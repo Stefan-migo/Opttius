@@ -99,7 +99,7 @@ Antes de comenzar, asegúrate de tener instalado:
 ### 1. Clonar el Repositorio
 
 ```bash
-git clone https://github.com/Stefan-migo/OpticSystemAI.git
+git clone https://github.com/Stefan-migo/Opttius.git
 cd Opttius
 ```
 
@@ -605,7 +605,7 @@ Para problemas y preguntas:
 
 - Revisa la sección de solución de problemas arriba
 - Revisa los archivos de documentación
-- Abre un issue en GitHub: https://github.com/Stefan-migo/OpticSystemAI/issues (repositorio Opttius)
+- Abre un issue en GitHub: https://github.com/Stefan-migo/Opttius/issues
 
 ---
 
