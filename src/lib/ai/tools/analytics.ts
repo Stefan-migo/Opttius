@@ -44,16 +44,13 @@ export const analyticsTools: ToolDefinition[] = [
           await Promise.all([
             supabase
               .from("products")
-              .select("id, inventory_quantity, status")
+              .select("id, inventory_quantity, status, low_stock_threshold")
               .eq("organization_id", organizationId),
             supabase
               .from("orders")
               .select("status, payment_status, total_amount, created_at")
               .eq("organization_id", organizationId),
-            supabase
-              .from("profiles")
-              .select("id, created_at")
-              .eq("organization_id", organizationId),
+            supabase.from("profiles").select("id, created_at"),
           ]);
 
         const products = productsResult.data || [];
@@ -68,8 +65,9 @@ export const analyticsTools: ToolDefinition[] = [
 
         const activeProducts = products.filter((p) => p.status === "active");
         const lowStockProducts = activeProducts.filter(
-          (p) =>
-            (p.inventory_quantity || 0) <= 5 && (p.inventory_quantity || 0) > 0,
+          (p: any) =>
+            (p.inventory_quantity || 0) <= (p.low_stock_threshold || 5) &&
+            (p.inventory_quantity || 0) > 0,
         ).length;
         const outOfStockProducts = activeProducts.filter(
           (p) => (p.inventory_quantity || 0) === 0,
@@ -115,7 +113,7 @@ export const analyticsTools: ToolDefinition[] = [
           },
           revenue: {
             currentMonth: currentMonthRevenue,
-            currency: "ARS",
+            currency: context.currency || "USD",
           },
           customers: {
             total: customers.length,
@@ -195,6 +193,7 @@ export const analyticsTools: ToolDefinition[] = [
           data: {
             trend,
             totalRevenue,
+            currency: context.currency || "USD",
             days: validated.days,
           },
           message: `Revenue trend for last ${validated.days} days`,
@@ -255,7 +254,6 @@ export const analyticsTools: ToolDefinition[] = [
             )
           `,
           )
-          .eq("organization_id", organizationId)
           .gte("order.created_at", startDate.toISOString())
           .eq("order.payment_status", "paid");
 

@@ -11,7 +11,9 @@ import { ChatHeader } from "./chat/ChatHeader";
 import { ExportDialog } from "./chat/ExportDialog";
 import { useChatSession } from "@/hooks/useChatSession";
 import { useChatConfig } from "@/hooks/useChatConfig";
+import { useBranch } from "@/hooks/useBranch";
 import { cn } from "@/lib/utils";
+import { Sparkles } from "lucide-react";
 
 interface Message {
   id: string;
@@ -70,9 +72,9 @@ export function ChatbotContent({
   currentSection,
   onClose,
 }: ChatbotContentProps) {
+  const { currentBranch, isGlobalView } = useBranch();
   const [showHistory, setShowHistory] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
-  const [showTools, setShowTools] = useState(false);
   const [showExport, setShowExport] = useState(false);
   const [historyWidth, setHistoryWidth] = useState(256);
 
@@ -187,31 +189,15 @@ export function ChatbotContent({
   const handleNewSession = async () => {
     clearSession();
     setMessages([]);
-    const provider = config.provider || "deepseek";
-    const model =
-      config.model ||
-      (provider === "deepseek"
-        ? "deepseek-chat"
-        : provider === "google"
-          ? "gemini-2.5-flash"
-          : provider === "openai"
-            ? "gpt-4"
-            : "deepseek-chat");
-
-    if (!provider || !model) {
-      console.error("Invalid provider or model for new session:", {
-        provider,
-        model,
-      });
-      return;
-    }
-
-    await createSession(provider, model, undefined, getConfigForAPI() as any);
+    setShowHistory(false);
+    // Session will be created automatically on the first message send
   };
 
   const handleSessionSelect = async (sessionId: string) => {
-    // Clear messages first to prevent duplicates
+    // Force a reload by resetting the ref
+    lastLoadedSessionId.current = null;
     setMessages([]);
+    setShowHistory(false); // Close the history overlay
     await loadSession(sessionId);
   };
 
@@ -307,6 +293,7 @@ export function ChatbotContent({
           sessionId: sessionToUse?.id,
           config: apiConfig,
           section: currentSection, // Pass current section for context
+          currentBranchId: isGlobalView ? "global" : currentBranch?.id, // Pass current branch for context
         }),
         signal: abortControllerRef.current.signal,
       });
@@ -477,19 +464,15 @@ export function ChatbotContent({
       } else if (ctrlKey && e.key === "h") {
         e.preventDefault();
         setShowHistory(!showHistory);
-      } else if (ctrlKey && e.key === "t") {
-        e.preventDefault();
-        setShowTools(!showTools);
       } else if (e.key === "Escape") {
         if (showSettings) setShowSettings(false);
-        if (showTools) setShowTools(false);
         if (showHistory) setShowHistory(false);
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [showSettings, showTools, showHistory]);
+  }, [showSettings, showHistory]);
 
   const handleExport = () => {
     if (currentSession && messages.length > 0) {
@@ -527,23 +510,26 @@ export function ChatbotContent({
   return (
     <div className={cn("flex h-full min-h-0 overflow-hidden", className)}>
       {showHistory && (
-        <ResizablePanel
-          defaultWidth={historyWidth}
-          minWidth={200}
-          maxWidth={500}
-          onWidthChange={handleHistoryWidthChange}
-          className="flex-shrink-0"
-        >
+        <div className="absolute inset-0 z-[60] bg-white dark:bg-slate-950 overflow-y-auto animate-in slide-in-from-left duration-300">
           <ChatHistorySidebar
             currentSessionId={currentSession?.id}
             onSessionSelect={handleSessionSelect}
             onNewSession={handleNewSession}
             onClose={() => setShowHistory(false)}
           />
-        </ResizablePanel>
+        </div>
       )}
 
-      <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
+      <div className="flex-1 flex flex-col min-h-0 overflow-hidden relative">
+        {showSettings && (
+          <div className="absolute inset-0 z-[60] bg-white dark:bg-slate-950 overflow-y-auto animate-in slide-in-from-right duration-300">
+            <SettingsPanel
+              config={config}
+              onConfigChange={updateChatConfig}
+              onClose={() => setShowSettings(false)}
+            />
+          </div>
+        )}
         {/* Fixed Header */}
         <div className="flex-shrink-0 z-20 bg-admin-bg-primary border-b border-admin-border-primary">
           <ChatHeader
@@ -555,7 +541,6 @@ export function ChatbotContent({
             }}
             onSettingsClick={() => setShowSettings(!showSettings)}
             onHistoryClick={() => setShowHistory(!showHistory)}
-            onToolsClick={() => setShowTools(!showTools)}
             onNewConversation={handleNewSession}
             onExport={handleExport}
             onClear={handleClear}
@@ -566,29 +551,7 @@ export function ChatbotContent({
 
         {/* Scrollable Messages Area */}
         <div className="flex-1 flex min-h-0 relative overflow-hidden">
-          {showSettings && (
-            <div className="absolute inset-y-0 right-0 w-96 border-l border-admin-border-primary z-10 bg-admin-bg-primary overflow-y-auto">
-              <SettingsPanel
-                config={config}
-                onConfigChange={updateChatConfig}
-                onClose={() => setShowSettings(false)}
-              />
-            </div>
-          )}
-
-          {showTools && (
-            <div className="absolute inset-y-0 right-0 w-96 border-l border-admin-border-primary z-10 bg-admin-bg-primary overflow-y-auto">
-              <ToolBrowser
-                enabledTools={config.enabledTools}
-                onToolsChange={(tools) =>
-                  updateChatConfig({ enabledTools: tools })
-                }
-                onClose={() => setShowTools(false)}
-              />
-            </div>
-          )}
-
-          <div className="flex-1 flex flex-col min-h-0 overflow-hidden bg-slate-50 dark:bg-slate-950/20">
+          <div className="flex-1 flex flex-col min-h-0 overflow-hidden bg-white dark:bg-slate-950">
             <div className="flex-1 overflow-y-auto min-h-0">
               <MessageList
                 messages={messages}
@@ -613,8 +576,8 @@ export function ChatbotContent({
         {/* Fixed Input at Bottom */}
         <div className="flex-shrink-0 z-10 bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800">
           {/* Quick Suggestions */}
-          {currentSection && messages.length === 0 && (
-            <div className="p-4 border-b border-slate-50 dark:border-slate-800/50">
+          {currentSection && messages.length === 0 && !isStreaming && (
+            <div className="p-4 border-b border-slate-50 dark:border-slate-800/50 animate-in fade-in slide-in-from-bottom-2 duration-300">
               <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-3 ml-1">
                 Sugerencias rápidas
               </p>
@@ -622,10 +585,15 @@ export function ChatbotContent({
                 {quickSuggestions[currentSection].map((suggestion, index) => (
                   <button
                     key={index}
-                    onClick={() => sendMessage(suggestion)}
+                    onClick={() => {
+                      if (!isStreaming) {
+                        sendMessage(suggestion);
+                      }
+                    }}
                     disabled={isStreaming}
-                    className="text-xs px-4 py-2 rounded-full bg-slate-50 dark:bg-slate-800 hover:bg-primary/5 hover:text-primary hover:border-primary/20 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm active:scale-95"
+                    className="text-xs px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 hover:bg-primary hover:text-white border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm active:scale-95 group flex items-center gap-2"
                   >
+                    <Sparkles className="w-3 h-3 text-primary group-hover:text-white transition-colors" />
                     {suggestion}
                   </button>
                 ))}

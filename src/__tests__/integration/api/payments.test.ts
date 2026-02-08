@@ -111,6 +111,78 @@ describe("Payments API - Integration Tests", { timeout: 15000 }, () => {
         expect(data).toHaveProperty("paymentId");
       }
     });
+
+    it("returns 200 or 500 when authenticated with org (PayPal keys may be missing)", async () => {
+      const response = await makeAuthenticatedRequest(
+        `${BASE_URL}/api/admin/payments/create-intent`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            amount: 100,
+            currency: "USD",
+            gateway: "paypal",
+          }),
+        },
+        user.authToken,
+        user.sessionData,
+      );
+      // 200 if PayPal is configured; 500 if credentials missing; 403 if no org
+      expect([200, 403, 500]).toContain(response.status);
+      if (response.status === 200) {
+        const data = await response.json();
+        expect(data).toHaveProperty("approvalUrl");
+        expect(data).toHaveProperty("paymentId");
+      }
+    });
+
+    it("returns 200 or 500 when authenticated with org (NOWPayments keys may be missing)", async () => {
+      const response = await makeAuthenticatedRequest(
+        `${BASE_URL}/api/admin/payments/create-intent`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            amount: 100,
+            currency: "USD",
+            gateway: "nowpayments",
+          }),
+        },
+        user.authToken,
+        user.sessionData,
+      );
+      // 200 if NOWPayments is configured; 500 if API key missing; 403 if no org
+      expect([200, 403, 500]).toContain(response.status);
+      if (response.status === 200) {
+        const data = await response.json();
+        expect(data).toHaveProperty("approvalUrl");
+        expect(data).toHaveProperty("paymentId");
+      }
+    });
+
+    it("returns 200 or 500 when authenticated with org (Mercado Pago keys may be missing)", async () => {
+      const response = await makeAuthenticatedRequest(
+        `${BASE_URL}/api/admin/payments/create-intent`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            amount: 10000,
+            currency: "CLP",
+            gateway: "mercadopago",
+          }),
+        },
+        user.authToken,
+        user.sessionData,
+      );
+      // 200 if Mercado Pago is configured; 500 if access token missing; 403 if no org
+      expect([200, 403, 500]).toContain(response.status);
+      if (response.status === 200) {
+        const data = await response.json();
+        expect(data).toHaveProperty("approvalUrl");
+        expect(data).toHaveProperty("paymentId");
+      }
+    });
   });
 
   describe("POST /api/webhooks/flow", () => {

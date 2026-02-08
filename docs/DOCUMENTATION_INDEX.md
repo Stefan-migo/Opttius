@@ -30,6 +30,35 @@ Tracking detallado del avance
 
 ### 3. **SAAS_IMPLEMENTATION_CURRENT_STATE.md** ⭐ CONSOLIDATED AUTHORITY
 
+### 4. **OPTIMIZATION_PERFORMANCE_BASELINE.md** ⭐ NEW (2026-02-08)
+
+Performance baseline report with current database metrics and optimization targets
+
+- Database size analysis (top 10 tables)
+- Slow query identification (>50ms average)
+- Missing index analysis (10 tables identified)
+- Optimization priorities and next steps
+
+👉 **Usar cuando:** Planeando optimizaciones de performance, monitoreo de base de datos, o como baseline para medir mejoras
+
+---
+
+### 6. **SUPABASE_MCP_SERVER_STATUS.md** ⭐ NEW (2026-02-08)
+
+Supabase MCP server configuration and connection status
+
+- Server connection details and status
+- Available tools (23 registered)
+- Quick start commands for all platforms
+- Integration guides for IDEs
+- Troubleshooting information
+
+👉 **Usar cuando:** Necesitas conectar herramientas de IA al database, monitoreo en tiempo real, o gestión de base de datos simplificada
+
+---
+
+### 3. **SAAS_IMPLEMENTATION_CURRENT_STATE.md** ⭐ CONSOLIDATED AUTHORITY
+
 Documentación consolidada y actualizada del estado actual de implementación SaaS
 
 - Arquitectura multi-tenancy actual y completa
@@ -239,6 +268,7 @@ Implementación completa del sistema de manejo de errores para la plataforma Opt
 - Mapeo automático de errores de base de datos
 - Helpers de validación de entrada
 - Ejemplos de uso y guía de migración
+- **Sentry Production Monitoring:** Basic integration working with error capture in dashboard
 
 👉 **Usar cuando:** Necesitas implementar manejo de errores consistente en toda la aplicación o entender el sistema de errores del SaaS
 

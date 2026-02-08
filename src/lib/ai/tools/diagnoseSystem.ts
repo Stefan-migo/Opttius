@@ -312,8 +312,7 @@ async function analyzeCustomerHealth(
 ) {
   const { data: customers, error } = await supabase
     .from("profiles")
-    .select("id, created_at")
-    .eq("organization_id", organizationId);
+    .select("id, created_at");
 
   if (error) {
     return { health: "unknown", issues: [], metrics: {} };

@@ -3,6 +3,8 @@ import { AnthropicProvider } from "./anthropic";
 import { GoogleProvider } from "./google";
 import { DeepSeekProvider } from "./deepseek";
 import { OpenRouterProvider } from "./openrouter";
+import { KilocodeProvider } from "./kilocode";
+import { MinimaxProvider } from "./minimax";
 import type { LLMProviderInterface, LLMProvider } from "../types";
 
 export const providers: Record<LLMProvider, () => LLMProviderInterface> = {
@@ -11,6 +13,8 @@ export const providers: Record<LLMProvider, () => LLMProviderInterface> = {
   google: () => new GoogleProvider(),
   deepseek: () => new DeepSeekProvider(),
   openrouter: () => new OpenRouterProvider(),
+  kilocode: () => new KilocodeProvider(),
+  minimax: () => new MinimaxProvider(),
   custom: () => {
     throw new Error("Custom provider not implemented");
   },

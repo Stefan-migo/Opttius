@@ -53,7 +53,15 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { message, provider, model, sessionId, config, section } = body;
+    const {
+      message,
+      provider,
+      model,
+      sessionId,
+      config,
+      section,
+      currentBranchId,
+    } = body;
 
     if (!message || typeof message !== "string") {
       return NextResponse.json(
@@ -61,6 +69,17 @@ export async function POST(request: NextRequest) {
         { status: 400 },
       );
     }
+
+    // Get user details for context
+    const { data: userData } = await supabase
+      .from("admin_users")
+      .select("role, full_name")
+      .eq("id", user.id)
+      .single();
+
+    const isSuperAdmin = userData?.role === "super_admin";
+    const userName =
+      userData?.full_name || user.email?.split("@")[0] || "Usuario";
 
     let currentSessionId = sessionId;
     let sessionTitle: string | null = null;
@@ -144,31 +163,75 @@ export async function POST(request: NextRequest) {
           const providerToolCalls: ToolCall[] = [];
 
           try {
+            // Get organization details for specialized personality
+            const { data: orgData } = await serviceSupabase
+              .from("organizations")
+              .select("name")
+              .eq("id", adminUser?.organization_id)
+              .single();
+
+            // Get branch details if branch selected
+            let branchName = "";
+            let branchContext = "";
+            if (currentBranchId && currentBranchId !== "global") {
+              const { data: branchData } = await serviceSupabase
+                .from("branches")
+                .select("name")
+                .eq("id", currentBranchId)
+                .single();
+              if (branchData) {
+                branchName = branchData.name;
+                branchContext = `SUCURSAL ACTUAL: ${branchName} (ID: ${currentBranchId})`;
+              }
+            } else if (currentBranchId === "global") {
+              branchContext = "MODO: Vista Global (Todas las sucursales)";
+            }
+
+            const orgName = orgData?.name || "tu óptica";
+
             // Map section to context for agent config
             const contextMap: Record<string, string> = {
               dashboard: "analytics",
               inventory: "products",
-              clients: "orders", // Using orders context for customer management
+              clients: "orders",
               pos: "orders",
               analytics: "analytics",
             };
             const agentContext = section ? contextMap[section] : undefined;
 
-            // Enhance system prompt with section context
+            // Enhance system prompt with section context and org name
             const baseConfig = config || {};
-            const enhancedSystemPrompt = section
-              ? `Eres un asistente experto de Opttius. El usuario está en la sección: ${section === "dashboard" ? "Dashboard" : section === "inventory" ? "Inventario" : section === "clients" ? "Clientes" : section === "pos" ? "Punto de Venta" : "Analíticas"}. Proporciona ayuda específica para esta sección. Si el usuario pregunta sobre otra sección, puedes ayudar pero también sugiere navegar a esa sección.\n\n${baseConfig.systemPrompt || ""}`
-              : baseConfig.systemPrompt;
+            let systemPrompt = baseConfig.systemPrompt || "";
+
+            // Replace organization name placeholder if exists
+            systemPrompt = systemPrompt.replace("[NOMBRE_OPTICA]", orgName);
+
+            // If prompt is default/generic, make it feel more "managerial"
+            const specializedIdentity = `Eres el Agente de Inteligencia de ${orgName}. No eres solo un asistente, eres el cerebro digital que ayuda a gestionar y optimizar cada aspecto de esta óptica. Habla con propiedad sobre "nuestros productos", "nuestros clientes" y "nuestras ventas". Tu objetivo es el éxito total de ${orgName}.
+            
+            IMPORTANTE: Te estás comunicando con ${userName} (${isSuperAdmin ? "Super Admin" : "Administrador"}). Trátalo con respeto pero de forma cercana.
+            
+            ${isSuperAdmin ? "NOTA SUPER ADMIN: Estás hablando con un Super Admin. Tienes permisos totales. Si te pide acciones sobre una sucursal específica y no está seleccionada, pregúntale sobre cuál actuar." : ""}`;
+
+            const enhancedSystemPrompt = `${specializedIdentity}\n\n${section ? `ESTADO ACTUAL: El usuario está navegando en la sección de ${section === "dashboard" ? "Dashboard" : section === "inventory" ? "Inventario" : section === "clients" ? "Clientes" : section === "pos" ? "Punto de Venta" : "Analíticas"}.\n` : ""}\n${branchContext}\n${systemPrompt}`;
 
             const fallbackAgent = await createAgent({
               userId: user.id,
               provider: providerToTry,
               model: modelToTry,
               sessionId: currentSessionId,
+              organizationId: adminUser?.organization_id,
               context: agentContext,
               config: {
                 ...baseConfig,
                 systemPrompt: enhancedSystemPrompt,
+              },
+              currentBranchId, // Pass branch context
+              userData: {
+                // Pass user context
+                role: userData?.role,
+                isSuperAdmin,
+                name: userName,
               },
             });
 

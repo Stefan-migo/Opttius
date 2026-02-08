@@ -48,6 +48,7 @@ export async function GET(request: NextRequest) {
         .from("chat_sessions")
         .select("*")
         .eq("user_id", user.id)
+        .gt("message_count", 0)
         .order("updated_at", { ascending: false })
         .range(offset, offset + limit - 1);
 

@@ -4,6 +4,15 @@ export interface ToolExecutionContext {
   userId: string;
   organizationId: string;
   supabase: SupabaseClient<any>;
+  currency?: string;
+
+  // New context for Super Admin awareness
+  userData?: {
+    role?: string;
+    isSuperAdmin?: boolean;
+    name?: string;
+  };
+  currentBranchId?: string | null; // null for global/unselected
 }
 
 export interface ToolResult<T = any> {

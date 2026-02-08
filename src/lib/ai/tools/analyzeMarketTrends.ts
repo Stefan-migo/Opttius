@@ -48,7 +48,7 @@ export const marketTrendsTools: ToolDefinition[] = [
         startDate.setMonth(startDate.getMonth() - validated.months);
 
         // Consultar items de órdenes vendidos en el período
-        let query = supabase
+        const query = supabase
           .from("order_items")
           .select(
             `
@@ -68,7 +68,6 @@ export const marketTrendsTools: ToolDefinition[] = [
             )
           `,
           )
-          .eq("organization_id", organizationId)
           .gte("created_at", startDate.toISOString())
           .order("created_at", { ascending: true });
 

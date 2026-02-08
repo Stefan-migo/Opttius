@@ -16,7 +16,13 @@ import {
   ArrowRight,
   Zap,
   Mail,
+  Shield,
+  Database,
+  HardDrive,
+  CheckCircle2,
+  AlertCircle,
 } from "lucide-react";
+import { toast } from "sonner";
 
 interface SaasMetrics {
   totalOrganizations: number;
@@ -257,6 +263,62 @@ export default function SaasManagementDashboardPage() {
           </CardContent>
         </Card>
       )}
+
+      {/* Sección de Seguridad y Backups SaaS */}
+      <div className="grid grid-cols-1 gap-6">
+        <Card
+          className="border-l-4 border-l-blue-600 cursor-pointer hover:shadow-lg transition-all"
+          onClick={() => router.push("/admin/saas-management/backups")}
+        >
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg">
+                  <Shield className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                </div>
+                <div>
+                  <CardTitle>SaaS Disaster Recovery & Backups</CardTitle>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Gestión integral de respaldos del servidor y descarga de
+                    volcados SQL
+                  </p>
+                </div>
+              </div>
+              <ArrowRight className="h-5 w-5 text-muted-foreground" />
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-col md:flex-row gap-6 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-dashed border-gray-300">
+              <div className="flex-1 space-y-3">
+                <div className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                  <CheckCircle2 className="h-4 w-4 text-green-500" />
+                  Triple Capa de Seguridad Activa
+                </div>
+                <ul className="text-xs text-muted-foreground space-y-2 list-disc pl-5">
+                  <li>Backups individuales por organización (diarios)</li>
+                  <li>Backups integrales de todo el SaaS (semanales)</li>
+                  <li>Cifrado AES-256 de archivos en reposo</li>
+                </ul>
+              </div>
+              <div className="flex-1 border-l pl-6 border-gray-200 dark:border-gray-700">
+                <div className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                  <AlertCircle className="h-4 w-4 text-amber-500" />
+                  Estado del Sistema
+                </div>
+                <div className="mt-2 flex items-center gap-2">
+                  <span className="relative flex h-3 w-3">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+                  </span>
+                  <span className="text-xs text-gray-600">
+                    Almacenamiento Conectado & Protegido
+                  </span>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Navegación rápida a secciones de gestión */}
       <Card>

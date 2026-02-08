@@ -30,7 +30,14 @@ export interface AgentOptions {
   model?: string;
   context?: string;
   sessionId?: string;
+  organizationId?: string;
   config?: AgentConfig;
+  currentBranchId?: string | null;
+  userData?: {
+    role?: string;
+    isSuperAdmin?: boolean;
+    name?: string;
+  };
 }
 
 export class Agent {
@@ -45,6 +52,14 @@ export class Agent {
   private memoryManager: MemoryManager | null = null;
   private organizationalMemory: OrganizationalMemory | null = null;
   private organizationId: string;
+  private currentBranchId: string | undefined | null;
+  private userData:
+    | {
+        role?: string;
+        isSuperAdmin?: boolean;
+        name?: string;
+      }
+    | undefined;
 
   constructor(options: AgentOptions) {
     this.userId = options.userId;
@@ -54,11 +69,9 @@ export class Agent {
     this.sessionId = options.sessionId;
     this.customConfig = options.config;
     this.organizationalMemory = null;
-    // Derive organizationId from sessionId (if format matches) or userId as fallback
-    // In a real multi-tenant scenario, we might need to fetch this from DB if not in session
-    this.organizationId = options.sessionId?.includes("-")
-      ? options.sessionId.split("-")[0]
-      : options.userId;
+    this.organizationId = options.organizationId || options.userId;
+    this.currentBranchId = options.currentBranchId;
+    this.userData = options.userData;
   }
 
   /**
@@ -116,8 +129,8 @@ export class Agent {
 
       const supabase = createServiceRoleClient();
 
-      // Get organization ID from session or user
-      const organizationId = this.sessionId?.split("-")[0] || this.userId;
+      // Use the resolved organization ID
+      const organizationId = this.organizationId;
 
       this.organizationalMemory = createOrganizationalMemory(
         organizationId,
@@ -167,10 +180,24 @@ export class Agent {
         }
       }
 
+      let currency = "USD";
+      try {
+        const orgMemory = await this.initializeOrganizationalMemory();
+        if (orgMemory) {
+          const orgContext = await orgMemory.getContextForAgent();
+          currency = orgContext.organization.currency;
+        }
+      } catch (e) {
+        console.error("Failed to fetch currency for tool executor:", e);
+      }
+
       const context: ToolExecutionContext = {
         userId: this.userId,
         organizationId: resolvedOrgId,
         supabase,
+        currency,
+        userData: this.userData,
+        currentBranchId: this.currentBranchId,
       };
       this.toolExecutor = new ToolExecutor(context);
     }
@@ -283,6 +310,7 @@ ORGANIZATIONAL CONTEXT:
 - Horario: ${context.organization.businessHours.open} - ${context.organization.businessHours.close}
 - Servicios: ${context.organization.services.join(", ") || "No especificados"}
 - Ubicación: ${context.organization.location}
+- Moneda: ${context.organization.currency}
 
 TOP 10 PRODUCTOS:
 ${context.organization.topProducts.map((p) => `- ${p.name}: $${p.price} (Stock: ${p.inventory})`).join("\n")}
@@ -298,7 +326,8 @@ INSTRUCCIONES:
 - Usa esta información para contextualizar todas las respuestas
 - Menciona el nombre de la óptica específica cuando sea apropiado
 - Proporciona recomendaciones basadas en el contexto de esta óptica
-- Considera la madurez organizacional al dar consejos`;
+- Considera la madurez organizacional al dar consejos
+- SÉ BREVE Y DIRECTO: Tus respuestas deben ser concisas y responder exactamente lo que el usuario pregunta. Evita saludos largos o explicaciones innecesarias a menos que se pidan.`;
 
       // Update the system prompt
       this.messages[0].content = contextEnhancedPrompt;

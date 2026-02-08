@@ -4,6 +4,8 @@ export type LLMProvider =
   | "google"
   | "deepseek"
   | "openrouter"
+  | "kilocode"
+  | "minimax"
   | "custom";
 
 export interface LLMModel {
@@ -24,6 +26,7 @@ export interface LLMConfig {
   model: string;
   apiKey: string;
   baseURL?: string;
+  groupId?: string; // For Minimax
   temperature?: number;
   maxTokens?: number;
   timeout?: number;

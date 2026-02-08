@@ -68,7 +68,6 @@ export const supportTools: ToolDefinition[] = [
         let query = supabase
           .from("support_tickets")
           .select("*")
-          .eq("organization_id", organizationId)
           .order("created_at", { ascending: false })
           .limit(validated.limit);
 
@@ -128,7 +127,6 @@ export const supportTools: ToolDefinition[] = [
         const { data: ticket, error: ticketError } = await supabase
           .from("support_tickets")
           .select("*")
-          .eq("organization_id", organizationId)
           .eq("id", validated.ticketId)
           .single();
 
@@ -209,7 +207,6 @@ export const supportTools: ToolDefinition[] = [
           .from("support_tickets")
           .update(updateData)
           .eq("id", validated.ticketId)
-          .eq("organization_id", organizationId)
           .select()
           .single();
 
@@ -264,7 +261,6 @@ export const supportTools: ToolDefinition[] = [
           .from("support_tickets")
           .select("id")
           .eq("id", validated.ticketId)
-          .eq("organization_id", organizationId)
           .single();
 
         if (!ticket) {

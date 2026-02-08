@@ -177,7 +177,7 @@ export function TourProvider({ children }: TourProviderProps) {
     ): Promise<DOMRect | null> => {
       return new Promise((resolve) => {
         let attempts = 0;
-        let warned = false; // Solo loguear una vez
+        const warned = false; // Solo loguear una vez
 
         const tryFind = () => {
           attempts++;

@@ -62,8 +62,7 @@ export const businessFlowTools: ToolDefinition[] = [
             total_amount,
             shipped_at,
             delivered_at,
-            processing_at,
-            completed_at,
+            updated_at,
             order_items (
               id,
               product_name,
@@ -109,37 +108,32 @@ export const businessFlowTools: ToolDefinition[] = [
             // Calcular tiempos por etapa
             const stages = [];
 
-            // Tiempo hasta procesamiento
-            if (order.processing_at) {
-              const processing = new Date(order.processing_at);
+            // Tiempo hasta procesamiento (usamos created_at como inicio si no hay más)
+            const processingTimeFallback = order.shipped_at || order.updated_at;
+            if (processingTimeFallback) {
+              const processing = new Date(processingTimeFallback);
               const timeToProcessing =
                 (processing.getTime() - created.getTime()) /
                 (1000 * 60 * 60 * 24); // días
               stages.push({
                 name: "Recepción",
-                duration: timeToProcessing,
-                timestamp: order.processing_at,
+                duration: timeToProcessing > 0 ? timeToProcessing : 0.1,
+                timestamp: processingTimeFallback,
               });
               processingTime += timeToProcessing;
-
-              if (timeToProcessing > 2) bottleneckStage = "Recepción";
             }
 
             // Tiempo hasta envío
             if (order.shipped_at) {
               const shipped = new Date(order.shipped_at);
               const timeToShipping =
-                (shipped.getTime() -
-                  (order.processing_at
-                    ? new Date(order.processing_at).getTime()
-                    : created.getTime())) /
-                (1000 * 60 * 60 * 24);
+                (shipped.getTime() - created.getTime()) / (1000 * 60 * 60 * 24);
               stages.push({
                 name: "Producción/Preparación",
                 duration: timeToShipping,
                 timestamp: order.shipped_at,
               });
-              processingTime += timeToShipping;
+              processingTime = timeToShipping; // Update cumulative processing time
 
               if (timeToShipping > 3)
                 bottleneckStage = "Producción/Preparación";
@@ -159,25 +153,32 @@ export const businessFlowTools: ToolDefinition[] = [
                 duration: timeToDelivery,
                 timestamp: order.delivered_at,
               });
-              processingTime += timeToDelivery;
+              processingTime =
+                (delivered.getTime() - created.getTime()) /
+                (1000 * 60 * 60 * 24);
 
               if (timeToDelivery > 5) bottleneckStage = "Envío/Entrega";
             }
 
-            // Tiempo hasta completación
-            if (order.completed_at) {
-              const completed = new Date(order.completed_at);
+            // Tiempo hasta completación Final
+            if (order.status === "completed") {
+              const completed = new Date(order.updated_at);
               const timeToCompletion =
                 (completed.getTime() - created.getTime()) /
                 (1000 * 60 * 60 * 24);
               stages.push({
                 name: "Completación Final",
-                duration: timeToCompletion - processingTime,
-                timestamp: order.completed_at,
+                duration:
+                  timeToCompletion > processingTime
+                    ? timeToCompletion - processingTime
+                    : 0.1,
+                timestamp: order.updated_at,
               });
 
-              if (timeToCompletion > processingTime + 1)
+              if (timeToCompletion > processingTime + 1 && processingTime > 0)
                 bottleneckStage = "Completación Final";
+
+              processingTime = timeToCompletion;
             }
 
             return {

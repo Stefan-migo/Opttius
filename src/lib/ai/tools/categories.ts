@@ -78,10 +78,7 @@ export const categoryTools: ToolDefinition[] = [
           };
         }
 
-        let query = supabase
-          .from("categories")
-          .select("*", { count: "exact" })
-          .eq("organization_id", organizationId);
+        let query = supabase.from("categories").select("*", { count: "exact" });
 
         if (validated.search) {
           query = query.ilike("name", `%${validated.search}%`);
@@ -161,7 +158,6 @@ export const categoryTools: ToolDefinition[] = [
           `,
           )
           .eq("id", validated.categoryId)
-          .eq("organization_id", organizationId)
           .single();
 
         if (error) {
@@ -176,8 +172,7 @@ export const categoryTools: ToolDefinition[] = [
         const { count: productsCount } = await supabase
           .from("products")
           .select("*", { count: "exact", head: true })
-          .eq("category_id", validated.categoryId)
-          .eq("organization_id", organizationId);
+          .eq("category_id", validated.categoryId);
 
         // Get subcategories count
         const { count: subcategoriesCount } = await supabase
@@ -266,7 +261,6 @@ export const categoryTools: ToolDefinition[] = [
           .from("categories")
           .select("id")
           .eq("slug", slug)
-          .eq("organization_id", organizationId)
           .limit(1);
 
         if (existing && existing.length > 0) {
@@ -281,7 +275,7 @@ export const categoryTools: ToolDefinition[] = [
           parent_id: validated.parent_id || null,
           sort_order: validated.sort_order,
           is_active: validated.is_active,
-          organization_id: organizationId,
+          // organization_id: organizationId,
         };
 
         const { data, error } = await supabase
@@ -360,7 +354,6 @@ export const categoryTools: ToolDefinition[] = [
             .select("id")
             .eq("slug", validated.updates.slug)
             .neq("id", validated.categoryId)
-            .eq("organization_id", organizationId)
             .limit(1);
 
           if (existing && existing.length > 0) {
@@ -376,7 +369,6 @@ export const categoryTools: ToolDefinition[] = [
           })
 
           .eq("id", validated.categoryId)
-          .eq("organization_id", organizationId)
           .select()
           .single();
 
@@ -427,7 +419,6 @@ export const categoryTools: ToolDefinition[] = [
           .from("categories")
           .select("name")
           .eq("id", validated.categoryId)
-          .eq("organization_id", organizationId)
           .single();
 
         if (fetchError || !category) {
@@ -451,8 +442,7 @@ export const categoryTools: ToolDefinition[] = [
         const { error } = await supabase
           .from("categories")
           .delete()
-          .eq("id", validated.categoryId)
-          .eq("organization_id", organizationId);
+          .eq("id", validated.categoryId);
 
         if (error) {
           return { success: false, error: error.message };
@@ -500,7 +490,6 @@ export const categoryTools: ToolDefinition[] = [
         let query = supabase
           .from("categories")
           .select("*")
-          .eq("organization_id", organizationId)
           .order("sort_order", { ascending: true })
           .order("name", { ascending: true });
 

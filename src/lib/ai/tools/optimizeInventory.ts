@@ -49,13 +49,13 @@ export const inventoryTools: ToolDefinition[] = [
         let productsQuery = supabase
           .from("products")
           .select(
-            "id, name, inventory_quantity, min_stock_threshold, category, cost_price, price",
+            "id, name, inventory_quantity, low_stock_threshold, category_id, cost_price, price",
           )
           .eq("organization_id", organizationId)
           .eq("status", "active");
 
         if (validated.category) {
-          productsQuery = productsQuery.eq("category", validated.category);
+          productsQuery = productsQuery.eq("category_id", validated.category);
         }
 
         const { data: products, error: productsError } = await productsQuery;
@@ -75,7 +75,6 @@ export const inventoryTools: ToolDefinition[] = [
         const { data: sales, error: salesError } = await supabase
           .from("order_items")
           .select("product_id, quantity, created_at")
-          .eq("organization_id", organizationId)
           .gte("created_at", thirtyDaysAgo.toISOString());
 
         if (salesError) return { success: false, error: salesError.message };
@@ -99,7 +98,7 @@ export const inventoryTools: ToolDefinition[] = [
           }
 
           const minThreshold =
-            product.min_stock_threshold || validated.lowStockThreshold;
+            product.low_stock_threshold || validated.lowStockThreshold;
 
           // Determinar estado
           let status = "healthy";
@@ -125,7 +124,7 @@ export const inventoryTools: ToolDefinition[] = [
           return {
             id: product.id,
             name: product.name,
-            category: product.category,
+            category: product.category_id,
             currentStock,
             soldLast30Days,
             dailyRunRate: parseFloat(dailyRunRate.toFixed(2)),

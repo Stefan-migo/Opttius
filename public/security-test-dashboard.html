@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phase 3 Security Testing Dashboard</title>
+    <style>
+        :root {
+            --primary: #3b82f6;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --dark: #1f2937;
+            --light: #f9fafb;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--light);
+            color: var(--dark);
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background: linear-gradient(135deg, var(--primary), #60a5fa);
+            color: white;
+            padding: 2rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--light);
+        }
+        
+        .card-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--dark);
+        }
+        
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .btn-success {
+            background-color: var(--success);
+            color: white;
+        }
+        
+        .btn-warning {
+            background-color: var(--warning);
+            color: white;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .metric-card {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .metric-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin: 0.5rem 0;
+        }
+        
+        .metric-label {
+            color: #6b7280;
+            font-size: 1rem;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        .status-operational {
+            background-color: var(--success);
+        }
+        
+        .status-warning {
+            background-color: var(--warning);
+        }
+        
+        .status-critical {
+            background-color: var(--danger);
+        }
+        
+        .test-result {
+            padding: 1rem;
+            border-radius: 6px;
+            margin: 0.5rem 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .result-pass {
+            background-color: rgba(16, 185, 129, 0.1);
+            border-left: 4px solid var(--success);
+        }
+        
+        .result-fail {
+            background-color: rgba(239, 68, 68, 0.1);
+            border-left: 4px solid var(--danger);
+        }
+        
+        .result-warn {
+            background-color: rgba(245, 158, 11, 0.1);
+            border-left: 4px solid var(--warning);
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .scenario-selector {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin: 1rem 0;
+        }
+        
+        .scenario-btn {
+            padding: 0.5rem 1rem;
+            background-color: var(--light);
+            border: 2px solid #d1d5db;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .scenario-btn:hover, .scenario-btn.active {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        
+        pre {
+            background-color: var(--dark);
+            color: white;
+            padding: 1rem;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin-top: 1rem;
+        }
+        
+        .progress-bar {
+            height: 8px;
+            background-color: #e5e7eb;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 1rem 0;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--success));
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🛡️ Phase 3 Security Testing</h1>
+            <p class="subtitle">Comprehensive validation of advanced security implementations</p>
+        </header>
+
+        <!-- System Status -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">System Status</h2>
+                <button class="btn btn-primary" onclick="refreshStatus()">
+                    <span id="refresh-text">Refresh</span>
+                </button>
+            </div>
+            
+            <div class="grid">
+                <div class="metric-card">
+                    <div class="metric-value" id="active-incidents">-</div>
+                    <div class="metric-label">Active Incidents</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="threat-detections">-</div>
+                    <div class="metric-label">Threat Detections</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="anomaly-events">-</div>
+                    <div class="metric-label">Anomaly Events</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="compliance-score">-</div>
+                    <div class="metric-label">Compliance Score</div>
+                </div>
+            </div>
+            
+            <div id="component-status"></div>
+        </div>
+
+        <!-- Test Scenarios -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Security Scenarios</h2>
+            </div>
+            
+            <div class="scenario-selector">
+                <button class="scenario-btn active" data-scenario="normalUser">Normal User</button>
+                <button class="scenario-btn" data-scenario="suspiciousActivity">Suspicious Activity</button>
+                <button class="scenario-btn" data-scenario="dataExfiltration">Data Exfiltration</button>
+            </div>
+            
+            <button class="btn btn-success" onclick="runScenario()" id="run-scenario-btn">
+                <span id="scenario-btn-text">Run Selected Scenario</span>
+            </button>
+            
+            <div id="scenario-results" class="hidden">
+                <h3>Scenario Results:</h3>
+                <pre id="scenario-output"></pre>
+            </div>
+        </div>
+
+        <!-- Automated Tests -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Automated Testing</h2>
+                <button class="btn btn-primary" onclick="runComprehensiveTest()">
+                    <span id="test-btn-text">Run Full Test Suite</span>
+                </button>
+            </div>
+            
+            <div class="progress-bar hidden" id="test-progress">
+                <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+            </div>
+            
+            <div id="test-results"></div>
+        </div>
+
+        <!-- Performance Testing -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Performance Testing</h2>
+                <button class="btn btn-warning" onclick="runPerformanceTest()">
+                    <span id="perf-btn-text">Run Performance Test</span>
+                </button>
+            </div>
+            
+            <div id="performance-results"></div>
+        </div>
+    </div>
+
+    <script>
+        // Global state
+        let currentScenario = 'normalUser';
+        
+        // DOM Elements
+        const scenarioButtons = document.querySelectorAll('.scenario-btn');
+        const scenarioOutput = document.getElementById('scenario-output');
+        const scenarioResults = document.getElementById('scenario-results');
+        const testResults = document.getElementById('test-results');
+        const performanceResults = document.getElementById('performance-results');
+        const testProgress = document.getElementById('test-progress');
+        const progressFill = document.getElementById('progress-fill');
+        
+        // Event Listeners
+        scenarioButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                scenarioButtons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentScenario = btn.dataset.scenario;
+            });
+        });
+        
+        // API Functions
+        async function apiCall(endpoint) {
+            try {
+                const response = await fetch(`/api/security/validate?${endpoint}`);
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                return await response.json();
+            } catch (error) {
+                console.error('API call failed:', error);
+                throw error;
+            }
+        }
+        
+        // UI Update Functions
+        function updateStatus(data) {
+            document.getElementById('active-incidents').textContent = data.metrics?.activeIncidents || 0;
+            document.getElementById('threat-detections').textContent = data.metrics?.threatDetections || 0;
+            document.getElementById('anomaly-events').textContent = data.metrics?.anomalyEvents || 0;
+            document.getElementById('compliance-score').textContent = data.metrics?.complianceScore || 0;
+            
+            const componentStatus = document.getElementById('component-status');
+            componentStatus.innerHTML = '';
+            
+            if (data.components) {
+                Object.entries(data.components).forEach(([name, component]) => {
+                    const statusClass = component.status === 'operational' ? 'status-operational' : 
+                                      component.status === 'warning' ? 'status-warning' : 'status-critical';
+                    
+                    const div = document.createElement('div');
+                    div.className = 'test-result result-pass';
+                    div.innerHTML = `
+                        <span><span class="status-indicator ${statusClass}"></span>${name}</span>
+                        <span>${component.status}</span>
+                    `;
+                    componentStatus.appendChild(div);
+                });
+            }
+        }
+        
+        function showLoading(element, loading = true) {
+            const btn = element.querySelector('button');
+            const textSpan = element.querySelector('span');
+            if (loading) {
+                textSpan.innerHTML = '<span class="loading"></span> Running...';
+                btn.disabled = true;
+            } else {
+                textSpan.textContent = btn.dataset.originalText || textSpan.textContent.replace('<span class="loading"></span> Running...', '');
+                btn.disabled = false;
+            }
+        }
+        
+        // Main Functions
+        async function refreshStatus() {
+            const btn = event.target;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<span class="loading"></span>';
+            btn.disabled = true;
+            
+            try {
+                const data = await apiCall('scenario=health');
+                updateStatus(data);
+            } catch (error) {
+                alert('Failed to refresh status: ' + error.message);
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
+        
+        async function runScenario() {
+            const btn = document.getElementById('run-scenario-btn');
+            const originalText = btn.querySelector('span').textContent;
+            btn.querySelector('span').innerHTML = '<span class="loading"></span> Running Scenario...';
+            btn.disabled = true;
+            
+            try {
+                const data = await apiCall(`scenario=simulate&type=${currentScenario}`);
+                scenarioOutput.textContent = JSON.stringify(data, null, 2);
+                scenarioResults.classList.remove('hidden');
+            } catch (error) {
+                alert('Scenario failed: ' + error.message);
+            } finally {
+                btn.querySelector('span').textContent = originalText;
+                btn.disabled = false;
+            }
+        }
+        
+        async function runComprehensiveTest() {
+            const btn = event.target;
+            const originalText = btn.querySelector('span').textContent;
+            
+            testProgress.classList.remove('hidden');
+            testResults.innerHTML = '';
+            
+            try {
+                // Simulate progress
+                for (let i = 0; i <= 100; i += 20) {
+                    progressFill.style.width = i + '%';
+                    await new Promise(resolve => setTimeout(resolve, 200));
+                }
+                
+                const data = await apiCall('scenario=comprehensive');
+                
+                // Display results
+                const summary = document.createElement('div');
+                summary.innerHTML = `
+                    <h3>Test Summary</h3>
+                    <div class="test-result ${data.summary.passed === data.summary.totalTests ? 'result-pass' : 'result-fail'}">
+                        <span>Total Tests: ${data.summary.totalTests}</span>
+                        <span>Passed: ${data.summary.passed} | Failed: ${data.summary.failed}</span>
+                    </div>
+                    <div class="test-result result-pass">
+                        <span>Success Rate: ${data.successRate}%</span>
+                        <span>Duration: ${data.summary.duration}ms</span>
+                    </div>
+                `;
+                testResults.appendChild(summary);
+                
+                // Display component results
+                Object.entries(data.results).forEach(([component, result]) => {
+                    const componentDiv = document.createElement('div');
+                    componentDiv.className = 'card';
+                    componentDiv.innerHTML = `
+                        <h4>${component}</h4>
+                        <div class="test-result ${result.passed === result.tests ? 'result-pass' : 'result-fail'}">
+                            <span>Tests: ${result.tests}</span>
+                            <span>Passed: ${result.passed} | Failed: ${result.failed}</span>
+                        </div>
+                        <div>
+                            ${result.details.map(detail => 
+                                `<div class="test-result ${detail.status === 'passed' ? 'result-pass' : 'result-fail'}">
+                                    <span>${detail.test}</span>
+                                    <span>${detail.status}</span>
+                                </div>`
+                            ).join('')}
+                        </div>
+                    `;
+                    testResults.appendChild(componentDiv);
+                });
+                
+            } catch (error) {
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'test-result result-fail';
+                errorDiv.innerHTML = `<span>Test Execution Failed: ${error.message}</span>`;
+                testResults.appendChild(errorDiv);
+            } finally {
+                btn.querySelector('span').textContent = originalText;
+                setTimeout(() => {
+                    testProgress.classList.add('hidden');
+                    progressFill.style.width = '0%';
+                }, 1000);
+            }
+        }
+        
+        async function runPerformanceTest() {
+            const btn = event.target;
+            const originalText = btn.querySelector('span').textContent;
+            btn.querySelector('span').innerHTML = '<span class="loading"></span> Testing...';
+            btn.disabled = true;
+            
+            try {
+                const data = await apiCall('scenario=performance');
+                
+                performanceResults.innerHTML = `
+                    <div class="test-result result-pass">
+                        <span>Events Processed: ${data.eventCount}</span>
+                        <span>Duration: ${data.durationMs}ms</span>
+                    </div>
+                    <div class="test-result ${data.performanceRating === 'excellent' ? 'result-pass' : data.performanceRating === 'good' ? 'result-warn' : 'result-fail'}">
+                        <span>Performance: ${data.eventsPerSecond} EPS</span>
+                        <span>Rating: ${data.performanceRating}</span>
+                    </div>
+                `;
+            } catch (error) {
+                alert('Performance test failed: ' + error.message);
+            } finally {
+                btn.querySelector('span').textContent = originalText;
+                btn.disabled = false;
+            }
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const data = await apiCall('scenario=health');
+                updateStatus(data);
+            } catch (error) {
+                console.error('Failed to load initial status:', error);
+            }
+        });
+    </script>
+</body>
+</html>

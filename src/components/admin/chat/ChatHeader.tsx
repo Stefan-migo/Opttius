@@ -31,7 +31,6 @@ interface ChatHeaderProps {
   onTitleChange: (title: string) => void;
   onSettingsClick: () => void;
   onHistoryClick: () => void;
-  onToolsClick: () => void;
   onNewConversation: () => void;
   onExport: () => void;
   onClear: () => void;
@@ -45,7 +44,6 @@ export function ChatHeader({
   onTitleChange,
   onSettingsClick,
   onHistoryClick,
-  onToolsClick,
   onNewConversation,
   onExport,
   onClear,
@@ -133,9 +131,6 @@ export function ChatHeader({
             </DropdownMenuItem>
             <DropdownMenuItem onClick={onHistoryClick} className="gap-2">
               <History className="w-4 h-4" /> Ver historial
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={onToolsClick} className="gap-2">
-              <Wrench className="w-4 h-4" /> Herramientas IA
             </DropdownMenuItem>
             <DropdownMenuItem onClick={onSettingsClick} className="gap-2">
               <Settings className="w-4 h-4" /> Configuración

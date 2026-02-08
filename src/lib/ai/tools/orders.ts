@@ -457,7 +457,10 @@ export const orderTools: ToolDefinition[] = [
 
         return {
           success: true,
-          data: stats,
+          data: {
+            ...stats,
+            currency: context.currency || "USD",
+          },
           message: `Order statistics for last ${validated.days} days`,
         };
       } catch (error: any) {

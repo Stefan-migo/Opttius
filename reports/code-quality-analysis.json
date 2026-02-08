@@ -1,0 +1,968 @@
+{
+  "timestamp": "2026-02-08T05:16:00.520Z",
+  "config": {
+    "largeFileThreshold": 300,
+    "complexFunctionThreshold": 50,
+    "componentDir": "./src/components",
+    "excludePatterns": ["node_modules", ".next", "dist"]
+  },
+  "report": {
+    "totalFiles": 135,
+    "totalLines": 34099,
+    "avgLines": 253,
+    "largeFiles": 32,
+    "sizeDistribution": {
+      "small": 37,
+      "medium": 66,
+      "large": 32
+    },
+    "recommendations": true
+  },
+  "detailedAnalysis": [
+    {
+      "path": "src\\components\\admin\\AdminNotificationDropdown.tsx",
+      "lines": 362,
+      "isLarge": true,
+      "extension": ".tsx",
+      "name": "AdminNotificationDropdown.tsx"
+    },
+    {
+      "path": "src\\components\\admin\\AppointmentCalendar.tsx",
+      "lines": 630,
+      "isLarge": true,
+      "extension": ".tsx",
+      "name": "AppointmentCalendar.tsx"
+    },
+    {
+      "path": "src\\components\\admin\\BranchAccessManager.tsx",
+      "lines": 342,
+      "isLarge": true,
+      "extension": ".tsx",
+      "name": "BranchAccessManager.tsx"
+    },
+    {
+      "path": "src\\components\\admin\\BranchSelector.tsx",
+      "lines": 107,
+      "isLarge": false,
+      "extension": ".tsx",
+      "name": "BranchSelector.tsx"
+    },
+    {
+      "path": "src\\components\\admin\\charts\\AreaChart.tsx",
+      "lines": 279,
+      "isLarge": false,
+      "extension": ".tsx",
+      "name": "AreaChart.tsx"
+    },
+    {
+      "path": "src\\components\\admin\\charts\\BarChart.tsx",
+      "lines": 137,
+      "isLarge": false,
+      "extension": ".tsx",
+      "name": "BarChart.tsx"
+    },
+    {
+      "path": "src\\components\\admin\\charts\\ColumnChart.tsx",
+      "lines": 155,
+      "isLarge": false,
+      "extension": ".tsx",
+      "name": "ColumnChart.tsx"
+    },
+    {
+      "path": "src\\components\\admin\\charts\\EnhancedAreaChart.tsx",
+      "lines": 188,
+      "isLarge": false,
+      "extension": ".tsx",
+      "name": "EnhancedAreaChart.tsx"
+    },
+    {
+      "path": "src\\components\\admin\\charts\\EnhancedBarChart.tsx",
+      "lines": 200,
+      "isLarge": false,
+      "extension": ".tsx",
+      "name": "EnhancedBarChart.tsx"
+    },
+    {
+      "path": "src\\components\\admin\\charts\\EnhancedColumnChart.tsx",
+      "lines": 207,
+      "isLarge": false,
+      "extension": ".tsx",
+      "name": "EnhancedColumnChart.tsx"
+    },
+    {
+      "path": "src\\components\\admin\\charts\\EnhancedLineChart.tsx",
+      "lines": 175,
+      "isLarge": false,
+      "extension": ".tsx",
+      "name": "EnhancedLineChart.tsx"
+    },
+    {
+      "path": "src\\components\\admin\\charts\\EnhancedPieChart.tsx",
+      "lines": 184,
+      "isLarge": false,
+      "extension": ".tsx",
+      "name": "EnhancedPieChart.tsx"
+    },
+    {
+      "path": "src\\components\\admin\\charts\\LineChart.tsx",
+      "lines": 206,
+      "isLarge": false,
+      "extension": ".tsx",
+      "name": "LineChart.tsx"
+    },
+    {
+      "path": "src\\components\\admin\\charts\\PieChart.tsx",
+      "lines": 173,
+      "isLarge": false,
+      "extension": ".tsx",
+      "name": "PieChart.tsx"
+    },
+    {
+      "path": "src\\components\\admin\\chat\\ChatHeader.tsx",
+      "lines": 168,
+      "isLarge": false,
+      "extension": ".tsx",
+      "name": "ChatHeader.tsx"
+    },
+    {
+      "path": "src\\components\\admin\\chat\\ChatHistorySidebar.tsx",
+      "lines": 291,
+      "isLarge": false,
+      "extension": ".tsx",
+      "name": "ChatHistorySidebar.tsx"
+    },
+    {
+      "path": "src\\components\\admin\\chat\\ChatInput.tsx",
+      "lines": 99,
+      "isLarge": false,
+      "extension": ".tsx",
+      "name": "ChatInput.tsx"
+    },
+    {
+      "path": "src\\components\\admin\\chat\\ExportDialog.tsx",
+      "lines": 159,
+      "isLarge": false,
+      "extension": ".tsx",
+      "name": "ExportDialog.tsx"
+    },
+    {
+      "path": "src\\components\\admin\\chat\\MessageBubble.tsx",
+      "lines": 428,
+      "isLarge": true,
+      "extension": ".tsx",
+      "name": "MessageBubble.tsx"
+    },
+    {
+      "path": "src\\components\\admin\\chat\\MessageList.tsx",
+      "lines": 133,
+      "isLarge": false,
+      "extension": ".tsx",
+      "name": "MessageList.tsx"
+    },
+    {
+      "path": "src\\components\\admin\\chat\\ProviderSelector.tsx",
+      "lines": 85,
+      "isLarge": false,
+      "extension": ".tsx",
+      "name": "ProviderSelector.tsx"
+    },
+    {
+      "path": "src\\components\\admin\\chat\\SettingsPanel.tsx",
+      "lines": 134,
+      "isLarge": false,
+      "extension": ".tsx",
+      "name": "SettingsPanel.tsx"
+    },
+    {
+      "path": "src\\components\\admin\\chat\\ToolBrowser.tsx",
+      "lines": 179,
+      "isLarge": false,
+      "extension": ".tsx",
+      "name": "ToolBrowser.tsx"
+    },
+    {
+      "path": "src\\components\\admin\\chat\\ToolCallDisplay.tsx",
+      "lines": 106,
+      "isLarge": false,
+      "extension": ".tsx",
+      "name": "ToolCallDisplay.tsx"
+    },
+    {
+      "path": "src\\components\\admin\\chat\\TypingIndicator.tsx",
+      "lines": 39,
+      "isLarge": false,
+      "extension": ".tsx",
+      "name": "TypingIndicator.tsx"
+    },
+    {
+      "path": "src\\components\\admin\\Chatbot.tsx",
+      "lines": 94,
+      "isLarge": false,
+      "extension": ".tsx",
+      "name": "Chatbot.tsx"
+    },
+    {
+      "path": "src\\components\\admin\\ChatbotContent.tsx",
+      "lines": 628,
+      "isLarge": true,
+      "extension": ".tsx",
+      "name": "ChatbotContent.tsx"
+    },
+    {
+      "path": "src\\components\\admin\\CreateAppointmentForm.tsx",
+      "lines": 1140,
+      "isLarge": true,
+      "extension": ".tsx",
+      "name": "CreateAppointmentForm.tsx"
+    },
+    {
+      "path": "src\\components\\admin\\CreateManualOrderForm.tsx",
+      "lines": 561,
+      "isLarge": true,
+      "extension": ".tsx",
+      "name": "CreateManualOrderForm.tsx"
+    },
+    {
+      "path": "src\\components\\admin\\CreatePrescriptionForm.tsx",
+      "lines": 770,
+      "isLarge": true,
+      "extension": ".tsx",
+      "name": "CreatePrescriptionForm.tsx"
+    },
+    {
+      "path": "src\\components\\admin\\CreateQuoteForm.tsx",
+      "lines": 3033,
+      "isLarge": true,
+      "extension": ".tsx",
+      "name": "CreateQuoteForm.tsx"
+    },
+    {
+      "path": "src\\components\\admin\\CreateWorkOrderForm\\CustomerSelector.tsx",
+      "lines": 139,
+      "isLarge": false,
+      "extension": ".tsx",
+      "name": "CustomerSelector.tsx"
+    },
+    {
+      "path": "src\\components\\admin\\CreateWorkOrderForm\\FrameSelector.tsx",
+      "lines": 199,
+      "isLarge": false,
+      "extension": ".tsx",
+      "name": "FrameSelector.tsx"
+    },
+    {
+      "path": "src\\components\\admin\\CreateWorkOrderForm\\hooks\\useWorkOrderCalculations.ts",
+      "lines": 153,
+      "isLarge": false,
+      "extension": ".ts",
+      "name": "useWorkOrderCalculations.ts"
+    },
+    {
+      "path": "src\\components\\admin\\CreateWorkOrderForm\\hooks\\useWorkOrderForm.ts",
+      "lines": 190,
+      "isLarge": false,
+      "extension": ".ts",
+      "name": "useWorkOrderForm.ts"
+    },
+    {
+      "path": "src\\components\\admin\\CreateWorkOrderForm\\hooks\\useWorkOrderValidation.ts",
+      "lines": 96,
+      "isLarge": false,
+      "extension": ".ts",
+      "name": "useWorkOrderValidation.ts"
+    },
+    {
+      "path": "src\\components\\admin\\CreateWorkOrderForm\\index.tsx",
+      "lines": 378,
+      "isLarge": true,
+      "extension": ".tsx",
+      "name": "index.tsx"
+    },
+    {
+      "path": "src\\components\\admin\\CreateWorkOrderForm\\LabInfoSection.tsx",
+      "lines": 80,
+      "isLarge": false,
+      "extension": ".tsx",
+      "name": "LabInfoSection.tsx"
+    },
+    {
+      "path": "src\\components\\admin\\CreateWorkOrderForm\\LensConfiguration.tsx",
+      "lines": 260,
+      "isLarge": false,
+      "extension": ".tsx",
+      "name": "LensConfiguration.tsx"
+    },
+    {
+      "path": "src\\components\\admin\\CreateWorkOrderForm\\NotesSection.tsx",
+      "lines": 52,
+      "isLarge": false,
+      "extension": ".tsx",
+      "name": "NotesSection.tsx"
+    },
+    {
+      "path": "src\\components\\admin\\CreateWorkOrderForm\\PrescriptionSelector.tsx",
+      "lines": 192,
+      "isLarge": false,
+      "extension": ".tsx",
+      "name": "PrescriptionSelector.tsx"
+    },
+    {
+      "path": "src\\components\\admin\\CreateWorkOrderForm\\PricingSection.tsx",
+      "lines": 215,
+      "isLarge": false,
+      "extension": ".tsx",
+      "name": "PricingSection.tsx"
+    },
+    {
+      "path": "src\\components\\admin\\CreateWorkOrderForm\\StatusSection.tsx",
+      "lines": 45,
+      "isLarge": false,
+      "extension": ".tsx",
+      "name": "StatusSection.tsx"
+    },
+    {
+      "path": "src\\components\\admin\\CreateWorkOrderForm.tsx",
+      "lines": 378,
+      "isLarge": true,
+      "extension": ".tsx",
+      "name": "CreateWorkOrderForm.tsx"
+    },
+    {
+      "path": "src\\components\\admin\\DashboardSearch.tsx",
+      "lines": 197,
+      "isLarge": false,
+      "extension": ".tsx",
+      "name": "DashboardSearch.tsx"
+    },
+    {
+      "path": "src\\components\\admin\\EmailTemplateEditor.tsx",
+      "lines": 765,
+      "isLarge": true,
+      "extension": ".tsx",
+      "name": "EmailTemplateEditor.tsx"
+    },
+    {
+      "path": "src\\components\\admin\\EmailTemplatesManager.tsx",
+      "lines": 532,
+      "isLarge": true,
+      "extension": ".tsx",
+      "name": "EmailTemplatesManager.tsx"
+    },
+    {
+      "path": "src\\components\\admin\\HelpDialog.tsx",
+      "lines": 88,
+      "isLarge": false,
+      "extension": ".tsx",
+      "name": "HelpDialog.tsx"
+    },
+    {
+      "path": "src\\components\\admin\\InsightsFloatingButton.tsx",
+      "lines": 58,
+      "isLarge": false,
+      "extension": ".tsx",
+      "name": "InsightsFloatingButton.tsx"
+    },
+    {
+      "path": "src\\components\\admin\\lenses\\LensFamiliesList.tsx",
+      "lines": 296,
+      "isLarge": false,
+      "extension": ".tsx",
+      "name": "LensFamiliesList.tsx"
+    },
+    {
+      "path": "src\\components\\admin\\lenses\\LensFamilyBasicForm.tsx",
+      "lines": 150,
+      "isLarge": false,
+      "extension": ".tsx",
+      "name": "LensFamilyBasicForm.tsx"
+    },
+    {
+      "path": "src\\components\\admin\\lenses\\LensFamilyEditor.tsx",
+      "lines": 211,
+      "isLarge": false,
+      "extension": ".tsx",
+      "name": "LensFamilyEditor.tsx"
+    },
+    {
+      "path": "src\\components\\admin\\lenses\\LensFamilyWizard.tsx",
+      "lines": 197,
+      "isLarge": false,
+      "extension": ".tsx",
+      "name": "LensFamilyWizard.tsx"
+    },
+    {
+      "path": "src\\components\\admin\\lenses\\LensMatrixManager.tsx",
+      "lines": 452,
+      "isLarge": true,
+      "extension": ".tsx",
+      "name": "LensMatrixManager.tsx"
+    },
+    {
+      "path": "src\\components\\admin\\NotificationSettings.tsx",
+      "lines": 532,
+      "isLarge": true,
+      "extension": ".tsx",
+      "name": "NotificationSettings.tsx"
+    },
+    {
+      "path": "src\\components\\admin\\PaymentConfig.tsx",
+      "lines": 830,
+      "isLarge": true,
+      "extension": ".tsx",
+      "name": "PaymentConfig.tsx"
+    },
+    {
+      "path": "src\\components\\admin\\PermissionsEditor.tsx",
+      "lines": 202,
+      "isLarge": false,
+      "extension": ".tsx",
+      "name": "PermissionsEditor.tsx"
+    },
+    {
+      "path": "src\\components\\admin\\POS\\POSReceipt.tsx",
+      "lines": 211,
+      "isLarge": false,
+      "extension": ".tsx",
+      "name": "POSReceipt.tsx"
+    },
+    {
+      "path": "src\\components\\admin\\saas-support\\SupportMetrics.tsx",
+      "lines": 463,
+      "isLarge": true,
+      "extension": ".tsx",
+      "name": "SupportMetrics.tsx"
+    },
+    {
+      "path": "src\\components\\admin\\SEOManager.tsx",
+      "lines": 791,
+      "isLarge": true,
+      "extension": ".tsx",
+      "name": "SEOManager.tsx"
+    },
+    {
+      "path": "src\\components\\admin\\ShippingManager.tsx",
+      "lines": 1059,
+      "isLarge": true,
+      "extension": ".tsx",
+      "name": "ShippingManager.tsx"
+    },
+    {
+      "path": "src\\components\\admin\\SubscriptionGuard.tsx",
+      "lines": 77,
+      "isLarge": false,
+      "extension": ".tsx",
+      "name": "SubscriptionGuard.tsx"
+    },
+    {
+      "path": "src\\components\\admin\\SubscriptionManagementSection.tsx",
+      "lines": 455,
+      "isLarge": true,
+      "extension": ".tsx",
+      "name": "SubscriptionManagementSection.tsx"
+    },
+    {
+      "path": "src\\components\\admin\\WebhookMonitor.tsx",
+      "lines": 511,
+      "isLarge": true,
+      "extension": ".tsx",
+      "name": "WebhookMonitor.tsx"
+    },
+    {
+      "path": "src\\components\\ai\\GenerateInsightsButton.tsx",
+      "lines": 93,
+      "isLarge": false,
+      "extension": ".tsx",
+      "name": "GenerateInsightsButton.tsx"
+    },
+    {
+      "path": "src\\components\\ai\\InsightCard.tsx",
+      "lines": 342,
+      "isLarge": true,
+      "extension": ".tsx",
+      "name": "InsightCard.tsx"
+    },
+    {
+      "path": "src\\components\\ai\\SmartContextWidget.tsx",
+      "lines": 340,
+      "isLarge": true,
+      "extension": ".tsx",
+      "name": "SmartContextWidget.tsx"
+    },
+    {
+      "path": "src\\components\\checkout\\CheckoutForm.tsx",
+      "lines": 243,
+      "isLarge": false,
+      "extension": ".tsx",
+      "name": "CheckoutForm.tsx"
+    },
+    {
+      "path": "src\\components\\checkout\\CheckoutPageContent.tsx",
+      "lines": 885,
+      "isLarge": true,
+      "extension": ".tsx",
+      "name": "CheckoutPageContent.tsx"
+    },
+    {
+      "path": "src\\components\\checkout\\MercadoPagoButton.tsx",
+      "lines": 85,
+      "isLarge": false,
+      "extension": ".tsx",
+      "name": "MercadoPagoButton.tsx"
+    },
+    {
+      "path": "src\\components\\ErrorBoundary.tsx",
+      "lines": 111,
+      "isLarge": false,
+      "extension": ".tsx",
+      "name": "ErrorBoundary.tsx"
+    },
+    {
+      "path": "src\\components\\landing\\BenefitsSection.tsx",
+      "lines": 99,
+      "isLarge": false,
+      "extension": ".tsx",
+      "name": "BenefitsSection.tsx"
+    },
+    {
+      "path": "src\\components\\landing\\CTASection.tsx",
+      "lines": 79,
+      "isLarge": false,
+      "extension": ".tsx",
+      "name": "CTASection.tsx"
+    },
+    {
+      "path": "src\\components\\landing\\FeaturesSection.tsx",
+      "lines": 110,
+      "isLarge": false,
+      "extension": ".tsx",
+      "name": "FeaturesSection.tsx"
+    },
+    {
+      "path": "src\\components\\landing\\HeroSection.tsx",
+      "lines": 168,
+      "isLarge": false,
+      "extension": ".tsx",
+      "name": "HeroSection.tsx"
+    },
+    {
+      "path": "src\\components\\landing\\LandingFooter.tsx",
+      "lines": 202,
+      "isLarge": false,
+      "extension": ".tsx",
+      "name": "LandingFooter.tsx"
+    },
+    {
+      "path": "src\\components\\landing\\LandingHeader.tsx",
+      "lines": 305,
+      "isLarge": true,
+      "extension": ".tsx",
+      "name": "LandingHeader.tsx"
+    },
+    {
+      "path": "src\\components\\landing\\PricingSection.tsx",
+      "lines": 240,
+      "isLarge": false,
+      "extension": ".tsx",
+      "name": "PricingSection.tsx"
+    },
+    {
+      "path": "src\\components\\landing\\ProblemSolutionSection.tsx",
+      "lines": 155,
+      "isLarge": false,
+      "extension": ".tsx",
+      "name": "ProblemSolutionSection.tsx"
+    },
+    {
+      "path": "src\\components\\landing\\TestimonialsSection.tsx",
+      "lines": 94,
+      "isLarge": false,
+      "extension": ".tsx",
+      "name": "TestimonialsSection.tsx"
+    },
+    {
+      "path": "src\\components\\layout\\UserHeader.tsx",
+      "lines": 130,
+      "isLarge": false,
+      "extension": ".tsx",
+      "name": "UserHeader.tsx"
+    },
+    {
+      "path": "src\\components\\onboarding\\DemoModeBanner.tsx",
+      "lines": 114,
+      "isLarge": false,
+      "extension": ".tsx",
+      "name": "DemoModeBanner.tsx"
+    },
+    {
+      "path": "src\\components\\onboarding\\TourButton.tsx",
+      "lines": 28,
+      "isLarge": false,
+      "extension": ".tsx",
+      "name": "TourButton.tsx"
+    },
+    {
+      "path": "src\\components\\onboarding\\TourCard.tsx",
+      "lines": 176,
+      "isLarge": false,
+      "extension": ".tsx",
+      "name": "TourCard.tsx"
+    },
+    {
+      "path": "src\\components\\onboarding\\TourOverlay.tsx",
+      "lines": 140,
+      "isLarge": false,
+      "extension": ".tsx",
+      "name": "TourOverlay.tsx"
+    },
+    {
+      "path": "src\\components\\onboarding\\TourProgress.tsx",
+      "lines": 52,
+      "isLarge": false,
+      "extension": ".tsx",
+      "name": "TourProgress.tsx"
+    },
+    {
+      "path": "src\\components\\onboarding\\TourProvider.tsx",
+      "lines": 318,
+      "isLarge": true,
+      "extension": ".tsx",
+      "name": "TourProvider.tsx"
+    },
+    {
+      "path": "src\\components\\TestErrorComponent.tsx",
+      "lines": 27,
+      "isLarge": false,
+      "extension": ".tsx",
+      "name": "TestErrorComponent.tsx"
+    },
+    {
+      "path": "src\\components\\theme-provider.tsx",
+      "lines": 105,
+      "isLarge": false,
+      "extension": ".tsx",
+      "name": "theme-provider.tsx"
+    },
+    {
+      "path": "src\\components\\theme-selector.tsx",
+      "lines": 65,
+      "isLarge": false,
+      "extension": ".tsx",
+      "name": "theme-selector.tsx"
+    },
+    {
+      "path": "src\\components\\ui\\alert.tsx",
+      "lines": 60,
+      "isLarge": false,
+      "extension": ".tsx",
+      "name": "alert.tsx"
+    },
+    {
+      "path": "src\\components\\ui\\avatar.tsx",
+      "lines": 51,
+      "isLarge": false,
+      "extension": ".tsx",
+      "name": "avatar.tsx"
+    },
+    {
+      "path": "src\\components\\ui\\AvatarUpload.tsx",
+      "lines": 230,
+      "isLarge": false,
+      "extension": ".tsx",
+      "name": "AvatarUpload.tsx"
+    },
+    {
+      "path": "src\\components\\ui\\badge.tsx",
+      "lines": 39,
+      "isLarge": false,
+      "extension": ".tsx",
+      "name": "badge.tsx"
+    },
+    {
+      "path": "src\\components\\ui\\BlurText.tsx",
+      "lines": 154,
+      "isLarge": false,
+      "extension": ".tsx",
+      "name": "BlurText.tsx"
+    },
+    {
+      "path": "src\\components\\ui\\brand\\BlogCard.tsx",
+      "lines": 268,
+      "isLarge": false,
+      "extension": ".tsx",
+      "name": "BlogCard.tsx"
+    },
+    {
+      "path": "src\\components\\ui\\brand\\ContentSection.tsx",
+      "lines": 306,
+      "isLarge": true,
+      "extension": ".tsx",
+      "name": "ContentSection.tsx"
+    },
+    {
+      "path": "src\\components\\ui\\brand\\FeatureHighlight.tsx",
+      "lines": 302,
+      "isLarge": true,
+      "extension": ".tsx",
+      "name": "FeatureHighlight.tsx"
+    },
+    {
+      "path": "src\\components\\ui\\brand\\FormComponents.tsx",
+      "lines": 516,
+      "isLarge": true,
+      "extension": ".tsx",
+      "name": "FormComponents.tsx"
+    },
+    {
+      "path": "src\\components\\ui\\brand\\HeroSection.tsx",
+      "lines": 278,
+      "isLarge": false,
+      "extension": ".tsx",
+      "name": "HeroSection.tsx"
+    },
+    {
+      "path": "src\\components\\ui\\brand\\index.ts",
+      "lines": 27,
+      "isLarge": false,
+      "extension": ".ts",
+      "name": "index.ts"
+    },
+    {
+      "path": "src\\components\\ui\\brand\\NavigationMenu.tsx",
+      "lines": 389,
+      "isLarge": true,
+      "extension": ".tsx",
+      "name": "NavigationMenu.tsx"
+    },
+    {
+      "path": "src\\components\\ui\\brand\\ProductCard.tsx",
+      "lines": 572,
+      "isLarge": true,
+      "extension": ".tsx",
+      "name": "ProductCard.tsx"
+    },
+    {
+      "path": "src\\components\\ui\\brand\\ProductGrid.tsx",
+      "lines": 458,
+      "isLarge": true,
+      "extension": ".tsx",
+      "name": "ProductGrid.tsx"
+    },
+    {
+      "path": "src\\components\\ui\\brand\\ProgressIndicator.tsx",
+      "lines": 279,
+      "isLarge": false,
+      "extension": ".tsx",
+      "name": "ProgressIndicator.tsx"
+    },
+    {
+      "path": "src\\components\\ui\\brand\\ServiceCard.tsx",
+      "lines": 258,
+      "isLarge": false,
+      "extension": ".tsx",
+      "name": "ServiceCard.tsx"
+    },
+    {
+      "path": "src\\components\\ui\\brand\\TestimonialCard.tsx",
+      "lines": 253,
+      "isLarge": false,
+      "extension": ".tsx",
+      "name": "TestimonialCard.tsx"
+    },
+    {
+      "path": "src\\components\\ui\\button.tsx",
+      "lines": 149,
+      "isLarge": false,
+      "extension": ".tsx",
+      "name": "button.tsx"
+    },
+    {
+      "path": "src\\components\\ui\\card.tsx",
+      "lines": 286,
+      "isLarge": false,
+      "extension": ".tsx",
+      "name": "card.tsx"
+    },
+    {
+      "path": "src\\components\\ui\\checkbox.tsx",
+      "lines": 31,
+      "isLarge": false,
+      "extension": ".tsx",
+      "name": "checkbox.tsx"
+    },
+    {
+      "path": "src\\components\\ui\\command.tsx",
+      "lines": 157,
+      "isLarge": false,
+      "extension": ".tsx",
+      "name": "command.tsx"
+    },
+    {
+      "path": "src\\components\\ui\\dialog.tsx",
+      "lines": 123,
+      "isLarge": false,
+      "extension": ".tsx",
+      "name": "dialog.tsx"
+    },
+    {
+      "path": "src\\components\\ui\\dropdown-menu.tsx",
+      "lines": 202,
+      "isLarge": false,
+      "extension": ".tsx",
+      "name": "dropdown-menu.tsx"
+    },
+    {
+      "path": "src\\components\\ui\\form.tsx",
+      "lines": 179,
+      "isLarge": false,
+      "extension": ".tsx",
+      "name": "form.tsx"
+    },
+    {
+      "path": "src\\components\\ui\\ImageUpload.tsx",
+      "lines": 220,
+      "isLarge": false,
+      "extension": ".tsx",
+      "name": "ImageUpload.tsx"
+    },
+    {
+      "path": "src\\components\\ui\\input.tsx",
+      "lines": 215,
+      "isLarge": false,
+      "extension": ".tsx",
+      "name": "input.tsx"
+    },
+    {
+      "path": "src\\components\\ui\\label.tsx",
+      "lines": 27,
+      "isLarge": false,
+      "extension": ".tsx",
+      "name": "label.tsx"
+    },
+    {
+      "path": "src\\components\\ui\\navigation-menu.tsx",
+      "lines": 144,
+      "isLarge": false,
+      "extension": ".tsx",
+      "name": "navigation-menu.tsx"
+    },
+    {
+      "path": "src\\components\\ui\\pagination.tsx",
+      "lines": 168,
+      "isLarge": false,
+      "extension": ".tsx",
+      "name": "pagination.tsx"
+    },
+    {
+      "path": "src\\components\\ui\\popover.tsx",
+      "lines": 33,
+      "isLarge": false,
+      "extension": ".tsx",
+      "name": "popover.tsx"
+    },
+    {
+      "path": "src\\components\\ui\\progress.tsx",
+      "lines": 29,
+      "isLarge": false,
+      "extension": ".tsx",
+      "name": "progress.tsx"
+    },
+    {
+      "path": "src\\components\\ui\\radio-group.tsx",
+      "lines": 45,
+      "isLarge": false,
+      "extension": ".tsx",
+      "name": "radio-group.tsx"
+    },
+    {
+      "path": "src\\components\\ui\\resizable.tsx",
+      "lines": 90,
+      "isLarge": false,
+      "extension": ".tsx",
+      "name": "resizable.tsx"
+    },
+    {
+      "path": "src\\components\\ui\\RichTextDisplay.tsx",
+      "lines": 61,
+      "isLarge": false,
+      "extension": ".tsx",
+      "name": "RichTextDisplay.tsx"
+    },
+    {
+      "path": "src\\components\\ui\\RichTextEditor.tsx",
+      "lines": 160,
+      "isLarge": false,
+      "extension": ".tsx",
+      "name": "RichTextEditor.tsx"
+    },
+    {
+      "path": "src\\components\\ui\\scroll-area.tsx",
+      "lines": 50,
+      "isLarge": false,
+      "extension": ".tsx",
+      "name": "scroll-area.tsx"
+    },
+    {
+      "path": "src\\components\\ui\\select.tsx",
+      "lines": 160,
+      "isLarge": false,
+      "extension": ".tsx",
+      "name": "select.tsx"
+    },
+    {
+      "path": "src\\components\\ui\\separator.tsx",
+      "lines": 32,
+      "isLarge": false,
+      "extension": ".tsx",
+      "name": "separator.tsx"
+    },
+    {
+      "path": "src\\components\\ui\\sheet.tsx",
+      "lines": 141,
+      "isLarge": false,
+      "extension": ".tsx",
+      "name": "sheet.tsx"
+    },
+    {
+      "path": "src\\components\\ui\\slider.tsx",
+      "lines": 29,
+      "isLarge": false,
+      "extension": ".tsx",
+      "name": "slider.tsx"
+    },
+    {
+      "path": "src\\components\\ui\\switch.tsx",
+      "lines": 29,
+      "isLarge": false,
+      "extension": ".tsx",
+      "name": "switch.tsx"
+    },
+    {
+      "path": "src\\components\\ui\\table.tsx",
+      "lines": 121,
+      "isLarge": false,
+      "extension": ".tsx",
+      "name": "table.tsx"
+    },
+    {
+      "path": "src\\components\\ui\\tabs.tsx",
+      "lines": 56,
+      "isLarge": false,
+      "extension": ".tsx",
+      "name": "tabs.tsx"
+    },
+    {
+      "path": "src\\components\\ui\\textarea.tsx",
+      "lines": 24,
+      "isLarge": false,
+      "extension": ".tsx",
+      "name": "textarea.tsx"
+    },
+    {
+      "path": "src\\components\\ui\\toaster.tsx",
+      "lines": 146,
+      "isLarge": false,
+      "extension": ".tsx",
+      "name": "toaster.tsx"
+    }
+  ]
+}

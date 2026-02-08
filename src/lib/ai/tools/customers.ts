@@ -69,10 +69,7 @@ export const customerTools: ToolDefinition[] = [
           };
         }
 
-        let query = supabase
-          .from("profiles")
-          .select("*", { count: "exact" })
-          .eq("organization_id", organizationId);
+        let query = supabase.from("profiles").select("*", { count: "exact" });
 
         if (validated.search) {
           query = query.or(
@@ -137,7 +134,6 @@ export const customerTools: ToolDefinition[] = [
         const { data, error } = await supabase
           .from("profiles")
           .select("*")
-          .eq("organization_id", organizationId)
           .eq("id", validated.customerId)
           .single();
 
@@ -208,7 +204,6 @@ export const customerTools: ToolDefinition[] = [
           })
 
           .eq("id", validated.customerId)
-          .eq("organization_id", organizationId)
           .select()
           .single();
 

@@ -71,17 +71,20 @@ export default function Chatbot(
         size="icon"
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
-          "rounded-full w-14 h-14 shadow-xl transition-all duration-300 hover:scale-110 active:scale-95",
+          "rounded-full w-16 h-16 shadow-[0_8px_30px_rgb(0,0,0,0.12)] transition-all duration-500 hover:scale-110 active:scale-95 border-4 border-white dark:border-slate-900",
           isOpen
-            ? "bg-slate-200 dark:bg-slate-800 text-slate-600 rotate-90"
-            : "bg-primary text-primary-foreground",
+            ? "bg-slate-100 dark:bg-slate-800 text-slate-500 rotate-90 shadow-none"
+            : "bg-gradient-to-tr from-primary via-primary to-primary/80 text-white",
         )}
-        title="Asistente IA"
+        title="Asistente de Inteligencia Opttius"
       >
         {isOpen ? (
-          <X className="w-6 h-6" />
+          <X className="w-7 h-7" />
         ) : (
-          <MessageSquare className="w-6 h-6" />
+          <div className="relative">
+            <MessageSquare className="w-7 h-7" />
+            <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-primary animate-pulse" />
+          </div>
         )}
       </Button>
     </div>

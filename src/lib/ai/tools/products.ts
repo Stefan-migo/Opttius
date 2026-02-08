@@ -169,13 +169,20 @@ export const productTools: ToolDefinition[] = [
           return { success: false, error: error.message };
         }
 
+        const products =
+          data?.map((product) => ({
+            ...product,
+            currency: context.currency || "USD",
+          })) || [];
+
         return {
           success: true,
           data: {
-            products: data || [],
+            products,
             total: count || 0,
             page: validated.page,
             limit: validated.limit,
+            currency: context.currency || "USD",
           },
           message: `Found ${count || 0} products`,
         };
@@ -243,10 +250,15 @@ export const productTools: ToolDefinition[] = [
           return { success: false, error: "Product not found" };
         }
 
+        const product = {
+          ...data,
+          currency: context.currency || "USD",
+        };
+
         return {
           success: true,
-          data,
-          message: `Retrieved product: ${data.name}`,
+          data: product,
+          message: `Retrieved details for ${product.name}`,
         };
       } catch (error: any) {
         return {
@@ -384,6 +396,31 @@ export const productTools: ToolDefinition[] = [
           return { success: false, error: error.message };
         }
 
+        // Initialize inventory in the default branch if quantity provided
+        if (validated.inventory_quantity > 0) {
+          try {
+            // Get default branch
+            const { data: branch } = await supabase
+              .from("branches")
+              .select("id")
+              .eq("organization_id", organizationId)
+              .limit(1)
+              .single();
+
+            if (branch) {
+              await supabase.from("product_branch_stock").insert({
+                product_id: data.id,
+                branch_id: branch.id,
+                quantity: validated.inventory_quantity,
+                low_stock_threshold: 5,
+              });
+            }
+          } catch (e) {
+            console.error("Failed to initialize branch stock:", e);
+            // Don't fail the whole operation, just log
+          }
+        }
+
         return {
           success: true,
           data,
@@ -485,14 +522,23 @@ export const productTools: ToolDefinition[] = [
           };
         }
 
-        const { error } = await supabase
+        const { data, error } = await supabase
           .from("products")
           .delete()
           .eq("id", validated.productId)
-          .eq("organization_id", organizationId);
+          .eq("organization_id", organizationId)
+          .select()
+          .single();
 
         if (error) {
           return { success: false, error: error.message };
+        }
+
+        if (!data) {
+          return {
+            success: false,
+            error: "Product not found or access denied",
+          };
         }
 
         return {
@@ -538,27 +584,103 @@ export const productTools: ToolDefinition[] = [
           };
         }
 
-        const { data: currentProduct, error: fetchError } = await supabase
+        // Check for organization_id
+        const { data: productData, error: productError } = await supabase
           .from("products")
-          .select("inventory_quantity")
+          .select("id, organization_id")
           .eq("id", validated.productId)
           .eq("organization_id", organizationId)
           .single();
 
-        if (fetchError || !currentProduct) {
-          return { success: false, error: "Product not found" };
+        if (productError || !productData) {
+          return {
+            success: false,
+            error: "Product not found or access denied",
+          };
         }
 
-        let newQuantity = currentProduct.inventory_quantity || 0;
+        let branchId = context.currentBranchId;
 
-        if (validated.adjustmentType === "set") {
-          newQuantity = validated.quantity;
-        } else if (validated.adjustmentType === "add") {
-          newQuantity = newQuantity + validated.quantity;
-        } else if (validated.adjustmentType === "subtract") {
-          newQuantity = Math.max(0, newQuantity - validated.quantity);
+        if (!branchId || branchId === "global") {
+          // Get default branch for the organization if no specific branch is selected
+          const { data: branch, error: branchError } = await supabase
+            .from("branches")
+            .select("id")
+            .eq("organization_id", organizationId)
+            .limit(1)
+            .single();
+
+          if (branchError || !branch) {
+            // If no branch found, fallback to just updating products table (legacy)
+            // But warn
+            console.warn(
+              "No branch found for inventory update, falling back to legacy column",
+            );
+          } else {
+            branchId = branch.id;
+          }
+        }
+        let newQuantity = 0;
+
+        if (branchId) {
+          // Get current stock
+          const { data: currentStock } = await supabase
+            .from("product_branch_stock")
+            .select("quantity")
+            .eq("product_id", validated.productId)
+            .eq("branch_id", branchId)
+            .single();
+
+          const currentQty = currentStock?.quantity || 0;
+
+          if (validated.adjustmentType === "set") {
+            newQuantity = validated.quantity;
+          } else if (validated.adjustmentType === "add") {
+            newQuantity = currentQty + validated.quantity;
+          } else if (validated.adjustmentType === "subtract") {
+            newQuantity = Math.max(0, currentQty - validated.quantity);
+          }
+
+          // Upsert stock
+          const { error: stockError } = await supabase
+            .from("product_branch_stock")
+            .upsert(
+              {
+                product_id: validated.productId,
+                branch_id: branchId,
+                quantity: newQuantity,
+                low_stock_threshold: 5,
+                updated_at: new Date().toISOString(),
+              },
+              { onConflict: "product_id, branch_id" },
+            );
+
+          if (stockError) {
+            console.error("Stock update error:", stockError);
+            return {
+              success: false,
+              error: "Failed to update branch stock: " + stockError.message,
+            };
+          }
+        } else {
+          // Fallback logic for legacy column if no branch
+          const { data: currentProduct } = await supabase
+            .from("products")
+            .select("inventory_quantity")
+            .eq("id", validated.productId)
+            .single();
+
+          const currentQty = currentProduct?.inventory_quantity || 0;
+          if (validated.adjustmentType === "set") {
+            newQuantity = validated.quantity;
+          } else if (validated.adjustmentType === "add") {
+            newQuantity = currentQty + validated.quantity;
+          } else if (validated.adjustmentType === "subtract") {
+            newQuantity = Math.max(0, currentQty - validated.quantity);
+          }
         }
 
+        // Also update legacy column for compatibility
         const { data, error } = await supabase
           .from("products")
           .update({

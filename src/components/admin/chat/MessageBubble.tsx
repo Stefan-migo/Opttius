@@ -2,7 +2,16 @@
 
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { Bot, User, Copy, Check, Edit2, Trash2, RotateCw } from "lucide-react";
+import {
+  Bot,
+  User,
+  Copy,
+  Check,
+  Edit2,
+  Trash2,
+  RotateCw,
+  Sparkles,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ToolCallDisplay } from "./ToolCallDisplay";
 
@@ -49,7 +58,7 @@ function renderInlineMarkdown(
       parts.push(
         <code
           key={`${keyPrefix}code-${matchIndex}`}
-          className="bg-admin-bg-primary px-1.5 py-0.5 rounded text-xs font-mono text-admin-text-secondary"
+          className="bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded text-[11px] font-mono text-primary font-bold"
         >
           {fullMatch.slice(1, -1)}
         </code>,
@@ -57,14 +66,20 @@ function renderInlineMarkdown(
     } else if (match[2]) {
       // Bold: **text**
       parts.push(
-        <strong key={`${keyPrefix}bold-${matchIndex}`}>
+        <strong
+          key={`${keyPrefix}bold-${matchIndex}`}
+          className="font-extrabold text-slate-900 dark:text-white"
+        >
           {fullMatch.slice(2, -2)}
         </strong>,
       );
     } else if (match[3]) {
       // Italic: *text*
       parts.push(
-        <em key={`${keyPrefix}italic-${matchIndex}`}>
+        <em
+          key={`${keyPrefix}italic-${matchIndex}`}
+          className="italic opacity-90"
+        >
           {fullMatch.slice(1, -1)}
         </em>,
       );
@@ -78,7 +93,7 @@ function renderInlineMarkdown(
             href={linkMatch[2]}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-blue-500 hover:underline"
+            className="text-primary hover:underline font-bold decoration-primary/30"
           >
             {linkMatch[1]}
           </a>,
@@ -139,8 +154,11 @@ function renderMarkdown(content: string) {
       parts.push(
         <pre
           key={`codeblock-${segIndex}`}
-          className="bg-admin-bg-primary p-3 rounded-md overflow-x-auto my-2 text-xs"
+          className="bg-slate-950 text-slate-100 p-4 rounded-xl overflow-x-auto my-3 text-[13px] font-mono shadow-2xl border border-white/5"
         >
+          <div className="flex items-center justify-between mb-2 pb-2 border-b border-white/10 opacity-50 uppercase text-[10px] font-bold tracking-widest">
+            <span>{segment.lang || "code"}</span>
+          </div>
           <code>{segment.content}</code>
         </pre>,
       );
@@ -158,7 +176,7 @@ function renderMarkdown(content: string) {
           parts.push(
             <h2
               key={`h2-${lineKey}`}
-              className="text-lg font-bold mt-4 mb-2 text-admin-text-primary"
+              className="text-lg font-bold mt-5 mb-2.5 text-slate-900 dark:text-white"
             >
               {renderInlineMarkdown(headingContent, `h2-${lineKey}-`)}
             </h2>,
@@ -170,7 +188,7 @@ function renderMarkdown(content: string) {
           parts.push(
             <h3
               key={`h3-${lineKey}`}
-              className="text-base font-semibold mt-3 mb-1 text-admin-text-primary"
+              className="text-base font-bold mt-4 mb-2 text-slate-800 dark:text-slate-100"
             >
               {renderInlineMarkdown(headingContent, `h3-${lineKey}-`)}
             </h3>,
@@ -182,7 +200,7 @@ function renderMarkdown(content: string) {
           parts.push(
             <h1
               key={`h1-${lineKey}`}
-              className="text-xl font-bold mt-4 mb-2 text-admin-text-primary"
+              className="text-xl font-black mt-6 mb-3 text-slate-950 dark:text-white underline decoration-primary/20 underline-offset-4"
             >
               {renderInlineMarkdown(headingContent, `h1-${lineKey}-`)}
             </h1>,
@@ -194,10 +212,12 @@ function renderMarkdown(content: string) {
           parts.push(
             <div
               key={`ul-${lineKey}`}
-              className="flex items-start gap-2 ml-2 my-0.5"
+              className="flex items-start gap-3 ml-2 my-1.5"
             >
-              <span className="text-admin-text-secondary mt-1">•</span>
-              <span>{renderInlineMarkdown(listContent, `ul-${lineKey}-`)}</span>
+              <span className="text-primary font-black mt-0.5">•</span>
+              <span className="text-slate-700 dark:text-slate-300">
+                {renderInlineMarkdown(listContent, `ul-${lineKey}-`)}
+              </span>
             </div>,
           );
         }
@@ -208,12 +228,12 @@ function renderMarkdown(content: string) {
             parts.push(
               <div
                 key={`ol-${lineKey}`}
-                className="flex items-start gap-2 ml-2 my-0.5"
+                className="flex items-start gap-3 ml-2 my-1.5"
               >
-                <span className="text-admin-text-secondary min-w-[1.5em]">
+                <span className="text-primary font-bold min-w-[1.2em]">
                   {numMatch[1]}.
                 </span>
-                <span>
+                <span className="text-slate-700 dark:text-slate-300">
                   {renderInlineMarkdown(numMatch[2], `ol-${lineKey}-`)}
                 </span>
               </div>,
@@ -222,12 +242,15 @@ function renderMarkdown(content: string) {
         }
         // Empty line
         else if (trimmedLine === "") {
-          parts.push(<div key={`br-${lineKey}`} className="h-2" />);
+          parts.push(<div key={`br-${lineKey}`} className="h-3" />);
         }
         // Regular paragraph
         else {
           parts.push(
-            <p key={`p-${lineKey}`} className="my-0.5">
+            <p
+              key={`p-${lineKey}`}
+              className="my-1.5 leading-relaxed text-slate-700 dark:text-slate-300"
+            >
               {renderInlineMarkdown(line, `p-${lineKey}-`)}
             </p>,
           );
@@ -277,114 +300,167 @@ export function MessageBubble({
   return (
     <div
       className={cn(
-        "flex gap-3 mb-4 group",
-        isUser ? "justify-end" : "justify-start",
+        "flex flex-col mb-8 group animate-in fade-in slide-in-from-bottom-2 duration-500",
+        isUser ? "items-end" : "items-start",
       )}
     >
-      {!isUser && !isTool && (
-        <div className="flex-shrink-0 w-8 h-8 rounded-full bg-admin-accent-primary flex items-center justify-center">
-          <Bot className="w-4 h-4 text-admin-text-primary" />
-        </div>
-      )}
-
       <div
         className={cn(
-          "max-w-[80%] rounded-lg px-4 py-2 relative",
-          isUser
-            ? "bg-admin-accent-primary text-admin-text-primary"
-            : isTool
-              ? "bg-admin-bg-primary text-admin-text-secondary border border-admin-border-primary"
-              : "bg-admin-bg-secondary text-admin-text-primary",
+          "flex gap-3 max-w-[90%]",
+          isUser ? "flex-row-reverse" : "flex-row",
         )}
       >
-        <div className="text-sm whitespace-pre-wrap break-words">
-          {renderMarkdown(content)}
+        {/* Avatar */}
+        <div
+          className={cn(
+            "flex-shrink-0 w-9 h-9 rounded-2xl flex items-center justify-center shadow-lg transition-transform group-hover:scale-110",
+            isUser
+              ? "bg-primary text-white"
+              : "bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-primary shadow-slate-200/50 dark:shadow-none",
+          )}
+        >
+          {isUser ? <User className="w-5 h-5" /> : <Bot className="w-5 h-5" />}
         </div>
 
-        {toolCallsData && (
-          <ToolCallDisplay
-            toolCalls={
-              Array.isArray(toolCallsData) ? toolCallsData : [toolCallsData]
-            }
-            toolResults={toolResultsData}
-            className="mt-3"
-          />
-        )}
-
-        <div className="flex items-center justify-between mt-2">
-          {timestamp && (
-            <p className="text-xs opacity-70">
-              {new Date(timestamp).toLocaleTimeString("es-ES", {
-                hour: "2-digit",
-                minute: "2-digit",
-              })}
-            </p>
-          )}
-
+        {/* Bubble */}
+        <div className="flex flex-col gap-1.5 min-w-0">
           <div
             className={cn(
-              "flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity",
-              timestamp ? "ml-auto" : "",
+              "rounded-2xl px-5 py-3.5 relative shadow-sm transition-all shadow-slate-200/50 dark:shadow-none",
+              isUser
+                ? "bg-primary text-white rounded-tr-none font-medium ml-4"
+                : isTool
+                  ? "bg-slate-50 dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 font-mono text-xs rounded-tl-none mr-4"
+                  : "bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 border border-slate-100 dark:border-slate-800 rounded-tl-none mr-4 backdrop-blur-sm",
             )}
           >
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-6 w-6"
-              onClick={handleCopy}
-              title="Copiar"
-            >
-              {copied ? (
-                <Check className="w-3 h-3" />
-              ) : (
-                <Copy className="w-3 h-3" />
+            <div
+              className={cn(
+                "text-[14.5px] whitespace-pre-wrap break-words",
+                isUser
+                  ? "selection:bg-white/30 [&_span]:text-[var(--accent)]"
+                  : "selection:bg-primary/20",
               )}
-            </Button>
+            >
+              {renderMarkdown(content)}
+            </div>
 
-            {isUser && onEdit && (
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-6 w-6"
-                onClick={onEdit}
-                title="Editar"
-              >
-                <Edit2 className="w-3 h-3" />
-              </Button>
+            {(() => {
+              const toolCallsArray = Array.isArray(toolCallsData)
+                ? toolCallsData
+                : toolCallsData
+                  ? [toolCallsData]
+                  : [];
+              const hasError = toolCallsArray.some((tc: any, index: number) => {
+                const result =
+                  toolResultsData?.[tc.id] || toolResultsData?.[index];
+                return result && result.success === false;
+              });
+
+              if (hasError) {
+                // Log the error to console as requested
+                toolCallsArray.forEach((tc: any, index: number) => {
+                  const result =
+                    toolResultsData?.[tc.id] || toolResultsData?.[index];
+                  if (result && result.success === false) {
+                    console.error(
+                      `Tool Execution Error [${tc.name}]:`,
+                      result.error || "Unknown error",
+                      result,
+                    );
+                  }
+                });
+
+                return (
+                  <ToolCallDisplay
+                    toolCalls={toolCallsArray}
+                    toolResults={toolResultsData}
+                    className="mt-4 border-t border-red-100 dark:border-red-900/30 pt-3"
+                  />
+                );
+              }
+              return null;
+            })()}
+          </div>
+
+          {/* Footer actions & Timestamp */}
+          <div
+            className={cn(
+              "flex items-center gap-3 px-1.5 transition-all duration-300",
+              isUser ? "flex-row-reverse" : "flex-row",
+              "opacity-0 group-hover:opacity-100",
+            )}
+          >
+            {timestamp && (
+              <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-tighter">
+                {new Date(timestamp).toLocaleTimeString("es-ES", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+              </span>
             )}
 
-            {!isUser && onRegenerate && (
+            <div className="flex items-center gap-0.5">
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-6 w-6"
-                onClick={onRegenerate}
-                title="Regenerar"
+                className="h-7 w-7 rounded-lg text-slate-400 hover:text-primary hover:bg-primary/5 transition-colors"
+                onClick={handleCopy}
+                title="Copiar texto"
               >
-                <RotateCw className="w-3 h-3" />
+                {copied ? (
+                  <Check className="w-3.5 h-3.5" />
+                ) : (
+                  <Copy className="w-3.5 h-3.5" />
+                )}
               </Button>
-            )}
 
-            {onDelete && (
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-6 w-6 text-destructive hover:text-destructive"
-                onClick={onDelete}
-                title="Eliminar"
-              >
-                <Trash2 className="w-3 h-3" />
-              </Button>
+              {isUser && onEdit && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7 rounded-lg text-slate-400 hover:text-primary hover:bg-primary/5 transition-colors"
+                  onClick={onEdit}
+                  title="Editar mensaje"
+                >
+                  <Edit2 className="w-3.5 h-3.5" />
+                </Button>
+              )}
+
+              {!isUser && onRegenerate && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7 rounded-lg text-slate-400 hover:text-primary hover:bg-primary/5 transition-colors"
+                  onClick={onRegenerate}
+                  title="Regenerar respuesta"
+                >
+                  <RotateCw className="w-3.5 h-3.5" />
+                </Button>
+              )}
+
+              {onDelete && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7 rounded-lg text-slate-400 hover:text-destructive hover:bg-destructive/5 transition-colors"
+                  onClick={onDelete}
+                  title="Eliminar mensaje"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </Button>
+              )}
+            </div>
+
+            {!isUser && !isTool && (
+              <div className="flex items-center gap-1 text-[10px] font-bold text-primary/50 uppercase tracking-widest ml-1">
+                <Sparkles className="w-3 h-3" />
+                Experto Óptico
+              </div>
             )}
           </div>
         </div>
       </div>
-
-      {isUser && (
-        <div className="flex-shrink-0 w-8 h-8 rounded-full bg-admin-accent-secondary flex items-center justify-center">
-          <User className="w-4 h-4 text-admin-text-primary" />
-        </div>
-      )}
     </div>
   );
 }

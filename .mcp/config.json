@@ -1,0 +1,16 @@
+{
+  "supabase": {
+    "url": "http://127.0.0.1:54321",
+    "key": "YOUR_SUPABASE_ANON_KEY",
+    "serviceKey": "YOUR_SUPABASE_SERVICE_ROLE_KEY"
+  },
+  "database": {
+    "connectionString": "postgresql://postgres:postgres@127.0.0.1:54322/postgres"
+  },
+  "features": {
+    "enableSchemaBrowser": true,
+    "enableQueryRunner": true,
+    "enablePerformanceInsights": true,
+    "enableMigrationTools": true
+  }
+}

@@ -31,7 +31,7 @@ export async function POST(
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    let updateData: any = {};
+    const updateData: any = {};
 
     switch (action) {
       case "activate":

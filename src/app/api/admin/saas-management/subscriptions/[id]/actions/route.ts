@@ -34,7 +34,7 @@ export async function POST(
       );
     }
 
-    let updateData: any = {};
+    const updateData: any = {};
 
     switch (action) {
       case "cancel":

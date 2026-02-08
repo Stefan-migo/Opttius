@@ -94,7 +94,11 @@ ${EXPERT_KNOWLEDGE.email_configuration}`,
 - Proponer soluciones técnicas y operativas
 - Evaluar la salud del sistema óptico
 - Recomendar mejoras continuas`,
+  default: "",
 };
+
+// @ts-ignore
+SYSTEM_PROMPTS.default = SYSTEM_PROMPTS.optic_expert;
 
 export interface AgentConfig {
   systemPrompt: string;

@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    let updateData: any = {};
+    const updateData: any = {};
 
     switch (action) {
       case "suspend":

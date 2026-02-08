@@ -43,114 +43,75 @@ export async function POST(request: NextRequest) {
       userEmail: user.email,
     });
 
+    // Get user's organization_id
+    const { data: adminUser } = await supabase
+      .from("admin_users")
+      .select("organization_id")
+      .eq("id", user.id)
+      .single();
+
+    const userOrganizationId = adminUser?.organization_id;
+
+    if (!userOrganizationId) {
+      return NextResponse.json(
+        { error: "Organization not found for user" },
+        { status: 400 },
+      );
+    }
+
     switch (action) {
       case "backup_database":
-        // Create database backup by exporting key tables to JSON
         try {
-          const backupStartTime = new Date();
-          const backupId = `backup_${backupStartTime.toISOString().replace(/[:.]/g, "-")}`;
+          const { BackupService } = await import("@/lib/backup-service");
 
-          logger.info("Starting database backup");
+          logger.info("Iniciando backup de base de datos", {
+            organizationId: userOrganizationId,
+            userEmail: user.email,
+          });
 
-          // Use service role client for backup (needs elevated permissions)
-          const supabaseService = createServiceRoleClient();
-
-          // Export key tables to JSON
-          const tablesToBackup = [
-            "products",
-            "categories",
-            "orders",
-            "order_items",
-            "profiles",
-            "admin_users",
-            "system_config",
-          ];
-
-          const backupData: any = {
-            backup_id: backupId,
-            created_at: backupStartTime.toISOString(),
-            created_by: user.email,
-            tables: {},
-          };
-
-          // Export each table
-          for (const tableName of tablesToBackup) {
-            const { data, error } = await supabaseService
-              .from(tableName)
-              .select("*");
-
-            if (error) {
-              logger.error("Error backing up table", { tableName, error });
-              backupData.tables[tableName] = {
-                error: error.message,
-                record_count: 0,
-              };
-            } else {
-              backupData.tables[tableName] = {
-                data: data || [],
-                record_count: data?.length || 0,
-              };
-            }
-          }
-
-          // Calculate total records
-          const totalRecords = Object.values(backupData.tables).reduce(
-            (sum: number, table: any) => {
-              return sum + (table.record_count || 0);
-            },
-            0,
+          const backupData = await BackupService.generateBackup(
+            userOrganizationId,
+            user.email,
           );
+          const backupId = backupData.backup_id;
 
-          // Convert to JSON string
           const backupJson = JSON.stringify(backupData, null, 2);
           const backupBuffer = Buffer.from(backupJson, "utf-8");
           const backupSize = backupBuffer.length;
 
-          // Upload to Supabase Storage using service role client
-          const backupFileName = `${backupId}.json`;
-          const { data: uploadData, error: uploadError } =
-            await supabaseService.storage
-              .from("database-backups")
-              .upload(backupFileName, backupBuffer, {
-                contentType: "application/json",
-                cacheControl: "3600",
-                upsert: false,
-              });
+          // Guardar con prefijo de organización para facilitar filtrado
+          const backupFileName = `${userOrganizationId}/${backupId}.json`;
+          const supabaseService = createServiceRoleClient();
+
+          // Subir a Supabase Storage
+          const { error: uploadError } = await supabaseService.storage
+            .from("database-backups")
+            .upload(backupFileName, backupBuffer, {
+              contentType: "application/json",
+              cacheControl: "3600",
+              upsert: false,
+            });
 
           if (uploadError) {
-            logger.error("Error uploading backup", { error: uploadError });
-            return NextResponse.json(
-              {
-                error: "Error al subir backup a almacenamiento",
-                details: uploadError.message,
-              },
-              { status: 500 },
-            );
-          }
-
-          // Create signed URL for download (valid for 1 hour)
-          const { data: signedUrlData, error: signedUrlError } =
-            await supabaseService.storage
-              .from("database-backups")
-              .createSignedUrl(backupFileName, 3600); // 1 hour expiration
-
-          if (signedUrlError) {
-            logger.error("Error creating signed URL", {
-              error: signedUrlError,
+            logger.error("Error en la subida a Supabase Storage", {
+              error: uploadError,
+              bucket: "database-backups",
+              fileName: backupFileName,
             });
-            // Continue anyway, backup is saved
+            throw new Error(`Error en la subida: ${uploadError.message}`);
           }
 
-          // Calculate expiration time (1 hour from now)
-          const expiresAt = signedUrlData?.signedUrl
-            ? new Date(Date.now() + 3600 * 1000).toISOString()
-            : null;
+          // Crear URL firmada (1 hora)
+          const { data: signedUrlData } = await supabaseService.storage
+            .from("database-backups")
+            .createSignedUrl(backupFileName, 3600);
 
-          const backupEndTime = new Date();
-          const backupDuration =
-            (backupEndTime.getTime() - backupStartTime.getTime()) / 1000;
+          const totalRecords = Object.values(backupData.tables).reduce(
+            (sum: number, table: any) => sum + (table.record_count || 0),
+            0,
+          );
 
-          // Log the action
+          // Registrar actividad con detalle de aislamiento
           await supabase.rpc("log_admin_activity", {
             action: "maintenance_backup_database",
             resource_type: "system",
@@ -158,32 +119,29 @@ export async function POST(request: NextRequest) {
             details: {
               action: "backup_database",
               backup_id: backupId,
-              backup_file: backupFileName,
-              tables_backed_up: tablesToBackup.length,
-              total_records: totalRecords,
-              backup_size_bytes: backupSize,
-              backup_size_mb: (backupSize / 1024 / 1024).toFixed(2),
-              duration_seconds: backupDuration,
-              download_url_created: !!signedUrlData,
-              initiated_by: user.email,
+              file: backupFileName,
+              organization_id: userOrganizationId,
+              stats: totalRecords,
+              size_mb: (backupSize / 1024 / 1024).toFixed(2),
+              tables_count: Object.keys(backupData.tables).length,
             },
           });
 
           return NextResponse.json({
             success: true,
-            message: `Backup completado: ${totalRecords} registros en ${tablesToBackup.length} tablas (${(backupSize / 1024 / 1024).toFixed(2)} MB)`,
-            action: "backup_database",
+            message: `Backup completado exitosamente para la organización.`,
             backup_id: backupId,
             backup_file: backupFileName,
             download_url: signedUrlData?.signedUrl || null,
-            download_url_expires_at: expiresAt,
-            tables_count: tablesToBackup.length,
+            tables_count: Object.keys(backupData.tables).length,
             total_records: totalRecords,
             backup_size_mb: (backupSize / 1024 / 1024).toFixed(2),
-            duration_seconds: backupDuration.toFixed(2),
           });
         } catch (error) {
-          logger.error("Error creating backup", { error });
+          logger.error("Error creating backup", {
+            error,
+            organizationId: userOrganizationId,
+          });
           return NextResponse.json(
             {
               error: "Error al crear backup de base de datos",

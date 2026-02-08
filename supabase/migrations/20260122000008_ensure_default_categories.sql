@@ -12,7 +12,6 @@ ON CONFLICT (slug) DO UPDATE SET
 -- Insert other useful categories if they don't exist
 INSERT INTO public.categories (name, slug, description, is_active, sort_order)
 VALUES 
-  ('Lentes', 'lentes', 'Lentes y cristales', true, 2),
   ('Accesorios', 'accesorios', 'Accesorios para lentes', true, 3),
   ('Servicios', 'servicios', 'Servicios de óptica', true, 4)
 ON CONFLICT (slug) DO UPDATE SET

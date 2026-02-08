@@ -29,6 +29,7 @@ export interface OrganizationalContext {
   phone: string;
   email: string;
   website: string;
+  currency: string;
   createdAt: string;
 }
 
@@ -72,27 +73,66 @@ export class OrganizationalMemory {
     }
 
     try {
-      const [orgData, productsData, ordersData] = await Promise.all([
-        this.getOrganizationData(),
-        this.getTopProducts(),
-        this.getRecentOrders(),
-      ]);
+      const [orgData, settingsData, productsData, ordersData] =
+        await Promise.all([
+          this.getOrganizationData(),
+          this.getOrganizationSettings(),
+          this.getTopProducts(),
+          this.getRecentOrders(),
+        ]);
+
+      const settings = settingsData || {};
+      const phone = settings.business_phone || "";
+      const address = settings.business_address || "";
+      const docType = settings.default_document_type || "";
+
+      // Detect location and currency
+      let location = "No especificado";
+      let currency = "USD"; // Default fallback
+
+      if (
+        phone.startsWith("+56") ||
+        address.toLowerCase().includes("chile") ||
+        docType === "boleta"
+      ) {
+        location = "Chile";
+        currency = "CLP";
+      } else if (
+        phone.startsWith("+54") ||
+        address.toLowerCase().includes("argentina")
+      ) {
+        location = "Argentina";
+        currency = "ARS";
+      } else if (
+        phone.startsWith("+34") ||
+        address.toLowerCase().includes("españa")
+      ) {
+        location = "España";
+        currency = "EUR";
+      } else if (
+        address.toLowerCase().includes("méxico") ||
+        phone.startsWith("+52")
+      ) {
+        location = "México";
+        currency = "MXN";
+      }
 
       const context: OrganizationalContext = {
         name: orgData.name,
-        specialty: orgData.specialty || "Óptica General",
+        specialty: "Óptica General",
         topProducts: productsData,
-        customerCount: orgData.total_customers || 0,
+        customerCount: 0,
         monthlyOrders: ordersData.monthly || 0,
         businessHours: {
-          open: orgData.opening_hours?.open || "09:00",
-          close: orgData.opening_hours?.close || "18:00",
+          open: "09:00",
+          close: "18:00",
         },
-        services: orgData.services || [],
-        location: orgData.location || "No especificado",
-        phone: orgData.phone || "No especificado",
-        email: orgData.email || "No especificado",
-        website: orgData.website || "No especificado",
+        services: [],
+        location: location,
+        phone: settings.business_phone || "No especificado",
+        email: settings.business_email || "No especificado",
+        website: "No especificado",
+        currency: currency,
         createdAt: orgData.created_at || new Date().toISOString(),
       };
 
@@ -116,14 +156,9 @@ export class OrganizationalMemory {
         .from("organizations")
         .select(
           `
-          total_orders,
-          total_revenue,
-          average_order_value,
-          customer_retention_rate,
-          order_completion_rate,
-          monthly_orders,
-          weekly_orders,
-          daily_orders
+          id,
+          name,
+          created_at
         `,
         )
         .eq("id", this.organizationId)
@@ -134,14 +169,14 @@ export class OrganizationalMemory {
       }
 
       return {
-        totalOrders: data.total_orders || 0,
-        totalRevenue: data.total_revenue || 0,
-        averageOrderValue: data.average_order_value || 0,
-        customerRetentionRate: data.customer_retention_rate || 0,
-        orderCompletionRate: data.order_completion_rate || 0,
-        monthlyOrders: data.monthly_orders || 0,
-        weeklyOrders: data.weekly_orders || 0,
-        dailyOrders: data.daily_orders || 0,
+        totalOrders: 0,
+        totalRevenue: 0,
+        averageOrderValue: 0,
+        customerRetentionRate: 0,
+        orderCompletionRate: 0,
+        monthlyOrders: 0,
+        weeklyOrders: 0,
+        dailyOrders: 0,
       };
     } catch (error) {
       console.error("Error getting activity metrics:", error);
@@ -227,15 +262,7 @@ export class OrganizationalMemory {
       .select(
         `
         name,
-        specialty,
-        opening_hours,
-        services,
-        location,
-        phone,
-        email,
-        website,
-        created_at,
-        total_customers
+        created_at
       `,
       )
       .eq("id", this.organizationId)
@@ -243,6 +270,21 @@ export class OrganizationalMemory {
 
     if (error) {
       throw error;
+    }
+
+    return data;
+  }
+
+  private async getOrganizationSettings(): Promise<any> {
+    const { data, error } = await this.supabase
+      .from("organization_settings")
+      .select("*")
+      .eq("organization_id", this.organizationId)
+      .maybeSingle();
+
+    if (error) {
+      console.error("Error fetching organization settings:", error);
+      return null;
     }
 
     return data;
@@ -320,6 +362,7 @@ export class OrganizationalMemory {
       phone: "No especificado",
       email: "No especificado",
       website: "No especificado",
+      currency: "USD",
       createdAt: new Date().toISOString(),
     };
   }

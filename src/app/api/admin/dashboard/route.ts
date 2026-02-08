@@ -109,7 +109,7 @@ export async function GET(request: NextRequest) {
 
     // Products query: include products of the branch OR global products (branch_id IS NULL)
     // This ensures that when a branch is selected, we still see products that aren't tied to any specific branch
-    let productsBaseQuery = supabase
+    const productsBaseQuery = supabase
       .from("products")
       .select("*")
       .eq("status", "active");

@@ -8,6 +8,7 @@ export interface AIConfig {
     [key in LLMProvider]?: {
       apiKey?: string;
       baseURL?: string;
+      groupId?: string; // For Minimax
       defaultModel?: string;
       enabled: boolean;
     };
@@ -57,6 +58,19 @@ export function getAIConfig(): AIConfig {
           process.env.OPENROUTER_DEFAULT_MODEL || "anthropic/claude-3.5-sonnet",
         enabled: !!process.env.OPENROUTER_API_KEY,
       },
+      kilocode: {
+        apiKey: process.env.KILOCODE_API_KEY,
+        baseURL: process.env.KILOCODE_BASE_URL || "https://api.kilo.ai/v1",
+        defaultModel: process.env.KILOCODE_DEFAULT_MODEL || "kilocode-frontier",
+        enabled: !!process.env.KILOCODE_API_KEY,
+      },
+      minimax: {
+        apiKey: process.env.MINIMAX_API_KEY,
+        baseURL: process.env.MINIMAX_BASE_URL || "https://api.minimax.io/v1",
+        groupId: process.env.MINIMAX_GROUP_ID,
+        defaultModel: process.env.MINIMAX_DEFAULT_MODEL || "minimax-m2.1",
+        enabled: !!process.env.MINIMAX_API_KEY,
+      },
     },
   };
 }
@@ -74,6 +88,7 @@ export function getProviderConfig(provider: LLMProvider): LLMConfig | null {
     model: providerConfig.defaultModel || aiConfig.defaultModel,
     apiKey: providerConfig.apiKey,
     baseURL: providerConfig.baseURL,
+    groupId: providerConfig.groupId,
     temperature: 0.7,
     maxTokens: 4096,
   };

@@ -39,7 +39,7 @@ export async function GET(
     const isRoot = adminUser?.role === "root" || adminUser?.role === "dev";
 
     // Obtener ticket
-    let query = supabaseServiceRole
+    const query = supabaseServiceRole
       .from("saas_support_tickets")
       .select(
         `
