@@ -77,7 +77,7 @@ describe("Generate Insights API - Integration Tests", () => {
 
   afterAll(async () => {
     if (infrastructureCheck) {
-      await cleanupTestData();
+      await cleanupTestData(orgA.id);
     }
   });
 
@@ -119,7 +119,7 @@ describe("Generate Insights API - Integration Tests", () => {
           },
         }),
       },
-      user,
+      user.authToken,
     );
 
     expect(response.status).toBe(200);

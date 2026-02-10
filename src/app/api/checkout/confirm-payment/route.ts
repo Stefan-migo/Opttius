@@ -198,10 +198,12 @@ export async function POST(request: NextRequest) {
           } catch (saveError) {
             logger.warn(
               "Failed to save card (non-blocking)",
-              saveError instanceof Error
-                ? saveError
-                : new Error(String(saveError)),
-              { organizationId },
+              {
+                error: saveError instanceof Error
+                  ? saveError.message
+                  : String(saveError),
+                organizationId,
+              },
             );
             // Do not fail the response; payment already succeeded
           }

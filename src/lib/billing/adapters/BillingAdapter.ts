@@ -47,7 +47,7 @@ export interface DocumentStatus {
 export interface Order {
   id: string;
   order_number: string;
-  customer_id: string;
+  customer_id?: string;
   branch_id: string;
   total_amount: number;
   subtotal: number;

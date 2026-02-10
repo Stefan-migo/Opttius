@@ -91,6 +91,7 @@ export class MercadoPagoGateway implements IPaymentGateway {
         body: {
           items: [
             {
+              id: orderId || `direct-payment-${Date.now()}`,
               title: `Order ${orderId || "Direct Payment"}`,
               quantity: 1,
               unit_price: unitPriceInteger,
@@ -191,12 +192,13 @@ export class MercadoPagoGateway implements IPaymentGateway {
             metadata?: { user_id?: string; organization_id?: string };
           });
 
-        const orderId = paymentData.external_reference ?? null;
+        const orderId = typeof paymentData.external_reference === 'string' ? paymentData.external_reference : null;
         const organizationId =
-          (paymentData.metadata as { organization_id?: string } | undefined)
-            ?.organization_id ?? null;
-        const amount = paymentData.transaction_amount ?? 0;
-        const currency = paymentData.currency_id ?? "CLP";
+          typeof paymentData.metadata === 'object' && paymentData.metadata && 'organization_id' in paymentData.metadata && typeof (paymentData.metadata as any).organization_id === 'string'
+            ? (paymentData.metadata as any).organization_id 
+            : null;
+        const amount = typeof paymentData.transaction_amount === 'number' ? paymentData.transaction_amount : 0;
+        const currency = typeof paymentData.currency_id === 'string' ? paymentData.currency_id : "CLP";
         // We store gateway_payment_intent_id = preference_id (from createPaymentIntent).
         // MP payment response often has order.id = merchant_order id but no top-level preference_id.
         let preferenceId =
@@ -227,12 +229,12 @@ export class MercadoPagoGateway implements IPaymentGateway {
           gateway: "mercadopago",
           gatewayEventId: `${topic}-${id}`,
           type: topic ?? "payment",
-          status: this.mapStatus(paymentData.status ?? "pending"),
-          gatewayTransactionId: String(paymentData.id ?? id),
+          status: this.mapStatus(typeof paymentData.status === 'string' ? paymentData.status : "pending"),
+          gatewayTransactionId: String(typeof paymentData.id === 'number' || typeof paymentData.id === 'string' ? paymentData.id : id),
           gatewayPaymentIntentId: preferenceId ?? String(id),
           amount,
-          currency: currency.toUpperCase(),
-          orderId,
+          currency: typeof currency === 'string' ? currency.toUpperCase() : "CLP",
+          orderId: typeof orderId === 'string' ? orderId : null,
           organizationId,
           metadata: paymentData as unknown as Record<string, unknown>,
         };
@@ -367,7 +369,7 @@ export class MercadoPagoGateway implements IPaymentGateway {
 
       const body =
         (result as { body?: Record<string, unknown> }).body ??
-        (result as Record<string, unknown>);
+        (result as unknown as Record<string, unknown>);
 
       const paymentId = String(body.id ?? "");
       const mpStatus = String(body.status ?? "pending");
@@ -447,8 +449,10 @@ export class MercadoPagoGateway implements IPaymentGateway {
     } catch (error) {
       logger.warn(
         "Mercado Pago customer search failed",
-        error instanceof Error ? error : new Error(String(error)),
-        { email },
+        {
+          error: error instanceof Error ? error.message : String(error),
+          email,
+        }
       );
       return null;
     }
@@ -654,7 +658,7 @@ export class MercadoPagoGateway implements IPaymentGateway {
       const result = await preApproval.get({ id: preapprovalId });
       const body =
         (result as { body?: Record<string, unknown> }).body ??
-        (result as Record<string, unknown>);
+        (result as unknown as Record<string, unknown>);
       return {
         id: String(body.id ?? preapprovalId),
         status: String(body.status ?? "pending"),

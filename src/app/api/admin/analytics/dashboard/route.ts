@@ -4,10 +4,20 @@ import { createClient } from "@/utils/supabase/server";
 import { getBranchContext, addBranchFilter } from "@/lib/api/branch-middleware";
 import { appLogger as logger } from "@/lib/logger";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
+import { 
+  AuthenticationError,
+  AuthorizationError 
+} from "@/lib/api/errors";
+import {
+  createApiSuccessResponse,
+  createApiErrorResponse,
+} from "@/lib/api/response";
 
 export async function GET(request: NextRequest) {
+  const requestId = crypto.randomUUID();
+  
   try {
-    logger.debug("Analytics Dashboard API called");
+    logger.debug("Analytics Dashboard API called", { requestId });
 
     const supabase = await createClient();
 
@@ -17,19 +27,16 @@ export async function GET(request: NextRequest) {
       error: userError,
     } = await supabase.auth.getUser();
     if (userError || !user) {
-      logger.error("User authentication failed:", { error: userError });
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      logger.error("User authentication failed:", { error: userError, requestId });
+      throw new AuthenticationError("Unauthorized");
     }
 
     const { data: isAdmin } = (await supabase.rpc("is_admin", {
       user_id: user.id,
     } as IsAdminParams)) as { data: IsAdminResult | null; error: Error | null };
     if (!isAdmin) {
-      logger.warn("User is not admin:", { email: user.email });
-      return NextResponse.json(
-        { error: "Admin access required" },
-        { status: 403 },
-      );
+      logger.warn("User is not admin:", { email: user.email, requestId });
+      throw new AuthorizationError("Admin access required");
     }
 
     // Tier feature: advanced_analytics must be enabled for the organization
@@ -45,13 +52,8 @@ export async function GET(request: NextRequest) {
         "advanced_analytics",
       );
       if (!hasAdvancedAnalytics) {
-        return NextResponse.json(
-          {
-            error:
-              "Analíticas avanzadas no están incluidas en tu plan. Actualiza a Pro o Premium.",
-            code: "FEATURE_NOT_AVAILABLE",
-          },
-          { status: 403 },
+        throw new AuthorizationError(
+          "Analíticas avanzadas no están incluidas en tu plan. Actualiza a Pro o Premium."
         );
       }
     }
@@ -73,6 +75,7 @@ export async function GET(request: NextRequest) {
       to: endDate.toISOString(),
       days: period,
       branchId: branchContext.branchId,
+      requestId,
     });
 
     // Build queries with branch filtering
@@ -621,14 +624,19 @@ export async function GET(request: NextRequest) {
       period,
       branchId: branchContext.branchId,
       kpis: analytics.kpis,
+      requestId,
     });
 
-    return NextResponse.json({ analytics });
+    // Use standardized success response
+    return createApiSuccessResponse(
+      { analytics },
+      { requestId }
+    );
   } catch (error) {
-    logger.error("Analytics API error:", { error });
-    return NextResponse.json(
-      { error: "Failed to fetch analytics data" },
-      { status: 500 },
+    logger.error("Analytics API error:", { error, requestId });
+    return createApiErrorResponse(
+      error instanceof Error ? error : new Error("Failed to fetch analytics data"),
+      { requestId }
     );
   }
 }

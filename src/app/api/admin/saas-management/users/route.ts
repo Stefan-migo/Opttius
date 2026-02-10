@@ -90,11 +90,15 @@ export async function GET(request: NextRequest) {
             .map(
               (a: {
                 branch_id: string;
-                branches?: { name: string; code: string };
+                branches?: {
+                  id: any;
+                  name: any;
+                  code: any;
+                }[];
               }) => ({
                 id: a.branch_id,
-                name: a.branches?.name ?? "N/A",
-                code: a.branches?.code ?? "N/A",
+                name: a.branches?.[0]?.name ?? "N/A",
+                code: a.branches?.[0]?.code ?? "N/A",
               }),
             );
 

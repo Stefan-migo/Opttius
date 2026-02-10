@@ -163,6 +163,7 @@ export default function OrganizationDetailsPage() {
     current_period_end: "",
     stripe_subscription_id: "",
     stripe_customer_id: "",
+    gateway_customer_id: "",
   });
 
   useEffect(() => {

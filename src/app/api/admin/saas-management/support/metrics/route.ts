@@ -61,15 +61,18 @@ export async function GET(request: NextRequest) {
     });
 
     // Tickets by priority
-    const { data: ticketsByPriority } = await supabaseServiceRole
+    let ticketsByPriorityQuery = supabaseServiceRole
       .from("saas_support_tickets")
-      .select("priority")
-      .then((query) => {
-        if (dateFilter) {
-          return query.filter(dateFilter);
-        }
-        return query;
-      });
+      .select("priority");
+    
+    if (startDate) {
+      ticketsByPriorityQuery = ticketsByPriorityQuery.gte("created_at", startDate);
+    }
+    if (endDate) {
+      ticketsByPriorityQuery = ticketsByPriorityQuery.lte("created_at", endDate);
+    }
+    
+    const { data: ticketsByPriority } = await ticketsByPriorityQuery;
 
     const priorityCounts = {
       low: 0,
@@ -105,16 +108,19 @@ export async function GET(request: NextRequest) {
     });
 
     // Average response time
-    const { data: ticketsWithResponseTime } = await supabaseServiceRole
+    let responseTimeQuery = supabaseServiceRole
       .from("saas_support_tickets")
       .select("response_time_minutes")
-      .not("response_time_minutes", "is", null)
-      .then((query) => {
-        if (dateFilter) {
-          return query.filter(dateFilter);
-        }
-        return query;
-      });
+      .not("response_time_minutes", "is", null);
+    
+    if (startDate) {
+      responseTimeQuery = responseTimeQuery.gte("created_at", startDate);
+    }
+    if (endDate) {
+      responseTimeQuery = responseTimeQuery.lte("created_at", endDate);
+    }
+    
+    const { data: ticketsWithResponseTime } = await responseTimeQuery;
 
     const avgResponseTime =
       ticketsWithResponseTime && ticketsWithResponseTime.length > 0

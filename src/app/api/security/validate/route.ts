@@ -14,6 +14,7 @@ import {
   incidentResponse,
   phase3Security,
 } from "@/lib/security";
+import { SecurityEvent } from "@/lib/security/events";
 import { appLogger as logger } from "@/lib/logger";
 
 // Test scenarios
@@ -265,7 +266,7 @@ async function simulateScenario(scenarioType: string) {
   }));
 
   const incidents =
-    await incidentResponse.processSecurityEvents(securityEvents);
+    await incidentResponse.processSecurityEvents(securityEvents as any);
 
   // Get final assessment
   const baseline = await behavioralAnalytics.getUserBaseline(userId);
@@ -294,7 +295,12 @@ async function simulateScenario(scenarioType: string) {
 
 // Individual test functions
 async function testBehavioralAnalytics() {
-  const results = { tests: 0, passed: 0, failed: 0, details: [] };
+  const results: {
+    tests: number;
+    passed: number;
+    failed: number;
+    details: Array<{ test: string; status: string; error?: string }>;
+  } = { tests: 0, passed: 0, failed: 0, details: [] };
 
   try {
     // Test 1: Action recording
@@ -375,7 +381,12 @@ async function testBehavioralAnalytics() {
 }
 
 async function testThreatDetection() {
-  const results = { tests: 0, passed: 0, failed: 0, details: [] };
+  const results: {
+    tests: number;
+    passed: number;
+    failed: number;
+    details: Array<{ test: string; status: string; error?: string }>;
+  } = { tests: 0, passed: 0, failed: 0, details: [] };
 
   try {
     // Test 1: System status
@@ -423,19 +434,25 @@ async function testThreatDetection() {
 }
 
 async function testIncidentResponse() {
-  const results = { tests: 0, passed: 0, failed: 0, details: [] };
+  const results: {
+    tests: number;
+    passed: number;
+    failed: number;
+    details: Array<{ test: string; status: string; error?: string }>;
+  } = { tests: 0, passed: 0, failed: 0, details: [] };
 
   try {
     // Test 1: Event processing
     results.tests++;
-    const testEvents = [
+    const testEvents: SecurityEvent[] = [
       {
         id: "ir-test-event",
         timestamp: new Date().toISOString(),
-        eventType: "auth.suspicious_activity",
+        eventType: "system.suspicious_activity",
         severity: "high",
         source: "test",
         userId: "ir-test-user",
+        details: {},
       },
     ];
 
@@ -470,7 +487,12 @@ async function testIncidentResponse() {
 }
 
 async function testOrchestration() {
-  const results = { tests: 0, passed: 0, failed: 0, details: [] };
+  const results: {
+    tests: number;
+    passed: number;
+    failed: number;
+    details: Array<{ test: string; status: string; error?: string }>;
+  } = { tests: 0, passed: 0, failed: 0, details: [] };
 
   try {
     // Test 1: Event processing

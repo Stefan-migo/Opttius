@@ -23,7 +23,7 @@ export async function POST(
     // Verificar que la suscripción existe
     const { data: subscription } = await supabaseServiceRole
       .from("subscriptions")
-      .select("id, status, organization_id")
+      .select("id, status, organization_id, current_period_end")
       .eq("id", id)
       .single();
 

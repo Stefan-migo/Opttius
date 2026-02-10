@@ -73,6 +73,7 @@ interface CashClosure {
   reopened_by?: string | null;
   reopen_count?: number;
   reopen_notes?: string | null;
+  pos_session_id?: string;
   branch?: {
     id: string;
     name: string;

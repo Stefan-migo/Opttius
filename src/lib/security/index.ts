@@ -6,9 +6,11 @@
  * @module lib/security
  */
 
-export { SecurityMonitor, getSecurityMonitor } from "./monitoring";
+export type { SecurityMonitor } from "./monitoring";
+export { getSecurityMonitor } from "./monitoring";
 
-export { SecurityAlerting, getSecurityAlerting } from "./alerting";
+export type { SecurityAlerting } from "./alerting";
+export { getSecurityAlerting } from "./alerting";
 
 export {
   withAuthSecurity,

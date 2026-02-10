@@ -5,9 +5,15 @@ export async function GET(request: NextRequest) {
   try {
     const { getUser } = await createClientFromRequest(request);
     const {
-      data: { user },
+      data: userData,
       error: userError,
     } = await getUser();
+    
+    if (userError || !userData || !("user" in userData) || !userData.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    
+    const user = userData.user;
 
     if (userError || !user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -65,9 +71,15 @@ export async function POST(request: NextRequest) {
   try {
     const { getUser } = await createClientFromRequest(request);
     const {
-      data: { user },
+      data: userData,
       error: userError,
     } = await getUser();
+    
+    if (userError || !userData || !("user" in userData) || !userData.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    
+    const user = userData.user;
 
     if (userError || !user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

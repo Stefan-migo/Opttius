@@ -30,14 +30,16 @@ describe("FlowGateway", () => {
     });
 
     it("should map approved status correctly", () => {
-      expect(gateway.mapStatus("approved")).toBe("succeeded");
+      expect(gateway.mapStatus("1")).toBe("succeeded");
       expect(gateway.mapStatus("paid")).toBe("succeeded");
+      expect(gateway.mapStatus("pagado")).toBe("succeeded");
     });
 
     it("should map rejected status correctly", () => {
+      expect(gateway.mapStatus("3")).toBe("failed");
       expect(gateway.mapStatus("rejected")).toBe("failed");
-      expect(gateway.mapStatus("cancelled")).toBe("failed");
-      expect(gateway.mapStatus("refunded")).toBe("failed");
+      expect(gateway.mapStatus("rechazado")).toBe("failed");
+      expect(gateway.mapStatus("failed")).toBe("failed");
     });
 
     it("should map unknown status to pending", () => {
@@ -67,11 +69,9 @@ describe("FlowGateway", () => {
       );
 
       expect(result).toEqual({
-        paymentId: "test_token",
         approvalUrl: "https://flow.cl/payment/test_token",
+        gatewayPaymentIntentId: 12345,
         status: "pending",
-        clientSecret: "test_token",
-        gateway: "flow",
       });
 
       expect(global.fetch).toHaveBeenCalledWith(
@@ -97,7 +97,7 @@ describe("FlowGateway", () => {
           "user_123",
           "org_123",
         ),
-      ).rejects.toThrow("Flow API error: Invalid parameters");
+      ).rejects.toThrow("Flow error: Invalid parameters");
     });
 
     it("should throw error when Flow credentials are missing", async () => {
@@ -143,12 +143,12 @@ describe("FlowGateway", () => {
         gateway: "flow",
         gatewayEventId: "test_token",
         type: "payment_status",
-        status: "succeeded",
+        status: "pending",
         gatewayTransactionId: "test_token",
         gatewayPaymentIntentId: "test_token",
         amount: 10000,
         currency: "CLP",
-        orderId: "order_123",
+        orderId: "123",
         organizationId: null,
         metadata: {
           token: "test_token",

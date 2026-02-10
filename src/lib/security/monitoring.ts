@@ -142,7 +142,9 @@ export class SecurityMonitor {
     eventType:
       | "payment.fraud_suspected"
       | "payment.webhook_tampered"
-      | "payment.signature_invalid",
+      | "payment.signature_invalid"
+      | "payment.amount_anomaly"
+      | "payment.frequency_anomaly",
     details: {
       gateway?: string;
       transactionId?: string;
@@ -151,11 +153,12 @@ export class SecurityMonitor {
       suspicionReason?: string;
       expectedSignature?: string;
       receivedSignature?: string;
-    },
+    } & Record<string, any>,
     options: {
       userId?: string;
       ipAddress?: string;
       requestId?: string;
+      severity?: SecuritySeverity;
     } = {},
   ): SecurityEvent {
     return this.logEvent(eventType, details, {
@@ -479,4 +482,5 @@ export function getSecurityMonitor(): SecurityMonitor {
 }
 
 // Export types
-export type { SecurityMonitor };
+// SecurityMonitor is already available as a class export
+// export type { SecurityMonitor };

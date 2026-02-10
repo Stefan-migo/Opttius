@@ -41,7 +41,7 @@ export async function createClient() {
  *   - getUser: Helper function that handles both cookie and Bearer token authentication
  */
 export async function createClientFromRequest(request?: NextRequest): Promise<{
-  client: ReturnType<typeof createSupabaseClient>;
+  client: any; // Flexible type for test compatibility
   getUser: () => Promise<{ data: { user: any } | null; error: any }>;
 }> {
   const supabaseUrl =

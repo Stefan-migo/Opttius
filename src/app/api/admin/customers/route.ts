@@ -5,7 +5,17 @@ import { getBranchContext, addBranchFilter } from "@/lib/api/branch-middleware";
 import { appLogger as logger } from "@/lib/logger";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
 import { withRateLimit, rateLimitConfigs } from "@/lib/api/middleware";
-import { RateLimitError, ValidationError } from "@/lib/api/errors";
+import { 
+  RateLimitError, 
+  ValidationError,
+  AuthenticationError,
+  AuthorizationError 
+} from "@/lib/api/errors";
+import {
+  createPaginatedResponse,
+  createApiErrorResponse,
+  extractPaginationParams,
+} from "@/lib/api/response";
 import { z } from "zod";
 import {
   createCustomerSchema,
@@ -20,8 +30,10 @@ import {
 } from "@/lib/api/validation/zod-helpers";
 
 export async function GET(request: NextRequest) {
+  const requestId = crypto.randomUUID();
+  
   try {
-    logger.info("Customers API GET called");
+    logger.info("Customers API GET called", { requestId });
 
     // Validate query parameters with Zod
     let queryParams;
@@ -31,7 +43,7 @@ export async function GET(request: NextRequest) {
       queryParams = parseAndValidateQuery(request, combinedSchema);
     } catch (error) {
       if (error instanceof ValidationError) {
-        return validationErrorResponse(error);
+        return createApiErrorResponse(error, { requestId });
       }
       throw error;
     }
@@ -43,11 +55,10 @@ export async function GET(request: NextRequest) {
           ? "active"
           : "inactive"
         : "";
-    const page = queryParams.page || 1;
-    const limit = queryParams.limit || 20;
+    const { page, limit } = extractPaginationParams(request.url);
     const offset = (page - 1) * limit;
 
-    logger.debug("Query params", { search, status, page, limit });
+    logger.debug("Query params", { search, status, page, limit, requestId });
 
     const { client: supabase, getUser } =
       await createClientFromRequest(request);
@@ -56,30 +67,24 @@ export async function GET(request: NextRequest) {
     const { data, error: userError } = await getUser();
     const user = data?.user;
     if (userError || !user) {
-      logger.error("User authentication failed", userError);
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      logger.error("User authentication failed", { error: userError, requestId });
+      throw new AuthenticationError("Unauthorized");
     }
-    logger.debug("User authenticated", { email: user.email });
+    logger.debug("User authenticated", { email: user.email, requestId });
 
     const { data: isAdmin, error: adminError } = (await supabase.rpc(
       "is_admin",
       { user_id: user.id } as IsAdminParams,
     )) as { data: IsAdminResult | null; error: Error | null };
     if (adminError) {
-      logger.error("Admin check error", adminError);
-      return NextResponse.json(
-        { error: "Admin verification failed" },
-        { status: 500 },
-      );
+      logger.error("Admin check error", { error: adminError, requestId });
+      throw new AuthorizationError("Admin verification failed");
     }
     if (!isAdmin) {
-      logger.warn("User is not admin", { email: user.email });
-      return NextResponse.json(
-        { error: "Admin access required" },
-        { status: 403 },
-      );
+      logger.warn("User is not admin", { email: user.email, requestId });
+      throw new AuthorizationError("Admin access required");
     }
-    logger.debug("Admin access confirmed", { email: user.email });
+    logger.debug("Admin access confirmed", { email: user.email, requestId });
 
     // Get branch context (pass supabase client to use same auth context)
     const branchContext = await getBranchContext(request, user.id, supabase);
@@ -161,13 +166,10 @@ export async function GET(request: NextRequest) {
     const { count, error: countError } = await countQuery;
 
     if (countError) {
-      logger.error("Error getting customer count", countError);
-      return NextResponse.json(
-        { error: "Failed to count customers" },
-        { status: 500 },
-      );
+      logger.error("Error getting customer count", { error: countError, requestId });
+      throw new Error("Failed to count customers");
     }
-    logger.debug("Customer count retrieved", { count });
+    logger.debug("Customer count retrieved", { count, requestId });
 
     // Apply pagination and ordering
     const { data: customers, error } = await query
@@ -175,14 +177,12 @@ export async function GET(request: NextRequest) {
       .order("created_at", { ascending: false });
 
     if (error) {
-      logger.error("Error fetching customers", error);
-      return NextResponse.json(
-        { error: "Failed to fetch customers" },
-        { status: 500 },
-      );
+      logger.error("Error fetching customers", { error, requestId });
+      throw new Error("Failed to fetch customers");
     }
     logger.debug("Customers fetched successfully", {
       count: customers?.length || 0,
+      requestId
     });
 
     // Calculate customer analytics
@@ -204,20 +204,21 @@ export async function GET(request: NextRequest) {
       };
     });
 
-    return NextResponse.json({
-      customers: customerStats,
-      pagination: {
+    // Use standardized paginated response
+    return createPaginatedResponse(
+      customerStats,
+      {
         page,
         limit,
         total: count || 0,
-        totalPages: Math.ceil((count || 0) / limit),
       },
-    });
+      { requestId },
+    );
   } catch (error) {
-    logger.error("Error in customers API GET", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
+    logger.error("Error in customers API GET", { error, requestId });
+    return createApiErrorResponse(
+      error instanceof Error ? error : new Error("Internal server error"),
+      { requestId },
     );
   }
 }

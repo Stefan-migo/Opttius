@@ -114,7 +114,43 @@ src/components/admin/CreateQuoteForm/
 - [x] TypeScript compilation verified
 - [x] Production build successful
 
-### 2.2 Other Large Components
+### 2.2 CreateAppointmentForm Refactoring
+
+**Priority:** 🔴 HIGH  
+**Duration:** 3-4 days
+**Status:** ✅ Completed February 8, 2026
+**Impact:** Major improvement in maintainability
+
+**Results Achieved:**
+
+- ✅ Original file size: 1,140 lines
+- ✅ Refactored main component: ~240 lines (79% reduction)
+- ✅ 4 custom hooks created for specific responsibilities
+- ✅ 3 UI components extracted for different sections
+- ✅ TypeScript compilation successful
+- ✅ All existing functionality preserved
+
+**Architecture Implemented:**
+
+```
+src/components/admin/CreateAppointmentForm/
+├── index.tsx                    # Main orchestrator (~240 lines)
+├── hooks/
+│   ├── useAppointmentForm.ts    # Core form logic
+│   ├── useCustomerSearch.ts     # Customer search functionality
+│   ├── useAvailability.ts       # Availability checking
+│   └── useScheduleSettings.ts   # Schedule configuration
+├── components/
+│   ├── CustomerSelection.tsx    # Customer UI section
+│   ├── DateTimeSelection.tsx    # Date/time UI section
+│   └── AppointmentDetails.tsx   # Appointment details UI
+├── types/
+│   └── appointment.types.ts     # TypeScript interfaces
+└── utils/
+    └── (to be populated)
+```
+
+### 2.3 Remaining Large Components
 
 **Priority:** 🔴 HIGH  
 **Duration:** 3-4 days each
@@ -122,9 +158,13 @@ src/components/admin/CreateQuoteForm/
 
 **Components to Refactor:**
 
-1. `CreateAppointmentForm.tsx` (1,140 lines)
-2. `ShippingManager.tsx` (1,059 lines)
-3. `ChatbotContent.tsx` (627 lines)
+1. `ProductsPage.tsx` (1,309 lines) - **HIGHEST PRIORITY**
+2. `ChatbotContent.tsx` (627 lines)
+
+**Components to Remove/Repurpose:**
+
+1. `CreateWorkOrderForm.tsx` (378 lines) - **DEPRECATED** - Will be deleted (unused)
+2. `ShippingManager.tsx` (1,059 lines) - **REPURPOSE** - Will become Internal Order Tracking system
 
 **Common Refactoring Pattern:**
 
@@ -665,8 +705,20 @@ src/components/
 │   │   └── CustomerForm/
 │   ├── orders/
 │   │   ├── CreateQuoteForm/
-│   │   ├── CreateWorkOrderForm/
 │   │   └── OrderList/
+│   ├── products/
+│   │   ├── ProductsPage/          # Refactored from 1,309 lines
+│   │   │   ├── index.tsx          # Main orchestrator
+│   │   │   ├── components/
+│   │   │   │   ├── ProductListing/
+│   │   │   │   ├── CategoriesManagement/
+│   │   │   │   └── LensFamilies/
+│   │   │   └── hooks/
+│   │   │       ├── useProducts/
+│   │   │       ├── useCategories/
+│   │   │       └── useProductFilters/
+│   ├── shipping/
+│   │   └── InternalOrderTracking/   # Repurposed from ShippingManager
 │   └── shared/
 │       ├── forms/
 │       ├── tables/
@@ -777,15 +829,17 @@ Phase 8: Organization & Perf       (Week 9)    🟩🟩🟩🟩🟩🟩🟩🟩�
    - ✅ 23 unit tests implemented
    - ✅ Documentation updated
 
-2. **Plan Phase 2.2**: Address remaining large components
-   - CreateAppointmentForm (1,140 lines)
-   - ShippingManager (1,059 lines)
+2. **Immediate Cleanup**: Remove deprecated components
+   - ❌ Delete CreateWorkOrderForm (378 lines) - Unused legacy code
+   - ✅ Repurpose ShippingManager as InternalOrderTracking system
+
+3. **Critical Refactoring Priority**: Products Page overhaul
+   - 🚨 ProductsPage.tsx (1,309 lines) - HIGHEST PRIORITY
+   - Split into logical components with dedicated hooks
+   - Target: <300 lines for main orchestrator
+
+4. **Secondary Refactoring**: Remaining components
    - ChatbotContent (627 lines)
+   - Other large components identified
 
-3. **Prepare for Phase 3**: Utility function consolidation
-   - Identify duplicated utilities across codebase
-   - Plan centralization strategy
-
-4. **Continue documentation updates**: Keep roadmap synchronized with progress
-
-**Immediate Next Step**: Begin analysis of CreateAppointmentForm for Phase 2.2 refactoring.
+**Immediate Next Step**: Delete unused CreateWorkOrderForm component to eliminate dead code.

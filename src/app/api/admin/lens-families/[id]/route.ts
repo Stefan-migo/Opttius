@@ -6,6 +6,7 @@ import { updateLensFamilySchema } from "@/lib/api/validation/zod-schemas";
 import {
   parseAndValidateBody,
   validationErrorResponse,
+  ValidationError,
 } from "@/lib/api/validation/zod-helpers";
 
 export async function GET(
@@ -166,15 +167,16 @@ export async function PUT(
     }
 
     return NextResponse.json({ family });
-  } catch (error) {
-    if (error instanceof Error && error.name === "ValidationError") {
+  } catch (error: any) {
+    if (error instanceof ValidationError) {
       return validationErrorResponse(error);
+    } else {
+      logger.error("Error in lens families API PUT", error);
+      return NextResponse.json(
+        { error: "Internal server error" },
+        { status: 500 },
+      );
     }
-    logger.error("Error in lens families API PUT", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
   }
 }
 

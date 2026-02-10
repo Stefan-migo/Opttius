@@ -1,5 +1,4 @@
 import axios from "axios";
-import nodemailer from "nodemailer";
 import { appLogger as logger } from "@/lib/logger";
 import {
   SecurityAlert,
@@ -25,7 +24,7 @@ import {
 export class SecurityAlerting {
   private channels: AlertChannel[] = [];
   private alertHistory: SecurityAlert[] = [];
-  private transporter: nodemailer.Transporter | null = null;
+  private transporter: any | null = null;
   private readonly ALERT_HISTORY_LIMIT = 1000;
   private readonly DEDUPLICATION_WINDOW = 5 * 60 * 1000; // 5 minutes
 
@@ -581,14 +580,14 @@ export class SecurityAlerting {
     // In a real implementation, this would be configured with actual SMTP settings
     // For now, we'll create a mock transporter for testing
     this.transporter = {
-      sendMail: async (mailOptions) => {
+      sendMail: async (mailOptions: any) => {
         logger.debug("Mock email sent", {
           to: mailOptions.to,
           subject: mailOptions.subject,
         });
         return { messageId: "mock-message-id" };
       },
-    } as unknown as nodemailer.Transporter;
+    };
   }
 }
 
@@ -603,4 +602,5 @@ export function getSecurityAlerting(): SecurityAlerting {
 }
 
 // Export types
-export type { SecurityAlerting };
+// SecurityAlerting is already available as a class export
+// export type { SecurityAlerting };

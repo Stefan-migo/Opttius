@@ -1,4 +1,4 @@
-// No explicit imports needed when globals: true is set in vitest.config.ts
+import { describe, it, expect, beforeEach, vi } from "vitest";
 import { POST } from "@/app/api/upload/route";
 import { NextRequest } from "next/server";
 import { createClient } from "@/utils/supabase/server";
@@ -148,7 +148,7 @@ describe("POST /api/upload", () => {
     const data = await res.json();
     expect(data.storage).toBe("r2");
     expect(data.url).toContain("https://cdn.test.com/avatars/");
-    expect(r2Client.send).toHaveBeenCalled();
+    expect(r2Client?.send).toHaveBeenCalled();
   });
 
   it("should fallback to Supabase if R2 is not configured", async () => {

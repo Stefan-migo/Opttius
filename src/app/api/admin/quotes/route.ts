@@ -7,7 +7,16 @@ import { normalizeRUT } from "@/lib/utils/rut";
 import { appLogger as logger } from "@/lib/logger";
 import { EmailNotificationService } from "@/lib/email/notifications";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
-import { ValidationError } from "@/lib/api/errors";
+import { 
+  ValidationError,
+  AuthenticationError,
+  AuthorizationError 
+} from "@/lib/api/errors";
+import {
+  createPaginatedResponse,
+  createApiErrorResponse,
+  extractPaginationParams,
+} from "@/lib/api/response";
 import { createQuoteSchema } from "@/lib/api/validation/zod-schemas";
 import {
   parseAndValidateBody,
@@ -15,7 +24,11 @@ import {
 } from "@/lib/api/validation/zod-helpers";
 
 export async function GET(request: NextRequest) {
+  const requestId = crypto.randomUUID();
+  
   try {
+    logger.info("Quotes API GET called", { requestId });
+    
     const supabase = await createClient();
 
     // Check admin authorization
@@ -24,17 +37,16 @@ export async function GET(request: NextRequest) {
       error: userError,
     } = await supabase.auth.getUser();
     if (userError || !user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      logger.error("User authentication failed", { error: userError, requestId });
+      throw new AuthenticationError("Unauthorized");
     }
 
     const { data: isAdmin } = (await supabase.rpc("is_admin", {
       user_id: user.id,
     } as IsAdminParams)) as { data: IsAdminResult | null; error: Error | null };
     if (!isAdmin) {
-      return NextResponse.json(
-        { error: "Admin access required" },
-        { status: 403 },
-      );
+      logger.warn("User is not admin", { email: user.email, requestId });
+      throw new AuthorizationError("Admin access required");
     }
 
     const searchParams = request.nextUrl.searchParams;
@@ -64,10 +76,10 @@ export async function GET(request: NextRequest) {
     );
 
     // Build branch filter function
-    const applyBranchFilter = (query: ReturnType<typeof supabase.from>) => {
+    const applyBranchFilter = (query: any) => {
       // CRITICAL: Always filter by organization_id first for multi-tenancy isolation
       // Then apply branch filter if needed (skip branch when listing by customer for POS)
-      let filteredQuery = query;
+      let filteredQuery: any = query;
 
       if (userOrganizationId && !branchContext.isSuperAdmin) {
         // For POS/customer lookup: include legacy quotes with organization_id NULL
@@ -180,14 +192,8 @@ export async function GET(request: NextRequest) {
     const { data: quotes, error, count } = await query.range(from, to);
 
     if (error) {
-      logger.error("Error fetching quotes", error);
-      return NextResponse.json(
-        {
-          error: "Failed to fetch quotes",
-          details: error.message,
-        },
-        { status: 500 },
-      );
+      logger.error("Error fetching quotes", { error, requestId });
+      throw new Error(`Failed to fetch quotes: ${error.message}`);
     }
 
     // Fetch related data separately if quotes exist
@@ -254,20 +260,27 @@ export async function GET(request: NextRequest) {
       }));
     }
 
-    return NextResponse.json({
-      quotes: quotesWithRelations,
-      pagination: {
+    logger.debug("Quotes fetched successfully", {
+      count: quotesWithRelations.length,
+      total: count,
+      requestId,
+    });
+
+    // Use standardized paginated response
+    return createPaginatedResponse(
+      quotesWithRelations,
+      {
         page,
         limit,
         total: count || 0,
-        totalPages: Math.ceil((count || 0) / limit),
       },
-    });
+      { requestId },
+    );
   } catch (error) {
-    logger.error("Error in quotes API GET", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
+    logger.error("Error in quotes API GET", { error, requestId });
+    return createApiErrorResponse(
+      error instanceof Error ? error : new Error("Internal server error"),
+      { requestId }
     );
   }
 }
@@ -528,7 +541,7 @@ export async function POST(request: NextRequest) {
                 branch_name: branch?.name || "",
                 items: [], // Could be expanded later
               },
-              branchContext.organizationId,
+              branchContext.organizationId || undefined,
             );
           } catch (err) {
             logger.error("Error sending quote email", err);

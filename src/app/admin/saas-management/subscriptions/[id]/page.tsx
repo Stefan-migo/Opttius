@@ -376,9 +376,11 @@ export default function SubscriptionDetailsPage() {
                         : ""
                   }`}
                 >
-                  {subscription.daysUntilExpiry < 0
+                  {subscription.daysUntilExpiry != null && subscription.daysUntilExpiry < 0
                     ? `Vencida hace ${Math.abs(subscription.daysUntilExpiry)} días`
-                    : `${subscription.daysUntilExpiry} días`}
+                    : subscription.daysUntilExpiry != null
+                      ? `${subscription.daysUntilExpiry} días`
+                      : "N/A"}
                 </p>
               </div>
             )}

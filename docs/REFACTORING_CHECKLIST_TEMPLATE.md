@@ -20,6 +20,8 @@
 - [ ] **Maintainability Issues**: Hard to understand or modify
 - [ ] **Testing Difficulties**: Hard to unit test
 - [ ] **Performance Bottlenecks**: Slow rendering or operations
+- [ ] **Dead Code**: Unused components that should be removed
+- [ ] **Misaligned Functionality**: Components serving wrong business purpose
 
 ### Critical Success Factors (Learned from CreateQuoteForm)
 
@@ -28,6 +30,8 @@
 - [ ] **Test-Driven Mindset**: Write tests alongside implementation
 - [ ] **Clear Boundaries**: Well-defined component responsibilities
 - [ ] **Performance Optimization**: Implement debouncing for calculations
+- [ ] **Business Alignment**: Ensure components serve correct business purpose
+- [ ] **Dead Code Elimination**: Remove unused/deprecated components
 
 ## Refactoring Plan
 

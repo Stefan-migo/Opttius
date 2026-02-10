@@ -12,7 +12,17 @@ import type {
   CheckAppointmentAvailabilityParams,
   CheckAppointmentAvailabilityResult,
 } from "@/types/supabase-rpc";
-import { ValidationError } from "@/lib/api/errors";
+import { 
+  ValidationError,
+  AuthenticationError,
+  AuthorizationError 
+} from "@/lib/api/errors";
+import {
+  createPaginatedResponse,
+  createApiSuccessResponse,
+  createApiErrorResponse,
+  extractPaginationParams,
+} from "@/lib/api/response";
 import { createAppointmentSchema } from "@/lib/api/validation/zod-schemas";
 import {
   parseAndValidateBody,
@@ -21,7 +31,11 @@ import {
 } from "@/lib/api/validation/zod-helpers";
 
 export async function GET(request: NextRequest) {
+  const requestId = crypto.randomUUID();
+  
   try {
+    logger.info("Appointments API GET called", { requestId });
+    
     const supabase = await createClient();
 
     // Check admin authorization
@@ -30,17 +44,16 @@ export async function GET(request: NextRequest) {
       error: userError,
     } = await supabase.auth.getUser();
     if (userError || !user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      logger.error("User authentication failed", { error: userError, requestId });
+      throw new AuthenticationError("Unauthorized");
     }
 
     const { data: isAdmin } = (await supabase.rpc("is_admin", {
       user_id: user.id,
     } as IsAdminParams)) as { data: IsAdminResult | null; error: Error | null };
     if (!isAdmin) {
-      return NextResponse.json(
-        { error: "Admin access required" },
-        { status: 403 },
-      );
+      logger.warn("User is not admin", { email: user.email, requestId });
+      throw new AuthorizationError("Admin access required");
     }
 
     // Get branch context
@@ -190,14 +203,21 @@ export async function GET(request: NextRequest) {
       order: orders?.find((o) => o.id === appointment.order_id) || null,
     }));
 
-    return NextResponse.json({
-      appointments: appointmentsWithRelations,
+    logger.debug("Appointments fetched successfully", {
+      count: appointmentsWithRelations.length,
+      requestId,
     });
+
+    // Use standardized success response (no pagination for now)
+    return createApiSuccessResponse(
+      appointmentsWithRelations,
+      { requestId }
+    );
   } catch (error) {
-    logger.error("Error in appointments API GET", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
+    logger.error("Error in appointments API GET", { error, requestId });
+    return createApiErrorResponse(
+      error instanceof Error ? error : new Error("Internal server error"),
+      { requestId }
     );
   }
 }

@@ -45,7 +45,7 @@ export async function GET(request: NextRequest) {
     let organizationId = adminUser.organization_id;
 
     if (!organizationId && isRoot) {
-      organizationId = (process.env.NEXT_PUBLIC_ROOT_ORG_ID as string) || null;
+      organizationId = (process.env.NEXT_PUBLIC_ROOT_ORG_ID as string) || undefined
     }
 
     if (!organizationId) {
@@ -72,7 +72,7 @@ export async function GET(request: NextRequest) {
       sort_order: searchParams.get("sort_order") || "desc",
     });
 
-    const offset = (filters.page - 1) * filters.limit;
+    const offset = ((filters.page ?? 1) - 1) * (filters.limit ?? 20);
 
     // Construir query base
     let query = supabaseServiceRole
@@ -92,7 +92,7 @@ export async function GET(request: NextRequest) {
         { count: "exact" },
       )
       .eq("organization_id", organizationId) // Solo tickets de su organización
-      .order(filters.sort_by, { ascending: filters.sort_order === "asc" });
+      .order((filters.sort_by || "created_at") as any, { ascending: filters.sort_order === "asc" });
 
     // Aplicar filtros
     if (filters.branch_id) {
@@ -126,7 +126,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Aplicar paginación
-    query = query.range(offset, offset + filters.limit - 1);
+    query = query.range(offset, offset + (filters.limit ?? 20) - 1);
 
     const { data: tickets, error, count } = await query;
 
@@ -143,8 +143,8 @@ export async function GET(request: NextRequest) {
       pagination: {
         total: count || 0,
         page: filters.page,
-        limit: filters.limit,
-        totalPages: Math.ceil((count || 0) / filters.limit),
+        limit: filters.limit ?? 20,
+        totalPages: Math.ceil((count || 0) / (filters.limit ?? 20)),
       },
     });
   } catch (error) {
@@ -194,7 +194,7 @@ export async function POST(request: NextRequest) {
     let organizationId = adminUser.organization_id;
 
     if (!organizationId && isRoot) {
-      organizationId = (process.env.NEXT_PUBLIC_ROOT_ORG_ID as string) || null;
+      organizationId = (process.env.NEXT_PUBLIC_ROOT_ORG_ID as string) || undefined
     }
 
     if (!organizationId) {
@@ -249,9 +249,9 @@ export async function POST(request: NextRequest) {
       body.customer_name =
         body.customer_name ||
         `${customer.first_name || ""} ${customer.last_name || ""}`.trim() ||
-        null;
-      body.customer_email = body.customer_email || customer.email || null;
-      body.customer_phone = body.customer_phone || customer.phone || null;
+        undefined;
+      body.customer_email = body.customer_email || customer.email || undefined;
+      body.customer_phone = body.customer_phone || customer.phone || undefined;
     }
 
     // Crear ticket

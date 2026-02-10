@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
 import { appLogger as logger } from "@/lib/logger";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
+import { ValidationError } from "@/lib/api/errors";
 import {
   createLensFamilySchema,
   createLensFamilyFullSchema,
@@ -208,14 +209,15 @@ export async function POST(request: NextRequest) {
 
       return NextResponse.json({ family }, { status: 201 });
     }
-  } catch (error) {
-    if (error instanceof Error && error.name === "ValidationError") {
-      return validationErrorResponse(error); // Should theoretically be caught above
+  } catch (error: any) {
+    if (error instanceof ValidationError) {
+      return validationErrorResponse(error as any);
+    } else {
+      logger.error("Error in lens families API POST", error);
+      return NextResponse.json(
+        { error: "Internal server error" },
+        { status: 500 },
+      );
     }
-    logger.error("Error in lens families API POST", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
   }
 }

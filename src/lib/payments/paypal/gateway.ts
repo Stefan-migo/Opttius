@@ -184,7 +184,7 @@ export class PayPalGateway implements IPaymentGateway {
         event.resource.purchase_units?.[0]?.amount?.currency_code ??
         event.resource.amount?.currency_code ??
         "USD";
-      const customId = event.resource.purchase_units?.[0]?.custom_id ?? null;
+      const customId = event.resource.purchase_units?.[0]?.reference_id ?? null;
 
       return {
         gateway: "paypal",

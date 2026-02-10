@@ -41,7 +41,7 @@ export async function GET(
     // Obtener ticket para verificar permisos
     const { data: ticket, error: ticketError } = await supabaseServiceRole
       .from("saas_support_tickets")
-      .select("id, organization_id")
+      .select("*")
       .eq("id", params.id)
       .single();
 
@@ -192,12 +192,12 @@ export async function POST(
       last_response_at: now,
     };
 
-    if (!ticket.first_response_at && !isFromCustomer) {
+    if (!(ticket as any)?.first_response_at && !isFromCustomer) {
       updates.first_response_at = now;
 
       // Calcular tiempo de primera respuesta
-      if (ticket.created_at) {
-        const created = new Date(ticket.created_at);
+      if ((ticket as any)?.created_at) {
+        const created = new Date((ticket as any).created_at);
         const firstResponse = new Date();
         const diffMinutes = Math.floor(
           (firstResponse.getTime() - created.getTime()) / (1000 * 60),
@@ -286,8 +286,8 @@ export async function POST(
         );
         await NotificationService.notifySaasSupportNewMessage(
           params.id,
-          ticket.ticket_number,
-          ticket.subject,
+          (ticket as any)?.ticket_number,
+          (ticket as any)?.subject,
           true,
         );
       } catch (pushErr) {

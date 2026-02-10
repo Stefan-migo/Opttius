@@ -773,8 +773,8 @@ export async function POST(request: NextRequest) {
             const billingOrder: BillingOrder = {
               id: newOrder.id,
               order_number: newOrder.order_number,
-              customer_id: customer_id || null,
-              branch_id: branchContext.branchId || "",
+              customer_id: customer_id ?? undefined,
+              branch_id: branchContext.branchId ?? "",
               total_amount: total_amount,
               subtotal: subtotal,
               tax_amount: tax_amount || 0,
@@ -782,23 +782,22 @@ export async function POST(request: NextRequest) {
               items: orderItems,
               customer: customer
                 ? {
-                    id: customer.id,
-                    first_name: customer.first_name || undefined,
-                    last_name: customer.last_name || undefined,
-                    email: customer.email || undefined,
-                    phone: customer.phone || undefined,
-                    rut: customer.rut || undefined,
-                    business_name: undefined, // customers table doesn't have business_name
+                    id: customer.id ?? "",
+                    first_name: customer.first_name ?? undefined,
+                    last_name: customer.last_name ?? undefined,
+                    email: customer.email ?? undefined,
+                    phone: customer.phone ?? undefined,
+                    rut: customer.rut ?? undefined,
+                    business_name: undefined,
                   }
                 : {
-                    id: null,
-                    first_name: customer_name?.split(" ")[0] || undefined,
-                    last_name:
-                      customer_name?.split(" ").slice(1).join(" ") || undefined,
-                    email: email || undefined,
+                    id: "",
+                    first_name: customer_name?.split(" ")[0] ?? undefined,
+                    last_name: customer_name?.split(" ").slice(1).join(" ") ?? undefined,
+                    email: email ?? undefined,
                     phone: undefined,
-                    rut: customer_rut || undefined,
-                    business_name: sii_business_name || undefined,
+                    rut: customer_rut ?? undefined,
+                    business_name: sii_business_name ?? undefined,
                   },
               created_at: newOrder.created_at,
             };

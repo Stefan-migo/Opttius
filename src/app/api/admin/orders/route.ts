@@ -5,11 +5,22 @@ import { appLogger as logger } from "@/lib/logger";
 import { EmailNotificationService } from "@/lib/email/notifications";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
 import { withRateLimit, rateLimitConfigs } from "@/lib/api/middleware";
-import { RateLimitError } from "@/lib/api/errors";
+import { 
+  RateLimitError,
+  AuthenticationError,
+  AuthorizationError 
+} from "@/lib/api/errors";
+import {
+  createPaginatedResponse,
+  createApiErrorResponse,
+  extractPaginationParams,
+} from "@/lib/api/response";
 
 export async function GET(request: NextRequest) {
+  const requestId = crypto.randomUUID();
+  
   try {
-    logger.info("Admin Orders API GET called");
+    logger.info("Admin Orders API GET called", { requestId });
     const { client: supabase, getUser } =
       await createClientFromRequest(request);
 
@@ -17,30 +28,24 @@ export async function GET(request: NextRequest) {
     const { data, error: userError } = await getUser();
     const user = data?.user;
     if (userError || !user) {
-      logger.error("User authentication failed", userError);
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      logger.error("User authentication failed", { error: userError, requestId });
+      throw new AuthenticationError("Unauthorized");
     }
-    logger.debug("User authenticated", { email: user.email });
+    logger.debug("User authenticated", { email: user.email, requestId });
 
     const { data: isAdmin, error: adminError } = (await supabase.rpc(
       "is_admin",
       { user_id: user.id } as IsAdminParams,
     )) as { data: IsAdminResult | null; error: Error | null };
     if (adminError) {
-      logger.error("Admin check error", adminError);
-      return NextResponse.json(
-        { error: "Admin verification failed" },
-        { status: 500 },
-      );
+      logger.error("Admin check error", { error: adminError, requestId });
+      throw new AuthorizationError("Admin verification failed");
     }
     if (!isAdmin) {
-      logger.warn("User is not admin", { email: user.email });
-      return NextResponse.json(
-        { error: "Admin access required" },
-        { status: 403 },
-      );
+      logger.warn("User is not admin", { email: user.email, requestId });
+      throw new AuthorizationError("Admin access required");
     }
-    logger.debug("Admin access confirmed", { email: user.email });
+    logger.debug("Admin access confirmed", { email: user.email, requestId });
 
     // Get branch context for multi-tenancy
     const branchContext = await getBranchContext(request, user.id, supabase);
@@ -155,11 +160,8 @@ export async function GET(request: NextRequest) {
     const { data: orders, error: ordersError, count } = await query;
 
     if (ordersError) {
-      logger.error("Error fetching admin orders", ordersError);
-      return NextResponse.json(
-        { error: "Failed to fetch orders" },
-        { status: 500 },
-      );
+      logger.error("Error fetching admin orders", { error: ordersError, requestId });
+      throw new Error(`Failed to fetch orders: ${ordersError.message}`);
     }
 
     logger.debug("Orders fetched successfully", {
@@ -167,10 +169,11 @@ export async function GET(request: NextRequest) {
       totalCount: count,
       offset,
       limit,
+      requestId,
     });
 
     // Transform data to include customer names
-    const transformedOrders = orders?.map((order) => ({
+    const transformedOrders = orders?.map((order: any) => ({
       id: order.id,
       order_number: order.order_number,
       customer_name: (order as any).customer_name || "Cliente",
@@ -187,18 +190,21 @@ export async function GET(request: NextRequest) {
       order_payments: (order as any).order_payments || [],
     }));
 
-    return NextResponse.json({
-      success: true,
-      orders: transformedOrders || [],
-      total: count || 0,
-      offset,
-      limit,
-    });
+    // Use standardized paginated response
+    return createPaginatedResponse(
+      transformedOrders || [],
+      {
+        page: Math.floor(offset / limit) + 1,
+        limit,
+        total: count || 0,
+      },
+      { requestId },
+    );
   } catch (error) {
-    logger.error("Admin orders API GET error", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
+    logger.error("Admin orders API GET error", { error, requestId });
+    return createApiErrorResponse(
+      error instanceof Error ? error : new Error("Internal server error"),
+      { requestId }
     );
   }
 }
@@ -416,7 +422,7 @@ export async function POST(request: NextRequest) {
 
             const totalRevenue =
               revenueData?.reduce(
-                (sum, order) => sum + (order.total_amount || 0),
+                (sum: number, order: any) => sum + (order.total_amount || 0),
                 0,
               ) || 0;
 
@@ -476,7 +482,7 @@ export async function POST(request: NextRequest) {
                 orderCounts: statusCounts, // This is an object, not an array
                 totalRevenue,
                 recentOrders:
-                  recentOrders?.map((order) => ({
+                  recentOrders?.map((order: any) => ({
                     id: order.id,
                     order_number: order.order_number,
                     customer_name: "Cliente", // Generic name for now

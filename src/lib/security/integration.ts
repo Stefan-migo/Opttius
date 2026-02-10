@@ -30,9 +30,7 @@ export function withAuthSecurity(
       // Log authentication attempt
       securityMonitor.logAuthEvent(
         "auth.login_attempt",
-        {
-          userAgent,
-        },
+        {},
         {
           ipAddress: clientIp,
           userAgent,
@@ -45,9 +43,7 @@ export function withAuthSecurity(
       if (response.status === 200) {
         securityMonitor.logAuthEvent(
           "auth.login_success",
-          {
-            userAgent,
-          },
+          {},
           {
             ipAddress: clientIp,
             userAgent,
@@ -64,7 +60,6 @@ export function withAuthSecurity(
           failureReason:
             error instanceof Error ? error.message : "Unknown error",
           attemptCount: 1, // This would need to be tracked separately
-          userAgent,
         },
         {
           ipAddress: clientIp,
@@ -109,7 +104,7 @@ export function withRateLimitSecurity(
           },
           {
             ipAddress: clientIp,
-            requestId: response?.headers.get("X-Request-ID") || undefined,
+            requestId: request.headers.get("X-Request-ID") || undefined,
           },
         );
       }

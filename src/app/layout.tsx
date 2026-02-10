@@ -6,6 +6,7 @@ import { BranchProvider } from "@/contexts/BranchContext";
 import { QueryProvider } from "@/lib/react-query/QueryProvider";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { Toaster } from "@/components/ui/toaster";
+import { TelemetryProvider } from "@/components/providers/telemetry-provider";
 import "./globals.css";
 
 const inter = Inter({
@@ -43,8 +44,10 @@ export default function RootLayout({
           <ErrorBoundary>
             <QueryProvider>
               <AuthProvider>
-                <BranchProvider>{children}</BranchProvider>
-                <Toaster />
+                <TelemetryProvider>
+                  <BranchProvider>{children}</BranchProvider>
+                  <Toaster />
+                </TelemetryProvider>
               </AuthProvider>
             </QueryProvider>
           </ErrorBoundary>

@@ -8,9 +8,15 @@ export async function POST(
   try {
     const { getUser } = await createClientFromRequest(request);
     const {
-      data: { user },
+      data,
       error: userError,
     } = await getUser();
+    
+    if (userError || !data || !("user" in data) || !data.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    
+    const user = data.user;
 
     if (userError || !user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -24,10 +30,10 @@ export async function POST(
       );
     }
 
-    const supabase = await createClientFromRequest(request);
+    const { client: supabaseClient } = await createClientFromRequest(request);
 
     // Obtener organización del usuario
-    const { data: adminUser } = await supabase.client
+    const { data: adminUser } = await supabaseClient
       .from("admin_users")
       .select("organization_id")
       .eq("id", user.id)
@@ -36,7 +42,7 @@ export async function POST(
     const organizationId = adminUser?.organization_id || null;
 
     // Obtener progreso actual
-    const { data: progress, error: fetchError } = await supabase.client
+    const { data: progress, error: fetchError } = await supabaseClient
       .from("user_tour_progress")
       .select("*")
       .eq("user_id", user.id)
@@ -62,7 +68,7 @@ export async function POST(
     }
     const nextStep = stepIndex + 1;
 
-    const { data, error } = await supabase.client
+    const { data, error } = await supabaseClient
       .from("user_tour_progress")
       .update({
         current_step: nextStep,

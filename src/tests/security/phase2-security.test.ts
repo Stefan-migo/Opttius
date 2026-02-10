@@ -93,27 +93,21 @@ describe("Phase 2 Security Implementation Tests", () => {
     });
 
     it("should log rate limiting violations", () => {
-      const rateLimitEvent: SecurityEvent = {
-        id: "test-rate-1",
-        timestamp: new Date().toISOString(),
-        eventType: "rate_limit.exceeded",
-        severity: "medium",
-        source: "rate-limiter",
-        ipAddress: "192.168.1.100",
-        details: {
+      monitor.logRateLimitEvent(
+        "rate_limit.exceeded",
+        {
           limit: 100,
-          window: "15 minutes",
           requestCount: 150,
         },
-      };
-
-      monitor.logRateLimitEvent(rateLimitEvent);
+        {
+          ipAddress: "192.168.1.100",
+        }
+      );
 
       expect(appLogger.warn).toHaveBeenCalledWith(
         "Security Event",
         expect.objectContaining({
           eventType: "rate_limit.exceeded",
-          severity: "medium",
         }),
       );
     });
@@ -278,15 +272,13 @@ describe("Phase 2 Security Implementation Tests", () => {
     it("should send email alerts for high severity events", async () => {
       const alert: SecurityAlert = {
         id: "alert-test-1",
-        title: "Security Incident Detected",
-        description: "A security incident was detected",
-        severity: "high",
-        timestamp: new Date().toISOString(),
         title: "High Severity Security Alert",
         description: "Suspicious login activity detected",
-        userId: "user-123",
-        ipAddress: "192.168.1.100",
+        severity: "high",
+        timestamp: new Date().toISOString(),
+        relatedEvents: [],
         recommendedActions: ["Review user activity", "Reset credentials"],
+        status: "active",
       };
 
       await alerting.sendAlert(
@@ -309,14 +301,13 @@ describe("Phase 2 Security Implementation Tests", () => {
     it("should send Slack notifications", async () => {
       const alert: SecurityAlert = {
         id: "alert-test-2",
-        title: "Rate Limit Violation",
-        description: "Rate limit violation detected",
-        severity: "medium",
-        timestamp: new Date().toISOString(),
         title: "Rate Limit Exceeded",
         description: "IP 192.168.1.100 exceeded rate limit",
-        ipAddress: "192.168.1.100",
+        severity: "medium",
+        timestamp: new Date().toISOString(),
+        relatedEvents: [],
         recommendedActions: ["Block IP temporarily", "Review traffic patterns"],
+        status: "active",
       };
 
       await alerting.sendAlert(
@@ -339,16 +330,16 @@ describe("Phase 2 Security Implementation Tests", () => {
     it("should handle PagerDuty integration", async () => {
       const criticalAlert: SecurityAlert = {
         id: "alert-test-3",
-        title: "System Compromise",
+        title: "Critical Security Incident",
         description: "Potential system compromise detected",
         severity: "critical",
         timestamp: new Date().toISOString(),
-        title: "Critical Security Incident",
-        description: "Potential system compromise detected",
+        relatedEvents: [],
         recommendedActions: [
           "Isolate affected systems",
           "Contact security team immediately",
         ],
+        status: "active",
       };
 
       await alerting.sendAlert(
@@ -374,13 +365,31 @@ describe("Phase 2 Security Implementation Tests", () => {
           title: "Repeated Login Failure",
           description: "Multiple failed login attempts",
           severity: "medium" as const,
-          events: [{ id: "evt-1", eventType: "auth.login_failure" as const }],
+          events: [
+            {
+              id: "evt-1",
+              timestamp: new Date().toISOString(),
+              eventType: "auth.login_failure" as const,
+              severity: "medium" as const,
+              source: "test",
+              details: { username: "testuser", reason: "invalid_credentials" },
+            },
+          ],
         },
         {
           title: "Repeated Login Failure",
           description: "Multiple failed login attempts",
           severity: "medium" as const,
-          events: [{ id: "evt-2", eventType: "auth.login_failure" as const }],
+          events: [
+            {
+              id: "evt-2",
+              timestamp: new Date().toISOString(),
+              eventType: "auth.login_failure" as const,
+              severity: "medium" as const,
+              source: "test",
+              details: { username: "testuser", reason: "invalid_credentials" },
+            },
+          ],
         },
       ];
 
@@ -443,22 +452,34 @@ describe("Phase 2 Security Implementation Tests", () => {
       const alerting = getSecurityAlerting();
 
       // Simulate failed login attempts
-      const failedLogins = Array.from({ length: 5 }, (_, i) => ({
-        id: `failed-login-${i}`,
-        timestamp: new Date().toISOString(),
-        eventType: "auth.login_failure",
-        severity: "medium",
-        source: "auth-service",
-        userId: "test-user",
-        ipAddress: "192.168.1.100",
-        details: {
-          username: "admin@test.com",
-          reason: "invalid_credentials",
-        },
-      }));
+      const failedLogins: SecurityEvent[] = Array.from(
+        { length: 5 },
+        (_, i): SecurityEvent => ({
+          id: `failed-login-${i}`,
+          timestamp: new Date().toISOString(),
+          eventType: "auth.login_failure",
+          severity: "medium",
+          source: "auth-service",
+          userId: "test-user",
+          ipAddress: "192.168.1.100",
+          details: {
+            username: "admin@test.com",
+            reason: "invalid_credentials",
+          },
+        }),
+      );
 
       // Log failed login events
-      failedLogins.forEach((event) => monitor.logAuthEvent(event));
+      failedLogins.forEach((event) =>
+        monitor.logAuthEvent(
+          "auth.login_failure",
+          event.details as any,
+          {
+            userId: event.userId,
+            ipAddress: event.ipAddress,
+          },
+        ),
+      );
 
       // Send alert for multiple failed attempts
       await alerting.sendAlert(

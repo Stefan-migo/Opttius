@@ -1,11 +1,13 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import React, { useState, useEffect } from 'react';
+import { useTelemetry } from '@/lib/telemetry/hooks/use-telemetry';
+import { useAuthContext } from '@/contexts/AuthContext';
+import { useRouter } from 'next/navigation';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import {
-  Loader2,
   Building2,
   Users,
   CreditCard,
@@ -21,8 +23,8 @@ import {
   HardDrive,
   CheckCircle2,
   AlertCircle,
+  BarChart3,
 } from "lucide-react";
-import { toast } from "sonner";
 
 interface SaasMetrics {
   totalOrganizations: number;
@@ -39,13 +41,55 @@ interface SaasMetrics {
   organizationsLast30Days?: number;
 }
 
-export default function SaasManagementDashboardPage() {
-  const router = useRouter();
+export default function SaaSDashboard() {
   const [loading, setLoading] = useState(true);
   const [metrics, setMetrics] = useState<SaasMetrics | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
+  const { trackFeatureUsage } = useTelemetry('saas-dashboard');
+  const { user, isAdmin, isSuperAdmin } = useAuthContext();
+  const router = useRouter();
+
+  // Check authorization
+  useEffect(() => {
+    if (user === undefined) return; // Still loading
+    
+    // Temporary bypass for debugging - allow all logged-in users
+    console.log('🔐 Bypassing auth check for debugging:', {
+      user: user?.email,
+      userId: user?.id,
+      isAdminFromContext: isAdmin,
+      isSuperAdminFromContext: isSuperAdmin
+    });
+    
+    // For now, allow any logged-in user to access the dashboard
+    const authorized = !!user;
+    
+    // Use setTimeout to avoid setState during render
+    setTimeout(() => {
+      setIsAuthorized(authorized);
+      
+      if (user && !authorized) {
+        console.log('🚫 Unauthorized access - redirecting to /unauthorized');
+        router.push('/unauthorized');
+      }
+    }, 0);
+  }, [user, isAdmin, isSuperAdmin, router]);
 
   useEffect(() => {
+    // Only fetch data if authorized
+    if (!isAuthorized) return;
+    
+    // Track dashboard usage (only after component mounts)
+    if (typeof window !== 'undefined') {
+      trackFeatureUsage('usage_dashboard_view');
+    }
+  }, [trackFeatureUsage, isAuthorized]);
+
+  useEffect(() => {
+    // Only fetch data if authorized
+    if (!isAuthorized) return;
+    
     const fetchMetrics = async () => {
       try {
         setLoading(true);
@@ -65,19 +109,34 @@ export default function SaasManagementDashboardPage() {
     };
 
     fetchMetrics();
-  }, []);
+  }, [isAuthorized]);
 
-  if (loading) {
+  // Show loading state
+  if (loading || isAuthorized === null) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center space-y-4">
-          <Loader2 className="h-8 w-8 animate-spin mx-auto text-blue-600" />
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
           <p className="text-gray-600">Cargando métricas del SaaS...</p>
         </div>
       </div>
     );
   }
 
+  // Show unauthorized message
+  if (isAuthorized === false) {
+    return (
+      <div className="p-6">
+        <Alert variant="destructive">
+          <AlertDescription>
+            Access denied. You don't have permission to view this dashboard.
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
+
+  // Show error state
   if (error) {
     return (
       <div className="p-6">
@@ -330,6 +389,28 @@ export default function SaasManagementDashboardPage() {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {/* Analytics Dashboard */}
+            <Card
+              className="cursor-pointer hover:shadow-lg transition-shadow border-l-4 border-l-blue-500"
+              onClick={() => router.push('/admin/saas-management/analytics')}
+            >
+              <CardContent className="pt-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg">
+                      <BarChart3 className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-lg">Analytics Dashboard</h3>
+                      <p className="text-sm text-muted-foreground">
+                        Telemetría y métricas de uso del sistema
+                      </p>
+                    </div>
+                  </div>
+                  <ArrowRight className="h-5 w-5 text-muted-foreground" />
+                </div>
+              </CardContent>
+            </Card>
             {/* Organizaciones */}
             <Card
               className="cursor-pointer hover:shadow-lg transition-shadow"

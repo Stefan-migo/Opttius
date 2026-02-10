@@ -82,7 +82,6 @@ function createRedisClient(): Redis {
     db: config.db,
     tls: config.tls ? {} : undefined,
     connectTimeout: config.connectTimeout,
-    retryDelayOnFailover: config.retryDelay,
     maxRetriesPerRequest: config.maxRetriesPerRequest,
     lazyConnect: true,
     reconnectOnError: (err) => {

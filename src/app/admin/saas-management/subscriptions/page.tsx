@@ -589,11 +589,13 @@ export default function SubscriptionsPage() {
                                 : ""
                             }
                           >
-                            {sub.daysUntilExpiry > 0
+                            {sub.daysUntilExpiry != null && sub.daysUntilExpiry > 0
                               ? `${sub.daysUntilExpiry} días`
-                              : sub.daysUntilExpiry === 0
+                              : sub.daysUntilExpiry != null && sub.daysUntilExpiry === 0
                                 ? "Hoy"
-                                : `Vencida hace ${Math.abs(sub.daysUntilExpiry)} días`}
+                                : sub.daysUntilExpiry != null
+                                  ? `Vencida hace ${Math.abs(sub.daysUntilExpiry)} días`
+                                  : "N/A"}
                           </div>
                         ) : (
                           <span className="text-gray-400">-</span>

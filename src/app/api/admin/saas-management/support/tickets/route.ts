@@ -61,13 +61,13 @@ export async function GET(request: NextRequest) {
       sort_order: searchParams.get("sort_order") || "desc",
     });
 
-    const offset = (filters.page - 1) * filters.limit;
+    const offset = ((filters.page || 1) - 1) * (filters.limit || 20);
 
     // Construir query base (sin relaciones complejas para evitar errores)
     let query = supabaseServiceRole
       .from("saas_support_tickets")
       .select("*", { count: "exact" })
-      .order(filters.sort_by, { ascending: filters.sort_order === "asc" });
+      .order(filters.sort_by || "created_at", { ascending: filters.sort_order === "asc" });
 
     // Aplicar filtros
     // Si no es root, solo puede ver tickets de su organización
@@ -107,7 +107,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Paginación
-    query = query.range(offset, offset + filters.limit - 1);
+    query = query.range(offset, offset + (filters.limit || 20) - 1);
 
     const { data: tickets, error, count } = await query;
 
@@ -170,7 +170,7 @@ export async function GET(request: NextRequest) {
         page: filters.page,
         limit: filters.limit,
         total: count || 0,
-        totalPages: Math.ceil((count || 0) / filters.limit),
+        totalPages: Math.ceil((count || 0) / (filters.limit || 20)),
       },
     });
   } catch (error) {

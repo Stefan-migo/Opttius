@@ -110,7 +110,7 @@ export async function PUT(
         updated_at: new Date().toISOString(),
       })
       .eq("id", id)
-      .select("quote_number, status")
+      .select("quote_number, status, branch_id")
       .single();
 
     if (error) {

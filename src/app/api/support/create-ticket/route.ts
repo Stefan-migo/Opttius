@@ -91,7 +91,9 @@ export async function POST(request: NextRequest) {
           category: body.category,
           requester_name: body.requester_name,
           requester_email: body.requester_email,
-          organization: ticket.organization,
+          organization: Array.isArray(ticket.organization)
+            ? ticket.organization[0] || null
+            : ticket.organization,
         });
         logger.info("Ticket creation email sent successfully");
       } else {

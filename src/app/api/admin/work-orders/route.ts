@@ -5,7 +5,16 @@ import { getBranchContext, addBranchFilter } from "@/lib/api/branch-middleware";
 import { NotificationService } from "@/lib/notifications/notification-service";
 import { appLogger as logger } from "@/lib/logger";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
-import { ValidationError } from "@/lib/api/errors";
+import { 
+  ValidationError,
+  AuthenticationError,
+  AuthorizationError 
+} from "@/lib/api/errors";
+import {
+  createPaginatedResponse,
+  createApiErrorResponse,
+  extractPaginationParams,
+} from "@/lib/api/response";
 import { createWorkOrderSchema } from "@/lib/api/validation/zod-schemas";
 import {
   parseAndValidateBody,
@@ -13,7 +22,11 @@ import {
 } from "@/lib/api/validation/zod-helpers";
 
 export async function GET(request: NextRequest) {
+  const requestId = crypto.randomUUID();
+  
   try {
+    logger.info("Work Orders API GET called", { requestId });
+    
     const supabase = await createClient();
 
     // Check admin authorization
@@ -22,17 +35,16 @@ export async function GET(request: NextRequest) {
       error: userError,
     } = await supabase.auth.getUser();
     if (userError || !user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      logger.error("User authentication failed", { error: userError, requestId });
+      throw new AuthenticationError("Unauthorized");
     }
 
     const { data: isAdmin } = (await supabase.rpc("is_admin", {
       user_id: user.id,
     } as IsAdminParams)) as { data: IsAdminResult | null; error: Error | null };
     if (!isAdmin) {
-      return NextResponse.json(
-        { error: "Admin access required" },
-        { status: 403 },
-      );
+      logger.warn("User is not admin", { email: user.email, requestId });
+      throw new AuthorizationError("Admin access required");
     }
 
     // Get branch context
@@ -72,21 +84,15 @@ export async function GET(request: NextRequest) {
     const { data: workOrders, error, count } = await query.range(from, to);
 
     if (error) {
-      logger.error("Error fetching work orders", error, {
+      logger.error("Error fetching work orders", { 
+        error, 
         errorDetails: JSON.stringify(error, null, 2),
         errorCode: error.code,
         errorMessage: error.message,
         errorHint: error.hint,
+        requestId 
       });
-      return NextResponse.json(
-        {
-          error: "Failed to fetch work orders",
-          details: error.message,
-          code: error.code,
-          hint: error.hint,
-        },
-        { status: 500 },
-      );
+      throw new Error(`Failed to fetch work orders: ${error.message}`);
     }
 
     // Fetch related data using batch queries to avoid N+1
@@ -179,20 +185,27 @@ export async function GET(request: NextRequest) {
       }));
     }
 
-    return NextResponse.json({
-      workOrders: workOrdersWithRelations,
-      pagination: {
+    logger.debug("Work orders fetched successfully", {
+      count: workOrdersWithRelations.length,
+      total: count,
+      requestId,
+    });
+
+    // Use standardized paginated response
+    return createPaginatedResponse(
+      workOrdersWithRelations,
+      {
         page,
         limit,
         total: count || 0,
-        totalPages: Math.ceil((count || 0) / limit),
       },
-    });
+      { requestId },
+    );
   } catch (error) {
-    logger.error("Error in work orders API GET", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
+    logger.error("Error in work orders API GET", { error, requestId });
+    return createApiErrorResponse(
+      error instanceof Error ? error : new Error("Internal server error"),
+      { requestId }
     );
   }
 }

@@ -88,10 +88,9 @@ export async function GET(request: NextRequest) {
 
         // CRITICAL: Filter by organization_id FIRST to ensure multi-tenancy isolation
         // Products must be filtered by organization_id before search to prevent cross-organization data leakage
-        let productsQuery = supabase
-          .from("products")
-          .select(selectFields)
-          .eq("status", "active");
+        const baseQuery: any = supabase.from("products");
+        const selectedQuery: any = baseQuery.select(selectFields);
+        let productsQuery: any = selectedQuery.eq("status", "active");
 
         // Apply organization filter - CRITICAL for multi-tenancy
         if (branchContext.organizationId) {

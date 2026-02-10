@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
 import { appLogger as logger } from "@/lib/logger";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
+import { ValidationError } from "@/lib/api/errors";
 import { updateLensPriceMatrixSchemaV2 } from "@/lib/api/validation/zod-schemas";
 import {
   parseAndValidateBody,
@@ -198,15 +199,16 @@ export async function PUT(
     }
 
     return NextResponse.json({ matrix });
-  } catch (error) {
-    if (error instanceof Error && error.name === "ValidationError") {
+  } catch (error: any) {
+    if (error instanceof ValidationError) {
       return validationErrorResponse(error);
+    } else {
+      logger.error("Error in lens matrices API PUT", error);
+      return NextResponse.json(
+        { error: "Internal server error" },
+        { status: 500 },
+      );
     }
-    logger.error("Error in lens matrices API PUT", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
   }
 }
 

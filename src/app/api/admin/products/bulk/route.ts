@@ -564,7 +564,7 @@ export async function GET(request: NextRequest) {
         created_at,
         updated_at`;
 
-    let query = supabase.from("products").select(selectFields);
+    let query = supabase.from("products").select(selectFields as any) as any;
 
     if (branchId) {
       query = query.eq("product_branch_stock.branch_id", branchId);
@@ -610,7 +610,7 @@ export async function GET(request: NextRequest) {
 
       const csvRows = [
         headers.join(","),
-        ...(products || []).map((product) =>
+        ...(products || []).map((product: any) =>
           [
             product.id,
             `"${product.name || ""}"`,

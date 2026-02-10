@@ -1,0 +1,47 @@
+{
+  "version": "1.0.0",
+  "collectors": {
+    "browser": {
+      "enabled": true,
+      "batchSize": 10,
+      "flushInterval": 5000,
+      "maxQueueSize": 1000,
+      "trackPageViews": true,
+      "trackFeatureUsage": true,
+      "trackPerformance": true,
+      "trackErrors": true
+    },
+    "server": {
+      "enabled": true,
+      "batchSize": 20,
+      "flushInterval": 10000,
+      "maxQueueSize": 5000,
+      "trackApiCalls": true,
+      "trackDatabaseQueries": true,
+      "trackExternalServices": true,
+      "trackSystemMetrics": true
+    }
+  },
+  "sampling": {
+    "page_views": 1,
+    "feature_usage": 0.8,
+    "performance": 0.5,
+    "errors": 1,
+    "api_calls": 0.3,
+    "database_queries": 0.2
+  },
+  "privacy": {
+    "anonymizeIp": true,
+    "excludeSensitivePaths": [
+      "/api/auth",
+      "/admin/users"
+    ],
+    "dataRetentionDays": 90,
+    "gdprCompliant": true
+  },
+  "endpoints": {
+    "browserEndpoint": "/api/telemetry/browser",
+    "serverEndpoint": "/api/telemetry/server",
+    "dashboardEndpoint": "/api/telemetry/dashboard"
+  }
+}

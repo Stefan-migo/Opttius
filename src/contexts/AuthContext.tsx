@@ -3,6 +3,8 @@
 import { createContext, useContext, ReactNode } from 'react'
 import { useAuth, AuthState } from '@/hooks/useAuth'
 import { Tables } from '@/types/database'
+import { createClient } from '@/utils/supabase/client'
+import { IsAdminParams, IsAdminResult, GetAdminRoleParams, GetAdminRoleResult } from '@/types/supabase-rpc'
 
 type Profile = Tables<'profiles'>
 
@@ -17,9 +19,40 @@ interface AuthContextType extends AuthState {
   updateProfile: (updates: Partial<Profile>) => Promise<Profile>
   resetPassword: (email: string) => Promise<{ error: any }>
   refetchProfile: () => Promise<Profile | null> | null
+  isAdmin: boolean
+  isSuperAdmin: boolean
+  adminRole: string | null
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
+
+// Helper functions for admin checks
+async function checkAdminStatus(userId: string): Promise<{ isAdmin: boolean; role: string | null }> {
+  const supabase = createClient()
+  
+  try {
+    // Check if user is admin
+    const { data: isAdmin } = (await supabase.rpc("is_admin", {
+      user_id: userId,
+    } as IsAdminParams)) as { data: IsAdminResult | null; error: Error | null }
+    
+    // Get admin role
+    const { data: adminRole } = (await supabase.rpc("get_admin_role", {
+      user_id: userId,
+    } as GetAdminRoleParams)) as { data: GetAdminRoleResult | null; error: Error | null }
+    
+    return {
+      isAdmin: !!isAdmin,
+      role: adminRole || null
+    }
+  } catch (error) {
+    console.error('Error checking admin status:', error)
+    return {
+      isAdmin: false,
+      role: null
+    }
+  }
+}
 
 interface AuthProviderProps {
   children: ReactNode

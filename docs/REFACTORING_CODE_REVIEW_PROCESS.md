@@ -35,6 +35,8 @@ This document establishes the code review process specifically for refactored co
 - [ ] Document changes in pull request description
 - [ ] Include before/after metrics
 - [ ] Add screenshots/videos for UI changes
+- [ ] **Identify and document dead code removal**
+- [ ] **Verify business logic alignment**
 
 **Pull Request Template:**
 
@@ -93,6 +95,8 @@ This document establishes the code review process specifically for refactored co
 - [ ] State management patterns consistent
 - [ ] Data flow清晰 and predictable
 - [ ] Reusability opportunities identified
+- [ ] **Dead code properly identified and removed**
+- [ ] **Business functionality properly aligned**
 
 **Code Quality Assessment:**
 

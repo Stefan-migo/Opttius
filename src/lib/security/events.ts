@@ -472,20 +472,4 @@ export function getSeverityForEventType(
   return "low";
 }
 
-// Export all types and interfaces
-export type {
-  SecuritySeverity,
-  SecurityEventType,
-  SecurityEvent,
-  AuthSecurityEvent,
-  RateLimitSecurityEvent,
-  PaymentSecurityEvent,
-  AlertChannelType,
-  AlertChannel,
-  EmailAlertConfig,
-  SlackAlertConfig,
-  PagerDutyAlertConfig,
-  WebhookAlertConfig,
-  SecurityAlert,
-  SecurityMonitoringConfig,
-};
+
