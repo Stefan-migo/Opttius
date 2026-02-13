@@ -7,10 +7,8 @@ export async function createClient() {
   const cookieStore = await cookies();
 
   return createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL ||
-      "https://xdvemkyvgnfnibntfbwq.supabase.co",
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhkdmVta3l2Z25mbmlibnRmYndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI2MjMwNzAsImV4cCI6MjA2ODE5OTA3MH0.JhKvg2LIEaDmvcD09QuTkS4pi2ZqB6wZgUNZ2eLDqxQ",
+    process.env.NEXT_PUBLIC_SUPABASE_URL || "",
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "",
     {
       cookies: {
         getAll() {
@@ -44,12 +42,8 @@ export async function createClientFromRequest(request?: NextRequest): Promise<{
   client: any; // Flexible type for test compatibility
   getUser: () => Promise<{ data: { user: any } | null; error: any }>;
 }> {
-  const supabaseUrl =
-    process.env.NEXT_PUBLIC_SUPABASE_URL ||
-    "https://xdvemkyvgnfnibntfbwq.supabase.co";
-  const supabaseAnonKey =
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhkdmVta3l2Z25mbmlibnRmYndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI2MjMwNzAsImV4cCI6MjA2ODE5OTA3MH0.JhKvg2LIEaDmvcD09QuTkS4pi2ZqB6wZgUNZ2eLDqxQ";
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
 
   // Check if Authorization header with Bearer token is present (for tests)
   if (request) {
@@ -94,11 +88,10 @@ export async function createClientFromRequest(request?: NextRequest): Promise<{
 // Service role client for admin operations (bypasses RLS)
 export function createServiceRoleClient() {
   return createSupabaseClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL ||
-      "https://xdvemkyvgnfnibntfbwq.supabase.co",
+    process.env.NEXT_PUBLIC_SUPABASE_URL || "",
     process.env.SUPABASE_SERVICE_ROLE_KEY ||
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhkdmVta3l2Z25mbmlibnRmYndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI2MjMwNzAsImV4cCI6MjA2ODE5OTA3MH0.JhKvg2LIEaDmvcD09QuTkS4pi2ZqB6wZgUNZ2eLDqxQ",
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+    "",
     {
       auth: {
         autoRefreshToken: false,
