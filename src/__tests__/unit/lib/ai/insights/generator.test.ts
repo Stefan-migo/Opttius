@@ -16,7 +16,7 @@ vi.mock("@/lib/ai/factory", () => ({
 
 // Mock logger
 vi.mock("@/lib/logger", () => ({
-  logger: {
+  appLogger: {
     info: vi.fn(),
     error: vi.fn(),
     warn: vi.fn(),

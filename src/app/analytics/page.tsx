@@ -11,19 +11,19 @@ interface DashboardData {
     avgSessionDuration: number;
   };
   trends: {
-    dailyActiveUsers: Array<{date: string, count: number}>;
-    featureUsage: Array<{feature: string, usage: number}>;
-    performanceMetrics: Array<{metric: string, value: number, trend: 'up' | 'down'}>;
+    dailyActiveUsers: Array<{ date: string, count: number }>;
+    featureUsage: Array<{ feature: string, usage: number }>;
+    performanceMetrics: Array<{ metric: string, value: number, trend: 'up' | 'down' }>;
   };
-  topFeatures: Array<{name: string, usage: number, growth: number}>;
-  errorRates: Array<{type: string, rate: number, change: number}>;
+  topFeatures: Array<{ name: string, usage: number, growth: number }>;
+  errorRates: Array<{ type: string, rate: number, change: number }>;
 }
 
 export default function UsageAnalyticsDashboard() {
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [timeRange, setTimeRange] = useState('7d');
-  const { trackFeatureUsage } = useTelemetry();
+  const { trackFeatureUsage } = useTelemetry('UsageAnalyticsDashboard');
 
   useEffect(() => {
     // Track dashboard usage (only after component mounts)
@@ -74,17 +74,16 @@ export default function UsageAnalyticsDashboard() {
       <div className="mb-6">
         <h1 className="text-3xl font-bold text-gray-900">Usage Analytics Dashboard</h1>
         <p className="text-gray-600 mt-2">Monitor system performance and user behavior patterns</p>
-        
+
         <div className="flex gap-2 mt-4">
           {['7d', '30d', '90d'].map((range) => (
             <button
               key={range}
               onClick={() => setTimeRange(range)}
-              className={`px-4 py-2 rounded-lg ${
-                timeRange === range 
-                  ? 'bg-blue-600 text-white' 
+              className={`px-4 py-2 rounded-lg ${timeRange === range
+                  ? 'bg-blue-600 text-white'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
+                }`}
             >
               {range}
             </button>
@@ -99,19 +98,19 @@ export default function UsageAnalyticsDashboard() {
           <p className="text-3xl font-bold text-gray-900">{dashboardData?.overview?.totalUsers?.toLocaleString() || '0'}</p>
           <p className="text-green-600 text-sm mt-1">↑ 12% from last period</p>
         </div>
-        
+
         <div className="bg-white rounded-lg shadow p-6">
           <h3 className="text-gray-500 text-sm font-medium">Active Users</h3>
           <p className="text-3xl font-bold text-gray-900">{dashboardData?.overview?.activeUsers?.toLocaleString() || '0'}</p>
           <p className="text-green-600 text-sm mt-1">↑ 8% from last period</p>
         </div>
-        
+
         <div className="bg-white rounded-lg shadow p-6">
           <h3 className="text-gray-500 text-sm font-medium">Total Events</h3>
           <p className="text-3xl font-bold text-gray-900">{dashboardData?.overview?.totalEvents?.toLocaleString() || '0'}</p>
           <p className="text-blue-600 text-sm mt-1">↗ Steady growth</p>
         </div>
-        
+
         <div className="bg-white rounded-lg shadow p-6">
           <h3 className="text-gray-500 text-sm font-medium">Avg Session</h3>
           <p className="text-3xl font-bold text-gray-900">{Math.round(dashboardData?.overview?.avgSessionDuration || 0)}s</p>
@@ -127,7 +126,7 @@ export default function UsageAnalyticsDashboard() {
             <p className="text-gray-500">Chart visualization would go here</p>
           </div>
         </div>
-        
+
         <div className="bg-white rounded-lg shadow p-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Top Features</h3>
           <div className="space-y-3">
@@ -136,9 +135,8 @@ export default function UsageAnalyticsDashboard() {
                 <span className="text-gray-700">{feature.name}</span>
                 <div className="flex items-center gap-2">
                   <span className="font-medium">{feature.usage}%</span>
-                  <span className={`text-sm ${
-                    feature.growth > 0 ? 'text-green-600' : 'text-red-600'
-                  }`}>
+                  <span className={`text-sm ${feature.growth > 0 ? 'text-green-600' : 'text-red-600'
+                    }`}>
                     {feature.growth > 0 ? '↗' : '↘'} {Math.abs(feature.growth)}%
                   </span>
                 </div>
@@ -158,9 +156,8 @@ export default function UsageAnalyticsDashboard() {
               <p className="text-2xl font-bold mt-2">
                 {typeof metric.value === 'number' ? metric.value.toFixed(2) : metric.value}
               </p>
-              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium mt-2 ${
-                metric.trend === 'up' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-              }`}>
+              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium mt-2 ${metric.trend === 'up' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                }`}>
                 {metric.trend === 'up' ? '↗ Improving' : '↘ Declining'}
               </span>
             </div>

@@ -52,7 +52,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
-import { useForm } from "react-hook-form";
+import { useForm, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { createSaasSupportMessageSchema } from "@/lib/api/validation/zod-schemas";
 import type { z } from "zod";
@@ -182,7 +182,7 @@ export default function TicketDetailPage() {
     formState: { errors },
     reset,
     setValue,
-  } = useForm<MessageForm>({
+  } = useForm<any>({
     resolver: zodResolver(createSaasSupportMessageSchema),
     defaultValues: {
       is_internal: false,
@@ -247,7 +247,7 @@ export default function TicketDetailPage() {
     }
   };
 
-  const onSubmitMessage = async (data: MessageForm) => {
+  const onSubmitMessage: SubmitHandler<any> = async (data) => {
     setSendingMessage(true);
     try {
       const response = await fetch(
@@ -475,13 +475,12 @@ export default function TicketDetailPage() {
                     {messages.map((msg) => (
                       <div
                         key={msg.id}
-                        className={`p-4 rounded-lg border ${
-                          msg.is_internal
+                        className={`p-4 rounded-lg border ${msg.is_internal
                             ? "bg-yellow-50 border-yellow-200"
                             : msg.is_from_customer
                               ? "bg-blue-50 border-blue-200"
                               : "bg-gray-50 border-gray-200"
-                        }`}
+                          }`}
                       >
                         <div className="flex items-start justify-between mb-2">
                           <div className="flex items-center gap-2">
@@ -559,7 +558,7 @@ export default function TicketDetailPage() {
                     />
                     {errors.message && (
                       <p className="text-sm text-red-500">
-                        {errors.message.message}
+                        {String(errors.message.message)}
                       </p>
                     )}
                   </div>

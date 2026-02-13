@@ -35,6 +35,7 @@ import { formatRUT } from "@/lib/utils/rut";
 import { useBranch } from "@/hooks/useBranch";
 import { getBranchHeader } from "@/lib/utils/branch";
 import { useAuthContext } from "@/contexts/AuthContext";
+import { extractDataFromResponse } from "@/lib/api/response-helpers";
 
 interface CreateAppointmentFormProps {
   onSuccess: () => void;
@@ -189,7 +190,10 @@ export default function CreateAppointmentForm({
         ...getBranchHeader(currentBranchId),
       };
 
-      const response = await fetch("/api/admin/schedule-settings", { headers });
+      const response = await fetch("/api/admin/schedule-settings", {
+        headers,
+        credentials: "include", // Include cookies for authentication
+      });
       if (response.ok) {
         const data = await response.json();
         setScheduleSettings(data.settings);
@@ -319,7 +323,7 @@ export default function CreateAppointmentForm({
         );
         if (response.ok) {
           const data = await response.json();
-          setCustomerResults(data.customers || []);
+          setCustomerResults(extractDataFromResponse(data));
         }
       } catch (error) {
         console.error("Error searching customers:", error);
@@ -416,6 +420,7 @@ export default function CreateAppointmentForm({
         prescription_id: formData.prescription_id || null,
         order_id: formData.order_id || null,
         cancellation_reason: null,
+        branch_id: currentBranchId, // Ensure branch_id is sent for availability check
       };
 
       // If guest customer, send guest data to store in appointment (not create customer)
@@ -500,7 +505,7 @@ export default function CreateAppointmentForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-8 pb-4">
+    <form id="create-appointment-form" onSubmit={handleSubmit} className="space-y-8 pb-4">
       {/* Customer Selection */}
       <Card className="border-none bg-admin-bg-tertiary/20 shadow-premium-sm rounded-2xl overflow-hidden border border-admin-border-primary/30">
         <CardHeader className="pb-4 border-b border-admin-border-primary/10">
@@ -1132,6 +1137,31 @@ export default function CreateAppointmentForm({
               {initialData?.id ? "Confirmar Cambios" : "Agendar Ahora"}
             </>
           )}
+        </Button>
+        {/* Debug: Force creation button */}
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => {
+            // Trigger form submission with force_create flag
+            const form = document.getElementById('create-appointment-form') as HTMLFormElement;
+            if (form) {
+              // Create a hidden input for force_create
+              let forceInput = form.querySelector('input[name="force_create"]') as HTMLInputElement;
+              if (!forceInput) {
+                forceInput = document.createElement('input');
+                forceInput.type = 'hidden';
+                forceInput.name = 'force_create';
+                form.appendChild(forceInput);
+              }
+              forceInput.value = 'true';
+              form.requestSubmit();
+            }
+          }}
+          className="h-12 px-4 rounded-xl border-orange-500 text-orange-600 hover:bg-orange-50 font-bold uppercase text-[10px] tracking-widest transition-all"
+          title="Fuerza la creación de la cita sin verificar disponibilidad"
+        >
+          ⚠️ Forzar
         </Button>
       </div>
     </form>

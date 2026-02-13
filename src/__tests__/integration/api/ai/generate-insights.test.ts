@@ -76,8 +76,8 @@ describe("Generate Insights API - Integration Tests", () => {
   });
 
   afterAll(async () => {
-    if (infrastructureCheck) {
-      await cleanupTestData(orgA.id);
+    if (infrastructureCheck && org?.id) {
+      await cleanupTestData(org.id);
     }
   });
 
@@ -120,6 +120,7 @@ describe("Generate Insights API - Integration Tests", () => {
         }),
       },
       user.authToken,
+      user.sessionData,
     );
 
     expect(response.status).toBe(200);
@@ -148,7 +149,8 @@ describe("Generate Insights API - Integration Tests", () => {
           data: {},
         }),
       },
-      user,
+      user.authToken,
+      user.sessionData,
     );
 
     expect(response.status).toBe(500);
@@ -186,7 +188,8 @@ describe("Generate Insights API - Integration Tests", () => {
           data: {},
         }),
       },
-      user,
+      user.authToken,
+      user.sessionData,
     );
 
     expect(response.status).toBe(500);
@@ -211,7 +214,8 @@ describe("Generate Insights API - Integration Tests", () => {
           data: {},
         }),
       },
-      user,
+      user.authToken,
+      user.sessionData,
     );
 
     expect(response.status).toBe(503);

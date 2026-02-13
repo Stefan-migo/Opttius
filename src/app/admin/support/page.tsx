@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { extractDataFromResponse, extractPaginationFromResponse } from "@/lib/api/response-helpers";
 import {
   Card,
   CardContent,
@@ -48,7 +49,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
-import { useForm } from "react-hook-form";
+import { useForm, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   createOpticalInternalSupportTicketSchema,
@@ -164,7 +165,7 @@ export default function OpticalInternalSupportPage() {
     reset: resetTicket,
     watch: watchTicket,
     setValue: setTicketValue,
-  } = useForm<TicketForm>({
+  } = useForm<any>({
     resolver: zodResolver(createOpticalInternalSupportTicketSchema),
     defaultValues: {
       priority: "medium",
@@ -197,7 +198,7 @@ export default function OpticalInternalSupportPage() {
       const response = await fetch("/api/admin/customers?limit=100");
       if (response.ok) {
         const data = await response.json();
-        setCustomers(data.customers || []);
+        setCustomers(extractDataFromResponse<any>(data));
       }
     } catch (err) {
       console.error("Error loading customers:", err);
@@ -235,11 +236,13 @@ export default function OpticalInternalSupportPage() {
       }
 
       const data = await response.json();
-      setTickets(data.tickets || []);
+      const tickets = extractDataFromResponse<Ticket>(data);
+      const paginationData = extractPaginationFromResponse(data);
+      setTickets(tickets);
       setPagination((prev) => ({
         ...prev,
-        total: data.pagination?.total || 0,
-        totalPages: data.pagination?.totalPages || 0,
+        total: paginationData.total || 0,
+        totalPages: paginationData.totalPages || 0,
       }));
     } catch (err) {
       toast.error("Error al cargar tickets");
@@ -248,7 +251,7 @@ export default function OpticalInternalSupportPage() {
     }
   };
 
-  const onSubmitTicket = async (data: TicketForm) => {
+  const onSubmitTicket: SubmitHandler<any> = async (data) => {
     setCreatingTicket(true);
     try {
       const response = await fetch("/api/admin/optical-support/tickets", {
@@ -504,9 +507,9 @@ export default function OpticalInternalSupportPage() {
               <p className="text-lg font-medium mb-2">No hay tickets</p>
               <p className="text-sm mb-4">
                 {(filters.status && filters.status !== "all") ||
-                (filters.priority && filters.priority !== "all") ||
-                (filters.category && filters.category !== "all") ||
-                filters.search
+                  (filters.priority && filters.priority !== "all") ||
+                  (filters.category && filters.category !== "all") ||
+                  filters.search
                   ? "No hay tickets que coincidan con los filtros"
                   : "Crea tu primer ticket de soporte interno"}
               </p>
@@ -646,7 +649,7 @@ export default function OpticalInternalSupportPage() {
                 </Label>
                 <Select
                   value={watchTicket("category")}
-                  onValueChange={(value) => setTicketValue("category", value)}
+                  onValueChange={(value) => setTicketValue("category", value as any)}
                 >
                   <SelectTrigger
                     id="category"
@@ -664,7 +667,7 @@ export default function OpticalInternalSupportPage() {
                 </Select>
                 {ticketErrors.category && (
                   <p className="text-sm text-red-500">
-                    {ticketErrors.category.message}
+                    {String(ticketErrors.category.message)}
                   </p>
                 )}
               </div>
@@ -675,7 +678,7 @@ export default function OpticalInternalSupportPage() {
                 </Label>
                 <Select
                   value={watchTicket("priority")}
-                  onValueChange={(value) => setTicketValue("priority", value)}
+                  onValueChange={(value) => setTicketValue("priority", value as any)}
                 >
                   <SelectTrigger
                     id="priority"
@@ -693,7 +696,7 @@ export default function OpticalInternalSupportPage() {
                 </Select>
                 {ticketErrors.priority && (
                   <p className="text-sm text-red-500">
-                    {ticketErrors.priority.message}
+                    {String(ticketErrors.priority.message)}
                   </p>
                 )}
               </div>
@@ -746,7 +749,7 @@ export default function OpticalInternalSupportPage() {
               />
               {ticketErrors.subject && (
                 <p className="text-sm text-red-500">
-                  {ticketErrors.subject.message}
+                  {String(ticketErrors.subject.message)}
                 </p>
               )}
             </div>
@@ -764,7 +767,7 @@ export default function OpticalInternalSupportPage() {
               />
               {ticketErrors.description && (
                 <p className="text-sm text-red-500">
-                  {ticketErrors.description.message}
+                  {String(ticketErrors.description.message)}
                 </p>
               )}
               <p className="text-xs text-gray-500">

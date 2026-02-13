@@ -26,6 +26,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'sonner';
+import { extractDataFromResponse } from '@/lib/api/response-helpers';
 
 interface Customer {
   id: string;
@@ -120,7 +121,7 @@ export default function NewTicketPage() {
       const response = await fetch('/api/admin/users');
       if (response.ok) {
         const data = await response.json();
-        setAdminUsers(data.users || []);
+        setAdminUsers(extractDataFromResponse(data));
       }
     } catch (err) {
       console.error('Error fetching admin users:', err);
@@ -133,7 +134,7 @@ export default function NewTicketPage() {
       const response = await fetch(`/api/admin/customers?search=${encodeURIComponent(customerSearch)}&limit=10`);
       if (response.ok) {
         const data = await response.json();
-        setCustomers(data.customers || []);
+        setCustomers(extractDataFromResponse(data));
       }
     } catch (err) {
       console.error('Error searching customers:', err);
@@ -148,7 +149,7 @@ export default function NewTicketPage() {
       const response = await fetch(`/api/admin/orders?search=${encodeURIComponent(orderSearch)}&limit=10`);
       if (response.ok) {
         const data = await response.json();
-        setOrders(data.orders || []);
+        setOrders(extractDataFromResponse(data));
       }
     } catch (err) {
       console.error('Error searching orders:', err);

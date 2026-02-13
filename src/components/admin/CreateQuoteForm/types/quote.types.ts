@@ -44,6 +44,7 @@ export interface Frame {
 export interface LensFamily {
   id: string;
   name: string;
+  brand?: string;
   lens_type?: string;
   lens_material?: string;
   description?: string;
@@ -130,6 +131,7 @@ export interface QuoteFormData {
   near_frame_price: number;
   near_frame_price_includes_tax: boolean;
   near_frame_cost: number;
+  customer_own_near_frame: boolean;
 }
 
 export type PresbyopiaSolution =

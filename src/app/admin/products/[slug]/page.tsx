@@ -15,33 +15,8 @@ import {
 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { productService, Product } from '@/lib/api/services';
 
-interface Product {
-  id: string;
-  name: string;
-  slug: string;
-  description: string | null;
-  short_description: string | null;
-  price: number;
-  compare_at_price: number | null;
-  inventory_quantity: number;
-  status: string;
-  featured_image: string | null;
-  gallery: string[];
-  is_featured: boolean;
-  category?: { name: string; slug: string };
-  categories?: { name: string; slug: string };
-  product_type?: string;
-  frame_type?: string;
-  frame_material?: string;
-  frame_shape?: string;
-  frame_color?: string;
-  lens_type?: string;
-  lens_material?: string;
-  sku?: string;
-  brand?: string;
-  created_at: string;
-}
 
 export default function ProductViewPage() {
   const params = useParams();
@@ -64,25 +39,14 @@ export default function ProductViewPage() {
       setLoading(true);
       setError(null);
       
-      const response = await fetch(`/api/products/${slug}`);
-      
-      if (!response.ok) {
-        if (response.status === 404) {
-          setError('Producto no encontrado');
-        } else {
-          setError('Error al cargar el producto');
-        }
-        return;
-      }
-
-      const data = await response.json();
-      setProduct(data.product);
+      const productData = await productService.getProductBySlug(slug);
+      setProduct(productData);
       
       // Set initial selected image
-      if (data.product.featured_image) {
-        setSelectedImage(data.product.featured_image);
-      } else if (data.product.gallery && data.product.gallery.length > 0) {
-        setSelectedImage(data.product.gallery[0]);
+      if (productData.featured_image) {
+        setSelectedImage(productData.featured_image);
+      } else if (productData.gallery && productData.gallery.length > 0) {
+        setSelectedImage(productData.gallery[0]);
       }
     } catch (err) {
       console.error('Error fetching product:', err);
@@ -147,7 +111,7 @@ export default function ProductViewPage() {
   const discountPercentage = hasDiscount 
     ? Math.round(((product.compare_at_price! - product.price) / product.compare_at_price!) * 100)
     : 0;
-  const inStock = product.inventory_quantity > 0;
+  const inStock = (product.inventory_quantity ?? 0) > 0;
 
   return (
     <div className="p-6">

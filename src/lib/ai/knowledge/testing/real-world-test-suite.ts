@@ -1,5 +1,4 @@
-import { getKnowledgeBase } from '../base';
-import { KnowledgeContext } from '../types';
+import { getKnowledgeBase, KnowledgeContext } from '../base/knowledge-manager';
 
 /**
  * Real-World User Query Test Suite
@@ -137,7 +136,7 @@ export class RealWorldTestingSuite {
 
   async runAllTests(): Promise<TestResults> {
     const results: TestResult[] = [];
-    
+
     for (const testCase of REAL_WORLD_TEST_CASES) {
       const result = await this.runSingleTest(testCase);
       results.push(result);
@@ -187,7 +186,7 @@ export class RealWorldTestingSuite {
         testCaseId: testCase.id,
         passed: false,
         score: 0,
-        findings: [`Execution Error: ${error.message}`],
+        findings: [`Execution Error: ${error instanceof Error ? error.message : String(error)}`],
         searchResults: [],
         executionTime: Date.now()
       };
@@ -215,8 +214,8 @@ export class RealWorldTestingSuite {
 
     // Check section coverage (30 points)
     if (testCase.expectedSections) {
-      const foundSections = new Set(searchResults.flatMap(r => 
-        r.sections?.map(s => s.title) || []
+      const foundSections = new Set(searchResults.flatMap(r =>
+        r.sections?.map((s: any) => s.title) || []
       ));
       const expectedSections = new Set(testCase.expectedSections);
       const sectionMatches = [...expectedSections].filter(section => foundSections.has(section));

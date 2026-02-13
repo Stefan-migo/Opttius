@@ -103,7 +103,7 @@ export function CheckoutPageContent() {
             setTiers(data.tiers);
           }
         })
-        .catch(() => {}),
+        .catch(() => { }),
       fetch("/api/checkout/current-subscription", { credentials: "include" })
         .then((res) => res.json())
         .then((data) => {
@@ -113,7 +113,7 @@ export function CheckoutPageContent() {
             setSelectedTier(data.currentTier);
           }
         })
-        .catch(() => {}),
+        .catch(() => { }),
       fetch("/api/checkout/gateways")
         .then((res) => res.json())
         .then((data) => {
@@ -123,7 +123,7 @@ export function CheckoutPageContent() {
             setSelectedGateway(data.gateways[0].gateway_id);
           }
         })
-        .catch(() => {}),
+        .catch(() => { }),
     ]).finally(() => setLoading(false));
   }, []);
 
@@ -481,7 +481,7 @@ export function CheckoutPageContent() {
                               {tierLabels[tier.name]}
                             </h3>
                             <p className="text-sm font-medium text-slate-500">
-                              {config.branches} Sedes / {config.employees}{" "}
+                              {config.max_branches} Sedes / {config.max_users}{" "}
                               Colab.
                             </p>
                           </div>
@@ -842,8 +842,7 @@ export function CheckoutPageContent() {
                             }}
                             customization={{
                               paymentMethods: {
-                                creditCard: "all",
-                                debitCard: "all",
+                                // Default is all
                               },
                               visual: {
                                 style: {

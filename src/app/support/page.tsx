@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { useForm } from "react-hook-form";
+import { useForm, type SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { createPublicSaasSupportTicketSchema } from "@/lib/api/validation/zod-schemas";
 import type { z } from "zod";
@@ -69,18 +69,23 @@ export default function SupportPage() {
     formState: { errors },
     setValue,
     watch,
-  } = useForm<SupportForm>({
+  } = useForm<any>({
     resolver: zodResolver(createPublicSaasSupportTicketSchema),
     defaultValues: {
+      requester_name: "",
+      requester_email: "",
+      subject: "",
+      description: "",
       priority: "medium",
       category: "technical",
+      metadata: {},
     },
   });
 
   const category = watch("category");
   const priority = watch("priority");
 
-  const onSubmit = async (data: SupportForm) => {
+  const onSubmit: SubmitHandler<SupportForm> = async (data) => {
     setIsSubmitting(true);
 
     try {
@@ -246,7 +251,7 @@ export default function SupportPage() {
                     />
                     {errors.requester_name && (
                       <p className="text-sm text-red-500">
-                        {errors.requester_name.message}
+                        {String(errors.requester_name.message)}
                       </p>
                     )}
                   </div>
@@ -262,14 +267,13 @@ export default function SupportPage() {
                         type="email"
                         {...register("requester_email")}
                         placeholder="tu@email.com"
-                        className={`pl-10 ${
-                          errors.requester_email ? "border-red-500" : ""
-                        }`}
+                        className={`pl-10 ${errors.requester_email ? "border-red-500" : ""
+                          }`}
                       />
                     </div>
                     {errors.requester_email && (
                       <p className="text-sm text-red-500">
-                        {errors.requester_email.message}
+                        {String(errors.requester_email.message)}
                       </p>
                     )}
                   </div>
@@ -330,7 +334,7 @@ export default function SupportPage() {
                     </Select>
                     {errors.category && (
                       <p className="text-sm text-red-500">
-                        {errors.category.message}
+                        {String(errors.category.message)}
                       </p>
                     )}
                   </div>
@@ -363,7 +367,7 @@ export default function SupportPage() {
                     </Select>
                     {errors.priority && (
                       <p className="text-sm text-red-500">
-                        {errors.priority.message}
+                        {String(errors.priority.message)}
                       </p>
                     )}
                   </div>
@@ -381,7 +385,7 @@ export default function SupportPage() {
                   />
                   {errors.subject && (
                     <p className="text-sm text-red-500">
-                      {errors.subject.message}
+                      {String(errors.subject.message)}
                     </p>
                   )}
                 </div>
@@ -399,7 +403,7 @@ export default function SupportPage() {
                   />
                   {errors.description && (
                     <p className="text-sm text-red-500">
-                      {errors.description.message}
+                      {String(errors.description.message)}
                     </p>
                   )}
                   <p className="text-xs text-gray-500">

@@ -39,6 +39,7 @@ import { toast } from "sonner";
 import Link from "next/link";
 import { useBranch } from "@/hooks/useBranch";
 import { formatCurrency, formatDate } from "@/lib/utils";
+import { quoteService } from "@/lib/api/services";
 
 interface Quote {
   id: string;
@@ -111,6 +112,15 @@ interface Quote {
 }
 
 export default function QuoteDetailPage() {
+  // Helper function to safely get customer ID
+  const getCustomerId = (q: Quote | null): string => {
+    if (!q) return "N/A";
+    if (typeof q.customer === 'object' && q.customer !== null) {
+      return q.customer.id ?? "N/A";
+    }
+    return "N/A";
+  };
+
   const router = useRouter();
   const params = useParams();
   const quoteId = params.id as string;
@@ -146,30 +156,28 @@ export default function QuoteDetailPage() {
         headers["x-branch-id"] = "global";
       }
 
-      const response = await fetch(`/api/admin/quotes/${quoteId}`, { headers });
-      if (!response.ok) {
-        throw new Error("Failed to fetch quote");
-      }
-
-      const data = await response.json();
+      const quoteResult = await quoteService.getQuote(quoteId);
+      // Cast to any to handle additional properties from API response
+      const quote = quoteResult as unknown as any;
+      
       console.log("Quote loaded:", {
-        quoteId: data.quote?.id,
-        hasCustomer: !!data.quote?.customer,
-        customerId: data.quote?.customer_id,
-        customer: data.quote?.customer,
-        presbyopia_solution: data.quote?.presbyopia_solution,
-        far_lens_family_id: data.quote?.far_lens_family_id,
-        near_lens_family_id: data.quote?.near_lens_family_id,
-        far_lens_cost: data.quote?.far_lens_cost,
-        near_lens_cost: data.quote?.near_lens_cost,
-        near_frame_name: data.quote?.near_frame_name,
-        near_frame_cost: data.quote?.near_frame_cost,
-        frame_cost: data.quote?.frame_cost,
-        frame_name: data.quote?.frame_name,
-        far_lens_family: data.quote?.far_lens_family,
-        near_lens_family: data.quote?.near_lens_family,
+        quoteId: quote?.id,
+        hasCustomer: !!quote?.customer,
+        customerId: quote?.customer_id,
+        customer: quote?.customer,
+        presbyopia_solution: quote?.presbyopia_solution,
+        far_lens_family_id: quote?.far_lens_family_id,
+        near_lens_family_id: quote?.near_lens_family_id,
+        far_lens_cost: quote?.far_lens_cost,
+        near_lens_cost: quote?.near_lens_cost,
+        near_frame_name: quote?.near_frame_name,
+        near_frame_cost: quote?.near_frame_cost,
+        frame_cost: quote?.frame_cost,
+        frame_name: quote?.frame_name,
+        far_lens_family: quote?.far_lens_family,
+        near_lens_family: quote?.near_lens_family,
       });
-      setQuote(data.quote);
+      setQuote(quote);
     } catch (error) {
       console.error("Error fetching quote:", error);
       toast.error("Error al cargar el presupuesto");
@@ -440,16 +448,7 @@ export default function QuoteDetailPage() {
 
     setSending(true);
     try {
-      const response = await fetch(`/api/admin/quotes/${quoteId}/send`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: emailToSend }),
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || "Error al enviar presupuesto");
-      }
+      await quoteService.sendQuote(quoteId, emailToSend);
 
       toast.success(`Presupuesto enviado exitosamente a ${emailToSend}`);
       setShowSendDialog(false);
@@ -694,7 +693,7 @@ export default function QuoteDetailPage() {
                         <p className="font-medium">{quote.customer.phone}</p>
                       </div>
                     )}
-                    {quote.customer.id && (
+                    {quote.customer?.id ? (
                       <Link href={`/admin/customers/${quote.customer.id}`}>
                         <Button
                           variant="outline"
@@ -704,12 +703,12 @@ export default function QuoteDetailPage() {
                           Ver Cliente
                         </Button>
                       </Link>
-                    )}
+                    ) : null}
                   </>
                 ) : (
                   <div>
                     <p className="text-sm text-tierra-media text-red-500">
-                      Cliente no encontrado (ID: {quote.customer_id || "N/A"})
+                      Cliente no encontrado (ID: {getCustomerId(quote)})
                     </p>
                   </div>
                 )}

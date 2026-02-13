@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
+import { extractDataFromResponse } from '@/lib/api/response-helpers';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -132,7 +133,7 @@ export default function TemplatesPage() {
       const response = await fetch('/api/admin/support/categories');
       if (response.ok) {
         const data = await response.json();
-        setCategories(data.categories || []);
+        setCategories(extractDataFromResponse(data));
       }
     } catch (err) {
       console.error('Error fetching categories:', err);

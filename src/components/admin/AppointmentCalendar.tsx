@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -67,6 +67,7 @@ interface AppointmentCalendarProps {
   onDateChange: (date: Date) => void;
   onSlotClick?: (date: Date, time: string) => void;
   scheduleSettings?: ScheduleSettings | null;
+  lastRefresh?: number;
 }
 
 export default function AppointmentCalendar({
@@ -77,8 +78,15 @@ export default function AppointmentCalendar({
   onDateChange,
   onSlotClick,
   scheduleSettings,
+  lastRefresh,
 }: AppointmentCalendarProps) {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+
+  // Force re-render when lastRefresh changes
+  useEffect(() => {
+    // This effect runs when lastRefresh changes, forcing component to re-render
+    // with fresh appointment data
+  }, [lastRefresh, appointments]);
 
   // Generate time slots based on schedule settings
   // If no settings, fallback to default (8:00 to 20:00)
@@ -250,7 +258,11 @@ export default function AppointmentCalendar({
   }, [currentDate]);
 
   const getAppointmentsForDate = (date: Date) => {
-    const dateStr = date.toISOString().split("T")[0];
+    // Use local date string to avoid UTC timezone issues
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    const dateStr = `${year}-${month}-${day}`;
     return appointments.filter((apt) => apt.appointment_date === dateStr);
   };
 
@@ -299,7 +311,12 @@ export default function AppointmentCalendar({
   };
 
   const getAppointmentsForTimeSlot = (date: Date, timeSlot: string) => {
-    const dateStr = date.toISOString().split("T")[0];
+    // Use local date string to avoid UTC timezone issues
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    const dateStr = `${year}-${month}-${day}`;
+
     return appointments.filter((apt) => {
       if (apt.appointment_date !== dateStr) return false;
       const aptTime = apt.appointment_time.substring(0, 5); // HH:MM
@@ -341,7 +358,7 @@ export default function AppointmentCalendar({
 
   if (view === "week") {
     return (
-      <div className="space-y-4 pb-4">
+      <div className="space-y-4 pb-4" key={`week-view-${lastRefresh}-${appointments.length}`}>
         {/* Style for custom scrollbar to ensure visibility and interaction */}
         <style dangerouslySetInnerHTML={{ __html: CUSTOM_SCROLLBAR_CSS }} />
 
@@ -524,7 +541,7 @@ export default function AppointmentCalendar({
 
   // Month view
   return (
-    <div className="space-y-4 pb-4">
+    <div className="space-y-4 pb-4" key={`month-view-${lastRefresh}-${appointments.length}`}>
       {/* Month Header */}
       <div className="grid grid-cols-7 gap-2 bg-admin-bg-tertiary/20 p-2 rounded-2xl border border-admin-border-primary/30 backdrop-blur-sm">
         {["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"].map((day) => (

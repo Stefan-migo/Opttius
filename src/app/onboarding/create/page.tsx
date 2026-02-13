@@ -258,7 +258,7 @@ export default function CreateOrganizationPage() {
                   </div>
                   {errors.name && (
                     <p className="text-xs font-medium text-red-500 flex items-center gap-1">
-                      <XCircle className="h-3 w-3" /> {errors.name.message}
+                      <XCircle className="h-3 w-3" /> {String(errors.name.message)}
                     </p>
                   )}
                 </div>
@@ -290,9 +290,9 @@ export default function CreateOrganizationPage() {
                       className={cn(
                         "h-12 bg-[var(--admin-bg-primary)] border-[var(--admin-border-secondary)] transition-all focus:ring-4 focus:ring-primary/10 pr-12",
                         (errors.slug || isSlugInvalid) &&
-                          "border-red-500 focus:ring-red-500/10",
+                        "border-red-500 focus:ring-red-500/10",
                         isSlugValid &&
-                          "border-green-500/50 focus:ring-green-500/5",
+                        "border-green-500/50 focus:ring-green-500/5",
                       )}
                       disabled={isSubmitting}
                     />
@@ -310,7 +310,7 @@ export default function CreateOrganizationPage() {
                   </div>
                   {errors.slug && (
                     <p className="text-xs font-medium text-red-500">
-                      {errors.slug.message}
+                      {String(errors.slug.message)}
                     </p>
                   )}
                   {slugValidation.error && (

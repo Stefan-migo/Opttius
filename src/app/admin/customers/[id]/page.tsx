@@ -43,6 +43,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { formatCurrency, formatDate } from "@/lib/utils";
+import { customerService, Customer, Prescription, Appointment, Quote, LensPurchase } from "@/lib/api/services";
 import {
   Dialog,
   DialogContent,
@@ -89,22 +90,15 @@ const CreateQuoteForm = dynamic(
   },
 );
 
-interface Customer {
-  id: string;
-  first_name?: string;
-  last_name?: string;
-  email: string;
-  phone?: string;
+// Local Customer interface for the form state - extended with additional fields
+interface CustomerFormData extends Partial<Customer> {
+  // Extended fields that may not be in the base Customer type
   address_line_1?: string;
   address_line_2?: string;
   city?: string;
   state?: string;
   postal_code?: string;
   country?: string;
-  created_at: string;
-  updated_at: string;
-  // Optical shop fields
-  rut?: string;
   date_of_birth?: string;
   gender?: string;
   medical_conditions?: string[];
@@ -119,107 +113,6 @@ interface Customer {
   insurance_provider?: string;
   insurance_policy_number?: string;
   is_active_customer?: boolean;
-  // Relations
-  orders?: any[];
-  prescriptions?: Prescription[];
-  appointments?: Appointment[];
-  lensPurchases?: LensPurchase[];
-  quotes?: Quote[];
-  analytics?: {
-    totalSpent: number;
-    orderCount: number;
-    lastOrderDate?: string;
-    avgOrderValue: number;
-    segment: string;
-    lifetimeValue: number;
-    orderStatusCounts: Record<string, number>;
-    favoriteProducts: any[];
-    monthlySpending: any[];
-  };
-}
-
-interface Prescription {
-  id: string;
-  customer_id: string;
-  prescription_date: string;
-  expiration_date?: string;
-  prescription_number?: string;
-  issued_by?: string;
-  issued_by_license?: string;
-  od_sphere?: number;
-  od_cylinder?: number;
-  od_axis?: number;
-  od_add?: number;
-  od_pd?: number;
-  os_sphere?: number;
-  os_cylinder?: number;
-  os_axis?: number;
-  os_add?: number;
-  os_pd?: number;
-  prescription_type?: string;
-  lens_type?: string;
-  lens_material?: string;
-  notes?: string;
-  is_active: boolean;
-  is_current: boolean;
-  created_at: string;
-}
-
-interface Appointment {
-  id: string;
-  customer_id: string;
-  appointment_date: string;
-  appointment_time: string;
-  duration_minutes: number;
-  appointment_type: string;
-  status: string;
-  notes?: string;
-  reason?: string;
-  outcome?: string;
-  follow_up_required: boolean;
-  follow_up_date?: string;
-  created_at: string;
-}
-
-interface LensPurchase {
-  id: string;
-  customer_id: string;
-  order_id?: string;
-  prescription_id?: string;
-  product_id?: string;
-  product_name: string;
-  product_type: string;
-  purchase_date: string;
-  quantity: number;
-  unit_price: number;
-  total_price: number;
-  lens_type?: string;
-  frame_brand?: string;
-  status: string;
-  delivery_date?: string;
-  created_at: string;
-}
-
-interface Quote {
-  id: string;
-  customer_id: string;
-  quote_number: string;
-  quote_date: string;
-  expiration_date?: string;
-  status: string;
-  frame_name?: string;
-  frame_price?: number;
-  lens_type?: string;
-  lens_material?: string;
-  lens_cost?: number;
-  treatments_cost?: number;
-  labor_cost?: number;
-  subtotal?: number;
-  tax_amount?: number;
-  discount_amount?: number;
-  total_amount?: number;
-  created_at: string;
-  converted_to_work_order_id?: string;
 }
 
 export default function CustomerDetailPage() {
@@ -248,13 +141,8 @@ export default function CustomerDetailPage() {
   const fetchCustomer = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`/api/admin/customers/${customerId}`);
-      if (!response.ok) {
-        throw new Error("Failed to fetch customer");
-      }
-
-      const data = await response.json();
-      setCustomer(data.customer);
+      const customerData = await customerService.getCustomer(customerId);
+      setCustomer(customerData);
       setError(null);
     } catch (err) {
       console.error("Error fetching customer:", err);
@@ -591,7 +479,7 @@ export default function CustomerDetailPage() {
                         Condiciones Médicas
                       </p>
                       <div className="flex flex-wrap gap-1 mt-1">
-                        {customer.medical_conditions.map((condition, idx) => (
+                        {customer.medical_conditions.map((condition: string, idx: number) => (
                           <Badge key={idx} variant="outline">
                             {condition}
                           </Badge>
@@ -604,7 +492,7 @@ export default function CustomerDetailPage() {
                   <div>
                     <p className="text-sm text-tierra-media">Alergias</p>
                     <div className="flex flex-wrap gap-1 mt-1">
-                      {customer.allergies.map((allergy, idx) => (
+                      {customer.allergies.map((allergy: string, idx: number) => (
                         <Badge
                           key={idx}
                           variant="outline"
@@ -782,7 +670,7 @@ export default function CustomerDetailPage() {
 
           {customer.prescriptions && customer.prescriptions.length > 0 ? (
             <div className="space-y-4">
-              {customer.prescriptions.map((prescription) => (
+              {customer.prescriptions.map((prescription: Prescription) => (
                 <Card
                   key={prescription.id}
                   className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)]"
@@ -1019,7 +907,7 @@ export default function CustomerDetailPage() {
 
           {customer.appointments && customer.appointments.length > 0 ? (
             <div className="space-y-4">
-              {customer.appointments.map((appointment) => {
+              {customer.appointments.map((appointment: Appointment) => {
                 const appointmentDate = new Date(
                   `${appointment.appointment_date}T${appointment.appointment_time}`,
                 );
@@ -1191,7 +1079,7 @@ export default function CustomerDetailPage() {
 
           {customer.quotes && customer.quotes.length > 0 ? (
             <div className="space-y-4">
-              {customer.quotes.map((quote) => {
+              {customer.quotes.map((quote: Quote) => {
                 const getStatusBadge = (status: string) => {
                   const config: Record<
                     string,
@@ -1398,7 +1286,7 @@ export default function CustomerDetailPage() {
             <CardContent>
               {customer.lensPurchases && customer.lensPurchases.length > 0 ? (
                 <div className="space-y-4">
-                  {customer.lensPurchases.map((purchase) => {
+                  {customer.lensPurchases.map((purchase: LensPurchase) => {
                     const statusColors: Record<string, string> = {
                       ordered: "bg-blue-100 text-blue-800",
                       in_progress: "bg-yellow-100 text-yellow-800",

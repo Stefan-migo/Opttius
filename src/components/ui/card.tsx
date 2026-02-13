@@ -19,6 +19,8 @@ const cardVariants = cva(
           "border-transparent bg-transparent hover:bg-accent/10 hover:border-border/50",
         glass:
           "border-white/10 dark:border-slate-800/10 bg-[var(--admin-bg-tertiary)] backdrop-blur-md shadow-lg",
+        "line-outline": "border-2 border-line-primary bg-transparent hover:shadow-line transition-all duration-300",
+        "line-subtle": "border border-line-primary/10 bg-line-lightest/30 hover:shadow-soft transition-all duration-300",
       },
       padding: {
         none: "",
@@ -45,7 +47,7 @@ const cardVariants = cva(
 
 export interface CardProps
   extends React.HTMLAttributes<HTMLDivElement>,
-    VariantProps<typeof cardVariants> {
+  VariantProps<typeof cardVariants> {
   shimmer?: boolean;
   float?: boolean;
 }
@@ -68,7 +70,7 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
       className={cn(
         cardVariants({ variant, padding, rounded }),
         shimmer &&
-          "relative overflow-hidden before:absolute before:inset-0 before:bg-gradient-to-r before:from-transparent before:via-white/10 before:to-transparent before:-translate-x-full hover:before:translate-x-full before:transition-transform before:duration-1000",
+        "relative overflow-hidden before:absolute before:inset-0 before:bg-gradient-to-r before:from-transparent before:via-white/10 before:to-transparent before:-translate-x-full hover:before:translate-x-full before:transition-transform before:duration-1000",
         float && "animate-premium-float",
         className,
       )}
@@ -101,7 +103,7 @@ const cardHeaderVariants = cva("flex flex-col space-y-1.5", {
 
 export interface CardHeaderProps
   extends React.HTMLAttributes<HTMLDivElement>,
-    VariantProps<typeof cardHeaderVariants> {}
+  VariantProps<typeof cardHeaderVariants> { }
 
 const CardHeader = React.forwardRef<HTMLDivElement, CardHeaderProps>(
   ({ className, padding, align, ...props }, ref) => (
@@ -137,7 +139,7 @@ const cardTitleVariants = cva("font-semibold leading-none tracking-tight", {
 
 export interface CardTitleProps
   extends React.HTMLAttributes<HTMLDivElement>,
-    VariantProps<typeof cardTitleVariants> {}
+  VariantProps<typeof cardTitleVariants> { }
 
 const CardTitle = React.forwardRef<HTMLDivElement, CardTitleProps>(
   ({ className, size, theme, ...props }, ref) => (
@@ -171,7 +173,7 @@ const cardDescriptionVariants = cva("text-muted-foreground", {
 
 export interface CardDescriptionProps
   extends React.HTMLAttributes<HTMLDivElement>,
-    VariantProps<typeof cardDescriptionVariants> {}
+  VariantProps<typeof cardDescriptionVariants> { }
 
 const CardDescription = React.forwardRef<HTMLDivElement, CardDescriptionProps>(
   ({ className, size, theme, ...props }, ref) => (
@@ -208,7 +210,7 @@ const cardContentVariants = cva("", {
 
 export interface CardContentProps
   extends React.HTMLAttributes<HTMLDivElement>,
-    VariantProps<typeof cardContentVariants> {}
+  VariantProps<typeof cardContentVariants> { }
 
 const CardContent = React.forwardRef<HTMLDivElement, CardContentProps>(
   ({ className, padding, spacing, ...props }, ref) => (
@@ -253,7 +255,7 @@ const cardFooterVariants = cva("flex items-center", {
 
 export interface CardFooterProps
   extends React.HTMLAttributes<HTMLDivElement>,
-    VariantProps<typeof cardFooterVariants> {}
+  VariantProps<typeof cardFooterVariants> { }
 
 const CardFooter = React.forwardRef<HTMLDivElement, CardFooterProps>(
   ({ className, padding, justify, direction, ...props }, ref) => (

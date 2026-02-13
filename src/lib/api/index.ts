@@ -70,3 +70,20 @@ export {
   requireRoot,
   isRootUser,
 } from "./root-middleware";
+
+// API Client and helpers
+export {
+  ApiClient,
+  isSuccess,
+  isError,
+  unwrapData,
+  getErrorMessage,
+  queryFn,
+  handlePaginatedResponse,
+  isValidationError,
+  getValidationErrors,
+  formatErrorForDisplay,
+} from "./client-helpers";
+
+// API Services
+export * from "./services";

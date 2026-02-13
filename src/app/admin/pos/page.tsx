@@ -60,6 +60,18 @@ import {
 } from "@/lib/utils/tax";
 import { getTaxPercentage } from "@/lib/utils/tax-config";
 import { formatCurrency, formatDate, formatPrice } from "@/lib/utils";
+import { extractDataFromResponse } from "@/lib/api/response-helpers";
+import { 
+  posService, 
+  quoteService,
+  customerService, 
+  productService, 
+  quoteSettingsService,
+  lensFamilyService,
+  contactLensFamilyService,
+  contactLensMatrixService,
+} from "@/lib/api/services";
+import type { QuoteSearchParams } from "@/lib/api/services";
 import { useBranch } from "@/hooks/useBranch";
 import { getBranchHeader } from "@/lib/utils/branch";
 import { BranchSelector } from "@/components/admin/BranchSelector";
@@ -115,14 +127,14 @@ interface CartItem {
 
 interface Customer {
   id: string;
-  email: string;
+  email?: string | null;
   first_name?: string;
   last_name?: string;
   name?: string;
-  rut?: string;
+  rut?: string | null | undefined;
   business_name?: string;
   address?: string;
-  phone?: string;
+  phone?: string | null;
 }
 
 interface Quote {
@@ -376,19 +388,8 @@ export default function POSPage() {
       // This allows editing before adding to cart
       const loadQuoteFromUrl = async () => {
         try {
-          // Fetch full quote details (incl. branch header para acceso correcto)
-          const headers: HeadersInit = {
-            ...getBranchHeader(currentBranchId),
-          };
-          const response = await fetch(`/api/admin/quotes/${quoteId}`, {
-            headers,
-          });
-          if (!response.ok) {
-            throw new Error("Error al cargar el presupuesto");
-          }
-
-          const data = await response.json();
-          const fullQuote = data.quote;
+          // Fetch full quote details using quoteService
+          const fullQuote = await quoteService.getQuote(quoteId);
 
           // Set selected quote immediately to prevent re-triggering the effect
           setSelectedQuote(fullQuote);
@@ -440,17 +441,10 @@ export default function POSPage() {
 
     setCheckingCashStatus(true);
     try {
-      const headers: HeadersInit = {
-        ...getBranchHeader(currentBranchId),
-      };
-
-      const response = await fetch("/api/admin/cash-register/open", {
-        headers,
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setIsCashOpen(data.isOpen);
+      // Use posService for cash status
+      const cashStatus = await posService.getCashStatus(currentBranchId || undefined);
+      if (cashStatus) {
+        setIsCashOpen(cashStatus.isOpen);
       }
     } catch (error: any) {
       console.error("Error checking cash status:", error);
@@ -465,25 +459,13 @@ export default function POSPage() {
       if (!currentBranchId && !isSuperAdmin) return;
 
       try {
-        const headers = { ...getBranchHeader(currentBranchId) };
+        // Fetch Billing settings using posService
+        const billingSettings = await posService.getBillingSettings(currentBranchId || undefined);
+        if (billingSettings) setBillingSettings(billingSettings);
 
-        // Fetch Billing settings
-        const billingRes = await fetch("/api/admin/billing/settings", {
-          headers,
-        });
-        if (billingRes.ok) {
-          const billingData = await billingRes.json();
-          if (billingData?.settings) setBillingSettings(billingData.settings);
-        }
-
-        // Fetch Organization info
-        const orgRes = await fetch("/api/admin/organizations/current", {
-          headers,
-        });
-        if (orgRes.ok) {
-          const orgData = await orgRes.json();
-          setOrganization(orgData.organization);
-        }
+        // Fetch Organization info using posService
+        const organization = await posService.getCurrentOrganization(currentBranchId || undefined);
+        if (organization) setOrganization(organization);
       } catch (error) {
         console.error("Error fetching POS prerequisites:", error);
       }
@@ -509,24 +491,21 @@ export default function POSPage() {
 
       setSearchingCustomers(true);
       try {
-        const headers: HeadersInit = {
-          ...getBranchHeader(currentBranchId),
-        };
-        const searchUrl = `/api/admin/customers/search?q=${encodeURIComponent(customerSearchTerm)}`;
-        console.log("🔍 POS: Searching customers:", searchUrl);
+        console.log("🔍 POS: Searching customers:", customerSearchTerm);
 
-        const response = await fetch(searchUrl, { headers });
-        const data = await response.json();
-
-        console.log("📦 POS: Search response:", {
-          ok: response.ok,
-          status: response.status,
-          customersCount: data.customers?.length || 0,
-          error: data.error,
+        // Use getCustomers with search param
+        const result = await customerService.getCustomers({
+          search: customerSearchTerm,
+          limit: 10,
+          branchId: currentBranchId || undefined,
         });
 
-        if (response.ok) {
-          const customers = (data.customers || []).map((c: any) => ({
+        console.log("📦 POS: Search response:", {
+          customersCount: result?.data?.length || 0,
+        });
+
+        if (result?.data) {
+          const customers = result.data.map((c: any) => ({
             ...c,
             name:
               `${c.first_name || ""} ${c.last_name || ""}`.trim() ||
@@ -537,8 +516,8 @@ export default function POSPage() {
           setCustomerSearchResults(customers);
           setSelectedCustomerIndex(-1);
         } else {
-          console.error("❌ POS: Search failed:", data.error || data.details);
-          toast.error(data.error || "Error al buscar clientes");
+          console.error("❌ POS: Search failed");
+          toast.error("Error al buscar clientes");
           setCustomerSearchResults([]);
         }
       } catch (error: any) {
@@ -580,18 +559,25 @@ export default function POSPage() {
         customerId,
         customerRut: customerRut || null,
         customerEmail: customerEmail || null,
-        params: params.toString(),
       });
-      const response = await fetch(`/api/admin/quotes?${params.toString()}`);
-      if (response.ok) {
-        const data = await response.json();
-        const allQuotes = data.quotes || [];
-        console.log("✅ POS: Quotes response:", {
-          status: response.status,
-          count: allQuotes.length,
-        });
-        setCustomerQuotes(allQuotes);
-      }
+      
+      // Build search params for quoteService.getQuotes
+      const searchParams: QuoteSearchParams = {
+        customer_id: customerId,
+        limit: 50,
+      };
+      
+      // Add optional filters
+      if (customerRut) searchParams.search = customerRut;
+      if (customerEmail) searchParams.search = customerEmail.trim();
+      
+      const quotesResponse = await quoteService.getQuotes(searchParams);
+      const allQuotes = quotesResponse.data || [];
+      
+      console.log("✅ POS: Quotes response:", {
+        count: allQuotes.length,
+      });
+      setCustomerQuotes(allQuotes);
     } catch (error) {
       console.error("Error fetching customer quotes:", error);
     } finally {
@@ -602,14 +588,10 @@ export default function POSPage() {
   // Load quote data into the form (not cart)
   const handleLoadQuoteToForm = async (quote: Quote) => {
     try {
-      // Fetch full quote details
-      const response = await fetch(`/api/admin/quotes/${quote.id}`);
-      if (!response.ok) {
-        throw new Error("Error al cargar el presupuesto");
-      }
-
-      const data = await response.json();
-      const fullQuote = data.quote;
+      // Fetch full quote details using quoteService
+      const quoteResult = await quoteService.getQuote(quote.id);
+      // Cast to any to handle additional nested properties from API response
+      const fullQuote = quoteResult as unknown as any;
 
       console.log("📋 Loading quote to form:", fullQuote);
 
@@ -653,18 +635,12 @@ export default function POSPage() {
       // Load frame data - try to fetch product if frame_product_id exists
       if (fullQuote.frame_product_id) {
         try {
-          const productResponse = await fetch(
-            `/api/admin/products/${fullQuote.frame_product_id}`,
-          );
-          if (productResponse.ok) {
-            const productData = await productResponse.json();
-            setSelectedFrame(productData.product);
-            console.log("✅ Frame product loaded:", productData.product);
-          } else {
-            console.log("⚠️ Frame product not found, using manual frame data");
-          }
+          const productResult = await productService.getProduct(fullQuote.frame_product_id);
+          setSelectedFrame(productResult as unknown as any);
+          console.log("✅ Frame product loaded:", productResult);
         } catch (error) {
           console.error("Error fetching frame product:", error);
+          console.log("⚠️ Frame product not found, using manual frame data");
         }
       }
 
@@ -778,17 +754,12 @@ export default function POSPage() {
         // Load near frame data if exists
         if (fullQuote.near_frame_product_id) {
           try {
-            const nearFrameResponse = await fetch(
-              `/api/admin/products/${fullQuote.near_frame_product_id}`,
+            const nearFrameResult = await productService.getProduct(fullQuote.near_frame_product_id);
+            setSelectedNearFrame(nearFrameResult as unknown as any);
+            console.log(
+              "✅ Near frame product loaded:",
+              nearFrameResult,
             );
-            if (nearFrameResponse.ok) {
-              const nearFrameData = await nearFrameResponse.json();
-              setSelectedNearFrame(nearFrameData.product);
-              console.log(
-                "✅ Near frame product loaded:",
-                nearFrameData.product,
-              );
-            }
           } catch (error) {
             console.error("Error fetching near frame product:", error);
           }
@@ -842,24 +813,15 @@ export default function POSPage() {
 
       setSearching(true);
       try {
-        const headers: HeadersInit = {
-          ...getBranchHeader(currentBranchId),
-        };
-        const response = await fetch(
-          `/api/admin/products/search?q=${encodeURIComponent(searchTerm)}&limit=20`,
-          { headers },
+        const products = await productService.searchProducts(searchTerm);
+        // Filter out products with category "Marcos" (frames should be added via "Crear Orden Completa")
+        const filteredProducts = (products as unknown as any[]).filter(
+          (product: any) =>
+            product.category?.name?.toLowerCase() !== "marcos" &&
+            product.category?.name?.toLowerCase() !== "marco",
         );
-        if (response.ok) {
-          const data = await response.json();
-          // Filter out products with category "Marcos" (frames should be added via "Crear Orden Completa")
-          const filteredProducts = (data.products || []).filter(
-            (product: Product) =>
-              product.category?.name?.toLowerCase() !== "marcos" &&
-              product.category?.name?.toLowerCase() !== "marco",
-          );
-          setProducts(filteredProducts);
-          setSelectedProductIndex(-1); // Reset selection when new results arrive
-        }
+        setProducts(filteredProducts as unknown as Product[]);
+        setSelectedProductIndex(-1); // Reset selection when new results arrive
       } catch (error) {
         console.error("Error searching products:", error);
         setProducts([]);
@@ -1022,6 +984,24 @@ export default function POSPage() {
       near_lens_family_id: "",
       far_lens_cost: 0,
       near_lens_cost: 0,
+      // Contact lens fields
+      contact_lens_family_id: "",
+      contact_lens_rx_sphere_od: null,
+      contact_lens_rx_cylinder_od: null,
+      contact_lens_rx_axis_od: null,
+      contact_lens_rx_add_od: null,
+      contact_lens_rx_base_curve_od: null,
+      contact_lens_rx_diameter_od: null,
+      contact_lens_rx_sphere_os: null,
+      contact_lens_rx_cylinder_os: null,
+      contact_lens_rx_axis_os: null,
+      contact_lens_rx_add_os: null,
+      contact_lens_rx_base_curve_os: null,
+      contact_lens_rx_diameter_os: null,
+      contact_lens_quantity: 1,
+      contact_lens_cost: 0,
+      contact_lens_price: 0,
+      // Second frame for two separate lenses (near vision)
       near_frame_product_id: "",
       near_frame_name: "",
       near_frame_brand: "",
@@ -1092,6 +1072,24 @@ export default function POSPage() {
       near_lens_family_id: "",
       far_lens_cost: 0,
       near_lens_cost: 0,
+      // Contact lens fields
+      contact_lens_family_id: "",
+      contact_lens_rx_sphere_od: null,
+      contact_lens_rx_cylinder_od: null,
+      contact_lens_rx_axis_od: null,
+      contact_lens_rx_add_od: null,
+      contact_lens_rx_base_curve_od: null,
+      contact_lens_rx_diameter_od: null,
+      contact_lens_rx_sphere_os: null,
+      contact_lens_rx_cylinder_os: null,
+      contact_lens_rx_axis_os: null,
+      contact_lens_rx_add_os: null,
+      contact_lens_rx_base_curve_os: null,
+      contact_lens_rx_diameter_os: null,
+      contact_lens_quantity: 1,
+      contact_lens_cost: 0,
+      contact_lens_price: 0,
+      // Second frame for two separate lenses (near vision)
       near_frame_product_id: "",
       near_frame_name: "",
       near_frame_brand: "",
@@ -1126,13 +1124,8 @@ export default function POSPage() {
   // Fetch customer prescriptions
   const fetchCustomerPrescriptions = async (customerId: string) => {
     try {
-      const response = await fetch(
-        `/api/admin/customers/${customerId}/prescriptions`,
-      );
-      if (response.ok) {
-        const data = await response.json();
-        setPrescriptions(data.prescriptions || []);
-      }
+      const prescriptions = await customerService.getPrescriptions(customerId);
+      setPrescriptions(prescriptions || []);
     } catch (error) {
       console.error("Error fetching prescriptions:", error);
     }
@@ -1167,104 +1160,37 @@ export default function POSPage() {
         return;
       }
 
-      const headers: HeadersInit = {
-        "Content-Type": "application/json",
-        ...getBranchHeader(currentBranchId),
-      };
-
-      // Step 1: Create customer
-      const customerResponse = await fetch("/api/admin/customers", {
-        method: "POST",
-        headers,
-        body: JSON.stringify({
-          first_name: externalCustomerData.first_name,
-          last_name: externalCustomerData.last_name,
-          rut: externalCustomerData.rut,
-          phone: externalCustomerData.phone || null,
-          email: externalCustomerData.email || null,
-        }),
+      // Step 1: Create customer using customerService
+      const newCustomer = await customerService.createCustomer({
+        name: `${externalCustomerData.first_name} ${externalCustomerData.last_name}`.trim(),
+        email: externalCustomerData.email || `${externalCustomerData.first_name.toLowerCase()}.${externalCustomerData.last_name.toLowerCase()}@placeholder.com`,
+        phone: externalCustomerData.phone || undefined,
+        rut: externalCustomerData.rut || undefined,
       });
 
-      if (!customerResponse.ok) {
-        const errorData = await customerResponse.json();
-        throw new Error(errorData.error || "Error al crear cliente");
-      }
-
-      const customerResult = await customerResponse.json();
-      if (!customerResult.success || !customerResult.customer) {
-        throw new Error("Error al crear cliente");
-      }
-
-      const newCustomer = customerResult.customer;
-
       // Step 2: Create prescription for the new customer
-      const prescriptionResponse = await fetch(
-        `/api/admin/customers/${newCustomer.id}/prescriptions`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            prescription_date: externalPrescriptionData.prescription_date,
-            expiration_date: externalPrescriptionData.expiration_date || null,
-            prescription_number:
-              externalPrescriptionData.prescription_number || null,
-            issued_by: externalPrescriptionData.issued_by || null,
-            issued_by_license:
-              externalPrescriptionData.issued_by_license || null,
-            od_sphere: externalPrescriptionData.od_sphere
-              ? parseFloat(externalPrescriptionData.od_sphere)
-              : null,
-            od_cylinder: externalPrescriptionData.od_cylinder
-              ? parseFloat(externalPrescriptionData.od_cylinder)
-              : null,
-            od_axis: externalPrescriptionData.od_axis
-              ? parseInt(externalPrescriptionData.od_axis)
-              : null,
-            od_add: externalPrescriptionData.od_add
-              ? parseFloat(externalPrescriptionData.od_add)
-              : null,
-            od_pd: externalPrescriptionData.pd
-              ? parseFloat(externalPrescriptionData.pd) / 2
-              : null,
-            od_near_pd: externalPrescriptionData.near_pd
-              ? parseFloat(externalPrescriptionData.near_pd) / 2
-              : null,
-            os_sphere: externalPrescriptionData.os_sphere
-              ? parseFloat(externalPrescriptionData.os_sphere)
-              : null,
-            os_cylinder: externalPrescriptionData.os_cylinder
-              ? parseFloat(externalPrescriptionData.os_cylinder)
-              : null,
-            os_axis: externalPrescriptionData.os_axis
-              ? parseInt(externalPrescriptionData.os_axis)
-              : null,
-            os_add: externalPrescriptionData.os_add
-              ? parseFloat(externalPrescriptionData.os_add)
-              : null,
-            os_pd: externalPrescriptionData.pd
-              ? parseFloat(externalPrescriptionData.pd) / 2
-              : null,
-            os_near_pd: externalPrescriptionData.near_pd
-              ? parseFloat(externalPrescriptionData.near_pd) / 2
-              : null,
-            frame_pd: externalPrescriptionData.frame_pd
-              ? parseFloat(externalPrescriptionData.frame_pd)
-              : null,
-            height_segmentation: externalPrescriptionData.height_segmentation
-              ? parseFloat(externalPrescriptionData.height_segmentation)
-              : null,
-            is_current: true, // Mark as current prescription
-          }),
-        },
-      );
-
-      if (!prescriptionResponse.ok) {
-        const errorData = await prescriptionResponse.json();
-        throw new Error(errorData.error || "Error al crear receta");
-      }
-
-      const prescriptionResult = await prescriptionResponse.json();
-      const newPrescription = prescriptionResult.prescription;
+      const newPrescription = await customerService.createPrescription(newCustomer.id, {
+        prescription_date: externalPrescriptionData.prescription_date,
+        expiration_date: externalPrescriptionData.expiration_date || undefined,
+        prescription_number: externalPrescriptionData.prescription_number || undefined,
+        issued_by: externalPrescriptionData.issued_by || undefined,
+        issued_by_license: externalPrescriptionData.issued_by_license || undefined,
+        od_sphere: externalPrescriptionData.od_sphere ? parseFloat(externalPrescriptionData.od_sphere) : undefined,
+        od_cylinder: externalPrescriptionData.od_cylinder ? parseFloat(externalPrescriptionData.od_cylinder) : undefined,
+        od_axis: externalPrescriptionData.od_axis ? parseInt(externalPrescriptionData.od_axis) : undefined,
+        od_add: externalPrescriptionData.od_add ? parseFloat(externalPrescriptionData.od_add) : undefined,
+        od_pd: externalPrescriptionData.pd ? parseFloat(externalPrescriptionData.pd) / 2 : undefined,
+        od_near_pd: externalPrescriptionData.near_pd ? parseFloat(externalPrescriptionData.near_pd) / 2 : undefined,
+        os_sphere: externalPrescriptionData.os_sphere ? parseFloat(externalPrescriptionData.os_sphere) : undefined,
+        os_cylinder: externalPrescriptionData.os_cylinder ? parseFloat(externalPrescriptionData.os_cylinder) : undefined,
+        os_axis: externalPrescriptionData.os_axis ? parseInt(externalPrescriptionData.os_axis) : undefined,
+        os_add: externalPrescriptionData.os_add ? parseFloat(externalPrescriptionData.os_add) : undefined,
+        os_pd: externalPrescriptionData.pd ? parseFloat(externalPrescriptionData.pd) / 2 : undefined,
+        os_near_pd: externalPrescriptionData.near_pd ? parseFloat(externalPrescriptionData.near_pd) / 2 : undefined,
+        frame_pd: externalPrescriptionData.frame_pd ? parseFloat(externalPrescriptionData.frame_pd) : undefined,
+        height_segmentation: externalPrescriptionData.height_segmentation ? parseFloat(externalPrescriptionData.height_segmentation) : undefined,
+        is_current: true, // Mark as current prescription
+      });
 
       // Step 3: Set the new customer and prescription as selected
       const customer = {
@@ -1340,14 +1266,13 @@ export default function POSPage() {
   useEffect(() => {
     const fetchSettings = async () => {
       try {
-        const response = await fetch("/api/admin/quote-settings");
-        if (response.ok) {
-          const data = await response.json();
-          setQuoteSettings(data.settings);
-          if (data.settings?.default_labor_cost) {
+        const settings = await quoteSettingsService.get();
+        if (settings) {
+          setQuoteSettings(settings);
+          if (settings.default_labor_cost) {
             setOrderFormData((prev) => ({
               ...prev,
-              labor_cost: data.settings.default_labor_cost,
+              labor_cost: settings.default_labor_cost,
             }));
           }
         }
@@ -1364,11 +1289,8 @@ export default function POSPage() {
   const fetchLensFamilies = async () => {
     try {
       setLoadingFamilies(true);
-      const response = await fetch("/api/admin/lens-families");
-      if (response.ok) {
-        const data = await response.json();
-        setLensFamilies(data.families || []);
-      }
+      const families = await lensFamilyService.getAll();
+      setLensFamilies(families || []);
     } catch (error) {
       console.error("Error fetching lens families:", error);
     } finally {
@@ -1380,21 +1302,13 @@ export default function POSPage() {
   const fetchContactLensFamilies = async () => {
     try {
       setLoadingContactLensFamilies(true);
-      const response = await fetch("/api/admin/contact-lens-families");
-      if (response.ok) {
-        const data = await response.json();
-        console.log(
-          "Contact lens families loaded in POS:",
-          data.families?.length || 0,
-          "families",
-        );
-        setContactLensFamilies(data.families || []);
-      } else {
-        console.error(
-          "Failed to fetch contact lens families:",
-          response.status,
-        );
-      }
+      const families = await contactLensFamilyService.getAll();
+      console.log(
+        "Contact lens families loaded in POS:",
+        families?.length || 0,
+        "families",
+      );
+      setContactLensFamilies(families || []);
     } catch (error) {
       console.error("Error fetching contact lens families:", error);
     } finally {
@@ -1448,35 +1362,25 @@ export default function POSPage() {
       const axisOD = selectedPrescription.od_axis || null;
       const additionOD = selectedPrescription.od_add || null;
 
-      const response = await fetch(
-        "/api/admin/contact-lens-matrices/calculate",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            contact_lens_family_id: orderFormData.contact_lens_family_id,
-            sphere: sphereOD,
-            cylinder: cylinderOD,
-            axis: axisOD,
-            addition: additionOD,
-          }),
-        },
+      // Use contactLensMatrixService for calculation
+      const calculation = await contactLensMatrixService.calculate(
+        orderFormData.contact_lens_family_id,
+        sphereOD,
+        cylinderOD,
+        axisOD,
+        additionOD
       );
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        const message =
-          data?.error || "No se pudo calcular el precio del lente de contacto";
-        toast.error(message);
+      if (!calculation) {
+        toast.error("No se pudo calcular el precio del lente de contacto");
         return;
       }
 
-      if (data.calculation && data.calculation.price) {
+      if (calculation.price) {
         // Calculate total price: price per box * quantity
         const quantity = orderFormData.contact_lens_quantity || 1;
-        const totalPrice = data.calculation.price * quantity;
-        const totalCost = data.calculation.cost * quantity;
+        const totalPrice = calculation.price * quantity;
+        const totalCost = calculation.cost * quantity;
 
         setOrderFormData((prev) => ({
           ...prev,
@@ -1674,7 +1578,7 @@ export default function POSPage() {
         );
         if (response.ok) {
           const data = await response.json();
-          setFrameResults(data.products || []);
+          setFrameResults(extractDataFromResponse<Product>(data));
         }
       } catch (error) {
         console.error("Error searching frames:", error);
@@ -1704,7 +1608,7 @@ export default function POSPage() {
         );
         if (response.ok) {
           const data = await response.json();
-          setNearFrameResults(data.products || []);
+          setNearFrameResults(extractDataFromResponse<Product>(data));
         }
       } catch (error) {
         console.error("Error searching near frames:", error);
@@ -2738,40 +2642,29 @@ export default function POSPage() {
         quote_id: selectedQuote?.id || null,
       };
 
-      const headers: HeadersInit = {
-        "Content-Type": "application/json",
-        ...getBranchHeader(currentBranchId),
-      };
-
-      const response = await fetch("/api/admin/pos/process-sale", {
-        method: "POST",
-        headers,
-        body: JSON.stringify(orderData),
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || "Error al procesar la venta");
-      }
-
-      const result = await response.json();
+      // Use posService.processSale() instead of direct fetch
+      // Cast orderData to ProcessSaleRequest to satisfy type requirements
+      const result = await posService.processSale(
+        orderData as unknown as import('@/lib/api/services').ProcessSaleRequest,
+        currentBranchId || undefined
+      );
 
       // Support both work_order and order for backward compatibility
       const orderNumber =
-        result.work_order?.work_order_number || result.order?.order_number;
+        result?.work_order?.work_order_number || result?.order?.order_number;
       toast.success(`Venta procesada: ${orderNumber}`);
 
       // Print receipt (if printer available)
       const invoiceNumber =
-        result.work_order?.sii_invoice_number ||
-        result.order?.sii_invoice_number;
+        result?.work_order?.sii_invoice_number ||
+        result?.order?.sii_invoice_number;
       if (invoiceNumber) {
         toast.info(`Factura: ${invoiceNumber}`);
       }
 
       // Clear cart and reset
       setLastProcessedOrder(
-        result.order || result.work_order?.order || result.work_order,
+        (result as any)?.order || (result as any)?.work_order?.order || (result as any)?.work_order
       );
 
       // Clear cart and reset
@@ -2795,31 +2688,14 @@ export default function POSPage() {
   const fetchPendingBalanceOrders = async (searchTerm: string = "") => {
     setLoadingPendingBalance(true);
     try {
-      const headers = {
-        ...getBranchHeader(currentBranchId),
-      };
-
-      const params = new URLSearchParams({
-        limit: "50",
-      });
-
-      if (searchTerm.trim()) {
-        params.append("search", searchTerm.trim());
-      }
-
-      const response = await fetch(`/api/admin/pos/pending-balance?${params}`, {
-        headers,
-        credentials: "include",
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setPendingBalanceOrders(data.orders || []);
-        if (data.orders?.length === 0 && searchTerm) {
-          toast.info("No se encontraron órdenes con esos criterios");
-        }
-      } else {
-        const error = await response.json();
-        toast.error(error.error || "Error al cargar órdenes pendientes");
+      const orders = await posService.getPendingBalanceOrders(
+        searchTerm.trim() || undefined,
+        currentBranchId || undefined,
+        50
+      );
+      setPendingBalanceOrders(orders);
+      if (orders.length === 0 && searchTerm) {
+        toast.info("No se encontraron órdenes con esos criterios");
       }
     } catch (error: any) {
       console.error("Error fetching pending balance orders:", error);
@@ -2850,32 +2726,23 @@ export default function POSPage() {
 
     setProcessingPendingPayment(true);
     try {
-      const headers = {
-        "Content-Type": "application/json",
-        ...getBranchHeader(currentBranchId),
-      };
-
-      const response = await fetch("/api/admin/pos/pending-balance/pay", {
-        method: "POST",
-        headers,
-        credentials: "include",
-        body: JSON.stringify({
+      const result = await posService.processPendingPayment(
+        {
           order_id: selectedPendingOrder.id,
-          payment_amount: amount,
-          payment_method: pendingPaymentMethod,
+          payment_amount: parseFloat(String(amount)),
+          payment_method: String(pendingPaymentMethod),
           notes: `Pago de saldo pendiente en POS`,
-        }),
-      });
+        },
+        currentBranchId || undefined
+      );
 
-      if (response.ok) {
-        const data = await response.json();
-        toast.success(data.message);
+      if (result?.success) {
+        toast.success(result?.message || "Pago procesado exitosamente");
         setPendingPaymentAmount("");
         setSelectedPendingOrder(null);
         await fetchPendingBalanceOrders();
       } else {
-        const error = await response.json();
-        toast.error(error.error || "Error al procesar pago");
+        toast.error("Error al procesar pago");
       }
     } catch (error: any) {
       console.error("Error processing pending payment:", error);

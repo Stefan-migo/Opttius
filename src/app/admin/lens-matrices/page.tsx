@@ -41,6 +41,7 @@ import {
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Pagination } from "@/components/ui/pagination";
+import { formatCurrency } from "@/lib/utils/formatting";
 
 interface LensFamily {
   id: string;

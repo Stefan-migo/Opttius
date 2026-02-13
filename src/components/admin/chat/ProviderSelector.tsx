@@ -21,7 +21,7 @@ interface ProviderSelectorProps {
 export function ProviderSelector({ selectedProvider, onProviderChange }: ProviderSelectorProps) {
   const [providers, setProviders] = useState<{ id: LLMProvider; name: string; enabled: boolean }[]>([])
   const [loading, setLoading] = useState(true)
-  
+
   useEffect(() => {
     const fetchProviders = async () => {
       try {
@@ -36,25 +36,28 @@ export function ProviderSelector({ selectedProvider, onProviderChange }: Provide
         setLoading(false)
       }
     }
-    
+
     fetchProviders()
   }, [])
-  
+
   const providerNames: Record<LLMProvider, string> = {
     openai: 'OpenAI',
     anthropic: 'Anthropic',
     google: 'Google',
     deepseek: 'DeepSeek',
+    openrouter: 'OpenRouter',
+    kilocode: 'Kilocode',
+    minimax: 'Minimax',
     custom: 'Custom'
   }
-  
+
   const enabledProviders = providers.filter(p => p.enabled)
   const currentProvider = providers.find(p => p.id === selectedProvider) || enabledProviders[0]
-  
+
   if (loading) {
     return <div className="text-sm text-admin-text-secondary">Cargando...</div>
   }
-  
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>

@@ -14,7 +14,7 @@ export class ServerTelemetryCollector extends TelemetryCollector {
     organizationId?: string;
   }): string {
     const eventId = uuidv4();
-    
+
     const event: TelemetryEvent = {
       eventId,
       timestamp: new Date(),
@@ -55,7 +55,7 @@ export class ServerTelemetryCollector extends TelemetryCollector {
     organizationId?: string;
   }): string {
     const eventId = uuidv4();
-    
+
     const event: TelemetryEvent = {
       eventId,
       timestamp: new Date(),
@@ -96,7 +96,7 @@ export class ServerTelemetryCollector extends TelemetryCollector {
     organizationId?: string;
   }): string {
     const eventId = uuidv4();
-    
+
     const event: TelemetryEvent = {
       eventId,
       timestamp: new Date(),
@@ -136,7 +136,7 @@ export class ServerTelemetryCollector extends TelemetryCollector {
     organizationId?: string;
   }): string {
     const eventId = uuidv4();
-    
+
     const event: TelemetryEvent = {
       eventId,
       timestamp: new Date(),
@@ -181,7 +181,7 @@ export class ServerTelemetryCollector extends TelemetryCollector {
     organizationId?: string;
   }): string {
     const eventId = uuidv4();
-    
+
     const event: TelemetryEvent = {
       eventId,
       timestamp: new Date(),
@@ -223,7 +223,7 @@ export class ServerTelemetryCollector extends TelemetryCollector {
     organizationId?: string;
   }): string {
     const eventId = uuidv4();
-    
+
     const event: TelemetryEvent = {
       eventId,
       timestamp: new Date(),
@@ -258,7 +258,7 @@ export class ServerTelemetryCollector extends TelemetryCollector {
     organizationId?: string;
   }): string {
     const eventId = uuidv4();
-    
+
     const event: TelemetryEvent = {
       eventId,
       timestamp: new Date(),
@@ -299,7 +299,7 @@ export class ServerTelemetryCollector extends TelemetryCollector {
     organizationId?: string;
   }): string {
     const eventId = uuidv4();
-    
+
     const event: TelemetryEvent = {
       eventId,
       timestamp: new Date(),
@@ -332,7 +332,7 @@ export class ServerTelemetryCollector extends TelemetryCollector {
   /**
    * Generate server session ID
    */
-  private getSessionId(): string {
+  protected getSessionId(): string {
     // For server-side, we'll generate a new session ID for each request context
     // In a real implementation, this would come from request context or user session
     return 'server-session-' + uuidv4();

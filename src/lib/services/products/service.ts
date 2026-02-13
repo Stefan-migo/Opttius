@@ -6,9 +6,9 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { appLogger as logger } from "@/lib/logger";
 import { Database } from "@/types/supabase";
-import { 
-  ProductWithRelations, 
-  ProductListParams, 
+import {
+  ProductWithRelations,
+  ProductListParams,
   ProductListResponse,
   ProductServiceContext,
   ProductInsert,
@@ -170,21 +170,21 @@ export class ProductsService {
 
       // Post-process results for branch filtering when needed
       let filteredProducts = products || [];
-      
+
       if (search && branchId) {
         filteredProducts = this.filterProductsByBranch(filteredProducts, branchId);
       }
 
       // Apply low stock filtering
       if (lowStockOnly) {
-        filteredProducts = this.filterLowStockProducts(filteredProducts, branchId);
+        filteredProducts = this.filterLowStockProducts(filteredProducts, branchId as string | null);
       }
 
       // Apply in-stock filtering
       if (inStock === "true") {
-        filteredProducts = this.filterInStockProducts(filteredProducts, branchId);
+        filteredProducts = this.filterInStockProducts(filteredProducts, branchId as string | null);
       } else if (inStock === "false") {
-        filteredProducts = this.filterOutOfStockProducts(filteredProducts, branchId);
+        filteredProducts = this.filterOutOfStockProducts(filteredProducts, branchId as string | null);
       }
 
       const totalCount = count || 0;
@@ -192,7 +192,7 @@ export class ProductsService {
       const totalPages = Math.ceil(totalCount / limit);
 
       return {
-        products: filteredProducts as ProductWithRelations[],
+        products: filteredProducts as unknown as ProductWithRelations[],
         totalCount,
         currentPage,
         totalPages,
@@ -237,15 +237,14 @@ export class ProductsService {
             branch_id
           )
         `)
-        .eq("id", id)
-        .single();
+        .eq("id", id);
 
       // Apply organization filter for non-super admins
       if (context.organizationId && !context.isSuperAdmin) {
         query = query.eq("organization_id", context.organizationId);
       }
 
-      const { data: product, error } = await query;
+      const { data: product, error } = await query.single();
 
       if (error) {
         if (error.code === "PGRST116") {
@@ -336,8 +335,8 @@ export class ProductsService {
    * Update existing product
    */
   async updateProduct(
-    id: string, 
-    productData: ProductUpdate, 
+    id: string,
+    productData: ProductUpdate,
     context: ProductServiceContext
   ): Promise<ProductWithRelations> {
     try {
@@ -416,10 +415,10 @@ export class ProductsService {
 
   private validateSortColumn(sortBy: string): string {
     const validColumns = [
-      "created_at", "updated_at", "name", "price", "sku", 
+      "created_at", "updated_at", "name", "price", "sku",
       "status", "featured", "inventory_quantity"
     ];
-    
+
     return validColumns.includes(sortBy) ? sortBy : "created_at";
   }
 
@@ -430,7 +429,7 @@ export class ProductsService {
     });
   }
 
-  private filterLowStockProducts(products: any[], branchId: string | null): any[] {
+  private filterLowStockProducts(products: any[], branchId: string | null | undefined): any[] {
     return products.filter(product => {
       if (branchId && product.product_branch_stock) {
         const branchStock = product.product_branch_stock.find(
@@ -444,7 +443,7 @@ export class ProductsService {
     });
   }
 
-  private filterInStockProducts(products: any[], branchId: string | null): any[] {
+  private filterInStockProducts(products: any[], branchId: string | null | undefined): any[] {
     return products.filter(product => {
       if (branchId && product.product_branch_stock) {
         const branchStock = product.product_branch_stock.find(
@@ -458,7 +457,7 @@ export class ProductsService {
     });
   }
 
-  private filterOutOfStockProducts(products: any[], branchId: string | null): any[] {
+  private filterOutOfStockProducts(products: any[], branchId: string | null | undefined): any[] {
     return products.filter(product => {
       if (branchId && product.product_branch_stock) {
         const branchStock = product.product_branch_stock.find(
@@ -485,26 +484,26 @@ export class ProductsService {
   private async ensureUniqueSlug(slug: string, excludeId?: string): Promise<string> {
     let uniqueSlug = slug;
     let counter = 1;
-    
+
     while (true) {
       let query = this.supabase
         .from("products")
         .select("id")
         .eq("slug", uniqueSlug);
-      
+
       if (excludeId) {
         query = query.neq("id", excludeId);
       }
-      
+
       const { data: existing } = await query.limit(1);
-      
+
       if (!existing || existing.length === 0) {
         break;
       }
-      
+
       uniqueSlug = `${slug}-${counter++}`;
     }
-    
+
     return uniqueSlug;
   }
 }

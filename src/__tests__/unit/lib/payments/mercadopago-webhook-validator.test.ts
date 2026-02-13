@@ -18,7 +18,7 @@ describe("MercadoPagoWebhookValidator", () => {
     it("should validate a correct signature", () => {
       const dataId = "123456";
       const xRequestId = "test-request-id";
-      const ts = Date.now().toString();
+      const ts = Math.floor(Date.now() / 1000).toString();
       const manifest = `id:${dataId};request-id:${xRequestId};ts:${ts};`;
       const hmac = crypto.createHmac("sha256", testSecret);
       hmac.update(manifest);
@@ -34,7 +34,7 @@ describe("MercadoPagoWebhookValidator", () => {
     it("should reject an incorrect signature", () => {
       const dataId = "123456";
       const xRequestId = "test-request-id";
-      const ts = Date.now().toString();
+      const ts = Math.floor(Date.now() / 1000).toString();
       const xSignature = `ts=${ts},v1=invalid_hash`;
 
       const result = validator.validate(xSignature, xRequestId, dataId);
@@ -46,7 +46,7 @@ describe("MercadoPagoWebhookValidator", () => {
     it("should reject a timestamp that is too old", () => {
       const dataId = "123456";
       const xRequestId = "test-request-id";
-      const ts = (Date.now() - 10 * 60 * 1000).toString();
+      const ts = Math.floor((Date.now() - 10 * 60 * 1000) / 1000).toString();
       const manifest = `id:${dataId};request-id:${xRequestId};ts:${ts};`;
       const hmac = crypto.createHmac("sha256", testSecret);
       hmac.update(manifest);

@@ -1518,7 +1518,7 @@ export const createSaasSupportTicketSchema = z.object({
     .trim(),
   category: saasSupportCategorySchema,
   priority: saasSupportPrioritySchema.default("medium").optional(),
-  metadata: z.record(z.unknown()).optional().default({}),
+  metadata: z.record(z.unknown()).default({}),
 });
 
 /**
@@ -1544,7 +1544,7 @@ export const createPublicSaasSupportTicketSchema = z.object({
     .trim(),
   category: saasSupportCategorySchema,
   priority: saasSupportPrioritySchema.default("medium").optional(),
-  metadata: z.record(z.unknown()).optional().default({}),
+  metadata: z.record(z.unknown()).default({}),
 });
 
 /**
@@ -1576,7 +1576,7 @@ export const createSaasSupportMessageSchema = z.object({
     .trim(),
   is_internal: z.boolean().default(false).optional(),
   message_type: saasSupportMessageTypeSchema.default("message").optional(),
-  attachments: z.array(z.record(z.unknown())).optional().default([]),
+  attachments: z.array(z.record(z.unknown())).default([]),
 });
 
 /**
@@ -1708,7 +1708,7 @@ export const createOpticalInternalSupportTicketSchema = z.object({
   related_appointment_id: uuidOptionalSchema,
   related_quote_id: uuidOptionalSchema,
   assigned_to: uuidOptionalSchema,
-  metadata: z.record(z.unknown()).optional().default({}),
+  metadata: z.record(z.unknown()).default({}),
 });
 
 /**
@@ -1735,7 +1735,7 @@ export const createOpticalInternalSupportMessageSchema = z.object({
   message_type: opticalInternalSupportMessageTypeSchema
     .default("message")
     .optional(),
-  attachments: z.array(z.record(z.unknown())).optional().default([]),
+  attachments: z.array(z.record(z.unknown())).default([]),
 });
 
 /**

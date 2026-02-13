@@ -56,6 +56,7 @@ import { useBranch } from "@/hooks/useBranch";
 import { getBranchHeader } from "@/lib/utils/branch";
 import { BranchSelector } from "@/components/admin/BranchSelector";
 import { formatCurrency, formatDate } from "@/lib/utils";
+import { extractDataFromResponse, extractPaginationFromResponse } from "@/lib/api/response-helpers";
 
 // CreateWorkOrderForm eliminado: Los trabajos solo se crean desde POS (process-sale)
 // Esto previene trabajos "fantasma" sin vínculo financiero ni control de inventario
@@ -143,9 +144,10 @@ export default function WorkOrdersPage() {
       }
 
       const data = await response.json();
-      setWorkOrders(data.workOrders || []);
-      setTotalPages(data.pagination?.totalPages || 1);
-      setTotalWorkOrders(data.pagination?.total || 0);
+      const pagination = extractPaginationFromResponse(data);
+      setWorkOrders(extractDataFromResponse(data));
+      setTotalPages(pagination.totalPages || 1);
+      setTotalWorkOrders(pagination.total || 0);
     } catch (error) {
       console.error("Error fetching work orders:", error);
       toast.error("Error al cargar trabajos");

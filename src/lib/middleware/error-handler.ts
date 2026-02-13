@@ -35,7 +35,7 @@ function generateRequestId(): string {
 /**
  * Error handling middleware for API routes
  */
-export async function withErrorHandling(
+export function withErrorHandling(
   handler: (
     request: NextRequest,
     context: { requestId: string },
@@ -148,7 +148,7 @@ export function handleGet(
     requireAdmin?: boolean;
     allowedRoles?: string[];
   },
-) {
+): (request: NextRequest) => Promise<NextResponse> {
   return withErrorHandling(handler, options);
 }
 
@@ -165,7 +165,7 @@ export function handlePost(
     requireAdmin?: boolean;
     allowedRoles?: string[];
   },
-) {
+): (request: NextRequest) => Promise<NextResponse> {
   return withErrorHandling(handler, options);
 }
 
@@ -182,7 +182,7 @@ export function handlePut(
     requireAdmin?: boolean;
     allowedRoles?: string[];
   },
-) {
+): (request: NextRequest) => Promise<NextResponse> {
   return withErrorHandling(handler, options);
 }
 
@@ -199,7 +199,7 @@ export function handleDelete(
     requireAdmin?: boolean;
     allowedRoles?: string[];
   },
-) {
+): (request: NextRequest) => Promise<NextResponse> {
   return withErrorHandling(handler, options);
 }
 

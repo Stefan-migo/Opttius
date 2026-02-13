@@ -1000,6 +1000,7 @@ function AdminSidebar({
     inProgressWorkOrders: number;
     pendingQuotes: number;
     todayAppointments: number;
+    openTickets: number;
   };
   onChatbotClick?: () => void;
   organizationState?: {

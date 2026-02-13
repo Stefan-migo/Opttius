@@ -69,30 +69,11 @@ const CreateQuoteForm = dynamic(
   },
 );
 import { BranchSelector } from "@/components/admin/BranchSelector";
-import { getBranchHeader } from "@/lib/utils/branch";
 import { formatDate, formatCurrency } from "@/lib/utils";
+import { quoteService, Quote } from "@/lib/api/services";
+import type { UpdateQuoteData } from "@/lib/api/services/quoteService";
+import { extractDataFromResponse, extractPaginationFromResponse } from "@/lib/api/response-helpers";
 
-interface Quote {
-  id: string;
-  quote_number: string;
-  quote_date: string;
-  expiration_date?: string;
-  customer: {
-    id: string;
-    first_name?: string;
-    last_name?: string;
-    email?: string;
-  };
-  prescription?: any;
-  frame_name?: string;
-  lens_type?: string;
-  lens_material?: string;
-  total_amount: number;
-  status: string;
-  original_status?: string;
-  converted_to_work_order_id?: string;
-  created_at: string;
-}
 
 export default function QuotesPage() {
   // Branch context
@@ -119,30 +100,18 @@ export default function QuotesPage() {
   const fetchQuotes = async () => {
     try {
       setLoading(true);
-      const params = new URLSearchParams({
-        page: currentPage.toString(),
-        limit: quotesPerPage.toString(),
-        ...(statusFilter !== "all" && { status: statusFilter }),
+
+      const result = await quoteService.getQuotes({
+        page: currentPage,
+        limit: quotesPerPage,
+        status: statusFilter !== "all" ? statusFilter : undefined,
+        branch_id: isGlobalView && isSuperAdmin ? "global" : currentBranchId || undefined,
+        search: searchTerm || undefined,
       });
 
-      const headers: HeadersInit = {};
-      if (isGlobalView && isSuperAdmin) {
-        headers["x-branch-id"] = "global";
-      } else if (currentBranchId) {
-        headers["x-branch-id"] = currentBranchId;
-      }
-
-      const response = await fetch(`/api/admin/quotes?${params}`, {
-        headers,
-      });
-      if (!response.ok) {
-        throw new Error("Failed to fetch quotes");
-      }
-
-      const data = await response.json();
-      setQuotes(data.quotes || []);
-      setTotalPages(data.pagination?.totalPages || 1);
-      setTotalQuotes(data.pagination?.total || 0);
+      setQuotes(result.data);
+      setTotalPages(result.pagination.totalPages || 1);
+      setTotalQuotes(result.pagination.total || 0);
     } catch (error) {
       console.error("Error fetching quotes:", error);
       toast.error("Error al cargar presupuestos");
@@ -213,15 +182,7 @@ export default function QuotesPage() {
 
     setDeleting(true);
     try {
-      const response = await fetch(`/api/admin/quotes/${quoteToDelete}`, {
-        method: "DELETE",
-        credentials: "include",
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || "Error al eliminar presupuesto");
-      }
+      await quoteService.deleteQuote(quoteToDelete);
 
       toast.success("Presupuesto eliminado exitosamente");
       setDeleteDialogOpen(false);
@@ -388,7 +349,8 @@ export default function QuotesPage() {
                             <Select
                               value={displayStatus}
                               disabled={isConverted}
-                              onValueChange={async (newStatus) => {
+                              onValueChange={async (value) => {
+                                const newStatus = value as 'draft' | 'sent' | 'accepted' | 'rejected' | 'expired' | 'converted_to_work';
                                 if (isConverted) {
                                   toast.error(
                                     "No se puede cambiar el estado de un presupuesto convertido",
@@ -397,37 +359,13 @@ export default function QuotesPage() {
                                 }
 
                                 try {
-                                  const response = await fetch(
-                                    `/api/admin/quotes/${quote.id}/status`,
-                                    {
-                                      method: "PUT",
-                                      headers: {
-                                        "Content-Type": "application/json",
-                                      },
-                                      credentials: "include",
-                                      body: JSON.stringify({
-                                        status: newStatus,
-                                      }),
-                                    },
-                                  );
-
-                                  if (!response.ok) {
-                                    const errorData = await response
-                                      .json()
-                                      .catch(() => ({}));
-                                    throw new Error(
-                                      errorData.error ||
-                                        "Failed to update status",
-                                    );
-                                  }
-
-                                  const result = await response.json();
+                                  await quoteService.updateQuote(quote.id, { status: newStatus as UpdateQuoteData['status'] });
 
                                   // Update local state
                                   setQuotes((prev) =>
                                     prev.map((q) =>
                                       q.id === quote.id
-                                        ? { ...q, status: newStatus }
+                                        ? { ...q, status: newStatus as Quote['status'] }
                                         : q,
                                     ),
                                   );

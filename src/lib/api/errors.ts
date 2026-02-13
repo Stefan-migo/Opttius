@@ -133,9 +133,9 @@ export function createErrorResponse(
 
 // Error handler middleware wrapper
 export function withErrorHandler(
-  handler: (request: Request, context?: any) => Promise<NextResponse>,
+  handler: (request: any, context?: any) => Promise<NextResponse>,
 ) {
-  return async (request: Request, context?: any): Promise<NextResponse> => {
+  return async (request: any, context?: any): Promise<NextResponse> => {
     try {
       return await handler(request, context);
     } catch (error) {
@@ -175,9 +175,9 @@ export function createSuccessResponse<T>(
 
 // Async handler wrapper with error handling
 export function asyncHandler(
-  fn: (request: Request, context?: any) => Promise<NextResponse>,
+  fn: (request: any, context?: any) => Promise<NextResponse>,
 ) {
-  return (request: Request, context?: any) => {
+  return (request: any, context?: any) => {
     return Promise.resolve(fn(request, context)).catch((error) => {
       const requestId = crypto.randomUUID();
       return createErrorResponse(error, requestId);

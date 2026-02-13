@@ -85,7 +85,8 @@ describe("AI Insights API - Integration Tests", () => {
 
   afterAll(async () => {
     if (infrastructureCheck) {
-      await cleanupTestData();
+      if (orgA?.id) await cleanupTestData(orgA.id);
+      if (orgB?.id) await cleanupTestData(orgB.id);
     }
   });
 
@@ -98,7 +99,8 @@ describe("AI Insights API - Integration Tests", () => {
       const response = await makeAuthenticatedRequest(
         "/api/ai/insights?section=dashboard",
         { method: "GET" },
-        userA,
+        userA.authToken,
+        userA.sessionData,
       );
 
       expect(response.status).toBe(200);
@@ -136,7 +138,8 @@ describe("AI Insights API - Integration Tests", () => {
       const response = await makeAuthenticatedRequest(
         "/api/ai/insights?section=dashboard",
         { method: "GET" },
-        userA,
+        userA.authToken,
+        userA.sessionData,
       );
 
       expect(response.status).toBe(200);
@@ -188,7 +191,8 @@ describe("AI Insights API - Integration Tests", () => {
       const response = await makeAuthenticatedRequest(
         "/api/ai/insights?section=dashboard",
         { method: "GET" },
-        userA,
+        userA.authToken,
+        userA.sessionData,
       );
 
       expect(response.status).toBe(200);
@@ -206,7 +210,8 @@ describe("AI Insights API - Integration Tests", () => {
       const responseA = await makeAuthenticatedRequest(
         "/api/ai/insights?section=dashboard",
         { method: "GET" },
-        userA,
+        userA.authToken,
+        userA.sessionData,
       );
 
       const dataA = await responseA.json();
@@ -219,7 +224,8 @@ describe("AI Insights API - Integration Tests", () => {
       const responseB = await makeAuthenticatedRequest(
         "/api/ai/insights?section=dashboard",
         { method: "GET" },
-        userB,
+        userB.authToken,
+        userB.sessionData,
       );
 
       const dataB = await responseB.json();
@@ -245,7 +251,8 @@ describe("AI Insights API - Integration Tests", () => {
       const response = await makeAuthenticatedRequest(
         `/api/ai/insights/${insightA.id}/dismiss`,
         { method: "POST" },
-        userA,
+        userA.authToken,
+        userA.sessionData,
       );
 
       expect(response.status).toBe(200);
@@ -263,7 +270,8 @@ describe("AI Insights API - Integration Tests", () => {
       const response = await makeAuthenticatedRequest(
         `/api/ai/insights/${insightB.id}/dismiss`,
         { method: "POST" },
-        userA,
+        userA.authToken,
+        userA.sessionData,
       );
 
       expect(response.status).toBe(404);
@@ -283,7 +291,8 @@ describe("AI Insights API - Integration Tests", () => {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ score: 5 }),
         },
-        userA,
+        userA.authToken,
+        userA.sessionData,
       );
 
       expect(response.status).toBe(200);
@@ -305,7 +314,8 @@ describe("AI Insights API - Integration Tests", () => {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ score: 10 }),
         },
-        userA,
+        userA.authToken,
+        userA.sessionData,
       );
 
       expect(responseHigh.status).toBe(400);
@@ -318,7 +328,8 @@ describe("AI Insights API - Integration Tests", () => {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ score: 0 }),
         },
-        userA,
+        userA.authToken,
+        userA.sessionData,
       );
 
       expect(responseLow.status).toBe(400);

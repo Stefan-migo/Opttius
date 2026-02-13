@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { extractDataFromResponse } from "@/lib/api/response-helpers";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -327,7 +328,7 @@ export default function CashRegisterPage() {
 
       if (response.ok) {
         const data = await response.json();
-        let filteredOrders = data.orders || [];
+        let filteredOrders = extractDataFromResponse(data);
 
         // Apply search filter (client-side for now, could be moved to backend)
         if (orderSearchTerm) {

@@ -79,7 +79,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useAuthContext } from "@/contexts/AuthContext";
-import { getBranchHeader } from "@/lib/utils/branch";
+import { appointmentService } from "@/lib/api/services";
 
 interface Appointment {
   id: string;
@@ -126,6 +126,7 @@ export default function AppointmentsPage() {
   } | null>(null);
   const [scheduleSettings, setScheduleSettings] = useState<any>(null);
   const [showWeeklyReport, setShowWeeklyReport] = useState(false);
+  const [lastRefresh, setLastRefresh] = useState<number>(Date.now());
 
   const {
     currentBranch,
@@ -173,26 +174,14 @@ export default function AppointmentsPage() {
       const endDate = new Date(currentDate);
       endDate.setDate(endDate.getDate() + (view === "week" ? 7 : 30));
 
-      const params = new URLSearchParams({
-        start_date: startDate.toISOString().split("T")[0],
-        end_date: endDate.toISOString().split("T")[0],
-        ...(statusFilter !== "all" && { status: statusFilter }),
-        ...(branchIdForFilter && { branch_id: branchIdForFilter }),
+      const appointments = await appointmentService.getAppointments({
+        date_from: startDate.toISOString().split("T")[0],
+        date_to: endDate.toISOString().split("T")[0],
+        status: statusFilter !== "all" ? statusFilter : undefined,
+        branch_id: branchIdForFilter || undefined,
       });
 
-      const headers: HeadersInit = {
-        ...getBranchHeader(branchIdForFilter || currentBranchId),
-      };
-
-      const response = await fetch(`/api/admin/appointments?${params}`, {
-        headers,
-      });
-      if (!response.ok) {
-        throw new Error("Failed to fetch appointments");
-      }
-
-      const data = await response.json();
-      setAppointments(data.appointments || []);
+      setAppointments(appointments.data || []);
     } catch (error) {
       console.error("Error fetching appointments:", error);
       toast.error("Error al cargar citas");
@@ -205,16 +194,10 @@ export default function AppointmentsPage() {
     if (!user || authLoading) return;
 
     try {
-      const headers: HeadersInit = {
-        ...getBranchHeader(branchIdForFilter || currentBranchId),
-      };
-
-      const response = await fetch("/api/admin/schedule-settings", { headers });
-      if (!response.ok) {
-        throw new Error("Failed to fetch schedule settings");
-      }
-      const data = await response.json();
-      setScheduleSettings(data.settings || null);
+      const settings = await appointmentService.getScheduleSettings(
+        branchIdForFilter || currentBranchId || undefined
+      );
+      setScheduleSettings(settings || null);
     } catch (error) {
       console.error("Error fetching schedule settings:", error);
     }
@@ -326,11 +309,21 @@ export default function AppointmentsPage() {
     }
   };
 
-  const handleAppointmentCreated = () => {
+  const handleAppointmentCreated = async () => {
     setShowCreateAppointment(false);
     setSelectedAppointment(null);
     setPrefilledAppointmentData(null); // Clear prefilled data after successful creation
-    fetchAppointments();
+
+    // Force refresh to ensure calendar updates
+    setLastRefresh(Date.now());
+
+    // Fetch appointments and wait for it to complete
+    try {
+      await fetchAppointments();
+      toast.success("Cita agendada correctamente");
+    } catch (error) {
+      toast.error("Error al actualizar el calendario");
+    }
   };
 
   const handleAppointmentClick = (appointment: Appointment) => {
@@ -676,6 +669,11 @@ export default function AppointmentsPage() {
               <Button
                 variant="ghost"
                 className="w-full justify-start text-xs font-bold text-admin-text-secondary hover:text-admin-accent-primary hover:bg-admin-accent-primary/5 rounded-lg h-9"
+                onClick={() => {
+                  setLastRefresh(Date.now());
+                  fetchAppointments();
+                  toast.info("Datos sincronizados");
+                }}
               >
                 <RefreshCw className="h-3.5 w-3.5 mr-2" />
                 Sincronizar Datos
@@ -720,6 +718,7 @@ export default function AppointmentsPage() {
                   onDateChange={setCurrentDate}
                   onSlotClick={handleSlotClick}
                   scheduleSettings={scheduleSettings}
+                  lastRefresh={lastRefresh}
                 />
               </div>
             )}
@@ -911,28 +910,25 @@ export default function AppointmentsPage() {
                   <Select
                     value={selectedAppointment.status}
                     onValueChange={async (newStatus) => {
+                      // Validate that newStatus is a valid appointment status
+                      const validStatuses = ['pending', 'confirmed', 'completed', 'cancelled', 'no_show'] as const;
+                      if (!validStatuses.includes(newStatus as any)) {
+                        toast.error("Estado inválido");
+                        return;
+                      }
                       try {
-                        const response = await fetch(
-                          `/api/admin/appointments/${selectedAppointment.id}`,
-                          {
-                            method: "PUT",
-                            headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify({ status: newStatus }),
-                          },
-                        );
-                        if (response.ok) {
-                          setSelectedAppointment({
-                            ...selectedAppointment,
-                            status: newStatus,
-                          });
-                          fetchAppointments();
-                          if (newStatus === "completed") {
-                            toast.success(
-                              "Cita completada. El cliente ha sido registrado exitosamente en la base de datos de esta sucursal.",
-                            );
-                          } else {
-                            toast.success("Estado actualizado");
-                          }
+                        await appointmentService.updateAppointment(selectedAppointment.id, { status: newStatus as 'pending' | 'confirmed' | 'completed' | 'cancelled' | 'no_show' });
+                        setSelectedAppointment({
+                          ...selectedAppointment,
+                          status: newStatus,
+                        });
+                        fetchAppointments();
+                        if (newStatus === "completed") {
+                          toast.success(
+                            "Cita completada. El cliente ha sido registrado exitosamente en la base de datos de esta sucursal.",
+                          );
+                        } else {
+                          toast.success("Estado actualizado");
                         }
                       } catch (error) {
                         toast.error("Error al actualizar");
@@ -979,15 +975,10 @@ export default function AppointmentsPage() {
                       e.stopPropagation();
                       if (!confirm("¿Eliminar cita permanentemente?")) return;
                       try {
-                        const response = await fetch(
-                          `/api/admin/appointments/${selectedAppointment.id}`,
-                          { method: "DELETE" },
-                        );
-                        if (response.ok) {
-                          toast.success("Cita eliminada");
-                          setSelectedAppointment(null);
-                          fetchAppointments();
-                        }
+                        await appointmentService.deleteAppointment(selectedAppointment.id);
+                        toast.success("Cita eliminada");
+                        setSelectedAppointment(null);
+                        fetchAppointments();
                       } catch (error) {
                         toast.error("Error al eliminar");
                       }

@@ -319,64 +319,114 @@ export async function POST(request: NextRequest) {
     // Time format is already validated by Zod (HH:MM:SS)
     const normalizedTime = validatedBody.appointment_time;
 
-    logger.debug("Checking availability", {
+    logger.info("Checking appointment availability", {
       date: validatedBody.appointment_date,
       time: normalizedTime,
       originalTime: validatedBody.appointment_time,
       duration: validatedBody.duration_minutes || 30,
+      finalBranchId,
+      bodyBranchId: body.branch_id,
+      contextBranchId: branchContext.branchId,
+      defaultBranchForNonSuperAdmin,
+      effectiveBranchId,
+      isSuperAdmin: branchContext.isSuperAdmin,
     });
+
+    // Time format for RPC: ensure HH:MM:SS format
+    const timeForRPC = normalizedTime.substring(0, 8);
 
     // Check availability using the function
-    // Ensure time is in correct format for PostgreSQL TIME type
-    const timeForRPC = normalizedTime.substring(0, 8); // Ensure HH:MM:SS format (max 8 chars)
-
-    logger.debug("Calling RPC with", {
-      p_date: validatedBody.appointment_date,
-      p_time: timeForRPC,
-      p_duration_minutes: body.duration_minutes || 30,
-      p_appointment_id: null,
-      p_staff_id: body.assigned_to || null,
-    });
-
-    // Try calling the RPC function
+    // Use the same approach as the frontend's availability endpoint for consistency
+    // This ensures we get the same results as what's shown in the calendar
     let isAvailable = false;
     let availabilityError = null;
 
-    try {
-      // Only check availability if branch_id is set (required for non-super admins)
-      // For super admins in global view, skip availability check or use a default branch
-      const rpcParams: CheckAppointmentAvailabilityParams = {
-        p_date: validatedBody.appointment_date,
-        p_time: timeForRPC,
-        p_duration_minutes: validatedBody.duration_minutes || 30,
-        p_appointment_id: null,
-        p_staff_id: (validatedBody as any).assigned_to || null,
-        p_branch_id: finalBranchId,
-      };
+    // Allow forcing appointment creation for admin (skip availability check)
+    // This is useful when availability check has issues
+    const forceCreate = body.force_create === true;
 
-      const rpcResult = (await supabaseServiceRole.rpc(
-        "check_appointment_availability",
-        rpcParams,
-      )) as {
-        data: CheckAppointmentAvailabilityResult | null;
-        error: Error | null;
-      };
-
-      // Supabase RPC returns { data, error } structure
-      // CheckAppointmentAvailabilityResult is boolean | string ('t'/'f')
-      const result = rpcResult.data;
-      isAvailable = result === true || result === "t" || result === "true";
-      availabilityError = rpcResult.error;
-
-      logger.debug("RPC Result", {
-        data: rpcResult.data,
-        dataType: typeof rpcResult.data,
-        error: rpcResult.error,
-        hasData: rpcResult.data !== null && rpcResult.data !== undefined,
+    if (forceCreate) {
+      logger.warn("Forcing appointment creation - skipping availability check", {
+        date: validatedBody.appointment_date,
+        time: normalizedTime,
       });
-    } catch (err) {
-      logger.error("Exception calling RPC", { error: err });
-      availabilityError = err instanceof Error ? err : new Error(String(err));
+      isAvailable = true;
+    } else {
+      try {
+        // Extract duration from body (already validated)
+        const durationMinutes = body.duration_minutes || validatedBody.duration_minutes || 30;
+
+        logger.info("Checking availability using get_available_time_slots for consistency", {
+          date: validatedBody.appointment_date,
+          time: timeForRPC,
+          duration: durationMinutes,
+          branchId: finalBranchId,
+        });
+
+        // Call get_available_time_slots to get all available slots
+        const { data: slots, error: slotsError } = (await supabaseServiceRole.rpc(
+          "get_available_time_slots",
+          {
+            p_date: validatedBody.appointment_date,
+            p_duration_minutes: durationMinutes,
+            p_staff_id: (validatedBody as any).assigned_to || null,
+            p_branch_id: finalBranchId,
+          },
+        )) as { data: any[] | null; error: Error | null };
+
+        if (slotsError) {
+          logger.error("Error fetching available slots", { error: slotsError });
+          availabilityError = slotsError;
+        } else if (slots && slots.length > 0) {
+          // Find the specific time slot in the results
+          const normalizedTimeForCompare = timeForRPC.substring(0, 5); // HH:MM format
+          
+          const matchingSlot = slots.find((slot: any) => {
+            let slotTime = slot.time_slot;
+            // Handle different TIME formats from PostgreSQL
+            if (typeof slotTime === "object" && slotTime !== null) {
+              if ("hours" in slotTime && "minutes" in slotTime) {
+                slotTime = `${String(slotTime.hours).padStart(2, "0")}:${String(slotTime.minutes).padStart(2, "0")}`;
+              }
+            }
+            // Normalize to HH:MM
+            if (slotTime && slotTime.includes(":")) {
+              slotTime = slotTime.substring(0, 5);
+            }
+            return slotTime === normalizedTimeForCompare;
+          });
+
+          if (matchingSlot) {
+            // Handle boolean availability
+            const slotAvailable = matchingSlot.available;
+            isAvailable = slotAvailable === true || slotAvailable === "t" || slotAvailable === "true";
+            
+            logger.info("Slot availability check result", {
+              time: normalizedTimeForCompare,
+              slotAvailable: matchingSlot.available,
+              isAvailable,
+              totalSlots: slots.length,
+              availableSlots: slots.filter((s: any) => s.available === true || s.available === "t").length,
+            });
+          } else {
+            logger.warn("Time slot not found in available slots list", {
+              requestedTime: normalizedTimeForCompare,
+              availableTimes: slots.map((s: any) => s.time_slot).slice(0, 10),
+            });
+            // If we can't find the slot, assume it's not available
+            isAvailable = false;
+          }
+        } else {
+          logger.warn("No slots returned from get_available_time_slots", {
+            date: validatedBody.appointment_date,
+            duration: durationMinutes,
+          });
+          isAvailable = false;
+        }
+      } catch (err) {
+        logger.error("Exception checking availability", { error: err });
+        availabilityError = err instanceof Error ? err : new Error(String(err));
+      }
     }
 
     if (availabilityError) {

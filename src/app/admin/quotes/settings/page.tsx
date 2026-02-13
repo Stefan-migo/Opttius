@@ -32,38 +32,28 @@ import {
 import { toast } from "sonner";
 import Link from "next/link";
 import { useBranch } from "@/hooks/useBranch";
-import { getBranchHeader } from "@/lib/utils/branch";
 import { BranchSelector } from "@/components/admin/BranchSelector";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { formatCurrency } from "@/lib/utils";
+import { quoteSettingsService, QuoteSettings } from "@/lib/api/services";
 
 interface TreatmentPrice {
   price: number;
   enabled: boolean;
 }
 
-interface QuoteSettings {
+// Extended QuoteSettings type for form state with additional UI-specific fields
+interface FormQuoteSettings extends Omit<QuoteSettings, 'treatment_prices'> {
   treatment_prices: {
     anti_reflective: TreatmentPrice | number;
     blue_light_filter: TreatmentPrice | number;
     uv_protection: TreatmentPrice | number;
     scratch_resistant: TreatmentPrice | number;
     anti_fog: TreatmentPrice | number;
-    photochromic: TreatmentPrice | number;
-    polarized: TreatmentPrice | number;
-    tint: TreatmentPrice | number;
+    photochromic?: TreatmentPrice | number;
+    polarized?: TreatmentPrice | number;
+    tint?: TreatmentPrice | number;
   };
-  default_labor_cost: number;
-  default_tax_percentage: number;
-  default_expiration_days: number;
-  default_margin_percentage: number;
-  labor_cost_includes_tax?: boolean;
-  lens_cost_includes_tax?: boolean;
-  treatments_cost_includes_tax?: boolean;
-  volume_discounts: Array<{ min_amount: number; discount_percentage: number }>;
-  currency: string;
-  terms_and_conditions?: string;
-  notes_template?: string;
 }
 
 export default function QuoteSettingsPage() {
@@ -75,7 +65,7 @@ export default function QuoteSettingsPage() {
   } = useBranch();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [settings, setSettings] = useState<QuoteSettings | null>(null);
+  const [settings, setSettings] = useState<FormQuoteSettings | null>(null);
   const [hasChanges, setHasChanges] = useState(false);
   const [activeTab, setActiveTab] = useState("general");
 
@@ -88,16 +78,12 @@ export default function QuoteSettingsPage() {
   const fetchSettings = async () => {
     try {
       setLoading(true);
-      const headers: HeadersInit = {
-        "Content-Type": "application/json",
-        ...getBranchHeader(currentBranchId),
-      };
-      const response = await fetch("/api/admin/quote-settings", { headers });
-      if (!response.ok) {
-        throw new Error("Failed to fetch settings");
+      const fetchedSettings = await quoteSettingsService.get();
+      if (fetchedSettings) {
+        setSettings(fetchedSettings as FormQuoteSettings);
+      } else {
+        setSettings(null);
       }
-      const data = await response.json();
-      setSettings(data.settings);
       setHasChanges(false);
     } catch (error) {
       console.error("Error fetching settings:", error);
@@ -121,19 +107,7 @@ export default function QuoteSettingsPage() {
 
     try {
       setSaving(true);
-      const headers: HeadersInit = {
-        "Content-Type": "application/json",
-        ...getBranchHeader(currentBranchId),
-      };
-      const response = await fetch("/api/admin/quote-settings", {
-        method: "PUT",
-        headers,
-        body: JSON.stringify(settings),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to save settings");
-      }
+      await quoteSettingsService.update(settings as any);
 
       setHasChanges(false);
 
@@ -252,7 +226,7 @@ export default function QuoteSettingsPage() {
   const addVolumeDiscount = () => {
     if (!settings) return;
     updateSetting("volume_discounts", [
-      ...settings.volume_discounts,
+      ...(settings.volume_discounts || []),
       { min_amount: 0, discount_percentage: 0 },
     ]);
   };
@@ -263,7 +237,7 @@ export default function QuoteSettingsPage() {
     value: number,
   ) => {
     if (!settings) return;
-    const updated = [...settings.volume_discounts];
+    const updated = [...(settings.volume_discounts || [])];
     updated[index] = { ...updated[index], [field]: value };
     updateSetting("volume_discounts", updated);
   };
@@ -272,7 +246,7 @@ export default function QuoteSettingsPage() {
     if (!settings) return;
     updateSetting(
       "volume_discounts",
-      settings.volume_discounts.filter((_, i) => i !== index),
+      (settings.volume_discounts || []).filter((_, i) => i !== index),
     );
   };
 
@@ -693,7 +667,7 @@ export default function QuoteSettingsPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {settings.volume_discounts.length === 0 ? (
+                {settings.volume_discounts?.length === 0 ? (
                   <div className="text-center py-8 border-2 border-dashed rounded-lg">
                     <Percent className="h-12 w-12 mx-auto mb-4 text-tierra-media" />
                     <p className="text-tierra-media mb-2">
@@ -710,7 +684,7 @@ export default function QuoteSettingsPage() {
                   </div>
                 ) : (
                   <>
-                    {settings.volume_discounts.map((discount, index) => (
+                    {settings.volume_discounts?.map((discount, index) => (
                       <div
                         key={index}
                         className="flex items-center gap-4 p-4 border rounded-lg hover:bg-gray-50 transition-colors"

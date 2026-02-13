@@ -116,7 +116,7 @@ export function useProducts(params: FetchProductsParams) {
       params.isGlobalView,
     ],
     queryFn: () => fetchProducts(params),
-    staleTime: 30 * 1000, // 30 seconds
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
   const createMutation = useMutation({

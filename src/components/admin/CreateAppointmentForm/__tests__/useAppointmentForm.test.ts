@@ -5,11 +5,15 @@ import * as branchHook from "@/hooks/useBranch";
 import * as authContext from "@/contexts/AuthContext";
 
 // Mock dependencies
-vi.mock("@/hooks/useBranch");
-vi.mock("@/contexts/AuthContext");
+vi.mock("@/hooks/useBranch", () => ({
+  useBranch: vi.fn(),
+}));
+vi.mock("@/contexts/AuthContext", () => ({
+  useAuthContext: vi.fn(),
+}));
 
-const mockUseBranch = branchHook.useBranch as any;
-const mockUseAuthContext = authContext.useAuthContext as any;
+const mockUseBranch = vi.mocked(branchHook.useBranch);
+const mockUseAuthContext = vi.mocked(authContext.useAuthContext);
 
 describe("useAppointmentForm", () => {
   const mockInitialData = {
@@ -34,11 +38,33 @@ describe("useAppointmentForm", () => {
   beforeEach(() => {
     mockUseBranch.mockReturnValue({
       currentBranchId: "test-branch-123",
+      currentBranchName: "Test Branch",
+      canSwitchBranch: false,
+      hasMultipleBranches: false,
+      branches: [{ id: "test-branch-123", name: "Test Branch", code: "TEST001" }],
+      currentBranch: { id: "test-branch-123", name: "Test Branch", code: "TEST001" },
+      isGlobalView: false,
+      isSuperAdmin: false,
+      isLoading: false,
+      setCurrentBranch: vi.fn(),
+      refreshBranches: vi.fn(),
     });
 
     mockUseAuthContext.mockReturnValue({
-      user: { id: "test-user-456", email: "test@example.com" },
+      user: null,
+      profile: null,
+      session: null,
       loading: false,
+      error: null,
+      signUp: vi.fn(),
+      signIn: vi.fn(),
+      signOut: vi.fn(),
+      updateProfile: vi.fn(),
+      resetPassword: vi.fn(),
+      refetchProfile: vi.fn(),
+      isAdmin: false,
+      isSuperAdmin: false,
+      adminRole: null,
     });
 
     // Mock fetch globally
@@ -53,12 +79,12 @@ describe("useAppointmentForm", () => {
   });
 
   it("should initialize with default form data when no initial data provided", () => {
-    const { result } = renderHook(() => 
+    const { result } = renderHook(() =>
       useAppointmentForm({ scheduleSettings: mockScheduleSettings })
     );
 
     const today = new Date().toISOString().split("T")[0];
-    
+
     expect(result.current.formData).toEqual({
       appointment_date: today,
       appointment_time: "",
@@ -79,10 +105,10 @@ describe("useAppointmentForm", () => {
   });
 
   it("should initialize with provided initial data", () => {
-    const { result } = renderHook(() => 
-      useAppointmentForm({ 
-        initialData: mockInitialData, 
-        scheduleSettings: mockScheduleSettings 
+    const { result } = renderHook(() =>
+      useAppointmentForm({
+        initialData: mockInitialData,
+        scheduleSettings: mockScheduleSettings
       })
     );
 
@@ -95,7 +121,7 @@ describe("useAppointmentForm", () => {
   });
 
   it("should update individual fields correctly", () => {
-    const { result } = renderHook(() => 
+    const { result } = renderHook(() =>
       useAppointmentForm({ scheduleSettings: mockScheduleSettings })
     );
 
@@ -107,7 +133,7 @@ describe("useAppointmentForm", () => {
   });
 
   it("should update multiple fields at once", () => {
-    const { result } = renderHook(() => 
+    const { result } = renderHook(() =>
       useAppointmentForm({ scheduleSettings: mockScheduleSettings })
     );
 
@@ -125,7 +151,7 @@ describe("useAppointmentForm", () => {
   });
 
   it("should clear errors when updating fields", () => {
-    const { result } = renderHook(() => 
+    const { result } = renderHook(() =>
       useAppointmentForm({ scheduleSettings: mockScheduleSettings })
     );
 
@@ -144,7 +170,7 @@ describe("useAppointmentForm", () => {
   });
 
   it("should validate required fields", () => {
-    const { result } = renderHook(() => 
+    const { result } = renderHook(() =>
       useAppointmentForm({ scheduleSettings: mockScheduleSettings })
     );
 
@@ -160,7 +186,7 @@ describe("useAppointmentForm", () => {
   });
 
   it("should validate successfully when required fields are present", () => {
-    const { result } = renderHook(() => 
+    const { result } = renderHook(() =>
       useAppointmentForm({ scheduleSettings: mockScheduleSettings })
     );
 
@@ -180,10 +206,10 @@ describe("useAppointmentForm", () => {
   });
 
   it("should reset form to default values", () => {
-    const { result } = renderHook(() => 
-      useAppointmentForm({ 
-        initialData: mockInitialData, 
-        scheduleSettings: mockScheduleSettings 
+    const { result } = renderHook(() =>
+      useAppointmentForm({
+        initialData: mockInitialData,
+        scheduleSettings: mockScheduleSettings
       })
     );
 
@@ -211,14 +237,14 @@ describe("useAppointmentForm", () => {
   it("should handle form submission successfully", async () => {
     const mockOnSuccess = vi.fn();
     const mockSelectedCustomer = { id: "customer-123", name: "John Doe" };
-    
+
     // Mock successful API response
     (global.fetch as any).mockResolvedValueOnce({
       ok: true,
       json: () => Promise.resolve({ id: "new-appointment-456" }),
     });
 
-    const { result } = renderHook(() => 
+    const { result } = renderHook(() =>
       useAppointmentForm({ scheduleSettings: mockScheduleSettings })
     );
 
@@ -239,7 +265,7 @@ describe("useAppointmentForm", () => {
         {}, // guestCustomerData
         mockOnSuccess
       );
-      
+
       expect(success).toBe(true);
     });
 
@@ -252,7 +278,7 @@ describe("useAppointmentForm", () => {
         }),
       })
     );
-    
+
     // Note: onSuccess is not called by the hook itself, but by the calling component
     // The hook returns a boolean success value and the component calls onSuccess based on that
     expect(mockOnSuccess).not.toHaveBeenCalled();
@@ -261,14 +287,14 @@ describe("useAppointmentForm", () => {
   it("should handle form submission errors", async () => {
     const mockOnSuccess = vi.fn();
     const mockSelectedCustomer = { id: "customer-123", name: "John Doe" };
-    
+
     // Mock failed API response
     (global.fetch as any).mockResolvedValueOnce({
       ok: false,
       json: () => Promise.resolve({ error: "Failed to create appointment" }),
     });
 
-    const { result } = renderHook(() => 
+    const { result } = renderHook(() =>
       useAppointmentForm({ scheduleSettings: mockScheduleSettings })
     );
 
@@ -305,13 +331,13 @@ describe("useAppointmentForm", () => {
       email: "jane@example.com",
       phone: "+1234567890",
     };
-    
+
     (global.fetch as any).mockResolvedValueOnce({
       ok: true,
       json: () => Promise.resolve({ id: "new-appointment-456" }),
     });
 
-    const { result } = renderHook(() => 
+    const { result } = renderHook(() =>
       useAppointmentForm({ scheduleSettings: mockScheduleSettings })
     );
 
@@ -332,7 +358,7 @@ describe("useAppointmentForm", () => {
         mockGuestCustomerData,
         mockOnSuccess
       );
-      
+
       expect(success).toBe(true);
     });
 
@@ -347,9 +373,9 @@ describe("useAppointmentForm", () => {
 
   it("should update duration when schedule settings load", () => {
     const { result, rerender } = renderHook(
-      ({ scheduleSettings }) => useAppointmentForm({ scheduleSettings }),
+      ({ scheduleSettings }: { scheduleSettings: any }) => useAppointmentForm({ scheduleSettings }),
       {
-        initialProps: { scheduleSettings: null },
+        initialProps: { scheduleSettings: null as any },
       }
     );
 
@@ -367,10 +393,10 @@ describe("useAppointmentForm", () => {
       duration_minutes: 60,
     };
 
-    const { result } = renderHook(() => 
-      useAppointmentForm({ 
-        initialData: initialDataWithDuration, 
-        scheduleSettings: mockScheduleSettings 
+    const { result } = renderHook(() =>
+      useAppointmentForm({
+        initialData: initialDataWithDuration,
+        scheduleSettings: mockScheduleSettings
       })
     );
 

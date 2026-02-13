@@ -39,12 +39,12 @@ export interface PerformanceMetrics {
   fid?: number;        // First Input Delay (ms)
   cls?: number;        // Cumulative Layout Shift
   ttfb?: number;       // Time to First Byte (ms)
-  
+
   // Backend Performance
   responseTime?: number;  // API response time (ms)
   databaseTime?: number;  // Database query time (ms)
   cacheHit?: boolean;     // Whether request was cached
-  
+
   // User Experience
   interactionToNextPaint?: number;  // INP metric
   totalBlockingTime?: number;       // TBT metric
@@ -67,7 +67,7 @@ export class TelemetryCollector {
   constructor(options?: { batchSize?: number; flushInterval?: number }) {
     if (options?.batchSize) this.batchSize = options.batchSize;
     if (options?.flushInterval) this.flushInterval = options.flushInterval;
-    
+
     // Start automatic flushing
     this.startFlushTimer();
   }
@@ -83,7 +83,7 @@ export class TelemetryCollector {
     organizationId?: string;
   }): string {
     const eventId = uuidv4();
-    
+
     const event: TelemetryEvent = {
       eventId,
       timestamp: new Date(),
@@ -121,7 +121,7 @@ export class TelemetryCollector {
     userId?: string
   ): string {
     const eventId = uuidv4();
-    
+
     const event: TelemetryEvent = {
       eventId,
       timestamp: new Date(),
@@ -272,7 +272,7 @@ export class TelemetryCollector {
     userId?: string;
   }): string {
     const eventId = uuidv4();
-    
+
     const event: TelemetryEvent = {
       eventId,
       timestamp: new Date(),
@@ -300,7 +300,7 @@ export class TelemetryCollector {
   /**
    * Queue an event for batch processing
    */
-  private queueEvent(event: TelemetryEvent): void {
+  protected queueEvent(event: TelemetryEvent): void {
     const queueItem: QueueItem = {
       event,
       retries: 0,
@@ -308,7 +308,7 @@ export class TelemetryCollector {
     };
 
     this.eventQueue.push(queueItem);
-    
+
     // Flush immediately if queue is full
     if (this.eventQueue.length >= this.batchSize) {
       this.flushEvents();
@@ -324,16 +324,17 @@ export class TelemetryCollector {
     }
 
     this.isFlushing = true;
-    
+    let eventsToProcess: QueueItem[] = [];
+
     try {
       // Get events to process (up to batch size)
-      const eventsToProcess = this.eventQueue.splice(0, this.batchSize);
-      
+      eventsToProcess = this.eventQueue.splice(0, this.batchSize);
+
       // Send to storage (implement in storage layer)
       await this.sendEvents(eventsToProcess.map(item => item.event));
-      
+
       console.log(`Telemetry: Flushed ${eventsToProcess.length} events`);
-      
+
     } catch (error) {
       console.error('Telemetry: Failed to flush events', error);
       // Re-queue failed events (up to max retries)
@@ -356,7 +357,7 @@ export class TelemetryCollector {
 
     // Add back to queue for retry
     this.eventQueue.unshift(...retryItems);
-    
+
     // Log permanently failed events
     const failedEvents = failedItems.filter(item => item.retries >= this.maxRetries);
     if (failedEvents.length > 0) {
@@ -373,7 +374,7 @@ export class TelemetryCollector {
     if (process.env.NODE_ENV === 'development') {
       console.log('Telemetry events:', events);
     }
-    
+
     // TODO: Implement actual storage sending
     // await telemetryStorage.saveEvents(events);
   }
@@ -402,7 +403,7 @@ export class TelemetryCollector {
   /**
    * Get or create session ID
    */
-  private getSessionId(): string {
+  protected getSessionId(): string {
     if (typeof window !== 'undefined') {
       let sessionId = sessionStorage.getItem('telemetry_session_id');
       if (!sessionId) {
@@ -424,7 +425,7 @@ export class TelemetryCollector {
 
     const ua = navigator.userAgent;
     const platform = navigator.platform;
-    
+
     // Simple device detection (enhance as needed)
     let deviceType: 'mobile' | 'tablet' | 'desktop' = 'desktop';
     if (/Mobile|Android|iPhone|iPad|iPod/.test(ua)) {

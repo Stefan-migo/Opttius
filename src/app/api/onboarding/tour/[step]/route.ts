@@ -8,15 +8,15 @@ export async function POST(
   try {
     const { getUser } = await createClientFromRequest(request);
     const {
-      data,
+      data: userData,
       error: userError,
     } = await getUser();
     
-    if (userError || !data || !("user" in data) || !data.user) {
+    if (userError || !userData || !("user" in userData) || !userData.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
     
-    const user = data.user;
+    const user = userData.user;
 
     if (userError || !user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -68,7 +68,7 @@ export async function POST(
     }
     const nextStep = stepIndex + 1;
 
-    const { data, error } = await supabaseClient
+    const { data: updatedProgress, error } = await supabaseClient
       .from("user_tour_progress")
       .update({
         current_step: nextStep,
@@ -89,7 +89,7 @@ export async function POST(
       );
     }
 
-    return NextResponse.json(data);
+    return NextResponse.json(updatedProgress);
   } catch (error) {
     console.error("Step completion error:", error);
     return NextResponse.json(

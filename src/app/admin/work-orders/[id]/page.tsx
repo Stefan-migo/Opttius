@@ -117,6 +117,7 @@ interface WorkOrder {
     first_name?: string;
     last_name?: string;
   };
+  pos_order_id?: string;
   created_at: string;
 }
 
@@ -793,13 +794,12 @@ export default function WorkOrderDetailPage() {
                 >
                   <div className="flex flex-col items-center">
                     <div
-                      className={`w-14 h-14 rounded-full flex items-center justify-center border-2 relative ${
-                        isCurrent
+                      className={`w-14 h-14 rounded-full flex items-center justify-center border-2 relative ${isCurrent
                           ? "bg-green-500 border-green-600 text-white shadow-lg shadow-green-500/50"
                           : isCompleted
                             ? "bg-gray-300 border-gray-400 text-gray-600"
                             : "bg-gray-200 border-gray-300 text-gray-400"
-                      }`}
+                        }`}
                     >
                       {isCurrent ? (
                         <>
@@ -815,40 +815,37 @@ export default function WorkOrderDetailPage() {
                       )}
                     </div>
                     <p
-                      className={`text-xs mt-2 text-center max-w-[80px] ${
-                        isCurrent
+                      className={`text-xs mt-2 text-center max-w-[80px] ${isCurrent
                           ? "font-bold text-green-600"
                           : isCompleted || isFuture
                             ? "font-medium text-gray-500"
                             : "text-gray-400"
-                      }`}
+                        }`}
                     >
                       {step.label}
                     </p>
                     <p
-                      className={`text-xs mt-1 min-h-[16px] ${
-                        step.date
+                      className={`text-xs mt-1 min-h-[16px] ${step.date
                           ? isCurrent
                             ? "text-green-600 font-medium"
                             : "text-gray-500"
                           : "text-transparent"
-                      }`}
+                        }`}
                     >
                       {step.date
                         ? formatDate(step.date, {
-                            format: "medium",
-                            locale: "es-CL",
-                          })
+                          format: "medium",
+                          locale: "es-CL",
+                        })
                         : "\u00A0"}
                     </p>
                   </div>
                   {idx < array.length - 1 && (
                     <div
-                      className={`w-16 h-0.5 mx-2 ${
-                        isCurrent || (isCompleted && idx < currentStatusIndex)
+                      className={`w-16 h-0.5 mx-2 ${isCurrent || (isCompleted && idx < currentStatusIndex)
                           ? "bg-green-500"
                           : "bg-gray-300"
-                      }`}
+                        }`}
                     />
                   )}
                 </div>
@@ -1274,7 +1271,7 @@ export default function WorkOrderDetailPage() {
                     )}
                   {workOrder.prescription.height_segmentation !== null &&
                     workOrder.prescription.height_segmentation !==
-                      undefined && (
+                    undefined && (
                       <div>
                         <p className="text-xs text-tierra-media">
                           Altura de Segmento
@@ -1642,11 +1639,10 @@ export default function WorkOrderDetailPage() {
                     return (
                       <div
                         key={entry.id}
-                        className={`flex items-start space-x-4 pb-4 border-b last:border-0 ${
-                          isCurrentStatus
+                        className={`flex items-start space-x-4 pb-4 border-b last:border-0 ${isCurrentStatus
                             ? "bg-green-50 p-4 rounded-lg border-green-200"
                             : "bg-gray-50 p-3 rounded-lg border-gray-200"
-                        }`}
+                          }`}
                       >
                         <div className="flex-1">
                           <div className="flex items-center gap-2 flex-wrap">

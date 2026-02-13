@@ -5,21 +5,27 @@ import type {
   DatabaseInsight,
 } from "@/lib/ai/insights/schemas";
 
-// Mock Supabase
-const mockSupabase = {
-  from: vi.fn().mockReturnThis(),
-  update: vi.fn().mockReturnThis(),
-  eq: vi.fn().mockReturnThis(),
-  select: vi.fn().mockReturnThis(),
-  order: vi.fn().mockReturnThis(),
-  limit: vi.fn().mockReturnThis(),
+// Mock Supabase - create a proper chainable mock
+const createMockSupabase = () => {
+  const mock = {
+    from: vi.fn().mockReturnThis(),
+    update: vi.fn().mockReturnThis(),
+    eq: vi.fn().mockReturnThis(),
+    select: vi.fn().mockReturnThis(),
+    order: vi.fn().mockReturnThis(),
+    limit: vi.fn().mockReturnThis(),
+  };
+  return mock;
 };
+
+let mockSupabase: ReturnType<typeof createMockSupabase>;
 
 describe("InsightFeedbackSystem", () => {
   let feedbackSystem: InsightFeedbackSystem;
 
   beforeEach(() => {
     vi.clearAllMocks();
+    mockSupabase = createMockSupabase();
     feedbackSystem = new InsightFeedbackSystem(mockSupabase as any);
   });
 
@@ -96,6 +102,7 @@ describe("InsightFeedbackSystem", () => {
         message: "This needs attention",
         priority: 9,
         is_dismissed: false,
+        metadata: {},
         created_at: "2026-02-06T10:00:00Z",
         updated_at: "2026-02-06T10:00:00Z",
       },
@@ -108,6 +115,7 @@ describe("InsightFeedbackSystem", () => {
         message: "This is informational",
         priority: 5,
         is_dismissed: false,
+        metadata: {},
         created_at: "2026-02-06T09:00:00Z",
         updated_at: "2026-02-06T09:00:00Z",
       },
@@ -120,6 +128,7 @@ describe("InsightFeedbackSystem", () => {
         message: "This is an opportunity",
         priority: 3,
         is_dismissed: false,
+        metadata: {},
         created_at: "2026-02-06T08:00:00Z",
         updated_at: "2026-02-06T08:00:00Z",
       },
@@ -225,6 +234,7 @@ describe("InsightFeedbackSystem", () => {
           message: "This was dismissed",
           priority: 10,
           is_dismissed: true,
+          metadata: {},
           created_at: "2026-02-06T11:00:00Z",
           updated_at: "2026-02-06T11:00:00Z",
         },

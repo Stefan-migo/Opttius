@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
+import { extractDataFromResponse } from "@/lib/api/response-helpers";
 import {
   Card,
   CardContent,
@@ -49,7 +50,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
-import { useForm } from "react-hook-form";
+import { useForm, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   createOpticalInternalSupportMessageSchema,
@@ -214,7 +215,7 @@ export default function OpticalInternalSupportTicketDetailPage() {
     handleSubmit: handleSubmitMessage,
     formState: { errors: messageErrors },
     reset: resetMessage,
-  } = useForm<MessageForm>({
+  } = useForm<any>({
     resolver: zodResolver(createOpticalInternalSupportMessageSchema),
     defaultValues: {
       is_internal: false,
@@ -230,7 +231,7 @@ export default function OpticalInternalSupportTicketDetailPage() {
     reset: resetUpdate,
     watch: watchUpdate,
     setValue: setUpdateValue,
-  } = useForm<UpdateTicketForm>({
+  } = useForm<any>({
     resolver: zodResolver(updateOpticalInternalSupportTicketSchema),
   });
 
@@ -257,8 +258,9 @@ export default function OpticalInternalSupportTicketDetailPage() {
       const response = await fetch("/api/admin/admin-users");
       if (response.ok) {
         const data = await response.json();
-        console.log("Admin users fetched:", data.users?.length || 0);
-        setAdminUsers(data.users || []);
+        const adminUsers = extractDataFromResponse<{ id: string; email: string; role: string }>(data);
+        console.log("Admin users fetched:", adminUsers.length || 0);
+        setAdminUsers(adminUsers);
       }
     } catch (err) {
       console.error("Error loading admin users:", err);
@@ -304,7 +306,7 @@ export default function OpticalInternalSupportTicketDetailPage() {
     }
   };
 
-  const onSubmitMessage = async (data: MessageForm) => {
+  const onSubmitMessage: SubmitHandler<any> = async (data) => {
     setSendingMessage(true);
     try {
       const response = await fetch(
@@ -334,7 +336,7 @@ export default function OpticalInternalSupportTicketDetailPage() {
     }
   };
 
-  const onSubmitUpdate = async (data: UpdateTicketForm) => {
+  const onSubmitUpdate: SubmitHandler<any> = async (data) => {
     setUpdatingTicket(true);
     try {
       const response = await fetch(
@@ -501,11 +503,10 @@ export default function OpticalInternalSupportTicketDetailPage() {
                     {messages.map((msg) => (
                       <div
                         key={msg.id}
-                        className={`p-4 rounded-lg border ${
-                          msg.is_internal
-                            ? "bg-yellow-50 border-yellow-200"
-                            : "bg-gray-50 border-gray-200"
-                        }`}
+                        className={`p-4 rounded-lg border ${msg.is_internal
+                          ? "bg-yellow-50 border-yellow-200"
+                          : "bg-gray-50 border-gray-200"
+                          }`}
                       >
                         <div className="flex items-start justify-between mb-2">
                           <div className="flex items-center gap-2">
@@ -578,7 +579,7 @@ export default function OpticalInternalSupportTicketDetailPage() {
                       />
                       {messageErrors.message && (
                         <p className="text-sm text-red-500">
-                          {messageErrors.message.message}
+                          {String(messageErrors.message.message)}
                         </p>
                       )}
                     </div>

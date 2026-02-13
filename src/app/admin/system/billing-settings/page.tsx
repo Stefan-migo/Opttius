@@ -17,6 +17,7 @@ import {
   CheckCircle,
   Copy,
   Loader2,
+  Sparkles,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useBranch } from "@/hooks/useBranch";

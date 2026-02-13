@@ -72,12 +72,6 @@ export function MercadoPagoButton({
     <div className="w-full">
       <Wallet
         initialization={{ preferenceId }}
-        customization={{
-          texts: {
-            action: "pay",
-            valueProp: "security_safety",
-          },
-        }}
       />
     </div>
   );

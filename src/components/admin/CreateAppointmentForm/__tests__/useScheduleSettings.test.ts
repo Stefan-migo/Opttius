@@ -5,11 +5,15 @@ import * as branchHook from "@/hooks/useBranch";
 import * as authContext from "@/contexts/AuthContext";
 
 // Mock dependencies
-vi.mock("@/hooks/useBranch");
-vi.mock("@/contexts/AuthContext");
+vi.mock("@/hooks/useBranch", () => ({
+  useBranch: vi.fn(),
+}));
+vi.mock("@/contexts/AuthContext", () => ({
+  useAuthContext: vi.fn(),
+}));
 
-const mockUseBranch = branchHook.useBranch as any;
-const mockUseAuthContext = authContext.useAuthContext as any;
+const mockUseBranch = vi.mocked(branchHook.useBranch);
+const mockUseAuthContext = vi.mocked(authContext.useAuthContext);
 
 describe("useScheduleSettings", () => {
   const mockScheduleSettings = {
@@ -36,11 +40,33 @@ describe("useScheduleSettings", () => {
   beforeEach(() => {
     mockUseBranch.mockReturnValue({
       currentBranchId: "test-branch-123",
+      currentBranchName: "Test Branch",
+      canSwitchBranch: false,
+      hasMultipleBranches: false,
+      branches: [{ id: "test-branch-123", name: "Test Branch", code: "TEST001" }],
+      currentBranch: { id: "test-branch-123", name: "Test Branch", code: "TEST001" },
+      isGlobalView: false,
+      isSuperAdmin: false,
+      isLoading: false,
+      setCurrentBranch: vi.fn(),
+      refreshBranches: vi.fn(),
     });
 
     mockUseAuthContext.mockReturnValue({
-      user: { id: "test-user-456", email: "test@example.com" },
+      user: null,
+      profile: null,
+      session: null,
       loading: false,
+      error: null,
+      signUp: vi.fn(),
+      signIn: vi.fn(),
+      signOut: vi.fn(),
+      updateProfile: vi.fn(),
+      resetPassword: vi.fn(),
+      refetchProfile: vi.fn(),
+      isAdmin: false,
+      isSuperAdmin: false,
+      adminRole: null,
     });
 
     // Mock fetch globally

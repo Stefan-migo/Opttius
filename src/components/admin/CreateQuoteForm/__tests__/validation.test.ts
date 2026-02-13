@@ -104,6 +104,7 @@ describe("QuoteFormValidator", () => {
       near_frame_price: 0,
       near_frame_price_includes_tax: false,
       near_frame_cost: 0,
+      customer_own_near_frame: false,
     };
 
     validCustomer = {

@@ -3,6 +3,9 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
+import { extractDataFromResponse } from "@/lib/api/response-helpers";
+import { productService } from "@/lib/api/services";
+import type { Product } from "@/lib/api/services";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -55,7 +58,7 @@ import { toast } from "sonner";
 import { useBranch } from "@/hooks/useBranch";
 import { formatCurrency, formatDate } from "@/lib/utils";
 
-interface Product {
+interface ProductListItem {
   id: string;
   name: string;
   slug: string;
@@ -82,12 +85,9 @@ interface ImportResult {
     updated: number;
     skipped: number;
     errors_count: number;
-    warnings_count: number;
   };
-  results: {
+  results?: {
     errors: string[];
-    warnings: string[];
-    details: any[];
   };
 }
 
@@ -113,7 +113,7 @@ export default function BulkOperationsPage() {
   const [bulkUpdates, setBulkUpdates] = useState<any>({});
   const [showBulkDialog, setShowBulkDialog] = useState(false);
   const [showImportDialog, setShowImportDialog] = useState(false);
-  const [importMode, setImportMode] = useState("create");
+  const [importMode, setImportMode] = useState<"create" | "update" | "skip">("create");
   const [importResults, setImportResults] = useState<ImportResult | null>(null);
   const [isDeleteDialog, setIsDeleteDialog] = useState(false);
 
@@ -125,19 +125,12 @@ export default function BulkOperationsPage() {
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      const params = new URLSearchParams({
-        ...(searchTerm && { search: searchTerm }),
-        ...(categoryFilter !== "all" && { category: categoryFilter }),
-        ...(statusFilter !== "all" && { status: statusFilter }),
+      const result = await productService.getProducts({
+        search: searchTerm || undefined,
+        category: categoryFilter !== "all" ? categoryFilter : undefined,
+        status: statusFilter !== "all" ? statusFilter : undefined,
       });
-
-      const response = await fetch(`/api/products?${params}`);
-      if (!response.ok) {
-        throw new Error("Failed to fetch products");
-      }
-
-      const data = await response.json();
-      setProducts(data.products || []);
+      setProducts(result.data);
     } catch (error) {
       console.error("Error fetching products:", error);
       toast.error("Error al cargar productos");
@@ -151,7 +144,7 @@ export default function BulkOperationsPage() {
       const response = await fetch("/api/categories");
       if (response.ok) {
         const data = await response.json();
-        setCategories(data.categories || []);
+        setCategories(extractDataFromResponse(data));
       }
     } catch (error) {
       console.error("Error fetching categories:", error);
@@ -206,40 +199,17 @@ export default function BulkOperationsPage() {
     try {
       setProcessing(true);
 
-      // Prepare headers with branch context
-      const headers: HeadersInit = {
-        "Content-Type": "application/json",
-      };
-
-      if (currentBranchId) {
-        headers["x-branch-id"] = currentBranchId;
-      } else if (isSuperAdmin) {
-        headers["x-branch-id"] = "global";
-      }
-
-      const response = await fetch("/api/admin/products/bulk", {
-        method: "POST",
-        headers,
-        body: JSON.stringify({
-          operation: bulkOperation,
-          product_ids: selectedProducts,
-          updates: bulkUpdates,
-        }),
+      const result = await productService.bulkProducts({
+        products: selectedProducts.map(id => ({ id, ...bulkUpdates })),
+        action: bulkOperation as 'create' | 'update' | 'delete',
       });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to perform bulk operation");
-      }
-
-      const result: BulkOperationResult = await response.json();
 
       // Invalidate React Query cache to refresh the products list
       queryClient.invalidateQueries({ queryKey: ["products"] });
       queryClient.invalidateQueries({ queryKey: ["productStats"] });
 
       toast.success(
-        `Operación completada: ${result.affected_count} productos afectados`,
+        `Operación completada: ${result.success.length} productos afectados`,
       );
       setShowBulkDialog(false);
       setIsDeleteDialog(false);
@@ -261,18 +231,11 @@ export default function BulkOperationsPage() {
 
   const handleExport = async () => {
     try {
-      const params = new URLSearchParams({
-        format: "csv",
-        ...(categoryFilter !== "all" && { category_id: categoryFilter }),
-        ...(statusFilter !== "all" && { status: statusFilter }),
+      const blob = await productService.exportProducts('csv', {
+        category: categoryFilter,
+        status: statusFilter,
       });
-
-      const response = await fetch(`/api/admin/products/bulk?${params}`);
-      if (!response.ok) {
-        throw new Error("Failed to export products");
-      }
-
-      const blob = await response.blob();
+      
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
@@ -295,20 +258,7 @@ export default function BulkOperationsPage() {
     try {
       setProcessing(true);
 
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("mode", importMode);
-
-      const response = await fetch("/api/admin/products/import", {
-        method: "POST",
-        body: formData,
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to import products");
-      }
-
-      const result: ImportResult = await response.json();
+      const result = await productService.importProductsFile(file, importMode);
       setImportResults(result);
 
       if (result.success) {
@@ -601,7 +551,7 @@ export default function BulkOperationsPage() {
               <div className="space-y-4">
                 <div>
                   <Label htmlFor="import_mode">Modo de Importación</Label>
-                  <Select value={importMode} onValueChange={setImportMode}>
+                  <Select value={importMode} onValueChange={(value) => setImportMode(value as "create" | "update" | "skip")}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -652,16 +602,16 @@ export default function BulkOperationsPage() {
                       <div>Omitidos: {importResults.summary.skipped}</div>
                     </div>
 
-                    {importResults.results.errors.length > 0 && (
+                    {importResults.results?.errors && importResults.results.errors.length > 0 && (
                       <div className="mt-2">
                         <h5 className="font-medium text-red-600">Errores:</h5>
                         <ul className="text-sm text-red-600 list-disc list-inside">
-                          {importResults.results.errors
+                          {importResults.results?.errors
                             .slice(0, 5)
                             .map((error, index) => (
                               <li key={index}>{error}</li>
                             ))}
-                          {importResults.results.errors.length > 5 && (
+                          {importResults.results?.errors.length > 5 && (
                             <li>
                               ... y {importResults.results.errors.length - 5}{" "}
                               más
@@ -973,13 +923,13 @@ export default function BulkOperationsPage() {
                   <TableCell>
                     <div className="flex items-center space-x-2">
                       <span>{product.inventory_quantity}</span>
-                      {product.inventory_quantity <= 5 && (
+                      {((product.inventory_quantity ?? 0) <= 5) && (
                         <AlertTriangle className="h-4 w-4 text-red-500" />
                       )}
                     </div>
                   </TableCell>
 
-                  <TableCell>{getStatusBadge(product.status)}</TableCell>
+                  <TableCell>{getStatusBadge(product.status ?? '')}</TableCell>
 
                   <TableCell className="text-sm text-tierra-media">
                     {formatDate(product.created_at, { locale: "es-AR" })}

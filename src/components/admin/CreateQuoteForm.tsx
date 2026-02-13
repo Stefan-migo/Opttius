@@ -56,6 +56,16 @@ import { translatePrescriptionType } from "@/lib/prescription-helpers";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Info } from "lucide-react";
+import { extractDataFromResponse } from "@/lib/api/response-helpers";
+import { 
+  lensFamilyService,
+  contactLensFamilyService,
+  contactLensMatrixService,
+  quoteSettingsService,
+  customerService,
+  productService,
+  quoteService,
+} from "@/lib/api/services";
 
 interface CreateQuoteFormProps {
   onSuccess: () => void;
@@ -271,11 +281,8 @@ export default function CreateQuoteForm({
   const fetchLensFamilies = async () => {
     try {
       setLoadingFamilies(true);
-      const response = await fetch("/api/admin/lens-families");
-      if (response.ok) {
-        const data = await response.json();
-        setLensFamilies(data.families || []);
-      }
+      const families = await lensFamilyService.getAll();
+      setLensFamilies(families || []);
     } catch (error) {
       console.error("Error fetching lens families:", error);
     } finally {
@@ -287,24 +294,13 @@ export default function CreateQuoteForm({
   const fetchContactLensFamilies = async () => {
     try {
       setLoadingContactLensFamilies(true);
-      const response = await fetch("/api/admin/contact-lens-families");
-      if (response.ok) {
-        const data = await response.json();
-        console.log(
-          "Contact lens families loaded:",
-          data.families?.length || 0,
-          "families",
-        );
-        setContactLensFamilies(data.families || []);
-      } else {
-        console.error(
-          "Failed to fetch contact lens families:",
-          response.status,
-          response.statusText,
-        );
-        const errorData = await response.json().catch(() => ({}));
-        console.error("Error details:", errorData);
-      }
+      const families = await contactLensFamilyService.getAll();
+      console.log(
+        "Contact lens families loaded:",
+        families?.length || 0,
+        "families",
+      );
+      setContactLensFamilies(families || []);
     } catch (error) {
       console.error("Error fetching contact lens families:", error);
     } finally {
@@ -427,35 +423,19 @@ export default function CreateQuoteForm({
       const axisOD = selectedPrescription.od_axis || null;
       const additionOD = selectedPrescription.od_add || null;
 
-      const response = await fetch(
-        "/api/admin/contact-lens-matrices/calculate",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            contact_lens_family_id: formData.contact_lens_family_id,
-            sphere: sphereOD,
-            cylinder: cylinderOD,
-            axis: axisOD,
-            addition: additionOD,
-          }),
-        },
+      const calculation = await contactLensMatrixService.calculate(
+        formData.contact_lens_family_id,
+        sphereOD,
+        cylinderOD,
+        axisOD,
+        additionOD,
       );
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        const message =
-          data?.error || "No se pudo calcular el precio del lente de contacto";
-        toast.error(message);
-        return;
-      }
-
-      if (data.calculation && data.calculation.price) {
+      if (calculation && calculation.price) {
         // Calculate total price: price per box * quantity
         const quantity = formData.contact_lens_quantity || 1;
-        const totalPrice = data.calculation.price * quantity;
-        const totalCost = data.calculation.cost * quantity;
+        const totalPrice = calculation.price * quantity;
+        const totalCost = calculation.cost * quantity;
 
         setFormData((prev) => ({
           ...prev,
@@ -627,16 +607,10 @@ export default function CreateQuoteForm({
   const fetchQuoteSettings = async () => {
     try {
       setLoadingSettings(true);
-      const headers: HeadersInit = {
-        ...getBranchHeader(currentBranchId),
-      };
-      const response = await fetch("/api/admin/quote-settings", { headers });
-      if (!response.ok) {
-        throw new Error("Failed to fetch quote settings");
-      }
-      const data = await response.json();
+      const settings = await quoteSettingsService.get();
+      
       // Always create a new object to ensure React detects the change
-      const newSettings = data.settings ? { ...data.settings } : null;
+      const newSettings = settings ? { ...settings } as any : null;
       setQuoteSettings(newSettings);
 
       // Set default values from settings
@@ -645,7 +619,7 @@ export default function CreateQuoteForm({
           ...prev,
           // Use nullish coalescing (??) instead of || to allow 0 values
           labor_cost: newSettings.default_labor_cost ?? 15000,
-          expiration_days: newSettings.default_expiration_days ?? 30,
+          expiration_days: newSettings.validity_days ?? newSettings.default_expiration_days ?? 30,
         }));
       }
     } catch (error) {
@@ -854,11 +828,8 @@ export default function CreateQuoteForm({
 
   const fetchCustomer = async (customerId: string) => {
     try {
-      const response = await fetch(`/api/admin/customers/${customerId}`);
-      if (response.ok) {
-        const data = await response.json();
-        setSelectedCustomer(data.customer);
-      }
+      const customer = await customerService.getCustomer(customerId);
+      setSelectedCustomer(customer);
     } catch (error) {
       console.error("Error fetching customer:", error);
     }
@@ -867,13 +838,8 @@ export default function CreateQuoteForm({
   const fetchPrescriptions = async (customerId: string) => {
     try {
       setLoadingPrescriptions(true);
-      const response = await fetch(
-        `/api/admin/customers/${customerId}/prescriptions`,
-      );
-      if (response.ok) {
-        const data = await response.json();
-        setPrescriptions(data.prescriptions || []);
-      }
+      const prescriptions = await customerService.getPrescriptions(customerId);
+      setPrescriptions(prescriptions);
     } catch (error) {
       console.error("Error fetching prescriptions:", error);
     } finally {
@@ -891,20 +857,8 @@ export default function CreateQuoteForm({
 
       setSearchingCustomers(true);
       try {
-        const headers: HeadersInit = {
-          ...getBranchHeader(currentBranchId),
-        };
-
-        const response = await fetch(
-          `/api/admin/customers/search?q=${encodeURIComponent(customerSearch)}`,
-          {
-            headers,
-          },
-        );
-        if (response.ok) {
-          const data = await response.json();
-          setCustomerResults(data.customers || []);
-        }
+        const customers = await customerService.searchCustomers(customerSearch);
+        setCustomerResults(customers);
       } catch (error) {
         console.error("Error searching customers:", error);
       } finally {
@@ -914,7 +868,7 @@ export default function CreateQuoteForm({
 
     const debounce = setTimeout(searchCustomers, 300);
     return () => clearTimeout(debounce);
-  }, [customerSearch, currentBranchId]);
+  }, [customerSearch]);
 
   // Search frames
   useEffect(() => {
@@ -926,20 +880,8 @@ export default function CreateQuoteForm({
 
       setSearchingFrames(true);
       try {
-        const headers: HeadersInit = {
-          ...getBranchHeader(currentBranchId),
-        };
-
-        const response = await fetch(
-          `/api/admin/products/search?q=${encodeURIComponent(frameSearch)}&type=frame`,
-          {
-            headers,
-          },
-        );
-        if (response.ok) {
-          const data = await response.json();
-          setFrameResults(data.products || []);
-        }
+        const frames = await productService.searchProducts(frameSearch);
+        setFrameResults(frames);
       } catch (error) {
         console.error("Error searching frames:", error);
       } finally {
@@ -949,7 +891,7 @@ export default function CreateQuoteForm({
 
     const debounce = setTimeout(searchFrames, 300);
     return () => clearTimeout(debounce);
-  }, [frameSearch, currentBranchId]);
+  }, [frameSearch]);
 
   // Search near frames (for two separate lenses)
   useEffect(() => {
@@ -961,20 +903,8 @@ export default function CreateQuoteForm({
 
       setSearchingNearFrames(true);
       try {
-        const headers: HeadersInit = {
-          ...getBranchHeader(currentBranchId),
-        };
-
-        const response = await fetch(
-          `/api/admin/products/search?q=${encodeURIComponent(nearFrameSearch)}&type=frame`,
-          {
-            headers,
-          },
-        );
-        if (response.ok) {
-          const data = await response.json();
-          setNearFrameResults(data.products || []);
-        }
+        const results = await productService.searchProducts(nearFrameSearch);
+        setNearFrameResults(results || []);
       } catch (error) {
         console.error("Error searching near frames:", error);
       } finally {
@@ -1345,11 +1275,18 @@ export default function CreateQuoteForm({
         nearFrameData,
       });
 
-      const response = await fetch("/api/admin/quotes", {
-        method: "POST",
-        headers,
-        body: JSON.stringify({
-          customer_id: selectedCustomer.id,
+      await quoteService.createQuote({
+        customer_id: selectedCustomer.id,
+        status: "draft",
+        subtotal: formData.subtotal,
+        tax_amount: formData.tax_amount,
+        discount_amount: formData.discount_amount,
+        total_amount: formData.total_amount,
+        valid_until: expirationDate.toISOString().split("T")[0],
+        notes: formData.notes,
+        branch_id: currentBranchId || undefined,
+        items: [{
+          product_type: lensType === "contact" ? "contact_lens" : "lens",
           prescription_id: selectedPrescription.id,
           frame_product_id: selectedFrame?.id,
           customer_own_frame: customerOwnFrame,
@@ -1360,123 +1297,41 @@ export default function CreateQuoteForm({
           frame_size: formData.frame_size,
           frame_sku: formData.frame_sku,
           frame_price: formData.frame_price,
-          // Second frame for two separate lenses
           ...nearFrameData,
-          lens_family_id:
-            presbyopiaSolution === "two_separate"
-              ? null
-              : formData.lens_family_id || null,
-          lens_type:
-            lensType === "contact"
-              ? "Lentes de contacto"
-              : formData.lens_type || null,
+          lens_family_id: presbyopiaSolution === "two_separate" ? null : formData.lens_family_id || null,
+          lens_type: lensType === "contact" ? "Lentes de contacto" : formData.lens_type || null,
           lens_material: formData.lens_material || null,
-          lens_index:
-            formData.lens_index !== null && formData.lens_index !== undefined
-              ? formData.lens_index
-              : null,
-          lens_treatments:
-            lensType === "contact" ? [] : formData.lens_treatments,
+          lens_index: formData.lens_index !== null && formData.lens_index !== undefined ? formData.lens_index : null,
+          lens_treatments: lensType === "contact" ? [] : formData.lens_treatments,
           lens_tint_color: formData.lens_tint_color || null,
           lens_tint_percentage: formData.lens_tint_percentage || null,
           presbyopia_solution: formData.presbyopia_solution || "none",
-          far_lens_family_id:
-            presbyopiaSolution === "two_separate"
-              ? farLensFamilyId || null
-              : null,
-          near_lens_family_id:
-            presbyopiaSolution === "two_separate"
-              ? nearLensFamilyId || null
-              : null,
-          far_lens_cost:
-            presbyopiaSolution === "two_separate"
-              ? farLensCost || 0
-              : undefined,
-          near_lens_cost:
-            presbyopiaSolution === "two_separate"
-              ? nearLensCost || 0
-              : undefined,
-          // Contact lens fields
-          contact_lens_family_id:
-            lensType === "contact"
-              ? formData.contact_lens_family_id || null
-              : null,
-          // Usar receta seleccionada del cliente para lentes de contacto (no inputs manuales)
-          contact_lens_rx_sphere_od:
-            lensType === "contact" && selectedPrescription
-              ? (selectedPrescription.od_sphere ?? null)
-              : null,
-          contact_lens_rx_cylinder_od:
-            lensType === "contact" && selectedPrescription
-              ? (selectedPrescription.od_cylinder ?? null)
-              : null,
-          contact_lens_rx_axis_od:
-            lensType === "contact" && selectedPrescription
-              ? (selectedPrescription.od_axis ?? null)
-              : null,
-          contact_lens_rx_add_od:
-            lensType === "contact" && selectedPrescription
-              ? (selectedPrescription.od_add ?? null)
-              : null,
-          contact_lens_rx_base_curve_od:
-            lensType === "contact"
-              ? formData.contact_lens_rx_base_curve_od
-              : null,
-          contact_lens_rx_diameter_od:
-            lensType === "contact"
-              ? formData.contact_lens_rx_diameter_od
-              : null,
-          contact_lens_rx_sphere_os:
-            lensType === "contact" && selectedPrescription
-              ? (selectedPrescription.os_sphere ?? null)
-              : null,
-          contact_lens_rx_cylinder_os:
-            lensType === "contact" && selectedPrescription
-              ? (selectedPrescription.os_cylinder ?? null)
-              : null,
-          contact_lens_rx_axis_os:
-            lensType === "contact" && selectedPrescription
-              ? (selectedPrescription.os_axis ?? null)
-              : null,
-          contact_lens_rx_add_os:
-            lensType === "contact" && selectedPrescription
-              ? (selectedPrescription.os_add ?? null)
-              : null,
-          contact_lens_rx_base_curve_os:
-            lensType === "contact"
-              ? formData.contact_lens_rx_base_curve_os
-              : null,
-          contact_lens_rx_diameter_os:
-            lensType === "contact"
-              ? formData.contact_lens_rx_diameter_os
-              : null,
-          contact_lens_quantity:
-            lensType === "contact" ? formData.contact_lens_quantity || 1 : 1,
-          contact_lens_cost:
-            lensType === "contact" ? formData.contact_lens_cost || 0 : 0,
-          contact_lens_price:
-            lensType === "contact" ? formData.contact_lens_price || 0 : 0,
+          far_lens_family_id: presbyopiaSolution === "two_separate" ? farLensFamilyId || null : null,
+          near_lens_family_id: presbyopiaSolution === "two_separate" ? nearLensFamilyId || null : null,
+          far_lens_cost: presbyopiaSolution === "two_separate" ? farLensCost || 0 : undefined,
+          near_lens_cost: presbyopiaSolution === "two_separate" ? nearLensCost || 0 : undefined,
+          contact_lens_family_id: lensType === "contact" ? formData.contact_lens_family_id || null : null,
+          contact_lens_rx_sphere_od: lensType === "contact" && selectedPrescription ? (selectedPrescription.od_sphere ?? null) : null,
+          contact_lens_rx_cylinder_od: lensType === "contact" && selectedPrescription ? (selectedPrescription.od_cylinder ?? null) : null,
+          contact_lens_rx_axis_od: lensType === "contact" && selectedPrescription ? (selectedPrescription.od_axis ?? null) : null,
+          contact_lens_rx_add_od: lensType === "contact" && selectedPrescription ? (selectedPrescription.od_add ?? null) : null,
+          contact_lens_rx_base_curve_od: lensType === "contact" ? formData.contact_lens_rx_base_curve_od : null,
+          contact_lens_rx_diameter_od: lensType === "contact" ? formData.contact_lens_rx_diameter_od : null,
+          contact_lens_rx_sphere_os: lensType === "contact" && selectedPrescription ? (selectedPrescription.os_sphere ?? null) : null,
+          contact_lens_rx_cylinder_os: lensType === "contact" && selectedPrescription ? (selectedPrescription.os_cylinder ?? null) : null,
+          contact_lens_rx_axis_os: lensType === "contact" && selectedPrescription ? (selectedPrescription.os_axis ?? null) : null,
+          contact_lens_rx_add_os: lensType === "contact" && selectedPrescription ? (selectedPrescription.os_add ?? null) : null,
+          contact_lens_rx_base_curve_os: lensType === "contact" ? formData.contact_lens_rx_base_curve_os : null,
+          contact_lens_rx_diameter_os: lensType === "contact" ? formData.contact_lens_rx_diameter_os : null,
+          contact_lens_quantity: lensType === "contact" ? formData.contact_lens_quantity || 1 : 1,
+          contact_lens_cost: lensType === "contact" ? formData.contact_lens_cost || 0 : 0,
+          contact_lens_price: lensType === "contact" ? formData.contact_lens_price || 0 : 0,
           frame_cost: formData.frame_cost,
           lens_cost: lensType === "contact" ? 0 : formData.lens_cost,
-          treatments_cost:
-            lensType === "contact" ? 0 : formData.treatments_cost,
+          treatments_cost: lensType === "contact" ? 0 : formData.treatments_cost,
           labor_cost: formData.labor_cost,
-          subtotal: formData.subtotal,
-          tax_amount: formData.tax_amount,
-          discount_amount: formData.discount_amount,
-          discount_percentage: formData.discount_percentage,
-          total_amount: formData.total_amount,
-          notes: formData.notes,
-          customer_notes: formData.customer_notes,
-          expiration_date: expirationDate.toISOString().split("T")[0],
-          status: "draft",
-        }),
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || "Error al crear presupuesto");
-      }
+        }],
+      } as any);
 
       toast.success("Presupuesto creado exitosamente");
       onSuccess();

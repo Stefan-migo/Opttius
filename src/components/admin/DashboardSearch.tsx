@@ -13,6 +13,7 @@ import {
 import { Search, User, Package, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { extractDataFromResponse } from "@/lib/api/response-helpers";
 
 interface SearchResult {
   id: string;
@@ -62,7 +63,7 @@ export function DashboardSearch({ type, placeholder }: DashboardSearchProps) {
       if (response.ok) {
         if (type === "customer") {
           setResults(
-            (data.customers || []).map((c: any) => ({
+            (extractDataFromResponse(data) || []).map((c: any) => ({
               id: c.id,
               name:
                 `${c.first_name || ""} ${c.last_name || ""}`.trim() ||
@@ -74,7 +75,7 @@ export function DashboardSearch({ type, placeholder }: DashboardSearchProps) {
           );
         } else {
           setResults(
-            (data.products || []).map((p: any) => ({
+            (extractDataFromResponse(data) || []).map((p: any) => ({
               id: p.id,
               name: p.name,
               type: "product" as const,

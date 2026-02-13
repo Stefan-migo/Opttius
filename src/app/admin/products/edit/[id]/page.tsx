@@ -23,6 +23,7 @@ import RichTextEditor from "@/components/ui/RichTextEditor";
 import ImageUpload from "@/components/ui/ImageUpload";
 import { useProductOptions } from "@/hooks/useProductOptions";
 import { useBranch } from "@/hooks/useBranch";
+import { productService } from "@/lib/api/services";
 
 export default function EditProductPage() {
   const router = useRouter();
@@ -184,7 +185,73 @@ export default function EditProductPage() {
     { value: "uv350", label: "UV350" },
   ]);
 
-  const [formData, setFormData] = useState({
+  // Form state type
+  interface FormState {
+    name: string;
+    slug: string;
+    short_description: string;
+    description: string;
+    price: string;
+    price_includes_tax: boolean;
+    category_id: string;
+    featured_image: string;
+    gallery: string[];
+    stock_quantity: string;
+    is_featured: boolean;
+    status: string;
+    // Optical product fields
+    product_type: string;
+    sku: string;
+    barcode: string;
+    brand: string;
+    manufacturer: string;
+    model_number: string;
+    // Frame fields
+    frame_type: string;
+    frame_material: string;
+    frame_shape: string;
+    frame_color: string;
+    frame_colors: string[];
+    frame_brand: string;
+    frame_model: string;
+    frame_sku: string;
+    frame_gender: string;
+    frame_age_group: string;
+    frame_size: string;
+    frame_features: string[];
+    frame_measurements: {
+      lens_width: string;
+      bridge_width: string;
+      temple_length: string;
+      lens_height: string;
+      total_width: string;
+    };
+    // Lens fields
+    lens_type: string;
+    lens_material: string;
+    lens_index: string;
+    lens_coatings: string[];
+    lens_tint_options: string[];
+    uv_protection: string;
+    blue_light_filter: boolean;
+    blue_light_filter_percentage: string;
+    photochromic: boolean;
+    prescription_available: boolean;
+    prescription_range: {
+      sph_min: string;
+      sph_max: string;
+      cyl_min: string;
+      cyl_max: string;
+      add_min: string;
+      add_max: string;
+    };
+    requires_prescription: boolean;
+    is_customizable: boolean;
+    warranty_months: string;
+    warranty_details: string;
+  }
+
+  const [formData, setFormData] = useState<FormState>({
     name: "",
     slug: "",
     short_description: "",
@@ -275,30 +342,10 @@ export default function EditProductPage() {
       try {
         setLoading(true);
 
-        // Prepare headers with branch context
-        const headers: HeadersInit = {
-          "Content-Type": "application/json",
-        };
-
-        if (currentBranchId) {
-          headers["x-branch-id"] = currentBranchId;
-        } else if (isSuperAdmin) {
-          headers["x-branch-id"] = "global";
-        }
-
         // Fetch product data including archived products for admin editing
-        const productResponse = await fetch(
-          `/api/admin/products/${productId}?include_archived=true`,
-          {
-            headers,
-          },
-        );
-        if (!productResponse.ok) {
-          throw new Error("Failed to fetch product");
-        }
-        const productData = await productResponse.json();
+        const productData = await productService.getProduct(productId);
 
-        // Fetch categories
+        // Fetch categories - Note: This would need a categoryService in the future
         const categoriesResponse = await fetch("/api/categories");
         if (!categoriesResponse.ok) {
           throw new Error("Failed to fetch categories");
@@ -306,7 +353,7 @@ export default function EditProductPage() {
         const categoriesData = await categoriesResponse.json();
 
         // Set form data with product values
-        const product = productData.product;
+        const product = productData;
 
         // Debug: Log product data to see what we're getting
         console.log("Product data:", {
@@ -350,7 +397,31 @@ export default function EditProductPage() {
           console.log("No stock found, using default 0");
         }
 
-        const initialFormData = {
+        // Transform frame_measurements to ensure all fields are strings
+        const transformedFrameMeasurements = {
+          lens_width: product.frame_measurements?.lens_width?.toString() || "",
+          bridge_width: product.frame_measurements?.bridge_width?.toString() || "",
+          temple_length: product.frame_measurements?.temple_length?.toString() || "",
+          lens_height: product.frame_measurements?.lens_height?.toString() || "",
+          total_width: product.frame_measurements?.total_width?.toString() || "",
+        };
+
+        // Transform prescription_range to ensure all fields are strings
+        const transformedPrescriptionRange = {
+          sph_min: product.prescription_range?.sph_min?.toString() || "",
+          sph_max: product.prescription_range?.sph_max?.toString() || "",
+          cyl_min: product.prescription_range?.cyl_min?.toString() || "",
+          cyl_max: product.prescription_range?.cyl_max?.toString() || "",
+          add_min: product.prescription_range?.add_min?.toString() || "",
+          add_max: product.prescription_range?.add_max?.toString() || "",
+        };
+
+        // Ensure uv_protection is string
+        const uvProtectionValue = typeof product.uv_protection === 'string' 
+          ? product.uv_protection 
+          : product.uv_protection ? "true" : "";
+
+        const initialFormData: FormState = {
           name: product.name || "",
           slug: product.slug || "",
           short_description: product.short_description || "",
@@ -383,79 +454,25 @@ export default function EditProductPage() {
           frame_age_group: product.frame_age_group || "",
           frame_size: product.frame_size || "",
           frame_features: product.frame_features || [],
-          frame_measurements: product.frame_measurements || {
-            lens_width: "",
-            bridge_width: "",
-            temple_length: "",
-            lens_height: "",
-            total_width: "",
-          },
+          frame_measurements: transformedFrameMeasurements,
           // Lens fields
           lens_type: product.lens_type || "",
           lens_material: product.lens_material || "",
           lens_index: product.lens_index?.toString() || "",
           lens_coatings: product.lens_coatings || [],
           lens_tint_options: product.lens_tint_options || [],
-          uv_protection: product.uv_protection || "",
+          uv_protection: uvProtectionValue,
           blue_light_filter: product.blue_light_filter || false,
           blue_light_filter_percentage:
             product.blue_light_filter_percentage?.toString() || "",
           photochromic: product.photochromic || false,
           prescription_available: product.prescription_available || false,
-          prescription_range: product.prescription_range || {
-            sph_min: "",
-            sph_max: "",
-            cyl_min: "",
-            cyl_max: "",
-            add_min: "",
-            add_max: "",
-          },
+          prescription_range: transformedPrescriptionRange,
           requires_prescription: product.requires_prescription || false,
           is_customizable: product.is_customizable || false,
           warranty_months: product.warranty_months?.toString() || "",
           warranty_details: product.warranty_details || "",
         };
-
-        // Convert frame_measurements numbers to strings for form inputs
-        if (
-          initialFormData.frame_measurements &&
-          typeof initialFormData.frame_measurements === "object"
-        ) {
-          initialFormData.frame_measurements = {
-            lens_width:
-              initialFormData.frame_measurements.lens_width?.toString() || "",
-            bridge_width:
-              initialFormData.frame_measurements.bridge_width?.toString() || "",
-            temple_length:
-              initialFormData.frame_measurements.temple_length?.toString() ||
-              "",
-            lens_height:
-              initialFormData.frame_measurements.lens_height?.toString() || "",
-            total_width:
-              initialFormData.frame_measurements.total_width?.toString() || "",
-          };
-        }
-
-        // Convert prescription_range numbers to strings for form inputs
-        if (
-          initialFormData.prescription_range &&
-          typeof initialFormData.prescription_range === "object"
-        ) {
-          initialFormData.prescription_range = {
-            sph_min:
-              initialFormData.prescription_range.sph_min?.toString() || "",
-            sph_max:
-              initialFormData.prescription_range.sph_max?.toString() || "",
-            cyl_min:
-              initialFormData.prescription_range.cyl_min?.toString() || "",
-            cyl_max:
-              initialFormData.prescription_range.cyl_max?.toString() || "",
-            add_min:
-              initialFormData.prescription_range.add_min?.toString() || "",
-            add_max:
-              initialFormData.prescription_range.add_max?.toString() || "",
-          };
-        }
 
         setFormData(initialFormData);
         setInitialData(initialFormData);
@@ -618,34 +635,19 @@ export default function EditProductPage() {
         headers["x-branch-id"] = "global";
       }
 
-      const response = await fetch(`/api/admin/products/${productId}`, {
-        method: "PUT",
-        headers,
-        body: JSON.stringify(productData),
-      });
+      const result = await productService.updateProduct(productId, productData as any);
 
-      if (response.ok) {
-        const result = await response.json();
+      // Invalidate React Query cache to refresh the products list
+      queryClient.invalidateQueries({ queryKey: ["products"] });
+      queryClient.invalidateQueries({ queryKey: ["productStats"] });
 
-        // Invalidate React Query cache to refresh the products list
-        queryClient.invalidateQueries({ queryKey: ["products"] });
-        queryClient.invalidateQueries({ queryKey: ["productStats"] });
-
-        if (result.warning) {
-          toast.warning(result.warning);
-        } else {
-          toast.success("Producto actualizado exitosamente");
-        }
-        router.push("/admin/products");
-      } else {
-        const error = await response.json();
-        toast.error(
-          error.error || error.message || "Error al actualizar el producto",
-        );
-      }
+      toast.success("Producto actualizado exitosamente");
+      router.push("/admin/products");
     } catch (error) {
       console.error("Error:", error);
-      toast.error("Error al actualizar el producto");
+      const errorMessage =
+        error instanceof Error ? error.message : "Error al actualizar el producto";
+      toast.error(errorMessage);
     } finally {
       setSaving(false);
     }

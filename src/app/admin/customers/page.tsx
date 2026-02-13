@@ -44,27 +44,9 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useBranch } from "@/hooks/useBranch";
 import { BranchSelector } from "@/components/admin/BranchSelector";
-import { getBranchHeader } from "@/lib/utils/branch";
-interface Customer {
-  id: string;
-  first_name?: string;
-  last_name?: string;
-  email?: string | null;
-  phone?: string | null;
-  rut?: string | null;
-  branch_id: string;
-  is_active?: boolean;
-  created_at: string;
-  orders?: any[];
-  analytics?: {
-    totalSpent: number;
-    orderCount: number;
-    lastOrderDate?: string;
-    avgOrderValue: number;
-    segment: string;
-    lifetimeValue: number;
-  };
-}
+import { customerService, Customer } from "@/lib/api/services/customerService";
+import { handleApiError } from "@/lib/services/errorService";
+import { success } from "@/lib/services/notificationService";
 
 interface CustomerStats {
   totalCustomers: number;
@@ -99,33 +81,24 @@ export default function CustomersPage() {
   const fetchCustomers = async () => {
     try {
       setLoading(true);
-      const params = new URLSearchParams({
-        page: currentPage.toString(),
-        limit: "20",
-        ...(searchTerm && { search: searchTerm }),
-        ...(statusFilter !== "all" && { status: statusFilter }),
+      
+      const { data, pagination } = await customerService.getCustomers({
+        page: currentPage,
+        limit: 20,
+        search: searchTerm ? searchTerm : undefined,
+        status: statusFilter !== 'all' ? statusFilter : undefined,
+        branchId: currentBranchId || undefined,
+        isGlobalView,
+        isSuperAdmin,
       });
-
-      // Add branch header
-      const headers = getBranchHeader(currentBranchId);
-      if (isGlobalView && isSuperAdmin) {
-        headers["x-branch-id"] = "global";
-      }
-
-      const response = await fetch(`/api/admin/customers?${params}`, {
-        headers,
-      });
-      if (!response.ok) {
-        throw new Error("Failed to fetch customers");
-      }
-
-      const data = await response.json();
-      setCustomers(data.customers || []);
-      setTotalPages(data.pagination?.totalPages || 1);
+      
+      setCustomers(data);
+      setTotalPages(pagination.totalPages || 1);
       setError(null);
     } catch (err) {
       console.error("Error fetching customers:", err);
-      setError(err instanceof Error ? err.message : "Unknown error occurred");
+      const errorObj = handleApiError(err, 'Customers List');
+      setError(errorObj?.message || 'Error al cargar clientes');
     } finally {
       setLoading(false);
     }
@@ -133,28 +106,16 @@ export default function CustomersPage() {
 
   const fetchStats = async () => {
     try {
-      // Add branch header
-      const headers: HeadersInit = {
-        "Content-Type": "application/json",
-        ...getBranchHeader(currentBranchId),
-      };
-      if (isGlobalView && isSuperAdmin) {
-        headers["x-branch-id"] = "global";
-      }
-
-      const response = await fetch("/api/admin/customers", {
-        method: "POST",
-        headers,
-        body: JSON.stringify({}), // Send empty object to trigger analytics
-      });
-      if (!response.ok) {
-        throw new Error("Failed to fetch customer stats");
-      }
-
-      const data = await response.json();
-      setStats(data.summary);
+      const branchIdParam = currentBranchId as string | undefined;
+      const statsData = await customerService.getCustomerStats(
+        branchIdParam,
+        isGlobalView,
+        isSuperAdmin
+      );
+      setStats(statsData);
     } catch (err) {
       console.error("Error fetching customer stats:", err);
+      handleApiError(err, 'Customer Stats');
     }
   };
 

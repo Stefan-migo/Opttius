@@ -3,10 +3,12 @@ import { renderHook, act } from "@testing-library/react";
 import { useCustomerSearch } from "../hooks/useCustomerSearch";
 import * as branchHook from "@/hooks/useBranch";
 
-// Mock dependencies
-vi.mock("@/hooks/useBranch");
+// Mock the hook properly
+vi.mock("@/hooks/useBranch", () => ({
+  useBranch: vi.fn(),
+}));
 
-const mockUseBranch = branchHook.useBranch as any;
+const mockUseBranch = vi.mocked(branchHook.useBranch);
 
 describe("useCustomerSearch", () => {
   const mockInitialData = {
@@ -40,6 +42,16 @@ describe("useCustomerSearch", () => {
   beforeEach(() => {
     mockUseBranch.mockReturnValue({
       currentBranchId: "test-branch-123",
+      currentBranchName: "Test Branch",
+      canSwitchBranch: false,
+      hasMultipleBranches: false,
+      branches: [{ id: "test-branch-123", name: "Test Branch", code: "TEST001" }],
+      currentBranch: { id: "test-branch-123", name: "Test Branch", code: "TEST001" },
+      isGlobalView: false,
+      isSuperAdmin: false,
+      isLoading: false,
+      setCurrentBranch: vi.fn(),
+      refreshBranches: vi.fn(),
     });
 
     // Mock fetch globally
@@ -73,7 +85,7 @@ describe("useCustomerSearch", () => {
   });
 
   it("should initialize with provided initial data", () => {
-    const { result } = renderHook(() => 
+    const { result } = renderHook(() =>
       useCustomerSearch({ initialData: mockInitialData })
     );
 
@@ -82,7 +94,7 @@ describe("useCustomerSearch", () => {
   });
 
   it("should initialize with provided initial customer ID", () => {
-    const { result } = renderHook(() => 
+    const { result } = renderHook(() =>
       useCustomerSearch({ initialCustomerId: mockInitialCustomerId })
     );
 
@@ -126,7 +138,7 @@ describe("useCustomerSearch", () => {
   });
 
   it("should clear customer selection", () => {
-    const { result } = renderHook(() => 
+    const { result } = renderHook(() =>
       useCustomerSearch({ initialData: mockInitialData })
     );
 
@@ -229,7 +241,7 @@ describe("useCustomerSearch", () => {
       ok: true,
       json: () => Promise.resolve({ customers: mockCustomers }),
     };
-    
+
     (global.fetch as any).mockResolvedValueOnce(mockResponse);
 
     const { result } = renderHook(() => useCustomerSearch({}));
@@ -305,7 +317,7 @@ describe("useCustomerSearch", () => {
 
     (global.fetch as any).mockResolvedValueOnce(mockResponse);
 
-    const { result } = renderHook(() => 
+    const { result } = renderHook(() =>
       useCustomerSearch({ initialCustomerId: "customer-123" })
     );
 
@@ -323,7 +335,7 @@ describe("useCustomerSearch", () => {
   it("should handle fetch customer by ID error", async () => {
     (global.fetch as any).mockRejectedValueOnce(new Error("Customer not found"));
 
-    const { result } = renderHook(() => 
+    const { result } = renderHook(() =>
       useCustomerSearch({ initialCustomerId: "nonexistent-customer" })
     );
 

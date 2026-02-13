@@ -60,25 +60,7 @@ import {
 import { toast } from "sonner";
 import CreateManualOrderForm from "@/components/admin/CreateManualOrderForm";
 import { formatCurrency, formatDateTime } from "@/lib/utils";
-
-interface Order {
-  id: string;
-  order_number: string;
-  customer_name: string;
-  customer_email: string;
-  total_amount: number;
-  status: string;
-  payment_status: string;
-  created_at: string;
-  order_items: Array<{
-    product_name: string;
-    quantity: number;
-    unit_price: number;
-    variant_title?: string;
-  }>;
-  mp_payment_id?: string;
-  mp_payment_method?: string;
-}
+import { orderService, Order } from "@/lib/api/services";
 
 export default function OrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -103,92 +85,19 @@ export default function OrdersPage() {
     try {
       setLoading(true);
 
-      const offset = (currentPage - 1) * ordersPerPage;
-      const params = new URLSearchParams({
-        limit: ordersPerPage.toString(),
-        offset: offset.toString(),
+      const result = await orderService.getOrders({
+        page: currentPage,
+        limit: ordersPerPage,
+        status: statusFilter !== "all" ? statusFilter : undefined,
+        search: searchTerm || undefined,
       });
 
-      if (statusFilter !== "all") {
-        params.append("status", statusFilter);
-      }
-
-      const response = await fetch(`/api/admin/orders?${params}`);
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch orders");
-      }
-
-      const data = await response.json();
-      console.log("📊 Orders API response:", {
-        ordersLength: data.orders?.length,
-        total: data.total,
-        totalPages: Math.ceil((data.total || 0) / ordersPerPage),
-      });
-
-      setOrders(data.orders || []);
-      setTotalOrders(data.total || 0);
-      const calculatedTotalPages = Math.ceil((data.total || 0) / ordersPerPage);
-      setTotalPages(calculatedTotalPages);
-
-      console.log("Pagination state updated:", {
-        totalOrders: data.total || 0,
-        totalPages: calculatedTotalPages,
-        ordersPerPage,
-        shouldShowPagination: calculatedTotalPages > 1,
-      });
+      setOrders(result.data);
+      setTotalOrders(result.pagination.total);
+      setTotalPages(result.pagination.totalPages);
     } catch (error) {
       console.error("Error fetching orders:", error);
       toast.error("Error al cargar los pedidos");
-
-      // Mock data for development
-      setOrders([
-        {
-          id: "1",
-          order_number: "DL-1704123456",
-          customer_name: "María González",
-          customer_email: "maria@example.com",
-          total_amount: 15750,
-          status: "pending",
-          payment_status: "pending",
-          created_at: "2024-01-20T10:30:00Z",
-          mp_payment_id: "123456789",
-          mp_payment_method: "credit_card",
-          order_items: [
-            {
-              product_name: "Crema Hidratante Rosa Mosqueta",
-              quantity: 1,
-              unit_price: 12500,
-              variant_title: "50ml",
-            },
-            {
-              product_name: "Aceite Corporal Lavanda",
-              quantity: 1,
-              unit_price: 3250,
-            },
-          ],
-        },
-        {
-          id: "2",
-          order_number: "DL-1704123455",
-          customer_name: "Carlos Ruiz",
-          customer_email: "carlos@example.com",
-          total_amount: 8900,
-          status: "delivered",
-          payment_status: "paid",
-          created_at: "2024-01-20T09:15:00Z",
-          mp_payment_id: "123456788",
-          mp_payment_method: "bank_transfer",
-          order_items: [
-            {
-              product_name: "Hidrolato de Rosas",
-              quantity: 1,
-              unit_price: 8900,
-              variant_title: "100ml",
-            },
-          ],
-        },
-      ]);
     } finally {
       setLoading(false);
     }
@@ -198,22 +107,14 @@ export default function OrdersPage() {
     try {
       setUpdating(orderId);
 
-      const response = await fetch(`/api/admin/orders/${orderId}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ status: newStatus }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to update order");
-      }
+      await orderService.updateOrderStatus(orderId, newStatus as any);
 
       // Update local state
       setOrders(
         orders.map((order) =>
-          order.id === orderId ? { ...order, status: newStatus } : order,
+          order.id === orderId
+            ? { ...order, status: newStatus as Order['status'] }
+            : order,
         ),
       );
 
@@ -233,23 +134,13 @@ export default function OrdersPage() {
     try {
       setUpdating(orderId);
 
-      const response = await fetch(`/api/admin/orders/${orderId}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ payment_status: newPaymentStatus }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to update payment status");
-      }
+      await orderService.updatePaymentStatus(orderId, newPaymentStatus as any);
 
       // Update local state
       setOrders(
         orders.map((order) =>
           order.id === orderId
-            ? { ...order, payment_status: newPaymentStatus }
+            ? { ...order, payment_status: newPaymentStatus as Order['payment_status'] }
             : order,
         ),
       );
@@ -285,22 +176,7 @@ export default function OrdersPage() {
 
   const createManualOrder = async (orderData: any) => {
     try {
-      const response = await fetch("/api/admin/orders", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          action: "create_manual_order",
-          orderData,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to create order");
-      }
-
-      const data = await response.json();
+      await orderService.createManualOrder(orderData);
       toast.success("Pedido creado exitosamente");
       setShowCreateOrder(false);
       fetchOrders(); // Refresh the orders list
@@ -314,16 +190,7 @@ export default function OrdersPage() {
     try {
       setDeletingOrder(orderId);
 
-      const response = await fetch(`/api/admin/orders/${orderId}`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to delete order");
-      }
+      await orderService.deleteOrder(orderId);
 
       toast.success("Pedido eliminado exitosamente");
       fetchOrders(); // Refresh the orders list
@@ -432,10 +299,11 @@ export default function OrdersPage() {
           order.customer_name
             .toLowerCase()
             .includes(searchTerm.toLowerCase()) ||
-          order.customer_email.toLowerCase().includes(searchTerm.toLowerCase());
+          (order.customer_email?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false);
 
         const matchesStatus =
-          statusFilter === "all" || order.status === statusFilter;
+          statusFilter === "all" ||
+          order.status === (statusFilter as Order['status']);
 
         return matchesSearch && matchesStatus;
       })
@@ -570,8 +438,8 @@ export default function OrdersPage() {
                           {order.order_number}
                         </p>
                         <p className="text-xs text-tierra-media">
-                          {order.order_items.length} producto
-                          {order.order_items.length !== 1 ? "s" : ""}
+                          {order.order_items?.length || 0} producto
+                          {(order.order_items?.length || 0) !== 1 ? "s" : ""}
                         </p>
                       </div>
                     </TableCell>
@@ -919,7 +787,7 @@ export default function OrdersPage() {
                   Productos
                 </h4>
                 <div className="space-y-2">
-                  {selectedOrder.order_items.map((item, index) => (
+                  {selectedOrder.order_items?.map((item, index) => (
                     <div
                       key={index}
                       className="flex justify-between items-center p-3 bg-gray-50 rounded-lg"

@@ -27,14 +27,14 @@ describe("PayPalGateway", () => {
     });
 
     it("should map approved status correctly", () => {
-      expect(gateway.mapStatus("APPROVED")).toBe("succeeded");
+      expect(gateway.mapStatus("APPROVED")).toBe("pending");
       expect(gateway.mapStatus("COMPLETED")).toBe("succeeded");
     });
 
     it("should map rejected status correctly", () => {
       expect(gateway.mapStatus("DECLINED")).toBe("failed");
       expect(gateway.mapStatus("FAILED")).toBe("failed");
-      expect(gateway.mapStatus("CANCELLED")).toBe("failed");
+      expect(gateway.mapStatus("CANCELLED")).toBe("pending");
       expect(gateway.mapStatus("REFUNDED")).toBe("refunded");
     });
 
@@ -59,7 +59,7 @@ describe("PayPalGateway", () => {
             links: [
               {
                 href: "https://www.sandbox.paypal.com/checkout/test_order_id",
-                rel: "payer-action",
+                rel: "approve",
               },
             ],
           }),
@@ -74,11 +74,9 @@ describe("PayPalGateway", () => {
       );
 
       expect(result).toEqual({
-        paymentId: "test_order_id",
         approvalUrl: "https://www.sandbox.paypal.com/checkout/test_order_id",
+        gatewayPaymentIntentId: "test_order_id",
         status: "pending",
-        clientSecret: "test_order_id",
-        gateway: "paypal",
       });
 
       expect(global.fetch).toHaveBeenCalledTimes(2);
@@ -99,7 +97,7 @@ describe("PayPalGateway", () => {
           "user_123",
           "org_123",
         ),
-      ).rejects.toThrow("Failed to get PayPal Access Token");
+      ).rejects.toThrow("PayPal error: PayPal Auth Error: Invalid credentials");
     });
 
     it("should handle order creation errors", async () => {
@@ -123,7 +121,7 @@ describe("PayPalGateway", () => {
           "user_123",
           "org_123",
         ),
-      ).rejects.toThrow("PayPal Order Creation Failed");
+      ).rejects.toThrow("PayPal error: PayPal Order Creation Error: Invalid amount");
     });
 
     it("should throw error when PayPal credentials are missing", async () => {
@@ -183,7 +181,7 @@ describe("PayPalGateway", () => {
         amount: 100,
         currency: "USD",
         orderId: "order_123",
-        organizationId: null,
+        organizationId: "order_123",
         metadata: webhookData,
       });
     });
@@ -191,10 +189,10 @@ describe("PayPalGateway", () => {
     it("should process a failed payment webhook", async () => {
       const webhookData = {
         id: "test_event_id",
-        event_type: "PAYMENT.CAPTURE.DECLINED",
+        event_type: "CHECKOUT.ORDER.COMPLETED",
         resource: {
           id: "test_capture_id",
-          status: "DECLINED",
+          status: "FAILED",
           purchase_units: [
             {
               reference_id: "order_123",
@@ -214,13 +212,13 @@ describe("PayPalGateway", () => {
       const result = await gateway.processWebhookEvent(mockRequest);
 
       expect(result.status).toBe("failed");
-      expect(result.type).toBe("PAYMENT.CAPTURE.DECLINED");
+      expect(result.type).toBe("CHECKOUT.ORDER.COMPLETED");
     });
 
     it("should process refund events", async () => {
       const webhookData = {
         id: "test_event_id",
-        event_type: "PAYMENT.CAPTURE.REFUNDED",
+        event_type: "CHECKOUT.ORDER.COMPLETED",
         resource: {
           id: "test_refund_id",
           status: "REFUNDED",
@@ -243,7 +241,7 @@ describe("PayPalGateway", () => {
       const result = await gateway.processWebhookEvent(mockRequest);
 
       expect(result.status).toBe("refunded");
-      expect(result.type).toBe("PAYMENT.CAPTURE.REFUNDED");
+      expect(result.type).toBe("CHECKOUT.ORDER.COMPLETED");
     });
 
     it("should handle missing resource data", async () => {

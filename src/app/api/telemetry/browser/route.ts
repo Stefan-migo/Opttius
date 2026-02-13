@@ -52,6 +52,7 @@ export async function POST(request: NextRequest) {
 
         if (error) {
           console.error('Failed to store telemetry event:', error);
+          console.error('Event data:', JSON.stringify(dbEvent, null, 2));
           // Continue with other events even if one fails
           continue;
         }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { extractDataFromResponse, extractTotalFromResponse } from "@/lib/api/response-helpers";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -318,10 +319,10 @@ export default function ProductsPage() {
       console.log("✅ API Response:", data);
 
       // Calculate pagination
-      const total = data.pagination?.total || data.total || 0;
+      const total = extractTotalFromResponse(data);
       const calculatedTotalPages = Math.ceil(total / itemsPerPage);
 
-      setProducts(data.products || []);
+      setProducts(extractDataFromResponse<Product>(data));
       setTotalProducts(total);
       setTotalPages(calculatedTotalPages);
     } catch (error) {
@@ -340,7 +341,7 @@ export default function ProductsPage() {
       const response = await fetch("/api/categories");
       if (response.ok) {
         const data = await response.json();
-        setCategories(data.categories || []);
+        setCategories(extractDataFromResponse(data));
       }
     } catch (error) {
       console.error("Error fetching categories:", error);
@@ -375,7 +376,7 @@ export default function ProductsPage() {
       }
 
       const data = await response.json();
-      const allProducts = data.products || [];
+      const allProducts = extractDataFromResponse<Product>(data);
 
       // Calculate stats (branch-specific or global depending on currentBranchId)
       const stats = {

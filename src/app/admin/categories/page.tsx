@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { extractDataFromResponse } from "@/lib/api/response-helpers";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -62,7 +63,7 @@ export default function CategoriesPage() {
         throw new Error("Failed to fetch categories");
       }
       const data = await response.json();
-      setCategories(data.categories || []);
+      setCategories(extractDataFromResponse<Category>(data));
       setError(null);
     } catch (err) {
       console.error("Error fetching categories:", err);

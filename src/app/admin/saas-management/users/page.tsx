@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { extractDataFromResponse, extractPaginationFromResponse } from "@/lib/api/response-helpers";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -167,9 +168,10 @@ export default function UsersManagementPage() {
       }
 
       const data = await response.json();
-      setUsers(data.users || []);
-      setTotalPages(data.pagination?.totalPages || 1);
-      setTotalCount(data.pagination?.total || 0);
+      const pagination = extractPaginationFromResponse(data);
+      setUsers(extractDataFromResponse(data));
+      setTotalPages(pagination.totalPages || 1);
+      setTotalCount(pagination.total || 0);
       setError(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Error desconocido");

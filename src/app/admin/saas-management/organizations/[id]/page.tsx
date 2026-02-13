@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
+import { extractDataFromResponse } from "@/lib/api/response-helpers";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -163,6 +164,7 @@ export default function OrganizationDetailsPage() {
     current_period_end: "",
     stripe_subscription_id: "",
     stripe_customer_id: "",
+    gateway_subscription_id: "",
     gateway_customer_id: "",
   });
 
@@ -406,7 +408,7 @@ export default function OrganizationDetailsPage() {
       );
       if (!response.ok) throw new Error("Error al cargar usuarios");
       const data = await response.json();
-      setUsers(data.users || []);
+      setUsers(extractDataFromResponse(data));
     } catch (err) {
       toast.error("Error al cargar usuarios");
     }
@@ -547,6 +549,8 @@ export default function OrganizationDetailsPage() {
         current_period_end: "",
         stripe_subscription_id: "",
         stripe_customer_id: "",
+        gateway_subscription_id: "",
+        gateway_customer_id: "",
       });
       fetchSubscriptions();
       fetchOrganizationDetails();
@@ -580,6 +584,8 @@ export default function OrganizationDetailsPage() {
         current_period_end: "",
         stripe_subscription_id: "",
         stripe_customer_id: "",
+        gateway_subscription_id: "",
+        gateway_customer_id: "",
       });
       fetchSubscriptions();
       fetchOrganizationDetails();
@@ -1155,6 +1161,8 @@ export default function OrganizationDetailsPage() {
                     current_period_end: "",
                     stripe_subscription_id: "",
                     stripe_customer_id: "",
+                    gateway_subscription_id: "",
+                    gateway_customer_id: "",
                   });
                   setShowSubscriptionDialog(true);
                 }}
@@ -1223,6 +1231,10 @@ export default function OrganizationDetailsPage() {
                                     sub.current_period_start || "",
                                   current_period_end:
                                     sub.current_period_end || "",
+                                  stripe_subscription_id:
+                                    sub.stripe_subscription_id || "",
+                                  stripe_customer_id:
+                                    sub.stripe_customer_id || "",
                                   gateway_subscription_id:
                                     sub.gateway_subscription_id || "",
                                   gateway_customer_id:

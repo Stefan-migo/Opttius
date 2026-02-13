@@ -1518,7 +1518,7 @@ export const createSaasSupportTicketSchema = z.object({
     .trim(),
   category: saasSupportCategorySchema,
   priority: saasSupportPrioritySchema.default("medium").optional(),
-  metadata: z.record(z.unknown()).optional().default({}),
+  metadata: z.record(z.unknown()).optional(),
 });
 
 /**

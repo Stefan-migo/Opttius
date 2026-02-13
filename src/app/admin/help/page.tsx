@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { extractDataFromResponse, extractPaginationFromResponse } from "@/lib/api/response-helpers";
 import {
   Card,
   CardContent,
@@ -45,7 +46,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
-import { useForm } from "react-hook-form";
+import { useForm, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   createSaasSupportTicketSchema,
@@ -137,11 +138,12 @@ export default function HelpPage() {
     handleSubmit: handleSubmitTicket,
     formState: { errors: ticketErrors },
     reset: resetTicket,
-  } = useForm<TicketForm>({
+  } = useForm<any>({
     resolver: zodResolver(createSaasSupportTicketSchema),
     defaultValues: {
       priority: "medium",
       category: "technical",
+      metadata: {},
     },
   });
 
@@ -180,11 +182,12 @@ export default function HelpPage() {
       }
 
       const data = await response.json();
-      setTickets(data.tickets || []);
+      const paginationData = extractPaginationFromResponse(data);
+      setTickets(extractDataFromResponse<Ticket>(data));
       setPagination((prev) => ({
         ...prev,
-        total: data.pagination?.total || 0,
-        totalPages: data.pagination?.totalPages || 0,
+        total: paginationData.total || 0,
+        totalPages: paginationData.totalPages || 0,
       }));
     } catch (err) {
       toast.error("Error al cargar tickets");
@@ -193,7 +196,7 @@ export default function HelpPage() {
     }
   };
 
-  const onSubmitTicket = async (data: TicketForm) => {
+  const onSubmitTicket: SubmitHandler<any> = async (data) => {
     setCreatingTicket(true);
     try {
       const response = await fetch(
@@ -447,9 +450,9 @@ export default function HelpPage() {
               <p className="text-lg font-medium mb-2">No hay tickets</p>
               <p className="text-sm mb-4">
                 {(filters.status && filters.status !== "all") ||
-                (filters.priority && filters.priority !== "all") ||
-                (filters.category && filters.category !== "all") ||
-                filters.search
+                  (filters.priority && filters.priority !== "all") ||
+                  (filters.category && filters.category !== "all") ||
+                  filters.search
                   ? "No hay tickets que coincidan con los filtros"
                   : "Crea tu primer ticket de soporte"}
               </p>
@@ -593,7 +596,7 @@ export default function HelpPage() {
                 </Select>
                 {ticketErrors.category && (
                   <p className="text-sm text-red-500">
-                    {ticketErrors.category.message}
+                    {String(ticketErrors.category.message)}
                   </p>
                 )}
               </div>
@@ -624,7 +627,7 @@ export default function HelpPage() {
                 </Select>
                 {ticketErrors.priority && (
                   <p className="text-sm text-red-500">
-                    {ticketErrors.priority.message}
+                    {String(ticketErrors.priority.message)}
                   </p>
                 )}
               </div>
@@ -642,7 +645,7 @@ export default function HelpPage() {
               />
               {ticketErrors.subject && (
                 <p className="text-sm text-red-500">
-                  {ticketErrors.subject.message}
+                  {String(ticketErrors.subject.message)}
                 </p>
               )}
             </div>
@@ -660,7 +663,7 @@ export default function HelpPage() {
               />
               {ticketErrors.description && (
                 <p className="text-sm text-red-500">
-                  {ticketErrors.description.message}
+                  {String(ticketErrors.description.message)}
                 </p>
               )}
               <p className="text-xs text-gray-500">

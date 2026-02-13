@@ -1,18 +1,13 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
 import { useAvailability } from "../hooks/useAvailability";
-import { BranchProvider } from "@/contexts/BranchContext";
-import { AuthProvider } from "@/contexts/AuthContext";
+
 import * as branchHook from "@/hooks/useBranch";
 import * as authContext from "@/contexts/AuthContext";
 
-// Mock dependencies
-vi.mock("@/contexts/BranchContext");
-vi.mock("@/contexts/AuthContext");
-
 const mockBranchContext = {
-  branches: [{ id: "test-branch-123", name: "Test Branch" }],
-  currentBranch: { id: "test-branch-123", name: "Test Branch" },
+  branches: [{ id: "test-branch-123", name: "Test Branch", code: "TEST001" }],
+  currentBranch: { id: "test-branch-123", name: "Test Branch", code: "TEST001" },
   isGlobalView: false,
   isSuperAdmin: false,
   isLoading: false,
@@ -26,8 +21,12 @@ const mockAuthContext = {
 };
 
 // Mock the context hooks
-vi.mocked(require("@/contexts/BranchContext")).useBranchContext.mockReturnValue(mockBranchContext);
-vi.mocked(require("@/contexts/AuthContext")).useAuthContext.mockReturnValue(mockAuthContext);
+vi.mock("@/contexts/BranchContext", () => ({
+  useBranchContext: () => mockBranchContext,
+}));
+vi.mock("@/contexts/AuthContext", () => ({
+  useAuthContext: () => mockAuthContext,
+}));
 
 describe("useAvailability", () => {
   const mockScheduleSettings = {

@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { 
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -13,40 +13,82 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import FormField, { FormFieldActions } from '@/components/ui/FormField';
 import { Plus, Trash2, Search, User, Loader2 } from 'lucide-react';
+import { extractDataFromResponse } from '@/lib/api/response-helpers';
+import { useFormSimple } from '@/hooks/useForm';
+import { success, error as notifyError } from '@/lib/services/notificationService';
+import { handleApiError, getUserFriendlyMessage } from '@/lib/services/errorService';
 
 interface CreateManualOrderFormProps {
   onSubmit: (orderData: any) => void;
   onCancel: () => void;
 }
 
-export default function CreateManualOrderForm({ onSubmit, onCancel }: CreateManualOrderFormProps) {
-  const [formData, setFormData] = useState({
-    email: '',
-    status: 'pending',
-    payment_status: 'paid',
-    payment_method: 'transfer',
-    subtotal: 0,
-    total_amount: 0,
-    notes: '',
-    shipping: {
-      first_name: '',
-      last_name: '',
-      address_1: '',
-      city: '',
-      state: '',
-      postal_code: '',
-      phone: ''
-    },
-    items: [] as Array<{
-      product_id?: string;
-      product_name: string;
-      quantity: number;
-      unit_price: number;
-    }>
-  });
+interface OrderItem {
+  product_id?: string;
+  product_name: string;
+  quantity: number;
+  unit_price: number;
+}
 
-  const [loading, setLoading] = useState(false);
+interface ShippingInfo {
+  first_name: string;
+  last_name: string;
+  address_1: string;
+  city: string;
+  state: string;
+  postal_code: string;
+  phone: string;
+}
+
+interface OrderFormData {
+  email: string;
+  status: string;
+  payment_status: string;
+  payment_method: string;
+  subtotal: number;
+  total_amount: number;
+  notes: string;
+  shipping: ShippingInfo;
+  items: OrderItem[];
+}
+
+export default function CreateManualOrderForm({ onSubmit, onCancel }: CreateManualOrderFormProps) {
+  const form = useFormSimple<OrderFormData>(
+    {
+      email: '',
+      status: 'pending',
+      payment_status: 'paid',
+      payment_method: 'transfer',
+      subtotal: 0,
+      total_amount: 0,
+      notes: '',
+      shipping: {
+        first_name: '',
+        last_name: '',
+        address_1: '',
+        city: '',
+        state: '',
+        postal_code: '',
+        phone: ''
+      },
+      items: []
+    },
+    async (data) => {
+      await onSubmit(data);
+    },
+    {
+      onSuccess: () => {
+        success('Pedido creado exitosamente');
+      },
+      onError: (err: unknown) => {
+        const standardError = handleApiError(err, 'CreateManualOrderForm');
+        notifyError(getUserFriendlyMessage(standardError));
+      }
+    }
+  );
+
   const [customerSearch, setCustomerSearch] = useState('');
   const [customerResults, setCustomerResults] = useState<any[]>([]);
   const [searchingCustomers, setSearchingCustomers] = useState(false);
@@ -69,7 +111,7 @@ export default function CreateManualOrderForm({ onSubmit, onCancel }: CreateManu
         const response = await fetch(`/api/admin/customers/search?q=${encodeURIComponent(customerSearch)}`);
         if (response.ok) {
           const data = await response.json();
-          setCustomerResults(data.customers || []);
+          setCustomerResults(extractDataFromResponse(data));
         }
       } catch (error) {
         console.error('Error searching customers:', error);
@@ -95,7 +137,7 @@ export default function CreateManualOrderForm({ onSubmit, onCancel }: CreateManu
         const response = await fetch(`/api/admin/products/search?q=${encodeURIComponent(productSearch)}`);
         if (response.ok) {
           const data = await response.json();
-          setProductResults(data.products || []);
+          setProductResults(extractDataFromResponse(data));
         }
       } catch (error) {
         console.error('Error searching products:', error);
@@ -124,26 +166,16 @@ export default function CreateManualOrderForm({ onSubmit, onCancel }: CreateManu
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const handleInputChange = (field: string, value: any) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
-  };
-
   const handleShippingChange = (field: string, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      shipping: {
-        ...prev.shipping,
-        [field]: value
-      }
-    }));
+    const currentValues = form.getValues();
+    form.setValue('shipping', {
+      ...currentValues.shipping,
+      [field]: value
+    });
   };
 
   const loadCustomerData = (customer: any) => {
-    setFormData(prev => ({
-      ...prev,
+    form.setFieldValues({
       email: customer.email,
       shipping: {
         first_name: customer.name?.split(' ')[0] || '',
@@ -154,72 +186,55 @@ export default function CreateManualOrderForm({ onSubmit, onCancel }: CreateManu
         postal_code: customer.shipping_info?.postal_code || '',
         phone: customer.shipping_info?.phone || customer.phone || ''
       }
-    }));
+    });
     setCustomerSearch('');
     setOpenCustomerSearch(false);
   };
 
   const addProductToOrder = (product: any) => {
-    setFormData(prev => ({
-      ...prev,
-      items: [...prev.items, {
+    form.setValue('items', [
+      ...form.getValues().items,
+      {
         product_id: product.id,
         product_name: product.name,
         quantity: 1,
         unit_price: product.price
-      }]
-    }));
+      }
+    ]);
     setProductSearch('');
     setOpenProductSearch(false);
+    calculateTotal();
   };
 
   const addItem = () => {
-    setFormData(prev => ({
-      ...prev,
-      items: [...prev.items, { product_name: '', quantity: 1, unit_price: 0 }]
-    }));
+    form.setValue('items', [
+      ...form.getValues().items,
+      { product_name: '', quantity: 1, unit_price: 0 }
+    ]);
   };
 
   const removeItem = (index: number) => {
-    setFormData(prev => ({
-      ...prev,
-      items: prev.items.filter((_, i) => i !== index)
-    }));
+    form.setValue('items', form.getValues().items.filter((_: any, i: number) => i !== index));
+    calculateTotal();
   };
 
   const updateItem = (index: number, field: string, value: any) => {
-    setFormData(prev => ({
-      ...prev,
-      items: prev.items.map((item, i) => 
-        i === index ? { ...item, [field]: value } : item
-      )
-    }));
+    form.setValue('items', form.getValues().items.map((item: any, i: number) =>
+      i === index ? { ...item, [field]: value } : item
+    ));
+    calculateTotal();
   };
 
   const calculateTotal = () => {
-    const itemsTotal = formData.items.reduce((sum, item) => sum + (item.quantity * item.unit_price), 0);
-    setFormData(prev => ({
-      ...prev,
+    const itemsTotal = form.getValues().items.reduce((sum: number, item: any) => sum + (item.quantity * item.unit_price), 0);
+    form.setFieldValues({
       subtotal: itemsTotal,
       total_amount: itemsTotal
-    }));
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-
-    try {
-      await onSubmit(formData);
-    } catch (error) {
-      console.error('Error creating order:', error);
-    } finally {
-      setLoading(false);
-    }
+    });
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={form.handleSubmit} className="space-y-6">
       {/* Customer Information */}
       <Card>
         <CardHeader>
@@ -244,7 +259,7 @@ export default function CreateManualOrderForm({ onSubmit, onCancel }: CreateManu
                 <Loader2 className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 animate-spin text-gray-400" />
               )}
             </div>
-            
+
             {/* Customer Results */}
             {openCustomerSearch && customerResults.length > 0 && (
               <div className="absolute z-50 w-full mt-1 bg-white border rounded-md shadow-lg max-h-60 overflow-y-auto">
@@ -268,16 +283,18 @@ export default function CreateManualOrderForm({ onSubmit, onCancel }: CreateManu
             )}
           </div>
 
-          <div>
-            <Label htmlFor="email">Email del Cliente *</Label>
+          <FormField
+            label="Email del Cliente"
+            required
+          >
             <Input
               id="email"
               type="email"
-              value={formData.email}
-              onChange={(e) => handleInputChange('email', e.target.value)}
+              value={form.getValues().email}
+              onChange={(e) => form.setValue('email', e.target.value)}
               required
             />
-          </div>
+          </FormField>
         </CardContent>
       </Card>
 
@@ -288,9 +305,8 @@ export default function CreateManualOrderForm({ onSubmit, onCancel }: CreateManu
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="status">Estado</Label>
-              <Select value={formData.status} onValueChange={(value) => handleInputChange('status', value)}>
+            <FormField label="Estado">
+              <Select value={form.getValues().status} onValueChange={(value) => form.setValue('status', value)}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -302,11 +318,10 @@ export default function CreateManualOrderForm({ onSubmit, onCancel }: CreateManu
                   <SelectItem value="cancelled">Cancelado</SelectItem>
                 </SelectContent>
               </Select>
-            </div>
+            </FormField>
 
-            <div>
-              <Label htmlFor="payment_status">Estado del Pago</Label>
-              <Select value={formData.payment_status} onValueChange={(value) => handleInputChange('payment_status', value)}>
+            <FormField label="Estado del Pago">
+              <Select value={form.getValues().payment_status} onValueChange={(value) => form.setValue('payment_status', value)}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -316,12 +331,11 @@ export default function CreateManualOrderForm({ onSubmit, onCancel }: CreateManu
                   <SelectItem value="failed">Fallido</SelectItem>
                 </SelectContent>
               </Select>
-            </div>
+            </FormField>
           </div>
 
-          <div>
-            <Label htmlFor="payment_method">Método de Pago</Label>
-            <Select value={formData.payment_method} onValueChange={(value) => handleInputChange('payment_method', value)}>
+          <FormField label="Método de Pago">
+            <Select value={form.getValues().payment_method} onValueChange={(value) => form.setValue('payment_method', value)}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
@@ -332,17 +346,16 @@ export default function CreateManualOrderForm({ onSubmit, onCancel }: CreateManu
                 <SelectItem value="other">Otro</SelectItem>
               </SelectContent>
             </Select>
-          </div>
+          </FormField>
 
-          <div>
-            <Label htmlFor="notes">Notas del Pedido</Label>
+          <FormField label="Notas del Pedido" description="Notas adicionales sobre el pedido">
             <Textarea
               id="notes"
-              value={formData.notes}
-              onChange={(e) => handleInputChange('notes', e.target.value)}
+              value={form.getValues().notes}
+              onChange={(e) => form.setValue('notes', e.target.value)}
               placeholder="Notas adicionales sobre el pedido..."
             />
-          </div>
+          </FormField>
         </CardContent>
       </Card>
 
@@ -353,68 +366,61 @@ export default function CreateManualOrderForm({ onSubmit, onCancel }: CreateManu
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="shipping_first_name">Nombre</Label>
+            <FormField label="Nombre">
               <Input
                 id="shipping_first_name"
-                value={formData.shipping.first_name}
+                value={form.getValues().shipping.first_name}
                 onChange={(e) => handleShippingChange('first_name', e.target.value)}
               />
-            </div>
-            <div>
-              <Label htmlFor="shipping_last_name">Apellido</Label>
+            </FormField>
+            <FormField label="Apellido">
               <Input
                 id="shipping_last_name"
-                value={formData.shipping.last_name}
+                value={form.getValues().shipping.last_name}
                 onChange={(e) => handleShippingChange('last_name', e.target.value)}
               />
-            </div>
+            </FormField>
           </div>
 
-          <div>
-            <Label htmlFor="shipping_address_1">Dirección</Label>
+          <FormField label="Dirección">
             <Input
               id="shipping_address_1"
-              value={formData.shipping.address_1}
+              value={form.getValues().shipping.address_1}
               onChange={(e) => handleShippingChange('address_1', e.target.value)}
             />
-          </div>
+          </FormField>
 
           <div className="grid grid-cols-3 gap-4">
-            <div>
-              <Label htmlFor="shipping_city">Ciudad</Label>
+            <FormField label="Ciudad">
               <Input
                 id="shipping_city"
-                value={formData.shipping.city}
+                value={form.getValues().shipping.city}
                 onChange={(e) => handleShippingChange('city', e.target.value)}
               />
-            </div>
-            <div>
-              <Label htmlFor="shipping_state">Provincia</Label>
+            </FormField>
+            <FormField label="Provincia">
               <Input
                 id="shipping_state"
-                value={formData.shipping.state}
+                value={form.getValues().shipping.state}
                 onChange={(e) => handleShippingChange('state', e.target.value)}
               />
-            </div>
-            <div>
-              <Label htmlFor="shipping_postal_code">Código Postal</Label>
+            </FormField>
+            <FormField label="Código Postal">
               <Input
                 id="shipping_postal_code"
-                value={formData.shipping.postal_code}
+                value={form.getValues().shipping.postal_code}
                 onChange={(e) => handleShippingChange('postal_code', e.target.value)}
               />
-            </div>
+            </FormField>
           </div>
 
-          <div>
-            <Label htmlFor="shipping_phone">Teléfono</Label>
+          <FormField label="Teléfono">
             <Input
               id="shipping_phone"
-              value={formData.shipping.phone}
+              value={form.getValues().shipping.phone}
               onChange={(e) => handleShippingChange('phone', e.target.value)}
             />
-          </div>
+          </FormField>
         </CardContent>
       </Card>
 
@@ -442,7 +448,7 @@ export default function CreateManualOrderForm({ onSubmit, onCancel }: CreateManu
                 <Loader2 className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 animate-spin text-gray-400" />
               )}
             </div>
-            
+
             {/* Product Results */}
             {openProductSearch && productResults.length > 0 && (
               <div className="absolute z-50 w-full mt-1 bg-white border rounded-md shadow-lg max-h-60 overflow-y-auto">
@@ -471,7 +477,7 @@ export default function CreateManualOrderForm({ onSubmit, onCancel }: CreateManu
           </div>
 
           {/* Selected Products */}
-          {formData.items.map((item, index) => (
+          {form.getValues().items.map((item: OrderItem, index: number) => (
             <div key={index} className="flex gap-4 items-end p-3 bg-gray-50 rounded-lg">
               <div className="flex-1">
                 <Label>Nombre del Producto</Label>
@@ -489,7 +495,6 @@ export default function CreateManualOrderForm({ onSubmit, onCancel }: CreateManu
                   value={item.quantity}
                   onChange={(e) => {
                     updateItem(index, 'quantity', parseInt(e.target.value) || 1);
-                    setTimeout(calculateTotal, 100);
                   }}
                 />
               </div>
@@ -502,7 +507,6 @@ export default function CreateManualOrderForm({ onSubmit, onCancel }: CreateManu
                   value={item.unit_price}
                   onChange={(e) => {
                     updateItem(index, 'unit_price', parseFloat(e.target.value) || 0);
-                    setTimeout(calculateTotal, 100);
                   }}
                 />
               </div>
@@ -510,10 +514,7 @@ export default function CreateManualOrderForm({ onSubmit, onCancel }: CreateManu
                 type="button"
                 variant="outline"
                 size="icon"
-                onClick={() => {
-                  removeItem(index);
-                  setTimeout(calculateTotal, 100);
-                }}
+                onClick={() => removeItem(index)}
               >
                 <Trash2 className="h-4 w-4" />
               </Button>
@@ -533,7 +534,7 @@ export default function CreateManualOrderForm({ onSubmit, onCancel }: CreateManu
           <div className="flex justify-between items-center pt-4 border-t">
             <div>
               <div className="text-sm text-gray-600">Subtotal</div>
-              <div className="text-2xl font-bold text-verde-suave">${formData.total_amount.toFixed(2)}</div>
+              <div className="text-2xl font-bold text-verde-suave">${form.getValues().total_amount.toFixed(2)}</div>
             </div>
             <Button
               type="button"
@@ -547,14 +548,21 @@ export default function CreateManualOrderForm({ onSubmit, onCancel }: CreateManu
       </Card>
 
       {/* Form Actions */}
-      <div className="flex justify-end gap-4">
-        <Button type="button" variant="outline" onClick={onCancel}>
+      <FormFieldActions align="space-between">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={onCancel}
+        >
           Cancelar
         </Button>
-        <Button type="submit" disabled={loading}>
-          {loading ? 'Creando...' : 'Crear Pedido'}
+        <Button
+          type="submit"
+          disabled={form.isSubmitting}
+        >
+          {form.isSubmitting ? 'Creando...' : 'Crear Pedido'}
         </Button>
-      </div>
+      </FormFieldActions>
     </form>
   );
 }

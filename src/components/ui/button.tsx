@@ -20,6 +20,9 @@ const buttonVariants = cva(
         ghost: "text-slate-600 hover:bg-slate-100/50 hover:text-slate-900",
         link: "text-primary underline-offset-4 hover:underline",
         pill: "bg-primary text-white rounded-full px-6 hover:bg-primary/90 hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0",
+        brand: "bg-primary text-primary-foreground shadow-lg hover:bg-primary/90 hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0",
+        "line-primary": "bg-line-primary text-white hover:bg-line-primary/90 shadow-md hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0",
+        "line-outline": "border-2 border-line-primary bg-transparent text-line-primary hover:bg-line-primary/5 hover:-translate-y-0.5 active:translate-y-0",
       },
       size: {
         xs: "h-8 rounded-lg px-2 text-xs",
@@ -39,7 +42,7 @@ const buttonVariants = cva(
 
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof buttonVariants> {
+  VariantProps<typeof buttonVariants> {
   asChild?: boolean;
   loading?: boolean;
   shimmer?: boolean;
@@ -130,7 +133,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
           buttonVariants({ variant, size }),
           loading && "cursor-wait opacity-80",
           shimmer &&
-            "relative overflow-hidden before:absolute before:inset-0 before:bg-gradient-to-r before:from-transparent before:via-white/20 before:to-transparent before:-translate-x-full hover:before:translate-x-full before:transition-transform before:duration-700",
+          "relative overflow-hidden before:absolute before:inset-0 before:bg-gradient-to-r before:from-transparent before:via-white/20 before:to-transparent before:-translate-x-full hover:before:translate-x-full before:transition-transform before:duration-700",
           disabled && "transform-none hover:transform-none",
           className,
         )}

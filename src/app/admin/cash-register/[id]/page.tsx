@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
+import { extractDataFromResponse } from "@/lib/api/response-helpers";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -152,7 +153,7 @@ export default function CashClosureDetailPage() {
       if (response.ok) {
         const data = await response.json();
         setClosure(data.closure);
-        setOrders(data.orders || []);
+        setOrders(extractDataFromResponse(data));
       } else {
         const error = await response.json();
         toast.error(error.error || "Error al cargar el cierre de caja");

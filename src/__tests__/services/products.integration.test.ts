@@ -10,7 +10,7 @@ import { createMockSupabaseClient } from "@/__mocks__/supabase";
 describe("ProductsService", () => {
   let productService: ProductsService;
   let mockSupabase: any;
-  
+
   const mockContext = {
     userId: "test-user-id",
     organizationId: "test-org-id",
@@ -43,7 +43,7 @@ describe("ProductsService", () => {
           error: null
         })
       };
-      
+
       mockSupabase.from.mockReturnValue(mockChain);
 
       const params = {
@@ -62,7 +62,7 @@ describe("ProductsService", () => {
 
     it("should handle errors gracefully", async () => {
       const error = new Error("Database error");
-      
+
       const mockChain = {
         select: vi.fn().mockReturnThis(),
         eq: vi.fn().mockReturnThis(),
@@ -72,7 +72,7 @@ describe("ProductsService", () => {
           error
         })
       };
-      
+
       mockSupabase.from.mockReturnValue(mockChain);
 
       const params = {
@@ -98,6 +98,7 @@ describe("ProductsService", () => {
     it("should validate price", async () => {
       const productData = {
         name: "Test Product",
+        slug: "test-product",
         price: "invalid" as any
       };
 

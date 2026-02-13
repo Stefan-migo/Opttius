@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useProtectedForm } from "@/hooks/useFormProtection";
+import { extractDataFromResponse } from "@/lib/api/response-helpers";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -30,6 +31,7 @@ import { X, Plus, Save, ArrowLeft, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 import { useProductOptions } from "@/hooks/useProductOptions";
 import { useBranch } from "@/hooks/useBranch";
+import { productService } from "@/lib/api/services";
 
 interface Category {
   id: string;
@@ -275,7 +277,7 @@ export default function AddProductPage() {
       const response = await fetch("/api/categories");
       const data = await response.json();
       if (response.ok) {
-        setCategories(data.categories);
+        setCategories(extractDataFromResponse<Category>(data));
       }
     } catch (error) {
       console.error("Error fetching categories:", error);
@@ -567,37 +569,16 @@ export default function AddProductPage() {
         priceTypeAfterJSON: typeof parsedBody.price,
       });
 
-      const response = await fetch("/api/admin/products", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: jsonBody,
-      });
+      await productService.createProduct(productData as any);
 
-      if (response.ok) {
-        toast.success("Producto creado exitosamente");
-        markAsSaved(); // 🚀 Mark as saved to allow navigation
-        router.push("/admin/products");
-      } else {
-        const errorData = await response
-          .json()
-          .catch(() => ({ error: "Unknown error" }));
-        console.error("❌ API Error:", {
-          status: response.status,
-          statusText: response.statusText,
-          error: errorData,
-        });
-        toast.error(
-          errorData.message ||
-            errorData.error ||
-            `Error al crear el producto (${response.status})`,
-        );
-        markAsSaved(); // Reset saving state on error
-      }
+      toast.success("Producto creado exitosamente");
+      markAsSaved(); // 🚀 Mark as saved to allow navigation
+      router.push("/admin/products");
     } catch (error) {
       console.error("Error:", error);
-      toast.error("Error al crear el producto");
+      const errorMessage =
+        error instanceof Error ? error.message : "Error al crear el producto";
+      toast.error(errorMessage);
       markAsSaved(); // Reset saving state on error
     } finally {
       setLoading(false);

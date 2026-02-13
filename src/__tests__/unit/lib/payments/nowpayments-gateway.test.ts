@@ -94,6 +94,12 @@ describe("NowPaymentsGateway", () => {
         order_id: "order_123",
         order_description: "Test payment",
       };
+      
+      // Calculate the correct signature
+      const crypto = await import("crypto");
+      const hmac = crypto.createHmac("sha512", "test_ipn_secret");
+      hmac.update(JSON.stringify(webhookPayload));
+      const correctSignature = hmac.digest("hex");
 
       const request = new NextRequest(
         "http://localhost:3000/api/webhooks/nowpayments",
@@ -102,7 +108,7 @@ describe("NowPaymentsGateway", () => {
           body: JSON.stringify(webhookPayload),
           headers: {
             "content-type": "application/json",
-            "x-nowpayments-sig": "test_signature",
+            "x-nowpayments-sig": correctSignature,
           },
         },
       );
