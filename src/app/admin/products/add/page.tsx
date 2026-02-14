@@ -270,11 +270,17 @@ export default function AddProductPage() {
 
   useEffect(() => {
     fetchCategories();
-  }, []);
+  }, [currentBranchId]); // Re-fetch when branch changes
 
   const fetchCategories = async () => {
     try {
-      const response = await fetch("/api/categories");
+      // Include branch_id in query to get branch-specific categories
+      const params = new URLSearchParams();
+      if (currentBranchId) {
+        params.append("branch_id", currentBranchId);
+      }
+
+      const response = await fetch(`/api/categories?${params.toString()}`);
       const data = await response.json();
       if (response.ok) {
         setCategories(extractDataFromResponse<Category>(data));

@@ -55,13 +55,13 @@ export default function ProductFilters({
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
               <Input
-                type="search"
+                type="text"
                 placeholder="Buscar productos por nombre..."
                 value={searchTerm}
                 onChange={(e) => onSearchChange(e.target.value)}
                 onKeyDown={(e) => {
-                  // Prevent page reload when Enter is pressed
-                  if (e.key === 'Enter') {
+                  // Prevent form submission on Enter key
+                  if (e.key === "Enter") {
                     e.preventDefault();
                   }
                 }}
