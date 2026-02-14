@@ -1,8 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/utils/supabase/server";
+import { createClientFromRequest } from "@/utils/supabase/server";
 import { getBranchContext, addBranchFilter } from "@/lib/api/branch-middleware";
 import { appLogger as logger } from "@/lib/logger";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
+import {
+  createApiSuccessResponse,
+  createApiErrorResponse,
+} from "@/lib/api/response";
+import { AuthenticationError, AuthorizationError } from "@/lib/api/errors";
 
 /**
  * Helper to get YYYY-MM-DD date string in local timezone (not UTC)
@@ -18,25 +23,33 @@ export async function GET(request: NextRequest) {
   logger.info("Dashboard API endpoint called");
 
   try {
-    const supabase = await createClient();
+    const { client: supabase, getUser } =
+      await createClientFromRequest(request);
 
     // Check admin authorization
-    const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.getUser();
+    const { data: userData, error: userError } = await getUser();
+    const user = userData?.user;
+
     if (userError || !user) {
       // Silently return 401 - this is expected when user is not authenticated
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return createApiErrorResponse(new AuthenticationError("Unauthorized"));
     }
 
-    const { data: isAdmin } = (await supabase.rpc("is_admin", {
+    // Check admin authorization using service role to bypass any context/RLS issues
+    const { createServiceRoleClient } = await import("@/utils/supabase/server");
+    const serviceSupabase = createServiceRoleClient();
+
+    const { data: isAdmin } = await serviceSupabase.rpc("is_admin", {
       user_id: user.id,
-    } as IsAdminParams)) as { data: IsAdminResult | null; error: Error | null };
+    });
+
     if (!isAdmin) {
-      return NextResponse.json(
-        { error: "Admin access required" },
-        { status: 403 },
+      logger.warn("Admin access denied for user", {
+        userId: user.id,
+        email: user.email,
+      });
+      return createApiErrorResponse(
+        new AuthorizationError("Admin access required"),
       );
     }
 
@@ -566,7 +579,7 @@ export async function GET(request: NextRequest) {
 
     logger.info("Dashboard data fetched successfully");
 
-    return NextResponse.json({
+    return createApiSuccessResponse({
       branch: {
         id: branchContext.branchId,
         is_global: branchContext.isGlobalView,
@@ -624,9 +637,8 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     logger.error("Dashboard API error", error as Error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
+    return createApiErrorResponse(
+      error instanceof Error ? error : new Error(String(error)),
     );
   }
 }

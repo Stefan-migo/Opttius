@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
 import { getBranchContext } from "@/lib/api/branch-middleware";
 import { appLogger as logger } from "@/lib/logger";
+import {
+  createApiSuccessResponse,
+  createApiErrorResponse,
+} from "@/lib/api/response";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
 import { withRateLimit, rateLimitConfigs } from "@/lib/api/middleware";
 import { z } from "zod";
@@ -122,9 +126,7 @@ export async function GET(request: NextRequest) {
           auto_print_receipt: getMergedValue("auto_print_receipt", true),
         };
 
-        return NextResponse.json({
-          settings: mergedSettings,
-        });
+        return createApiSuccessResponse(mergedSettings);
       },
     );
   } catch (error) {
@@ -260,10 +262,7 @@ export async function PUT(request: NextRequest) {
           );
         }
 
-        return NextResponse.json({
-          success: true,
-          settings: result,
-        });
+        return createApiSuccessResponse(result);
       },
     );
   } catch (error) {

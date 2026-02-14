@@ -117,6 +117,7 @@ export function EnhancedColumnChart({
 
       <ResponsiveContainer width="100%" height={height}>
         <RechartsBarChart
+          id="enhanced-column-chart"
           data={chartData}
           margin={{ top: 20, right: 30, left: 20, bottom: 60 }}
         >

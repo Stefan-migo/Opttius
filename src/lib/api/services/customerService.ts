@@ -1,16 +1,16 @@
 /**
  * Customer Service
- * 
+ *
  * Service layer for customer-related API operations.
  * Provides type-safe methods for CRUD operations on customers.
  */
 
-import { ApiClient, isSuccess, unwrapData } from '../client-helpers';
-import { handleApiError } from '@/lib/services/errorService';
+import { ApiClient, isSuccess, unwrapData } from "../client-helpers";
+import { handleApiError } from "@/lib/services/errorService";
 
 // Import shared types from other services to avoid duplication
-import type { Appointment } from './appointmentService';
-import type { Quote } from './quoteService';
+import type { Appointment } from "./appointmentService";
+import type { Quote } from "./quoteService";
 
 // Types
 // Note: Using 'first_name' and 'last_name' instead of 'name' to match the database schema
@@ -28,22 +28,22 @@ export interface Customer {
   is_active_customer?: boolean; // Alias for is_active used in UI
   created_at: string;
   updated_at?: string;
-  
+
   // Personal info
   date_of_birth?: string | null;
-  
+
   // Eye exam info
   last_eye_exam_date?: string | null;
   next_eye_exam_due?: string | null;
-  
+
   // Medical info
   medical_conditions?: string[];
   allergies?: string[];
-  
+
   // Emergency contact
   emergency_contact_name?: string | null;
   emergency_contact_phone?: string | null;
-  
+
   // Address info (flat structure for UI convenience)
   address_line_1?: string | null;
   address_line_2?: string | null;
@@ -51,14 +51,14 @@ export interface Customer {
   state?: string | null;
   postal_code?: string | null;
   country?: string | null;
-  
+
   // Related data
   orders?: any[];
   prescriptions?: Prescription[];
   appointments?: Appointment[];
   quotes?: Quote[];
   lensPurchases?: LensPurchase[];
-  
+
   // Analytics
   analytics?: CustomerAnalytics;
 }
@@ -107,7 +107,7 @@ export interface LensPurchase {
   quantity: number;
   purchase_date: string;
   delivery_date?: string;
-  status: 'ordered' | 'in_progress' | 'ready' | 'delivered' | 'cancelled';
+  status: "ordered" | "in_progress" | "ready" | "delivered" | "cancelled";
   lens_type?: string;
   lens_material?: string;
   lens_index?: number;
@@ -145,17 +145,34 @@ export interface CustomerAnalytics {
 }
 
 export interface CreateCustomerData {
-  name: string;
-  email: string;
-  phone?: string;
-  rut?: string;
-  shipping_info?: {
-    address_1?: string;
-    city?: string;
-    state?: string;
-    postal_code?: string;
-    phone?: string;
-  };
+  first_name?: string | null;
+  last_name?: string | null;
+  email?: string | null;
+  phone?: string | null;
+  rut?: string | null;
+  date_of_birth?: string | null;
+  gender?: "male" | "female" | "other" | "prefer_not_to_say" | null;
+  address_line_1?: string | null;
+  address_line_2?: string | null;
+  city?: string | null;
+  state?: string | null;
+  postal_code?: string | null;
+  country?: string | null;
+  medical_conditions?: string | null;
+  allergies?: string | null;
+  medications?: string | null;
+  medical_notes?: string | null;
+  last_eye_exam_date?: string | null;
+  next_eye_exam_due?: string | null;
+  preferred_contact_method?: "email" | "phone" | "sms" | "whatsapp" | null;
+  emergency_contact_name?: string | null;
+  emergency_contact_phone?: string | null;
+  insurance_provider?: string | null;
+  insurance_policy_number?: string | null;
+  notes?: string | null;
+  tags?: string[] | null;
+  is_active?: boolean;
+  branch_id?: string | null;
 }
 
 export interface UpdateCustomerData extends Partial<CreateCustomerData> {}
@@ -187,19 +204,23 @@ const client = new ApiClient();
 /**
  * Get headers for branch-specific requests
  */
-function getBranchHeaders(branchId?: string, isGlobalView?: boolean, isSuperAdmin?: boolean): HeadersInit {
+function getBranchHeaders(
+  branchId?: string,
+  isGlobalView?: boolean,
+  isSuperAdmin?: boolean,
+): HeadersInit {
   const headers: HeadersInit = {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   };
-  
+
   if (branchId) {
-    headers['x-branch-id'] = branchId;
+    headers["x-branch-id"] = branchId;
   }
-  
+
   if (isGlobalView && isSuperAdmin) {
-    headers['x-branch-id'] = 'global';
+    headers["x-branch-id"] = "global";
   }
-  
+
   return headers;
 }
 
@@ -207,23 +228,23 @@ function getBranchHeaders(branchId?: string, isGlobalView?: boolean, isSuperAdmi
  * Get all customers with optional filters
  */
 export async function getCustomers(
-  params: CustomerSearchParams = {}
+  params: CustomerSearchParams = {},
 ): Promise<CustomerListResponse> {
   try {
     // Build query params, excluding branch-related params
     const { branchId, isGlobalView, isSuperAdmin, ...queryParams } = params;
-    
+
     const queryString = new URLSearchParams(
       Object.entries(queryParams)
         .filter(([_, v]) => v !== undefined)
-        .map(([k, v]) => [k, String(v)]) as [string, string][]
+        .map(([k, v]) => [k, String(v)]) as [string, string][],
     ).toString();
 
     const headers = getBranchHeaders(branchId, isGlobalView, isSuperAdmin);
 
     const response = await client.get<Customer[]>(
-      `/api/admin/customers${queryString ? `?${queryString}` : ''}`,
-      { headers }
+      `/api/admin/customers${queryString ? `?${queryString}` : ""}`,
+      { headers },
     );
 
     if (isSuccess(response)) {
@@ -238,9 +259,13 @@ export async function getCustomers(
       };
     }
 
-    throw new Error(response.error.message);
+    const errorMessage =
+      response.success === false && response.error?.message
+        ? response.error.message
+        : "An unknown error occurred";
+    throw new Error(errorMessage);
   } catch (error) {
-    handleApiError(error, 'getCustomers');
+    handleApiError(error, "getCustomers");
     throw error;
   }
 }
@@ -253,7 +278,7 @@ export async function getCustomer(id: string): Promise<Customer> {
     const response = await client.get<Customer>(`/api/admin/customers/${id}`);
     return unwrapData(response);
   } catch (error) {
-    handleApiError(error, 'getCustomer');
+    handleApiError(error, "getCustomer");
     throw error;
   }
 }
@@ -261,12 +286,14 @@ export async function getCustomer(id: string): Promise<Customer> {
 /**
  * Create a new customer
  */
-export async function createCustomer(data: CreateCustomerData): Promise<Customer> {
+export async function createCustomer(
+  data: CreateCustomerData,
+): Promise<Customer> {
   try {
-    const response = await client.post<Customer>('/api/admin/customers', data);
+    const response = await client.post<Customer>("/api/admin/customers", data);
     return unwrapData(response);
   } catch (error) {
-    handleApiError(error, 'createCustomer');
+    handleApiError(error, "createCustomer");
     throw error;
   }
 }
@@ -276,13 +303,16 @@ export async function createCustomer(data: CreateCustomerData): Promise<Customer
  */
 export async function updateCustomer(
   id: string,
-  data: UpdateCustomerData
+  data: UpdateCustomerData,
 ): Promise<Customer> {
   try {
-    const response = await client.put<Customer>(`/api/admin/customers/${id}`, data);
+    const response = await client.put<Customer>(
+      `/api/admin/customers/${id}`,
+      data,
+    );
     return unwrapData(response);
   } catch (error) {
-    handleApiError(error, 'updateCustomer');
+    handleApiError(error, "updateCustomer");
     throw error;
   }
 }
@@ -295,7 +325,7 @@ export async function deleteCustomer(id: string): Promise<void> {
     const response = await client.delete(`/api/admin/customers/${id}`);
     unwrapData(response);
   } catch (error) {
-    handleApiError(error, 'deleteCustomer');
+    handleApiError(error, "deleteCustomer");
     throw error;
   }
 }
@@ -306,11 +336,12 @@ export async function deleteCustomer(id: string): Promise<void> {
 export async function searchCustomers(query: string): Promise<Customer[]> {
   try {
     const response = await client.get<Customer[]>(
-      `/api/admin/customers/search?q=${encodeURIComponent(query)}`
+      `/api/admin/customers/search?q=${encodeURIComponent(query)}`,
     );
-    return unwrapData(response);
+    const data = unwrapData(response);
+    return Array.isArray(data) ? data : [];
   } catch (error) {
-    handleApiError(error, 'searchCustomers');
+    handleApiError(error, "searchCustomers");
     throw error;
   }
 }
@@ -321,7 +352,7 @@ export async function searchCustomers(query: string): Promise<Customer[]> {
 export async function getCustomerStats(
   branchId?: string,
   isGlobalView?: boolean,
-  isSuperAdmin?: boolean
+  isSuperAdmin?: boolean,
 ): Promise<{
   totalCustomers: number;
   activeCustomers: number;
@@ -329,15 +360,15 @@ export async function getCustomerStats(
 }> {
   try {
     const headers = getBranchHeaders(branchId, isGlobalView, isSuperAdmin);
-    
+
     const response = await client.post<{
       summary: {
         totalCustomers: number;
         activeCustomers: number;
         newCustomersThisMonth: number;
       };
-    }>('/api/admin/customers', {}, { headers });
-    
+    }>("/api/admin/customers", {}, { headers });
+
     if (isSuccess(response)) {
       return {
         totalCustomers: response.data.summary.totalCustomers,
@@ -346,9 +377,13 @@ export async function getCustomerStats(
       };
     }
 
-    throw new Error(response.error.message);
+    const errorMessage =
+      response.success === false && response.error?.message
+        ? response.error.message
+        : "An unknown error occurred";
+    throw new Error(errorMessage);
   } catch (error) {
-    handleApiError(error, 'getCustomerStats');
+    handleApiError(error, "getCustomerStats");
     throw error;
   }
 }
@@ -396,14 +431,17 @@ export interface CreatePrescriptionData {
 /**
  * Get prescriptions for a customer
  */
-export async function getPrescriptions(customerId: string): Promise<Prescription[]> {
+export async function getPrescriptions(
+  customerId: string,
+): Promise<Prescription[]> {
   try {
     const response = await client.get<Prescription[]>(
-      `/api/admin/customers/${customerId}/prescriptions`
+      `/api/admin/customers/${customerId}/prescriptions`,
     );
-    return unwrapData(response);
+    const data = unwrapData(response);
+    return Array.isArray(data) ? data : [];
   } catch (error) {
-    handleApiError(error, 'getPrescriptions');
+    handleApiError(error, "getPrescriptions");
     throw error;
   }
 }
@@ -413,16 +451,16 @@ export async function getPrescriptions(customerId: string): Promise<Prescription
  */
 export async function createPrescription(
   customerId: string,
-  data: CreatePrescriptionData
+  data: CreatePrescriptionData,
 ): Promise<Prescription> {
   try {
     const response = await client.post<Prescription>(
       `/api/admin/customers/${customerId}/prescriptions`,
-      data
+      data,
     );
     return unwrapData(response);
   } catch (error) {
-    handleApiError(error, 'createPrescription');
+    handleApiError(error, "createPrescription");
     throw error;
   }
 }

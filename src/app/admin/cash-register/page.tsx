@@ -125,7 +125,7 @@ interface DailySummary {
 
 interface Movement {
   id: string;
-  movement_type: "sale" | "partial_payment";
+  movement_type: "sale" | "partial_payment" | "credit_note";
   order_id: string;
   order_number: string;
   customer_name: string;
@@ -182,7 +182,13 @@ export default function CashRegisterPage() {
     "cancel" | "delete" | null
   >(null);
   const [orderActionReason, setOrderActionReason] = useState("");
+  const [createCreditNote, setCreateCreditNote] = useState(false);
+  const [refundMethod, setRefundMethod] = useState("cash");
   const [processingOrderAction, setProcessingOrderAction] = useState(false);
+
+  // Credit notes
+  const [creditNotes, setCreditNotes] = useState<any[]>([]);
+  const [loadingCreditNotes, setLoadingCreditNotes] = useState(false);
 
   // Pagination for orders
   const [ordersCurrentPage, setOrdersCurrentPage] = useState(1);
@@ -240,10 +246,14 @@ export default function CashRegisterPage() {
       });
 
       if (response.ok) {
-        const data = await response.json();
+        const result = await response.json();
+        const data = result.data || result; // Handle both standardized and legacy responses
         setIsCashOpen(data.isOpen);
         if (data.session) {
           setOpeningCash(data.session.opening_cash_amount || 0);
+          setCurrentSessionId(data.session.id);
+        } else {
+          setCurrentSessionId(null);
         }
       } else {
         const error = await response.json();
@@ -278,10 +288,11 @@ export default function CashRegisterPage() {
       });
 
       if (response.ok) {
-        const data = await response.json();
+        const result = await response.json();
+        const data = result.data || result; // Handle both standardized and legacy responses
         toast.success("Caja abierta exitosamente");
         setIsCashOpen(true);
-        setOpeningCash(data.session.opening_cash_amount || 0);
+        setOpeningCash(data.session?.opening_cash_amount || 0);
         setOpeningCashInput("");
         await checkCashStatus();
       } else {
@@ -367,8 +378,11 @@ export default function CashRegisterPage() {
   useEffect(() => {
     if (showCloseDialog) {
       fetchDailySummary();
+      if (currentSessionId) {
+        fetchMovements(currentSessionId);
+      }
     }
-  }, [showCloseDialog, currentBranchId]);
+  }, [showCloseDialog, currentSessionId, currentBranchId]);
 
   // Fetch orders when filters change
   useEffect(() => {
@@ -652,7 +666,37 @@ export default function CashRegisterPage() {
     }
   };
 
-  const handleCancelOrder = async (orderId: string, reason: string) => {
+  const fetchCreditNotes = async () => {
+    if (isGlobalView) return;
+    setLoadingCreditNotes(true);
+    try {
+      const headers = getBranchHeader(currentBranchId);
+      const params = new URLSearchParams({
+        date_from: orderFilters.date_from,
+        date_to: orderFilters.date_to,
+        limit: "50",
+        offset: "0",
+      });
+      const response = await fetch(`/api/admin/credit-notes?${params}`, {
+        headers,
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setCreditNotes(data.credit_notes || []);
+      }
+    } catch (err) {
+      console.error("Error fetching credit notes:", err);
+    } finally {
+      setLoadingCreditNotes(false);
+    }
+  };
+
+  const handleCancelOrder = async (
+    orderId: string,
+    reason: string,
+    withCreditNote?: boolean,
+    method?: string,
+  ) => {
     setProcessingOrderAction(true);
     try {
       const headers: HeadersInit = {
@@ -660,10 +704,16 @@ export default function CashRegisterPage() {
         ...getBranchHeader(currentBranchId),
       };
 
+      const body: Record<string, unknown> = { reason };
+      if (withCreditNote && method) {
+        body.create_credit_note = true;
+        body.refund_method = method;
+      }
+
       const response = await fetch(`/api/admin/orders/${orderId}/cancel`, {
         method: "POST",
         headers,
-        body: JSON.stringify({ reason }),
+        body: JSON.stringify(body),
       });
 
       if (response.ok) {
@@ -671,7 +721,13 @@ export default function CashRegisterPage() {
         setOrderActionDialog(null);
         setSelectedOrderForAction(null);
         setOrderActionReason("");
+        setCreateCreditNote(false);
+        setRefundMethod("cash");
         await fetchOrders();
+        await fetchCreditNotes();
+        if (currentSessionId) {
+          await fetchMovements(currentSessionId);
+        }
       } else {
         const error = await response.json();
         toast.error(error.error || "Error al anular venta");
@@ -924,12 +980,15 @@ export default function CashRegisterPage() {
         </Card>
       )}
 
-      {/* Tabs for Closures and Orders */}
+      {/* Tabs for Closures, Orders and Credit Notes */}
       <Tabs defaultValue="orders" className="space-y-4">
         <TabsList>
           <TabsTrigger value="closures">Cierres de Caja</TabsTrigger>
           <TabsTrigger value="orders" onClick={() => setOrdersTab(true)}>
             Ventas / Órdenes
+          </TabsTrigger>
+          <TabsTrigger value="credit_notes" onClick={() => fetchCreditNotes()}>
+            Notas de Crédito
           </TabsTrigger>
         </TabsList>
 
@@ -1502,6 +1561,101 @@ export default function CashRegisterPage() {
             </CardContent>
           </Card>
         </TabsContent>
+
+        <TabsContent value="credit_notes">
+          <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)]">
+            <CardHeader>
+              <CardTitle>Notas de Crédito</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {loadingCreditNotes ? (
+                <div className="text-center py-12">
+                  <RefreshCw className="h-8 w-8 animate-spin text-azul-profundo mx-auto mb-4" />
+                  <p className="text-tierra-media">
+                    Cargando notas de crédito...
+                  </p>
+                </div>
+              ) : creditNotes.length === 0 ? (
+                <div className="text-center py-12">
+                  <FileText className="h-12 w-12 text-tierra-media mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold text-azul-profundo mb-2">
+                    No hay notas de crédito
+                  </h3>
+                  <p className="text-tierra-media">
+                    Las notas de crédito se crean al anular una venta con la
+                    opción correspondiente
+                  </p>
+                </div>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Número</TableHead>
+                      <TableHead>Orden</TableHead>
+                      <TableHead>Monto</TableHead>
+                      <TableHead>Método Reembolso</TableHead>
+                      <TableHead>Motivo</TableHead>
+                      <TableHead>Fecha</TableHead>
+                      <TableHead>Acción</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {creditNotes.map((cn) => (
+                      <TableRow key={cn.id}>
+                        <TableCell className="font-mono font-medium">
+                          {cn.credit_note_number}
+                        </TableCell>
+                        <TableCell>
+                          {cn.order_id ? (
+                            <Link
+                              href={`/admin/cash-register/orders/${cn.order_id}`}
+                            >
+                              <Button variant="link" className="p-0 h-auto">
+                                {cn.order_number || "Ver orden"}
+                              </Button>
+                            </Link>
+                          ) : (
+                            "-"
+                          )}
+                        </TableCell>
+                        <TableCell className="font-semibold text-red-600">
+                          -{formatCurrency(cn.amount)}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="outline">
+                            {cn.refund_method === "cash"
+                              ? "Efectivo"
+                              : cn.refund_method === "debit"
+                                ? "Débito"
+                                : cn.refund_method === "credit"
+                                  ? "Crédito"
+                                  : "Transferencia"}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="max-w-xs truncate">
+                          {cn.reason}
+                        </TableCell>
+                        <TableCell>{formatDateTime(cn.created_at)}</TableCell>
+                        <TableCell>
+                          {cn.order_id && (
+                            <Link
+                              href={`/admin/cash-register/orders/${cn.order_id}`}
+                            >
+                              <Button variant="outline" size="sm">
+                                <Eye className="h-4 w-4 mr-1" />
+                                Ver orden
+                              </Button>
+                            </Link>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
       </Tabs>
 
       {/* Close Cash Register Dialog */}
@@ -1737,12 +1891,18 @@ export default function CashRegisterPage() {
                                         variant={
                                           movement.movement_type === "sale"
                                             ? "default"
-                                            : "secondary"
+                                            : movement.movement_type ===
+                                                "credit_note"
+                                              ? "destructive"
+                                              : "secondary"
                                         }
                                       >
                                         {movement.movement_type === "sale"
                                           ? "Venta"
-                                          : "Pago Saldo"}
+                                          : movement.movement_type ===
+                                              "credit_note"
+                                            ? "Nota de Crédito"
+                                            : "Pago Saldo"}
                                       </Badge>
                                     </TableCell>
                                     <TableCell className="font-mono text-sm whitespace-nowrap">
@@ -1765,7 +1925,13 @@ export default function CashRegisterPage() {
                                         {movement.payment_method}
                                       </Badge>
                                     </TableCell>
-                                    <TableCell className="text-right font-semibold whitespace-nowrap">
+                                    <TableCell
+                                      className={`text-right font-semibold whitespace-nowrap ${
+                                        movement.amount < 0
+                                          ? "text-red-600"
+                                          : ""
+                                      }`}
+                                    >
                                       {formatCurrency(movement.amount)}
                                     </TableCell>
                                     <TableCell className="whitespace-nowrap">
@@ -1931,16 +2097,25 @@ export default function CashRegisterPage() {
             setOrderActionDialog(null);
             setSelectedOrderForAction(null);
             setOrderActionReason("");
+            setCreateCreditNote(false);
+            setRefundMethod("cash");
           }
         }}
       >
-        <DialogContent>
+        <DialogContent
+          aria-describedby={orderActionDialog ? "order-action-desc" : undefined}
+        >
           <DialogHeader>
             <DialogTitle>
               {orderActionDialog === "cancel"
                 ? "Anular Venta"
                 : "Eliminar Venta"}
             </DialogTitle>
+            <DialogDescription id="order-action-desc">
+              {orderActionDialog === "cancel"
+                ? "Confirma la anulación de esta venta. Opcionalmente puedes crear una nota de crédito para registrar el reembolso en caja."
+                : "Esta acción eliminará la venta permanentemente del sistema."}
+            </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             {selectedOrderForAction && (
@@ -1974,6 +2149,39 @@ export default function CashRegisterPage() {
                         onChange={(e) => setOrderActionReason(e.target.value)}
                       />
                     </div>
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        id="create_credit_note"
+                        checked={createCreditNote}
+                        onChange={(e) => setCreateCreditNote(e.target.checked)}
+                        className="rounded border-gray-300"
+                      />
+                      <Label htmlFor="create_credit_note">
+                        Crear nota de crédito (registra el reembolso en caja)
+                      </Label>
+                    </div>
+                    {createCreditNote && (
+                      <div>
+                        <Label>Método de reembolso *</Label>
+                        <Select
+                          value={refundMethod}
+                          onValueChange={setRefundMethod}
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="cash">Efectivo</SelectItem>
+                            <SelectItem value="debit">Débito</SelectItem>
+                            <SelectItem value="credit">Crédito</SelectItem>
+                            <SelectItem value="transfer">
+                              Transferencia
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
                   </>
                 )}
 
@@ -1998,6 +2206,8 @@ export default function CashRegisterPage() {
                 setOrderActionDialog(null);
                 setSelectedOrderForAction(null);
                 setOrderActionReason("");
+                setCreateCreditNote(false);
+                setRefundMethod("cash");
               }}
               disabled={processingOrderAction}
             >
@@ -2012,6 +2222,8 @@ export default function CashRegisterPage() {
                   handleCancelOrder(
                     selectedOrderForAction.id,
                     orderActionReason,
+                    createCreditNote,
+                    refundMethod,
                   );
                 } else if (orderActionDialog === "delete") {
                   handleDeleteOrder(selectedOrderForAction.id);

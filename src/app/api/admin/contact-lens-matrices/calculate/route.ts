@@ -1,7 +1,12 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { createClient } from "@/utils/supabase/server";
 import { appLogger as logger } from "@/lib/logger";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
+import { APIError } from "@/lib/api/errors";
+import {
+  createApiSuccessResponse,
+  createApiErrorResponse,
+} from "@/lib/api/response";
 
 /**
  * POST /api/admin/contact-lens-matrices/calculate
@@ -24,7 +29,9 @@ export async function POST(request: NextRequest) {
       error: userError,
     } = await supabase.auth.getUser();
     if (userError || !user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return createApiErrorResponse(
+        new APIError("Unauthorized", 401, "UNAUTHORIZED"),
+      );
     }
 
     // Check admin status
@@ -32,9 +39,8 @@ export async function POST(request: NextRequest) {
       user_id: user.id,
     } as IsAdminParams)) as { data: IsAdminResult | null; error: Error | null };
     if (!isAdmin) {
-      return NextResponse.json(
-        { error: "Admin access required" },
-        { status: 403 },
+      return createApiErrorResponse(
+        new APIError("Admin access required", 403, "FORBIDDEN"),
       );
     }
 
@@ -63,25 +69,22 @@ export async function POST(request: NextRequest) {
 
     // Validate required parameters
     if (!contact_lens_family_id) {
-      return NextResponse.json(
-        { error: "contact_lens_family_id is required" },
-        { status: 400 },
+      return createApiErrorResponse(
+        new APIError("contact_lens_family_id is required", 400, "BAD_REQUEST"),
       );
     }
 
     if (sphere === undefined || sphere === null) {
-      return NextResponse.json(
-        { error: "sphere is required" },
-        { status: 400 },
+      return createApiErrorResponse(
+        new APIError("sphere is required", 400, "BAD_REQUEST"),
       );
     }
 
     // Validate sphere is a number
     const sphereNum = parseFloat(sphere);
     if (isNaN(sphereNum)) {
-      return NextResponse.json(
-        { error: "sphere must be a valid number" },
-        { status: 400 },
+      return createApiErrorResponse(
+        new APIError("sphere must be a valid number", 400, "BAD_REQUEST"),
       );
     }
 
@@ -89,18 +92,20 @@ export async function POST(request: NextRequest) {
     const cylinderNum =
       cylinder !== null && cylinder !== undefined ? parseFloat(cylinder) : 0;
     if (isNaN(cylinderNum)) {
-      return NextResponse.json(
-        { error: "cylinder must be a valid number" },
-        { status: 400 },
+      return createApiErrorResponse(
+        new APIError("cylinder must be a valid number", 400, "BAD_REQUEST"),
       );
     }
 
     // Validate axis is an integer between 0-180 if provided
     const axisInt = axis !== null && axis !== undefined ? parseInt(axis) : null;
     if (axisInt !== null && (isNaN(axisInt) || axisInt < 0 || axisInt > 180)) {
-      return NextResponse.json(
-        { error: "axis must be an integer between 0 and 180" },
-        { status: 400 },
+      return createApiErrorResponse(
+        new APIError(
+          "axis must be an integer between 0 and 180",
+          400,
+          "BAD_REQUEST",
+        ),
       );
     }
 
@@ -108,9 +113,8 @@ export async function POST(request: NextRequest) {
     const additionNum =
       addition !== null && addition !== undefined ? parseFloat(addition) : null;
     if (additionNum !== null && isNaN(additionNum)) {
-      return NextResponse.json(
-        { error: "addition must be a valid number" },
-        { status: 400 },
+      return createApiErrorResponse(
+        new APIError("addition must be a valid number", 400, "BAD_REQUEST"),
       );
     }
 
@@ -129,31 +133,28 @@ export async function POST(request: NextRequest) {
 
     if (error) {
       logger.error("Error calculating contact lens price", error);
-      return NextResponse.json(
-        {
-          error: "Error al calcular el precio del lente de contacto",
-          details: error.message,
-        },
-        { status: 500 },
+      return createApiErrorResponse(
+        new Error(
+          `Error al calcular el precio del lente de contacto: ${error.message}`,
+        ),
       );
     }
 
     // Si no hay resultado: configuración de la familia (matrices) o la receta no cae en ningún rango
     if (!calculation || calculation.length === 0) {
-      return NextResponse.json(
-        {
-          error:
-            "No se encontró una matriz de precios para esta familia y receta. Comprueba que existan matrices de precios para esta familia (Productos → Lentes de contacto → Matrices) y que los valores de la receta (esfera, cilindro, eje, adición) entren en algún rango configurado.",
-          code: "NO_PRICE_MATRIX_MATCH",
-        },
-        { status: 422 },
+      return createApiErrorResponse(
+        new APIError(
+          "No se encontró una matriz de precios para esta familia y receta. Comprueba que existan matrices de precios para esta familia (Productos → Lentes de contacto → Matrices) y que los valores de la receta (esfera, cilindro, eje, adición) entren en algún rango configurado.",
+          422,
+          "NO_PRICE_MATRIX_MATCH",
+        ),
       );
     }
 
     // The RPC function returns an array, get the first result
     const result = Array.isArray(calculation) ? calculation[0] : calculation;
 
-    return NextResponse.json({
+    return createApiSuccessResponse({
       calculation: {
         price: parseFloat(result.price),
         cost: parseFloat(result.cost),
@@ -163,9 +164,8 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     logger.error("Error in contact lens price calculation API", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
+    return createApiErrorResponse(
+      error instanceof Error ? error : new Error("Internal server error"),
     );
   }
 }

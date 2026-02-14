@@ -786,6 +786,7 @@ export const processSaleSchema = z
     cash_received: priceOptionalSchema,
     change_amount: priceNonNegativeSchema.optional().nullable(), // Can be 0 or null
     deposit_amount: priceNonNegativeSchema.optional().nullable(), // Monto de abono para pagos parciales
+    fiscal_reference: z.string().max(100).trim().optional().nullable(), // Nº boleta, factura o transacción (manual, sin SII)
     branch_id: uuidOptionalSchema,
     notes: z.string().max(1000).trim().optional().nullable(),
     // Nuevos campos estructurados para lentes y marcos

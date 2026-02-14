@@ -1,4 +1,4 @@
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4 } from "uuid";
 
 export interface TelemetryEvent {
   eventId: string;
@@ -6,7 +6,7 @@ export interface TelemetryEvent {
   userId?: string;
   sessionId: string;
   eventType: string;
-  source: 'frontend' | 'backend' | 'api' | 'system';
+  source: "frontend" | "backend" | "api" | "system";
   payload: Record<string, any>;
   metadata: {
     userAgent?: string;
@@ -25,7 +25,7 @@ export interface TelemetryEvent {
 }
 
 export interface DeviceInfo {
-  deviceType: 'mobile' | 'tablet' | 'desktop';
+  deviceType: "mobile" | "tablet" | "desktop";
   os: string;
   browser: string;
   screenWidth: number;
@@ -34,20 +34,20 @@ export interface DeviceInfo {
 
 export interface PerformanceMetrics {
   // Frontend Performance
-  fcp?: number;        // First Contentful Paint (ms)
-  lcp?: number;        // Largest Contentful Paint (ms)
-  fid?: number;        // First Input Delay (ms)
-  cls?: number;        // Cumulative Layout Shift
-  ttfb?: number;       // Time to First Byte (ms)
+  fcp?: number; // First Contentful Paint (ms)
+  lcp?: number; // Largest Contentful Paint (ms)
+  fid?: number; // First Input Delay (ms)
+  cls?: number; // Cumulative Layout Shift
+  ttfb?: number; // Time to First Byte (ms)
 
   // Backend Performance
-  responseTime?: number;  // API response time (ms)
-  databaseTime?: number;  // Database query time (ms)
-  cacheHit?: boolean;     // Whether request was cached
+  responseTime?: number; // API response time (ms)
+  databaseTime?: number; // Database query time (ms)
+  cacheHit?: boolean; // Whether request was cached
 
   // User Experience
-  interactionToNextPaint?: number;  // INP metric
-  totalBlockingTime?: number;       // TBT metric
+  interactionToNextPaint?: number; // INP metric
+  totalBlockingTime?: number; // TBT metric
 }
 
 export interface QueueItem {
@@ -62,6 +62,7 @@ export class TelemetryCollector {
   private flushInterval: number = 5000; // 5 seconds
   private maxRetries: number = 3;
   private isFlushing: boolean = false;
+  private isEnabled: boolean = true;
   private flushTimer: NodeJS.Timeout | null = null;
 
   constructor(options?: { batchSize?: number; flushInterval?: number }) {
@@ -89,22 +90,23 @@ export class TelemetryCollector {
       timestamp: new Date(),
       userId: pageData.userId,
       sessionId: this.getSessionId(),
-      eventType: 'page_view',
-      source: 'frontend',
+      eventType: "page_view",
+      source: "frontend",
       payload: {
         pageUrl: pageData.pageUrl,
         pageTitle: pageData.pageTitle,
-        referrer: pageData.referrer
+        referrer: pageData.referrer,
       },
       metadata: {
         pageUrl: pageData.pageUrl,
         referrer: pageData.referrer,
-        userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : undefined,
-        deviceInfo: this.getDeviceInfo()
+        userAgent:
+          typeof navigator !== "undefined" ? navigator.userAgent : undefined,
+        deviceInfo: this.getDeviceInfo(),
       },
       context: {
-        organizationId: pageData.organizationId
-      }
+        organizationId: pageData.organizationId,
+      },
     };
 
     this.queueEvent(event);
@@ -118,7 +120,7 @@ export class TelemetryCollector {
     featureName: string,
     action: string,
     details?: Record<string, any>,
-    userId?: string
+    userId?: string,
   ): string {
     const eventId = uuidv4();
 
@@ -127,18 +129,19 @@ export class TelemetryCollector {
       timestamp: new Date(),
       userId,
       sessionId: this.getSessionId(),
-      eventType: 'feature_usage',
-      source: 'frontend',
+      eventType: "feature_usage",
+      source: "frontend",
       payload: {
         featureName,
         action,
-        ...details
+        ...details,
       },
       metadata: {
-        userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : undefined,
-        deviceInfo: this.getDeviceInfo()
+        userAgent:
+          typeof navigator !== "undefined" ? navigator.userAgent : undefined,
+        deviceInfo: this.getDeviceInfo(),
       },
-      context: {}
+      context: {},
     };
 
     this.queueEvent(event);
@@ -162,19 +165,19 @@ export class TelemetryCollector {
       timestamp: new Date(),
       userId: requestData.userId,
       sessionId: this.getSessionId(),
-      eventType: 'api_request',
-      source: 'api',
+      eventType: "api_request",
+      source: "api",
       payload: {
         method: requestData.method,
-        url: requestData.url
+        url: requestData.url,
       },
       metadata: {
         userAgent: requestData.userAgent,
-        ipAddress: requestData.ipAddress
+        ipAddress: requestData.ipAddress,
       },
       context: {
-        organizationId: requestData.organizationId
-      }
+        organizationId: requestData.organizationId,
+      },
     };
 
     this.queueEvent(event);
@@ -193,19 +196,19 @@ export class TelemetryCollector {
       eventId: responseData.requestId,
       timestamp: new Date(),
       sessionId: this.getSessionId(),
-      eventType: 'api_response',
-      source: 'api',
+      eventType: "api_response",
+      source: "api",
       payload: {
         statusCode: responseData.statusCode,
         duration: responseData.duration,
-        responseBodySize: responseData.responseBodySize
+        responseBodySize: responseData.responseBodySize,
       },
       metadata: {
         performance: {
-          responseTime: responseData.duration
-        }
+          responseTime: responseData.duration,
+        },
       },
-      context: {}
+      context: {},
     };
 
     this.queueEvent(event);
@@ -224,15 +227,15 @@ export class TelemetryCollector {
       eventId: errorData.requestId,
       timestamp: new Date(),
       sessionId: this.getSessionId(),
-      eventType: 'api_error',
-      source: 'api',
+      eventType: "api_error",
+      source: "api",
       payload: {
         error: errorData.error,
         stack: errorData.stack,
-        duration: errorData.duration
+        duration: errorData.duration,
       },
       metadata: {},
-      context: {}
+      context: {},
     };
 
     this.queueEvent(event);
@@ -246,16 +249,16 @@ export class TelemetryCollector {
       eventId: uuidv4(),
       timestamp: new Date(),
       sessionId: this.getSessionId(),
-      eventType: 'navigation_timing',
-      source: 'frontend',
+      eventType: "navigation_timing",
+      source: "frontend",
       payload: timing,
       metadata: {
         performance: {
           fcp: timing.domContentLoadedEventEnd - timing.navigationStart,
-          ttfb: timing.responseStart - timing.navigationStart
-        }
+          ttfb: timing.responseStart - timing.navigationStart,
+        },
       },
-      context: {}
+      context: {},
     };
 
     this.queueEvent(event);
@@ -278,19 +281,20 @@ export class TelemetryCollector {
       timestamp: new Date(),
       userId: interactionData.userId,
       sessionId: this.getSessionId(),
-      eventType: 'user_interaction',
-      source: 'frontend',
+      eventType: "user_interaction",
+      source: "frontend",
       payload: {
         element: interactionData.element,
         action: interactionData.action,
         target: interactionData.target,
-        value: interactionData.value
+        value: interactionData.value,
       },
       metadata: {
-        userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : undefined,
-        deviceInfo: this.getDeviceInfo()
+        userAgent:
+          typeof navigator !== "undefined" ? navigator.userAgent : undefined,
+        deviceInfo: this.getDeviceInfo(),
       },
-      context: {}
+      context: {},
     };
 
     this.queueEvent(event);
@@ -298,13 +302,31 @@ export class TelemetryCollector {
   }
 
   /**
+   * Set global telemetry enable status
+   */
+  setEnabled(enabled: boolean): void {
+    this.isEnabled = enabled;
+    if (!enabled) {
+      if (this.flushTimer) {
+        clearInterval(this.flushTimer);
+        this.flushTimer = null;
+      }
+      this.eventQueue = [];
+    } else if (!this.flushTimer) {
+      this.startFlushTimer();
+    }
+  }
+
+  /**
    * Queue an event for batch processing
    */
   protected queueEvent(event: TelemetryEvent): void {
+    if (!this.isEnabled) return;
+
     const queueItem: QueueItem = {
       event,
       retries: 0,
-      queuedAt: new Date()
+      queuedAt: new Date(),
     };
 
     this.eventQueue.push(queueItem);
@@ -331,12 +353,11 @@ export class TelemetryCollector {
       eventsToProcess = this.eventQueue.splice(0, this.batchSize);
 
       // Send to storage (implement in storage layer)
-      await this.sendEvents(eventsToProcess.map(item => item.event));
+      await this.sendEvents(eventsToProcess.map((item) => item.event));
 
       console.log(`Telemetry: Flushed ${eventsToProcess.length} events`);
-
     } catch (error) {
-      console.error('Telemetry: Failed to flush events', error);
+      console.error("Telemetry: Failed to flush events", error);
       // Re-queue failed events (up to max retries)
       this.handleFailedEvents(eventsToProcess);
     } finally {
@@ -349,34 +370,46 @@ export class TelemetryCollector {
    */
   private handleFailedEvents(failedItems: QueueItem[]): void {
     const retryItems = failedItems
-      .filter(item => item.retries < this.maxRetries)
-      .map(item => ({
+      .filter((item) => item.retries < this.maxRetries)
+      .map((item) => ({
         ...item,
-        retries: item.retries + 1
+        retries: item.retries + 1,
       }));
 
     // Add back to queue for retry
     this.eventQueue.unshift(...retryItems);
 
     // Log permanently failed events
-    const failedEvents = failedItems.filter(item => item.retries >= this.maxRetries);
+    const failedEvents = failedItems.filter(
+      (item) => item.retries >= this.maxRetries,
+    );
     if (failedEvents.length > 0) {
-      console.warn(`Telemetry: ${failedEvents.length} events failed permanently`);
+      console.warn(
+        `Telemetry: ${failedEvents.length} events failed permanently`,
+      );
     }
   }
 
   /**
-   * Send events to storage (to be implemented)
+   * Send events to storage via API
    */
   private async sendEvents(events: TelemetryEvent[]): Promise<void> {
-    // This will be implemented to send to PostgreSQL/Redis storage
-    // For now, log to console in development
-    if (process.env.NODE_ENV === 'development') {
-      console.log('Telemetry events:', events);
-    }
+    try {
+      const response = await fetch("/api/admin/app-events", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(events),
+      });
 
-    // TODO: Implement actual storage sending
-    // await telemetryStorage.saveEvents(events);
+      if (!response.ok) {
+        throw new Error(`Failed to send telemetry: ${response.statusText}`);
+      }
+    } catch (error) {
+      console.error("Telemetry storage error:", error);
+      throw error;
+    }
   }
 
   /**
@@ -404,22 +437,22 @@ export class TelemetryCollector {
    * Get or create session ID
    */
   protected getSessionId(): string {
-    if (typeof window !== 'undefined') {
-      let sessionId = sessionStorage.getItem('telemetry_session_id');
+    if (typeof window !== "undefined") {
+      let sessionId = sessionStorage.getItem("telemetry_session_id");
       if (!sessionId) {
         sessionId = uuidv4();
-        sessionStorage.setItem('telemetry_session_id', sessionId);
+        sessionStorage.setItem("telemetry_session_id", sessionId);
       }
       return sessionId;
     }
-    return 'server-session-' + uuidv4();
+    return "server-session-" + uuidv4();
   }
 
   /**
    * Get device information
    */
   private getDeviceInfo(): DeviceInfo | undefined {
-    if (typeof navigator === 'undefined' || typeof window === 'undefined') {
+    if (typeof navigator === "undefined" || typeof window === "undefined") {
       return undefined;
     }
 
@@ -427,9 +460,9 @@ export class TelemetryCollector {
     const platform = navigator.platform;
 
     // Simple device detection (enhance as needed)
-    let deviceType: 'mobile' | 'tablet' | 'desktop' = 'desktop';
+    let deviceType: "mobile" | "tablet" | "desktop" = "desktop";
     if (/Mobile|Android|iPhone|iPad|iPod/.test(ua)) {
-      deviceType = /iPad/.test(ua) ? 'tablet' : 'mobile';
+      deviceType = /iPad/.test(ua) ? "tablet" : "mobile";
     }
 
     return {
@@ -437,7 +470,7 @@ export class TelemetryCollector {
       os: platform,
       browser: this.getBrowserName(ua),
       screenWidth: window.screen?.width || 0,
-      screenHeight: window.screen?.height || 0
+      screenHeight: window.screen?.height || 0,
     };
   }
 
@@ -445,11 +478,11 @@ export class TelemetryCollector {
    * Get browser name from user agent
    */
   private getBrowserName(ua: string): string {
-    if (ua.includes('Firefox')) return 'Firefox';
-    if (ua.includes('Chrome')) return 'Chrome';
-    if (ua.includes('Safari')) return 'Safari';
-    if (ua.includes('Edge')) return 'Edge';
-    return 'Unknown';
+    if (ua.includes("Firefox")) return "Firefox";
+    if (ua.includes("Chrome")) return "Chrome";
+    if (ua.includes("Safari")) return "Safari";
+    if (ua.includes("Edge")) return "Edge";
+    return "Unknown";
   }
 
   /**
@@ -470,5 +503,5 @@ export class TelemetryCollector {
 // Export singleton instance
 export const telemetryCollector = new TelemetryCollector({
   batchSize: 10,
-  flushInterval: 5000
+  flushInterval: 5000,
 });

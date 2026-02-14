@@ -64,7 +64,8 @@ export default function SystemMaintenance({
     {
       id: "security_audit",
       label: "Verificar Seguridad",
-      description: "Auditoría de seguridad",
+      description:
+        "Auditoría: admins inactivos, cantidad mínima de admins activos y políticas de seguridad",
       icon: Shield,
     },
     {

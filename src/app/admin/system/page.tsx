@@ -29,6 +29,7 @@ import {
   Trash2,
   Download,
   Receipt,
+  Users,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useBranch } from "@/hooks/useBranch";
@@ -56,6 +57,9 @@ export default function SystemAdministrationPage() {
   const searchParams = useSearchParams();
   const tabFromUrl = searchParams.get("tab");
   const { currentBranchId, isSuperAdmin, branches } = useBranch();
+  const [configScope, setConfigScope] = useState<"global" | "branch">("global");
+  const configBranchId =
+    configScope === "branch" && currentBranchId ? currentBranchId : null;
   const [activeTab, setActiveTab] = useState(
     tabFromUrl &&
       [
@@ -113,7 +117,7 @@ export default function SystemAdministrationPage() {
     isLoading: configsLoading,
     updateConfig,
     isUpdating,
-  } = useSystemConfig();
+  } = useSystemConfig({ branchId: configBranchId });
 
   const {
     healthMetrics,
@@ -140,12 +144,19 @@ export default function SystemAdministrationPage() {
   // Maintenance action handler
   const handleMaintenanceAction = async (action: string) => {
     try {
+      const body: { action: string; branch_id?: string } = { action };
+      if (
+        (action === "backup_database" || action === "system_status") &&
+        currentBranchId
+      ) {
+        body.branch_id = currentBranchId;
+      }
       const response = await fetch("/api/admin/system/maintenance", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ action }),
+        body: JSON.stringify(body),
       });
 
       if (!response.ok) {
@@ -485,6 +496,10 @@ export default function SystemAdministrationPage() {
             configs={configs}
             onUpdateConfig={updateConfig}
             isUpdating={isUpdating}
+            configScope={configScope}
+            onConfigScopeChange={setConfigScope}
+            currentBranchId={currentBranchId}
+            hasMultipleBranches={(branches?.length ?? 0) > 1}
           />
         </TabsContent>
 
@@ -541,7 +556,8 @@ export default function SystemAdministrationPage() {
               Resultados de Auditoría de Seguridad
             </DialogTitle>
             <DialogDescription>
-              Revisión de seguridad del sistema completada
+              La auditoría revisa: administradores inactivos, cantidad mínima de
+              admins activos y otras políticas de seguridad.
             </DialogDescription>
           </DialogHeader>
 
@@ -673,6 +689,36 @@ export default function SystemAdministrationPage() {
                     </p>
                   </CardContent>
                 </Card>
+                {systemStatusReport.total_orders != null && (
+                  <Card className="bg-admin-bg-tertiary">
+                    <CardContent className="p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Receipt className="h-4 w-4 text-azul-profundo" />
+                        <span className="text-xs text-tierra-media">
+                          Órdenes
+                        </span>
+                      </div>
+                      <p className="text-2xl font-bold">
+                        {systemStatusReport.total_orders}
+                      </p>
+                    </CardContent>
+                  </Card>
+                )}
+                {systemStatusReport.total_customers != null && (
+                  <Card className="bg-admin-bg-tertiary">
+                    <CardContent className="p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Users className="h-4 w-4 text-verde-suave" />
+                        <span className="text-xs text-tierra-media">
+                          Clientes
+                        </span>
+                      </div>
+                      <p className="text-2xl font-bold">
+                        {systemStatusReport.total_customers}
+                      </p>
+                    </CardContent>
+                  </Card>
+                )}
               </div>
 
               {/* Detailed Information */}

@@ -32,16 +32,13 @@
   },
   "privacy": {
     "anonymizeIp": true,
-    "excludeSensitivePaths": [
-      "/api/auth",
-      "/admin/users"
-    ],
+    "excludeSensitivePaths": ["/api/auth", "/admin/users"],
     "dataRetentionDays": 90,
     "gdprCompliant": true
   },
   "endpoints": {
-    "browserEndpoint": "/api/telemetry/browser",
-    "serverEndpoint": "/api/telemetry/server",
+    "browserEndpoint": "/api/admin/app-events",
+    "serverEndpoint": "/api/admin/app-events",
     "dashboardEndpoint": "/api/telemetry/dashboard"
   }
 }

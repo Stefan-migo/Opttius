@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient, createServiceRoleClient } from "@/utils/supabase/server";
 import { getBranchContext } from "@/lib/api/branch-middleware";
 import { appLogger as logger } from "@/lib/logger";
+import {
+  createApiSuccessResponse,
+  createApiErrorResponse,
+} from "@/lib/api/response";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
 
 /**
@@ -36,7 +40,13 @@ export async function POST(request: NextRequest) {
     const branchContext = await getBranchContext(request, user.id);
 
     const body = await request.json();
-    const { order_id, payment_amount, payment_method, notes } = body;
+    const {
+      order_id,
+      payment_amount,
+      payment_method,
+      notes,
+      fiscal_reference,
+    } = body;
 
     if (!order_id || !payment_amount || !payment_method) {
       return NextResponse.json(
@@ -87,23 +97,14 @@ export async function POST(request: NextRequest) {
     const newTotal = totalPaid + payment_amount;
     const stillPending = order.total_amount > newTotal;
 
-    // Get current POS session for this branch
+    // Get current POS session for this branch (simplified to find ANY open session)
     let posSessionId = null;
     if (branchContext.branchId) {
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const todayStart = today.toISOString();
-      const todayEnd = new Date(today);
-      todayEnd.setHours(23, 59, 59, 999);
-      const todayEndStr = todayEnd.toISOString();
-
       const { data: openSession } = await supabaseServiceRole
         .from("pos_sessions")
         .select("id")
         .eq("branch_id", branchContext.branchId)
         .eq("status", "open")
-        .gte("opening_time", todayStart)
-        .lte("opening_time", todayEndStr)
         .order("opening_time", { ascending: false })
         .limit(1)
         .maybeSingle();
@@ -112,7 +113,8 @@ export async function POST(request: NextRequest) {
         posSessionId = openSession.id;
       }
     } else if (branchContext.isSuperAdmin) {
-      // For super admin, try to find any open session
+      // For super admin in global view, try to find any open session
+      // This is a fallback and might not be accurate if multiple branches have open sessions
       const { data: activeSession } = await supabaseServiceRole
         .from("pos_sessions")
         .select("id")
@@ -134,6 +136,8 @@ export async function POST(request: NextRequest) {
         amount: payment_amount,
         payment_method: payment_method,
         pos_session_id: posSessionId, // Asociar pago a la sesión de caja actual
+        payment_reference: fiscal_reference?.trim() || null,
+        paid_at: new Date().toISOString(),
         created_by: user.id,
         notes: notes || "Pago de saldo pendiente",
       })
@@ -240,8 +244,7 @@ export async function POST(request: NextRequest) {
       new_status: newPaymentStatus,
     });
 
-    return NextResponse.json({
-      success: true,
+    return createApiSuccessResponse({
       payment,
       order_status: newPaymentStatus,
       message: stillPending

@@ -1,5 +1,5 @@
-import { useEffect, useCallback, useRef } from 'react';
-import { telemetryCollector } from '../collector/browser-collector';
+import { useEffect, useCallback, useRef } from "react";
+import { telemetryCollector } from "../collector/browser-collector";
 
 /**
  * Hook for tracking page views automatically
@@ -8,9 +8,9 @@ export function usePageTracking() {
   useEffect(() => {
     // Track page view when component mounts
     const pageViewId = telemetryCollector.trackPageView({
-      pageUrl: typeof window !== 'undefined' ? window.location.pathname : '/',
-      pageTitle: typeof document !== 'undefined' ? document.title : '',
-      referrer: typeof document !== 'undefined' ? document.referrer : ''
+      pageUrl: typeof window !== "undefined" ? window.location.pathname : "/",
+      pageTitle: typeof document !== "undefined" ? document.title : "",
+      referrer: typeof document !== "undefined" ? document.referrer : "",
     });
 
     // Clean up when component unmounts
@@ -24,14 +24,20 @@ export function usePageTracking() {
  * Hook for tracking feature usage
  */
 export function useFeatureTracking(featureName: string) {
-  const trackInteraction = useCallback((action: string, details?: any) => {
-    telemetryCollector.trackFeatureUsage(featureName, action, details);
-  }, [featureName]);
+  const trackInteraction = useCallback(
+    (action: string, details?: any) => {
+      telemetryCollector.trackFeatureUsage(featureName, action, details);
+    },
+    [featureName],
+  );
 
   // Also provide a direct feature usage tracker
-  const trackFeatureUsage = useCallback((action: string, details?: any) => {
-    telemetryCollector.trackFeatureUsage(featureName, action, details);
-  }, [featureName]);
+  const trackFeatureUsage = useCallback(
+    (action: string, details?: any) => {
+      telemetryCollector.trackFeatureUsage(featureName, action, details);
+    },
+    [featureName],
+  );
 
   return { trackInteraction, trackFeatureUsage };
 }
@@ -40,22 +46,28 @@ export function useFeatureTracking(featureName: string) {
  * Hook for tracking user interactions with DOM elements
  */
 export function useInteractionTracking() {
-  const trackClick = useCallback((elementName: string, target?: string, value?: string) => {
-    telemetryCollector.trackUserInteraction({
-      element: elementName,
-      action: 'click',
-      target,
-      value
-    });
-  }, []);
+  const trackClick = useCallback(
+    (elementName: string, target?: string, value?: string) => {
+      telemetryCollector.trackUserInteraction({
+        element: elementName,
+        action: "click",
+        target,
+        value,
+      });
+    },
+    [],
+  );
 
-  const trackInputChange = useCallback((elementName: string, value?: string) => {
-    telemetryCollector.trackUserInteraction({
-      element: elementName,
-      action: 'input',
-      value
-    });
-  }, []);
+  const trackInputChange = useCallback(
+    (elementName: string, value?: string) => {
+      telemetryCollector.trackUserInteraction({
+        element: elementName,
+        action: "input",
+        value,
+      });
+    },
+    [],
+  );
 
   return { trackClick, trackInputChange };
 }
@@ -66,7 +78,10 @@ export function useInteractionTracking() {
 export function usePerformanceMetrics() {
   useEffect(() => {
     // Only run in browser environment
-    if (typeof window === 'undefined' || typeof PerformanceObserver === 'undefined') {
+    if (
+      typeof window === "undefined" ||
+      typeof PerformanceObserver === "undefined"
+    ) {
       return;
     }
 
@@ -74,37 +89,39 @@ export function usePerformanceMetrics() {
     const observer = new PerformanceObserver((list) => {
       list.getEntries().forEach((entry) => {
         switch (entry.entryType) {
-          case 'navigation':
+          case "navigation":
             telemetryCollector.trackNavigationTiming(entry.toJSON());
             break;
-          
-          case 'paint':
-            if (entry.name === 'first-contentful-paint') {
+
+          case "paint":
+            if (entry.name === "first-contentful-paint") {
               telemetryCollector.trackUserInteraction({
-                element: 'performance',
-                action: 'fcp_measured',
-                value: entry.startTime.toString()
+                element: "performance",
+                action: "fcp_measured",
+                value: entry.startTime.toString(),
               });
             }
             break;
-          
-          case 'largest-contentful-paint':
-            telemetryCollector.trackUserInteraction({
-              element: 'performance',
-              action: 'lcp_measured',
-              value: entry.startTime.toString()
-            });
+
+          case "largest-contentful-paint":
+            if (entry.name === "largest-contentful-paint") {
+              telemetryCollector.trackUserInteraction({
+                element: "performance",
+                action: "lcp_measured",
+                value: entry.startTime.toString(),
+              });
+            }
             break;
         }
       });
     });
 
     try {
-      observer.observe({ 
-        entryTypes: ['navigation', 'paint', 'largest-contentful-paint'] 
+      observer.observe({
+        entryTypes: ["navigation", "paint", "largest-contentful-paint"],
       });
     } catch (error) {
-      console.warn('Performance Observer not supported:', error);
+      console.warn("Performance Observer not supported:", error);
     }
 
     // Cleanup observer
@@ -119,17 +136,17 @@ export function usePerformanceMetrics() {
  */
 export function useRenderTracking(componentName: string) {
   const renderStartTime = useRef<number | null>(null);
-  
+
   useEffect(() => {
     renderStartTime.current = performance.now();
-    
+
     return () => {
       if (renderStartTime.current) {
         const renderTime = performance.now() - renderStartTime.current;
         telemetryCollector.trackUserInteraction({
           element: componentName,
-          action: 'component_render',
-          value: renderTime.toString()
+          action: "component_render",
+          value: renderTime.toString(),
         });
       }
     };
@@ -143,24 +160,30 @@ export function useFormTracking(formName: string) {
   const trackFormStart = useCallback(() => {
     telemetryCollector.trackUserInteraction({
       element: formName,
-      action: 'form_start'
+      action: "form_start",
     });
   }, [formName]);
 
-  const trackFormSubmit = useCallback((success: boolean, error?: string) => {
-    telemetryCollector.trackUserInteraction({
-      element: formName,
-      action: success ? 'form_submit_success' : 'form_submit_error',
-      value: error
-    });
-  }, [formName]);
+  const trackFormSubmit = useCallback(
+    (success: boolean, error?: string) => {
+      telemetryCollector.trackUserInteraction({
+        element: formName,
+        action: success ? "form_submit_success" : "form_submit_error",
+        value: error,
+      });
+    },
+    [formName],
+  );
 
-  const trackFormField = useCallback((fieldName: string, action: string) => {
-    telemetryCollector.trackUserInteraction({
-      element: `${formName}_${fieldName}`,
-      action: `field_${action}`
-    });
-  }, [formName]);
+  const trackFormField = useCallback(
+    (fieldName: string, action: string) => {
+      telemetryCollector.trackUserInteraction({
+        element: `${formName}_${fieldName}`,
+        action: `field_${action}`,
+      });
+    },
+    [formName],
+  );
 
   return { trackFormStart, trackFormSubmit, trackFormField };
 }
@@ -169,23 +192,29 @@ export function useFormTracking(formName: string) {
  * Hook for tracking search functionality
  */
 export function useSearchTracking(searchContext: string) {
-  const trackSearch = useCallback((query: string, resultCount?: number) => {
-    telemetryCollector.trackUserInteraction({
-      element: searchContext,
-      action: 'search_executed',
-      value: query,
-      target: resultCount?.toString()
-    });
-  }, [searchContext]);
+  const trackSearch = useCallback(
+    (query: string, resultCount?: number) => {
+      telemetryCollector.trackUserInteraction({
+        element: searchContext,
+        action: "search_executed",
+        value: query,
+        target: resultCount?.toString(),
+      });
+    },
+    [searchContext],
+  );
 
-  const trackSearchResultClick = useCallback((resultId: string, position: number) => {
-    telemetryCollector.trackUserInteraction({
-      element: searchContext,
-      action: 'search_result_click',
-      value: resultId,
-      target: position.toString()
-    });
-  }, [searchContext]);
+  const trackSearchResultClick = useCallback(
+    (resultId: string, position: number) => {
+      telemetryCollector.trackUserInteraction({
+        element: searchContext,
+        action: "search_result_click",
+        value: resultId,
+        target: position.toString(),
+      });
+    },
+    [searchContext],
+  );
 
   return { trackSearch, trackSearchResultClick };
 }
@@ -194,14 +223,17 @@ export function useSearchTracking(searchContext: string) {
  * Hook for tracking navigation between pages/routes
  */
 export function useNavigationTracking() {
-  const trackNavigation = useCallback((from: string, to: string, method: string) => {
-    telemetryCollector.trackUserInteraction({
-      element: 'navigation',
-      action: method,
-      target: from,
-      value: to
-    });
-  }, []);
+  const trackNavigation = useCallback(
+    (from: string, to: string, method: string) => {
+      telemetryCollector.trackUserInteraction({
+        element: "navigation",
+        action: method,
+        target: from,
+        value: to,
+      });
+    },
+    [],
+  );
 
   return trackNavigation;
 }
@@ -210,14 +242,17 @@ export function useNavigationTracking() {
  * Hook for tracking error boundaries and caught errors
  */
 export function useErrorTracking(componentName: string) {
-  const trackError = useCallback((error: Error, errorInfo?: any) => {
-    telemetryCollector.trackUserInteraction({
-      element: componentName,
-      action: 'error_caught',
-      value: error.message,
-      target: error.name
-    });
-  }, [componentName]);
+  const trackError = useCallback(
+    (error: Error, errorInfo?: any) => {
+      telemetryCollector.trackUserInteraction({
+        element: componentName,
+        action: "error_caught",
+        value: error.message,
+        target: error.name,
+      });
+    },
+    [componentName],
+  );
 
   return trackError;
 }
@@ -230,8 +265,9 @@ export function useTelemetry(componentName: string) {
   usePageTracking();
   usePerformanceMetrics();
   useRenderTracking(componentName);
-  
-  const { trackFeatureUsage: featureTrackUsage } = useFeatureTracking(componentName);
+
+  const { trackFeatureUsage: featureTrackUsage } =
+    useFeatureTracking(componentName);
   const interactionTracking = useInteractionTracking();
   const formTracking = useFormTracking(componentName);
   const searchTracking = useSearchTracking(componentName);
@@ -244,6 +280,7 @@ export function useTelemetry(componentName: string) {
     ...searchTracking,
     trackFeatureUsage: featureTrackUsage,
     trackNavigation: navigationTracking,
-    trackError: errorTracking
+    trackError: errorTracking,
+    telemetryCollector,
   };
 }

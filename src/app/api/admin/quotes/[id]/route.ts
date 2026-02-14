@@ -3,12 +3,21 @@ import { createClient } from "@/utils/supabase/server";
 import { createServiceRoleClient } from "@/utils/supabase/server";
 import { getBranchContext, addBranchFilter } from "@/lib/api/branch-middleware";
 import { appLogger as logger } from "@/lib/logger";
+import {
+  createApiSuccessResponse,
+  createApiErrorResponse,
+} from "@/lib/api/response";
 import { EmailNotificationService } from "@/lib/email/notifications";
+import {
+  AuthenticationError,
+  AuthorizationError,
+  APIError,
+} from "@/lib/api/errors";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> },
+  { params }: { params: { id: string } },
 ) {
   try {
     const supabase = await createClient();
@@ -19,20 +28,17 @@ export async function GET(
       error: userError,
     } = await supabase.auth.getUser();
     if (userError || !user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return createApiErrorResponse(new AuthenticationError("No autorizado"));
     }
 
     const { data: isAdmin } = (await supabase.rpc("is_admin", {
       user_id: user.id,
     } as IsAdminParams)) as { data: IsAdminResult | null; error: Error | null };
     if (!isAdmin) {
-      return NextResponse.json(
-        { error: "Admin access required" },
-        { status: 403 },
-      );
+      return createApiErrorResponse(new AuthorizationError("Acceso denegado"));
     }
 
-    const { id } = await params;
+    const { id } = params;
 
     // Get user's organization_id for multi-tenancy
     const { data: adminUser } = await supabase
@@ -155,12 +161,8 @@ export async function GET(
         errorDetails: quoteError?.details,
         quoteId: id,
       });
-      return NextResponse.json(
-        {
-          error: "Quote not found",
-          details: quoteError?.message || "Failed to fetch quote",
-        },
-        { status: 404 },
+      return createApiErrorResponse(
+        new Error(quoteError?.message || "Failed to fetch quote"),
       );
     }
 
@@ -334,19 +336,17 @@ export async function GET(
       },
     });
 
-    return NextResponse.json({ quote });
+    return createApiSuccessResponse(quote);
   } catch (error) {
-    logger.error("Error fetching quote", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
+    return createApiErrorResponse(
+      error instanceof Error ? error : new Error("Internal server error"),
     );
   }
 }
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> },
+  { params }: { params: { id: string } },
 ) {
   try {
     const supabase = await createClient();
@@ -358,20 +358,17 @@ export async function PUT(
       error: userError,
     } = await supabase.auth.getUser();
     if (userError || !user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return createApiErrorResponse(new AuthenticationError("No autorizado"));
     }
 
     const { data: isAdmin } = (await supabase.rpc("is_admin", {
       user_id: user.id,
     } as IsAdminParams)) as { data: IsAdminResult | null; error: Error | null };
     if (!isAdmin) {
-      return NextResponse.json(
-        { error: "Admin access required" },
-        { status: 403 },
-      );
+      return createApiErrorResponse(new AuthorizationError("Acceso denegado"));
     }
 
-    const { id } = await params;
+    const { id } = params;
 
     // Get branch context
     const branchContext = await getBranchContext(request, user.id);
@@ -521,22 +518,17 @@ export async function PUT(
       })();
     }
 
-    return NextResponse.json({
-      success: true,
-      quote: updatedQuote,
-    });
+    return createApiSuccessResponse(updatedQuote);
   } catch (error) {
-    logger.error("Error updating quote", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
+    return createApiErrorResponse(
+      error instanceof Error ? error : new Error("Internal server error"),
     );
   }
 }
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> },
+  { params }: { params: { id: string } },
 ) {
   try {
     const supabase = await createClient();
@@ -548,20 +540,17 @@ export async function DELETE(
       error: userError,
     } = await supabase.auth.getUser();
     if (userError || !user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return createApiErrorResponse(new AuthenticationError("No autorizado"));
     }
 
     const { data: isAdmin } = (await supabase.rpc("is_admin", {
       user_id: user.id,
     } as IsAdminParams)) as { data: IsAdminResult | null; error: Error | null };
     if (!isAdmin) {
-      return NextResponse.json(
-        { error: "Admin access required" },
-        { status: 403 },
-      );
+      return createApiErrorResponse(new AuthorizationError("Acceso denegado"));
     }
 
-    const { id } = await params;
+    const { id } = params;
 
     // First, check if the quote exists and if it's converted
     const { data: quote, error: fetchError } = await supabaseServiceRole

@@ -1,12 +1,12 @@
 /**
  * Order Service
- * 
+ *
  * Service layer for order-related API operations.
  * Provides type-safe methods for CRUD operations on orders.
  */
 
-import { ApiClient, isSuccess, unwrapData } from '../client-helpers';
-import { handleApiError } from '@/lib/services/errorService';
+import { ApiClient, isSuccess, unwrapData } from "../client-helpers";
+import { handleApiError } from "@/lib/services/errorService";
 
 // Types
 export interface Order {
@@ -15,8 +15,8 @@ export interface Order {
   customer_name: string;
   customer_email?: string;
   order_number: string;
-  status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
-  payment_status: 'pending' | 'paid' | 'failed' | 'refunded';
+  status: "pending" | "processing" | "shipped" | "delivered" | "cancelled";
+  payment_status: "pending" | "paid" | "failed" | "refunded";
   payment_method?: string;
   mp_payment_id?: string | null;
   mp_payment_method?: string | null;
@@ -56,8 +56,8 @@ export interface ShippingInfo {
 
 export interface CreateOrderData {
   customer_id: string;
-  status?: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
-  payment_status?: 'pending' | 'paid' | 'failed' | 'refunded';
+  status?: "pending" | "processing" | "shipped" | "delivered" | "cancelled";
+  payment_status?: "pending" | "paid" | "failed" | "refunded";
   payment_method?: string;
   subtotal: number;
   tax_amount: number;
@@ -67,7 +67,7 @@ export interface CreateOrderData {
   notes?: string;
   branch_id?: string;
   shipping?: ShippingInfo;
-  items?: Omit<OrderItem, 'id' | 'order_id'>[];
+  items?: Omit<OrderItem, "id" | "order_id">[];
 }
 
 export interface UpdateOrderData extends Partial<CreateOrderData> {}
@@ -106,17 +106,17 @@ const client = new ApiClient();
  * Get all orders with optional filters
  */
 export async function getOrders(
-  params: OrderSearchParams = {}
+  params: OrderSearchParams = {},
 ): Promise<OrderListResponse> {
   try {
     const queryString = new URLSearchParams(
       Object.entries(params)
         .filter(([_, v]) => v !== undefined)
-        .map(([k, v]) => [k, String(v)]) as [string, string][]
+        .map(([k, v]) => [k, String(v)]) as [string, string][],
     ).toString();
 
     const response = await client.get<Order[]>(
-      `/api/admin/orders${queryString ? `?${queryString}` : ''}`
+      `/api/admin/orders${queryString ? `?${queryString}` : ""}`,
     );
 
     if (isSuccess(response)) {
@@ -131,9 +131,13 @@ export async function getOrders(
       };
     }
 
-    throw new Error(response.error.message);
+    const errorMessage =
+      response.success === false && response.error?.message
+        ? response.error.message
+        : "An unknown error occurred";
+    throw new Error(errorMessage);
   } catch (error) {
-    handleApiError(error, 'getOrders');
+    handleApiError(error, "getOrders");
     throw error;
   }
 }
@@ -143,10 +147,12 @@ export async function getOrders(
  */
 export async function getOrder(id: string): Promise<OrderWithItems> {
   try {
-    const response = await client.get<OrderWithItems>(`/api/admin/orders/${id}`);
+    const response = await client.get<OrderWithItems>(
+      `/api/admin/orders/${id}`,
+    );
     return unwrapData(response);
   } catch (error) {
-    handleApiError(error, 'getOrder');
+    handleApiError(error, "getOrder");
     throw error;
   }
 }
@@ -156,10 +162,10 @@ export async function getOrder(id: string): Promise<OrderWithItems> {
  */
 export async function createOrder(data: CreateOrderData): Promise<Order> {
   try {
-    const response = await client.post<Order>('/api/admin/orders', data);
+    const response = await client.post<Order>("/api/admin/orders", data);
     return unwrapData(response);
   } catch (error) {
-    handleApiError(error, 'createOrder');
+    handleApiError(error, "createOrder");
     throw error;
   }
 }
@@ -169,10 +175,10 @@ export async function createOrder(data: CreateOrderData): Promise<Order> {
  */
 export async function createManualOrder(data: CreateOrderData): Promise<Order> {
   try {
-    const response = await client.post<Order>('/api/admin/orders/manual', data);
+    const response = await client.post<Order>("/api/admin/orders/manual", data);
     return unwrapData(response);
   } catch (error) {
-    handleApiError(error, 'createManualOrder');
+    handleApiError(error, "createManualOrder");
     throw error;
   }
 }
@@ -182,13 +188,13 @@ export async function createManualOrder(data: CreateOrderData): Promise<Order> {
  */
 export async function updateOrder(
   id: string,
-  data: UpdateOrderData
+  data: UpdateOrderData,
 ): Promise<Order> {
   try {
     const response = await client.put<Order>(`/api/admin/orders/${id}`, data);
     return unwrapData(response);
   } catch (error) {
-    handleApiError(error, 'updateOrder');
+    handleApiError(error, "updateOrder");
     throw error;
   }
 }
@@ -201,7 +207,7 @@ export async function deleteOrder(id: string): Promise<void> {
     const response = await client.delete(`/api/admin/orders/${id}`);
     unwrapData(response);
   } catch (error) {
-    handleApiError(error, 'deleteOrder');
+    handleApiError(error, "deleteOrder");
     throw error;
   }
 }
@@ -211,13 +217,15 @@ export async function deleteOrder(id: string): Promise<void> {
  */
 export async function updateOrderStatus(
   id: string,
-  status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled'
+  status: "pending" | "processing" | "shipped" | "delivered" | "cancelled",
 ): Promise<Order> {
   try {
-    const response = await client.put<Order>(`/api/admin/orders/${id}/status`, { status });
+    const response = await client.put<Order>(`/api/admin/orders/${id}/status`, {
+      status,
+    });
     return unwrapData(response);
   } catch (error) {
-    handleApiError(error, 'updateOrderStatus');
+    handleApiError(error, "updateOrderStatus");
     throw error;
   }
 }
@@ -227,17 +235,20 @@ export async function updateOrderStatus(
  */
 export async function updatePaymentStatus(
   id: string,
-  payment_status: 'pending' | 'paid' | 'failed' | 'refunded',
-  payment_method?: string
+  payment_status: "pending" | "paid" | "failed" | "refunded",
+  payment_method?: string,
 ): Promise<Order> {
   try {
-    const response = await client.put<Order>(`/api/admin/orders/${id}/payment`, {
-      payment_status,
-      payment_method,
-    });
+    const response = await client.put<Order>(
+      `/api/admin/orders/${id}/payment`,
+      {
+        payment_status,
+        payment_method,
+      },
+    );
     return unwrapData(response);
   } catch (error) {
-    handleApiError(error, 'updatePaymentStatus');
+    handleApiError(error, "updatePaymentStatus");
     throw error;
   }
 }
@@ -247,13 +258,16 @@ export async function updatePaymentStatus(
  */
 export async function addOrderItem(
   orderId: string,
-  item: Omit<OrderItem, 'id' | 'order_id'>
+  item: Omit<OrderItem, "id" | "order_id">,
 ): Promise<OrderItem> {
   try {
-    const response = await client.post<OrderItem>(`/api/admin/orders/${orderId}/items`, item);
+    const response = await client.post<OrderItem>(
+      `/api/admin/orders/${orderId}/items`,
+      item,
+    );
     return unwrapData(response);
   } catch (error) {
-    handleApiError(error, 'addOrderItem');
+    handleApiError(error, "addOrderItem");
     throw error;
   }
 }
@@ -264,16 +278,16 @@ export async function addOrderItem(
 export async function updateOrderItem(
   orderId: string,
   itemId: string,
-  item: Partial<Omit<OrderItem, 'id' | 'order_id'>>
+  item: Partial<Omit<OrderItem, "id" | "order_id">>,
 ): Promise<OrderItem> {
   try {
     const response = await client.put<OrderItem>(
       `/api/admin/orders/${orderId}/items/${itemId}`,
-      item
+      item,
     );
     return unwrapData(response);
   } catch (error) {
-    handleApiError(error, 'updateOrderItem');
+    handleApiError(error, "updateOrderItem");
     throw error;
   }
 }
@@ -281,12 +295,17 @@ export async function updateOrderItem(
 /**
  * Remove an order item
  */
-export async function removeOrderItem(orderId: string, itemId: string): Promise<void> {
+export async function removeOrderItem(
+  orderId: string,
+  itemId: string,
+): Promise<void> {
   try {
-    const response = await client.delete(`/api/admin/orders/${orderId}/items/${itemId}`);
+    const response = await client.delete(
+      `/api/admin/orders/${orderId}/items/${itemId}`,
+    );
     unwrapData(response);
   } catch (error) {
-    handleApiError(error, 'removeOrderItem');
+    handleApiError(error, "removeOrderItem");
     throw error;
   }
 }
@@ -297,16 +316,19 @@ export async function removeOrderItem(orderId: string, itemId: string): Promise<
 export async function processRefund(
   id: string,
   amount: number,
-  reason?: string
+  reason?: string,
 ): Promise<Order> {
   try {
-    const response = await client.post<Order>(`/api/admin/orders/${id}/refund`, {
-      amount,
-      reason,
-    });
+    const response = await client.post<Order>(
+      `/api/admin/orders/${id}/refund`,
+      {
+        amount,
+        reason,
+      },
+    );
     return unwrapData(response);
   } catch (error) {
-    handleApiError(error, 'processRefund');
+    handleApiError(error, "processRefund");
     throw error;
   }
 }

@@ -185,6 +185,21 @@ export async function GET(request: NextRequest) {
         if (payments) {
           sessionPayments = payments;
         }
+
+        // Get credit note movements (refunds) for this session
+        const { data: creditNoteMovements } = await supabaseServiceRole
+          .from("credit_note_movements")
+          .select("amount, refund_method")
+          .eq("pos_session_id", sessionId);
+
+        // Subtract refunds from payment totals (handled below with sessionPayments)
+        sessionPayments = [
+          ...sessionPayments,
+          ...(creditNoteMovements || []).map((cnm: any) => ({
+            amount: Number(cnm.amount) || 0, // negative
+            payment_method: cnm.refund_method,
+          })),
+        ];
       }
     }
 
@@ -209,8 +224,9 @@ export async function GET(request: NextRequest) {
       orders: orders || [],
     };
 
-    // Process each order (for totals, subtotals, taxes)
+    // Process each order (for totals, subtotals, taxes) - exclude cancelled
     (orders || []).forEach((order: any) => {
+      if (order.status === "cancelled") return;
       summary.total_sales += Number(order.total_amount) || 0;
       summary.total_subtotal += Number(order.subtotal) || 0;
       summary.total_tax += Number(order.tax_amount) || 0;
@@ -557,6 +573,22 @@ export async function POST(request: NextRequest) {
       } else {
         sessionPayments = payments || [];
       }
+
+      // Add credit note movements (refunds) - negative amounts
+      if (sessionIdForClosure) {
+        const { data: creditNoteMovements } = await supabaseServiceRole
+          .from("credit_note_movements")
+          .select("amount, refund_method")
+          .eq("pos_session_id", sessionIdForClosure);
+
+        sessionPayments = [
+          ...sessionPayments,
+          ...(creditNoteMovements || []).map((cnm: any) => ({
+            amount: Number(cnm.amount) || 0,
+            payment_method: cnm.refund_method,
+          })),
+        ];
+      }
     }
 
     // Calculate summary from ORDERS (for totals, subtotals, taxes)
@@ -566,6 +598,7 @@ export async function POST(request: NextRequest) {
     let totalDiscounts = 0;
 
     (orders || []).forEach((order: any) => {
+      if (order.status === "cancelled") return;
       totalSales += Number(order.total_amount) || 0;
       totalSubtotal += Number(order.subtotal) || 0;
       totalTax += Number(order.tax_amount) || 0;

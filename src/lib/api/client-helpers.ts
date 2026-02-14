@@ -3,7 +3,12 @@
  * Provides type-safe utilities for frontend API calls
  */
 
-import type { ApiResponse, ApiSuccessResponse, ApiErrorResponse, PaginationMeta } from "./response";
+import type {
+  ApiResponse,
+  ApiSuccessResponse,
+  ApiErrorResponse,
+  PaginationMeta,
+} from "./response";
 
 /**
  * Type-safe API client for making requests
@@ -102,7 +107,8 @@ export class ApiClient {
         success: false,
         error: {
           code: "NETWORK_ERROR",
-          message: error instanceof Error ? error.message : "Network error occurred",
+          message:
+            error instanceof Error ? error.message : "Network error occurred",
           timestamp: new Date().toISOString(),
         },
       };
@@ -136,7 +142,11 @@ export function unwrapData<T>(response: ApiResponse<T>): T {
   if (isSuccess(response)) {
     return response.data;
   }
-  throw new Error(response.error.message);
+  const errorMessage =
+    response && !response.success && response.error?.message
+      ? response.error.message
+      : "An unknown error occurred";
+  throw new Error(errorMessage);
 }
 
 /**
@@ -144,7 +154,7 @@ export function unwrapData<T>(response: ApiResponse<T>): T {
  */
 export function getErrorMessage(response: ApiResponse<any>): string {
   if (isError(response)) {
-    return response.error.message;
+    return response.error?.message || "Unknown error";
   }
   return "Unknown error";
 }
@@ -157,11 +167,11 @@ export async function queryFn<T>(
   fetcher: () => Promise<ApiResponse<T>>,
 ): Promise<T> {
   const response = await fetcher();
-  
+
   if (isSuccess(response)) {
     return response.data;
   }
-  
+
   // React Query will catch this error
   throw new Error(response.error.message);
 }
@@ -216,9 +226,12 @@ export async function fetchCustomers(params: {
 }): Promise<PaginatedResult<any>> {
   const client = new ApiClient();
   const queryString = new URLSearchParams(
-    Object.entries(params).filter(([_, v]) => v !== undefined) as [string, string][],
+    Object.entries(params).filter(([_, v]) => v !== undefined) as [
+      string,
+      string,
+    ][],
   ).toString();
-  
+
   const response = await client.get(`/api/admin/customers?${queryString}`);
   return handlePaginatedResponse(response);
 }
@@ -239,7 +252,7 @@ export function getValidationErrors(
   if (!isError(response)) {
     return null;
   }
-  
+
   if (response.error.code === "VALIDATION_ERROR") {
     const details = response.error.details;
     if (Array.isArray(details)) {

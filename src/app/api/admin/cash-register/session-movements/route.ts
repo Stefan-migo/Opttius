@@ -102,8 +102,84 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    // Get credit note movements (refunds) for this session
+    const { data: creditNoteMovements } = await supabaseServiceRole
+      .from("credit_note_movements")
+      .select(
+        `
+        id,
+        amount,
+        refund_method,
+        created_at,
+        credit_notes(
+          id,
+          credit_note_number,
+          order_id
+        )
+      `,
+      )
+      .eq("pos_session_id", sessionId)
+      .order("created_at", { ascending: true });
+
+    // Fetch order details for credit notes that have order_id
+    const orderIds = (creditNoteMovements || [])
+      .map((cnm: any) => cnm.credit_notes?.order_id)
+      .filter(Boolean);
+    let ordersMap: Record<string, any> = {};
+    if (orderIds.length > 0) {
+      const { data: orders } = await supabaseServiceRole
+        .from("orders")
+        .select(
+          "id, order_number, billing_first_name, billing_last_name, sii_business_name, sii_rut, email",
+        )
+        .in("id", orderIds);
+      if (orders) {
+        ordersMap = Object.fromEntries(orders.map((o: any) => [o.id, o]));
+      }
+    }
+
+    const paymentMethodMap: Record<string, string> = {
+      cash: "Efectivo",
+      debit: "Tarjeta Débito",
+      credit: "Tarjeta Crédito",
+      transfer: "Transferencia",
+      check: "Cheque",
+    };
+
+    // Transform credit note movements into movement format
+    const cnMovements = (creditNoteMovements || []).map((cnm: any) => {
+      const order = cnm.credit_notes?.order_id
+        ? ordersMap[cnm.credit_notes.order_id]
+        : null;
+      const customerName =
+        order?.sii_business_name ||
+        (order?.billing_first_name && order?.billing_last_name
+          ? `${order.billing_first_name} ${order.billing_last_name}`.trim()
+          : null) ||
+        order?.email ||
+        "Cliente no registrado";
+      return {
+        id: cnm.id,
+        movement_type: "credit_note",
+        order_id: order?.id || cnm.credit_notes?.order_id,
+        order_number:
+          order?.order_number || cnm.credit_notes?.credit_note_number || "N/A",
+        customer_name: customerName,
+        customer_rut: order?.sii_rut || null,
+        payment_method:
+          paymentMethodMap[cnm.refund_method] || cnm.refund_method,
+        payment_method_code: cnm.refund_method,
+        amount: Number(cnm.amount) || 0, // Already negative
+        payment_status: "Reembolso",
+        paid_at: cnm.created_at,
+        notes: `Nota de crédito ${cnm.credit_notes?.credit_note_number || ""}`,
+        order_total: Math.abs(Number(cnm.amount)) || 0,
+        order_payment_status: null,
+      };
+    });
+
     // Transform payments into movements with additional info
-    const movements = (payments || []).map((payment: any) => {
+    const paymentMovements = (payments || []).map((payment: any) => {
       const order = payment.order;
 
       // Extract customer information from order fields
@@ -122,8 +198,13 @@ export async function GET(request: NextRequest) {
       const paymentPaidAt = new Date(payment.paid_at);
       const timeDiff = paymentPaidAt.getTime() - orderCreatedAt.getTime();
 
-      // If payment was made more than 5 minutes after order creation, it's likely a pending balance payment
-      if (timeDiff > 5 * 60 * 1000) {
+      // If payment was made more than 5 minutes after order creation, OR notes indicate so, it's likely a pending balance payment
+      if (
+        timeDiff > 5 * 60 * 1000 ||
+        payment.notes?.toLowerCase().includes("saldo pendiente") ||
+        payment.notes?.toLowerCase().includes("pending balance") ||
+        payment.notes?.toLowerCase().includes("abono")
+      ) {
         movementType = "partial_payment";
       }
 
@@ -158,6 +239,11 @@ export async function GET(request: NextRequest) {
         order_payment_status: order?.payment_status || null,
       };
     });
+
+    // Merge and sort by date
+    const movements = [...paymentMovements, ...cnMovements].sort(
+      (a, b) => new Date(a.paid_at).getTime() - new Date(b.paid_at).getTime(),
+    );
 
     return NextResponse.json({
       movements,

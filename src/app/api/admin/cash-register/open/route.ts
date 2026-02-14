@@ -3,6 +3,10 @@ import { createClient } from "@/utils/supabase/server";
 import { createServiceRoleClient } from "@/utils/supabase/server";
 import { getBranchContext } from "@/lib/api/branch-middleware";
 import { appLogger as logger } from "@/lib/logger";
+import {
+  createApiSuccessResponse,
+  createApiErrorResponse,
+} from "@/lib/api/response";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
 import { withRateLimit, rateLimitConfigs } from "@/lib/api/middleware";
 import { z } from "zod";
@@ -142,8 +146,7 @@ export async function POST(request: NextRequest) {
           openingCash: validatedData.opening_cash_amount,
         });
 
-        return NextResponse.json({
-          success: true,
+        return createApiSuccessResponse({
           session: newSession,
           message: "Caja abierta exitosamente",
         });
@@ -203,7 +206,7 @@ export async function GET(request: NextRequest) {
 
         // No branch selected (global view or no branches): return closed state so POS can load
         if (!branchContext.branchId) {
-          return NextResponse.json({
+          return createApiSuccessResponse({
             isOpen: false,
             session: null,
           });
@@ -234,7 +237,7 @@ export async function GET(request: NextRequest) {
           );
         }
 
-        return NextResponse.json({
+        return createApiSuccessResponse({
           isOpen: !!openSession,
           session: openSession || null,
         });

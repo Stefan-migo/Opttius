@@ -285,7 +285,8 @@ export async function GET(
           amount,
           payment_method,
           paid_at,
-          notes
+          notes,
+          payment_reference
         )
       `,
       )

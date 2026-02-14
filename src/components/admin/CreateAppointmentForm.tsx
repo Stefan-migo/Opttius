@@ -127,12 +127,14 @@ export default function CreateAppointmentForm({
     }
   }, [currentBranchId, authLoading, user]);
 
-  // Load customer if initialCustomerId provided
   useEffect(() => {
-    if (initialCustomerId && !selectedCustomer) {
+    if (
+      initialCustomerId &&
+      (!selectedCustomer || selectedCustomer.id !== initialCustomerId)
+    ) {
       fetchCustomer(initialCustomerId);
     }
-  }, [initialCustomerId]);
+  }, [initialCustomerId, selectedCustomer]);
 
   // Load availability when date or duration changes
   useEffect(() => {
@@ -221,7 +223,7 @@ export default function CreateAppointmentForm({
       const response = await fetch(`/api/admin/customers/${customerId}`);
       if (response.ok) {
         const data = await response.json();
-        setSelectedCustomer(data.customer);
+        setSelectedCustomer(data.data);
       }
     } catch (error) {
       console.error("Error fetching customer:", error);
@@ -505,7 +507,11 @@ export default function CreateAppointmentForm({
   };
 
   return (
-    <form id="create-appointment-form" onSubmit={handleSubmit} className="space-y-8 pb-4">
+    <form
+      id="create-appointment-form"
+      onSubmit={handleSubmit}
+      className="space-y-8 pb-4"
+    >
       {/* Customer Selection */}
       <Card className="border-none bg-admin-bg-tertiary/20 shadow-premium-sm rounded-2xl overflow-hidden border border-admin-border-primary/30">
         <CardHeader className="pb-4 border-b border-admin-border-primary/10">
@@ -1137,31 +1143,6 @@ export default function CreateAppointmentForm({
               {initialData?.id ? "Confirmar Cambios" : "Agendar Ahora"}
             </>
           )}
-        </Button>
-        {/* Debug: Force creation button */}
-        <Button
-          type="button"
-          variant="outline"
-          onClick={() => {
-            // Trigger form submission with force_create flag
-            const form = document.getElementById('create-appointment-form') as HTMLFormElement;
-            if (form) {
-              // Create a hidden input for force_create
-              let forceInput = form.querySelector('input[name="force_create"]') as HTMLInputElement;
-              if (!forceInput) {
-                forceInput = document.createElement('input');
-                forceInput.type = 'hidden';
-                forceInput.name = 'force_create';
-                form.appendChild(forceInput);
-              }
-              forceInput.value = 'true';
-              form.requestSubmit();
-            }
-          }}
-          className="h-12 px-4 rounded-xl border-orange-500 text-orange-600 hover:bg-orange-50 font-bold uppercase text-[10px] tracking-widest transition-all"
-          title="Fuerza la creación de la cita sin verificar disponibilidad"
-        >
-          ⚠️ Forzar
         </Button>
       </div>
     </form>

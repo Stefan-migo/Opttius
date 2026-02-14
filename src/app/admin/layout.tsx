@@ -440,7 +440,11 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
         const response = await fetch("/api/admin/dashboard", { headers });
         if (response.ok) {
-          const data = await response.json();
+          const result = await response.json();
+          if (!result.success)
+            throw new Error(result.error?.message || "Error fetching stats");
+
+          const data = result.data;
           // Extract optical shop specific data
           const workOrders = data.kpis?.workOrders || {};
           const quotes = data.kpis?.quotes || {};

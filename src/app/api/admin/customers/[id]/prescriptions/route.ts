@@ -1,7 +1,12 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { createClient, createServiceRoleClient } from "@/utils/supabase/server";
 import { appLogger as logger } from "@/lib/logger";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
+import { APIError } from "@/lib/api/errors";
+import {
+  createApiSuccessResponse,
+  createApiErrorResponse,
+} from "@/lib/api/response";
 
 // GET - Get all prescriptions for a customer
 export async function GET(
@@ -18,16 +23,17 @@ export async function GET(
       error: userError,
     } = await supabase.auth.getUser();
     if (userError || !user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return createApiErrorResponse(
+        new APIError("Unauthorized", 401, "UNAUTHORIZED"),
+      );
     }
 
     const { data: isAdmin } = (await supabase.rpc("is_admin", {
       user_id: user.id,
     } as IsAdminParams)) as { data: IsAdminResult | null; error: Error | null };
     if (!isAdmin) {
-      return NextResponse.json(
-        { error: "Admin access required" },
-        { status: 403 },
+      return createApiErrorResponse(
+        new APIError("Admin access required", 403, "FORBIDDEN"),
       );
     }
 
@@ -39,18 +45,14 @@ export async function GET(
 
     if (error) {
       logger.error("Error fetching prescriptions", error);
-      return NextResponse.json(
-        { error: "Failed to fetch prescriptions" },
-        { status: 500 },
-      );
+      return createApiErrorResponse(new Error("Failed to fetch prescriptions"));
     }
 
-    return NextResponse.json({ prescriptions: prescriptions || [] });
+    return createApiSuccessResponse(prescriptions || []);
   } catch (error) {
     logger.error("Error in prescriptions API GET", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
+    return createApiErrorResponse(
+      error instanceof Error ? error : new Error("Internal server error"),
     );
   }
 }
@@ -70,16 +72,17 @@ export async function POST(
       error: userError,
     } = await supabase.auth.getUser();
     if (userError || !user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return createApiErrorResponse(
+        new APIError("Unauthorized", 401, "UNAUTHORIZED"),
+      );
     }
 
     const { data: isAdmin } = (await supabase.rpc("is_admin", {
       user_id: user.id,
     } as IsAdminParams)) as { data: IsAdminResult | null; error: Error | null };
     if (!isAdmin) {
-      return NextResponse.json(
-        { error: "Admin access required" },
-        { status: 403 },
+      return createApiErrorResponse(
+        new APIError("Admin access required", 403, "FORBIDDEN"),
       );
     }
 
@@ -149,18 +152,14 @@ export async function POST(
 
     if (error) {
       logger.error("Error creating prescription", error);
-      return NextResponse.json(
-        { error: "Failed to create prescription" },
-        { status: 500 },
-      );
+      return createApiErrorResponse(new Error("Failed to create prescription"));
     }
 
-    return NextResponse.json({ prescription }, { status: 201 });
+    return createApiSuccessResponse(prescription, { statusCode: 201 });
   } catch (error) {
     logger.error("Error in create prescription API", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
+    return createApiErrorResponse(
+      error instanceof Error ? error : new Error("Internal server error"),
     );
   }
 }

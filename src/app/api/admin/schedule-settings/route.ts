@@ -31,13 +31,23 @@ export async function GET(request: NextRequest) {
     // Get branch context
     const branchContext = await getBranchContext(request, user.id);
 
+    if (!branchContext.organizationId) {
+      return NextResponse.json(
+        { error: "Organization ID not found" },
+        { status: 404 },
+      );
+    }
+
     // Get schedule settings for current branch (or default if no branch selected)
-    let query = supabase.from("schedule_settings").select("*");
+    // RLS handles org security for the 'supabase' client
+    let query = supabase
+      .from("schedule_settings")
+      .select("*")
+      .eq("organization_id", branchContext.organizationId);
 
     if (branchContext.branchId) {
       query = query.eq("branch_id", branchContext.branchId);
     } else {
-      // If no branch selected or global view, get default settings (branch_id IS NULL)
       query = query.is("branch_id", null);
     }
 
@@ -161,13 +171,28 @@ export async function PUT(request: NextRequest) {
     // Get branch context
     const branchContext = await getBranchContext(request, user.id);
 
-    const body = await request.json();
+    if (!branchContext.organizationId) {
+      return NextResponse.json(
+        { error: "Organization ID not found" },
+        { status: 404 },
+      );
+    }
 
-    // Check if settings exist for this branch
-    const { data: existingSettings } = await supabaseServiceRole
+    // Check if settings exist for this branch/org
+    // Use service role to bypass RLS, so MUST filter by organization_id
+    let existingQuery = supabaseServiceRole
       .from("schedule_settings")
       .select("id")
-      .eq("branch_id", branchContext.branchId)
+      .eq("organization_id", branchContext.organizationId);
+
+    if (branchContext.branchId) {
+      existingQuery = existingQuery.eq("branch_id", branchContext.branchId);
+    } else {
+      existingQuery = existingQuery.is("branch_id", null);
+    }
+
+    const { data: existingSettings } = await existingQuery
+      .limit(1)
       .maybeSingle();
 
     const updateData: any = {
@@ -195,128 +220,85 @@ export async function PUT(request: NextRequest) {
 
     let result;
 
-    // GLOBAL UPDATE LOGIC for Super Admins
-    if (!branchContext.branchId && branchContext.isSuperAdmin) {
-      logger.info("Global Schedule settings update initiated", {
-        organizationId: branchContext.organizationId,
-      });
-
-      // 1. Update organization-level settings (using branch_id NULL but with organization_id)
-      const { data: orgSettings, error: orgError } = await supabaseServiceRole
+    // 1. Update or Insert the specific record
+    if (existingSettings) {
+      // Update existing
+      const { data, error } = await supabaseServiceRole
         .from("schedule_settings")
-        .upsert(
-          {
-            organization_id: branchContext.organizationId,
-            branch_id: null,
-            ...updateData,
-            updated_at: new Date().toISOString(),
-            updated_by: user.id,
-          },
-          { onConflict: "organization_id" },
-        )
+        .update({
+          ...updateData,
+          organization_id: branchContext.organizationId,
+        })
+        .eq("id", existingSettings.id)
         .select()
         .single();
 
-      if (orgError) {
-        logger.error(
-          "Error updating global organization schedule settings",
-          orgError,
-        );
+      if (error) {
+        logger.error("Error updating schedule settings:", {
+          error,
+          branchId: branchContext.branchId,
+          settingsId: existingSettings.id,
+        });
         return NextResponse.json(
-          { error: "Error al actualizar configuración global de horarios" },
+          {
+            error: "Failed to update schedule settings",
+            details: error.message,
+          },
           { status: 500 },
         );
       }
+      result = data;
+    } else {
+      // Insert new
+      const { data, error } = await supabaseServiceRole
+        .from("schedule_settings")
+        .insert({
+          ...updateData,
+          organization_id: branchContext.organizationId,
+          branch_id: branchContext.branchId || null,
+        })
+        .select()
+        .single();
 
-      // 2. Sync ALL branches of the organization
+      if (error) {
+        logger.error("Error creating schedule settings:", {
+          error,
+          branchId: branchContext.branchId,
+        });
+        return NextResponse.json(
+          {
+            error: "Failed to create schedule settings",
+            details: error.message,
+          },
+          { status: 500 },
+        );
+      }
+      result = data;
+    }
+
+    // 2. If GLOBAL update by Super Admin, SYNC to all branches
+    if (!branchContext.branchId && branchContext.isSuperAdmin) {
+      logger.info("Syncing Global schedule settings to all branches", {
+        organizationId: branchContext.organizationId,
+      });
+
       const { data: branches } = await supabase
         .from("branches")
         .select("id")
-        .eq("organization_id", branchContext.organizationId!);
+        .eq("organization_id", branchContext.organizationId);
 
       if (branches && branches.length > 0) {
-        const branchIds = branches.map((b) => b.id);
-
-        for (const bId of branchIds) {
+        for (const branch of branches) {
           await supabaseServiceRole.from("schedule_settings").upsert(
             {
-              branch_id: bId,
               organization_id: branchContext.organizationId,
+              branch_id: branch.id,
               ...updateData,
-              updated_at: new Date().toISOString(),
-              updated_by: user.id,
             },
             { onConflict: "branch_id" },
           );
         }
       }
-
-      result = orgSettings;
-    } else if (branchContext.branchId) {
-      // BRANCH-SPECIFIC UPDATE
-      if (existingSettings) {
-        // Update existing
-        const { data, error } = await supabaseServiceRole
-          .from("schedule_settings")
-          .update({
-            ...updateData,
-            organization_id: branchContext.organizationId,
-          })
-          .eq("id", existingSettings.id)
-          .select()
-          .single();
-
-        if (error) {
-          logger.error("Error updating schedule settings:", {
-            error,
-            branchId: branchContext.branchId,
-            settingsId: existingSettings.id,
-          });
-          return NextResponse.json(
-            {
-              error: "Failed to update schedule settings",
-              details: error.message,
-            },
-            { status: 500 },
-          );
-        }
-
-        result = data;
-      } else {
-        // Insert new with branch_id
-        const insertData = {
-          ...updateData,
-          organization_id: branchContext.organizationId,
-          branch_id: branchContext.branchId,
-        };
-
-        const { data, error } = await supabaseServiceRole
-          .from("schedule_settings")
-          .insert(insertData)
-          .select()
-          .single();
-
-        if (error) {
-          logger.error("Error creating schedule settings:", {
-            error,
-            branchId: branchContext.branchId,
-          });
-          return NextResponse.json(
-            {
-              error: "Failed to create schedule settings",
-              details: error.message,
-            },
-            { status: 500 },
-          );
-        }
-
-        result = data;
-      }
-    } else {
-      return NextResponse.json(
-        { error: "Debe seleccionar una sucursal o ser super administrador" },
-        { status: 400 },
-      );
     }
 
     return NextResponse.json({

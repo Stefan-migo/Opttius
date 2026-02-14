@@ -26,7 +26,13 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { productService, bulkProductOperations } from "@/lib/api/services";
 
@@ -47,10 +53,6 @@ export default function ProductListingSection({
   const [viewMode, setViewMode] = useState<"grid" | "table">("grid");
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(12);
-  const [isSearching, setIsSearching] = useState(false);
-  
-  // Debounced search term state
-  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState<string>("");
 
   // Filters - MUST be declared before any effects that use it
   const { filters, updateFilter, resetFilters, applyFilters } =
@@ -70,13 +72,6 @@ export default function ProductListingSection({
     }
   }, []);
 
-  // Cleanup effect for search state on unmount
-  useEffect(() => {
-    return () => {
-      setIsSearching(false);
-    };
-  }, []);
-
   // Categories
   const { categories, isLoading: categoriesLoading } = useCategories();
 
@@ -87,7 +82,7 @@ export default function ProductListingSection({
     isSuperAdmin,
   });
 
-  // Products with React Query
+  // Products with React Query - NO searchTerm, fetch all for client-side filtering
   const {
     products,
     total,
@@ -95,22 +90,37 @@ export default function ProductListingSection({
     error: productsError,
     refetch: refetchProducts,
   } = useProducts({
-    page: currentPage,
-    itemsPerPage,
+    page: 1, // Always fetch from page 1
+    itemsPerPage: 1000, // Fetch all products for client-side filtering
     categoryFilter: filters.categoryFilter,
     statusFilter: filters.statusFilter,
-    searchTerm: debouncedSearchTerm,
+    searchTerm: "", // No server-side search
     showLowStockOnly: filters.showLowStockOnly,
     currentBranchId,
     isGlobalView,
     isSuperAdmin,
   });
 
-  // Calculate total pages
-  const totalPages = Math.ceil(total / itemsPerPage);
+  // Client-side filtering for search (instant, no reload)
+  const filteredProducts = products.filter((product) => {
+    if (!filters.searchTerm) return true;
+    const searchLower = filters.searchTerm.toLowerCase();
+    return (
+      product.name.toLowerCase().includes(searchLower) ||
+      (product.sku || "").toLowerCase().includes(searchLower) ||
+      (product.brand || "").toLowerCase().includes(searchLower) ||
+      (product.barcode || "").toLowerCase().includes(searchLower)
+    );
+  });
 
-  // Products are already filtered on the server, no need for client-side filtering
-  const filteredProducts = products;
+  // Calculate total pages based on filtered results
+  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+
+  // Paginate the filtered products
+  const paginatedProducts = filteredProducts.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage,
+  );
 
   // Selection for bulk operations
   const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
@@ -133,34 +143,11 @@ export default function ProductListingSection({
   const [productToDelete, setProductToDelete] = useState<any>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
 
-  // Handle search term changes with improved debouncing and proper cleanup
-  useEffect(() => {
-    // Handle search term changes
-    if (filters.searchTerm) {
-      setIsSearching(true);
-      
-      const searchTimer = setTimeout(() => {
-        setDebouncedSearchTerm(filters.searchTerm || "");
-        setIsSearching(false);
-      }, 300);
-      
-      // Proper cleanup - clear timeout and reset searching state
-      return () => {
-        clearTimeout(searchTimer);
-        setIsSearching(false);
-      };
-    } else {
-      // Handle search clear
-      setDebouncedSearchTerm("");
-      setIsSearching(false);
-      setCurrentPage(1);
-    }
-  }, [filters.searchTerm]);
-
-  // Reset page when non-search filters change (category, status, low stock)
+  // Reset page when filters change (including search)
   useEffect(() => {
     setCurrentPage(1);
   }, [
+    filters.searchTerm,
     filters.categoryFilter,
     filters.statusFilter,
     filters.showLowStockOnly,
@@ -190,9 +177,9 @@ export default function ProductListingSection({
 
   const handleSelectAll = () => {
     setSelectedProducts(
-      selectedProducts.length === filteredProducts.length
+      selectedProducts.length === paginatedProducts.length
         ? []
-        : filteredProducts.map((p) => p.id),
+        : paginatedProducts.map((p) => p.id),
     );
   };
 
@@ -292,7 +279,8 @@ export default function ProductListingSection({
       let message = `Importación JSON completada: `;
       if (result.imported > 0) message += `${result.imported} creados `;
       if (result.updated > 0) message += `${result.updated} actualizados `;
-      if (result.errors.length > 0) message += `${result.errors.length} errores `;
+      if (result.errors.length > 0)
+        message += `${result.errors.length} errores `;
       toast.success(message);
       refetchProducts();
     } catch (error) {
@@ -344,14 +332,12 @@ export default function ProductListingSection({
   };
 
   // Loading state
-  if ((productsLoading || isSearching) && products.length === 0) {
+  if (productsLoading && products.length === 0) {
     return (
       <div className="flex items-center justify-center py-12">
         <div className="text-center">
           <Package className="h-12 w-12 text-tierra-media mx-auto mb-4 animate-pulse" />
-          <p className="text-tierra-media">
-            {isSearching ? "Buscando productos..." : "Cargando productos..."}
-          </p>
+          <p className="text-tierra-media">Cargando productos...</p>
         </div>
       </div>
     );
@@ -458,7 +444,14 @@ export default function ProductListingSection({
                 }}
                 className="h-7 w-7 p-0"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-3.5 w-3.5"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
                   <line x1="18" y1="6" x2="6" y2="18"></line>
                   <line x1="6" y1="6" x2="18" y2="18"></line>
                 </svg>
@@ -470,10 +463,7 @@ export default function ProductListingSection({
                 <Label htmlFor="operation" className="text-xs font-semibold">
                   Seleccionar Operación
                 </Label>
-                <Select
-                  value={bulkOperation}
-                  onValueChange={setBulkOperation}
-                >
+                <Select value={bulkOperation} onValueChange={setBulkOperation}>
                   <SelectTrigger className="mt-1.5 h-9">
                     <SelectValue placeholder="Seleccionar operación" />
                   </SelectTrigger>
@@ -509,7 +499,14 @@ export default function ProductListingSection({
 
             {bulkOperation && (
               <div className="pt-2 border-t border-blue-200 dark:border-blue-800 mb-4">
-                {renderBulkOperationForm(bulkOperation, bulkUpdates, setBulkUpdates, categories, forceDelete, setForceDelete)}
+                {renderBulkOperationForm(
+                  bulkOperation,
+                  bulkUpdates,
+                  setBulkUpdates,
+                  categories,
+                  forceDelete,
+                  setForceDelete,
+                )}
               </div>
             )}
 
@@ -535,8 +532,7 @@ export default function ProductListingSection({
                   (bulkOperation === "hard_delete" && !forceDelete)
                 }
                 variant={
-                  bulkOperation === "delete" ||
-                    bulkOperation === "hard_delete"
+                  bulkOperation === "delete" || bulkOperation === "hard_delete"
                     ? "destructive"
                     : "default"
                 }
@@ -562,7 +558,7 @@ export default function ProductListingSection({
 
       {/* Products Display */}
       <ProductList
-        products={filteredProducts}
+        products={paginatedProducts}
         viewMode={viewMode}
         selectedProducts={selectedProducts}
         onSelectProduct={handleSelectProduct}
@@ -573,11 +569,11 @@ export default function ProductListingSection({
       />
 
       {/* Pagination - Show if there are products or if totalPages > 1 */}
-      {(total > 0 || totalPages > 1) && (
+      {(filteredProducts.length > 0 || totalPages > 1) && (
         <ProductPagination
           currentPage={currentPage}
           totalPages={totalPages}
-          totalProducts={total}
+          totalProducts={filteredProducts.length}
           itemsPerPage={itemsPerPage}
           onPageChange={setCurrentPage}
           onItemsPerPageChange={handleItemsPerPageChange}
@@ -597,7 +593,7 @@ export default function ProductListingSection({
             }}
             onJsonExport={handleJsonExport}
             onJsonImport={() => setShowJsonImportDialog(true)}
-            onShowCategories={() => { }}
+            onShowCategories={() => {}}
             hasLowStock={stats.lowStockCount > 0}
             lowStockCount={stats.lowStockCount}
           />
@@ -667,7 +663,7 @@ function renderBulkOperationForm(
   setBulkUpdates: (updates: any) => void,
   categories: any[],
   forceDelete: boolean,
-  setForceDelete: (value: boolean) => void
+  setForceDelete: (value: boolean) => void,
 ) {
   switch (bulkOperation) {
     case "update_status":
@@ -826,8 +822,8 @@ function renderBulkOperationForm(
                 Confirmar eliminación suave
               </p>
               <p className="text-xs text-red-600 mt-0.5">
-                Los productos seleccionados serán archivados. Esta
-                acción se puede deshacer.
+                Los productos seleccionados serán archivados. Esta acción se
+                puede deshacer.
               </p>
             </div>
           </div>
@@ -844,8 +840,7 @@ function renderBulkOperationForm(
                 ⚠️ ELIMINACIÓN PERMANENTE
               </p>
               <p className="text-xs text-red-700 font-medium mt-0.5">
-                Los productos seleccionados serán ELIMINADOS
-                PERMANENTEMENTE.
+                Los productos seleccionados serán ELIMINADOS PERMANENTEMENTE.
               </p>
               <p className="text-xs text-red-600 mt-1">
                 ⚠️ Esta acción NO se puede deshacer.

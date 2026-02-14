@@ -1,24 +1,24 @@
 /**
  * API Response Helpers
- * 
+ *
  * Helper functions to extract data from API responses that may be in either
  * legacy format or standardized format.
- * 
+ *
  * Legacy format: { customers: [...], pagination: {...} }
  * Standardized format: { success: true, data: [...], meta: { pagination: {...} } }
  */
 
 /**
  * Extract data from API response (handles both legacy and standardized formats)
- * 
+ *
  * @param response - The API response object
  * @returns Array of data items
- * 
+ *
  * @example
  * // Standardized format
  * const response = { success: true, data: [{ id: 1 }], meta: {...} };
  * const data = extractDataFromResponse(response); // [{ id: 1 }]
- * 
+ *
  * // Legacy format
  * const legacyResponse = { customers: [{ id: 1 }], pagination: {...} };
  * const data = extractDataFromResponse(legacyResponse); // [{ id: 1 }]
@@ -49,6 +49,7 @@ export function extractDataFromResponse<T>(response: any): T[] {
     "adminUsers",
     "branches",
     "inventory",
+    "categories",
   ];
   for (const key of dataKeys) {
     if (Array.isArray(response[key])) {
@@ -62,15 +63,15 @@ export function extractDataFromResponse<T>(response: any): T[] {
 
 /**
  * Extract pagination from API response (handles both legacy and standardized formats)
- * 
+ *
  * @param response - The API response object
  * @returns Pagination metadata
- * 
+ *
  * @example
  * // Standardized format
  * const response = { success: true, data: [...], meta: { pagination: {...} } };
  * const pagination = extractPaginationFromResponse(response);
- * 
+ *
  * // Legacy format
  * const legacyResponse = { customers: [...], pagination: {...} };
  * const pagination = extractPaginationFromResponse(legacyResponse);
@@ -114,15 +115,15 @@ export function extractPaginationFromResponse(response: any): {
 
 /**
  * Extract total count from API response (handles both legacy and standardized formats)
- * 
+ *
  * @param response - The API response object
  * @returns Total count of items
- * 
+ *
  * @example
  * // Standardized format
  * const response = { success: true, data: [...], meta: { pagination: { total: 100 } } };
  * const total = extractTotalFromResponse(response); // 100
- * 
+ *
  * // Legacy format
  * const legacyResponse = { customers: [...], total: 100 };
  * const total = extractTotalFromResponse(legacyResponse); // 100
@@ -134,7 +135,10 @@ export function extractTotalFromResponse(response: any): number {
   }
 
   // Standardized format: { success: true, data: [...], meta: { pagination: { total: ... } } }
-  if (response.success === true && response.meta?.pagination?.total !== undefined) {
+  if (
+    response.success === true &&
+    response.meta?.pagination?.total !== undefined
+  ) {
     return response.meta.pagination.total;
   }
 
@@ -154,15 +158,15 @@ export function extractTotalFromResponse(response: any): number {
 
 /**
  * Check if response is successful (handles both legacy and standardized formats)
- * 
+ *
  * @param response - The API response object
  * @returns True if response is successful
- * 
+ *
  * @example
  * // Standardized format
  * const response = { success: true, data: [...], meta: {...} };
  * const isSuccess = isResponseSuccessful(response); // true
- * 
+ *
  * // Legacy format (no success field, assume successful if no error)
  * const legacyResponse = { customers: [...], pagination: {...} };
  * const isSuccess = isResponseSuccessful(legacyResponse); // true
@@ -184,15 +188,15 @@ export function isResponseSuccessful(response: any): boolean {
 
 /**
  * Extract error from API response (handles both legacy and standardized formats)
- * 
+ *
  * @param response - The API response object
  * @returns Error message or null if no error
- * 
+ *
  * @example
  * // Standardized format
  * const response = { success: false, error: { code: 'ERROR', message: 'Something went wrong' } };
  * const error = extractErrorFromResponse(response); // 'Something went wrong'
- * 
+ *
  * // Legacy format
  * const legacyResponse = { error: 'Something went wrong' };
  * const error = extractErrorFromResponse(legacyResponse); // 'Something went wrong'
@@ -210,7 +214,9 @@ export function extractErrorFromResponse(response: any): string | null {
 
   // Legacy format: { error: '...' }
   if (response.error) {
-    return typeof response.error === 'string' ? response.error : response.error.message || 'Unknown error';
+    return typeof response.error === "string"
+      ? response.error
+      : response.error.message || "Unknown error";
   }
 
   // No error

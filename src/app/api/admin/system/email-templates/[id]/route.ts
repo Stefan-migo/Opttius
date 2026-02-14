@@ -125,10 +125,13 @@ export async function PUT(
       );
     }
 
-    if (
-      adminUser.role !== "super_admin" &&
-      existingTemplate.organization_id !== adminUser.organization_id
-    ) {
+    const canUpdate =
+      adminUser.role === "super_admin" ||
+      existingTemplate.organization_id === adminUser.organization_id ||
+      (existingTemplate.organization_id === null &&
+        !existingTemplate.is_system);
+
+    if (!canUpdate) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 

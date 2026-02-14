@@ -37,10 +37,7 @@ export default function ProductsPage() {
           </p>
         </div>
         {activeTab === "products" && (
-          <Button
-            onClick={() => router.push("/admin/products/add")}
-            className="bg-azul-profundo hover:bg-azul-profundo/90 text-white"
-          >
+          <Button onClick={() => router.push("/admin/products/add")}>
             <Plus className="h-4 w-4 mr-2" />
             Agregar Producto
           </Button>

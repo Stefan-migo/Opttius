@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
 import { getBranchContext } from "@/lib/api/branch-middleware";
 import { appLogger as logger } from "@/lib/logger";
+import {
+  createApiSuccessResponse,
+  createApiErrorResponse,
+} from "@/lib/api/response";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
 import { withRateLimit, rateLimitConfigs } from "@/lib/api/middleware";
 import { z } from "zod";
@@ -111,28 +115,26 @@ export async function GET(request: NextRequest) {
           return defaultValue;
         };
 
-        return NextResponse.json({
-          settings: {
-            min_deposit_percent: getMergedValue("min_deposit_percent", 50.0),
-            min_deposit_amount: getMergedValue("min_deposit_amount", null),
-            business_name: getMergedValue("business_name"),
-            business_rut: getMergedValue("business_rut"),
-            business_address: getMergedValue("business_address"),
-            business_phone: getMergedValue("business_phone"),
-            business_email: getMergedValue("business_email"),
-            logo_url: getMergedValue("logo_url"),
-            header_text: getMergedValue("header_text"),
-            footer_text: getMergedValue("footer_text"),
-            terms_and_conditions: getMergedValue("terms_and_conditions"),
-            default_document_type: getMergedValue(
-              "default_document_type",
-              "boleta",
-            ),
-            printer_type: getMergedValue("printer_type", "thermal"),
-            printer_width_mm: getMergedValue("printer_width_mm", 80),
-            printer_height_mm: getMergedValue("printer_height_mm", 297),
-            auto_print_receipt: getMergedValue("auto_print_receipt", true),
-          },
+        return createApiSuccessResponse({
+          min_deposit_percent: getMergedValue("min_deposit_percent", 50.0),
+          min_deposit_amount: getMergedValue("min_deposit_amount", null),
+          business_name: getMergedValue("business_name"),
+          business_rut: getMergedValue("business_rut"),
+          business_address: getMergedValue("business_address"),
+          business_phone: getMergedValue("business_phone"),
+          business_email: getMergedValue("business_email"),
+          logo_url: getMergedValue("logo_url"),
+          header_text: getMergedValue("header_text"),
+          footer_text: getMergedValue("footer_text"),
+          terms_and_conditions: getMergedValue("terms_and_conditions"),
+          default_document_type: getMergedValue(
+            "default_document_type",
+            "boleta",
+          ),
+          printer_type: getMergedValue("printer_type", "thermal"),
+          printer_width_mm: getMergedValue("printer_width_mm", 80),
+          printer_height_mm: getMergedValue("printer_height_mm", 297),
+          auto_print_receipt: getMergedValue("auto_print_receipt", true),
         });
       },
     );
@@ -313,10 +315,7 @@ export async function PUT(request: NextRequest) {
           organizationId: branchContext.organizationId,
         });
 
-        return NextResponse.json({
-          success: true,
-          settings: result,
-        });
+        return createApiSuccessResponse(result);
       },
     );
   } catch (error) {

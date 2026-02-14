@@ -90,6 +90,7 @@ export function EnhancedLineChart({
 
       <ResponsiveContainer width="100%" height={height}>
         <RechartsLineChart
+          id="enhanced-line-chart"
           data={chartData}
           margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
         >

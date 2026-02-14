@@ -343,7 +343,11 @@ export default function EditProductPage() {
         setLoading(true);
 
         // Fetch product data including archived products for admin editing
-        const productData = await productService.getProduct(productId);
+        // Pass branch ID to get correct stock data for the selected branch
+        const productData = await productService.getProduct(
+          productId,
+          currentBranchId || undefined,
+        );
 
         // Fetch categories - Note: This would need a categoryService in the future
         const categoriesResponse = await fetch("/api/categories");
@@ -400,10 +404,14 @@ export default function EditProductPage() {
         // Transform frame_measurements to ensure all fields are strings
         const transformedFrameMeasurements = {
           lens_width: product.frame_measurements?.lens_width?.toString() || "",
-          bridge_width: product.frame_measurements?.bridge_width?.toString() || "",
-          temple_length: product.frame_measurements?.temple_length?.toString() || "",
-          lens_height: product.frame_measurements?.lens_height?.toString() || "",
-          total_width: product.frame_measurements?.total_width?.toString() || "",
+          bridge_width:
+            product.frame_measurements?.bridge_width?.toString() || "",
+          temple_length:
+            product.frame_measurements?.temple_length?.toString() || "",
+          lens_height:
+            product.frame_measurements?.lens_height?.toString() || "",
+          total_width:
+            product.frame_measurements?.total_width?.toString() || "",
         };
 
         // Transform prescription_range to ensure all fields are strings
@@ -417,9 +425,12 @@ export default function EditProductPage() {
         };
 
         // Ensure uv_protection is string
-        const uvProtectionValue = typeof product.uv_protection === 'string' 
-          ? product.uv_protection 
-          : product.uv_protection ? "true" : "";
+        const uvProtectionValue =
+          typeof product.uv_protection === "string"
+            ? product.uv_protection
+            : product.uv_protection
+              ? "true"
+              : "";
 
         const initialFormData: FormState = {
           name: product.name || "",
@@ -635,7 +646,10 @@ export default function EditProductPage() {
         headers["x-branch-id"] = "global";
       }
 
-      const result = await productService.updateProduct(productId, productData as any);
+      const result = await productService.updateProduct(
+        productId,
+        productData as any,
+      );
 
       // Invalidate React Query cache to refresh the products list
       queryClient.invalidateQueries({ queryKey: ["products"] });
@@ -646,7 +660,9 @@ export default function EditProductPage() {
     } catch (error) {
       console.error("Error:", error);
       const errorMessage =
-        error instanceof Error ? error.message : "Error al actualizar el producto";
+        error instanceof Error
+          ? error.message
+          : "Error al actualizar el producto";
       toast.error(errorMessage);
     } finally {
       setSaving(false);

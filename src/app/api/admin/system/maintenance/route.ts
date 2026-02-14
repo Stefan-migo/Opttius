@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
-import { createServiceRoleClient } from "@/lib/supabase";
+import { createServiceRoleClient } from "@/utils/supabase/server";
 import { appLogger as logger } from "@/lib/logger";
 import type {
   GetAdminRoleParams,
@@ -10,7 +10,7 @@ import type {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { action } = body;
+    const { action, branch_id: branchId } = body;
 
     const supabase = await createClient();
 
@@ -72,6 +72,7 @@ export async function POST(request: NextRequest) {
           const backupData = await BackupService.generateBackup(
             userOrganizationId,
             user.email,
+            branchId ?? undefined,
           );
           const backupId = backupData.backup_id;
 
@@ -394,35 +395,114 @@ export async function POST(request: NextRequest) {
           );
         }
 
-      case "system_status":
-        // Generate comprehensive system status report
-        const { count: totalUsers } = await supabase
-          .from("profiles")
-          .select("*", { count: "exact", head: true });
+      case "system_status": {
+        // Generate system status report scoped by org (and branch if provided)
+        const serviceSupabase = createServiceRoleClient();
+        const orgFilter = userOrganizationId
+          ? { orgId: userOrganizationId, branchId }
+          : null;
 
-        const { count: activeAdmins } = await supabase
-          .from("admin_users")
-          .select("*", { count: "exact", head: true })
-          .eq("is_active", true);
+        let totalUsers = 0;
+        let activeAdmins = 0;
+        let totalProducts = 0;
+        let totalOrders = 0;
+        let totalCustomers = 0;
 
-        const { count: totalProducts } = await supabase
-          .from("products")
-          .select("*", { count: "exact", head: true });
+        if (orgFilter) {
+          const { count: adminsCount } = await serviceSupabase
+            .from("admin_users")
+            .select("*", { count: "exact", head: true })
+            .eq("organization_id", orgFilter.orgId)
+            .eq("is_active", true);
+          activeAdmins = adminsCount || 0;
 
-        const { count: recentActivity } = await supabase
-          .from("admin_activity_log")
-          .select("*", { count: "exact", head: true })
-          .gte(
-            "created_at",
-            new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
-          );
+          const { count: productsCount } = await serviceSupabase
+            .from("products")
+            .select("*", { count: "exact", head: true })
+            .eq("organization_id", orgFilter.orgId);
+          totalProducts = productsCount || 0;
+
+          let ordersQuery = serviceSupabase
+            .from("orders")
+            .select("*", { count: "exact", head: true })
+            .eq("organization_id", orgFilter.orgId);
+          if (orgFilter.branchId) {
+            ordersQuery = ordersQuery.eq("branch_id", orgFilter.branchId);
+          }
+          const { count: ordersCount } = await ordersQuery;
+          totalOrders = ordersCount || 0;
+
+          const { count: customersCount } = await serviceSupabase
+            .from("customers")
+            .select("*", { count: "exact", head: true })
+            .eq("organization_id", orgFilter.orgId);
+          totalCustomers = customersCount || 0;
+
+          const { count: usersCount } = await serviceSupabase
+            .from("profiles")
+            .select("*", { count: "exact", head: true });
+          totalUsers = usersCount || 0;
+        } else {
+          const { count: usersCount } = await supabase
+            .from("profiles")
+            .select("*", { count: "exact", head: true });
+          totalUsers = usersCount || 0;
+
+          const { count: adminsCount } = await supabase
+            .from("admin_users")
+            .select("*", { count: "exact", head: true })
+            .eq("is_active", true);
+          activeAdmins = adminsCount || 0;
+
+          const { count: productsCount } = await supabase
+            .from("products")
+            .select("*", { count: "exact", head: true });
+          totalProducts = productsCount || 0;
+        }
+
+        let recentActivity = 0;
+        if (orgFilter?.orgId) {
+          const { data: orgAdmins } = await serviceSupabase
+            .from("admin_users")
+            .select("id")
+            .eq("organization_id", orgFilter.orgId)
+            .eq("is_active", true);
+          const adminIds = (orgAdmins || []).map((a) => a.id);
+          if (adminIds.length > 0) {
+            const { count } = await serviceSupabase
+              .from("admin_activity_log")
+              .select("*", { count: "exact", head: true })
+              .in("admin_user_id", adminIds)
+              .gte(
+                "created_at",
+                new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+              );
+            recentActivity = count || 0;
+          }
+        } else {
+          const { count } = await supabase
+            .from("admin_activity_log")
+            .select("*", { count: "exact", head: true })
+            .gte(
+              "created_at",
+              new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+            );
+          recentActivity = count || 0;
+        }
 
         const statusReport = {
-          total_users: totalUsers || 0,
-          active_admins: activeAdmins || 0,
-          total_products: totalProducts || 0,
+          total_users: totalUsers,
+          active_admins: activeAdmins,
+          total_products: totalProducts,
+          total_orders: orgFilter ? totalOrders : undefined,
+          total_customers: orgFilter ? totalCustomers : undefined,
           activity_24h: recentActivity || 0,
           timestamp: new Date().toISOString(),
+          scope: orgFilter
+            ? orgFilter.branchId
+              ? "branch"
+              : "organization"
+            : "global",
         };
 
         await supabase.rpc("log_admin_activity", {
@@ -442,6 +522,7 @@ export async function POST(request: NextRequest) {
           action: "system_status",
           report: statusReport,
         });
+      }
 
       case "clear_memory":
         // Safely clear Node.js memory by forcing garbage collection

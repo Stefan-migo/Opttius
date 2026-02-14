@@ -5,8 +5,10 @@ import { getBranchContext, addBranchFilter } from "@/lib/api/branch-middleware";
 import { appLogger as logger } from "@/lib/logger";
 import { withRateLimit, rateLimitConfigs } from "@/lib/api/middleware";
 import { RateLimitError } from "@/lib/api/errors";
+import { createApiSuccessResponse } from "@/lib/api/response";
 
 export async function GET(request: NextRequest) {
+  const requestId = crypto.randomUUID();
   try {
     return await (withRateLimit(rateLimitConfigs.search) as any)(
       request,
@@ -53,7 +55,7 @@ export async function GET(request: NextRequest) {
           const query = searchParams.get("q") || "";
 
           if (query.length < 1) {
-            return NextResponse.json({ customers: [] });
+            return createApiSuccessResponse([], { requestId });
           }
 
           // Use service role client to bypass RLS and ensure we can search all customers
@@ -375,20 +377,12 @@ export async function GET(request: NextRequest) {
 
           if (error) {
             logger.error("Error searching customers", error);
-            return NextResponse.json(
-              {
-                error: "Failed to search customers",
-                details: error.message,
-              },
-              { status: 500 },
-            );
+            throw error;
           }
 
           logger.debug("Found customers", { count: customers.length });
 
-          return NextResponse.json({
-            customers: customers || [],
-          });
+          return createApiSuccessResponse(customers || [], { requestId });
         } catch (error) {
           if (error instanceof RateLimitError) {
             logger.warn("Rate limit exceeded for customer search", {

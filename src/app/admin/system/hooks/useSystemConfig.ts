@@ -15,8 +15,16 @@ export interface SystemConfig {
   updated_at: string;
 }
 
-const fetchConfigs = async (): Promise<SystemConfig[]> => {
-  const response = await fetch("/api/admin/system/config");
+const fetchConfigs = async (
+  branchId?: string | null,
+): Promise<SystemConfig[]> => {
+  const url = new URL("/api/admin/system/config");
+  if (branchId) {
+    url.searchParams.set("branch_id", branchId);
+  }
+  const response = await fetch(url.toString(), {
+    headers: branchId ? { "x-branch-id": branchId } : undefined,
+  });
   if (!response.ok) {
     throw new Error("Failed to fetch system config");
   }
@@ -24,12 +32,18 @@ const fetchConfigs = async (): Promise<SystemConfig[]> => {
   return data.configs || [];
 };
 
-export function useSystemConfig() {
+export interface UseSystemConfigOptions {
+  /** When "branch", fetch/update config for this branch. When null/undefined, use org-level (all branches). */
+  branchId?: string | null;
+}
+
+export function useSystemConfig(options?: UseSystemConfigOptions) {
+  const branchId = options?.branchId ?? null;
   const queryClient = useQueryClient();
 
   const query = useQuery({
-    queryKey: ["systemConfig"],
-    queryFn: fetchConfigs,
+    queryKey: ["systemConfig", branchId ?? "global"],
+    queryFn: () => fetchConfigs(branchId ?? undefined),
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
@@ -41,13 +55,18 @@ export function useSystemConfig() {
       configKey: string;
       newValue: any;
     }) => {
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+      };
+      if (branchId) {
+        headers["x-branch-id"] = branchId;
+      }
       const response = await fetch("/api/admin/system/config", {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers,
         body: JSON.stringify({
           updates: [{ config_key: configKey, config_value: newValue }],
+          branch_id: branchId || undefined,
         }),
       });
 

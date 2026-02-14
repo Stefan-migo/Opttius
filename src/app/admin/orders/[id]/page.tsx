@@ -5,7 +5,15 @@ import { useParams } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, ArrowLeft, AlertCircle } from "lucide-react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Loader2, ArrowLeft, AlertCircle, CreditCard } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
 import { useBranch } from "@/hooks/useBranch";
@@ -53,6 +61,14 @@ export default function AdminOrderDetailPage() {
     ) || 0;
   const pendingAmount = Math.max(0, (order?.total_amount || 0) - paidAmount);
 
+  const paymentMethodMap: Record<string, string> = {
+    cash: "Efectivo",
+    debit: "Tarjeta Débito",
+    credit: "Tarjeta Crédito",
+    transfer: "Transferencia",
+    check: "Cheque",
+  };
+
   const paymentMethodLabel =
     order?.order_payments && order.order_payments.length > 0
       ? Array.from(
@@ -82,14 +98,11 @@ export default function AdminOrderDetailPage() {
     return (
       <div className="space-y-4 p-6">
         <div className="flex gap-2">
-          <Link href="/admin/orders">
+          <Link href="/admin/cash-register">
             <Button variant="outline">
               <ArrowLeft className="h-4 w-4 mr-2" />
-              Órdenes
+              Caja
             </Button>
-          </Link>
-          <Link href="/admin/cash-register">
-            <Button variant="outline">Caja</Button>
           </Link>
         </div>
         <Card>
@@ -104,14 +117,11 @@ export default function AdminOrderDetailPage() {
   return (
     <div className="space-y-6 p-6">
       <div className="flex gap-2">
-        <Link href="/admin/orders">
+        <Link href="/admin/cash-register">
           <Button variant="outline">
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Órdenes
+            Caja
           </Button>
-        </Link>
-        <Link href="/admin/cash-register">
-          <Button variant="outline">Caja</Button>
         </Link>
       </div>
 
@@ -235,6 +245,63 @@ export default function AdminOrderDetailPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Historial de Pagos */}
+      {order.order_payments && order.order_payments.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <CreditCard className="h-5 w-5" />
+              Historial de Pagos
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Fecha</TableHead>
+                  <TableHead>Monto</TableHead>
+                  <TableHead>Método</TableHead>
+                  <TableHead>Descripción</TableHead>
+                  <TableHead className="text-right">Ref. Fiscal</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {[...(order.order_payments || [])]
+                  .sort(
+                    (a: any, b: any) =>
+                      new Date(a.paid_at).getTime() -
+                      new Date(b.paid_at).getTime(),
+                  )
+                  .map((payment: any, idx: number) => (
+                    <TableRow key={payment.id || idx}>
+                      <TableCell className="whitespace-nowrap">
+                        {formatDateTime(payment.paid_at)}
+                      </TableCell>
+                      <TableCell className="font-semibold">
+                        {formatCurrency(Number(payment.amount))}
+                      </TableCell>
+                      <TableCell>
+                        {paymentMethodMap[payment.payment_method] ||
+                          payment.payment_method ||
+                          "N/A"}
+                      </TableCell>
+                      <TableCell>
+                        {payment.notes ||
+                          (idx === 0
+                            ? "Abono inicial"
+                            : "Pago de saldo pendiente")}
+                      </TableCell>
+                      <TableCell className="text-right text-sm text-gray-600">
+                        {payment.payment_reference || "-"}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Order Items */}
       {order.order_items && order.order_items.length > 0 && (

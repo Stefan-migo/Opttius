@@ -57,7 +57,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Info } from "lucide-react";
 import { extractDataFromResponse } from "@/lib/api/response-helpers";
-import { 
+import {
   lensFamilyService,
   contactLensFamilyService,
   contactLensMatrixService,
@@ -608,9 +608,9 @@ export default function CreateQuoteForm({
     try {
       setLoadingSettings(true);
       const settings = await quoteSettingsService.get();
-      
+
       // Always create a new object to ensure React detects the change
-      const newSettings = settings ? { ...settings } as any : null;
+      const newSettings = settings ? ({ ...settings } as any) : null;
       setQuoteSettings(newSettings);
 
       // Set default values from settings
@@ -619,7 +619,10 @@ export default function CreateQuoteForm({
           ...prev,
           // Use nullish coalescing (??) instead of || to allow 0 values
           labor_cost: newSettings.default_labor_cost ?? 15000,
-          expiration_days: newSettings.validity_days ?? newSettings.default_expiration_days ?? 30,
+          expiration_days:
+            newSettings.validity_days ??
+            newSettings.default_expiration_days ??
+            30,
         }));
       }
     } catch (error) {
@@ -800,9 +803,11 @@ export default function CreateQuoteForm({
         },
       ];
 
-  // Load customer if initialCustomerId provided
   useEffect(() => {
-    if (initialCustomerId) {
+    if (
+      initialCustomerId &&
+      (!selectedCustomer || selectedCustomer.id !== initialCustomerId)
+    ) {
       fetchCustomer(initialCustomerId);
     }
   }, [initialCustomerId]);
@@ -858,7 +863,7 @@ export default function CreateQuoteForm({
       setSearchingCustomers(true);
       try {
         const customers = await customerService.searchCustomers(customerSearch);
-        setCustomerResults(customers);
+        setCustomerResults(customers || []);
       } catch (error) {
         console.error("Error searching customers:", error);
       } finally {
@@ -880,8 +885,12 @@ export default function CreateQuoteForm({
 
       setSearchingFrames(true);
       try {
-        const frames = await productService.searchProducts(frameSearch);
-        setFrameResults(frames);
+        const frames = await productService.searchProducts(
+          frameSearch,
+          currentBranchId,
+          "frame",
+        );
+        setFrameResults(frames || []);
       } catch (error) {
         console.error("Error searching frames:", error);
       } finally {
@@ -891,7 +900,7 @@ export default function CreateQuoteForm({
 
     const debounce = setTimeout(searchFrames, 300);
     return () => clearTimeout(debounce);
-  }, [frameSearch]);
+  }, [frameSearch, currentBranchId]);
 
   // Search near frames (for two separate lenses)
   useEffect(() => {
@@ -903,7 +912,11 @@ export default function CreateQuoteForm({
 
       setSearchingNearFrames(true);
       try {
-        const results = await productService.searchProducts(nearFrameSearch);
+        const results = await productService.searchProducts(
+          nearFrameSearch,
+          currentBranchId,
+          "frame",
+        );
         setNearFrameResults(results || []);
       } catch (error) {
         console.error("Error searching near frames:", error);
@@ -1285,53 +1298,106 @@ export default function CreateQuoteForm({
         valid_until: expirationDate.toISOString().split("T")[0],
         notes: formData.notes,
         branch_id: currentBranchId || undefined,
-        items: [{
-          product_type: lensType === "contact" ? "contact_lens" : "lens",
-          prescription_id: selectedPrescription.id,
-          frame_product_id: selectedFrame?.id,
-          customer_own_frame: customerOwnFrame,
-          frame_name: formData.frame_name,
-          frame_brand: formData.frame_brand,
-          frame_model: formData.frame_model,
-          frame_color: formData.frame_color,
-          frame_size: formData.frame_size,
-          frame_sku: formData.frame_sku,
-          frame_price: formData.frame_price,
-          ...nearFrameData,
-          lens_family_id: presbyopiaSolution === "two_separate" ? null : formData.lens_family_id || null,
-          lens_type: lensType === "contact" ? "Lentes de contacto" : formData.lens_type || null,
-          lens_material: formData.lens_material || null,
-          lens_index: formData.lens_index !== null && formData.lens_index !== undefined ? formData.lens_index : null,
-          lens_treatments: lensType === "contact" ? [] : formData.lens_treatments,
-          lens_tint_color: formData.lens_tint_color || null,
-          lens_tint_percentage: formData.lens_tint_percentage || null,
-          presbyopia_solution: formData.presbyopia_solution || "none",
-          far_lens_family_id: presbyopiaSolution === "two_separate" ? farLensFamilyId || null : null,
-          near_lens_family_id: presbyopiaSolution === "two_separate" ? nearLensFamilyId || null : null,
-          far_lens_cost: presbyopiaSolution === "two_separate" ? farLensCost || 0 : undefined,
-          near_lens_cost: presbyopiaSolution === "two_separate" ? nearLensCost || 0 : undefined,
-          contact_lens_family_id: lensType === "contact" ? formData.contact_lens_family_id || null : null,
-          contact_lens_rx_sphere_od: lensType === "contact" && selectedPrescription ? (selectedPrescription.od_sphere ?? null) : null,
-          contact_lens_rx_cylinder_od: lensType === "contact" && selectedPrescription ? (selectedPrescription.od_cylinder ?? null) : null,
-          contact_lens_rx_axis_od: lensType === "contact" && selectedPrescription ? (selectedPrescription.od_axis ?? null) : null,
-          contact_lens_rx_add_od: lensType === "contact" && selectedPrescription ? (selectedPrescription.od_add ?? null) : null,
-          contact_lens_rx_base_curve_od: lensType === "contact" ? formData.contact_lens_rx_base_curve_od : null,
-          contact_lens_rx_diameter_od: lensType === "contact" ? formData.contact_lens_rx_diameter_od : null,
-          contact_lens_rx_sphere_os: lensType === "contact" && selectedPrescription ? (selectedPrescription.os_sphere ?? null) : null,
-          contact_lens_rx_cylinder_os: lensType === "contact" && selectedPrescription ? (selectedPrescription.os_cylinder ?? null) : null,
-          contact_lens_rx_axis_os: lensType === "contact" && selectedPrescription ? (selectedPrescription.os_axis ?? null) : null,
-          contact_lens_rx_add_os: lensType === "contact" && selectedPrescription ? (selectedPrescription.os_add ?? null) : null,
-          contact_lens_rx_base_curve_os: lensType === "contact" ? formData.contact_lens_rx_base_curve_os : null,
-          contact_lens_rx_diameter_os: lensType === "contact" ? formData.contact_lens_rx_diameter_os : null,
-          contact_lens_quantity: lensType === "contact" ? formData.contact_lens_quantity || 1 : 1,
-          contact_lens_cost: lensType === "contact" ? formData.contact_lens_cost || 0 : 0,
-          contact_lens_price: lensType === "contact" ? formData.contact_lens_price || 0 : 0,
-          frame_cost: formData.frame_cost,
-          lens_cost: lensType === "contact" ? 0 : formData.lens_cost,
-          treatments_cost: lensType === "contact" ? 0 : formData.treatments_cost,
-          labor_cost: formData.labor_cost,
-        }],
-      } as any);
+        // Move fields from items to top level
+        prescription_id: selectedPrescription.id,
+        frame_product_id: selectedFrame?.id,
+        customer_own_frame: customerOwnFrame,
+        frame_name: formData.frame_name,
+        frame_brand: formData.frame_brand,
+        frame_model: formData.frame_model,
+        frame_color: formData.frame_color,
+        frame_size: formData.frame_size,
+        frame_sku: formData.frame_sku,
+        frame_price: formData.frame_price,
+        ...nearFrameData,
+        lens_family_id:
+          presbyopiaSolution === "two_separate"
+            ? null
+            : formData.lens_family_id || null,
+        lens_type:
+          lensType === "contact"
+            ? "Lentes de contacto"
+            : formData.lens_type || null,
+        lens_material: formData.lens_material || null,
+        lens_index:
+          formData.lens_index !== null && formData.lens_index !== undefined
+            ? formData.lens_index
+            : null,
+        lens_treatments: lensType === "contact" ? [] : formData.lens_treatments,
+        lens_tint_color: formData.lens_tint_color || null,
+        lens_tint_percentage: formData.lens_tint_percentage || null,
+        presbyopia_solution: formData.presbyopia_solution || "none",
+        far_lens_family_id:
+          presbyopiaSolution === "two_separate"
+            ? farLensFamilyId || null
+            : null,
+        near_lens_family_id:
+          presbyopiaSolution === "two_separate"
+            ? nearLensFamilyId || null
+            : null,
+        far_lens_cost:
+          presbyopiaSolution === "two_separate" ? farLensCost || 0 : undefined,
+        near_lens_cost:
+          presbyopiaSolution === "two_separate" ? nearLensCost || 0 : undefined,
+        contact_lens_family_id:
+          lensType === "contact"
+            ? formData.contact_lens_family_id || null
+            : null,
+        contact_lens_rx_sphere_od:
+          lensType === "contact" && selectedPrescription
+            ? (selectedPrescription.od_sphere ?? null)
+            : null,
+        contact_lens_rx_cylinder_od:
+          lensType === "contact" && selectedPrescription
+            ? (selectedPrescription.od_cylinder ?? null)
+            : null,
+        contact_lens_rx_axis_od:
+          lensType === "contact" && selectedPrescription
+            ? (selectedPrescription.od_axis ?? null)
+            : null,
+        contact_lens_rx_add_od:
+          lensType === "contact" && selectedPrescription
+            ? (selectedPrescription.od_add ?? null)
+            : null,
+        contact_lens_rx_base_curve_od:
+          lensType === "contact"
+            ? formData.contact_lens_rx_base_curve_od
+            : null,
+        contact_lens_rx_diameter_od:
+          lensType === "contact" ? formData.contact_lens_rx_diameter_od : null,
+        contact_lens_rx_sphere_os:
+          lensType === "contact" && selectedPrescription
+            ? (selectedPrescription.os_sphere ?? null)
+            : null,
+        contact_lens_rx_cylinder_os:
+          lensType === "contact" && selectedPrescription
+            ? (selectedPrescription.os_cylinder ?? null)
+            : null,
+        contact_lens_rx_axis_os:
+          lensType === "contact" && selectedPrescription
+            ? (selectedPrescription.os_axis ?? null)
+            : null,
+        contact_lens_rx_add_os:
+          lensType === "contact" && selectedPrescription
+            ? (selectedPrescription.os_add ?? null)
+            : null,
+        contact_lens_rx_base_curve_os:
+          lensType === "contact"
+            ? formData.contact_lens_rx_base_curve_os
+            : null,
+        contact_lens_rx_diameter_os:
+          lensType === "contact" ? formData.contact_lens_rx_diameter_os : null,
+        contact_lens_quantity:
+          lensType === "contact" ? formData.contact_lens_quantity || 1 : 1,
+        contact_lens_cost:
+          lensType === "contact" ? formData.contact_lens_cost || 0 : 0,
+        contact_lens_price:
+          lensType === "contact" ? formData.contact_lens_price || 0 : 0,
+        frame_cost: formData.frame_cost,
+        lens_cost: lensType === "contact" ? 0 : formData.lens_cost,
+        treatments_cost: lensType === "contact" ? 0 : formData.treatments_cost,
+        labor_cost: formData.labor_cost,
+      });
 
       toast.success("Presupuesto creado exitosamente");
       onSuccess();
@@ -1402,7 +1468,7 @@ export default function CreateQuoteForm({
                     <div className="p-4 text-center">
                       <Loader2 className="h-4 w-4 animate-spin mx-auto" />
                     </div>
-                  ) : customerResults.length > 0 ? (
+                  ) : (customerResults || []).length > 0 ? (
                     customerResults.map((customer) => (
                       <div
                         key={customer.id}
@@ -1746,7 +1812,7 @@ export default function CreateQuoteForm({
                     <div className="p-4 text-center">
                       <Loader2 className="h-4 w-4 animate-spin mx-auto" />
                     </div>
-                  ) : frameResults.length > 0 ? (
+                  ) : (frameResults || []).length > 0 ? (
                     frameResults.map((frame) => (
                       <div
                         key={frame.id}
@@ -1934,7 +2000,7 @@ export default function CreateQuoteForm({
                         <div className="p-4 text-center">
                           <Loader2 className="h-4 w-4 animate-spin mx-auto" />
                         </div>
-                      ) : nearFrameResults.length > 0 ? (
+                      ) : (nearFrameResults || []).length > 0 ? (
                         nearFrameResults.map((frame) => (
                           <div
                             key={frame.id}

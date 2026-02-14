@@ -1,12 +1,12 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import { useTelemetry } from '@/lib/telemetry/hooks/use-telemetry';
-import { useAuthContext } from '@/contexts/AuthContext';
-import { useRouter } from 'next/navigation';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import React, { useState, useEffect } from "react";
+import { useTelemetry } from "@/lib/telemetry/hooks/use-telemetry";
+import { useAuthContext } from "@/contexts/AuthContext";
+import { useRouter } from "next/navigation";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import {
   Building2,
   Users,
@@ -24,7 +24,20 @@ import {
   CheckCircle2,
   AlertCircle,
   BarChart3,
+  ShieldCheck,
+  Activity,
+  RotateCcw,
 } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { toast } from "sonner";
 
 interface SaasMetrics {
   totalOrganizations: number;
@@ -46,50 +59,119 @@ export default function SaaSDashboard() {
   const [metrics, setMetrics] = useState<SaasMetrics | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
-  const { trackFeatureUsage } = useTelemetry('saas-dashboard');
+  const [telemetryEnabled, setTelemetryEnabled] = useState(true);
+  const [updatingTelemetry, setUpdatingTelemetry] = useState(false);
+  const [showResetDemoDialog, setShowResetDemoDialog] = useState(false);
+  const [resettingDemo, setResettingDemo] = useState(false);
+  const { trackFeatureUsage } = useTelemetry("saas-dashboard");
   const { user, isAdmin, isSuperAdmin } = useAuthContext();
   const router = useRouter();
 
-  // Check authorization
+  // Check authorization - optimized to avoid redundant updates
   useEffect(() => {
-    if (user === undefined) return; // Still loading
-    
-    // Temporary bypass for debugging - allow all logged-in users
-    console.log('🔐 Bypassing auth check for debugging:', {
-      user: user?.email,
-      userId: user?.id,
-      isAdminFromContext: isAdmin,
-      isSuperAdminFromContext: isSuperAdmin
-    });
-    
-    // For now, allow any logged-in user to access the dashboard
+    if (user === undefined) return;
+
+    // Temporary bypass for debugging
     const authorized = !!user;
-    
-    // Use setTimeout to avoid setState during render
-    setTimeout(() => {
+
+    // Setting state in useEffect is fine, but we should only do it if the value changed
+    if (isAuthorized !== authorized) {
       setIsAuthorized(authorized);
-      
-      if (user && !authorized) {
-        console.log('🚫 Unauthorized access - redirecting to /unauthorized');
-        router.push('/unauthorized');
+    }
+
+    if (user && !authorized) {
+      router.push("/unauthorized");
+    }
+  }, [user, isAuthorized, router]);
+
+  // Fetch telemetry configuration
+  useEffect(() => {
+    if (!isAuthorized) return;
+
+    const fetchTelemetryConfig = async () => {
+      try {
+        const response = await fetch(
+          "/api/admin/saas-management/telemetry-config",
+        );
+        if (response.ok) {
+          const data = await response.json();
+          setTelemetryEnabled(data.enabled);
+        }
+      } catch (err) {
+        console.error("Error fetching telemetry config:", err);
       }
-    }, 0);
-  }, [user, isAdmin, isSuperAdmin, router]);
+    };
+
+    fetchTelemetryConfig();
+  }, [isAuthorized]);
+
+  const handleResetDemo = async () => {
+    try {
+      setResettingDemo(true);
+      const response = await fetch("/api/admin/saas-management/reset-demo", {
+        method: "POST",
+      });
+      if (response.ok) {
+        toast.success("Óptica Demo reseteada correctamente");
+        setShowResetDemoDialog(false);
+        trackFeatureUsage("admin_reset_demo");
+      } else {
+        const data = await response.json();
+        toast.error(data.error || "Error al resetear la Óptica Demo");
+      }
+    } catch (err) {
+      toast.error("Error al resetear la Óptica Demo");
+      console.error(err);
+    } finally {
+      setResettingDemo(false);
+    }
+  };
+
+  const handleToggleTelemetry = async (enabled: boolean) => {
+    try {
+      setUpdatingTelemetry(true);
+      const response = await fetch(
+        "/api/admin/saas-management/telemetry-config",
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ enabled }),
+        },
+      );
+
+      if (response.ok) {
+        setTelemetryEnabled(enabled);
+        toast.success(
+          `Telemetría ${enabled ? "activada" : "desactivada"} globalmente`,
+        );
+
+        // Track the change
+        trackFeatureUsage("admin_telemetry_toggle", { enabled });
+      } else {
+        throw new Error("Error al actualizar configuración");
+      }
+    } catch (err) {
+      toast.error("No se pudo actualizar la configuración de telemetría");
+      console.error(err);
+    } finally {
+      setUpdatingTelemetry(false);
+    }
+  };
 
   useEffect(() => {
     // Only fetch data if authorized
     if (!isAuthorized) return;
-    
+
     // Track dashboard usage (only after component mounts)
-    if (typeof window !== 'undefined') {
-      trackFeatureUsage('usage_dashboard_view');
+    if (typeof window !== "undefined") {
+      trackFeatureUsage("usage_dashboard_view");
     }
   }, [trackFeatureUsage, isAuthorized]);
 
   useEffect(() => {
     // Only fetch data if authorized
     if (!isAuthorized) return;
-    
+
     const fetchMetrics = async () => {
       try {
         setLoading(true);
@@ -379,6 +461,53 @@ export default function SaaSDashboard() {
         </Card>
       </div>
 
+      {/* Estado del Sistema y Telemetría */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+        <Card className="border-l-4 border-l-azul-profundo">
+          <CardHeader className="pb-2">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <ShieldCheck className="h-5 w-5 text-azul-profundo" />
+                <CardTitle className="text-lg">Estado de Telemetría</CardTitle>
+              </div>
+              <div className="flex items-center gap-2">
+                <span
+                  className={`text-sm font-medium ${telemetryEnabled ? "text-green-600" : "text-red-500"}`}
+                >
+                  {telemetryEnabled ? "Activa" : "Inactiva"}
+                </span>
+                <Switch
+                  checked={telemetryEnabled}
+                  onCheckedChange={handleToggleTelemetry}
+                  disabled={updatingTelemetry}
+                />
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              Control global de recolección de métricas y tracking de eventos.
+              Desactívelo para reducir carga en el servidor.
+            </p>
+          </CardHeader>
+        </Card>
+
+        <Card className="border-l-4 border-l-green-500">
+          <CardHeader className="pb-2">
+            <div className="flex items-center gap-2">
+              <Activity className="h-5 w-5 text-green-600" />
+              <CardTitle className="text-lg">Salud del Sistema</CardTitle>
+            </div>
+            <div className="flex items-center gap-2 mt-2">
+              <div className="flex items-center gap-1">
+                <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse"></div>
+                <span className="text-sm font-medium text-green-600">
+                  Sistemas operacionales
+                </span>
+              </div>
+            </div>
+          </CardHeader>
+        </Card>
+      </div>
+
       {/* Navegación rápida a secciones de gestión */}
       <Card>
         <CardHeader>
@@ -392,7 +521,7 @@ export default function SaaSDashboard() {
             {/* Analytics Dashboard */}
             <Card
               className="cursor-pointer hover:shadow-lg transition-shadow border-l-4 border-l-blue-500"
-              onClick={() => router.push('/admin/saas-management/analytics')}
+              onClick={() => router.push("/admin/saas-management/analytics")}
             >
               <CardContent className="pt-6">
                 <div className="flex items-center justify-between">
@@ -401,7 +530,9 @@ export default function SaaSDashboard() {
                       <BarChart3 className="h-6 w-6 text-blue-600 dark:text-blue-400" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-lg">Analytics Dashboard</h3>
+                      <h3 className="font-semibold text-lg">
+                        Analytics Dashboard
+                      </h3>
                       <p className="text-sm text-muted-foreground">
                         Telemetría y métricas de uso del sistema
                       </p>
@@ -602,9 +733,73 @@ export default function SaaSDashboard() {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Resetear Óptica Demo - Herramientas de desarrollo */}
+            <Card
+              className="cursor-pointer hover:shadow-lg transition-shadow border-l-4 border-l-amber-500 border-amber-100 dark:border-amber-900/50"
+              onClick={() => setShowResetDemoDialog(true)}
+            >
+              <CardContent className="pt-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-amber-100 dark:bg-amber-900 rounded-lg">
+                      <RotateCcw className="h-6 w-6 text-amber-600 dark:text-amber-400" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-lg">
+                        Resetear Óptica Demo
+                      </h3>
+                      <p className="text-sm text-muted-foreground">
+                        Restaurar la base de datos de la Óptica Demo al estado
+                        inicial (solo dev)
+                      </p>
+                    </div>
+                  </div>
+                  <ArrowRight className="h-5 w-5 text-muted-foreground" />
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </CardContent>
       </Card>
+
+      {/* Diálogo de confirmación Reset Demo */}
+      <Dialog open={showResetDemoDialog} onOpenChange={setShowResetDemoDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Resetear Óptica Demo</DialogTitle>
+            <DialogDescription>
+              Esto borrará todos los datos de la Óptica Demo y los restaurará al
+              estado inicial. Los clientes, productos, órdenes, citas y demás
+              datos serán eliminados y reemplazados por datos de prueba.
+              ¿Continuar?
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setShowResetDemoDialog(false)}
+              disabled={resettingDemo}
+            >
+              Cancelar
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleResetDemo}
+              disabled={resettingDemo}
+            >
+              {resettingDemo ? (
+                <>
+                  <RotateCcw className="h-4 w-4 mr-2 animate-spin" />
+                  Reseteando...
+                </>
+              ) : (
+                "Resetear Óptica Demo"
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

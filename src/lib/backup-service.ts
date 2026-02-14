@@ -1,4 +1,4 @@
-import { createServiceRoleClient } from "@/lib/supabase";
+import { createServiceRoleClient } from "@/utils/supabase/server";
 import { appLogger as logger } from "@/lib/logger";
 
 export interface BackupTableData {
@@ -109,6 +109,7 @@ export class BackupService {
   static async generateBackup(
     organizationId: string,
     userIdOrEmail?: string,
+    branchId?: string,
   ): Promise<BackupData> {
     const backupStartTime = new Date();
     const backupId = `backup_${organizationId}_${backupStartTime.toISOString().replace(/[:.]/g, "-")}`;
@@ -168,7 +169,13 @@ export class BackupService {
               .map((row: any) => row.id)
               .filter(Boolean);
         } else {
-          const { data, error } = await query.eq(config.filter, organizationId);
+          let q = query;
+          if (config.name === "branches" && branchId) {
+            q = q.eq(config.filter, organizationId).eq("id", branchId);
+          } else {
+            q = q.eq(config.filter, organizationId);
+          }
+          const { data, error } = await q;
           if (error) throw error;
           backupData.tables[config.name] = {
             data: data || [],

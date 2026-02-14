@@ -5,14 +5,15 @@ import { getBranchContext, addBranchFilter } from "@/lib/api/branch-middleware";
 import { appLogger as logger } from "@/lib/logger";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
 import { withRateLimit, rateLimitConfigs } from "@/lib/api/middleware";
-import { 
-  RateLimitError, 
+import {
+  RateLimitError,
   ValidationError,
   AuthenticationError,
-  AuthorizationError 
+  AuthorizationError,
 } from "@/lib/api/errors";
 import {
   createPaginatedResponse,
+  createApiSuccessResponse,
   createApiErrorResponse,
   extractPaginationParams,
 } from "@/lib/api/response";
@@ -31,7 +32,7 @@ import {
 
 export async function GET(request: NextRequest) {
   const requestId = crypto.randomUUID();
-  
+
   try {
     logger.info("Customers API GET called", { requestId });
 
@@ -67,7 +68,10 @@ export async function GET(request: NextRequest) {
     const { data, error: userError } = await getUser();
     const user = data?.user;
     if (userError || !user) {
-      logger.error("User authentication failed", { error: userError, requestId });
+      logger.error("User authentication failed", {
+        error: userError,
+        requestId,
+      });
       throw new AuthenticationError("Unauthorized");
     }
     logger.debug("User authenticated", { email: user.email, requestId });
@@ -166,7 +170,10 @@ export async function GET(request: NextRequest) {
     const { count, error: countError } = await countQuery;
 
     if (countError) {
-      logger.error("Error getting customer count", { error: countError, requestId });
+      logger.error("Error getting customer count", {
+        error: countError,
+        requestId,
+      });
       throw new Error("Failed to count customers");
     }
     logger.debug("Customer count retrieved", { count, requestId });
@@ -182,7 +189,7 @@ export async function GET(request: NextRequest) {
     }
     logger.debug("Customers fetched successfully", {
       count: customers?.length || 0,
-      requestId
+      requestId,
     });
 
     // Calculate customer analytics
@@ -238,29 +245,26 @@ export async function POST(request: NextRequest) {
           const user = data?.user;
           if (userError || !user) {
             logger.error("User authentication failed", userError);
-            return NextResponse.json(
-              { error: "Unauthorized" },
-              { status: 401 },
+            return createApiErrorResponse(
+              new AuthenticationError("Unauthorized"),
             );
           }
           logger.debug("User authenticated", { email: user.email });
 
-          const { data: isAdmin, error: adminError } = (await supabase.rpc(
-            "is_admin",
-            { user_id: user.id } as IsAdminParams,
-          )) as { data: IsAdminResult | null; error: Error | null };
-          if (adminError) {
-            logger.error("Admin check error", adminError);
-            return NextResponse.json(
-              { error: "Admin verification failed" },
-              { status: 500 },
-            );
-          }
+          // Check admin authorization using service role to bypass any context/RLS issues
+          const { createServiceRoleClient } = await import(
+            "@/utils/supabase/server"
+          );
+          const serviceSupabase = createServiceRoleClient();
+
+          const { data: isAdmin } = await serviceSupabase.rpc("is_admin", {
+            user_id: user.id,
+          });
+
           if (!isAdmin) {
             logger.warn("User is not admin", { email: user.email });
-            return NextResponse.json(
-              { error: "Admin access required" },
-              { status: 403 },
+            return createApiErrorResponse(
+              new AuthorizationError("Admin access required"),
             );
           }
           logger.debug("Admin access confirmed", { email: user.email });
@@ -587,13 +591,7 @@ export async function POST(request: NextRequest) {
               newCustomer.branch_id ?? undefined,
             ).catch((err) => logger.error("Error creating notification", err));
 
-            return NextResponse.json(
-              {
-                success: true,
-                customer: newCustomer,
-              },
-              { status: 201 },
-            );
+            return createApiSuccessResponse(newCustomer, { statusCode: 201 });
           } else {
             // This is an analytics request
             logger.info("Customers API POST called (analytics summary)");
@@ -639,7 +637,7 @@ export async function POST(request: NextRequest) {
                 ),
             );
 
-            return NextResponse.json({
+            return createApiSuccessResponse({
               summary: {
                 totalCustomers: totalCount || 0,
                 activeCustomers: activeCount || totalCount || 0,
@@ -655,28 +653,9 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: error.message }, { status: 429 });
           }
 
-          // Log error details for debugging
-          if (error instanceof Error) {
-            logger.error("Error in customers API POST", error);
-          } else {
-            logger.error(
-              "Error in customers API POST",
-              new Error(String(error)),
-            );
-          }
-
-          // Return proper JSON error response
-          const errorMessage =
-            error instanceof Error ? error.message : "Internal server error";
-          return NextResponse.json(
-            {
-              error: errorMessage,
-              ...(process.env.NODE_ENV === "development" &&
-              error instanceof Error
-                ? { details: error.stack }
-                : {}),
-            },
-            { status: 500 },
+          // Return standardized error response
+          return createApiErrorResponse(
+            error instanceof Error ? error : new Error(String(error)),
           );
         }
       },
@@ -688,16 +667,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 429 });
     }
 
-    // Log and return error response for any other unexpected errors
-    logger.error(
-      "Unexpected error in POST handler",
+    // Log and return standardized error response
+    return createApiErrorResponse(
       error instanceof Error ? error : new Error(String(error)),
-    );
-    return NextResponse.json(
-      {
-        error: error instanceof Error ? error.message : "Internal server error",
-      },
-      { status: 500 },
     );
   }
 }

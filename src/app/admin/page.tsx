@@ -229,8 +229,14 @@ export default function AdminDashboard() {
       }
 
       const result = await response.json();
-      setData(result);
-      setError(null);
+      if (result.success) {
+        setData(result.data);
+        setError(null);
+      } else {
+        throw new Error(
+          result.error?.message || "Failed to fetch dashboard data",
+        );
+      }
     } catch (err) {
       console.error("Error fetching dashboard data:", err);
       setError("Error al cargar los datos del dashboard");
@@ -402,7 +408,7 @@ export default function AdminDashboard() {
       </div>
 
       {/* Stock Alert Banner - Compact */}
-      {data.lowStockProducts.length > 0 && (
+      {data?.lowStockProducts?.length > 0 && (
         <Card className="border-none bg-admin-bg-tertiary shadow-soft overflow-hidden animate-in slide-in-from-top duration-500">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
@@ -412,17 +418,17 @@ export default function AdminDashboard() {
                 </div>
                 <div>
                   <p className="font-bold text-admin-text-primary text-sm">
-                    {data.lowStockProducts.length} producto
-                    {data.lowStockProducts.length !== 1 ? "s" : ""} con stock
+                    {data?.lowStockProducts?.length} producto
+                    {data?.lowStockProducts?.length !== 1 ? "s" : ""} con stock
                     crítico
                   </p>
                   <p className="text-xs text-admin-text-tertiary">
-                    {data.lowStockProducts
-                      .slice(0, 2)
+                    {data?.lowStockProducts
+                      ?.slice(0, 2)
                       .map((p) => p.name)
                       .join(", ")}
-                    {data.lowStockProducts.length > 2 &&
-                      ` y ${data.lowStockProducts.length - 2} más`}
+                    {data?.lowStockProducts?.length > 2 &&
+                      ` y ${data?.lowStockProducts?.length - 2} más`}
                   </p>
                 </div>
               </div>
@@ -647,10 +653,13 @@ export default function AdminDashboard() {
             </p>
           </CardHeader>
           <CardContent>
-            {data.charts.revenueTrend.length > 0 ? (
+            {data?.charts?.revenueTrend?.length > 0 ? (
               <div className="h-[300px] w-full pt-4">
                 <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={data.charts.revenueTrend}>
+                  <AreaChart
+                    id="dashboard-revenue-chart"
+                    data={data.charts.revenueTrend}
+                  >
                     <defs>
                       <linearGradient
                         id="colorRevenue"
@@ -768,7 +777,7 @@ export default function AdminDashboard() {
             {data.kpis.workOrders && data.kpis.workOrders.total > 0 ? (
               <div className="h-[300px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
+                  <PieChart id="dashboard-ops-chart">
                     <Pie
                       data={[
                         {
@@ -851,7 +860,7 @@ export default function AdminDashboard() {
       </div>
 
       {/* Top Products Chart */}
-      {data.charts.topProducts.length > 0 && (
+      {data?.charts?.topProducts?.length > 0 && (
         <Card className="border-none bg-admin-bg-tertiary shadow-soft overflow-hidden">
           <CardHeader className="pb-2">
             <div className="flex items-center gap-2 mb-1">
@@ -966,7 +975,7 @@ export default function AdminDashboard() {
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {data.todayAppointments.length > 0 ? (
+                {data?.todayAppointments?.length > 0 ? (
                   data.todayAppointments.map((appointment) => (
                     <div
                       key={appointment.id}
@@ -1052,7 +1061,7 @@ export default function AdminDashboard() {
           </CardHeader>
           <CardContent className="space-y-6">
             {/* Stock Alerts Section */}
-            {data.lowStockProducts.length > 0 && (
+            {data?.lowStockProducts?.length > 0 && (
               <div className="p-4 bg-admin-error/5 border border-admin-error/10 rounded-2xl animate-in zoom-in-95 duration-500">
                 <div className="flex items-center gap-3 mb-3">
                   <div className="h-8 w-8 bg-admin-error/10 rounded-lg flex items-center justify-center">
@@ -1064,7 +1073,7 @@ export default function AdminDashboard() {
                 </div>
 
                 <div className="space-y-2 mb-4">
-                  {data.lowStockProducts.slice(0, 3).map((product) => (
+                  {data?.lowStockProducts?.slice(0, 3).map((product) => (
                     <div
                       key={product.id}
                       className="flex items-center justify-between p-2 rounded-lg bg-white/50 border border-admin-error/5"
@@ -1077,9 +1086,10 @@ export default function AdminDashboard() {
                       </span>
                     </div>
                   ))}
-                  {data.lowStockProducts.length > 3 && (
+                  {data?.lowStockProducts?.length > 3 && (
                     <p className="text-[10px] font-bold text-admin-error/60 text-center uppercase">
-                      +{data.lowStockProducts.length - 3} productos adicionales
+                      +{data?.lowStockProducts?.length - 3} productos
+                      adicionales
                     </p>
                   )}
                 </div>

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,6 +11,7 @@ interface CustomerSelectionProps {
   onCustomerSelect: (customer: Customer) => void;
   onCustomerClear: () => void;
   disabled?: boolean;
+  initialCustomerId?: string;
 }
 
 export function CustomerSelection({
@@ -18,9 +19,24 @@ export function CustomerSelection({
   onCustomerSelect,
   onCustomerClear,
   disabled = false,
+  initialCustomerId,
 }: CustomerSelectionProps) {
-  const { search, setSearch, results, loading, selectCustomer, clearCustomer } =
-    useCustomerSearch();
+  const {
+    search,
+    setSearch,
+    results,
+    loading,
+    selected,
+    selectCustomer,
+    clearCustomer,
+  } = useCustomerSearch(initialCustomerId);
+
+  // When customer is loaded from initialCustomerId, notify parent
+  useEffect(() => {
+    if (selected && !selectedCustomer) {
+      onCustomerSelect(selected);
+    }
+  }, [selected, selectedCustomer, onCustomerSelect]);
 
   const handleSelect = (customer: Customer) => {
     selectCustomer(customer);

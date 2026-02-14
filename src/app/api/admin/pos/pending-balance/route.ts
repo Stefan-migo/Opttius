@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient, createServiceRoleClient } from "@/utils/supabase/server";
 import { getBranchContext } from "@/lib/api/branch-middleware";
 import { appLogger as logger } from "@/lib/logger";
+import {
+  createApiSuccessResponse,
+  createApiErrorResponse,
+} from "@/lib/api/response";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
 
 /**
@@ -201,10 +205,7 @@ export async function GET(request: NextRequest) {
       branch: branchContext.branchId,
     });
 
-    return NextResponse.json({
-      orders: ordersWithBalance,
-      count: ordersWithBalance.length,
-    });
+    return createApiSuccessResponse(ordersWithBalance);
   } catch (error: any) {
     console.error("[PENDING-BALANCE-API] Catch block error:", {
       message: error.message,

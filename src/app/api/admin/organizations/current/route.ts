@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
 import { createServiceRoleClient } from "@/utils/supabase/service-role";
 import { appLogger as logger } from "@/lib/logger";
+import {
+  createApiSuccessResponse,
+  createApiErrorResponse,
+} from "@/lib/api/response";
 
 /**
  * GET /api/admin/organizations/current
@@ -50,7 +54,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    return NextResponse.json({ organization });
+    return createApiSuccessResponse(organization);
   } catch (error) {
     logger.error("Error in GET /api/admin/organizations/current", error);
     return NextResponse.json(
@@ -141,7 +145,7 @@ export async function PATCH(request: NextRequest) {
 
     logger.info(`Organization updated: ${adminUser.organization_id}`);
 
-    return NextResponse.json({ organization: updatedOrg });
+    return createApiSuccessResponse(updatedOrg);
   } catch (error) {
     logger.error("Error in PATCH /api/admin/organizations/current", error);
     return NextResponse.json(

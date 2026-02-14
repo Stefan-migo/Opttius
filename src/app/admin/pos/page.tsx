@@ -61,11 +61,11 @@ import {
 import { getTaxPercentage } from "@/lib/utils/tax-config";
 import { formatCurrency, formatDate, formatPrice } from "@/lib/utils";
 import { extractDataFromResponse } from "@/lib/api/response-helpers";
-import { 
-  posService, 
+import {
+  posService,
   quoteService,
-  customerService, 
-  productService, 
+  customerService,
+  productService,
   quoteSettingsService,
   lensFamilyService,
   contactLensFamilyService,
@@ -193,6 +193,9 @@ export default function POSPage() {
   const [showPendingBalanceDialog, setShowPendingBalanceDialog] =
     useState(false);
   const [pendingBalanceOrders, setPendingBalanceOrders] = useState<any[]>([]);
+  const [allPendingBalanceOrders, setAllPendingBalanceOrders] = useState<any[]>(
+    [],
+  );
   const [loadingPendingBalance, setLoadingPendingBalance] = useState(false);
   const [selectedPendingOrder, setSelectedPendingOrder] = useState<any>(null);
   const [pendingPaymentAmount, setPendingPaymentAmount] = useState<string>("");
@@ -200,6 +203,10 @@ export default function POSPage() {
   const [processingPendingPayment, setProcessingPendingPayment] =
     useState(false);
   const [pendingBalanceSearchTerm, setPendingBalanceSearchTerm] = useState("");
+  const [fiscalReference, setFiscalReference] = useState<string>("");
+  const [pendingFiscalReference, setPendingFiscalReference] =
+    useState<string>("");
+  const [receiptType, setReceiptType] = useState<"sale" | "payment">("sale");
   const [selectedProductIndex, setSelectedProductIndex] = useState<number>(-1);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const suggestionsRef = useRef<HTMLDivElement>(null);
@@ -442,7 +449,9 @@ export default function POSPage() {
     setCheckingCashStatus(true);
     try {
       // Use posService for cash status
-      const cashStatus = await posService.getCashStatus(currentBranchId || undefined);
+      const cashStatus = await posService.getCashStatus(
+        currentBranchId || undefined,
+      );
       if (cashStatus) {
         setIsCashOpen(cashStatus.isOpen);
       }
@@ -460,11 +469,15 @@ export default function POSPage() {
 
       try {
         // Fetch Billing settings using posService
-        const billingSettings = await posService.getBillingSettings(currentBranchId || undefined);
+        const billingSettings = await posService.getBillingSettings(
+          currentBranchId || undefined,
+        );
         if (billingSettings) setBillingSettings(billingSettings);
 
         // Fetch Organization info using posService
-        const organization = await posService.getCurrentOrganization(currentBranchId || undefined);
+        const organization = await posService.getCurrentOrganization(
+          currentBranchId || undefined,
+        );
         if (organization) setOrganization(organization);
       } catch (error) {
         console.error("Error fetching POS prerequisites:", error);
@@ -560,20 +573,20 @@ export default function POSPage() {
         customerRut: customerRut || null,
         customerEmail: customerEmail || null,
       });
-      
+
       // Build search params for quoteService.getQuotes
       const searchParams: QuoteSearchParams = {
         customer_id: customerId,
         limit: 50,
       };
-      
+
       // Add optional filters
       if (customerRut) searchParams.search = customerRut;
       if (customerEmail) searchParams.search = customerEmail.trim();
-      
+
       const quotesResponse = await quoteService.getQuotes(searchParams);
       const allQuotes = quotesResponse.data || [];
-      
+
       console.log("✅ POS: Quotes response:", {
         count: allQuotes.length,
       });
@@ -635,7 +648,9 @@ export default function POSPage() {
       // Load frame data - try to fetch product if frame_product_id exists
       if (fullQuote.frame_product_id) {
         try {
-          const productResult = await productService.getProduct(fullQuote.frame_product_id);
+          const productResult = await productService.getProduct(
+            fullQuote.frame_product_id,
+          );
           setSelectedFrame(productResult as unknown as any);
           console.log("✅ Frame product loaded:", productResult);
         } catch (error) {
@@ -754,12 +769,11 @@ export default function POSPage() {
         // Load near frame data if exists
         if (fullQuote.near_frame_product_id) {
           try {
-            const nearFrameResult = await productService.getProduct(fullQuote.near_frame_product_id);
-            setSelectedNearFrame(nearFrameResult as unknown as any);
-            console.log(
-              "✅ Near frame product loaded:",
-              nearFrameResult,
+            const nearFrameResult = await productService.getProduct(
+              fullQuote.near_frame_product_id,
             );
+            setSelectedNearFrame(nearFrameResult as unknown as any);
+            console.log("✅ Near frame product loaded:", nearFrameResult);
           } catch (error) {
             console.error("Error fetching near frame product:", error);
           }
@@ -1162,35 +1176,73 @@ export default function POSPage() {
 
       // Step 1: Create customer using customerService
       const newCustomer = await customerService.createCustomer({
-        name: `${externalCustomerData.first_name} ${externalCustomerData.last_name}`.trim(),
-        email: externalCustomerData.email || `${externalCustomerData.first_name.toLowerCase()}.${externalCustomerData.last_name.toLowerCase()}@placeholder.com`,
+        first_name: externalCustomerData.first_name,
+        last_name: externalCustomerData.last_name,
+        email:
+          externalCustomerData.email ||
+          `${externalCustomerData.first_name.toLowerCase()}.${externalCustomerData.last_name.toLowerCase()}@placeholder.com`,
         phone: externalCustomerData.phone || undefined,
         rut: externalCustomerData.rut || undefined,
+        branch_id: currentBranchId || undefined,
       });
 
       // Step 2: Create prescription for the new customer
-      const newPrescription = await customerService.createPrescription(newCustomer.id, {
-        prescription_date: externalPrescriptionData.prescription_date,
-        expiration_date: externalPrescriptionData.expiration_date || undefined,
-        prescription_number: externalPrescriptionData.prescription_number || undefined,
-        issued_by: externalPrescriptionData.issued_by || undefined,
-        issued_by_license: externalPrescriptionData.issued_by_license || undefined,
-        od_sphere: externalPrescriptionData.od_sphere ? parseFloat(externalPrescriptionData.od_sphere) : undefined,
-        od_cylinder: externalPrescriptionData.od_cylinder ? parseFloat(externalPrescriptionData.od_cylinder) : undefined,
-        od_axis: externalPrescriptionData.od_axis ? parseInt(externalPrescriptionData.od_axis) : undefined,
-        od_add: externalPrescriptionData.od_add ? parseFloat(externalPrescriptionData.od_add) : undefined,
-        od_pd: externalPrescriptionData.pd ? parseFloat(externalPrescriptionData.pd) / 2 : undefined,
-        od_near_pd: externalPrescriptionData.near_pd ? parseFloat(externalPrescriptionData.near_pd) / 2 : undefined,
-        os_sphere: externalPrescriptionData.os_sphere ? parseFloat(externalPrescriptionData.os_sphere) : undefined,
-        os_cylinder: externalPrescriptionData.os_cylinder ? parseFloat(externalPrescriptionData.os_cylinder) : undefined,
-        os_axis: externalPrescriptionData.os_axis ? parseInt(externalPrescriptionData.os_axis) : undefined,
-        os_add: externalPrescriptionData.os_add ? parseFloat(externalPrescriptionData.os_add) : undefined,
-        os_pd: externalPrescriptionData.pd ? parseFloat(externalPrescriptionData.pd) / 2 : undefined,
-        os_near_pd: externalPrescriptionData.near_pd ? parseFloat(externalPrescriptionData.near_pd) / 2 : undefined,
-        frame_pd: externalPrescriptionData.frame_pd ? parseFloat(externalPrescriptionData.frame_pd) : undefined,
-        height_segmentation: externalPrescriptionData.height_segmentation ? parseFloat(externalPrescriptionData.height_segmentation) : undefined,
-        is_current: true, // Mark as current prescription
-      });
+      const newPrescription = await customerService.createPrescription(
+        newCustomer.id,
+        {
+          prescription_date: externalPrescriptionData.prescription_date,
+          expiration_date:
+            externalPrescriptionData.expiration_date || undefined,
+          prescription_number:
+            externalPrescriptionData.prescription_number || undefined,
+          issued_by: externalPrescriptionData.issued_by || undefined,
+          issued_by_license:
+            externalPrescriptionData.issued_by_license || undefined,
+          od_sphere: externalPrescriptionData.od_sphere
+            ? parseFloat(externalPrescriptionData.od_sphere)
+            : undefined,
+          od_cylinder: externalPrescriptionData.od_cylinder
+            ? parseFloat(externalPrescriptionData.od_cylinder)
+            : undefined,
+          od_axis: externalPrescriptionData.od_axis
+            ? parseInt(externalPrescriptionData.od_axis)
+            : undefined,
+          od_add: externalPrescriptionData.od_add
+            ? parseFloat(externalPrescriptionData.od_add)
+            : undefined,
+          od_pd: externalPrescriptionData.pd
+            ? parseFloat(externalPrescriptionData.pd) / 2
+            : undefined,
+          od_near_pd: externalPrescriptionData.near_pd
+            ? parseFloat(externalPrescriptionData.near_pd) / 2
+            : undefined,
+          os_sphere: externalPrescriptionData.os_sphere
+            ? parseFloat(externalPrescriptionData.os_sphere)
+            : undefined,
+          os_cylinder: externalPrescriptionData.os_cylinder
+            ? parseFloat(externalPrescriptionData.os_cylinder)
+            : undefined,
+          os_axis: externalPrescriptionData.os_axis
+            ? parseInt(externalPrescriptionData.os_axis)
+            : undefined,
+          os_add: externalPrescriptionData.os_add
+            ? parseFloat(externalPrescriptionData.os_add)
+            : undefined,
+          os_pd: externalPrescriptionData.pd
+            ? parseFloat(externalPrescriptionData.pd) / 2
+            : undefined,
+          os_near_pd: externalPrescriptionData.near_pd
+            ? parseFloat(externalPrescriptionData.near_pd) / 2
+            : undefined,
+          frame_pd: externalPrescriptionData.frame_pd
+            ? parseFloat(externalPrescriptionData.frame_pd)
+            : undefined,
+          height_segmentation: externalPrescriptionData.height_segmentation
+            ? parseFloat(externalPrescriptionData.height_segmentation)
+            : undefined,
+          is_current: true, // Mark as current prescription
+        },
+      );
 
       // Step 3: Set the new customer and prescription as selected
       const customer = {
@@ -1368,7 +1420,7 @@ export default function POSPage() {
         sphereOD,
         cylinderOD,
         axisOD,
-        additionOD
+        additionOD,
       );
 
       if (!calculation) {
@@ -2521,6 +2573,13 @@ export default function POSPage() {
             ? Math.max(0, change)
             : null, // Ensure change is never negative (solo para efectivo completo)
         deposit_amount: paymentAmount < total ? paymentAmount : null, // Monto de abono si es pago parcial
+        fiscal_reference:
+          (paymentMethod === "debit_card" ||
+            paymentMethod === "credit_card" ||
+            paymentMethod === "transfer") &&
+          fiscalReference?.trim()
+            ? fiscalReference.trim()
+            : null,
         // Datos estructurados de lentes y marcos (solo para lentes ópticos)
         lens_data:
           lensType === "optical" &&
@@ -2645,8 +2704,8 @@ export default function POSPage() {
       // Use posService.processSale() instead of direct fetch
       // Cast orderData to ProcessSaleRequest to satisfy type requirements
       const result = await posService.processSale(
-        orderData as unknown as import('@/lib/api/services').ProcessSaleRequest,
-        currentBranchId || undefined
+        orderData as unknown as import("@/lib/api/services").ProcessSaleRequest,
+        currentBranchId || undefined,
       );
 
       // Support both work_order and order for backward compatibility
@@ -2663,8 +2722,11 @@ export default function POSPage() {
       }
 
       // Clear cart and reset
+      setReceiptType("sale");
       setLastProcessedOrder(
-        (result as any)?.order || (result as any)?.work_order?.order || (result as any)?.work_order
+        (result as any)?.order ||
+          (result as any)?.work_order?.order ||
+          (result as any)?.work_order,
       );
 
       // Clear cart and reset
@@ -2685,24 +2747,48 @@ export default function POSPage() {
     }
   };
 
-  const fetchPendingBalanceOrders = async (searchTerm: string = "") => {
+  const fetchPendingBalanceOrders = async () => {
     setLoadingPendingBalance(true);
     try {
       const orders = await posService.getPendingBalanceOrders(
-        searchTerm.trim() || undefined,
+        undefined,
         currentBranchId || undefined,
-        50
+        500,
       );
-      setPendingBalanceOrders(orders);
-      if (orders.length === 0 && searchTerm) {
-        toast.info("No se encontraron órdenes con esos criterios");
-      }
+      setAllPendingBalanceOrders(orders);
+      filterPendingBalanceBySearch(pendingBalanceSearchTerm, orders);
     } catch (error: any) {
       console.error("Error fetching pending balance orders:", error);
       toast.error("Error al cargar órdenes pendientes");
+      setAllPendingBalanceOrders([]);
+      setPendingBalanceOrders([]);
     } finally {
       setLoadingPendingBalance(false);
     }
+  };
+
+  const filterPendingBalanceBySearch = (
+    searchTerm: string,
+    ordersToFilter: any[] = allPendingBalanceOrders,
+  ) => {
+    const term = searchTerm.trim().toLowerCase();
+    if (!term) {
+      setPendingBalanceOrders(ordersToFilter);
+      return;
+    }
+    const filtered = ordersToFilter.filter((order: any) => {
+      const orderNum = (order.order_number || "").toLowerCase();
+      const email = (order.customer_email || "").toLowerCase();
+      const name = (order.customer_name || "").toLowerCase();
+      const rut = (order.customer_rut || "").toLowerCase();
+      return (
+        orderNum.includes(term) ||
+        email.includes(term) ||
+        name.includes(term) ||
+        rut.includes(term)
+      );
+    });
+    setPendingBalanceOrders(filtered);
   };
 
   const processPendingPayment = async () => {
@@ -2732,15 +2818,40 @@ export default function POSPage() {
           payment_amount: parseFloat(String(amount)),
           payment_method: String(pendingPaymentMethod),
           notes: `Pago de saldo pendiente en POS`,
+          fiscal_reference: pendingFiscalReference?.trim() || undefined,
         },
-        currentBranchId || undefined
+        currentBranchId || undefined,
       );
 
-      if (result?.success) {
-        toast.success(result?.message || "Pago procesado exitosamente");
+      // Result is the data object from the response (unwrapped), so it doesn't have a .success property
+      // If we got here, it means the request was successful because the service throws otherwise
+      if (result) {
+        toast.success(result.message || "Pago procesado exitosamente");
         setPendingPaymentAmount("");
+        const orderId = selectedPendingOrder.id;
         setSelectedPendingOrder(null);
         await fetchPendingBalanceOrders();
+
+        // Fetch full order for receipt and trigger print
+        try {
+          const orderRes = await fetch(`/api/admin/orders/${orderId}`, {
+            headers: getBranchHeader(currentBranchId),
+          });
+          if (orderRes.ok) {
+            const orderData = await orderRes.json();
+            const fullOrder = orderData.order;
+            if (fullOrder) {
+              setReceiptType("payment");
+              setLastProcessedOrder(fullOrder);
+              if (billingSettings?.auto_print_receipt !== false) {
+                toast.info("Imprimiendo comprobante...");
+                setTimeout(() => window.print(), 500);
+              }
+            }
+          }
+        } catch (fetchErr) {
+          console.warn("Could not fetch order for receipt:", fetchErr);
+        }
       } else {
         toast.error("Error al procesar pago");
       }
@@ -5525,7 +5636,13 @@ export default function POSPage() {
       </div>
 
       {/* Payment Confirmation Dialog */}
-      <Dialog open={showPaymentDialog} onOpenChange={setShowPaymentDialog}>
+      <Dialog
+        open={showPaymentDialog}
+        onOpenChange={(open) => {
+          setShowPaymentDialog(open);
+          if (!open) setFiscalReference("");
+        }}
+      >
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>Confirmar Venta</DialogTitle>
@@ -5567,6 +5684,30 @@ export default function POSPage() {
                   )}
                 </div>
               )}
+            {(paymentMethod === "debit_card" ||
+              paymentMethod === "credit_card" ||
+              paymentMethod === "transfer") && (
+              <div>
+                <Label className="text-sm text-gray-600">
+                  Número de referencia fiscal (opcional)
+                </Label>
+                <Input
+                  placeholder="Ej: Nº boleta, factura o transacción"
+                  value={fiscalReference}
+                  onChange={(e) => setFiscalReference(e.target.value)}
+                  className="mt-1"
+                />
+                <p className="text-xs text-amber-600 mt-1">
+                  Se recomienda registrar el número para trazabilidad con
+                  documentos fiscales reales
+                </p>
+                {!fiscalReference && (
+                  <p className="text-xs text-gray-500 mt-0.5">
+                    Puede continuar sin ingresar (opcional)
+                  </p>
+                )}
+              </div>
+            )}
             {paymentMethod === "cash" && cashReceived > 0 && (
               <div>
                 <div className="text-sm text-gray-600 mb-1">Vuelto:</div>
@@ -5689,6 +5830,7 @@ export default function POSPage() {
           } else {
             setPendingBalanceSearchTerm("");
             setSelectedPendingOrder(null);
+            setPendingFiscalReference("");
           }
         }}
       >
@@ -5696,7 +5838,8 @@ export default function POSPage() {
           <DialogHeader>
             <DialogTitle>Cobrar Saldos Pendientes</DialogTitle>
             <DialogDescription>
-              Busca clientes u órdenes con saldo pendiente por cobrar
+              Se cargan automáticamente todos los saldos pendientes de la
+              sucursal. Usa el buscador para filtrar por cliente u orden.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
@@ -5704,11 +5847,12 @@ export default function POSPage() {
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
               <Input
-                placeholder="Buscar por nombre, RUT, número de orden, email..."
+                placeholder="Filtrar por nombre, RUT, número de orden, email..."
                 value={pendingBalanceSearchTerm}
                 onChange={(e) => {
-                  setPendingBalanceSearchTerm(e.target.value);
-                  fetchPendingBalanceOrders(e.target.value);
+                  const value = e.target.value;
+                  setPendingBalanceSearchTerm(value);
+                  filterPendingBalanceBySearch(value, allPendingBalanceOrders);
                 }}
                 className="pl-10"
               />
@@ -5882,6 +6026,27 @@ export default function POSPage() {
                           {formatCurrency(selectedPendingOrder.pending_amount)}
                         </p>
                       </div>
+                      {(pendingPaymentMethod === "debit" ||
+                        pendingPaymentMethod === "credit" ||
+                        pendingPaymentMethod === "transfer") && (
+                        <div>
+                          <Label className="text-sm text-gray-600">
+                            Número de referencia fiscal (opcional)
+                          </Label>
+                          <Input
+                            placeholder="Ej: Nº boleta, factura o transacción"
+                            value={pendingFiscalReference}
+                            onChange={(e) =>
+                              setPendingFiscalReference(e.target.value)
+                            }
+                            className="mt-1"
+                          />
+                          <p className="text-xs text-amber-600 mt-1">
+                            Se recomienda registrar el número para trazabilidad
+                            con documentos fiscales reales
+                          </p>
+                        </div>
+                      )}
                     </CardContent>
                   </Card>
                 )}
@@ -5934,6 +6099,7 @@ export default function POSPage() {
           settings={billingSettings}
           branch={branches.find((b) => b.id === currentBranchId)}
           organization={organization}
+          receiptType={receiptType}
         />
       </div>
     </div>

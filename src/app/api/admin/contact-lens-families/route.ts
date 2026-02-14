@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { createClient } from "@/utils/supabase/server";
 import { appLogger as logger } from "@/lib/logger";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
@@ -8,10 +8,13 @@ import {
 } from "@/lib/api/validation/zod-schemas";
 import {
   parseAndValidateBody,
-  parseAndValidateQuery,
   validationErrorResponse,
 } from "@/lib/api/validation/zod-helpers";
-import { ValidationError } from "@/lib/api/errors";
+import { APIError } from "@/lib/api/errors";
+import {
+  createApiSuccessResponse,
+  createApiErrorResponse,
+} from "@/lib/api/response";
 import { z } from "zod";
 
 export async function GET(request: NextRequest) {
@@ -24,7 +27,9 @@ export async function GET(request: NextRequest) {
       error: userError,
     } = await supabase.auth.getUser();
     if (userError || !user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return createApiErrorResponse(
+        new APIError("Unauthorized", 401, "UNAUTHORIZED"),
+      );
     }
 
     // Check admin status
@@ -32,9 +37,8 @@ export async function GET(request: NextRequest) {
       user_id: user.id,
     } as IsAdminParams)) as { data: IsAdminResult | null; error: Error | null };
     if (!isAdmin) {
-      return NextResponse.json(
-        { error: "Admin access required" },
-        { status: 403 },
+      return createApiErrorResponse(
+        new APIError("Admin access required", 403, "FORBIDDEN"),
       );
     }
 
@@ -77,18 +81,16 @@ export async function GET(request: NextRequest) {
 
     if (error) {
       logger.error("Error fetching contact lens families", error);
-      return NextResponse.json(
-        { error: "Error al cargar familias de lentes de contacto" },
-        { status: 500 },
+      return createApiErrorResponse(
+        new Error("Error al cargar familias de lentes de contacto"),
       );
     }
 
-    return NextResponse.json({ families: families || [] });
+    return createApiSuccessResponse(families || []);
   } catch (error) {
     logger.error("Error in contact lens families API GET", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
+    return createApiErrorResponse(
+      error instanceof Error ? error : new Error("Internal server error"),
     );
   }
 }
@@ -103,7 +105,9 @@ export async function POST(request: NextRequest) {
       error: userError,
     } = await supabase.auth.getUser();
     if (userError || !user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return createApiErrorResponse(
+        new APIError("Unauthorized", 401, "UNAUTHORIZED"),
+      );
     }
 
     // Check admin status
@@ -111,9 +115,8 @@ export async function POST(request: NextRequest) {
       user_id: user.id,
     } as IsAdminParams)) as { data: IsAdminResult | null; error: Error | null };
     if (!isAdmin) {
-      return NextResponse.json(
-        { error: "Admin access required" },
-        { status: 403 },
+      return createApiErrorResponse(
+        new APIError("Admin access required", 403, "FORBIDDEN"),
       );
     }
 
@@ -131,9 +134,8 @@ export async function POST(request: NextRequest) {
     )?.organization_id;
 
     if (!userOrganizationId) {
-      return NextResponse.json(
-        { error: "Organization not found" },
-        { status: 404 },
+      return createApiErrorResponse(
+        new APIError("Organization not found", 404, "NOT_FOUND"),
       );
     }
 
@@ -155,21 +157,16 @@ export async function POST(request: NextRequest) {
 
     if (error) {
       logger.error("Error creating contact lens family", error);
-      return NextResponse.json(
-        { error: "Error al crear familia de lentes de contacto" },
-        { status: 500 },
+      return createApiErrorResponse(
+        new Error("Error al crear familia de lentes de contacto"),
       );
     }
 
-    return NextResponse.json({ family }, { status: 201 });
+    return createApiSuccessResponse(family, { statusCode: 201 });
   } catch (error) {
-    if (error instanceof ValidationError || error instanceof z.ZodError) {
-      return validationErrorResponse(error);
-    }
     logger.error("Error in contact lens families API POST", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
+    return createApiErrorResponse(
+      error instanceof Error ? error : new Error("Internal server error"),
     );
   }
 }

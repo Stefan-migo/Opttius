@@ -26,14 +26,14 @@ interface UseCustomerSearchReturn {
   selectedCustomer: Customer | null;
   setSelectedCustomer: (customer: Customer | null) => void;
   clearCustomerSearch: () => void;
-  
+
   // Guest customer mode
   isGuestCustomer: boolean;
   setIsGuestCustomer: (isGuest: boolean) => void;
   guestCustomerData: GuestCustomerData;
   updateGuestCustomerData: (data: Partial<GuestCustomerData>) => void;
   resetGuestCustomerData: () => void;
-  
+
   // Validation
   validateCustomer: () => { isValid: boolean; errors: Record<string, string> };
 }
@@ -43,29 +43,31 @@ interface UseCustomerSearchProps {
   initialCustomerId?: string;
 }
 
-export function useCustomerSearch({ 
-  initialData, 
-  initialCustomerId 
+export function useCustomerSearch({
+  initialData,
+  initialCustomerId,
 }: UseCustomerSearchProps = {}): UseCustomerSearchReturn {
   // Registered customer search
   const [customerSearch, setCustomerSearch] = useState("");
   const [customerResults, setCustomerResults] = useState<Customer[]>([]);
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(
-    initialData?.customer || null
+    initialData?.customer || null,
   );
   const [searchingCustomers, setSearchingCustomers] = useState(false);
 
   // Guest customer mode
   const [isGuestCustomer, setIsGuestCustomer] = useState(
-    !initialData?.customer && !initialCustomerId
+    !initialData?.customer && !initialCustomerId,
   );
-  const [guestCustomerData, setGuestCustomerData] = useState<GuestCustomerData>({
-    first_name: "",
-    last_name: "",
-    rut: "",
-    email: "",
-    phone: "",
-  });
+  const [guestCustomerData, setGuestCustomerData] = useState<GuestCustomerData>(
+    {
+      first_name: "",
+      last_name: "",
+      rut: "",
+      email: "",
+      phone: "",
+    },
+  );
 
   // Search customers with debounce
   useEffect(() => {
@@ -78,7 +80,7 @@ export function useCustomerSearch({
       setSearchingCustomers(true);
       try {
         const response = await fetch(
-          `/api/admin/customers/search?q=${encodeURIComponent(customerSearch)}`
+          `/api/admin/customers/search?q=${encodeURIComponent(customerSearch)}`,
         );
         if (response.ok) {
           const data = await response.json();
@@ -102,7 +104,7 @@ export function useCustomerSearch({
         const response = await fetch(`/api/admin/customers/${customerId}`);
         if (response.ok) {
           const data = await response.json();
-          setSelectedCustomer(data.customer);
+          setSelectedCustomer(data.data);
         }
       } catch (error) {
         console.error("Error fetching customer:", error);
@@ -120,7 +122,7 @@ export function useCustomerSearch({
   };
 
   const updateGuestCustomerData = (data: Partial<GuestCustomerData>) => {
-    setGuestCustomerData(prev => ({ ...prev, ...data }));
+    setGuestCustomerData((prev) => ({ ...prev, ...data }));
   };
 
   const resetGuestCustomerData = () => {
@@ -133,7 +135,10 @@ export function useCustomerSearch({
     });
   };
 
-  const validateCustomer = (): { isValid: boolean; errors: Record<string, string> } => {
+  const validateCustomer = (): {
+    isValid: boolean;
+    errors: Record<string, string>;
+  } => {
     const errors: Record<string, string> = {};
 
     if (isGuestCustomer) {
@@ -156,7 +161,7 @@ export function useCustomerSearch({
 
     return {
       isValid: Object.keys(errors).length === 0,
-      errors
+      errors,
     };
   };
 
@@ -182,14 +187,14 @@ export function useCustomerSearch({
     selectedCustomer,
     setSelectedCustomer,
     clearCustomerSearch,
-    
+
     // Guest customer mode
     isGuestCustomer,
     setIsGuestCustomer: handleCustomerModeToggle,
     guestCustomerData,
     updateGuestCustomerData,
     resetGuestCustomerData,
-    
+
     // Validation
     validateCustomer,
   };

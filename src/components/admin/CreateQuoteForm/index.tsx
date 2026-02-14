@@ -207,6 +207,7 @@ export default function CreateQuoteForm({
         selectedCustomer={selectedCustomer}
         onCustomerSelect={handleCustomerSelect}
         onCustomerClear={handleCustomerClear}
+        initialCustomerId={initialCustomerId}
       />
 
       {/* Prescription Selection Section */}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -161,12 +161,22 @@ export default function WorkOrderDetailPage() {
     orderId?: string;
     message?: string;
   } | null>(null);
+  const [orgName, setOrgName] = useState<string>("Opttius");
 
   useEffect(() => {
     if (workOrderId) {
       fetchWorkOrder();
     }
   }, [workOrderId]);
+
+  useEffect(() => {
+    fetch("/api/admin/organizations/current")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (data?.organization?.name) setOrgName(data.organization.name);
+      })
+      .catch(() => {});
+  }, []);
 
   const fetchWorkOrder = async () => {
     try {
@@ -461,6 +471,175 @@ export default function WorkOrderDetailPage() {
     return labels[status] || status;
   };
 
+  const handlePrint = useCallback(() => {
+    if (!workOrder) return;
+
+    const printWindow = window.open("", "_blank");
+    if (!printWindow) {
+      toast.error("Por favor, permite ventanas emergentes para imprimir");
+      return;
+    }
+
+    const customerName =
+      workOrder.customer?.first_name && workOrder.customer?.last_name
+        ? `${workOrder.customer.first_name} ${workOrder.customer.last_name}`
+        : "Sin nombre";
+
+    const statusLabels: Record<string, string> = {
+      quote: "Presupuesto",
+      ordered: "Ordenado",
+      sent_to_lab: "Enviado al Lab",
+      received_from_lab: "Recibido del Lab",
+      mounted: "Montado",
+      quality_check: "Control de Calidad",
+      ready_for_pickup: "Listo para Retiro",
+      delivered: "Entregado",
+      cancelled: "Cancelado",
+      returned: "Devuelto",
+    };
+
+    const rx = (v: number | null | undefined) =>
+      v !== null && v !== undefined ? `${v > 0 ? "+" : ""}${v}` : "-";
+
+    const rxSection = workOrder.prescription
+      ? `
+      <div class="section">
+        <h2>Receta (Para Laboratorio)</h2>
+        <div class="rx-grid">
+          <div>
+            <strong>OD:</strong> Esf ${rx(workOrder.prescription.od_sphere)} | Cil ${rx(workOrder.prescription.od_cylinder)} | Eje ${workOrder.prescription.od_axis ?? "-"}° | Add ${workOrder.prescription.od_add ?? "-"} | PD ${workOrder.prescription.od_pd ?? "-"} mm
+          </div>
+          <div>
+            <strong>OS:</strong> Esf ${rx(workOrder.prescription.os_sphere)} | Cil ${rx(workOrder.prescription.os_cylinder)} | Eje ${workOrder.prescription.os_axis ?? "-"}° | Add ${workOrder.prescription.os_add ?? "-"} | PD ${workOrder.prescription.os_pd ?? "-"} mm
+          </div>
+        </div>
+      </div>
+    `
+      : "";
+
+    const labSection = workOrder.lab_name
+      ? `
+      <div class="section">
+        <h2>Laboratorio</h2>
+        <p><strong>${workOrder.lab_name}</strong></p>
+        ${workOrder.lab_order_number ? `<p>Orden Lab: ${workOrder.lab_order_number}</p>` : ""}
+      </div>
+    `
+      : "";
+
+    const notesSection =
+      workOrder.internal_notes || workOrder.lab_notes
+        ? `
+      <div class="section">
+        <h2>Notas</h2>
+        ${workOrder.internal_notes ? `<p>${String(workOrder.internal_notes).replace(/\n/g, "<br>")}</p>` : ""}
+        ${workOrder.lab_notes ? `<p><em>Lab:</em> ${String(workOrder.lab_notes).replace(/\n/g, "<br>")}</p>` : ""}
+      </div>
+    `
+        : "";
+
+    const treatmentsList =
+      workOrder.lens_treatments && workOrder.lens_treatments.length > 0
+        ? workOrder.lens_treatments.join(", ")
+        : "Ninguno";
+
+    const printContent = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Orden de Trabajo ${workOrder.work_order_number}</title>
+          <style>
+            body { font-family: Arial, sans-serif; max-width: 210mm; margin: 0 auto; padding: 20px; color: #333; }
+            .header { text-align: center; border-bottom: 2px solid #333; padding-bottom: 16px; margin-bottom: 24px; }
+            .header h1 { margin: 0; font-size: 20px; }
+            .meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+            .badge { display: inline-block; padding: 4px 8px; background: #e5e7eb; border-radius: 4px; font-size: 12px; margin-right: 8px; }
+            .section { margin-bottom: 20px; padding: 12px; background: #f9fafb; border-radius: 6px; border: 1px solid #e5e7eb; }
+            .section h2 { margin: 0 0 12px 0; font-size: 14px; color: #6b7280; text-transform: uppercase; }
+            .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+            .rx-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 12px; }
+            .total-row { font-weight: bold; font-size: 18px; border-top: 2px solid #333; padding-top: 12px; margin-top: 12px; }
+            .footer { margin-top: 24px; text-align: center; font-size: 11px; color: #6b7280; }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1>${orgName}</h1>
+            <p style="margin: 8px 0 0 0; font-size: 14px;">Orden de Trabajo #${workOrder.work_order_number}</p>
+          </div>
+
+          <div class="meta">
+            <span>${formatDate(workOrder.work_order_date, { format: "long", locale: "es-CL" })}</span>
+            <span>
+              <span class="badge">${statusLabels[workOrder.status] || workOrder.status}</span>
+              <span class="badge">Pago: ${workOrder.payment_status}</span>
+            </span>
+          </div>
+
+          <div class="section">
+            <h2>Cliente</h2>
+            <p><strong>${customerName}</strong></p>
+            ${workOrder.customer?.email ? `<p>${workOrder.customer.email}</p>` : ""}
+            ${workOrder.customer?.phone ? `<p>${workOrder.customer.phone}</p>` : ""}
+          </div>
+
+          <div class="info-grid">
+            <div class="section">
+              <h2>Marco</h2>
+              <p><strong>${workOrder.frame_name}</strong></p>
+              ${workOrder.frame_brand ? `<p>Marca: ${workOrder.frame_brand}</p>` : ""}
+              ${workOrder.frame_model ? `<p>Modelo: ${workOrder.frame_model}</p>` : ""}
+              ${workOrder.frame_serial_number ? `<p>Serie: ${workOrder.frame_serial_number}</p>` : ""}
+            </div>
+            <div class="section">
+              <h2>Lente</h2>
+              <p><strong>${workOrder.lens_type}</strong></p>
+              <p>Material: ${workOrder.lens_material}</p>
+              ${workOrder.lens_index ? `<p>Índice: ${workOrder.lens_index}</p>` : ""}
+              <p>Tratamientos: ${treatmentsList}</p>
+            </div>
+          </div>
+
+          ${rxSection}
+          ${labSection}
+          ${notesSection}
+
+          <div class="section">
+            <h2>Total</h2>
+            <div class="total-row">${formatCurrency(workOrder.total_amount)}</div>
+            ${
+              workOrder.deposit_amount && workOrder.deposit_amount > 0
+                ? `
+              <p>Depósito: ${formatCurrency(workOrder.deposit_amount)}</p>
+              ${
+                workOrder.balance_amount !== undefined &&
+                workOrder.balance_amount > 0
+                  ? `
+                <p style="color: #ea580c; font-weight: 600;">Saldo Pendiente: ${formatCurrency(workOrder.balance_amount)}</p>
+              `
+                  : ""
+              }
+            `
+                : ""
+            }
+          </div>
+
+          <div class="footer">
+            Documento generado el ${formatDate(new Date(), { locale: "es-CL" })}
+          </div>
+        </body>
+      </html>
+    `;
+
+    printWindow.document.write(printContent);
+    printWindow.document.close();
+
+    setTimeout(() => {
+      printWindow.print();
+      printWindow.onafterprint = () => printWindow.close();
+    }, 250);
+  }, [workOrder, orgName]);
+
   const getPaymentStatusBadge = (status: string) => {
     const config: Record<string, { variant: any; label: string }> = {
       pending: { variant: "outline", label: "Pendiente" },
@@ -706,7 +885,7 @@ export default function WorkOrderDetailPage() {
               </DialogContent>
             </Dialog>
           )}
-          <Button variant="outline">
+          <Button variant="outline" onClick={handlePrint}>
             <Printer className="h-4 w-4 mr-2" />
             Imprimir
           </Button>
@@ -794,12 +973,13 @@ export default function WorkOrderDetailPage() {
                 >
                   <div className="flex flex-col items-center">
                     <div
-                      className={`w-14 h-14 rounded-full flex items-center justify-center border-2 relative ${isCurrent
+                      className={`w-14 h-14 rounded-full flex items-center justify-center border-2 relative ${
+                        isCurrent
                           ? "bg-green-500 border-green-600 text-white shadow-lg shadow-green-500/50"
                           : isCompleted
                             ? "bg-gray-300 border-gray-400 text-gray-600"
                             : "bg-gray-200 border-gray-300 text-gray-400"
-                        }`}
+                      }`}
                     >
                       {isCurrent ? (
                         <>
@@ -815,37 +995,40 @@ export default function WorkOrderDetailPage() {
                       )}
                     </div>
                     <p
-                      className={`text-xs mt-2 text-center max-w-[80px] ${isCurrent
+                      className={`text-xs mt-2 text-center max-w-[80px] ${
+                        isCurrent
                           ? "font-bold text-green-600"
                           : isCompleted || isFuture
                             ? "font-medium text-gray-500"
                             : "text-gray-400"
-                        }`}
+                      }`}
                     >
                       {step.label}
                     </p>
                     <p
-                      className={`text-xs mt-1 min-h-[16px] ${step.date
+                      className={`text-xs mt-1 min-h-[16px] ${
+                        step.date
                           ? isCurrent
                             ? "text-green-600 font-medium"
                             : "text-gray-500"
                           : "text-transparent"
-                        }`}
+                      }`}
                     >
                       {step.date
                         ? formatDate(step.date, {
-                          format: "medium",
-                          locale: "es-CL",
-                        })
+                            format: "medium",
+                            locale: "es-CL",
+                          })
                         : "\u00A0"}
                     </p>
                   </div>
                   {idx < array.length - 1 && (
                     <div
-                      className={`w-16 h-0.5 mx-2 ${isCurrent || (isCompleted && idx < currentStatusIndex)
+                      className={`w-16 h-0.5 mx-2 ${
+                        isCurrent || (isCompleted && idx < currentStatusIndex)
                           ? "bg-green-500"
                           : "bg-gray-300"
-                        }`}
+                      }`}
                     />
                   )}
                 </div>
@@ -1271,7 +1454,7 @@ export default function WorkOrderDetailPage() {
                     )}
                   {workOrder.prescription.height_segmentation !== null &&
                     workOrder.prescription.height_segmentation !==
-                    undefined && (
+                      undefined && (
                       <div>
                         <p className="text-xs text-tierra-media">
                           Altura de Segmento
@@ -1639,10 +1822,11 @@ export default function WorkOrderDetailPage() {
                     return (
                       <div
                         key={entry.id}
-                        className={`flex items-start space-x-4 pb-4 border-b last:border-0 ${isCurrentStatus
+                        className={`flex items-start space-x-4 pb-4 border-b last:border-0 ${
+                          isCurrentStatus
                             ? "bg-green-50 p-4 rounded-lg border-green-200"
                             : "bg-gray-50 p-3 rounded-lg border-gray-200"
-                          }`}
+                        }`}
                       >
                         <div className="flex-1">
                           <div className="flex items-center gap-2 flex-wrap">

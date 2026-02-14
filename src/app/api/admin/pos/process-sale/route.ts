@@ -11,6 +11,10 @@ import {
   parseAndValidateBody,
   validationErrorResponse,
 } from "@/lib/api/validation/zod-helpers";
+import {
+  createApiSuccessResponse,
+  createApiErrorResponse,
+} from "@/lib/api/response";
 import { BillingFactory } from "@/lib/billing/BillingFactory";
 import type { Order as BillingOrder } from "@/lib/billing/adapters/BillingAdapter";
 
@@ -96,6 +100,7 @@ export async function POST(request: NextRequest) {
             cash_received,
             change_amount,
             deposit_amount,
+            fiscal_reference,
             lens_data,
             frame_data,
             presbyopia_solution,
@@ -728,7 +733,8 @@ export async function POST(request: NextRequest) {
               amount: paymentAmount,
               payment_method: dbPaymentMethod,
               pos_session_id: posSessionId || null, // Asociar pago a la sesión de caja
-              payment_reference: siiInvoiceNumber || null,
+              payment_reference:
+                siiInvoiceNumber || fiscal_reference?.trim() || null,
               created_by: user.id,
               notes: `Pago inicial - Método: ${payment_method_type}`,
             });
@@ -793,7 +799,8 @@ export async function POST(request: NextRequest) {
                 : {
                     id: "",
                     first_name: customer_name?.split(" ")[0] ?? undefined,
-                    last_name: customer_name?.split(" ").slice(1).join(" ") ?? undefined,
+                    last_name:
+                      customer_name?.split(" ").slice(1).join(" ") ?? undefined,
                     email: email ?? undefined,
                     phone: undefined,
                     rut: customer_rut ?? undefined,
@@ -1400,8 +1407,7 @@ export async function POST(request: NextRequest) {
             billing_last_name: billingLastName,
           };
 
-          return NextResponse.json({
-            success: true,
+          return createApiSuccessResponse({
             order: fullOrder,
             work_order: {
               ...newWorkOrder,

@@ -39,6 +39,10 @@ interface SystemConfigProps {
   configs: SystemConfigType[];
   onUpdateConfig: (key: string, value: any) => Promise<void>;
   isUpdating?: boolean;
+  configScope?: "global" | "branch";
+  onConfigScopeChange?: (scope: "global" | "branch") => void;
+  currentBranchId?: string | null;
+  hasMultipleBranches?: boolean;
 }
 
 const getCategoryIcon = (category: string) => {
@@ -55,6 +59,16 @@ const getCategoryIcon = (category: string) => {
   };
 
   return icons[category] || Settings;
+};
+
+const getContactPlaceholder = (key: string): string => {
+  const placeholders: Record<string, string> = {
+    address: "Dirección",
+    phone_number: "Teléfono",
+    contact_email: "contacto@ejemplo.com",
+    support_email: "soporte@ejemplo.com",
+  };
+  return placeholders[key] ?? "";
 };
 
 const translateConfigKey = (key: string): string => {
@@ -123,6 +137,10 @@ export default function SystemConfig({
   configs,
   onUpdateConfig,
   isUpdating = false,
+  configScope = "global",
+  onConfigScopeChange,
+  currentBranchId,
+  hasMultipleBranches = false,
 }: SystemConfigProps) {
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [showSensitive, setShowSensitive] = useState(false);
@@ -155,7 +173,9 @@ export default function SystemConfig({
     return configs.filter((config) => {
       // Filter out overlapping or irrelevant categories
       // 'appointments' is plural in DB. 'branches' handles isolation.
-      if (["appointments", "branches"].includes(config.category)) return false;
+      // 'telemetry' is SaaS config, not for optics
+      if (["appointments", "branches", "telemetry"].includes(config.category))
+        return false;
 
       // Filter out redundant keys that are handled by the specific Organization Card
       const redundancyKeys = [
@@ -199,7 +219,10 @@ export default function SystemConfig({
   const uniqueCategories = Array.from(
     new Set(
       configs
-        .filter((c) => !["appointments", "branches"].includes(c.category))
+        .filter(
+          (c) =>
+            !["appointments", "branches", "telemetry"].includes(c.category),
+        )
         .map((c) => c.category),
     ),
   );
@@ -221,12 +244,13 @@ export default function SystemConfig({
         const response = await fetch("/api/admin/organizations/current");
         if (response.ok) {
           const data = await response.json();
-          if (data.organization) {
-            setOrganizationData(data.organization);
+          const organization = data?.data ?? data?.organization;
+          if (organization) {
+            setOrganizationData(organization);
             setLocalOrgData({
-              name: data.organization.name || "",
-              logo_url: data.organization.logo_url || "",
-              slogan: data.organization.slogan || "",
+              name: organization.name || "",
+              logo_url: organization.logo_url || "",
+              slogan: organization.slogan || "",
             });
           }
         }
@@ -286,8 +310,9 @@ export default function SystemConfig({
       }
 
       const data = await response.json();
-      if (data.organization) {
-        setOrganizationData(data.organization);
+      const organization = data?.data ?? data?.organization;
+      if (organization) {
+        setOrganizationData(organization);
         toast.success("Información de la óptica actualizada correctamente");
         // Reload page to update header
         window.location.reload();
@@ -330,6 +355,27 @@ export default function SystemConfig({
       <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.4)]">
         <CardContent className="p-6">
           <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
+            {hasMultipleBranches && onConfigScopeChange && (
+              <div>
+                <Label className="text-sm font-medium mb-2 block">
+                  Aplicar a
+                </Label>
+                <Select
+                  value={configScope}
+                  onValueChange={(v) =>
+                    onConfigScopeChange(v as "global" | "branch")
+                  }
+                >
+                  <SelectTrigger className="w-full md:w-[220px]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="global">Todas las sucursales</SelectItem>
+                    <SelectItem value="branch">Sucursal actual</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
             <div className="flex-1">
               <Label className="text-sm font-medium mb-2 block">
                 Filtrar por Categoría
@@ -644,6 +690,11 @@ export default function SystemConfig({
                                       [config.config_key]: e.target.value,
                                     });
                                   }}
+                                  placeholder={
+                                    category === "contact"
+                                      ? getContactPlaceholder(config.config_key)
+                                      : undefined
+                                  }
                                   className="w-full md:w-[400px]"
                                   disabled={isUpdating || isSaving}
                                 />

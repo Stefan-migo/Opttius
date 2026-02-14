@@ -1,8 +1,12 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { createClient } from "@/utils/supabase/server";
 import { appLogger as logger } from "@/lib/logger";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
-import { ValidationError } from "@/lib/api/errors";
+import { APIError } from "@/lib/api/errors";
+import {
+  createApiSuccessResponse,
+  createApiErrorResponse,
+} from "@/lib/api/response";
 import {
   createLensFamilySchema,
   createLensFamilyFullSchema,
@@ -23,7 +27,9 @@ export async function GET(request: NextRequest) {
       error: userError,
     } = await supabase.auth.getUser();
     if (userError || !user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return createApiErrorResponse(
+        new APIError("Unauthorized", 401, "UNAUTHORIZED"),
+      );
     }
 
     // Check admin status
@@ -31,9 +37,8 @@ export async function GET(request: NextRequest) {
       user_id: user.id,
     } as IsAdminParams)) as { data: IsAdminResult | null; error: Error | null };
     if (!isAdmin) {
-      return NextResponse.json(
-        { error: "Admin access required" },
-        { status: 403 },
+      return createApiErrorResponse(
+        new APIError("Admin access required", 403, "FORBIDDEN"),
       );
     }
 
@@ -65,7 +70,7 @@ export async function GET(request: NextRequest) {
       query = query.eq("organization_id", userOrganizationId);
     } else if (!isSuperAdmin) {
       // If no organization_id and not super admin, return empty (no families)
-      return NextResponse.json({ families: [] });
+      return createApiSuccessResponse([]);
     }
     // Note: Root/dev users (super_admin role) without organization_id can see all families
     // This is intentional for platform administration
@@ -79,18 +84,16 @@ export async function GET(request: NextRequest) {
 
     if (error) {
       logger.error("Error fetching lens families", error);
-      return NextResponse.json(
-        { error: "Error al cargar familias de lentes" },
-        { status: 500 },
+      return createApiErrorResponse(
+        new Error("Error al cargar familias de lentes"),
       );
     }
 
-    return NextResponse.json({ families: families || [] });
+    return createApiSuccessResponse(families || []);
   } catch (error) {
     logger.error("Error in lens families API GET", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
+    return createApiErrorResponse(
+      error instanceof Error ? error : new Error("Internal server error"),
     );
   }
 }
@@ -105,7 +108,9 @@ export async function POST(request: NextRequest) {
       error: userError,
     } = await supabase.auth.getUser();
     if (userError || !user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return createApiErrorResponse(
+        new APIError("Unauthorized", 401, "UNAUTHORIZED"),
+      );
     }
 
     // Check admin status
@@ -113,9 +118,8 @@ export async function POST(request: NextRequest) {
       user_id: user.id,
     } as IsAdminParams)) as { data: IsAdminResult | null; error: Error | null };
     if (!isAdmin) {
-      return NextResponse.json(
-        { error: "Admin access required" },
-        { status: 403 },
+      return createApiErrorResponse(
+        new APIError("Admin access required", 403, "FORBIDDEN"),
       );
     }
 
@@ -130,9 +134,8 @@ export async function POST(request: NextRequest) {
       ?.organization_id;
 
     if (!userOrganizationId) {
-      return NextResponse.json(
-        { error: "Organization not found" },
-        { status: 404 },
+      return createApiErrorResponse(
+        new APIError("Organization not found", 404, "NOT_FOUND"),
       );
     }
 
@@ -170,10 +173,12 @@ export async function POST(request: NextRequest) {
 
       if (error) {
         logger.error("Error creating lens family full (RPC)", error);
-        return NextResponse.json(
-          { error: "Error al crear familia de lentes completa" },
-          { status: 500 },
-        );
+        if (error) {
+          logger.error("Error creating lens family full (RPC)", error);
+          return createApiErrorResponse(
+            new Error("Error al crear familia de lentes completa"),
+          );
+        }
       }
 
       // Fetch the created family to return it (optional, but good practice)
@@ -183,7 +188,7 @@ export async function POST(request: NextRequest) {
         .eq("id", (familyId as any).id) // RPC returns object with id
         .single();
 
-      return NextResponse.json({ family: createdFamily }, { status: 201 });
+      return createApiSuccessResponse(createdFamily, { statusCode: 201 });
     } else {
       // Legacy/Simple creation (without matrices)
       const validation = createLensFamilySchema.safeParse(bodyRaw);
@@ -201,23 +206,17 @@ export async function POST(request: NextRequest) {
 
       if (error) {
         logger.error("Error creating lens family", error);
-        return NextResponse.json(
-          { error: "Error al crear familia de lentes" },
-          { status: 500 },
+        return createApiErrorResponse(
+          new Error("Error al crear familia de lentes"),
         );
       }
 
-      return NextResponse.json({ family }, { status: 201 });
+      return createApiSuccessResponse(family, { statusCode: 201 });
     }
   } catch (error: any) {
-    if (error instanceof ValidationError) {
-      return validationErrorResponse(error as any);
-    } else {
-      logger.error("Error in lens families API POST", error);
-      return NextResponse.json(
-        { error: "Internal server error" },
-        { status: 500 },
-      );
-    }
+    logger.error("Error in lens families API POST", error);
+    return createApiErrorResponse(
+      error instanceof Error ? error : new Error("Internal server error"),
+    );
   }
 }

@@ -20,6 +20,9 @@ export interface Product {
   featured?: boolean;
   title?: string;
   created_at: string;
+  sku?: string;
+  brand?: string;
+  barcode?: string;
 }
 
 interface ProductsResponse {

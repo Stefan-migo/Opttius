@@ -7,13 +7,14 @@ import { normalizeRUT } from "@/lib/utils/rut";
 import { appLogger as logger } from "@/lib/logger";
 import { EmailNotificationService } from "@/lib/email/notifications";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
-import { 
+import {
   ValidationError,
   AuthenticationError,
-  AuthorizationError 
+  AuthorizationError,
 } from "@/lib/api/errors";
 import {
   createPaginatedResponse,
+  createApiSuccessResponse,
   createApiErrorResponse,
   extractPaginationParams,
 } from "@/lib/api/response";
@@ -25,10 +26,10 @@ import {
 
 export async function GET(request: NextRequest) {
   const requestId = crypto.randomUUID();
-  
+
   try {
     logger.info("Quotes API GET called", { requestId });
-    
+
     const supabase = await createClient();
 
     // Check admin authorization
@@ -37,7 +38,10 @@ export async function GET(request: NextRequest) {
       error: userError,
     } = await supabase.auth.getUser();
     if (userError || !user) {
-      logger.error("User authentication failed", { error: userError, requestId });
+      logger.error("User authentication failed", {
+        error: userError,
+        requestId,
+      });
       throw new AuthenticationError("Unauthorized");
     }
 
@@ -280,7 +284,7 @@ export async function GET(request: NextRequest) {
     logger.error("Error in quotes API GET", { error, requestId });
     return createApiErrorResponse(
       error instanceof Error ? error : new Error("Internal server error"),
-      { requestId }
+      { requestId },
     );
   }
 }
@@ -550,10 +554,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    return NextResponse.json({
-      success: true,
-      quote: newQuote,
-    });
+    return createApiSuccessResponse(newQuote, { statusCode: 201 });
   } catch (error) {
     logger.error("Error in quotes POST API", error);
     return NextResponse.json(

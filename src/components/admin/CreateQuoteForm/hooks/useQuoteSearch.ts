@@ -3,7 +3,7 @@ import { useBranch } from "@/hooks/useBranch";
 import { getBranchHeader } from "@/lib/utils/branch";
 import { Customer, Prescription, Frame } from "../types/quote.types";
 
-export function useCustomerSearch() {
+export function useCustomerSearch(initialCustomerId?: string) {
   const { currentBranchId } = useBranch();
   const [search, setSearch] = useState("");
   const [results, setResults] = useState<Customer[]>([]);
@@ -48,6 +48,28 @@ export function useCustomerSearch() {
 
     return () => clearTimeout(debounceTimer);
   }, [search, searchCustomers]);
+
+  // Load customer if initialCustomerId provided
+  useEffect(() => {
+    const fetchCustomer = async (customerId: string) => {
+      try {
+        setLoading(true);
+        const response = await fetch(`/api/admin/customers/${customerId}`);
+        if (response.ok) {
+          const data = await response.json();
+          setSelected(data.data);
+        }
+      } catch (error) {
+        console.error("Error fetching customer:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (initialCustomerId && !selected) {
+      fetchCustomer(initialCustomerId);
+    }
+  }, [initialCustomerId, selected]);
 
   const selectCustomer = (customer: Customer) => {
     setSelected(customer);

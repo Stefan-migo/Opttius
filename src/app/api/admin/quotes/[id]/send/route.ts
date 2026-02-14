@@ -4,11 +4,22 @@ import { sendEmail } from "@/lib/email/client";
 import businessConfig from "@/config/business";
 import { getBranchContext, addBranchFilter } from "@/lib/api/branch-middleware";
 import { appLogger as logger } from "@/lib/logger";
+import {
+  createApiSuccessResponse,
+  createApiErrorResponse,
+} from "@/lib/api/response";
+import {
+  AuthenticationError,
+  AuthorizationError,
+  NotFoundError,
+  ValidationError,
+  APIError,
+} from "@/lib/api/errors";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> },
+  { params }: { params: { id: string } },
 ) {
   try {
     const supabase = await createClient();
@@ -20,26 +31,26 @@ export async function POST(
       error: userError,
     } = await supabase.auth.getUser();
     if (userError || !user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return createApiErrorResponse(new AuthenticationError("No autorizado"));
     }
 
     const { data: isAdmin } = (await supabase.rpc("is_admin", {
       user_id: user.id,
     } as IsAdminParams)) as { data: IsAdminResult | null; error: Error | null };
     if (!isAdmin) {
-      return NextResponse.json(
-        { error: "Admin access required" },
-        { status: 403 },
+      return createApiErrorResponse(
+        new AuthorizationError("Se requiere acceso de administrador"),
       );
     }
 
-    const { id } = await params;
+    // Fix for Next.js 14 params (not a promise)
+    const { id } = params;
 
     // Get branch context
     const branchContext = await getBranchContext(request, user.id);
 
     // Build branch filter function
-    const applyBranchFilter = (query: ReturnType<typeof supabase.from>) => {
+    const applyBranchFilter = (query: any) => {
       return addBranchFilter(
         query,
         branchContext.branchId,
@@ -52,29 +63,56 @@ export async function POST(
     const { email } = body;
 
     if (!email || !email.includes("@")) {
-      return NextResponse.json(
-        { error: "Email válido requerido" },
-        { status: 400 },
+      return createApiErrorResponse(
+        new ValidationError("Email válido requerido"),
       );
     }
 
-    // Fetch quote with customer and prescription data (with branch access check)
-    const { data: quote, error: quoteError } = await applyBranchFilter(
-      supabaseServiceRole.from("quotes").select(`
-          *,
-          customer:customers!quotes_customer_id_fkey(id, first_name, last_name, email, phone),
-          prescription:prescriptions!quotes_prescription_id_fkey(*)
-        `) as any,
+    // 1. Fetch quote data first (with branch access check)
+    const { data: quoteData, error: quoteError } = await applyBranchFilter(
+      supabaseServiceRole.from("quotes").select("*"),
     )
       .eq("id", id)
       .single();
 
-    if (quoteError || !quote) {
-      return NextResponse.json(
-        { error: "Presupuesto no encontrado o sin acceso" },
-        { status: 404 },
-      );
+    if (quoteError || !quoteData) {
+      logger.error("Quote not found or access denied for sending", {
+        quoteId: id,
+        error: quoteError,
+        branchId: branchContext.branchId,
+      });
+      return createApiErrorResponse(new NotFoundError("Presupuesto"));
     }
+
+    // 2. Fetch related data separately (safer than complex joins in select string)
+    const relations: any = {
+      customer: null,
+      prescription: null,
+    };
+
+    if (quoteData.customer_id) {
+      const { data: customerData } = await supabaseServiceRole
+        .from("customers")
+        .select("id, first_name, last_name, email, phone")
+        .eq("id", quoteData.customer_id)
+        .single();
+      relations.customer = customerData || null;
+    }
+
+    if (quoteData.prescription_id) {
+      const { data: prescriptionData } = await supabaseServiceRole
+        .from("prescriptions")
+        .select("*")
+        .eq("id", quoteData.prescription_id)
+        .single();
+      relations.prescription = prescriptionData || null;
+    }
+
+    const quote = {
+      ...quoteData,
+      customer: relations.customer,
+      prescription: relations.prescription,
+    };
 
     // Format customer name
     const customerName =
@@ -88,7 +126,7 @@ export async function POST(
         style: "currency",
         currency: quote.currency || "CLP",
         minimumFractionDigits: 0,
-      }).format(amount);
+      }).format(amount || 0);
 
     // Build treatments list
     const treatmentsList =
@@ -386,12 +424,8 @@ Este presupuesto es válido hasta ${quote.expiration_date ? new Date(quote.expir
     });
 
     if (!emailResult.success) {
-      return NextResponse.json(
-        {
-          error: "Error al enviar email",
-          details: emailResult.error,
-        },
-        { status: 500 },
+      return createApiErrorResponse(
+        new APIError(emailResult.error || "Error al enviar email", 500),
       );
     }
 
@@ -409,19 +443,14 @@ Este presupuesto es válido hasta ${quote.expiration_date ? new Date(quote.expir
       // Don't fail the request if status update fails
     }
 
-    return NextResponse.json({
-      success: true,
+    return createApiSuccessResponse({
       message: "Presupuesto enviado exitosamente",
       emailId: emailResult.id,
     });
   } catch (error: any) {
     logger.error("Error sending quote", error);
-    return NextResponse.json(
-      {
-        error: "Error interno del servidor",
-        details: error.message,
-      },
-      { status: 500 },
+    return createApiErrorResponse(
+      error instanceof Error ? error : new Error("Error interno del servidor"),
     );
   }
 }

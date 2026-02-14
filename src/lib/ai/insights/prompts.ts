@@ -392,7 +392,7 @@ ${JSON.stringify(data.trends || {}, null, 2)}
 
 RUTAS DISPONIBLES EN EL SISTEMA (usa SOLO estas rutas):
 - Analíticas y reportes: /admin/analytics
-- Ventas/Órdenes: /admin/orders
+- Ventas/Órdenes (Caja): /admin/cash-register
 - Productos: /admin/products
 - Trabajos: /admin/work-orders
 
@@ -405,7 +405,7 @@ Tareas:
 IMPORTANTE: Usa SOLO las rutas listadas arriba. NO inventes rutas que no existen.
 Ejemplos de action_url válidos:
 - "/admin/analytics"
-- "/admin/orders"
+- "/admin/cash-register"
 - "/admin/products"
 
 Ejemplos de insights:

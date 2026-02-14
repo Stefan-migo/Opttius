@@ -1,8 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { extractDataFromResponse, extractPaginationFromResponse } from "@/lib/api/response-helpers";
+import {
+  extractDataFromResponse,
+  extractPaginationFromResponse,
+} from "@/lib/api/response-helpers";
 import {
   Card,
   CardContent,
@@ -46,6 +49,8 @@ import {
   Package,
   Calendar,
   Receipt,
+  Search,
+  X,
 } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
@@ -57,6 +62,7 @@ import {
 } from "@/lib/api/validation/zod-schemas";
 import type { z } from "zod";
 import { useBranch } from "@/hooks/useBranch";
+import { getBranchHeader } from "@/lib/utils/branch";
 
 type TicketForm = z.infer<typeof createOpticalInternalSupportTicketSchema>;
 type MessageForm = z.infer<typeof createOpticalInternalSupportMessageSchema>;
@@ -143,6 +149,24 @@ export default function OpticalInternalSupportPage() {
     Array<{ id: string; first_name: string; last_name: string; email: string }>
   >([]);
   const [loadingCustomers, setLoadingCustomers] = useState(false);
+  // Customer search for Create Ticket form
+  const [customerSearch, setCustomerSearch] = useState("");
+  const [customerSearchResults, setCustomerSearchResults] = useState<
+    Array<{
+      id: string;
+      first_name?: string;
+      last_name?: string;
+      email: string;
+      rut?: string;
+    }>
+  >([]);
+  const [selectedCustomerForTicket, setSelectedCustomerForTicket] = useState<{
+    id: string;
+    first_name?: string;
+    last_name?: string;
+    email: string;
+  } | null>(null);
+  const [loadingCustomerSearch, setLoadingCustomerSearch] = useState(false);
   const [filters, setFilters] = useState({
     status: "all",
     priority: "all",
@@ -174,12 +198,62 @@ export default function OpticalInternalSupportPage() {
     },
   });
 
-  // Cargar clientes cuando se abre el diálogo
+  // Cargar clientes para filtros al montar
   useEffect(() => {
-    if (showCreateDialog) {
-      loadCustomers();
+    loadCustomers();
+  }, []);
+
+  // Reset customer search when dialog closes
+  useEffect(() => {
+    if (!showCreateDialog) {
+      setCustomerSearch("");
+      setCustomerSearchResults([]);
+      setSelectedCustomerForTicket(null);
+      setTicketValue("customer_id", undefined);
+      setTicketValue("customer_name", undefined);
+      setTicketValue("customer_email", undefined);
     }
-  }, [showCreateDialog]);
+  }, [showCreateDialog, setTicketValue]);
+
+  // Debounced customer search for Create Ticket form
+  const searchCustomersForTicket = useCallback(
+    async (query: string) => {
+      if (query.length < 2) {
+        setCustomerSearchResults([]);
+        return;
+      }
+      try {
+        setLoadingCustomerSearch(true);
+        const params = new URLSearchParams({ q: query });
+        if (currentBranchId) params.set("branch_id", currentBranchId);
+        const headers = getBranchHeader(currentBranchId || null);
+        const response = await fetch(
+          `/api/admin/customers/search?${params.toString()}`,
+          { headers },
+        );
+        if (response.ok) {
+          const res = await response.json();
+          const list =
+            res?.data ?? res?.customers ?? (Array.isArray(res) ? res : []);
+          setCustomerSearchResults(
+            Array.isArray(list) ? list.slice(0, 15) : [],
+          );
+        } else {
+          setCustomerSearchResults([]);
+        }
+      } catch {
+        setCustomerSearchResults([]);
+      } finally {
+        setLoadingCustomerSearch(false);
+      }
+    },
+    [currentBranchId],
+  );
+
+  useEffect(() => {
+    const t = setTimeout(() => searchCustomersForTicket(customerSearch), 300);
+    return () => clearTimeout(t);
+  }, [customerSearch, searchCustomersForTicket]);
 
   // Actualizar branch_id cuando cambia currentBranchId
   useEffect(() => {
@@ -507,9 +581,9 @@ export default function OpticalInternalSupportPage() {
               <p className="text-lg font-medium mb-2">No hay tickets</p>
               <p className="text-sm mb-4">
                 {(filters.status && filters.status !== "all") ||
-                  (filters.priority && filters.priority !== "all") ||
-                  (filters.category && filters.category !== "all") ||
-                  filters.search
+                (filters.priority && filters.priority !== "all") ||
+                (filters.category && filters.category !== "all") ||
+                filters.search
                   ? "No hay tickets que coincidan con los filtros"
                   : "Crea tu primer ticket de soporte interno"}
               </p>
@@ -649,7 +723,9 @@ export default function OpticalInternalSupportPage() {
                 </Label>
                 <Select
                   value={watchTicket("category")}
-                  onValueChange={(value) => setTicketValue("category", value as any)}
+                  onValueChange={(value) =>
+                    setTicketValue("category", value as any)
+                  }
                 >
                   <SelectTrigger
                     id="category"
@@ -678,7 +754,9 @@ export default function OpticalInternalSupportPage() {
                 </Label>
                 <Select
                   value={watchTicket("priority")}
-                  onValueChange={(value) => setTicketValue("priority", value as any)}
+                  onValueChange={(value) =>
+                    setTicketValue("priority", value as any)
+                  }
                 >
                   <SelectTrigger
                     id="priority"
@@ -703,37 +781,95 @@ export default function OpticalInternalSupportPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="customer_id">Cliente (opcional)</Label>
-              <Select
-                value={watchTicket("customer_id") || "__none__"}
-                onValueChange={(value) =>
-                  setTicketValue(
-                    "customer_id",
-                    value === "__none__" ? undefined : value,
-                  )
-                }
-              >
-                <SelectTrigger id="customer_id">
-                  <SelectValue placeholder="Selecciona un cliente" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="__none__">Sin cliente</SelectItem>
-                  {loadingCustomers ? (
-                    <SelectItem value="__loading__" disabled>
-                      Cargando clientes...
-                    </SelectItem>
-                  ) : (
-                    customers.map((customer) => (
-                      <SelectItem key={customer.id} value={customer.id}>
-                        {customer.first_name} {customer.last_name} (
-                        {customer.email})
-                      </SelectItem>
-                    ))
+              <Label htmlFor="customer_search">Cliente (opcional)</Label>
+              {selectedCustomerForTicket ? (
+                <div className="flex items-center justify-between p-3 border rounded-lg bg-gray-50">
+                  <div>
+                    <div className="font-medium">
+                      {selectedCustomerForTicket.first_name}{" "}
+                      {selectedCustomerForTicket.last_name}
+                    </div>
+                    <div className="text-sm text-gray-600">
+                      {selectedCustomerForTicket.email}
+                    </div>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setSelectedCustomerForTicket(null);
+                      setTicketValue("customer_id", undefined);
+                      setTicketValue("customer_name", undefined);
+                      setTicketValue("customer_email", undefined);
+                    }}
+                  >
+                    <X className="h-4 w-4 mr-1" />
+                    Cambiar
+                  </Button>
+                </div>
+              ) : (
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Input
+                    id="customer_search"
+                    placeholder="Buscar por nombre, RUT o email..."
+                    value={customerSearch}
+                    onChange={(e) => setCustomerSearch(e.target.value)}
+                    className="pl-10"
+                  />
+                  {customerSearch.length >= 2 && (
+                    <div className="absolute z-50 w-full mt-1 bg-white border rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                      {loadingCustomerSearch ? (
+                        <div className="p-4 text-center">
+                          <Loader2 className="h-4 w-4 animate-spin mx-auto" />
+                        </div>
+                      ) : customerSearchResults.length > 0 ? (
+                        customerSearchResults.map((c) => (
+                          <button
+                            key={c.id}
+                            type="button"
+                            className="w-full text-left p-3 hover:bg-gray-100 border-b last:border-b-0"
+                            onClick={() => {
+                              setSelectedCustomerForTicket({
+                                id: c.id,
+                                first_name: c.first_name,
+                                last_name: c.last_name,
+                                email: c.email,
+                              });
+                              setTicketValue("customer_id", c.id);
+                              setTicketValue(
+                                "customer_name",
+                                [c.first_name, c.last_name]
+                                  .filter(Boolean)
+                                  .join(" ") || undefined,
+                              );
+                              setTicketValue("customer_email", c.email);
+                              setCustomerSearch("");
+                              setCustomerSearchResults([]);
+                            }}
+                          >
+                            <div className="font-medium">
+                              {c.first_name} {c.last_name}
+                            </div>
+                            <div className="text-sm text-gray-600">
+                              {c.email}
+                              {c.rut ? ` • RUT: ${c.rut}` : ""}
+                            </div>
+                          </button>
+                        ))
+                      ) : (
+                        <div className="p-4 text-center text-gray-500 text-sm">
+                          No se encontraron clientes
+                        </div>
+                      )}
+                    </div>
                   )}
-                </SelectContent>
-              </Select>
+                </div>
+              )}
               <p className="text-xs text-gray-500">
-                Si el problema está relacionado con un cliente específico
+                Busca por nombre, RUT o email. Si el problema está relacionado
+                con un cliente específico.
               </p>
             </div>
 

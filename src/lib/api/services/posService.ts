@@ -1,6 +1,6 @@
 /**
  * POS Service - Centralized API operations for Point of Sale
- * 
+ *
  * This service handles all POS-related API calls including:
  * - Cash register status
  * - Sales processing
@@ -8,10 +8,10 @@
  * - Payment processing
  */
 
-import { ApiClient } from '../client-helpers';
-import { isSuccess, unwrapData } from '../client-helpers';
-import { handleApiError } from '@/lib/services/errorService';
-import { success } from '@/lib/services/notificationService';
+import { ApiClient } from "../client-helpers";
+import { isSuccess, unwrapData } from "../client-helpers";
+import { handleApiError } from "@/lib/services/errorService";
+import { success } from "@/lib/services/notificationService";
 
 // ============================================
 // Types
@@ -45,7 +45,7 @@ export interface ProcessSaleRequest {
   customer_rut?: string;
   customer_email?: string;
   customer_phone?: string;
-  
+
   // Cart items
   items: Array<{
     product_id: string;
@@ -56,32 +56,32 @@ export interface ProcessSaleRequest {
     discount_type?: "percentage" | "fixed";
     notes?: string;
   }>;
-  
+
   // Payment info
   payment_method: string;
   cash_received?: number;
   card_last_four?: string;
   card_brand?: string;
   transfer_reference?: string;
-  
+
   // Lens data (optional)
   lens_type?: string;
   lens_material?: string;
   lens_index?: number;
   frame_model?: string;
-  
+
   // Prescription
   prescription_id?: string;
-  
+
   // Financial
   subtotal: number;
   discount_amount: number;
   tax_amount: number;
   total: number;
-  
+
   // Branch
   branch_id: string;
-  
+
   // Notes
   notes?: string;
   internal_notes?: string;
@@ -109,6 +109,7 @@ export interface PendingPaymentRequest {
   payment_amount: number;
   payment_method: string;
   notes?: string;
+  fiscal_reference?: string;
 }
 
 export interface PendingPaymentResponse {
@@ -134,9 +135,12 @@ class POSService {
    */
   async getCashStatus(branchId?: string): Promise<CashRegisterStatus | null> {
     try {
-      const response = await this.client.get<CashRegisterStatus>(`${this.basePath}/open`, {
-        headers: branchId ? { "x-branch-id": branchId } : undefined,
-      });
+      const response = await this.client.get<CashRegisterStatus>(
+        `/api/admin/cash-register/open`,
+        {
+          headers: branchId ? { "x-branch-id": branchId } : undefined,
+        },
+      );
 
       if (isSuccess(response)) {
         return unwrapData(response);
@@ -157,7 +161,7 @@ class POSService {
   async getPendingBalanceOrders(
     searchTerm?: string,
     branchId?: string,
-    limit: number = 50
+    limit: number = 50,
   ): Promise<PendingBalanceOrder[]> {
     try {
       const params = new URLSearchParams({
@@ -168,9 +172,12 @@ class POSService {
         params.append("search", searchTerm.trim());
       }
 
-      const response = await this.client.get<PendingBalanceOrder[]>(`${this.basePath}/pending-balance?${params}`, {
-        headers: branchId ? { "x-branch-id": branchId } : undefined,
-      });
+      const response = await this.client.get<PendingBalanceOrder[]>(
+        `${this.basePath}/pending-balance?${params}`,
+        {
+          headers: branchId ? { "x-branch-id": branchId } : undefined,
+        },
+      );
 
       if (isSuccess(response)) {
         const data = unwrapData(response);
@@ -191,25 +198,30 @@ class POSService {
    */
   async processPendingPayment(
     request: PendingPaymentRequest,
-    branchId?: string
+    branchId?: string,
   ): Promise<PendingPaymentResponse | null> {
     try {
-      const response = await this.client.post<PendingPaymentResponse>(`${this.basePath}/pending-balance/pay`, request, {
-        headers: branchId ? { "x-branch-id": branchId } : undefined,
-      });
+      const response = await this.client.post<PendingPaymentResponse>(
+        `${this.basePath}/pending-balance/pay`,
+        request,
+        {
+          headers: branchId ? { "x-branch-id": branchId } : undefined,
+        },
+      );
 
       if (isSuccess(response)) {
         const data = unwrapData(response);
-        success(data?.message || "Pago procesado exitosamente");
+        // Removed success toast from service layer to avoid double toasts
         return data;
       }
 
-      handleApiError(response);
-      return null;
+      // If response is not success, throw error with message from response
+      const errorMessage =
+        response.error?.message || "Error processing payment";
+      throw new Error(errorMessage);
     } catch (error) {
       console.error("Error processing pending payment:", error);
-      handleApiError(error);
-      return null;
+      throw error;
     }
   }
 
@@ -218,19 +230,24 @@ class POSService {
    */
   async processSale(
     orderData: ProcessSaleRequest,
-    branchId?: string
+    branchId?: string,
   ): Promise<ProcessSaleResponse | null> {
     try {
-      const response = await this.client.post<ProcessSaleResponse>(`${this.basePath}/process-sale`, orderData, {
-        headers: branchId ? { "x-branch-id": branchId } : undefined,
-      });
+      const response = await this.client.post<ProcessSaleResponse>(
+        `${this.basePath}/process-sale`,
+        orderData,
+        {
+          headers: branchId ? { "x-branch-id": branchId } : undefined,
+        },
+      );
 
       if (isSuccess(response)) {
         const data = unwrapData(response);
-        
-        const orderNumber = data?.work_order?.work_order_number || data?.order?.order_number;
+
+        const orderNumber =
+          data?.work_order?.work_order_number || data?.order?.order_number;
         success(`Venta procesada: ${orderNumber}`);
-        
+
         return data;
       }
 
@@ -248,7 +265,9 @@ class POSService {
    */
   async getBillingSettings(branchId?: string) {
     try {
-      const response = await this.client.get<{ settings: Record<string, unknown> }>("/api/admin/billing/settings", {
+      const response = await this.client.get<{
+        settings: Record<string, unknown>;
+      }>("/api/admin/billing/settings", {
         headers: branchId ? { "x-branch-id": branchId } : undefined,
       });
 
@@ -271,7 +290,9 @@ class POSService {
    */
   async getCurrentOrganization(branchId?: string) {
     try {
-      const response = await this.client.get<{ organization: Record<string, unknown> }>("/api/admin/organizations/current", {
+      const response = await this.client.get<{
+        organization: Record<string, unknown>;
+      }>("/api/admin/organizations/current", {
         headers: branchId ? { "x-branch-id": branchId } : undefined,
       });
 

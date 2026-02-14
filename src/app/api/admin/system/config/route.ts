@@ -2,15 +2,40 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient, createServiceRoleClient } from "@/utils/supabase/server";
 import { appLogger as logger } from "@/lib/logger";
 
+/** Merge configs: branch > org > global. Returns one config per config_key. */
+function mergeConfigsByScope(
+  configs: Array<{
+    config_key: string;
+    organization_id: string | null;
+    branch_id: string | null;
+    [k: string]: unknown;
+  }>,
+): typeof configs {
+  const byKey = new Map<
+    string,
+    { config: (typeof configs)[0]; priority: number }
+  >();
+  for (const c of configs) {
+    const priority =
+      c.branch_id != null ? 3 : c.organization_id != null ? 2 : 1;
+    const existing = byKey.get(c.config_key);
+    if (!existing || priority > existing.priority) {
+      byKey.set(c.config_key, { config: c, priority });
+    }
+  }
+  return Array.from(byKey.values()).map(({ config }) => config);
+}
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const category = searchParams.get("category") || "";
     const public_only = searchParams.get("public_only") === "true";
+    const branchId =
+      searchParams.get("branch_id") || request.headers.get("x-branch-id");
 
     const supabase = await createClient();
 
-    // Check admin authorization
     const {
       data: { user },
       error: userError,
@@ -19,28 +44,51 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Temporarily bypass admin checks to test table access
-    logger.debug("Testing system_config table access for user:", {
-      email: user.email,
-    });
+    const { data: adminUser } = await supabase
+      .from("admin_users")
+      .select("organization_id, role")
+      .eq("id", user.id)
+      .eq("is_active", true)
+      .maybeSingle();
 
-    // Build the query (simplified for testing)
+    if (!adminUser) {
+      return NextResponse.json(
+        { error: "Admin access required" },
+        { status: 403 },
+      );
+    }
+
+    const orgId = adminUser.organization_id;
+    const isSuperAdmin = adminUser.role === "super_admin";
+
+    // Build filter: super_admin sees global only; org admin sees global + org + branch
     let query = supabase.from("system_config").select("*");
 
-    // Apply basic filters
     if (public_only) {
       query = query.eq("is_public", true);
     }
-
     if (category && category !== "all") {
       query = query.eq("category", category);
     }
 
-    // For testing: don't filter sensitive configs
-    logger.debug("Executing query to system_config table", {
-      category,
-      public_only,
-    });
+    if (isSuperAdmin) {
+      // Super admin: global configs only (org_id null, branch_id null)
+      query = query.is("organization_id", null).is("branch_id", null);
+    } else if (orgId) {
+      // Org admin: global OR org-level OR branch-level
+      const orParts = [
+        "and(organization_id.is.null,branch_id.is.null)",
+        `and(organization_id.eq.${orgId},branch_id.is.null)`,
+      ];
+      if (branchId) {
+        orParts.push(
+          `and(organization_id.eq.${orgId},branch_id.eq.${branchId})`,
+        );
+      }
+      query = query.or(orParts.join(","));
+    } else {
+      query = query.is("organization_id", null).is("branch_id", null);
+    }
 
     const { data: configs, error } = await query
       .order("category", { ascending: true })
@@ -54,29 +102,22 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Parse JSON values safely
-    const parsedConfigs =
-      configs?.map((config) => {
-        let parsedValue = config.config_value;
+    const merged =
+      isSuperAdmin || !orgId
+        ? configs || []
+        : mergeConfigsByScope(configs || []);
 
-        // Try to parse as JSON if it's a string
-        if (typeof config.config_value === "string") {
-          try {
-            parsedValue = JSON.parse(config.config_value);
-          } catch (error) {
-            // If JSON parsing fails, keep the original string value
-            logger.warn("Config value is not valid JSON, keeping as string:", {
-              config_key: config.config_key,
-            });
-            parsedValue = config.config_value;
-          }
+    const parsedConfigs = merged.map((config) => {
+      let parsedValue = config.config_value;
+      if (typeof config.config_value === "string") {
+        try {
+          parsedValue = JSON.parse(config.config_value);
+        } catch {
+          parsedValue = config.config_value;
         }
-
-        return {
-          ...config,
-          config_value: parsedValue,
-        };
-      }) || [];
+      }
+      return { ...config, config_value: parsedValue };
+    });
 
     return NextResponse.json({ configs: parsedConfigs });
   } catch (error) {
@@ -202,7 +243,9 @@ export async function POST(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   try {
     const body = await request.json();
-    const updates = body.updates; // Array of config updates
+    const updates = body.updates;
+    const branchId =
+      body.branch_id ?? request.headers.get("x-branch-id") ?? null;
 
     if (!Array.isArray(updates)) {
       return NextResponse.json(
@@ -213,7 +256,6 @@ export async function PUT(request: NextRequest) {
 
     const supabase = await createClient();
 
-    // Check admin authorization
     const {
       data: { user },
       error: userError,
@@ -222,11 +264,26 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Temporarily bypass admin checks for testing
-    logger.debug("Testing config updates for user:", {
-      email: user.email,
-      updatesCount: updates.length,
-    });
+    const { data: adminUser, error: adminCheckError } = await supabase
+      .from("admin_users")
+      .select("organization_id, role")
+      .eq("id", user.id)
+      .eq("is_active", true)
+      .maybeSingle();
+
+    if (adminCheckError || !adminUser) {
+      return NextResponse.json(
+        { error: "Admin access required" },
+        { status: 403 },
+      );
+    }
+
+    const orgId = adminUser.organization_id;
+    const isSuperAdmin = adminUser.role === "super_admin";
+
+    // Target scope: super_admin -> global (null, null); org admin -> (orgId, branchId)
+    const targetOrgId = isSuperAdmin ? null : orgId;
+    const targetBranchId = isSuperAdmin ? null : branchId || null;
 
     const results = [];
 
@@ -239,14 +296,25 @@ export async function PUT(request: NextRequest) {
       }
 
       try {
-        // Get existing config to check permissions
-        const { data: existingConfig, error: checkError } = await supabase
+        let query = supabase
           .from("system_config")
-          .select("is_sensitive, category, value_type")
-          .eq("config_key", config_key)
-          .maybeSingle();
+          .select("id, is_sensitive, category, value_type")
+          .eq("config_key", config_key);
 
-        // Handle error
+        if (targetOrgId == null) {
+          query = query.is("organization_id", null).is("branch_id", null);
+        } else {
+          query = query.eq("organization_id", targetOrgId);
+          if (targetBranchId) {
+            query = query.eq("branch_id", targetBranchId);
+          } else {
+            query = query.is("branch_id", null);
+          }
+        }
+
+        const { data: existingConfig, error: checkError } =
+          await query.maybeSingle();
+
         if (checkError) {
           results.push({
             config_key,
@@ -255,41 +323,14 @@ export async function PUT(request: NextRequest) {
           continue;
         }
 
-        // Check if user is admin (for sensitive configs, we'll use service role client)
-        const { data: adminUser, error: adminCheckError } = await supabase
-          .from("admin_users")
-          .select("role")
-          .eq("id", user.id)
-          .eq("is_active", true)
-          .maybeSingle();
-
-        if (adminCheckError) {
-          results.push({
-            config_key,
-            error: `Failed to verify admin access: ${adminCheckError.message}`,
-          });
-          continue;
-        }
-
-        if (!adminUser) {
-          results.push({ config_key, error: "Admin access required" });
-          continue;
-        }
-
-        // Determine if config is sensitive (for new configs, infer from key)
         const isSensitive =
           existingConfig?.is_sensitive ??
           (config_key.includes("token") ||
             config_key.includes("secret") ||
             config_key.includes("key"));
-
-        // For sensitive configs, use service role client to bypass RLS
-        // (but only if user is an admin - we already verified above)
         const dbClient = isSensitive ? createServiceRoleClient() : supabase;
 
-        // If config doesn't exist, create it (upsert behavior)
         if (!existingConfig) {
-          // Determine category and value type from config_key
           let category = "general";
           let valueType = "string";
           let configIsSensitive =
@@ -305,7 +346,7 @@ export async function PUT(request: NextRequest) {
               config_key.includes("binary_mode")
             ) {
               valueType = "boolean";
-              configIsSensitive = false; // These are not sensitive
+              configIsSensitive = false;
             } else if (config_key.includes("max_installments")) {
               valueType = "number";
               configIsSensitive = false;
@@ -313,7 +354,6 @@ export async function PUT(request: NextRequest) {
               valueType = "array";
               configIsSensitive = false;
             }
-            // Test credentials are sensitive
             if (
               config_key.includes("test_access_token") ||
               config_key.includes("test_public_key") ||
@@ -323,20 +363,23 @@ export async function PUT(request: NextRequest) {
             }
           }
 
-          // Create the config (use service role client for sensitive configs)
           const insertClient = configIsSensitive
             ? createServiceRoleClient()
             : supabase;
+          const insertPayload: Record<string, unknown> = {
+            config_key,
+            config_value: JSON.stringify(config_value),
+            category,
+            value_type: valueType,
+            is_sensitive: configIsSensitive,
+            last_modified_by: user.id,
+          };
+          if (targetOrgId != null) insertPayload.organization_id = targetOrgId;
+          if (targetBranchId != null) insertPayload.branch_id = targetBranchId;
+
           const { data: newConfig, error: createError } = await insertClient
             .from("system_config")
-            .insert({
-              config_key,
-              config_value: JSON.stringify(config_value),
-              category,
-              value_type: valueType,
-              is_sensitive: configIsSensitive,
-              last_modified_by: user.id,
-            })
+            .insert(insertPayload)
             .select()
             .single();
 
@@ -348,32 +391,22 @@ export async function PUT(request: NextRequest) {
             continue;
           }
 
-          // Parse the created config value safely
           let parsedValue = newConfig.config_value;
           try {
             parsedValue = JSON.parse(newConfig.config_value);
-          } catch (error) {
-            logger.warn(
-              "Created config value is not valid JSON, keeping as string:",
-              { config_key },
-            );
+          } catch {
+            /* keep as-is */
           }
 
           results.push({
             config_key,
             success: true,
-            config: {
-              ...newConfig,
-              config_value: parsedValue,
-            },
+            config: { ...newConfig, config_value: parsedValue },
           });
           continue;
         }
 
-        logger.debug("Updating config:", { config_key, isSensitive });
-
-        // Update the config (use service role client for sensitive configs to bypass RLS)
-        const { data: updatedConfig, error: updateError } = await dbClient
+        let updateQuery = dbClient
           .from("system_config")
           .update({
             config_value: JSON.stringify(config_value),
@@ -381,6 +414,9 @@ export async function PUT(request: NextRequest) {
             updated_at: new Date().toISOString(),
           })
           .eq("config_key", config_key)
+          .eq("id", existingConfig.id);
+
+        const { data: updatedConfig, error: updateError } = await updateQuery
           .select()
           .maybeSingle();
 
@@ -389,7 +425,6 @@ export async function PUT(request: NextRequest) {
           continue;
         }
 
-        // If no rows were updated, the config might have been deleted
         if (!updatedConfig) {
           results.push({
             config_key,
@@ -398,24 +433,17 @@ export async function PUT(request: NextRequest) {
           continue;
         }
 
-        // Parse the updated config value safely
         let parsedUpdatedValue = updatedConfig.config_value;
         try {
           parsedUpdatedValue = JSON.parse(updatedConfig.config_value);
-        } catch (error) {
-          logger.warn(
-            "Updated config value is not valid JSON, keeping as string:",
-            { config_key },
-          );
+        } catch {
+          /* keep as-is */
         }
 
         results.push({
           config_key,
           success: true,
-          config: {
-            ...updatedConfig,
-            config_value: parsedUpdatedValue,
-          },
+          config: { ...updatedConfig, config_value: parsedUpdatedValue },
         });
       } catch (error) {
         results.push({ config_key, error: `Unexpected error: ${error}` });

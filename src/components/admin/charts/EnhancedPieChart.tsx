@@ -147,7 +147,7 @@ export function EnhancedPieChart({
       )}
 
       <ResponsiveContainer width="100%" height={height}>
-        <RechartsPieChart>
+        <RechartsPieChart id="enhanced-pie-chart">
           <Pie
             data={chartData}
             cx="50%"

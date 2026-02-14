@@ -1,12 +1,12 @@
 /**
  * Quote Service
- * 
+ *
  * Service layer for quote-related API operations.
  * Provides type-safe methods for CRUD operations on quotes.
  */
 
-import { ApiClient, isSuccess, unwrapData } from '../client-helpers';
-import { handleApiError } from '@/lib/services/errorService';
+import { ApiClient, isSuccess, unwrapData } from "../client-helpers";
+import { handleApiError } from "@/lib/services/errorService";
 
 // Types
 export interface Quote {
@@ -25,7 +25,13 @@ export interface Quote {
   quote_number: string;
   quote_date: string;
   expiration_date?: string;
-  status: 'draft' | 'sent' | 'accepted' | 'rejected' | 'expired' | 'converted_to_work';
+  status:
+    | "draft"
+    | "sent"
+    | "accepted"
+    | "rejected"
+    | "expired"
+    | "converted_to_work";
   subtotal: number;
   tax_amount: number;
   discount_amount: number;
@@ -63,7 +69,7 @@ export interface QuoteItem {
 
 export interface CreateQuoteData {
   customer_id: string;
-  status?: 'draft' | 'sent' | 'accepted' | 'rejected' | 'expired';
+  status?: "draft" | "sent" | "accepted" | "rejected" | "expired";
   subtotal: number;
   tax_amount: number;
   discount_amount: number;
@@ -72,7 +78,69 @@ export interface CreateQuoteData {
   valid_until?: string;
   notes?: string;
   branch_id?: string;
-  items?: Omit<QuoteItem, 'id' | 'quote_id'>[];
+  // Frame fields
+  prescription_id?: string | null;
+  frame_product_id?: string | null;
+  customer_own_frame?: boolean;
+  frame_name?: string | null;
+  frame_brand?: string | null;
+  frame_model?: string | null;
+  frame_color?: string | null;
+  frame_size?: string | null;
+  frame_sku?: string | null;
+  frame_price?: number;
+  frame_cost?: number;
+  // Lens fields
+  lens_family_id?: string | null;
+  lens_type?: string | null;
+  lens_material?: string | null;
+  lens_index?: number | null;
+  lens_treatments?: string[];
+  lens_tint_color?: string | null;
+  lens_tint_percentage?: number | null;
+  lens_cost?: number;
+  treatments_cost?: number;
+  labor_cost?: number;
+  // Presbyopia solution fields
+  presbyopia_solution?:
+    | "none"
+    | "two_separate"
+    | "bifocal"
+    | "trifocal"
+    | "progressive";
+  far_lens_family_id?: string | null;
+  near_lens_family_id?: string | null;
+  far_lens_cost?: number;
+  near_lens_cost?: number;
+  // Near frame fields
+  near_frame_product_id?: string | null;
+  near_frame_name?: string | null;
+  near_frame_brand?: string | null;
+  near_frame_model?: string | null;
+  near_frame_color?: string | null;
+  near_frame_size?: string | null;
+  near_frame_sku?: string | null;
+  near_frame_price?: number;
+  near_frame_cost?: number;
+  customer_own_near_frame?: boolean;
+  // Contact lens fields
+  contact_lens_family_id?: string | null;
+  contact_lens_rx_sphere_od?: number | null;
+  contact_lens_rx_cylinder_od?: number | null;
+  contact_lens_rx_axis_od?: number | null;
+  contact_lens_rx_add_od?: number | null;
+  contact_lens_rx_base_curve_od?: number | null;
+  contact_lens_rx_diameter_od?: number | null;
+  contact_lens_rx_sphere_os?: number | null;
+  contact_lens_rx_cylinder_os?: number | null;
+  contact_lens_rx_axis_os?: number | null;
+  contact_lens_rx_add_os?: number | null;
+  contact_lens_rx_base_curve_os?: number | null;
+  contact_lens_rx_diameter_os?: number | null;
+  contact_lens_quantity?: number;
+  contact_lens_cost?: number;
+  contact_lens_price?: number;
+  items?: Omit<QuoteItem, "id" | "quote_id">[];
 }
 
 export interface UpdateQuoteData extends Partial<CreateQuoteData> {}
@@ -109,17 +177,17 @@ const client = new ApiClient();
  * Get all quotes with optional filters
  */
 export async function getQuotes(
-  params: QuoteSearchParams = {}
+  params: QuoteSearchParams = {},
 ): Promise<QuoteListResponse> {
   try {
     const queryString = new URLSearchParams(
       Object.entries(params)
         .filter(([_, v]) => v !== undefined)
-        .map(([k, v]) => [k, String(v)]) as [string, string][]
+        .map(([k, v]) => [k, String(v)]) as [string, string][],
     ).toString();
 
     const response = await client.get<Quote[]>(
-      `/api/admin/quotes${queryString ? `?${queryString}` : ''}`
+      `/api/admin/quotes${queryString ? `?${queryString}` : ""}`,
     );
 
     if (isSuccess(response)) {
@@ -134,9 +202,13 @@ export async function getQuotes(
       };
     }
 
-    throw new Error(response.error.message);
+    const errorMessage =
+      response.success === false && response.error?.message
+        ? response.error.message
+        : "An unknown error occurred";
+    throw new Error(errorMessage);
   } catch (error) {
-    handleApiError(error, 'getQuotes');
+    handleApiError(error, "getQuotes");
     throw error;
   }
 }
@@ -146,10 +218,12 @@ export async function getQuotes(
  */
 export async function getQuote(id: string): Promise<QuoteWithItems> {
   try {
-    const response = await client.get<QuoteWithItems>(`/api/admin/quotes/${id}`);
+    const response = await client.get<QuoteWithItems>(
+      `/api/admin/quotes/${id}`,
+    );
     return unwrapData(response);
   } catch (error) {
-    handleApiError(error, 'getQuote');
+    handleApiError(error, "getQuote");
     throw error;
   }
 }
@@ -159,10 +233,10 @@ export async function getQuote(id: string): Promise<QuoteWithItems> {
  */
 export async function createQuote(data: CreateQuoteData): Promise<Quote> {
   try {
-    const response = await client.post<Quote>('/api/admin/quotes', data);
+    const response = await client.post<Quote>("/api/admin/quotes", data);
     return unwrapData(response);
   } catch (error) {
-    handleApiError(error, 'createQuote');
+    handleApiError(error, "createQuote");
     throw error;
   }
 }
@@ -172,13 +246,13 @@ export async function createQuote(data: CreateQuoteData): Promise<Quote> {
  */
 export async function updateQuote(
   id: string,
-  data: UpdateQuoteData
+  data: UpdateQuoteData,
 ): Promise<Quote> {
   try {
     const response = await client.put<Quote>(`/api/admin/quotes/${id}`, data);
     return unwrapData(response);
   } catch (error) {
-    handleApiError(error, 'updateQuote');
+    handleApiError(error, "updateQuote");
     throw error;
   }
 }
@@ -191,7 +265,7 @@ export async function deleteQuote(id: string): Promise<void> {
     const response = await client.delete(`/api/admin/quotes/${id}`);
     unwrapData(response);
   } catch (error) {
-    handleApiError(error, 'deleteQuote');
+    handleApiError(error, "deleteQuote");
     throw error;
   }
 }
@@ -201,10 +275,13 @@ export async function deleteQuote(id: string): Promise<void> {
  */
 export async function sendQuote(id: string, email?: string): Promise<Quote> {
   try {
-    const response = await client.post<Quote>(`/api/admin/quotes/${id}/send`, email ? { email } : {});
+    const response = await client.post<Quote>(
+      `/api/admin/quotes/${id}/send`,
+      email ? { email } : {},
+    );
     return unwrapData(response);
   } catch (error) {
-    handleApiError(error, 'sendQuote');
+    handleApiError(error, "sendQuote");
     throw error;
   }
 }
@@ -214,10 +291,13 @@ export async function sendQuote(id: string, email?: string): Promise<Quote> {
  */
 export async function acceptQuote(id: string): Promise<Quote> {
   try {
-    const response = await client.post<Quote>(`/api/admin/quotes/${id}/accept`, {});
+    const response = await client.post<Quote>(
+      `/api/admin/quotes/${id}/accept`,
+      {},
+    );
     return unwrapData(response);
   } catch (error) {
-    handleApiError(error, 'acceptQuote');
+    handleApiError(error, "acceptQuote");
     throw error;
   }
 }
@@ -227,10 +307,13 @@ export async function acceptQuote(id: string): Promise<Quote> {
  */
 export async function rejectQuote(id: string, reason?: string): Promise<Quote> {
   try {
-    const response = await client.post<Quote>(`/api/admin/quotes/${id}/reject`, { reason });
+    const response = await client.post<Quote>(
+      `/api/admin/quotes/${id}/reject`,
+      { reason },
+    );
     return unwrapData(response);
   } catch (error) {
-    handleApiError(error, 'rejectQuote');
+    handleApiError(error, "rejectQuote");
     throw error;
   }
 }
@@ -238,12 +321,17 @@ export async function rejectQuote(id: string, reason?: string): Promise<Quote> {
 /**
  * Convert a quote to an order
  */
-export async function convertQuoteToOrder(id: string): Promise<{ order_id: string }> {
+export async function convertQuoteToOrder(
+  id: string,
+): Promise<{ order_id: string }> {
   try {
-    const response = await client.post<{ order_id: string }>(`/api/admin/quotes/${id}/convert`, {});
+    const response = await client.post<{ order_id: string }>(
+      `/api/admin/quotes/${id}/convert`,
+      {},
+    );
     return unwrapData(response);
   } catch (error) {
-    handleApiError(error, 'convertQuoteToOrder');
+    handleApiError(error, "convertQuoteToOrder");
     throw error;
   }
 }
@@ -253,13 +341,16 @@ export async function convertQuoteToOrder(id: string): Promise<{ order_id: strin
  */
 export async function addQuoteItem(
   quoteId: string,
-  item: Omit<QuoteItem, 'id' | 'quote_id'>
+  item: Omit<QuoteItem, "id" | "quote_id">,
 ): Promise<QuoteItem> {
   try {
-    const response = await client.post<QuoteItem>(`/api/admin/quotes/${quoteId}/items`, item);
+    const response = await client.post<QuoteItem>(
+      `/api/admin/quotes/${quoteId}/items`,
+      item,
+    );
     return unwrapData(response);
   } catch (error) {
-    handleApiError(error, 'addQuoteItem');
+    handleApiError(error, "addQuoteItem");
     throw error;
   }
 }
@@ -270,16 +361,16 @@ export async function addQuoteItem(
 export async function updateQuoteItem(
   quoteId: string,
   itemId: string,
-  item: Partial<Omit<QuoteItem, 'id' | 'quote_id'>>
+  item: Partial<Omit<QuoteItem, "id" | "quote_id">>,
 ): Promise<QuoteItem> {
   try {
     const response = await client.put<QuoteItem>(
       `/api/admin/quotes/${quoteId}/items/${itemId}`,
-      item
+      item,
     );
     return unwrapData(response);
   } catch (error) {
-    handleApiError(error, 'updateQuoteItem');
+    handleApiError(error, "updateQuoteItem");
     throw error;
   }
 }
@@ -287,12 +378,17 @@ export async function updateQuoteItem(
 /**
  * Remove a quote item
  */
-export async function removeQuoteItem(quoteId: string, itemId: string): Promise<void> {
+export async function removeQuoteItem(
+  quoteId: string,
+  itemId: string,
+): Promise<void> {
   try {
-    const response = await client.delete(`/api/admin/quotes/${quoteId}/items/${itemId}`);
+    const response = await client.delete(
+      `/api/admin/quotes/${quoteId}/items/${itemId}`,
+    );
     unwrapData(response);
   } catch (error) {
-    handleApiError(error, 'removeQuoteItem');
+    handleApiError(error, "removeQuoteItem");
     throw error;
   }
 }

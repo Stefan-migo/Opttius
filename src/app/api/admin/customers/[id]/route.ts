@@ -3,6 +3,11 @@ import { createClientFromRequest } from "@/utils/supabase/server";
 import { getBranchContext, addBranchFilter } from "@/lib/api/branch-middleware";
 import { appLogger as logger } from "@/lib/logger";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
+import {
+  createApiSuccessResponse,
+  createApiErrorResponse,
+} from "@/lib/api/response";
+import { AuthenticationError, AuthorizationError } from "@/lib/api/errors";
 
 export async function GET(
   request: NextRequest,
@@ -19,26 +24,22 @@ export async function GET(
     const user = data?.user;
     if (userError || !user) {
       logger.error("User authentication failed", userError);
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return createApiErrorResponse(new AuthenticationError("Unauthorized"));
     }
     logger.debug("User authenticated", { email: user.email });
 
-    const { data: isAdmin, error: adminError } = await supabase.rpc(
-      "is_admin",
-      { user_id: user.id },
-    );
-    if (adminError) {
-      logger.error("Admin check error", adminError);
-      return NextResponse.json(
-        { error: "Admin verification failed" },
-        { status: 500 },
-      );
-    }
+    // Check admin authorization using service role to bypass any context/RLS issues
+    const { createServiceRoleClient } = await import("@/utils/supabase/server");
+    const serviceSupabase = createServiceRoleClient();
+
+    const { data: isAdmin } = await serviceSupabase.rpc("is_admin", {
+      user_id: user.id,
+    });
+
     if (!isAdmin) {
       logger.warn("User is not admin", { email: user.email });
-      return NextResponse.json(
-        { error: "Admin access required" },
-        { status: 403 },
+      return createApiErrorResponse(
+        new AuthorizationError("Admin access required"),
       );
     }
     logger.debug("Admin access confirmed", { email: user.email });
@@ -97,18 +98,12 @@ export async function GET(
 
     if (customerError) {
       logger.error("Error fetching customer", customerError);
-      return NextResponse.json(
-        { error: "Customer not found" },
-        { status: 404 },
-      );
+      return createApiErrorResponse(new Error("Customer not found"));
     }
 
     if (!customer) {
       logger.warn("Customer not found", { customerId: params.id });
-      return NextResponse.json(
-        { error: "Customer not found" },
-        { status: 404 },
-      );
+      return createApiErrorResponse(new Error("Customer not found"));
     }
 
     logger.debug("Customer found", { email: customer.email });
@@ -330,22 +325,19 @@ export async function GET(
 
     logger.debug("Analytics calculated successfully");
 
-    return NextResponse.json({
-      customer: {
-        ...customer,
-        orders: orders || [],
-        prescriptions: prescriptions || [],
-        appointments: appointments || [],
-        lensPurchases: lensPurchases || [],
-        quotes: quotes || [],
-        analytics,
-      },
+    return createApiSuccessResponse({
+      ...customer,
+      orders: orders || [],
+      prescriptions: prescriptions || [],
+      appointments: appointments || [],
+      lensPurchases: lensPurchases || [],
+      quotes: quotes || [],
+      analytics,
     });
   } catch (error) {
     logger.error("Error in customer detail API GET", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
+    return createApiErrorResponse(
+      error instanceof Error ? error : new Error(String(error)),
     );
   }
 }
@@ -365,26 +357,22 @@ export async function PUT(
     const user = data?.user;
     if (userError || !user) {
       logger.error("User authentication failed", userError);
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return createApiErrorResponse(new AuthenticationError("Unauthorized"));
     }
     logger.debug("User authenticated", { email: user.email });
 
-    const { data: isAdmin, error: adminError } = await supabase.rpc(
-      "is_admin",
-      { user_id: user.id },
-    );
-    if (adminError) {
-      logger.error("Admin check error", adminError);
-      return NextResponse.json(
-        { error: "Admin verification failed" },
-        { status: 500 },
-      );
-    }
+    // Check admin authorization using service role to bypass any context/RLS issues
+    const { createServiceRoleClient } = await import("@/utils/supabase/server");
+    const serviceSupabase = createServiceRoleClient();
+
+    const { data: isAdmin } = await serviceSupabase.rpc("is_admin", {
+      user_id: user.id,
+    });
+
     if (!isAdmin) {
       logger.warn("User is not admin", { email: user.email });
-      return NextResponse.json(
-        { error: "Admin access required" },
-        { status: 403 },
+      return createApiErrorResponse(
+        new AuthorizationError("Admin access required"),
       );
     }
     logger.debug("Admin access confirmed", { email: user.email });
@@ -475,9 +463,8 @@ export async function PUT(
     ).single();
 
     if (!existingCustomer) {
-      return NextResponse.json(
-        { error: "Customer not found or access denied" },
-        { status: 404 },
+      return createApiErrorResponse(
+        new Error("Customer not found or access denied"),
       );
     }
 
@@ -494,33 +481,23 @@ export async function PUT(
 
     if (updateError) {
       logger.error("Error updating customer", updateError);
-      return NextResponse.json(
-        { error: "Failed to update customer" },
-        { status: 500 },
-      );
+      return createApiErrorResponse(new Error("Failed to update customer"));
     }
 
     if (!updatedCustomer) {
       logger.warn("Customer not found for update", { customerId: params.id });
-      return NextResponse.json(
-        { error: "Customer not found" },
-        { status: 404 },
-      );
+      return createApiErrorResponse(new Error("Customer not found"));
     }
 
     logger.info("Customer updated successfully", {
       email: updatedCustomer.email,
     });
 
-    return NextResponse.json({
-      success: true,
-      customer: updatedCustomer,
-    });
+    return createApiSuccessResponse(updatedCustomer);
   } catch (error) {
     logger.error("Error in customer update API PUT", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
+    return createApiErrorResponse(
+      error instanceof Error ? error : new Error(String(error)),
     );
   }
 }
@@ -540,26 +517,22 @@ export async function DELETE(
     const user = data?.user;
     if (userError || !user) {
       logger.error("User authentication failed", userError);
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return createApiErrorResponse(new AuthenticationError("Unauthorized"));
     }
     logger.debug("User authenticated", { email: user.email });
 
-    const { data: isAdmin, error: adminError } = await supabase.rpc(
-      "is_admin",
-      { user_id: user.id },
-    );
-    if (adminError) {
-      logger.error("Admin check error", adminError);
-      return NextResponse.json(
-        { error: "Admin verification failed" },
-        { status: 500 },
-      );
-    }
+    // Check admin authorization using service role to bypass any context/RLS issues
+    const { createServiceRoleClient } = await import("@/utils/supabase/server");
+    const serviceSupabase = createServiceRoleClient();
+
+    const { data: isAdmin } = await serviceSupabase.rpc("is_admin", {
+      user_id: user.id,
+    });
+
     if (!isAdmin) {
       logger.warn("User is not admin", { email: user.email });
-      return NextResponse.json(
-        { error: "Admin access required" },
-        { status: 403 },
+      return createApiErrorResponse(
+        new AuthorizationError("Admin access required"),
       );
     }
     logger.debug("Admin access confirmed", { email: user.email });
@@ -614,9 +587,8 @@ export async function DELETE(
     ).single();
 
     if (!existingCustomer) {
-      return NextResponse.json(
-        { error: "Customer not found or access denied" },
-        { status: 404 },
+      return createApiErrorResponse(
+        new Error("Customer not found or access denied"),
       );
     }
 
@@ -628,23 +600,18 @@ export async function DELETE(
 
     if (deleteError) {
       logger.error("Error deleting customer", deleteError);
-      return NextResponse.json(
-        { error: "Failed to delete customer" },
-        { status: 500 },
-      );
+      return createApiErrorResponse(new Error("Failed to delete customer"));
     }
 
     logger.info("Customer deleted successfully", { customerId: params.id });
 
-    return NextResponse.json({
-      success: true,
+    return createApiSuccessResponse({
       message: "Customer deleted successfully",
     });
   } catch (error) {
     logger.error("Error in customer delete API DELETE", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
+    return createApiErrorResponse(
+      error instanceof Error ? error : new Error(String(error)),
     );
   }
 }

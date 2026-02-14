@@ -9,10 +9,11 @@ interface POSReceiptProps {
   settings: any;
   branch: any;
   organization: any;
+  receiptType?: "sale" | "payment";
 }
 
 export const POSReceipt = forwardRef<HTMLDivElement, POSReceiptProps>(
-  ({ order, settings, branch, organization }, ref) => {
+  ({ order, settings, branch, organization, receiptType = "sale" }, ref) => {
     if (!order) return null;
 
     const isThermal = settings?.printer_type === "thermal";
@@ -57,6 +58,11 @@ export const POSReceipt = forwardRef<HTMLDivElement, POSReceiptProps>(
 
         {/* Info Grid */}
         <div className="border-t border-b border-black py-2 mb-4 space-y-1">
+          {receiptType === "payment" && (
+            <div className="text-center font-bold text-sm mb-2">
+              COMPROBANTE DE PAGO - SALDO PENDIENTE
+            </div>
+          )}
           <div className="flex justify-between">
             <span className="font-bold">ORDEN:</span>
             <span>#{order.order_number}</span>

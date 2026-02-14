@@ -1,7 +1,12 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { createClient } from "@/utils/supabase/server";
 import { appLogger as logger } from "@/lib/logger";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
+import { APIError } from "@/lib/api/errors";
+import {
+  createApiSuccessResponse,
+  createApiErrorResponse,
+} from "@/lib/api/response";
 
 /**
  * GET /api/admin/lens-matrices/calculate
@@ -24,7 +29,9 @@ export async function GET(request: NextRequest) {
       error: userError,
     } = await supabase.auth.getUser();
     if (userError || !user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return createApiErrorResponse(
+        new APIError("Unauthorized", 401, "UNAUTHORIZED"),
+      );
     }
 
     // Check admin status
@@ -32,9 +39,8 @@ export async function GET(request: NextRequest) {
       user_id: user.id,
     } as IsAdminParams)) as { data: IsAdminResult | null; error: Error | null };
     if (!isAdmin) {
-      return NextResponse.json(
-        { error: "Admin access required" },
-        { status: 403 },
+      return createApiErrorResponse(
+        new APIError("Admin access required", 403, "FORBIDDEN"),
       );
     }
 
@@ -51,32 +57,28 @@ export async function GET(request: NextRequest) {
 
     // Validate required parameters
     if (!lensFamilyId) {
-      return NextResponse.json(
-        { error: "lens_family_id is required" },
-        { status: 400 },
+      return createApiErrorResponse(
+        new APIError("lens_family_id is required", 400, "BAD_REQUEST"),
       );
     }
 
     if (!sphereParam) {
-      return NextResponse.json(
-        { error: "sphere is required" },
-        { status: 400 },
+      return createApiErrorResponse(
+        new APIError("sphere is required", 400, "BAD_REQUEST"),
       );
     }
 
     const sphere = parseFloat(sphereParam);
     if (isNaN(sphere)) {
-      return NextResponse.json(
-        { error: "sphere must be a valid number" },
-        { status: 400 },
+      return createApiErrorResponse(
+        new APIError("sphere must be a valid number", 400, "BAD_REQUEST"),
       );
     }
 
     const cylinder = cylinderParam ? parseFloat(cylinderParam) : 0;
     if (isNaN(cylinder)) {
-      return NextResponse.json(
-        { error: "cylinder must be a valid number" },
-        { status: 400 },
+      return createApiErrorResponse(
+        new APIError("cylinder must be a valid number", 400, "BAD_REQUEST"),
       );
     }
 
@@ -118,30 +120,26 @@ export async function GET(request: NextRequest) {
 
     if (error) {
       logger.error("Error calculating lens price", error);
-      return NextResponse.json(
-        {
-          error: "Error al calcular el precio del lente",
-          details: error.message,
-        },
-        { status: 500 },
+      return createApiErrorResponse(
+        new Error(`Error al calcular el precio del lente: ${error.message}`),
       );
     }
 
     // If no result found, return appropriate error
     if (!calculation || calculation.length === 0) {
-      return NextResponse.json(
-        {
-          error:
-            "No se encontró una matriz de precios para los parámetros especificados",
-        },
-        { status: 404 },
+      return createApiErrorResponse(
+        new APIError(
+          "No se encontró una matriz de precios para los parámetros especificados",
+          404,
+          "NOT_FOUND",
+        ),
       );
     }
 
     // The RPC function returns an array, get the first result
     const result = Array.isArray(calculation) ? calculation[0] : calculation;
 
-    return NextResponse.json({
+    return createApiSuccessResponse({
       calculation: {
         price: parseFloat(result.price),
         sourcing_type: result.sourcing_type,
@@ -150,9 +148,8 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     logger.error("Error in lens price calculation API", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
+    return createApiErrorResponse(
+      error instanceof Error ? error : new Error("Internal server error"),
     );
   }
 }

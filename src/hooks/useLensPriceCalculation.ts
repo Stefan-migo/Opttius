@@ -49,7 +49,7 @@ export function useLensPriceCalculation() {
         }
 
         const data = await response.json();
-        return data.calculation;
+        return data.data?.calculation || data.calculation;
       } catch (err: any) {
         const errorMessage =
           err.message || "Error al calcular el precio del lente";

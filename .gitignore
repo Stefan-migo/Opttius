@@ -43,7 +43,8 @@ next-env.d.ts
 # Supabase
 .supabase/
 
-# IDE
+# IDE / Tools
+.kilocode/
 .vscode/
 .idea/
 *.swp
