@@ -1,0 +1,7 @@
+# Exclude from Vercel deployment to reduce serverless function size
+.next/cache
+.git
+.qoder
+*.tsbuildinfo
+build-output.txt
+build-test.txt

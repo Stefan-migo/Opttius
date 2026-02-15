@@ -47,6 +47,7 @@ next-env.d.ts
 .kilocode/
 .vscode/
 .idea/
+.qoder/
 *.swp
 *.swo
 *~

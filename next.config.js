@@ -17,12 +17,23 @@ const nextConfig = {
     // typedRoutes: true, // Temporarily disabled
     // Externalize packages that use native binaries
     serverComponentsExternalPackages: ['@xenova/transformers', 'onnxruntime-node'],
-    // Exclude large ML packages from serverless bundles (250MB limit on Vercel)
+    // Exclude large files from serverless bundles (250MB limit on Vercel)
     outputFileTracingExcludes: {
       '*': [
         'node_modules/@xenova/**',
         'node_modules/onnxruntime-node/**',
         'node_modules/@huggingface/**',
+        '.next/cache/**',
+        '.git/**',
+        '.qoder/**',
+        'node_modules/.cache/**',
+      ],
+      // Chat route pulls in heavy AI deps - exclude build artifacts
+      '/api/admin/chat': [
+        '.next/cache/**',
+        '.git/**',
+        '.qoder/**',
+        'node_modules/.cache/**',
       ],
     },
   },
