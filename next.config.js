@@ -17,6 +17,14 @@ const nextConfig = {
     // typedRoutes: true, // Temporarily disabled
     // Externalize packages that use native binaries
     serverComponentsExternalPackages: ['@xenova/transformers', 'onnxruntime-node'],
+    // Exclude large ML packages from serverless bundles (250MB limit on Vercel)
+    outputFileTracingExcludes: {
+      '*': [
+        'node_modules/@xenova/**',
+        'node_modules/onnxruntime-node/**',
+        'node_modules/@huggingface/**',
+      ],
+    },
   },
   // Webpack configuration to handle native modules
   webpack: (config, { isServer }) => {
