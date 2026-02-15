@@ -29,6 +29,7 @@ const paymentRateLimitConfig =
     ? { ...rateLimitConfigs.payment, maxRequests: 50 }
     : rateLimitConfigs.payment;
 
+export const dynamic = "force-dynamic";
 export async function POST(request: NextRequest) {
   return (
     withRateLimit(paymentRateLimitConfig) as (
@@ -196,15 +197,13 @@ export async function POST(request: NextRequest) {
               cardId,
             );
           } catch (saveError) {
-            logger.warn(
-              "Failed to save card (non-blocking)",
-              {
-                error: saveError instanceof Error
+            logger.warn("Failed to save card (non-blocking)", {
+              error:
+                saveError instanceof Error
                   ? saveError.message
                   : String(saveError),
-                organizationId,
-              },
-            );
+              organizationId,
+            });
             // Do not fail the response; payment already succeeded
           }
         }

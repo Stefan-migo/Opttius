@@ -8,6 +8,7 @@ import { AuthorizationError } from "@/lib/api/errors";
  * GET /api/admin/saas-management/users/[id]
  * Obtener detalles completos de un usuario
  */
+export const dynamic = "force-dynamic";
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } },

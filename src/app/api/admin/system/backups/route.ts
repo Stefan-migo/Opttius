@@ -7,6 +7,7 @@ import { appLogger as logger } from "@/lib/logger";
  * GET /api/admin/system/backups
  * List all available backups from Supabase Storage for the user's organization
  */
+export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);

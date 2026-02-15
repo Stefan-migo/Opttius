@@ -10,6 +10,7 @@ import {
   createApiErrorResponse,
 } from "@/lib/api/response";
 
+export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
   const requestId = crypto.randomUUID();
 

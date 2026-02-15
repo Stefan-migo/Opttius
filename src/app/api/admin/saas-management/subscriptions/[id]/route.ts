@@ -8,6 +8,7 @@ import { AuthorizationError } from "@/lib/api/errors";
  * GET /api/admin/saas-management/subscriptions/[id]
  * Obtener detalles completos de una suscripción
  */
+export const dynamic = "force-dynamic";
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } },

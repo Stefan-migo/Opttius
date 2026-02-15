@@ -5,6 +5,7 @@ import { createClient } from "@/utils/supabase/server";
  * GET /api/checkout/gateways
  * Obtiene las pasarelas activas para el checkout
  */
+export const dynamic = "force-dynamic";
 export async function GET() {
   const supabase = await createClient();
 

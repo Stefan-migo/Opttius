@@ -12,6 +12,7 @@ import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
  * POST /api/admin/pos/pending-balance/pay
  * Record payment for pending balance order
  */
+export const dynamic = "force-dynamic";
 export async function POST(request: NextRequest) {
   try {
     const supabase = await createClient();

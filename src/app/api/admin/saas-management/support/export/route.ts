@@ -37,6 +37,7 @@ function rowToCsv(row: Record<string, unknown>): string {
  * GET /api/admin/saas-management/support/export
  * Export support tickets as CSV (root/dev only)
  */
+export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
   try {
     await requireRoot(request);

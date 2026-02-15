@@ -13,6 +13,7 @@ import type {
  * DELETE /api/admin/orders/[id]
  * Delete an order permanently (Admin or SuperAdmin, for cancelled orders only)
  */
+export const dynamic = "force-dynamic";
 export async function DELETE(
   request: NextRequest,
   { params }: { params: { id: string } },

@@ -10,6 +10,7 @@ import { FlowGateway } from "@/lib/payments/flow/gateway";
 import { PaymentService } from "@/lib/payments/services/payment-service";
 import { appLogger as logger } from "@/lib/logger";
 
+export const dynamic = "force-dynamic";
 export async function POST(request: NextRequest) {
   const supabase = createServiceRoleClient();
   const flowGateway = new FlowGateway();

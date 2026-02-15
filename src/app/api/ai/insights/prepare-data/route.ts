@@ -10,6 +10,7 @@ import type { InsightSection } from "@/lib/ai/insights/schemas";
  * Prepare real system data for insight generation
  * This endpoint aggregates data from various sources to prepare it for AI analysis
  */
+export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
   return withRateLimit(rateLimitConfigs.general)(request, async () => {
     try {

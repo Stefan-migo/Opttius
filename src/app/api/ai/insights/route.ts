@@ -14,6 +14,7 @@ const querySchema = z.object({
  * GET /api/ai/insights
  * Fetch insights for a specific section
  */
+export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
   return withRateLimit(rateLimitConfigs.general)(request, async () => {
     try {

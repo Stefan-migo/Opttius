@@ -4,6 +4,7 @@ import { getAllTools, getToolByName, getToolsByCategory } from "@/lib/ai/tools";
 import { appLogger as logger } from "@/lib/logger";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
 
+export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
   try {
     const supabase = await createClient();

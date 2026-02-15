@@ -13,6 +13,7 @@ import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
  * - cylinder: Cylinder value (default: 0)
  * - addition: Addition value for presbyopia (optional)
  */
+export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
   try {
     const supabase = await createClient();

@@ -11,6 +11,7 @@ import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
  * GET /api/admin/cash-register/close
  * Get daily sales summary for cash register closure
  */
+export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
   try {
     const supabase = await createClient();

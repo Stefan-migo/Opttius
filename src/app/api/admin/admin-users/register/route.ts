@@ -93,6 +93,7 @@ function getDefaultPermissions(role: string) {
   return rolePermissions[role] || rolePermissions.admin;
 }
 
+export const dynamic = "force-dynamic";
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();

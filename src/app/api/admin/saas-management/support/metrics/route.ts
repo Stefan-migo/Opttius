@@ -8,6 +8,7 @@ import { AuthorizationError } from "@/lib/api/errors";
  * GET /api/admin/saas-management/support/metrics
  * Obtener métricas de soporte SaaS (solo root/dev)
  */
+export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
   try {
     await requireRoot(request);
@@ -64,14 +65,20 @@ export async function GET(request: NextRequest) {
     let ticketsByPriorityQuery = supabaseServiceRole
       .from("saas_support_tickets")
       .select("priority");
-    
+
     if (startDate) {
-      ticketsByPriorityQuery = ticketsByPriorityQuery.gte("created_at", startDate);
+      ticketsByPriorityQuery = ticketsByPriorityQuery.gte(
+        "created_at",
+        startDate,
+      );
     }
     if (endDate) {
-      ticketsByPriorityQuery = ticketsByPriorityQuery.lte("created_at", endDate);
+      ticketsByPriorityQuery = ticketsByPriorityQuery.lte(
+        "created_at",
+        endDate,
+      );
     }
-    
+
     const { data: ticketsByPriority } = await ticketsByPriorityQuery;
 
     const priorityCounts = {
@@ -112,14 +119,14 @@ export async function GET(request: NextRequest) {
       .from("saas_support_tickets")
       .select("response_time_minutes")
       .not("response_time_minutes", "is", null);
-    
+
     if (startDate) {
       responseTimeQuery = responseTimeQuery.gte("created_at", startDate);
     }
     if (endDate) {
       responseTimeQuery = responseTimeQuery.lte("created_at", endDate);
     }
-    
+
     const { data: ticketsWithResponseTime } = await responseTimeQuery;
 
     const avgResponseTime =

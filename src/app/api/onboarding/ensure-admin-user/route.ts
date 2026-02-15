@@ -10,6 +10,7 @@ import { appLogger as logger } from "@/lib/logger";
  * Si no existe, lo crea con role 'store_manager'.
  * Esto permite que usuarios nuevos puedan acceder al onboarding.
  */
+export const dynamic = "force-dynamic";
 export async function POST(request: NextRequest) {
   try {
     const supabase = await createClient();

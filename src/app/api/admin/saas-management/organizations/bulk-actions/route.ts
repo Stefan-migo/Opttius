@@ -8,6 +8,7 @@ import { AuthorizationError } from "@/lib/api/errors";
  * POST /api/admin/saas-management/organizations/bulk-actions
  * Acciones masivas sobre organizaciones
  */
+export const dynamic = "force-dynamic";
 export async function POST(request: NextRequest) {
   try {
     await requireRoot(request);

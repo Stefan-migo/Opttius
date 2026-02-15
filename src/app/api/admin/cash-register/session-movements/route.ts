@@ -8,6 +8,7 @@ import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
  * GET /api/admin/cash-register/session-movements
  * Get all movements (payments) for a POS session
  */
+export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
   try {
     const supabase = await createClient();

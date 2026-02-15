@@ -10,6 +10,7 @@ import { parseAndValidateBody } from "@/lib/api/validation/zod-helpers";
  * PATCH /api/admin/saas-management/support/templates/[id]
  * Actualizar template (solo root/dev)
  */
+export const dynamic = "force-dynamic";
 export async function PATCH(
   request: NextRequest,
   { params }: { params: { id: string } },

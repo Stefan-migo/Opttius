@@ -11,6 +11,7 @@ import { PayPalGateway } from "@/lib/payments/paypal/gateway";
 import { PaymentService } from "@/lib/payments/services/payment-service";
 import { appLogger as logger } from "@/lib/logger";
 
+export const dynamic = "force-dynamic";
 export async function POST(request: NextRequest) {
   const supabase = createServiceRoleClient();
   const paypalGateway = new PayPalGateway();

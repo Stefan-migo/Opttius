@@ -8,6 +8,7 @@ import { AuthorizationError } from "@/lib/api/errors";
  * PATCH /api/admin/saas-management/organizations/[id]/branches/[branchId]
  * Actualizar sucursal
  */
+export const dynamic = "force-dynamic";
 export async function PATCH(
   request: NextRequest,
   { params }: { params: { id: string; branchId: string } },

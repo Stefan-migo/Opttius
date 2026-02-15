@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { appLogger as logger } from "@/lib/logger";
 
+export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
   try {
     // Since this is just a template download, we'll use static category IDs

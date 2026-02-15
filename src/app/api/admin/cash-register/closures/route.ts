@@ -8,6 +8,7 @@ import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
  * GET /api/admin/cash-register/closures
  * Get list of cash register closures
  */
+export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
   try {
     const supabase = await createClient();

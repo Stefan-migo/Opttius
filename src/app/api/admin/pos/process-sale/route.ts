@@ -18,6 +18,7 @@ import {
 import { BillingFactory } from "@/lib/billing/BillingFactory";
 import type { Order as BillingOrder } from "@/lib/billing/adapters/BillingAdapter";
 
+export const dynamic = "force-dynamic";
 export async function POST(request: NextRequest) {
   try {
     return await (withRateLimit(rateLimitConfigs.pos) as any)(

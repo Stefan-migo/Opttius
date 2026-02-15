@@ -8,6 +8,7 @@ import { AuthorizationError } from "@/lib/api/errors";
  * POST /api/admin/saas-management/reset-demo
  * Reset the Demo Optica database to initial seed state (solo root/dev)
  */
+export const dynamic = "force-dynamic";
 export async function POST(request: NextRequest) {
   try {
     await requireRoot(request);

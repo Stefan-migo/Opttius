@@ -8,6 +8,7 @@ import { AuthorizationError } from "@/lib/api/errors";
  * GET /api/admin/saas-management/support/search
  * Búsqueda rápida de organizaciones y usuarios para soporte
  */
+export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
   try {
     await requireRoot(request);

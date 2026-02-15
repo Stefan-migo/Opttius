@@ -10,6 +10,7 @@ import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
  * Retorna los datos del presupuesto en formato compatible con el carrito del POS
  * Permite que el presupuesto sea editado antes de procesar el pago
  */
+export const dynamic = "force-dynamic";
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> },

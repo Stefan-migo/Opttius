@@ -8,6 +8,7 @@ import { AuthorizationError } from "@/lib/api/errors";
  * POST /api/admin/saas-management/users/[id]/actions
  * Acciones sobre usuarios: cambiar organización, activar/desactivar, resetear contraseña
  */
+export const dynamic = "force-dynamic";
 export async function POST(
   request: NextRequest,
   { params }: { params: { id: string } },

@@ -8,6 +8,7 @@ import { AuthorizationError } from "@/lib/api/errors";
  * POST /api/admin/saas-management/organizations/[id]/actions
  * Acciones sobre organizaciones: suspender, activar, cambiar tier
  */
+export const dynamic = "force-dynamic";
 export async function POST(
   request: NextRequest,
   { params }: { params: { id: string } },

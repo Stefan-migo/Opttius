@@ -11,6 +11,7 @@ import { appLogger as logger } from "@/lib/logger";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
 import { NotificationService } from "@/lib/notifications/notification-service";
 
+export const dynamic = "force-dynamic";
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> },

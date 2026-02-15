@@ -14,6 +14,7 @@ import { organizationSlugSchema } from "@/lib/api/validation/organization-schema
  * Returns:
  * - { available: boolean, slug: string }
  */
+export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
   try {
     const supabase = await createClient();

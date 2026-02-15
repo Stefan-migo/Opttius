@@ -11,6 +11,7 @@ import { parseAndValidateBody } from "@/lib/api/validation/zod-helpers";
  * GET /api/admin/saas-management/support/tickets/[id]/messages
  * Obtener mensajes de un ticket
  */
+export const dynamic = "force-dynamic";
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } },

@@ -6,6 +6,7 @@
 import { NextResponse } from "next/server";
 import { createServiceRoleClient } from "@/utils/supabase/service-role";
 
+export const dynamic = "force-dynamic";
 export async function GET() {
   try {
     const supabase = createServiceRoleClient();

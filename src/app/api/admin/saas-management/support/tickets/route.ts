@@ -16,6 +16,7 @@ import { parseAndValidateBody } from "@/lib/api/validation/zod-helpers";
  * - Root/dev: puede ver todos los tickets
  * - Organizaciones: solo pueden ver sus propios tickets
  */
+export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
   try {
     const supabase = await createClient();
@@ -67,7 +68,9 @@ export async function GET(request: NextRequest) {
     let query = supabaseServiceRole
       .from("saas_support_tickets")
       .select("*", { count: "exact" })
-      .order(filters.sort_by || "created_at", { ascending: filters.sort_order === "asc" });
+      .order(filters.sort_by || "created_at", {
+        ascending: filters.sort_order === "asc",
+      });
 
     // Aplicar filtros
     // Si no es root, solo puede ver tickets de su organización

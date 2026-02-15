@@ -10,6 +10,7 @@ import { requireAuth } from "@/lib/api/middleware";
 import { getTierConfig, SubscriptionTier } from "@/lib/saas/tier-config";
 import { validateTierLimit } from "@/lib/saas/tier-validator";
 
+export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
   try {
     // Authenticate user

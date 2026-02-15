@@ -9,6 +9,7 @@ import { EmailNotificationService } from "@/lib/email/notifications";
  * GET /api/admin/saas-management/organizations
  * Listar todas las organizaciones con filtros (solo root/dev)
  */
+export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
   try {
     await requireRoot(request);

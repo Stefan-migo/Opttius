@@ -13,6 +13,7 @@ import type {
  * POST /api/admin/cash-register/reopen
  * Reopen a closed cash register session (admin or super_admin)
  */
+export const dynamic = "force-dynamic";
 export async function POST(request: NextRequest) {
   try {
     const supabase = await createClient();

@@ -10,6 +10,7 @@ import type {
  * GET /api/admin/users/search
  * Search registered users by email or name (for admin user creation)
  */
+export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;

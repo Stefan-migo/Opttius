@@ -23,6 +23,7 @@ const paymentRateLimitConfig =
     ? { ...rateLimitConfigs.payment, maxRequests: 50 }
     : rateLimitConfigs.payment;
 
+export const dynamic = "force-dynamic";
 export async function POST(request: NextRequest) {
   return (
     withRateLimit(paymentRateLimitConfig) as (

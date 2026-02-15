@@ -49,6 +49,7 @@ const TEST_SCENARIOS = {
   },
 };
 
+export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -265,8 +266,9 @@ async function simulateScenario(scenarioType: string) {
     details: action.metadata,
   }));
 
-  const incidents =
-    await incidentResponse.processSecurityEvents(securityEvents as any);
+  const incidents = await incidentResponse.processSecurityEvents(
+    securityEvents as any,
+  );
 
   // Get final assessment
   const baseline = await behavioralAnalytics.getUserBaseline(userId);

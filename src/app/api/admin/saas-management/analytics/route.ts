@@ -4,6 +4,7 @@ import { createServiceRoleClient } from "@/utils/supabase/service-role";
 import { appLogger as logger } from "@/lib/logger";
 import { AuthorizationError } from "@/lib/api/errors";
 
+export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
   try {
     // Verificar que el usuario es root/dev

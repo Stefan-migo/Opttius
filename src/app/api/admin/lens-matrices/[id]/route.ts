@@ -9,6 +9,7 @@ import {
   validationErrorResponse,
 } from "@/lib/api/validation/zod-helpers";
 
+export const dynamic = "force-dynamic";
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } },

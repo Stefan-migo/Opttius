@@ -10,6 +10,7 @@ import { parseAndValidateBody } from "@/lib/api/validation/zod-helpers";
  * GET /api/admin/saas-management/support/templates
  * Listar templates de soporte SaaS (solo root/dev)
  */
+export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
   try {
     await requireRoot(request);

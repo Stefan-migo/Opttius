@@ -6,6 +6,7 @@ import { appLogger as logger } from "@/lib/logger";
  * GET /api/admin/saas-management/payments
  * Obtiene la configuración de todas las pasarelas
  */
+export const dynamic = "force-dynamic";
 export async function GET() {
   try {
     const supabase = await createClient();

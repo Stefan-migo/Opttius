@@ -29,6 +29,7 @@ const generateBodySchema = z.object({
  * Generate insights for a specific section
  * This endpoint is used by cron jobs or manual triggers
  */
+export const dynamic = "force-dynamic";
 export async function POST(request: NextRequest) {
   return withRateLimit(rateLimitConfigs.general)(request, async () => {
     try {

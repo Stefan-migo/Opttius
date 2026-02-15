@@ -8,6 +8,7 @@ import { parseAndValidateBody } from "@/lib/api/validation/zod-helpers";
  * POST /api/support/create-ticket
  * Crear ticket de soporte SaaS desde portal público (sin autenticación)
  */
+export const dynamic = "force-dynamic";
 export async function POST(request: NextRequest) {
   try {
     const supabaseServiceRole = createServiceRoleClient();
@@ -114,7 +115,9 @@ export async function POST(request: NextRequest) {
         ticket.ticket_number,
         ticket.subject,
         body.requester_email,
-        Array.isArray(ticket.organization) ? (ticket.organization[0] as any)?.name : (ticket.organization as any)?.name,
+        Array.isArray(ticket.organization)
+          ? (ticket.organization[0] as any)?.name
+          : (ticket.organization as any)?.name,
       );
     } catch (notifError) {
       logger.warn("Failed to create support notification", notifError);

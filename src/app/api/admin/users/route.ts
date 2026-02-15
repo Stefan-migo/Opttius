@@ -7,6 +7,8 @@ import {
 } from "@/lib/api/response";
 import { asyncHandler, AuthenticationError } from "@/lib/api/errors";
 
+export const dynamic = "force-dynamic";
+
 export const GET = asyncHandler(async (request: NextRequest) => {
   const supabase = await createClient();
 
@@ -39,6 +41,6 @@ export const GET = asyncHandler(async (request: NextRequest) => {
       users: adminUsers || [],
       count: adminUsers?.length || 0,
     },
-    { meta: { message: "Admin users retrieved successfully" } }
+    { meta: { message: "Admin users retrieved successfully" } },
   );
 });

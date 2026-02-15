@@ -18,6 +18,7 @@ const ALLOWED_MIME_TYPES = [
  *
  * Handles file uploads to Cloudflare R2 with fallback to Supabase Storage.
  */
+export const dynamic = "force-dynamic";
 export async function POST(request: NextRequest) {
   try {
     const supabase = await createClient();

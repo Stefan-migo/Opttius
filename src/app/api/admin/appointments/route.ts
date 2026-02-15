@@ -12,10 +12,10 @@ import type {
   CheckAppointmentAvailabilityParams,
   CheckAppointmentAvailabilityResult,
 } from "@/types/supabase-rpc";
-import { 
+import {
   ValidationError,
   AuthenticationError,
-  AuthorizationError 
+  AuthorizationError,
 } from "@/lib/api/errors";
 import {
   createPaginatedResponse,
@@ -30,12 +30,13 @@ import {
   validationErrorResponse,
 } from "@/lib/api/validation/zod-helpers";
 
+export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
   const requestId = crypto.randomUUID();
-  
+
   try {
     logger.info("Appointments API GET called", { requestId });
-    
+
     const supabase = await createClient();
 
     // Check admin authorization
@@ -44,7 +45,10 @@ export async function GET(request: NextRequest) {
       error: userError,
     } = await supabase.auth.getUser();
     if (userError || !user) {
-      logger.error("User authentication failed", { error: userError, requestId });
+      logger.error("User authentication failed", {
+        error: userError,
+        requestId,
+      });
       throw new AuthenticationError("Unauthorized");
     }
 
@@ -209,15 +213,12 @@ export async function GET(request: NextRequest) {
     });
 
     // Use standardized success response (no pagination for now)
-    return createApiSuccessResponse(
-      appointmentsWithRelations,
-      { requestId }
-    );
+    return createApiSuccessResponse(appointmentsWithRelations, { requestId });
   } catch (error) {
     logger.error("Error in appointments API GET", { error, requestId });
     return createApiErrorResponse(
       error instanceof Error ? error : new Error("Internal server error"),
-      { requestId }
+      { requestId },
     );
   }
 }
@@ -346,33 +347,38 @@ export async function POST(request: NextRequest) {
     const forceCreate = body.force_create === true;
 
     if (forceCreate) {
-      logger.warn("Forcing appointment creation - skipping availability check", {
-        date: validatedBody.appointment_date,
-        time: normalizedTime,
-      });
+      logger.warn(
+        "Forcing appointment creation - skipping availability check",
+        {
+          date: validatedBody.appointment_date,
+          time: normalizedTime,
+        },
+      );
       isAvailable = true;
     } else {
       try {
         // Extract duration from body (already validated)
-        const durationMinutes = body.duration_minutes || validatedBody.duration_minutes || 30;
+        const durationMinutes =
+          body.duration_minutes || validatedBody.duration_minutes || 30;
 
-        logger.info("Checking availability using get_available_time_slots for consistency", {
-          date: validatedBody.appointment_date,
-          time: timeForRPC,
-          duration: durationMinutes,
-          branchId: finalBranchId,
-        });
+        logger.info(
+          "Checking availability using get_available_time_slots for consistency",
+          {
+            date: validatedBody.appointment_date,
+            time: timeForRPC,
+            duration: durationMinutes,
+            branchId: finalBranchId,
+          },
+        );
 
         // Call get_available_time_slots to get all available slots
-        const { data: slots, error: slotsError } = (await supabaseServiceRole.rpc(
-          "get_available_time_slots",
-          {
+        const { data: slots, error: slotsError } =
+          (await supabaseServiceRole.rpc("get_available_time_slots", {
             p_date: validatedBody.appointment_date,
             p_duration_minutes: durationMinutes,
             p_staff_id: (validatedBody as any).assigned_to || null,
             p_branch_id: finalBranchId,
-          },
-        )) as { data: any[] | null; error: Error | null };
+          })) as { data: any[] | null; error: Error | null };
 
         if (slotsError) {
           logger.error("Error fetching available slots", { error: slotsError });
@@ -380,7 +386,7 @@ export async function POST(request: NextRequest) {
         } else if (slots && slots.length > 0) {
           // Find the specific time slot in the results
           const normalizedTimeForCompare = timeForRPC.substring(0, 5); // HH:MM format
-          
+
           const matchingSlot = slots.find((slot: any) => {
             let slotTime = slot.time_slot;
             // Handle different TIME formats from PostgreSQL
@@ -399,14 +405,19 @@ export async function POST(request: NextRequest) {
           if (matchingSlot) {
             // Handle boolean availability
             const slotAvailable = matchingSlot.available;
-            isAvailable = slotAvailable === true || slotAvailable === "t" || slotAvailable === "true";
-            
+            isAvailable =
+              slotAvailable === true ||
+              slotAvailable === "t" ||
+              slotAvailable === "true";
+
             logger.info("Slot availability check result", {
               time: normalizedTimeForCompare,
               slotAvailable: matchingSlot.available,
               isAvailable,
               totalSlots: slots.length,
-              availableSlots: slots.filter((s: any) => s.available === true || s.available === "t").length,
+              availableSlots: slots.filter(
+                (s: any) => s.available === true || s.available === "t",
+              ).length,
             });
           } else {
             logger.warn("Time slot not found in available slots list", {

@@ -15,6 +15,7 @@ const DEMO_ORG_ID =
  * Returns:
  * - { success: boolean, organizationId: string }
  */
+export const dynamic = "force-dynamic";
 export async function POST(request: NextRequest) {
   try {
     const supabase = await createClient();

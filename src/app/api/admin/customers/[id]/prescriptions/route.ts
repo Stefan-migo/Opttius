@@ -9,6 +9,7 @@ import {
 } from "@/lib/api/response";
 
 // GET - Get all prescriptions for a customer
+export const dynamic = "force-dynamic";
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> },

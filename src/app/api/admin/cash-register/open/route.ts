@@ -15,6 +15,7 @@ const openCashRegisterSchema = z.object({
   opening_cash_amount: z.number().min(0).default(0),
 });
 
+export const dynamic = "force-dynamic";
 export async function POST(request: NextRequest) {
   try {
     return await (withRateLimit(rateLimitConfigs.modification) as any)(

@@ -3,6 +3,7 @@ import { createClient } from "@/utils/supabase/server";
 import { validateBranchAccess } from "@/lib/api/branch-middleware";
 import { appLogger as logger } from "@/lib/logger";
 
+export const dynamic = "force-dynamic";
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> },

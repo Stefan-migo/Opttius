@@ -1,18 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClientFromRequest } from "@/utils/supabase/server";
 
+export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
   try {
     const { getUser } = await createClientFromRequest(request);
-    const {
-      data: userData,
-      error: userError,
-    } = await getUser();
-    
+    const { data: userData, error: userError } = await getUser();
+
     if (userError || !userData || !("user" in userData) || !userData.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-    
+
     const user = userData.user;
 
     if (userError || !user) {
@@ -70,15 +68,12 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const { getUser } = await createClientFromRequest(request);
-    const {
-      data: userData,
-      error: userError,
-    } = await getUser();
-    
+    const { data: userData, error: userError } = await getUser();
+
     if (userError || !userData || !("user" in userData) || !userData.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-    
+
     const user = userData.user;
 
     if (userError || !user) {

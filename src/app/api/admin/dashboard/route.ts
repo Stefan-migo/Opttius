@@ -12,6 +12,8 @@ import { AuthenticationError, AuthorizationError } from "@/lib/api/errors";
 /**
  * Helper to get YYYY-MM-DD date string in local timezone (not UTC)
  */
+export const dynamic = "force-dynamic";
+
 function getLocalDateString(date: Date): string {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, "0");

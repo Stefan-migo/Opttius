@@ -16,6 +16,7 @@ function getBackUrl(): string {
   return `${base.replace(/\/$/, "")}/checkout/result`;
 }
 
+export const dynamic = "force-dynamic";
 export async function GET() {
   const supabase = await createClient();
   const {

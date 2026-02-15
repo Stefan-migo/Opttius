@@ -17,6 +17,7 @@ import { createOrganizationSchema } from "@/lib/api/validation/organization-sche
  * Returns:
  * - { organization: { id, name, slug, subscription_tier } }
  */
+export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
   try {
     const supabase = await createClient();

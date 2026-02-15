@@ -3,6 +3,7 @@ import { createClient } from "@/utils/supabase/server";
 import { MercadoPagoConfig, Payment } from "mercadopago";
 import { appLogger as logger } from "@/lib/logger";
 
+export const dynamic = "force-dynamic";
 export async function POST(request: NextRequest) {
   try {
     const supabase = await createClient();

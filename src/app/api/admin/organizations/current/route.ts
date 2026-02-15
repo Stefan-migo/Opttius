@@ -11,6 +11,7 @@ import {
  * GET /api/admin/organizations/current
  * Obtiene la información completa de la organización del usuario actual
  */
+export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
   try {
     const supabase = await createClient();

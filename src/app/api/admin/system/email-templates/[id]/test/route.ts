@@ -3,6 +3,7 @@ import { createClient } from "@/utils/supabase/server";
 import { sendEmail } from "@/lib/email/client";
 import { appLogger as logger } from "@/lib/logger";
 
+export const dynamic = "force-dynamic";
 export async function POST(
   request: NextRequest,
   { params }: { params: { id: string } },

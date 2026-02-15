@@ -26,6 +26,7 @@ function mergeConfigsByScope(
   return Array.from(byKey.values()).map(({ config }) => config);
 }
 
+export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);

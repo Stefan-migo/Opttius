@@ -9,6 +9,7 @@ import type {
 } from "@/types/supabase-rpc";
 
 // GET: Get branch access for an admin user
+export const dynamic = "force-dynamic";
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> },

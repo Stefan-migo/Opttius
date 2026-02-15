@@ -19,6 +19,7 @@ import {
  * - addition: Addition value for presbyopia (optional)
  * - sourcing_type: 'stock' or 'surfaced' (optional)
  */
+export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
   try {
     const supabase = await createClient();

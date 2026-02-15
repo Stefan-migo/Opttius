@@ -19,6 +19,7 @@ import {
  * - axis: Axis value for toric lenses (optional)
  * - addition: Addition value for multifocal lenses (optional)
  */
+export const dynamic = "force-dynamic";
 export async function POST(request: NextRequest) {
   try {
     const supabase = await createClient();

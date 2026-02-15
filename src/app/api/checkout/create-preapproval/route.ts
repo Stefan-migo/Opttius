@@ -35,6 +35,7 @@ const baseUrl =
   "http://localhost:3000";
 const backUrl = `${baseUrl.replace(/\/$/, "")}/checkout/result`;
 
+export const dynamic = "force-dynamic";
 export async function POST(request: NextRequest) {
   return (
     withRateLimit(paymentRateLimitConfig) as (

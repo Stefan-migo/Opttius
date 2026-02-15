@@ -9,6 +9,7 @@ import { withSecurityHeaders } from "@/lib/api/middleware";
  *
  * Retorna información sobre los headers aplicados
  */
+export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
   try {
     // Crear respuesta básica

@@ -6,6 +6,7 @@ import { appLogger as logger } from "@/lib/logger";
  * GET /api/support/ticket/[ticketNumber]
  * Obtener información de un ticket público por su número
  */
+export const dynamic = "force-dynamic";
 export async function GET(
   request: NextRequest,
   { params }: { params: { ticketNumber: string } },

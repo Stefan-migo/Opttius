@@ -5,10 +5,10 @@ import { getBranchContext, addBranchFilter } from "@/lib/api/branch-middleware";
 import { NotificationService } from "@/lib/notifications/notification-service";
 import { appLogger as logger } from "@/lib/logger";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
-import { 
+import {
   ValidationError,
   AuthenticationError,
-  AuthorizationError 
+  AuthorizationError,
 } from "@/lib/api/errors";
 import {
   createPaginatedResponse,
@@ -21,12 +21,13 @@ import {
   validationErrorResponse,
 } from "@/lib/api/validation/zod-helpers";
 
+export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
   const requestId = crypto.randomUUID();
-  
+
   try {
     logger.info("Work Orders API GET called", { requestId });
-    
+
     const supabase = await createClient();
 
     // Check admin authorization
@@ -35,7 +36,10 @@ export async function GET(request: NextRequest) {
       error: userError,
     } = await supabase.auth.getUser();
     if (userError || !user) {
-      logger.error("User authentication failed", { error: userError, requestId });
+      logger.error("User authentication failed", {
+        error: userError,
+        requestId,
+      });
       throw new AuthenticationError("Unauthorized");
     }
 
@@ -84,13 +88,13 @@ export async function GET(request: NextRequest) {
     const { data: workOrders, error, count } = await query.range(from, to);
 
     if (error) {
-      logger.error("Error fetching work orders", { 
-        error, 
+      logger.error("Error fetching work orders", {
+        error,
         errorDetails: JSON.stringify(error, null, 2),
         errorCode: error.code,
         errorMessage: error.message,
         errorHint: error.hint,
-        requestId 
+        requestId,
       });
       throw new Error(`Failed to fetch work orders: ${error.message}`);
     }
@@ -205,7 +209,7 @@ export async function GET(request: NextRequest) {
     logger.error("Error in work orders API GET", { error, requestId });
     return createApiErrorResponse(
       error instanceof Error ? error : new Error("Internal server error"),
-      { requestId }
+      { requestId },
     );
   }
 }

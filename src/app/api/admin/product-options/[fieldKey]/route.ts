@@ -5,6 +5,7 @@ import { appLogger as logger } from "@/lib/logger";
 const supabase = createServiceRoleClient();
 
 // GET - Fetch options for a specific field key
+export const dynamic = "force-dynamic";
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ fieldKey: string }> },

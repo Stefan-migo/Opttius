@@ -9,6 +9,7 @@ import { parseAndValidateBody } from "@/lib/api/validation/zod-helpers";
  * GET /api/admin/optical-support/tickets/[id]
  * Obtener detalles de un ticket específico
  */
+export const dynamic = "force-dynamic";
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } },

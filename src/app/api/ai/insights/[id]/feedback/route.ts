@@ -9,6 +9,7 @@ import { withRateLimit, rateLimitConfigs } from "@/lib/api/middleware";
  * POST /api/ai/insights/:id/feedback
  * Submit feedback for an insight
  */
+export const dynamic = "force-dynamic";
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> },

@@ -15,6 +15,7 @@ import {
 } from "@/lib/api/errors";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
 
+export const dynamic = "force-dynamic";
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } },

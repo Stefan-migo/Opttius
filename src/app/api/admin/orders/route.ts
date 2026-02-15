@@ -5,10 +5,10 @@ import { appLogger as logger } from "@/lib/logger";
 import { EmailNotificationService } from "@/lib/email/notifications";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
 import { withRateLimit, rateLimitConfigs } from "@/lib/api/middleware";
-import { 
+import {
   RateLimitError,
   AuthenticationError,
-  AuthorizationError 
+  AuthorizationError,
 } from "@/lib/api/errors";
 import {
   createPaginatedResponse,
@@ -16,9 +16,10 @@ import {
   extractPaginationParams,
 } from "@/lib/api/response";
 
+export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
   const requestId = crypto.randomUUID();
-  
+
   try {
     logger.info("Admin Orders API GET called", { requestId });
     const { client: supabase, getUser } =
@@ -28,7 +29,10 @@ export async function GET(request: NextRequest) {
     const { data, error: userError } = await getUser();
     const user = data?.user;
     if (userError || !user) {
-      logger.error("User authentication failed", { error: userError, requestId });
+      logger.error("User authentication failed", {
+        error: userError,
+        requestId,
+      });
       throw new AuthenticationError("Unauthorized");
     }
     logger.debug("User authenticated", { email: user.email, requestId });
@@ -160,7 +164,10 @@ export async function GET(request: NextRequest) {
     const { data: orders, error: ordersError, count } = await query;
 
     if (ordersError) {
-      logger.error("Error fetching admin orders", { error: ordersError, requestId });
+      logger.error("Error fetching admin orders", {
+        error: ordersError,
+        requestId,
+      });
       throw new Error(`Failed to fetch orders: ${ordersError.message}`);
     }
 
@@ -204,7 +211,7 @@ export async function GET(request: NextRequest) {
     logger.error("Admin orders API GET error", { error, requestId });
     return createApiErrorResponse(
       error instanceof Error ? error : new Error("Internal server error"),
-      { requestId }
+      { requestId },
     );
   }
 }

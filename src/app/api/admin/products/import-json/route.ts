@@ -28,6 +28,7 @@ interface ProductImport {
   status?: "active" | "draft" | "archived";
 }
 
+export const dynamic = "force-dynamic";
 export async function POST(request: NextRequest) {
   try {
     const supabase = await createClient();

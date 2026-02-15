@@ -13,6 +13,7 @@ import type {
  * POST /api/admin/orders/[id]/cancel
  * Cancel/void an order (Admin or SuperAdmin; Admin only for orders in their branch)
  */
+export const dynamic = "force-dynamic";
 export async function POST(
   request: NextRequest,
   { params }: { params: { id: string } },

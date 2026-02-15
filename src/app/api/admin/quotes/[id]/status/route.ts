@@ -5,6 +5,7 @@ import { getBranchContext, addBranchFilter } from "@/lib/api/branch-middleware";
 import { appLogger as logger } from "@/lib/logger";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
 
+export const dynamic = "force-dynamic";
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> },

@@ -7,6 +7,7 @@ import { withRateLimit, rateLimitConfigs } from "@/lib/api/middleware";
  * POST /api/ai/insights/:id/dismiss
  * Dismiss an insight
  */
+export const dynamic = "force-dynamic";
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> },

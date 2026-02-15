@@ -26,6 +26,7 @@ const DEMO_ORG_ID =
  * Returns:
  * - { organization: {...}, branch: {...} }
  */
+export const dynamic = "force-dynamic";
 export async function POST(request: NextRequest) {
   try {
     const supabase = await createClient();

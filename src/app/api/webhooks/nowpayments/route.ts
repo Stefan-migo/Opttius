@@ -15,6 +15,7 @@ import { appLogger as logger } from "@/lib/logger";
  * POST /api/webhooks/nowpayments
  * Handles IPN callbacks from NOWPayments
  */
+export const dynamic = "force-dynamic";
 export async function POST(request: NextRequest) {
   try {
     logger.info("NOWPayments webhook received");

@@ -7,6 +7,7 @@ import { appLogger as logger } from "@/lib/logger";
  * GET /api/admin/saas-management/backups
  * List all SaaS full backups
  */
+export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
   try {
     const supabase = await createClient();

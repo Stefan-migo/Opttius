@@ -9,6 +9,7 @@ import {
 } from "@/lib/api/response";
 import { APIError } from "@/lib/api/errors";
 
+export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
   try {
     const supabase = await createClient();

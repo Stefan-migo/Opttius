@@ -11,6 +11,7 @@ import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
  * GET /api/admin/cash-register/closures/[id]
  * Get a specific cash register closure with details
  */
+export const dynamic = "force-dynamic";
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> },

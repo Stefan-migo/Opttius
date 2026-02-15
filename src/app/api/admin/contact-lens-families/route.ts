@@ -17,6 +17,7 @@ import {
 } from "@/lib/api/response";
 import { z } from "zod";
 
+export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
   try {
     const supabase = await createClient();

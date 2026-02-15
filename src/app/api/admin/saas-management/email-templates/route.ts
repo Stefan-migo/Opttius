@@ -15,6 +15,8 @@ import {
   mapPostgresError,
 } from "@/lib/errors/comprehensive-handler";
 
+export const dynamic = "force-dynamic";
+
 export const GET = handleGet(
   async (request, { requestId }) => {
     // Require root or dev role for SaaS management

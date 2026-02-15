@@ -12,6 +12,7 @@ import { getSubscriptionStatus } from "@/lib/saas/subscription-status";
 import { canUpgrade } from "@/lib/saas/tier-config";
 import type { SubscriptionTier } from "@/lib/saas/tier-config";
 
+export const dynamic = "force-dynamic";
 export async function POST(request: NextRequest) {
   try {
     const supabase = await createClient();

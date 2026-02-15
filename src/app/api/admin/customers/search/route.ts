@@ -7,6 +7,7 @@ import { withRateLimit, rateLimitConfigs } from "@/lib/api/middleware";
 import { RateLimitError } from "@/lib/api/errors";
 import { createApiSuccessResponse } from "@/lib/api/response";
 
+export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
   const requestId = crypto.randomUUID();
   try {

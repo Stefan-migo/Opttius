@@ -27,6 +27,7 @@ const billingSettingsSchema = z.object({
   auto_print_receipt: z.boolean().optional().default(true),
 });
 
+export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
   try {
     return await (withRateLimit(rateLimitConfigs.general) as any)(

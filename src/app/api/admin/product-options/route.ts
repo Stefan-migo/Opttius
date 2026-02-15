@@ -5,6 +5,7 @@ import { appLogger as logger } from "@/lib/logger";
 const supabase = createServiceRoleClient();
 
 // GET - Fetch all option fields with their values
+export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);

@@ -14,6 +14,7 @@ import { getBranchContext } from "@/lib/api/branch-middleware";
  * Listar tickets de soporte interno de la óptica con filtros
  * Solo usuarios de la misma organización pueden ver sus tickets
  */
+export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
   try {
     const supabase = await createClient();
@@ -45,7 +46,8 @@ export async function GET(request: NextRequest) {
     let organizationId = adminUser.organization_id;
 
     if (!organizationId && isRoot) {
-      organizationId = (process.env.NEXT_PUBLIC_ROOT_ORG_ID as string) || undefined
+      organizationId =
+        (process.env.NEXT_PUBLIC_ROOT_ORG_ID as string) || undefined;
     }
 
     if (!organizationId) {
@@ -92,7 +94,9 @@ export async function GET(request: NextRequest) {
         { count: "exact" },
       )
       .eq("organization_id", organizationId) // Solo tickets de su organización
-      .order((filters.sort_by || "created_at") as any, { ascending: filters.sort_order === "asc" });
+      .order((filters.sort_by || "created_at") as any, {
+        ascending: filters.sort_order === "asc",
+      });
 
     // Aplicar filtros
     if (filters.branch_id) {
@@ -194,7 +198,8 @@ export async function POST(request: NextRequest) {
     let organizationId = adminUser.organization_id;
 
     if (!organizationId && isRoot) {
-      organizationId = (process.env.NEXT_PUBLIC_ROOT_ORG_ID as string) || undefined
+      organizationId =
+        (process.env.NEXT_PUBLIC_ROOT_ORG_ID as string) || undefined;
     }
 
     if (!organizationId) {

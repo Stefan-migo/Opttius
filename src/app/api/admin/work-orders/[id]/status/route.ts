@@ -7,6 +7,7 @@ import { appLogger as logger } from "@/lib/logger";
 import { EmailNotificationService } from "@/lib/email/notifications";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
 
+export const dynamic = "force-dynamic";
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> },

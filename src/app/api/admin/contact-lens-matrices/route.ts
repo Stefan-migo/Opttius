@@ -11,6 +11,7 @@ import {
 import { ValidationError } from "@/lib/api/errors";
 import { z } from "zod";
 
+export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
   try {
     const supabase = await createClient();

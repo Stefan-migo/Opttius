@@ -11,6 +11,7 @@ import type {
   TimeSlot,
 } from "@/types/supabase-rpc";
 
+export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
   try {
     const supabase = await createClient();

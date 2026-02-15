@@ -7,6 +7,7 @@ import type {
   GetAdminRoleResult,
 } from "@/types/supabase-rpc";
 
+export const dynamic = "force-dynamic";
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } },

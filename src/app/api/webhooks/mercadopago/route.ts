@@ -83,9 +83,7 @@ async function processWebhook(request: NextRequest): Promise<NextResponse> {
         }
         const preapproval = await (
           mpGateway as {
-            getPreApproval: (
-              id: string,
-            ) => Promise<{
+            getPreApproval: (id: string) => Promise<{
               id: string;
               status: string;
               external_reference?: string | null;
@@ -362,6 +360,7 @@ async function processWebhook(request: NextRequest): Promise<NextResponse> {
   }
 }
 
+export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
   return processWebhook(request);
 }
