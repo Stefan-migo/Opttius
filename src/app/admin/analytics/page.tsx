@@ -59,6 +59,7 @@ interface AnalyticsData {
   kpis: {
     totalRevenue: number;
     posRevenue: number;
+    posTransactionCount?: number;
     workOrdersRevenue: number;
     revenueGrowth: number;
     totalOrders: number;
@@ -179,7 +180,7 @@ export default function AnalyticsPage() {
       }
 
       const data = await response.json();
-      setAnalytics(data.analytics);
+      setAnalytics(data.data?.analytics ?? data.analytics ?? null);
       setError(null);
     } catch (err) {
       console.error("Error fetching analytics:", err);
@@ -473,7 +474,9 @@ export default function AnalyticsPage() {
                 <div className="flex items-center gap-1 mt-2">
                   <ShoppingCart className="h-3 w-3 text-gray-400" />
                   <p className="text-xs text-gray-600 dark:text-gray-400">
-                    {analytics.kpis.totalOrders} transacciones
+                    {analytics.kpis.posTransactionCount ??
+                      analytics.kpis.totalOrders}{" "}
+                    transacciones
                   </p>
                 </div>
               </div>

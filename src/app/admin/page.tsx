@@ -33,6 +33,13 @@ import {
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -206,6 +213,7 @@ export default function AdminDashboard() {
   const [data, setData] = useState<DashboardData>(defaultDashboardData);
   const [error, setError] = useState<string | null>(null);
   const [isAppointmentModalOpen, setIsAppointmentModalOpen] = useState(false);
+  const [revenuePeriod, setRevenuePeriod] = useState<string>("7");
 
   const fetchDashboardData = async () => {
     try {
@@ -222,7 +230,11 @@ export default function AdminDashboard() {
         headers["x-branch-id"] = "global";
       }
 
-      const response = await fetch("/api/admin/dashboard", { headers });
+      const params = new URLSearchParams({ period: revenuePeriod });
+      const response = await fetch(
+        `/api/admin/dashboard?${params.toString()}`,
+        { headers },
+      );
 
       if (!response.ok) {
         throw new Error("Failed to fetch dashboard data");
@@ -247,7 +259,7 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     fetchDashboardData();
-  }, [currentBranchId, isGlobalView]);
+  }, [currentBranchId, isGlobalView, revenuePeriod]);
 
   const getAppointmentStatusBadge = (status: string) => {
     switch (status) {
@@ -640,16 +652,32 @@ export default function AdminDashboard() {
         {/* Revenue Trend Chart */}
         <Card className="border-none bg-admin-bg-tertiary shadow-soft overflow-hidden group">
           <CardHeader className="pb-2">
-            <div className="flex items-center gap-2 mb-1">
-              <div className="h-8 w-8 bg-admin-success/10 rounded-lg flex items-center justify-center">
-                <TrendingUp className="h-4 w-4 text-admin-success" />
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-1">
+              <div className="flex items-center gap-2">
+                <div className="h-8 w-8 bg-admin-success/10 rounded-lg flex items-center justify-center">
+                  <TrendingUp className="h-4 w-4 text-admin-success" />
+                </div>
+                <CardTitle className="text-lg font-bold text-admin-text-primary tracking-tight">
+                  Evolución de Ingresos
+                </CardTitle>
               </div>
-              <CardTitle className="text-lg font-bold text-admin-text-primary tracking-tight">
-                Evolución de Ingresos
-              </CardTitle>
+              <Select value={revenuePeriod} onValueChange={setRevenuePeriod}>
+                <SelectTrigger className="w-[140px] h-9 text-xs font-bold border-admin-border-primary/50 bg-admin-bg-secondary">
+                  <SelectValue placeholder="Período" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="7">7 días</SelectItem>
+                  <SelectItem value="30">30 días</SelectItem>
+                  <SelectItem value="90">3 meses</SelectItem>
+                  <SelectItem value="365">12 meses</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <p className="text-xs font-bold text-admin-text-tertiary uppercase tracking-wider">
-              Análisis de los últimos 7 días
+              {revenuePeriod === "7" && "Análisis de los últimos 7 días"}
+              {revenuePeriod === "30" && "Análisis de los últimos 30 días"}
+              {revenuePeriod === "90" && "Análisis de los últimos 3 meses"}
+              {revenuePeriod === "365" && "Análisis de los últimos 12 meses"}
             </p>
           </CardHeader>
           <CardContent>

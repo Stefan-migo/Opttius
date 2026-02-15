@@ -82,12 +82,7 @@ export async function GET(request: NextRequest) {
             "organization_id",
             branchContext.organizationId,
           );
-
-          if (currentBranchId) {
-            productsQuery = productsQuery.or(
-              `branch_id.is.null,branch_id.eq.${currentBranchId}`,
-            );
-          }
+          // Shared catalog: no branch_id filter - show all org products
         } else if (!branchContext.isSuperAdmin) {
           return createApiSuccessResponse([]);
         }

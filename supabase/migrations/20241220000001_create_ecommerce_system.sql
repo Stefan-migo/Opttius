@@ -1,3 +1,7 @@
+-- Ensure uuid_generate_v4 is available in public (Supabase Cloud installs uuid-ossp in extensions schema)
+CREATE OR REPLACE FUNCTION public.uuid_generate_v4() RETURNS uuid
+  LANGUAGE sql AS 'SELECT extensions.uuid_generate_v4()';
+
 -- Create product categories table
 CREATE TABLE public.categories (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),

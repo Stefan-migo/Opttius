@@ -16,11 +16,20 @@ export async function POST(request: NextRequest) {
     const { error } = await supabaseServiceRole.rpc("reset_demo_organization");
 
     if (error) {
-      logger.error("Error resetting demo organization", { error });
+      const errMsg = (error as { message?: string }).message ?? String(error);
+      const errDetails = (error as { details?: string }).details;
+      const errCode = (error as { code?: string }).code;
+      const errHint = (error as { hint?: string }).hint;
+      logger.error("Error resetting demo organization", {
+        message: errMsg,
+        details: errDetails,
+        code: errCode,
+        hint: errHint,
+      });
       return NextResponse.json(
         {
-          error: "Error al resetear la Óptica Demo",
-          details: error.message,
+          error: errMsg || "Error al resetear la Óptica Demo",
+          details: errMsg,
         },
         { status: 500 },
       );

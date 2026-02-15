@@ -116,7 +116,15 @@ ALTER TABLE public.telemetry_events ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.telemetry_aggregates ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.telemetry_config ENABLE ROW LEVEL SECURITY;
 
--- Telemetry Events Policies
+-- Telemetry Events Policies (drop first in case 20260209100000 already created them)
+DROP POLICY IF EXISTS "Users can insert their telemetry events" ON public.telemetry_events;
+DROP POLICY IF EXISTS "Users can read organization telemetry events" ON public.telemetry_events;
+DROP POLICY IF EXISTS "Organization admins can manage telemetry events" ON public.telemetry_events;
+DROP POLICY IF EXISTS "Users can read organization telemetry aggregates" ON public.telemetry_aggregates;
+DROP POLICY IF EXISTS "Organization admins can manage telemetry aggregates" ON public.telemetry_aggregates;
+DROP POLICY IF EXISTS "Users can read organization telemetry config" ON public.telemetry_config;
+DROP POLICY IF EXISTS "Organization admins can manage telemetry config" ON public.telemetry_config;
+
 -- Users can insert their own events
 CREATE POLICY "Users can insert their telemetry events" 
     ON public.telemetry_events 
@@ -214,7 +222,9 @@ BEGIN
 END;
 $$ language 'plpgsql';
 
--- Create triggers for updated_at
+-- Create triggers for updated_at (drop first if exists from 20260209100000)
+DROP TRIGGER IF EXISTS update_telemetry_config_updated_at ON public.telemetry_config;
+DROP TRIGGER IF EXISTS update_telemetry_aggregates_updated_at ON public.telemetry_aggregates;
 CREATE TRIGGER update_telemetry_config_updated_at 
     BEFORE UPDATE ON public.telemetry_config 
     FOR EACH ROW 

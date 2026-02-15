@@ -117,7 +117,9 @@ export default function SaaSDashboard() {
         trackFeatureUsage("admin_reset_demo");
       } else {
         const data = await response.json();
-        toast.error(data.error || "Error al resetear la Óptica Demo");
+        toast.error(
+          data.details || data.error || "Error al resetear la Óptica Demo",
+        );
       }
     } catch (err) {
       toast.error("Error al resetear la Óptica Demo");

@@ -82,8 +82,8 @@ export default function ContactLensFamiliesList() {
         `/api/admin/contact-lens-families?${params.toString()}`,
       );
       if (response.ok) {
-        const data = await response.json();
-        setFamilies(data.families || []);
+        const result = await response.json();
+        setFamilies(result.data ?? result.families ?? []);
       } else {
         toast.error("Error al cargar familias de lentes de contacto");
       }
@@ -203,9 +203,7 @@ export default function ContactLensFamiliesList() {
               <TableBody>
                 {paginatedFamilies.map((family) => (
                   <TableRow key={family.id}>
-                    <TableCell className="font-medium">
-                      {family.name}
-                    </TableCell>
+                    <TableCell className="font-medium">{family.name}</TableCell>
                     <TableCell>{family.brand || "-"}</TableCell>
                     <TableCell>
                       {USE_TYPES.find((t) => t.value === family.use_type)
@@ -229,7 +227,9 @@ export default function ContactLensFamiliesList() {
                           variant="ghost"
                           size="sm"
                           onClick={() =>
-                            router.push(`/admin/contact-lens-families/${family.id}`)
+                            router.push(
+                              `/admin/contact-lens-families/${family.id}`,
+                            )
                           }
                         >
                           <Edit className="h-4 w-4" />

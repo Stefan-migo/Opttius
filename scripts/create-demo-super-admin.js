@@ -29,6 +29,7 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey, {
 
 const DEMO_ORG_ID = '00000000-0000-0000-0000-000000000001';
 const DEMO_BRANCH_ID = '00000000-0000-0000-0000-000000000002';
+const DEMO_BRANCH_2_ID = '00000000-0000-0000-0000-000000000003';
 
 async function createDemoSuperAdmin() {
   const email = process.env.DEMO_ADMIN_EMAIL;
@@ -186,10 +187,32 @@ async function createDemoSuperAdmin() {
     if (branchError) {
       console.warn('⚠️  Branch access error (may already exist):', branchError.message);
     } else {
-      console.log('✅ Branch access granted');
+      console.log('✅ Branch access granted (Casa Matriz)');
       console.log('   Branch ID:', DEMO_BRANCH_ID);
       console.log('   Role: manager');
       console.log('   Is Primary: true');
+    }
+
+    // Grant access to second branch (Sucursal Providencia)
+    console.log('📝 Granting access to Sucursal Providencia...');
+    const branch2Data = {
+      admin_user_id: userId,
+      branch_id: DEMO_BRANCH_2_ID,
+      role: 'manager',
+      is_primary: false
+    };
+
+    const { error: branch2Error } = await supabase
+      .from('admin_branch_access')
+      .upsert(branch2Data, {
+        onConflict: 'admin_user_id,branch_id'
+      });
+
+    if (branch2Error) {
+      console.warn('⚠️  Branch 2 access error (may already exist):', branch2Error.message);
+    } else {
+      console.log('✅ Branch access granted (Sucursal Providencia)');
+      console.log('   Branch ID:', DEMO_BRANCH_2_ID);
     }
 
     // También crear acceso global (super_admin) para acceso completo
@@ -239,20 +262,19 @@ async function createDemoSuperAdmin() {
       console.log('   Is Active:', verifyAdmin.is_active);
     }
 
-    // Verificar acceso a sucursal
-    const { data: verifyBranch, error: branchVerifyError } = await supabase
+    // Verificar acceso a sucursales
+    const { data: verifyBranches, error: branchVerifyError } = await supabase
       .from('admin_branch_access')
       .select('admin_user_id, branch_id, role, is_primary')
-      .eq('admin_user_id', userId)
-      .single();
+      .eq('admin_user_id', userId);
 
     if (branchVerifyError) {
       console.warn('⚠️  Warning: Could not verify branch access:', branchVerifyError.message);
-    } else {
+    } else if (verifyBranches?.length) {
       console.log('✅ Branch access verified:');
-      console.log('   Branch ID:', verifyBranch.branch_id);
-      console.log('   Role:', verifyBranch.role);
-      console.log('   Is Primary:', verifyBranch.is_primary);
+      verifyBranches.forEach((aba, i) => {
+        console.log(`   ${i + 1}. Branch: ${aba.branch_id || 'All (global)'}, Role: ${aba.role}, Primary: ${aba.is_primary}`);
+      });
     }
 
     console.log('');
@@ -265,7 +287,7 @@ async function createDemoSuperAdmin() {
     console.log('  Password:', password);
     console.log('  Role: admin (full access)');
     console.log('  Organization: Óptica Demo Global (Demo Mode)');
-    console.log('  Branch: Casa Matriz');
+    console.log('  Branches: Casa Matriz, Sucursal Providencia');
     console.log('');
     console.log('You can now login at: http://localhost:3000/login');
     console.log('');

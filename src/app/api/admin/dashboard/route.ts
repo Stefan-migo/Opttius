@@ -56,6 +56,13 @@ export async function GET(request: NextRequest) {
     // Get branch context
     const branchContext = await getBranchContext(request, user.id);
 
+    const { searchParams } = new URL(request.url);
+    const periodParam = searchParams.get("period") || "7";
+    const periodDays = Math.min(
+      365,
+      Math.max(7, parseInt(periodParam, 10) || 7),
+    );
+
     logger.info("Dashboard - Branch Context", {
       branchId: branchContext.branchId,
       isGlobalView: branchContext.isGlobalView,
@@ -139,19 +146,43 @@ export async function GET(request: NextRequest) {
         productsQuery = applyBranchFilter(productsBaseQuery);
       }
     } else if (branchContext.branchId) {
-      // Branch View: branch_id = current OR branch_id IS NULL, scoped to org
-      productsQuery = productsBaseQuery
-        .eq("organization_id", branchContext.organizationId)
-        .or(`branch_id.eq.${branchContext.branchId},branch_id.is.null`);
+      // Branch View: show ALL products of the organization (shared catalog across branches)
+      // Stock is per-branch via product_branch_stock - Providencia uses same products as Casa Matriz
+      let orgId = branchContext.organizationId;
+      if (!orgId) {
+        const { data: branchData } = await supabase
+          .from("branches")
+          .select("organization_id")
+          .eq("id", branchContext.branchId)
+          .single();
+        orgId = branchData?.organization_id ?? undefined;
+      }
+      productsQuery = productsBaseQuery.eq(
+        "organization_id",
+        orgId || "00000000-0000-0000-0000-000000000000",
+      );
     } else {
       productsQuery = applyBranchFilter(productsBaseQuery);
     }
 
-    const [productsResult, ordersResult, customersResult] = await Promise.all([
-      productsQuery,
-      ordersQuery,
-      applyBranchFilter(supabase.from("customers").select("*")),
-    ]);
+    // Cash register closures for revenue (demo has 12 months of closures)
+    let closuresQuery = supabase
+      .from("cash_register_closures")
+      .select("branch_id, closure_date, total_sales, total_transactions")
+      .in("status", ["confirmed", "closed"]);
+    if (branchContext.branchId) {
+      closuresQuery = closuresQuery.eq("branch_id", branchContext.branchId);
+    } else if (orgBranchIds.length > 0) {
+      closuresQuery = closuresQuery.in("branch_id", orgBranchIds);
+    }
+
+    const [productsResult, ordersResult, customersResult, closuresResult] =
+      await Promise.all([
+        productsQuery,
+        ordersQuery,
+        applyBranchFilter(supabase.from("customers").select("*")),
+        closuresQuery,
+      ]);
 
     if (productsResult.error) {
       logger.error("Error fetching products", productsResult.error);
@@ -166,6 +197,7 @@ export async function GET(request: NextRequest) {
     const products = productsResult.data || [];
     const orders = ordersResult.data || [];
     const customers = customersResult.data || []; // Now from customers table, not profiles
+    const closures = closuresResult?.data || [];
 
     // We no longer strictly filter products by branch_id in post-processing
     // because we want to include global products (branch_id IS NULL).
@@ -243,7 +275,29 @@ export async function GET(request: NextRequest) {
     ).length;
 
     // === REVENUE METRICS ===
-    // Current month revenue (from completed or paid orders)
+    // Prefer cash_register_closures when available (demo has 12 months of closures)
+    const currentMonthClosures = closures.filter(
+      (c: { closure_date: string }) => {
+        const d = new Date(c.closure_date);
+        return d >= startOfMonth && d <= now;
+      },
+    );
+    const lastMonthClosures = closures.filter((c: { closure_date: string }) => {
+      const d = new Date(c.closure_date);
+      return d >= startOfLastMonth && d <= endOfLastMonth;
+    });
+    const closuresCurrentRevenue = currentMonthClosures.reduce(
+      (sum: number, c: { total_sales?: number | null }) =>
+        sum + (c.total_sales || 0),
+      0,
+    );
+    const closuresLastRevenue = lastMonthClosures.reduce(
+      (sum: number, c: { total_sales?: number | null }) =>
+        sum + (c.total_sales || 0),
+      0,
+    );
+
+    // Use closures when they have data, otherwise fall back to orders
     const currentMonthOrders = orders.filter(
       (o: { created_at: string; status: string; payment_status?: string }) => {
         const orderDate = new Date(o.created_at);
@@ -253,13 +307,11 @@ export async function GET(request: NextRequest) {
         );
       },
     );
-    const currentMonthRevenue = currentMonthOrders.reduce(
+    const ordersCurrentRevenue = currentMonthOrders.reduce(
       (sum: number, o: { total_amount?: number | null }) =>
         sum + (o.total_amount || 0),
       0,
     );
-
-    // Last month revenue for comparison
     const lastMonthOrders = orders.filter(
       (o: { created_at: string; status: string; payment_status?: string }) => {
         const orderDate = new Date(o.created_at);
@@ -270,11 +322,18 @@ export async function GET(request: NextRequest) {
         );
       },
     );
-    const lastMonthRevenue = lastMonthOrders.reduce(
+    const ordersLastRevenue = lastMonthOrders.reduce(
       (sum: number, o: { total_amount?: number | null }) =>
         sum + (o.total_amount || 0),
       0,
     );
+
+    const currentMonthRevenue =
+      closuresCurrentRevenue > 0
+        ? closuresCurrentRevenue
+        : ordersCurrentRevenue;
+    const lastMonthRevenue =
+      closuresLastRevenue > 0 ? closuresLastRevenue : ordersLastRevenue;
 
     // Calculate revenue change
     const revenueChange =
@@ -476,43 +535,75 @@ export async function GET(request: NextRequest) {
       },
     );
 
-    // === REVENUE TREND (Last 7 days) ===
-    const last7Days = [];
-    for (let i = 6; i >= 0; i--) {
-      const date = new Date(now);
-      date.setDate(date.getDate() - i);
-      date.setHours(0, 0, 0, 0);
+    // === REVENUE TREND (configurable period: 7, 30, 90, 365 days) ===
+    // Granularity: 7-30 days = daily, 90 days = ~3-day buckets, 365 = monthly
+    const bucketCount =
+      periodDays <= 30 ? periodDays : periodDays <= 90 ? 30 : 12;
+    const bucketSize = Math.ceil(periodDays / bucketCount);
+    const revenueTrend: Array<{
+      date: string;
+      revenue: number;
+      orders: number;
+    }> = [];
 
-      const nextDate = new Date(date);
-      nextDate.setDate(nextDate.getDate() + 1);
+    for (let b = 0; b < bucketCount; b++) {
+      const bucketStart = new Date(now);
+      bucketStart.setDate(bucketStart.getDate() - periodDays + b * bucketSize);
+      bucketStart.setHours(0, 0, 0, 0);
+      const bucketEnd = new Date(bucketStart);
+      bucketEnd.setDate(bucketEnd.getDate() + bucketSize);
 
-      const dayOrders = orders.filter(
-        (o: {
-          created_at: string;
-          status: string;
-          payment_status?: string;
-        }) => {
-          const orderDate = new Date(o.created_at);
-          return (
-            orderDate >= date &&
-            orderDate < nextDate &&
-            (o.status === "completed" || o.payment_status === "paid")
-          );
-        },
+      let bucketRevenue = 0;
+      let bucketOrders = 0;
+
+      // From closures (preferred when available)
+      const bucketClosures = closures.filter((c: { closure_date: string }) => {
+        const d = new Date(c.closure_date);
+        return d >= bucketStart && d < bucketEnd;
+      });
+      bucketRevenue = bucketClosures.reduce(
+        (s: number, c: { total_sales?: number | null }) =>
+          s + (c.total_sales || 0),
+        0,
       );
-
-      const dayRevenue = dayOrders.reduce(
-        (sum: number, o: { total_amount?: number | null }) =>
-          sum + (o.total_amount || 0),
+      bucketOrders = bucketClosures.reduce(
+        (s: number, c: { total_transactions?: number | null }) =>
+          s + (c.total_transactions || 0),
         0,
       );
 
-      last7Days.push({
-        date: getLocalDateString(date),
-        revenue: dayRevenue,
-        orders: dayOrders.length,
+      // From orders (when closures have no data for this bucket)
+      if (bucketRevenue === 0) {
+        const bucketOrderList = orders.filter(
+          (o: {
+            created_at: string;
+            status: string;
+            payment_status?: string;
+          }) => {
+            const orderDate = new Date(o.created_at);
+            return (
+              orderDate >= bucketStart &&
+              orderDate < bucketEnd &&
+              (o.status === "completed" || o.payment_status === "paid")
+            );
+          },
+        );
+        bucketRevenue = bucketOrderList.reduce(
+          (s: number, o: { total_amount?: number | null }) =>
+            s + (o.total_amount || 0),
+          0,
+        );
+        bucketOrders = bucketOrderList.length;
+      }
+
+      revenueTrend.push({
+        date: getLocalDateString(bucketStart),
+        revenue: bucketRevenue,
+        orders: bucketOrders,
       });
     }
+
+    const last7Days = revenueTrend;
 
     // === ORDERS STATUS DISTRIBUTION (Last 30 days) ===
     const last30DaysOrders = orders.filter(

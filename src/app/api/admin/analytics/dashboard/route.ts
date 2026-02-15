@@ -4,10 +4,7 @@ import { createClient } from "@/utils/supabase/server";
 import { getBranchContext, addBranchFilter } from "@/lib/api/branch-middleware";
 import { appLogger as logger } from "@/lib/logger";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
-import { 
-  AuthenticationError,
-  AuthorizationError 
-} from "@/lib/api/errors";
+import { AuthenticationError, AuthorizationError } from "@/lib/api/errors";
 import {
   createApiSuccessResponse,
   createApiErrorResponse,
@@ -15,7 +12,7 @@ import {
 
 export async function GET(request: NextRequest) {
   const requestId = crypto.randomUUID();
-  
+
   try {
     logger.debug("Analytics Dashboard API called", { requestId });
 
@@ -27,7 +24,10 @@ export async function GET(request: NextRequest) {
       error: userError,
     } = await supabase.auth.getUser();
     if (userError || !user) {
-      logger.error("User authentication failed:", { error: userError, requestId });
+      logger.error("User authentication failed:", {
+        error: userError,
+        requestId,
+      });
       throw new AuthenticationError("Unauthorized");
     }
 
@@ -53,7 +53,7 @@ export async function GET(request: NextRequest) {
       );
       if (!hasAdvancedAnalytics) {
         throw new AuthorizationError(
-          "Analíticas avanzadas no están incluidas en tu plan. Actualiza a Pro o Premium."
+          "Analíticas avanzadas no están incluidas en tu plan. Actualiza a Pro o Premium.",
         );
       }
     }
@@ -70,6 +70,20 @@ export async function GET(request: NextRequest) {
     const startDate = new Date();
     startDate.setDate(endDate.getDate() - period);
 
+    // Org branch IDs for global view (Vision Global)
+    let orgBranchIds: string[] = [];
+    if (
+      branchContext.isSuperAdmin &&
+      !branchContext.branchId &&
+      branchContext.organizationId
+    ) {
+      const { data: branches } = await supabaseServiceRole
+        .from("branches")
+        .select("id")
+        .eq("organization_id", branchContext.organizationId);
+      orgBranchIds = (branches || []).map((b: { id: string }) => b.id);
+    }
+
     logger.debug("Fetching analytics for period:", {
       from: startDate.toISOString(),
       to: endDate.toISOString(),
@@ -77,6 +91,21 @@ export async function GET(request: NextRequest) {
       branchId: branchContext.branchId,
       requestId,
     });
+
+    // Cash register closures for POS revenue (demo has 12 months of closures)
+    let closuresQuery = supabaseServiceRole
+      .from("cash_register_closures")
+      .select(
+        "branch_id, closure_date, total_sales, total_transactions, cash_sales, debit_card_sales, credit_card_sales, installments_sales, other_payment_sales",
+      )
+      .in("status", ["confirmed", "closed"])
+      .gte("closure_date", startDate.toISOString().split("T")[0])
+      .lte("closure_date", endDate.toISOString().split("T")[0]);
+    if (branchContext.branchId) {
+      closuresQuery = closuresQuery.eq("branch_id", branchContext.branchId);
+    } else if (orgBranchIds.length > 0) {
+      closuresQuery = closuresQuery.in("branch_id", orgBranchIds);
+    }
 
     // Build queries with branch filtering
     let productsQuery = supabaseServiceRole
@@ -114,7 +143,19 @@ export async function GET(request: NextRequest) {
 
     // Apply branch filters
     if (branchContext.branchId) {
-      productsQuery = productsQuery.eq("branch_id", branchContext.branchId);
+      // Products: shared catalog - filter by org, not branch (stock is per-branch)
+      let productsOrgId = branchContext.organizationId;
+      if (!productsOrgId) {
+        const { data: branchData } = await supabaseServiceRole
+          .from("branches")
+          .select("organization_id")
+          .eq("id", branchContext.branchId)
+          .single();
+        productsOrgId = branchData?.organization_id ?? undefined;
+      }
+      productsQuery = productsOrgId
+        ? productsQuery.eq("organization_id", productsOrgId)
+        : productsQuery.eq("branch_id", branchContext.branchId);
       ordersQuery = ordersQuery.eq("branch_id", branchContext.branchId);
       customersQuery = customersQuery.eq("branch_id", branchContext.branchId);
       quotesQuery = quotesQuery.eq("branch_id", branchContext.branchId);
@@ -123,6 +164,23 @@ export async function GET(request: NextRequest) {
         "branch_id",
         branchContext.branchId,
       );
+    } else if (
+      branchContext.isSuperAdmin &&
+      !branchContext.branchId &&
+      orgBranchIds.length > 0
+    ) {
+      // Global view: filter by org branches
+      ordersQuery = ordersQuery.in("branch_id", orgBranchIds);
+      customersQuery = customersQuery.in("branch_id", orgBranchIds);
+      quotesQuery = quotesQuery.in("branch_id", orgBranchIds);
+      workOrdersQuery = workOrdersQuery.in("branch_id", orgBranchIds);
+      appointmentsQuery = appointmentsQuery.in("branch_id", orgBranchIds);
+      if (branchContext.organizationId) {
+        productsQuery = productsQuery.eq(
+          "organization_id",
+          branchContext.organizationId,
+        );
+      }
     } else if (!branchContext.isSuperAdmin) {
       // Regular admin without branch - return empty data
       productsQuery = productsQuery.is("branch_id", null).limit(0);
@@ -142,6 +200,7 @@ export async function GET(request: NextRequest) {
       workOrdersResult,
       appointmentsResult,
       orderItemsResult,
+      closuresResult,
     ] = await Promise.all([
       productsQuery,
       supabaseServiceRole.from("categories").select("id, name, slug"),
@@ -155,11 +214,13 @@ export async function GET(request: NextRequest) {
         .select(
           "id, order_id, product_id, product_name, quantity, unit_price, total_price",
         ),
+      closuresQuery,
     ]);
 
     const products = productsResult.data || [];
     const categories = categoriesResult.data || [];
     const ordersInPeriod = ordersResult.data || [];
+    const closuresInPeriod = closuresResult.data || [];
     const customers = customersResult.data || [];
     const quotes = quotesResult.data || [];
     const workOrders = workOrdersResult.data || [];
@@ -194,6 +255,9 @@ export async function GET(request: NextRequest) {
         "branch_id",
         branchContext.branchId,
       );
+    } else if (orgBranchIds.length > 0) {
+      prevOrdersQuery = prevOrdersQuery.in("branch_id", orgBranchIds);
+      prevWorkOrdersQuery = prevWorkOrdersQuery.in("branch_id", orgBranchIds);
     }
 
     const [prevOrdersResult, prevWorkOrdersResult] = await Promise.all([
@@ -207,14 +271,32 @@ export async function GET(request: NextRequest) {
     // ====================================
     // REVENUE CALCULATIONS
     // ====================================
-    // POS Sales Revenue
-    const posRevenue = ordersInPeriod
-      .filter(
+    // POS Sales Revenue: prefer cash_register_closures when available (demo has 12 months)
+    let posRevenue: number;
+    let posTransactionCount: number;
+    if (closuresInPeriod.length > 0) {
+      posRevenue = closuresInPeriod.reduce(
+        (sum: number, c: { total_sales?: number | null }) =>
+          sum + (Number(c.total_sales) || 0),
+        0,
+      );
+      posTransactionCount = closuresInPeriod.reduce(
+        (sum: number, c: { total_transactions?: number | null }) =>
+          sum + (Number(c.total_transactions) || 0),
+        0,
+      );
+    } else {
+      const posOrders = ordersInPeriod.filter(
         (o) =>
           o.is_pos_sale &&
           (o.payment_status === "paid" || o.status === "delivered"),
-      )
-      .reduce((sum, order) => sum + Number(order.total_amount || 0), 0);
+      );
+      posRevenue = posOrders.reduce(
+        (sum, order) => sum + Number(order.total_amount || 0),
+        0,
+      );
+      posTransactionCount = posOrders.length;
+    }
 
     // Work Orders Revenue
     const workOrdersRevenue = workOrders
@@ -223,13 +305,37 @@ export async function GET(request: NextRequest) {
 
     const totalRevenue = posRevenue + workOrdersRevenue;
 
-    // Previous period revenue
-    const prevPosRevenue = prevOrders
-      .filter((o: any) => o.is_pos_sale && o.payment_status === "paid")
-      .reduce(
-        (sum: number, order: any) => sum + Number(order.total_amount || 0),
+    // Previous period revenue (fetch prev closures when we used closures)
+    let prevPosRevenue: number;
+    if (closuresInPeriod.length > 0) {
+      let prevClosuresQuery = supabaseServiceRole
+        .from("cash_register_closures")
+        .select("total_sales")
+        .in("status", ["confirmed", "closed"])
+        .gte("closure_date", prevPeriodStart.toISOString().split("T")[0])
+        .lt("closure_date", startDate.toISOString().split("T")[0]);
+      if (branchContext.branchId) {
+        prevClosuresQuery = prevClosuresQuery.eq(
+          "branch_id",
+          branchContext.branchId,
+        );
+      } else if (orgBranchIds.length > 0) {
+        prevClosuresQuery = prevClosuresQuery.in("branch_id", orgBranchIds);
+      }
+      const { data: prevClosures } = await prevClosuresQuery;
+      prevPosRevenue = (prevClosures || []).reduce(
+        (sum: number, c: { total_sales?: number | null }) =>
+          sum + (Number(c.total_sales) || 0),
         0,
       );
+    } else {
+      prevPosRevenue = prevOrders
+        .filter((o: any) => o.is_pos_sale && o.payment_status === "paid")
+        .reduce(
+          (sum: number, order: any) => sum + Number(order.total_amount || 0),
+          0,
+        );
+    }
 
     const prevWorkOrdersRevenue = prevWorkOrders
       .filter((wo: any) => wo.payment_status === "paid")
@@ -456,16 +562,51 @@ export async function GET(request: NextRequest) {
     const paymentMethods: Record<string, { count: number; revenue: number }> =
       {};
 
-    ordersInPeriod.forEach((o: any) => {
-      if (o.is_pos_sale && o.payment_method_type) {
-        const method = o.payment_method_type;
-        if (!paymentMethods[method]) {
-          paymentMethods[method] = { count: 0, revenue: 0 };
-        }
-        paymentMethods[method].count += 1;
-        paymentMethods[method].revenue += Number(o.total_amount || 0);
+    if (closuresInPeriod.length > 0) {
+      // Use closures payment breakdown when available
+      const totalClosureRevenue = closuresInPeriod.reduce(
+        (s: number, c: any) => s + (Number(c.total_sales) || 0),
+        0,
+      );
+      const totalClosureTxns = closuresInPeriod.reduce(
+        (s: number, c: any) => s + (Number(c.total_transactions) || 0),
+        0,
+      );
+      closuresInPeriod.forEach((c: any) => {
+        const addPayment = (method: string, amount: number) => {
+          if (amount > 0) {
+            if (!paymentMethods[method]) {
+              paymentMethods[method] = { count: 0, revenue: 0 };
+            }
+            paymentMethods[method].revenue += Number(amount);
+          }
+        };
+        addPayment("cash", Number(c.cash_sales) || 0);
+        addPayment("debit_card", Number(c.debit_card_sales) || 0);
+        addPayment("credit_card", Number(c.credit_card_sales) || 0);
+        addPayment("installments", Number(c.installments_sales) || 0);
+        addPayment("other", Number(c.other_payment_sales) || 0);
+      });
+      // Approximate count by revenue proportion
+      if (totalClosureRevenue > 0 && totalClosureTxns > 0) {
+        Object.keys(paymentMethods).forEach((method) => {
+          const rev = paymentMethods[method].revenue;
+          paymentMethods[method].count =
+            Math.round((rev / totalClosureRevenue) * totalClosureTxns) || 1;
+        });
       }
-    });
+    } else {
+      ordersInPeriod.forEach((o: any) => {
+        if (o.is_pos_sale && o.payment_method_type) {
+          const method = o.payment_method_type;
+          if (!paymentMethods[method]) {
+            paymentMethods[method] = { count: 0, revenue: 0 };
+          }
+          paymentMethods[method].count += 1;
+          paymentMethods[method].revenue += Number(o.total_amount || 0);
+        }
+      });
+    }
 
     // ====================================
     // DAILY TRENDS
@@ -480,21 +621,39 @@ export async function GET(request: NextRequest) {
       currentDate.setDate(currentDate.getDate() + i);
       const nextDate = new Date(currentDate);
       nextDate.setDate(nextDate.getDate() + 1);
+      const dateStr = currentDate.toISOString().split("T")[0];
 
-      // Sales for this day
-      const dayOrders = ordersInPeriod.filter((order: any) => {
-        const orderDate = new Date(order.created_at);
-        return orderDate >= currentDate && orderDate < nextDate;
-      });
-
-      const daySales = dayOrders
-        .filter(
-          (o: any) => o.payment_status === "paid" || o.status === "delivered",
-        )
-        .reduce(
-          (sum: number, order: any) => sum + Number(order.total_amount || 0),
+      // Sales for this day: use closures when available, else orders
+      let daySales: number;
+      let dayOrderCount: number;
+      if (closuresInPeriod.length > 0) {
+        const dayClosures = closuresInPeriod.filter((c: any) => {
+          const d = String(c.closure_date).split("T")[0];
+          return d === dateStr;
+        });
+        daySales = dayClosures.reduce(
+          (s: number, c: any) => s + (Number(c.total_sales) || 0),
           0,
         );
+        dayOrderCount = dayClosures.reduce(
+          (s: number, c: any) => s + (Number(c.total_transactions) || 0),
+          0,
+        );
+      } else {
+        const dayOrders = ordersInPeriod.filter((order: any) => {
+          const orderDate = new Date(order.created_at);
+          return orderDate >= currentDate && orderDate < nextDate;
+        });
+        daySales = dayOrders
+          .filter(
+            (o: any) => o.payment_status === "paid" || o.status === "delivered",
+          )
+          .reduce(
+            (sum: number, order: any) => sum + Number(order.total_amount || 0),
+            0,
+          );
+        dayOrderCount = dayOrders.length;
+      }
 
       // Work orders revenue for this day
       const dayWorkOrders = workOrders.filter((wo: any) => {
@@ -509,9 +668,9 @@ export async function GET(request: NextRequest) {
         );
 
       salesTrends.push({
-        date: currentDate.toISOString().split("T")[0],
+        date: dateStr,
         value: daySales + dayWorkOrdersRevenue,
-        count: dayOrders.length + dayWorkOrders.length,
+        count: dayOrderCount + dayWorkOrders.length,
       });
 
       // New customers for this day
@@ -553,6 +712,7 @@ export async function GET(request: NextRequest) {
       kpis: {
         totalRevenue,
         posRevenue,
+        posTransactionCount,
         workOrdersRevenue,
         revenueGrowth,
         totalOrders: ordersInPeriod.length,
@@ -563,7 +723,11 @@ export async function GET(request: NextRequest) {
         newCustomers,
         recurringCustomers,
         avgOrderValue:
-          ordersInPeriod.length > 0 ? posRevenue / ordersInPeriod.length : 0,
+          posTransactionCount > 0
+            ? posRevenue / posTransactionCount
+            : ordersInPeriod.length > 0
+              ? posRevenue / ordersInPeriod.length
+              : 0,
         avgWorkOrderValue:
           workOrders.length > 0 ? workOrdersRevenue / workOrders.length : 0,
         avgQuoteValue,
@@ -628,15 +792,14 @@ export async function GET(request: NextRequest) {
     });
 
     // Use standardized success response
-    return createApiSuccessResponse(
-      { analytics },
-      { requestId }
-    );
+    return createApiSuccessResponse({ analytics }, { requestId });
   } catch (error) {
     logger.error("Analytics API error:", { error, requestId });
     return createApiErrorResponse(
-      error instanceof Error ? error : new Error("Failed to fetch analytics data"),
-      { requestId }
+      error instanceof Error
+        ? error
+        : new Error("Failed to fetch analytics data"),
+      { requestId },
     );
   }
 }

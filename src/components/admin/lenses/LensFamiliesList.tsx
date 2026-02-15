@@ -83,8 +83,8 @@ export default function LensFamiliesList() {
         `/api/admin/lens-families?${params.toString()}`,
       );
       if (response.ok) {
-        const data = await response.json();
-        setFamilies(data.families || []);
+        const result = await response.json();
+        setFamilies(result.data ?? result.families ?? []);
       } else {
         toast.error("Error al cargar familias de lentes");
       }

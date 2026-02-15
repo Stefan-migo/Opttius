@@ -146,52 +146,45 @@ export async function GET(request: NextRequest) {
       query = query.eq("organization_id", userOrganizationId);
       logger.debug("Filtering by organization_id", { userOrganizationId });
 
-      // If a specific branch is selected, also filter by branch_id
-      // Otherwise, show all products from the organization (including global and branch-specific)
-      // IMPORTANT: If we have a search query, we'll apply branch_id filter in post-processing
-      // to avoid conflicts with the search .or() condition (Supabase PostgREST only allows one .or() at a time)
-      if (currentBranchId && !search) {
-        // When a branch is selected and NO search, show:
-        // 1. Global products (branch_id IS NULL) - available to all branches
-        // 2. Products specific to this branch (branch_id = currentBranchId)
-        try {
-          query = query.or(`branch_id.is.null,branch_id.eq.${currentBranchId}`);
-          logger.debug("Filtering by branch_id in query", { currentBranchId });
-        } catch (error) {
-          // Fallback: filter in post-processing if .or() fails with nested relations
-          logger.warn(
-            "Error using .or() filter, will filter in post-processing",
-            { error },
-          );
-        }
-      }
+      // When a branch is selected: show ALL products of the organization (shared catalog)
+      // Stock is per-branch via product_branch_stock - no branch_id filter on products
       // If no branch selected, show all products from organization (no branch_id filter)
       // If search is present, branch filter will be applied in post-processing
     } else if (branchContext.isSuperAdmin) {
-      // Super admin: branch selected = filter by branch; Vision Global = only user's organization
+      // Super admin: branch selected = all products of that branch's org (shared catalog)
+      // Vision Global = only user's organization
       if (currentBranchId) {
-        try {
-          query = query.or(`branch_id.is.null,branch_id.eq.${currentBranchId}`);
-        } catch (error) {
-          logger.warn(
-            "Error using .or() filter, will filter in post-processing",
-            { error },
+        // Need org - from context or fetch from branch
+        const orgId = branchContext.organizationId;
+        if (orgId) {
+          query = query.eq("organization_id", orgId);
+        } else {
+          const { data: branchData } = await supabase
+            .from("branches")
+            .select("organization_id")
+            .eq("id", currentBranchId)
+            .single();
+          query = query.eq(
+            "organization_id",
+            branchData?.organization_id ??
+              "00000000-0000-0000-0000-000000000000",
           );
         }
       } else if (branchContext.organizationId) {
         query = query.eq("organization_id", branchContext.organizationId);
       }
     } else {
-      // Fallback: no organization_id found, use branch filter only
+      // Fallback: no organization_id - get org from branch when branch selected
       if (currentBranchId) {
-        try {
-          query = query.or(`branch_id.is.null,branch_id.eq.${currentBranchId}`);
-        } catch (error) {
-          logger.warn(
-            "Error using .or() filter, will filter in post-processing",
-            { error },
-          );
-        }
+        const { data: branchData } = await supabase
+          .from("branches")
+          .select("organization_id")
+          .eq("id", currentBranchId)
+          .single();
+        query = query.eq(
+          "organization_id",
+          branchData?.organization_id ?? "00000000-0000-0000-0000-000000000000",
+        );
       } else {
         // Regular admin without branch selected - show only their accessible branches
         const accessibleBranchIds = branchContext.accessibleBranches.map(
@@ -253,10 +246,7 @@ export async function GET(request: NextRequest) {
         query = query.eq("organization_id", userOrganizationId);
       }
 
-      // Re-apply branch filter after search because .or() overrides previous .or()
-      if (currentBranchId) {
-        query = query.or(`branch_id.is.null,branch_id.eq.${currentBranchId}`);
-      }
+      // Shared catalog: no branch_id filter - search returns all org products
 
       logger.debug("Applied search filter", {
         search,
@@ -389,42 +379,9 @@ export async function GET(request: NextRequest) {
             }
           }
 
-          // Filter by branch_id in post-processing to ensure we only show:
-          // 1. Global products (branch_id IS NULL)
-          // 2. Products specific to the selected branch (branch_id = currentBranchId)
-          // This is especially important when we have a search query, as the search .or() would override the branch .or()
-          // IMPORTANT: Only filter by branch_id when it was EXPLICITLY requested in the request
-          // When no branch_id is explicitly requested, show ALL products from the organization
-          // (including products from all branches within that organization)
-          // This applies to both search and non-search queries
-          // CRITICAL: When searching, only filter by branch if branch_id was explicitly requested
-          // Otherwise, show all products from the organization (including branch-specific products)
-          if (currentBranchId && requestedBranchId) {
-            // Only filter by branch if it was explicitly requested
-            const productBranchId = product.branch_id;
-            const isGlobalProduct =
-              productBranchId === null || productBranchId === undefined;
-            const isBranchProduct = productBranchId === currentBranchId;
-
-            // Skip products that don't match the branch filter
-            if (!isGlobalProduct && !isBranchProduct) {
-              return null; // Will be filtered out
-            }
-          } else if (currentBranchId && !search) {
-            // When NOT searching and a branch is selected (even if not explicitly requested),
-            // filter to show only global products and products from that branch
-            // This is the default behavior for non-search queries
-            const productBranchId = product.branch_id;
-            const isGlobalProduct =
-              productBranchId === null || productBranchId === undefined;
-            const isBranchProduct = productBranchId === currentBranchId;
-
-            // Skip products that don't match the branch filter
-            if (!isGlobalProduct && !isBranchProduct) {
-              return null; // Will be filtered out
-            }
-          }
-          // If no branch was explicitly requested AND we're searching, show all products from organization (no branch filtering)
+          // Shared catalog: when branch is selected, show ALL products of the organization
+          // (no branch_id filter - Providencia sees same products as Casa Matriz)
+          // Stock is filtered by branch via product_branch_stock below
           // This ensures that when searching without a specific branch, we see all products from the organization
 
           if (currentBranchId) {
