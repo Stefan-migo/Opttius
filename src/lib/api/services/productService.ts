@@ -237,6 +237,13 @@ export async function getProducts(
 /**
  * Get a single product by ID
  */
+function extractProductFromResponse(response: unknown): Product {
+  const r = response as Record<string, unknown>;
+  if (r?.success === true && r?.data) return r.data as Product;
+  if (r?.product) return r.product as Product;
+  throw new Error("Invalid response format");
+}
+
 export async function getProduct(
   id: string,
   branchId?: string,
@@ -246,19 +253,10 @@ export async function getProduct(
     if (branchId) {
       headers["x-branch-id"] = branchId;
     }
-    const response = await client.get<{ product: Product }>(
-      `/api/admin/products/${id}`,
-      { headers },
-    );
-    // Handle both standardized response { success, data } and legacy response { product }
-    if (isSuccess(response)) {
-      return response.data;
-    }
-    // Handle legacy API response format { product: ... }
-    if (response && typeof response === "object" && "product" in response) {
-      return response.product;
-    }
-    throw new Error("Invalid response format");
+    const response = await client.get(`/api/admin/products/${id}`, {
+      headers,
+    });
+    return extractProductFromResponse(response);
   } catch (error) {
     handleApiError(error, "getProduct");
     throw error;
@@ -270,19 +268,8 @@ export async function getProduct(
  */
 export async function createProduct(data: CreateProductData): Promise<Product> {
   try {
-    const response = await client.post<{ product: Product }>(
-      "/api/admin/products",
-      data,
-    );
-    // Handle both standardized response { success, data } and legacy response { product }
-    if (isSuccess(response)) {
-      return response.data;
-    }
-    // Handle legacy API response format { product: ... }
-    if (response && typeof response === "object" && "product" in response) {
-      return response.product;
-    }
-    throw new Error("Invalid response format");
+    const response = await client.post("/api/admin/products", data);
+    return extractProductFromResponse(response);
   } catch (error) {
     handleApiError(error, "createProduct");
     throw error;
@@ -297,19 +284,8 @@ export async function updateProduct(
   data: UpdateProductData,
 ): Promise<Product> {
   try {
-    const response = await client.put<{ product: Product }>(
-      `/api/admin/products/${id}`,
-      data,
-    );
-    // Handle both standardized response { success, data } and legacy response { product }
-    if (isSuccess(response)) {
-      return response.data;
-    }
-    // Handle legacy API response format { product: ... }
-    if (response && typeof response === "object" && "product" in response) {
-      return response.product;
-    }
-    throw new Error("Invalid response format");
+    const response = await client.put(`/api/admin/products/${id}`, data);
+    return extractProductFromResponse(response);
   } catch (error) {
     handleApiError(error, "updateProduct");
     throw error;
@@ -472,18 +448,8 @@ export async function importProductsJson(
  */
 export async function getProductBySlug(slug: string): Promise<Product> {
   try {
-    const response = await client.get<{ product: Product }>(
-      `/api/products/${slug}`,
-    );
-    // Handle both standardized response { success, data } and legacy response { product }
-    if (isSuccess(response)) {
-      return response.data;
-    }
-    // Handle legacy API response format { product: ... }
-    if (response && typeof response === "object" && "product" in response) {
-      return response.product;
-    }
-    throw new Error("Invalid response format");
+    const response = await client.get(`/api/products/${slug}`);
+    return extractProductFromResponse(response);
   } catch (error) {
     handleApiError(error, "getProductBySlug");
     throw error;

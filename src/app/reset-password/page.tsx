@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { useForm } from "react-hook-form";
@@ -47,7 +47,6 @@ type UpdateForm = z.infer<typeof updateSchema>;
 
 export default function ResetPasswordPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const { resetPassword, loading: authLoading } = useAuthContext();
   const [step, setStep] = useState<"request" | "sent" | "update">("request");
   const [error, setError] = useState<string | null>(null);

@@ -887,7 +887,7 @@ export default function CreateQuoteForm({
       try {
         const frames = await productService.searchProducts(
           frameSearch,
-          currentBranchId,
+          currentBranchId ?? undefined,
           "frame",
         );
         setFrameResults(frames || []);
@@ -914,7 +914,7 @@ export default function CreateQuoteForm({
       try {
         const results = await productService.searchProducts(
           nearFrameSearch,
-          currentBranchId,
+          currentBranchId ?? undefined,
           "frame",
         );
         setNearFrameResults(results || []);

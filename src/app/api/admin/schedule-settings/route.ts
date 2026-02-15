@@ -178,6 +178,8 @@ export async function PUT(request: NextRequest) {
       );
     }
 
+    const body = await request.json().catch(() => ({}));
+
     // Check if settings exist for this branch/org
     // Use service role to bypass RLS, so MUST filter by organization_id
     let existingQuery = supabaseServiceRole
