@@ -4,9 +4,11 @@ import {
   createContext,
   useContext,
   useEffect,
+  useRef,
   useState,
   ReactNode,
 } from "react";
+import { usePathname } from "next/navigation";
 import { useAuthContext } from "./AuthContext";
 
 export interface Branch {
@@ -37,12 +39,14 @@ interface BranchProviderProps {
 
 export function BranchProvider({ children }: BranchProviderProps) {
   const { user, loading: authLoading } = useAuthContext();
+  const pathname = usePathname();
   const [branches, setBranches] = useState<Branch[]>([]);
   const [currentBranch, setCurrentBranchState] = useState<Branch | null>(null);
   const [isGlobalView, setIsGlobalView] = useState(false);
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isInitialized, setIsInitialized] = useState(false);
+  const lastOrganizationIdRef = useRef<string | null>(null);
 
   // Función optimizada para inicializar desde localStorage (solo para super admins)
   const initializeFromStorage = (availableBranches: Branch[]) => {
@@ -77,7 +81,8 @@ export function BranchProvider({ children }: BranchProviderProps) {
     }
 
     // Para super admins: si ya está inicializado y no es un refresh forzado,
-    // solo validar que la sucursal guardada aún existe (sin hacer petición al servidor)
+    // solo validar que la sucursal guardada aún existe (sin hacer petición al servidor).
+    // Si organizationId cambió (ej. usuario activó su óptica real), NO saltar: forzar re-fetch.
     if (isSuperAdmin && isInitialized && !forceRefresh) {
       const savedBranchId = localStorage.getItem(STORAGE_KEY);
 
@@ -105,8 +110,12 @@ export function BranchProvider({ children }: BranchProviderProps) {
 
       const data = await response.json();
       const serverIsSuperAdmin = data.isSuperAdmin || false;
+      const responseOrgId = data.organizationId ?? null;
       setBranches(data.branches || []);
       setIsSuperAdmin(serverIsSuperAdmin);
+
+      // Track organizationId for change detection (e.g. user activated real org)
+      lastOrganizationIdRef.current = responseOrgId;
 
       // For super admins, prioritize localStorage to maintain selection across page reloads
       // For regular admins, use server values (they have assigned branches)
@@ -175,7 +184,43 @@ export function BranchProvider({ children }: BranchProviderProps) {
     }
   };
 
-  // Inicializar solo una vez cuando el usuario se autentica
+  // Fetch organizationId to detect org changes (e.g. user activated real optica from demo)
+  useEffect(() => {
+    if (!user || authLoading) return;
+
+    let cancelled = false;
+    const loadOrgId = async () => {
+      try {
+        const res = await fetch("/api/admin/check-status");
+        if (!res.ok || cancelled) return;
+        const data = await res.json();
+        const orgId = data.organization?.organizationId ?? null;
+
+        if (cancelled) return;
+
+        // Reset when organization changed (e.g. demo -> real optica)
+        if (
+          lastOrganizationIdRef.current !== null &&
+          lastOrganizationIdRef.current !== orgId
+        ) {
+          setIsInitialized(false);
+          setBranches([]);
+          setCurrentBranchState(null);
+          setIsGlobalView(false);
+          localStorage.removeItem(STORAGE_KEY);
+        }
+        lastOrganizationIdRef.current = orgId;
+      } catch {
+        // Ignore - check-status may fail if not admin
+      }
+    };
+    loadOrgId();
+    return () => {
+      cancelled = true;
+    };
+  }, [user, authLoading, pathname]);
+
+  // Inicializar cuando el usuario se autentica o cuando se resetea por cambio de org
   useEffect(() => {
     if (!authLoading && user && !isInitialized) {
       fetchBranches();
@@ -184,6 +229,7 @@ export function BranchProvider({ children }: BranchProviderProps) {
       setBranches([]);
       setCurrentBranchState(null);
       setIsInitialized(false);
+      lastOrganizationIdRef.current = null;
       localStorage.removeItem(STORAGE_KEY);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

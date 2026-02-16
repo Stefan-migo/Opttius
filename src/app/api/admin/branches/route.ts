@@ -102,6 +102,7 @@ export async function GET(request: NextRequest) {
       currentBranch: branchContext.branchId,
       isGlobalView: branchContext.isGlobalView,
       isSuperAdmin: branchContext.isSuperAdmin,
+      organizationId: userOrganizationId ?? null,
     });
   } catch (error: any) {
     logger.error("Error in GET /api/admin/branches", error);

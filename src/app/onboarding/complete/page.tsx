@@ -60,7 +60,8 @@ export default function OnboardingCompletePage() {
   }, [user, authLoading]);
 
   const handleGoToAdmin = () => {
-    router.push("/admin");
+    // Full reload to clear cached demo data (branches, notifications) after activating real optica
+    window.location.href = "/admin";
   };
 
   // Mostrar loading mientras se verifica autenticación
