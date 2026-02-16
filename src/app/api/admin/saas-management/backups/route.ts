@@ -41,14 +41,11 @@ export async function GET(request: NextRequest) {
 
     const formattedBackups = backups.map((file) => ({
       id: file.id,
-      name: file.name,
-      size: file.metadata?.size || file.metadata?.size_bytes || 0,
-      size_mb: (
-        (file.metadata?.size || file.metadata?.size_bytes || 0) /
-        1024 /
-        1024
-      ).toFixed(2),
+      name: file.filename,
+      size: file.size_bytes,
+      size_mb: file.size_mb,
       created_at: file.created_at,
+      source: file.source,
     }));
 
     return NextResponse.json({ success: true, backups: formattedBackups });
@@ -87,7 +84,7 @@ export async function POST(request: NextRequest) {
       userEmail: user.email,
     });
 
-    const result = await SaasBackupService.generateFullBackup();
+    const result = await SaasBackupService.generateFullBackup(user.id);
 
     if (result.success) {
       await supabase.rpc("log_admin_activity", {

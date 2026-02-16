@@ -522,6 +522,26 @@ Opcionales (para funcionalidades de producción):
 - `MERCADOPAGO_ACCESS_TOKEN` - Para procesamiento de pagos
 - `NEXT_PUBLIC_MERCADOPAGO_PUBLIC_KEY` - Para procesamiento de pagos
 
+### Backup SaaS (producción)
+
+Para backups diarios automáticos de la base de datos en producción:
+
+1. **GitHub Actions** (`.github/workflows/saas-daily-backup.yml`): ejecuta `pg_dump` diariamente a las 4:00 UTC.
+
+2. **Secrets en GitHub** (Settings → Secrets and variables → Actions):
+   - `DIRECT_DATABASE_URL` - URL de conexión directa a Postgres (no pooler)
+   - `SUPABASE_URL` - URL del proyecto Supabase
+   - `SUPABASE_SERVICE_ROLE_KEY` - Service role key
+   - `CRON_SECRET` - Secreto para proteger el endpoint de registro
+
+3. **Variables en GitHub** (opcional):
+   - `APP_URL` - URL de la app (ej. `https://opttius.vercel.app`). Por defecto usa `https://opttius.vercel.app`.
+
+4. **Variables en Vercel** (para el endpoint `/api/cron/saas-backup`):
+   - `CRON_SECRET` o `SAAS_BACKUP_SECRET` - Mismo valor que en GitHub
+
+Los backups se listan y descargan desde `/admin/saas-management/backups`.
+
 ### Configuración de Chatbot AI
 
 El sistema incluye un agente chatbot con IA que puede gestionar la aplicación mediante lenguaje natural. Configura al menos un proveedor LLM:

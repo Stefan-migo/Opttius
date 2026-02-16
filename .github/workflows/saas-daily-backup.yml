@@ -1,0 +1,67 @@
+name: SaaS Daily Database Backup
+
+on:
+  schedule:
+    # Run daily at 4:00 AM UTC (adjust for your timezone)
+    - cron: "0 4 * * *"
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PostgreSQL client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+
+      - name: Create backup with pg_dump
+        env:
+          DIRECT_DATABASE_URL: ${{ secrets.DIRECT_DATABASE_URL }}
+        run: |
+          BACKUP_ID="full_backup_$(date -u +%Y-%m-%dT%H-%M-%SZ)"
+          FILENAME="${BACKUP_ID}.sql"
+
+          pg_dump "$DIRECT_DATABASE_URL" \
+            --no-owner \
+            --no-privileges \
+            -F p \
+            -f "$FILENAME"
+
+          SIZE_BYTES=$(stat -c%s "$FILENAME")
+          echo "BACKUP_FILENAME=$FILENAME" >> $GITHUB_ENV
+          echo "BACKUP_SIZE_BYTES=$SIZE_BYTES" >> $GITHUB_ENV
+          echo "Backup created: $FILENAME ($SIZE_BYTES bytes)"
+
+      - name: Upload to Supabase Storage
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          FILENAME="${{ env.BACKUP_FILENAME }}"
+          curl -f -X POST "${SUPABASE_URL}/storage/v1/object/saas-backups/${FILENAME}" \
+            -H "Authorization: Bearer ${SUPABASE_SERVICE_ROLE_KEY}" \
+            -H "apikey: ${SUPABASE_SERVICE_ROLE_KEY}" \
+            -H "Content-Type: application/sql" \
+            --data-binary "@${FILENAME}"
+
+      - name: Register backup in app
+        env:
+          APP_URL: ${{ vars.APP_URL || 'https://opttius.vercel.app' }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          curl -f -X POST "${APP_URL}/api/cron/saas-backup" \
+            -H "Authorization: Bearer ${CRON_SECRET}" \
+            -H "Content-Type: application/json" \
+            -d "{\"filename\": \"${{ env.BACKUP_FILENAME }}\", \"size_bytes\": ${{ env.BACKUP_SIZE_BYTES }}}"
+
+      - name: Summary
+        run: |
+          echo "## Backup completed" >> $GITHUB_STEP_SUMMARY
+          echo "- File: ${{ env.BACKUP_FILENAME }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Size: ${{ env.BACKUP_SIZE_BYTES }} bytes" >> $GITHUB_STEP_SUMMARY

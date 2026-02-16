@@ -2,6 +2,20 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient, createServiceRoleClient } from "@/utils/supabase/server";
 import { appLogger as logger } from "@/lib/logger";
 
+/** Detect if error is due to legacy schema (missing organization_id/branch_id columns). */
+function isLegacySchemaError(
+  error: { message?: string; code?: string } | null,
+): boolean {
+  if (!error) return false;
+  const msg = (error.message || "").toLowerCase();
+  return (
+    error.code === "42703" ||
+    msg.includes("organization_id") ||
+    msg.includes("branch_id") ||
+    msg.includes("does not exist")
+  );
+}
+
 /** Merge configs: branch > org > global. Returns one config per config_key. */
 function mergeConfigsByScope(
   configs: Array<{
@@ -86,7 +100,20 @@ export async function GET(request: NextRequest) {
       [k: string]: unknown;
     };
     let configs: ConfigRow[] = [];
-    let error: { message: string } | null = null;
+    let error: { message: string; code?: string } | null = null;
+
+    /** Legacy schema fallback: simple select without org/branch (for DBs without those columns). */
+    const fetchLegacyConfigs = async (): Promise<ConfigRow[]> => {
+      let q = supabaseAdmin
+        .from("system_config")
+        .select("*")
+        .order("category", { ascending: true })
+        .order("config_key", { ascending: true });
+      if (public_only) q = q.eq("is_public", true);
+      if (category && category !== "all") q = q.eq("category", category);
+      const res = await q;
+      return (res.data ?? []) as ConfigRow[];
+    };
 
     if (isSuperAdmin || !orgId) {
       // Super admin or no org: global configs only
@@ -97,11 +124,16 @@ export async function GET(request: NextRequest) {
         .order("config_key", { ascending: true });
       type ConfigResult = {
         data: Array<Record<string, unknown>> | null;
-        error: { message: string } | null;
+        error: { message: string; code?: string } | null;
       };
       const res: ConfigResult = (await q) as unknown as ConfigResult;
       configs = (res.data ?? []) as ConfigRow[];
       error = res.error;
+
+      if (error && isLegacySchemaError(error)) {
+        configs = await fetchLegacyConfigs();
+        error = null;
+      }
     } else {
       // Org admin: run separate queries and merge (avoids PostgREST or() syntax issues)
       const baseQuery = () =>
@@ -136,12 +168,18 @@ export async function GET(request: NextRequest) {
       ]);
 
       error = globalRes.error ?? orgRes.error ?? branchRes.error ?? null;
-      const all = [
-        ...(globalRes.data || []),
-        ...(orgRes.data || []),
-        ...(branchRes.data || []),
-      ];
-      configs = mergeConfigsByScope(all);
+
+      if (error && isLegacySchemaError(error)) {
+        configs = await fetchLegacyConfigs();
+        error = null;
+      } else if (!error) {
+        const all = [
+          ...(globalRes.data || []),
+          ...(orgRes.data || []),
+          ...(branchRes.data || []),
+        ];
+        configs = mergeConfigsByScope(all);
+      }
     }
 
     if ((!configs || configs.length === 0) && !error) {
@@ -151,7 +189,7 @@ export async function GET(request: NextRequest) {
         .order("category", { ascending: true })
         .order("config_key", { ascending: true });
       if (!res.error && res.data?.length) {
-        configs = res.data;
+        configs = res.data as ConfigRow[];
       }
     }
 
@@ -341,6 +379,9 @@ export async function PUT(request: NextRequest) {
     const targetOrgId = isSuperAdmin ? null : orgId;
     const targetBranchId = isSuperAdmin ? null : branchId || null;
 
+    // Legacy schema: DB without organization_id/branch_id columns (e.g. production)
+    let useLegacySchema: boolean | null = null;
+
     const results = [];
 
     for (const update of updates) {
@@ -357,19 +398,39 @@ export async function PUT(request: NextRequest) {
           .select("id, is_sensitive, category, value_type")
           .eq("config_key", config_key);
 
-        if (targetOrgId == null) {
-          query = query.is("organization_id", null).is("branch_id", null);
-        } else {
-          query = query.eq("organization_id", targetOrgId);
-          if (targetBranchId) {
-            query = query.eq("branch_id", targetBranchId);
+        if (useLegacySchema !== true) {
+          if (targetOrgId == null) {
+            query = query.is("organization_id", null).is("branch_id", null);
           } else {
-            query = query.is("branch_id", null);
+            query = query.eq("organization_id", targetOrgId);
+            if (targetBranchId) {
+              query = query.eq("branch_id", targetBranchId);
+            } else {
+              query = query.is("branch_id", null);
+            }
           }
         }
 
-        const { data: existingConfig, error: checkError } =
-          await query.maybeSingle();
+        let existingConfig: {
+          id: string;
+          is_sensitive?: boolean;
+          category?: string;
+          value_type?: string;
+        } | null = null;
+        let checkError: { message: string; code?: string } | null = null;
+        ({ data: existingConfig, error: checkError } =
+          await query.maybeSingle());
+
+        if (checkError && isLegacySchemaError(checkError)) {
+          useLegacySchema = true;
+          const legacyRes = await supabase
+            .from("system_config")
+            .select("id, is_sensitive, category, value_type")
+            .eq("config_key", config_key)
+            .maybeSingle();
+          existingConfig = legacyRes.data;
+          checkError = legacyRes.error;
+        }
 
         if (checkError) {
           results.push({
@@ -430,26 +491,47 @@ export async function PUT(request: NextRequest) {
             is_sensitive: configIsSensitive,
             last_modified_by: user.id,
           };
-          if (targetOrgId != null) insertPayload.organization_id = targetOrgId;
-          if (targetBranchId != null) insertPayload.branch_id = targetBranchId;
+          if (!useLegacySchema) {
+            if (targetOrgId != null)
+              insertPayload.organization_id = targetOrgId;
+            if (targetBranchId != null)
+              insertPayload.branch_id = targetBranchId;
+          }
 
-          const { data: newConfig, error: createError } = await insertClient
+          let newConfig: Record<string, unknown> | null = null;
+          let createError: { message: string; code?: string } | null = null;
+          ({ data: newConfig, error: createError } = await insertClient
             .from("system_config")
             .insert(insertPayload)
             .select()
-            .single();
+            .single());
 
-          if (createError) {
+          if (createError && isLegacySchemaError(createError)) {
+            useLegacySchema = true;
+            delete insertPayload.organization_id;
+            delete insertPayload.branch_id;
+            const retryRes = await insertClient
+              .from("system_config")
+              .insert(insertPayload)
+              .select()
+              .single();
+            newConfig = retryRes.data;
+            createError = retryRes.error;
+          }
+
+          if (createError || !newConfig) {
             results.push({
               config_key,
-              error: `Failed to create config: ${createError.message}`,
+              error: createError
+                ? `Failed to create config: ${createError.message}`
+                : "Failed to create config: no data returned",
             });
             continue;
           }
 
-          let parsedValue = newConfig.config_value;
+          let parsedValue: unknown = newConfig.config_value;
           try {
-            parsedValue = JSON.parse(newConfig.config_value);
+            parsedValue = JSON.parse(String(newConfig.config_value ?? ""));
           } catch {
             /* keep as-is */
           }
