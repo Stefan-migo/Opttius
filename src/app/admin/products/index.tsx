@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Package, Tag, Eye, Plus } from "lucide-react";
@@ -14,15 +14,34 @@ import CategoriesManagementSection from "./sections/CategoriesManagementSection"
 import LensFamiliesList from "@/components/admin/lenses/LensFamiliesList";
 import ContactLensFamiliesList from "@/components/admin/lenses/ContactLensFamiliesList";
 
+const VALID_TABS = [
+  "products",
+  "categories",
+  "lens-families",
+  "contact-lens-families",
+] as const;
+
 export default function ProductsPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { currentBranchId, isSuperAdmin, branches } = useBranch();
   const isGlobalView = !currentBranchId && isSuperAdmin;
 
-  // Tabs management state
+  // Tabs management state - read ?tab= from URL on mount
+  const tabParam = searchParams.get("tab");
+  const initialTab = VALID_TABS.includes(tabParam as any)
+    ? (tabParam as (typeof VALID_TABS)[number])
+    : "products";
+
   const [activeTab, setActiveTab] = useState<
     "products" | "categories" | "lens-families" | "contact-lens-families"
-  >("products");
+  >(initialTab);
+
+  useEffect(() => {
+    if (tabParam && VALID_TABS.includes(tabParam as any)) {
+      setActiveTab(tabParam as (typeof VALID_TABS)[number]);
+    }
+  }, [tabParam]);
 
   return (
     <div className="space-y-6">
@@ -40,6 +59,18 @@ export default function ProductsPage() {
           <Button onClick={() => router.push("/admin/products/add")}>
             <Plus className="h-4 w-4 mr-2" />
             Agregar Producto
+          </Button>
+        )}
+        {activeTab === "lens-families" && (
+          <Button onClick={() => router.push("/admin/lens-families/new")}>
+            <Plus className="h-4 w-4 mr-2" />
+            Nueva Familia Óptica
+          </Button>
+        )}
+        {activeTab === "contact-lens-families" && (
+          <Button onClick={() => router.push("/admin/contact-lens-families")}>
+            <Plus className="h-4 w-4 mr-2" />
+            Nueva Familia de Contacto
           </Button>
         )}
       </div>
@@ -80,15 +111,15 @@ export default function ProductsPage() {
       {/* Tabs for Products, Categories, Lens Families, and Contact Lens Families */}
       <Tabs
         value={activeTab}
-        onValueChange={(value) =>
-          setActiveTab(
-            value as
-              | "products"
-              | "categories"
-              | "lens-families"
-              | "contact-lens-families",
-          )
-        }
+        onValueChange={(value) => {
+          const tab = value as (typeof VALID_TABS)[number];
+          setActiveTab(tab);
+          const url =
+            tab === "products"
+              ? "/admin/products"
+              : `/admin/products?tab=${tab}`;
+          router.replace(url, { scroll: false });
+        }}
         className="w-full"
       >
         <TabsList className="grid w-full max-w-3xl grid-cols-4">

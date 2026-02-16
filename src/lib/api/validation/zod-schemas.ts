@@ -978,6 +978,7 @@ export const createWorkOrderSchema = z.object({
 export const lensFamilyBaseSchema = z.object({
   name: z.string().min(1, "El nombre es requerido").max(255),
   brand: z.string().max(255).optional().nullable(),
+  category_id: uuidOptionalSchema,
   lens_type: z.enum([
     "single_vision",
     "bifocal",
@@ -1095,6 +1096,7 @@ export const updateLensPriceMatrixSchemaV2 = updateLensPriceMatrixSchema.refine(
 export const contactLensFamilyBaseSchema = z.object({
   name: z.string().min(1, "El nombre es requerido").max(255),
   brand: z.string().max(255).optional().nullable(),
+  category_id: uuidOptionalSchema,
   description: z.string().optional().nullable(),
   use_type: z.enum(["daily", "bi_weekly", "monthly", "extended_wear"]),
   modality: z.enum(["spherical", "toric", "multifocal", "cosmetic"]),

@@ -58,11 +58,15 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url);
     const includeInactive = searchParams.get("include_inactive") === "true";
+    const categorySlug = searchParams.get("category_slug");
+    const categoryId = searchParams.get("category_id");
+    const search = searchParams.get("search")?.trim();
 
-    // Build query
-    let query = supabase.from("lens_families").select("*").order("created_at", {
-      ascending: false,
-    });
+    // Build query - include category for display (FK category_id -> categories)
+    let query = supabase
+      .from("lens_families")
+      .select("*, categories(id, name, slug)")
+      .order("created_at", { ascending: false });
 
     // CRITICAL: Filter by organization_id (each organization has its own lens families)
     // Even super admins should only see families from their organization (unless root/dev)
@@ -79,6 +83,34 @@ export async function GET(request: NextRequest) {
     // Filter by active status if needed
     if (!includeInactive) {
       query = query.eq("is_active", true);
+    }
+
+    // Filter by category_id (direct)
+    if (categoryId) {
+      query = query.eq("category_id", categoryId);
+    }
+
+    // Filter by category_slug (supports comma-separated: monofocales,lectura,ocupacional)
+    if (categorySlug && !categoryId) {
+      const slugs = categorySlug
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean);
+      if (slugs.length > 0) {
+        const { data: cats } = await supabase
+          .from("categories")
+          .select("id")
+          .in("slug", slugs);
+        const ids = (cats ?? []).map((c) => c.id).filter(Boolean);
+        if (ids.length > 0) {
+          query = query.in("category_id", ids);
+        }
+      }
+    }
+
+    // Filter by search (name or brand ILIKE)
+    if (search) {
+      query = query.or(`name.ilike.%${search}%,brand.ilike.%${search}%`);
     }
 
     const { data: families, error } = await query;

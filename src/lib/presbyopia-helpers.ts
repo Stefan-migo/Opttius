@@ -166,3 +166,30 @@ export function getRecommendedLensTypes(
       return [];
   }
 }
+
+/**
+ * Mapping from presbyopia solution to category slugs for filtering lens families.
+ * Used by LensFamilyCombobox to show only relevant families.
+ * Trifocals deprecated - no category.
+ */
+export const PRESBYOPIA_TO_CATEGORY_SLUGS: Record<
+  PresbyopiaSolution,
+  string[]
+> = {
+  none: ["monofocales", "lectura", "ocupacional", "deportivo"],
+  progressive: ["progresivos"],
+  bifocal: ["bifocales"],
+  trifocal: [], // Deprecated - no category
+  two_separate: ["monofocales", "lectura"],
+};
+
+/**
+ * Get category slugs for filtering lens families by presbyopia solution.
+ * Returns empty array for null/undefined or when no mapping exists (e.g. trifocal).
+ */
+export function getCategorySlugsForPresbyopia(
+  solution: PresbyopiaSolution | null | undefined,
+): string[] {
+  if (solution == null) return [];
+  return PRESBYOPIA_TO_CATEGORY_SLUGS[solution] ?? [];
+}

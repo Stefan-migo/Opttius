@@ -37,7 +37,9 @@ import {
   RefreshCw,
   Eye,
   EyeOff,
+  ArrowLeft,
 } from "lucide-react";
+import Link from "next/link";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Pagination } from "@/components/ui/pagination";
@@ -89,9 +91,13 @@ export default function ContactLensFamiliesPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(20);
 
+  const [categories, setCategories] = useState<
+    { id: string; name: string; slug: string }[]
+  >([]);
   const [formData, setFormData] = useState<{
     name: string;
     brand: string;
+    category_id: string | null;
     use_type: ContactLensUseType;
     modality: ContactLensModality;
     material: string | undefined;
@@ -103,6 +109,7 @@ export default function ContactLensFamiliesPage() {
   }>({
     name: "",
     brand: "",
+    category_id: null,
     use_type: "monthly",
     modality: "spherical",
     material: undefined,
@@ -117,6 +124,28 @@ export default function ContactLensFamiliesPage() {
     fetchFamilies();
   }, [includeInactive]);
 
+  useEffect(() => {
+    fetch("/api/categories")
+      .then((r) => r.json())
+      .then((json) => {
+        const cats = json.categories || json.data || [];
+        setCategories(
+          cats.filter((c: { slug?: string }) =>
+            [
+              "lentes-contacto",
+              "monofocales",
+              "progresivos",
+              "bifocales",
+              "lectura",
+              "ocupacional",
+              "deportivo",
+            ].includes(c.slug ?? ""),
+          ),
+        );
+      })
+      .catch(() => setCategories([]));
+  }, []);
+
   const fetchFamilies = async () => {
     try {
       setLoading(true);
@@ -129,7 +158,7 @@ export default function ContactLensFamiliesPage() {
       );
       if (response.ok) {
         const data = await response.json();
-        setFamilies(data.families || []);
+        setFamilies(data.data || data.families || []);
       } else {
         toast.error("Error al cargar familias de lentes de contacto");
       }
@@ -147,6 +176,7 @@ export default function ContactLensFamiliesPage() {
       setFormData({
         name: family.name,
         brand: family.brand || "",
+        category_id: (family as { category_id?: string }).category_id || null,
         use_type: family.use_type,
         modality: family.modality,
         material: family.material || "",
@@ -161,6 +191,7 @@ export default function ContactLensFamiliesPage() {
       setFormData({
         name: "",
         brand: "",
+        category_id: null,
         use_type: "monthly",
         modality: "spherical",
         material: "",
@@ -190,6 +221,7 @@ export default function ContactLensFamiliesPage() {
       const body: any = {
         name: formData.name,
         brand: formData.brand || null,
+        category_id: formData.category_id || null,
         use_type: formData.use_type,
         modality: formData.modality,
         packaging: formData.packaging,
@@ -269,6 +301,13 @@ export default function ContactLensFamiliesPage() {
 
   return (
     <div className="container mx-auto py-6 space-y-6">
+      <Link
+        href="/admin/products"
+        className="inline-flex items-center gap-2 text-sm text-tierra-media hover:text-azul-profundo transition-colors"
+      >
+        <ArrowLeft className="h-4 w-4" />
+        Volver a Productos
+      </Link>
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
@@ -467,6 +506,31 @@ export default function ContactLensFamiliesPage() {
                 </div>
               </div>
 
+              <div className="space-y-2">
+                <Label htmlFor="category_id">Categoría</Label>
+                <Select
+                  value={formData.category_id ?? "__none__"}
+                  onValueChange={(value) =>
+                    setFormData({
+                      ...formData,
+                      category_id: value === "__none__" ? null : value,
+                    })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Seleccionar categoría (opcional)" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__none__">Sin categoría</SelectItem>
+                    {categories.map((cat) => (
+                      <SelectItem key={cat.id} value={cat.id}>
+                        {cat.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="use_type">
@@ -518,16 +582,19 @@ export default function ContactLensFamiliesPage() {
                 <div className="space-y-2">
                   <Label htmlFor="material">Material</Label>
                   <Select
-                    value={formData.material || ""}
+                    value={formData.material || "__none__"}
                     onValueChange={(value) =>
-                      setFormData({ ...formData, material: value || undefined })
+                      setFormData({
+                        ...formData,
+                        material: value === "__none__" ? undefined : value,
+                      })
                     }
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Seleccionar material" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Ninguno</SelectItem>
+                      <SelectItem value="__none__">Ninguno</SelectItem>
                       {MATERIALS.map((mat) => (
                         <SelectItem key={mat.value} value={mat.value}>
                           {mat.label}

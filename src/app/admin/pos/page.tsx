@@ -77,6 +77,8 @@ import {
   contactLensFamilyService,
   contactLensMatrixService,
 } from "@/lib/api/services";
+import { LensFamilyCombobox } from "@/components/admin/lenses/LensFamilyCombobox";
+import { ContactLensFamilyCombobox } from "@/components/admin/lenses/ContactLensFamilyCombobox";
 import type { QuoteSearchParams } from "@/lib/api/services";
 import { useBranch } from "@/hooks/useBranch";
 import { getBranchHeader } from "@/lib/utils/branch";
@@ -4249,41 +4251,21 @@ export default function POSPage() {
                               <Label className="text-sm font-medium">
                                 Familia de Lente de Lejos
                               </Label>
-                              <Select
-                                value={farLensFamilyId || "none"}
-                                onValueChange={(value) => {
-                                  const familyId =
-                                    value === "none" ? "" : value;
+                              <LensFamilyCombobox
+                                value={farLensFamilyId || ""}
+                                onChange={(familyId) => {
                                   setFarLensFamilyId(familyId);
                                   setOrderFormData((prev) => ({
                                     ...prev,
                                     far_lens_family_id: familyId,
                                   }));
                                 }}
-                                disabled={loadingFamilies}
-                              >
-                                <SelectTrigger className="h-9 text-sm">
-                                  <SelectValue placeholder="Selecciona familia de lente" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="none">
-                                    Sin familia (precio manual)
-                                  </SelectItem>
-                                  {lensFamilies
-                                    .filter(
-                                      (f) => f.lens_type === "single_vision",
-                                    )
-                                    .map((family) => (
-                                      <SelectItem
-                                        key={family.id}
-                                        value={family.id}
-                                      >
-                                        {family.name}{" "}
-                                        {family.brand && `(${family.brand})`}
-                                      </SelectItem>
-                                    ))}
-                                </SelectContent>
-                              </Select>
+                                presbyopiaSolution="two_separate"
+                                families={lensFamilies}
+                                loading={loadingFamilies}
+                                placeholder="Selecciona familia de lente"
+                                className="h-9 text-sm"
+                              />
                               {farLensCost > 0 && (
                                 <div className="mt-1 p-2 bg-green-50 border border-green-200 rounded">
                                   <p className="text-xs font-medium text-green-800">
@@ -4480,43 +4462,21 @@ export default function POSPage() {
                               <Label className="text-sm font-medium">
                                 Familia de Lente de Cerca
                               </Label>
-                              <Select
-                                value={nearLensFamilyId || "none"}
-                                onValueChange={(value) => {
-                                  const familyId =
-                                    value === "none" ? "" : value;
+                              <LensFamilyCombobox
+                                value={nearLensFamilyId || ""}
+                                onChange={(familyId) => {
                                   setNearLensFamilyId(familyId);
                                   setOrderFormData((prev) => ({
                                     ...prev,
                                     near_lens_family_id: familyId,
                                   }));
                                 }}
-                                disabled={loadingFamilies}
-                              >
-                                <SelectTrigger className="h-9 text-sm">
-                                  <SelectValue placeholder="Selecciona familia de lente" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="none">
-                                    Sin familia (precio manual)
-                                  </SelectItem>
-                                  {lensFamilies
-                                    .filter(
-                                      (f) =>
-                                        f.lens_type === "single_vision" ||
-                                        f.lens_type === "reading",
-                                    )
-                                    .map((family) => (
-                                      <SelectItem
-                                        key={family.id}
-                                        value={family.id}
-                                      >
-                                        {family.name}{" "}
-                                        {family.brand && `(${family.brand})`}
-                                      </SelectItem>
-                                    ))}
-                                </SelectContent>
-                              </Select>
+                                presbyopiaSolution="two_separate"
+                                families={lensFamilies}
+                                loading={loadingFamilies}
+                                placeholder="Selecciona familia de lente"
+                                className="h-9 text-sm"
+                              />
                               {nearLensCost > 0 && (
                                 <div className="mt-1 p-2 bg-green-50 border border-green-200 rounded">
                                   <p className="text-xs font-medium text-green-800">
@@ -4608,44 +4568,21 @@ export default function POSPage() {
                       <div className="space-y-4">
                         <div>
                           <Label>Familia de Lentes de Contacto</Label>
-                          <Select
-                            value={
-                              orderFormData.contact_lens_family_id || "none"
-                            }
-                            onValueChange={(value) => {
+                          <ContactLensFamilyCombobox
+                            value={orderFormData.contact_lens_family_id || ""}
+                            onChange={(value) => {
                               setOrderFormData((prev) => ({
                                 ...prev,
-                                contact_lens_family_id:
-                                  value === "none" ? "" : value,
+                                contact_lens_family_id: value,
                                 contact_lens_cost: 0,
                                 contact_lens_price: 0,
                               }));
                             }}
-                            disabled={loadingContactLensFamilies}
-                          >
-                            <SelectTrigger className="h-9 text-sm">
-                              <SelectValue
-                                placeholder={
-                                  loadingContactLensFamilies
-                                    ? "Cargando..."
-                                    : "Selecciona familia (opcional)"
-                                }
-                              />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="none">
-                                Sin familia (precio manual)
-                              </SelectItem>
-                              {contactLensFamilies
-                                .filter((f) => f.is_active)
-                                .map((family) => (
-                                  <SelectItem key={family.id} value={family.id}>
-                                    {family.name}{" "}
-                                    {family.brand && `(${family.brand})`}
-                                  </SelectItem>
-                                ))}
-                            </SelectContent>
-                          </Select>
+                            families={contactLensFamilies}
+                            loading={loadingContactLensFamilies}
+                            categorySlug="lentes-contacto"
+                            className="h-9 text-sm"
+                          />
                         </div>
 
                         {orderFormData.contact_lens_family_id && (
@@ -4743,58 +4680,21 @@ export default function POSPage() {
                         {/* Single Lens Family Selection */}
                         <div>
                           <Label>Familia de Lentes</Label>
-                          <Select
-                            value={orderFormData.lens_family_id || "none"}
-                            onValueChange={(value) => {
-                              if (value === "none") {
-                                setOrderFormData((prev) => ({
-                                  ...prev,
-                                  lens_family_id: "",
-                                }));
-                                setManualLensPrice(false);
-                              } else {
-                                setOrderFormData((prev) => ({
-                                  ...prev,
-                                  lens_family_id: value,
-                                }));
-                                setManualLensPrice(false);
-                              }
+                          <LensFamilyCombobox
+                            value={orderFormData.lens_family_id || ""}
+                            onChange={(value) => {
+                              setOrderFormData((prev) => ({
+                                ...prev,
+                                lens_family_id: value,
+                              }));
+                              setManualLensPrice(false);
                             }}
-                          >
-                            <SelectTrigger className="h-9 text-sm">
-                              <SelectValue placeholder="Selecciona una familia (opcional)" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="none">
-                                Sin familia (manual)
-                              </SelectItem>
-                              {loadingFamilies ? (
-                                <SelectItem value="loading" disabled>
-                                  Cargando...
-                                </SelectItem>
-                              ) : (
-                                lensFamilies
-                                  .filter((f) => {
-                                    if (presbyopiaSolution === "none")
-                                      return true;
-                                    const recommended =
-                                      getRecommendedLensTypes(
-                                        presbyopiaSolution,
-                                      );
-                                    return recommended.includes(f.lens_type);
-                                  })
-                                  .map((family) => (
-                                    <SelectItem
-                                      key={family.id}
-                                      value={family.id}
-                                    >
-                                      {family.name} (
-                                      {family.brand || "Sin marca"})
-                                    </SelectItem>
-                                  ))
-                              )}
-                            </SelectContent>
-                          </Select>
+                            presbyopiaSolution={presbyopiaSolution}
+                            families={lensFamilies}
+                            loading={loadingFamilies}
+                            placeholder="Selecciona una familia (opcional)"
+                            className="h-9 text-sm"
+                          />
                         </div>
 
                         {/* Lens Configuration */}

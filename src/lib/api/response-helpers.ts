@@ -50,6 +50,7 @@ export function extractDataFromResponse<T>(response: any): T[] {
     "branches",
     "inventory",
     "categories",
+    "families",
   ];
   for (const key of dataKeys) {
     if (Array.isArray(response[key])) {

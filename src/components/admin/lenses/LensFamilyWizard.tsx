@@ -23,6 +23,7 @@ export function LensFamilyWizard() {
   const [data, setData] = useState<FullLensFamilyData>({
     name: "",
     brand: "",
+    category_id: null,
     lens_type: "single_vision",
     lens_material: "cr39",
     description: "",
@@ -86,7 +87,7 @@ export function LensFamilyWizard() {
       }
 
       toast.success("Familia de lentes creada exitosamente");
-      router.push("/admin/lens-families");
+      router.push("/admin/products?tab=lens-families");
     } catch (error: any) {
       console.error(error);
       toast.error(error.message || "Error al guardar");
@@ -167,7 +168,10 @@ export function LensFamilyWizard() {
 
           <div className="flex justify-between pt-6 border-t mt-6">
             {step === 1 ? (
-              <Button variant="outline" onClick={() => router.back()}>
+              <Button
+                variant="outline"
+                onClick={() => router.push("/admin/products?tab=lens-families")}
+              >
                 Cancelar
               </Button>
             ) : (

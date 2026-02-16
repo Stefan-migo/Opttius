@@ -66,6 +66,8 @@ import {
   productService,
   quoteService,
 } from "@/lib/api/services";
+import { LensFamilyCombobox } from "@/components/admin/lenses/LensFamilyCombobox";
+import { ContactLensFamilyCombobox } from "@/components/admin/lenses/ContactLensFamilyCombobox";
 
 interface CreateQuoteFormProps {
   onSuccess: () => void;
@@ -2126,40 +2128,20 @@ export default function CreateQuoteForm({
               <div className="space-y-4">
                 <div>
                   <Label>Familia de Lentes de Contacto</Label>
-                  <Select
-                    value={formData.contact_lens_family_id || "none"}
-                    onValueChange={(value) => {
+                  <ContactLensFamilyCombobox
+                    value={formData.contact_lens_family_id || ""}
+                    onChange={(value) => {
                       setFormData((prev) => ({
                         ...prev,
-                        contact_lens_family_id: value === "none" ? "" : value,
+                        contact_lens_family_id: value,
                         contact_lens_cost: 0,
                         contact_lens_price: 0,
                       }));
                     }}
-                    disabled={loadingContactLensFamilies}
-                  >
-                    <SelectTrigger>
-                      <SelectValue
-                        placeholder={
-                          loadingContactLensFamilies
-                            ? "Cargando..."
-                            : "Selecciona familia (opcional)"
-                        }
-                      />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none">
-                        Sin familia (precio manual)
-                      </SelectItem>
-                      {contactLensFamilies
-                        .filter((f) => f.is_active)
-                        .map((family) => (
-                          <SelectItem key={family.id} value={family.id}>
-                            {family.name} {family.brand && `(${family.brand})`}
-                          </SelectItem>
-                        ))}
-                    </SelectContent>
-                  </Select>
+                    families={contactLensFamilies}
+                    loading={loadingContactLensFamilies}
+                    categorySlug="lentes-contacto"
+                  />
                 </div>
 
                 {formData.contact_lens_family_id && (
@@ -2215,41 +2197,19 @@ export default function CreateQuoteForm({
                     {/* Far Lens */}
                     <div className="space-y-2">
                       <Label>Lente de Lejos</Label>
-                      <Select
-                        value={farLensFamilyId || "none"}
-                        onValueChange={(value) => {
-                          const familyId = value === "none" ? "" : value;
+                      <LensFamilyCombobox
+                        value={farLensFamilyId || ""}
+                        onChange={(familyId) => {
                           setFarLensFamilyId(familyId);
                           setFormData((prev) => ({
                             ...prev,
                             far_lens_family_id: familyId,
                           }));
                         }}
-                        disabled={loadingFamilies}
-                      >
-                        <SelectTrigger>
-                          <SelectValue
-                            placeholder={
-                              loadingFamilies
-                                ? "Cargando..."
-                                : "Selecciona familia"
-                            }
-                          />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="none">
-                            Sin familia (precio manual)
-                          </SelectItem>
-                          {lensFamilies
-                            .filter((f) => f.lens_type === "single_vision")
-                            .map((family) => (
-                              <SelectItem key={family.id} value={family.id}>
-                                {family.name}{" "}
-                                {family.brand && `(${family.brand})`}
-                              </SelectItem>
-                            ))}
-                        </SelectContent>
-                      </Select>
+                        presbyopiaSolution="two_separate"
+                        families={lensFamilies}
+                        loading={loadingFamilies}
+                      />
                       {farLensCost > 0 && (
                         <p className="text-sm text-green-600 font-medium">
                           Precio: ${farLensCost.toLocaleString()}
@@ -2260,45 +2220,19 @@ export default function CreateQuoteForm({
                     {/* Near Lens */}
                     <div className="space-y-2">
                       <Label>Lente de Cerca</Label>
-                      <Select
-                        value={nearLensFamilyId || "none"}
-                        onValueChange={(value) => {
-                          const familyId = value === "none" ? "" : value;
+                      <LensFamilyCombobox
+                        value={nearLensFamilyId || ""}
+                        onChange={(familyId) => {
                           setNearLensFamilyId(familyId);
                           setFormData((prev) => ({
                             ...prev,
                             near_lens_family_id: familyId,
                           }));
                         }}
-                        disabled={loadingFamilies}
-                      >
-                        <SelectTrigger>
-                          <SelectValue
-                            placeholder={
-                              loadingFamilies
-                                ? "Cargando..."
-                                : "Selecciona familia"
-                            }
-                          />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="none">
-                            Sin familia (precio manual)
-                          </SelectItem>
-                          {lensFamilies
-                            .filter(
-                              (f) =>
-                                f.lens_type === "single_vision" ||
-                                f.lens_type === "reading",
-                            )
-                            .map((family) => (
-                              <SelectItem key={family.id} value={family.id}>
-                                {family.name}{" "}
-                                {family.brand && `(${family.brand})`}
-                              </SelectItem>
-                            ))}
-                        </SelectContent>
-                      </Select>
+                        presbyopiaSolution="two_separate"
+                        families={lensFamilies}
+                        loading={loadingFamilies}
+                      />
                       {nearLensCost > 0 && (
                         <p className="text-sm text-green-600 font-medium">
                           Precio: ${nearLensCost.toLocaleString()}
@@ -2320,83 +2254,20 @@ export default function CreateQuoteForm({
                         </div>
                       </div>
                     </div>
-                    <Select
-                      value={formData.lens_family_id || "none"}
-                      onValueChange={(value) => {
+                    <LensFamilyCombobox
+                      value={formData.lens_family_id || ""}
+                      onChange={(value) => {
                         setFormData((prev) => ({
                           ...prev,
-                          lens_family_id: value === "none" ? "" : value,
-                          // Reset lens_cost when changing family to trigger recalculation
+                          lens_family_id: value,
                           lens_cost: 0,
                         }));
                       }}
-                      disabled={loadingFamilies}
-                    >
-                      <SelectTrigger>
-                        <SelectValue
-                          placeholder={
-                            loadingFamilies
-                              ? "Cargando..."
-                              : "Selecciona familia (opcional)"
-                          }
-                        >
-                          {formData.lens_family_id &&
-                            (() => {
-                              const selectedFamily = lensFamilies.find(
-                                (f) => f.id === formData.lens_family_id,
-                              );
-                              return selectedFamily
-                                ? `${selectedFamily.name}${selectedFamily.brand ? ` (${selectedFamily.brand})` : ""}`
-                                : "Selecciona familia (opcional)";
-                            })()}
-                        </SelectValue>
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="none">
-                          Sin familia (precio manual)
-                        </SelectItem>
-                        {lensFamilies
-                          .filter((f) => {
-                            if (presbyopiaSolution === "none") return true;
-                            const recommended =
-                              getRecommendedLensTypes(presbyopiaSolution);
-                            return recommended.includes(f.lens_type);
-                          })
-                          .map((family) => {
-                            const lensTypeLabels: Record<string, string> = {
-                              single_vision: "Monofocal",
-                              progressive: "Progresivo",
-                              bifocal: "Bifocal",
-                              trifocal: "Trifocal",
-                              reading: "Lectura",
-                              computer: "Computadora",
-                              sports: "Deportivo",
-                            };
-                            return (
-                              <SelectItem key={family.id} value={family.id}>
-                                <div className="flex flex-col">
-                                  <span>
-                                    {family.name}{" "}
-                                    {family.brand && `(${family.brand})`}
-                                  </span>
-                                  {family.description && (
-                                    <span className="text-xs text-gray-500 mt-1">
-                                      {family.description}
-                                    </span>
-                                  )}
-                                  {family.lens_type && (
-                                    <span className="text-xs text-gray-400 mt-0.5">
-                                      Tipo:{" "}
-                                      {lensTypeLabels[family.lens_type] ||
-                                        family.lens_type}
-                                    </span>
-                                  )}
-                                </div>
-                              </SelectItem>
-                            );
-                          })}
-                      </SelectContent>
-                    </Select>
+                      presbyopiaSolution={presbyopiaSolution}
+                      families={lensFamilies}
+                      loading={loadingFamilies}
+                      placeholder="Selecciona familia (opcional)"
+                    />
                     {formData.lens_family_id &&
                       (() => {
                         const selectedFamily = lensFamilies.find(

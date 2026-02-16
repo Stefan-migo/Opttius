@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -10,11 +11,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export interface LensFamilyFormData {
   name: string;
   brand: string;
+  category_id: string | null;
   lens_type: string;
   lens_material: string;
   description: string;
@@ -46,11 +47,40 @@ export const LENS_MATERIALS = [
   { value: "glass", label: "Vidrio" },
 ];
 
+const CATEGORY_NONE_VALUE = "__none__";
+
+const LENS_CATEGORY_SLUGS = [
+  "monofocales",
+  "progresivos",
+  "bifocales",
+  "lectura",
+  "ocupacional",
+  "deportivo",
+];
+
 export function LensFamilyBasicForm({
   data,
   onChange,
   errors = {},
 }: LensFamilyBasicFormProps) {
+  const [categories, setCategories] = useState<
+    { id: string; name: string; slug: string }[]
+  >([]);
+
+  useEffect(() => {
+    fetch("/api/categories")
+      .then((r) => r.json())
+      .then((json) => {
+        const cats = json.categories || json.data || [];
+        setCategories(
+          cats.filter((c: { slug?: string }) =>
+            LENS_CATEGORY_SLUGS.includes(c.slug ?? ""),
+          ),
+        );
+      })
+      .catch(() => setCategories([]));
+  }, []);
+
   const handleChange = (field: keyof LensFamilyFormData, value: any) => {
     onChange({ ...data, [field]: value });
   };
@@ -83,7 +113,40 @@ export function LensFamilyBasicForm({
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
+          <Label htmlFor="category_id">Categoría</Label>
+          <p className="text-xs text-muted-foreground">
+            Para que el sistema sugiera esta familia al crear presupuestos según
+            el tipo de receta del cliente (ej: si elige progresivos, verá las
+            familias con categoría Progresivos).
+          </p>
+          <Select
+            value={data.category_id ?? CATEGORY_NONE_VALUE}
+            onValueChange={(value) =>
+              handleChange(
+                "category_id",
+                value === CATEGORY_NONE_VALUE ? null : value,
+              )
+            }
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Seleccionar categoría (opcional)" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={CATEGORY_NONE_VALUE}>Sin categoría</SelectItem>
+              {categories.map((cat) => (
+                <SelectItem key={cat.id} value={cat.id}>
+                  {cat.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="space-y-2">
           <Label htmlFor="lens_type">Tipo de Lente *</Label>
+          <p className="text-xs text-muted-foreground">
+            Clasificación técnica del diseño óptico: monofocal, bifocal,
+            progresivo, lectura, etc.
+          </p>
           <Select
             value={data.lens_type}
             onValueChange={(value) => handleChange("lens_type", value)}

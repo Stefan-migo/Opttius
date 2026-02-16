@@ -1490,16 +1490,21 @@ export default function OrganizationDetailsPage() {
                   Sucursal (Opcional)
                 </label>
                 <Select
-                  value={userFormData.branch_id}
+                  value={userFormData.branch_id || "__none__"}
                   onValueChange={(value) =>
-                    setUserFormData({ ...userFormData, branch_id: value })
+                    setUserFormData({
+                      ...userFormData,
+                      branch_id: value === "__none__" ? "" : value,
+                    })
                   }
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Seleccionar sucursal" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Sin sucursal específica</SelectItem>
+                    <SelectItem value="__none__">
+                      Sin sucursal específica
+                    </SelectItem>
                     {branches.map((branch) => (
                       <SelectItem key={branch.id} value={branch.id}>
                         {branch.name} ({branch.code})

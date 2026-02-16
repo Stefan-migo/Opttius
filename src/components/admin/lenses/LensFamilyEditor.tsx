@@ -40,6 +40,7 @@ export function LensFamilyEditor({ familyId }: LensFamilyEditorProps) {
       setFamilyData({
         name: f.name,
         brand: f.brand || "",
+        category_id: f.category_id || null,
         lens_type: f.lens_type,
         lens_material: f.lens_material,
         description: f.description || "",
@@ -158,7 +159,11 @@ export function LensFamilyEditor({ familyId }: LensFamilyEditorProps) {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
-          <Button variant="outline" size="sm" onClick={() => router.back()}>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => router.push("/admin/products?tab=lens-families")}
+          >
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div>
