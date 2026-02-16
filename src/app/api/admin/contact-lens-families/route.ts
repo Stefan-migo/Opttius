@@ -69,8 +69,11 @@ export async function GET(request: NextRequest) {
       .order("created_at", { ascending: false });
 
     // Filter by organization_id (multi-tenancy isolation)
-    if (!isSuperAdmin && userOrganizationId) {
+    // Even super admins should only see families from their organization (unless root/dev)
+    if (userOrganizationId) {
       query = query.eq("organization_id", userOrganizationId);
+    } else if (!isSuperAdmin) {
+      return createApiSuccessResponse([]);
     }
 
     // Filter by active status if needed
