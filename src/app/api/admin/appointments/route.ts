@@ -648,7 +648,9 @@ export async function POST(request: NextRequest) {
         customerName,
         appointmentWithCustomer.appointment_date,
         appointmentWithCustomer.appointment_time,
-        appointmentWithCustomer.branch_id ?? undefined,
+        appointmentWithCustomer.branch_id ??
+          branchContext.branchId ??
+          undefined,
       ).catch((err) => logger.error("Error creating notification", err));
 
       // Send Customer Email Confirmation (non-blocking)

@@ -56,73 +56,91 @@ export class NotificationService {
     try {
       const supabase = createServiceRoleClient();
 
-      // Check if notification type is enabled
-      const { data: settingsData, error: settingsError } = await supabase
-        .from("notification_settings")
-        .select("enabled, priority")
-        .eq("notification_type", params.type)
-        .single();
-
-      if (settingsError && settingsError.code !== "PGRST116") {
-        // PGRST116 = not found
-        console.error("Error checking notification settings:", settingsError);
-        // Continue anyway - default to enabled
-      }
-
-      // If notification is disabled, skip creation
-      if (settingsData && settingsData.enabled === false) {
-        console.log(
-          `Notification type ${params.type} is disabled, skipping...`,
-        );
-        return { success: true }; // Return success but don't create notification
-      }
-
-      // Get priority (with override support)
-      const priority = settingsData?.priority || params.priority || "medium";
-
-      // Determine organization_id
+      // Resolve organization_id and branch_id (from params, branch, or related entity)
       let organizationId: string | null = params.organizationId ?? null;
+      let branchId: string | null = params.branchId ?? null;
 
       // If organization_id not provided but branch_id is, get it from branch
-      if (!organizationId && params.branchId) {
+      if (!organizationId && branchId) {
         const { data: branch } = await supabase
           .from("branches")
           .select("organization_id")
-          .eq("id", params.branchId)
+          .eq("id", branchId)
           .single();
         organizationId = branch?.organization_id || null;
       }
 
-      // If organization_id still not set but related entity exists, try to get it from entity
+      // If org/branch still not set but related entity exists, get from entity
       if (
-        !organizationId &&
+        (!organizationId || !branchId) &&
         params.relatedEntityId &&
         params.relatedEntityType
       ) {
-        const entityTableMap: Record<string, string> = {
-          order: "orders",
-          quote: "quotes",
-          work_order: "lab_work_orders",
-          appointment: "appointments",
-          customer: "customers",
-          product: "products",
+        const entityTableMap: Record<
+          string,
+          { table: string; hasBranch: boolean }
+        > = {
+          order: { table: "orders", hasBranch: true },
+          quote: { table: "quotes", hasBranch: true },
+          work_order: { table: "lab_work_orders", hasBranch: true },
+          appointment: { table: "appointments", hasBranch: true },
+          customer: { table: "customers", hasBranch: true },
+          product: { table: "products", hasBranch: true },
         };
 
-        const tableName = entityTableMap[params.relatedEntityType];
-        if (tableName) {
+        const mapping = entityTableMap[params.relatedEntityType];
+        if (mapping) {
+          const cols = [
+            "organization_id",
+            ...(mapping.hasBranch ? ["branch_id"] : []),
+          ].join(", ");
           const { data: entity } = await supabase
-            .from(tableName)
-            .select("organization_id")
+            .from(mapping.table)
+            .select(cols)
             .eq("id", params.relatedEntityId)
             .single();
-          organizationId = entity?.organization_id || null;
+          if (entity) {
+            organizationId =
+              organizationId ?? (entity as any).organization_id ?? null;
+            if (mapping.hasBranch) {
+              branchId = branchId ?? (entity as any).branch_id ?? null;
+            }
+          }
         }
       }
 
       // For SaaS notifications (target_admin_role=root), organization_id should be NULL
       if (params.targetAdminRole === "root") {
         organizationId = null;
+        branchId = null;
       }
+
+      // Check if notification type is enabled (resolution: branch > org > global)
+      const { data: settingsRows, error: settingsError } = await supabase.rpc(
+        "get_notification_setting_effective",
+        {
+          p_notification_type: params.type,
+          p_organization_id: organizationId,
+          p_branch_id: branchId,
+        },
+      );
+
+      if (settingsError) {
+        console.error("Error checking notification settings:", settingsError);
+        // Continue anyway - default to enabled
+      }
+
+      const settingsData = Array.isArray(settingsRows)
+        ? settingsRows[0]
+        : settingsRows;
+      if (settingsData && settingsData.enabled === false) {
+        console.log(
+          `Notification type ${params.type} is disabled, skipping...`,
+        );
+        return { success: true };
+      }
+
+      const priority = settingsData?.priority || params.priority || "medium";
 
       // Create notification (branch_id scopes to óptica; SaaS uses target_admin_role=root, no branch_id)
       const { error: insertError } = await supabase
@@ -139,7 +157,7 @@ export class NotificationService {
           metadata: params.metadata || {},
           target_admin_id: params.targetAdminId || null,
           target_admin_role: params.targetAdminRole || null,
-          branch_id: params.branchId ?? null,
+          branch_id: branchId,
           organization_id: organizationId,
           created_by_system: true,
         });

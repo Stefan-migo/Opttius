@@ -589,7 +589,10 @@ export async function POST(request: NextRequest) {
               newCustomer.id,
               customerName,
               validatedBody.email || undefined,
-              newCustomer.branch_id ?? undefined,
+              newCustomer.branch_id ??
+                customerBranchId ??
+                branchContext.branchId ??
+                undefined,
             ).catch((err) => logger.error("Error creating notification", err));
 
             return createApiSuccessResponse(newCustomer, { statusCode: 201 });

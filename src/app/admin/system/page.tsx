@@ -56,7 +56,13 @@ const POSBillingSettings = dynamic(
 export default function SystemAdministrationPage() {
   const searchParams = useSearchParams();
   const tabFromUrl = searchParams.get("tab");
-  const { currentBranchId, isSuperAdmin, branches } = useBranch();
+  const {
+    currentBranchId,
+    isSuperAdmin,
+    branches,
+    organizationId,
+    currentBranchName,
+  } = useBranch();
   const [configScope, setConfigScope] = useState<"global" | "branch">("global");
   const configBranchId =
     configScope === "branch" && currentBranchId ? currentBranchId : null;
@@ -508,7 +514,16 @@ export default function SystemAdministrationPage() {
         </TabsContent>
 
         <TabsContent value="notifications" className="space-y-6">
-          <NotificationSettings />
+          <NotificationSettings
+            branchId={configScope === "branch" ? currentBranchId : null}
+            organizationId={organizationId ?? undefined}
+            branchName={
+              configScope === "branch" ? currentBranchName : undefined
+            }
+            configScope={configScope}
+            onConfigScopeChange={setConfigScope}
+            hasMultipleBranches={(branches?.length ?? 0) > 1}
+          />
         </TabsContent>
 
         <TabsContent value="billing" className="space-y-6">

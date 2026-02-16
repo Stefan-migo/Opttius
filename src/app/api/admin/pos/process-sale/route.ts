@@ -1117,7 +1117,7 @@ export async function POST(request: NextRequest) {
               newOrder.order_number,
               newOrder.email || "venta@pos.local",
               newOrder.total_amount,
-              newOrder.branch_id ?? undefined,
+              newOrder.branch_id ?? branchContext.branchId ?? undefined,
             ).catch((err) =>
               logger.error("Error creating sale notification", err),
             );
@@ -1364,7 +1364,7 @@ export async function POST(request: NextRequest) {
             newOrder.order_number,
             newOrder.email || "venta@pos.local",
             newOrder.total_amount,
-            newOrder.branch_id ?? undefined,
+            newOrder.branch_id ?? branchContext.branchId ?? undefined,
           ).catch((err) =>
             logger.error("Error creating sale notification", err),
           );
@@ -1382,7 +1382,7 @@ export async function POST(request: NextRequest) {
               newWorkOrder.work_order_number,
               customerName,
               newWorkOrder.total_amount,
-              newWorkOrder.branch_id ?? undefined,
+              newWorkOrder.branch_id ?? branchContext.branchId ?? undefined,
             ).catch((err) =>
               logger.error("Error creating work order notification", err),
             );

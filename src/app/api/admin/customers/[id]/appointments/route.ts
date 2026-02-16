@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
 import { NotificationService } from "@/lib/notifications/notification-service";
+import { getBranchContext } from "@/lib/api/branch-middleware";
 import { appLogger as logger } from "@/lib/logger";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
 
@@ -101,6 +102,15 @@ export async function POST(
     }
 
     const body = await request.json();
+    const branchContext = await getBranchContext(request, user.id);
+
+    const branchId = body.branch_id ?? branchContext.branchId;
+    if (!branchContext.isSuperAdmin && !branchId) {
+      return NextResponse.json(
+        { error: "Debe seleccionar una sucursal para crear una cita" },
+        { status: 400 },
+      );
+    }
 
     const { data: appointment, error } = await supabase
       .from("appointments")
@@ -120,6 +130,8 @@ export async function POST(
         prescription_id: body.prescription_id || null,
         order_id: body.order_id || null,
         created_by: user.id,
+        branch_id: branchId,
+        organization_id: branchContext.organizationId,
       })
       .select(
         `
@@ -150,7 +162,10 @@ export async function POST(
         customerName,
         appointment.appointment_date,
         appointment.appointment_time,
-        appointment.branch_id ?? undefined,
+        appointment.branch_id ??
+          branchId ??
+          branchContext.branchId ??
+          undefined,
       ).catch((err) => logger.warn("Error creating notification", err));
     }
 

@@ -17,6 +17,7 @@ export interface Branch {
   code: string;
   role?: string;
   is_primary?: boolean;
+  organization_id?: string;
 }
 
 interface BranchContextType {
@@ -25,6 +26,7 @@ interface BranchContextType {
   isGlobalView: boolean;
   isSuperAdmin: boolean;
   isLoading: boolean;
+  organizationId: string | null;
   setCurrentBranch: (branchId: string | "global" | null) => Promise<void>;
   refreshBranches: () => Promise<void>;
 }
@@ -44,6 +46,7 @@ export function BranchProvider({ children }: BranchProviderProps) {
   const [currentBranch, setCurrentBranchState] = useState<Branch | null>(null);
   const [isGlobalView, setIsGlobalView] = useState(false);
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
+  const [organizationId, setOrganizationId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isInitialized, setIsInitialized] = useState(false);
   const lastOrganizationIdRef = useRef<string | null>(null);
@@ -113,6 +116,7 @@ export function BranchProvider({ children }: BranchProviderProps) {
       const responseOrgId = data.organizationId ?? null;
       setBranches(data.branches || []);
       setIsSuperAdmin(serverIsSuperAdmin);
+      setOrganizationId(responseOrgId);
 
       // Track organizationId for change detection (e.g. user activated real org)
       lastOrganizationIdRef.current = responseOrgId;
@@ -228,6 +232,7 @@ export function BranchProvider({ children }: BranchProviderProps) {
       setIsLoading(false);
       setBranches([]);
       setCurrentBranchState(null);
+      setOrganizationId(null);
       setIsInitialized(false);
       lastOrganizationIdRef.current = null;
       localStorage.removeItem(STORAGE_KEY);
@@ -243,6 +248,7 @@ export function BranchProvider({ children }: BranchProviderProps) {
         isGlobalView,
         isSuperAdmin,
         isLoading,
+        organizationId,
         setCurrentBranch,
         refreshBranches: () => fetchBranches(true),
       }}
