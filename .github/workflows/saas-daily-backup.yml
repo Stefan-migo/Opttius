@@ -18,8 +18,14 @@ jobs:
       - name: Setup PostgreSQL client
         run: |
           sudo apt-get update
-          sudo apt-get install -y postgresql-client
+          sudo apt install -y postgresql-common
+          sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y
+          sudo apt-get update
+          sudo apt install -y postgresql-client-17
 
+      # IMPORTANT: Use Supavisor Session Mode URL (pooler), NOT direct connection.
+      # GitHub Actions has no IPv6; db.xxx.supabase.co fails with "Network is unreachable".
+      # Get it from: Supabase Dashboard → Connect → Connection pooling → Session mode
       - name: Create backup with pg_dump
         env:
           DIRECT_DATABASE_URL: ${{ secrets.DIRECT_DATABASE_URL }}
@@ -27,7 +33,7 @@ jobs:
           BACKUP_ID="full_backup_$(date -u +%Y-%m-%dT%H-%M-%SZ)"
           FILENAME="${BACKUP_ID}.sql"
 
-          pg_dump "$DIRECT_DATABASE_URL" \
+          /usr/lib/postgresql/17/bin/pg_dump "$DIRECT_DATABASE_URL" \
             --no-owner \
             --no-privileges \
             -F p \
