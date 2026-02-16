@@ -38,7 +38,38 @@ export async function GET(
       );
     }
 
-    const { data: prescriptions, error } = await supabase
+    // Verify customer exists and admin has access (customer in same org or super_admin)
+    const supabaseServiceRole = createServiceRoleClient();
+    const { data: customer, error: custError } = await supabaseServiceRole
+      .from("customers")
+      .select("id, organization_id")
+      .eq("id", id)
+      .single();
+    if (custError || !customer) {
+      return createApiErrorResponse(
+        new APIError("Cliente no encontrado", 404, "NOT_FOUND"),
+      );
+    }
+
+    const { data: adminUser } = await supabase
+      .from("admin_users")
+      .select("organization_id, role")
+      .eq("id", user.id)
+      .eq("is_active", true)
+      .maybeSingle();
+    const isSuperAdmin = adminUser?.role === "super_admin";
+    if (
+      !isSuperAdmin &&
+      adminUser?.organization_id &&
+      customer.organization_id !== adminUser.organization_id
+    ) {
+      return createApiErrorResponse(
+        new APIError("No tiene acceso a este cliente", 403, "FORBIDDEN"),
+      );
+    }
+
+    // Use service role to bypass RLS - demo/legacy prescriptions may have organization_id=null
+    const { data: prescriptions, error } = await supabaseServiceRole
       .from("prescriptions")
       .select("*")
       .eq("customer_id", id)

@@ -18,11 +18,10 @@ export interface SystemConfig {
 const fetchConfigs = async (
   branchId?: string | null,
 ): Promise<SystemConfig[]> => {
-  const url = new URL("/api/admin/system/config");
-  if (branchId) {
-    url.searchParams.set("branch_id", branchId);
-  }
-  const response = await fetch(url.toString(), {
+  const path = branchId
+    ? `/api/admin/system/config?branch_id=${encodeURIComponent(branchId)}`
+    : "/api/admin/system/config";
+  const response = await fetch(path, {
     headers: branchId ? { "x-branch-id": branchId } : undefined,
   });
   if (!response.ok) {

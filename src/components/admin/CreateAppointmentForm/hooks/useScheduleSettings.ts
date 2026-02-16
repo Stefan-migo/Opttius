@@ -45,7 +45,7 @@ export function useScheduleSettings(): UseScheduleSettingsReturn {
       const response = await fetch("/api/admin/schedule-settings", { headers });
       if (response.ok) {
         const data = await response.json();
-        setSettings(data.settings);
+        setSettings(data.data ?? data.settings);
       }
     } catch (error) {
       console.error("Error fetching schedule settings:", error);

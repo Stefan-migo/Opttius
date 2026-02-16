@@ -62,8 +62,14 @@ export async function GET(request: NextRequest) {
     const orgId = adminUser.organization_id;
     const isSuperAdmin = adminUser.role === "super_admin";
 
+    // Use service role when available (bypasses RLS); otherwise use authenticated client
+    // (when service role key is missing, createServiceRoleClient falls back to anon key
+    // which has no user context, so RLS blocks - use supabase with user cookies instead)
+    const hasServiceRole = !!process.env.SUPABASE_SERVICE_ROLE_KEY;
+    const supabaseAdmin = hasServiceRole ? createServiceRoleClient() : supabase;
+
     // Build filter: super_admin sees global only; org admin sees global + org + branch
-    let query = supabase.from("system_config").select("*");
+    let query = supabaseAdmin.from("system_config").select("*");
 
     if (public_only) {
       query = query.eq("is_public", true);
@@ -72,28 +78,82 @@ export async function GET(request: NextRequest) {
       query = query.eq("category", category);
     }
 
-    if (isSuperAdmin) {
-      // Super admin: global configs only (org_id null, branch_id null)
-      query = query.is("organization_id", null).is("branch_id", null);
-    } else if (orgId) {
-      // Org admin: global OR org-level OR branch-level
-      const orParts = [
-        "and(organization_id.is.null,branch_id.is.null)",
-        `and(organization_id.eq.${orgId},branch_id.is.null)`,
-      ];
-      if (branchId) {
-        orParts.push(
-          `and(organization_id.eq.${orgId},branch_id.eq.${branchId})`,
-        );
-      }
-      query = query.or(orParts.join(","));
+    type ConfigRow = {
+      config_key: string;
+      config_value?: unknown;
+      organization_id?: string | null;
+      branch_id?: string | null;
+      [k: string]: unknown;
+    };
+    let configs: ConfigRow[] = [];
+    let error: { message: string } | null = null;
+
+    if (isSuperAdmin || !orgId) {
+      // Super admin or no org: global configs only
+      const q = query
+        .is("organization_id", null)
+        .is("branch_id", null)
+        .order("category", { ascending: true })
+        .order("config_key", { ascending: true });
+      type ConfigResult = {
+        data: Array<Record<string, unknown>> | null;
+        error: { message: string } | null;
+      };
+      const res: ConfigResult = (await q) as unknown as ConfigResult;
+      configs = (res.data ?? []) as ConfigRow[];
+      error = res.error;
     } else {
-      query = query.is("organization_id", null).is("branch_id", null);
+      // Org admin: run separate queries and merge (avoids PostgREST or() syntax issues)
+      const baseQuery = () =>
+        supabaseAdmin
+          .from("system_config")
+          .select("*")
+          .order("category", { ascending: true })
+          .order("config_key", { ascending: true });
+
+      const [globalRes, orgRes, branchRes] = await Promise.all([
+        (() => {
+          let q = baseQuery();
+          if (public_only) q = q.eq("is_public", true);
+          if (category && category !== "all") q = q.eq("category", category);
+          return q.is("organization_id", null).is("branch_id", null);
+        })(),
+        (() => {
+          let q = baseQuery();
+          if (public_only) q = q.eq("is_public", true);
+          if (category && category !== "all") q = q.eq("category", category);
+          return q.eq("organization_id", orgId).is("branch_id", null);
+        })(),
+        branchId
+          ? (() => {
+              let q = baseQuery();
+              if (public_only) q = q.eq("is_public", true);
+              if (category && category !== "all")
+                q = q.eq("category", category);
+              return q.eq("organization_id", orgId).eq("branch_id", branchId);
+            })()
+          : Promise.resolve({ data: [], error: null }),
+      ]);
+
+      error = globalRes.error ?? orgRes.error ?? branchRes.error ?? null;
+      const all = [
+        ...(globalRes.data || []),
+        ...(orgRes.data || []),
+        ...(branchRes.data || []),
+      ];
+      configs = mergeConfigsByScope(all);
     }
 
-    const { data: configs, error } = await query
-      .order("category", { ascending: true })
-      .order("config_key", { ascending: true });
+    if ((!configs || configs.length === 0) && !error) {
+      const res = await supabaseAdmin
+        .from("system_config")
+        .select("*")
+        .order("category", { ascending: true })
+        .order("config_key", { ascending: true });
+      if (!res.error && res.data?.length) {
+        configs = res.data;
+      }
+    }
 
     if (error) {
       logger.error("Error fetching system config:", { error });
@@ -103,12 +163,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const merged =
-      isSuperAdmin || !orgId
-        ? configs || []
-        : mergeConfigsByScope(configs || []);
-
-    const parsedConfigs = merged.map((config) => {
+    const parsedConfigs = (configs || []).map((config: ConfigRow) => {
       let parsedValue = config.config_value;
       if (typeof config.config_value === "string") {
         try {

@@ -36,6 +36,7 @@ import {
 import { toast } from "sonner";
 import { useBranch } from "@/hooks/useBranch";
 import { getBranchHeader } from "@/lib/utils/branch";
+import { formatRUT, formatRUTAsYouType } from "@/lib/utils/rut";
 import { BranchSelector } from "@/components/admin/BranchSelector";
 import { Loader2, Copy, Sparkles } from "lucide-react";
 import ImageUpload from "@/components/ui/ImageUpload";
@@ -140,12 +141,13 @@ export default function POSBillingSettingsPage() {
       });
       if (billingResponse.ok) {
         const billingData = await billingResponse.json();
-        if (billingData.settings) {
+        const settings = billingData.data ?? billingData.settings;
+        if (settings) {
           setBillingSettings({
-            ...billingData.settings,
-            printer_type: billingData.settings.printer_type || "thermal",
-            printer_width_mm: billingData.settings.printer_width_mm || 80,
-            printer_height_mm: billingData.settings.printer_height_mm || 297,
+            ...settings,
+            printer_type: settings.printer_type || "thermal",
+            printer_width_mm: settings.printer_width_mm || 80,
+            printer_height_mm: settings.printer_height_mm || 297,
           });
         }
       } else if (billingResponse.status !== 404) {
@@ -471,13 +473,27 @@ export default function POSBillingSettingsPage() {
                   <Label>RUT de la Empresa *</Label>
                   <Input
                     value={billingSettings.business_rut}
-                    onChange={(e) =>
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      const formatted = formatRUTAsYouType(val);
                       setBillingSettings({
                         ...billingSettings,
-                        business_rut: e.target.value,
-                      })
-                    }
-                    placeholder="Ej: 76.123.456-7"
+                        business_rut: formatted,
+                      });
+                    }}
+                    onBlur={(e) => {
+                      const val = e.target.value.trim();
+                      if (val) {
+                        const formatted = formatRUT(val);
+                        if (formatted) {
+                          setBillingSettings({
+                            ...billingSettings,
+                            business_rut: formatted,
+                          });
+                        }
+                      }
+                    }}
+                    placeholder="Ej: 76.123.456-7 o 761234567"
                     className="font-mono"
                   />
                 </div>

@@ -1,5 +1,9 @@
 import { z } from "zod";
-import { isValidRUTFormat, normalizeRUT } from "@/lib/utils/rut";
+import {
+  isValidRUTFormat,
+  normalizeRUT,
+  completeRUTIfNeeded,
+} from "@/lib/utils/rut";
 
 /**
  * Base Zod Schemas - Reutilizables en todo el sistema
@@ -69,6 +73,7 @@ export const rutSchema = z
 /**
  * Schema para validar RUT opcional
  * Permite string, null, o undefined
+ * Preprocess: intenta completar RUT incompleto; si no es válido, coerces a null en vez de fallar
  */
 export const rutOptionalSchema = z
   .union([z.string(), z.null(), z.undefined(), z.literal("")])
@@ -79,29 +84,16 @@ export const rutOptionalSchema = z
     if (!rut || (typeof rut === "string" && rut.trim() === "")) {
       return null;
     }
-    // Si es string válido, normalizar (la validación se hará con superRefine)
+    // Si es string, completar con dígito verificador si solo tiene 7-8 dígitos
     if (typeof rut === "string") {
       const trimmed = rut.trim();
       if (trimmed === "") return null;
-      return trimmed; // Retornar sin normalizar aún, se hará después de validar
+      const completed = completeRUTIfNeeded(trimmed) || trimmed;
+      // Si aún no pasa formato, retornar null (coerce en vez de fallar)
+      if (!isValidRUTFormat(completed)) return null;
+      return completed;
     }
     return null;
-  })
-  .superRefine((rut, ctx) => {
-    // Si es null, es válido (opcional)
-    if (rut === null) {
-      return;
-    }
-    // Si es string, validar formato
-    if (typeof rut === "string" && rut.trim() !== "") {
-      if (!isValidRUTFormat(rut)) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message:
-            "El formato del RUT no es válido (debe ser xx.xxx.xxx-x o x.xxx.xxx-x, dígito verificador puede ser K)",
-        });
-      }
-    }
   })
   .transform((rut) => {
     // Normalizar después de validar

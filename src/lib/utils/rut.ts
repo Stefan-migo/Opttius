@@ -50,6 +50,72 @@ export function normalizeRUT(rut: string): string {
 }
 
 /**
+ * Computes the Chilean RUT verification digit (dígito verificador)
+ *
+ * @param rutBody - RUT body (digits only, without verification digit)
+ * @returns The verification digit as string ("0"-"9" or "K")
+ */
+export function computeRUTVerificationDigit(rutBody: string): string {
+  if (!rutBody || !/^\d+$/.test(rutBody)) return "";
+
+  const digits = rutBody.split("").map(Number).reverse();
+  const multipliers = [2, 3, 4, 5, 6, 7];
+  let sum = 0;
+  digits.forEach((d, i) => {
+    sum += d * multipliers[i % multipliers.length];
+  });
+  const remainder = 11 - (sum % 11);
+  if (remainder === 11) return "0";
+  if (remainder === 10) return "K";
+  return String(remainder);
+}
+
+/**
+ * Completes RUT with verification digit if only body digits are provided
+ *
+ * @param rut - RUT string (with or without verification digit)
+ * @returns RUT with verification digit, or original if already complete/invalid
+ */
+export function completeRUTIfNeeded(rut: string): string {
+  if (!rut || typeof rut !== "string") return rut;
+  const normalized = normalizeRUT(rut);
+  // Already has 9 chars (7-8 digits + 1 DV)
+  if (/^[0-9]{7,8}[0-9Kk]$/.test(normalized)) return normalized;
+  // Has 7 or 8 digits only - compute and append DV
+  if (/^[0-9]{7,8}$/.test(normalized)) {
+    const dv = computeRUTVerificationDigit(normalized);
+    return normalized + dv;
+  }
+  return rut;
+}
+
+/**
+ * Formats RUT as the user types (dynamic formatting).
+ * Handles partial input: "1234567" → "1.234.567", "123456789" → "12.345.678-9"
+ *
+ * @param rut - RUT string (digits, may include K for DV)
+ * @returns Formatted RUT string
+ */
+export function formatRUTAsYouType(rut: string): string {
+  if (!rut) return "";
+
+  const clean = rut.replace(/[^0-9Kk]/g, "");
+  if (clean.length === 0) return "";
+
+  // If we have 9+ chars, last is DV - format as xx.xxx.xxx-x
+  if (clean.length >= 9) {
+    const body = clean.slice(0, -1);
+    const dv = clean.slice(-1).toUpperCase();
+    const formatted = body.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    return `${formatted}-${dv}`;
+  }
+
+  // Partial: only digits, add dots as thousands separator
+  const formatted = clean.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  return formatted;
+}
+
+/**
  * Validates if a RUT has a valid format (basic format check, not verification digit validation)
  *
  * @param rut - RUT string to validate

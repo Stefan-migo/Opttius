@@ -1,5 +1,9 @@
 import { z } from "zod";
-import { isValidRUTFormat, normalizeRUT } from "@/lib/utils/rut";
+import {
+  isValidRUTFormat,
+  normalizeRUT,
+  completeRUTIfNeeded,
+} from "@/lib/utils/rut";
 
 /**
  * Base Zod Schemas - Reutilizables en todo el sistema
@@ -79,11 +83,11 @@ export const rutOptionalSchema = z
     if (!rut || (typeof rut === "string" && rut.trim() === "")) {
       return null;
     }
-    // Si es string válido, normalizar (la validación se hará con superRefine)
+    // Si es string, completar con dígito verificador si solo tiene 7-8 dígitos
     if (typeof rut === "string") {
       const trimmed = rut.trim();
       if (trimmed === "") return null;
-      return trimmed; // Retornar sin normalizar aún, se hará después de validar
+      return completeRUTIfNeeded(trimmed) || trimmed;
     }
     return null;
   })

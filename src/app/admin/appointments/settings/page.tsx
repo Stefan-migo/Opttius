@@ -78,7 +78,7 @@ export default function ScheduleSettingsPage() {
       }
 
       const data = await response.json();
-      setSettings(data.settings);
+      setSettings(data.data ?? data.settings);
     } catch (error) {
       console.error("Error fetching settings:", error);
       toast.error("Error al cargar configuración");

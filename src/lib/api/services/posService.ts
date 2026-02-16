@@ -161,7 +161,7 @@ class POSService {
   async getPendingBalanceOrders(
     searchTerm?: string,
     branchId?: string,
-    limit: number = 50,
+    limit: number = 500,
   ): Promise<PendingBalanceOrder[]> {
     try {
       const params = new URLSearchParams({
@@ -246,7 +246,11 @@ class POSService {
 
         const orderNumber =
           data?.work_order?.work_order_number || data?.order?.order_number;
-        success(`Venta procesada: ${orderNumber}`);
+        success(
+          orderNumber
+            ? `Venta procesada: ${orderNumber}`
+            : "Venta procesada correctamente",
+        );
 
         return data;
       }
@@ -273,7 +277,7 @@ class POSService {
 
       if (isSuccess(response)) {
         const data = unwrapData(response);
-        return data?.settings || null;
+        return (data as any)?.settings ?? data ?? null;
       }
 
       handleApiError(response);

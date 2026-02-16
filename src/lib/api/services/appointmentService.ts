@@ -235,7 +235,7 @@ export async function getScheduleSettings(
   try {
     const queryString = branch_id ? `?branch_id=${branch_id}` : "";
     const response = await client.get<ScheduleSettings>(
-      `/api/admin/appointments/settings${queryString}`,
+      `/api/admin/schedule-settings${queryString}`,
     );
     return unwrapData(response);
   } catch (error) {
@@ -254,7 +254,7 @@ export async function updateScheduleSettings(
   try {
     const queryString = branch_id ? `?branch_id=${branch_id}` : "";
     const response = await client.put<ScheduleSettings>(
-      `/api/admin/appointments/settings${queryString}`,
+      `/api/admin/schedule-settings${queryString}`,
       settings,
     );
     return unwrapData(response);

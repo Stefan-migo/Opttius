@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { useSearchParams } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -52,7 +53,12 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { formatRUT } from "@/lib/utils/rut";
+import {
+  formatRUT,
+  completeRUTIfNeeded,
+  isValidRUTFormat,
+  normalizeRUT,
+} from "@/lib/utils/rut";
 import {
   calculateSubtotal,
   calculateTotalTax,
@@ -367,6 +373,51 @@ export default function POSPage() {
   });
 
   const printRef = useRef<HTMLDivElement>(null);
+  const printReceipt = (retryCount = 0) => {
+    const el = printRef.current;
+    if (!lastProcessedOrder) {
+      window.print();
+      return;
+    }
+    if (!el || !el.innerHTML?.trim()) {
+      // Portal may not have rendered yet - retry once after 200ms
+      if (retryCount < 1) {
+        setTimeout(() => printReceipt(retryCount + 1), 200);
+        return;
+      }
+      window.print();
+      return;
+    }
+    const html = el.innerHTML;
+    const w = window.open("", "_blank");
+    if (!w) {
+      window.print();
+      return;
+    }
+    w.document.write(`<!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <title>Boleta</title>
+          <style>
+            body { margin: 0; padding: 16px; font-family: monospace; font-size: 12px; color: #000; }
+            table { width: 100%; border-collapse: collapse; }
+            th, td { padding: 4px 0; text-align: left; }
+            .text-right { text-align: right; }
+            .font-bold { font-weight: 700; }
+            .border-top { border-top: 1px solid #000; }
+            .border-bottom { border-bottom: 1px solid #000; }
+          </style>
+        </head>
+        <body>${html}</body>
+      </html>`);
+    w.document.close();
+    w.onload = () => {
+      w.focus();
+      w.print();
+      w.close();
+    };
+  };
 
   // Tab activo del formulario "Crear orden completa" (para abrir Lentes al cargar presupuesto de lentes de contacto)
   const [orderFormTab, setOrderFormTab] = useState("customer");
@@ -1135,11 +1186,14 @@ export default function POSPage() {
     ]);
   };
 
-  // Fetch customer prescriptions
+  // Fetch customer prescriptions and auto-select current or first
   const fetchCustomerPrescriptions = async (customerId: string) => {
     try {
-      const prescriptions = await customerService.getPrescriptions(customerId);
-      setPrescriptions(prescriptions || []);
+      const rx = await customerService.getPrescriptions(customerId);
+      const list = rx || [];
+      setPrescriptions(list);
+      const current = list.find((p: any) => p.is_current) ?? list[0] ?? null;
+      setSelectedPrescription(current);
     } catch (error) {
       console.error("Error fetching prescriptions:", error);
     }
@@ -1337,6 +1391,13 @@ export default function POSPage() {
     fetchContactLensFamilies();
   }, []);
 
+  // Load pending balance orders when dialog opens
+  useEffect(() => {
+    if (showPendingBalanceDialog) {
+      fetchPendingBalanceOrders();
+    }
+  }, [showPendingBalanceDialog]);
+
   // Fetch lens families
   const fetchLensFamilies = async () => {
     try {
@@ -1367,6 +1428,17 @@ export default function POSPage() {
       setLoadingContactLensFamilies(false);
     }
   };
+
+  // Ensure prescriptions load whenever selectedCustomer changes (also for quote loads)
+  useEffect(() => {
+    if (selectedCustomer?.id) {
+      fetchCustomerPrescriptions(selectedCustomer.id);
+    } else {
+      setPrescriptions([]);
+      setSelectedPrescription(null);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedCustomer?.id]);
 
   // When a family is selected, inherit genetic properties (type/material) from that family
   useEffect(() => {
@@ -2523,10 +2595,14 @@ export default function POSPage() {
         customer_name: selectedCustomer
           ? `${selectedCustomer.first_name || ""} ${selectedCustomer.last_name || ""}`.trim()
           : customerBusinessName || null,
-        customer_rut:
-          selectedCustomer?.rut ||
-          (customerRUT && customerRUT.trim() !== "" ? customerRUT : null) ||
-          null,
+        customer_rut: (() => {
+          const raw =
+            selectedCustomer?.rut ||
+            (customerRUT && customerRUT.trim() !== "" ? customerRUT : null);
+          if (!raw || typeof raw !== "string" || raw.trim() === "") return null;
+          const completed = completeRUTIfNeeded(raw.trim());
+          return isValidRUTFormat(completed) ? normalizeRUT(completed) : null;
+        })(),
         payment_method_type: paymentMethod,
         payment_status: finalPaymentStatus,
         status: "delivered", // POS sales are immediately fulfilled
@@ -2536,10 +2612,14 @@ export default function POSPage() {
         currency: "CLP", // Chilean Peso
         installments_count: 1, // Ya no se usa, mantener para compatibilidad
         sii_invoice_type: siiInvoiceType,
-        sii_rut:
-          selectedCustomer?.rut ||
-          (customerRUT && customerRUT.trim() !== "" ? customerRUT : null) ||
-          null,
+        sii_rut: (() => {
+          const raw =
+            selectedCustomer?.rut ||
+            (customerRUT && customerRUT.trim() !== "" ? customerRUT : null);
+          if (!raw || typeof raw !== "string" || raw.trim() === "") return null;
+          const completed = completeRUTIfNeeded(raw.trim());
+          return isValidRUTFormat(completed) ? normalizeRUT(completed) : null;
+        })(),
         sii_business_name:
           selectedCustomer?.business_name || customerBusinessName || null,
         items: cart.map((item) => {
@@ -2573,13 +2653,7 @@ export default function POSPage() {
             ? Math.max(0, change)
             : null, // Ensure change is never negative (solo para efectivo completo)
         deposit_amount: paymentAmount < total ? paymentAmount : null, // Monto de abono si es pago parcial
-        fiscal_reference:
-          (paymentMethod === "debit_card" ||
-            paymentMethod === "credit_card" ||
-            paymentMethod === "transfer") &&
-          fiscalReference?.trim()
-            ? fiscalReference.trim()
-            : null,
+        fiscal_reference: fiscalReference?.trim() || null,
         // Datos estructurados de lentes y marcos (solo para lentes ópticos)
         lens_data:
           lensType === "optical" &&
@@ -2711,7 +2785,11 @@ export default function POSPage() {
       // Support both work_order and order for backward compatibility
       const orderNumber =
         result?.work_order?.work_order_number || result?.order?.order_number;
-      toast.success(`Venta procesada: ${orderNumber}`);
+      toast.success(
+        orderNumber
+          ? `Venta procesada: ${orderNumber}`
+          : "Venta procesada correctamente",
+      );
 
       // Print receipt (if printer available)
       const invoiceNumber =
@@ -2723,21 +2801,19 @@ export default function POSPage() {
 
       // Clear cart and reset
       setReceiptType("sale");
-      setLastProcessedOrder(
+      const orderToPrint =
         (result as any)?.order ||
-          (result as any)?.work_order?.order ||
-          (result as any)?.work_order,
-      );
+        (result as any)?.work_order?.order ||
+        (result as any)?.work_order;
+      setLastProcessedOrder(orderToPrint);
 
       // Clear cart and reset
       clearCart();
       setShowPaymentDialog(false);
 
-      // Trigger automatic print if configured (default to true for POS)
+      // Trigger automatic print after React re-renders with new order (state update is async)
       if (billingSettings?.auto_print_receipt !== false) {
-        setTimeout(() => {
-          window.print();
-        }, 1000);
+        setTimeout(printReceipt, 400);
       }
     } catch (error: any) {
       console.error("Error processing payment:", error);
@@ -2845,7 +2921,7 @@ export default function POSPage() {
               setLastProcessedOrder(fullOrder);
               if (billingSettings?.auto_print_receipt !== false) {
                 toast.info("Imprimiendo comprobante...");
-                setTimeout(() => window.print(), 500);
+                setTimeout(printReceipt, 400);
               }
             }
           }
@@ -3388,42 +3464,55 @@ export default function POSPage() {
                         {selectedCustomer && (
                           <div>
                             <Label>Receta</Label>
-                            {prescriptions.length === 0 ? (
-                              <div className="text-sm text-gray-500 py-2">
-                                Este cliente no tiene recetas registradas.
-                              </div>
-                            ) : (
-                              <Select
-                                value={selectedPrescription?.id || ""}
-                                onValueChange={(value) => {
-                                  const prescription = prescriptions.find(
-                                    (p) => p.id === value,
-                                  );
-                                  setSelectedPrescription(prescription || null);
-                                }}
-                              >
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Selecciona una receta" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {prescriptions.map((prescription) => (
-                                    <SelectItem
-                                      key={prescription.id}
-                                      value={prescription.id}
-                                    >
-                                      {prescription.prescription_date
-                                        ? formatDate(
-                                            prescription.prescription_date,
-                                          )
-                                        : "Sin fecha"}
-                                      {prescription.issued_by &&
-                                        ` - ${prescription.issued_by}`}
-                                      {prescription.is_current && " (Actual)"}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                            )}
+                            {(() => {
+                              const prescriptionsList =
+                                prescriptions.length > 0
+                                  ? prescriptions
+                                  : selectedPrescription
+                                    ? [selectedPrescription]
+                                    : [];
+                              if (prescriptionsList.length === 0) {
+                                return (
+                                  <div className="text-sm text-gray-500 py-2">
+                                    Este cliente no tiene recetas registradas.
+                                  </div>
+                                );
+                              }
+                              return (
+                                <Select
+                                  value={selectedPrescription?.id || ""}
+                                  onValueChange={(value) => {
+                                    const prescription = prescriptionsList.find(
+                                      (p) => p.id === value,
+                                    );
+                                    setSelectedPrescription(
+                                      prescription || null,
+                                    );
+                                  }}
+                                >
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Selecciona una receta" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {prescriptionsList.map((prescription) => (
+                                      <SelectItem
+                                        key={prescription.id}
+                                        value={prescription.id}
+                                      >
+                                        {prescription.prescription_date
+                                          ? formatDate(
+                                              prescription.prescription_date,
+                                            )
+                                          : "Sin fecha"}
+                                        {prescription.issued_by &&
+                                          ` - ${prescription.issued_by}`}
+                                        {prescription.is_current && " (Actual)"}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              );
+                            })()}
                           </div>
                         )}
 
@@ -6091,17 +6180,26 @@ export default function POSPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Container for printing - hidden on screen, becomes visible only during print */}
-      <div className="hidden print:block">
-        <POSReceipt
-          ref={printRef}
-          order={lastProcessedOrder}
-          settings={billingSettings}
-          branch={branches.find((b) => b.id === currentBranchId)}
-          organization={organization}
-          receiptType={receiptType}
-        />
-      </div>
+      {/* Receipt for printing - rendered in portal as direct body child so @media print only shows it */}
+      {typeof document !== "undefined" &&
+        lastProcessedOrder &&
+        createPortal(
+          <div
+            id="print-receipt-portal"
+            className="hidden print:block"
+            aria-hidden="true"
+          >
+            <POSReceipt
+              ref={printRef}
+              order={lastProcessedOrder}
+              settings={billingSettings}
+              branch={branches.find((b) => b.id === currentBranchId)}
+              organization={organization}
+              receiptType={receiptType}
+            />
+          </div>,
+          document.body,
+        )}
     </div>
   );
 }

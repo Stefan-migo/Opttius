@@ -1,3 +1,5 @@
+import { useRef, useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
@@ -37,8 +39,73 @@ export default function CustomerSelection({
   onCustomerSearchChange,
   onCustomerSearchClear,
 }: CustomerSelectionProps) {
+  const inputContainerRef = useRef<HTMLDivElement>(null);
+  const [dropdownPosition, setDropdownPosition] = useState({
+    top: 0,
+    left: 0,
+    width: 0,
+  });
+
+  useEffect(() => {
+    if (customerSearch.length >= 1 && inputContainerRef.current) {
+      const rect = inputContainerRef.current.getBoundingClientRect();
+      setDropdownPosition({
+        top: rect.bottom + 8,
+        left: rect.left,
+        width: rect.width,
+      });
+    }
+  }, [customerSearch.length]);
+
+  const dropdownContent = customerSearch.length >= 1 &&
+    dropdownPosition.width > 0 && (
+      <div
+        className="fixed z-[9999] bg-white/95 backdrop-blur-md border border-admin-border-primary shadow-premium-lg rounded-2xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-300"
+        style={{
+          top: dropdownPosition.top,
+          left: dropdownPosition.left,
+          width: dropdownPosition.width,
+        }}
+      >
+        <div className="max-h-60 overflow-y-auto p-2 custom-scrollbar">
+          {customerResults.length > 0
+            ? customerResults.map((customer) => (
+                <div
+                  key={customer.id}
+                  className="flex items-center gap-3 p-3 hover:bg-admin-accent-primary/5 cursor-pointer rounded-xl transition-colors group"
+                  onClick={() => {
+                    onCustomerSelect(customer);
+                    onCustomerSearchClear();
+                  }}
+                >
+                  <div className="h-9 w-9 bg-admin-bg-tertiary rounded-lg flex items-center justify-center font-bold text-admin-text-secondary group-hover:bg-admin-accent-primary/10 group-hover:text-admin-accent-primary transition-colors text-xs">
+                    {customer.first_name?.[0]}
+                    {customer.last_name?.[0]}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-bold text-admin-text-primary truncate">
+                      {customer.first_name} {customer.last_name}
+                    </p>
+                    <p className="text-[10px] text-admin-text-tertiary truncate">
+                      {customer.rut || customer.email}
+                    </p>
+                  </div>
+                </div>
+              ))
+            : !searchingCustomers && (
+                <div className="p-8 text-center text-admin-text-tertiary">
+                  <User className="h-8 w-8 mx-auto mb-2 opacity-20" />
+                  <p className="text-xs font-bold uppercase tracking-widest">
+                    Sin coincidencias
+                  </p>
+                </div>
+              )}
+        </div>
+      </div>
+    );
+
   return (
-    <Card className="border-none bg-admin-bg-tertiary/20 shadow-premium-sm rounded-2xl overflow-hidden border border-admin-border-primary/30">
+    <Card className="border-none bg-admin-bg-tertiary/20 shadow-premium-sm rounded-2xl !overflow-visible border border-admin-border-primary/30">
       <CardHeader className="pb-4 border-b border-admin-border-primary/10">
         <CardTitle className="flex items-center text-lg font-bold text-admin-text-primary tracking-tight">
           <div className="h-8 w-8 bg-admin-accent-primary/10 rounded-lg flex items-center justify-center mr-3">
@@ -134,9 +201,7 @@ export default function CustomerSelection({
                   type="tel"
                   placeholder="+56 9..."
                   value={guestCustomerData.phone}
-                  onChange={(e) =>
-                    onGuestDataChange({ phone: e.target.value })
-                  }
+                  onChange={(e) => onGuestDataChange({ phone: e.target.value })}
                   className="h-11 rounded-xl border-admin-border-primary/50 bg-white/50 focus:bg-white transition-all"
                 />
               </div>
@@ -150,9 +215,7 @@ export default function CustomerSelection({
                 type="email"
                 placeholder="cliente@ejemplo.com"
                 value={guestCustomerData.email}
-                onChange={(e) =>
-                  onGuestDataChange({ email: e.target.value })
-                }
+                onChange={(e) => onGuestDataChange({ email: e.target.value })}
                 className="h-11 rounded-xl border-admin-border-primary/50 bg-white/50 focus:bg-white transition-all"
               />
             </div>
@@ -195,7 +258,7 @@ export default function CustomerSelection({
             </div>
           </div>
         ) : (
-          <div className="relative">
+          <div className="relative" ref={inputContainerRef}>
             <div className="absolute left-4 top-1/2 -translate-y-1/2 z-10">
               {searchingCustomers ? (
                 <Loader2 className="h-4 w-4 animate-spin text-admin-accent-primary" />
@@ -210,44 +273,9 @@ export default function CustomerSelection({
               className="h-12 pl-12 rounded-2xl border-admin-border-primary/50 bg-white/60 focus:bg-white focus:ring-2 focus:ring-admin-accent-primary/20 transition-all font-medium text-sm"
             />
 
-            {customerSearch.length >= 1 && (
-              <div className="absolute z-20 w-full mt-2 bg-white/95 backdrop-blur-md border border-admin-border-primary shadow-premium-lg rounded-2xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-300">
-                <div className="max-h-60 overflow-y-auto p-2 custom-scrollbar">
-                  {customerResults.length > 0
-                    ? customerResults.map((customer) => (
-                        <div
-                          key={customer.id}
-                          className="flex items-center gap-3 p-3 hover:bg-admin-accent-primary/5 cursor-pointer rounded-xl transition-colors group"
-                          onClick={() => {
-                            onCustomerSelect(customer);
-                            onCustomerSearchClear();
-                          }}
-                        >
-                          <div className="h-9 w-9 bg-admin-bg-tertiary rounded-lg flex items-center justify-center font-bold text-admin-text-secondary group-hover:bg-admin-accent-primary/10 group-hover:text-admin-accent-primary transition-colors text-xs">
-                            {customer.first_name?.[0]}
-                            {customer.last_name?.[0]}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-bold text-admin-text-primary truncate">
-                              {customer.first_name} {customer.last_name}
-                            </p>
-                            <p className="text-[10px] text-admin-text-tertiary truncate">
-                              {customer.rut || customer.email}
-                            </p>
-                          </div>
-                        </div>
-                      ))
-                    : !searchingCustomers && (
-                        <div className="p-8 text-center text-admin-text-tertiary">
-                          <User className="h-8 w-8 mx-auto mb-2 opacity-20" />
-                          <p className="text-xs font-bold uppercase tracking-widest">
-                            Sin coincidencias
-                          </p>
-                        </div>
-                      )}
-                </div>
-              </div>
-            )}
+            {typeof document !== "undefined" &&
+              dropdownContent &&
+              createPortal(dropdownContent, document.body)}
           </div>
         )}
       </CardContent>

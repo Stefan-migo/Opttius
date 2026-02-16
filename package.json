@@ -19,6 +19,7 @@
     "supabase:push": "npx supabase db push --local --include-all --yes",
     "supabase:push:remote": "npx supabase db push --include-all --yes",
     "validate:demo-reset": "node scripts/validate-demo-reset.js",
+    "diagnose:quotes-prescriptions": "node scripts/diagnose-quotes-prescriptions.js",
     "admin:create": "node scripts/create-admin-via-api.js",
     "admin:create-branch-users": "node scripts/create-branch-users.js",
     "admin:confirm-email": "node scripts/confirm-user-email.js",

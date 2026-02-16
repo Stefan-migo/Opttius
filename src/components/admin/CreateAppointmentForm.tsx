@@ -198,11 +198,11 @@ export default function CreateAppointmentForm({
       });
       if (response.ok) {
         const data = await response.json();
-        setScheduleSettings(data.settings);
+        const settings = data.data ?? data.settings;
+        setScheduleSettings(settings);
         // Update default duration from settings if not set from initialData
-        if (data.settings && !initialData?.duration_minutes) {
-          const defaultDuration =
-            data.settings.default_appointment_duration || 30;
+        if (settings && !initialData?.duration_minutes) {
+          const defaultDuration = settings.default_appointment_duration || 30;
           setFormData((prev) => {
             // Always update to use the configured default duration
             // This ensures the form uses the setting from schedule configuration
@@ -719,7 +719,7 @@ export default function CreateAppointmentForm({
               />
 
               {customerSearch.length >= 1 && (
-                <div className="absolute z-20 w-full mt-2 bg-white/95 backdrop-blur-md border border-admin-border-primary shadow-premium-lg rounded-2xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-300">
+                <div className="z-[100] w-full mt-2 bg-white/95 backdrop-blur-md border border-admin-border-primary shadow-premium-lg rounded-2xl animate-in fade-in slide-in-from-top-2 duration-300">
                   <div className="max-h-60 overflow-y-auto p-2 custom-scrollbar">
                     {customerResults.length > 0
                       ? customerResults.map((customer) => (
@@ -1086,12 +1086,20 @@ export default function CreateAppointmentForm({
             </div>
             <Switch
               checked={formData.follow_up_required}
-              onCheckedChange={(checked) =>
+              onCheckedChange={(checked) => {
+                const baseDate = formData.appointment_date
+                  ? new Date(formData.appointment_date)
+                  : new Date();
+                const followUpDate = new Date(baseDate);
+                followUpDate.setFullYear(followUpDate.getFullYear() + 1);
                 setFormData((prev) => ({
                   ...prev,
                   follow_up_required: checked,
-                }))
-              }
+                  follow_up_date: checked
+                    ? followUpDate.toISOString().split("T")[0]
+                    : "",
+                }));
+              }}
               className="data-[state=checked]:bg-admin-accent-primary"
             />
           </div>

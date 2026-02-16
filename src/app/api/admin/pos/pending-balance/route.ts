@@ -50,11 +50,12 @@ export async function GET(request: NextRequest) {
 
     const url = new URL(request.url);
     const searchTerm = url.searchParams.get("search") || "";
-    const limit = parseInt(url.searchParams.get("limit") || "20");
+    const limit = parseInt(url.searchParams.get("limit") || "500");
 
     // Query for orders with pending balance (payment_status = 'partial' or 'on_hold_payment')
     // NOTE: We don't include customers/work_orders relationships here because they may not exist
     // We'll fetch just the order data and filter in-memory
+    // orders table has user_id and email, NOT customer_id - use email for customer lookup
     let query = supabaseServiceRole
       .from("orders")
       .select(
@@ -62,6 +63,7 @@ export async function GET(request: NextRequest) {
         id,
         order_number,
         email,
+        user_id,
         total_amount,
         payment_status,
         created_at,
@@ -89,7 +91,7 @@ export async function GET(request: NextRequest) {
     //   );
     // }
 
-    const { data: orders, error: ordersError, count } = await query;
+    const { data: orders, error: ordersError } = await query;
 
     if (ordersError) {
       console.error("[PENDING-BALANCE-API] Supabase error:", {
@@ -111,21 +113,20 @@ export async function GET(request: NextRequest) {
     const uniqueEmails = [
       ...new Set((orders || []).map((o: any) => o.email).filter(Boolean)),
     ];
-    const customerMap = new Map();
-    if (uniqueEmails.length > 0) {
-      const { data: customers } = await supabaseServiceRole
-        .from("customers")
-        .select("email, first_name, last_name, rut")
-        .in("email", uniqueEmails);
+    const customerMapByEmail = new Map();
+    const { data: customersByEmail } =
+      uniqueEmails.length > 0
+        ? await supabaseServiceRole
+            .from("customers")
+            .select("id, email, first_name, last_name, rut")
+            .in("email", uniqueEmails)
+        : { data: null };
 
-      if (customers) {
-        customers.forEach((customer: any) => {
-          if (customer.email) {
-            customerMap.set(customer.email.toLowerCase(), customer);
-          }
-        });
+    (customersByEmail || []).forEach((customer: any) => {
+      if (customer.email) {
+        customerMapByEmail.set(customer.email.toLowerCase(), customer);
       }
-    }
+    });
 
     // Filter results by related data if search term is provided
     let filteredOrders = orders || [];
@@ -141,15 +142,20 @@ export async function GET(request: NextRequest) {
             return true;
           }
 
-          // Check customer info from map
-          const customer = order.email
-            ? customerMap.get(order.email.toLowerCase())
-            : null;
+          // Check customer info from map (orders use email, not customer_id)
+          const customer =
+            (order.email &&
+              customerMapByEmail.get(order.email.toLowerCase())) ||
+            null;
           if (customer) {
             const fullName =
               `${customer.first_name || ""} ${customer.last_name || ""}`.toLowerCase();
             const rut = (customer.rut || "").toLowerCase();
-            if (fullName.includes(searchLower) || rut.includes(searchLower)) {
+            if (
+              fullName.includes(searchLower) ||
+              rut.includes(searchLower) ||
+              (customer.email || "").toLowerCase().includes(searchLower)
+            ) {
               return true;
             }
           }
@@ -172,9 +178,9 @@ export async function GET(request: NextRequest) {
         );
         const pendingAmount = Math.max(0, order.total_amount - totalPaid);
 
-        // Get customer info from map
+        // Get customer info from map (orders use email, not customer_id)
         const customer = order.email
-          ? customerMap.get(order.email.toLowerCase())
+          ? customerMapByEmail.get(order.email.toLowerCase())
           : null;
         const customerName = customer
           ? `${customer.first_name || ""} ${customer.last_name || ""}`.trim() ||

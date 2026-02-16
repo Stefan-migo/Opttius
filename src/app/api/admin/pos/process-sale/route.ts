@@ -714,6 +714,28 @@ export async function POST(request: NextRequest) {
             );
           }
 
+          // Insert order_items for persistence (cash register, reports, etc.)
+          if (orderItems.length > 0) {
+            const { error: itemsError } = await supabaseServiceRole
+              .from("order_items")
+              .insert(
+                orderItems.map((item) => ({
+                  order_id: newOrder.id,
+                  product_id: item.product_id || null,
+                  product_name: item.product_name || "Producto",
+                  quantity: item.quantity,
+                  unit_price: item.unit_price,
+                  total_price: item.unit_price * item.quantity,
+                  sku: item.sku || null,
+                })),
+              );
+
+            if (itemsError) {
+              logger.error("Error creating order items", itemsError);
+              // Don't fail the sale - order is created, items can be fixed later
+            }
+          }
+
           // Register payment(s) in order_payments
           // Calcular monto de pago: usar deposit_amount si está disponible, sino cash_received, sino total
           const paymentAmount = deposit_amount || cash_received || total_amount;
@@ -735,7 +757,7 @@ export async function POST(request: NextRequest) {
               payment_method: dbPaymentMethod,
               pos_session_id: posSessionId || null, // Asociar pago a la sesión de caja
               payment_reference:
-                siiInvoiceNumber || fiscal_reference?.trim() || null,
+                fiscal_reference?.trim() || siiInvoiceNumber || null,
               created_by: user.id,
               notes: `Pago inicial - Método: ${payment_method_type}`,
             });
@@ -1100,9 +1122,9 @@ export async function POST(request: NextRequest) {
               logger.error("Error creating sale notification", err),
             );
 
-            return NextResponse.json({
-              success: true,
+            return createApiSuccessResponse({
               order: { ...newOrder, order_items: orderItems },
+              work_order: null,
               billing: billingResult
                 ? {
                     folio: billingResult.folio,
@@ -1110,8 +1132,6 @@ export async function POST(request: NextRequest) {
                     type: billingResult.type,
                   }
                 : null,
-              work_order: null,
-              message: "Order created successfully (no work order needed)",
             });
           }
 

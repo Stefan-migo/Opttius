@@ -491,29 +491,41 @@ html.dark .admin-header {
 
 /* Print styles for Receipts and Reports */
 @media print {
-  body * {
-    visibility: hidden;
+  /* POS receipt: portal is direct child of body - hide siblings, show only portal */
+  body > *:not(#print-receipt-portal):not(#print-report-portal) {
+    visibility: hidden !important;
+  }
+  #print-receipt-portal,
+  #print-receipt-portal *,
+  #print-report-portal,
+  #print-report-portal * {
+    visibility: visible !important;
   }
 
-  #pos-receipt-print,
-  #pos-receipt-print *,
+  /* Fallback for weekly report (when not using portal) */
+  body *:has(#weekly-report-print),
+  body *:has(#weekly-report-print) *,
+  #weekly-report-print,
+  #weekly-report-print *,
   .print-visible,
   .print-visible * {
-    visibility: visible;
+    visibility: visible !important;
   }
 
-  #pos-receipt-print {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-    margin: 0;
-    padding: 0;
-    background: white;
-  }
-
+  #print-receipt-portal,
+  #pos-receipt-print,
   #weekly-report-print {
-    max-width: none !important;
-    visibility: visible;
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 1rem !important;
+    background: white !important;
+    overflow: visible !important;
+    box-shadow: none !important;
+    border: none !important;
   }
+
 }

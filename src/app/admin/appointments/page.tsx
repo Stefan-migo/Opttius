@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -127,6 +127,7 @@ export default function AppointmentsPage() {
   const [scheduleSettings, setScheduleSettings] = useState<any>(null);
   const [showWeeklyReport, setShowWeeklyReport] = useState(false);
   const [lastRefresh, setLastRefresh] = useState<number>(Date.now());
+  const weeklyReportRef = useRef<HTMLDivElement>(null);
 
   const {
     currentBranch,
@@ -195,7 +196,7 @@ export default function AppointmentsPage() {
 
     try {
       const settings = await appointmentService.getScheduleSettings(
-        branchIdForFilter || currentBranchId || undefined
+        branchIdForFilter || currentBranchId || undefined,
       );
       setScheduleSettings(settings || null);
     } catch (error) {
@@ -402,6 +403,56 @@ export default function AppointmentsPage() {
       lockDateTime: true, // Lock date and time when opened from slot
     });
     setShowCreateAppointment(true);
+  };
+
+  const handlePrintWeeklyReport = () => {
+    const el = weeklyReportRef.current;
+    // Try new window first (direct from user gesture to avoid popup blocking)
+    const printWindow = window.open("", "_blank");
+    if (!printWindow || !el) {
+      // Fallback: use in-page print with CSS visibility
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => window.print());
+      });
+      return;
+    }
+    const clone = el.cloneNode(true) as HTMLElement;
+    clone.querySelectorAll("[data-print-hide]").forEach((n) => n.remove());
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <title>Reporte Semanal de Citas</title>
+          <style>
+            body { font-family: system-ui, sans-serif; padding: 1rem; color: #333; }
+            .grid { display: grid; gap: 0.75rem; }
+            .grid-cols-5 { grid-template-columns: repeat(5, 1fr); }
+            .grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
+            .p-4 { padding: 1rem; }
+            .rounded-xl { border-radius: 0.75rem; }
+            .border { border: 1px solid #e5e7eb; }
+            .text-xs { font-size: 0.75rem; }
+            .text-sm { font-size: 0.875rem; }
+            .text-2xl { font-size: 1.5rem; }
+            .font-bold { font-weight: 700; }
+            .space-y-4 > * + * { margin-top: 1rem; }
+            .divide-y > * + * { border-top: 1px solid #e5e7eb; }
+            [class*="print:hidden"] { display: none !important; }
+          </style>
+        </head>
+        <body>${clone.innerHTML}</body>
+      </html>
+    `);
+    printWindow.document.close();
+    printWindow.onload = () => {
+      // Delay print to ensure layout is ready
+      setTimeout(() => {
+        printWindow.focus();
+        printWindow.print();
+        printWindow.close();
+      }, 100);
+    };
   };
 
   return (
@@ -911,13 +962,29 @@ export default function AppointmentsPage() {
                     value={selectedAppointment.status}
                     onValueChange={async (newStatus) => {
                       // Validate that newStatus is a valid appointment status
-                      const validStatuses = ['pending', 'confirmed', 'completed', 'cancelled', 'no_show'] as const;
+                      const validStatuses = [
+                        "pending",
+                        "confirmed",
+                        "completed",
+                        "cancelled",
+                        "no_show",
+                      ] as const;
                       if (!validStatuses.includes(newStatus as any)) {
                         toast.error("Estado inválido");
                         return;
                       }
                       try {
-                        await appointmentService.updateAppointment(selectedAppointment.id, { status: newStatus as 'pending' | 'confirmed' | 'completed' | 'cancelled' | 'no_show' });
+                        await appointmentService.updateAppointment(
+                          selectedAppointment.id,
+                          {
+                            status: newStatus as
+                              | "pending"
+                              | "confirmed"
+                              | "completed"
+                              | "cancelled"
+                              | "no_show",
+                          },
+                        );
                         setSelectedAppointment({
                           ...selectedAppointment,
                           status: newStatus,
@@ -975,7 +1042,9 @@ export default function AppointmentsPage() {
                       e.stopPropagation();
                       if (!confirm("¿Eliminar cita permanentemente?")) return;
                       try {
-                        await appointmentService.deleteAppointment(selectedAppointment.id);
+                        await appointmentService.deleteAppointment(
+                          selectedAppointment.id,
+                        );
                         toast.success("Cita eliminada");
                         setSelectedAppointment(null);
                         fetchAppointments();
@@ -1045,8 +1114,9 @@ export default function AppointmentsPage() {
 
       {/* Weekly Report Dialog */}
       <Dialog open={showWeeklyReport} onOpenChange={setShowWeeklyReport}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto border-none bg-admin-bg-secondary shadow-premium-xl rounded-2xl p-0">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto border-none bg-admin-bg-secondary shadow-premium-xl rounded-2xl p-0 print:overflow-visible print:max-h-none">
           <div
+            ref={weeklyReportRef}
             id="weekly-report-print"
             className="p-8 space-y-8 print:p-4 print:max-w-none"
           >
@@ -1076,11 +1146,11 @@ export default function AppointmentsPage() {
                   </div>
                 </div>
               </DialogHeader>
-              <div className="flex gap-2 print:hidden">
+              <div className="flex gap-2 print:hidden" data-print-hide>
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => window.print()}
+                  onClick={handlePrintWeeklyReport}
                   className="gap-2"
                 >
                   <FileText className="h-4 w-4" />
