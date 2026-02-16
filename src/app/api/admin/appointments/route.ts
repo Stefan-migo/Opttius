@@ -64,8 +64,9 @@ export async function GET(request: NextRequest) {
     const branchContext = await getBranchContext(request, user.id);
 
     const searchParams = request.nextUrl.searchParams;
-    const startDate = searchParams.get("start_date");
-    const endDate = searchParams.get("end_date");
+    const startDate =
+      searchParams.get("start_date") ?? searchParams.get("date_from");
+    const endDate = searchParams.get("end_date") ?? searchParams.get("date_to");
     const status = searchParams.get("status");
     const customerId = searchParams.get("customer_id");
     const staffId = searchParams.get("staff_id");
@@ -127,21 +128,20 @@ export async function GET(request: NextRequest) {
         errorMessage: error.message,
         errorHint: error.hint,
       });
-      return NextResponse.json(
+      return createApiErrorResponse(
+        new Error(error.message || "Failed to fetch appointments"),
         {
-          error: "Failed to fetch appointments",
-          details: error.message,
-          code: error.code,
-          hint: error.hint,
+          requestId,
+          details: { code: error.code, hint: error.hint } as Record<
+            string,
+            unknown
+          >,
         },
-        { status: 500 },
       );
     }
 
     if (!appointments || appointments.length === 0) {
-      return NextResponse.json({
-        appointments: [],
-      });
+      return createApiSuccessResponse([], { requestId });
     }
 
     // Fetch related data using batch queries to avoid N+1

@@ -59,35 +59,39 @@ export async function GET(request: NextRequest) {
 
     const supabaseServiceRole = createServiceRoleClient();
 
-    const queries: Promise<{ data: unknown[] | null; error: unknown }>[] = [
+    const queries = [
       supabaseServiceRole
         .from("notification_settings")
         .select("*")
         .is("organization_id", null)
         .is("branch_id", null),
+      ...(organizationId
+        ? [
+            supabaseServiceRole
+              .from("notification_settings")
+              .select("*")
+              .eq("organization_id", organizationId)
+              .is("branch_id", null),
+            ...(branchId
+              ? [
+                  supabaseServiceRole
+                    .from("notification_settings")
+                    .select("*")
+                    .eq("organization_id", organizationId)
+                    .eq("branch_id", branchId),
+                ]
+              : []),
+          ]
+        : []),
     ];
 
-    if (organizationId) {
-      queries.push(
-        supabaseServiceRole
-          .from("notification_settings")
-          .select("*")
-          .eq("organization_id", organizationId)
-          .is("branch_id", null),
-      );
-      if (branchId) {
-        queries.push(
-          supabaseServiceRole
-            .from("notification_settings")
-            .select("*")
-            .eq("organization_id", organizationId)
-            .eq("branch_id", branchId),
-        );
-      }
-    }
-
-    const results = await Promise.all(queries);
-    const error = results.find((r) => r.error)?.error;
+    const results = (await Promise.all(queries)) as {
+      data: unknown[] | null;
+      error: unknown;
+    }[];
+    const error = results.find((r) => r.error)?.error as
+      | { code?: string; message?: string }
+      | undefined;
     const rawSettings = results.flatMap((r) => r.data || []);
 
     if (error) {

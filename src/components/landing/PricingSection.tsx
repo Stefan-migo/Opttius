@@ -14,6 +14,7 @@ interface TierFromApi {
   max_users?: number | null;
   max_customers?: number | null;
   max_products?: number | null;
+  features?: Record<string, boolean> | null;
 }
 
 const DEFAULT_PRICES: Record<TierName, number> = {
@@ -22,89 +23,123 @@ const DEFAULT_PRICES: Record<TierName, number> = {
   premium: 299,
 };
 
-const PLANS_CONFIG: Record<
+/** Mapeo de feature keys a etiquetas para la landing (sincronizado con /admin/saas-management/tiers) */
+const FEATURE_LABELS: Record<string, string> = {
+  pos: "Punto de Venta",
+  appointments: "Citas y Agenda",
+  quotes: "Presupuestos",
+  work_orders: "Trabajos de Laboratorio",
+  chat_ia: "Asistente IA 24/7",
+  advanced_analytics: "Reportes ejecutivos",
+  api_access: "API de integración",
+  custom_branding: "Personalización de marca",
+};
+
+/** Fallback para displayName y description cuando no vienen de la API */
+const TIER_DISPLAY: Record<
   TierName,
-  {
-    displayName: string;
-    description: string;
-    features: string[];
-    popular: boolean;
-  }
+  { displayName: string; description: string; popular: boolean }
 > = {
   basic: {
     displayName: "Standard",
     description: "Para ópticas que inician su transformación digital.",
-    features: [
-      "1 sucursal",
-      "Hasta 2 usuarios",
-      "Hasta 500 pacientes",
-      "Inventario básico",
-      "POS integrado",
-      "Presupuestos & Órdenes",
-      "Soporte vía tickets",
-    ],
     popular: false,
   },
   pro: {
     displayName: "Professional",
     description: "La potencia de la IA para ópticas en expansión.",
-    features: [
-      "3 sucursales",
-      "Hasta 10 usuarios",
-      "Hasta 5,000 pacientes",
-      "Inventario avanzado",
-      "Asistente IA 24/7",
-      "Reportes ejecutivos",
-      "Soporte prioritario",
-    ],
     popular: true,
   },
   premium: {
     displayName: "Enterprise",
     description: "Control total para grandes cadenas y laboratorios.",
-    features: [
-      "Sucursales ilimitadas",
-      "Usuarios ilimitados",
-      "Pacientes ilimitados",
-      "API de integración",
-      "Multibodega avanzada",
-      "Personalización de marca",
-      "Account Manager dedicado",
-    ],
     popular: false,
   },
 };
+
+function buildFeaturesFromTier(tier: TierFromApi): string[] {
+  const features: string[] = [];
+
+  // Límites formateados
+  const maxBranches = tier.max_branches ?? 0;
+  const maxUsers = tier.max_users ?? 0;
+  const maxCustomers = tier.max_customers ?? 0;
+  const maxProducts = tier.max_products ?? 0;
+
+  features.push(
+    maxBranches === 0
+      ? "Sucursales ilimitadas"
+      : `${maxBranches} sucursal${maxBranches > 1 ? "es" : ""}`,
+  );
+  features.push(
+    maxUsers === 0
+      ? "Usuarios ilimitados"
+      : `Hasta ${maxUsers.toLocaleString()} usuarios`,
+  );
+  features.push(
+    maxCustomers === 0
+      ? "Pacientes ilimitados"
+      : `Hasta ${maxCustomers.toLocaleString()} pacientes`,
+  );
+
+  if (maxProducts > 0) {
+    features.push(`Hasta ${maxProducts.toLocaleString()} productos`);
+  } else if (tier.name === "premium") {
+    features.push("Productos ilimitados");
+  }
+
+  // Features habilitados del tier (desde subscription_tiers.features)
+  const tierFeatures = tier.features || {};
+  for (const [key, enabled] of Object.entries(tierFeatures)) {
+    if (enabled && FEATURE_LABELS[key]) {
+      features.push(FEATURE_LABELS[key]);
+    }
+  }
+
+  return features;
+}
 
 const TIER_ORDER: TierName[] = ["basic", "pro", "premium"];
 
 export function PricingSection() {
   const router = useRouter();
-  const [tiers, setTiers] = useState<Array<{ name: TierName; price: number }>>(
-    [],
-  );
+  const [tiers, setTiers] = useState<TierFromApi[]>([]);
+  const [trialDays, setTrialDays] = useState<number>(7);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let cancelled = false;
-    fetch("/api/landing/tiers")
+    fetch("/api/landing/tiers", { cache: "no-store" })
       .then((res) => res.json())
       .then((data) => {
-        if (cancelled || !data.tiers?.length) return;
+        if (cancelled) return;
+        if (data.trial_days != null) {
+          const parsed = parseInt(String(data.trial_days), 10);
+          if (!isNaN(parsed) && parsed > 0) setTrialDays(parsed);
+        }
+        if (!data.tiers?.length) return;
         const ordered = TIER_ORDER.map((name) => {
           const row = data.tiers.find((t: TierFromApi) => t.name === name);
-          const price =
-            row != null && typeof row.price_monthly === "number"
-              ? Number(row.price_monthly)
-              : DEFAULT_PRICES[name];
-          return { name, price };
-        });
+          if (!row)
+            return {
+              name,
+              price_monthly: DEFAULT_PRICES[name],
+              features: {},
+            } as TierFromApi;
+          const price = Number(row.price_monthly);
+          return {
+            ...row,
+            name: row.name as TierName,
+            price_monthly: Number.isFinite(price)
+              ? price
+              : DEFAULT_PRICES[name],
+          };
+        }).filter(Boolean) as TierFromApi[];
         setTiers(ordered);
       })
       .catch(() => {
         if (!cancelled) {
-          setTiers(
-            TIER_ORDER.map((name) => ({ name, price: DEFAULT_PRICES[name] })),
-          );
+          setTiers([]);
         }
       })
       .finally(() => {
@@ -119,17 +154,80 @@ export function PricingSection() {
     router.push("/signup");
   };
 
-  const plans = tiers.length
-    ? tiers.map((t) => ({
-        ...PLANS_CONFIG[t.name],
-        price: `$${Math.round(t.price).toLocaleString()}`,
-        period: "mes",
-      }))
-    : TIER_ORDER.map((name) => ({
-        ...PLANS_CONFIG[name],
-        price: `$${DEFAULT_PRICES[name].toLocaleString()}`,
-        period: "mes",
-      }));
+  const plans =
+    tiers.length > 0
+      ? tiers.map((t) => ({
+          ...TIER_DISPLAY[t.name as TierName],
+          features: buildFeaturesFromTier(t),
+          price: `$${Math.round(Number(t.price_monthly)).toLocaleString()}`,
+          period: "mes",
+        }))
+      : TIER_ORDER.map((name) => {
+          const fallbackTiers: Record<
+            TierName,
+            {
+              max_branches: number;
+              max_users: number;
+              max_customers: number;
+              max_products: number;
+              features: Record<string, boolean>;
+            }
+          > = {
+            basic: {
+              max_branches: 1,
+              max_users: 2,
+              max_customers: 500,
+              max_products: 100,
+              features: {
+                pos: true,
+                appointments: true,
+                quotes: true,
+                work_orders: true,
+              },
+            },
+            pro: {
+              max_branches: 3,
+              max_users: 10,
+              max_customers: 5000,
+              max_products: 500,
+              features: {
+                pos: true,
+                appointments: true,
+                quotes: true,
+                work_orders: true,
+                chat_ia: true,
+                advanced_analytics: true,
+              },
+            },
+            premium: {
+              max_branches: 0,
+              max_users: 0,
+              max_customers: 0,
+              max_products: 0,
+              features: {
+                pos: true,
+                appointments: true,
+                quotes: true,
+                work_orders: true,
+                chat_ia: true,
+                advanced_analytics: true,
+                api_access: true,
+                custom_branding: true,
+              },
+            },
+          };
+          const fb = fallbackTiers[name];
+          return {
+            ...TIER_DISPLAY[name],
+            features: buildFeaturesFromTier({
+              name,
+              price_monthly: DEFAULT_PRICES[name],
+              ...fb,
+            }),
+            price: `$${DEFAULT_PRICES[name].toLocaleString()}`,
+            period: "mes",
+          };
+        });
 
   return (
     <section id="precios" className="py-32 bg-[var(--admin-bg-primary)]">
@@ -155,7 +253,7 @@ export function PricingSection() {
           </div>
         ) : (
           <div className="grid lg:grid-cols-3 gap-8 items-stretch">
-            {plans.map((plan, index) => (
+            {plans.map((plan) => (
               <div
                 key={plan.displayName}
                 className={`relative flex flex-col p-10 rounded-[3rem] transition-all duration-500 ${
@@ -228,8 +326,8 @@ export function PricingSection() {
 
         <div className="mt-20 text-center max-w-2xl mx-auto">
           <p className="text-gray-500 text-sm font-body leading-relaxed mb-8">
-            Todos los planes incluyen una prueba gratuita de 14 días con acceso
-            total. No se requiere tarjeta de crédito para comenzar.
+            Todos los planes incluyen una prueba gratuita de {trialDays} días
+            con acceso total. No se requiere tarjeta de crédito para comenzar.
           </p>
           <div className="h-px w-20 bg-gray-200 mx-auto"></div>
         </div>
