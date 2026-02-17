@@ -177,7 +177,10 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    const body = await request.json().catch(() => ({}));
+    const body = (await request.json().catch(() => ({}))) as Record<
+      string,
+      unknown
+    >;
 
     // Check if settings exist for this branch/org
     // Use service role to bypass RLS, so MUST filter by organization_id
