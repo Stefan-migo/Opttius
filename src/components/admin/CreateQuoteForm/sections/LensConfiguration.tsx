@@ -53,10 +53,15 @@ export function LensConfiguration({
     const fetchLensFamilies = async () => {
       try {
         setLoadingFamilies(true);
-        const response = await fetch("/api/admin/lens-families");
-        if (response.ok) {
-          const data = await response.json();
-          setLensFamilies(data.families || []);
+        const res = await fetch("/api/admin/lens-families");
+        if (res.ok) {
+          const data = await res.json();
+          // Standardized API returns data in 'data' field
+          if (data.success && Array.isArray(data.data)) {
+            setLensFamilies(data.data);
+          } else {
+            setLensFamilies(data.families || []);
+          }
         }
       } catch (error) {
         console.error("Error fetching lens families:", error);
@@ -73,10 +78,15 @@ export function LensConfiguration({
     const fetchContactLensFamilies = async () => {
       try {
         setLoadingContactLensFamilies(true);
-        const response = await fetch("/api/admin/contact-lens-families");
-        if (response.ok) {
-          const data = await response.json();
-          setContactLensFamilies(data.families || []);
+        const res = await fetch("/api/admin/contact-lens-families");
+        if (res.ok) {
+          const data = await res.json();
+          // Standardized API returns data in 'data' field
+          if (data.success && Array.isArray(data.data)) {
+            setContactLensFamilies(data.data);
+          } else {
+            setContactLensFamilies(data.families || []);
+          }
         }
       } catch (error) {
         console.error("Error fetching contact lens families:", error);

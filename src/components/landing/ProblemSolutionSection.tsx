@@ -7,104 +7,97 @@ export function ProblemSolutionSection() {
   const problems = [
     {
       icon: XCircle,
-      title: "Gestión Manual Desorganizada",
+      title: "GESTIÓN MANUAL",
       description:
-        "Seguimiento de clientes, citas y recetas en múltiples sistemas o papel que generan caos.",
+        "Sistemas arcaicos y papel que sepultan la eficiencia bajo el peso del desorden.",
     },
     {
       icon: XCircle,
-      title: "Pérdida de Tiempo Admin",
+      title: "TIEMPO PERDIDO",
       description:
-        "Horas perdidas en procesos manuales que consumen la energía de tu equipo.",
+        "Horas de labor administrativa que podrían dedicarse al arte de la atención.",
     },
     {
       icon: XCircle,
-      title: "Errores en Recetas y Órdenes",
+      title: "ERROR HUMANO",
       description:
-        "Cálculos manuales propensos a errores que resultan en devoluciones y pérdida de dinero.",
-    },
-    {
-      icon: XCircle,
-      title: "Falta de Visibilidad Real",
-      description:
-        "Sin datos claros sobre ventas e inventario, diriges tu negocio a ciegas.",
+        "Cálculos imprecisos que resultan en fracturas financieras y operativa imperfecta.",
     },
   ];
 
   const solutions = [
     {
       icon: CheckCircle2,
-      title: "Centro de Operaciones Inteligente",
+      title: "MAESTRÍA DIGITAL",
       description:
-        "Una única plataforma para controlar pacientes, ventas y laboratorio con precisión total.",
+        "Una sinfonía de procesos orquestados con precisión suiza y visión de futuro.",
     },
     {
       icon: CheckCircle2,
-      title: "Automatización con IA Avanzada",
+      title: "INTELIGENCIA PURA",
       description:
-        "Nuestra IA gestiona lo complejo mientras tú te enfocas en el crecimiento de tu óptica.",
+        "IA que refina cada decisión, permitiéndole alcanzar la cúspide de su potencial.",
     },
     {
       icon: CheckCircle2,
-      title: "Precisión Absoluta en Cálculos",
+      title: "PERFECCIÓN TÉCNICA",
       description:
-        "Elimina el error humano. Presupuestos y órdenes perfectas desde el primer intento.",
-    },
-    {
-      icon: CheckCircle2,
-      title: "Analíticas de Alto Nivel",
-      description:
-        "Toma decisiones basadas en datos reales. Imagina tener el control total de tus KPI.",
+        "Órdenes grabadas con exactitud matemática, eliminando el margen de error.",
     },
   ];
 
   return (
-    <section className="py-32 bg-[var(--admin-bg-primary)]" id="beneficios">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-24 max-w-3xl mx-auto">
-          <h2 className="text-sm font-bold text-primary uppercase tracking-[0.3em] mb-4">
-            Evolución Digital
+    <section
+      className="py-32 bg-epoch-background relative overflow-hidden"
+      id="evolucion"
+    >
+      {/* Decorative center line */}
+      <div className="absolute left-1/2 top-0 bottom-0 w-[1px] bg-epoch-accent/10 hidden lg:block"></div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div className="text-center mb-32 max-w-4xl mx-auto">
+          <div className="inline-flex items-center gap-4 px-6 py-2 border border-epoch-primary/10 rounded-full text-epoch-primary/60 text-[10px] font-display tracking-[0.4em] uppercase mb-8">
+            <span>Trascendencia Operativa</span>
+          </div>
+          <h2 className="text-5xl md:text-7xl font-display font-bold text-epoch-primary tracking-tight leading-none mb-10">
+            DEL CAOS A LA
+            <br />
+            <span className="text-epoch-accent italic font-serif lowercase tracking-normal">
+              maestría absoluta
+            </span>
           </h2>
-          <h3 className="text-4xl md:text-5xl lg:text-6xl font-malisha text-gray-900 mb-6 leading-tight">
-            De Problemas a una{" "}
-            <span className="text-primary italic">Gestión Impecable</span>
-          </h3>
-          <p className="text-lg text-gray-500 font-body">
-            Entendemos los desafíos del mercado óptico actual. Por eso hemos
-            creado la solución definitiva.
+          <p className="text-xl md:text-2xl text-epoch-primary/90 font-serif italic tracking-wide max-w-2xl mx-auto">
+            Comprendemos que la excelencia no es un acto, sino un hábito
+            facilitado por las herramientas correctas.
           </p>
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-20 items-stretch">
+        <div className="grid lg:grid-cols-2 gap-16 lg:gap-32 items-start">
           {/* Problems Column */}
-          <div className="relative">
-            <div className="flex items-center gap-4 mb-10">
-              <div className="h-12 w-12 rounded-2xl bg-gray-100 flex items-center justify-center text-gray-400">
-                <AlertCircle className="h-6 w-6" />
-              </div>
-              <h3 className="text-2xl font-malisha text-gray-900">
-                Los Desafíos Tradicionales
+          <div className="space-y-16">
+            <div className="flex flex-col items-start gap-4">
+              <span className="font-display text-[9px] tracking-[0.5em] uppercase text-red-900/40">
+                El Pasado
+              </span>
+              <h3 className="text-3xl font-display font-bold text-epoch-primary/80">
+                Desafíos de Ayer
               </h3>
+              <div className="w-12 h-[1px] bg-red-900/20"></div>
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-12">
               {problems.map((problem, index) => (
-                <div
-                  key={index}
-                  className="group p-8 bg-white border border-gray-100 rounded-[2rem] transition-all duration-300 hover:border-red-100 hover:bg-red-50/10"
-                >
-                  <div className="flex items-start gap-5">
-                    <div className="mt-1 h-6 w-6 rounded-full bg-gray-50 flex items-center justify-center text-gray-300 group-hover:text-red-400 group-hover:bg-red-50 transition-colors">
-                      <XCircle className="h-4 w-4" />
-                    </div>
-                    <div>
-                      <h4 className="text-lg font-bold text-gray-900 mb-2 group-hover:text-red-900 transition-colors">
-                        {problem.title}
-                      </h4>
-                      <p className="text-gray-500 leading-relaxed text-sm">
-                        {problem.description}
-                      </p>
-                    </div>
+                <div key={index} className="group flex gap-8">
+                  <div className="flex-shrink-0 w-12 h-12 border border-red-900/10 rounded-full flex items-center justify-center text-red-900/20 group-hover:bg-red-900 group-hover:text-white transition-all duration-700">
+                    <problem.icon className="h-5 w-5 stroke-1" />
+                  </div>
+                  <div className="space-y-3">
+                    <h4 className="font-display font-bold text-xs tracking-[0.2em] text-epoch-primary/90">
+                      {problem.title}
+                    </h4>
+                    <p className="font-serif italic text-sm text-epoch-primary/50 leading-relaxed">
+                      {problem.description}
+                    </p>
                   </div>
                 </div>
               ))}
@@ -112,36 +105,30 @@ export function ProblemSolutionSection() {
           </div>
 
           {/* Solutions Column */}
-          <div className="relative">
-            <div className="absolute -inset-6 bg-primary/5 rounded-[3rem] blur-3xl -z-10"></div>
-
-            <div className="flex items-center gap-4 mb-10">
-              <div className="h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary">
-                <CheckCircle2 className="h-6 w-6" />
-              </div>
-              <h3 className="text-2xl font-malisha text-gray-900">
-                La Solución {businessConfig.name}
+          <div className="space-y-16">
+            <div className="flex flex-col items-start gap-4">
+              <span className="font-display text-[9px] tracking-[0.5em] uppercase text-epoch-accent">
+                El Futuro
+              </span>
+              <h3 className="text-3xl font-display font-bold text-epoch-primary">
+                El Estándar Opttius
               </h3>
+              <div className="w-12 h-[1px] bg-epoch-accent/50"></div>
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-12">
               {solutions.map((solution, index) => (
-                <div
-                  key={index}
-                  className="group p-8 bg-white border border-transparent rounded-[2rem] shadow-premium hover:shadow-premium-lg transition-all duration-500 hover:scale-[1.02] border-primary/5"
-                >
-                  <div className="flex items-start gap-5">
-                    <div className="mt-1 h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-                      <CheckCircle2 className="h-4 w-4" />
-                    </div>
-                    <div>
-                      <h4 className="text-lg font-bold text-gray-900 mb-2">
-                        {solution.title}
-                      </h4>
-                      <p className="text-gray-500 leading-relaxed text-sm">
-                        {solution.description}
-                      </p>
-                    </div>
+                <div key={index} className="group flex gap-8">
+                  <div className="flex-shrink-0 w-12 h-12 border border-epoch-accent/30 rounded-full flex items-center justify-center text-epoch-accent group-hover:bg-epoch-accent group-hover:text-epoch-primary transition-all duration-700">
+                    <solution.icon className="h-5 w-5 stroke-1" />
+                  </div>
+                  <div className="space-y-3">
+                    <h4 className="font-display font-bold text-xs tracking-[0.2em] text-epoch-primary">
+                      {solution.title}
+                    </h4>
+                    <p className="font-serif italic text-sm text-epoch-primary/70 leading-relaxed">
+                      {solution.description}
+                    </p>
                   </div>
                 </div>
               ))}
@@ -149,6 +136,10 @@ export function ProblemSolutionSection() {
           </div>
         </div>
       </div>
+
+      {/* Aesthetic corner accents */}
+      <div className="absolute top-0 right-0 w-64 h-64 bg-epoch-accent/5 rounded-full blur-3xl pointer-events-none"></div>
+      <div className="absolute bottom-0 left-0 w-96 h-96 bg-epoch-primary/5 rounded-full blur-3xl pointer-events-none"></div>
     </section>
   );
 }

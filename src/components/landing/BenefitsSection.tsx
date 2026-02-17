@@ -34,63 +34,81 @@ const benefits = [
   },
 ];
 
+import Image from "next/image";
+
 export function BenefitsSection() {
   return (
     <section
-      className="py-32 bg-[var(--admin-bg-primary)] relative overflow-hidden"
+      className="py-32 bg-epoch-primary text-white relative overflow-hidden"
       id="beneficios"
     >
-      {/* Decorative blurry background highlights */}
-      <div className="absolute top-1/2 left-0 -translate-y-1/2 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px] -z-10"></div>
-      <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-blue-50/50 rounded-full blur-[100px] -z-10"></div>
+      {/* Texture overlay */}
+      <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10 pointer-events-none"></div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-24 max-w-3xl mx-auto">
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full text-primary text-[10px] font-bold uppercase tracking-[0.2em] mb-6 animate-fade-in">
-            <Sparkles className="h-4 w-4" />
-            <span>Impacto en tu Negocio</span>
-          </div>
-          <h2 className="text-4xl md:text-5xl lg:text-6xl font-malisha text-gray-900 mb-6 leading-tight">
-            Resultados que{" "}
-            <span className="text-primary italic">Transforman</span>
-          </h2>
-          <p className="text-lg text-gray-500 font-body">
-            Descubre por qué {businessConfig.name} es la elección predilecta de
-            las ópticas modernas.
-          </p>
-        </div>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div className="flex flex-col lg:flex-row items-center gap-20">
+          {/* Text Content */}
+          <div className="lg:w-1/2 space-y-10">
+            <div className="inline-flex items-center gap-4 px-6 py-2 border border-epoch-accent/30 rounded-full text-epoch-accent text-[10px] font-display tracking-[0.4em] uppercase mb-4">
+              <Sparkles className="h-3 w-3" />
+              <span>Legado de Valor</span>
+            </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {benefits.map((benefit, index) => {
-            return (
-              <div
-                key={index}
-                className="group relative p-10 bg-[var(--admin-bg-tertiary)] rounded-[2.5rem] border border-gray-100 shadow-premium hover:shadow-premium-lg transition-all duration-500 hover:-translate-y-2 overflow-hidden"
-              >
-                {/* Background Stat Number */}
-                <div className="absolute -top-4 -right-2 text-7xl font-malisha text-[var(--accent-foreground)] transition-colors group-hover:text-primary/5 select-none pointer-events-none">
-                  {benefit.stat}
-                </div>
+            <h2 className="text-5xl md:text-7xl font-display font-bold text-white tracking-tight leading-none">
+              GUIADOS POR LA
+              <br />
+              <span className="text-epoch-accent italic font-serif lowercase tracking-normal">
+                luz de la precisión
+              </span>
+            </h2>
 
-                <div className="relative z-10">
-                  <div className="inline-flex p-5 bg-[var(--admin-bg-secondary)] rounded-[1.5rem] mb-8 text-gray-400 group-hover:bg-primary/10 group-hover:text-[rgba(22,101,52,0.99)] transition-all duration-500 shadow-sm">
-                    <benefit.icon className="h-8 w-8" />
+            <div className="w-24 h-[1px] bg-epoch-accent"></div>
+
+            <p className="text-xl text-white/70 font-serif italic tracking-wide max-w-xl">
+              Más que un software, una filosofía de gestión. Descubra el impacto
+              de la maestría digital en cada aspecto de su óptica.
+            </p>
+
+            <div className="grid sm:grid-cols-2 gap-10">
+              {benefits.map((benefit, index) => (
+                <div key={index} className="space-y-4 group">
+                  <div className="flex items-center gap-4">
+                    <div className="p-3 border border-epoch-accent/30 text-epoch-accent transition-colors duration-500 group-hover:bg-epoch-accent group-hover:text-epoch-primary">
+                      <benefit.icon className="h-5 w-5 stroke-1" />
+                    </div>
+                    <span className="font-display text-2xl text-epoch-accent/80">
+                      {benefit.stat}
+                    </span>
                   </div>
-
-                  <h3 className="text-xl font-bold text-gray-900 mb-4 tracking-tight group-hover:text-primary transition-colors">
+                  <h3 className="font-display font-bold text-sm tracking-widest uppercase text-white/90">
                     {benefit.title}
                   </h3>
-
-                  <p className="text-gray-500 leading-relaxed font-body text-sm">
+                  <p className="text-white/50 text-xs leading-relaxed font-body italic">
                     {benefit.description}
                   </p>
                 </div>
+              ))}
+            </div>
+          </div>
 
-                {/* Bottom decorative line */}
-                <div className="absolute bottom-0 left-0 w-full h-1.5 bg-[var(--admin-bg-tertiary)] transition-colors group-hover:bg-primary/20"></div>
-              </div>
-            );
-          })}
+          {/* Visual Element */}
+          <div className="lg:w-1/2 relative group">
+            {/* Decorative Frame */}
+            <div className="absolute -inset-4 border border-epoch-accent/20 -translate-x-4 -translate-y-4 pointer-events-none transition-transform duration-700 group-hover:translate-x-0 group-hover:translate-y-0"></div>
+
+            <div className="relative aspect-[4/5] md:aspect-square overflow-hidden shadow-2xl">
+              <Image
+                src="/images/landing/vision-epoch.png"
+                alt="Precision Vision"
+                fill
+                className="object-cover grayscale hover:grayscale-0 transition-all duration-1000 scale-105 group-hover:scale-100"
+              />
+              <div className="absolute inset-0 bg-epoch-primary/20 group-hover:bg-transparent transition-colors duration-1000"></div>
+            </div>
+
+            {/* Aesthetic Arch Background */}
+            <div className="absolute -bottom-10 -right-10 w-40 h-40 border border-epoch-accent/10 rounded-full blur-2xl pointer-events-none"></div>
+          </div>
         </div>
       </div>
     </section>

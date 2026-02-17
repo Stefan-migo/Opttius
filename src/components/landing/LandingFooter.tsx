@@ -13,80 +13,42 @@ import {
 } from "lucide-react";
 import businessConfig from "@/config/business";
 import { useTheme } from "@/components/theme-provider";
-import Image from "next/image";
+import { OpttiusLogoText } from "@/components/ui/brand";
 
 export function LandingFooter() {
   const currentYear = new Date().getFullYear();
-  const { theme } = useTheme();
-
-  const getThemeLogo = () => {
-    switch (theme) {
-      case "dark":
-        return "/logo-opttius-dark.png";
-      case "blue":
-        return "/logo-opttius-blue.png";
-      case "green":
-        return "/logo-opttius-green.png";
-      case "red":
-        return "/logo-opttius-red.png";
-      default:
-        return "/logo-opttius.png";
-    }
-  };
-
-  const getThemeTextLogo = () => {
-    switch (theme) {
-      case "dark":
-        return "/logo-text-dark.svg";
-      case "blue":
-        return "/logo-text-blue.svg";
-      case "green":
-        return "/logo-text-green.svg";
-      case "red":
-        return "/logo-text-red.svg";
-      default:
-        return "/logo-text-default.svg";
-    }
-  };
 
   return (
-    <footer className="bg-[var(--admin-bg-primary)] border-t border-gray-100 relative overflow-hidden">
-      <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-primary/20 to-transparent"></div>
+    <footer className="bg-epoch-surface text-white relative overflow-hidden">
+      {/* Texture overlay */}
+      <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-epoch-accent/30 to-transparent"></div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 bg-[var(--admin-bg-primary)]">
-        <div className="grid md:grid-cols-4 gap-16">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-64 pb-32">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-20">
           {/* Brand Column */}
-          <div className="space-y-8">
-            <div className="flex items-center gap-3">
-              <div className="relative overflow-hidden rounded-xl shadow-md">
-                <Image
-                  src={getThemeLogo()}
-                  alt="Logo"
-                  width={40}
-                  height={40}
-                  className="object-contain"
+          <div className="space-y-10">
+            <Link href="/" className="group flex flex-col items-start">
+              <div className="relative group-hover:scale-105 transition-all duration-700">
+                <OpttiusLogoText
+                  forceLight={true}
+                  className="h-14 w-48 opacity-90 group-hover:opacity-100 transition-opacity"
                 />
               </div>
-              <Image
-                src={getThemeTextLogo()}
-                alt="Opttius"
-                width={100}
-                height={30}
-                className="object-contain"
-              />
-            </div>
-            <p className="text-gray-500 text-sm font-body leading-relaxed max-w-xs">
+            </Link>
+
+            <p className="text-white/40 text-sm font-body leading-relaxed italic max-w-xs">
               Redefiniendo el estándar tecnológico en la industria óptica global
-              con inteligencia artificial y diseño centrado en el ser humano.
+              con la elegancia de una era dorada y la precisión del mañana.
             </p>
-            <div className="flex gap-5">
+
+            <div className="flex gap-8">
               {[Facebook, Twitter, Linkedin, Instagram].map((Icon, i) => (
                 <a
                   key={i}
                   href="#"
-                  className="h-10 w-10 flex items-center justify-center rounded-xl bg-[var(--admin-bg-tertiary)] text-gray-400 hover:bg-primary/10 hover:text-primary transition-all duration-300"
+                  className="text-white/30 hover:text-epoch-accent transition-all duration-500"
                 >
-                  <Icon className="h-5 w-5" />
+                  <Icon className="h-5 w-5 stroke-1" />
                 </a>
               ))}
             </div>
@@ -94,18 +56,18 @@ export function LandingFooter() {
 
           {/* Product Column */}
           <div>
-            <h3 className="text-xs font-bold text-gray-900 uppercase tracking-[0.2em] mb-8">
-              Soluciones
+            <h3 className="font-display text-xs font-bold text-epoch-accent uppercase tracking-[0.4em] mb-12">
+              Exploración
             </h3>
-            <ul className="space-y-4 text-sm font-body">
-              {["Características", "Precios", "API & Developers"].map(
+            <ul className="space-y-6 text-xs font-display tracking-[0.2em] uppercase">
+              {["Inicio", "Características", "Beneficios", "Precios"].map(
                 (item, i) => (
                   <li key={i}>
                     <Link
-                      href={`#${item.toLowerCase().replace(/ /g, "-")}`}
-                      className="text-gray-500 hover:text-primary transition-colors flex items-center group"
+                      href={`#${item.toLowerCase()}`}
+                      className="text-white/50 hover:text-white transition-all duration-300 flex items-center group"
                     >
-                      <div className="w-0 group-hover:w-2 h-px bg-primary mr-0 group-hover:mr-2 transition-all"></div>
+                      <span className="w-0 group-hover:w-4 h-[1px] bg-epoch-accent mr-0 group-hover:mr-4 transition-all duration-500"></span>
                       {item}
                     </Link>
                   </li>
@@ -114,20 +76,20 @@ export function LandingFooter() {
             </ul>
           </div>
 
-          {/* Company Column */}
+          {/* Legal Column */}
           <div>
-            <h3 className="text-xs font-bold text-gray-900 uppercase tracking-[0.2em] mb-8">
-              Compañía
+            <h3 className="font-display text-xs font-bold text-epoch-accent uppercase tracking-[0.4em] mb-12">
+              Manuscritos
             </h3>
-            <ul className="space-y-4 text-sm font-body">
-              {["Sobre Nosotros", "Carreras", "Blog", "Prensa"].map(
+            <ul className="space-y-6 text-xs font-display tracking-[0.2em] uppercase">
+              {["Privacidad", "Términos", "Cookies", "Seguridad"].map(
                 (item, i) => (
                   <li key={i}>
                     <Link
                       href="#"
-                      className="text-gray-500 hover:text-primary transition-colors flex items-center group"
+                      className="text-white/50 hover:text-white transition-all duration-300 flex items-center group"
                     >
-                      <div className="w-0 group-hover:w-2 h-px bg-primary mr-0 group-hover:mr-2 transition-all"></div>
+                      <span className="w-0 group-hover:w-4 h-[1px] bg-epoch-accent mr-0 group-hover:mr-4 transition-all duration-500"></span>
                       {item}
                     </Link>
                   </li>
@@ -138,64 +100,51 @@ export function LandingFooter() {
 
           {/* Contact Column */}
           <div>
-            <h3 className="text-xs font-bold text-gray-900 uppercase tracking-[0.2em] mb-8">
-              Soporte
+            <h3 className="font-display text-xs font-bold text-epoch-accent uppercase tracking-[0.4em] mb-12">
+              Corresponsal
             </h3>
-            <ul className="space-y-6 text-sm font-body">
-              <li className="flex items-start gap-4 text-gray-500 group">
-                <div className="p-2 bg-gray-50 rounded-lg group-hover:bg-primary/5 transition-colors">
-                  <Mail className="h-4 w-4 text-gray-400 group-hover:text-primary" />
-                </div>
-                <div>
-                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">
-                    Email
-                  </p>
-                  <a
-                    href={`mailto:${businessConfig.contactEmail}`}
-                    className="hover:text-primary transition-colors"
-                  >
-                    {businessConfig.contactEmail}
-                  </a>
-                </div>
+            <ul className="space-y-8 font-serif italic text-sm">
+              <li className="flex flex-col gap-2">
+                <span className="text-[10px] font-display tracking-[0.3em] uppercase text-white/30">
+                  Despacho
+                </span>
+                <a
+                  href={`mailto:${businessConfig.contactEmail}`}
+                  className="text-white/60 hover:text-white transition-colors"
+                >
+                  {businessConfig.contactEmail}
+                </a>
               </li>
-              <li className="flex items-start gap-4 text-gray-500 group">
-                <div className="p-2 bg-gray-50 rounded-lg group-hover:bg-primary/5 transition-colors">
-                  <Phone className="h-4 w-4 text-gray-400 group-hover:text-primary" />
-                </div>
-                <div>
-                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">
-                    Citas
-                  </p>
-                  <a
-                    href="tel:+1234567890"
-                    className="hover:text-primary transition-colors"
-                  >
-                    +1 (234) 567-890
-                  </a>
-                </div>
+              <li className="flex flex-col gap-2">
+                <span className="text-[10px] font-display tracking-[0.3em] uppercase text-white/30">
+                  Audiencias
+                </span>
+                <a
+                  href="tel:+1234567890"
+                  className="text-white/60 hover:text-white transition-colors"
+                >
+                  +1 (234) 567-890
+                </a>
               </li>
             </ul>
           </div>
         </div>
 
-        <div className="border-t border-gray-100 mt-20 pt-10 flex flex-col md:flex-row justify-between items-center gap-6">
-          <p className="text-[11px] font-medium text-gray-400 uppercase tracking-widest">
-            © {currentYear} {businessConfig.displayName}. Todos los derechos
-            reservados.
+        <div className="mt-32 pt-12 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-10">
+          <p className="font-display text-[9px] text-white/20 uppercase tracking-[0.4em]">
+            © {currentYear} {businessConfig.displayName}. CREADO PARA EL
+            EXIGENTE.
           </p>
-          <div className="flex gap-8 text-[11px] font-medium text-gray-400 uppercase tracking-widest">
-            <Link href="#" className="hover:text-primary transition-colors">
-              Privacidad
-            </Link>
-            <Link href="#" className="hover:text-primary transition-colors">
-              Términos
-            </Link>
-            <Link href="#" className="hover:text-primary transition-colors">
-              Cookies
-            </Link>
+          <div className="flex gap-4">
+            <div className="w-12 h-12 border border-white/5 flex items-center justify-center rounded-full opacity-50">
+              <Sparkles className="h-4 w-4 text-epoch-accent" />
+            </div>
           </div>
         </div>
       </div>
+
+      {/* Aesthetic Arch Base */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[120%] h-40 bg-epoch-background rounded-b-[100%] z-0"></div>
     </footer>
   );
 }

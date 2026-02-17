@@ -36,231 +36,271 @@
     --font-velista: "VELISTA", serif;
   }
 
-  /* Light Theme (Default) - Clean Slate & Blue Palette */
+  /* Epoch Aesthetic Tokens - Cream, Deep Green, Gold */
   :root,
   html.theme-light {
-    --background: #f8fafc;
-    /* Slate-50 */
-    --foreground: #0f172a;
-    /* Slate-900 */
-    --card: #ffffff;
-    --card-foreground: #0f172a;
-    --popover: #ffffff;
-    --popover-foreground: #0f172a;
+    --background: #F9F7F2;
+    /* Cream Background */
+    --foreground: #1A2B23;
+    /* Deep Forest Green */
+    --card: #FFFFFF;
+    --card-foreground: #1A2B23;
+    --popover: #FFFFFF;
+    --popover-foreground: #1A2B23;
 
-    --primary: #AE0000;
-    /* Brand Red */
-    --primary-foreground: #ffffff;
-    --secondary: #fafafa;
-    /* Near white */
-    --secondary-foreground: #1a1a1a;
-    --muted: #f5f5f5;
-    --muted-foreground: #737373;
+    --primary: #1A2B23;
+    /* Deep Green */
+    --primary-foreground: #F9F7F2;
+    --secondary: #F3F1EB;
+    /* Muted Cream */
+    --secondary-foreground: #1A2B23;
+    --muted: #EAE8E0;
+    --muted-foreground: #6A7A71;
 
-    --accent: #f8fafc;
-    --accent-foreground: #0f172a;
-    --destructive: #ef4444;
-    /* Red-500 */
-    --destructive-foreground: #ffffff;
-    --border: #e2e8f0;
-    /* Slate-200 */
-    --input: #e2e8f0;
-    --ring: #3b82f6;
-    /* Blue-500 */
+    --accent: #C5A059;
+    /* Vintage Gold */
+    --accent-foreground: #1A2B23;
+    --destructive: #8B0000;
+    --destructive-foreground: #F9F7F2;
+    --border: #E5E1D5;
+    --input: #E5E1D5;
+    --ring: #C5A059;
 
-    /* Admin-specific colors */
-    --admin-bg-primary: #f8fafc;
-    --admin-bg-secondary: #ffffff;
-    --admin-bg-tertiary: #f1f5f9;
-    --admin-border-primary: #e2e8f0;
-    --admin-border-secondary: #cbd5e1;
-    --admin-text-primary: #0f172a;
-    --admin-text-secondary: #475569;
-    --admin-text-tertiary: #94a3b8;
-    --admin-accent-primary: #AE0000;
-    --admin-accent-secondary: #D40000;
-    --admin-accent-tertiary: #FF3333;
-    --admin-success: #10b981;
-    --admin-warning: #f59e0b;
-    --admin-error: #ef4444;
-    --admin-info: #3b82f6;
+    /* Admin-specific colors (Epoch Edition) */
+    --admin-bg-primary: #F9F7F2;
+    --admin-bg-secondary: #3A453E;
+    /* Soft Moss Green for Sidebar/Header in light mode */
+    --admin-bg-tertiary: #F1F0EA;
+    --admin-border-primary: rgba(229, 225, 213, 0.2);
+    /* Muted border for dark sidebar */
+    --admin-border-secondary: #DCD7C9;
+    --admin-text-primary: #1A2B23;
+    --admin-text-secondary: #4A5A51;
+    --admin-text-tertiary: #8A9A91;
+    --admin-text-on-dark: #F9F7F2;
+    /* Cream text for dark components */
+    --admin-accent-primary: #C5A059;
+    /* Use Gold for better active contrast */
+    --admin-accent-secondary: #C5A059;
+    --admin-accent-tertiary: #E5E1D5;
+    --admin-success: #2C5E43;
+    --admin-warning: #B8860B;
+    --admin-error: #8B0000;
+    --admin-info: #3A453E;
+
+    /* Chart specific colors */
+    --chart-1: #1A2B23;
+    --chart-2: #C5A059;
+    --chart-3: #2C4A33;
+    --chart-4: #4A5A51;
+    --chart-5: #D4AF37;
   }
 
-  /* Dark Theme - Sophisticated Slate-900 */
+  /* Dark Theme - Deep Forest Epoch */
   html.theme-dark,
   html.dark {
-    --background: #020617;
-    /* Slate-950 */
-    --foreground: #f8fafc;
-    --card: #0f172a;
-    /* Slate-900 */
-    --card-foreground: #f8fafc;
-    --popover: #0f172a;
-    --popover-foreground: #f8fafc;
+    --background: #0D1612;
+    /* Even deeper green for "dark" background */
+    --foreground: #F9F7F2;
+    --card: #14211B;
+    --card-foreground: #F9F7F2;
+    --popover: #14211B;
+    --popover-foreground: #F9F7F2;
 
-    --primary: #3b82f6;
-    --primary-foreground: #ffffff;
-    --secondary: #1e293b;
-    --secondary-foreground: #cbd5e1;
-    --muted: #1e293b;
-    --muted-foreground: #94a3b8;
+    --primary: #C5A059;
+    --primary-foreground: #1A2B23;
+    --secondary: #1A2B23;
+    --secondary-foreground: #F9F7F2;
+    --muted: #1A2B23;
+    --muted-foreground: #8A9A91;
 
-    --accent: #1e293b;
-    --accent-foreground: #f8fafc;
-    --destructive: #ef4444;
-    --destructive-foreground: #ffffff;
-    --border: #1e293b;
-    --input: #1e293b;
-    --ring: #3b82f6;
+    --accent: #C5A059;
+    --accent-foreground: #1A2B23;
+    --destructive: #FF4D4D;
+    --destructive-foreground: #FFFFFF;
+    --border: #2C3E33;
+    --input: #2C3E33;
+    --ring: #C5A059;
 
-    /* Admin-specific colors for dark theme */
-    --admin-bg-primary: #020617;
-    --admin-bg-secondary: #0f172a;
-    --admin-bg-tertiary: #1e293b;
-    --admin-border-primary: #334155;
-    --admin-border-secondary: #334155;
-    --admin-text-primary: #f8fafc;
-    --admin-text-secondary: #94a3b8;
-    --admin-text-tertiary: #64748b;
-    --admin-accent-primary: #3b82f6;
-    --admin-accent-secondary: #60a5fa;
-    --admin-accent-tertiary: #0ea5e9;
-    --admin-success: #34d399;
-    --admin-warning: #fbbf24;
-    --admin-error: #ef4444;
-    --admin-info: #3b82f6;
+    /* Admin-specific colors for dark theme - Using the "Perfect" Sidebar Reference */
+    --admin-bg-primary: #0D1612;
+    --admin-bg-secondary: #1A2B23;
+    /* The user's reference color */
+    --admin-bg-tertiary: #14211B;
+    --admin-border-primary: #2C3E33;
+    --admin-border-secondary: #2C3E33;
+    --admin-text-primary: #F9F7F2;
+    --admin-text-secondary: #8A9A91;
+    --admin-text-tertiary: #5A6A61;
+    --admin-text-on-dark: #F9F7F2;
+    --admin-accent-primary: #C5A059;
+    --admin-accent-secondary: #D4AF37;
+    --admin-accent-tertiary: #2C3E33;
+    --admin-success: #4ADE80;
+    --admin-warning: #FBBF24;
+    --admin-error: #EF4444;
+    --admin-info: #C5A059;
+
+    /* Chart specific colors */
+    --chart-1: #C5A059;
+    --chart-2: #F9F7F2;
+    --chart-3: #4ADE80;
+    --chart-4: #FBBF24;
+    --chart-5: #2C5E43;
   }
 
-  /* Blue Theme - Trust and Tech */
+  /* Themes (Blue, Green, Red) refactored into Epoch variants */
   html.theme-blue {
-    --background: #eff6ff;
-    /* Blue-50 */
-    --foreground: #1e3a8a;
-    /* Blue-900 */
-    --card: #eff6ff;
-    --card-foreground: #1e3a8a;
-    --popover: #ffffff;
-    --popover-foreground: #1e3a8a;
+    --background: #F0F4F8;
+    --foreground: #102A43;
+    --card: #FFFFFF;
+    --card-foreground: #102A43;
+    --popover: #FFFFFF;
+    --popover-foreground: #102A43;
 
-    --primary: #2563eb;
-    --primary-foreground: #ffffff;
-    --secondary: #dbeafe;
-    --secondary-foreground: #1e40af;
-    --muted: #dbeafe;
-    --muted-foreground: #60a5fa;
+    --primary: #102A43;
+    --primary-foreground: #F0F4F8;
+    --secondary: #E1E8F0;
+    --secondary-foreground: #102A43;
+    --muted: #D9E2EC;
+    --muted-foreground: #627D98;
 
-    --accent: #f0f7ff;
-    --accent-foreground: #2563eb;
-    --destructive: #ef4444;
-    --destructive-foreground: #ffffff;
-    --border: #bfdbfe;
-    --input: #bfdbfe;
-    --ring: #2563eb;
+    --accent: #C5A059;
+    --accent-foreground: #102A43;
+    --destructive: #8B0000;
+    --destructive-foreground: #F0F4F8;
+    --border: #D9E2EC;
+    --input: #D9E2EC;
+    --ring: #102A43;
 
-    --admin-bg-primary: #f0f9ff;
-    --admin-bg-secondary: #f0f7ff;
-    /* Harmony: Light blue instead of white */
-    --admin-bg-tertiary: #e0f2fe;
-    --admin-border-primary: #bae6fd;
-    --admin-border-secondary: #7dd3fc;
-    --admin-text-primary: #0c4a6e;
-    --admin-text-secondary: #0369a1;
-    --admin-text-tertiary: #38bdf8;
-    --admin-accent-primary: #0284c7;
-    --admin-accent-secondary: #0ea5e9;
-    --admin-accent-tertiary: #22d3ee;
-    --admin-success: #10b981;
-    --admin-warning: #f59e0b;
-    --admin-error: #ef4444;
-    --admin-info: #0ea5e9;
+    /* Admin-specific colors for Blue Theme */
+    --admin-bg-primary: #F0F4F8;
+    --admin-bg-secondary: #102A43;
+    /* Deep Brand Blue for Sidebar/Header */
+    --admin-bg-tertiary: #E1E8F0;
+    --admin-border-primary: #D9E2EC;
+    --admin-border-secondary: #BCCCDC;
+    --admin-text-primary: #102A43;
+    --admin-text-secondary: #334E68;
+    --admin-text-tertiary: #627D98;
+    --admin-text-on-dark: #F0F4F8;
+    --admin-accent-primary: #C5A059;
+    /* Use Gold for better active contrast on Blue */
+    --admin-accent-secondary: #C5A059;
+    --admin-accent-tertiary: #D9E2EC;
+    --admin-success: #2C5E43;
+    --admin-warning: #B8860B;
+    --admin-error: #8B0000;
+    --admin-info: #102A43;
+
+    /* Chart specific colors */
+    --chart-1: #102A43;
+    --chart-2: #C5A059;
+    --chart-3: #243B53;
+    --chart-4: #486581;
+    --chart-5: #D4AF37;
   }
 
-  /* Green Theme - Growth & Efficiency */
   html.theme-green {
-    --background: #f0fdf4;
-    /* Green-50 */
-    --foreground: #14532d;
-    /* Green-900 */
-    --card: #f0fdf4;
-    --card-foreground: #14532d;
-    --popover: #ffffff;
-    --popover-foreground: #14532d;
+    --background: #F2F7F2;
+    --foreground: #1A2B23;
+    --card: #FFFFFF;
+    --card-foreground: #1A2B23;
+    --popover: #FFFFFF;
+    --popover-foreground: #1A2B23;
 
-    --primary: #166534;
-    --primary-foreground: #ffffff;
-    --secondary: #dcfce7;
-    --secondary-foreground: #166534;
-    --muted: #dcfce7;
-    --muted-foreground: #4ade80;
+    --primary: #1A2B23;
+    --primary-foreground: #F2F7F2;
+    --secondary: #E8F0E8;
+    --secondary-foreground: #1A2B23;
+    --muted: #DCE5DC;
+    --muted-foreground: #6A7A71;
 
-    --accent: #f0fdf4;
-    --accent-foreground: #166534;
-    --destructive: #ef4444;
-    --destructive-foreground: #ffffff;
-    --border: #bbf7d0;
-    --input: #bbf7d0;
-    --ring: #166534;
+    --accent: #C5A059;
+    --accent-foreground: #1A2B23;
+    --destructive: #8B0000;
+    --destructive-foreground: #F2F7F2;
+    --border: #DCE5DC;
+    --input: #DCE5DC;
+    --ring: #1A2B23;
 
-    --admin-bg-primary: #f0fdf4;
-    --admin-bg-secondary: #ecfdf5;
-    /* Harmony: Hint of emerald/green */
-    --admin-bg-tertiary: #dcfce7;
-    --admin-border-primary: #bbf7d0;
-    --admin-border-secondary: #86efac;
-    --admin-text-primary: #064e3b;
-    --admin-text-secondary: #065f46;
-    --admin-text-tertiary: #10b981;
-    --admin-accent-primary: #059669;
-    --admin-accent-secondary: #10b981;
-    --admin-accent-tertiary: #34d399;
-    --admin-success: #10b981;
-    --admin-warning: #f59e0b;
-    --admin-error: #ef4444;
-    --admin-info: #10b981;
+    /* Admin-specific colors for Green Theme */
+    --admin-bg-primary: #F2F7F2;
+    --admin-bg-secondary: #1A2B23;
+    /* Deep Brand Green for Sidebar/Header */
+    --admin-bg-tertiary: #E8F0E8;
+    --admin-border-primary: #DCE5DC;
+    --admin-border-secondary: #CCD5CC;
+    --admin-text-primary: #1A2B23;
+    --admin-text-secondary: #4A5A52;
+    --admin-text-tertiary: #6A7A71;
+    --admin-text-on-dark: #F2F7F2;
+    --admin-accent-primary: #C5A059;
+    /* Use Gold for better active contrast on Green */
+    --admin-accent-secondary: #C5A059;
+    --admin-accent-tertiary: #DCE5DC;
+    --admin-success: #2C5E43;
+    --admin-warning: #B8860B;
+    --admin-error: #8B0000;
+    --admin-info: #1A2B23;
+
+    /* Chart specific colors */
+    --chart-1: #1A2B23;
+    --chart-2: #C5A059;
+    --chart-3: #2C4E3C;
+    --chart-4: #4A6D5A;
+    --chart-5: #D4AF37;
   }
 
-  /* Red Theme - Energy & Passion */
   html.theme-red {
-    --background: #fef2f2;
-    /* Red-50 */
-    --foreground: #7f1d1d;
-    /* Red-900 */
-    --card: #fef2f2;
-    --card-foreground: #7f1d1d;
-    --popover: #ffffff;
-    --popover-foreground: #7f1d1d;
+    --background: #FCF4F4;
+    --foreground: #4D1414;
+    --card: #FFFFFF;
+    --card-foreground: #4D1414;
+    --popover: #FFFFFF;
+    --popover-foreground: #4D1414;
 
-    --primary: #b91c1c;
-    --primary-foreground: #ffffff;
-    --secondary: #fce7e7;
-    --secondary-foreground: #b91c1c;
-    --muted: #fce7e7;
-    --muted-foreground: #f87171;
+    --primary: #4D1414;
+    --primary-foreground: #FCF4F4;
+    --secondary: #F8E8E8;
+    --secondary-foreground: #4D1414;
+    --muted: #F0DCDC;
+    --muted-foreground: #8A5A5A;
 
-    --accent: #fef2f2;
-    --accent-foreground: #b91c1c;
-    --destructive: #ef4444;
-    --destructive-foreground: #ffffff;
-    --border: #fca5a5;
-    --input: #fca5a5;
-    --ring: #b91c1c;
+    --accent: #C5A059;
+    --accent-foreground: #4D1414;
+    --destructive: #8B0000;
+    --destructive-foreground: #FCF4F4;
+    --border: #F0DCDC;
+    --input: #F0DCDC;
+    --ring: #4D1414;
 
-    --admin-bg-primary: #fef2f2;
-    --admin-bg-secondary: #fff5f5;
-    /* Harmony: Hint of rose/red */
-    --admin-bg-tertiary: #fee2e2;
-    --admin-border-primary: #fecaca;
-    --admin-border-secondary: #fca5a5;
-    --admin-text-primary: #7f1d1d;
-    --admin-text-secondary: #991b1b;
-    --admin-text-tertiary: #ef4444;
-    --admin-accent-primary: #dc2626;
-    --admin-accent-secondary: #ef4444;
-    --admin-accent-tertiary: #f87171;
-    --admin-success: #10b981;
-    --admin-warning: #f59e0b;
-    --admin-error: #ef4444;
-    --admin-info: #dc2626;
+    /* Admin-specific colors for Red Theme */
+    --admin-bg-primary: #FCF4F4;
+    --admin-bg-secondary: #4D1414;
+    /* Deep Brand Red for Sidebar/Header */
+    --admin-bg-tertiary: #F8E8E8;
+    --admin-border-primary: #F0DCDC;
+    --admin-border-secondary: #E5CCCC;
+    --admin-text-primary: #4D1414;
+    --admin-text-secondary: #6B3A3A;
+    --admin-text-tertiary: #8A5A5A;
+    --admin-text-on-dark: #FCF4F4;
+    --admin-accent-primary: #C5A059;
+    /* Use Gold for better active contrast on Red */
+    --admin-accent-secondary: #C5A059;
+    --admin-accent-tertiary: #F0DCDC;
+    --admin-success: #2C5E43;
+    --admin-warning: #B8860B;
+    --admin-error: #8B0000;
+    --admin-info: #4D1414;
+
+    /* Chart specific colors */
+    --chart-1: #4D1414;
+    --chart-2: #C5A059;
+    --chart-3: #6D2D2D;
+    --chart-4: #8D4747;
+    --chart-5: #D4AF37;
   }
 }
 
@@ -288,7 +328,8 @@
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--admin-border-primary);
-  color: var(--admin-text-primary);
+  color: #F9F7F2 !important;
+  /* Force off-white for all themes with colored headers */
   padding: 0.75rem 1.5rem;
   position: sticky;
   top: 0;
@@ -296,8 +337,21 @@
   transition: all 0.3s ease;
 }
 
-html.dark .admin-header {
-  background: var(--admin-bg-secondary);
+.admin-header *,
+.admin-header-title,
+.admin-header-subtitle,
+.admin-header button,
+.admin-header span,
+.admin-header div[role="combobox"] {
+  color: #F9F7F2 !important;
+  /* Global contrast fix for header contents */
+}
+
+.admin-header-subtitle {
+  opacity: 0.7;
+  @apply font-serif italic;
+  font-size: 0.75rem;
+  margin-top: -2px;
 }
 
 .admin-header-content {
@@ -308,18 +362,14 @@ html.dark .admin-header {
 }
 
 .admin-header-title {
+  @apply font-display uppercase tracking-widest;
   font-size: 1.25rem;
   font-weight: 800;
-  letter-spacing: -0.025em;
   margin: 0;
-  color: var(--admin-text-primary);
 }
 
-.admin-header-subtitle {
-  font-size: 0.75rem;
-  font-weight: 500;
-  color: var(--admin-text-tertiary);
-  margin-top: -2px;
+html.dark .admin-header {
+  background: var(--admin-bg-secondary);
 }
 
 .admin-header-actions {
@@ -342,11 +392,12 @@ html.dark .admin-header {
   top: 0;
   z-index: 50;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
 }
 
 .admin-sidebar-header {
-  padding: 1.25rem 1.5rem;
-  border-bottom: 1px solid var(--admin-border-primary);
+  padding: 1.25rem 1rem;
+  border-bottom: 1px solid rgba(249, 247, 242, 0.08);
 }
 
 .admin-sidebar-logo {
@@ -354,18 +405,26 @@ html.dark .admin-header {
   align-items: center;
   gap: 0.75rem;
   text-decoration: none;
-  color: var(--admin-text-primary);
+}
+
+.admin-sidebar-header,
+.admin-sidebar .admin-sidebar-logo,
+.admin-sidebar .admin-sidebar-logo * {
+  color: #F9F7F2 !important;
+  /* Ensure logo/text is visible on dark backgrounds */
 }
 
 .admin-sidebar-logo span {
   font-weight: 800;
   font-size: 1.35rem;
   letter-spacing: -0.04em;
+  color: #F9F7F2 !important;
 }
 
 .admin-sidebar-logo span.text-\[10px\] {
   font-weight: 600;
   font-size: 12px;
+  color: #F9F7F2 !important;
 }
 
 .admin-sidebar-nav {
@@ -389,15 +448,43 @@ html.dark .admin-header {
 }
 
 .admin-nav-item:hover {
-  background: var(--admin-bg-tertiary);
-  color: var(--admin-text-primary);
+  background: rgba(249, 247, 242, 0.1);
+  color: #F9F7F2 !important;
   transform: translateX(4px);
+}
+
+.admin-nav-item:hover * {
+  color: #F9F7F2 !important;
 }
 
 .admin-nav-item.active {
   background: var(--admin-accent-primary);
-  color: white;
-  box-shadow: 0 4px 12px color-mix(in srgb, var(--admin-accent-primary), transparent 75%);
+  color: #1A2B23 !important;
+  /* Force deep forest green for text on gold background */
+  font-weight: 800;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.admin-nav-item.active * {
+  color: var(--admin-bg-secondary) !important;
+}
+
+.admin-nav-item:not(.active) {
+  color: rgba(249, 247, 242, 0.7) !important;
+  /* Clearly visible off-white on dark backgrounds */
+}
+
+.admin-nav-item:not(.active) * {
+  color: rgba(249, 247, 242, 0.7);
+}
+
+.admin-nav-item:not(.active):hover {
+  background: rgba(249, 247, 242, 0.08);
+  color: #F9F7F2 !important;
+}
+
+.admin-nav-item:not(.active):hover * {
+  color: #F9F7F2 !important;
 }
 
 .admin-nav-item.active p {
@@ -408,26 +495,112 @@ html.dark .admin-header {
   padding: 1.5rem;
   max-width: 100%;
   background: var(--admin-bg-primary);
+  color: var(--admin-text-primary);
+  /* Ensure content text is visible */
   min-height: calc(100vh - 4rem);
   transition: background-color 0.4s ease;
 }
 
+/* Global Hover Contrast Fix for KPI Cards and Action Surfaces */
+.hover\:bg-admin-bg-secondary:hover,
+.admin-card:hover {
+  background-color: var(--admin-bg-secondary) !important;
+  color: #F9F7F2 !important;
+}
+
+.hover\:bg-admin-bg-secondary:hover *,
+.admin-card:hover *,
+.hover\:bg-admin-bg-secondary:hover p,
+.admin-card:hover p,
+.hover\:bg-admin-bg-secondary:hover span {
+  color: #F9F7F2 !important;
+  /* Force light text when hovering to dark brand background */
+}
+
+/* Specific fix for elements that should keep their accent color even on hover */
+.hover\:bg-admin-bg-secondary:hover .text-admin-accent-secondary,
+.admin-card:hover .text-admin-accent-secondary,
+.hover\:bg-admin-bg-secondary:hover .text-epoch-accent,
+.admin-card:hover .text-epoch-accent {
+  color: var(--admin-accent-secondary) !important;
+}
+
+/* Sidebar Footer Buttons Contrast */
+.admin-sidebar button:hover {
+  background: rgba(255, 255, 255, 0.12) !important;
+  color: #FFFFFF !important;
+}
+
+.admin-sidebar .admin-logout-button:hover {
+  background: rgba(239, 68, 68, 0.2) !important;
+  color: #ffb8b8 !important;
+  /* Brighter red for visibility */
+}
+
+/* Specific fix for Lucide icons inside these buttons */
+.admin-sidebar button:hover svg {
+  color: inherit !important;
+}
+
+.admin-sidebar .admin-logout-button:hover svg {
+  color: #ffb8b8 !important;
+}
+
+/* Global Header Interaction Fixes */
+.admin-header .flex.items-center.space-x-2,
+.admin-header div[role="combobox"],
+.admin-header button[variant="ghost"],
+.admin-header button[variant="outline"],
+.admin-header [class*="SelectTrigger"],
+.admin-header [data-radix-collection-item] {
+  color: #F9F7F2 !important;
+  border-color: rgba(249, 247, 242, 0.2) !important;
+}
+
+.admin-header button:hover,
+.admin-header [class*="SelectTrigger"]:hover {
+  background: rgba(249, 247, 242, 0.1) !important;
+  color: #FFFFFF !important;
+}
+
+.admin-header svg {
+  color: #F9F7F2 !important;
+}
+
+.admin-header [class*="SelectValue"] {
+  color: #F9F7F2 !important;
+}
+
 .admin-card {
   background: var(--card);
-  border-radius: var(--radius);
+  border-radius: 0;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05), 0 4px 12px rgba(0, 0, 0, 0.03);
   border: 1px solid var(--border);
   transition: all 0.3s ease;
   overflow: hidden;
+  position: relative;
+}
+
+.admin-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0.02;
+  pointer-events: none;
+  /* Removed invalid asset reference */
+  /* background-image: url('/images/textures/paper.png'); */
 }
 
 .admin-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+  border-color: var(--admin-accent-secondary);
 }
 
 .admin-card-content {
   padding: 1.25rem;
+  position: relative;
+  z-index: 10;
 }
 
 .admin-card-title {
@@ -437,24 +610,36 @@ html.dark .admin-header {
   color: var(--foreground);
 }
 
+/* Sidebar Badge Transparency - Only show number */
+.admin-sidebar-badge {
+  background: transparent !important;
+  box-shadow: none !important;
+  color: var(--admin-accent-secondary) !important;
+  padding: 0 !important;
+  font-weight: 900 !important;
+}
+
 /* Badges */
 .admin-badge {
-  font-size: 0.7rem;
-  padding: 0.2rem 0.5rem;
-  border-radius: 9999px;
+  @apply font-display;
+  font-size: 0.65rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 0;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.025em;
+  letter-spacing: 0.1em;
 }
 
 .admin-badge-error {
   background: #fee2e2;
-  color: #ef4444;
+  color: #8B0000;
+  border: 1px solid #8B0000/20;
 }
 
 .admin-badge-success {
   background: #dcfce7;
-  color: #10b981;
+  color: #2C5E43;
+  border: 1px solid #2C5E43/20;
 }
 
 /* Transitions */
@@ -491,10 +676,12 @@ html.dark .admin-header {
 
 /* Print styles for Receipts and Reports */
 @media print {
+
   /* POS receipt: portal is direct child of body - hide siblings, show only portal */
-  body > *:not(#print-receipt-portal):not(#print-report-portal) {
+  body>*:not(#print-receipt-portal):not(#print-report-portal) {
     visibility: hidden !important;
   }
+
   #print-receipt-portal,
   #print-receipt-portal *,
   #print-report-portal,

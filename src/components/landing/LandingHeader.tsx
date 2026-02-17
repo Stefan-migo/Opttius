@@ -4,11 +4,12 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Menu, X, Building2, LayoutDashboard, Eye } from "lucide-react";
+import { Menu, X, LayoutDashboard } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
 import Image from "next/image";
 import businessConfig from "@/config/business";
 import { useTheme } from "@/components/theme-provider";
+import { OpttiusLogoText } from "@/components/ui/brand";
 
 type OrgStatus = {
   hasOrganization: boolean;
@@ -18,41 +19,26 @@ type OrgStatus = {
 export function LandingHeader() {
   const router = useRouter();
   const { theme } = useTheme();
+  const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
-  // Mapeo de logos por tema
-  const getThemeLogo = () => {
-    switch (theme) {
-      case "dark":
-        return "/logo-opttius-dark.png";
-      case "blue":
-        return "/logo-opttius-blue.png";
-      case "green":
-        return "/logo-opttius-green.png";
-      case "red":
-        return "/logo-opttius-red.png";
-      default:
-        return "/logo-opttius.png";
-    }
-  };
-
-  const getThemeTextLogo = () => {
-    switch (theme) {
-      case "dark":
-        return "/logo-text-dark.svg";
-      case "blue":
-        return "/logo-text-blue.svg";
-      case "green":
-        return "/logo-text-green.svg";
-      case "red":
-        return "/logo-text-red.svg";
-      default:
-        return "/logo-text-default.svg";
-    }
-  };
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const [orgStatus, setOrgStatus] = useState<OrgStatus>(null);
   const [isLoading, setIsLoading] = useState(true);
+
+  const navigation = [
+    { name: "Inicio", href: "#inicio" },
+    { name: "Características", href: "#caracteristicas" },
+    { name: "Beneficios", href: "#beneficios" },
+    { name: "Precios", href: "#precios" },
+  ];
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   useEffect(() => {
     async function checkAuthAndOrg() {
@@ -95,13 +81,6 @@ export function LandingHeader() {
     checkAuthAndOrg();
   }, []);
 
-  const navigation = [
-    { name: "Inicio", href: "#inicio" },
-    { name: "Características", href: "#caracteristicas" },
-    { name: "Beneficios", href: "#beneficios" },
-    { name: "Precios", href: "#precios" },
-  ];
-
   const scrollToSection = (href: string) => {
     if (href.startsWith("#")) {
       const element = document.querySelector(href);
@@ -113,192 +92,165 @@ export function LandingHeader() {
   };
 
   return (
-    <header className="fixed top-0 w-full bg-[var(--admin-bg-tertiary)] backdrop-blur-md border-b border-gray-100 z-50 transition-all duration-300">
-      <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 bg-[var(--admin-bg-tertiary)]">
-        <div className="flex justify-between items-center h-20">
-          {/* Logo */}
-          <Link href="/" className="flex items-center gap-3 group">
-            <div className="relative overflow-hidden rounded-[50px] shadow-lg transition-transform duration-300 group-hover:scale-105">
-              <Image
-                src={getThemeLogo()}
-                alt="Opttius Logo"
-                width={50}
-                height={50}
-                className="object-contain rounded-[50px]"
-              />
-            </div>
-            <div className="flex flex-col">
-              <Image
-                src={getThemeTextLogo()}
-                alt="Opttius"
-                width={150}
-                height={40}
-                className="object-contain pt-[5px]"
-              />
-            </div>
-          </Link>
+    <header
+      className={`fixed top-0 w-full z-50 transition-all duration-500 py-6 px-4 md:px-8 ${
+        isScrolled
+          ? "bg-epoch-surface/90 backdrop-blur-md py-4 shadow-xl"
+          : "bg-transparent"
+      }`}
+    >
+      <nav className="max-w-7xl mx-auto flex justify-between items-center transition-all duration-300">
+        {/* Logo */}
+        <Link
+          href="/"
+          className="group flex flex-col items-start translate-y-0"
+        >
+          <div className="relative group-hover:scale-105 transition-all duration-700">
+            <OpttiusLogoText
+              forceLight={true}
+              className="h-14 w-44 transition-all duration-700 opacity-100"
+            />
+          </div>
+        </Link>
 
-          {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center gap-10">
+        {/* Desktop Navigation */}
+        <div className="hidden lg:flex items-center gap-10 font-serif italic text-sm tracking-wide text-white/90">
+          {navigation.map((item) => (
+            <button
+              key={item.name}
+              onClick={() => scrollToSection(item.href)}
+              className="hover:text-epoch-accent transition-colors duration-300 relative group"
+            >
+              {item.name}
+              <span className="absolute -bottom-1 left-0 w-0 h-[1px] bg-epoch-accent transition-all duration-500 group-hover:w-full"></span>
+            </button>
+          ))}
+        </div>
+
+        {/* CTA Buttons */}
+        <div className="hidden md:flex items-center gap-6">
+          {isLoading ? (
+            <div className="h-8 w-24 bg-white/10 animate-pulse rounded-full" />
+          ) : isAuthenticated ? (
+            orgStatus?.hasOrganization && !orgStatus?.isDemoMode ? (
+              <Button
+                onClick={() => router.push("/admin")}
+                className="bg-transparent border border-white/30 hover:bg-white hover:text-epoch-surface text-white rounded-none px-8 py-2 font-display text-xs tracking-widest uppercase transition-all duration-500"
+              >
+                <LayoutDashboard className="mr-2 h-3 w-3" />
+                Dashboard
+              </Button>
+            ) : (
+              <div className="flex gap-4">
+                <Button
+                  onClick={() => router.push("/onboarding/create")}
+                  className="bg-epoch-accent hover:bg-white text-epoch-surface rounded-none px-8 py-2 font-display text-xs tracking-widest uppercase transition-all duration-500"
+                >
+                  Activar
+                </Button>
+                <Button
+                  onClick={() => router.push("/onboarding/choice")}
+                  variant="outline"
+                  className="bg-transparent border-white/30 hover:border-white text-white rounded-none px-8 py-2 font-display text-xs tracking-widest uppercase transition-all duration-500"
+                >
+                  Demo
+                </Button>
+              </div>
+            )
+          ) : (
+            <div className="flex items-center gap-8">
+              <button
+                onClick={() => router.push("/login")}
+                className="text-white/80 hover:text-white font-serif italic text-sm tracking-wide transition-colors"
+              >
+                Acceso
+              </button>
+              <Button
+                onClick={() => router.push("/signup")}
+                className="bg-transparent border border-white/30 hover:bg-white hover:text-epoch-surface text-white rounded-none px-10 py-5 font-display text-xs tracking-widest uppercase transition-all duration-502 animate-in fade-in zoom-in"
+              >
+                Empezar Ahora
+              </Button>
+            </div>
+          )}
+        </div>
+
+        {/* Mobile menu button */}
+        <div className="lg:hidden">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="text-white hover:bg-white/10"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          >
+            {mobileMenuOpen ? (
+              <X className="h-6 w-6" />
+            ) : (
+              <Menu className="h-6 w-6" />
+            )}
+          </Button>
+        </div>
+      </nav>
+
+      {/* Mobile menu */}
+      {mobileMenuOpen && (
+        <div className="lg:hidden py-12 px-6 space-y-8 bg-epoch-surface text-white animate-in slide-in-from-top duration-500 fixed inset-0 z-[100] flex flex-col items-center justify-center">
+          <button
+            onClick={() => setMobileMenuOpen(false)}
+            className="absolute top-8 right-8 text-white"
+          >
+            <X className="h-8 w-8" />
+          </button>
+          <div className="flex flex-col items-center space-y-8 font-serif italic text-xl">
             {navigation.map((item) => (
               <button
                 key={item.name}
                 onClick={() => scrollToSection(item.href)}
-                className="text-sm font-medium text-gray-600 hover:text-primary transition-all duration-300 relative group"
+                className="hover:text-epoch-accent transition-colors py-2"
               >
                 {item.name}
-                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
               </button>
             ))}
           </div>
-
-          {/* CTA Buttons */}
-          <div className="hidden md:flex items-center gap-4">
+          <div className="pt-12 w-full max-w-xs space-y-6 border-t border-white/10 flex flex-col items-center">
             {isLoading ? (
-              <div className="h-10 w-32 bg-gray-50 animate-pulse rounded-full" />
+              <div className="h-12 w-full bg-white/10 animate-pulse rounded-none" />
             ) : isAuthenticated ? (
-              orgStatus?.hasOrganization && !orgStatus?.isDemoMode ? (
-                <Button
-                  onClick={() => router.push("/admin")}
-                  className="rounded-full px-6 shadow-premium hover:shadow-premium-lg transition-all"
-                >
-                  <LayoutDashboard className="mr-2 h-4 w-4" />
-                  Ir al Dashboard
-                </Button>
-              ) : (
-                <div className="flex gap-3">
-                  <Button
-                    onClick={() => router.push("/onboarding/create")}
-                    className="rounded-full px-6 shadow-premium hover:shadow-premium-lg transition-all"
-                  >
-                    <Building2 className="mr-2 h-4 w-4" />
-                    Activar Óptica
-                  </Button>
-                  <Button
-                    onClick={() => router.push("/onboarding/choice")}
-                    variant="outline"
-                    className="rounded-full px-6 border-gray-200 hover:border-primary hover:text-primary transition-all"
-                  >
-                    <Eye className="mr-2 h-4 w-4" />
-                    Demo
-                  </Button>
-                </div>
-              )
+              <Button
+                onClick={() => {
+                  router.push("/admin");
+                  setMobileMenuOpen(false);
+                }}
+                className="w-full bg-epoch-accent text-epoch-surface rounded-none h-14 font-display tracking-widest uppercase"
+              >
+                <LayoutDashboard className="mr-2 h-5 w-5" />
+                Dashboard
+              </Button>
             ) : (
-              <div className="flex items-center gap-3">
-                <Button
-                  variant="ghost"
-                  onClick={() => router.push("/login")}
-                  className="rounded-full px-6 text-gray-600 font-bold hover:bg-gray-50"
+              <div className="w-full space-y-4">
+                <button
+                  onClick={() => {
+                    router.push("/login");
+                    setMobileMenuOpen(false);
+                  }}
+                  className="w-full py-4 text-white font-serif italic text-lg text-center"
                 >
-                  Acceso
-                </Button>
+                  Iniciar Sesión
+                </button>
                 <Button
-                  onClick={() => router.push("/signup")}
-                  className="rounded-full px-8 shadow-premium hover:shadow-premium-lg transition-all font-bold"
+                  onClick={() => {
+                    router.push("/signup");
+                    setMobileMenuOpen(false);
+                  }}
+                  className="w-full bg-transparent border border-white/30 text-white rounded-none h-14 font-display tracking-widest uppercase transition-colors hover:bg-white hover:text-epoch-surface"
                 >
-                  Empezar Ahora
+                  Registrarse
                 </Button>
               </div>
             )}
           </div>
-
-          {/* Mobile menu button */}
-          <div className="lg:hidden">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="rounded-xl"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            >
-              {mobileMenuOpen ? (
-                <X className="h-6 w-6" />
-              ) : (
-                <Menu className="h-6 w-6" />
-              )}
-            </Button>
-          </div>
         </div>
-
-        {/* Mobile menu */}
-        {mobileMenuOpen && (
-          <div className="lg:hidden py-6 space-y-4 border-t border-gray-50 animate-in slide-in-from-top duration-300">
-            {navigation.map((item) => (
-              <button
-                key={item.name}
-                onClick={() => scrollToSection(item.href)}
-                className="block w-full text-left text-lg font-medium text-gray-700 hover:text-primary transition-colors py-2"
-              >
-                {item.name}
-              </button>
-            ))}
-            <div className="pt-6 space-y-3 border-t border-gray-50">
-              {isLoading ? (
-                <div className="h-12 w-full bg-gray-50 animate-pulse rounded-2xl" />
-              ) : isAuthenticated ? (
-                orgStatus?.hasOrganization && !orgStatus?.isDemoMode ? (
-                  <Button
-                    onClick={() => {
-                      router.push("/admin");
-                      setMobileMenuOpen(false);
-                    }}
-                    className="w-full rounded-2xl h-12 shadow-premium"
-                  >
-                    <LayoutDashboard className="mr-2 h-5 w-5" />
-                    Ir al Dashboard
-                  </Button>
-                ) : (
-                  <div className="space-y-3">
-                    <Button
-                      onClick={() => {
-                        router.push("/onboarding/create");
-                        setMobileMenuOpen(false);
-                      }}
-                      className="w-full rounded-2xl h-12 shadow-premium"
-                    >
-                      <Building2 className="mr-2 h-5 w-5" />
-                      Activar tu Óptica
-                    </Button>
-                    <Button
-                      onClick={() => {
-                        router.push("/onboarding/choice");
-                        setMobileMenuOpen(false);
-                      }}
-                      variant="outline"
-                      className="w-full rounded-2xl h-12 border-gray-200"
-                    >
-                      <Eye className="mr-2 h-5 w-5" />
-                      Probar Demo
-                    </Button>
-                  </div>
-                )
-              ) : (
-                <div className="space-y-3">
-                  <Button
-                    variant="ghost"
-                    onClick={() => {
-                      router.push("/login");
-                      setMobileMenuOpen(false);
-                    }}
-                    className="w-full rounded-2xl h-12 text-gray-600 font-bold"
-                  >
-                    Iniciar Sesión
-                  </Button>
-                  <Button
-                    onClick={() => {
-                      router.push("/signup");
-                      setMobileMenuOpen(false);
-                    }}
-                    className="w-full rounded-2xl h-12 shadow-premium font-bold"
-                  >
-                    Registrarse Gratis
-                  </Button>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-      </nav>
+      )}
     </header>
   );
 }

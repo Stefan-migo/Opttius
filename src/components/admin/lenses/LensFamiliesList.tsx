@@ -140,130 +140,195 @@ export default function LensFamiliesList() {
   }, [searchTerm, includeInactive]);
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          <h1 className="text-3xl font-bold">Familias de Lentes</h1>
-          <p className="text-muted-foreground mt-1">
-            Gestiona las familias de lentes disponibles en el sistema
+    <div className="py-6 space-y-8">
+      <div className="flex justify-between items-end border-b border-admin-border-primary/10 pb-6">
+        <div className="space-y-1">
+          <h2 className="text-sm font-display font-bold text-admin-text-primary uppercase tracking-[0.2em] flex items-center">
+            Matriz de Familias de Lentes
+          </h2>
+          <p className="text-[10px] font-serif italic text-admin-text-tertiary uppercase tracking-widest">
+            Protocolos de Materiales y Tratamientos por Marca
           </p>
         </div>
         <div className="flex gap-2">
-          <Button onClick={() => router.push("/admin/lens-families/new")}>
+          <Button
+            onClick={() => router.push("/admin/lens-families/new")}
+            className="bg-epoch-primary hover:bg-epoch-primary/90 text-white rounded-none text-[10px] font-display font-bold tracking-widest uppercase px-6 py-4 h-auto border-none shadow-premium-sm"
+          >
             <Plus className="h-4 w-4 mr-2" />
-            Nueva Familia
+            VINCULAR NUEVA FAMILIA
           </Button>
         </div>
       </div>
 
-      <Card>
-        <CardHeader>
+      <Card className="border border-admin-border-primary/20 bg-white rounded-none shadow-none overflow-hidden">
+        <CardHeader className="bg-admin-bg-tertiary/50 border-b border-admin-border-primary/10 py-6">
           <div className="flex justify-between items-center">
-            <CardTitle>Lista de Familias</CardTitle>
+            <div className="flex items-center gap-2">
+              <RefreshCw className="h-4 w-4 text-epoch-primary opacity-50" />
+              <h3 className="text-[11px] font-display font-bold text-admin-text-primary uppercase tracking-[0.2em]">
+                REGISTRO CENTRAL DE ÓPTICA ({filteredFamilies.length})
+              </h3>
+            </div>
             <div className="flex gap-2">
               <Button
-                variant="outline"
+                variant="ghost"
                 size="sm"
+                className={`rounded-none text-[9px] font-display font-bold tracking-widest uppercase h-auto py-2 border-none ${
+                  includeInactive
+                    ? "bg-admin-error/10 text-admin-error"
+                    : "hover:bg-admin-bg-tertiary text-admin-text-tertiary"
+                }`}
                 onClick={() => setIncludeInactive(!includeInactive)}
               >
                 {includeInactive ? (
                   <>
-                    <EyeOff className="h-4 w-4 mr-2" />
-                    Ocultar Inactivas
+                    <EyeOff className="h-3 w-3 mr-2" />
+                    OCULTAR INACTIVAS
                   </>
                 ) : (
                   <>
-                    <Eye className="h-4 w-4 mr-2" />
-                    Mostrar Inactivas
+                    <Eye className="h-3 w-3 mr-2" />
+                    MOSTRAR INACTIVAS
                   </>
                 )}
               </Button>
-              <Button variant="outline" size="sm" onClick={fetchFamilies}>
-                <RefreshCw className="h-4 w-4" />
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 w-8 p-0 border-none hover:bg-admin-bg-tertiary text-epoch-primary"
+                onClick={fetchFamilies}
+              >
+                <RefreshCw
+                  className={`h-4 w-4 ${loading ? "animate-spin" : ""}`}
+                />
               </Button>
             </div>
           </div>
         </CardHeader>
-        <CardContent>
-          <div className="mb-4">
+        <CardContent className="p-0">
+          <div className="p-6 border-b border-admin-border-primary/10 bg-admin-bg-tertiary/20">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-4 w-4 text-admin-text-tertiary opacity-40" />
               <Input
-                placeholder="Buscar por nombre, marca, tipo o material..."
+                placeholder="BUSCAR EN MATRIZ POR NOMBRE, MARCA O MATERIAL TÉCNICO..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
+                className="pl-12 rounded-none border-admin-border-primary/10 focus:border-epoch-primary focus:ring-0 bg-white p-6 text-[10px] font-display font-bold tracking-widest uppercase"
               />
             </div>
           </div>
 
           {loading ? (
-            <div className="text-center py-8">Cargando...</div>
-          ) : filteredFamilies.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              No se encontraron familias de lentes
+            <div className="text-center py-24 bg-admin-bg-tertiary/10">
+              <RefreshCw className="h-8 w-8 text-epoch-primary animate-spin mx-auto mb-4 opacity-30" />
+              <p className="text-[10px] font-display font-bold text-admin-text-tertiary uppercase tracking-widest">
+                SINCRONIZANDO MATRIZ...
+              </p>
+            </div>
+          ) : paginatedFamilies.length === 0 ? (
+            <div className="text-center py-24 bg-admin-bg-tertiary/10 border-2 border-dashed border-admin-border-primary/5 m-6">
+              <EyeOff className="h-12 w-12 text-admin-text-tertiary mx-auto mb-4 opacity-20" />
+              <h3 className="text-xs font-display font-bold text-admin-text-primary uppercase tracking-[0.2em]">
+                REGISTRO NO ENCONTRADO
+              </h3>
+              <p className="text-[10px] font-serif italic text-admin-text-tertiary uppercase tracking-widest mt-2">
+                No existen familias vinculadas bajo los criterios actuales
+              </p>
             </div>
           ) : (
             <div className="overflow-x-auto">
               <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Nombre</TableHead>
-                    <TableHead>Marca</TableHead>
-                    <TableHead>Tipo</TableHead>
-                    <TableHead>Material</TableHead>
-                    <TableHead>Descripción</TableHead>
-                    <TableHead>Estado</TableHead>
-                    <TableHead className="text-right">Acciones</TableHead>
+                <TableHeader className="bg-admin-bg-tertiary/30">
+                  <TableRow className="hover:bg-transparent border-admin-border-primary/10">
+                    <TableHead className="text-[10px] font-display font-bold text-admin-text-primary uppercase tracking-[0.2em] p-6">
+                      MARCA / FAMILIA
+                    </TableHead>
+                    <TableHead className="text-[10px] font-display font-bold text-admin-text-primary uppercase tracking-[0.2em] p-6">
+                      TIPO DE LENTE
+                    </TableHead>
+                    <TableHead className="text-[10px] font-display font-bold text-admin-text-primary uppercase tracking-[0.2em] p-6">
+                      MATERIAL BASE
+                    </TableHead>
+                    <TableHead className="text-[10px] font-display font-bold text-admin-text-primary uppercase tracking-[0.2em] p-6">
+                      COMENTARIOS
+                    </TableHead>
+                    <TableHead className="text-[10px] font-display font-bold text-admin-text-primary uppercase tracking-[0.2em] p-6">
+                      ESTADO
+                    </TableHead>
+                    <TableHead className="text-[10px] font-display font-bold text-admin-text-primary uppercase tracking-[0.2em] p-6 text-right">
+                      ACCIONES
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {paginatedFamilies.map((family) => (
-                    <TableRow key={family.id}>
-                      <TableCell className="font-medium">
-                        {family.name}
+                    <TableRow
+                      key={family.id}
+                      className="border-admin-border-primary/10 hover:bg-admin-bg-tertiary/10 transition-colors"
+                    >
+                      <TableCell className="p-6">
+                        <div className="space-y-1">
+                          <p className="text-sm font-display font-bold text-admin-text-primary uppercase tracking-tight">
+                            {family.name}
+                          </p>
+                          <span className="text-[9px] font-display font-bold text-admin-text-tertiary tracking-widest uppercase bg-admin-bg-tertiary px-2 py-0.5 border border-admin-border-primary/5">
+                            {family.brand || "MARCA GENÉRICA"}
+                          </span>
+                        </div>
                       </TableCell>
-                      <TableCell>{family.brand || "-"}</TableCell>
-                      <TableCell>
-                        {
-                          LENS_TYPES.find((t) => t.value === family.lens_type)
-                            ?.label
-                        }
+                      <TableCell className="p-6">
+                        <span className="text-[10px] font-serif italic text-admin-text-primary uppercase tracking-wider">
+                          {
+                            LENS_TYPES.find((t) => t.value === family.lens_type)
+                              ?.label
+                          }
+                        </span>
                       </TableCell>
-                      <TableCell>
-                        {
-                          LENS_MATERIALS.find(
-                            (m) => m.value === family.lens_material,
-                          )?.label
-                        }
+                      <TableCell className="p-6">
+                        <span className="text-[10px] font-display font-bold text-admin-text-tertiary uppercase tracking-widest">
+                          {
+                            LENS_MATERIALS.find(
+                              (m) => m.value === family.lens_material,
+                            )?.label
+                          }
+                        </span>
                       </TableCell>
-                      <TableCell className="max-w-xs truncate">
-                        {family.description || "-"}
+                      <TableCell className="p-6">
+                        <p className="text-[10px] font-serif italic text-admin-text-tertiary max-w-[200px] truncate">
+                          {family.description || "Sin anotaciones técnicas"}
+                        </p>
                       </TableCell>
-                      <TableCell>
-                        <Badge
-                          variant={family.is_active ? "default" : "secondary"}
+                      <TableCell className="p-6">
+                        <div
+                          className={`px-2 py-1 text-[8px] font-display font-bold tracking-widest uppercase inline-block border ${
+                            family.is_active
+                              ? "bg-epoch-primary/5 text-epoch-primary border-epoch-primary/20"
+                              : "bg-admin-error/5 text-admin-error border-admin-error/20"
+                          }`}
                         >
-                          {family.is_active ? "Activa" : "Inactiva"}
-                        </Badge>
+                          {family.is_active ? "ACTIVA" : "INACTIVA"}
+                        </div>
                       </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-2">
+                      <TableCell className="p-6 text-right">
+                        <div className="flex justify-end gap-1">
                           <Button
                             variant="ghost"
                             size="sm"
+                            className="h-8 w-8 p-0 rounded-none hover:bg-admin-bg-tertiary text-epoch-primary"
                             onClick={() =>
                               router.push(`/admin/lens-families/${family.id}`)
                             }
                           >
-                            <Edit className="h-4 w-4" />
+                            <Edit className="h-3.5 w-3.5" />
                           </Button>
                           <Button
                             variant="ghost"
                             size="sm"
+                            className="h-8 w-8 p-0 rounded-none hover:bg-admin-error/5 text-admin-error"
                             onClick={() => handleDelete(family.id)}
                           >
-                            <Trash2 className="h-4 w-4" />
+                            <Trash2 className="h-3.5 w-3.5" />
                           </Button>
                         </div>
                       </TableCell>

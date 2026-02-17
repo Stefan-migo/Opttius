@@ -1,108 +1,72 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { createServerClient } from "@supabase/ssr";
 
 /**
- * Middleware para redirigir usuarios sin organización a onboarding
+ * Middleware: Refresca la sesión de Supabase y protege rutas /admin
  *
- * Rutas excluidas:
- * - /onboarding/* - Rutas de onboarding
- * - /login, /signup - Rutas de autenticación
- * - /api/* - API routes
- * - /_next/* - Next.js internals
- * - /favicon.ico, etc. - Assets estáticos
+ * 1. SIEMPRE refresca la sesión (requerido para SSR - evita 401 en API routes)
+ * 2. Para /admin: redirige a login si no hay sesión
  */
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Excluir rutas que no necesitan verificación de organización
+  // Rutas excluidas (no requieren verificación de admin)
   const excludedPaths = [
     "/onboarding",
     "/login",
     "/signup",
     "/reset-password",
-    "/support", // Portal público de soporte
+    "/support",
     "/api",
     "/_next",
     "/favicon.ico",
     "/favicon",
   ];
 
-  // Permitir acceso a la landing page (raíz)
   if (pathname === "/") {
     return NextResponse.next();
   }
 
   const shouldExclude = excludedPaths.some((path) => pathname.startsWith(path));
 
-  if (shouldExclude) {
-    return NextResponse.next();
+  // Crear response y cliente Supabase para refrescar sesión
+  let response = NextResponse.next({ request });
+
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll();
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value, options }) =>
+            response.cookies.set(name, value, options),
+          );
+        },
+      },
+    },
+  );
+
+  // 1. Refrescar sesión: getSession() dispara refresh si el token expiró y actualiza cookies
+  //    (necesario para que la sesión persista al recargar la página)
+  await supabase.auth.getSession();
+
+  // 2. Obtener usuario para la verificación: getUser() valida el JWT con el servidor
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  // Para /admin: redirigir a login si no hay sesión
+  if (pathname.startsWith("/admin") && !user) {
+    return NextResponse.redirect(new URL("/login", request.url));
   }
 
-  // Solo verificar organización en rutas /admin/*
-  if (pathname.startsWith("/admin")) {
-    console.log("🛡️ Middleware: Checking /admin route:", pathname);
-    try {
-      // Supabase SSR usa cookies con formato: sb-${projectRef}-auth-token
-      // Para localhost, el projectRef es "127"
-      const supabaseUrl =
-        process.env.NEXT_PUBLIC_SUPABASE_URL || "http://127.0.0.1:54321";
-      let projectRef: string;
-
-      if (
-        supabaseUrl.includes("localhost") ||
-        supabaseUrl.includes("127.0.0.1")
-      ) {
-        projectRef = "127"; // Simplified format for localhost
-      } else {
-        // Extract project ref from URL (e.g., https://xyz.supabase.co -> xyz)
-        const match = supabaseUrl.match(/https?:\/\/([^.]+)/);
-        projectRef = match ? match[1] : "default";
-      }
-
-      const authCookieName = `sb-${projectRef}-auth-token`;
-      const authCookie = request.cookies.get(authCookieName);
-
-      console.log("🛡️ Middleware: Token check:", {
-        cookieName: authCookieName,
-        hasAuthCookie: !!authCookie,
-        allCookies: request.cookies.getAll().map((c) => c.name),
-      });
-
-      if (!authCookie) {
-        // No hay cookie de autenticación, redirigir a login
-        console.log(
-          "🛡️ Middleware: No auth cookie found, redirecting to login",
-        );
-        if (pathname !== "/login") {
-          return NextResponse.redirect(new URL("/login", request.url));
-        }
-        return NextResponse.next();
-      }
-
-      console.log(
-        "🛡️ Middleware: Auth cookie found, allowing access to layout",
-      );
-      // Verificar estado de organización llamando al endpoint check-status
-      // Nota: En producción, esto podría optimizarse usando JWT directamente
-      // Por ahora, redirigimos y dejamos que el layout haga la verificación
-      // para evitar múltiples llamadas API en el middleware
-    } catch (error) {
-      console.error("🛡️ Middleware error:", error);
-    }
-  }
-
-  return NextResponse.next();
+  return response;
 }
 
 export const config = {
-  matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - api (API routes)
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     */
-    "/((?!_next/static|_next/image|favicon.ico).*)",
-  ],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
 };

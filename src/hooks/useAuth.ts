@@ -141,7 +141,7 @@ export function useAuth() {
 
       const timeoutPromise = new Promise(
         (_, reject) =>
-          setTimeout(() => reject(new Error("Profile fetch timeout")), 8000), // Increased to 8s for admin flows
+          setTimeout(() => reject(new Error("Profile fetch timeout")), 15000), // 15s for slow connections / new users
       );
 
       const { data, error } = (await Promise.race([
@@ -204,7 +204,8 @@ export function useAuth() {
     setAuthState((prev) => ({ ...prev, loading: true, error: null }));
 
     try {
-      // Create auth user
+      // Create auth user - handle_new_user trigger creates profile with SECURITY DEFINER
+      // (bypasses RLS). We pass phone in metadata so the trigger can include it.
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
         password,
@@ -212,6 +213,7 @@ export function useAuth() {
           data: {
             first_name: userData?.firstName,
             last_name: userData?.lastName,
+            phone: userData?.phone,
           },
         },
       });
@@ -221,34 +223,9 @@ export function useAuth() {
         throw authError;
       }
 
-      // Profile is automatically created by database trigger (handle_new_user)
-      // We only need to update it if additional data is provided (like phone)
-      // or if the user is immediately confirmed and we want to ensure data consistency
-      if (authData.user) {
-        // The trigger already creates the profile, so we use upsert to update
-        // if it exists or create if it doesn't (though it should always exist)
-        const { error: profileError } = await supabase.from("profiles").upsert(
-          {
-            id: authData.user.id,
-            email: authData.user.email!,
-            first_name: userData?.firstName || "",
-            last_name: userData?.lastName || "",
-            phone: userData?.phone || "",
-          },
-          {
-            onConflict: "id",
-          },
-        );
-
-        if (profileError) {
-          // Log but don't fail - profile might already exist from trigger
-          // or might be created later when email is confirmed
-          console.warn(
-            "Profile upsert warning (this is usually fine):",
-            profileError,
-          );
-        }
-      }
+      // Profile is created by handle_new_user trigger (SECURITY DEFINER - bypasses RLS).
+      // No client-side upsert needed - the trigger includes first_name, last_name, phone.
+      // When email confirmation is required, auth.uid() is null so client upsert would fail with RLS.
 
       setAuthState((prev) => ({ ...prev, loading: false }));
       return { data: authData, error: null };

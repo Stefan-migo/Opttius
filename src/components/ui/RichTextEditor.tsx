@@ -3,14 +3,14 @@
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { 
-  Bold, 
-  Italic, 
-  Underline, 
+import {
+  Bold,
+  Italic,
+  Underline,
   Type,
   AlignLeft,
   AlignCenter,
-  AlignRight
+  AlignRight,
 } from "lucide-react";
 
 interface RichTextEditorProps {
@@ -21,12 +21,12 @@ interface RichTextEditorProps {
   className?: string;
 }
 
-export default function RichTextEditor({ 
-  value, 
-  onChange, 
-  placeholder = "", 
+export default function RichTextEditor({
+  value,
+  onChange,
+  placeholder = "",
   rows = 4,
-  className = ""
+  className = "",
 }: RichTextEditorProps) {
   const [isRichMode, setIsRichMode] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -38,22 +38,31 @@ export default function RichTextEditor({
     const start = textarea.selectionStart;
     const end = textarea.selectionEnd;
     const selectedText = value.substring(start, end);
-    
+
     if (!selectedText) {
       // If no text is selected, just insert the format tags
-      const newValue = value.substring(0, start) + format + format + value.substring(end);
+      const newValue =
+        value.substring(0, start) + format + format + value.substring(end);
       onChange(newValue);
-      
+
       // Set cursor position between the tags
       setTimeout(() => {
         textarea.focus();
-        textarea.setSelectionRange(start + format.length, start + format.length);
+        textarea.setSelectionRange(
+          start + format.length,
+          start + format.length,
+        );
       }, 0);
     } else {
       // If text is selected, wrap it with the format tags
-      const newValue = value.substring(0, start) + format + selectedText + format + value.substring(end);
+      const newValue =
+        value.substring(0, start) +
+        format +
+        selectedText +
+        format +
+        value.substring(end);
       onChange(newValue);
-      
+
       // Set cursor position after the formatted text
       setTimeout(() => {
         textarea.focus();
@@ -81,9 +90,12 @@ export default function RichTextEditor({
     const start = textarea.selectionStart;
     const end = textarea.selectionEnd;
     const selectedText = value.substring(start, end);
-    
+
     if (selectedText) {
-      const newValue = value.substring(0, start) + `<div style="text-align: ${alignment}">${selectedText}</div>` + value.substring(end);
+      const newValue =
+        value.substring(0, start) +
+        `<div style="text-align: ${alignment}">${selectedText}</div>` +
+        value.substring(end);
       onChange(newValue);
     }
   };
@@ -102,7 +114,7 @@ export default function RichTextEditor({
           <Type className="h-4 w-4 mr-1" />
           {isRichMode ? "Modo Simple" : "Formato"}
         </Button>
-        
+
         {isRichMode && (
           <>
             <div className="flex items-center gap-1 border-r pr-2 mr-2">
@@ -119,7 +131,7 @@ export default function RichTextEditor({
                 </Button>
               ))}
             </div>
-            
+
             <div className="flex items-center gap-1">
               {alignmentButtons.map((button, index) => (
                 <Button
@@ -147,11 +159,16 @@ export default function RichTextEditor({
         rows={rows}
         className="min-h-[100px]"
       />
-      
+
       {isRichMode && (
         <div className="text-xs text-gray-500">
-          <p><strong>Formato:</strong> **negrita**, *cursiva*, __subrayado__</p>
-          <p><strong>HTML:</strong> También puedes usar etiquetas HTML básicas como &lt;strong&gt;, &lt;em&gt;, &lt;u&gt;</p>
+          <p>
+            <strong>Formato:</strong> **negrita**, *cursiva*, __subrayado__
+          </p>
+          <p>
+            <strong>HTML:</strong> También puedes usar etiquetas HTML básicas
+            como &lt;strong&gt;, &lt;em&gt;, &lt;u&gt;
+          </p>
         </div>
       )}
     </div>

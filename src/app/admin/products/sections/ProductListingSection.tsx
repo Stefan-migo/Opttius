@@ -13,7 +13,7 @@ import ProductList from "../components/ProductList";
 import ProductPagination from "../components/ProductPagination";
 import QuickActions from "../components/QuickActions";
 import ProductActions from "../components/ProductActions";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Edit, Trash2, AlertTriangle, RefreshCw, Package } from "lucide-react";
 import {
@@ -34,6 +34,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
 import { productService, bulkProductOperations } from "@/lib/api/services";
 
 interface ProductListingSectionProps {
@@ -334,10 +335,54 @@ export default function ProductListingSection({
   // Loading state
   if (productsLoading && products.length === 0) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <div className="text-center">
-          <Package className="h-12 w-12 text-tierra-media mx-auto mb-4 animate-pulse" />
-          <p className="text-tierra-media">Cargando productos...</p>
+      <div className="space-y-8 animate-in fade-in duration-500">
+        {/* Stats Skeleton */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-0 border border-admin-border-primary/20 bg-white">
+          {[...Array(4)].map((_, i) => (
+            <div
+              key={i}
+              className="p-8 border-r border-admin-border-primary/10"
+            >
+              <Skeleton className="h-3 w-24 mb-3 opacity-50" />
+              <Skeleton className="h-8 w-32 mb-4" />
+              <Skeleton className="h-2 w-20 opacity-30" />
+            </div>
+          ))}
+        </div>
+
+        {/* Filters Skeleton */}
+        <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
+          <Skeleton className="h-12 flex-1 max-w-md" />
+          <div className="flex gap-2">
+            <Skeleton className="h-10 w-32" />
+            <Skeleton className="h-10 w-32" />
+            <Skeleton className="h-10 w-10" />
+            <Skeleton className="h-10 w-10" />
+          </div>
+        </div>
+
+        {/* Grid Skeleton */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {[...Array(8)].map((_, i) => (
+            <Card
+              key={i}
+              className="border border-admin-border-primary/10 rounded-none shadow-none bg-white"
+            >
+              <div className="aspect-square bg-admin-bg-tertiary/20 relative overflow-hidden">
+                <Skeleton className="absolute inset-0" />
+              </div>
+              <CardContent className="p-5 space-y-4">
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-3/4" />
+                  <Skeleton className="h-3 w-1/2 opacity-50" />
+                </div>
+                <div className="flex justify-between items-center pt-2">
+                  <Skeleton className="h-5 w-20" />
+                  <Skeleton className="h-8 w-8 rounded-full" />
+                </div>
+              </CardContent>
+            </Card>
+          ))}
         </div>
       </div>
     );
@@ -412,23 +457,26 @@ export default function ProductListingSection({
       {selectedProducts.length > 0 && (
         <Card
           data-bulk-panel
-          className="w-full bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20 border-2 border-blue-200 dark:border-blue-800 shadow-lg animate-in slide-in-from-top-2 duration-300"
-          style={{ position: "relative", zIndex: 1 }}
+          className="w-full bg-admin-bg-secondary border-2 border-admin-accent-primary shadow-premium-xl rounded-none animate-in slide-in-from-top-4 duration-500 overflow-hidden sticky top-6 z-40"
+          style={{ position: "relative" }}
         >
-          <CardContent className="pt-4 pb-4">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center space-x-2">
-                <div className="p-1.5 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
-                  <Edit className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+          <div className="absolute top-0 left-0 w-1 h-full bg-admin-accent-primary" />
+          <CardContent className="pt-6 pb-6">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center space-x-4">
+                <div className="p-3 bg-admin-accent-primary/10 border border-admin-accent-primary/20 rounded-none">
+                  <Edit className="h-5 w-5 text-admin-accent-primary" />
                 </div>
                 <div>
-                  <h3 className="text-base text-blue-900 dark:text-blue-100 font-semibold">
-                    Operaciones Masivas
+                  <h3 className="text-[10px] font-display font-black text-admin-accent-primary tracking-[0.2em] uppercase leading-none mb-1">
+                    Operaciones de Archivo
                   </h3>
-                  <p className="text-xs text-blue-700 dark:text-blue-300">
-                    {selectedProducts.length} producto
-                    {selectedProducts.length > 1 ? "s" : ""} seleccionado
-                    {selectedProducts.length > 1 ? "s" : ""}
+                  <p className="text-[11px] font-serif italic text-admin-text-tertiary">
+                    {selectedProducts.length}{" "}
+                    {selectedProducts.length === 1
+                      ? "registro seleccionado"
+                      : "registros seleccionados"}{" "}
+                    en cola técnica
                   </p>
                 </div>
               </div>
@@ -510,9 +558,9 @@ export default function ProductListingSection({
               </div>
             )}
 
-            <div className="flex items-center justify-end space-x-2 pt-2 border-t border-blue-200 dark:border-blue-800">
+            <div className="flex items-center justify-end space-x-4 pt-6 mt-4 border-t border-admin-border-primary/10">
               <Button
-                variant="outline"
+                variant="ghost"
                 onClick={() => {
                   setIsDeleteDialog(false);
                   setBulkOperation("");
@@ -521,6 +569,7 @@ export default function ProductListingSection({
                   setSelectedProducts([]);
                 }}
                 disabled={processing}
+                className="text-admin-text-tertiary hover:text-admin-text-primary uppercase text-[10px] font-bold tracking-widest"
               >
                 Cancelar
               </Button>
@@ -536,19 +585,24 @@ export default function ProductListingSection({
                     ? "destructive"
                     : "default"
                 }
-                className="min-w-[140px]"
+                className={cn(
+                  "min-w-[180px] h-12 rounded-none font-display font-black text-[10px] tracking-[0.2em] uppercase transition-all shadow-premium-sm",
+                  bulkOperation !== "delete" &&
+                    bulkOperation !== "hard_delete" &&
+                    "bg-admin-accent-primary text-[#1A2B23] hover:bg-admin-accent-secondary",
+                )}
               >
                 {processing ? (
                   <>
                     <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                    Procesando...
+                    Procesando Operación...
                   </>
                 ) : bulkOperation === "delete" ? (
-                  "Archivar Productos"
+                  "Archivar Registros"
                 ) : bulkOperation === "hard_delete" ? (
                   "⚠️ ELIMINAR PERMANENTEMENTE"
                 ) : (
-                  "Aplicar Cambios"
+                  "Ejecutar Cambios"
                 )}
               </Button>
             </div>
@@ -581,75 +635,83 @@ export default function ProductListingSection({
       )}
 
       {/* Quick Actions */}
-      <div className="space-y-4">
-        <div>
-          <h3 className="text-lg font-semibold text-azul-profundo mb-4">
-            Acciones Rápidas
-          </h3>
-          <QuickActions
-            onShowLowStock={() => {
-              updateFilter("showLowStockOnly", true);
-              setCurrentPage(1);
-            }}
-            onJsonExport={handleJsonExport}
-            onJsonImport={() => setShowJsonImportDialog(true)}
-            onShowCategories={() => {}}
-            hasLowStock={stats.lowStockCount > 0}
-            lowStockCount={stats.lowStockCount}
-          />
-        </div>
+      <div className="pt-12 border-t border-admin-border-primary/20">
+        <h3 className="text-xl font-display font-bold text-admin-text-primary uppercase tracking-widest mb-6 px-1">
+          Comandos de Administración
+        </h3>
+        <QuickActions
+          onShowLowStock={() => {
+            updateFilter("showLowStockOnly", true);
+            setCurrentPage(1);
+          }}
+          onJsonExport={handleJsonExport}
+          onJsonImport={() => setShowJsonImportDialog(true)}
+          onShowCategories={() => {}}
+          hasLowStock={stats.lowStockCount > 0}
+          lowStockCount={stats.lowStockCount}
+        />
       </div>
 
       {/* Single Product Delete Dialog */}
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle className="flex items-center text-red-600">
-              <AlertTriangle className="h-5 w-5 mr-2" />
-              Eliminar Producto
-            </DialogTitle>
-            <DialogDescription className="py-3">
-              ¿Estás seguro de que deseas eliminar el producto{" "}
-              <span className="font-bold">
+        <DialogContent className="max-w-md border-2 border-admin-error/20 bg-white shadow-premium-xl rounded-none p-0 overflow-hidden">
+          <div className="bg-admin-error/5 p-8 border-b border-admin-error/10">
+            <DialogHeader>
+              <div className="flex items-center gap-3">
+                <div className="h-12 w-12 bg-admin-error/10 flex items-center justify-center">
+                  <AlertTriangle className="h-6 w-6 text-admin-error" />
+                </div>
+                <DialogTitle className="text-2xl font-display font-bold text-admin-error tracking-tight uppercase">
+                  ELIMINAR PRODUCTO
+                </DialogTitle>
+              </div>
+              <DialogDescription className="text-[11px] font-serif italic text-admin-text-tertiary tracking-wide pl-15 mt-1">
+                ADVERTENCIA: Esta operación de purga en el archivo técnico es
+                irreversible.
+              </DialogDescription>
+            </DialogHeader>
+          </div>
+          <div className="p-8">
+            <p className="text-sm text-admin-text-secondary leading-relaxed mb-8">
+              ¿Confirmar la eliminación permanente de{" "}
+              <span className="font-display font-bold text-admin-text-primary px-1 border-b border-admin-text-primary/20">
                 &quot;{productToDelete?.name}&quot;
               </span>
-              ?
-              <br />
-              <br />
-              Esta acción eliminará el producto permanentemente de la base de
-              datos y no se puede deshacer.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter className="gap-2 sm:gap-0">
-            <Button
-              variant="outline"
-              onClick={() => {
-                setDeleteDialogOpen(false);
-                setProductToDelete(null);
-              }}
-              disabled={deleteLoading}
-            >
-              Cancelar
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={handleDeleteProduct}
-              disabled={deleteLoading}
-              className="min-w-[100px]"
-            >
-              {deleteLoading ? (
-                <>
-                  <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                  Eliminando...
-                </>
-              ) : (
-                <>
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  Eliminar
-                </>
-              )}
-            </Button>
-          </DialogFooter>
+              ? Los registros históricos y dependencias asociadas serán
+              removidos del sistema.
+            </p>
+            <DialogFooter className="flex items-center justify-end gap-3 pt-4">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setDeleteDialogOpen(false);
+                  setProductToDelete(null);
+                }}
+                disabled={deleteLoading}
+                className="h-10 px-6 font-display font-bold text-[10px] tracking-widest uppercase rounded-none border-admin-border-primary/20"
+              >
+                CANCELAR
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={handleDeleteProduct}
+                disabled={deleteLoading}
+                className="h-10 px-8 font-display font-bold text-[10px] tracking-widest uppercase rounded-none bg-admin-error hover:bg-admin-error/90"
+              >
+                {deleteLoading ? (
+                  <>
+                    <RefreshCw className="h-3.5 w-3.5 mr-2 animate-spin" />
+                    PURGANDO...
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="h-3.5 w-3.5 mr-2" />
+                    ELIMINAR REGISTRO
+                  </>
+                )}
+              </Button>
+            </DialogFooter>
+          </div>
         </DialogContent>
       </Dialog>
     </>

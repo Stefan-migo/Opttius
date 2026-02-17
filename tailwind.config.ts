@@ -62,6 +62,7 @@ const config = {
           "text-primary": "var(--admin-text-primary)",
           "text-secondary": "var(--admin-text-secondary)",
           "text-tertiary": "var(--admin-text-tertiary)",
+          "text-on-dark": "var(--admin-text-on-dark)",
           "accent-primary": "var(--admin-accent-primary)",
           "accent-secondary": "var(--admin-accent-secondary)",
           "accent-tertiary": "var(--admin-accent-tertiary)",
@@ -127,11 +128,22 @@ const config = {
           light: "var(--utopica-light)",
           lightest: "var(--utopica-lightest)",
         },
+        // Epoch Design System
+        epoch: {
+          primary: "#2C3E33",
+          accent: "#C4B28C",
+          background: "#EAE8DD",
+          surface: "#1A1A1A",
+          "surface-light": "#F5F4EF",
+          "surface-dark": "#262626",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+        arch: "100px 100px 0 0",
+        oval: "50%",
       },
       keyframes: {
         "accordion-down": {
@@ -176,6 +188,11 @@ const config = {
           from: { opacity: "0", transform: "translateY(-20px)" },
           to: { opacity: "1", transform: "translateY(0)" },
         },
+        shimmer: {
+          "100%": {
+            transform: "translateX(100%)",
+          },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -192,8 +209,13 @@ const config = {
         "fade-in-down": "fade-in-down 0.6s ease-out",
       },
       fontFamily: {
+        // Epoch Fonts
+        display: ["var(--font-cinzel)", "serif"],
+        serif: ["var(--font-playfair)", "serif"],
+        body: ["var(--font-lato)", "sans-serif"],
+
         // Opttius Font Hierarchy
-        display: ["var(--font-display)", "Malisha", "cursive"],
+        // display: ["var(--font-display)", "Malisha", "cursive"], // Overridden by display above
         title: ["var(--font-title)", "VELISTA", "serif"],
         subtitle: ["var(--font-subtitle)", "Inter", "sans-serif"],
         text: ["var(--font-text)", "Inter", "sans-serif"],
@@ -202,9 +224,9 @@ const config = {
         // LEGACY SUPPORT (existing)
         // Primary Branding
         heading: ["var(--font-heading)", "Inter", "sans-serif"],
-        body: ["var(--font-body)", "Inter", "sans-serif"],
+        // body: ["var(--font-body)", "Inter", "sans-serif"], // Overridden by body above
         sans: ["var(--font-body)", "Inter", "sans-serif"],
-        serif: ["var(--font-heading)", "Inter", "sans-serif"],
+        // serif: ["var(--font-heading)", "Inter", "sans-serif"], // Overridden by serif above
         malisha: ["var(--font-malisha)", "Malisha", "cursive"],
         velista: ["var(--font-velista)", "VELISTA", "serif"],
       },

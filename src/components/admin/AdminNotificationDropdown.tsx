@@ -81,7 +81,9 @@ export default function AdminNotificationDropdown() {
     }
 
     try {
-      const response = await fetch("/api/admin/notifications?limit=10");
+      const response = await fetch("/api/admin/notifications?limit=10", {
+        credentials: "include",
+      });
       if (!response.ok) {
         // Silently handle 401 (unauthorized) - user might not be logged in yet
         if (response.status === 401) {
@@ -120,6 +122,7 @@ export default function AdminNotificationDropdown() {
   const markAsRead = async (notificationId: string, actionUrl?: string) => {
     try {
       const response = await fetch("/api/admin/notifications", {
+        credentials: "include",
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ notificationId }),
@@ -150,6 +153,7 @@ export default function AdminNotificationDropdown() {
     try {
       setLoading(true);
       const response = await fetch("/api/admin/notifications", {
+        credentials: "include",
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ markAllRead: true }),
@@ -190,7 +194,7 @@ export default function AdminNotificationDropdown() {
         >
           <Bell className="h-5 w-5 text-admin-text-secondary group-hover:text-admin-accent-primary transition-colors duration-300" />
           {unreadCount > 0 && (
-            <span className="absolute top-2 right-2 h-4 w-4 bg-primary rounded-full flex items-center justify-center text-[10px] font-bold text-white shadow-lg shadow-primary/20 animate-pulse border-2 border-admin-bg-secondary">
+            <span className="absolute top-1.5 right-1.5 h-4 w-4 bg-admin-accent-secondary flex items-center justify-center text-[10px] font-black text-[#1A2B23] shadow-lg shadow-black/20 border border-admin-bg-secondary leading-none">
               {unreadCount > 9 ? "9+" : unreadCount}
             </span>
           )}

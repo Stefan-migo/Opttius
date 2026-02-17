@@ -68,7 +68,7 @@ export async function GET(request: NextRequest) {
     // Build query - include category for display
     let query = supabase
       .from("contact_lens_families")
-      .select("*, categories(id, name, slug)")
+      .select("*, categories:category_id(id, name, slug)")
       .order("created_at", { ascending: false });
 
     // Filter by organization_id (multi-tenancy isolation)

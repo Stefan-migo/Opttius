@@ -110,17 +110,54 @@ export function LensFamilyCombobox({
   const filteredList =
     baseList.length > 0 && (slugs.length > 0 || recommendedTypes.length > 0)
       ? baseList.filter((f) => {
-          const cat = (f as { categories?: { slug?: string } }).categories;
+          // Extraer slug de categoría (soporta categories, category, o category_id como objeto)
+          const cat =
+            (f as any).categories ??
+            (f as any).category ??
+            (typeof (f as any).category_id === "object"
+              ? (f as any).category_id
+              : null);
           const catSlug =
             typeof cat === "object" && cat?.slug ? cat.slug : null;
-          if (catSlug && slugs.length > 0) {
-            return slugs.includes(catSlug);
+
+          // 1. If category exists and matches one of the expected slugs, it's a perfect match
+          if (catSlug && slugs.length > 0 && slugs.includes(catSlug)) {
+            return true;
           }
+
+          // 2. If it matches recommended lens types, it's also a good match (handles legacy without category)
           if (recommendedTypes.length > 0) {
-            return recommendedTypes.includes(
-              (f as { lens_type?: string }).lens_type ?? "",
-            );
+            const familyType = (f as any).lens_type || "";
+            const normalizedType = familyType
+              .toLowerCase()
+              .replace(/[^a-z]/g, "");
+
+            const hasMatch = recommendedTypes.some((rt) => {
+              const normalizedRT = rt.toLowerCase().replace(/[^a-z]/g, "");
+              return (
+                normalizedRT === normalizedType ||
+                (normalizedRT === "singlevision" &&
+                  (normalizedType === "monofocal" ||
+                    normalizedType === "visionsencilla"))
+              );
+            });
+
+            if (hasMatch) return true;
           }
+
+          // 3. Fallback: If it has NO category but we are looking for specific categories,
+          // allow it (legacy data that hasn't been categorized yet)
+          if (!catSlug && slugs.length > 0) {
+            return true;
+          }
+
+          // 4. If it HAS a category but it's NOT in the expected slugs, then we should probably filter it
+          // as it belongs to a different group (e.g. contact lenses instead of optical)
+          if (catSlug && slugs.length > 0 && !slugs.includes(catSlug)) {
+            return false;
+          }
+
+          // 5. Default to showing it if no strict mismatch found
           return true;
         })
       : baseList;

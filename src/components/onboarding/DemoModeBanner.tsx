@@ -67,46 +67,61 @@ export function DemoModeBanner() {
   }
 
   return (
-    <Alert className="border-amber-200 bg-amber-50 mb-4 relative">
-      <div className="flex items-start gap-3">
-        <div className="p-2 bg-amber-100 rounded-lg">
-          <Sparkles className="h-5 w-5 text-amber-600" />
+    <Alert className="border-admin-accent-secondary/30 bg-admin-bg-secondary/5 mb-6 relative rounded-none overflow-hidden group shadow-xl backdrop-blur-md">
+      {/* Decorative background element */}
+      <div className="absolute top-0 right-0 p-4 opacity-[0.03] pointer-events-none group-hover:opacity-[0.06] transition-opacity">
+        <Sparkles size={80} />
+      </div>
+
+      <div className="flex items-center gap-6 py-2">
+        <div className="h-12 w-12 bg-admin-accent-secondary/10 border border-admin-accent-secondary/20 flex items-center justify-center relative">
+          <Sparkles className="h-6 w-6 text-admin-accent-secondary animate-pulse" />
+          <div className="absolute inset-x-0 bottom-0 h-[2px] bg-admin-accent-secondary shadow-[0_0_8px_rgba(197,160,89,0.5)]" />
         </div>
+
         <div className="flex-1">
-          <AlertDescription className="text-amber-900 font-medium mb-2">
-            Estás en modo demo
-          </AlertDescription>
-          <p className="text-sm text-amber-800 mb-3">
-            Estás explorando el sistema con datos de ejemplo. ¿Listo para
-            empezar con tus propios datos?
-          </p>
+          <div className="flex flex-col">
+            <h4 className="text-[10px] font-display font-bold text-admin-accent-secondary uppercase tracking-[0.2em] mb-1">
+              Modo Exploración Activo
+            </h4>
+            <AlertDescription className="text-admin-text-primary text-sm font-medium tracking-tight">
+              Estás visualizando el potencial de Opttius con datos de muestra.
+              <span className="hidden md:inline text-admin-text-tertiary ml-2 font-serif italic normal-case">
+                ¿Preparado para trascender al control total de tu propia óptica?
+              </span>
+            </AlertDescription>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-4">
           <div className="flex gap-2">
             <Button
               onClick={handleActivate}
               size="sm"
-              className="bg-amber-600 hover:bg-amber-700 text-white"
+              className="bg-admin-accent-secondary hover:bg-admin-accent-secondary/90 text-[#1A2B23] font-display font-bold rounded-none uppercase tracking-widest text-[9px] h-9 px-4 shadow-lg shadow-admin-accent-secondary/10"
             >
               Activar mi Óptica
-              <ArrowRight className="ml-2 h-3 w-3" />
+              <ArrowRight className="ml-2 h-3.5 w-3.5" />
             </Button>
             <Button
               onClick={handleDismiss}
               variant="ghost"
               size="sm"
-              className="text-amber-700 hover:text-amber-900 hover:bg-amber-100"
+              className="text-admin-text-tertiary hover:text-admin-text-primary hover:bg-admin-bg-secondary/10 font-display font-bold rounded-none uppercase tracking-widest text-[9px] h-9"
             >
               Más tarde
             </Button>
           </div>
+
+          <Button
+            onClick={handleDismiss}
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 text-admin-text-tertiary/40 hover:text-admin-error hover:bg-admin-error/5 rounded-none transition-colors"
+          >
+            <X className="h-4 w-4" />
+          </Button>
         </div>
-        <Button
-          onClick={handleDismiss}
-          variant="ghost"
-          size="icon"
-          className="h-6 w-6 text-amber-600 hover:text-amber-900 hover:bg-amber-100"
-        >
-          <X className="h-4 w-4" />
-        </Button>
       </div>
     </Alert>
   );

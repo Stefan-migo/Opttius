@@ -5,16 +5,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  ArrowLeft,
-  Save,
-  User,
-  MapPin,
-} from "lucide-react";
+import { ArrowLeft, Save, User, MapPin } from "lucide-react";
 import { useForm } from "@/hooks/useForm";
 import FormField, { FormFieldActionsExtended } from "@/components/ui/FormField";
 import { customerSchema } from "@/lib/validation/formValidation";
-import { success, error as notifyError } from "@/lib/services/notificationService";
+import {
+  success,
+  error as notifyError,
+} from "@/lib/services/notificationService";
 import { handleApiError } from "@/lib/services/errorService";
 import { useBranch } from "@/hooks/useBranch";
 import { customerService } from "@/lib/api/services/customerService";
@@ -98,11 +96,11 @@ export default function NewCustomerPage() {
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div>
-            <h1 className="text-3xl font-bold text-azul-profundo">
+            <h1 className="text-4xl font-display font-bold text-admin-text-primary tracking-tight uppercase">
               Nuevo Cliente
             </h1>
-            <p className="text-tierra-media">
-              Crear un nuevo cliente en el sistema
+            <p className="text-[10px] font-serif italic text-admin-text-tertiary uppercase tracking-[0.3em]">
+              Registro de Archivo en la Base de Datos
             </p>
           </div>
         </div>
@@ -130,8 +128,8 @@ export default function NewCustomerPage() {
       <form onSubmit={form.handleSubmit} className="space-y-6">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Personal Information */}
-          <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)]">
-            <CardHeader>
+          <Card className="border-none bg-admin-bg-secondary shadow-premium-sm rounded-none overflow-hidden border border-admin-border-primary/30">
+            <CardHeader className="border-b border-admin-border-primary/10">
               <CardTitle className="flex items-center">
                 <User className="h-5 w-5 mr-2" />
                 Información Personal
@@ -147,7 +145,9 @@ export default function NewCustomerPage() {
                   <Input
                     id="first_name"
                     value={form.values.first_name}
-                    onChange={(e) => form.setValue("first_name", e.target.value)}
+                    onChange={(e) =>
+                      form.setValue("first_name", e.target.value)
+                    }
                     placeholder="Nombre"
                     aria-invalid={!!form.errors.first_name}
                   />
@@ -216,8 +216,8 @@ export default function NewCustomerPage() {
           </Card>
 
           {/* Address Information */}
-          <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)]">
-            <CardHeader>
+          <Card className="border-none bg-admin-bg-secondary shadow-premium-sm rounded-none overflow-hidden border border-admin-border-primary/30">
+            <CardHeader className="border-b border-admin-border-primary/10">
               <CardTitle className="flex items-center">
                 <MapPin className="h-5 w-5 mr-2" />
                 Dirección
@@ -231,7 +231,9 @@ export default function NewCustomerPage() {
                 <Input
                   id="address_line_1"
                   value={form.values.address_line_1}
-                  onChange={(e) => form.setValue("address_line_1", e.target.value)}
+                  onChange={(e) =>
+                    form.setValue("address_line_1", e.target.value)
+                  }
                   placeholder="Calle y número"
                   aria-invalid={!!form.errors.address_line_1}
                 />
@@ -245,17 +247,16 @@ export default function NewCustomerPage() {
                 <Input
                   id="address_line_2"
                   value={form.values.address_line_2}
-                  onChange={(e) => form.setValue("address_line_2", e.target.value)}
+                  onChange={(e) =>
+                    form.setValue("address_line_2", e.target.value)
+                  }
                   placeholder="Departamento, piso, etc."
                   aria-invalid={!!form.errors.address_line_2}
                 />
               </FormField>
 
               <div className="grid grid-cols-2 gap-4">
-                <FormField
-                  label="Ciudad"
-                  error={form.errors.city?.message}
-                >
+                <FormField label="Ciudad" error={form.errors.city?.message}>
                   <Input
                     id="city"
                     value={form.values.city}
@@ -265,10 +266,7 @@ export default function NewCustomerPage() {
                   />
                 </FormField>
 
-                <FormField
-                  label="Provincia"
-                  error={form.errors.state?.message}
-                >
+                <FormField label="Provincia" error={form.errors.state?.message}>
                   <Input
                     id="state"
                     value={form.values.state}
@@ -287,16 +285,15 @@ export default function NewCustomerPage() {
                   <Input
                     id="postal_code"
                     value={form.values.postal_code}
-                    onChange={(e) => form.setValue("postal_code", e.target.value)}
+                    onChange={(e) =>
+                      form.setValue("postal_code", e.target.value)
+                    }
                     placeholder="1234"
                     aria-invalid={!!form.errors.postal_code}
                   />
                 </FormField>
 
-                <FormField
-                  label="País"
-                  error={form.errors.country?.message}
-                >
+                <FormField label="País" error={form.errors.country?.message}>
                   <Input
                     id="country"
                     value={form.values.country}
@@ -310,8 +307,8 @@ export default function NewCustomerPage() {
           </Card>
 
           {/* Additional Notes */}
-          <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)]">
-            <CardHeader>
+          <Card className="border-none bg-admin-bg-secondary shadow-premium-sm rounded-none overflow-hidden border border-admin-border-primary/30 lg:col-span-2">
+            <CardHeader className="border-b border-admin-border-primary/10">
               <CardTitle>Notas Adicionales</CardTitle>
             </CardHeader>
             <CardContent>

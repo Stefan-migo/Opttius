@@ -1,27 +1,27 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { useTheme } from "@/components/theme-provider"
-import { Button } from "@/components/ui/button"
+import * as React from "react";
+import { useTheme } from "@/components/theme-provider";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Palette, Check } from "lucide-react"
-import { ThemeId, themes } from "@/config/themes"
-import { cn } from "@/lib/utils"
+} from "@/components/ui/dropdown-menu";
+import { Palette, Check } from "lucide-react";
+import { ThemeId, themes } from "@/config/themes";
+import { cn } from "@/lib/utils";
 
 export function ThemeSelector() {
-  const { theme, setTheme, mounted } = useTheme()
+  const { theme, setTheme, mounted } = useTheme();
 
   if (!mounted) {
     return (
       <Button variant="ghost" size="icon" disabled>
         <Palette className="h-4 w-4" />
       </Button>
-    )
+    );
   }
 
   return (
@@ -43,22 +43,19 @@ export function ThemeSelector() {
               <div
                 className={cn(
                   "h-4 w-4 rounded-full border-2 border-border",
-                  themeOption.id === 'light' && "bg-white",
-                  themeOption.id === 'dark' && "bg-slate-900",
-                  themeOption.id === 'blue' && "bg-blue-500",
-                  themeOption.id === 'green' && "bg-green-500",
-                  themeOption.id === 'red' && "bg-red-500"
+                  themeOption.id === "light" && "bg-[#F9F7F2]",
+                  themeOption.id === "dark" && "bg-[#1A2B23]",
+                  themeOption.id === "blue" && "bg-[#102A43]",
+                  themeOption.id === "green" && "bg-[#1A2B23]",
+                  themeOption.id === "red" && "bg-[#4D1414]",
                 )}
               />
               <span>{themeOption.name}</span>
             </div>
-            {theme === themeOption.id && (
-              <Check className="h-4 w-4" />
-            )}
+            {theme === themeOption.id && <Check className="h-4 w-4" />}
           </DropdownMenuItem>
         ))}
       </DropdownMenuContent>
     </DropdownMenu>
-  )
+  );
 }
-

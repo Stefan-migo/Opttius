@@ -40,6 +40,7 @@ import { toast } from "sonner";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { useBranch } from "@/hooks/useBranch";
+import { Skeleton } from "@/components/ui/skeleton";
 
 // Lazy load large components to reduce initial bundle size
 const AppointmentCalendar = dynamic(
@@ -458,23 +459,23 @@ export default function AppointmentsPage() {
   return (
     <div className="space-y-8 animate-in fade-in duration-700">
       {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 pb-2">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 pb-6 border-b border-admin-border-primary/20">
         <div className="space-y-1">
-          <h1 className="text-3xl font-bold tracking-tight text-admin-text-primary font-malisha">
-            Agenda Maestra
+          <h1 className="text-4xl font-display font-bold text-admin-text-primary tracking-tight uppercase">
+            Archivo de Agendamiento
           </h1>
-          <p className="text-sm font-medium text-admin-text-tertiary uppercase tracking-widest">
-            Gestión de Consultas y Procedimientos
+          <p className="text-[10px] font-serif italic text-admin-text-tertiary uppercase tracking-[0.3em]">
+            Gestión Técnica de Consultas y Procedimientos Ópticos
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-4">
           <Link href="/admin/appointments/settings">
             <Button
-              variant="secondary"
-              className="h-11 px-5 bg-admin-bg-tertiary hover:bg-admin-border-primary text-admin-text-primary font-bold rounded-xl transition-all flex items-center gap-2"
+              variant="outline"
+              className="h-11 px-6 bg-white border-admin-border-primary/20 hover:border-epoch-accent/40 text-admin-text-primary font-display font-bold text-[10px] tracking-widest uppercase rounded-none transition-all flex items-center gap-2"
             >
               <Settings className="h-4 w-4" />
-              <span>Configuración</span>
+              <span>CONFIGURACIÓN</span>
             </Button>
           </Link>
           <Button
@@ -483,25 +484,25 @@ export default function AppointmentsPage() {
               setPrefilledAppointmentData(null);
               setShowCreateAppointment(true);
             }}
-            className="h-11 px-6 bg-admin-accent-primary hover:bg-admin-accent-secondary text-white font-bold rounded-xl transition-all shadow-lg shadow-admin-accent-primary/10 flex items-center gap-2"
+            className="h-11 px-8 bg-epoch-primary hover:bg-epoch-surface text-white font-display font-bold text-[10px] tracking-[0.2em] uppercase rounded-none transition-all shadow-premium-sm flex items-center gap-2"
           >
             <Plus className="h-4 w-4" />
-            <span>Nueva Cita</span>
+            <span>NUEVA CITA MÉDICA</span>
           </Button>
         </div>
       </div>
 
       {/* View Controls */}
-      <Card className="border-none bg-admin-bg-tertiary shadow-soft overflow-hidden">
+      <Card className="border border-admin-border-primary/20 bg-admin-border-primary/5 rounded-none shadow-none overflow-hidden">
         <CardContent className="p-4 md:p-6">
           <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-6">
             <div className="flex flex-wrap items-center gap-4">
-              <div className="flex items-center bg-admin-bg-tertiary/50 p-1 rounded-xl border border-admin-border-primary/30">
+              <div className="flex items-center bg-white p-1 rounded-none border border-admin-border-primary/20">
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => navigateDate("prev")}
-                  className="h-9 w-9 p-0 hover:bg-white hover:text-admin-accent-primary rounded-lg transition-all"
+                  className="h-9 w-9 p-0 hover:bg-admin-bg-tertiary text-admin-text-primary rounded-none transition-all"
                 >
                   <ChevronLeft className="h-5 w-5" />
                 </Button>
@@ -509,24 +510,24 @@ export default function AppointmentsPage() {
                   variant="ghost"
                   size="sm"
                   onClick={goToToday}
-                  className="px-4 h-9 font-bold text-xs uppercase tracking-widest hover:bg-white hover:text-admin-accent-primary rounded-lg transition-all"
+                  className="px-6 h-9 font-display font-bold text-[10px] uppercase tracking-widest text-admin-text-secondary hover:bg-admin-bg-tertiary rounded-none transition-all"
                 >
-                  Hoy
+                  HOY
                 </Button>
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => navigateDate("next")}
-                  className="h-9 w-9 p-0 hover:bg-white hover:text-admin-accent-primary rounded-lg transition-all"
+                  className="h-9 w-9 p-0 hover:bg-admin-bg-tertiary text-admin-text-primary rounded-none transition-all"
                 >
                   <ChevronRight className="h-5 w-5" />
                 </Button>
               </div>
-              <div className="flex items-center gap-3 px-4 py-2 bg-admin-accent-primary/5 rounded-xl border border-admin-accent-primary/10">
-                <CalendarDays className="h-5 w-5 text-admin-accent-primary" />
-                <span className="text-lg font-bold text-admin-text-primary">
+              <div className="flex items-center gap-3 px-6 py-2 bg-white rounded-none border border-admin-border-primary/20">
+                <CalendarDays className="h-5 w-5 text-epoch-primary" />
+                <span className="text-lg font-display font-bold text-admin-text-primary uppercase tracking-tight">
                   {view === "week"
-                    ? `Semana del ${currentDate.toLocaleDateString("es-CL", { day: "numeric", month: "long" })}`
+                    ? `SEMANA DEL ${currentDate.toLocaleDateString("es-CL", { day: "numeric", month: "long" })}`
                     : currentDate.toLocaleDateString("es-CL", {
                         month: "long",
                         year: "numeric",
@@ -543,18 +544,18 @@ export default function AppointmentsPage() {
                     value={selectedBranchForView || ""}
                     onValueChange={(value) => setSelectedBranchForView(value)}
                   >
-                    <SelectTrigger className="w-[180px] h-10 bg-admin-bg-tertiary/30 border-admin-border-primary/50 font-bold text-xs rounded-xl focus:ring-admin-accent-primary/20">
+                    <SelectTrigger className="w-[180px] h-10 bg-white border-admin-border-primary/20 font-display font-bold text-[10px] tracking-widest uppercase rounded-none focus:ring-epoch-primary/20 transition-all">
                       <div className="flex items-center gap-2">
-                        <Building2 className="h-3.5 w-3.5 text-admin-text-tertiary" />
-                        <SelectValue placeholder="Sucursal" />
+                        <Building2 className="h-3.5 w-3.5 text-epoch-primary" />
+                        <SelectValue placeholder="SUCURSAL" />
                       </div>
                     </SelectTrigger>
-                    <SelectContent className="rounded-xl border-admin-border-primary shadow-premium-lg">
+                    <SelectContent className="rounded-none border-admin-border-primary/20 shadow-premium-lg">
                       {branches.map((branch) => (
                         <SelectItem
                           key={branch.id}
                           value={branch.id}
-                          className="font-medium"
+                          className="font-display font-medium text-[10px] tracking-widest uppercase"
                         >
                           {branch.name}
                         </SelectItem>
@@ -564,59 +565,68 @@ export default function AppointmentsPage() {
                 </div>
               )}
 
-              <div className="h-10 w-px bg-admin-border-primary/30 hidden md:block" />
+              <div className="h-10 w-px bg-admin-border-primary/10 hidden md:block mx-1" />
 
               <Select
                 value={view}
                 onValueChange={(value: "week" | "month") => setView(value)}
               >
-                <SelectTrigger className="w-[110px] h-10 bg-admin-bg-tertiary/30 border-admin-border-primary/50 font-bold text-xs rounded-xl">
+                <SelectTrigger className="w-[120px] h-10 bg-white border-admin-border-primary/20 font-display font-bold text-[10px] tracking-widest uppercase rounded-none transition-all">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="rounded-xl border-admin-border-primary shadow-premium-lg">
-                  <SelectItem value="week" className="font-medium">
-                    Semana
+                <SelectContent className="rounded-none border-admin-border-primary/20 shadow-premium-lg">
+                  <SelectItem
+                    value="week"
+                    className="font-display font-medium text-[10px] tracking-widest uppercase"
+                  >
+                    SEMANA
                   </SelectItem>
-                  <SelectItem value="month" className="font-medium">
-                    Mes
+                  <SelectItem
+                    value="month"
+                    className="font-display font-medium text-[10px] tracking-widest uppercase"
+                  >
+                    MENSUAL
                   </SelectItem>
                 </SelectContent>
               </Select>
 
               <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-[160px] h-10 bg-admin-bg-tertiary/30 border-admin-border-primary/50 font-bold text-xs rounded-xl">
+                <SelectTrigger className="w-[180px] h-10 bg-white border-admin-border-primary/20 font-display font-bold text-[10px] tracking-widest uppercase rounded-none transition-all">
                   <div className="flex items-center gap-2">
-                    <Filter className="h-3.5 w-3.5 text-admin-text-tertiary" />
-                    <SelectValue placeholder="Filtrar Estado" />
+                    <Filter className="h-3.5 w-3.5 text-epoch-accent" />
+                    <SelectValue placeholder="ESTADO" />
                   </div>
                 </SelectTrigger>
-                <SelectContent className="rounded-xl border-admin-border-primary shadow-premium-lg">
-                  <SelectItem value="all" className="font-medium">
-                    Todos los Estados
+                <SelectContent className="rounded-none border-admin-border-primary/20 shadow-premium-lg">
+                  <SelectItem
+                    value="all"
+                    className="font-display font-medium text-[10px] tracking-widest uppercase"
+                  >
+                    TODOS LOS ESTADOS
                   </SelectItem>
                   <SelectItem
                     value="scheduled"
-                    className="font-medium text-admin-info"
+                    className="font-display font-medium text-[10px] tracking-widest uppercase text-admin-info"
                   >
-                    Programadas
+                    PROGRAMADAS
                   </SelectItem>
                   <SelectItem
                     value="confirmed"
-                    className="font-medium text-admin-success"
+                    className="font-display font-medium text-[10px] tracking-widest uppercase text-admin-success"
                   >
-                    Confirmadas
+                    CONFIRMADAS
                   </SelectItem>
                   <SelectItem
                     value="completed"
-                    className="font-medium text-admin-accent-secondary"
+                    className="font-display font-medium text-[10px] tracking-widest uppercase text-epoch-primary"
                   >
-                    Completadas
+                    COMPLETADAS
                   </SelectItem>
                   <SelectItem
                     value="cancelled"
-                    className="font-medium text-admin-error"
+                    className="font-display font-medium text-[10px] tracking-widest uppercase text-admin-error"
                   >
-                    Canceladas
+                    CANCELADAS
                   </SelectItem>
                 </SelectContent>
               </Select>
@@ -748,16 +758,33 @@ export default function AppointmentsPage() {
         >
           <CardContent className="p-0">
             {loading ? (
-              <div className="flex flex-col items-center justify-center min-h-[400px] text-center space-y-4">
-                <div className="relative h-12 w-12">
-                  <RefreshCw className="h-12 w-12 animate-spin text-admin-accent-primary opacity-20" />
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <Calendar className="h-5 w-5 text-admin-accent-primary animate-pulse" />
-                  </div>
+              <div className="p-1 space-y-1 animate-in fade-in duration-500">
+                <div className="grid grid-cols-7 gap-1 border-b border-admin-border-primary/10 pb-1">
+                  {[...Array(7)].map((_, i) => (
+                    <div key={i} className="p-4 space-y-2">
+                      <Skeleton className="h-4 w-12 mx-auto opacity-40" />
+                      <Skeleton className="h-6 w-8 mx-auto" />
+                    </div>
+                  ))}
                 </div>
-                <p className="text-xs font-bold text-admin-text-tertiary uppercase tracking-widest">
-                  Sincronizando Agenda...
-                </p>
+                <div className="grid grid-cols-7 gap-1 h-[500px]">
+                  {[...Array(7)].map((_, col) => (
+                    <div
+                      key={col}
+                      className="border-r border-admin-border-primary/5 last:border-0 p-2 space-y-3"
+                    >
+                      {[...Array(6)].map((_, row) => (
+                        <Skeleton
+                          key={row}
+                          className={cn(
+                            "h-16 w-full opacity-[0.03]",
+                            row % 3 === 0 && "opacity-10",
+                          )}
+                        />
+                      ))}
+                    </div>
+                  ))}
+                </div>
               </div>
             ) : (
               <div className="p-1">
@@ -782,36 +809,40 @@ export default function AppointmentsPage() {
         open={showCreateAppointment}
         onOpenChange={setShowCreateAppointment}
       >
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto border-none bg-admin-bg-secondary shadow-premium-xl rounded-2xl p-0">
-          <div className="p-8">
-            <DialogHeader className="mb-8">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto border-2 border-admin-border-primary/20 bg-white shadow-premium-xl rounded-none p-0">
+          <div className="p-0">
+            <DialogHeader className="p-8 bg-admin-bg-tertiary border-b border-admin-border-primary/10">
               <div className="flex items-center gap-3 mb-2">
-                <div className="h-10 w-10 bg-admin-accent-primary/10 rounded-xl flex items-center justify-center">
-                  <CalendarDays className="h-5 w-5 text-admin-accent-primary" />
+                <div className="h-10 w-10 bg-epoch-primary flex items-center justify-center">
+                  <CalendarDays className="h-5 w-5 text-white" />
                 </div>
-                <DialogTitle className="text-2xl font-bold text-admin-text-primary tracking-tight">
-                  {selectedAppointment ? "Editar Cita" : "Nueva Reserva"}
+                <DialogTitle className="text-2xl font-display font-bold text-admin-text-primary tracking-tight uppercase">
+                  {selectedAppointment
+                    ? "EXPEDIENTE DE CITA"
+                    : "CONSULTA DE RESERVA"}
                 </DialogTitle>
               </div>
-              <DialogDescription className="text-sm font-medium text-admin-text-tertiary uppercase tracking-widest pl-13">
+              <DialogDescription className="text-[11px] font-serif italic text-admin-text-tertiary tracking-wide pl-13">
                 {selectedAppointment
-                  ? "Modifique los parámetros de la sesión seleccionada"
-                  : "Ingrese los detalles para agendar una nueva consulta"}
+                  ? "Modifique los parámetros técnicos de la sesión seleccionada en el archivo maestro."
+                  : "Ingrese las especificaciones para agendar una nueva consulta en el ciclo óptico."}
               </DialogDescription>
             </DialogHeader>
-            <CreateAppointmentForm
-              initialData={
-                selectedAppointment || prefilledAppointmentData || undefined
-              }
-              initialCustomerId={undefined}
-              lockDateTime={prefilledAppointmentData?.lockDateTime || false}
-              onSuccess={handleAppointmentCreated}
-              onCancel={() => {
-                setShowCreateAppointment(false);
-                setSelectedAppointment(null);
-                setPrefilledAppointmentData(null);
-              }}
-            />
+            <div className="p-8">
+              <CreateAppointmentForm
+                initialData={
+                  selectedAppointment || prefilledAppointmentData || undefined
+                }
+                initialCustomerId={undefined}
+                lockDateTime={prefilledAppointmentData?.lockDateTime || false}
+                onSuccess={handleAppointmentCreated}
+                onCancel={() => {
+                  setShowCreateAppointment(false);
+                  setSelectedAppointment(null);
+                  setPrefilledAppointmentData(null);
+                }}
+              />
+            </div>
           </div>
         </DialogContent>
       </Dialog>
@@ -822,23 +853,23 @@ export default function AppointmentsPage() {
           open={!!selectedAppointment}
           onOpenChange={() => setSelectedAppointment(null)}
         >
-          <DialogContent className="max-w-lg border-none bg-admin-bg-secondary shadow-premium-xl rounded-2xl p-0 overflow-hidden">
-            <div className="bg-admin-accent-primary/5 p-8 border-b border-admin-border-primary/30">
+          <DialogContent className="max-w-lg border-2 border-admin-border-primary/20 bg-white shadow-premium-xl rounded-none p-0 overflow-hidden">
+            <div className="bg-admin-bg-tertiary p-8 border-b border-admin-border-primary/10">
               <DialogHeader>
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 bg-admin-accent-primary/10 rounded-xl flex items-center justify-center">
-                      <User className="h-5 w-5 text-admin-accent-primary" />
+                    <div className="h-10 w-10 bg-epoch-primary flex items-center justify-center">
+                      <User className="h-5 w-5 text-white" />
                     </div>
-                    <DialogTitle className="text-2xl font-bold text-admin-text-primary">
-                      Detalles de la Cita
+                    <DialogTitle className="text-2xl font-display font-bold text-admin-text-primary tracking-tight uppercase">
+                      DETALLES TÉCNICOS
                     </DialogTitle>
                   </div>
                   {getStatusBadge(selectedAppointment.status)}
                 </div>
-                <DialogDescription className="text-xs font-bold text-admin-text-tertiary uppercase tracking-widest pl-13">
-                  ID: {selectedAppointment.id.substring(0, 8)} • Registro de
-                  Agenda
+                <DialogDescription className="text-[10px] font-serif italic text-admin-text-tertiary tracking-widest pl-13">
+                  EXPEDIENTE ID: {selectedAppointment.id.substring(0, 8)} •
+                  REGISTRO DE ARCHIVO
                 </DialogDescription>
               </DialogHeader>
             </div>
@@ -1114,7 +1145,7 @@ export default function AppointmentsPage() {
 
       {/* Weekly Report Dialog */}
       <Dialog open={showWeeklyReport} onOpenChange={setShowWeeklyReport}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto border-none bg-admin-bg-secondary shadow-premium-xl rounded-2xl p-0 print:overflow-visible print:max-h-none">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto border-2 border-admin-border-primary/20 bg-admin-bg-secondary shadow-premium-xl rounded-none p-0 print:overflow-visible print:max-h-none">
           <div
             ref={weeklyReportRef}
             id="weekly-report-print"
@@ -1172,43 +1203,48 @@ export default function AppointmentsPage() {
                 <>
                   {/* Summary Cards */}
                   <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-                    <div className="p-4 rounded-xl bg-admin-bg-tertiary/50 border border-admin-border-primary/30">
-                      <p className="text-[10px] font-bold text-admin-text-tertiary uppercase tracking-wider">
+                    <div className="p-4 rounded-none bg-admin-bg-tertiary/30 border border-admin-border-primary/20 relative overflow-hidden group">
+                      <div className="absolute inset-0 bg-gradient-to-br from-admin-accent-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                      <p className="text-[9px] font-bold text-admin-text-tertiary uppercase tracking-[0.2em] relative z-10">
                         Total
                       </p>
-                      <p className="text-2xl font-bold text-admin-text-primary">
+                      <p className="text-2xl font-display font-bold text-admin-text-primary relative z-10">
                         {data.appointments.length}
                       </p>
                     </div>
-                    <div className="p-4 rounded-xl bg-admin-info/10 border border-admin-info/20">
-                      <p className="text-[10px] font-bold text-admin-text-tertiary uppercase tracking-wider">
+                    <div className="p-4 rounded-none bg-admin-info/5 border border-admin-info/10 relative overflow-hidden group">
+                      <div className="absolute inset-0 bg-gradient-to-br from-admin-info/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                      <p className="text-[9px] font-bold text-admin-text-tertiary uppercase tracking-[0.2em] relative z-10">
                         Programadas
                       </p>
-                      <p className="text-2xl font-bold text-admin-info">
+                      <p className="text-2xl font-display font-bold text-admin-info relative z-10">
                         {data.byStatus.scheduled}
                       </p>
                     </div>
-                    <div className="p-4 rounded-xl bg-admin-success/10 border border-admin-success/20">
-                      <p className="text-[10px] font-bold text-admin-text-tertiary uppercase tracking-wider">
+                    <div className="p-4 rounded-none bg-admin-success/5 border border-admin-success/10 relative overflow-hidden group">
+                      <div className="absolute inset-0 bg-gradient-to-br from-admin-success/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                      <p className="text-[9px] font-bold text-admin-text-tertiary uppercase tracking-[0.2em] relative z-10">
                         Confirmadas
                       </p>
-                      <p className="text-2xl font-bold text-admin-success">
+                      <p className="text-2xl font-display font-bold text-admin-success relative z-10">
                         {data.byStatus.confirmed}
                       </p>
                     </div>
-                    <div className="p-4 rounded-xl bg-admin-accent-secondary/10 border border-admin-accent-secondary/20">
-                      <p className="text-[10px] font-bold text-admin-text-tertiary uppercase tracking-wider">
+                    <div className="p-4 rounded-none bg-admin-accent-secondary/5 border border-admin-accent-secondary/10 relative overflow-hidden group">
+                      <div className="absolute inset-0 bg-gradient-to-br from-admin-accent-secondary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                      <p className="text-[9px] font-bold text-admin-text-tertiary uppercase tracking-[0.2em] relative z-10">
                         Completadas
                       </p>
-                      <p className="text-2xl font-bold text-admin-accent-secondary">
+                      <p className="text-2xl font-display font-bold text-admin-accent-secondary relative z-10">
                         {data.byStatus.completed}
                       </p>
                     </div>
-                    <div className="p-4 rounded-xl bg-admin-error/10 border border-admin-error/20 col-span-2 sm:col-span-1">
-                      <p className="text-[10px] font-bold text-admin-text-tertiary uppercase tracking-wider">
+                    <div className="p-4 rounded-none bg-admin-error/5 border border-admin-error/10 col-span-2 sm:col-span-1 relative overflow-hidden group">
+                      <div className="absolute inset-0 bg-gradient-to-br from-admin-error/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                      <p className="text-[9px] font-bold text-admin-text-tertiary uppercase tracking-[0.2em] relative z-10">
                         Canceladas / No asistió
                       </p>
-                      <p className="text-2xl font-bold text-admin-error">
+                      <p className="text-2xl font-display font-bold text-admin-error relative z-10">
                         {data.byStatus.cancelled + data.byStatus.no_show}
                       </p>
                     </div>

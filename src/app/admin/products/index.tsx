@@ -44,48 +44,61 @@ export default function ProductsPage() {
   }, [tabParam]);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8 animate-in fade-in duration-700">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-azul-profundo">
-            Gestión de Productos
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 pb-6 border-b border-admin-border-primary/20">
+        <div className="space-y-1">
+          <h1 className="text-4xl font-display font-bold text-admin-text-primary tracking-tight uppercase">
+            Control de Inventario
           </h1>
-          <p className="text-tierra-media">
-            Administra tu catálogo de productos y categorías
+          <p className="text-[10px] font-serif italic text-admin-text-tertiary uppercase tracking-[0.3em]">
+            Gestión de Catálogo y Registro de Existencias
           </p>
         </div>
-        {activeTab === "products" && (
-          <Button onClick={() => router.push("/admin/products/add")}>
-            <Plus className="h-4 w-4 mr-2" />
-            Agregar Producto
-          </Button>
-        )}
-        {activeTab === "lens-families" && (
-          <Button onClick={() => router.push("/admin/lens-families/new")}>
-            <Plus className="h-4 w-4 mr-2" />
-            Nueva Familia Óptica
-          </Button>
-        )}
-        {activeTab === "contact-lens-families" && (
-          <Button onClick={() => router.push("/admin/contact-lens-families")}>
-            <Plus className="h-4 w-4 mr-2" />
-            Nueva Familia de Contacto
-          </Button>
-        )}
+        <div className="flex gap-4">
+          {activeTab === "products" && (
+            <Button
+              onClick={() => router.push("/admin/products/add")}
+              className="h-11 px-8 bg-admin-accent-primary hover:bg-admin-accent-secondary text-[#1A2B23] font-display font-black text-[10px] tracking-[0.2em] uppercase rounded-none transition-all shadow-premium-sm flex items-center gap-2 border border-admin-accent-secondary/20"
+            >
+              <Plus className="h-4 w-4" />
+              <span>Alta de Producto</span>
+            </Button>
+          )}
+          {activeTab === "lens-families" && (
+            <Button
+              onClick={() => router.push("/admin/lens-families/new")}
+              className="h-11 px-8 bg-admin-accent-primary hover:bg-admin-accent-secondary text-[#1A2B23] font-display font-black text-[10px] tracking-[0.2em] uppercase rounded-none transition-all shadow-premium-sm flex items-center gap-2 border border-admin-accent-secondary/20"
+            >
+              <Plus className="h-4 w-4" />
+              <span>Nueva Familia Óptica</span>
+            </Button>
+          )}
+          {activeTab === "contact-lens-families" && (
+            <Button
+              onClick={() => router.push("/admin/contact-lens-families")}
+              className="h-11 px-8 bg-admin-accent-primary hover:bg-admin-accent-secondary text-[#1A2B23] font-display font-black text-[10px] tracking-[0.2em] uppercase rounded-none transition-all shadow-premium-sm flex items-center gap-2 border border-admin-accent-secondary/20"
+            >
+              <Plus className="h-4 w-4" />
+              <span>Nueva Familia Contacto</span>
+            </Button>
+          )}
+        </div>
       </div>
 
       {/* Branch Selector */}
       {(isSuperAdmin || (branches && branches.length > 1)) && (
-        <Card className="bg-admin-bg-tertiary">
-          <CardContent className="p-4">
+        <Card className="border border-admin-border-primary/20 bg-admin-border-primary/5 rounded-none shadow-none">
+          <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium">Sucursal de Trabajo</p>
-                <p className="text-xs text-tierra-media mt-1">
+                <p className="text-[10px] font-display font-bold text-admin-text-primary tracking-widest uppercase mb-1">
+                  Sucursal de Operación
+                </p>
+                <p className="text-[10px] font-serif italic text-admin-text-tertiary uppercase tracking-wider">
                   {isSuperAdmin
-                    ? "Selecciona la sucursal para ver y gestionar productos"
-                    : "Selecciona la sucursal para gestionar productos"}
+                    ? "Determine el centro de gestión para la consulta de existencias"
+                    : "Seleccione la sucursal para la administración de inventario"}
                 </p>
               </div>
               <BranchSelector />
@@ -122,22 +135,30 @@ export default function ProductsPage() {
         }}
         className="w-full"
       >
-        <TabsList className="grid w-full max-w-3xl grid-cols-4">
-          <TabsTrigger value="products">
-            <Package className="h-4 w-4 mr-2" />
+        <TabsList className="flex items-center bg-transparent border-b border-admin-border-primary/20 w-full justify-start rounded-none h-auto p-0 gap-8">
+          <TabsTrigger
+            value="products"
+            className="rounded-none border-b-2 border-transparent data-[state=active]:border-admin-accent-primary data-[state=active]:bg-transparent bg-transparent text-admin-text-tertiary data-[state=active]:text-admin-text-primary px-0 pb-4 font-display font-bold text-[10px] tracking-[0.2em] uppercase transition-all"
+          >
             Productos
           </TabsTrigger>
-          <TabsTrigger value="categories">
-            <Tag className="h-4 w-4 mr-2" />
+          <TabsTrigger
+            value="categories"
+            className="rounded-none border-b-2 border-transparent data-[state=active]:border-admin-accent-primary data-[state=active]:bg-transparent bg-transparent text-admin-text-tertiary data-[state=active]:text-admin-text-primary px-0 pb-4 font-display font-bold text-[10px] tracking-[0.2em] uppercase transition-all"
+          >
             Categorías
           </TabsTrigger>
-          <TabsTrigger value="lens-families">
-            <Tag className="h-4 w-4 mr-2" />
-            Fam. Lentes Ópticos
+          <TabsTrigger
+            value="lens-families"
+            className="rounded-none border-b-2 border-transparent data-[state=active]:border-admin-accent-primary data-[state=active]:bg-transparent bg-transparent text-admin-text-tertiary data-[state=active]:text-admin-text-primary px-0 pb-4 font-display font-bold text-[10px] tracking-[0.2em] uppercase transition-all"
+          >
+            Oftálmicos
           </TabsTrigger>
-          <TabsTrigger value="contact-lens-families">
-            <Eye className="h-4 w-4 mr-2" />
-            Fam. Lentes Contacto
+          <TabsTrigger
+            value="contact-lens-families"
+            className="rounded-none border-b-2 border-transparent data-[state=active]:border-admin-accent-primary data-[state=active]:bg-transparent bg-transparent text-admin-text-tertiary data-[state=active]:text-admin-text-primary px-0 pb-4 font-display font-bold text-[10px] tracking-[0.2em] uppercase transition-all"
+          >
+            Contactología
           </TabsTrigger>
         </TabsList>
 

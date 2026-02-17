@@ -103,7 +103,7 @@ export function CheckoutPageContent() {
             setTiers(data.tiers);
           }
         })
-        .catch(() => { }),
+        .catch(() => {}),
       fetch("/api/checkout/current-subscription", { credentials: "include" })
         .then((res) => res.json())
         .then((data) => {
@@ -113,7 +113,7 @@ export function CheckoutPageContent() {
             setSelectedTier(data.currentTier);
           }
         })
-        .catch(() => { }),
+        .catch(() => {}),
       fetch("/api/checkout/gateways")
         .then((res) => res.json())
         .then((data) => {
@@ -123,7 +123,7 @@ export function CheckoutPageContent() {
             setSelectedGateway(data.gateways[0].gateway_id);
           }
         })
-        .catch(() => { }),
+        .catch(() => {}),
     ]).finally(() => setLoading(false));
   }, []);
 
@@ -363,53 +363,53 @@ export function CheckoutPageContent() {
   const amount = selectedTier ? calculateAmount(selectedTier) : 0;
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 px-4 py-12 relative overflow-hidden">
+    <div className="min-h-screen bg-admin-bg-primary px-4 py-12 relative overflow-hidden">
       {/* Premium Background Elements */}
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
-        <div className="absolute top-[-5%] left-[-5%] w-[30%] h-[30%] bg-primary/5 rounded-full blur-[100px] animate-premium-float" />
+        <div className="absolute top-[-5%] left-[-5%] w-[30%] h-[30%] bg-admin-accent-primary/5 rounded-full blur-[100px] animate-premium-float" />
         <div
-          className="absolute bottom-[-10%] right-[-5%] w-[25%] h-[25%] bg-indigo-500/5 rounded-full blur-[100px] animate-premium-float"
+          className="absolute bottom-[-10%] right-[-5%] w-[25%] h-[25%] bg-admin-accent-secondary/5 rounded-full blur-[100px] animate-premium-float"
           style={{ animationDelay: "-3s" }}
         />
       </div>
 
-      <div className="max-w-5xl mx-auto relative z-10 space-y-10">
+      <div className="max-w-5xl mx-auto relative z-10 space-y-12">
         {/* Header Section */}
-        <div className="text-center space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-700">
+        <div className="text-center space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-1000">
           <Badge
             variant="outline"
-            className="px-4 py-1 border-primary/20 bg-primary/5 text-primary rounded-full font-bold text-xs uppercase tracking-widest"
+            className="px-4 py-1 border-admin-accent-primary/20 bg-admin-accent-primary/5 text-admin-accent-primary rounded-none font-display font-black text-[10px] uppercase tracking-[0.3em]"
           >
-            Suscripción segura
+            Protocolo de Pago Seguro
           </Badge>
-          <h1 className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white tracking-tight">
-            Finaliza tu <span className="text-primary italic">Suscripción</span>
+          <h1 className="text-5xl md:text-6xl font-display font-bold text-admin-text-primary tracking-tight uppercase">
+            Finalizar{" "}
+            <span className="text-admin-accent-primary">Suscripción</span>
           </h1>
-          <p className="text-slate-600 dark:text-slate-400 max-w-2xl mx-auto text-lg font-medium font-body leading-relaxed">
-            Estás a un paso de potenciar tu óptica con tecnología de vanguardia.
-            Elige el plan ideal y gestiona tu crecimiento hoy mismo.
+          <p className="text-[11px] font-serif italic text-admin-text-tertiary uppercase tracking-[0.5em] max-w-2xl mx-auto">
+            Potenciando su Óptica con Excelencia Tecnológica
           </p>
         </div>
 
         {currentSubscription?.currentTier && (
           <Card
             variant="glass"
-            className="border-blue-500/20 bg-blue-500/5 overflow-hidden animate-in zoom-in-95 duration-500"
+            className="border-admin-accent-secondary/20 bg-admin-bg-secondary/80 backdrop-blur-md rounded-none shadow-premium-lg animate-in zoom-in-95 duration-700"
           >
-            <CardContent className="p-4 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-blue-500/10 rounded-lg">
-                  <Zap className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+            <CardContent className="p-6 flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-admin-accent-secondary/10 rounded-none border border-admin-accent-secondary/20">
+                  <Zap className="h-6 w-6 text-admin-accent-secondary" />
                 </div>
                 <div>
-                  <p className="text-xs font-bold text-blue-500 uppercase tracking-widest leading-none mb-1">
-                    Tu plan actual
+                  <p className="text-[10px] font-display font-black text-admin-accent-secondary uppercase tracking-[0.2em] leading-none mb-2">
+                    Nivel de Acceso Actual
                   </p>
-                  <p className="font-bold text-slate-900 dark:text-white">
+                  <p className="font-display font-bold text-admin-text-primary text-xl uppercase tracking-tight">
                     {tierLabels[currentSubscription.currentTier]}
                     {currentSubscription.subscription?.currentPeriodEnd && (
-                      <span className="text-xs font-medium text-slate-500 ml-2">
-                        • Renueva el{" "}
+                      <span className="text-[11px] font-serif italic text-admin-text-tertiary normal-case ml-3 tracking-normal">
+                        • Vigente hasta el{" "}
                         {new Date(
                           currentSubscription.subscription.currentPeriodEnd,
                         ).toLocaleDateString("es-CL", {
@@ -424,7 +424,7 @@ export function CheckoutPageContent() {
               </div>
               <Badge
                 variant="healty"
-                className="bg-green-500/10 text-green-600 border-none font-bold"
+                className="bg-admin-accent-primary/10 text-admin-accent-primary border border-admin-accent-primary/20 rounded-none font-display font-black text-[10px] tracking-widest px-4 py-1"
               >
                 ACTIVO
               </Badge>
@@ -461,15 +461,15 @@ export function CheckoutPageContent() {
                       type="button"
                       onClick={() => handleTierSelect(tierName)}
                       className={cn(
-                        "relative flex flex-col p-6 rounded-3xl border-2 text-left transition-all duration-300 group hover:scale-[1.02] active:scale-[0.98]",
+                        "relative flex flex-col p-8 rounded-none border-2 text-left transition-all duration-500 group hover:scale-[1.02] active:scale-[0.98]",
                         isSelected
-                          ? "border-primary bg-white dark:bg-slate-900 shadow-2xl shadow-primary/10 ring-4 ring-primary/5"
-                          : "border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 hover:border-primary/40",
-                        isCurrent && "opacity-80 grayscale-[0.5]",
+                          ? "border-admin-accent-primary bg-admin-bg-secondary shadow-premium-xl ring-4 ring-admin-accent-primary/5"
+                          : "border-admin-border-primary/20 bg-admin-bg-secondary/40 hover:border-admin-accent-primary/40",
+                        isCurrent && "opacity-60",
                       )}
                     >
                       {isCurrent && (
-                        <div className="absolute -top-3 left-6 px-3 py-1 bg-blue-500 text-white text-[10px] font-bold rounded-full uppercase tracking-widest shadow-lg">
+                        <div className="absolute -top-3 left-6 px-4 py-1.5 bg-admin-accent-secondary text-[#1A2B23] text-[9px] font-display font-black rounded-none uppercase tracking-widest shadow-lg border border-admin-accent-secondary/20">
                           Plan Actual
                         </div>
                       )}
@@ -487,14 +487,14 @@ export function CheckoutPageContent() {
                           </div>
                           <div
                             className={cn(
-                              "w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors",
+                              "w-6 h-6 rounded-none border-2 flex items-center justify-center transition-all duration-500",
                               isSelected
-                                ? "border-primary bg-primary text-white"
-                                : "border-slate-300 dark:border-slate-700",
+                                ? "border-admin-accent-primary bg-admin-accent-primary text-[#1A2B23]"
+                                : "border-admin-border-primary/30",
                             )}
                           >
                             {isSelected && (
-                              <Check className="h-4 w-4" strokeWidth={3} />
+                              <Check className="h-4 w-4" strokeWidth={4} />
                             )}
                           </div>
                         </div>
@@ -581,10 +581,10 @@ export function CheckoutPageContent() {
                       type="button"
                       onClick={() => setSelectedGateway(gw.gateway_id)}
                       className={cn(
-                        "flex flex-col items-center justify-center p-6 rounded-3xl border-2 transition-all duration-300 group relative",
+                        "flex flex-col items-center justify-center p-8 rounded-none border-2 transition-all duration-500 group relative",
                         selectedGateway === gw.gateway_id
-                          ? "border-primary bg-white dark:bg-slate-900 shadow-xl shadow-primary/5 ring-4 ring-primary/5"
-                          : "border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/20 hover:border-primary/40",
+                          ? "border-admin-accent-primary bg-admin-bg-secondary shadow-premium-xl ring-4 ring-admin-accent-primary/5"
+                          : "border-admin-border-primary/10 bg-admin-bg-secondary/40 hover:border-admin-accent-primary/30",
                       )}
                     >
                       <div
@@ -652,38 +652,43 @@ export function CheckoutPageContent() {
               <div className="grid lg:grid-cols-2 gap-8">
                 {/* Left: Summary and Security */}
                 <div className="space-y-6">
-                  <Card
-                    variant="interactive"
-                    className="border-0 shadow-2xl bg-white dark:bg-slate-900 rounded-[2.5rem]"
-                  >
+                  <Card className="border-2 border-admin-accent-primary bg-admin-bg-secondary shadow-premium-xl rounded-none relative overflow-hidden">
+                    <div className="absolute top-0 left-0 w-full h-1 bg-admin-accent-primary" />
                     <CardHeader className="p-8 pb-0">
-                      <CardTitle className="text-xl font-bold">
-                        Resumen de Cuenta
+                      <CardTitle className="text-[10px] font-display font-black text-admin-accent-primary uppercase tracking-[0.2em]">
+                        Resumen de Transacción
                       </CardTitle>
                     </CardHeader>
-                    <CardContent className="p-8 space-y-6">
+                    <CardContent className="p-8 space-y-8">
                       <div className="space-y-4">
-                        <div className="flex justify-between items-center text-sm font-medium">
-                          <span className="text-slate-500">Plan Elegido</span>
-                          <span className="text-slate-900 dark:text-white font-bold">
+                        <div className="flex justify-between items-center text-[10px] font-display font-black uppercase tracking-widest">
+                          <span className="text-admin-text-tertiary">
+                            Plan Seleccionado
+                          </span>
+                          <span className="text-admin-text-primary border-b border-admin-accent-primary/30 pb-1">
                             {selectedTier
                               ? tierLabels[selectedTier]
                               : "No seleccionado"}
                           </span>
                         </div>
-                        <div className="flex justify-between items-center text-sm font-medium">
-                          <span className="text-slate-500">Frecuencia</span>
-                          <span className="text-slate-900 dark:text-white font-bold">
+                        <div className="flex justify-between items-center text-[10px] font-display font-black uppercase tracking-widest">
+                          <span className="text-admin-text-tertiary">
+                            Ciclo de Facturación
+                          </span>
+                          <span className="text-admin-text-primary">
                             Mensual
                           </span>
                         </div>
-                        <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex justify-between items-center text-lg font-black">
-                          <span className="text-slate-900 dark:text-white uppercase tracking-tight">
-                            Monto a pagar
-                          </span>
-                          <span className="text-primary">
-                            ${amount.toLocaleString()} CLP
-                          </span>
+                        <div className="pt-6 border-t border-admin-border-primary/10 flex justify-between items-end">
+                          <div>
+                            <p className="text-[9px] font-display font-black text-admin-accent-secondary uppercase tracking-[0.3em] mb-1">
+                              Total a Finalizar
+                            </p>
+                            <p className="text-4xl font-display font-bold text-admin-accent-primary tracking-tighter">
+                              ${amount.toLocaleString()}{" "}
+                              <span className="text-sm">CLP</span>
+                            </p>
+                          </div>
                         </div>
                       </div>
 
@@ -692,28 +697,27 @@ export function CheckoutPageContent() {
                           <Button
                             onClick={handleCreateIntent}
                             disabled={!selectedTier || processing}
-                            className="w-full h-14 rounded-2xl text-lg font-bold shadow-xl shadow-primary/20"
-                            shimmer
+                            className="w-full h-16 bg-admin-accent-primary text-[#1A2B23] hover:bg-admin-accent-secondary rounded-none font-display font-black text-[12px] tracking-[0.2em] uppercase transition-all shadow-premium-sm"
                           >
                             {processing ? (
                               <>
-                                <Loader2 className="h-5 w-5 mr-2 animate-spin" />
-                                Creando sesión...
+                                <Loader2 className="h-5 w-5 mr-3 animate-spin" />
+                                Sincronizando Seguridad...
                               </>
                             ) : (
                               <>
                                 {selectedGateway === "nowpayments" ? (
-                                  <Coins className="h-5 w-5 mr-2" />
+                                  <Coins className="h-5 w-5 mr-3" />
                                 ) : selectedGateway === "paypal" ? (
-                                  <CreditCard className="h-5 w-5 mr-2" />
+                                  <CreditCard className="h-5 w-5 mr-3" />
                                 ) : (
-                                  <Lock className="h-5 w-5 mr-2" />
+                                  <Lock className="h-5 w-5 mr-3" />
                                 )}
                                 {selectedGateway === "nowpayments"
-                                  ? "Pagar con Cripto"
+                                  ? "Pagar con Criptografía"
                                   : selectedGateway === "paypal"
-                                    ? "Pagar con PayPal"
-                                    : "Proceder al pago seguro"}
+                                    ? "Finalizar con PayPal"
+                                    : "Finalizar Pago Seguro"}
                               </>
                             )}
                           </Button>
@@ -724,29 +728,29 @@ export function CheckoutPageContent() {
 
                   {/* Security Highlights */}
                   <div className="grid grid-cols-2 gap-4">
-                    <div className="p-4 bg-white/50 dark:bg-slate-900/50 rounded-2xl border border-slate-100 dark:border-slate-800 flex items-center gap-3">
-                      <div className="p-2 bg-emerald-500/10 rounded-lg">
-                        <ShieldCheck className="h-5 w-5 text-emerald-600" />
+                    <div className="p-6 bg-admin-bg-secondary/60 rounded-none border border-admin-border-primary/10 flex items-center gap-4 transition-all hover:bg-admin-bg-secondary">
+                      <div className="p-3 bg-emerald-500/10 rounded-none border border-emerald-500/20">
+                        <ShieldCheck className="h-6 w-6 text-emerald-600" />
                       </div>
                       <div>
-                        <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">
-                          Estándar
+                        <p className="text-[9px] font-display font-black uppercase tracking-[0.2em] text-admin-text-tertiary mb-1">
+                          Estándar Global
                         </p>
-                        <p className="text-xs font-bold text-slate-700 dark:text-slate-200">
+                        <p className="text-[10px] font-display font-bold text-admin-text-primary uppercase tracking-tight">
                           PCI-DSS Compliant
                         </p>
                       </div>
                     </div>
-                    <div className="p-4 bg-white/50 dark:bg-slate-900/50 rounded-2xl border border-slate-100 dark:border-slate-800 flex items-center gap-3">
-                      <div className="p-2 bg-blue-500/10 rounded-lg">
-                        <Lock className="h-5 w-5 text-blue-600" />
+                    <div className="p-6 bg-admin-bg-secondary/60 rounded-none border border-admin-border-primary/10 flex items-center gap-4 transition-all hover:bg-admin-bg-secondary">
+                      <div className="p-3 bg-admin-accent-secondary/10 rounded-none border border-admin-accent-secondary/20">
+                        <Lock className="h-6 w-6 text-admin-accent-secondary" />
                       </div>
                       <div>
-                        <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">
-                          Seguridad
+                        <p className="text-[9px] font-display font-black uppercase tracking-[0.2em] text-admin-text-tertiary mb-1">
+                          Encriptación
                         </p>
-                        <p className="text-xs font-bold text-slate-700 dark:text-slate-200">
-                          Encripción SSL 256-bit
+                        <p className="text-[10px] font-display font-bold text-admin-text-primary uppercase tracking-tight">
+                          SSL 256-bit Secure
                         </p>
                       </div>
                     </div>

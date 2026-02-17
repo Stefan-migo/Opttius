@@ -40,105 +40,134 @@ function ProductTableComponent({
 
   if (products.length === 0) {
     return (
-      <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.4)]">
-        <CardContent>
-          <div className="text-center py-12">
-            <Package className="h-12 w-12 text-tierra-media mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-azul-profundo mb-2">
-              No se encontraron productos
-            </h3>
-            <p className="text-tierra-media">
-              Ajusta los filtros o agrega nuevos productos.
-            </p>
-          </div>
+      <Card className="border border-admin-border-primary/20 bg-admin-bg-tertiary/30 rounded-none shadow-none">
+        <CardContent className="p-24 text-center">
+          <Package className="h-12 w-12 text-admin-text-tertiary mx-auto mb-4 opacity-20" />
+          <h3 className="text-sm font-display font-bold text-admin-text-primary uppercase tracking-widest">
+            Archivo de Inventario Vacío
+          </h3>
+          <p className="text-[10px] font-serif italic text-admin-text-tertiary uppercase tracking-wider mt-2">
+            No se han encontrado registros que coincidan con los criterios de
+            búsqueda
+          </p>
         </CardContent>
       </Card>
     );
   }
 
   return (
-    <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.4)]">
-      <CardHeader>
+    <Card className="border border-admin-border-primary/20 bg-white rounded-none shadow-none overflow-hidden">
+      <CardHeader className="bg-admin-bg-tertiary/50 border-b border-admin-border-primary/10 py-6">
         <CardTitle className="flex items-center justify-between">
-          <div className="flex items-center">
-            <Package className="h-5 w-5 mr-2" />
-            Productos ({products.length})
+          <div className="flex flex-col gap-1">
+            <h3 className="text-sm font-display font-bold text-admin-text-primary uppercase tracking-widest flex items-center">
+              Registros de Inventario ({products.length})
+            </h3>
+            <p className="text-[10px] font-serif italic text-admin-text-tertiary uppercase tracking-widest">
+              Consulta de Fichas Técnicas Activas
+            </p>
           </div>
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-3 bg-white px-4 py-2 border border-admin-border-primary/10">
             <input
               type="checkbox"
               checked={allSelected}
               onChange={onSelectAll}
-              className="rounded border-gray-300"
+              className="w-4 h-4 rounded-none border-admin-border-primary/20 accent-epoch-primary cursor-pointer"
             />
-            <span className="text-sm text-tierra-media">Seleccionar todos</span>
+            <span className="text-[10px] font-display font-bold text-admin-text-tertiary uppercase tracking-widest">
+              Seleccionar Todos
+            </span>
           </div>
         </CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="p-0">
         <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-12">
+          <TableHeader className="bg-admin-bg-tertiary/30">
+            <TableRow className="hover:bg-transparent border-admin-border-primary/10">
+              <TableHead className="w-12 text-center p-4">
                 <input
                   type="checkbox"
                   checked={allSelected}
                   onChange={onSelectAll}
-                  className="rounded border-gray-300"
+                  className="w-4 h-4 rounded-none border-admin-border-primary/20 accent-epoch-primary"
                 />
               </TableHead>
-              <TableHead>Producto</TableHead>
-              <TableHead>Categoría</TableHead>
-              <TableHead>Precio</TableHead>
-              <TableHead>Stock</TableHead>
-              <TableHead>Estado</TableHead>
-              <TableHead>Fecha</TableHead>
-              <TableHead>Acciones</TableHead>
+              <TableHead className="text-[10px] font-display font-bold text-admin-text-primary uppercase tracking-[0.2em] p-4">
+                Archivo / SKU
+              </TableHead>
+              <TableHead className="text-[10px] font-display font-bold text-admin-text-primary uppercase tracking-[0.2em] p-4">
+                Clasificación
+              </TableHead>
+              <TableHead className="text-[10px] font-display font-bold text-admin-text-primary uppercase tracking-[0.2em] p-4">
+                PVP
+              </TableHead>
+              <TableHead className="text-[10px] font-display font-bold text-admin-text-primary uppercase tracking-[0.2em] p-4">
+                Existencias
+              </TableHead>
+              <TableHead className="text-[10px] font-display font-bold text-admin-text-primary uppercase tracking-[0.2em] p-4">
+                Estado
+              </TableHead>
+              <TableHead className="text-[10px] font-display font-bold text-admin-text-primary uppercase tracking-[0.2em] p-4 text-right">
+                Acciones
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {products.map((product) => (
-              <TableRow key={product.id}>
-                <TableCell>
+              <TableRow
+                key={product.id}
+                className="border-admin-border-primary/10 hover:bg-admin-bg-tertiary/10 transition-colors"
+              >
+                <TableCell className="text-center p-4">
                   <input
                     type="checkbox"
                     checked={selectedProducts.includes(product.id)}
                     onChange={() => onSelectProduct(product.id)}
-                    className="rounded border-gray-300"
+                    className="w-4 h-4 rounded-none border-admin-border-primary/20 accent-epoch-primary"
                   />
                 </TableCell>
 
-                <TableCell>
-                  <div>
-                    <div className="font-medium">{product.name}</div>
-                    <div className="text-sm text-tierra-media">
-                      {product.slug}
+                <TableCell className="p-4">
+                  <div className="space-y-1">
+                    <p className="text-sm font-display font-bold text-admin-text-primary uppercase tracking-tight">
+                      {product.name}
+                    </p>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[9px] font-display font-bold text-admin-text-tertiary tracking-widest uppercase bg-admin-bg-tertiary px-1.5 py-0.5 border border-admin-border-primary/5">
+                        {product.sku || "NO-SKU"}
+                      </span>
+                      {product.is_featured && (
+                        <span className="text-[8px] font-display font-bold text-epoch-primary tracking-widest uppercase">
+                          • PREMIUM
+                        </span>
+                      )}
                     </div>
-                    {product.is_featured && (
-                      <Badge variant="outline" className="text-xs">
-                        Destacado
-                      </Badge>
-                    )}
                   </div>
                 </TableCell>
 
-                <TableCell>
-                  {product.categories?.name || product.category?.name ? (
-                    <Badge variant="outline">
-                      {product.categories?.name || product.category?.name}
-                    </Badge>
-                  ) : (
-                    <span className="text-tierra-media">Sin categoría</span>
-                  )}
+                <TableCell className="p-4">
+                  <span className="text-[10px] font-serif italic text-admin-text-tertiary uppercase tracking-wider">
+                    {product.categories?.name ||
+                      product.category?.name ||
+                      "Sin Clasificación"}
+                  </span>
                 </TableCell>
 
-                <TableCell className="font-medium">
-                  {formatPrice(product.price)}
+                <TableCell className="p-4">
+                  <span className="text-sm font-display font-bold text-epoch-primary">
+                    {formatPrice(product.price)}
+                  </span>
                 </TableCell>
 
-                <TableCell>
-                  <div className="flex items-center space-x-2">
-                    <span>
+                <TableCell className="p-4">
+                  <div className="flex items-center gap-2">
+                    <span
+                      className={`text-sm font-display font-bold ${
+                        (product.total_inventory_quantity || 0) <= 5
+                          ? "text-admin-error"
+                          : "text-admin-text-primary"
+                      }`}
+                    >
                       {product.total_inventory_quantity !== undefined
                         ? product.total_inventory_quantity
                         : product.inventory_quantity || 0}
@@ -146,35 +175,42 @@ function ProductTableComponent({
                     {(product.total_inventory_quantity !== undefined
                       ? product.total_inventory_quantity
                       : product.inventory_quantity || 0) <= 5 && (
-                      <AlertTriangle className="h-4 w-4 text-red-500" />
+                      <AlertTriangle className="h-3.5 w-3.5 text-admin-error animate-pulse" />
                     )}
                   </div>
                 </TableCell>
 
-                <TableCell>{getStatusBadge(product.status)}</TableCell>
-
-                <TableCell className="text-sm text-tierra-media">
-                  {new Date(product.created_at).toLocaleDateString("es-AR")}
+                <TableCell className="p-4">
+                  <div className="flex">{getStatusBadge(product.status)}</div>
                 </TableCell>
 
-                <TableCell>
-                  <div className="flex space-x-2">
+                <TableCell className="p-4 text-right">
+                  <div className="flex items-center justify-end gap-1">
                     <Link href={`/admin/products/${product.slug}`}>
-                      <Button variant="outline" size="sm">
-                        <Eye className="h-3 w-3" />
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 w-8 p-0 rounded-none hover:bg-admin-bg-tertiary text-epoch-primary"
+                      >
+                        <Eye className="h-4 w-4" />
                       </Button>
                     </Link>
                     <Link href={`/admin/products/edit/${product.id}`}>
-                      <Button variant="outline" size="sm">
-                        <Edit className="h-3 w-3" />
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 w-8 p-0 rounded-none hover:bg-admin-bg-tertiary text-epoch-primary"
+                      >
+                        <Edit className="h-4 w-4" />
                       </Button>
                     </Link>
                     <Button
-                      variant="outline"
+                      variant="ghost"
                       size="sm"
                       onClick={() => onDelete(product)}
+                      className="h-8 w-8 p-0 rounded-none hover:bg-admin-error/5 text-admin-error"
                     >
-                      <Trash2 className="h-3 w-3" />
+                      <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
                 </TableCell>

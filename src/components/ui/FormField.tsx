@@ -1,9 +1,9 @@
 /**
  * Form Field Component
- * 
+ *
  * Componente reutilizable para campos de formulario con label, error y descripción.
  * Proporciona una interfaz consistente para todos los campos de formulario.
- * 
+ *
  * @module components/ui/FormField
  */
 
@@ -41,7 +41,9 @@ export interface FormFieldProps extends React.HTMLAttributes<HTMLDivElement> {
 /**
  * Función para obtener el mensaje de error de un FieldError o string
  */
-function getErrorMessage(error: string | FieldError | null | undefined): string | undefined {
+function getErrorMessage(
+  error: string | FieldError | null | undefined,
+): string | undefined {
   if (!error) return undefined;
   if (typeof error === "string") return error;
   if (error && typeof error === "object" && "message" in error) {
@@ -52,15 +54,15 @@ function getErrorMessage(error: string | FieldError | null | undefined): string 
 
 /**
  * Componente FormField
- * 
+ *
  * @example
  * <FormField label="Nombre" error={errors.name?.message} required>
  *   <Input {...register("name")} />
  * </FormField>
- * 
+ *
  * @example
- * <FormField 
- *   label="Email" 
+ * <FormField
+ *   label="Email"
  *   error={errors.email?.message}
  *   description="Usaremos este email para contactarte"
  *   required
@@ -86,7 +88,7 @@ export default function FormField({
   const labelId = React.useId();
   const errorId = React.useId();
   const descriptionId = React.useId();
-  
+
   const errorMessage = getErrorMessage(error);
 
   return (
@@ -94,7 +96,7 @@ export default function FormField({
       className={cn(
         "space-y-2",
         labelPosition === "left" && "flex items-start gap-4 space-y-0",
-        containerClassName
+        containerClassName,
       )}
       {...props}
     >
@@ -105,40 +107,37 @@ export default function FormField({
             "text-sm font-medium",
             labelPosition === "left" && "min-w-[120px] pt-2",
             disabled && "opacity-50",
-            labelClassName
+            labelClassName,
           )}
         >
           {label}
           {required && <span className="text-destructive ml-1">*</span>}
         </Label>
       )}
-      
+
       <div className={cn("flex-1", className)}>
         {React.cloneElement(children as React.ReactElement<any>, {
           id: labelId,
           "aria-describedby": cn(
             description && descriptionId,
-            errorMessage && errorId
+            errorMessage && errorId,
           ),
           "aria-invalid": !!errorMessage,
           disabled,
         })}
-         
+
         {description && !errorMessage && (
-          <p
-            id={descriptionId}
-            className="text-xs text-muted-foreground mt-1"
-          >
+          <p id={descriptionId} className="text-xs text-muted-foreground mt-1">
             {description}
           </p>
         )}
-         
+
         {errorMessage && (
           <p
             id={errorId}
             className={cn(
               "text-xs text-destructive mt-1 flex items-center gap-1",
-              errorClassName
+              errorClassName,
             )}
             role="alert"
           >
@@ -168,7 +167,8 @@ export default function FormField({
 /**
  * Componente FormFieldGroup para agrupar campos relacionados
  */
-export interface FormFieldGroupProps extends React.HTMLAttributes<HTMLDivElement> {
+export interface FormFieldGroupProps
+  extends React.HTMLAttributes<HTMLDivElement> {
   /** Título del grupo */
   title?: string;
   /** Descripción del grupo */
@@ -201,17 +201,13 @@ export function FormFieldGroup({
     <div className={cn("space-y-4", className)} {...props}>
       {(title || description) && (
         <div className="space-y-1">
-          {title && (
-            <h3 className="text-lg font-semibold">{title}</h3>
-          )}
+          {title && <h3 className="text-lg font-semibold">{title}</h3>}
           {description && (
             <p className="text-sm text-muted-foreground">{description}</p>
           )}
         </div>
       )}
-      <div className={cn("grid gap-4", gridCols[columns])}>
-        {children}
-      </div>
+      <div className={cn("grid gap-4", gridCols[columns])}>{children}</div>
     </div>
   );
 }
@@ -219,7 +215,8 @@ export function FormFieldGroup({
 /**
  * Componente FormFieldSection para secciones de formulario
  */
-export interface FormFieldSectionProps extends React.HTMLAttributes<HTMLDivElement> {
+export interface FormFieldSectionProps
+  extends React.HTMLAttributes<HTMLDivElement> {
   /** Título de la sección */
   title?: string;
   /** Descripción de la sección */
@@ -251,9 +248,7 @@ export function FormFieldSection({
       {(title || description) && (
         <div className="flex items-center justify-between">
           <div className="space-y-1">
-            {title && (
-              <h3 className="text-lg font-semibold">{title}</h3>
-            )}
+            {title && <h3 className="text-lg font-semibold">{title}</h3>}
             {description && (
               <p className="text-sm text-muted-foreground">{description}</p>
             )}
@@ -277,7 +272,8 @@ export function FormFieldSection({
 /**
  * Componente FormFieldActions para botones de acción del formulario
  */
-export interface FormFieldActionsProps extends React.HTMLAttributes<HTMLDivElement> {
+export interface FormFieldActionsProps
+  extends React.HTMLAttributes<HTMLDivElement> {
   /** Alineación de los botones */
   align?: "left" | "center" | "right" | "space-between";
 }
@@ -343,7 +339,7 @@ export function FormFieldActionsExtended({
       {onCancel && (
         <button
           type="button"
-          className="px-4 py-2 border border-slate-200 rounded-lg text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+          className="px-6 py-2 border border-admin-border-primary/50 rounded-lg text-admin-text-secondary hover:bg-admin-bg-tertiary transition-all disabled:opacity-50 font-medium text-sm"
           onClick={onCancel}
           disabled={isSubmitting}
         >
@@ -353,7 +349,7 @@ export function FormFieldActionsExtended({
       {onSubmit && (
         <button
           type="button"
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2"
+          className="px-6 py-2 bg-admin-accent-primary text-[#1A2B23] rounded-lg hover:bg-admin-accent-secondary transition-all disabled:opacity-50 flex items-center gap-2 font-bold text-sm shadow-premium-sm"
           onClick={onSubmit as any}
           disabled={isSubmitting}
         >
@@ -365,5 +361,3 @@ export function FormFieldActionsExtended({
     </FormFieldActions>
   );
 }
-
-

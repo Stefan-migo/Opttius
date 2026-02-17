@@ -20,74 +20,74 @@ export default function ProductStats({
   formatPrice,
 }: ProductStatsProps) {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-      <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.4)]">
-        <CardContent className="p-6">
-          <div className="flex items-center">
-            <Package className="h-8 w-8 text-azul-profundo" />
-            <div className="ml-4">
-              <p className="text-sm font-medium text-tierra-media">
-                Total Productos
-              </p>
-              <p className="text-2xl font-bold text-azul-profundo">
-                {stats.totalProducts}
-              </p>
-              <p className="text-xs text-tierra-media mt-1">{statsLabel}</p>
-            </div>
+    <div className="grid grid-cols-1 md:grid-cols-4 gap-0 border border-admin-border-primary/20 bg-white">
+      <div className="p-8 border-r border-admin-border-primary/10 group hover:bg-admin-bg-tertiary transition-all duration-300">
+        <div className="flex items-start justify-between">
+          <div className="space-y-1">
+            <p className="text-[10px] font-display font-bold text-admin-text-tertiary uppercase tracking-[0.2em] group-hover:text-epoch-primary transition-colors">
+              VALORACIÓN TOTAL
+            </p>
+            <p className="text-2xl font-display font-bold text-admin-text-primary tracking-tight">
+              {formatPrice(stats.totalValue)}
+            </p>
+            <p className="text-[9px] font-serif italic text-admin-text-tertiary uppercase tracking-wider pt-2">
+              {statsLabel}
+            </p>
           </div>
-        </CardContent>
-      </Card>
+          <BarChart3 className="h-5 w-5 text-epoch-accent/40 group-hover:text-epoch-primary transition-colors" />
+        </div>
+      </div>
 
-      <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.4)]">
-        <CardContent className="p-6">
-          <div className="flex items-center">
-            <TrendingUp className="h-8 w-8 text-verde-suave" />
-            <div className="ml-4">
-              <p className="text-sm font-medium text-tierra-media">
-                Productos Activos
-              </p>
-              <p className="text-2xl font-bold text-verde-suave">
-                {stats.activeProducts}
-              </p>
-              <p className="text-xs text-tierra-media mt-1">{statsLabel}</p>
-            </div>
+      <div className="p-8 border-r border-admin-border-primary/10 group hover:bg-admin-bg-tertiary transition-all duration-300">
+        <div className="flex items-start justify-between">
+          <div className="space-y-1">
+            <p className="text-[10px] font-display font-bold text-admin-text-tertiary uppercase tracking-[0.2em] group-hover:text-epoch-primary transition-colors">
+              REGISTRO GLOBAL
+            </p>
+            <p className="text-2xl font-display font-bold text-admin-text-primary tracking-tight">
+              {stats.totalProducts}
+            </p>
+            <p className="text-[9px] font-serif italic text-admin-text-tertiary uppercase tracking-wider pt-2">
+              Ítems en archivo
+            </p>
           </div>
-        </CardContent>
-      </Card>
+          <Package className="h-5 w-5 text-epoch-accent/40 group-hover:text-epoch-primary transition-colors" />
+        </div>
+      </div>
 
-      <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.4)]">
-        <CardContent className="p-6">
-          <div className="flex items-center">
-            <AlertTriangle className="h-8 w-8 text-red-500" />
-            <div className="ml-4">
-              <p className="text-sm font-medium text-tierra-media">
-                Stock Bajo
-              </p>
-              <p className="text-2xl font-bold text-red-500">
-                {stats.lowStockCount}
-              </p>
-              <p className="text-xs text-tierra-media mt-1">{statsLabel}</p>
-            </div>
+      <div className="p-8 border-r border-admin-border-primary/10 group hover:bg-admin-bg-tertiary transition-all duration-300">
+        <div className="flex items-start justify-between">
+          <div className="space-y-1">
+            <p className="text-[10px] font-display font-bold text-admin-text-tertiary uppercase tracking-[0.2em] group-hover:text-admin-success transition-colors">
+              ESTADO ACTIVO
+            </p>
+            <p className="text-2xl font-display font-bold text-admin-text-primary tracking-tight">
+              {stats.activeProducts}
+            </p>
+            <p className="text-[9px] font-serif italic text-admin-text-tertiary uppercase tracking-wider pt-2">
+              Disponibilidad inmediata
+            </p>
           </div>
-        </CardContent>
-      </Card>
+          <TrendingUp className="h-5 w-5 text-admin-success/40 group-hover:text-admin-success transition-colors" />
+        </div>
+      </div>
 
-      <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.4)]">
-        <CardContent className="p-6">
-          <div className="flex items-center">
-            <BarChart3 className="h-8 w-8 text-dorado" />
-            <div className="ml-4">
-              <p className="text-sm font-medium text-tierra-media">
-                Valor Total
-              </p>
-              <p className="text-2xl font-bold text-dorado">
-                {formatPrice(stats.totalValue)}
-              </p>
-              <p className="text-xs text-tierra-media mt-1">{statsLabel}</p>
-            </div>
+      <div className="p-8 group hover:bg-admin-error/5 transition-all duration-300">
+        <div className="flex items-start justify-between">
+          <div className="space-y-1">
+            <p className="text-[10px] font-display font-bold text-admin-text-tertiary uppercase tracking-[0.2em] group-hover:text-admin-error transition-colors">
+              ALERTA DE STOCK
+            </p>
+            <p className="text-2xl font-display font-bold text-admin-text-primary tracking-tight">
+              {stats.lowStockCount}
+            </p>
+            <p className="text-[9px] font-serif italic text-admin-error/60 uppercase tracking-wider pt-2">
+              Reposición requerida
+            </p>
           </div>
-        </CardContent>
-      </Card>
+          <AlertTriangle className="h-5 w-5 text-admin-error/30 group-hover:text-admin-error transition-colors" />
+        </div>
+      </div>
     </div>
   );
 }

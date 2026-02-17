@@ -529,7 +529,7 @@ Para backups diarios automáticos de la base de datos en producción:
 1. **GitHub Actions** (`.github/workflows/saas-daily-backup.yml`): ejecuta `pg_dump` diariamente a las 4:00 UTC.
 
 2. **Secrets en GitHub** (Settings → Secrets and variables → Actions):
-   - `DIRECT_DATABASE_URL` - URL de conexión directa a Postgres (no pooler)
+   - `DIRECT_DATABASE_URL` - **Debe usar Supavisor Session Mode** (no la conexión directa). GitHub Actions no soporta IPv6; la conexión directa `db.xxx.supabase.co` falla con "Network is unreachable". Formato: `postgresql://postgres.[PROJECT_REF]:[PASSWORD]@aws-0-[REGION].pooler.supabase.com:5432/postgres`. Obtener en Supabase Dashboard → Connect → Connection pooling → Session mode.
    - `SUPABASE_URL` - URL del proyecto Supabase
    - `SUPABASE_SERVICE_ROLE_KEY` - Service role key
    - `CRON_SECRET` - Secreto para proteger el endpoint de registro

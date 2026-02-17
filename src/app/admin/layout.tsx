@@ -33,6 +33,7 @@ import {
   ArrowRight,
   Sparkles,
   HelpCircle,
+  Loader2,
 } from "lucide-react";
 import AdminNotificationDropdown from "@/components/admin/AdminNotificationDropdown";
 import Chatbot from "@/components/admin/Chatbot";
@@ -48,6 +49,7 @@ import { useBranch } from "@/hooks/useBranch";
 import { useRoot } from "@/hooks/useRoot";
 import { getBranchHeader } from "@/lib/utils/branch";
 import businessConfig from "@/config/business";
+import { OpttiusBrand, OpttiusLogoCompact } from "@/components/ui/brand";
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -438,7 +440,10 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           ...getBranchHeader(currentBranchId),
         };
 
-        const response = await fetch("/api/admin/dashboard", { headers });
+        const response = await fetch("/api/admin/dashboard", {
+          headers,
+          credentials: "include",
+        });
         if (response.ok) {
           const result = await response.json();
           if (!result.success)
@@ -705,10 +710,10 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             return;
           }
 
-          // Check admin access - only redirect if we've definitely checked and user is not admin
+          // Usuario logueado pero no admin -> onboarding (elegir demo o crear org)
           if (!adminState.isAdmin) {
-            console.log("❌ User is not admin, redirecting to login");
-            router.push("/login");
+            console.log("⚠️ User is not admin, redirecting to onboarding");
+            router.push("/onboarding/choice");
             return;
           }
 
@@ -756,41 +761,39 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
   if (isStillChecking) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="text-center space-y-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-dorado mx-auto"></div>
-          <div className="space-y-2">
-            <p className="text-azul-profundo font-semibold">
-              {loading
-                ? "Cargando autenticación..."
-                : adminState.isChecking
-                  ? "Verificando permisos de admin..."
-                  : organizationState.isChecking
-                    ? "Verificando organización..."
-                    : "Cargando..."}
-            </p>
-            <p className="text-tierra-media text-sm">
-              {loading
-                ? "Iniciando sesión..."
-                : user?.email
-                  ? `Verificando acceso para ${user.email}`
-                  : "Verificando permisos..."}
-            </p>
-            <div className="text-xs text-muted-foreground mt-2">
-              Estado:{" "}
-              {loading
-                ? "Auth loading"
-                : adminState.isChecking
-                  ? "Admin checking"
-                  : organizationState.isChecking
-                    ? "Org checking"
-                    : adminState.hasChecked
-                      ? "Check complete"
-                      : "Not checked"}{" "}
-              | User: {user ? "✓" : "✗"} | Admin:{" "}
-              {adminState.isAdmin ? "✓" : "✗"} | HasOrg:{" "}
-              {organizationState.hasOrganization ? "✓" : "✗"}
+      <div className="min-h-screen flex items-center justify-center bg-epoch-background relative overflow-hidden">
+        {/* Decorative Background Elements */}
+        <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+          <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-epoch-accent/10 rounded-full blur-[120px] animate-pulse" />
+          <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-epoch-primary/5 rounded-full blur-[120px] animate-pulse delay-700" />
+        </div>
+
+        <div className="relative z-10 flex flex-col items-center justify-center space-y-10 animate-in fade-in zoom-in duration-1000">
+          <div className="relative group">
+            <div className="absolute inset-0 bg-epoch-accent/20 rounded-none blur-3xl animate-pulse scale-125 opacity-50 group-hover:opacity-100 transition-opacity duration-700" />
+            <OpttiusLogoCompact
+              forceLight={false}
+              className="h-28 w-36 relative z-10 transition-transform duration-700 group-hover:scale-105"
+            />
+          </div>
+
+          <div className="flex flex-col items-center space-y-6">
+            <div className="flex items-center gap-4 px-6 py-2 border border-epoch-primary/5 bg-white shadow-sm rounded-none animate-in slide-in-from-bottom-4 duration-1000 delay-300">
+              <Loader2 className="h-4 w-4 animate-spin text-epoch-accent" />
+              <p className="text-[10px] font-display font-bold text-epoch-primary uppercase tracking-[0.4em]">
+                {loading
+                  ? "Sincronizando Identidad"
+                  : adminState.isChecking
+                    ? "Consultando Credenciales de Maestro"
+                    : "Autenticando Protocolos"}
+              </p>
             </div>
+
+            <p className="text-[11px] font-serif italic text-epoch-primary/40 text-center uppercase tracking-[0.2em] animate-in fade-in duration-1000 delay-500">
+              {user?.email
+                ? `Estableciendo acceso seguro para ${user.email}`
+                : "Estructurando entorno de trabajo..."}
+            </p>
           </div>
         </div>
       </div>
@@ -808,20 +811,24 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     (!user || !adminState.isAdmin)
   ) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="text-center space-y-4">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-500 mx-auto"></div>
-          <p className="text-red-600">
-            {!user
-              ? "Redirigiendo al login..."
-              : "Acceso no autorizado, redirigiendo..."}
-          </p>
-          <div className="text-xs text-muted-foreground">
-            User: {user ? "✓" : "✗"} | Admin: {adminState.isAdmin ? "✓" : "✗"} |
-            Loading: {loading ? "✓" : "✗"} | Checking:{" "}
-            {adminState.isChecking ? "✓" : "✗"} | HasChecked:{" "}
-            {adminState.hasChecked ? "✓" : "✗"}
+      <div className="min-h-screen flex items-center justify-center bg-epoch-background relative overflow-hidden">
+        <div className="relative z-10 flex flex-col items-center justify-center space-y-8 animate-in fade-in duration-700">
+          <div className="p-6 bg-red-500/5 border border-red-500/10 rounded-none shadow-premium animate-pulse">
+            <Loader2 className="h-10 w-10 text-red-900 animate-spin" />
           </div>
+
+          <div className="text-center space-y-3">
+            <h2 className="text-xl font-display font-bold text-epoch-primary uppercase tracking-tighter">
+              Acceso Denegado
+            </h2>
+            <p className="text-[11px] font-serif italic text-epoch-primary/50 uppercase tracking-[0.2em]">
+              {!user
+                ? "Protocolo de seguridad: Redirigiendo al portal de acceso"
+                : "Credencial insuficiente: Permiso de Maestro requerido"}
+            </p>
+          </div>
+
+          <div className="w-48 h-[1px] bg-red-500/20" />
         </div>
       </div>
     );
@@ -877,7 +884,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                       className="rounded-lg shadow-sm"
                     />
                   )}
-                  <h1 className="admin-header-title font-malisha">
+                  <h1 className="admin-header-title font-display uppercase tracking-widest text-[14px]">
                     {organizationState.organizationName || businessConfig.name}
                   </h1>
                 </div>
@@ -920,19 +927,19 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                         />
                       )}
                       <div>
-                        <h1 className="admin-header-title font-malisha text-admin-text-primary">
+                        <h1 className="admin-header-title font-display text-admin-text-primary uppercase tracking-widest text-sm lg:text-base">
                           {organizationState.organizationName ||
                             businessConfig.displayName ||
                             businessConfig.name}
                         </h1>
                         {organizationState.organizationSlogan ? (
-                          <p className="admin-header-subtitle font-caption text-admin-text-tertiary">
+                          <p className="admin-header-subtitle font-serif italic text-admin-text-tertiary">
                             {organizationState.organizationSlogan}
                           </p>
                         ) : (
-                          <p className="admin-header-subtitle font-caption text-admin-text-tertiary">
+                          <p className="admin-header-subtitle font-serif italic text-admin-text-tertiary">
                             {organizationState.organizationName
-                              ? "Panel de Administración"
+                              ? "Excelencia en Gestión Óptica"
                               : businessConfig.admin.subtitle}
                           </p>
                         )}
@@ -949,12 +956,12 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                     {organizationState.isDemoMode && (
                       <Button
                         onClick={() => router.push("/onboarding/create")}
-                        className="bg-amber-600 hover:bg-amber-700 text-white flex items-center gap-2"
+                        className="bg-admin-accent-secondary hover:bg-admin-accent-secondary/90 text-[#1A2B23] flex items-center gap-2 font-display font-bold uppercase tracking-widest text-[9px] rounded-none shadow-lg shadow-admin-accent-secondary/10"
                         size="sm"
                       >
-                        <Sparkles className="h-4 w-4" />
+                        <Sparkles className="h-3.5 w-3.5" />
                         Activar tu Óptica
-                        <ArrowRight className="h-4 w-4" />
+                        <ArrowRight className="h-3.5 w-3.5" />
                       </Button>
                     )}
                   </div>
@@ -1024,63 +1031,23 @@ function AdminSidebar({
   const { theme } = useTheme(); // Hook para detectar el tema
   const router = useRouter();
 
-  // Mapeo de logos por tema
-  const getThemeLogo = () => {
-    switch (theme) {
-      case "dark":
-        return "/logo-opttius-dark.png";
-      case "blue":
-        return "/logo-opttius-blue.png";
-      case "green":
-        return "/logo-opttius-green.png";
-      case "red":
-        return "/logo-opttius-red.png";
-      default:
-        return "/logo-opttius.png";
-    }
-  };
-
-  const getThemeTextLogo = () => {
-    switch (theme) {
-      case "dark":
-        return "/logo-text-dark.svg";
-      case "blue":
-        return "/logo-text-blue.svg";
-      case "green":
-        return "/logo-text-green.svg";
-      case "red":
-        return "/logo-text-red.svg";
-      default:
-        return "/logo-text-default.svg";
-    }
-  };
-
   const handleSignOut = async () => {
     await signOut();
     router.push("/");
   };
 
   return (
-    <div className="admin-sidebar flex grow flex-col h-full overflow-hidden">
-      {/* Logo */}
-      <div className="admin-sidebar-header">
-        <Link href="/" className="admin-sidebar-logo">
-          <Image
-            src={getThemeLogo()}
-            alt="Logo"
-            width={50}
-            height={50}
-            className="rounded-[30px] shadow-md"
-          />
-          <div className="flex flex-col ml-1">
-            <Image
-              src={getThemeTextLogo()}
-              alt="Opttius"
-              width={140}
-              height={30}
-              className="object-contain pt-2"
-            />
-          </div>
+    <div className="admin-sidebar flex grow flex-col h-full overflow-hidden relative">
+      {/* Texture Overlay */}
+      <div className="absolute inset-0 opacity-[0.03] pointer-events-none" />
+
+      {/* Logo Section */}
+      <div className="admin-sidebar-header relative z-10 border-b border-admin-border-primary/10">
+        <Link
+          href="/"
+          className="admin-sidebar-logo group py-4 px-6 flex items-center justify-center"
+        >
+          <OpttiusBrand forceLight={true} />
         </Link>
       </div>
 
@@ -1115,16 +1082,43 @@ function AdminSidebar({
                   <Link
                     href={item.href}
                     onClick={onNavigate}
-                    className={cn("admin-nav-item", isActive && "active")}
+                    className={cn(
+                      "admin-nav-item rounded-none relative group overflow-hidden transition-all duration-300",
+                      isActive
+                        ? "active" // Usar la clase definida en globals.css para manejo de colores por CSS variables
+                        : "",
+                    )}
                   >
-                    <item.icon className="h-5 w-5" />
+                    <div
+                      className={cn(
+                        "absolute inset-y-0 left-0 w-[2px] bg-admin-accent-secondary transition-transform duration-300",
+                        isActive
+                          ? "scale-y-100"
+                          : "scale-y-0 group-hover:scale-y-50",
+                      )}
+                    />
+
+                    <item.icon
+                      className={cn(
+                        "h-5 w-5 transition-transform duration-300 group-hover:scale-110",
+                        isActive ? "text-inherit" : "text-inherit opacity-70",
+                      )}
+                    />
+
                     <div className="flex-1">
                       <div className="flex items-center justify-between">
-                        <span className="truncate">{item.label}</span>
+                        <span
+                          className={cn(
+                            "truncate font-display uppercase tracking-widest text-[10px]",
+                            isActive ? "font-bold" : "font-medium",
+                          )}
+                        >
+                          {item.label}
+                        </span>
                         {item.badge && (
                           <Badge
                             variant="secondary"
-                            className="admin-badge admin-badge-error"
+                            className="admin-sidebar-badge bg-admin-accent-secondary text-[#1A2B23] rounded-none px-1.5 py-0.5 text-[10px] font-display font-black leading-none shadow-[0_2px_4px_rgba(0,0,0,0.2)]"
                           >
                             {item.badge}
                           </Badge>
@@ -1139,53 +1133,59 @@ function AdminSidebar({
       </nav>
 
       {/* User & Footer Section */}
-      <div className="mt-auto p-4 space-y-4 bg-admin-bg-tertiary/20">
+      <div className="mt-auto p-4 space-y-4 border-t border-white/10 bg-black/5">
         {/* User Profile Hookup */}
-        <div className="flex items-center gap-3 p-3 rounded-2xl bg-admin-bg-tertiary shadow-sm border border-admin-border-primary">
-          <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">
+        <div className="flex items-center gap-3 p-4 bg-white/5 border border-white/10 rounded-none relative overflow-hidden group">
+          <div className="absolute inset-0 bg-gradient-to-br from-admin-accent-secondary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+          <div className="h-10 w-10 rounded-none bg-admin-accent-primary/10 border border-admin-accent-secondary/20 flex items-center justify-center text-admin-accent-secondary font-display font-bold relative z-10">
             {profile?.first_name?.[0] || user?.email?.[0]?.toUpperCase() || "U"}
           </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-bold truncate text-admin-text-primary">
+          <div className="flex-1 min-w-0 relative z-10">
+            <p className="text-[11px] font-display font-bold uppercase tracking-wider truncate text-[#F9F7F2]">
               {profile?.first_name
                 ? `${profile.first_name} ${profile.last_name || ""}`.trim()
                 : user?.email?.split("@")[0]}
             </p>
-            <p className="text-[10px] font-medium text-admin-text-tertiary uppercase tracking-wider">
+            <p className="text-[8px] font-serif italic text-[#F9F7F2]/60 tracking-widest uppercase">
               {isRoot
-                ? "Root User"
+                ? "Archivista Root"
                 : isSuperAdmin
-                  ? "Super Admin"
+                  ? "Guardián de Orden"
                   : "Administrador"}
             </p>
           </div>
-          <Link href="/admin/profile">
-            <Button variant="ghost" size="icon-sm" className="rounded-lg">
+          <Link href="/admin/profile" className="relative z-10">
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              className="rounded-none hover:bg-white/10 text-[#F9F7F2]"
+            >
               <User className="h-4 w-4" />
             </Button>
           </Link>
         </div>
 
         {/* Action Buttons */}
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-2 gap-2 relative z-10">
           <Link href="/admin/help" className="w-full">
             <Button
               variant="outline"
               size="sm"
-              className="w-full text-[10px] gap-1.5 h-8 bg-admin-bg-tertiary"
+              className="w-full text-[9px] font-display uppercase tracking-widest gap-1.5 h-9 bg-transparent border-white/20 text-[#F9F7F2] rounded-none"
             >
-              <HelpCircle className="h-3.5 w-3.5" />
-              Ayuda
+              <HelpCircle className="h-3.5 w-3.5 text-admin-accent-secondary transition-colors" />
+              Auxilio
             </Button>
           </Link>
           <Button
             variant="outline"
             size="sm"
             onClick={handleSignOut}
-            className="w-full text-[10px] gap-1.5 h-8 text-destructive hover:text-destructive bg-[var(--admin-border-primary)]"
+            className="admin-logout-button w-full text-[9px] font-display uppercase tracking-widest gap-1.5 h-9 text-red-300 border-red-300/20 rounded-none"
           >
-            <LogOut className="h-3.5 w-3.5" />
-            Salir
+            <LogOut className="h-3.5 w-3.5 transition-colors" />
+            Retiro
           </Button>
         </div>
 

@@ -65,7 +65,7 @@ export async function GET(request: NextRequest) {
     // Build query - include category for display (FK category_id -> categories)
     let query = supabase
       .from("lens_families")
-      .select("*, categories(id, name, slug)")
+      .select("*, categories:category_id(id, name, slug)")
       .order("created_at", { ascending: false });
 
     // CRITICAL: Filter by organization_id (each organization has its own lens families)
