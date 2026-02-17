@@ -41,6 +41,7 @@ import Link from "next/link";
 import dynamic from "next/dynamic";
 import { useBranch } from "@/hooks/useBranch";
 import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
 
 // Lazy load large components to reduce initial bundle size
 const AppointmentCalendar = dynamic(
