@@ -467,9 +467,9 @@ export default function AdminDashboard() {
             >
               <div className="relative">
                 <Package className="h-4 w-4" />
-                {data?.kpis?.workOrders?.pending > 0 && (
+                {(data?.kpis?.workOrders?.pending ?? 0) > 0 && (
                   <span className="absolute -top-1.5 -right-1.5 h-3.5 w-3.5 bg-admin-accent-secondary text-[#1A2B23] text-[8px] font-black flex items-center justify-center border border-admin-bg-secondary leading-none shadow-sm">
-                    {data.kpis.workOrders.pending}
+                    {data?.kpis?.workOrders?.pending ?? 0}
                   </span>
                 )}
               </div>
