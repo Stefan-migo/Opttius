@@ -37,8 +37,8 @@ export function LandingFooter() {
             </Link>
 
             <p className="text-white/40 text-sm font-body leading-relaxed italic max-w-xs">
-              Redefiniendo el estándar tecnológico en la industria óptica global
-              con la elegancia de una era dorada y la precisión del mañana.
+              Sistema de gestión para ópticas creado por un tecnólogo médico.
+              Exclusivo para el sector. Última generación.
             </p>
 
             <div className="flex gap-8">
@@ -57,56 +57,63 @@ export function LandingFooter() {
           {/* Product Column */}
           <div>
             <h3 className="font-display text-xs font-bold text-epoch-accent uppercase tracking-[0.4em] mb-12">
-              Exploración
+              Navegación
             </h3>
             <ul className="space-y-6 text-xs font-display tracking-[0.2em] uppercase">
-              {["Inicio", "Características", "Beneficios", "Precios"].map(
-                (item, i) => (
-                  <li key={i}>
-                    <Link
-                      href={`#${item.toLowerCase()}`}
-                      className="text-white/50 hover:text-white transition-all duration-300 flex items-center group"
-                    >
-                      <span className="w-0 group-hover:w-4 h-[1px] bg-epoch-accent mr-0 group-hover:mr-4 transition-all duration-500"></span>
-                      {item}
-                    </Link>
-                  </li>
-                ),
-              )}
+              {[
+                { name: "Inicio", href: "#inicio" },
+                { name: "Características", href: "#caracteristicas" },
+                { name: "Beneficios", href: "#beneficios" },
+                { name: "Precios", href: "#precios" },
+                { name: "Nosotros", href: "/about" },
+              ].map((item) => (
+                <li key={item.name}>
+                  <Link
+                    href={item.href}
+                    className="text-white/50 hover:text-white transition-all duration-300 flex items-center group"
+                  >
+                    <span className="w-0 group-hover:w-4 h-[1px] bg-epoch-accent mr-0 group-hover:mr-4 transition-all duration-500"></span>
+                    {item.name}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
 
           {/* Legal Column */}
           <div>
             <h3 className="font-display text-xs font-bold text-epoch-accent uppercase tracking-[0.4em] mb-12">
-              Manuscritos
+              Legal
             </h3>
             <ul className="space-y-6 text-xs font-display tracking-[0.2em] uppercase">
-              {["Privacidad", "Términos", "Cookies", "Seguridad"].map(
-                (item, i) => (
-                  <li key={i}>
-                    <Link
-                      href="#"
-                      className="text-white/50 hover:text-white transition-all duration-300 flex items-center group"
-                    >
-                      <span className="w-0 group-hover:w-4 h-[1px] bg-epoch-accent mr-0 group-hover:mr-4 transition-all duration-500"></span>
-                      {item}
-                    </Link>
-                  </li>
-                ),
-              )}
+              {[
+                { name: "Privacidad", href: "/legal/privacidad" },
+                { name: "Términos", href: "/legal/terminos" },
+                { name: "Cookies", href: "/legal/cookies" },
+                { name: "Seguridad", href: "/legal/seguridad" },
+              ].map((item) => (
+                <li key={item.name}>
+                  <Link
+                    href={item.href}
+                    className="text-white/50 hover:text-white transition-all duration-300 flex items-center group"
+                  >
+                    <span className="w-0 group-hover:w-4 h-[1px] bg-epoch-accent mr-0 group-hover:mr-4 transition-all duration-500"></span>
+                    {item.name}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
 
           {/* Contact Column */}
           <div>
             <h3 className="font-display text-xs font-bold text-epoch-accent uppercase tracking-[0.4em] mb-12">
-              Corresponsal
+              Contacto
             </h3>
             <ul className="space-y-8 font-serif italic text-sm">
               <li className="flex flex-col gap-2">
                 <span className="text-[10px] font-display tracking-[0.3em] uppercase text-white/30">
-                  Despacho
+                  Email
                 </span>
                 <a
                   href={`mailto:${businessConfig.contactEmail}`}
@@ -117,7 +124,7 @@ export function LandingFooter() {
               </li>
               <li className="flex flex-col gap-2">
                 <span className="text-[10px] font-display tracking-[0.3em] uppercase text-white/30">
-                  Audiencias
+                  Teléfono
                 </span>
                 <a
                   href="tel:+1234567890"
@@ -132,8 +139,8 @@ export function LandingFooter() {
 
         <div className="mt-32 pt-12 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-10">
           <p className="font-display text-[9px] text-white/20 uppercase tracking-[0.4em]">
-            © {currentYear} {businessConfig.displayName}. CREADO PARA EL
-            EXIGENTE.
+            © {currentYear} {businessConfig.displayName}. DISEÑADO PARA ÓPTICAS
+            EXIGENTES.
           </p>
           <div className="flex gap-4">
             <div className="w-12 h-12 border border-white/5 flex items-center justify-center rounded-full opacity-50">

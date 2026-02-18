@@ -1,9 +1,9 @@
 /**
  * Form Validation Utilities
- * 
+ *
  * Utilidades y esquemas de validación comunes para formularios.
  * Proporciona esquemas Zod predefinidos y funciones de validación reutilizables.
- * 
+ *
  * @module lib/validation/formValidation
  */
 
@@ -21,7 +21,7 @@ export const rutSchema = z
       const rutRegex = /^(\d{1,2}\.?\d{3}\.?\d{3}-)[\dKk]$/;
       return rutRegex.test(value);
     },
-    { message: "Formato de RUT inválido" }
+    { message: "Formato de RUT inválido" },
   )
   .refine(
     (value) => {
@@ -29,21 +29,26 @@ export const rutSchema = z
       const cleanRut = value.replace(/\./g, "").replace(/-/g, "");
       const rut = cleanRut.slice(0, -1);
       const dv = cleanRut.slice(-1).toUpperCase();
-      
+
       let sum = 0;
       let multiplier = 2;
-      
+
       for (let i = rut.length - 1; i >= 0; i--) {
         sum += parseInt(rut[i]) * multiplier;
         multiplier = multiplier === 7 ? 2 : multiplier + 1;
       }
-      
+
       const expectedDv = 11 - (sum % 11);
-      const calculatedDv = expectedDv === 11 ? "0" : expectedDv === 10 ? "K" : expectedDv.toString();
-      
+      const calculatedDv =
+        expectedDv === 11
+          ? "0"
+          : expectedDv === 10
+            ? "K"
+            : expectedDv.toString();
+
       return calculatedDv === dv;
     },
-    { message: "RUT inválido" }
+    { message: "RUT inválido" },
   );
 
 /**
@@ -66,7 +71,7 @@ export const phoneSchema = z
       const phoneRegex = /^(\+56\s?)?9\s?\d{4}\s?\d{4}$/;
       return phoneRegex.test(value.replace(/[-.]/g, " "));
     },
-    { message: "Formato de teléfono inválido" }
+    { message: "Formato de teléfono inválido" },
   )
   .optional();
 
@@ -78,10 +83,9 @@ export const nameSchema = z
   .min(1, "El nombre es requerido")
   .min(2, "El nombre debe tener al menos 2 caracteres")
   .max(100, "El nombre no puede exceder 100 caracteres")
-  .refine(
-    (value) => /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s'-]+$/.test(value),
-    { message: "El nombre solo puede contener letras y espacios" }
-  );
+  .refine((value) => /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s'-]+$/.test(value), {
+    message: "El nombre solo puede contener letras y espacios",
+  });
 
 /**
  * Esquema de validación para precio
@@ -89,10 +93,9 @@ export const nameSchema = z
 export const priceSchema = z
   .string()
   .min(1, "El precio es requerido")
-  .refine(
-    (value) => !isNaN(parseFloat(value)) && parseFloat(value) >= 0,
-    { message: "El precio debe ser un número positivo" }
-  )
+  .refine((value) => !isNaN(parseFloat(value)) && parseFloat(value) >= 0, {
+    message: "El precio debe ser un número positivo",
+  })
   .transform((value) => parseFloat(value));
 
 /**
@@ -101,19 +104,15 @@ export const priceSchema = z
 export const quantitySchema = z
   .string()
   .min(1, "La cantidad es requerida")
-  .refine(
-    (value) => !isNaN(parseInt(value)) && parseInt(value) > 0,
-    { message: "La cantidad debe ser un número positivo" }
-  )
+  .refine((value) => !isNaN(parseInt(value)) && parseInt(value) > 0, {
+    message: "La cantidad debe ser un número positivo",
+  })
   .transform((value) => parseInt(value));
 
 /**
  * Esquema de validación para URL
  */
-export const urlSchema = z
-  .string()
-  .url("URL inválida")
-  .optional();
+export const urlSchema = z.string().url("URL inválida").optional();
 
 /**
  * Esquema de validación para fecha
@@ -121,10 +120,7 @@ export const urlSchema = z
 export const dateSchema = z
   .string()
   .min(1, "La fecha es requerida")
-  .refine(
-    (value) => !isNaN(Date.parse(value)),
-    { message: "Fecha inválida" }
-  );
+  .refine((value) => !isNaN(Date.parse(value)), { message: "Fecha inválida" });
 
 /**
  * Esquema de validación para código postal chileno
@@ -132,10 +128,9 @@ export const dateSchema = z
 export const postalCodeSchema = z
   .string()
   .min(1, "El código postal es requerido")
-  .refine(
-    (value) => /^\d{7}$/.test(value),
-    { message: "El código postal debe tener 7 dígitos" }
-  );
+  .refine((value) => /^\d{7}$/.test(value), {
+    message: "El código postal debe tener 7 dígitos",
+  });
 
 /**
  * Esquema de validación para dirección
@@ -161,22 +156,18 @@ export const citySchema = z
 export const passwordSchema = z
   .string()
   .min(8, "La contraseña debe tener al menos 8 caracteres")
-  .refine(
-    (value) => /[A-Z]/.test(value),
-    { message: "La contraseña debe contener al menos una mayúscula" }
-  )
-  .refine(
-    (value) => /[a-z]/.test(value),
-    { message: "La contraseña debe contener al menos una minúscula" }
-  )
-  .refine(
-    (value) => /\d/.test(value),
-    { message: "La contraseña debe contener al menos un número" }
-  )
-  .refine(
-    (value) => /[!@#$%^&*(),.?":{}|<>]/.test(value),
-    { message: "La contraseña debe contener al menos un carácter especial" }
-  );
+  .refine((value) => /[A-Z]/.test(value), {
+    message: "La contraseña debe contener al menos una mayúscula",
+  })
+  .refine((value) => /[a-z]/.test(value), {
+    message: "La contraseña debe contener al menos una minúscula",
+  })
+  .refine((value) => /\d/.test(value), {
+    message: "La contraseña debe contener al menos un número",
+  })
+  .refine((value) => /[!@#$%^&*(),.?":{}|<>]/.test(value), {
+    message: "La contraseña debe contener al menos un carácter especial",
+  });
 
 /**
  * Esquema de validación para confirmación de contraseña
@@ -192,21 +183,61 @@ export const passwordConfirmationSchema = z
   });
 
 /**
+ * Esquema opcional que acepta string vacío (""), undefined o valor válido.
+ * Los formularios envían "" para campos vacíos, no undefined.
+ */
+const optionalOrEmpty = <T extends z.ZodTypeAny>(schema: T) =>
+  z.union([z.literal(""), schema]).optional();
+
+/**
+ * RUT opcional: vacío permitido; si hay valor, validar con validateRUT.
+ */
+const optionalRutSchema = z
+  .string()
+  .optional()
+  .transform((val) => (val === "" || val == null ? undefined : val))
+  .refine((val) => !val || val.trim() === "" || validateRUT(val), {
+    message: "RUT inválido",
+  });
+
+/**
+ * Teléfono requerido: al menos 8 dígitos, formato flexible.
+ */
+const requiredPhoneSchema = z
+  .string()
+  .min(1, "El teléfono es requerido")
+  .refine((val) => val.replace(/\D/g, "").length >= 8, {
+    message: "Ingrese un número de contacto válido (mín. 8 dígitos)",
+  });
+
+/**
  * Esquema de validación para cliente
+ * Requeridos: nombre, apellido, teléfono. El resto opcional.
  */
 export const customerSchema = z.object({
   first_name: nameSchema,
   last_name: nameSchema,
-  email: emailSchema,
-  phone: phoneSchema.optional(),
-  rut: rutSchema.optional(),
-  address_line_1: addressSchema.optional(),
-  address_line_2: addressSchema.optional(),
-  city: citySchema.optional(),
-  state: z.string().optional(),
-  postal_code: postalCodeSchema.optional(),
+  email: z
+    .union([z.literal(""), z.string().email("Email inválido")])
+    .optional()
+    .transform((val) => (val === "" || val == null ? undefined : val)),
+  phone: requiredPhoneSchema,
+  rut: optionalRutSchema,
+  address_line_1: optionalOrEmpty(
+    z.string().min(5, "La dirección debe tener al menos 5 caracteres").max(200),
+  ),
+  address_line_2: z.string().max(200).optional().or(z.literal("")),
+  city: optionalOrEmpty(
+    z.string().min(2, "La ciudad debe tener al menos 2 caracteres").max(100),
+  ),
+  state: z.string().optional().or(z.literal("")),
+  postal_code: z.string().max(20).optional().or(z.literal("")),
   country: z.string().default("Chile"),
-  notes: z.string().max(500, "Las notas no pueden exceder 500 caracteres").optional(),
+  notes: z
+    .string()
+    .max(500, "Las notas no pueden exceder 500 caracteres")
+    .optional()
+    .or(z.literal("")),
   branch_id: z.string().optional(),
 });
 
@@ -214,13 +245,34 @@ export const customerSchema = z.object({
  * Esquema de validación para producto
  */
 export const productSchema = z.object({
-  name: z.string().min(1, "El nombre es requerido").max(200, "El nombre no puede exceder 200 caracteres"),
-  slug: z.string().min(1, "El slug es requerido").regex(/^[a-z0-9-]+$/, "El slug solo puede contener letras minúsculas, números y guiones"),
-  description: z.string().max(1000, "La descripción no puede exceder 1000 caracteres").optional(),
+  name: z
+    .string()
+    .min(1, "El nombre es requerido")
+    .max(200, "El nombre no puede exceder 200 caracteres"),
+  slug: z
+    .string()
+    .min(1, "El slug es requerido")
+    .regex(
+      /^[a-z0-9-]+$/,
+      "El slug solo puede contener letras minúsculas, números y guiones",
+    ),
+  description: z
+    .string()
+    .max(1000, "La descripción no puede exceder 1000 caracteres")
+    .optional(),
   price: priceSchema,
-  sku: z.string().min(1, "El SKU es requerido").max(50, "El SKU no puede exceder 50 caracteres"),
-  barcode: z.string().max(50, "El código de barras no puede exceder 50 caracteres").optional(),
-  brand: z.string().max(100, "La marca no puede exceder 100 caracteres").optional(),
+  sku: z
+    .string()
+    .min(1, "El SKU es requerido")
+    .max(50, "El SKU no puede exceder 50 caracteres"),
+  barcode: z
+    .string()
+    .max(50, "El código de barras no puede exceder 50 caracteres")
+    .optional(),
+  brand: z
+    .string()
+    .max(100, "La marca no puede exceder 100 caracteres")
+    .optional(),
   category_id: z.string().min(1, "La categoría es requerida"),
   status: z.enum(["active", "draft", "archived"], {
     errorMap: () => ({ message: "Estado inválido" }),
@@ -232,17 +284,24 @@ export const productSchema = z.object({
  */
 export const orderSchema = z.object({
   customer_id: z.string().min(1, "El cliente es requerido"),
-  items: z.array(z.object({
-    product_id: z.string().min(1, "El producto es requerido"),
-    quantity: quantitySchema,
-    price: priceSchema,
-  })).min(1, "La orden debe tener al menos un item"),
+  items: z
+    .array(
+      z.object({
+        product_id: z.string().min(1, "El producto es requerido"),
+        quantity: quantitySchema,
+        price: priceSchema,
+      }),
+    )
+    .min(1, "La orden debe tener al menos un item"),
   shipping_address: addressSchema,
   shipping_city: citySchema,
   shipping_state: z.string().min(1, "La región es requerida"),
   shipping_postal_code: postalCodeSchema,
   shipping_phone: phoneSchema,
-  notes: z.string().max(500, "Las notas no pueden exceder 500 caracteres").optional(),
+  notes: z
+    .string()
+    .max(500, "Las notas no pueden exceder 500 caracteres")
+    .optional(),
 });
 
 /**
@@ -252,12 +311,24 @@ export const appointmentSchema = z.object({
   customer_id: z.string().min(1, "El cliente es requerido"),
   appointment_date: dateSchema,
   appointment_time: z.string().min(1, "La hora es requerida"),
-  duration_minutes: z.number().min(15, "La duración mínima es 15 minutos").max(180, "La duración máxima es 180 minutos"),
-  appointment_type: z.enum(["examen", "entrega", "ajuste", "revisión", "otro"], {
-    errorMap: () => ({ message: "Tipo de cita inválido" }),
-  }),
-  reason: z.string().min(1, "El motivo es requerido").max(200, "El motivo no puede exceder 200 caracteres"),
-  notes: z.string().max(500, "Las notas no pueden exceder 500 caracteres").optional(),
+  duration_minutes: z
+    .number()
+    .min(15, "La duración mínima es 15 minutos")
+    .max(180, "La duración máxima es 180 minutos"),
+  appointment_type: z.enum(
+    ["examen", "entrega", "ajuste", "revisión", "otro"],
+    {
+      errorMap: () => ({ message: "Tipo de cita inválido" }),
+    },
+  ),
+  reason: z
+    .string()
+    .min(1, "El motivo es requerido")
+    .max(200, "El motivo no puede exceder 200 caracteres"),
+  notes: z
+    .string()
+    .max(500, "Las notas no pueden exceder 500 caracteres")
+    .optional(),
 });
 
 /**
@@ -275,7 +346,10 @@ export const prescriptionSchema = z.object({
   left_eye_addition: z.string().optional(),
   pd_far: z.string().optional(),
   pd_near: z.string().optional(),
-  notes: z.string().max(500, "Las notas no pueden exceder 500 caracteres").optional(),
+  notes: z
+    .string()
+    .max(500, "Las notas no pueden exceder 500 caracteres")
+    .optional(),
 });
 
 /**
@@ -284,21 +358,22 @@ export const prescriptionSchema = z.object({
 export function validateRUT(rut: string): boolean {
   const cleanRut = rut.replace(/\./g, "").replace(/-/g, "");
   if (cleanRut.length < 8 || cleanRut.length > 9) return false;
-  
+
   const rutNumber = cleanRut.slice(0, -1);
   const dv = cleanRut.slice(-1).toUpperCase();
-  
+
   let sum = 0;
   let multiplier = 2;
-  
+
   for (let i = rutNumber.length - 1; i >= 0; i--) {
     sum += parseInt(rutNumber[i]) * multiplier;
     multiplier = multiplier === 7 ? 2 : multiplier + 1;
   }
-  
+
   const expectedDv = 11 - (sum % 11);
-  const calculatedDv = expectedDv === 11 ? "0" : expectedDv === 10 ? "K" : expectedDv.toString();
-  
+  const calculatedDv =
+    expectedDv === 11 ? "0" : expectedDv === 10 ? "K" : expectedDv.toString();
+
   return calculatedDv === dv;
 }
 
@@ -308,14 +383,14 @@ export function validateRUT(rut: string): boolean {
 export function formatRUT(rut: string): string {
   const cleanRut = rut.replace(/\./g, "").replace(/-/g, "");
   if (cleanRut.length < 8) return rut;
-  
+
   const rutNumber = cleanRut.slice(0, -1);
   const dv = cleanRut.slice(-1);
-  
+
   // Formatear con puntos: XX.XXX.XXX
   let formatted = "";
   let count = 0;
-  
+
   for (let i = rutNumber.length - 1; i >= 0; i--) {
     if (count > 0 && count % 3 === 0) {
       formatted = "." + formatted;
@@ -323,7 +398,7 @@ export function formatRUT(rut: string): string {
     formatted = rutNumber[i] + formatted;
     count++;
   }
-  
+
   return formatted + "-" + dv;
 }
 
@@ -349,15 +424,15 @@ export function validatePhone(phone: string): boolean {
  */
 export function formatPhone(phone: string): string {
   const cleanPhone = phone.replace(/[^0-9+]/g, "");
-  
+
   if (cleanPhone.startsWith("+56")) {
     return `+56 9 ${cleanPhone.slice(3, 7)} ${cleanPhone.slice(7)}`;
   }
-  
+
   if (cleanPhone.startsWith("9") && cleanPhone.length === 9) {
     return `9 ${cleanPhone.slice(1, 5)} ${cleanPhone.slice(5)}`;
   }
-  
+
   return phone;
 }
 

@@ -30,6 +30,7 @@ export function LandingHeader() {
     { name: "Características", href: "#caracteristicas" },
     { name: "Beneficios", href: "#beneficios" },
     { name: "Precios", href: "#precios" },
+    { name: "Nosotros", href: "/about" },
   ];
 
   useEffect(() => {
@@ -81,13 +82,15 @@ export function LandingHeader() {
     checkAuthAndOrg();
   }, []);
 
-  const scrollToSection = (href: string) => {
+  const handleNavClick = (href: string) => {
+    setMobileMenuOpen(false);
     if (href.startsWith("#")) {
       const element = document.querySelector(href);
       if (element) {
         element.scrollIntoView({ behavior: "smooth" });
       }
-      setMobileMenuOpen(false);
+    } else {
+      router.push(href);
     }
   };
 
@@ -100,16 +103,19 @@ export function LandingHeader() {
       }`}
     >
       <nav className="max-w-7xl mx-auto flex justify-between items-center transition-all duration-300">
-        {/* Logo */}
-        <Link
-          href="/"
-          className="group flex flex-col items-start translate-y-0"
-        >
-          <div className="relative group-hover:scale-105 transition-all duration-700">
-            <OpttiusLogoText
-              forceLight={true}
-              className="h-14 w-44 transition-all duration-700 opacity-100"
+        {/* Logo - same structure as admin sidebar */}
+        <Link href="/" className="group flex items-center gap-4 pl-5">
+          <div className="relative group-hover:scale-105 transition-all duration-700 flex-shrink-0">
+            <Image
+              src="/LogoCircle.svg"
+              alt="Opttius"
+              width={44}
+              height={44}
+              className="h-10 w-10 md:h-11 md:w-11 transition-all duration-700"
             />
+          </div>
+          <div className="flex flex-col items-start justify-center">
+            <OpttiusLogoText forceLight={true} className="h-10 w-40 md:w-44" />
           </div>
         </Link>
 
@@ -118,7 +124,7 @@ export function LandingHeader() {
           {navigation.map((item) => (
             <button
               key={item.name}
-              onClick={() => scrollToSection(item.href)}
+              onClick={() => handleNavClick(item.href)}
               className="hover:text-epoch-accent transition-colors duration-300 relative group"
             >
               {item.name}
@@ -205,7 +211,7 @@ export function LandingHeader() {
             {navigation.map((item) => (
               <button
                 key={item.name}
-                onClick={() => scrollToSection(item.href)}
+                onClick={() => handleNavClick(item.href)}
                 className="hover:text-epoch-accent transition-colors py-2"
               >
                 {item.name}

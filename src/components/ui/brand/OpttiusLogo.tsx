@@ -17,10 +17,6 @@ export function OpttiusIcon({
   forceLight = false,
   ...props
 }: LogoProps) {
-  const textFill = forceLight
-    ? "fill-admin-text-on-dark"
-    : "fill-admin-text-primary";
-
   return (
     <svg
       viewBox="0 0 121.07 121"
@@ -28,38 +24,19 @@ export function OpttiusIcon({
       className={cn("h-12 w-12 drop-shadow-sm", className)}
       {...props}
     >
-      <defs>
-        <linearGradient
-          id="icon-accent-gradient"
-          x1="0%"
-          y1="0%"
-          x2="100%"
-          y2="100%"
-        >
-          <stop
-            offset="0%"
-            style={{ stopColor: "var(--admin-accent-primary)" }}
-          />
-          <stop
-            offset="100%"
-            style={{
-              stopColor:
-                "var(--admin-accent-secondary, var(--admin-accent-primary))",
-            }}
-          />
-        </linearGradient>
-      </defs>
       <g transform="translate(0, 0.1)">
         <path
-          className="fill-admin-bg-secondary/20 transition-colors duration-500"
+          fill="#1A2B23"
+          className="transition-colors duration-500"
           d="M56.71.1c43.63-2.48,75.39,39.63,60.73,80.94-16.26,45.81-78.43,53.95-106.43,14.23C-16.11,56.82,9.81,2.77,56.71.1Z"
         />
         <path
-          className={cn(textFill, "transition-colors duration-500")}
+          fill="#F9F7F2"
+          className="transition-colors duration-500"
           d="M55.07,31.09v10.77h3.91s.32.29.32.32v9.72s-.29.32-.32.32h-3.91v18.48c0,.6-.59,2.71-.79,3.43-2.7,9.63-11.23,15.95-21.2,16.31v-9.93c4.55-.39,8.71-2.74,10.72-6.93.36-.76,1.33-3.46,1.33-4.16v-17.21H15.53v-10.35h29.6v-10.77h9.94Z"
         />
         <path
-          fill="url(#icon-accent-gradient)"
+          fill="#D4AF37"
           className="transition-colors duration-500"
           d="M76,31.09v10.77h29.6v10.35h-29.6c.41,5.99-.77,12.97.53,18.8s6.04,9.34,11.74,9.71v9.72c-7.8.03-15.53-4.44-19.28-11.26-4.56-8.29-2.44-18.12-2.93-27.18-.23-.08-.46.21-.53.21h-3.49v-10.35h4.02v-10.77h9.94Z"
         />

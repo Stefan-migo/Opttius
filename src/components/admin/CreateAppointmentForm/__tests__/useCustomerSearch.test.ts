@@ -45,8 +45,15 @@ describe("useCustomerSearch", () => {
       currentBranchName: "Test Branch",
       canSwitchBranch: false,
       hasMultipleBranches: false,
-      branches: [{ id: "test-branch-123", name: "Test Branch", code: "TEST001" }],
-      currentBranch: { id: "test-branch-123", name: "Test Branch", code: "TEST001" },
+      branches: [
+        { id: "test-branch-123", name: "Test Branch", code: "TEST001" },
+      ],
+      currentBranch: {
+        id: "test-branch-123",
+        name: "Test Branch",
+        code: "TEST001",
+      },
+      organizationId: "test-org-123",
       isGlobalView: false,
       isSuperAdmin: false,
       isLoading: false,
@@ -86,7 +93,7 @@ describe("useCustomerSearch", () => {
 
   it("should initialize with provided initial data", () => {
     const { result } = renderHook(() =>
-      useCustomerSearch({ initialData: mockInitialData })
+      useCustomerSearch({ initialData: mockInitialData }),
     );
 
     expect(result.current.isGuestCustomer).toBe(false); // Has initial customer
@@ -95,7 +102,7 @@ describe("useCustomerSearch", () => {
 
   it("should initialize with provided initial customer ID", () => {
     const { result } = renderHook(() =>
-      useCustomerSearch({ initialCustomerId: mockInitialCustomerId })
+      useCustomerSearch({ initialCustomerId: mockInitialCustomerId }),
     );
 
     expect(result.current.isGuestCustomer).toBe(false); // Has initial customer ID
@@ -139,7 +146,7 @@ describe("useCustomerSearch", () => {
 
   it("should clear customer selection", () => {
     const { result } = renderHook(() =>
-      useCustomerSearch({ initialData: mockInitialData })
+      useCustomerSearch({ initialData: mockInitialData }),
     );
 
     // Verify initial state
@@ -163,7 +170,10 @@ describe("useCustomerSearch", () => {
     expect(result.current.guestCustomerData.first_name).toBe("John");
 
     act(() => {
-      result.current.updateGuestCustomerData({ last_name: "Doe", rut: "12345678-9" });
+      result.current.updateGuestCustomerData({
+        last_name: "Doe",
+        rut: "12345678-9",
+      });
     });
 
     expect(result.current.guestCustomerData.last_name).toBe("Doe");
@@ -214,7 +224,7 @@ describe("useCustomerSearch", () => {
     expect(result.current.searchingCustomers).toBe(false);
     expect(result.current.customerResults).toEqual(mockCustomers);
     expect(global.fetch).toHaveBeenCalledWith(
-      "/api/admin/customers/search?q=John"
+      "/api/admin/customers/search?q=John",
     );
   });
 
@@ -270,7 +280,7 @@ describe("useCustomerSearch", () => {
     // Test with no customer selected
     const validation1 = result.current.validateCustomer();
     expect(validation1.isValid).toBe(false);
-    expect(validation1.errors).toHaveProperty('customer');
+    expect(validation1.errors).toHaveProperty("customer");
 
     // Test with customer selected
     act(() => {
@@ -300,7 +310,11 @@ describe("useCustomerSearch", () => {
 
     // Test with complete guest data
     act(() => {
-      result.current.updateGuestCustomerData({ first_name: "John", last_name: "Doe", rut: "12345678-9" });
+      result.current.updateGuestCustomerData({
+        first_name: "John",
+        last_name: "Doe",
+        rut: "12345678-9",
+      });
     });
 
     const validation2 = result.current.validateCustomer();
@@ -318,7 +332,7 @@ describe("useCustomerSearch", () => {
     (global.fetch as any).mockResolvedValueOnce(mockResponse);
 
     const { result } = renderHook(() =>
-      useCustomerSearch({ initialCustomerId: "customer-123" })
+      useCustomerSearch({ initialCustomerId: "customer-123" }),
     );
 
     // Wait for the effect to run
@@ -327,16 +341,18 @@ describe("useCustomerSearch", () => {
     });
 
     expect(global.fetch).toHaveBeenCalledWith(
-      "/api/admin/customers/customer-123"
+      "/api/admin/customers/customer-123",
     );
     expect(result.current.selectedCustomer).toEqual(mockCustomer);
   });
 
   it("should handle fetch customer by ID error", async () => {
-    (global.fetch as any).mockRejectedValueOnce(new Error("Customer not found"));
+    (global.fetch as any).mockRejectedValueOnce(
+      new Error("Customer not found"),
+    );
 
     const { result } = renderHook(() =>
-      useCustomerSearch({ initialCustomerId: "nonexistent-customer" })
+      useCustomerSearch({ initialCustomerId: "nonexistent-customer" }),
     );
 
     await act(async () => {
@@ -352,7 +368,10 @@ describe("useCustomerSearch", () => {
     // Set guest customer data
     act(() => {
       result.current.setIsGuestCustomer(true);
-      result.current.updateGuestCustomerData({ first_name: "John", last_name: "Doe" });
+      result.current.updateGuestCustomerData({
+        first_name: "John",
+        last_name: "Doe",
+      });
     });
 
     expect(result.current.guestCustomerData.first_name).toBe("John");

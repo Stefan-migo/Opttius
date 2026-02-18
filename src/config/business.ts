@@ -27,7 +27,7 @@ export const businessConfig = {
   admin: {
     title: "Opttius Admin",
     subtitle: "Sistema de Gestión Óptica",
-    logo: "/logo-opttius.png", // Path to the new logo
+    logo: "/LogoCircle.svg",
   },
 
   // Features

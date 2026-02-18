@@ -223,7 +223,7 @@ export default function NotificationsPage() {
       {/* Header Section */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 pb-2">
         <div className="space-y-1">
-          <h1 className="text-3xl font-bold tracking-tight text-admin-text-primary font-malisha">
+          <h1 className="text-3xl font-bold tracking-tight text-admin-text-primary font-cormorant">
             Notificaciones
           </h1>
           <p className="text-sm font-medium text-admin-text-tertiary uppercase tracking-widest">

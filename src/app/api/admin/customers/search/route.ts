@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient, createServiceRoleClient } from "@/utils/supabase/server";
+import {
+  createClientFromRequest,
+  createServiceRoleClient,
+} from "@/utils/supabase/server";
 import { normalizeRUT, formatRUT } from "@/lib/utils/rut";
 import { getBranchContext, addBranchFilter } from "@/lib/api/branch-middleware";
 import { appLogger as logger } from "@/lib/logger";
@@ -15,13 +18,12 @@ export async function GET(request: NextRequest) {
       request,
       async () => {
         try {
-          const supabase = await createClient();
+          const { client: supabase, getUser } =
+            await createClientFromRequest(request);
 
           // Check admin authorization
-          const {
-            data: { user },
-            error: userError,
-          } = await supabase.auth.getUser();
+          const { data, error: userError } = await getUser();
+          const user = data?.user;
           if (userError || !user) {
             return NextResponse.json(
               { error: "Unauthorized" },
@@ -40,7 +42,11 @@ export async function GET(request: NextRequest) {
           }
 
           // Get branch context
-          const branchContext = await getBranchContext(request, user.id);
+          const branchContext = await getBranchContext(
+            request,
+            user.id,
+            supabase,
+          );
 
           // Build branch filter function
           const applyBranchFilter = (query: any) => {

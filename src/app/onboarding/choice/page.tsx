@@ -49,6 +49,12 @@ export default function OnboardingChoicePage() {
         });
         const data = await response.json();
 
+        // Root/dev users: ir directo al dashboard SaaS (no necesitan organización)
+        if (data.organization?.isRootUser) {
+          router.push("/admin/saas-management/dashboard");
+          return;
+        }
+
         if (data.organization?.hasOrganization) {
           // Ya tiene organización, redirigir al admin
           router.push("/admin");

@@ -68,7 +68,7 @@ export default function LoginPage() {
       <div className="relative hidden lg:flex lg:w-1/2 xl:w-7/12 overflow-hidden items-center justify-center bg-epoch-surface">
         <div className="absolute inset-0 z-0">
           <Image
-            src="/images/landing/hero-epoch.png"
+            src="/images/landing/Hero.webp"
             alt="Vintage Optics"
             fill
             className="object-cover opacity-30 grayscale"
@@ -88,8 +88,8 @@ export default function LoginPage() {
           </Link>
 
           <div className="max-w-xl animate-in fade-in slide-in-from-left-10 duration-1000">
-            <h2 className="text-6xl font-display font-bold text-white leading-tight tracking-tight mb-8 uppercase">
-              REDEFINIENDO LA
+            <h2 className="text-6xl font-display font-bold text-white leading-tight tracking-tight mb-8">
+              Redefiniendo la
               <br />
               <span className="text-epoch-accent italic font-serif lowercase tracking-normal">
                 precisión ocular
@@ -97,8 +97,7 @@ export default function LoginPage() {
             </h2>
             <div className="w-24 h-[1px] bg-epoch-accent mb-8"></div>
             <p className="text-xl text-white/70 font-serif italic tracking-wide leading-relaxed">
-              Ingrese al santuario de la gestión óptica. Donde cada detalle
-              clínico se encuentra con la eficiencia artesanal.
+              Acceda al sistema de gestión diseñado para su óptica.
             </p>
           </div>
 
@@ -118,13 +117,13 @@ export default function LoginPage() {
           <div className="text-center mb-12">
             <div className="inline-flex items-center gap-4 px-6 py-2 border border-epoch-primary/10 rounded-full text-epoch-primary/60 text-[10px] font-display tracking-[0.4em] uppercase mb-8">
               <Sparkles className="h-3 w-3" />
-              <span>Acceso Maestro</span>
+              <span>Iniciar sesión</span>
             </div>
-            <h1 className="text-4xl md:text-5xl font-display font-bold text-epoch-primary tracking-tight mb-4 uppercase">
-              BIENVENIDO AL
+            <h1 className="text-4xl md:text-5xl font-display font-bold text-epoch-primary tracking-tight mb-4">
+              Bienvenido a
               <br />
               <span className="text-epoch-accent italic font-serif lowercase tracking-normal">
-                legado
+                Opttius
               </span>
             </h1>
           </div>
@@ -238,13 +237,13 @@ export default function LoginPage() {
 
               <div className="mt-12 text-center pt-8 border-t border-epoch-primary/5">
                 <p className="text-[10px] font-display font-bold text-epoch-primary/40 uppercase tracking-widest mb-6">
-                  ¿Nuevo en la orden Opttius?
+                  ¿Primera vez aquí?
                 </p>
                 <Link
                   href="/signup"
                   className="inline-flex items-center gap-4 px-10 py-4 border border-epoch-primary/10 text-xs font-display font-bold text-epoch-primary uppercase tracking-[0.3em] hover:bg-epoch-primary hover:text-white transition-all duration-500 hover:-translate-y-1"
                 >
-                  Crear Identidad
+                  Crear cuenta
                   <ArrowRight className="h-3 w-3" />
                 </Link>
               </div>

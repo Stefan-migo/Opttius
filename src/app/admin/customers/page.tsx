@@ -66,39 +66,54 @@ export default function CustomersPage() {
 
   // Filters
   const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
+  // Debounce search term (400ms)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
   // Fetch customers data
   useEffect(() => {
     fetchCustomers();
     fetchStats();
-  }, [currentPage, statusFilter, currentBranchId, isGlobalView]);
+  }, [
+    currentPage,
+    statusFilter,
+    currentBranchId,
+    isGlobalView,
+    debouncedSearchTerm,
+  ]);
 
   const fetchCustomers = async () => {
     try {
       setLoading(true);
-      
+
       const { data, pagination } = await customerService.getCustomers({
         page: currentPage,
         limit: 20,
-        search: searchTerm ? searchTerm : undefined,
-        status: statusFilter !== 'all' ? statusFilter : undefined,
+        search: debouncedSearchTerm ? debouncedSearchTerm : undefined,
+        status: statusFilter !== "all" ? statusFilter : undefined,
         branchId: currentBranchId || undefined,
         isGlobalView,
         isSuperAdmin,
       });
-      
+
       setCustomers(data);
       setTotalPages(pagination.totalPages || 1);
       setError(null);
     } catch (err) {
       console.error("Error fetching customers:", err);
-      const errorObj = handleApiError(err, 'Customers List');
-      setError(errorObj?.message || 'Error al cargar clientes');
+      const errorObj = handleApiError(err, "Customers List");
+      setError(errorObj?.message || "Error al cargar clientes");
     } finally {
       setLoading(false);
     }
@@ -110,12 +125,12 @@ export default function CustomersPage() {
       const statsData = await customerService.getCustomerStats(
         branchIdParam,
         isGlobalView,
-        isSuperAdmin
+        isSuperAdmin,
       );
       setStats(statsData);
     } catch (err) {
       console.error("Error fetching customer stats:", err);
-      handleApiError(err, 'Customer Stats');
+      handleApiError(err, "Customer Stats");
     }
   };
 

@@ -41,8 +41,15 @@ describe("useAppointmentForm", () => {
       currentBranchName: "Test Branch",
       canSwitchBranch: false,
       hasMultipleBranches: false,
-      branches: [{ id: "test-branch-123", name: "Test Branch", code: "TEST001" }],
-      currentBranch: { id: "test-branch-123", name: "Test Branch", code: "TEST001" },
+      branches: [
+        { id: "test-branch-123", name: "Test Branch", code: "TEST001" },
+      ],
+      currentBranch: {
+        id: "test-branch-123",
+        name: "Test Branch",
+        code: "TEST001",
+      },
+      organizationId: "test-org-123",
       isGlobalView: false,
       isSuperAdmin: false,
       isLoading: false,
@@ -80,7 +87,7 @@ describe("useAppointmentForm", () => {
 
   it("should initialize with default form data when no initial data provided", () => {
     const { result } = renderHook(() =>
-      useAppointmentForm({ scheduleSettings: mockScheduleSettings })
+      useAppointmentForm({ scheduleSettings: mockScheduleSettings }),
     );
 
     const today = new Date().toISOString().split("T")[0];
@@ -108,8 +115,8 @@ describe("useAppointmentForm", () => {
     const { result } = renderHook(() =>
       useAppointmentForm({
         initialData: mockInitialData,
-        scheduleSettings: mockScheduleSettings
-      })
+        scheduleSettings: mockScheduleSettings,
+      }),
     );
 
     expect(result.current.formData.appointment_date).toBe("2024-01-15");
@@ -122,7 +129,7 @@ describe("useAppointmentForm", () => {
 
   it("should update individual fields correctly", () => {
     const { result } = renderHook(() =>
-      useAppointmentForm({ scheduleSettings: mockScheduleSettings })
+      useAppointmentForm({ scheduleSettings: mockScheduleSettings }),
     );
 
     act(() => {
@@ -134,7 +141,7 @@ describe("useAppointmentForm", () => {
 
   it("should update multiple fields at once", () => {
     const { result } = renderHook(() =>
-      useAppointmentForm({ scheduleSettings: mockScheduleSettings })
+      useAppointmentForm({ scheduleSettings: mockScheduleSettings }),
     );
 
     act(() => {
@@ -152,7 +159,7 @@ describe("useAppointmentForm", () => {
 
   it("should clear errors when updating fields", () => {
     const { result } = renderHook(() =>
-      useAppointmentForm({ scheduleSettings: mockScheduleSettings })
+      useAppointmentForm({ scheduleSettings: mockScheduleSettings }),
     );
 
     // Simulate an error
@@ -171,7 +178,7 @@ describe("useAppointmentForm", () => {
 
   it("should validate required fields", () => {
     const { result } = renderHook(() =>
-      useAppointmentForm({ scheduleSettings: mockScheduleSettings })
+      useAppointmentForm({ scheduleSettings: mockScheduleSettings }),
     );
 
     act(() => {
@@ -187,7 +194,7 @@ describe("useAppointmentForm", () => {
 
   it("should validate successfully when required fields are present", () => {
     const { result } = renderHook(() =>
-      useAppointmentForm({ scheduleSettings: mockScheduleSettings })
+      useAppointmentForm({ scheduleSettings: mockScheduleSettings }),
     );
 
     act(() => {
@@ -209,8 +216,8 @@ describe("useAppointmentForm", () => {
     const { result } = renderHook(() =>
       useAppointmentForm({
         initialData: mockInitialData,
-        scheduleSettings: mockScheduleSettings
-      })
+        scheduleSettings: mockScheduleSettings,
+      }),
     );
 
     // Modify some fields
@@ -245,7 +252,7 @@ describe("useAppointmentForm", () => {
     });
 
     const { result } = renderHook(() =>
-      useAppointmentForm({ scheduleSettings: mockScheduleSettings })
+      useAppointmentForm({ scheduleSettings: mockScheduleSettings }),
     );
 
     // Fill required fields
@@ -263,7 +270,7 @@ describe("useAppointmentForm", () => {
         mockSelectedCustomer,
         false, // isGuestCustomer
         {}, // guestCustomerData
-        mockOnSuccess
+        mockOnSuccess,
       );
 
       expect(success).toBe(true);
@@ -276,7 +283,7 @@ describe("useAppointmentForm", () => {
         headers: expect.objectContaining({
           "Content-Type": "application/json",
         }),
-      })
+      }),
     );
 
     // Note: onSuccess is not called by the hook itself, but by the calling component
@@ -295,7 +302,7 @@ describe("useAppointmentForm", () => {
     });
 
     const { result } = renderHook(() =>
-      useAppointmentForm({ scheduleSettings: mockScheduleSettings })
+      useAppointmentForm({ scheduleSettings: mockScheduleSettings }),
     );
 
     // Fill required fields
@@ -314,9 +321,9 @@ describe("useAppointmentForm", () => {
           mockSelectedCustomer,
           false,
           {},
-          mockOnSuccess
+          mockOnSuccess,
         );
-      })
+      }),
     ).rejects.toThrow("Failed to create appointment");
 
     expect(result.current.saving).toBe(false);
@@ -338,7 +345,7 @@ describe("useAppointmentForm", () => {
     });
 
     const { result } = renderHook(() =>
-      useAppointmentForm({ scheduleSettings: mockScheduleSettings })
+      useAppointmentForm({ scheduleSettings: mockScheduleSettings }),
     );
 
     // Fill required fields
@@ -356,7 +363,7 @@ describe("useAppointmentForm", () => {
         null, // selectedCustomer
         true, // isGuestCustomer
         mockGuestCustomerData,
-        mockOnSuccess
+        mockOnSuccess,
       );
 
       expect(success).toBe(true);
@@ -367,16 +374,17 @@ describe("useAppointmentForm", () => {
       "/api/admin/appointments",
       expect.objectContaining({
         body: expect.stringContaining('"guest_customer"'),
-      })
+      }),
     );
   });
 
   it("should update duration when schedule settings load", () => {
     const { result, rerender } = renderHook(
-      ({ scheduleSettings }: { scheduleSettings: any }) => useAppointmentForm({ scheduleSettings }),
+      ({ scheduleSettings }: { scheduleSettings: any }) =>
+        useAppointmentForm({ scheduleSettings }),
       {
         initialProps: { scheduleSettings: null as any },
-      }
+      },
     );
 
     expect(result.current.formData.duration_minutes).toBe(30); // default
@@ -396,8 +404,8 @@ describe("useAppointmentForm", () => {
     const { result } = renderHook(() =>
       useAppointmentForm({
         initialData: initialDataWithDuration,
-        scheduleSettings: mockScheduleSettings
-      })
+        scheduleSettings: mockScheduleSettings,
+      }),
     );
 
     expect(result.current.formData.duration_minutes).toBe(60); // preserved from initial data

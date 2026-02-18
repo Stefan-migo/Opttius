@@ -43,8 +43,15 @@ describe("useScheduleSettings", () => {
       currentBranchName: "Test Branch",
       canSwitchBranch: false,
       hasMultipleBranches: false,
-      branches: [{ id: "test-branch-123", name: "Test Branch", code: "TEST001" }],
-      currentBranch: { id: "test-branch-123", name: "Test Branch", code: "TEST001" },
+      branches: [
+        { id: "test-branch-123", name: "Test Branch", code: "TEST001" },
+      ],
+      currentBranch: {
+        id: "test-branch-123",
+        name: "Test Branch",
+        code: "TEST001",
+      },
+      organizationId: "test-org-123",
       isGlobalView: false,
       isSuperAdmin: false,
       isLoading: false,
@@ -116,7 +123,7 @@ describe("useScheduleSettings", () => {
         headers: expect.objectContaining({
           "x-branch-id": "test-branch-123",
         }),
-      })
+      }),
     );
   });
 
@@ -202,14 +209,16 @@ describe("useScheduleSettings", () => {
     const minDate = result.current.getMinDate();
     const expectedMinDate = new Date();
     expectedMinDate.setHours(expectedMinDate.getHours() + 24);
-    
+
     // Compare dates - account for timezone differences
     // The hook uses setHours which can cross date boundaries
     const resultDate = new Date(minDate);
     const expectedDate = new Date(expectedMinDate);
-    
+
     // Allow for 1-day difference due to timezone/hour boundary crossing
-    const dayDifference = Math.abs(resultDate.getDate() - expectedDate.getDate());
+    const dayDifference = Math.abs(
+      resultDate.getDate() - expectedDate.getDate(),
+    );
     expect(dayDifference).toBeLessThanOrEqual(1);
   });
 
@@ -235,14 +244,16 @@ describe("useScheduleSettings", () => {
     const maxDate = result.current.getMaxDate();
     const expectedMaxDate = new Date();
     expectedMaxDate.setDate(expectedMaxDate.getDate() + 60);
-    
+
     // Compare dates - account for timezone differences
     // The hook uses setDate which should be more predictable
     const resultDate = new Date(maxDate);
     const expectedDate = new Date(expectedMaxDate);
-    
+
     // Allow for 1-day difference due to timezone boundary crossing
-    const dayDifference = Math.abs(resultDate.getDate() - expectedDate.getDate());
+    const dayDifference = Math.abs(
+      resultDate.getDate() - expectedDate.getDate(),
+    );
     expect(dayDifference).toBeLessThanOrEqual(1);
   });
 
@@ -268,7 +279,7 @@ describe("useScheduleSettings", () => {
     // Should still calculate dates correctly
     const minDate = result.current.getMinDate();
     const maxDate = result.current.getMaxDate();
-    
+
     expect(minDate).toBeDefined();
     expect(maxDate).toBeDefined();
   });
@@ -306,7 +317,7 @@ describe("useScheduleSettings", () => {
     // Should still work without crashing
     const minDate = result.current.getMinDate();
     const maxDate = result.current.getMaxDate();
-    
+
     expect(minDate).toBeDefined();
     expect(maxDate).toBeDefined();
   });

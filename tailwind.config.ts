@@ -215,19 +215,16 @@ const config = {
         body: ["var(--font-lato)", "sans-serif"],
 
         // Opttius Font Hierarchy
-        // display: ["var(--font-display)", "Malisha", "cursive"], // Overridden by display above
         title: ["var(--font-title)", "VELISTA", "serif"],
         subtitle: ["var(--font-subtitle)", "Inter", "sans-serif"],
         text: ["var(--font-text)", "Inter", "sans-serif"],
         caption: ["var(--font-caption)", "Inter", "sans-serif"],
 
         // LEGACY SUPPORT (existing)
-        // Primary Branding
         heading: ["var(--font-heading)", "Inter", "sans-serif"],
-        // body: ["var(--font-body)", "Inter", "sans-serif"], // Overridden by body above
         sans: ["var(--font-body)", "Inter", "sans-serif"],
-        // serif: ["var(--font-heading)", "Inter", "sans-serif"], // Overridden by serif above
-        malisha: ["var(--font-malisha)", "Malisha", "cursive"],
+        // Cormorant Garamond: reemplazo de Malisha, elegante y sobrio para títulos alternativos
+        cormorant: ["var(--font-cormorant)", "Cormorant Garamond", "serif"],
         velista: ["var(--font-velista)", "VELISTA", "serif"],
       },
       fontSize: {

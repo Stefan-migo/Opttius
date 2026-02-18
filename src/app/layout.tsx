@@ -1,5 +1,11 @@
 import type { Metadata } from "next";
-import { Inter, Cinzel, Playfair_Display, Lato } from "next/font/google";
+import {
+  Inter,
+  Cinzel,
+  Playfair_Display,
+  Lato,
+  Cormorant_Garamond,
+} from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { BranchProvider } from "@/contexts/BranchContext";
@@ -34,6 +40,13 @@ const lato = Lato({
   display: "swap",
 });
 
+const cormorantGaramond = Cormorant_Garamond({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
+  variable: "--font-cormorant",
+  display: "swap",
+});
+
 export const metadata: Metadata = {
   title: {
     default: "Opttius - Sistema de Gestión Óptica",
@@ -55,7 +68,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${inter.variable} ${cinzel.variable} ${playfair.variable} ${lato.variable} font-sans antialiased`}
+        className={`${inter.variable} ${cinzel.variable} ${playfair.variable} ${lato.variable} ${cormorantGaramond.variable} font-sans antialiased`}
       >
         <ThemeProvider
           attribute="class"

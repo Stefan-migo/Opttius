@@ -60,8 +60,10 @@ export default function OnboardingCompletePage() {
   }, [user, authLoading]);
 
   const handleGoToAdmin = () => {
-    // Full reload to clear cached demo data (branches, notifications) after activating real optica
-    window.location.href = "/admin";
+    // Usar router.push en lugar de full reload para preservar la sesión.
+    // router.refresh() invalida la caché de Next.js (branches, notifications).
+    router.refresh();
+    router.push("/admin");
   };
 
   // Mostrar loading mientras se verifica autenticación

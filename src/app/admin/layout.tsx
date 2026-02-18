@@ -804,31 +804,41 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   // Don't render the admin interface until we confirm admin access
   // IMPORTANT: Solo verificar esto después de que la verificación de admin haya terminado
   // NO bloquear por verificación de organización - eso es opcional
+  // Mostrar mensajes contextuales de redirección (no "Acceso Denegado" para usuarios en flujo de config)
   if (
     !loading &&
     adminState.hasChecked &&
     !adminState.isChecking &&
     (!user || !adminState.isAdmin)
   ) {
+    const isRedirectingToLogin = !user;
+    const isRedirectingToOnboarding = user && !adminState.isAdmin;
+
     return (
       <div className="min-h-screen flex items-center justify-center bg-epoch-background relative overflow-hidden">
         <div className="relative z-10 flex flex-col items-center justify-center space-y-8 animate-in fade-in duration-700">
-          <div className="p-6 bg-red-500/5 border border-red-500/10 rounded-none shadow-premium animate-pulse">
-            <Loader2 className="h-10 w-10 text-red-900 animate-spin" />
+          <div className="p-6 bg-epoch-primary/5 border border-epoch-primary/10 rounded-none shadow-premium animate-pulse">
+            <Loader2 className="h-10 w-10 text-epoch-primary animate-spin" />
           </div>
 
           <div className="text-center space-y-3">
             <h2 className="text-xl font-display font-bold text-epoch-primary uppercase tracking-tighter">
-              Acceso Denegado
+              {isRedirectingToLogin
+                ? "Redirigiendo"
+                : isRedirectingToOnboarding
+                  ? "Completando configuración"
+                  : "Redirigiendo"}
             </h2>
             <p className="text-[11px] font-serif italic text-epoch-primary/50 uppercase tracking-[0.2em]">
-              {!user
-                ? "Protocolo de seguridad: Redirigiendo al portal de acceso"
-                : "Credencial insuficiente: Permiso de Maestro requerido"}
+              {isRedirectingToLogin
+                ? "Redirigiendo al portal de acceso"
+                : isRedirectingToOnboarding
+                  ? "Redirigiendo a configuración inicial"
+                  : "Redirigiendo al portal de acceso"}
             </p>
           </div>
 
-          <div className="w-48 h-[1px] bg-red-500/20" />
+          <div className="w-48 h-[1px] bg-epoch-primary/20" />
         </div>
       </div>
     );

@@ -199,9 +199,8 @@ export default function NewCustomerPage() {
 
               <FormField
                 label="RUT"
-                required
                 error={form.errors.rut?.message}
-                description="Rol Único Tributario (requerido)"
+                description="Rol Único Tributario (opcional)"
               >
                 <Input
                   id="rut"

@@ -160,7 +160,7 @@ export default function ResetPasswordPage() {
           >
             <div className="h-16 w-16 bg-white/10 backdrop-blur-xl border border-white/20 rounded-[2rem] flex items-center justify-center shadow-2xl transition-all duration-500 group-hover:bg-white group-hover:scale-110">
               <Image
-                src="/logo-opttius.png"
+                src="/LogoCircle.svg"
                 alt="Opttius Logo"
                 width={44}
                 height={44}

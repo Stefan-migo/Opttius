@@ -6,17 +6,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  ArrowLeft,
-  Save,
-  User,
-  MapPin,
-  AlertTriangle,
-} from "lucide-react";
+import { ArrowLeft, Save, User, MapPin, AlertTriangle } from "lucide-react";
 import { useForm } from "@/hooks/useForm";
 import FormField, { FormFieldActionsExtended } from "@/components/ui/FormField";
 import { customerSchema } from "@/lib/validation/formValidation";
-import { success, error as notifyError } from "@/lib/services/notificationService";
+import {
+  success,
+  error as notifyError,
+} from "@/lib/services/notificationService";
 import { handleApiError } from "@/lib/services/errorService";
 import { formatRUT } from "@/lib/utils/rut";
 import { customerService } from "@/lib/api/services";
@@ -86,7 +83,7 @@ export default function CustomerEditPage() {
     try {
       setLoading(true);
       const customerData = await customerService.getCustomer(customerId);
-      
+
       // Map customer data to form data
       const formData: FormCustomerData = {
         first_name: customerData.first_name || "",
@@ -102,13 +99,15 @@ export default function CustomerEditPage() {
         country: (customerData as any).country || "Chile",
         notes: (customerData as any).notes || "",
       };
-      
+
       setCustomer(formData);
       form.setFieldValues(formData);
       setFetchError(null);
     } catch (err) {
       console.error("Error fetching customer:", err);
-      setFetchError(err instanceof Error ? err.message : "Unknown error occurred");
+      setFetchError(
+        err instanceof Error ? err.message : "Unknown error occurred",
+      );
     } finally {
       setLoading(false);
     }
@@ -247,7 +246,9 @@ export default function CustomerEditPage() {
                   <Input
                     id="first_name"
                     value={form.values.first_name}
-                    onChange={(e) => form.setValue("first_name", e.target.value)}
+                    onChange={(e) =>
+                      form.setValue("first_name", e.target.value)
+                    }
                     placeholder="Nombre"
                     aria-invalid={!!form.errors.first_name}
                   />
@@ -299,9 +300,8 @@ export default function CustomerEditPage() {
 
               <FormField
                 label="RUT"
-                required
                 error={form.errors.rut?.message}
-                description="Rol Único Tributario (requerido)"
+                description="Rol Único Tributario (opcional)"
               >
                 <Input
                   id="rut"
@@ -331,7 +331,9 @@ export default function CustomerEditPage() {
                 <Input
                   id="address_line_1"
                   value={form.values.address_line_1}
-                  onChange={(e) => form.setValue("address_line_1", e.target.value)}
+                  onChange={(e) =>
+                    form.setValue("address_line_1", e.target.value)
+                  }
                   placeholder="Calle y número"
                   aria-invalid={!!form.errors.address_line_1}
                 />
@@ -345,17 +347,16 @@ export default function CustomerEditPage() {
                 <Input
                   id="address_line_2"
                   value={form.values.address_line_2}
-                  onChange={(e) => form.setValue("address_line_2", e.target.value)}
+                  onChange={(e) =>
+                    form.setValue("address_line_2", e.target.value)
+                  }
                   placeholder="Departamento, piso, etc."
                   aria-invalid={!!form.errors.address_line_2}
                 />
               </FormField>
 
               <div className="grid grid-cols-2 gap-4">
-                <FormField
-                  label="Ciudad"
-                  error={form.errors.city?.message}
-                >
+                <FormField label="Ciudad" error={form.errors.city?.message}>
                   <Input
                     id="city"
                     value={form.values.city}
@@ -365,10 +366,7 @@ export default function CustomerEditPage() {
                   />
                 </FormField>
 
-                <FormField
-                  label="Provincia"
-                  error={form.errors.state?.message}
-                >
+                <FormField label="Provincia" error={form.errors.state?.message}>
                   <Input
                     id="state"
                     value={form.values.state}
@@ -387,16 +385,15 @@ export default function CustomerEditPage() {
                   <Input
                     id="postal_code"
                     value={form.values.postal_code}
-                    onChange={(e) => form.setValue("postal_code", e.target.value)}
+                    onChange={(e) =>
+                      form.setValue("postal_code", e.target.value)
+                    }
                     placeholder="1234"
                     aria-invalid={!!form.errors.postal_code}
                   />
                 </FormField>
 
-                <FormField
-                  label="País"
-                  error={form.errors.country?.message}
-                >
+                <FormField label="País" error={form.errors.country?.message}>
                   <Input
                     id="country"
                     value={form.values.country}

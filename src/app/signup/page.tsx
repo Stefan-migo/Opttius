@@ -153,12 +153,8 @@ export default function SignupPage() {
               {requiresEmailConfirmation ? (
                 <div className="space-y-8">
                   <p className="text-[15px] font-serif italic text-epoch-primary/80 leading-relaxed">
-                    Hemos enviado un{" "}
-                    <span className="text-epoch-primary font-bold">
-                      pergamino digital
-                    </span>{" "}
-                    de confirmación a su correo. Por favor, verifíquelo para
-                    activar su identidad en el ecosistema Opttius.
+                    Hemos enviado un correo de confirmación. Por favor,
+                    verifíquelo para activar su cuenta en Opttius.
                   </p>
                   <Button
                     onClick={() => router.push("/login")}
@@ -171,17 +167,14 @@ export default function SignupPage() {
               ) : (
                 <div className="space-y-8">
                   <p className="text-[15px] font-serif italic text-epoch-primary/80 leading-relaxed">
-                    Su identidad ha sido{" "}
-                    <span className="text-epoch-primary font-bold">
-                      forjada
-                    </span>
-                    . Redirigiéndole a los archivos de configuración inicial...
+                    Su cuenta ha sido creada. Redirigiéndole a la configuración
+                    inicial...
                   </p>
                   <Button
                     onClick={() => router.push("/onboarding/choice")}
                     className="w-full h-16 bg-epoch-primary hover:bg-epoch-surface text-white rounded-none font-display font-bold uppercase text-[11px] tracking-[0.3em] transition-all shadow-xl group"
                   >
-                    CONTINUAR EL LEGADO
+                    CONTINUAR
                     <ArrowRight className="ml-3 h-4 w-4 transition-transform group-hover:translate-x-2" />
                   </Button>
                 </div>
@@ -203,7 +196,7 @@ export default function SignupPage() {
       <div className="relative hidden lg:flex lg:w-5/12 xl:w-1/2 overflow-hidden items-center justify-center bg-epoch-primary">
         <div className="absolute inset-0 z-0">
           <Image
-            src="/images/landing/hero-epoch.png"
+            src="/images/landing/Hero.webp"
             alt="Elite Setup"
             fill
             sizes="(max-width: 1024px) 100vw, 50vw"
@@ -226,20 +219,18 @@ export default function SignupPage() {
           <div className="space-y-12 animate-in fade-in slide-in-from-left-10 duration-1000">
             <div className="space-y-6">
               <Badge className="bg-epoch-accent/20 text-epoch-accent border-epoch-accent/30 rounded-none px-4 py-1 text-[10px] uppercase font-display tracking-[0.3em]">
-                Registro de Socios
+                Registro
               </Badge>
-              <h2 className="text-7xl font-display font-bold text-white leading-none tracking-tighter uppercase">
-                DISEÑA EL <br />
-                <span className="text-epoch-accent italic font-serif lowercase tracking-normal">
-                  futuro
-                </span>{" "}
+              <h2 className="text-6xl xl:text-7xl font-display font-bold text-white leading-tight tracking-tight">
+                Diseña el futuro
                 <br />
-                DE TU ÓPTICA.
+                <span className="text-epoch-accent italic font-serif lowercase tracking-normal">
+                  de tu óptica
+                </span>
               </h2>
               <p className="text-xl text-white/60 font-serif italic tracking-wide max-w-lg leading-relaxed">
-                Únete a la orden de ópticas que trascienden el tiempo.
-                Tecnología de élite para el profesional que no acepta menos que
-                la perfección.
+                Únete a las ópticas que ya gestionan su negocio con tecnología
+                pensada para el sector.
               </p>
             </div>
 
@@ -270,15 +261,15 @@ export default function SignupPage() {
       <div className="flex-1 flex flex-col justify-center items-center p-6 md:p-12 xl:p-24 bg-epoch-background relative z-10 overflow-y-auto">
         <div className="w-full max-w-2xl animate-in fade-in slide-in-from-bottom-10 duration-700">
           <div className="mb-12">
-            <h1 className="text-5xl font-display font-bold text-epoch-primary tracking-tight leading-none uppercase">
-              COMIENCE SU
+            <h1 className="text-5xl font-display font-bold text-epoch-primary tracking-tight leading-none">
+              Cree su cuenta en
               <br />
               <span className="text-epoch-accent italic font-serif lowercase tracking-normal">
-                gran obra
+                Opttius
               </span>
             </h1>
-            <p className="mt-4 text-epoch-primary/40 font-display font-bold text-[10px] uppercase tracking-[0.3em]">
-              Establezca su presencia en el ecosistema más avanzado del sector.
+            <p className="mt-4 text-epoch-primary/60 font-body text-sm">
+              El sistema de gestión diseñado para su óptica.
             </p>
           </div>
 
@@ -454,7 +445,7 @@ export default function SignupPage() {
                     <Loader2 className="h-5 w-5 animate-spin" />
                   ) : (
                     <span className="flex items-center gap-3">
-                      Iniciar mi Evolución
+                      Crear cuenta
                       <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-3" />
                     </span>
                   )}
@@ -463,13 +454,13 @@ export default function SignupPage() {
 
               <div className="mt-12 text-center pt-8 border-t border-epoch-primary/5">
                 <p className="text-[10px] font-display font-bold text-epoch-primary/40 uppercase tracking-widest mb-4">
-                  ¿Ya posee una identidad registrada?
+                  ¿Ya tiene cuenta?
                 </p>
                 <Link
                   href="/login"
                   className="inline-flex items-center gap-2 text-xs font-display font-bold text-epoch-accent uppercase tracking-[0.2em] hover:text-epoch-primary transition-all group"
                 >
-                  Regresar al Panel Maestro
+                  Iniciar sesión
                   <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                 </Link>
               </div>
@@ -479,11 +470,11 @@ export default function SignupPage() {
           <p className="mt-12 text-center text-[8px] font-display font-bold text-epoch-primary/30 uppercase tracking-[0.2em] max-w-lg mx-auto leading-relaxed">
             Al registrarse en Opttius, usted acepta nuestros{" "}
             <Link href="#" className="underline hover:text-epoch-primary">
-              Términos de Élite
+              Términos de uso
             </Link>{" "}
-            y la{" "}
+            y{" "}
             <Link href="#" className="underline hover:text-epoch-primary">
-              Soberanía de Datos
+              Política de Privacidad
             </Link>
             .
           </p>

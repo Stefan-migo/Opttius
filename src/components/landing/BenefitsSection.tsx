@@ -51,22 +51,22 @@ export function BenefitsSection() {
           <div className="lg:w-1/2 space-y-10">
             <div className="inline-flex items-center gap-4 px-6 py-2 border border-epoch-accent/30 rounded-full text-epoch-accent text-[10px] font-display tracking-[0.4em] uppercase mb-4">
               <Sparkles className="h-3 w-3" />
-              <span>Legado de Valor</span>
+              <span>Resultados medibles</span>
             </div>
 
             <h2 className="text-5xl md:text-7xl font-display font-bold text-white tracking-tight leading-none">
-              GUIADOS POR LA
+              MENOS ERRORES.
               <br />
               <span className="text-epoch-accent italic font-serif lowercase tracking-normal">
-                luz de la precisión
+                más tiempo. más ventas.
               </span>
             </h2>
 
             <div className="w-24 h-[1px] bg-epoch-accent"></div>
 
             <p className="text-xl text-white/70 font-serif italic tracking-wide max-w-xl">
-              Más que un software, una filosofía de gestión. Descubra el impacto
-              de la maestría digital en cada aspecto de su óptica.
+              Ópticas que usan Opttius reportan ahorro de tiempo, menos errores
+              y mayor tasa de cierre en presupuestos.
             </p>
 
             <div className="grid sm:grid-cols-2 gap-10">
@@ -98,7 +98,7 @@ export function BenefitsSection() {
 
             <div className="relative aspect-[4/5] md:aspect-square overflow-hidden shadow-2xl">
               <Image
-                src="/images/landing/vision-epoch.png"
+                src="/images/landing/Vision.webp"
                 alt="Precision Vision"
                 fill
                 className="object-cover grayscale hover:grayscale-0 transition-all duration-1000 scale-105 group-hover:scale-100"

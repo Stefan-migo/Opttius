@@ -31,8 +31,8 @@
     /* Font System */
     --font-heading: "Inter", system-ui, -apple-system, sans-serif;
     --font-body: "Inter", system-ui, -apple-system, sans-serif;
-    --font-display: "Malisha", cursive;
-    --font-malisha: "Malisha", cursive;
+    --font-display: "Cinzel", serif;
+    --font-cormorant: "Cormorant Garamond", serif;
     --font-velista: "VELISTA", serif;
   }
 

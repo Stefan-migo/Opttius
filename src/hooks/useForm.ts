@@ -1,13 +1,18 @@
 /**
  * Generic Form Hook
- * 
+ *
  * Hook genérico para manejo estandarizado de formularios usando react-hook-form y zod.
  * Proporciona una interfaz consistente para manejar estado, validación y submission de formularios.
- * 
+ *
  * @module hooks/useForm
  */
 
-import { useForm as useReactHookForm, UseFormReturn, FieldErrors, Path } from "react-hook-form";
+import {
+  useForm as useReactHookForm,
+  UseFormReturn,
+  FieldErrors,
+  Path,
+} from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z, ZodSchema } from "zod";
 import { useState } from "react";
@@ -40,7 +45,10 @@ export interface UseFormOptions<T extends z.ZodType<any, any, any>, R = void> {
 /**
  * Return type del hook useForm
  */
-export interface UseFormReturnExtended<T extends z.ZodType<any, any, any>, R = void> {
+export interface UseFormReturnExtended<
+  T extends z.ZodType<any, any, any>,
+  R = void,
+> {
   /** Si el formulario está siendo enviado */
   isSubmitting: boolean;
   /** Error general del formulario */
@@ -81,10 +89,10 @@ export interface UseFormReturnExtended<T extends z.ZodType<any, any, any>, R = v
 
 /**
  * Hook genérico para manejo de formularios
- * 
+ *
  * @param options - Opciones del formulario
  * @returns Objeto con funciones y estado del formulario
- * 
+ *
  * @example
  * // Definir el esquema de validación
  * const customerSchema = z.object({
@@ -92,7 +100,7 @@ export interface UseFormReturnExtended<T extends z.ZodType<any, any, any>, R = v
  *   email: z.string().email("Email inválido"),
  *   phone: z.string().optional(),
  * });
- * 
+ *
  * // Usar el hook
  * const form = useForm({
  *   defaultValues: { name: "", email: "", phone: "" },
@@ -102,7 +110,7 @@ export interface UseFormReturnExtended<T extends z.ZodType<any, any, any>, R = v
  *   },
  *   successMessage: "Cliente creado exitosamente",
  * });
- * 
+ *
  * // En el JSX
  * <form onSubmit={form.handleSubmit}>
  *   <FormField label="Nombre" error={form.formState.errors.name?.message}>
@@ -114,7 +122,7 @@ export interface UseFormReturnExtended<T extends z.ZodType<any, any, any>, R = v
  * </form>
  */
 export function useForm<T extends z.ZodType<any, any, any>, R = void>(
-  options: UseFormOptions<T, R>
+  options: UseFormOptions<T, R>,
 ): UseFormReturnExtended<T, R> {
   const {
     defaultValues,
@@ -166,9 +174,10 @@ export function useForm<T extends z.ZodType<any, any, any>, R = void>(
 
       // Mostrar mensaje de éxito si está configurado
       if (showSuccess && successMessage) {
-        const message = typeof successMessage === "function" 
-          ? successMessage(values) 
-          : successMessage;
+        const message =
+          typeof successMessage === "function"
+            ? successMessage(values)
+            : successMessage;
         // Importar notificationService dinámicamente para evitar dependencia circular
         const { success } = await import("@/lib/services");
         success(message);
@@ -185,7 +194,8 @@ export function useForm<T extends z.ZodType<any, any, any>, R = void>(
       }
 
       // Setear error del formulario
-      const errorMessage = error instanceof Error ? error.message : "Error desconocido";
+      const errorMessage =
+        error instanceof Error ? error.message : "Error desconocido";
       setFormError(errorMessage);
 
       // Callback de error
@@ -231,7 +241,7 @@ export function useForm<T extends z.ZodType<any, any, any>, R = void>(
     resetForm,
     setFieldValue,
     setFieldValues,
-    values: reactHookForm.getValues(),
+    values: reactHookForm.watch(),
     errors: reactHookForm.formState.errors,
     register: reactHookForm.register,
     setValue: reactHookForm.setValue,
@@ -248,12 +258,12 @@ export function useForm<T extends z.ZodType<any, any, any>, R = void>(
 
 /**
  * Hook simplificado para formularios sin validación Zod
- * 
+ *
  * @param defaultValues - Valores iniciales del formulario
  * @param onSubmit - Función de submit del formulario
  * @param options - Opciones adicionales
  * @returns Objeto con funciones y estado del formulario
- * 
+ *
  * @example
  * const form = useFormSimple(
  *   { name: "", email: "" },
@@ -265,7 +275,12 @@ export function useForm<T extends z.ZodType<any, any, any>, R = void>(
 export function useFormSimple<T extends Record<string, any>, R = void>(
   defaultValues: T,
   onSubmit: (values: T) => Promise<R>,
-  options?: Partial<Omit<UseFormOptions<any, R>, "defaultValues" | "onSubmit" | "validationSchema">>
+  options?: Partial<
+    Omit<
+      UseFormOptions<any, R>,
+      "defaultValues" | "onSubmit" | "validationSchema"
+    >
+  >,
 ) {
   return useForm({
     defaultValues,
@@ -276,13 +291,13 @@ export function useFormSimple<T extends Record<string, any>, R = void>(
 
 /**
  * Hook para formularios con validación asíncrona
- * 
+ *
  * @param defaultValues - Valores iniciales del formulario
  * @param validationSchema - Esquema de validación Zod
  * @param onSubmit - Función de submit del formulario
  * @param options - Opciones adicionales
  * @returns Objeto con funciones y estado del formulario
- * 
+ *
  * @example
  * const form = useFormAsync(
  *   { email: "" },
@@ -300,7 +315,12 @@ export function useFormAsync<T extends z.ZodType<any, any, any>, R = void>(
   defaultValues: z.infer<T>,
   validationSchema: T,
   onSubmit: (values: z.infer<T>) => Promise<R>,
-  options?: Partial<Omit<UseFormOptions<T, R>, "defaultValues" | "validationSchema" | "onSubmit">>
+  options?: Partial<
+    Omit<
+      UseFormOptions<T, R>,
+      "defaultValues" | "validationSchema" | "onSubmit"
+    >
+  >,
 ) {
   return useForm({
     defaultValues,
@@ -313,4 +333,7 @@ export function useFormAsync<T extends z.ZodType<any, any, any>, R = void>(
 /**
  * Exportar tipos y funciones
  */
-export type { UseFormOptions as UseFormOptionsBase, UseFormReturnExtended as UseFormReturnExtendedBase };
+export type {
+  UseFormOptions as UseFormOptionsBase,
+  UseFormReturnExtended as UseFormReturnExtendedBase,
+};

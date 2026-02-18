@@ -39,7 +39,7 @@ export function TestimonialsSection() {
             <Sparkles className="h-4 w-4" />
             <span>Casos de Éxito</span>
           </div>
-          <h2 className="text-4xl md:text-5xl lg:text-6xl font-malisha text-gray-900 mb-6 leading-tight">
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-cormorant text-gray-900 mb-6 leading-tight">
             Confianza de{" "}
             <span className="text-primary italic">Líderes Ópticos</span>
           </h2>
