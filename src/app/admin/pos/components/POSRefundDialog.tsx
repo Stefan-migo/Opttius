@@ -237,11 +237,15 @@ export function POSRefundDialog({
             </div>
 
             {refundAmount > 0 && (
-              <div className="p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
+              <div className="p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg space-y-1">
                 <div className="flex justify-between font-semibold">
                   <span>Monto a devolver:</span>
                   <span>{formatCurrency(refundAmount)}</span>
                 </div>
+                <p className="text-xs text-amber-800 dark:text-amber-200">
+                  Si el cliente pagó parcialmente, el monto real no excederá su
+                  abono.
+                </p>
               </div>
             )}
           </div>

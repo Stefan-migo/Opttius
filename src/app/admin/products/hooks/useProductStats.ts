@@ -2,6 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { getBranchHeader } from "@/lib/utils/branch";
+import { extractDataFromResponse } from "@/lib/api/response-helpers";
 
 interface Product {
   id: string;
@@ -52,7 +53,9 @@ const fetchProductStats = async ({
   }
 
   const data = await response.json();
-  const allProducts = (data.products || []) as Product[];
+  const allProducts = (extractDataFromResponse<Product>(data) ||
+    data.products ||
+    []) as Product[];
 
   return {
     totalProducts: allProducts.length,

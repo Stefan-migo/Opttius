@@ -778,6 +778,23 @@ export const processSaleSchema = z
     cash_received: priceOptionalSchema,
     change_amount: priceNonNegativeSchema.optional().nullable(), // Can be 0 or null
     deposit_amount: priceNonNegativeSchema.optional().nullable(), // Monto de abono para pagos parciales
+    // Split payments: array of { method, amount } - when provided, overrides single payment
+    payments: z
+      .array(
+        z.object({
+          method: z.enum([
+            "cash",
+            "debit_card",
+            "credit_card",
+            "transfer",
+            "card",
+          ]),
+          amount: priceSchema,
+        }),
+      )
+      .min(1)
+      .optional()
+      .nullable(),
     fiscal_reference: z.string().max(100).trim().optional().nullable(), // Nº boleta, factura o transacción (manual, sin SII)
     branch_id: uuidOptionalSchema,
     notes: z.string().max(1000).trim().optional().nullable(),
@@ -834,6 +851,20 @@ export const processSaleSchema = z
       message:
         "El total_amount no coincide con el cálculo (subtotal + tax_amount)",
       path: ["total_amount"],
+    },
+  )
+  .refine(
+    (data) => {
+      if (data.payments && data.payments.length > 0) {
+        const sum = data.payments.reduce((s, p) => s + p.amount, 0);
+        return sum >= data.total_amount - 0.01;
+      }
+      return true;
+    },
+    {
+      message:
+        "La suma de pagos divididos debe ser al menos el total de la venta",
+      path: ["payments"],
     },
   );
 
@@ -1125,6 +1156,48 @@ export const contactLensFamilyBaseSchema = z.object({
 export const createContactLensFamilySchema = contactLensFamilyBaseSchema;
 export const updateContactLensFamilySchema =
   contactLensFamilyBaseSchema.partial();
+
+/** Matrix input for create (no contact_lens_family_id) */
+const contactLensPriceMatrixInputSchema = z
+  .object({
+    sphere_min: z.number().min(-30).max(30).multipleOf(0.25),
+    sphere_max: z.number().min(-30).max(30).multipleOf(0.25),
+    cylinder_min: z.number().min(-6).max(6).multipleOf(0.25).default(0),
+    cylinder_max: z.number().min(-6).max(6).multipleOf(0.25).default(0),
+    axis_min: z.number().int().min(0).max(180).default(0),
+    axis_max: z.number().int().min(0).max(180).default(180),
+    addition_min: z.number().min(0).max(4).multipleOf(0.25).default(0),
+    addition_max: z.number().min(0).max(4).multipleOf(0.25).default(4.0),
+    base_price: z.number().min(0),
+    cost: z.number().min(0),
+    is_active: z.boolean().default(true),
+  })
+  .refine((data) => data.sphere_min <= data.sphere_max, {
+    message: "sphere_min debe ser menor o igual a sphere_max",
+    path: ["sphere_max"],
+  })
+  .refine((data) => data.cylinder_min <= data.cylinder_max, {
+    message: "cylinder_min debe ser menor o igual a cylinder_max",
+    path: ["cylinder_max"],
+  })
+  .refine((data) => data.axis_min <= data.axis_max, {
+    message: "axis_min debe ser menor o igual a axis_max",
+    path: ["axis_max"],
+  })
+  .refine((data) => data.addition_min <= data.addition_max, {
+    message: "addition_min debe ser menor o igual a addition_max",
+    path: ["addition_max"],
+  });
+
+export const createContactLensFamilyWithMatricesSchema =
+  createContactLensFamilySchema.extend({
+    matrices: z.array(contactLensPriceMatrixInputSchema).optional().default([]),
+  });
+
+export const updateContactLensFamilyWithMatricesSchema =
+  updateContactLensFamilySchema.extend({
+    matrices: z.array(contactLensPriceMatrixInputSchema).optional(),
+  });
 
 // ============================================================================
 // Contact Lens Price Matrices Schemas

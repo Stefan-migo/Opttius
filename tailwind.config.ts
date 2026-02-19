@@ -128,12 +128,12 @@ const config = {
           light: "var(--utopica-light)",
           lightest: "var(--utopica-lightest)",
         },
-        // Epoch Design System
+        // Epoch Design System - Uses CSS variables from globals.css (single source of truth)
         epoch: {
-          primary: "#2C3E33",
-          accent: "#C4B28C",
-          background: "#EAE8DD",
-          surface: "#1A1A1A",
+          primary: "var(--epoch-primary)",
+          accent: "var(--epoch-accent)",
+          background: "var(--epoch-background)",
+          surface: "var(--epoch-surface)",
           "surface-light": "#F5F4EF",
           "surface-dark": "#262626",
         },

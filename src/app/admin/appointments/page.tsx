@@ -678,8 +678,9 @@ export default function AppointmentsPage() {
                   {appointments
                     .filter(
                       (a) =>
-                        new Date(a.appointment_date).toDateString() ===
-                        new Date().toDateString(),
+                        new Date(
+                          a.appointment_date + "T12:00:00",
+                        ).toDateString() === new Date().toDateString(),
                     )
                     .sort((a, b) =>
                       a.appointment_time.localeCompare(b.appointment_time),
@@ -708,8 +709,9 @@ export default function AppointmentsPage() {
                     ))}
                   {appointments.filter(
                     (a) =>
-                      new Date(a.appointment_date).toDateString() ===
-                      new Date().toDateString(),
+                      new Date(
+                        a.appointment_date + "T12:00:00",
+                      ).toDateString() === new Date().toDateString(),
                   ).length === 0 && (
                     <p className="text-[10px] text-admin-text-tertiary italic p-4 text-center">
                       No hay citas para hoy
@@ -944,7 +946,7 @@ export default function AppointmentsPage() {
                   <p className="text-sm font-bold text-admin-text-primary flex items-center gap-2">
                     <CalendarDays className="h-3.5 w-3.5 text-admin-accent-primary" />
                     {new Date(
-                      selectedAppointment.appointment_date,
+                      selectedAppointment.appointment_date + "T12:00:00",
                     ).toLocaleDateString("es-CL", {
                       day: "numeric",
                       month: "short",
@@ -995,7 +997,7 @@ export default function AppointmentsPage() {
                     onValueChange={async (newStatus) => {
                       // Validate that newStatus is a valid appointment status
                       const validStatuses = [
-                        "pending",
+                        "scheduled",
                         "confirmed",
                         "completed",
                         "cancelled",
@@ -1010,7 +1012,7 @@ export default function AppointmentsPage() {
                           selectedAppointment.id,
                           {
                             status: newStatus as
-                              | "pending"
+                              | "scheduled"
                               | "confirmed"
                               | "completed"
                               | "cancelled"
@@ -1278,10 +1280,12 @@ export default function AppointmentsPage() {
                               <span className="font-bold text-sm text-admin-text-primary">
                                 {day}{" "}
                                 {dateStr &&
-                                  new Date(dateStr).toLocaleDateString(
-                                    "es-CL",
-                                    { day: "numeric", month: "short" },
-                                  )}
+                                  new Date(
+                                    dateStr + "T12:00:00",
+                                  ).toLocaleDateString("es-CL", {
+                                    day: "numeric",
+                                    month: "short",
+                                  })}
                               </span>
                               <span className="text-xs font-medium text-admin-text-tertiary">
                                 {dayApts.length} cita

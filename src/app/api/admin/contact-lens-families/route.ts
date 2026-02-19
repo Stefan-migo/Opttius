@@ -3,7 +3,7 @@ import { createClient } from "@/utils/supabase/server";
 import { appLogger as logger } from "@/lib/logger";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
 import {
-  createContactLensFamilySchema,
+  createContactLensFamilyWithMatricesSchema,
   updateContactLensFamilySchema,
 } from "@/lib/api/validation/zod-schemas";
 import {
@@ -174,17 +174,19 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validate body
+    // Validate body (supports optional matrices)
     const body = await parseAndValidateBody(
       request,
-      createContactLensFamilySchema,
+      createContactLensFamilyWithMatricesSchema,
     );
+
+    const { matrices: matricesInput, ...familyPayload } = body;
 
     // Insert contact lens family with organization_id
     const { data: family, error } = await supabase
       .from("contact_lens_families")
       .insert({
-        ...body,
+        ...familyPayload,
         organization_id: userOrganizationId,
       })
       .select()
@@ -195,6 +197,43 @@ export async function POST(request: NextRequest) {
       return createApiErrorResponse(
         new Error("Error al crear familia de lentes de contacto"),
       );
+    }
+
+    // Create price matrices if provided
+    if (matricesInput && matricesInput.length > 0 && family) {
+      const matrixRows = matricesInput.map((m) => ({
+        contact_lens_family_id: family.id,
+        organization_id: userOrganizationId,
+        sphere_min: m.sphere_min,
+        sphere_max: m.sphere_max,
+        cylinder_min: m.cylinder_min,
+        cylinder_max: m.cylinder_max,
+        axis_min: m.axis_min,
+        axis_max: m.axis_max,
+        addition_min: m.addition_min,
+        addition_max: m.addition_max,
+        base_price: m.base_price,
+        cost: m.cost,
+        is_active: m.is_active,
+      }));
+
+      const { error: matricesError } = await supabase
+        .from("contact_lens_price_matrices")
+        .insert(matrixRows);
+
+      if (matricesError) {
+        logger.error(
+          "Error creating contact lens price matrices",
+          matricesError,
+        );
+        // Family was created; we could rollback or leave it. For simplicity, return success
+        // and log. The family exists but matrices failed.
+        return createApiErrorResponse(
+          new Error(
+            "Familia creada pero error al crear matrices de precios. Edite la familia para agregar matrices.",
+          ),
+        );
+      }
     }
 
     return createApiSuccessResponse(family, { statusCode: 201 });

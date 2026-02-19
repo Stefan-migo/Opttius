@@ -536,8 +536,12 @@ export async function PUT(
       );
     }
 
-    // Handle stock update if stock_quantity is provided
-    if (body.stock_quantity !== undefined && updatedProduct) {
+    // Handle stock update if stock_quantity or low_stock_threshold is provided
+    if (
+      (body.stock_quantity !== undefined ||
+        body.low_stock_threshold !== undefined) &&
+      updatedProduct
+    ) {
       const branchContext = await getBranchContext(request, user.id);
       const branchId = branchContext.branchId || body.branch_id;
 
@@ -547,7 +551,6 @@ export async function PUT(
           stockQuantity: body.stock_quantity,
           branchContext: branchContext.branchId,
         });
-        // Return success but with a warning message
         return NextResponse.json({
           product: updatedProduct,
           warning:
@@ -555,33 +558,64 @@ export async function PUT(
         });
       }
 
-      const stockQty = parseInt(String(body.stock_quantity)) || 0;
       const serviceSupabase = createServiceRoleClient();
 
-      // Get current stock to calculate difference
-      const currentStock = await getProductStock(id, branchId, serviceSupabase);
-      const currentQty = currentStock?.quantity || 0;
-      const quantityChange = stockQty - currentQty;
-
-      if (quantityChange !== 0) {
-        const stockResult = await updateProductStock(
+      if (body.stock_quantity !== undefined) {
+        const stockQty = parseInt(String(body.stock_quantity)) || 0;
+        const currentStock = await getProductStock(
           id,
           branchId,
-          quantityChange,
-          false,
+          serviceSupabase,
+        );
+        const currentQty = currentStock?.quantity || 0;
+        const quantityChange = stockQty - currentQty;
+
+        if (quantityChange !== 0) {
+          const stockResult = await updateProductStock(
+            id,
+            branchId,
+            quantityChange,
+            false,
+            serviceSupabase,
+          );
+
+          if (!stockResult.success) {
+            logger.warn("Failed to update stock, but product was updated", {
+              productId: id,
+              branchId,
+              error: stockResult.error,
+            });
+            return NextResponse.json({
+              product: updatedProduct,
+              warning:
+                "El producto se actualizó, pero hubo un error al actualizar el stock",
+            });
+          }
+        }
+      }
+
+      if (body.low_stock_threshold !== undefined) {
+        const lowStockThreshold =
+          parseInt(String(body.low_stock_threshold)) || 5;
+        const currentStock = await getProductStock(
+          id,
+          branchId,
           serviceSupabase,
         );
 
-        if (!stockResult.success) {
-          logger.warn("Failed to update stock, but product was updated", {
-            productId: id,
-            branchId,
-            error: stockResult.error,
-          });
-          return NextResponse.json({
-            product: updatedProduct,
-            warning:
-              "El producto se actualizó, pero hubo un error al actualizar el stock",
+        if (currentStock) {
+          await serviceSupabase
+            .from("product_branch_stock")
+            .update({ low_stock_threshold: lowStockThreshold })
+            .eq("product_id", id)
+            .eq("branch_id", branchId);
+        } else {
+          await serviceSupabase.from("product_branch_stock").insert({
+            product_id: id,
+            branch_id: branchId,
+            quantity: 0,
+            reserved_quantity: 0,
+            low_stock_threshold: lowStockThreshold,
           });
         }
       }

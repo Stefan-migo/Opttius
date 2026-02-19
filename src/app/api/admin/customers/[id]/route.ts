@@ -229,7 +229,17 @@ export async function GET(
       segment = "vip";
     } else if (orderCount > 3) {
       segment = "regular";
-    } else if (orderCount > 0) segment = "first-time";
+    } else if (orderCount > 0) {
+      segment = "first-time";
+    }
+    // At-risk: has orders but last order > 180 days ago
+    if (
+      orderCount > 0 &&
+      lastOrderDate &&
+      new Date(lastOrderDate) < new Date(Date.now() - 180 * 24 * 60 * 60 * 1000)
+    ) {
+      segment = "at-risk";
+    }
 
     // Order status counts
     const orderStatusCounts =

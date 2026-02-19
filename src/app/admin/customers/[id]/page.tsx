@@ -43,7 +43,15 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { formatCurrency, formatDate } from "@/lib/utils";
-import { customerService, Customer, Prescription, Appointment, Quote, LensPurchase } from "@/lib/api/services";
+import {
+  customerService,
+  Customer,
+  Prescription,
+  Appointment,
+  Quote,
+  LensPurchase,
+} from "@/lib/api/services";
+import { PrescriptionFullDisplay } from "@/components/admin/PrescriptionFullDisplay";
 import {
   Dialog,
   DialogContent,
@@ -59,7 +67,7 @@ const CreatePrescriptionForm = dynamic(
   {
     loading: () => (
       <div className="flex items-center justify-center py-8">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-azul-profundo"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-admin-text-primary"></div>
       </div>
     ),
     ssr: false,
@@ -71,7 +79,7 @@ const CreateAppointmentForm = dynamic(
   {
     loading: () => (
       <div className="flex items-center justify-center py-8">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-azul-profundo"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-admin-text-primary"></div>
       </div>
     ),
     ssr: false,
@@ -83,7 +91,7 @@ const CreateQuoteForm = dynamic(
   {
     loading: () => (
       <div className="flex items-center justify-center py-8">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-azul-profundo"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-admin-text-primary"></div>
       </div>
     ),
     ssr: false,
@@ -237,10 +245,10 @@ export default function CustomerDetailPage() {
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div>
-            <h1 className="text-3xl font-bold text-azul-profundo">
+            <h1 className="text-3xl font-bold text-admin-text-primary">
               Cargando cliente...
             </h1>
-            <p className="text-tierra-media">
+            <p className="text-admin-text-tertiary">
               Obteniendo información del cliente
             </p>
           </div>
@@ -267,8 +275,10 @@ export default function CustomerDetailPage() {
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div>
-            <h1 className="text-3xl font-bold text-azul-profundo">Error</h1>
-            <p className="text-tierra-media">
+            <h1 className="text-3xl font-bold text-admin-text-primary">
+              Error
+            </h1>
+            <p className="text-admin-text-tertiary">
               No se pudo cargar la información del cliente
             </p>
           </div>
@@ -279,7 +289,7 @@ export default function CustomerDetailPage() {
             <h3 className="text-lg font-semibold text-red-700 mb-2">
               Error al cargar cliente
             </h3>
-            <p className="text-tierra-media mb-4">
+            <p className="text-admin-text-tertiary mb-4">
               {error || "Cliente no encontrado"}
             </p>
             <Button onClick={fetchCustomer}>Reintentar</Button>
@@ -303,10 +313,12 @@ export default function CustomerDetailPage() {
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div>
-            <h1 className="text-3xl font-bold text-azul-profundo">
+            <h1 className="text-3xl font-bold text-admin-text-primary">
               {customerName}
             </h1>
-            <p className="text-tierra-media">{customer.email || "Sin email"}</p>
+            <p className="text-admin-text-tertiary">
+              {customer.email || "Sin email"}
+            </p>
           </div>
         </div>
 
@@ -327,10 +339,12 @@ export default function CustomerDetailPage() {
         <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)]">
           <CardContent className="p-6">
             <div className="flex items-center">
-              <DollarSign className="h-8 w-8 text-verde-suave" />
+              <DollarSign className="h-8 w-8 text-admin-success" />
               <div className="ml-4">
-                <p className="text-sm text-tierra-media">Total Gastado</p>
-                <p className="text-2xl font-bold text-verde-suave">
+                <p className="text-sm text-admin-text-tertiary">
+                  Total Gastado
+                </p>
+                <p className="text-2xl font-bold text-admin-success">
                   {formatCurrency(customer.analytics?.totalSpent || 0)}
                 </p>
               </div>
@@ -341,10 +355,12 @@ export default function CustomerDetailPage() {
         <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)]">
           <CardContent className="p-6">
             <div className="flex items-center">
-              <ShoppingBag className="h-8 w-8 text-azul-profundo" />
+              <ShoppingBag className="h-8 w-8 text-admin-text-primary" />
               <div className="ml-4">
-                <p className="text-sm text-tierra-media">Total Pedidos</p>
-                <p className="text-2xl font-bold text-azul-profundo">
+                <p className="text-sm text-admin-text-tertiary">
+                  Total Pedidos
+                </p>
+                <p className="text-2xl font-bold text-admin-text-primary">
                   {customer.analytics?.orderCount || 0}
                 </p>
               </div>
@@ -355,10 +371,12 @@ export default function CustomerDetailPage() {
         <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)]">
           <CardContent className="p-6">
             <div className="flex items-center">
-              <TrendingUp className="h-8 w-8 text-dorado" />
+              <TrendingUp className="h-8 w-8 text-admin-accent-primary" />
               <div className="ml-4">
-                <p className="text-sm text-tierra-media">Ticket Promedio</p>
-                <p className="text-2xl font-bold text-dorado">
+                <p className="text-sm text-admin-text-tertiary">
+                  Ticket Promedio
+                </p>
+                <p className="text-2xl font-bold text-admin-accent-primary">
                   {formatCurrency(customer.analytics?.avgOrderValue || 0)}
                 </p>
               </div>
@@ -371,7 +389,9 @@ export default function CustomerDetailPage() {
             <div className="flex items-center">
               <Calendar className="h-8 w-8 text-red-500" />
               <div className="ml-4">
-                <p className="text-sm text-tierra-media">Cliente Desde</p>
+                <p className="text-sm text-admin-text-tertiary">
+                  Cliente Desde
+                </p>
                 <p className="text-lg font-bold text-red-500">
                   {formatDate(customer.created_at)}
                 </p>
@@ -405,13 +425,13 @@ export default function CustomerDetailPage() {
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <p className="text-sm text-tierra-media">Nombre</p>
+                    <p className="text-sm text-admin-text-tertiary">Nombre</p>
                     <p className="font-medium">
                       {customer.first_name || "No especificado"}
                     </p>
                   </div>
                   <div>
-                    <p className="text-sm text-tierra-media">Apellido</p>
+                    <p className="text-sm text-admin-text-tertiary">Apellido</p>
                     <p className="font-medium">
                       {customer.last_name || "No especificado"}
                     </p>
@@ -420,26 +440,26 @@ export default function CustomerDetailPage() {
 
                 {customer.rut && (
                   <div>
-                    <p className="text-sm text-tierra-media">RUT</p>
+                    <p className="text-sm text-admin-text-tertiary">RUT</p>
                     <p className="font-medium">{customer.rut}</p>
                   </div>
                 )}
 
                 <div>
-                  <p className="text-sm text-tierra-media">Email</p>
+                  <p className="text-sm text-admin-text-tertiary">Email</p>
                   <p className="font-medium">{customer.email}</p>
                 </div>
 
                 {customer.phone && (
                   <div>
-                    <p className="text-sm text-tierra-media">Teléfono</p>
+                    <p className="text-sm text-admin-text-tertiary">Teléfono</p>
                     <p className="font-medium">{customer.phone}</p>
                   </div>
                 )}
 
                 {customer.date_of_birth && (
                   <div>
-                    <p className="text-sm text-tierra-media">
+                    <p className="text-sm text-admin-text-tertiary">
                       Fecha de Nacimiento
                     </p>
                     <p className="font-medium">
@@ -452,7 +472,7 @@ export default function CustomerDetailPage() {
 
                 {customer.last_eye_exam_date && (
                   <div>
-                    <p className="text-sm text-tierra-media">
+                    <p className="text-sm text-admin-text-tertiary">
                       Último Examen de la Vista
                     </p>
                     <p className="font-medium">
@@ -463,10 +483,10 @@ export default function CustomerDetailPage() {
 
                 {customer.next_eye_exam_due && (
                   <div>
-                    <p className="text-sm text-tierra-media">
+                    <p className="text-sm text-admin-text-tertiary">
                       Próximo Examen Recomendado
                     </p>
-                    <p className="font-medium text-azul-profundo">
+                    <p className="font-medium text-admin-text-primary">
                       {formatDate(customer.next_eye_exam_due)}
                     </p>
                   </div>
@@ -475,46 +495,50 @@ export default function CustomerDetailPage() {
                 {customer.medical_conditions &&
                   customer.medical_conditions.length > 0 && (
                     <div>
-                      <p className="text-sm text-tierra-media">
+                      <p className="text-sm text-admin-text-tertiary">
                         Condiciones Médicas
                       </p>
                       <div className="flex flex-wrap gap-1 mt-1">
-                        {customer.medical_conditions.map((condition: string, idx: number) => (
-                          <Badge key={idx} variant="outline">
-                            {condition}
-                          </Badge>
-                        ))}
+                        {customer.medical_conditions.map(
+                          (condition: string, idx: number) => (
+                            <Badge key={idx} variant="outline">
+                              {condition}
+                            </Badge>
+                          ),
+                        )}
                       </div>
                     </div>
                   )}
 
                 {customer.allergies && customer.allergies.length > 0 && (
                   <div>
-                    <p className="text-sm text-tierra-media">Alergias</p>
+                    <p className="text-sm text-admin-text-tertiary">Alergias</p>
                     <div className="flex flex-wrap gap-1 mt-1">
-                      {customer.allergies.map((allergy: string, idx: number) => (
-                        <Badge
-                          key={idx}
-                          variant="outline"
-                          className="bg-red-50 text-red-700"
-                        >
-                          {allergy}
-                        </Badge>
-                      ))}
+                      {customer.allergies.map(
+                        (allergy: string, idx: number) => (
+                          <Badge
+                            key={idx}
+                            variant="outline"
+                            className="bg-red-50 text-red-700"
+                          >
+                            {allergy}
+                          </Badge>
+                        ),
+                      )}
                     </div>
                   </div>
                 )}
 
                 {customer.emergency_contact_name && (
                   <div>
-                    <p className="text-sm text-tierra-media">
+                    <p className="text-sm text-admin-text-tertiary">
                       Contacto de Emergencia
                     </p>
                     <p className="font-medium">
                       {customer.emergency_contact_name}
                     </p>
                     {customer.emergency_contact_phone && (
-                      <p className="text-sm text-tierra-media">
+                      <p className="text-sm text-admin-text-tertiary">
                         {customer.emergency_contact_phone}
                       </p>
                     )}
@@ -522,7 +546,7 @@ export default function CustomerDetailPage() {
                 )}
 
                 <div>
-                  <p className="text-sm text-tierra-media">Estado</p>
+                  <p className="text-sm text-admin-text-tertiary">Estado</p>
                   <Badge
                     variant={
                       customer.is_active_customer !== false
@@ -550,7 +574,9 @@ export default function CustomerDetailPage() {
                 {customer.address_line_1 ? (
                   <>
                     <div>
-                      <p className="text-sm text-tierra-media">Dirección</p>
+                      <p className="text-sm text-admin-text-tertiary">
+                        Dirección
+                      </p>
                       <p className="font-medium">{customer.address_line_1}</p>
                       {customer.address_line_2 && (
                         <p className="font-medium">{customer.address_line_2}</p>
@@ -559,13 +585,17 @@ export default function CustomerDetailPage() {
 
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <p className="text-sm text-tierra-media">Ciudad</p>
+                        <p className="text-sm text-admin-text-tertiary">
+                          Ciudad
+                        </p>
                         <p className="font-medium">
                           {customer.city || "No especificado"}
                         </p>
                       </div>
                       <div>
-                        <p className="text-sm text-tierra-media">Provincia</p>
+                        <p className="text-sm text-admin-text-tertiary">
+                          Provincia
+                        </p>
                         <p className="font-medium">
                           {customer.state || "No especificado"}
                         </p>
@@ -574,7 +604,7 @@ export default function CustomerDetailPage() {
 
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <p className="text-sm text-tierra-media">
+                        <p className="text-sm text-admin-text-tertiary">
                           Código Postal
                         </p>
                         <p className="font-medium">
@@ -582,7 +612,7 @@ export default function CustomerDetailPage() {
                         </p>
                       </div>
                       <div>
-                        <p className="text-sm text-tierra-media">País</p>
+                        <p className="text-sm text-admin-text-tertiary">País</p>
                         <p className="font-medium">
                           {customer.country || "Chile"}
                         </p>
@@ -590,7 +620,7 @@ export default function CustomerDetailPage() {
                     </div>
                   </>
                 ) : (
-                  <p className="text-tierra-media">
+                  <p className="text-admin-text-tertiary">
                     No hay dirección registrada
                   </p>
                 )}
@@ -624,7 +654,7 @@ export default function CustomerDetailPage() {
                       <div className="flex items-center space-x-3">
                         <div>
                           <p className="font-medium">#{order.order_number}</p>
-                          <p className="text-sm text-tierra-media">
+                          <p className="text-sm text-admin-text-tertiary">
                             {formatDate(order.created_at)}
                           </p>
                         </div>
@@ -683,7 +713,7 @@ export default function CustomerDetailPage() {
                           {prescription.prescription_number ||
                             prescription.id.slice(0, 8)}
                         </CardTitle>
-                        <p className="text-sm text-tierra-media mt-1">
+                        <p className="text-sm text-admin-text-tertiary mt-1">
                           Fecha:{" "}
                           {new Date(
                             prescription.prescription_date,
@@ -723,143 +753,10 @@ export default function CustomerDetailPage() {
                     </div>
                   </CardHeader>
                   <CardContent>
-                    <div className="grid grid-cols-2 gap-6">
-                      {/* Right Eye (OD) */}
-                      <div className="border-r pr-6">
-                        <h4 className="font-semibold mb-3 text-azul-profundo">
-                          Ojo Derecho (OD)
-                        </h4>
-                        <div className="grid grid-cols-2 gap-3 text-sm">
-                          <div>
-                            <span className="text-tierra-media">Esfera:</span>
-                            <p className="font-medium">
-                              {prescription.od_sphere !== null &&
-                              prescription.od_sphere !== undefined
-                                ? `${prescription.od_sphere > 0 ? "+" : ""}${prescription.od_sphere}`
-                                : "-"}
-                            </p>
-                          </div>
-                          <div>
-                            <span className="text-tierra-media">Cilindro:</span>
-                            <p className="font-medium">
-                              {prescription.od_cylinder !== null &&
-                              prescription.od_cylinder !== undefined
-                                ? `${prescription.od_cylinder > 0 ? "+" : ""}${prescription.od_cylinder}`
-                                : "-"}
-                            </p>
-                          </div>
-                          <div>
-                            <span className="text-tierra-media">Eje:</span>
-                            <p className="font-medium">
-                              {prescription.od_axis !== null
-                                ? `${prescription.od_axis}°`
-                                : "-"}
-                            </p>
-                          </div>
-                          <div>
-                            <span className="text-tierra-media">ADD:</span>
-                            <p className="font-medium">
-                              {prescription.od_add !== null
-                                ? `+${prescription.od_add}`
-                                : "-"}
-                            </p>
-                          </div>
-                          <div>
-                            <span className="text-tierra-media">PD:</span>
-                            <p className="font-medium">
-                              {prescription.od_pd !== null
-                                ? `${prescription.od_pd} mm`
-                                : "-"}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Left Eye (OS) */}
-                      <div>
-                        <h4 className="font-semibold mb-3 text-azul-profundo">
-                          Ojo Izquierdo (OS)
-                        </h4>
-                        <div className="grid grid-cols-2 gap-3 text-sm">
-                          <div>
-                            <span className="text-tierra-media">Esfera:</span>
-                            <p className="font-medium">
-                              {prescription.os_sphere !== null &&
-                              prescription.os_sphere !== undefined
-                                ? `${prescription.os_sphere > 0 ? "+" : ""}${prescription.os_sphere}`
-                                : "-"}
-                            </p>
-                          </div>
-                          <div>
-                            <span className="text-tierra-media">Cilindro:</span>
-                            <p className="font-medium">
-                              {prescription.os_cylinder !== null &&
-                              prescription.os_cylinder !== undefined
-                                ? `${prescription.os_cylinder > 0 ? "+" : ""}${prescription.os_cylinder}`
-                                : "-"}
-                            </p>
-                          </div>
-                          <div>
-                            <span className="text-tierra-media">Eje:</span>
-                            <p className="font-medium">
-                              {prescription.os_axis !== null
-                                ? `${prescription.os_axis}°`
-                                : "-"}
-                            </p>
-                          </div>
-                          <div>
-                            <span className="text-tierra-media">ADD:</span>
-                            <p className="font-medium">
-                              {prescription.os_add !== null
-                                ? `+${prescription.os_add}`
-                                : "-"}
-                            </p>
-                          </div>
-                          <div>
-                            <span className="text-tierra-media">PD:</span>
-                            <p className="font-medium">
-                              {prescription.os_pd !== null
-                                ? `${prescription.os_pd} mm`
-                                : "-"}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {(prescription.issued_by ||
-                      prescription.prescription_type ||
-                      prescription.notes) && (
-                      <div className="mt-4 pt-4 border-t space-y-2">
-                        {prescription.issued_by && (
-                          <p className="text-sm">
-                            <span className="text-tierra-media">
-                              Emitida por:
-                            </span>{" "}
-                            <span className="font-medium">
-                              {prescription.issued_by}
-                            </span>
-                            {prescription.issued_by_license && (
-                              <> ({prescription.issued_by_license})</>
-                            )}
-                          </p>
-                        )}
-                        {prescription.prescription_type && (
-                          <p className="text-sm">
-                            <span className="text-tierra-media">Tipo:</span>{" "}
-                            <Badge variant="outline">
-                              {prescription.prescription_type}
-                            </Badge>
-                          </p>
-                        )}
-                        {prescription.notes && (
-                          <p className="text-sm">
-                            <span className="text-tierra-media">Notas:</span>{" "}
-                            <span>{prescription.notes}</span>
-                          </p>
-                        )}
-                      </div>
-                    )}
+                    <PrescriptionFullDisplay
+                      prescription={prescription}
+                      showCard={false}
+                    />
                   </CardContent>
                 </Card>
               ))}
@@ -867,11 +764,11 @@ export default function CustomerDetailPage() {
           ) : (
             <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)]">
               <CardContent className="text-center py-12">
-                <Eye className="h-12 w-12 text-tierra-media mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-azul-profundo mb-2">
+                <Eye className="h-12 w-12 text-admin-text-tertiary mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-admin-text-primary mb-2">
                   Sin recetas
                 </h3>
-                <p className="text-tierra-media mb-4">
+                <p className="text-admin-text-tertiary mb-4">
                   Este cliente aún no tiene recetas registradas.
                 </p>
                 <Button
@@ -953,7 +850,7 @@ export default function CustomerDetailPage() {
                               "emergency",
                             ].includes(appointment.appointment_type) && "Cita"}
                           </CardTitle>
-                          <div className="flex items-center gap-4 mt-2 text-sm text-tierra-media">
+                          <div className="flex items-center gap-4 mt-2 text-sm text-admin-text-tertiary">
                             <div className="flex items-center gap-1">
                               <Calendar className="h-4 w-4" />
                               {appointmentDate.toLocaleDateString("es-CL", {
@@ -992,19 +889,23 @@ export default function CustomerDetailPage() {
                     <CardContent>
                       {appointment.reason && (
                         <div className="mb-3">
-                          <p className="text-sm text-tierra-media">Motivo:</p>
+                          <p className="text-sm text-admin-text-tertiary">
+                            Motivo:
+                          </p>
                           <p className="font-medium">{appointment.reason}</p>
                         </div>
                       )}
                       {appointment.notes && (
                         <div className="mb-3">
-                          <p className="text-sm text-tierra-media">Notas:</p>
+                          <p className="text-sm text-admin-text-tertiary">
+                            Notas:
+                          </p>
                           <p>{appointment.notes}</p>
                         </div>
                       )}
                       {appointment.outcome && (
                         <div className="mb-3">
-                          <p className="text-sm text-tierra-media">
+                          <p className="text-sm text-admin-text-tertiary">
                             Resultado:
                           </p>
                           <p>{appointment.outcome}</p>
@@ -1013,10 +914,10 @@ export default function CustomerDetailPage() {
                       {appointment.follow_up_required &&
                         appointment.follow_up_date && (
                           <div className="mt-3 pt-3 border-t">
-                            <p className="text-sm text-tierra-media">
+                            <p className="text-sm text-admin-text-tertiary">
                               Seguimiento requerido:
                             </p>
-                            <p className="font-medium text-azul-profundo">
+                            <p className="font-medium text-admin-text-primary">
                               {new Date(
                                 appointment.follow_up_date,
                               ).toLocaleDateString("es-CL")}
@@ -1044,11 +945,11 @@ export default function CustomerDetailPage() {
           ) : (
             <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)]">
               <CardContent className="text-center py-12">
-                <CalendarIcon className="h-12 w-12 text-tierra-media mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-azul-profundo mb-2">
+                <CalendarIcon className="h-12 w-12 text-admin-text-tertiary mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-admin-text-primary mb-2">
                   Sin citas
                 </h3>
-                <p className="text-tierra-media mb-4">
+                <p className="text-admin-text-tertiary mb-4">
                   Este cliente aún no tiene citas programadas.
                 </p>
                 <Button
@@ -1117,7 +1018,7 @@ export default function CustomerDetailPage() {
                           <CardTitle className="text-lg">
                             Presupuesto {quote.quote_number}
                           </CardTitle>
-                          <p className="text-sm text-tierra-media mt-1">
+                          <p className="text-sm text-admin-text-tertiary mt-1">
                             Fecha:{" "}
                             {new Date(quote.quote_date).toLocaleDateString(
                               "es-CL",
@@ -1155,13 +1056,13 @@ export default function CustomerDetailPage() {
                     <CardContent>
                       <div className="grid grid-cols-2 gap-6">
                         <div>
-                          <p className="text-sm text-tierra-media mb-2">
+                          <p className="text-sm text-admin-text-tertiary mb-2">
                             Detalles del Presupuesto
                           </p>
                           <div className="space-y-1 text-sm">
                             {quote.frame_name && (
                               <p>
-                                <span className="text-tierra-media">
+                                <span className="text-admin-text-tertiary">
                                   Marco:
                                 </span>{" "}
                                 <span className="font-medium">
@@ -1171,7 +1072,7 @@ export default function CustomerDetailPage() {
                             )}
                             {quote.lens_type && (
                               <p>
-                                <span className="text-tierra-media">
+                                <span className="text-admin-text-tertiary">
                                   Tipo de lente:
                                 </span>{" "}
                                 <span className="font-medium">
@@ -1181,7 +1082,7 @@ export default function CustomerDetailPage() {
                             )}
                             {quote.lens_material && (
                               <p>
-                                <span className="text-tierra-media">
+                                <span className="text-admin-text-tertiary">
                                   Material:
                                 </span>{" "}
                                 <span className="font-medium">
@@ -1192,13 +1093,13 @@ export default function CustomerDetailPage() {
                           </div>
                         </div>
                         <div>
-                          <p className="text-sm text-tierra-media mb-2">
+                          <p className="text-sm text-admin-text-tertiary mb-2">
                             Información de Precio
                           </p>
                           <div className="space-y-1 text-sm">
                             {quote.frame_price && quote.frame_price > 0 && (
                               <p>
-                                <span className="text-tierra-media">
+                                <span className="text-admin-text-tertiary">
                                   Marco:
                                 </span>{" "}
                                 <span className="font-medium">
@@ -1208,7 +1109,7 @@ export default function CustomerDetailPage() {
                             )}
                             {quote.lens_cost && quote.lens_cost > 0 && (
                               <p>
-                                <span className="text-tierra-media">
+                                <span className="text-admin-text-tertiary">
                                   Lente:
                                 </span>{" "}
                                 <span className="font-medium">
@@ -1219,7 +1120,7 @@ export default function CustomerDetailPage() {
                             {quote.treatments_cost &&
                               quote.treatments_cost > 0 && (
                                 <p>
-                                  <span className="text-tierra-media">
+                                  <span className="text-admin-text-tertiary">
                                     Tratamientos:
                                   </span>{" "}
                                   <span className="font-medium">
@@ -1229,7 +1130,7 @@ export default function CustomerDetailPage() {
                               )}
                             {quote.labor_cost && quote.labor_cost > 0 && (
                               <p>
-                                <span className="text-tierra-media">
+                                <span className="text-admin-text-tertiary">
                                   Mano de obra:
                                 </span>{" "}
                                 <span className="font-medium">
@@ -1239,10 +1140,10 @@ export default function CustomerDetailPage() {
                             )}
                             {quote.total_amount && (
                               <p className="pt-2 border-t">
-                                <span className="text-tierra-media">
+                                <span className="text-admin-text-tertiary">
                                   Total:
                                 </span>{" "}
-                                <span className="font-medium text-verde-suave text-base">
+                                <span className="font-medium text-admin-success text-base">
                                   {formatCurrency(quote.total_amount)}
                                 </span>
                               </p>
@@ -1258,11 +1159,11 @@ export default function CustomerDetailPage() {
           ) : (
             <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)]">
               <CardContent className="text-center py-12">
-                <FileText className="h-12 w-12 text-tierra-media mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-azul-profundo mb-2">
+                <FileText className="h-12 w-12 text-admin-text-tertiary mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-admin-text-primary mb-2">
                   Sin presupuestos
                 </h3>
-                <p className="text-tierra-media mb-4">
+                <p className="text-admin-text-tertiary mb-4">
                   Este cliente aún no tiene presupuestos registrados.
                 </p>
                 <Button onClick={() => setShowCreateQuote(true)}>
@@ -1303,7 +1204,7 @@ export default function CustomerDetailPage() {
                               <CardTitle className="text-lg">
                                 {purchase.product_name}
                               </CardTitle>
-                              <p className="text-sm text-tierra-media mt-1">
+                              <p className="text-sm text-admin-text-tertiary mt-1">
                                 Fecha de compra:{" "}
                                 {new Date(
                                   purchase.purchase_date,
@@ -1337,12 +1238,12 @@ export default function CustomerDetailPage() {
                         <CardContent>
                           <div className="grid grid-cols-2 gap-6">
                             <div>
-                              <p className="text-sm text-tierra-media mb-2">
+                              <p className="text-sm text-admin-text-tertiary mb-2">
                                 Detalles del Producto
                               </p>
                               <div className="space-y-1 text-sm">
                                 <p>
-                                  <span className="text-tierra-media">
+                                  <span className="text-admin-text-tertiary">
                                     Tipo:
                                   </span>{" "}
                                   <span className="font-medium">
@@ -1350,7 +1251,7 @@ export default function CustomerDetailPage() {
                                   </span>
                                 </p>
                                 <p>
-                                  <span className="text-tierra-media">
+                                  <span className="text-admin-text-tertiary">
                                     Cantidad:
                                   </span>{" "}
                                   <span className="font-medium">
@@ -1359,7 +1260,7 @@ export default function CustomerDetailPage() {
                                 </p>
                                 {purchase.lens_type && (
                                   <p>
-                                    <span className="text-tierra-media">
+                                    <span className="text-admin-text-tertiary">
                                       Tipo de lente:
                                     </span>{" "}
                                     <span className="font-medium">
@@ -1369,7 +1270,7 @@ export default function CustomerDetailPage() {
                                 )}
                                 {purchase.frame_brand && (
                                   <p>
-                                    <span className="text-tierra-media">
+                                    <span className="text-admin-text-tertiary">
                                       Marca:
                                     </span>{" "}
                                     <span className="font-medium">
@@ -1380,12 +1281,12 @@ export default function CustomerDetailPage() {
                               </div>
                             </div>
                             <div>
-                              <p className="text-sm text-tierra-media mb-2">
+                              <p className="text-sm text-admin-text-tertiary mb-2">
                                 Información de Compra
                               </p>
                               <div className="space-y-1 text-sm">
                                 <p>
-                                  <span className="text-tierra-media">
+                                  <span className="text-admin-text-tertiary">
                                     Precio unitario:
                                   </span>{" "}
                                   <span className="font-medium">
@@ -1393,15 +1294,15 @@ export default function CustomerDetailPage() {
                                   </span>
                                 </p>
                                 <p>
-                                  <span className="text-tierra-media">
+                                  <span className="text-admin-text-tertiary">
                                     Total:
                                   </span>{" "}
-                                  <span className="font-medium text-verde-suave">
+                                  <span className="font-medium text-admin-success">
                                     {formatCurrency(purchase.total_price)}
                                   </span>
                                 </p>
                                 {purchase.prescription_id && (
-                                  <p className="text-xs text-tierra-media">
+                                  <p className="text-xs text-admin-text-tertiary">
                                     Con receta asociada
                                   </p>
                                 )}
@@ -1415,8 +1316,8 @@ export default function CustomerDetailPage() {
                 </div>
               ) : (
                 <div className="text-center py-8">
-                  <ShoppingBag className="h-10 w-10 text-tierra-media mx-auto mb-3 opacity-50" />
-                  <p className="text-sm text-tierra-media">
+                  <ShoppingBag className="h-10 w-10 text-admin-text-tertiary mx-auto mb-3 opacity-50" />
+                  <p className="text-sm text-admin-text-tertiary">
                     Sin compras de lentes o armazones
                   </p>
                 </div>
@@ -1466,7 +1367,7 @@ export default function CustomerDetailPage() {
                                 <p className="font-medium">
                                   #{order.order_number}
                                 </p>
-                                <p className="text-sm text-tierra-media">
+                                <p className="text-sm text-admin-text-tertiary">
                                   {order.order_items?.length || 0} productos
                                 </p>
                               </div>
@@ -1506,7 +1407,7 @@ export default function CustomerDetailPage() {
                             </Badge>
                           </TableCell>
 
-                          <TableCell className="font-medium text-verde-suave">
+                          <TableCell className="font-medium text-admin-success">
                             {formatCurrency(order.total_amount)}
                           </TableCell>
 
@@ -1526,7 +1427,7 @@ export default function CustomerDetailPage() {
                             <TableRow key={`${order.id}-items`}>
                               <TableCell colSpan={6} className="bg-gray-50 p-4">
                                 <div className="space-y-2">
-                                  <p className="text-sm font-medium text-azul-profundo mb-3">
+                                  <p className="text-sm font-medium text-admin-text-primary mb-3">
                                     Productos del Pedido:
                                   </p>
                                   {order.order_items.map(
@@ -1559,7 +1460,7 @@ export default function CustomerDetailPage() {
                                                   item.product_name ||
                                                   "Producto"}
                                               </p>
-                                              <p className="text-xs text-tierra-media">
+                                              <p className="text-xs text-admin-text-tertiary">
                                                 Cantidad: {item.quantity} ×{" "}
                                                 {formatCurrency(
                                                   item.unit_price,
@@ -1567,7 +1468,7 @@ export default function CustomerDetailPage() {
                                               </p>
                                             </div>
                                           </div>
-                                          <p className="text-sm font-medium text-verde-suave">
+                                          <p className="text-sm font-medium text-admin-success">
                                             {formatCurrency(item.total_price)}
                                           </p>
                                         </div>
@@ -1584,8 +1485,8 @@ export default function CustomerDetailPage() {
                 </Table>
               ) : (
                 <div className="text-center py-8">
-                  <Package className="h-10 w-10 text-tierra-media mx-auto mb-3 opacity-50" />
-                  <p className="text-sm text-tierra-media">
+                  <Package className="h-10 w-10 text-admin-text-tertiary mx-auto mb-3 opacity-50" />
+                  <p className="text-sm text-admin-text-tertiary">
                     Sin pedidos registrados
                   </p>
                 </div>
@@ -1599,11 +1500,11 @@ export default function CustomerDetailPage() {
           {customer.analytics?.orderCount === 0 && (
             <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)]">
               <CardContent className="text-center py-16">
-                <TrendingUp className="h-16 w-16 text-tierra-media mx-auto mb-4 opacity-50" />
-                <h3 className="text-xl font-semibold text-azul-profundo mb-2">
+                <TrendingUp className="h-16 w-16 text-admin-text-tertiary mx-auto mb-4 opacity-50" />
+                <h3 className="text-xl font-semibold text-admin-text-primary mb-2">
                   Sin Datos de Analíticas
                 </h3>
-                <p className="text-tierra-media mb-6 max-w-md mx-auto">
+                <p className="text-admin-text-tertiary mb-6 max-w-md mx-auto">
                   Este cliente aún no ha realizado ningún pedido. Las analíticas
                   estarán disponibles una vez que realice su primera compra a
                   través del POS.
@@ -1651,7 +1552,7 @@ export default function CustomerDetailPage() {
                                     <p className="font-medium">
                                       {item.product?.name || "Producto"}
                                     </p>
-                                    <p className="text-sm text-tierra-media">
+                                    <p className="text-sm text-admin-text-tertiary">
                                       {item.quantity}{" "}
                                       {item.quantity === 1
                                         ? "unidad"
@@ -1661,10 +1562,10 @@ export default function CustomerDetailPage() {
                                   </div>
                                 </div>
                                 <div className="text-right">
-                                  <p className="font-medium text-verde-suave">
+                                  <p className="font-medium text-admin-success">
                                     {formatCurrency(item.totalSpent)}
                                   </p>
-                                  <p className="text-xs text-tierra-media">
+                                  <p className="text-xs text-admin-text-tertiary">
                                     {formatCurrency(
                                       item.totalSpent / item.quantity,
                                     )}{" "}
@@ -1718,7 +1619,7 @@ export default function CustomerDetailPage() {
                           <TrendingUp className="h-5 w-5 mr-2" />
                           Tendencia de Gastos (Últimos 12 meses)
                         </div>
-                        <div className="text-sm font-normal text-tierra-media">
+                        <div className="text-sm font-normal text-admin-text-tertiary">
                           Total: {formatCurrency(customer.analytics.totalSpent)}
                         </div>
                       </CardTitle>
@@ -1731,17 +1632,17 @@ export default function CustomerDetailPage() {
                               key={index}
                               className={`text-center p-3 border rounded-lg transition-all hover:shadow-md ${
                                 month.amount > 0
-                                  ? "bg-verde-suave/10 border-verde-suave/30"
+                                  ? "bg-admin-success/10 border-admin-success/30"
                                   : "bg-gray-50"
                               }`}
                             >
-                              <p className="text-xs font-medium text-tierra-media mb-1">
+                              <p className="text-xs font-medium text-admin-text-tertiary mb-1">
                                 {month.month}
                               </p>
-                              <p className="font-bold text-sm text-azul-profundo">
+                              <p className="font-bold text-sm text-admin-text-primary">
                                 {formatCurrency(month.amount)}
                               </p>
-                              <p className="text-xs text-tierra-media mt-1">
+                              <p className="text-xs text-admin-text-tertiary mt-1">
                                 {month.orders}{" "}
                                 {month.orders === 1 ? "pedido" : "pedidos"}
                               </p>
@@ -1753,16 +1654,18 @@ export default function CustomerDetailPage() {
                       {/* Summary Stats */}
                       <div className="mt-6 pt-4 border-t grid grid-cols-3 gap-4 text-center">
                         <div>
-                          <p className="text-xs text-tierra-media">
+                          <p className="text-xs text-admin-text-tertiary">
                             Promedio Mensual
                           </p>
-                          <p className="font-bold text-lg text-azul-profundo">
+                          <p className="font-bold text-lg text-admin-text-primary">
                             {formatCurrency(customer.analytics.totalSpent / 12)}
                           </p>
                         </div>
                         <div>
-                          <p className="text-xs text-tierra-media">Mejor Mes</p>
-                          <p className="font-bold text-lg text-verde-suave">
+                          <p className="text-xs text-admin-text-tertiary">
+                            Mejor Mes
+                          </p>
+                          <p className="font-bold text-lg text-admin-success">
                             {formatCurrency(
                               Math.max(
                                 ...customer.analytics.monthlySpending.map(
@@ -1773,10 +1676,10 @@ export default function CustomerDetailPage() {
                           </p>
                         </div>
                         <div>
-                          <p className="text-xs text-tierra-media">
+                          <p className="text-xs text-admin-text-tertiary">
                             Meses Activos
                           </p>
-                          <p className="font-bold text-lg text-dorado">
+                          <p className="font-bold text-lg text-admin-accent-primary">
                             {
                               customer.analytics.monthlySpending.filter(
                                 (m: any) => m.amount > 0,

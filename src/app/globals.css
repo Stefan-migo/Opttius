@@ -88,6 +88,12 @@
     --admin-error: #8B0000;
     --admin-info: #3A453E;
 
+    /* Epoch Design System - Single source of truth for tailwind epoch.* */
+    --epoch-primary: #1A2B23;
+    --epoch-accent: #C5A059;
+    --epoch-background: #F9F7F2;
+    --epoch-surface: #1A1A1A;
+
     /* Chart specific colors */
     --chart-1: #1A2B23;
     --chart-2: #C5A059;
@@ -694,9 +700,9 @@ html.dark .admin-header {
 /* Print styles for Receipts and Reports */
 @media print {
 
-  /* POS receipt: portal is direct child of body - hide siblings, show only portal */
+  /* POS receipt / report: ocultar siblings sin ocupar espacio (evita 2ª página vacía) */
   body>*:not(#print-receipt-portal):not(#print-report-portal) {
-    visibility: hidden !important;
+    display: none !important;
   }
 
   #print-receipt-portal,
@@ -730,6 +736,23 @@ html.dark .admin-header {
     overflow: visible !important;
     box-shadow: none !important;
     border: none !important;
+  }
+
+  /* Receipt: body/html solo altura del contenido, evitar 2ª página */
+  html:has(#print-receipt-portal),
+  body:has(#print-receipt-portal) {
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+  }
+
+  body:has(#print-receipt-portal) {
+    page-break-after: avoid !important;
+  }
+
+  @page {
+    size: auto;
+    margin: 10mm;
   }
 
 }

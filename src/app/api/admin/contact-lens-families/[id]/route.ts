@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
 import { appLogger as logger } from "@/lib/logger";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
-import { updateContactLensFamilySchema } from "@/lib/api/validation/zod-schemas";
+import { updateContactLensFamilyWithMatricesSchema } from "@/lib/api/validation/zod-schemas";
 import {
   parseAndValidateBody,
   validationErrorResponse,
@@ -38,9 +38,16 @@ export async function GET(
       );
     }
 
+    const { searchParams } = new URL(request.url);
+    const includeMatrices = searchParams.get("include_matrices") !== "false";
+
+    const selectQuery = includeMatrices
+      ? "*, contact_lens_price_matrices(*)"
+      : "*";
+
     const { data: family, error } = await supabase
       .from("contact_lens_families")
-      .select("*")
+      .select(selectQuery)
       .eq("id", params.id)
       .single();
 
@@ -95,16 +102,18 @@ export async function PUT(
       );
     }
 
-    // Validate body
+    // Validate body (supports optional matrices)
     const body = await parseAndValidateBody(
       request,
-      updateContactLensFamilySchema,
+      updateContactLensFamilyWithMatricesSchema,
     );
+
+    const { matrices: matricesInput, ...familyPayload } = body;
 
     // Update contact lens family
     const { data: family, error } = await supabase
       .from("contact_lens_families")
-      .update(body)
+      .update(familyPayload)
       .eq("id", params.id)
       .select()
       .single();
@@ -121,6 +130,60 @@ export async function PUT(
         { error: "Error al actualizar familia de lentes de contacto" },
         { status: 500 },
       );
+    }
+
+    // Sync matrices if provided
+    if (matricesInput !== undefined && family) {
+      const { data: adminUser } = await supabase
+        .from("admin_users")
+        .select("organization_id")
+        .eq("id", user.id)
+        .single();
+      const userOrganizationId = (adminUser as { organization_id?: string })
+        ?.organization_id;
+
+      const { error: deleteError } = await supabase
+        .from("contact_lens_price_matrices")
+        .delete()
+        .eq("contact_lens_family_id", params.id);
+
+      if (deleteError) {
+        logger.error("Error deleting old matrices", deleteError);
+        return NextResponse.json(
+          { error: "Error al actualizar matrices de precios" },
+          { status: 500 },
+        );
+      }
+
+      if (matricesInput.length > 0 && userOrganizationId) {
+        const matrixRows = matricesInput.map((m) => ({
+          contact_lens_family_id: params.id,
+          organization_id: userOrganizationId,
+          sphere_min: m.sphere_min,
+          sphere_max: m.sphere_max,
+          cylinder_min: m.cylinder_min,
+          cylinder_max: m.cylinder_max,
+          axis_min: m.axis_min,
+          axis_max: m.axis_max,
+          addition_min: m.addition_min,
+          addition_max: m.addition_max,
+          base_price: m.base_price,
+          cost: m.cost,
+          is_active: m.is_active,
+        }));
+
+        const { error: insertError } = await supabase
+          .from("contact_lens_price_matrices")
+          .insert(matrixRows);
+
+        if (insertError) {
+          logger.error("Error inserting matrices", insertError);
+          return NextResponse.json(
+            { error: "Error al guardar matrices de precios" },
+            { status: 500 },
+          );
+        }
+      }
     }
 
     return NextResponse.json({ family });

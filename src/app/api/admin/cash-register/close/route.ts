@@ -235,9 +235,16 @@ export async function GET(request: NextRequest) {
     });
 
     // Calculate payment method totals from session payments if available
+    // Also track cash inflows vs outflows for clearer reconciliation
+    let cash_inflows = 0;
+    let cash_outflows = 0;
     if (sessionPayments.length > 0) {
       sessionPayments.forEach((payment: any) => {
         const amount = Number(payment.amount) || 0;
+        if (payment.payment_method === "cash") {
+          if (amount >= 0) cash_inflows += amount;
+          else cash_outflows += Math.abs(amount);
+        }
         switch (payment.payment_method) {
           case "cash":
             summary.cash_sales += amount;
@@ -349,6 +356,8 @@ export async function GET(request: NextRequest) {
         opening_cash_amount: openingCash,
         expected_cash: expectedCash,
         session_payments_count: sessionPayments.length,
+        cash_inflows,
+        cash_outflows,
       },
       previous_closure: previousClosure,
     });

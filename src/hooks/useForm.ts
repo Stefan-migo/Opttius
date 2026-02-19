@@ -160,6 +160,15 @@ export function useForm<T extends z.ZodType<any, any, any>, R = void>(
     // Validar el formulario
     const isValid = await reactHookForm.trigger();
     if (!isValid) {
+      const errors = reactHookForm.formState.errors;
+      const firstErrorKey = Object.keys(errors)[0] as keyof typeof errors;
+      const firstError = errors[firstErrorKey];
+      const message =
+        firstError && typeof firstError === "object" && "message" in firstError
+          ? String(firstError.message)
+          : "Por favor corrige los errores del formulario";
+      const { error: notifyError } = await import("@/lib/services");
+      notifyError(message);
       return;
     }
 

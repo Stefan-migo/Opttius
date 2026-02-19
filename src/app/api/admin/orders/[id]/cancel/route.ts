@@ -16,9 +16,10 @@ import type {
 export const dynamic = "force-dynamic";
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
+    const { id: orderId } = await params;
     const supabase = await createClient();
     const supabaseServiceRole = createServiceRoleClient();
 
@@ -63,7 +64,7 @@ export async function POST(
     const branchContext = await getBranchContext(request, user.id);
 
     const body = await request.json();
-    const { reason, create_credit_note, refund_method } = body;
+    const { reason, refund_method } = body;
 
     if (!reason) {
       return NextResponse.json(
@@ -72,22 +73,19 @@ export async function POST(
       );
     }
 
-    if (create_credit_note && !refund_method) {
+    // All cancellations require credit note: revert stock + register in caja
+    if (!refund_method) {
       return NextResponse.json(
         {
           error:
-            "refund_method is required when creating credit note (cash, debit, credit, transfer)",
+            "refund_method is required (cash, debit, credit, transfer) - todas las anulaciones crean nota de crédito para revertir stock y actualizar caja",
         },
         { status: 400 },
       );
     }
 
     const validRefundMethods = ["cash", "debit", "credit", "transfer"];
-    if (
-      create_credit_note &&
-      refund_method &&
-      !validRefundMethods.includes(refund_method)
-    ) {
+    if (!validRefundMethods.includes(refund_method)) {
       return NextResponse.json(
         {
           error: `refund_method must be one of: ${validRefundMethods.join(", ")}`,
@@ -100,7 +98,7 @@ export async function POST(
     const { data: order, error: orderError } = await supabaseServiceRole
       .from("orders")
       .select("*")
-      .eq("id", params.id)
+      .eq("id", orderId)
       .single();
 
     if (orderError || !order) {
@@ -144,85 +142,158 @@ export async function POST(
     let creditNoteId: string | null = null;
     let posSessionId: string | null = null;
 
-    // If creating credit note, get current POS session and create records
-    if (create_credit_note && order.branch_id) {
-      // Get open POS session for this branch
-      const { data: openSession } = await supabaseServiceRole
-        .from("pos_sessions")
-        .select("id")
-        .eq("branch_id", order.branch_id)
-        .eq("status", "open")
-        .order("opening_time", { ascending: false })
-        .limit(1)
-        .maybeSingle();
-
-      posSessionId = openSession?.id ?? null;
-
-      // Generate credit note number
-      const { data: cnNumber, error: cnNumError } =
-        await supabaseServiceRole.rpc("generate_credit_note_number");
-
-      if (cnNumError || !cnNumber) {
-        logger.error("Error generating credit note number", cnNumError);
-        return NextResponse.json(
-          {
-            error: "Error al generar número de nota de crédito",
-            details: cnNumError?.message,
-          },
-          { status: 500 },
+    // All cancellations: revert stock + create credit note (for caja consistency)
+    if (order.branch_id) {
+      try {
+        // Get total_paid from order_payments (for partial payments, refund only what was paid)
+        const { data: payments } = await supabaseServiceRole
+          .from("order_payments")
+          .select("amount")
+          .eq("order_id", orderId);
+        const totalPaid = (payments || []).reduce(
+          (sum: number, p: { amount: number }) => sum + Number(p.amount || 0),
+          0,
         );
-      }
+        const refundAmount =
+          totalPaid > 0
+            ? Math.min(totalPaid, Number(order.total_amount))
+            : Number(order.total_amount);
 
-      // Get organization_id from branch
-      const { data: branchRow } = await supabaseServiceRole
-        .from("branches")
-        .select("organization_id")
-        .eq("id", order.branch_id)
-        .single();
+        // Revert stock for order items with product_id
+        const { data: orderItems } = await supabaseServiceRole
+          .from("order_items")
+          .select("id, product_id, quantity")
+          .eq("order_id", orderId);
+        for (const oi of orderItems || []) {
+          if (oi.product_id && order.branch_id) {
+            try {
+              const { error: stockErr } = await supabaseServiceRole.rpc(
+                "update_product_stock",
+                {
+                  p_product_id: oi.product_id,
+                  p_branch_id: order.branch_id,
+                  p_quantity_change: parseInt(String(oi.quantity), 10) || 0,
+                  p_reserve: false,
+                  p_movement_type: "refund",
+                  p_reference_type: "order_cancel",
+                  p_reference_id: orderId,
+                  p_created_by: user.id,
+                },
+              );
+              if (stockErr) {
+                logger.warn("Stock revert failed for item, continuing", {
+                  order_item_id: oi.id,
+                  product_id: oi.product_id,
+                  error: stockErr.message,
+                });
+              }
+            } catch (stockEx: any) {
+              logger.warn("Stock revert exception, continuing", {
+                order_item_id: oi.id,
+                error: stockEx?.message,
+              });
+            }
+          }
+        }
 
-      const { data: newCreditNote, error: cnError } = await supabaseServiceRole
-        .from("credit_notes")
-        .insert({
-          credit_note_number: cnNumber,
-          order_id: params.id,
-          branch_id: order.branch_id,
-          organization_id: (branchRow as any)?.organization_id ?? null,
-          amount: Number(order.total_amount),
-          reason,
-          refund_method,
-          pos_session_id: posSessionId,
-          created_by: user.id,
-        })
-        .select("id")
-        .single();
+        // Get open POS session for this branch
+        const { data: openSession } = await supabaseServiceRole
+          .from("pos_sessions")
+          .select("id")
+          .eq("branch_id", order.branch_id)
+          .eq("status", "open")
+          .order("opening_time", { ascending: false })
+          .limit(1)
+          .maybeSingle();
 
-      if (cnError) {
-        logger.error("Error creating credit note", cnError);
+        posSessionId = openSession?.id ?? null;
+
+        // Generate credit note number
+        const { data: cnNumberRaw, error: cnNumError } =
+          await supabaseServiceRole.rpc("generate_credit_note_number");
+
+        const cnNumber =
+          typeof cnNumberRaw === "string"
+            ? cnNumberRaw
+            : Array.isArray(cnNumberRaw) && cnNumberRaw[0]
+              ? cnNumberRaw[0]
+              : cnNumberRaw;
+
+        if (cnNumError || !cnNumber || typeof cnNumber !== "string") {
+          logger.error("Error generating credit note number", {
+            error: cnNumError,
+            raw: cnNumberRaw,
+          });
+          return NextResponse.json(
+            {
+              error: "Error al generar número de nota de crédito",
+              details: cnNumError?.message || "Número de nota inválido",
+            },
+            { status: 500 },
+          );
+        }
+
+        // Get organization_id from branch
+        const { data: branchRow } = await supabaseServiceRole
+          .from("branches")
+          .select("organization_id")
+          .eq("id", order.branch_id)
+          .single();
+
+        const { data: newCreditNote, error: cnError } =
+          await supabaseServiceRole
+            .from("credit_notes")
+            .insert({
+              credit_note_number: cnNumber,
+              order_id: orderId,
+              branch_id: order.branch_id,
+              organization_id: (branchRow as any)?.organization_id ?? null,
+              amount: refundAmount,
+              reason,
+              refund_method,
+              pos_session_id: posSessionId,
+              created_by: user.id,
+            })
+            .select("id")
+            .single();
+
+        if (cnError) {
+          logger.error("Error creating credit note", cnError);
+          return NextResponse.json(
+            {
+              error: "Error al crear nota de crédito",
+              details: cnError.message,
+            },
+            { status: 500 },
+          );
+        }
+        creditNoteId = newCreditNote?.id ?? null;
+
+        // Create movement only if we have a session (caja abierta)
+        if (posSessionId && creditNoteId) {
+          const { error: movError } = await supabaseServiceRole
+            .from("credit_note_movements")
+            .insert({
+              credit_note_id: creditNoteId,
+              pos_session_id: posSessionId,
+              amount: -refundAmount,
+              refund_method,
+            });
+
+          if (movError) {
+            logger.error("Error creating credit note movement", movError);
+            // Don't fail the whole operation - credit note was created
+          }
+        }
+      } catch (creditNoteErr: any) {
+        logger.error("Error in credit note block", creditNoteErr);
         return NextResponse.json(
           {
             error: "Error al crear nota de crédito",
-            details: cnError.message,
+            details: creditNoteErr?.message ?? String(creditNoteErr),
           },
           { status: 500 },
         );
-      }
-      creditNoteId = newCreditNote?.id ?? null;
-
-      // Create movement only if we have a session (caja abierta)
-      if (posSessionId && creditNoteId) {
-        const { error: movError } = await supabaseServiceRole
-          .from("credit_note_movements")
-          .insert({
-            credit_note_id: creditNoteId,
-            pos_session_id: posSessionId,
-            amount: -Number(order.total_amount),
-            refund_method,
-          });
-
-        if (movError) {
-          logger.error("Error creating credit note movement", movError);
-          // Don't fail the whole operation - credit note was created
-        }
       }
     }
 
@@ -235,7 +306,7 @@ export async function POST(
         cancellation_reason: reason,
         updated_at: new Date().toISOString(),
       })
-      .eq("id", params.id);
+      .eq("id", orderId);
 
     if (updateError) {
       logger.error("Error cancelling order", updateError);
@@ -249,7 +320,7 @@ export async function POST(
     }
 
     logger.info("Order cancelled", {
-      order_id: params.id,
+      order_id: orderId,
       cancelled_by: user.email,
       reason,
       original_amount: order.total_amount,
@@ -258,16 +329,22 @@ export async function POST(
     return NextResponse.json({
       success: true,
       message: "Venta anulada correctamente",
-      order_id: params.id,
+      order_id: orderId,
       credit_note_id: creditNoteId ?? undefined,
       credit_note_movement_registered: !!posSessionId,
     });
   } catch (error: any) {
-    logger.error("Error in cancel order API", { error });
+    const errMsg = error?.message ?? String(error);
+    const errStack = error?.stack;
+    logger.error("Error in cancel order API", {
+      message: errMsg,
+      stack: errStack,
+    });
+    console.error("[cancel] Unhandled error:", errMsg, errStack);
     return NextResponse.json(
       {
         error: "Internal server error",
-        details: error.message,
+        details: errMsg,
       },
       { status: 500 },
     );

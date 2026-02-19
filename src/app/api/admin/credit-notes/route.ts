@@ -59,15 +59,19 @@ export async function GET(request: NextRequest) {
       .order("created_at", { ascending: false })
       .range(offset, offset + limit - 1);
 
-    if (branchContext.branchId && !branchContext.isSuperAdmin) {
+    if (branchContext.branchId) {
       query = query.eq("branch_id", branchContext.branchId);
+    } else if (branchContext.organizationId) {
+      // Global view or no branch: scope to user's organization
+      query = query.eq("organization_id", branchContext.organizationId);
     }
+    // When both null (e.g. super_admin without org): no filter, show all
 
-    if (dateFrom) {
-      query = query.gte("created_at", `${dateFrom}T00:00:00`);
-    }
-    if (dateTo) {
-      query = query.lt("created_at", `${dateTo}T23:59:59`);
+    // Date filter: use wide range to avoid timezone/year mismatches with "antiguas"
+    if (dateFrom && dateTo) {
+      query = query
+        .gte("created_at", `${dateFrom}T00:00:00.000Z`)
+        .lt("created_at", `${dateTo}T23:59:59.999Z`);
     }
 
     const { data: creditNotes, error, count } = await query;

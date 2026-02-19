@@ -211,6 +211,18 @@ const requiredPhoneSchema = z
   });
 
 /**
+ * Teléfono opcional: vacío permitido; si hay valor, mínimo 8 dígitos.
+ */
+const optionalPhoneSchema = z
+  .string()
+  .optional()
+  .transform((val) => (val === "" || val == null ? undefined : val))
+  .refine(
+    (val) => !val || val.trim() === "" || val.replace(/\D/g, "").length >= 8,
+    { message: "Ingrese un número de contacto válido (mín. 8 dígitos)" },
+  );
+
+/**
  * Esquema de validación para cliente
  * Requeridos: nombre, apellido, teléfono. El resto opcional.
  */
@@ -230,6 +242,33 @@ export const customerSchema = z.object({
   city: optionalOrEmpty(
     z.string().min(2, "La ciudad debe tener al menos 2 caracteres").max(100),
   ),
+  state: z.string().optional().or(z.literal("")),
+  postal_code: z.string().max(20).optional().or(z.literal("")),
+  country: z.string().default("Chile"),
+  notes: z
+    .string()
+    .max(500, "Las notas no pueden exceder 500 caracteres")
+    .optional()
+    .or(z.literal("")),
+  branch_id: z.string().optional(),
+});
+
+/**
+ * Esquema de validación para edición de cliente.
+ * Teléfono y dirección opcionales (coincide con labels "Opcional" en el formulario).
+ */
+export const customerEditSchema = z.object({
+  first_name: nameSchema,
+  last_name: nameSchema,
+  email: z
+    .union([z.literal(""), z.string().email("Email inválido")])
+    .optional()
+    .transform((val) => (val === "" || val == null ? undefined : val)),
+  phone: optionalPhoneSchema,
+  rut: optionalRutSchema,
+  address_line_1: z.string().max(200).optional().or(z.literal("")),
+  address_line_2: z.string().max(200).optional().or(z.literal("")),
+  city: z.string().max(100).optional().or(z.literal("")),
   state: z.string().optional().or(z.literal("")),
   postal_code: z.string().max(20).optional().or(z.literal("")),
   country: z.string().default("Chile"),
@@ -454,6 +493,7 @@ export const formValidationSchemas = {
   password: passwordSchema,
   passwordConfirmation: passwordConfirmationSchema,
   customer: customerSchema,
+  customerEdit: customerEditSchema,
   product: productSchema,
   order: orderSchema,
   appointment: appointmentSchema,

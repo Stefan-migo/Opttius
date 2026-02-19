@@ -83,7 +83,7 @@ export default function ProductsPage() {
           )}
           {activeTab === "contact-lens-families" && (
             <Button
-              onClick={() => router.push("/admin/contact-lens-families")}
+              onClick={() => router.push("/admin/contact-lens-families/new")}
               className="h-11 px-8 bg-admin-accent-primary hover:bg-admin-accent-secondary text-[#1A2B23] font-display font-black text-[10px] tracking-[0.2em] uppercase rounded-none transition-all shadow-premium-sm flex items-center gap-2 border border-admin-accent-secondary/20"
             >
               <Plus className="h-4 w-4" />

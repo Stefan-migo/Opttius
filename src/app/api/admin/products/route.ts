@@ -21,6 +21,7 @@ import {
   validationErrorResponse,
 } from "@/lib/api/validation/zod-helpers";
 import { DEFAULT_LOW_STOCK_THRESHOLD } from "@/lib/inventory/constants";
+import { createPaginatedResponse } from "@/lib/api/response";
 
 export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
@@ -140,40 +141,48 @@ export async function GET(request: NextRequest) {
       .select(selectString, { count: "exact" });
 
     // IMPORTANT: Apply organization filter BEFORE search to ensure multi-tenancy isolation
-    // Filter by organization_id first (multi-tenancy isolation)
-    // Similar to customers API: filter by organization_id, then optionally by branch_id
+    // Product visibility by branch:
+    // - Regular admin + branch selected: only products where branch_id = that branch (branch-local)
+    // - Super admin + branch selected: products where branch_id = branch OR branch_id IS NULL (branch-local + org-wide)
+    // - Super admin + global view: all products of the organization
     if (userOrganizationId && !branchContext.isSuperAdmin) {
-      // Filter by organization_id - this ensures multi-tenancy isolation
-      // This MUST be applied before search to ensure it's combined correctly with .or()
       query = query.eq("organization_id", userOrganizationId);
       logger.debug("Filtering by organization_id", { userOrganizationId });
 
-      // When a branch is selected: show ALL products of the organization (shared catalog)
-      // Stock is per-branch via product_branch_stock - no branch_id filter on products
-      // If no branch selected, show all products from organization (no branch_id filter)
-      // If search is present, branch filter will be applied in post-processing
-    } else if (branchContext.isSuperAdmin) {
-      // Super admin: branch selected = all products of that branch's org (shared catalog)
-      // Vision Global = only user's organization
+      // Regular admin with branch selected: only products created in that branch (branch-local catalog)
       if (currentBranchId) {
-        // Need org - from context or fetch from branch
+        query = query.eq("branch_id", currentBranchId);
+        logger.debug("Filtering by branch_id (branch-local)", {
+          currentBranchId,
+        });
+      }
+    } else if (branchContext.isSuperAdmin) {
+      if (currentBranchId) {
+        // Super admin with branch selected: branch-local + org-wide products
         const orgId = branchContext.organizationId;
-        if (orgId) {
-          query = query.eq("organization_id", orgId);
-        } else {
+        let resolvedOrgId = orgId;
+        if (!resolvedOrgId) {
           const { data: branchData } = await supabase
             .from("branches")
             .select("organization_id")
             .eq("id", currentBranchId)
             .single();
-          query = query.eq(
-            "organization_id",
+          resolvedOrgId =
             branchData?.organization_id ??
-              "00000000-0000-0000-0000-000000000000",
-          );
+            "00000000-0000-0000-0000-000000000000";
         }
+        query = query.eq("organization_id", resolvedOrgId);
+        query = query.or(`branch_id.eq.${currentBranchId},branch_id.is.null`);
+        logger.debug("Filtering by branch (super admin)", {
+          currentBranchId,
+          filter: "branch_id = branch OR branch_id IS NULL",
+        });
       } else if (branchContext.organizationId) {
+        // Super admin in global view: all products of the organization
         query = query.eq("organization_id", branchContext.organizationId);
+        logger.debug("Filtering by organization (super admin global)", {
+          organizationId: branchContext.organizationId,
+        });
       }
     } else {
       // Fallback: no organization_id - get org from branch when branch selected
@@ -207,15 +216,10 @@ export async function GET(request: NextRequest) {
           }
         } else {
           // No accessible branches - return empty
-          return NextResponse.json({
-            products: [],
-            pagination: {
-              page: 1,
-              limit: parseInt(searchParams.get("limit") || "12"),
-              total: 0,
-              totalPages: 0,
-              hasMore: false,
-            },
+          return createPaginatedResponse([], {
+            page: 1,
+            limit: parseInt(searchParams.get("limit") || "12"),
+            total: 0,
           });
         }
       }
@@ -483,15 +487,10 @@ export async function GET(request: NextRequest) {
     const totalPages = Math.ceil((adjustedCount || 0) / limit);
     const hasMore = page < totalPages;
 
-    return NextResponse.json({
-      products: processedProducts,
-      pagination: {
-        page,
-        limit,
-        total: adjustedCount,
-        totalPages,
-        hasMore,
-      },
+    return createPaginatedResponse(processedProducts, {
+      page,
+      limit,
+      total: adjustedCount || 0,
     });
   } catch (error) {
     logger.error("API error in products GET", error);
@@ -1029,12 +1028,22 @@ export async function POST(request: NextRequest) {
 
           const createdProduct = data[0];
 
-          // Create stock entry in product_branch_stock if branch_id and stock_quantity are provided
-          if (productBranchId && body.stock_quantity !== undefined) {
-            const stockQty = parseInt(String(body.stock_quantity)) || 0;
-            if (stockQty > 0) {
-              const serviceSupabase = createServiceRoleClient();
+          // Create stock entry in product_branch_stock if branch_id and stock_quantity or low_stock_threshold are provided
+          const stockQty = parseInt(String(body.stock_quantity)) || 0;
+          const lowStockThreshold =
+            body.low_stock_threshold !== undefined
+              ? parseInt(String(body.low_stock_threshold)) ||
+                DEFAULT_LOW_STOCK_THRESHOLD
+              : DEFAULT_LOW_STOCK_THRESHOLD;
 
+          if (
+            productBranchId &&
+            (body.stock_quantity !== undefined ||
+              body.low_stock_threshold !== undefined)
+          ) {
+            const serviceSupabase = createServiceRoleClient();
+
+            if (stockQty > 0) {
               // Use the update_product_stock function for consistency
               const { error: stockError } = await serviceSupabase.rpc(
                 "update_product_stock",
@@ -1057,7 +1066,7 @@ export async function POST(request: NextRequest) {
                       branch_id: productBranchId,
                       quantity: stockQty,
                       reserved_quantity: 0,
-                      low_stock_threshold: DEFAULT_LOW_STOCK_THRESHOLD,
+                      low_stock_threshold: lowStockThreshold,
                     },
                     {
                       onConflict: "product_id,branch_id",
@@ -1069,10 +1078,84 @@ export async function POST(request: NextRequest) {
                     "Error in fallback stock creation",
                     fallbackError,
                   );
-                  // Don't fail the product creation, just log the error
-                  // The stock can be added later
                 }
               }
+            }
+
+            // Set low_stock_threshold (creates record with qty 0 if needed, or updates existing)
+            if (
+              lowStockThreshold !== DEFAULT_LOW_STOCK_THRESHOLD ||
+              stockQty === 0
+            ) {
+              const { error: thresholdError } = await serviceSupabase
+                .from("product_branch_stock")
+                .upsert(
+                  {
+                    product_id: createdProduct.id,
+                    branch_id: productBranchId,
+                    quantity: stockQty,
+                    reserved_quantity: 0,
+                    low_stock_threshold: lowStockThreshold,
+                  },
+                  {
+                    onConflict: "product_id,branch_id",
+                  },
+                );
+
+              if (thresholdError) {
+                logger.warn("Could not set low_stock_threshold", {
+                  productId: createdProduct.id,
+                  branchId: productBranchId,
+                  error: thresholdError,
+                });
+              }
+            }
+          }
+
+          // Super admin in global view: create product_branch_stock with qty 0 for each branch of the org
+          if (!productBranchId && branchContext.isSuperAdmin) {
+            const serviceSupabase = createServiceRoleClient();
+            const { data: orgBranches } = await serviceSupabase
+              .from("branches")
+              .select("id")
+              .eq("organization_id", userOrganizationId);
+
+            if (orgBranches && orgBranches.length > 0) {
+              const lowStockThreshold =
+                body.low_stock_threshold !== undefined
+                  ? parseInt(String(body.low_stock_threshold)) ||
+                    DEFAULT_LOW_STOCK_THRESHOLD
+                  : DEFAULT_LOW_STOCK_THRESHOLD;
+
+              for (const branch of orgBranches) {
+                const { error: insertError } = await serviceSupabase
+                  .from("product_branch_stock")
+                  .upsert(
+                    {
+                      product_id: createdProduct.id,
+                      branch_id: branch.id,
+                      quantity: 0,
+                      reserved_quantity: 0,
+                      low_stock_threshold: lowStockThreshold,
+                    },
+                    { onConflict: "product_id,branch_id" },
+                  );
+
+                if (insertError) {
+                  logger.warn(
+                    "Could not create stock for branch (org-wide product)",
+                    {
+                      productId: createdProduct.id,
+                      branchId: branch.id,
+                      error: insertError,
+                    },
+                  );
+                }
+              }
+              logger.info("Created product_branch_stock for all org branches", {
+                productId: createdProduct.id,
+                branchCount: orgBranches.length,
+              });
             }
           }
 

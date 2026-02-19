@@ -50,6 +50,7 @@ import {
 import { toast } from "sonner";
 import Link from "next/link";
 import { formatCurrency, formatDate, formatDateTime } from "@/lib/utils";
+import { PrescriptionFullDisplay } from "@/components/admin/PrescriptionFullDisplay";
 
 interface WorkOrder {
   id: string;
@@ -119,6 +120,14 @@ interface WorkOrder {
   };
   pos_order_id?: string;
   created_at: string;
+  presbyopia_solution?: string | null;
+  far_lens_family_id?: string | null;
+  near_lens_family_id?: string | null;
+  far_lens_cost?: number | null;
+  near_lens_cost?: number | null;
+  lens_family?: { id: string; name: string } | null;
+  far_lens_family?: { id: string; name: string } | null;
+  near_lens_family?: { id: string; name: string } | null;
 }
 
 interface StatusHistory {
@@ -144,6 +153,8 @@ export default function WorkOrderDetailPage() {
   const [updatingStatus, setUpdatingStatus] = useState(false);
   const [showStatusDialog, setShowStatusDialog] = useState(false);
   const [newStatus, setNewStatus] = useState("");
+  const [statusDialogOpenedFromTimeline, setStatusDialogOpenedFromTimeline] =
+    useState(false);
   const [statusNotes, setStatusNotes] = useState("");
   const [labInfo, setLabInfo] = useState({
     lab_name: "",
@@ -501,18 +512,31 @@ export default function WorkOrderDetailPage() {
     const rx = (v: number | null | undefined) =>
       v !== null && v !== undefined ? `${v > 0 ? "+" : ""}${v}` : "-";
 
-    const rxSection = workOrder.prescription
+    const p = workOrder.prescription;
+    const rxSection = p
       ? `
       <div class="section">
         <h2>Receta (Para Laboratorio)</h2>
         <div class="rx-grid">
           <div>
-            <strong>OD:</strong> Esf ${rx(workOrder.prescription.od_sphere)} | Cil ${rx(workOrder.prescription.od_cylinder)} | Eje ${workOrder.prescription.od_axis ?? "-"}° | Add ${workOrder.prescription.od_add ?? "-"} | PD ${workOrder.prescription.od_pd ?? "-"} mm
+            <strong>OD:</strong> Esf ${rx(p.od_sphere)} | Cil ${rx(p.od_cylinder)} | Eje ${p.od_axis ?? "-"}° | Add ${p.od_add ?? "-"} | PD ${p.od_pd ?? "-"} mm${p.od_near_pd != null ? ` | PD Cerca ${p.od_near_pd} mm` : ""}${(p.od_prism ?? p.prism_od) != null ? ` | Prisma ${p.od_prism ?? p.prism_od}` : ""}${p.od_base != null ? ` | Base ${p.od_base}` : ""}
           </div>
           <div>
-            <strong>OS:</strong> Esf ${rx(workOrder.prescription.os_sphere)} | Cil ${rx(workOrder.prescription.os_cylinder)} | Eje ${workOrder.prescription.os_axis ?? "-"}° | Add ${workOrder.prescription.os_add ?? "-"} | PD ${workOrder.prescription.os_pd ?? "-"} mm
+            <strong>OS:</strong> Esf ${rx(p.os_sphere)} | Cil ${rx(p.os_cylinder)} | Eje ${p.os_axis ?? "-"}° | Add ${p.os_add ?? "-"} | PD ${p.os_pd ?? "-"} mm${p.os_near_pd != null ? ` | PD Cerca ${p.os_near_pd} mm` : ""}${(p.os_prism ?? p.prism_os) != null ? ` | Prisma ${p.os_prism ?? p.prism_os}` : ""}${p.os_base != null ? ` | Base ${p.os_base}` : ""}
           </div>
         </div>
+        ${
+          p.frame_pd != null || p.height_segmentation != null || p.issued_by
+            ? `
+        <div class="rx-extra mt-2">
+          ${p.frame_pd != null ? `<span>DP Marco: ${p.frame_pd} mm</span>` : ""}
+          ${p.height_segmentation != null ? `<span>Altura Segmento: ${p.height_segmentation} mm</span>` : ""}
+          ${p.issued_by ? `<span>Prescrito por: ${p.issued_by}${p.issued_by_license ? ` (${p.issued_by_license})` : ""}</span>` : ""}
+        </div>
+        `
+            : ""
+        }
+        ${p.notes ? `<p class="mt-2"><em>Notas:</em> ${String(p.notes).replace(/\n/g, "<br>")}</p>` : ""}
       </div>
     `
       : "";
@@ -694,10 +718,14 @@ export default function WorkOrderDetailPage() {
       ? `${workOrder.customer.first_name} ${workOrder.customer.last_name}`
       : "Sin nombre";
 
-  // Get all available statuses except the current one
+  // Get all available statuses except the current one (for "Cambiar Estado" button)
   const availableStatuses = getAllStatuses().filter(
     (s) => s.value !== workOrder.status,
   );
+  // When opened from timeline, show all statuses including current (for view/edit)
+  const statusOptions = statusDialogOpenedFromTimeline
+    ? getAllStatuses()
+    : availableStatuses;
 
   return (
     <div className="space-y-6">
@@ -756,135 +784,143 @@ export default function WorkOrderDetailPage() {
               })()}
             </Badge>
           </div>
-          {availableStatuses.length > 0 && (
-            <Dialog open={showStatusDialog} onOpenChange={setShowStatusDialog}>
+          <Dialog
+            open={showStatusDialog}
+            onOpenChange={(open) => {
+              setShowStatusDialog(open);
+              if (!open) setStatusDialogOpenedFromTimeline(false);
+            }}
+          >
+            {availableStatuses.length > 0 && (
               <DialogTrigger asChild>
-                <Button>
+                <Button
+                  onClick={() => setStatusDialogOpenedFromTimeline(false)}
+                >
                   <ArrowRight className="h-4 w-4 mr-2" />
                   Cambiar Estado
                 </Button>
               </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Cambiar Estado del Trabajo</DialogTitle>
-                  <DialogDescription>
-                    Selecciona el nuevo estado del trabajo. Puedes cambiar a
-                    cualquier estado disponible.
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="space-y-4">
-                  <div>
-                    <Label>Nuevo Estado</Label>
-                    <Select value={newStatus} onValueChange={setNewStatus}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecciona el nuevo estado" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {availableStatuses.map((status) => (
-                          <SelectItem key={status.value} value={status.value}>
-                            {status.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  {newStatus === "sent_to_lab" && (
-                    <div className="space-y-4 border-t pt-4">
-                      <div>
-                        <Label>Nombre del Laboratorio *</Label>
-                        <Input
-                          value={labInfo.lab_name}
-                          onChange={(e) =>
-                            setLabInfo((prev) => ({
-                              ...prev,
-                              lab_name: e.target.value,
-                            }))
-                          }
-                          placeholder="Ej: Laboratorio Óptico Central"
-                        />
-                      </div>
-                      <div>
-                        <Label>Contacto del Laboratorio</Label>
-                        <Input
-                          value={labInfo.lab_contact}
-                          onChange={(e) =>
-                            setLabInfo((prev) => ({
-                              ...prev,
-                              lab_contact: e.target.value,
-                            }))
-                          }
-                          placeholder="Teléfono o email"
-                        />
-                      </div>
-                      <div>
-                        <Label>Número de Orden del Lab</Label>
-                        <Input
-                          value={labInfo.lab_order_number}
-                          onChange={(e) =>
-                            setLabInfo((prev) => ({
-                              ...prev,
-                              lab_order_number: e.target.value,
-                            }))
-                          }
-                          placeholder="Número asignado por el laboratorio"
-                        />
-                      </div>
-                      <div>
-                        <Label>Fecha Estimada de Entrega</Label>
-                        <Input
-                          type="date"
-                          value={labInfo.lab_estimated_delivery_date}
-                          onChange={(e) =>
-                            setLabInfo((prev) => ({
-                              ...prev,
-                              lab_estimated_delivery_date: e.target.value,
-                            }))
-                          }
-                        />
-                      </div>
-                    </div>
-                  )}
-
-                  <div>
-                    <Label>Notas (opcional)</Label>
-                    <Textarea
-                      value={statusNotes}
-                      onChange={(e) => setStatusNotes(e.target.value)}
-                      placeholder="Notas sobre el cambio de estado..."
-                      rows={3}
-                    />
-                  </div>
-
-                  <div className="flex justify-end gap-2">
-                    <Button
-                      variant="outline"
-                      onClick={() => setShowStatusDialog(false)}
-                    >
-                      Cancelar
-                    </Button>
-                    <Button
-                      onClick={handleStatusUpdate}
-                      disabled={
-                        updatingStatus ||
-                        !newStatus ||
-                        (newStatus === "sent_to_lab" && !labInfo.lab_name)
-                      }
-                    >
-                      {updatingStatus ? (
-                        <>
-                          <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                          Actualizando...
-                        </>
-                      ) : (
-                        "Actualizar Estado"
-                      )}
-                    </Button>
-                  </div>
+            )}
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Cambiar Estado del Trabajo</DialogTitle>
+                <DialogDescription>
+                  Selecciona el nuevo estado del trabajo. Puedes cambiar a
+                  cualquier estado disponible.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div>
+                  <Label>Nuevo Estado</Label>
+                  <Select value={newStatus} onValueChange={setNewStatus}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecciona el nuevo estado" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {statusOptions.map((status) => (
+                        <SelectItem key={status.value} value={status.value}>
+                          {status.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
-              </DialogContent>
-            </Dialog>
-          )}
+
+                {newStatus === "sent_to_lab" && (
+                  <div className="space-y-4 border-t pt-4">
+                    <div>
+                      <Label>Nombre del Laboratorio *</Label>
+                      <Input
+                        value={labInfo.lab_name}
+                        onChange={(e) =>
+                          setLabInfo((prev) => ({
+                            ...prev,
+                            lab_name: e.target.value,
+                          }))
+                        }
+                        placeholder="Ej: Laboratorio Óptico Central"
+                      />
+                    </div>
+                    <div>
+                      <Label>Contacto del Laboratorio</Label>
+                      <Input
+                        value={labInfo.lab_contact}
+                        onChange={(e) =>
+                          setLabInfo((prev) => ({
+                            ...prev,
+                            lab_contact: e.target.value,
+                          }))
+                        }
+                        placeholder="Teléfono o email"
+                      />
+                    </div>
+                    <div>
+                      <Label>Número de Orden del Lab</Label>
+                      <Input
+                        value={labInfo.lab_order_number}
+                        onChange={(e) =>
+                          setLabInfo((prev) => ({
+                            ...prev,
+                            lab_order_number: e.target.value,
+                          }))
+                        }
+                        placeholder="Número asignado por el laboratorio"
+                      />
+                    </div>
+                    <div>
+                      <Label>Fecha Estimada de Entrega</Label>
+                      <Input
+                        type="date"
+                        value={labInfo.lab_estimated_delivery_date}
+                        onChange={(e) =>
+                          setLabInfo((prev) => ({
+                            ...prev,
+                            lab_estimated_delivery_date: e.target.value,
+                          }))
+                        }
+                      />
+                    </div>
+                  </div>
+                )}
+
+                <div>
+                  <Label>Notas (opcional)</Label>
+                  <Textarea
+                    value={statusNotes}
+                    onChange={(e) => setStatusNotes(e.target.value)}
+                    placeholder="Notas sobre el cambio de estado..."
+                    rows={3}
+                  />
+                </div>
+
+                <div className="flex justify-end gap-2">
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowStatusDialog(false)}
+                  >
+                    Cancelar
+                  </Button>
+                  <Button
+                    onClick={handleStatusUpdate}
+                    disabled={
+                      updatingStatus ||
+                      !newStatus ||
+                      (newStatus === "sent_to_lab" && !labInfo.lab_name)
+                    }
+                  >
+                    {updatingStatus ? (
+                      <>
+                        <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                        Actualizando...
+                      </>
+                    ) : (
+                      "Actualizar Estado"
+                    )}
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
           <Button variant="outline" onClick={handlePrint}>
             <Printer className="h-4 w-4 mr-2" />
             Imprimir
@@ -973,7 +1009,30 @@ export default function WorkOrderDetailPage() {
                 >
                   <div className="flex flex-col items-center">
                     <div
-                      className={`w-14 h-14 rounded-full flex items-center justify-center border-2 relative ${
+                      role="button"
+                      tabIndex={0}
+                      onClick={() => {
+                        if (step.status === "delivered") {
+                          setDeliveryDialogOpen(true);
+                        } else {
+                          setNewStatus(step.status);
+                          setStatusDialogOpenedFromTimeline(true);
+                          setShowStatusDialog(true);
+                        }
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          if (step.status === "delivered") {
+                            setDeliveryDialogOpen(true);
+                          } else {
+                            setNewStatus(step.status);
+                            setStatusDialogOpenedFromTimeline(true);
+                            setShowStatusDialog(true);
+                          }
+                        }
+                      }}
+                      className={`w-14 h-14 rounded-full flex items-center justify-center border-2 relative cursor-pointer transition-transform hover:scale-105 ${
                         isCurrent
                           ? "bg-green-500 border-green-600 text-white shadow-lg shadow-green-500/50"
                           : isCompleted
@@ -1148,81 +1207,85 @@ export default function WorkOrderDetailPage() {
             </Card>
           </div>
 
-          {/* Frame and Lens Info */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Package className="h-5 w-5 mr-2" />
-                  Marco
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                <div>
-                  <p className="text-sm text-tierra-media">Nombre</p>
-                  <p className="font-medium">{workOrder.frame_name}</p>
-                </div>
-                {workOrder.frame_brand && (
-                  <div>
-                    <p className="text-sm text-tierra-media">Marca</p>
-                    <p className="font-medium">{workOrder.frame_brand}</p>
-                  </div>
-                )}
-                {workOrder.frame_model && (
-                  <div>
-                    <p className="text-sm text-tierra-media">Modelo</p>
-                    <p className="font-medium">{workOrder.frame_model}</p>
-                  </div>
-                )}
-                {workOrder.frame_serial_number && (
-                  <div>
-                    <p className="text-sm text-tierra-media">Número de Serie</p>
+          {/* Marco y Lente - Single merged card */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <Package className="h-5 w-5 mr-2" />
+                <Eye className="h-5 w-5 mr-2" />
+                Marco y Lente
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {workOrder.presbyopia_solution === "two_separate" ? (
+                <>
+                  <div className="space-y-2 pb-4 border-b border-admin-border-primary/20">
+                    <p className="text-xs font-display font-bold text-admin-text-tertiary uppercase tracking-widest">
+                      Par Lejos
+                    </p>
                     <p className="font-medium">
-                      {workOrder.frame_serial_number}
+                      Marco: {workOrder.frame_name}
+                      {workOrder.frame_brand && ` (${workOrder.frame_brand})`}
+                    </p>
+                    <p className="font-medium">
+                      Lente:{" "}
+                      {workOrder.far_lens_family?.name ||
+                        workOrder.lens_type ||
+                        "—"}
                     </p>
                   </div>
-                )}
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Eye className="h-5 w-5 mr-2" />
-                  Lente
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                <div>
-                  <p className="text-sm text-tierra-media">Tipo</p>
-                  <p className="font-medium">{workOrder.lens_type}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-tierra-media">Material</p>
-                  <p className="font-medium">{workOrder.lens_material}</p>
-                </div>
-                {workOrder.lens_index && (
-                  <div>
-                    <p className="text-sm text-tierra-media">Índice</p>
-                    <p className="font-medium">{workOrder.lens_index}</p>
+                  <div className="space-y-2">
+                    <p className="text-xs font-display font-bold text-admin-text-tertiary uppercase tracking-widest">
+                      Par Cerca
+                    </p>
+                    <p className="font-medium">
+                      Marco: {workOrder.frame_name}
+                      {workOrder.frame_brand && ` (${workOrder.frame_brand})`}
+                    </p>
+                    <p className="font-medium">
+                      Lente: {workOrder.near_lens_family?.name || "—"}
+                    </p>
                   </div>
-                )}
-                {workOrder.lens_treatments &&
-                  workOrder.lens_treatments.length > 0 && (
-                    <div>
-                      <p className="text-sm text-tierra-media">Tratamientos</p>
-                      <div className="flex flex-wrap gap-1 mt-1">
-                        {workOrder.lens_treatments.map((treatment, idx) => (
-                          <Badge key={idx} variant="outline">
-                            {treatment}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-              </CardContent>
-            </Card>
-          </div>
+                </>
+              ) : (
+                <div className="space-y-2">
+                  <div>
+                    <p className="text-sm text-tierra-media">Marco</p>
+                    <p className="font-medium">{workOrder.frame_name}</p>
+                    {workOrder.frame_brand && (
+                      <p className="text-sm text-tierra-media">
+                        {workOrder.frame_brand}
+                        {workOrder.frame_model && ` · ${workOrder.frame_model}`}
+                      </p>
+                    )}
+                  </div>
+                  <div>
+                    <p className="text-sm text-tierra-media">Lente</p>
+                    <p className="font-medium">
+                      {workOrder.lens_family?.name ||
+                        workOrder.lens_type ||
+                        "—"}
+                    </p>
+                    <p className="text-sm text-tierra-media">
+                      {workOrder.lens_material}
+                      {workOrder.lens_index &&
+                        ` · Índice ${workOrder.lens_index}`}
+                    </p>
+                    {workOrder.lens_treatments &&
+                      workOrder.lens_treatments.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mt-1">
+                          {workOrder.lens_treatments.map((treatment, idx) => (
+                            <Badge key={idx} variant="outline">
+                              {treatment}
+                            </Badge>
+                          ))}
+                        </div>
+                      )}
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
 
           {/* Lab Information */}
           {workOrder.lab_name && (
@@ -1267,225 +1330,23 @@ export default function WorkOrderDetailPage() {
         <TabsContent value="details" className="space-y-6">
           {/* Prescription Details - Critical for Lab */}
           {workOrder.prescription && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Eye className="h-5 w-5 mr-2" />
-                  Detalles de la Receta (Para Laboratorio)
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* Right Eye (OD) */}
-                  <div className="space-y-3">
-                    <h3 className="font-semibold text-azul-profundo border-b pb-2">
-                      Ojo Derecho (OD)
-                    </h3>
-                    <div className="grid grid-cols-2 gap-3">
-                      {workOrder.prescription.od_sphere !== null &&
-                        workOrder.prescription.od_sphere !== undefined && (
-                          <div>
-                            <p className="text-xs text-tierra-media">Esfera</p>
-                            <p className="font-medium">
-                              {workOrder.prescription.od_sphere > 0 ? "+" : ""}
-                              {workOrder.prescription.od_sphere} D
-                            </p>
-                          </div>
-                        )}
-                      {workOrder.prescription.od_cylinder !== null &&
-                        workOrder.prescription.od_cylinder !== undefined && (
-                          <div>
-                            <p className="text-xs text-tierra-media">
-                              Cilindro
-                            </p>
-                            <p className="font-medium">
-                              {workOrder.prescription.od_cylinder > 0
-                                ? "+"
-                                : ""}
-                              {workOrder.prescription.od_cylinder} D
-                            </p>
-                          </div>
-                        )}
-                      {workOrder.prescription.od_axis !== null &&
-                        workOrder.prescription.od_axis !== undefined && (
-                          <div>
-                            <p className="text-xs text-tierra-media">Eje</p>
-                            <p className="font-medium">
-                              {workOrder.prescription.od_axis}°
-                            </p>
-                          </div>
-                        )}
-                      {workOrder.prescription.od_add !== null &&
-                        workOrder.prescription.od_add !== undefined && (
-                          <div>
-                            <p className="text-xs text-tierra-media">Adición</p>
-                            <p className="font-medium">
-                              +{workOrder.prescription.od_add} D
-                            </p>
-                          </div>
-                        )}
-                      {workOrder.prescription.od_pd !== null &&
-                        workOrder.prescription.od_pd !== undefined && (
-                          <div>
-                            <p className="text-xs text-tierra-media">
-                              DP Lejos
-                            </p>
-                            <p className="font-medium">
-                              {workOrder.prescription.od_pd} mm
-                            </p>
-                          </div>
-                        )}
-                      {workOrder.prescription.od_near_pd !== null &&
-                        workOrder.prescription.od_near_pd !== undefined && (
-                          <div>
-                            <p className="text-xs text-tierra-media">
-                              DP Cerca
-                            </p>
-                            <p className="font-medium">
-                              {workOrder.prescription.od_near_pd} mm
-                            </p>
-                          </div>
-                        )}
-                    </div>
-                    {workOrder.prescription.prism_od && (
-                      <div className="mt-2">
-                        <p className="text-xs text-tierra-media">Prisma</p>
-                        <p className="font-medium">
-                          {workOrder.prescription.prism_od}
-                        </p>
-                      </div>
+            <PrescriptionFullDisplay
+              prescription={workOrder.prescription}
+              title="Detalles de la Receta (Para Laboratorio)"
+              subtitle={
+                workOrder.prescription.prescription_date && (
+                  <>
+                    Fecha:{" "}
+                    {new Date(
+                      workOrder.prescription.prescription_date + "T12:00:00",
+                    ).toLocaleDateString("es-CL")}
+                    {workOrder.prescription.prescription_type && (
+                      <> • Tipo: {workOrder.prescription.prescription_type}</>
                     )}
-                  </div>
-
-                  {/* Left Eye (OS) */}
-                  <div className="space-y-3">
-                    <h3 className="font-semibold text-azul-profundo border-b pb-2">
-                      Ojo Izquierdo (OS)
-                    </h3>
-                    <div className="grid grid-cols-2 gap-3">
-                      {workOrder.prescription.os_sphere !== null &&
-                        workOrder.prescription.os_sphere !== undefined && (
-                          <div>
-                            <p className="text-xs text-tierra-media">Esfera</p>
-                            <p className="font-medium">
-                              {workOrder.prescription.os_sphere > 0 ? "+" : ""}
-                              {workOrder.prescription.os_sphere} D
-                            </p>
-                          </div>
-                        )}
-                      {workOrder.prescription.os_cylinder !== null &&
-                        workOrder.prescription.os_cylinder !== undefined && (
-                          <div>
-                            <p className="text-xs text-tierra-media">
-                              Cilindro
-                            </p>
-                            <p className="font-medium">
-                              {workOrder.prescription.os_cylinder > 0
-                                ? "+"
-                                : ""}
-                              {workOrder.prescription.os_cylinder} D
-                            </p>
-                          </div>
-                        )}
-                      {workOrder.prescription.os_axis !== null &&
-                        workOrder.prescription.os_axis !== undefined && (
-                          <div>
-                            <p className="text-xs text-tierra-media">Eje</p>
-                            <p className="font-medium">
-                              {workOrder.prescription.os_axis}°
-                            </p>
-                          </div>
-                        )}
-                      {workOrder.prescription.os_add !== null &&
-                        workOrder.prescription.os_add !== undefined && (
-                          <div>
-                            <p className="text-xs text-tierra-media">Adición</p>
-                            <p className="font-medium">
-                              +{workOrder.prescription.os_add} D
-                            </p>
-                          </div>
-                        )}
-                      {workOrder.prescription.os_pd !== null &&
-                        workOrder.prescription.os_pd !== undefined && (
-                          <div>
-                            <p className="text-xs text-tierra-media">
-                              DP Lejos
-                            </p>
-                            <p className="font-medium">
-                              {workOrder.prescription.os_pd} mm
-                            </p>
-                          </div>
-                        )}
-                      {workOrder.prescription.os_near_pd !== null &&
-                        workOrder.prescription.os_near_pd !== undefined && (
-                          <div>
-                            <p className="text-xs text-tierra-media">
-                              DP Cerca
-                            </p>
-                            <p className="font-medium">
-                              {workOrder.prescription.os_near_pd} mm
-                            </p>
-                          </div>
-                        )}
-                    </div>
-                    {workOrder.prescription.prism_os && (
-                      <div className="mt-2">
-                        <p className="text-xs text-tierra-media">Prisma</p>
-                        <p className="font-medium">
-                          {workOrder.prescription.prism_os}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Additional Measurements */}
-                <div className="mt-6 pt-4 border-t grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {workOrder.prescription.frame_pd !== null &&
-                    workOrder.prescription.frame_pd !== undefined && (
-                      <div>
-                        <p className="text-xs text-tierra-media">
-                          DP del Marco
-                        </p>
-                        <p className="font-medium">
-                          {workOrder.prescription.frame_pd} mm
-                        </p>
-                      </div>
-                    )}
-                  {workOrder.prescription.height_segmentation !== null &&
-                    workOrder.prescription.height_segmentation !==
-                      undefined && (
-                      <div>
-                        <p className="text-xs text-tierra-media">
-                          Altura de Segmento
-                        </p>
-                        <p className="font-medium">
-                          {workOrder.prescription.height_segmentation} mm
-                        </p>
-                      </div>
-                    )}
-                  {workOrder.prescription.issued_by && (
-                    <div>
-                      <p className="text-xs text-tierra-media">Prescrito por</p>
-                      <p className="font-medium">
-                        {workOrder.prescription.issued_by}
-                      </p>
-                    </div>
-                  )}
-                </div>
-
-                {workOrder.prescription.notes && (
-                  <div className="mt-4 pt-4 border-t">
-                    <p className="text-xs text-tierra-media">
-                      Notas de la Receta
-                    </p>
-                    <p className="font-medium whitespace-pre-wrap text-sm">
-                      {workOrder.prescription.notes}
-                    </p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+                  </>
+                )
+              }
+            />
           )}
 
           {/* Frame Details */}
@@ -1544,64 +1405,111 @@ export default function WorkOrderDetailPage() {
             </CardContent>
           </Card>
 
-          {/* Lens Details */}
+          {/* Lens Details - Split for two_separate presbyopia */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center">
                 <Eye className="h-5 w-5 mr-2" />
-                Detalles del Lente
+                {workOrder.presbyopia_solution === "two_separate"
+                  ? "Detalles de Lentes (Lejos y Cerca)"
+                  : "Detalles del Lente"}
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <p className="text-xs text-tierra-media">Tipo de Lente</p>
-                  <p className="font-medium">{workOrder.lens_type}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-tierra-media">Material</p>
-                  <p className="font-medium">{workOrder.lens_material}</p>
-                </div>
-                {workOrder.lens_index && (
-                  <div>
-                    <p className="text-xs text-tierra-media">
-                      Índice de Refracción
+              {workOrder.presbyopia_solution === "two_separate" ? (
+                <div className="space-y-6">
+                  <div className="space-y-3 pb-4 border-b border-admin-border-primary/20">
+                    <h3 className="font-semibold text-azul-profundo border-b pb-2">
+                      Lente Lejos
+                    </h3>
+                    <p className="text-xs text-tierra-media">Marco</p>
+                    <p className="font-medium">
+                      {workOrder.frame_name}
+                      {workOrder.frame_brand && ` · ${workOrder.frame_brand}`}
+                      {workOrder.frame_model && ` · ${workOrder.frame_model}`}
                     </p>
-                    <p className="font-medium">{workOrder.lens_index}</p>
-                  </div>
-                )}
-                {workOrder.lens_treatments &&
-                  workOrder.lens_treatments.length > 0 && (
-                    <div>
-                      <p className="text-xs text-tierra-media">Tratamientos</p>
-                      <div className="flex flex-wrap gap-1 mt-1">
-                        {workOrder.lens_treatments.map(
-                          (treatment: string, idx: number) => (
-                            <Badge key={idx} variant="outline">
-                              {treatment}
-                            </Badge>
-                          ),
-                        )}
-                      </div>
-                    </div>
-                  )}
-                {workOrder.lens_tint_color && (
-                  <div>
-                    <p className="text-xs text-tierra-media">Color del Tinte</p>
-                    <p className="font-medium">{workOrder.lens_tint_color}</p>
-                  </div>
-                )}
-                {workOrder.lens_tint_percentage && (
-                  <div>
-                    <p className="text-xs text-tierra-media">
-                      Porcentaje de Tinte
+                    <p className="text-xs text-tierra-media mt-2">
+                      Familia de Lente
                     </p>
                     <p className="font-medium">
-                      {workOrder.lens_tint_percentage}%
+                      {workOrder.far_lens_family?.name || "—"}
                     </p>
                   </div>
-                )}
-              </div>
+                  <div className="space-y-3">
+                    <h3 className="font-semibold text-azul-profundo border-b pb-2">
+                      Lente Cerca
+                    </h3>
+                    <p className="text-xs text-tierra-media">Marco</p>
+                    <p className="font-medium">
+                      {workOrder.frame_name}
+                      {workOrder.frame_brand && ` · ${workOrder.frame_brand}`}
+                      {workOrder.frame_model && ` · ${workOrder.frame_model}`}
+                    </p>
+                    <p className="text-xs text-tierra-media mt-2">
+                      Familia de Lente
+                    </p>
+                    <p className="font-medium">
+                      {workOrder.near_lens_family?.name || "—"}
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-xs text-tierra-media">Tipo de Lente</p>
+                    <p className="font-medium">
+                      {workOrder.lens_family?.name || workOrder.lens_type}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-tierra-media">Material</p>
+                    <p className="font-medium">{workOrder.lens_material}</p>
+                  </div>
+                  {workOrder.lens_index && (
+                    <div>
+                      <p className="text-xs text-tierra-media">
+                        Índice de Refracción
+                      </p>
+                      <p className="font-medium">{workOrder.lens_index}</p>
+                    </div>
+                  )}
+                  {workOrder.lens_treatments &&
+                    workOrder.lens_treatments.length > 0 && (
+                      <div>
+                        <p className="text-xs text-tierra-media">
+                          Tratamientos
+                        </p>
+                        <div className="flex flex-wrap gap-1 mt-1">
+                          {workOrder.lens_treatments.map(
+                            (treatment: string, idx: number) => (
+                              <Badge key={idx} variant="outline">
+                                {treatment}
+                              </Badge>
+                            ),
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  {workOrder.lens_tint_color && (
+                    <div>
+                      <p className="text-xs text-tierra-media">
+                        Color del Tinte
+                      </p>
+                      <p className="font-medium">{workOrder.lens_tint_color}</p>
+                    </div>
+                  )}
+                  {workOrder.lens_tint_percentage && (
+                    <div>
+                      <p className="text-xs text-tierra-media">
+                        Porcentaje de Tinte
+                      </p>
+                      <p className="font-medium">
+                        {workOrder.lens_tint_percentage}%
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
             </CardContent>
           </Card>
 
@@ -1658,7 +1566,7 @@ export default function WorkOrderDetailPage() {
                   <p className="text-sm text-tierra-media mb-1">
                     Notas Internas
                   </p>
-                  <p className="font-medium whitespace-pre-wrap text-sm bg-admin-bg-secondary p-3 rounded">
+                  <p className="font-medium whitespace-pre-wrap text-sm text-admin-text-primary bg-admin-bg-tertiary p-3 rounded-none border border-admin-border-primary/20">
                     {workOrder.internal_notes}
                   </p>
                 </div>
@@ -1668,7 +1576,7 @@ export default function WorkOrderDetailPage() {
                   <p className="text-sm text-tierra-media mb-1">
                     Notas para el Cliente
                   </p>
-                  <p className="font-medium whitespace-pre-wrap text-sm bg-admin-bg-secondary p-3 rounded">
+                  <p className="font-medium whitespace-pre-wrap text-sm text-admin-text-primary bg-admin-bg-tertiary p-3 rounded-none border border-admin-border-primary/20">
                     {workOrder.customer_notes}
                   </p>
                 </div>
@@ -1678,7 +1586,7 @@ export default function WorkOrderDetailPage() {
                   <p className="text-sm text-tierra-media mb-1">
                     Notas del Laboratorio
                   </p>
-                  <p className="font-medium whitespace-pre-wrap text-sm bg-admin-bg-secondary p-3 rounded">
+                  <p className="font-medium whitespace-pre-wrap text-sm text-admin-text-primary bg-admin-bg-tertiary p-3 rounded-none border border-admin-border-primary/20">
                     {workOrder.lab_notes}
                   </p>
                 </div>
@@ -1688,7 +1596,7 @@ export default function WorkOrderDetailPage() {
                   <p className="text-sm text-tierra-media mb-1">
                     Notas de Control de Calidad
                   </p>
-                  <p className="font-medium whitespace-pre-wrap text-sm bg-admin-bg-secondary p-3 rounded">
+                  <p className="font-medium whitespace-pre-wrap text-sm text-admin-text-primary bg-admin-bg-tertiary p-3 rounded-none border border-admin-border-primary/20">
                     {workOrder.quality_notes}
                   </p>
                 </div>
@@ -1723,12 +1631,35 @@ export default function WorkOrderDetailPage() {
                     {formatCurrency(workOrder.frame_cost)}
                   </span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-tierra-media">Costo de Lente:</span>
-                  <span className="font-medium">
-                    {formatCurrency(workOrder.lens_cost)}
-                  </span>
-                </div>
+                {workOrder.presbyopia_solution === "two_separate" ? (
+                  <>
+                    <div className="flex justify-between">
+                      <span className="text-tierra-media">
+                        Costo Lente Lejos (
+                        {workOrder.far_lens_family?.name || "Lejos"}):
+                      </span>
+                      <span className="font-medium">
+                        {formatCurrency(workOrder.far_lens_cost ?? 0)}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-tierra-media">
+                        Costo Lente Cerca (
+                        {workOrder.near_lens_family?.name || "Cerca"}):
+                      </span>
+                      <span className="font-medium">
+                        {formatCurrency(workOrder.near_lens_cost ?? 0)}
+                      </span>
+                    </div>
+                  </>
+                ) : (
+                  <div className="flex justify-between">
+                    <span className="text-tierra-media">Costo de Lente:</span>
+                    <span className="font-medium">
+                      {formatCurrency(workOrder.lens_cost)}
+                    </span>
+                  </div>
+                )}
                 <div className="flex justify-between">
                   <span className="text-tierra-media">
                     Costo de Tratamientos:

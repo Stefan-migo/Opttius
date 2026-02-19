@@ -45,7 +45,13 @@ export interface CreateAppointmentData {
   appointment_time: string;
   duration_minutes: number;
   appointment_type: string;
-  status?: "pending" | "confirmed" | "completed" | "cancelled" | "no_show";
+  status?:
+    | "pending"
+    | "scheduled"
+    | "confirmed"
+    | "completed"
+    | "cancelled"
+    | "no_show";
   notes?: string;
   branch_id?: string;
 }

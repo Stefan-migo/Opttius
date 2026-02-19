@@ -197,6 +197,7 @@ export default function EditProductPage() {
     featured_image: string;
     gallery: string[];
     stock_quantity: string;
+    low_stock_threshold: string;
     is_featured: boolean;
     status: string;
     // Optical product fields
@@ -262,6 +263,7 @@ export default function EditProductPage() {
     featured_image: "",
     gallery: [] as string[],
     stock_quantity: "", // Changed from inventory_quantity - now managed in product_branch_stock
+    low_stock_threshold: "5",
     is_featured: false,
     status: "active",
     // Optical product fields
@@ -368,24 +370,32 @@ export default function EditProductPage() {
           currentBranchId,
         });
 
-        // Get stock from product_branch_stock if available, otherwise fallback to deprecated inventory_quantity
+        // Get stock and low_stock_threshold from product_branch_stock if available
         let stockQuantity = "0";
+        let lowStockThreshold = "5";
         if (
           product.product_branch_stock &&
           Array.isArray(product.product_branch_stock) &&
           product.product_branch_stock.length > 0
         ) {
-          const stockQty = product.product_branch_stock[0].quantity;
-          // Handle null, undefined, or 0 - always show the actual value
+          const stockRecord = product.product_branch_stock[0];
+          const stockQty = stockRecord.quantity;
           stockQuantity =
             stockQty !== null && stockQty !== undefined
               ? stockQty.toString()
               : "0";
+          lowStockThreshold =
+            stockRecord.low_stock_threshold !== null &&
+            stockRecord.low_stock_threshold !== undefined
+              ? stockRecord.low_stock_threshold.toString()
+              : "5";
           console.log(
             "Stock found in product_branch_stock:",
             stockQty,
             "->",
             stockQuantity,
+            "threshold:",
+            lowStockThreshold,
           );
         } else if (
           product.inventory_quantity !== undefined &&
@@ -443,6 +453,7 @@ export default function EditProductPage() {
           featured_image: product.featured_image || "",
           gallery: product.gallery || [],
           stock_quantity: stockQuantity, // Changed from inventory_quantity
+          low_stock_threshold: lowStockThreshold,
           is_featured: product.is_featured || false,
           status: product.status || "active",
           // Optical product fields
@@ -612,6 +623,9 @@ export default function EditProductPage() {
         stock_quantity: formData.stock_quantity
           ? parseInt(String(formData.stock_quantity))
           : 0,
+        low_stock_threshold: formData.low_stock_threshold
+          ? parseInt(String(formData.low_stock_threshold))
+          : 5,
         // branch_id in body - same as create, required for stock update
         branch_id: currentBranchId || null,
         // Optical fields
@@ -900,6 +914,26 @@ export default function EditProductPage() {
                 <p className="text-xs text-muted-foreground mt-1">
                   Stock para esta sucursal. Puede gestionar stock por sucursal
                   desde la página de productos.
+                </p>
+              </div>
+              <div>
+                <Label htmlFor="low_stock_threshold">
+                  Umbral de Stock Bajo
+                </Label>
+                <Input
+                  id="low_stock_threshold"
+                  type="number"
+                  value={formData.low_stock_threshold}
+                  onChange={(e) =>
+                    handleInputChange("low_stock_threshold", e.target.value)
+                  }
+                  placeholder="5"
+                  min="0"
+                  className="border-black/20"
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Alerta cuando el stock disponible sea menor o igual a este
+                  valor.
                 </p>
               </div>
             </div>

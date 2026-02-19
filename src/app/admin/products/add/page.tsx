@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useProtectedForm } from "@/hooks/useFormProtection";
-import { extractDataFromResponse } from "@/lib/api/response-helpers";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -31,19 +30,14 @@ import { X, Plus, Save, ArrowLeft, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 import { useProductOptions } from "@/hooks/useProductOptions";
 import { useBranch } from "@/hooks/useBranch";
+import { useCategories } from "@/app/admin/products/hooks/useCategories";
 import { productService } from "@/lib/api/services";
-
-interface Category {
-  id: string;
-  name: string;
-  slug: string;
-}
 
 export default function AddProductPage() {
   const router = useRouter();
   const { currentBranchId, isSuperAdmin, branches } = useBranch();
   const [loading, setLoading] = useState(false);
-  const [categories, setCategories] = useState<Category[]>([]);
+  const { categories } = useCategories();
   const [showPublishAlert, setShowPublishAlert] = useState(false);
   const { options: productOptions, loading: optionsLoading } =
     useProductOptions();
@@ -67,6 +61,7 @@ export default function AddProductPage() {
     featured_image: "",
     tags: [] as string[],
     stock_quantity: "0", // Changed from inventory_quantity - now managed in product_branch_stock
+    low_stock_threshold: "5", // Umbral de alerta de stock bajo por sucursal
     is_featured: false,
     status: "active",
     // Optical product fields
@@ -268,28 +263,6 @@ export default function AddProductPage() {
     { value: "uv350", label: "UV350" },
   ]);
 
-  useEffect(() => {
-    fetchCategories();
-  }, [currentBranchId]); // Re-fetch when branch changes
-
-  const fetchCategories = async () => {
-    try {
-      // Include branch_id in query to get branch-specific categories
-      const params = new URLSearchParams();
-      if (currentBranchId) {
-        params.append("branch_id", currentBranchId);
-      }
-
-      const response = await fetch(`/api/categories?${params.toString()}`);
-      const data = await response.json();
-      if (response.ok) {
-        setCategories(extractDataFromResponse<Category>(data));
-      }
-    } catch (error) {
-      console.error("Error fetching categories:", error);
-    }
-  };
-
   const generateSlug = (name: string) => {
     return name
       .toLowerCase()
@@ -473,6 +446,9 @@ export default function AddProductPage() {
         stock_quantity: formData.stock_quantity
           ? parseInt(String(formData.stock_quantity))
           : 0,
+        low_stock_threshold: formData.low_stock_threshold
+          ? parseInt(String(formData.low_stock_threshold))
+          : 5,
         status: status,
         featured_image: formData.featured_image || null,
         tags: formData.tags || [],
@@ -745,6 +721,26 @@ export default function AddProductPage() {
                 <p className="text-xs text-muted-foreground mt-1">
                   Stock inicial para esta sucursal. Puede agregar más stock
                   después de crear el producto.
+                </p>
+              </div>
+              <div>
+                <Label htmlFor="low_stock_threshold">
+                  Umbral de Stock Bajo
+                </Label>
+                <Input
+                  id="low_stock_threshold"
+                  type="number"
+                  value={formData.low_stock_threshold}
+                  onChange={(e) =>
+                    handleInputChange("low_stock_threshold", e.target.value)
+                  }
+                  placeholder="5"
+                  className="border-black/20"
+                  min="0"
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Alerta cuando el stock disponible sea menor o igual a este
+                  valor.
                 </p>
               </div>
             </div>

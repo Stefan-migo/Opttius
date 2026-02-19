@@ -47,7 +47,10 @@ export async function GET(
         customer:customers!lab_work_orders_customer_id_fkey(id, first_name, last_name, email, phone),
         prescription:prescriptions!lab_work_orders_prescription_id_fkey(*),
         quote:quotes!lab_work_orders_quote_id_fkey(*),
-        frame_product:products!lab_work_orders_frame_product_id_fkey(id, name, price, frame_brand, frame_model)
+        frame_product:products!lab_work_orders_frame_product_id_fkey(id, name, price, frame_brand, frame_model),
+        lens_family:lens_families!lab_work_orders_lens_family_id_fkey(id, name),
+        far_lens_family:lens_families!lab_work_orders_far_lens_family_id_fkey(id, name),
+        near_lens_family:lens_families!lab_work_orders_near_lens_family_id_fkey(id, name)
       `,
       )
       .eq("id", id)

@@ -11,6 +11,7 @@ import {
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Plus, Eye, Loader2 } from "lucide-react";
 import { usePrescriptionSearch } from "../hooks";
+import { PrescriptionFullDisplay } from "@/components/admin/PrescriptionFullDisplay";
 import { Prescription } from "../types/quote.types";
 import { translatePrescriptionType } from "@/lib/prescription-helpers";
 import {
@@ -65,43 +66,40 @@ export function PrescriptionSelection({
   if (selectedPrescription) {
     return (
       <div className="space-y-4">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <Eye className="h-5 w-5 mr-2" />
-              Receta
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="p-4 border rounded-lg bg-blue-50 text-blue-900">
-              <p className="font-medium mb-2">Resumen de Receta</p>
-              <div className="grid grid-cols-2 gap-2 text-sm">
-                <div>
-                  <span className="font-semibold">OD:</span> Esf{" "}
-                  {selectedPrescription.od_sphere ?? "—"} / Cil{" "}
-                  {selectedPrescription.od_cylinder ?? "—"}
-                  {selectedPrescription.od_add &&
-                    selectedPrescription.od_add > 0 && (
-                      <span className="ml-2 text-orange-600">
-                        Add: +{selectedPrescription.od_add}
-                      </span>
+        <PrescriptionFullDisplay
+          prescription={selectedPrescription}
+          title="Receta seleccionada"
+          subtitle={
+            selectedPrescription.prescription_date && (
+              <>
+                Fecha:{" "}
+                {new Date(
+                  selectedPrescription.prescription_date + "T12:00:00",
+                ).toLocaleDateString("es-CL")}
+                {selectedPrescription.prescription_type && (
+                  <>
+                    {" "}
+                    • Tipo:{" "}
+                    {translatePrescriptionType(
+                      selectedPrescription.prescription_type,
                     )}
-                </div>
-                <div>
-                  <span className="font-semibold">OS:</span> Esf{" "}
-                  {selectedPrescription.os_sphere ?? "—"} / Cil{" "}
-                  {selectedPrescription.os_cylinder ?? "—"}
-                  {selectedPrescription.os_add &&
-                    selectedPrescription.os_add > 0 && (
-                      <span className="ml-2 text-orange-600">
-                        Add: +{selectedPrescription.os_add}
-                      </span>
-                    )}
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+                  </>
+                )}
+              </>
+            )
+          }
+          badges={
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={handleClear}
+              disabled={disabled}
+            >
+              Cambiar receta
+            </Button>
+          }
+        />
 
         {/* Presbyopia Solution Selector */}
         {hasAddition(selectedPrescription) && (

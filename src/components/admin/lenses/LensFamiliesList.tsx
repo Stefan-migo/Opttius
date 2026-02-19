@@ -13,15 +13,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Plus,
-  Edit,
-  Trash2,
-  Search,
-  RefreshCw,
-  Eye,
-  EyeOff,
-} from "lucide-react";
+import { Edit, Trash2, Search, RefreshCw, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Pagination } from "@/components/ui/pagination";
@@ -141,7 +133,7 @@ export default function LensFamiliesList() {
 
   return (
     <div className="py-6 space-y-8">
-      <div className="flex justify-between items-end border-b border-admin-border-primary/10 pb-6">
+      <div className="border-b border-admin-border-primary/10 pb-6">
         <div className="space-y-1">
           <h2 className="text-sm font-display font-bold text-admin-text-primary uppercase tracking-[0.2em] flex items-center">
             Matriz de Familias de Lentes
@@ -149,15 +141,6 @@ export default function LensFamiliesList() {
           <p className="text-[10px] font-serif italic text-admin-text-tertiary uppercase tracking-widest">
             Protocolos de Materiales y Tratamientos por Marca
           </p>
-        </div>
-        <div className="flex gap-2">
-          <Button
-            onClick={() => router.push("/admin/lens-families/new")}
-            className="bg-epoch-primary hover:bg-epoch-primary/90 text-white rounded-none text-[10px] font-display font-bold tracking-widest uppercase px-6 py-4 h-auto border-none shadow-premium-sm"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            VINCULAR NUEVA FAMILIA
-          </Button>
         </div>
       </div>
 

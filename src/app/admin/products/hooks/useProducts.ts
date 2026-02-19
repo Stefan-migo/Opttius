@@ -2,6 +2,10 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getBranchHeader } from "@/lib/utils/branch";
+import {
+  extractDataFromResponse,
+  extractPaginationFromResponse,
+} from "@/lib/api/response-helpers";
 import { toast } from "sonner";
 
 export interface Product {
@@ -26,13 +30,16 @@ export interface Product {
 }
 
 interface ProductsResponse {
-  products: Product[];
+  products?: Product[];
+  data?: Product[];
   pagination?: {
     total: number;
     totalPages: number;
-    currentPage: number;
+    page?: number;
   };
   total?: number;
+  success?: boolean;
+  meta?: { pagination?: { total: number; totalPages: number; page: number } };
 }
 
 interface FetchProductsParams {
@@ -100,7 +107,12 @@ const fetchProducts = async ({
     throw new Error(`API Error: ${response.status} - ${errorText}`);
   }
 
-  return response.json();
+  const json = await response.json();
+  // Support both legacy { products, pagination } and standardized { success, data, meta }
+  return {
+    products: extractDataFromResponse<Product>(json) || json.products,
+    pagination: extractPaginationFromResponse(json) || json.pagination,
+  };
 };
 
 export function useProducts(params: FetchProductsParams) {
@@ -210,10 +222,11 @@ export function useProducts(params: FetchProductsParams) {
     },
   });
 
+  const pagination = query.data?.pagination;
   return {
     products: query.data?.products || [],
-    pagination: query.data?.pagination,
-    total: query.data?.pagination?.total || query.data?.total || 0,
+    pagination,
+    total: pagination?.total ?? query.data?.total ?? 0,
     isLoading: query.isLoading,
     error: query.error,
     refetch: query.refetch,

@@ -129,6 +129,7 @@ export async function POST(request: NextRequest) {
             contact_lens_cost,
             contact_lens_price,
             quote_id,
+            payments: paymentsArray,
           } = validatedBody;
 
           const supabaseServiceRole = createServiceRoleClient();
@@ -740,34 +741,85 @@ export async function POST(request: NextRequest) {
           }
 
           // Register payment(s) in order_payments
-          // Calcular monto de pago: usar deposit_amount si está disponible, sino cash_received, sino total
-          const paymentAmount = deposit_amount || cash_received || total_amount;
           const paymentMethodMap: Record<string, string> = {
             cash: "cash",
             card: "card",
             debit_card: "debit",
             credit_card: "credit",
-            transfer: "transfer", // Transferencia se registra como transfer en order_payments
+            transfer: "transfer",
           };
-          const dbPaymentMethod =
-            paymentMethodMap[payment_method_type] || payment_method_type;
+          let paymentAmount: number;
+          let dbPaymentMethod: string;
+          if (paymentsArray && paymentsArray.length > 0) {
+            paymentAmount = paymentsArray.reduce((s, p) => s + p.amount, 0);
+            dbPaymentMethod =
+              paymentMethodMap[paymentsArray[0].method] ||
+              paymentsArray[0].method ||
+              "cash";
+            for (let i = 0; i < paymentsArray.length; i++) {
+              const p = paymentsArray[i];
+              const dbMethod = paymentMethodMap[p.method] || p.method;
+              const { error: payErr } = await supabaseServiceRole
+                .from("order_payments")
+                .insert({
+                  order_id: newOrder.id,
+                  amount: p.amount,
+                  payment_method: dbMethod,
+                  pos_session_id: posSessionId || null,
+                  payment_reference:
+                    i === 0
+                      ? fiscal_reference?.trim() || siiInvoiceNumber || null
+                      : null,
+                  created_by: user.id,
+                  notes:
+                    paymentsArray.length > 1
+                      ? `Pago ${i + 1}/${paymentsArray.length} - ${dbMethod}`
+                      : `Pago - ${dbMethod}`,
+                });
+              if (payErr) {
+                logger.error("Error creating payment record", payErr);
+              }
+            }
+          } else {
+            paymentAmount = deposit_amount || cash_received || total_amount;
+            dbPaymentMethod =
+              paymentMethodMap[payment_method_type] || payment_method_type;
+            const { error: paymentError } = await supabaseServiceRole
+              .from("order_payments")
+              .insert({
+                order_id: newOrder.id,
+                amount: paymentAmount,
+                payment_method: dbPaymentMethod,
+                pos_session_id: posSessionId || null,
+                payment_reference:
+                  fiscal_reference?.trim() || siiInvoiceNumber || null,
+                created_by: user.id,
+                notes: `Pago inicial - Método: ${payment_method_type}`,
+              });
+            if (paymentError) {
+              logger.error("Error creating payment record", paymentError);
+            }
+          }
 
-          const { error: paymentError } = await supabaseServiceRole
-            .from("order_payments")
-            .insert({
-              order_id: newOrder.id,
-              amount: paymentAmount,
-              payment_method: dbPaymentMethod,
-              pos_session_id: posSessionId || null, // Asociar pago a la sesión de caja
-              payment_reference:
-                fiscal_reference?.trim() || siiInvoiceNumber || null,
-              created_by: user.id,
-              notes: `Pago inicial - Método: ${payment_method_type}`,
-            });
-
-          if (paymentError) {
-            logger.error("Error creating payment record", paymentError);
-            // Don't fail, but log the error
+          // Create pos_transaction for sale (traceability, session movements)
+          if (posSessionId) {
+            const { error: txError } = await supabaseServiceRole
+              .from("pos_transactions")
+              .insert({
+                order_id: newOrder.id,
+                pos_session_id: posSessionId,
+                transaction_type: "sale",
+                payment_method: dbPaymentMethod,
+                amount: total_amount,
+                change_amount: change_amount ?? null,
+                notes: `Venta POS - ${newOrder.order_number}`,
+              });
+            if (txError) {
+              logger.warn("Could not create pos_transaction for sale", {
+                txError,
+                order_id: newOrder.id,
+              });
+            }
           }
 
           // Update order's mp_payment_method with normalized value
@@ -995,6 +1047,10 @@ export async function POST(request: NextRequest) {
                   p_branch_id: branchId,
                   p_quantity_change: -item.quantity, // Negative to decrease
                   p_reserve: false, // Decrease actual quantity, not reserved
+                  p_movement_type: "sale",
+                  p_reference_type: "order",
+                  p_reference_id: newOrder.id,
+                  p_created_by: user.id,
                 });
 
               if (inventoryError) {
@@ -1374,15 +1430,18 @@ export async function POST(request: NextRequest) {
           // If needed, this can be implemented later
 
           // Update POS session cash amount if cash payment
-          if (payment_method_type === "cash" && posSessionId) {
+          const cashAmount = paymentsArray?.length
+            ? paymentsArray
+                .filter((p) => p.method === "cash")
+                .reduce((s, p) => s + p.amount, 0)
+            : payment_method_type === "cash"
+              ? cash_received || total_amount
+              : 0;
+          if (cashAmount > 0 && posSessionId) {
             const { error: cashError } = await supabase.rpc(
               "update_pos_session_cash",
-              {
-                session_id: posSessionId,
-                cash_amount: cash_received || total_amount,
-              },
+              { session_id: posSessionId, cash_amount: cashAmount },
             );
-
             if (cashError) {
               logger.error("Error updating POS session cash", cashError);
             }

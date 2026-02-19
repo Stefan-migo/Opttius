@@ -53,9 +53,8 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(url.searchParams.get("limit") || "500");
 
     // Query for orders with pending balance (payment_status = 'partial' or 'on_hold_payment')
+    // Exclude cancelled/refunded orders (they should not appear after devolution)
     // NOTE: We don't include customers/work_orders relationships here because they may not exist
-    // We'll fetch just the order data and filter in-memory
-    // orders table has user_id and email, NOT customer_id - use email for customer lookup
     let query = supabaseServiceRole
       .from("orders")
       .select(
@@ -64,8 +63,10 @@ export async function GET(request: NextRequest) {
         order_number,
         email,
         user_id,
+        branch_id,
         total_amount,
         payment_status,
+        status,
         created_at,
         order_payments (
           id,
@@ -75,6 +76,7 @@ export async function GET(request: NextRequest) {
       `,
       )
       .in("payment_status", ["partial", "on_hold_payment"])
+      .neq("status", "cancelled")
       .order("created_at", { ascending: false })
       .limit(limit);
 
@@ -191,6 +193,7 @@ export async function GET(request: NextRequest) {
         return {
           id: order.id,
           order_number: order.order_number,
+          branch_id: order.branch_id,
           customer_email: order.email,
           customer_name: customerName,
           customer_rut: customerRUT,

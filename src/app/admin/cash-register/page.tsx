@@ -111,6 +111,8 @@ interface DailySummary {
   total_sales: number;
   total_transactions: number;
   cash_sales: number;
+  cash_inflows?: number;
+  cash_outflows?: number;
   debit_card_sales: number;
   credit_card_sales: number;
   transfer_sales: number;
@@ -172,23 +174,36 @@ export default function CashRegisterPage() {
   const [ordersTab, setOrdersTab] = useState(false);
   const [orderFilters, setOrderFilters] = useState({
     payment_status: "all",
+    payment_method: "all",
     date_from: new Date().toISOString().split("T")[0],
     date_to: new Date().toISOString().split("T")[0],
   });
   const [orderSearchTerm, setOrderSearchTerm] = useState("");
+  const [orderProductFilter, setOrderProductFilter] = useState("");
   const [selectedOrderForAction, setSelectedOrderForAction] =
     useState<any>(null);
   const [orderActionDialog, setOrderActionDialog] = useState<
     "cancel" | "delete" | null
   >(null);
   const [orderActionReason, setOrderActionReason] = useState("");
-  const [createCreditNote, setCreateCreditNote] = useState(false);
   const [refundMethod, setRefundMethod] = useState("cash");
   const [processingOrderAction, setProcessingOrderAction] = useState(false);
 
-  // Credit notes
+  // Credit notes (use wider date range to avoid timezone issues)
   const [creditNotes, setCreditNotes] = useState<any[]>([]);
   const [loadingCreditNotes, setLoadingCreditNotes] = useState(false);
+  const getCreditNotesDateRange = () => {
+    // Wide range (5 years back, 1 year ahead) to show all notes including "antiguas"
+    // and avoid timezone/year mismatches between client and DB
+    const to = new Date();
+    const from = new Date();
+    from.setFullYear(from.getFullYear() - 5);
+    to.setFullYear(to.getFullYear() + 1);
+    return {
+      date_from: from.toISOString().split("T")[0],
+      date_to: to.toISOString().split("T")[0],
+    };
+  };
 
   // Pagination for orders
   const [ordersCurrentPage, setOrdersCurrentPage] = useState(1);
@@ -204,6 +219,7 @@ export default function CashRegisterPage() {
   const [movements, setMovements] = useState<Movement[]>([]);
   const [loadingMovements, setLoadingMovements] = useState(false);
   const [movementFilter, setMovementFilter] = useState<string>("all");
+  const [movementTypeFilter, setMovementTypeFilter] = useState<string>("all");
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
 
   const isGlobalView = !currentBranchId && isSuperAdmin;
@@ -346,7 +362,7 @@ export default function CashRegisterPage() {
           filteredOrders = filteredOrders.filter(
             (order: any) =>
               order.order_number
-                .toLowerCase()
+                ?.toLowerCase()
                 .includes(orderSearchTerm.toLowerCase()) ||
               order.customer_email
                 ?.toLowerCase()
@@ -358,6 +374,39 @@ export default function CashRegisterPage() {
                 ?.toLowerCase()
                 .includes(orderSearchTerm.toLowerCase()),
           );
+        }
+
+        // Filter by payment method (from order_payments or mp_payment_method)
+        if (orderFilters.payment_method !== "all") {
+          const methodMap: Record<string, string[]> = {
+            cash: ["cash"],
+            debit: ["debit", "debit_card"],
+            credit: ["credit", "credit_card"],
+            transfer: ["transfer"],
+          };
+          const allowed = methodMap[orderFilters.payment_method] || [];
+          filteredOrders = filteredOrders.filter((order: any) => {
+            const payments = order.order_payments || [];
+            const hasMatch = payments.some((p: any) =>
+              allowed.includes((p.payment_method || "").toLowerCase()),
+            );
+            if (hasMatch) return true;
+            const mp = (order.mp_payment_method || "").toLowerCase();
+            return allowed.some((a) => mp.includes(a.replace("_", "")));
+          });
+        }
+
+        // Filter by product name in order_items
+        if (orderProductFilter.trim()) {
+          const term = orderProductFilter.trim().toLowerCase();
+          filteredOrders = filteredOrders.filter((order: any) => {
+            const items = order.order_items || [];
+            return items.some(
+              (item: any) =>
+                (item.product_name || "").toLowerCase().includes(term) ||
+                (item.variant_title || "").toLowerCase().includes(term),
+            );
+          });
         }
 
         setOrders(filteredOrders);
@@ -389,7 +438,7 @@ export default function CashRegisterPage() {
     if (!isGlobalView) {
       fetchOrders();
     }
-  }, [orderFilters, orderSearchTerm]);
+  }, [orderFilters, orderSearchTerm, orderProductFilter]);
 
   const fetchClosures = async () => {
     setLoading(true);
@@ -667,13 +716,13 @@ export default function CashRegisterPage() {
   };
 
   const fetchCreditNotes = async () => {
-    if (isGlobalView) return;
     setLoadingCreditNotes(true);
     try {
       const headers = getBranchHeader(currentBranchId);
+      const { date_from, date_to } = getCreditNotesDateRange();
       const params = new URLSearchParams({
-        date_from: orderFilters.date_from,
-        date_to: orderFilters.date_to,
+        date_from,
+        date_to,
         limit: "50",
         offset: "0",
       });
@@ -694,8 +743,7 @@ export default function CashRegisterPage() {
   const handleCancelOrder = async (
     orderId: string,
     reason: string,
-    withCreditNote?: boolean,
-    method?: string,
+    method: string,
   ) => {
     setProcessingOrderAction(true);
     try {
@@ -704,11 +752,10 @@ export default function CashRegisterPage() {
         ...getBranchHeader(currentBranchId),
       };
 
-      const body: Record<string, unknown> = { reason };
-      if (withCreditNote && method) {
-        body.create_credit_note = true;
-        body.refund_method = method;
-      }
+      const body: Record<string, unknown> = {
+        reason,
+        refund_method: method,
+      };
 
       const response = await fetch(`/api/admin/orders/${orderId}/cancel`, {
         method: "POST",
@@ -721,7 +768,6 @@ export default function CashRegisterPage() {
         setOrderActionDialog(null);
         setSelectedOrderForAction(null);
         setOrderActionReason("");
-        setCreateCreditNote(false);
         setRefundMethod("cash");
         await fetchOrders();
         await fetchCreditNotes();
@@ -729,8 +775,16 @@ export default function CashRegisterPage() {
           await fetchMovements(currentSessionId);
         }
       } else {
-        const error = await response.json();
-        toast.error(error.error || "Error al anular venta");
+        let msg = "Error al anular venta";
+        try {
+          const errData = await response.json();
+          msg = errData.details
+            ? `${errData.error || "Error"}: ${errData.details}`
+            : errData.error || msg;
+        } catch (_) {
+          msg = `Error ${response.status}: ${response.statusText}`;
+        }
+        toast.error(msg);
       }
     } catch (error: any) {
       console.error("Error cancelling order:", error);
@@ -1227,8 +1281,40 @@ export default function CashRegisterPage() {
                       </SelectContent>
                     </Select>
                   </div>
+                  <div className="w-full sm:w-48">
+                    <Label>Método de Pago</Label>
+                    <Select
+                      value={orderFilters.payment_method}
+                      onValueChange={(value) => {
+                        setOrderFilters({
+                          ...orderFilters,
+                          payment_method: value,
+                        });
+                      }}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Todos</SelectItem>
+                        <SelectItem value="cash">Efectivo</SelectItem>
+                        <SelectItem value="debit">Débito</SelectItem>
+                        <SelectItem value="credit">Crédito</SelectItem>
+                        <SelectItem value="transfer">Transferencia</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
                 <div className="flex flex-col sm:flex-row gap-3">
+                  <div className="flex-1">
+                    <Label>Producto (filtrar por nombre)</Label>
+                    <Input
+                      placeholder="Ej: test, Kit Limpieza..."
+                      value={orderProductFilter}
+                      onChange={(e) => setOrderProductFilter(e.target.value)}
+                      className="pl-2"
+                    />
+                  </div>
                   <div className="flex-1">
                     <Label>Fecha Desde</Label>
                     <Input
@@ -1694,12 +1780,19 @@ export default function CashRegisterPage() {
                     </p>
                   </div>
                   <div>
-                    <p className="text-sm text-tierra-media">
-                      Ventas en Efectivo
-                    </p>
+                    <p className="text-sm text-tierra-media">Efectivo Neto</p>
                     <p className="text-xl font-bold">
                       {formatCurrency(dailySummary.cash_sales)}
                     </p>
+                    {(dailySummary.cash_inflows != null ||
+                      dailySummary.cash_outflows != null) && (
+                      <p className="text-xs text-tierra-media mt-1">
+                        Ingresos:{" "}
+                        {formatCurrency(dailySummary.cash_inflows ?? 0)} |
+                        Egresos: -
+                        {formatCurrency(dailySummary.cash_outflows ?? 0)}
+                      </p>
+                    )}
                   </div>
                   <div>
                     <p className="text-sm text-tierra-media">Tarjeta Débito</p>
@@ -1762,9 +1855,17 @@ export default function CashRegisterPage() {
                       </strong>{" "}
                       (Monto inicial{" "}
                       {formatCurrency(dailySummary.opening_cash_amount)} +
-                      ventas en efectivo{" "}
-                      {formatCurrency(dailySummary.cash_sales)})
+                      efectivo neto {formatCurrency(dailySummary.cash_sales)})
                     </li>
+                    {(dailySummary.cash_inflows != null ||
+                      dailySummary.cash_outflows != null) && (
+                      <li className="text-xs">
+                        Desglose efectivo: Ingresos{" "}
+                        {formatCurrency(dailySummary.cash_inflows ?? 0)} -
+                        Egresos{" "}
+                        {formatCurrency(dailySummary.cash_outflows ?? 0)}
+                      </li>
+                    )}
                     <li>
                       Ventas débito:{" "}
                       <strong>
@@ -1796,16 +1897,34 @@ export default function CashRegisterPage() {
                       <FileText className="h-5 w-5" />
                       Detalle de Movimientos
                     </CardTitle>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <Select
+                        value={movementTypeFilter}
+                        onValueChange={setMovementTypeFilter}
+                      >
+                        <SelectTrigger className="w-40">
+                          <SelectValue placeholder="Tipo" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">Todos los tipos</SelectItem>
+                          <SelectItem value="sale">Venta</SelectItem>
+                          <SelectItem value="partial_payment">
+                            Pago Saldo
+                          </SelectItem>
+                          <SelectItem value="credit_note">
+                            Nota de Crédito
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
                       <Select
                         value={movementFilter}
                         onValueChange={setMovementFilter}
                       >
                         <SelectTrigger className="w-40">
-                          <SelectValue placeholder="Filtrar" />
+                          <SelectValue placeholder="Método" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="all">Todos</SelectItem>
+                          <SelectItem value="all">Todos los métodos</SelectItem>
                           <SelectItem value="cash">Efectivo</SelectItem>
                           <SelectItem value="debit">Débito</SelectItem>
                           <SelectItem value="credit">Crédito</SelectItem>
@@ -1871,6 +1990,11 @@ export default function CashRegisterPage() {
                             <TableBody>
                               {movements
                                 .filter((m) => {
+                                  if (
+                                    movementTypeFilter !== "all" &&
+                                    m.movement_type !== movementTypeFilter
+                                  )
+                                    return false;
                                   if (movementFilter === "all") return true;
                                   return (
                                     m.payment_method_code === movementFilter
@@ -1952,10 +2076,16 @@ export default function CashRegisterPage() {
                         </div>
                       </div>
                       {movements.filter((m) => {
+                        if (
+                          movementTypeFilter !== "all" &&
+                          m.movement_type !== movementTypeFilter
+                        )
+                          return false;
                         if (movementFilter === "all") return true;
                         return m.payment_method_code === movementFilter;
                       }).length === 0 &&
-                        movementFilter !== "all" && (
+                        (movementFilter !== "all" ||
+                          movementTypeFilter !== "all") && (
                           <div className="text-center py-4 text-tierra-media text-sm">
                             No hay movimientos con el filtro seleccionado
                           </div>
@@ -2097,7 +2227,6 @@ export default function CashRegisterPage() {
             setOrderActionDialog(null);
             setSelectedOrderForAction(null);
             setOrderActionReason("");
-            setCreateCreditNote(false);
             setRefundMethod("cash");
           }
         }}
@@ -2113,7 +2242,7 @@ export default function CashRegisterPage() {
             </DialogTitle>
             <DialogDescription id="order-action-desc">
               {orderActionDialog === "cancel"
-                ? "Confirma la anulación de esta venta. Opcionalmente puedes crear una nota de crédito para registrar el reembolso en caja."
+                ? "Confirma la anulación de esta venta. Se creará una nota de crédito, se revertirá el stock y se actualizará la caja."
                 : "Esta acción eliminará la venta permanentemente del sistema."}
             </DialogDescription>
           </DialogHeader>
@@ -2138,8 +2267,9 @@ export default function CashRegisterPage() {
                 {orderActionDialog === "cancel" && (
                   <>
                     <p className="text-sm text-gray-600">
-                      ¿Estás seguro de que deseas anular esta venta? Se marcará
-                      como cancelada pero seguirá en el sistema.
+                      ¿Estás seguro de que deseas anular esta venta? Se creará
+                      una nota de crédito, se revertirá el stock y se
+                      actualizará la caja.
                     </p>
                     <div>
                       <Label>Razón de la anulación *</Label>
@@ -2149,39 +2279,25 @@ export default function CashRegisterPage() {
                         onChange={(e) => setOrderActionReason(e.target.value)}
                       />
                     </div>
-                    <div className="flex items-center space-x-2">
-                      <input
-                        type="checkbox"
-                        id="create_credit_note"
-                        checked={createCreditNote}
-                        onChange={(e) => setCreateCreditNote(e.target.checked)}
-                        className="rounded border-gray-300"
-                      />
-                      <Label htmlFor="create_credit_note">
-                        Crear nota de crédito (registra el reembolso en caja)
-                      </Label>
+                    <div>
+                      <Label>Método de reembolso *</Label>
+                      <Select
+                        value={refundMethod}
+                        onValueChange={setRefundMethod}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="cash">Efectivo</SelectItem>
+                          <SelectItem value="debit">Débito</SelectItem>
+                          <SelectItem value="credit">Crédito</SelectItem>
+                          <SelectItem value="transfer">
+                            Transferencia
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
-                    {createCreditNote && (
-                      <div>
-                        <Label>Método de reembolso *</Label>
-                        <Select
-                          value={refundMethod}
-                          onValueChange={setRefundMethod}
-                        >
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="cash">Efectivo</SelectItem>
-                            <SelectItem value="debit">Débito</SelectItem>
-                            <SelectItem value="credit">Crédito</SelectItem>
-                            <SelectItem value="transfer">
-                              Transferencia
-                            </SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    )}
                   </>
                 )}
 
@@ -2206,7 +2322,6 @@ export default function CashRegisterPage() {
                 setOrderActionDialog(null);
                 setSelectedOrderForAction(null);
                 setOrderActionReason("");
-                setCreateCreditNote(false);
                 setRefundMethod("cash");
               }}
               disabled={processingOrderAction}
@@ -2222,7 +2337,6 @@ export default function CashRegisterPage() {
                   handleCancelOrder(
                     selectedOrderForAction.id,
                     orderActionReason,
-                    createCreditNote,
                     refundMethod,
                   );
                 } else if (orderActionDialog === "delete") {

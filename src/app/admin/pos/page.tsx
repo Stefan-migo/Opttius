@@ -97,7 +97,12 @@ import {
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { POSCart, POSRefundDialog, POSBarcodeInput } from "./components";
+import {
+  POSCart,
+  POSRefundDialog,
+  POSBarcodeInput,
+  POSPendingBalanceDialog,
+} from "./components";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -382,27 +387,7 @@ export default function POSPage() {
   const printRef = useRef<HTMLDivElement>(null);
   const printReceipt = (retryCount = 0) => {
     const el = printRef.current;
-    // #region agent log
-    const log = (msg: string, data: Record<string, unknown>) => {
-      fetch(
-        "http://127.0.0.1:7244/ingest/31142538-c0fe-4e58-9e94-5a9176bfd36e",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            location: "pos/page.tsx:printReceipt",
-            message: msg,
-            data,
-            timestamp: Date.now(),
-          }),
-        },
-      ).catch(() => {});
-    };
-    // #endregion
     if (!lastProcessedOrder) {
-      log("printReceipt: no order, using window.print fallback", {
-        hypothesisId: "h2",
-      });
       window.print();
       return;
     }
@@ -411,25 +396,15 @@ export default function POSPage() {
         setTimeout(() => printReceipt(retryCount + 1), 200);
         return;
       }
-      log("printReceipt: no el/innerHTML, fallback", { hypothesisId: "h2" });
       window.print();
       return;
     }
     const html = el.innerHTML;
-    const htmlLen = html.length;
     const w = window.open("", "_blank");
     if (!w) {
-      log("printReceipt: popup blocked, using window.print fallback", {
-        hypothesisId: "h2",
-        receiptHtmlLen: htmlLen,
-      });
       window.print();
       return;
     }
-    log("printReceipt: using popup path", {
-      hypothesisId: "h1",
-      receiptHtmlLen: htmlLen,
-    });
     w.document.write(`<!DOCTYPE html>
       <html>
         <head>
@@ -443,66 +418,22 @@ export default function POSPage() {
             .font-bold { font-weight: 700; }
             .border-top { border-top: 1px solid #000; }
             .border-bottom { border-bottom: 1px solid #000; }
+            @media print {
+              html, body { height: auto !important; min-height: 0 !important; overflow: visible !important; }
+              body { page-break-after: avoid; }
+              @page { size: auto; margin: 10mm; }
+            }
           </style>
         </head>
         <body>${html}</body>
       </html>`);
     w.document.close();
     w.onload = () => {
-      const doc = w.document;
-      const body = doc.body;
-      const htmlEl = doc.documentElement;
-      const bodyH = body?.scrollHeight ?? 0;
-      const bodyOH = body?.offsetHeight ?? 0;
-      const htmlH = htmlEl?.scrollHeight ?? 0;
-      log("printReceipt: popup onload dimensions", {
-        hypothesisId: "h1",
-        bodyScrollHeight: bodyH,
-        bodyOffsetHeight: bodyOH,
-        htmlScrollHeight: htmlH,
-        bodyChildCount: body?.childNodes?.length ?? 0,
-      });
       w.focus();
       w.print();
       w.close();
     };
   };
-
-  // #region agent log
-  useEffect(() => {
-    const log = (msg: string, data: Record<string, unknown>) => {
-      fetch(
-        "http://127.0.0.1:7244/ingest/31142538-c0fe-4e58-9e94-5a9176bfd36e",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            location: "pos/page.tsx:beforeprint",
-            message: msg,
-            data,
-            timestamp: Date.now(),
-          }),
-        },
-      ).catch(() => {});
-    };
-    const onBeforePrint = () => {
-      const body = document.body;
-      const portal = document.getElementById("print-receipt-portal");
-      const receipt = document.getElementById("pos-receipt-print");
-      log("beforeprint: main doc dimensions (fallback path)", {
-        hypothesisId: "h2",
-        bodyScrollHeight: body?.scrollHeight ?? 0,
-        bodyOffsetHeight: body?.offsetHeight ?? 0,
-        docElScrollHeight: document.documentElement?.scrollHeight ?? 0,
-        portalScrollHeight: portal?.scrollHeight ?? 0,
-        receiptScrollHeight: receipt?.scrollHeight ?? 0,
-        bodyChildCount: body?.children?.length ?? 0,
-      });
-    };
-    window.addEventListener("beforeprint", onBeforePrint);
-    return () => window.removeEventListener("beforeprint", onBeforePrint);
-  }, []);
-  // #endregion
 
   // Tab activo del formulario "Crear orden completa" (para abrir Lentes al cargar presupuesto de lentes de contacto)
   const [orderFormTab, setOrderFormTab] = useState("customer");
@@ -1197,6 +1128,77 @@ export default function POSPage() {
       discount_amount: 0,
     });
     setDiscountType("amount"); // Reset to default
+  };
+
+  const resetCompleteOrderForm = () => {
+    setSelectedQuote(null);
+    setSelectedFrame(null);
+    setSelectedNearFrame(null);
+    setNearFrameSearch("");
+    setNearFrameResults([]);
+    setCustomerOwnFrame(false);
+    setCustomerOwnNearFrame(false);
+    setManualLensPrice(false);
+    setPresbyopiaSolution("none");
+    setFarLensFamilyId("");
+    setNearLensFamilyId("");
+    setFarLensCost(0);
+    setNearLensCost(0);
+    setOrderFormData({
+      frame_name: "",
+      frame_brand: "",
+      frame_model: "",
+      frame_color: "",
+      frame_size: "",
+      frame_sku: "",
+      frame_price: 0,
+      lens_family_id: "",
+      lens_type: "",
+      lens_material: "",
+      lens_index: null,
+      lens_treatments: [],
+      lens_tint_color: "",
+      lens_tint_percentage: 0,
+      presbyopia_solution: "none" as PresbyopiaSolution,
+      far_lens_family_id: "",
+      near_lens_family_id: "",
+      far_lens_cost: 0,
+      near_lens_cost: 0,
+      contact_lens_family_id: "",
+      contact_lens_rx_sphere_od: null,
+      contact_lens_rx_cylinder_od: null,
+      contact_lens_rx_axis_od: null,
+      contact_lens_rx_add_od: null,
+      contact_lens_rx_base_curve_od: null,
+      contact_lens_rx_diameter_od: null,
+      contact_lens_rx_sphere_os: null,
+      contact_lens_rx_cylinder_os: null,
+      contact_lens_rx_axis_os: null,
+      contact_lens_rx_add_os: null,
+      contact_lens_rx_base_curve_os: null,
+      contact_lens_rx_diameter_os: null,
+      contact_lens_quantity: 1,
+      contact_lens_cost: 0,
+      contact_lens_price: 0,
+      near_frame_product_id: "",
+      near_frame_name: "",
+      near_frame_brand: "",
+      near_frame_model: "",
+      near_frame_color: "",
+      near_frame_size: "",
+      near_frame_sku: "",
+      near_frame_price: 0,
+      near_frame_price_includes_tax: false,
+      near_frame_cost: 0,
+      customer_own_near_frame: false,
+      frame_cost: 0,
+      lens_cost: 0,
+      treatments_cost: 0,
+      labor_cost: quoteSettings?.default_labor_cost ?? 15000,
+      discount_percentage: 0,
+      discount_amount: 0,
+    });
+    setDiscountType("amount");
   };
 
   const handleSelectCustomer = async (customer: Customer) => {
@@ -2983,9 +2985,12 @@ export default function POSPage() {
   const fetchPendingBalanceOrders = async () => {
     setLoadingPendingBalance(true);
     try {
+      // Use currentBranchId, or first branch when in global view (ensures API gets branch filter)
+      const branchForFetch =
+        currentBranchId || (branches?.length ? branches[0]?.id : undefined);
       const orders = await posService.getPendingBalanceOrders(
         undefined,
-        currentBranchId || undefined,
+        branchForFetch,
         500,
       );
       setAllPendingBalanceOrders(orders);
@@ -3062,18 +3067,27 @@ export default function POSPage() {
         toast.success(result.message || "Pago procesado exitosamente");
         setPendingPaymentAmount("");
         const orderId = selectedPendingOrder.id;
+        const orderBranchId = selectedPendingOrder.branch_id;
         setSelectedPendingOrder(null);
         await fetchPendingBalanceOrders();
 
-        // Fetch full order for receipt and trigger print
+        // Fetch full order for receipt and trigger print (mismo formato que venta POS)
         try {
           const orderRes = await fetch(`/api/admin/orders/${orderId}`, {
-            headers: getBranchHeader(currentBranchId),
+            headers: getBranchHeader(orderBranchId || currentBranchId),
           });
           if (orderRes.ok) {
             const orderData = await orderRes.json();
-            const fullOrder = orderData.order;
+            const fullOrder = orderData.order ?? orderData.data;
             if (fullOrder) {
+              // Cargar billing settings de la sucursal de la orden para usar el formato guardado
+              const receiptBranchId = fullOrder.branch_id || orderBranchId;
+              if (receiptBranchId && receiptBranchId !== currentBranchId) {
+                const orderBranchSettings =
+                  await posService.getBillingSettings(receiptBranchId);
+                if (orderBranchSettings)
+                  setBillingSettings(orderBranchSettings);
+              }
               setReceiptType("payment");
               setLastProcessedOrder(fullOrder);
               if (billingSettings?.auto_print_receipt !== false) {
@@ -3748,8 +3762,13 @@ export default function POSPage() {
                             </div>
                           ) : (
                             <Select
-                              value={selectedQuote?.id || ""}
+                              value={selectedQuote?.id || "__none__"}
                               onValueChange={async (value) => {
+                                if (value === "__none__") {
+                                  setSelectedQuote(null);
+                                  resetCompleteOrderForm();
+                                  return;
+                                }
                                 const quote = customerQuotes.find(
                                   (q) => q.id === value,
                                 );
@@ -3757,6 +3776,7 @@ export default function POSPage() {
                                   await handleLoadQuoteToForm(quote);
                                 } else {
                                   setSelectedQuote(null);
+                                  resetCompleteOrderForm();
                                 }
                               }}
                             >
@@ -3764,6 +3784,9 @@ export default function POSPage() {
                                 <SelectValue placeholder="Selecciona un presupuesto" />
                               </SelectTrigger>
                               <SelectContent>
+                                <SelectItem value="__none__">
+                                  Ninguno / Sin presupuesto
+                                </SelectItem>
                                 {customerQuotes.map((quote) => (
                                   <SelectItem key={quote.id} value={quote.id}>
                                     {quote.quote_number} -{" "}
@@ -5885,291 +5908,44 @@ export default function POSPage() {
       </Dialog>
 
       {/* Pending Balance Payment Dialog */}
-      <Dialog
+      <POSPendingBalanceDialog
         open={showPendingBalanceDialog}
-        onOpenChange={(open) => {
-          setShowPendingBalanceDialog(open);
-          if (open) {
-            fetchPendingBalanceOrders();
-          } else {
+        onOpenChange={(o) => {
+          setShowPendingBalanceDialog(o);
+          if (!o) {
             setPendingBalanceSearchTerm("");
             setSelectedPendingOrder(null);
             setPendingFiscalReference("");
           }
         }}
-      >
-        <DialogContent className="max-w-3xl">
-          <DialogHeader>
-            <DialogTitle>Cobrar Saldos Pendientes</DialogTitle>
-            <DialogDescription>
-              Se cargan automáticamente todos los saldos pendientes de la
-              sucursal. Usa el buscador para filtrar por cliente u orden.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            {/* Search Input */}
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
-              <Input
-                placeholder="Filtrar por nombre, RUT, número de orden, email..."
-                value={pendingBalanceSearchTerm}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  setPendingBalanceSearchTerm(value);
-                  filterPendingBalanceBySearch(value, allPendingBalanceOrders);
-                }}
-                className="pl-10"
-              />
-            </div>
-
-            {loadingPendingBalance ? (
-              <div className="flex items-center justify-center py-8">
-                <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
-              </div>
-            ) : pendingBalanceOrders.length > 0 ? (
-              <>
-                <div className="border rounded-lg overflow-hidden">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Orden</TableHead>
-                        <TableHead>Cliente</TableHead>
-                        <TableHead className="text-right">Total</TableHead>
-                        <TableHead className="text-right">Pagado</TableHead>
-                        <TableHead className="text-right">Pendiente</TableHead>
-                        <TableHead>Acción</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {pendingBalanceOrders.map((order) => (
-                        <TableRow
-                          key={order.id}
-                          className={
-                            selectedPendingOrder?.id === order.id
-                              ? "bg-blue-50"
-                              : "cursor-pointer hover:bg-gray-50"
-                          }
-                          onClick={() => {
-                            setSelectedPendingOrder(order);
-                            setPendingPaymentAmount(
-                              order.pending_amount.toString(),
-                            );
-                          }}
-                        >
-                          <TableCell className="font-mono font-semibold">
-                            {order.order_number}
-                          </TableCell>
-                          <TableCell>
-                            <div className="font-medium">
-                              {order.customer_name ||
-                                order.customer_email ||
-                                "Sin nombre"}
-                            </div>
-                            {order.customer_rut && (
-                              <div className="text-xs text-gray-600 font-mono">
-                                RUT: {order.customer_rut}
-                              </div>
-                            )}
-                            {order.customer_email && (
-                              <div className="text-xs text-gray-500">
-                                {order.customer_email}
-                              </div>
-                            )}
-                          </TableCell>
-                          <TableCell className="text-right">
-                            {formatCurrency(order.total_amount)}
-                          </TableCell>
-                          <TableCell className="text-right text-green-600">
-                            {formatCurrency(order.total_paid)}
-                          </TableCell>
-                          <TableCell className="text-right font-semibold text-orange-600">
-                            {formatCurrency(order.pending_amount)}
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center gap-2">
-                              <Button
-                                size="sm"
-                                variant={
-                                  selectedPendingOrder?.id === order.id
-                                    ? "default"
-                                    : "outline"
-                                }
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setSelectedPendingOrder(order);
-                                  setPendingPaymentAmount(
-                                    order.pending_amount.toString(),
-                                  );
-                                }}
-                              >
-                                {selectedPendingOrder?.id === order.id
-                                  ? "Seleccionado"
-                                  : "Seleccionar"}
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setRefundOrderId(order.id);
-                                  setRefundOrderNumber(
-                                    order.order_number || "",
-                                  );
-                                  setShowRefundDialog(true);
-                                }}
-                              >
-                                Devolución
-                              </Button>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-
-                {selectedPendingOrder && (
-                  <Card className="bg-blue-50 border-blue-200">
-                    <CardContent className="pt-6 space-y-4">
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <Label className="text-xs text-gray-600">Orden</Label>
-                          <div className="font-semibold text-lg">
-                            {selectedPendingOrder.order_number}
-                          </div>
-                        </div>
-                        <div>
-                          <Label className="text-xs text-gray-600">
-                            Cliente
-                          </Label>
-                          <div className="font-semibold">
-                            {selectedPendingOrder.customer_name ||
-                              selectedPendingOrder.customer_email ||
-                              "Sin nombre"}
-                          </div>
-                          {selectedPendingOrder.customer_rut && (
-                            <div className="text-xs text-gray-600 font-mono">
-                              RUT: {selectedPendingOrder.customer_rut}
-                            </div>
-                          )}
-                          {selectedPendingOrder.customer_email && (
-                            <div className="text-xs text-gray-600">
-                              {selectedPendingOrder.customer_email}
-                            </div>
-                          )}
-                        </div>
-                        <div>
-                          <Label className="text-xs text-gray-600">
-                            Saldo Pendiente
-                          </Label>
-                          <div className="font-semibold text-lg text-orange-600">
-                            {formatCurrency(
-                              selectedPendingOrder.pending_amount,
-                            )}
-                          </div>
-                        </div>
-                        <div>
-                          <Label className="text-xs text-gray-600">
-                            Método de Pago
-                          </Label>
-                          <Select
-                            value={pendingPaymentMethod}
-                            onValueChange={setPendingPaymentMethod}
-                          >
-                            <SelectTrigger>
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="cash">Efectivo</SelectItem>
-                              <SelectItem value="debit">Débito</SelectItem>
-                              <SelectItem value="credit">Crédito</SelectItem>
-                              <SelectItem value="transfer">
-                                Transferencia
-                              </SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </div>
-                      <div>
-                        <Label>Monto a Pagar *</Label>
-                        <Input
-                          type="number"
-                          placeholder="0"
-                          value={pendingPaymentAmount}
-                          onChange={(e) =>
-                            setPendingPaymentAmount(e.target.value)
-                          }
-                          max={selectedPendingOrder.pending_amount}
-                        />
-                        <p className="text-xs text-gray-600 mt-1">
-                          Máximo:{" "}
-                          {formatCurrency(selectedPendingOrder.pending_amount)}
-                        </p>
-                      </div>
-                      {(pendingPaymentMethod === "debit" ||
-                        pendingPaymentMethod === "credit" ||
-                        pendingPaymentMethod === "transfer") && (
-                        <div>
-                          <Label className="text-sm text-gray-600">
-                            Número de referencia fiscal (opcional)
-                          </Label>
-                          <Input
-                            placeholder="Ej: Nº boleta, factura o transacción"
-                            value={pendingFiscalReference}
-                            onChange={(e) =>
-                              setPendingFiscalReference(e.target.value)
-                            }
-                            className="mt-1"
-                          />
-                          <p className="text-xs text-amber-600 mt-1">
-                            Se recomienda registrar el número para trazabilidad
-                            con documentos fiscales reales
-                          </p>
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                )}
-              </>
-            ) : (
-              <div className="text-center py-8 text-gray-500">
-                <CreditCard className="h-12 w-12 mx-auto mb-2 text-gray-400" />
-                <p>
-                  {pendingBalanceSearchTerm
-                    ? "No se encontraron resultados"
-                    : "No hay órdenes con saldo pendiente"}
-                </p>
-              </div>
-            )}
-          </div>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setShowPendingBalanceDialog(false)}
-            >
-              Cerrar
-            </Button>
-            {selectedPendingOrder && (
-              <Button
-                onClick={processPendingPayment}
-                disabled={processingPendingPayment || !pendingPaymentAmount}
-              >
-                {processingPendingPayment ? (
-                  <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Procesando...
-                  </>
-                ) : (
-                  <>
-                    <CheckCircle2 className="h-4 w-4 mr-2" />
-                    Registrar Pago
-                  </>
-                )}
-              </Button>
-            )}
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+        orders={pendingBalanceOrders}
+        allOrders={allPendingBalanceOrders}
+        loading={loadingPendingBalance}
+        selectedOrder={selectedPendingOrder}
+        pendingPaymentAmount={pendingPaymentAmount}
+        pendingPaymentMethod={pendingPaymentMethod}
+        pendingFiscalReference={pendingFiscalReference}
+        processingPayment={processingPendingPayment}
+        searchTerm={pendingBalanceSearchTerm}
+        onFetchOrders={fetchPendingBalanceOrders}
+        onFilterSearch={(value) => {
+          setPendingBalanceSearchTerm(value);
+          filterPendingBalanceBySearch(value, allPendingBalanceOrders);
+        }}
+        onSelectOrder={(order) => {
+          setSelectedPendingOrder(order);
+          setPendingPaymentAmount(order?.pending_amount?.toString() ?? "");
+        }}
+        onPaymentAmountChange={setPendingPaymentAmount}
+        onPaymentMethodChange={setPendingPaymentMethod}
+        onFiscalReferenceChange={setPendingFiscalReference}
+        onProcessPayment={processPendingPayment}
+        onRefundClick={(order) => {
+          setRefundOrderId(order.id);
+          setRefundOrderNumber(order.order_number || "");
+          setShowRefundDialog(true);
+        }}
+      />
 
       {/* Refund Dialog */}
       <POSRefundDialog
@@ -6200,7 +5976,12 @@ export default function POSPage() {
               ref={printRef}
               order={lastProcessedOrder}
               settings={billingSettings}
-              branch={branches.find((b) => b.id === currentBranchId)}
+              branch={
+                branches.find(
+                  (b) =>
+                    b.id === (currentBranchId || lastProcessedOrder?.branch_id),
+                ) ?? null
+              }
               organization={organization}
               receiptType={receiptType}
             />

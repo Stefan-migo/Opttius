@@ -6,7 +6,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
 import { createServiceRoleClient } from "@/utils/supabase/server";
-import { getBranchContext, addBranchFilter } from "@/lib/api/branch-middleware";
+import { validateBranchAccess } from "@/lib/api/branch-middleware";
 import { appLogger as logger } from "@/lib/logger";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
 import { NotificationService } from "@/lib/notifications/notification-service";
@@ -41,23 +41,10 @@ export async function POST(
 
     const { id } = await params;
 
-    // Get branch context
-    const branchContext = await getBranchContext(request, user.id);
-
-    // Build branch filter function
-    const applyBranchFilter = (query: ReturnType<typeof supabase.from>) => {
-      return addBranchFilter(
-        query,
-        branchContext.branchId,
-        branchContext.isSuperAdmin,
-        branchContext.organizationId,
-      );
-    };
-
-    // 1. Get work order
-    const { data: workOrder, error: workOrderError } = await applyBranchFilter(
-      supabaseServiceRole.from("lab_work_orders").select("*") as any,
-    )
+    // 1. Get work order by id (no branch filter - same pattern as GET [id])
+    const { data: workOrder, error: workOrderError } = await supabaseServiceRole
+      .from("lab_work_orders")
+      .select("*")
       .eq("id", id)
       .single();
 
@@ -68,13 +55,22 @@ export async function POST(
       );
     }
 
-    // 2. Check if work order has associated order
+    // 2. Validate branch access (user must have access to work order's branch)
+    const hasAccess = await validateBranchAccess(user.id, workOrder.branch_id);
+    if (!hasAccess) {
+      return NextResponse.json(
+        { error: "No tiene acceso a este trabajo" },
+        { status: 403 },
+      );
+    }
+
+    // 3. Check if work order has associated order
     if (!workOrder.pos_order_id) {
       // Work order without order (shouldn't happen with new flow, but handle gracefully)
       logger.warn(`Work order ${id} has no pos_order_id, allowing delivery`);
       // Still allow delivery but log warning
     } else {
-      // 3. Get associated order
+      // 4. Get associated order
       const { data: order, error: orderError } = await supabaseServiceRole
         .from("orders")
         .select("id, total_amount, order_number")
@@ -89,7 +85,7 @@ export async function POST(
         );
       }
 
-      // 4. Calculate order balance
+      // 5. Calculate order balance
       const { data: balance, error: balanceError } =
         await supabaseServiceRole.rpc("calculate_order_balance", {
           p_order_id: order.id,
@@ -105,7 +101,7 @@ export async function POST(
 
       const balanceAmount = balance || 0;
 
-      // 5. Check if there's outstanding balance
+      // 6. Check if there's outstanding balance
       if (balanceAmount > 0) {
         return NextResponse.json(
           {
@@ -120,7 +116,7 @@ export async function POST(
       }
     }
 
-    // 6. If balance is $0 (or no order), allow delivery
+    // 7. If balance is $0 (or no order), allow delivery
     // Update work order status to 'delivered'
     const { error: updateError } = await supabaseServiceRole.rpc(
       "update_work_order_status",
@@ -140,7 +136,7 @@ export async function POST(
       );
     }
 
-    // 7. Fetch updated work order
+    // 8. Fetch updated work order
     const { data: updatedWorkOrder, error: fetchError } =
       await supabaseServiceRole
         .from("lab_work_orders")
@@ -169,7 +165,7 @@ export async function POST(
       });
     }
 
-    // 8. Create notification (non-blocking)
+    // 9. Create notification (non-blocking)
     if (updatedWorkOrder) {
       const customerName = updatedWorkOrder.customer
         ? `${updatedWorkOrder.customer.first_name || ""} ${updatedWorkOrder.customer.last_name || ""}`.trim() ||

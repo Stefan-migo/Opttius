@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft, Save, User, MapPin, AlertTriangle } from "lucide-react";
 import { useForm } from "@/hooks/useForm";
 import FormField, { FormFieldActionsExtended } from "@/components/ui/FormField";
-import { customerSchema } from "@/lib/validation/formValidation";
+import { customerEditSchema } from "@/lib/validation/formValidation";
 import {
   success,
   error as notifyError,
@@ -44,7 +44,7 @@ export default function CustomerEditPage() {
   const [fetchError, setFetchError] = useState<string | null>(null);
 
   const form = useForm({
-    validationSchema: customerSchema,
+    validationSchema: customerEditSchema,
     defaultValues: {
       first_name: "",
       last_name: "",
@@ -133,10 +133,10 @@ export default function CustomerEditPage() {
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div>
-            <h1 className="text-3xl font-bold text-azul-profundo">
+            <h1 className="text-3xl font-bold text-admin-text-primary">
               Cargando cliente...
             </h1>
-            <p className="text-tierra-media">
+            <p className="text-admin-text-tertiary">
               Obteniendo información del cliente
             </p>
           </div>
@@ -163,8 +163,10 @@ export default function CustomerEditPage() {
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div>
-            <h1 className="text-3xl font-bold text-azul-profundo">Error</h1>
-            <p className="text-tierra-media">
+            <h1 className="text-3xl font-bold text-admin-text-primary">
+              Error
+            </h1>
+            <p className="text-admin-text-tertiary">
               No se pudo cargar la información del cliente
             </p>
           </div>
@@ -175,7 +177,7 @@ export default function CustomerEditPage() {
             <h3 className="text-lg font-semibold text-red-700 mb-2">
               Error al cargar cliente
             </h3>
-            <p className="text-tierra-media mb-4">
+            <p className="text-admin-text-tertiary mb-4">
               {fetchError || "Cliente no encontrado"}
             </p>
             <Button onClick={fetchCustomer}>Reintentar</Button>
@@ -199,10 +201,10 @@ export default function CustomerEditPage() {
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div>
-            <h1 className="text-3xl font-bold text-azul-profundo">
+            <h1 className="text-3xl font-bold text-admin-text-primary">
               Editar Cliente
             </h1>
-            <p className="text-tierra-media">{customerName}</p>
+            <p className="text-admin-text-tertiary">{customerName}</p>
           </div>
         </div>
 

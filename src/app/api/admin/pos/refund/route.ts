@@ -21,6 +21,10 @@ const refundSchema = z.object({
   ),
   reason: z.string().min(1, "Motivo requerido"),
   refund_type: z.enum(["full", "partial"]),
+  refund_method: z
+    .enum(["cash", "debit", "credit", "transfer"])
+    .optional()
+    .default("cash"),
 });
 
 export const dynamic = "force-dynamic";
@@ -71,12 +75,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { order_id, items, reason, refund_type } = parseResult.data;
+    const { order_id, items, reason, refund_type, refund_method } =
+      parseResult.data;
 
     // Fetch order and validate
     const { data: order, error: orderError } = await supabaseServiceRole
       .from("orders")
-      .select("id, branch_id, organization_id, status")
+      .select("id, branch_id, organization_id, status, total_amount")
       .eq("id", order_id)
       .single();
 
@@ -152,15 +157,26 @@ export async function POST(request: NextRequest) {
       if (!oi.product_id) continue;
     }
 
+    // Get total_paid from order_payments (cap refund at what client actually paid)
+    const { data: payments } = await supabaseServiceRole
+      .from("order_payments")
+      .select("amount")
+      .eq("order_id", order_id);
+    const totalPaid = (payments || []).reduce(
+      (sum: number, p: { amount: number }) => sum + Number(p.amount || 0),
+      0,
+    );
+    const orderTotal = Number(order.total_amount) || 0;
+
     // Get active pos_session for branch (optional - for pos_transactions)
     const { data: session } = await supabaseServiceRole
       .from("pos_sessions")
       .select("id")
       .eq("branch_id", branchId)
       .eq("status", "open")
-      .order("opened_at", { ascending: false })
+      .order("opening_time", { ascending: false })
       .limit(1)
-      .single();
+      .maybeSingle();
 
     const posSessionId = session?.id ?? null;
 
@@ -176,6 +192,10 @@ export async function POST(request: NextRequest) {
           p_branch_id: branchId,
           p_quantity_change: refItem.quantity,
           p_reserve: false,
+          p_movement_type: "refund",
+          p_reference_type: "refund",
+          p_reference_id: order_id,
+          p_created_by: user.id,
         },
       );
 
@@ -195,24 +215,82 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Calculate refund amount
-    let refundAmount = 0;
+    // Calculate refund amount from items (proportional to order total)
+    let refundAmountFromItems = 0;
     for (const refItem of items) {
       const oi = itemMap.get(refItem.order_item_id);
       if (oi) {
-        const unitRefund = oi.total_price / oi.quantity;
-        refundAmount += unitRefund * refItem.quantity;
+        const unitRefund = Number(oi.total_price) / oi.quantity;
+        refundAmountFromItems += unitRefund * refItem.quantity;
+      }
+    }
+    // Cap refund at total_paid (client only gets back what they paid)
+    const refundAmount =
+      totalPaid < orderTotal
+        ? Math.min(
+            refundAmountFromItems,
+            totalPaid * (refundAmountFromItems / orderTotal),
+          )
+        : refundAmountFromItems;
+
+    // Create credit_note and credit_note_movement for caja integration
+    let creditNoteId: string | null = null;
+    if (posSessionId && refundAmount > 0) {
+      const { data: cnNumber, error: cnNumError } =
+        await supabaseServiceRole.rpc("generate_credit_note_number");
+      if (!cnNumError && cnNumber) {
+        const { data: branchRow } = await supabaseServiceRole
+          .from("branches")
+          .select("organization_id")
+          .eq("id", branchId)
+          .single();
+        const { data: newCreditNote, error: cnError } =
+          await supabaseServiceRole
+            .from("credit_notes")
+            .insert({
+              credit_note_number: cnNumber,
+              order_id,
+              branch_id: branchId,
+              organization_id: (branchRow as any)?.organization_id ?? null,
+              amount: refundAmount,
+              reason,
+              refund_method: refund_method ?? "cash",
+              pos_session_id: posSessionId,
+              created_by: user.id,
+            })
+            .select("id")
+            .single();
+        if (!cnError && newCreditNote) {
+          creditNoteId = newCreditNote.id;
+          await supabaseServiceRole.from("credit_note_movements").insert({
+            credit_note_id: creditNoteId,
+            pos_session_id: posSessionId,
+            amount: -refundAmount,
+            refund_method: refund_method ?? "cash",
+          });
+        }
       }
     }
 
-    // Create pos_transaction for refund
+    // Update order status to cancelled/refunded (removes from pending balance)
+    await supabaseServiceRole
+      .from("orders")
+      .update({
+        status: "cancelled",
+        payment_status: "refunded",
+        cancellation_reason: reason,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", order_id);
+
+    // Create pos_transaction for refund (legacy/traceability)
     const { error: txError } = await supabaseServiceRole
       .from("pos_transactions")
       .insert({
         order_id,
         pos_session_id: posSessionId,
         transaction_type: "refund",
-        payment_method: "refund",
+        payment_method: refund_method ?? "cash",
         amount: -refundAmount,
         change_amount: null,
         notes: `${reason} | Items: ${items.map((i) => i.order_item_id).join(", ")}`,
@@ -220,13 +298,13 @@ export async function POST(request: NextRequest) {
 
     if (txError) {
       logger.warn("Could not create pos_transaction for refund", { txError });
-      // Don't fail - stock was already reversed
     }
 
     logger.info("Refund processed successfully", {
       order_id,
       refund_amount: refundAmount,
       items_count: items.length,
+      credit_note_id: creditNoteId,
     });
 
     return createApiSuccessResponse({
@@ -234,6 +312,7 @@ export async function POST(request: NextRequest) {
       message: "Devolución procesada correctamente",
       refund_amount: refundAmount,
       items_refunded: items.length,
+      credit_note_id: creditNoteId ?? undefined,
     });
   } catch (error) {
     logger.error("Error in POS Refund API", error);

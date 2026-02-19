@@ -14,6 +14,10 @@ interface POSBarcodeInputProps {
   className?: string;
   autoFocus?: boolean;
   inputRef?: React.RefObject<HTMLInputElement | null>;
+  /** Restore focus after successful scan/search (default: true) */
+  restoreFocusOnSuccess?: boolean;
+  /** Scan detection window in ms - chars+Enter within this = barcode (default: 150) */
+  scanWindowMs?: number;
 }
 
 /**
@@ -31,6 +35,8 @@ export function POSBarcodeInput({
   className,
   autoFocus = true,
   inputRef: inputRefProp,
+  restoreFocusOnSuccess = true,
+  scanWindowMs = 150,
 }: POSBarcodeInputProps) {
   const internalRef = useRef<HTMLInputElement>(null);
   const inputRef = inputRefProp || internalRef;
@@ -39,7 +45,7 @@ export function POSBarcodeInput({
 
   const restoreFocus = useCallback(() => {
     setTimeout(() => inputRef.current?.focus(), 50);
-  }, []);
+  }, [inputRef]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -49,20 +55,28 @@ export function POSBarcodeInput({
       if (e.key === "Enter") {
         e.preventDefault();
 
-        // If we received Enter within 100ms of previous key, treat as barcode scan
+        // If we received Enter within scanWindowMs of previous key, treat as barcode scan
         const isLikelyScan =
-          timeSinceLastKey < 100 && bufferRef.current.length > 0;
+          timeSinceLastKey < scanWindowMs && bufferRef.current.length > 0;
 
         if (isLikelyScan && bufferRef.current.trim()) {
           const barcode = bufferRef.current.trim();
           onScan(barcode);
           bufferRef.current = "";
           onChange("");
-          restoreFocus();
+          if (restoreFocusOnSuccess) restoreFocus();
         } else if (value.trim()) {
-          // Normal Enter - trigger search
-          onSearch?.(value.trim());
-          restoreFocus();
+          const term = value.trim();
+          // Prioritize barcode lookup for long numeric strings (EAN-13, etc.)
+          const isLongNumeric = /^\d{12,}$/.test(term);
+          if (isLongNumeric) {
+            onScan(term);
+            bufferRef.current = "";
+            onChange("");
+          } else {
+            onSearch?.(term);
+          }
+          if (restoreFocusOnSuccess) restoreFocus();
         }
         lastKeyTimeRef.current = now;
         return;
@@ -80,7 +94,16 @@ export function POSBarcodeInput({
         bufferRef.current = value + e.key;
       }
     },
-    [value, onChange, onScan, onSearch, onKeyDownProp, restoreFocus],
+    [
+      value,
+      onChange,
+      onScan,
+      onSearch,
+      onKeyDownProp,
+      restoreFocus,
+      restoreFocusOnSuccess,
+      scanWindowMs,
+    ],
   );
 
   const handleChange = useCallback(

@@ -101,10 +101,11 @@ export interface Product {
   // Branch stock
   product_branch_stock?: {
     branch_id: string;
-    branch_name: string;
+    branch_name?: string;
     quantity: number;
     reserved_quantity: number;
-    available_quantity: number;
+    available_quantity?: number;
+    low_stock_threshold?: number | null;
   }[];
   // Warranty
   warranty_months?: number;

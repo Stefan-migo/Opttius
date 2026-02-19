@@ -268,19 +268,46 @@ supabase/
 
 ## 10. Mejoras Futuras (Roadmap)
 
-1. **Auditoría de movimientos**: Tabla inventory_transactions (product_id, branch_id, quantity_change, type, reference_id, created_at)
-2. **Transferencias entre sucursales**: API para mover stock de branch A a B
+### 10.1 Auditoría de movimientos (inventory_transactions)
+
+Tabla para registrar todos los movimientos de stock con trazabilidad:
+
+| Campo           | Tipo        | Descripción                                       |
+| --------------- | ----------- | ------------------------------------------------- |
+| id              | UUID        | PK                                                |
+| product_id      | UUID        | FK → products                                     |
+| branch_id       | UUID        | FK → branches                                     |
+| quantity_change | INTEGER     | Cambio (+/-)                                      |
+| type            | TEXT        | sale, adjustment, transfer_out, transfer_in, etc. |
+| reference_id    | UUID        | ID de referencia (sale_id, work_order_id, etc.)   |
+| created_at      | TIMESTAMPTZ | Fecha del movimiento                              |
+| created_by      | UUID        | FK → auth.users (opcional)                        |
+
+**Implementación**: Crear migración, triggers o llamadas explícitas desde `update_product_stock` para insertar en `inventory_transactions`.
+
+### 10.2 Transferencias entre sucursales
+
+API para mover stock de una sucursal origen a una sucursal destino:
+
+- **Endpoint**: `POST /api/admin/inventory/transfers`
+- **Body**: `{ origin_branch_id, destination_branch_id, items: [{ product_id, quantity }] }`
+- **Validaciones**: Mismo organization_id en ambas sucursales, stock suficiente en origen
+- **Flujo**: `update_product_stock(origin, -q)` + `update_product_stock(destination, +q)` + registros en `inventory_transactions` (type: transfer_out, transfer_in)
+
+### 10.3 Otras mejoras
+
 3. **low_stock_threshold por producto/sucursal**: Ya existe en product_branch_stock, exponer en UI
 4. **reorder_point**: Sugerencias de compra cuando stock <= reorder_point
 5. **Lotes/caducidad**: Para lentes de contacto (shelf_life)
 6. **Reservas temporales**: Sistema de reserva para presupuestos con expiración
-7. **Eliminar columnas deprecadas**: DROP inventory_quantity, track_inventory, low_stock_threshold de products
+7. **Eliminar columnas deprecadas**: DROP inventory_quantity, track_inventory, low_stock_threshold de products (cuando no haya referencias)
 
 ---
 
 ## 11. Changelog
 
-| Fecha      | Cambio                                                                       |
-| ---------- | ---------------------------------------------------------------------------- |
-| 2026-01-20 | Refactor: separación products/product_branch_stock, RPC update_product_stock |
-| 2026-02-18 | Documentación inicial INVENTORY_SYSTEM.md y skill inventory-optical-supabase |
+| Fecha      | Cambio                                                                              |
+| ---------- | ----------------------------------------------------------------------------------- |
+| 2026-01-20 | Refactor: separación products/product_branch_stock, RPC update_product_stock        |
+| 2026-02-18 | Documentación inicial INVENTORY_SYSTEM.md y skill inventory-optical-supabase        |
+| 2026-02-19 | Roadmap: detalle de inventory_transactions y API de transferencias entre sucursales |

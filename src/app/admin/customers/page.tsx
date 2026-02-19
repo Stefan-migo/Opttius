@@ -146,10 +146,10 @@ export default function CustomersPage() {
       <div className="space-y-6">
         <div className="flex justify-between items-start">
           <div>
-            <h1 className="text-3xl font-bold text-azul-profundo">
+            <h1 className="text-3xl font-bold text-admin-text-primary">
               Gestión de Clientes
             </h1>
-            <p className="text-tierra-media">
+            <p className="text-admin-text-tertiary">
               Cargando información de clientes...
             </p>
           </div>
@@ -173,10 +173,12 @@ export default function CustomersPage() {
       <div className="space-y-6">
         <div className="flex justify-between items-start">
           <div>
-            <h1 className="text-3xl font-bold text-azul-profundo">
+            <h1 className="text-3xl font-bold text-admin-text-primary">
               Gestión de Clientes
             </h1>
-            <p className="text-tierra-media">Error al cargar los datos</p>
+            <p className="text-admin-text-tertiary">
+              Error al cargar los datos
+            </p>
           </div>
         </div>
         <Card>
@@ -185,7 +187,7 @@ export default function CustomersPage() {
             <h3 className="text-lg font-semibold text-red-700 mb-2">
               Error al cargar clientes
             </h3>
-            <p className="text-tierra-media mb-4">{error}</p>
+            <p className="text-admin-text-tertiary mb-4">{error}</p>
             <Button onClick={fetchCustomers}>Reintentar</Button>
           </CardContent>
         </Card>
@@ -198,10 +200,10 @@ export default function CustomersPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-azul-profundo">
+          <h1 className="text-3xl font-bold text-admin-text-primary">
             Gestión de Clientes
           </h1>
-          <p className="text-tierra-media">
+          <p className="text-admin-text-tertiary">
             Administra los clientes de tu sucursal
           </p>
         </div>
@@ -230,15 +232,15 @@ export default function CustomersPage() {
               <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.4)]">
                 <CardContent className="p-6">
                   <div className="flex items-center">
-                    <Users className="h-8 w-8 text-azul-profundo" />
+                    <Users className="h-8 w-8 text-admin-text-primary" />
                     <div className="ml-4">
-                      <p className="text-sm text-tierra-media">
+                      <p className="text-sm text-admin-text-tertiary">
                         Total Clientes
                       </p>
-                      <p className="text-2xl font-bold text-azul-profundo">
+                      <p className="text-2xl font-bold text-admin-text-primary">
                         {stats.totalCustomers}
                       </p>
-                      <p className="text-xs text-tierra-media mt-1">
+                      <p className="text-xs text-admin-text-tertiary mt-1">
                         {statsLabel}
                       </p>
                     </div>
@@ -249,15 +251,15 @@ export default function CustomersPage() {
               <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.4)]">
                 <CardContent className="p-6">
                   <div className="flex items-center">
-                    <CheckCircle className="h-8 w-8 text-verde-suave" />
+                    <CheckCircle className="h-8 w-8 text-admin-success" />
                     <div className="ml-4">
-                      <p className="text-sm text-tierra-media">
+                      <p className="text-sm text-admin-text-tertiary">
                         Clientes Activos
                       </p>
-                      <p className="text-2xl font-bold text-verde-suave">
+                      <p className="text-2xl font-bold text-admin-success">
                         {stats.activeCustomers || stats.totalCustomers}
                       </p>
-                      <p className="text-xs text-tierra-media mt-1">
+                      <p className="text-xs text-admin-text-tertiary mt-1">
                         {statsLabel}
                       </p>
                     </div>
@@ -268,15 +270,15 @@ export default function CustomersPage() {
               <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.4)]">
                 <CardContent className="p-6">
                   <div className="flex items-center">
-                    <ArrowUpRight className="h-8 w-8 text-azul-profundo" />
+                    <ArrowUpRight className="h-8 w-8 text-admin-text-primary" />
                     <div className="ml-4">
-                      <p className="text-sm text-tierra-media">
+                      <p className="text-sm text-admin-text-tertiary">
                         Nuevos Este Mes
                       </p>
-                      <p className="text-2xl font-bold text-azul-profundo">
+                      <p className="text-2xl font-bold text-admin-text-primary">
                         {stats.newCustomersThisMonth}
                       </p>
-                      <p className="text-xs text-tierra-media mt-1">
+                      <p className="text-xs text-admin-text-tertiary mt-1">
                         {statsLabel}
                       </p>
                     </div>
@@ -293,7 +295,7 @@ export default function CustomersPage() {
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-tierra-media h-4 w-4" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-admin-text-tertiary h-4 w-4" />
                 <Input
                   data-tour="customers-search"
                   placeholder="Buscar por nombre, email, teléfono o RUT..."
@@ -350,11 +352,11 @@ export default function CustomersPage() {
               {customers.length === 0 && !loading ? (
                 <TableRow>
                   <TableCell colSpan={6} className="text-center py-12">
-                    <Users className="h-12 w-12 text-tierra-media mx-auto mb-4" />
-                    <h3 className="text-lg font-semibold text-azul-profundo mb-2">
+                    <Users className="h-12 w-12 text-admin-text-tertiary mx-auto mb-4" />
+                    <h3 className="text-lg font-semibold text-admin-text-primary mb-2">
                       No se encontraron clientes
                     </h3>
-                    <p className="text-tierra-media">
+                    <p className="text-admin-text-tertiary">
                       Ajusta los filtros o agrega nuevos clientes.
                     </p>
                   </TableCell>
@@ -375,7 +377,7 @@ export default function CustomersPage() {
                               "Sin nombre"}
                         </div>
                         {customer.email && (
-                          <div className="text-sm text-tierra-media">
+                          <div className="text-sm text-admin-text-tertiary">
                             {customer.email}
                           </div>
                         )}
@@ -386,22 +388,22 @@ export default function CustomersPage() {
                       <div className="space-y-1">
                         {customer.email && (
                           <div className="flex items-center text-sm">
-                            <Mail className="h-3 w-3 mr-1 text-tierra-media" />
-                            <span className="text-tierra-media">
+                            <Mail className="h-3 w-3 mr-1 text-admin-text-tertiary" />
+                            <span className="text-admin-text-tertiary">
                               {customer.email}
                             </span>
                           </div>
                         )}
                         {customer.phone && (
                           <div className="flex items-center text-sm">
-                            <Phone className="h-3 w-3 mr-1 text-tierra-media" />
-                            <span className="text-tierra-media">
+                            <Phone className="h-3 w-3 mr-1 text-admin-text-tertiary" />
+                            <span className="text-admin-text-tertiary">
                               {customer.phone}
                             </span>
                           </div>
                         )}
                         {!customer.email && !customer.phone && (
-                          <span className="text-xs text-tierra-media">
+                          <span className="text-xs text-admin-text-tertiary">
                             Sin contacto
                           </span>
                         )}
@@ -412,7 +414,9 @@ export default function CustomersPage() {
                       {customer.rut ? (
                         <span className="text-sm">{customer.rut}</span>
                       ) : (
-                        <span className="text-xs text-tierra-media">-</span>
+                        <span className="text-xs text-admin-text-tertiary">
+                          -
+                        </span>
                       )}
                     </TableCell>
 
@@ -420,7 +424,7 @@ export default function CustomersPage() {
                       {customer.is_active !== false ? (
                         <Badge
                           variant="default"
-                          className="bg-verde-suave text-white"
+                          className="bg-admin-success text-white"
                           style={{ color: "var(--admin-accent-secondary)" }}
                         >
                           <CheckCircle className="h-3 w-3 mr-1" />
@@ -434,7 +438,7 @@ export default function CustomersPage() {
                       )}
                     </TableCell>
 
-                    <TableCell className="text-sm text-tierra-media">
+                    <TableCell className="text-sm text-admin-text-tertiary">
                       {new Date(customer.created_at).toLocaleDateString(
                         "es-AR",
                       )}
@@ -471,7 +475,7 @@ export default function CustomersPage() {
                 Anterior
               </Button>
 
-              <span className="text-sm text-tierra-media">
+              <span className="text-sm text-admin-text-tertiary">
                 Página {currentPage} de {totalPages}
               </span>
 
