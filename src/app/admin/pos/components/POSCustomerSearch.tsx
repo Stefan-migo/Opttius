@@ -70,7 +70,7 @@ export function POSCustomerSearch({
 
           {!loading && results.length > 0 && (
             <div
-              ref={suggestionsRef}
+              ref={suggestionsRef as React.Ref<HTMLDivElement>}
               className="max-h-60 overflow-y-auto border rounded-lg bg-white dark:bg-gray-900 shadow-lg z-20"
             >
               {results.map((customer, index) => (
