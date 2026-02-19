@@ -163,7 +163,7 @@ export async function POST(
           customer_own_near_frame: quote.customer_own_near_frame ?? false,
           prescription_snapshot: prescriptionSnapshot,
           frame_cost: quote.frame_cost || 0,
-          lens_cost,
+          lens_cost: quote.lens_cost || 0,
           treatments_cost: quote.treatments_cost || 0,
           labor_cost: quote.labor_cost || 0,
           lab_cost: 0,

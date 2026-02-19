@@ -8,6 +8,7 @@ import {
   createApiSuccessResponse,
   createApiErrorResponse,
 } from "@/lib/api/response";
+import { APIError } from "@/lib/api/errors";
 import { z } from "zod";
 
 const refundSchema = z.object({
@@ -36,21 +37,28 @@ export async function POST(request: NextRequest) {
       error: userError,
     } = await supabase.auth.getUser();
     if (userError || !user) {
-      return createApiErrorResponse(new Error("Unauthorized"), 401);
+      return createApiErrorResponse(
+        new APIError("Unauthorized", 401, "UNAUTHORIZED"),
+      );
     }
 
     const { data: isAdmin } = (await supabase.rpc("is_admin", {
       user_id: user.id,
     } as IsAdminParams)) as { data: IsAdminResult | null };
     if (!isAdmin) {
-      return createApiErrorResponse(new Error("Admin access required"), 403);
+      return createApiErrorResponse(
+        new APIError("Admin access required", 403, "FORBIDDEN"),
+      );
     }
 
     const branchContext = await getBranchContext(request, user.id);
     if (!branchContext.isSuperAdmin && !branchContext.branchId) {
       return createApiErrorResponse(
-        new Error("Debe seleccionar una sucursal para realizar devoluciones"),
-        400,
+        new APIError(
+          "Debe seleccionar una sucursal para realizar devoluciones",
+          400,
+          "BAD_REQUEST",
+        ),
       );
     }
 
@@ -73,7 +81,9 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (orderError || !order) {
-      return createApiErrorResponse(new Error("Orden no encontrada"), 404);
+      return createApiErrorResponse(
+        new APIError("Orden no encontrada", 404, "NOT_FOUND"),
+      );
     }
 
     // Validate branch access
@@ -83,16 +93,18 @@ export async function POST(request: NextRequest) {
       order.branch_id !== branchContext.branchId
     ) {
       return createApiErrorResponse(
-        new Error("La orden no pertenece a la sucursal seleccionada"),
-        403,
+        new APIError(
+          "La orden no pertenece a la sucursal seleccionada",
+          403,
+          "FORBIDDEN",
+        ),
       );
     }
 
     const branchId = order.branch_id;
     if (!branchId) {
       return createApiErrorResponse(
-        new Error("La orden no tiene sucursal asociada"),
-        400,
+        new APIError("La orden no tiene sucursal asociada", 400, "BAD_REQUEST"),
       );
     }
 
@@ -106,8 +118,11 @@ export async function POST(request: NextRequest) {
 
     if (itemsError || !orderItems || orderItems.length === 0) {
       return createApiErrorResponse(
-        new Error("No se encontraron los ítems de la orden"),
-        400,
+        new APIError(
+          "No se encontraron los ítems de la orden",
+          400,
+          "BAD_REQUEST",
+        ),
       );
     }
 
@@ -117,16 +132,20 @@ export async function POST(request: NextRequest) {
       const oi = itemMap.get(refItem.order_item_id);
       if (!oi) {
         return createApiErrorResponse(
-          new Error(`Ítem ${refItem.order_item_id} no pertenece a esta orden`),
-          400,
+          new APIError(
+            `Ítem ${refItem.order_item_id} no pertenece a esta orden`,
+            400,
+            "BAD_REQUEST",
+          ),
         );
       }
       if (refItem.quantity > oi.quantity) {
         return createApiErrorResponse(
-          new Error(
+          new APIError(
             `Cantidad a devolver (${refItem.quantity}) excede la cantidad vendida (${oi.quantity}) para ${oi.product_name}`,
+            400,
+            "BAD_REQUEST",
           ),
-          400,
         );
       }
       // Skip services - no stock to reverse
@@ -167,10 +186,11 @@ export async function POST(request: NextRequest) {
           error: stockError,
         });
         return createApiErrorResponse(
-          new Error(
+          new APIError(
             `Error al revertir stock para ${oi.product_name}: ${stockError.message}`,
+            500,
+            "INTERNAL_ERROR",
           ),
-          500,
         );
       }
     }

@@ -370,6 +370,7 @@ export default function POSPage() {
     near_frame_price: 0,
     near_frame_price_includes_tax: false,
     near_frame_cost: 0,
+    customer_own_near_frame: false,
     frame_cost: 0,
     lens_cost: 0,
     treatments_cost: 0,
@@ -863,6 +864,7 @@ export default function POSPage() {
         near_frame_price_includes_tax:
           fullQuote.near_frame_price_includes_tax || false,
         near_frame_cost: fullQuote.near_frame_cost || 0,
+        customer_own_near_frame: fullQuote.customer_own_near_frame || false,
         frame_cost: fullQuote.frame_cost || 0,
         lens_cost: fullQuote.lens_cost || 0,
         treatments_cost: fullQuote.treatments_cost || 0,
@@ -1186,6 +1188,7 @@ export default function POSPage() {
       near_frame_price: 0,
       near_frame_price_includes_tax: false,
       near_frame_cost: 0,
+      customer_own_near_frame: false,
       frame_cost: 0,
       lens_cost: 0,
       treatments_cost: 0,
@@ -1274,6 +1277,7 @@ export default function POSPage() {
       near_frame_price: 0,
       near_frame_price_includes_tax: false,
       near_frame_cost: 0,
+      customer_own_near_frame: false,
       frame_cost: 0,
       lens_cost: 0,
       treatments_cost: 0,
@@ -2445,7 +2449,8 @@ export default function POSPage() {
           near_frame_price: oq.near_frame_price ?? prev.near_frame_price,
           near_frame_cost: oq.near_frame_cost ?? prev.near_frame_cost,
           customer_own_near_frame:
-            oq.customer_own_near_frame ?? prev.customer_own_near_frame,
+            (oq as { customer_own_near_frame?: boolean })
+              .customer_own_near_frame ?? prev.customer_own_near_frame,
           frame_cost: oq.frame_cost ?? prev.frame_cost,
           lens_cost: oq.lens_cost ?? prev.lens_cost,
           treatments_cost: oq.treatments_cost ?? prev.treatments_cost,
@@ -3193,7 +3198,7 @@ export default function POSPage() {
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                   <Input
-                    ref={customerSearchInputRef}
+                    ref={customerSearchInputRef as React.Ref<HTMLInputElement>}
                     placeholder="Buscar cliente (nombre, email, teléfono, RUT)..."
                     value={customerSearchTerm}
                     onChange={(e) => {
@@ -3254,7 +3259,9 @@ export default function POSPage() {
                     {!searchingCustomers &&
                       customerSearchResults.length > 0 && (
                         <div
-                          ref={customerSuggestionsRef}
+                          ref={
+                            customerSuggestionsRef as React.Ref<HTMLDivElement>
+                          }
                           className="max-h-60 overflow-y-auto border rounded-lg bg-white shadow-lg z-20"
                         >
                           {customerSearchResults.map((customer, index) => (
@@ -3469,7 +3476,7 @@ export default function POSPage() {
 
                     {!searching && products.length > 0 && (
                       <div
-                        ref={suggestionsRef}
+                        ref={suggestionsRef as React.Ref<HTMLDivElement>}
                         className="max-h-96 overflow-y-auto border rounded-lg bg-white shadow-lg divide-y"
                       >
                         {products.map((product, index) => (

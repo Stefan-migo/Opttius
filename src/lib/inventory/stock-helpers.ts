@@ -118,7 +118,7 @@ export async function updateProductStock(
 ): Promise<{
   success: boolean;
   stock?: {
-    id: string;
+    id?: string;
     product_id: string;
     branch_id: string;
     quantity: number;
@@ -194,7 +194,7 @@ export async function upsertProductStock(
 ): Promise<{
   success: boolean;
   stock?: {
-    id: string;
+    id?: string;
     product_id: string;
     branch_id: string;
     quantity: number;
