@@ -15,18 +15,47 @@ export interface AuthState {
   error: AuthError | null;
 }
 
-export function useAuth() {
+/**
+ * @param initialUser - Usuario validado en servidor (getUser). Evita redirect erróneo
+ * cuando el cliente aún no tiene sesión en document.cookie (nueva pestaña/refresh).
+ */
+export function useAuth(initialUser?: User | null) {
   const [authState, setAuthState] = useState<AuthState>({
-    user: null,
+    user: initialUser ?? null,
     profile: null,
     session: null,
-    loading: true,
+    loading: !initialUser,
     error: null,
   });
 
   useEffect(() => {
     let mounted = true;
     const supabase = createClient();
+
+    // Si tenemos initialUser del servidor, cargar perfil y marcar listo (evita redirect prematuro)
+    if (initialUser) {
+      fetchProfile(initialUser.id)
+        .then((profile) => {
+          if (!mounted) return;
+          setAuthState({
+            user: initialUser,
+            profile,
+            session: null, // Se llenará con onAuthStateChange
+            loading: false,
+            error: null,
+          });
+        })
+        .catch(() => {
+          if (!mounted) return;
+          setAuthState({
+            user: initialUser,
+            profile: null,
+            session: null,
+            loading: false,
+            error: null,
+          });
+        });
+    }
 
     // Add timeout to prevent infinite loading
     const timeoutId = setTimeout(() => {
@@ -96,7 +125,17 @@ export function useAuth() {
     } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (!mounted) return;
 
-      if (event === "SIGNED_IN" && session?.user) {
+      // INITIAL_SESSION: aplica sesión al montar (refresh/nueva pestaña)
+      if (event === "INITIAL_SESSION" && session?.user) {
+        const profile = await fetchProfile(session.user.id);
+        setAuthState({
+          user: session.user,
+          profile,
+          session,
+          loading: false,
+          error: null,
+        });
+      } else if (event === "SIGNED_IN" && session?.user) {
         const profile = await fetchProfile(session.user.id);
         setAuthState({
           user: session.user,

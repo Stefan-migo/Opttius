@@ -386,7 +386,7 @@ export async function PUT(
 
     // First, verify the quote exists and user has access
     const { data: existingQuote, error: fetchError } = await applyBranchFilter(
-      supabase.from("quotes").select("id, branch_id") as any,
+      supabase.from("quotes").select("id, branch_id, customer_id") as any,
     )
       .eq("id", id)
       .single();
@@ -399,6 +399,33 @@ export async function PUT(
     }
 
     const body = await request.json();
+
+    // Validate prescription belongs to quote's customer when prescription_id is updated
+    const prescriptionIdToValidate =
+      body.prescription_id !== undefined && body.prescription_id
+        ? body.prescription_id
+        : null;
+    if (prescriptionIdToValidate) {
+      const { data: prescription } = await supabaseServiceRole
+        .from("prescriptions")
+        .select("customer_id")
+        .eq("id", prescriptionIdToValidate)
+        .single();
+      const quoteCustomerId = (existingQuote as { customer_id?: string })
+        .customer_id;
+      if (
+        prescription &&
+        quoteCustomerId &&
+        prescription.customer_id !== quoteCustomerId
+      ) {
+        return NextResponse.json(
+          {
+            error: "La receta no pertenece al cliente del presupuesto",
+          },
+          { status: 400 },
+        );
+      }
+    }
 
     const updateData: {
       updated_at: string;
@@ -461,6 +488,86 @@ export async function PUT(
       updateData.customer_notes = body.customer_notes;
     if (body.expiration_date !== undefined)
       updateData.expiration_date = body.expiration_date;
+    // Prescription and frame product
+    if (body.prescription_id !== undefined)
+      updateData.prescription_id = body.prescription_id;
+    if (body.frame_product_id !== undefined)
+      updateData.frame_product_id = body.frame_product_id;
+    if (body.customer_own_frame !== undefined)
+      updateData.customer_own_frame = body.customer_own_frame;
+    // Lens family
+    if (body.lens_family_id !== undefined)
+      updateData.lens_family_id = body.lens_family_id;
+    // Presbyopia solution fields
+    if (body.presbyopia_solution !== undefined)
+      updateData.presbyopia_solution = body.presbyopia_solution;
+    if (body.far_lens_family_id !== undefined)
+      updateData.far_lens_family_id = body.far_lens_family_id;
+    if (body.near_lens_family_id !== undefined)
+      updateData.near_lens_family_id = body.near_lens_family_id;
+    if (body.far_lens_cost !== undefined)
+      updateData.far_lens_cost = body.far_lens_cost;
+    if (body.near_lens_cost !== undefined)
+      updateData.near_lens_cost = body.near_lens_cost;
+    // Near frame fields
+    if (body.near_frame_product_id !== undefined)
+      updateData.near_frame_product_id = body.near_frame_product_id;
+    if (body.near_frame_name !== undefined)
+      updateData.near_frame_name = body.near_frame_name;
+    if (body.near_frame_brand !== undefined)
+      updateData.near_frame_brand = body.near_frame_brand;
+    if (body.near_frame_model !== undefined)
+      updateData.near_frame_model = body.near_frame_model;
+    if (body.near_frame_color !== undefined)
+      updateData.near_frame_color = body.near_frame_color;
+    if (body.near_frame_size !== undefined)
+      updateData.near_frame_size = body.near_frame_size;
+    if (body.near_frame_sku !== undefined)
+      updateData.near_frame_sku = body.near_frame_sku;
+    if (body.near_frame_price !== undefined)
+      updateData.near_frame_price = body.near_frame_price;
+    if (body.near_frame_price_includes_tax !== undefined)
+      updateData.near_frame_price_includes_tax =
+        body.near_frame_price_includes_tax;
+    if (body.near_frame_cost !== undefined)
+      updateData.near_frame_cost = body.near_frame_cost;
+    if (body.customer_own_near_frame !== undefined)
+      updateData.customer_own_near_frame = body.customer_own_near_frame;
+    // Contact lens fields
+    if (body.contact_lens_family_id !== undefined)
+      updateData.contact_lens_family_id = body.contact_lens_family_id;
+    if (body.contact_lens_rx_sphere_od !== undefined)
+      updateData.contact_lens_rx_sphere_od = body.contact_lens_rx_sphere_od;
+    if (body.contact_lens_rx_cylinder_od !== undefined)
+      updateData.contact_lens_rx_cylinder_od = body.contact_lens_rx_cylinder_od;
+    if (body.contact_lens_rx_axis_od !== undefined)
+      updateData.contact_lens_rx_axis_od = body.contact_lens_rx_axis_od;
+    if (body.contact_lens_rx_add_od !== undefined)
+      updateData.contact_lens_rx_add_od = body.contact_lens_rx_add_od;
+    if (body.contact_lens_rx_base_curve_od !== undefined)
+      updateData.contact_lens_rx_base_curve_od =
+        body.contact_lens_rx_base_curve_od;
+    if (body.contact_lens_rx_diameter_od !== undefined)
+      updateData.contact_lens_rx_diameter_od = body.contact_lens_rx_diameter_od;
+    if (body.contact_lens_rx_sphere_os !== undefined)
+      updateData.contact_lens_rx_sphere_os = body.contact_lens_rx_sphere_os;
+    if (body.contact_lens_rx_cylinder_os !== undefined)
+      updateData.contact_lens_rx_cylinder_os = body.contact_lens_rx_cylinder_os;
+    if (body.contact_lens_rx_axis_os !== undefined)
+      updateData.contact_lens_rx_axis_os = body.contact_lens_rx_axis_os;
+    if (body.contact_lens_rx_add_os !== undefined)
+      updateData.contact_lens_rx_add_os = body.contact_lens_rx_add_os;
+    if (body.contact_lens_rx_base_curve_os !== undefined)
+      updateData.contact_lens_rx_base_curve_os =
+        body.contact_lens_rx_base_curve_os;
+    if (body.contact_lens_rx_diameter_os !== undefined)
+      updateData.contact_lens_rx_diameter_os = body.contact_lens_rx_diameter_os;
+    if (body.contact_lens_quantity !== undefined)
+      updateData.contact_lens_quantity = body.contact_lens_quantity;
+    if (body.contact_lens_cost !== undefined)
+      updateData.contact_lens_cost = body.contact_lens_cost;
+    if (body.contact_lens_price !== undefined)
+      updateData.contact_lens_price = body.contact_lens_price;
 
     const { data: updatedQuote, error } = await supabaseServiceRole
       .from("quotes")

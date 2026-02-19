@@ -5,7 +5,7 @@ import { getBranchContext } from "@/lib/api/branch-middleware";
 import { appLogger as logger } from "@/lib/logger";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
 import { withRateLimit, rateLimitConfigs } from "@/lib/api/middleware";
-import { RateLimitError, ValidationError } from "@/lib/api/errors";
+import { APIError, RateLimitError, ValidationError } from "@/lib/api/errors";
 import { processSaleSchema } from "@/lib/api/validation/zod-schemas";
 import {
   parseAndValidateBody,
@@ -17,6 +17,8 @@ import {
 } from "@/lib/api/response";
 import { BillingFactory } from "@/lib/billing/BillingFactory";
 import type { Order as BillingOrder } from "@/lib/billing/adapters/BillingAdapter";
+import { getAvailableQuantity } from "@/lib/inventory/stock-helpers";
+import { DEFAULT_LOW_STOCK_THRESHOLD } from "@/lib/inventory/constants";
 
 export const dynamic = "force-dynamic";
 export async function POST(request: NextRequest) {
@@ -702,6 +704,7 @@ export async function POST(request: NextRequest) {
                 billing_last_name: billingLastName,
                 sii_rut: customer_rut || sii_rut || customer?.rut || null,
                 sii_business_name: sii_business_name || null,
+                customer_id: customer_id || null,
               })
               .select()
               .single();
@@ -860,14 +863,51 @@ export async function POST(request: NextRequest) {
 
           let productsForStockCheck: Array<{
             id: string;
+            name?: string;
             product_type?: string;
           }> = [];
           if (productIdsForStock.length > 0) {
             const { data: products } = await supabaseServiceRole
               .from("products")
-              .select("id, product_type")
+              .select("id, name, product_type")
               .in("id", productIdsForStock);
             productsForStockCheck = products || [];
+          }
+
+          // Validate stock sufficient before reducing (prevent oversell)
+          const branchIdForStock = branchContext.branchId;
+          if (branchIdForStock) {
+            for (const item of items) {
+              if (
+                item.product_id &&
+                !item.product_id.includes("frame-manual") &&
+                !item.product_id.includes("lens-") &&
+                !item.product_id.includes("treatments-") &&
+                !item.product_id.includes("labor-") &&
+                !item.product_id.includes("discount-")
+              ) {
+                const product = productsForStockCheck.find(
+                  (p) => p.id === item.product_id,
+                );
+                if (product?.product_type === "service") continue;
+
+                const availableQty = await getAvailableQuantity(
+                  item.product_id,
+                  branchIdForStock,
+                  supabaseServiceRole,
+                );
+                if (availableQty < item.quantity) {
+                  const productName = product?.name || item.product_id;
+                  return createApiErrorResponse(
+                    new APIError(
+                      `Stock insuficiente para ${productName}. Disponible: ${availableQty}, solicitado: ${item.quantity}`,
+                      400,
+                      "INSUFFICIENT_STOCK",
+                    ),
+                  );
+                }
+              }
+            }
           }
 
           for (const item of items) {
@@ -925,7 +965,7 @@ export async function POST(request: NextRequest) {
                     branch_id: branchId,
                     quantity: 0,
                     reserved_quantity: 0,
-                    low_stock_threshold: 5,
+                    low_stock_threshold: DEFAULT_LOW_STOCK_THRESHOLD,
                   });
 
                 if (createError) {

@@ -13,6 +13,7 @@ import { QueryProvider } from "@/lib/react-query/QueryProvider";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { Toaster } from "@/components/ui/toaster";
 import { TelemetryProvider } from "@/components/providers/telemetry-provider";
+import { createClient } from "@/utils/supabase/server";
 import "./globals.css";
 
 const inter = Inter({
@@ -60,11 +61,18 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  // Obtener usuario en servidor (cookies ya validadas por middleware)
+  // Evita redirect erróneo cuando cliente aún no tiene sesión (nueva pestaña/refresh)
+  const supabase = await createClient();
+  const {
+    data: { user: serverUser },
+  } = await supabase.auth.getUser();
+
   return (
     <html lang="en" suppressHydrationWarning>
       <body
@@ -77,7 +85,7 @@ export default function RootLayout({
         >
           <ErrorBoundary>
             <QueryProvider>
-              <AuthProvider>
+              <AuthProvider initialUser={serverUser ?? undefined}>
                 <TelemetryProvider>
                   <BranchProvider>{children}</BranchProvider>
                   <Toaster />

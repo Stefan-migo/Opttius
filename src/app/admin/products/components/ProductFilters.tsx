@@ -41,7 +41,7 @@ export default function ProductFilters({
   onViewModeChange,
 }: ProductFiltersProps) {
   return (
-    <Card className="border border-admin-border-primary/20 bg-white rounded-none shadow-none">
+    <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)]">
       <CardContent className="p-6">
         <div className="flex flex-col lg:flex-row gap-6">
           {/* Search Input */}

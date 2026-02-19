@@ -275,6 +275,7 @@ export async function GET(
         *,
         order_items (
           id,
+          product_id,
           product_name,
           variant_title,
           quantity,
@@ -326,7 +327,8 @@ export async function GET(
 
     return NextResponse.json({
       success: true,
-      order,
+      data: order,
+      order, // backward compatibility for pages using data.order
     });
   } catch (error) {
     logger.error("Admin order fetch error", error);

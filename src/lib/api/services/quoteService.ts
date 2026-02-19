@@ -287,15 +287,11 @@ export async function sendQuote(id: string, email?: string): Promise<Quote> {
 }
 
 /**
- * Accept a quote
+ * Accept a quote (updates status to 'accepted' via PATCH /status)
  */
 export async function acceptQuote(id: string): Promise<Quote> {
   try {
-    const response = await client.post<Quote>(
-      `/api/admin/quotes/${id}/accept`,
-      {},
-    );
-    return unwrapData(response);
+    return updateQuote(id, { status: "accepted" });
   } catch (error) {
     handleApiError(error, "acceptQuote");
     throw error;
@@ -303,15 +299,14 @@ export async function acceptQuote(id: string): Promise<Quote> {
 }
 
 /**
- * Reject a quote
+ * Reject a quote (updates status to 'rejected' via PUT)
  */
-export async function rejectQuote(id: string, reason?: string): Promise<Quote> {
+export async function rejectQuote(
+  id: string,
+  _reason?: string,
+): Promise<Quote> {
   try {
-    const response = await client.post<Quote>(
-      `/api/admin/quotes/${id}/reject`,
-      { reason },
-    );
-    return unwrapData(response);
+    return updateQuote(id, { status: "rejected" });
   } catch (error) {
     handleApiError(error, "rejectQuote");
     throw error;
@@ -338,6 +333,7 @@ export async function convertQuoteToOrder(
 
 /**
  * Add an item to a quote
+ * @deprecated The quote model is flat (no quote_items table). Use updateQuote to modify quote fields. Endpoint /quotes/[id]/items does not exist.
  */
 export async function addQuoteItem(
   quoteId: string,
@@ -357,6 +353,7 @@ export async function addQuoteItem(
 
 /**
  * Update a quote item
+ * @deprecated The quote model is flat (no quote_items table). Use updateQuote to modify quote fields. Endpoint /quotes/[id]/items does not exist.
  */
 export async function updateQuoteItem(
   quoteId: string,
@@ -377,6 +374,7 @@ export async function updateQuoteItem(
 
 /**
  * Remove a quote item
+ * @deprecated The quote model is flat (no quote_items table). Use updateQuote to modify quote fields. Endpoint /quotes/[id]/items does not exist.
  */
 export async function removeQuoteItem(
   quoteId: string,

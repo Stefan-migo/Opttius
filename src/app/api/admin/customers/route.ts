@@ -193,21 +193,94 @@ export async function GET(request: NextRequest) {
       requestId,
     });
 
+    // Fetch order aggregates for customers on this page (customer_id or email for legacy)
+    const customerIds = (customers || []).map((c: any) => c.id);
+
+    let orderStatsMap: Record<
+      string,
+      { totalSpent: number; orderCount: number; lastOrderDate: string | null }
+    > = {};
+
+    if (customerIds.length > 0) {
+      const { createServiceRoleClient } = await import(
+        "@/utils/supabase/server"
+      );
+      const serviceSupabase = createServiceRoleClient();
+
+      // Get all orders for these customers: by customer_id OR by email (legacy, no customer_id)
+      const { data: ordersById } = await serviceSupabase
+        .from("orders")
+        .select("id, customer_id, email, total_amount, created_at")
+        .in("customer_id", customerIds);
+
+      const customerEmailsList = [
+        ...new Set((customers || []).map((c: any) => c.email).filter(Boolean)),
+      ];
+      const { data: ordersByEmail } =
+        customerEmailsList.length > 0
+          ? await serviceSupabase
+              .from("orders")
+              .select("id, customer_id, email, total_amount, created_at")
+              .is("customer_id", null)
+              .in("email", customerEmailsList)
+          : { data: [] };
+
+      for (const c of customers || []) {
+        const byId = (ordersById || []).filter(
+          (o: any) => o.customer_id === c.id,
+        );
+        const byEmail = (ordersByEmail || []).filter(
+          (o: any) =>
+            o.email && o.email.toLowerCase() === (c.email || "").toLowerCase(),
+        );
+        const allOrders = [...byId, ...byEmail];
+
+        const totalSpent = allOrders.reduce(
+          (s: number, o: any) => s + (o.total_amount || 0),
+          0,
+        );
+        const orderCount = allOrders.length;
+        const lastOrder =
+          allOrders.length > 0
+            ? [...allOrders].sort(
+                (a: any, b: any) =>
+                  new Date(b.created_at).getTime() -
+                  new Date(a.created_at).getTime(),
+              )[0]
+            : null;
+
+        orderStatsMap[c.id] = {
+          totalSpent,
+          orderCount,
+          lastOrderDate: lastOrder?.created_at || null,
+        };
+      }
+    }
+
     // Calculate customer analytics
-    const customerStats = customers?.map((customer: any) => {
-      // Basic segment classification based on order count
-      const segment = "new";
-      // Segment will be calculated based on orders in the detail endpoint
+    const customerStats = (customers || []).map((customer: any) => {
+      const stats = orderStatsMap[customer.id] || {
+        totalSpent: 0,
+        orderCount: 0,
+        lastOrderDate: null,
+      };
+      const { totalSpent, orderCount, lastOrderDate } = stats;
+      const avgOrderValue = orderCount > 0 ? totalSpent / orderCount : 0;
+
+      let segment = "new";
+      if (orderCount > 10) segment = "vip";
+      else if (orderCount > 3) segment = "regular";
+      else if (orderCount > 0) segment = "first-time";
 
       return {
         ...customer,
         analytics: {
-          totalSpent: 0, // TODO: Calculate from orders
-          orderCount: 0, // TODO: Calculate from orders
-          lastOrderDate: null, // TODO: Get from orders
-          avgOrderValue: 0, // TODO: Calculate from orders
+          totalSpent,
+          orderCount,
+          lastOrderDate,
+          avgOrderValue,
           segment,
-          lifetimeValue: 0, // TODO: Calculate from orders
+          lifetimeValue: totalSpent,
         },
       };
     });

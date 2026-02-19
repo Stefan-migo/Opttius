@@ -6,11 +6,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Package, Tag, Eye, Plus } from "lucide-react";
 import { useBranch } from "@/hooks/useBranch";
-import { BranchSelector } from "@/components/admin/BranchSelector";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import ProductListingSection from "./sections/ProductListingSection";
 import CategoriesManagementSection from "./sections/CategoriesManagementSection";
+import QuickActions from "./components/QuickActions";
+import { useProductStats } from "./hooks/useProductStats";
 import LensFamiliesList from "@/components/admin/lenses/LensFamiliesList";
 import ContactLensFamiliesList from "@/components/admin/lenses/ContactLensFamiliesList";
 
@@ -42,6 +43,12 @@ export default function ProductsPage() {
       setActiveTab(tabParam as (typeof VALID_TABS)[number]);
     }
   }, [tabParam]);
+
+  const { stats } = useProductStats({
+    currentBranchId,
+    isGlobalView,
+    isSuperAdmin,
+  });
 
   return (
     <div className="space-y-8 animate-in fade-in duration-700">
@@ -86,25 +93,22 @@ export default function ProductsPage() {
         </div>
       </div>
 
-      {/* Branch Selector */}
-      {(isSuperAdmin || (branches && branches.length > 1)) && (
-        <Card className="border border-admin-border-primary/20 bg-admin-border-primary/5 rounded-none shadow-none">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-[10px] font-display font-bold text-admin-text-primary tracking-widest uppercase mb-1">
-                  Sucursal de Operación
-                </p>
-                <p className="text-[10px] font-serif italic text-admin-text-tertiary uppercase tracking-wider">
-                  {isSuperAdmin
-                    ? "Determine el centro de gestión para la consulta de existencias"
-                    : "Seleccione la sucursal para la administración de inventario"}
-                </p>
-              </div>
-              <BranchSelector />
-            </div>
-          </CardContent>
-        </Card>
+      {/* Quick Actions - Comandos de Administración (solo en tab productos) */}
+      {activeTab === "products" && (
+        <QuickActions
+          onShowLowStock={() =>
+            router.replace("/admin/products?filter=low_stock", {
+              scroll: false,
+            })
+          }
+          onShowCategories={() =>
+            router.replace("/admin/products?tab=categories", {
+              scroll: false,
+            })
+          }
+          hasLowStock={stats.lowStockCount > 0}
+          lowStockCount={stats.lowStockCount}
+        />
       )}
 
       {/* Warning if no branch selected */}

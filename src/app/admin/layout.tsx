@@ -238,6 +238,10 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   // Add ref to prevent multiple redirects
   const redirectInProgress = useRef(false);
 
+  // Ref para leer user actual en setTimeout (evita closure obsoleta cuando INITIAL_SESSION llega tarde)
+  const latestUserRef = useRef(user);
+  latestUserRef.current = user;
+
   // When user is signing out, skip any redirect to onboarding (avoids race with check-status response)
   const signOutInProgress = useRef(false);
 
@@ -679,12 +683,6 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
     // Only redirect after both auth and admin checks are COMPLETELY finished
     if (!loading && adminState.hasChecked && !adminState.isChecking) {
-      console.log("✅ All checks complete, evaluating redirect:", {
-        user: !!user,
-        userEmail: user?.email,
-        isAdmin: adminState.isAdmin,
-      });
-
       // If user is admin, just mark as done and return early
       if (user && user.email && adminState.isAdmin) {
         console.log("✅ User is admin, allowing access");
@@ -702,7 +700,10 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             isAdmin: adminState.isAdmin,
           });
 
-          if (!user || !user.email) {
+          // Usar ref para leer user ACTUAL (evita redirect si INITIAL_SESSION llegó durante el delay)
+          const currentUser = latestUserRef.current;
+
+          if (!currentUser || !currentUser.email) {
             // Si el usuario acaba de cerrar sesión, ya estamos yendo a "/"; no redirigir a login
             if (signOutInProgress.current) return;
             console.log("❌ No user, redirecting to login");
@@ -718,7 +719,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           }
 
           console.log("✅ User is admin, allowing access");
-        }, 500); // 500ms delay to let auth stabilize
+        }, 800); // 800ms delay to let auth stabilize (INITIAL_SESSION puede llegar tarde en nueva pestaña)
       };
 
       if (!user || !user.email || !adminState.isAdmin) {
@@ -1199,14 +1200,12 @@ function AdminSidebar({
           </Button>
         </div>
 
-        {/* Opttius Branding */}
+        {/* Opttius Branding - cream text for contrast on dark sidebar (Epoch) */}
         <div className="text-center pt-2">
-          <p className="text-[10px] text-admin-text-tertiary font-medium">
+          <p className="text-[10px] text-[#F9F7F2] font-medium">
             &copy; {new Date().getFullYear()} Opttius
           </p>
-          <p className="text-[9px] text-admin-text-tertiary/60">
-            Derechos Reservados
-          </p>
+          <p className="text-[9px] text-[#F9F7F2]/75">Derechos Reservados</p>
         </div>
       </div>
     </div>

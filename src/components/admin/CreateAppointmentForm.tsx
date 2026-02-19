@@ -36,6 +36,7 @@ import { useBranch } from "@/hooks/useBranch";
 import { getBranchHeader } from "@/lib/utils/branch";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { extractDataFromResponse } from "@/lib/api/response-helpers";
+import { useFormOptions } from "@/hooks/useFormOptions";
 
 interface CreateAppointmentFormProps {
   onSuccess: () => void;
@@ -109,7 +110,19 @@ export default function CreateAppointmentForm({
     order_id: initialData?.order_id || null,
   });
 
-  const appointmentTypes = [
+  const { options: formOptions } = useFormOptions("appointment");
+  const appointmentTypeValues = formOptions.appointment_type || [];
+  const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
+    eye_exam: Eye,
+    consultation: User,
+    fitting: Package,
+    delivery: Truck,
+    repair: Wrench,
+    follow_up: RefreshCw,
+    emergency: AlertCircle,
+    other: CheckCircle,
+  };
+  const defaultAppointmentTypes = [
     { value: "eye_exam", label: "Examen de la Vista", icon: Eye },
     { value: "consultation", label: "Consulta", icon: User },
     { value: "fitting", label: "Ajuste de Lentes", icon: Package },
@@ -119,6 +132,14 @@ export default function CreateAppointmentForm({
     { value: "emergency", label: "Emergencia", icon: AlertCircle },
     { value: "other", label: "Otro", icon: CheckCircle },
   ];
+  const appointmentTypes =
+    appointmentTypeValues.length > 0
+      ? appointmentTypeValues.map((opt) => ({
+          value: opt.value,
+          label: opt.label,
+          icon: iconMap[opt.value] || CheckCircle,
+        }))
+      : defaultAppointmentTypes;
 
   // Load schedule settings
   useEffect(() => {

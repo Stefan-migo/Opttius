@@ -97,6 +97,7 @@ import {
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { POSCart, POSRefundDialog, POSBarcodeInput } from "./components";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -211,6 +212,9 @@ export default function POSPage() {
   const [processingPendingPayment, setProcessingPendingPayment] =
     useState(false);
   const [pendingBalanceSearchTerm, setPendingBalanceSearchTerm] = useState("");
+  const [showRefundDialog, setShowRefundDialog] = useState(false);
+  const [refundOrderId, setRefundOrderId] = useState<string | null>(null);
+  const [refundOrderNumber, setRefundOrderNumber] = useState<string>("");
   const [fiscalReference, setFiscalReference] = useState<string>("");
   const [pendingFiscalReference, setPendingFiscalReference] =
     useState<string>("");
@@ -377,25 +381,54 @@ export default function POSPage() {
   const printRef = useRef<HTMLDivElement>(null);
   const printReceipt = (retryCount = 0) => {
     const el = printRef.current;
+    // #region agent log
+    const log = (msg: string, data: Record<string, unknown>) => {
+      fetch(
+        "http://127.0.0.1:7244/ingest/31142538-c0fe-4e58-9e94-5a9176bfd36e",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            location: "pos/page.tsx:printReceipt",
+            message: msg,
+            data,
+            timestamp: Date.now(),
+          }),
+        },
+      ).catch(() => {});
+    };
+    // #endregion
     if (!lastProcessedOrder) {
+      log("printReceipt: no order, using window.print fallback", {
+        hypothesisId: "h2",
+      });
       window.print();
       return;
     }
     if (!el || !el.innerHTML?.trim()) {
-      // Portal may not have rendered yet - retry once after 200ms
       if (retryCount < 1) {
         setTimeout(() => printReceipt(retryCount + 1), 200);
         return;
       }
+      log("printReceipt: no el/innerHTML, fallback", { hypothesisId: "h2" });
       window.print();
       return;
     }
     const html = el.innerHTML;
+    const htmlLen = html.length;
     const w = window.open("", "_blank");
     if (!w) {
+      log("printReceipt: popup blocked, using window.print fallback", {
+        hypothesisId: "h2",
+        receiptHtmlLen: htmlLen,
+      });
       window.print();
       return;
     }
+    log("printReceipt: using popup path", {
+      hypothesisId: "h1",
+      receiptHtmlLen: htmlLen,
+    });
     w.document.write(`<!DOCTYPE html>
       <html>
         <head>
@@ -415,11 +448,60 @@ export default function POSPage() {
       </html>`);
     w.document.close();
     w.onload = () => {
+      const doc = w.document;
+      const body = doc.body;
+      const htmlEl = doc.documentElement;
+      const bodyH = body?.scrollHeight ?? 0;
+      const bodyOH = body?.offsetHeight ?? 0;
+      const htmlH = htmlEl?.scrollHeight ?? 0;
+      log("printReceipt: popup onload dimensions", {
+        hypothesisId: "h1",
+        bodyScrollHeight: bodyH,
+        bodyOffsetHeight: bodyOH,
+        htmlScrollHeight: htmlH,
+        bodyChildCount: body?.childNodes?.length ?? 0,
+      });
       w.focus();
       w.print();
       w.close();
     };
   };
+
+  // #region agent log
+  useEffect(() => {
+    const log = (msg: string, data: Record<string, unknown>) => {
+      fetch(
+        "http://127.0.0.1:7244/ingest/31142538-c0fe-4e58-9e94-5a9176bfd36e",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            location: "pos/page.tsx:beforeprint",
+            message: msg,
+            data,
+            timestamp: Date.now(),
+          }),
+        },
+      ).catch(() => {});
+    };
+    const onBeforePrint = () => {
+      const body = document.body;
+      const portal = document.getElementById("print-receipt-portal");
+      const receipt = document.getElementById("pos-receipt-print");
+      log("beforeprint: main doc dimensions (fallback path)", {
+        hypothesisId: "h2",
+        bodyScrollHeight: body?.scrollHeight ?? 0,
+        bodyOffsetHeight: body?.offsetHeight ?? 0,
+        docElScrollHeight: document.documentElement?.scrollHeight ?? 0,
+        portalScrollHeight: portal?.scrollHeight ?? 0,
+        receiptScrollHeight: receipt?.scrollHeight ?? 0,
+        bodyChildCount: body?.children?.length ?? 0,
+      });
+    };
+    window.addEventListener("beforeprint", onBeforePrint);
+    return () => window.removeEventListener("beforeprint", onBeforePrint);
+  }, []);
+  // #endregion
 
   // Tab activo del formulario "Crear orden completa" (para abrir Lentes al cargar presupuesto de lentes de contacto)
   const [orderFormTab, setOrderFormTab] = useState("customer");
@@ -949,6 +1031,31 @@ export default function POSPage() {
       }
     }
   }, [selectedProductIndex]);
+
+  const handleBarcodeScan = async (barcode: string) => {
+    if (!barcode.trim()) return;
+    setSearching(true);
+    try {
+      const results = await productService.searchProducts(barcode);
+      const filtered = (results as unknown as any[]).filter(
+        (p: any) =>
+          p.category?.name?.toLowerCase() !== "marcos" &&
+          p.category?.name?.toLowerCase() !== "marco",
+      );
+      if (filtered.length > 0) {
+        addToCart(filtered[0] as Product);
+        setSearchTerm("");
+        toast.success(`Agregado: ${(filtered[0] as any).name}`);
+      } else {
+        toast.error("No se encontró producto con ese código");
+      }
+    } catch (err) {
+      toast.error("Error al buscar producto");
+    } finally {
+      setSearching(false);
+      searchInputRef.current?.focus();
+    }
+  };
 
   const addToCart = (product: Product) => {
     // Debug: Log product being added
@@ -2314,6 +2421,44 @@ export default function POSPage() {
         setSelectedCustomer(data.customer || null);
       }
 
+      // Populate order form and presbyopia state with quote data
+      if (data.originalQuote) {
+        const oq = data.originalQuote;
+        const solution = oq.presbyopia_solution || "none";
+        setPresbyopiaSolution(solution);
+        setOrderFormData((prev) => ({
+          ...prev,
+          presbyopia_solution: solution,
+          far_lens_family_id: oq.far_lens_family_id || prev.far_lens_family_id,
+          near_lens_family_id:
+            oq.near_lens_family_id || prev.near_lens_family_id,
+          far_lens_cost: oq.far_lens_cost ?? prev.far_lens_cost,
+          near_lens_cost: oq.near_lens_cost ?? prev.near_lens_cost,
+          near_frame_product_id:
+            oq.near_frame_product_id || prev.near_frame_product_id,
+          near_frame_name: oq.near_frame_name || prev.near_frame_name,
+          near_frame_brand: oq.near_frame_brand || prev.near_frame_brand,
+          near_frame_model: oq.near_frame_model || prev.near_frame_model,
+          near_frame_color: oq.near_frame_color || prev.near_frame_color,
+          near_frame_size: oq.near_frame_size || prev.near_frame_size,
+          near_frame_sku: oq.near_frame_sku || prev.near_frame_sku,
+          near_frame_price: oq.near_frame_price ?? prev.near_frame_price,
+          near_frame_cost: oq.near_frame_cost ?? prev.near_frame_cost,
+          customer_own_near_frame:
+            oq.customer_own_near_frame ?? prev.customer_own_near_frame,
+          frame_cost: oq.frame_cost ?? prev.frame_cost,
+          lens_cost: oq.lens_cost ?? prev.lens_cost,
+          treatments_cost: oq.treatments_cost ?? prev.treatments_cost,
+          labor_cost: oq.labor_cost ?? prev.labor_cost,
+          contact_lens_family_id:
+            oq.contact_lens_family_id || prev.contact_lens_family_id,
+          contact_lens_quantity:
+            oq.contact_lens_quantity ?? prev.contact_lens_quantity,
+          contact_lens_cost: oq.contact_lens_cost ?? prev.contact_lens_cost,
+          contact_lens_price: oq.contact_lens_price ?? prev.contact_lens_price,
+        }));
+      }
+
       // Clear current cart
       setCart([]);
 
@@ -2783,6 +2928,11 @@ export default function POSPage() {
         orderData as unknown as import("@/lib/api/services").ProcessSaleRequest,
         currentBranchId || undefined,
       );
+
+      // API returns null on error (e.g. stock insuficiente) - handleApiError already showed toast
+      if (!result) {
+        return;
+      }
 
       // Support both work_order and order for backward compatibility
       const orderNumber =
@@ -3281,18 +3431,27 @@ export default function POSPage() {
               </CardHeader>
               <CardContent className="space-y-3">
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
-                  <Input
-                    ref={searchInputRef}
-                    placeholder="Buscar productos (nombre, SKU, código de barras)..."
+                  <POSBarcodeInput
                     value={searchTerm}
-                    onChange={(e) => {
-                      setSearchTerm(e.target.value);
+                    onChange={(v) => {
+                      setSearchTerm(v);
                       setSelectedProductIndex(-1);
                     }}
+                    onScan={handleBarcodeScan}
+                    onSearch={() => {
+                      if (
+                        selectedProductIndex >= 0 &&
+                        products[selectedProductIndex]
+                      ) {
+                        addToCart(products[selectedProductIndex]);
+                      } else if (products.length > 0) {
+                        addToCart(products[0]);
+                      }
+                    }}
                     onKeyDown={handleSearchKeyPress}
-                    className="pl-10 h-12 text-base"
-                    autoComplete="off"
+                    inputRef={searchInputRef}
+                    placeholder="Escanear código o buscar (nombre, SKU)..."
+                    className="h-12 text-base"
                   />
                   {searching && (
                     <Loader2 className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 animate-spin text-gray-400" />
@@ -5273,110 +5432,19 @@ export default function POSPage() {
         <div className="w-1/3 flex flex-col bg-white border-l overflow-hidden">
           {/* Scrollable Content - Cart, Summary & Payment */}
           <div className="flex-1 overflow-y-auto bg-[var(--admin-bg-primary)]">
-            {/* Cart */}
+            {/* Cart - extracted component */}
             <div className="p-4 border-b">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-semibold">Carrito de Venta</h2>
-                <Badge variant="secondary">{cart.length} productos</Badge>
-              </div>
-
-              {cart.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-12 text-gray-400">
-                  <ShoppingCart className="h-24 w-24 mb-4" />
-                  <p className="text-lg">El carrito está vacío</p>
-                  <p className="text-sm">Busca productos para agregar</p>
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  {cart.map((item) => (
-                    <Card key={item.product.id} className="p-3">
-                      <div className="flex items-center justify-between gap-2">
-                        <div className="flex-1 min-w-0">
-                          <div className="font-semibold text-sm break-words">
-                            {item.product.name}
-                          </div>
-                          <div className="text-xs text-gray-600 mt-1">
-                            {formatCurrency(item.unitPrice)} c/u
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2 flex-shrink-0">
-                          <div className="flex items-center gap-1 border rounded-lg">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() =>
-                                updateCartQuantity(
-                                  item.product.id,
-                                  item.quantity - 1,
-                                )
-                              }
-                              className="h-7 w-7 p-0"
-                            >
-                              <Minus className="h-3 w-3" />
-                            </Button>
-                            <span className="w-10 text-center font-semibold text-sm">
-                              {item.quantity}
-                            </span>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() =>
-                                updateCartQuantity(
-                                  item.product.id,
-                                  item.quantity + 1,
-                                )
-                              }
-                              className="h-7 w-7 p-0"
-                              disabled={
-                                item.quantity >= item.product.inventory_quantity
-                              }
-                            >
-                              <Plus className="h-3 w-3" />
-                            </Button>
-                          </div>
-                          <div className="text-sm font-bold w-24 text-right">
-                            {formatCurrency(item.subtotal)}
-                          </div>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => removeFromCart(item.product.id)}
-                            className="text-red-600 hover:text-red-700 h-7 w-7 p-0"
-                          >
-                            <Trash2 className="h-3 w-3" />
-                          </Button>
-                        </div>
-                      </div>
-                    </Card>
-                  ))}
-                </div>
-              )}
+              <POSCart
+                items={cart}
+                subtotal={subtotal}
+                taxAmount={taxAmount}
+                total={total}
+                onUpdateQuantity={updateCartQuantity}
+                onRemove={removeFromCart}
+              />
             </div>
 
-            {/* Payment Summary */}
-            <Card className="mx-4 mb-4 flex-shrink-0 bg-[var(--admin-bg-tertiary)]">
-              <CardHeader>
-                <CardTitle className="text-lg">Resumen</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span>Subtotal:</span>
-                  <span>{formatCurrency(subtotal)}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span>IVA (19%):</span>
-                  <span>{formatCurrency(taxAmount)}</span>
-                </div>
-                <div className="border-t pt-2 flex justify-between text-lg font-bold">
-                  <span>Total:</span>
-                  <span className="text-green-600">
-                    {formatCurrency(total)}
-                  </span>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Payment Method */}
+            {/* Payment Method - totals shown in POSCart */}
             <Card className="mx-4 mb-4 flex-shrink-0 bg-[var(--admin-bg-tertiary)]">
               <CardHeader>
                 <CardTitle className="text-lg">Método de Pago</CardTitle>
@@ -5911,25 +5979,41 @@ export default function POSPage() {
                             {formatCurrency(order.pending_amount)}
                           </TableCell>
                           <TableCell>
-                            <Button
-                              size="sm"
-                              variant={
-                                selectedPendingOrder?.id === order.id
-                                  ? "default"
-                                  : "outline"
-                              }
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setSelectedPendingOrder(order);
-                                setPendingPaymentAmount(
-                                  order.pending_amount.toString(),
-                                );
-                              }}
-                            >
-                              {selectedPendingOrder?.id === order.id
-                                ? "Seleccionado"
-                                : "Seleccionar"}
-                            </Button>
+                            <div className="flex items-center gap-2">
+                              <Button
+                                size="sm"
+                                variant={
+                                  selectedPendingOrder?.id === order.id
+                                    ? "default"
+                                    : "outline"
+                                }
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setSelectedPendingOrder(order);
+                                  setPendingPaymentAmount(
+                                    order.pending_amount.toString(),
+                                  );
+                                }}
+                              >
+                                {selectedPendingOrder?.id === order.id
+                                  ? "Seleccionado"
+                                  : "Seleccionar"}
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setRefundOrderId(order.id);
+                                  setRefundOrderNumber(
+                                    order.order_number || "",
+                                  );
+                                  setShowRefundDialog(true);
+                                }}
+                              >
+                                Devolución
+                              </Button>
+                            </div>
                           </TableCell>
                         </TableRow>
                       ))}
@@ -6079,6 +6163,22 @@ export default function POSPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Refund Dialog */}
+      <POSRefundDialog
+        open={showRefundDialog}
+        onOpenChange={(open) => {
+          setShowRefundDialog(open);
+          if (!open) {
+            setRefundOrderId(null);
+            setRefundOrderNumber("");
+          }
+        }}
+        orderId={refundOrderId || ""}
+        orderNumber={refundOrderNumber}
+        branchId={currentBranchId}
+        onSuccess={fetchPendingBalanceOrders}
+      />
 
       {/* Receipt for printing - rendered in portal as direct body child so @media print only shows it */}
       {typeof document !== "undefined" &&

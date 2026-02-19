@@ -13,7 +13,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Package, Eye, Edit, Trash2, AlertTriangle } from "lucide-react";
+import {
+  Package,
+  Eye,
+  Edit,
+  Trash2,
+  AlertTriangle,
+  RefreshCw,
+} from "lucide-react";
 import { Product } from "../hooks/useProducts";
 
 interface ProductTableProps {
@@ -24,6 +31,8 @@ interface ProductTableProps {
   onDelete: (product: Product) => void;
   formatPrice: (amount: number) => string;
   getStatusBadge: (status: string) => React.ReactNode;
+  onRefresh?: () => void;
+  isRefreshing?: boolean;
 }
 
 function ProductTableComponent({
@@ -34,13 +43,15 @@ function ProductTableComponent({
   onDelete,
   formatPrice,
   getStatusBadge,
+  onRefresh,
+  isRefreshing,
 }: ProductTableProps) {
   const allSelected =
     products.length > 0 && selectedProducts.length === products.length;
 
   if (products.length === 0) {
     return (
-      <Card className="border border-admin-border-primary/20 bg-admin-bg-tertiary/30 rounded-none shadow-none">
+      <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)]">
         <CardContent className="p-24 text-center">
           <Package className="h-12 w-12 text-admin-text-tertiary mx-auto mb-4 opacity-20" />
           <h3 className="text-sm font-display font-bold text-admin-text-primary uppercase tracking-widest">
@@ -56,7 +67,7 @@ function ProductTableComponent({
   }
 
   return (
-    <Card className="border border-admin-border-primary/20 bg-white rounded-none shadow-none overflow-hidden">
+    <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)] overflow-hidden">
       <CardHeader className="bg-admin-bg-tertiary/50 border-b border-admin-border-primary/10 py-6">
         <CardTitle className="flex items-center justify-between">
           <div className="flex flex-col gap-1">
@@ -67,16 +78,32 @@ function ProductTableComponent({
               Consulta de Fichas Técnicas Activas
             </p>
           </div>
-          <div className="flex items-center space-x-3 bg-white px-4 py-2 border border-admin-border-primary/10">
-            <input
-              type="checkbox"
-              checked={allSelected}
-              onChange={onSelectAll}
-              className="w-4 h-4 rounded-none border-admin-border-primary/20 accent-epoch-primary cursor-pointer"
-            />
-            <span className="text-[10px] font-display font-bold text-admin-text-tertiary uppercase tracking-widest">
-              Seleccionar Todos
-            </span>
+          <div className="flex items-center gap-3">
+            <div className="flex items-center space-x-3 bg-white px-4 py-2 border border-admin-border-primary/10">
+              <input
+                type="checkbox"
+                checked={allSelected}
+                onChange={onSelectAll}
+                className="w-4 h-4 rounded-none border-admin-border-primary/20 accent-epoch-primary cursor-pointer"
+              />
+              <span className="text-[10px] font-display font-bold text-admin-text-tertiary uppercase tracking-widest">
+                Seleccionar Todos
+              </span>
+            </div>
+            {onRefresh && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={onRefresh}
+                disabled={isRefreshing}
+                className="h-9 px-4 rounded-none border-admin-border-primary/10 font-display font-bold text-[10px] tracking-widest uppercase"
+              >
+                <RefreshCw
+                  className={`h-4 w-4 mr-2 ${isRefreshing ? "animate-spin" : ""}`}
+                />
+                Actualizar
+              </Button>
+            )}
           </div>
         </CardTitle>
       </CardHeader>

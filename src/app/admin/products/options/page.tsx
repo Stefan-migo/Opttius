@@ -82,7 +82,7 @@ export default function ProductOptionsPage() {
     try {
       setLoading(true);
       const response = await fetch(
-        "/api/admin/product-options?include_inactive=true",
+        "/api/admin/product-options?form_type=product&include_inactive=true",
       );
       const data = await response.json();
       if (response.ok) {

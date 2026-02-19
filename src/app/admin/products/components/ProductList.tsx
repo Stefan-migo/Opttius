@@ -14,6 +14,8 @@ interface ProductListProps {
   onDelete: (product: Product) => void;
   formatPrice: (amount: number) => string;
   getStatusBadge: (status: string) => React.ReactNode;
+  onRefresh?: () => void;
+  isRefreshing?: boolean;
 }
 
 function ProductListComponent({
@@ -25,6 +27,8 @@ function ProductListComponent({
   onDelete,
   formatPrice,
   getStatusBadge,
+  onRefresh,
+  isRefreshing,
 }: ProductListProps) {
   if (viewMode === "grid") {
     return (
@@ -35,6 +39,8 @@ function ProductListComponent({
         onDelete={onDelete}
         formatPrice={formatPrice}
         getStatusBadge={getStatusBadge}
+        onRefresh={onRefresh}
+        isRefreshing={isRefreshing}
       />
     );
   }
@@ -48,6 +54,8 @@ function ProductListComponent({
       onDelete={onDelete}
       formatPrice={formatPrice}
       getStatusBadge={getStatusBadge}
+      onRefresh={onRefresh}
+      isRefreshing={isRefreshing}
     />
   );
 }

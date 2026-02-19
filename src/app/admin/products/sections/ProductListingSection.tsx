@@ -1,6 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { useSearchParams } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
 import { useProducts } from "../hooks/useProducts";
@@ -11,8 +13,6 @@ import ProductStats from "../components/ProductStats";
 import ProductFilters from "../components/ProductFilters";
 import ProductList from "../components/ProductList";
 import ProductPagination from "../components/ProductPagination";
-import QuickActions from "../components/QuickActions";
-import ProductActions from "../components/ProductActions";
 import { formatCurrency, cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Edit, Trash2, AlertTriangle, RefreshCw, Package } from "lucide-react";
@@ -50,6 +50,8 @@ export default function ProductListingSection({
   isGlobalView,
   branches,
 }: ProductListingSectionProps) {
+  const queryClient = useQueryClient();
+
   // View state
   const [viewMode, setViewMode] = useState<"grid" | "table">("grid");
   const [currentPage, setCurrentPage] = useState(1);
@@ -134,15 +136,24 @@ export default function ProductListingSection({
   const [processing, setProcessing] = useState(false);
   const [forceDelete, setForceDelete] = useState(false);
 
-  // Import/Export states
-  const [showJsonImportDialog, setShowJsonImportDialog] = useState(false);
-  const [jsonImportResults, setJsonImportResults] = useState<any>(null);
-  const [jsonImportMode, setJsonImportMode] = useState("create");
-
   // Single product delete
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [productToDelete, setProductToDelete] = useState<any>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
+
+  // URL state: apply filter=low_stock when coming from QuickActions (run once on mount)
+  const searchParams = useSearchParams();
+  const hasAppliedLowStockFilter = useRef(false);
+  useEffect(() => {
+    if (
+      searchParams.get("filter") === "low_stock" &&
+      !hasAppliedLowStockFilter.current
+    ) {
+      hasAppliedLowStockFilter.current = true;
+      updateFilter("showLowStockOnly", true);
+      setCurrentPage(1);
+    }
+  }, [searchParams.get("filter"), updateFilter]);
 
   // Reset page when filters change (including search)
   useEffect(() => {
@@ -224,69 +235,6 @@ export default function ProductListingSection({
           ? error.message
           : "Error al realizar la operación masiva";
       toast.error(errorMessage);
-    } finally {
-      setProcessing(false);
-    }
-  };
-
-  // Import/Export functions
-  const handleJsonExport = async () => {
-    try {
-      const params = new URLSearchParams({
-        format: "json",
-        ...(filters.categoryFilter !== "all" && {
-          category_id: filters.categoryFilter,
-        }),
-        ...(filters.statusFilter !== "all" && { status: filters.statusFilter }),
-      });
-
-      const response = await fetch(`/api/admin/products/bulk?${params}`);
-      if (!response.ok) {
-        throw new Error("Failed to export products");
-      }
-
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `productos-${new Date().toISOString().split("T")[0]}.json`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-
-      toast.success("Productos exportados exitosamente");
-    } catch (error) {
-      console.error("Error exporting products:", error);
-      toast.error("Error al exportar productos");
-    }
-  };
-
-  const handleJsonImport = async (file: File) => {
-    if (!file) return;
-
-    try {
-      setProcessing(true);
-
-      const text = await file.text();
-      const products = JSON.parse(text);
-
-      const result = await productService.importProductsJson(products, {
-        updateExisting: jsonImportMode === "update",
-      });
-
-      setJsonImportResults(result);
-
-      let message = `Importación JSON completada: `;
-      if (result.imported > 0) message += `${result.imported} creados `;
-      if (result.updated > 0) message += `${result.updated} actualizados `;
-      if (result.errors.length > 0)
-        message += `${result.errors.length} errores `;
-      toast.success(message);
-      refetchProducts();
-    } catch (error) {
-      console.error("Error importing JSON products:", error);
-      toast.error("Error al importar productos JSON");
     } finally {
       setProcessing(false);
     }
@@ -406,7 +354,7 @@ export default function ProductListingSection({
               </p>
               <button
                 onClick={() => refetchProducts()}
-                className="px-4 py-2 bg-azul-profundo text-white rounded hover:bg-azul-profundo/90"
+                className="px-4 py-2 bg-epoch-primary text-white rounded-none hover:bg-epoch-surface transition-all font-display font-bold text-[10px] tracking-widest uppercase"
               >
                 Reintentar
               </button>
@@ -424,6 +372,12 @@ export default function ProductListingSection({
     : currentBranch
       ? `Sucursal: ${currentBranch.name}`
       : "Sucursal seleccionada";
+
+  const handleRefresh = () => {
+    refetchProducts();
+    queryClient.invalidateQueries({ queryKey: ["productStats"] });
+    toast.success("Datos actualizados");
+  };
 
   return (
     <>
@@ -457,7 +411,7 @@ export default function ProductListingSection({
       {selectedProducts.length > 0 && (
         <Card
           data-bulk-panel
-          className="w-full bg-admin-bg-secondary border-2 border-admin-accent-primary shadow-premium-xl rounded-none animate-in slide-in-from-top-4 duration-500 overflow-hidden sticky top-6 z-40"
+          className="w-full bg-admin-bg-tertiary border border-admin-border-primary/20 shadow-premium-xl rounded-none animate-in slide-in-from-top-4 duration-500 overflow-hidden sticky top-6 z-40"
           style={{ position: "relative" }}
         >
           <div className="absolute top-0 left-0 w-1 h-full bg-admin-accent-primary" />
@@ -468,7 +422,7 @@ export default function ProductListingSection({
                   <Edit className="h-5 w-5 text-admin-accent-primary" />
                 </div>
                 <div>
-                  <h3 className="text-[10px] font-display font-black text-admin-accent-primary tracking-[0.2em] uppercase leading-none mb-1">
+                  <h3 className="text-[10px] font-display font-black text-admin-text-primary tracking-[0.2em] uppercase leading-none mb-1">
                     Operaciones de Archivo
                   </h3>
                   <p className="text-[11px] font-serif italic text-admin-text-tertiary">
@@ -490,7 +444,7 @@ export default function ProductListingSection({
                   setForceDelete(false);
                   setSelectedProducts([]);
                 }}
-                className="h-7 w-7 p-0"
+                className="h-7 w-7 p-0 text-admin-text-tertiary hover:text-admin-text-primary"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -508,14 +462,17 @@ export default function ProductListingSection({
 
             {!isDeleteDialog && (
               <div className="mb-4">
-                <Label htmlFor="operation" className="text-xs font-semibold">
+                <Label
+                  htmlFor="operation"
+                  className="text-[10px] font-display font-bold text-admin-text-primary uppercase tracking-widest mb-2 block"
+                >
                   Seleccionar Operación
                 </Label>
                 <Select value={bulkOperation} onValueChange={setBulkOperation}>
-                  <SelectTrigger className="mt-1.5 h-9">
+                  <SelectTrigger className="mt-1.5 h-11 bg-admin-bg-tertiary border-admin-border-primary/10 rounded-none font-display text-[10px] tracking-widest uppercase">
                     <SelectValue placeholder="Seleccionar operación" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="rounded-none border-admin-border-primary/20">
                     <SelectItem value="update_status">
                       Cambiar Estado
                     </SelectItem>
@@ -536,7 +493,7 @@ export default function ProductListingSection({
                     </SelectItem>
                     <SelectItem
                       value="hard_delete"
-                      className="text-red-600 font-medium"
+                      className="text-admin-error font-display font-bold"
                     >
                       ⚠️ Eliminar Permanentemente
                     </SelectItem>
@@ -546,7 +503,7 @@ export default function ProductListingSection({
             )}
 
             {bulkOperation && (
-              <div className="pt-2 border-t border-blue-200 dark:border-blue-800 mb-4">
+              <div className="pt-2 border-t border-admin-border-primary/20 mb-4">
                 {renderBulkOperationForm(
                   bulkOperation,
                   bulkUpdates,
@@ -620,6 +577,8 @@ export default function ProductListingSection({
         onDelete={openDeleteDialog}
         formatPrice={formatPrice}
         getStatusBadge={getStatusBadge}
+        onRefresh={handleRefresh}
+        isRefreshing={productsLoading}
       />
 
       {/* Pagination - Show if there are products or if totalPages > 1 */}
@@ -633,24 +592,6 @@ export default function ProductListingSection({
           onItemsPerPageChange={handleItemsPerPageChange}
         />
       )}
-
-      {/* Quick Actions */}
-      <div className="pt-12 border-t border-admin-border-primary/20">
-        <h3 className="text-xl font-display font-bold text-admin-text-primary uppercase tracking-widest mb-6 px-1">
-          Comandos de Administración
-        </h3>
-        <QuickActions
-          onShowLowStock={() => {
-            updateFilter("showLowStockOnly", true);
-            setCurrentPage(1);
-          }}
-          onJsonExport={handleJsonExport}
-          onJsonImport={() => setShowJsonImportDialog(true)}
-          onShowCategories={() => {}}
-          hasLowStock={stats.lowStockCount > 0}
-          lowStockCount={stats.lowStockCount}
-        />
-      </div>
 
       {/* Single Product Delete Dialog */}
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
@@ -732,7 +673,10 @@ function renderBulkOperationForm(
       return (
         <div className="space-y-2">
           <div>
-            <Label htmlFor="status" className="text-xs">
+            <Label
+              htmlFor="status"
+              className="text-[10px] font-display font-bold text-admin-text-primary uppercase tracking-widest mb-2 block"
+            >
               Nuevo Estado
             </Label>
             <Select
@@ -740,7 +684,7 @@ function renderBulkOperationForm(
                 setBulkUpdates({ ...bulkUpdates, status: value })
               }
             >
-              <SelectTrigger className="h-9 mt-1">
+              <SelectTrigger className="h-11 mt-1 bg-admin-bg-tertiary border-admin-border-primary/10 rounded-none font-display text-[10px] tracking-widest uppercase">
                 <SelectValue placeholder="Seleccionar estado" />
               </SelectTrigger>
               <SelectContent>
@@ -757,7 +701,10 @@ function renderBulkOperationForm(
       return (
         <div className="space-y-2">
           <div>
-            <Label htmlFor="category" className="text-xs">
+            <Label
+              htmlFor="category"
+              className="text-[10px] font-display font-bold text-admin-text-primary uppercase tracking-widest mb-2 block"
+            >
               Nueva Categoría
             </Label>
             <Select
@@ -765,7 +712,7 @@ function renderBulkOperationForm(
                 setBulkUpdates({ ...bulkUpdates, category_id: value })
               }
             >
-              <SelectTrigger className="h-9 mt-1">
+              <SelectTrigger className="h-11 mt-1 bg-admin-bg-tertiary border-admin-border-primary/10 rounded-none font-display text-[10px] tracking-widest uppercase">
                 <SelectValue placeholder="Seleccionar categoría" />
               </SelectTrigger>
               <SelectContent>
@@ -784,7 +731,10 @@ function renderBulkOperationForm(
       return (
         <div className="space-y-2">
           <div>
-            <Label htmlFor="adjustment_type" className="text-xs">
+            <Label
+              htmlFor="adjustment_type"
+              className="text-[10px] font-display font-bold text-admin-text-primary uppercase tracking-widest mb-2 block"
+            >
               Tipo de Ajuste
             </Label>
             <Select
@@ -793,7 +743,7 @@ function renderBulkOperationForm(
                 setBulkUpdates({ ...bulkUpdates, adjustment_type: value })
               }
             >
-              <SelectTrigger className="h-9 mt-1">
+              <SelectTrigger className="h-11 mt-1 bg-admin-bg-tertiary border-admin-border-primary/10 rounded-none font-display text-[10px] tracking-widest uppercase">
                 <SelectValue placeholder="Tipo de ajuste" />
               </SelectTrigger>
               <SelectContent>
@@ -803,14 +753,17 @@ function renderBulkOperationForm(
             </Select>
           </div>
           <div>
-            <Label htmlFor="price_adjustment" className="text-xs">
+            <Label
+              htmlFor="price_adjustment"
+              className="text-[10px] font-display font-bold text-admin-text-primary uppercase tracking-widest mb-2 block"
+            >
               Ajuste{" "}
               {bulkUpdates.adjustment_type === "percentage" ? "(%)" : "($)"}
             </Label>
             <Input
               type="number"
               step="0.01"
-              className="h-9 mt-1"
+              className="h-11 mt-1 bg-admin-bg-tertiary border-admin-border-primary/10 rounded-none font-display text-[10px] tracking-widest"
               placeholder={
                 bulkUpdates.adjustment_type === "percentage"
                   ? "ej: 10 para +10%"
@@ -831,7 +784,10 @@ function renderBulkOperationForm(
       return (
         <div className="space-y-2">
           <div>
-            <Label htmlFor="inventory_adjustment_type" className="text-xs">
+            <Label
+              htmlFor="inventory_adjustment_type"
+              className="text-[10px] font-display font-bold text-admin-text-primary uppercase tracking-widest mb-2 block"
+            >
               Tipo de Ajuste
             </Label>
             <Select
@@ -840,7 +796,7 @@ function renderBulkOperationForm(
                 setBulkUpdates({ ...bulkUpdates, adjustment_type: value })
               }
             >
-              <SelectTrigger className="h-9 mt-1">
+              <SelectTrigger className="h-11 mt-1 bg-admin-bg-tertiary border-admin-border-primary/10 rounded-none font-display text-[10px] tracking-widest uppercase">
                 <SelectValue placeholder="Tipo de ajuste" />
               </SelectTrigger>
               <SelectContent>
@@ -850,14 +806,17 @@ function renderBulkOperationForm(
             </Select>
           </div>
           <div>
-            <Label htmlFor="inventory_adjustment" className="text-xs">
+            <Label
+              htmlFor="inventory_adjustment"
+              className="text-[10px] font-display font-bold text-admin-text-primary uppercase tracking-widest mb-2 block"
+            >
               {bulkUpdates.adjustment_type === "set"
                 ? "Nueva Cantidad"
                 : "Ajuste (+/-)"}
             </Label>
             <Input
               type="number"
-              className="h-9 mt-1"
+              className="h-11 mt-1 bg-admin-bg-tertiary border-admin-border-primary/10 rounded-none font-display text-[10px] tracking-widest"
               placeholder={
                 bulkUpdates.adjustment_type === "set"
                   ? "ej: 50"
@@ -877,13 +836,13 @@ function renderBulkOperationForm(
     case "delete":
       return (
         <div className="space-y-2">
-          <div className="flex items-start space-x-2 p-3 bg-red-50 border border-red-200 rounded-lg">
-            <AlertTriangle className="h-4 w-4 text-red-600 mt-0.5 flex-shrink-0" />
+          <div className="flex items-start space-x-2 p-3 bg-admin-error/5 border border-admin-error/20 rounded-none">
+            <AlertTriangle className="h-4 w-4 text-admin-error mt-0.5 flex-shrink-0" />
             <div>
-              <p className="font-medium text-red-800 text-sm">
+              <p className="font-display font-bold text-admin-error text-sm uppercase tracking-wider">
                 Confirmar eliminación suave
               </p>
-              <p className="text-xs text-red-600 mt-0.5">
+              <p className="text-[11px] font-serif italic text-admin-text-secondary mt-0.5">
                 Los productos seleccionados serán archivados. Esta acción se
                 puede deshacer.
               </p>
@@ -895,22 +854,22 @@ function renderBulkOperationForm(
     case "hard_delete":
       return (
         <div className="space-y-2">
-          <div className="flex items-start space-x-2 p-3 bg-red-100 border border-red-300 rounded-lg">
-            <AlertTriangle className="h-4 w-4 text-red-700 mt-0.5 flex-shrink-0" />
+          <div className="flex items-start space-x-2 p-3 bg-admin-error/10 border border-admin-error/30 rounded-none">
+            <AlertTriangle className="h-4 w-4 text-admin-error mt-0.5 flex-shrink-0" />
             <div>
-              <p className="font-medium text-red-900 text-sm">
+              <p className="font-display font-bold text-admin-error text-sm uppercase tracking-wider">
                 ⚠️ ELIMINACIÓN PERMANENTE
               </p>
-              <p className="text-xs text-red-700 font-medium mt-0.5">
+              <p className="text-[11px] font-serif italic text-admin-text-secondary mt-0.5">
                 Los productos seleccionados serán ELIMINADOS PERMANENTEMENTE.
               </p>
-              <p className="text-xs text-red-600 mt-1">
+              <p className="text-[11px] font-display font-bold text-admin-error mt-1">
                 ⚠️ Esta acción NO se puede deshacer.
               </p>
             </div>
           </div>
-          <div className="p-2.5 bg-yellow-50 border border-yellow-200 rounded-lg">
-            <p className="text-xs text-yellow-800">
+          <div className="p-2.5 bg-admin-warning/10 border border-admin-warning/30 rounded-none">
+            <p className="text-[11px] font-serif italic text-admin-text-secondary">
               <strong>Recomendación:</strong> Considera usar &quot;Eliminación
               suave&quot; (archivar) en su lugar.
             </p>

@@ -8,6 +8,7 @@ import { getBranchContext } from "@/lib/api/branch-middleware";
 import {
   getProductStock,
   updateProductStock,
+  DEFAULT_LOW_STOCK_THRESHOLD,
 } from "@/lib/inventory/stock-helpers";
 
 export const dynamic = "force-dynamic";
@@ -191,7 +192,7 @@ export async function GET(
           {
             quantity: 0,
             reserved_quantity: 0,
-            low_stock_threshold: 5,
+            low_stock_threshold: DEFAULT_LOW_STOCK_THRESHOLD,
             branch_id: currentBranchId,
           },
         ];
@@ -548,7 +549,7 @@ export async function PUT(
         });
         // Return success but with a warning message
         return NextResponse.json({
-          product: data,
+          product: updatedProduct,
           warning:
             "El producto se actualizó, pero el stock no se actualizó porque no se seleccionó una sucursal",
         });
@@ -578,7 +579,7 @@ export async function PUT(
             error: stockResult.error,
           });
           return NextResponse.json({
-            product: data,
+            product: updatedProduct,
             warning:
               "El producto se actualizó, pero hubo un error al actualizar el stock",
           });

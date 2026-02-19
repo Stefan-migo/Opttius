@@ -109,9 +109,7 @@ export async function GET(
 
     logger.debug("Customer found", { email: customer.email });
 
-    // Get customer orders
-    // Note: orders table uses user_id (auth.users), not customer_id
-    // For now, we'll search by customer email if available
+    // Get customer orders - prefer customer_id, fallback to email for legacy orders
     let ordersQuery = applyBranchFilter(
       supabase.from("orders").select(`
           *,
@@ -126,15 +124,13 @@ export async function GET(
         `),
     );
 
-    // Try to find orders by customer email (since orders use user_id, not customer_id)
+    // Find orders by customer_id (primary) or email (legacy orders not yet linked)
     if (customer?.email) {
-      ordersQuery = ordersQuery.eq("email", customer.email);
+      ordersQuery = ordersQuery.or(
+        `customer_id.eq.${params.id},email.eq.${customer.email}`,
+      );
     } else {
-      // If no email, return empty orders array
-      ordersQuery = ordersQuery.eq(
-        "id",
-        "00000000-0000-0000-0000-000000000000",
-      ); // Non-existent ID
+      ordersQuery = ordersQuery.eq("customer_id", params.id);
     }
 
     ordersQuery = ordersQuery.order("created_at", { ascending: false });

@@ -525,6 +525,23 @@ html.dark .admin-header {
   color: var(--admin-accent-secondary) !important;
 }
 
+/* Product grid: botones con fondo claro y texto oscuro cuando tarjeta en hover (solo si el botón NO está en hover) */
+.hover\:bg-admin-bg-secondary:hover .product-grid-actions .product-grid-card-btn:not(:hover) {
+  background-color: rgba(249, 247, 242, 0.2) !important;
+  color: #1A2B23 !important;
+  border-color: rgba(249, 247, 242, 0.3) !important;
+}
+.hover\:bg-admin-bg-secondary:hover .product-grid-actions .product-grid-card-btn:not(:hover) svg {
+  color: #1A2B23 !important;
+}
+.hover\:bg-admin-bg-secondary:hover .product-grid-actions .product-grid-card-btn-delete:not(:hover) {
+  color: var(--admin-error) !important;
+  border-color: rgba(139, 0, 0, 0.5) !important;
+}
+.hover\:bg-admin-bg-secondary:hover .product-grid-actions .product-grid-card-btn-delete:not(:hover) svg {
+  color: var(--admin-error) !important;
+}
+
 /* Sidebar Footer Buttons Contrast */
 .admin-sidebar button:hover {
   background: rgba(255, 255, 255, 0.12) !important;

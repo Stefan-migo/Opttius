@@ -153,28 +153,171 @@ export async function POST(
       }
     }
 
-    // Add optical lens as custom item (lens_complete type)
+    // Add optical lens(es) - handle single lens and two_separate presbyopia
+    const isTwoSeparate = quote.presbyopia_solution === "two_separate";
     if (
       quote.lens_type &&
       quote.lens_type !== "Lentes de contacto" &&
       quote.lens_material
     ) {
+      if (isTwoSeparate && quote.far_lens_family_id) {
+        // Far lens (distance)
+        items.push({
+          type: "lens_complete",
+          id: `lens-far-${quote.id}`,
+          name: `Lente Lejos ${quote.lens_type} ${quote.lens_material}`,
+          price: quote.far_lens_cost || 0,
+          quantity: 1,
+          lens_family_id: quote.far_lens_family_id,
+          lens_type: quote.lens_type,
+          lens_material: quote.lens_material,
+          lens_index: quote.lens_index,
+          lens_treatments: quote.lens_treatments || [],
+          lens_tint_color: quote.lens_tint_color,
+          lens_tint_percentage: quote.lens_tint_percentage,
+          treatments_cost: 0,
+          labor_cost: 0,
+          prescription_id: quote.prescription_id,
+          is_far_lens: true,
+        });
+      }
+      if (isTwoSeparate && quote.near_lens_family_id) {
+        // Near lens (reading)
+        items.push({
+          type: "lens_complete",
+          id: `lens-near-${quote.id}`,
+          name: `Lente Cerca ${quote.lens_type} ${quote.lens_material}`,
+          price: quote.near_lens_cost || 0,
+          quantity: 1,
+          lens_family_id: quote.near_lens_family_id,
+          lens_type: quote.lens_type || "reading",
+          lens_material: quote.lens_material,
+          lens_index: quote.lens_index,
+          lens_treatments: quote.lens_treatments || [],
+          lens_tint_color: quote.lens_tint_color,
+          lens_tint_percentage: quote.lens_tint_percentage,
+          treatments_cost: 0,
+          labor_cost: 0,
+          prescription_id: quote.prescription_id,
+          is_near_lens: true,
+        });
+      }
+      if (!isTwoSeparate) {
+        // Single lens
+        items.push({
+          type: "lens_complete",
+          id: `lens-${quote.id}`,
+          name: `Lente ${quote.lens_type} ${quote.lens_material}`,
+          price: quote.lens_cost || 0,
+          quantity: 1,
+          lens_family_id: quote.lens_family_id,
+          lens_type: quote.lens_type,
+          lens_material: quote.lens_material,
+          lens_index: quote.lens_index,
+          lens_treatments: quote.lens_treatments || [],
+          lens_tint_color: quote.lens_tint_color,
+          lens_tint_percentage: quote.lens_tint_percentage,
+          treatments_cost: quote.treatments_cost || 0,
+          labor_cost: quote.labor_cost || 0,
+          prescription_id: quote.prescription_id,
+        });
+      } else if (!quote.far_lens_family_id && !quote.near_lens_family_id) {
+        // Fallback: two_separate but no far/near ids - use single lens
+        items.push({
+          type: "lens_complete",
+          id: `lens-${quote.id}`,
+          name: `Lente ${quote.lens_type} ${quote.lens_material}`,
+          price: quote.lens_cost || 0,
+          quantity: 1,
+          lens_family_id: quote.lens_family_id,
+          lens_type: quote.lens_type,
+          lens_material: quote.lens_material,
+          lens_index: quote.lens_index,
+          lens_treatments: quote.lens_treatments || [],
+          lens_tint_color: quote.lens_tint_color,
+          lens_tint_percentage: quote.lens_tint_percentage,
+          treatments_cost: quote.treatments_cost || 0,
+          labor_cost: quote.labor_cost || 0,
+          prescription_id: quote.prescription_id,
+        });
+      }
+    }
+
+    // Add near frame for two_separate presbyopia
+    if (isTwoSeparate) {
+      const hasNearFrameData =
+        quote.near_frame_product_id ||
+        quote.near_frame_name ||
+        (quote.near_frame_brand && quote.near_frame_model) ||
+        (quote.near_frame_price !== null && quote.near_frame_price > 0);
+
+      if (hasNearFrameData) {
+        if (quote.customer_own_near_frame) {
+          items.push({
+            type: "product",
+            id: `near-frame-customer-own-${quote.id}`,
+            name: quote.near_frame_name || "Marco de cerca del cliente",
+            price: 0,
+            sku: "NEAR-FRAME-CUSTOMER-OWN",
+            quantity: 1,
+            inventory_quantity: 999,
+            customer_own_frame: true,
+            customer_own_near_frame: true,
+            frame_brand: quote.near_frame_brand,
+            frame_model: quote.near_frame_model,
+            frame_color: quote.near_frame_color,
+            frame_size: quote.near_frame_size,
+            is_near_frame: true,
+          });
+        } else {
+          const nearFramePrice =
+            quote.near_frame_price && quote.near_frame_price > 0
+              ? quote.near_frame_price
+              : quote.near_frame_cost || 0;
+          items.push({
+            type: "product",
+            id: quote.near_frame_product_id || `near-frame-manual-${quote.id}`,
+            name:
+              quote.near_frame_name ||
+              (quote.near_frame_brand && quote.near_frame_model
+                ? `${quote.near_frame_brand} ${quote.near_frame_model} (Cerca)`
+                : "Marco de Cerca"),
+            price: nearFramePrice,
+            sku: quote.near_frame_sku || "FRAME-NEAR",
+            quantity: 1,
+            inventory_quantity: 999,
+            frame_brand: quote.near_frame_brand,
+            frame_model: quote.near_frame_model,
+            frame_color: quote.near_frame_color,
+            frame_size: quote.near_frame_size,
+            customer_own_frame: false,
+            is_near_frame: true,
+          });
+        }
+      }
+    }
+
+    // Add treatments and labor for two_separate (single items, not per-lens)
+    if (isTwoSeparate && (quote.treatments_cost || 0) > 0) {
       items.push({
-        type: "lens_complete",
-        id: `lens-${quote.id}`,
-        name: `Lente ${quote.lens_type} ${quote.lens_material}`,
-        price: quote.lens_cost || 0,
+        type: "product",
+        id: `treatments-two-separate-${quote.id}`,
+        name: `Tratamientos: ${quote.lens_treatments?.join(", ") || "Varios"}`,
+        price: quote.treatments_cost || 0,
+        sku: "TREATMENTS",
         quantity: 1,
-        lens_family_id: quote.lens_family_id,
-        lens_type: quote.lens_type,
-        lens_material: quote.lens_material,
-        lens_index: quote.lens_index,
-        lens_treatments: quote.lens_treatments || [],
-        lens_tint_color: quote.lens_tint_color,
-        lens_tint_percentage: quote.lens_tint_percentage,
-        treatments_cost: quote.treatments_cost || 0,
-        labor_cost: quote.labor_cost || 0,
-        prescription_id: quote.prescription_id,
+        inventory_quantity: 999,
+      });
+    }
+    if (isTwoSeparate && (quote.labor_cost || 0) > 0) {
+      items.push({
+        type: "product",
+        id: `labor-two-separate-${quote.id}`,
+        name: "Mano de obra (montaje)",
+        price: quote.labor_cost || 0,
+        sku: "LABOR",
+        quantity: 1,
+        inventory_quantity: 999,
       });
     }
 
@@ -226,6 +369,21 @@ export async function POST(
         contact_lens_quantity: quote.contact_lens_quantity || 1,
         contact_lens_cost: quote.contact_lens_cost || 0,
         contact_lens_price: quote.contact_lens_price || 0,
+        presbyopia_solution: quote.presbyopia_solution || "none",
+        far_lens_family_id: quote.far_lens_family_id || null,
+        near_lens_family_id: quote.near_lens_family_id || null,
+        far_lens_cost: quote.far_lens_cost ?? 0,
+        near_lens_cost: quote.near_lens_cost ?? 0,
+        near_frame_product_id: quote.near_frame_product_id || null,
+        near_frame_name: quote.near_frame_name || null,
+        near_frame_brand: quote.near_frame_brand || null,
+        near_frame_model: quote.near_frame_model || null,
+        near_frame_color: quote.near_frame_color || null,
+        near_frame_size: quote.near_frame_size || null,
+        near_frame_sku: quote.near_frame_sku || null,
+        near_frame_price: quote.near_frame_price ?? 0,
+        near_frame_cost: quote.near_frame_cost ?? 0,
+        customer_own_near_frame: quote.customer_own_near_frame ?? false,
       },
     });
   } catch (error) {

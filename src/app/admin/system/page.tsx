@@ -30,6 +30,7 @@ import {
   Download,
   Receipt,
   Users,
+  FileText,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useBranch } from "@/hooks/useBranch";
@@ -43,6 +44,7 @@ import SystemOverview from "./components/SystemOverview";
 import SystemConfig from "./components/SystemConfig";
 import SystemHealth from "./components/SystemHealth";
 import SystemMaintenance from "./components/SystemMaintenance";
+import FormOptionsConfig from "./components/FormOptionsConfig";
 import dynamic from "next/dynamic";
 
 const POSBillingSettings = dynamic(
@@ -74,6 +76,7 @@ export default function SystemAdministrationPage() {
         "email",
         "notifications",
         "billing",
+        "formularios",
         "health",
         "maintenance",
       ].includes(tabFromUrl)
@@ -90,6 +93,7 @@ export default function SystemAdministrationPage() {
         "email",
         "notifications",
         "billing",
+        "formularios",
         "health",
         "maintenance",
       ].includes(tabFromUrl)
@@ -482,6 +486,10 @@ export default function SystemAdministrationPage() {
             <Receipt className="h-4 w-4 mr-1" />
             Boletas y Facturas
           </TabsTrigger>
+          <TabsTrigger value="formularios" className="flex-1">
+            <FileText className="h-4 w-4 mr-1" />
+            Formularios
+          </TabsTrigger>
           <TabsTrigger value="health" className="flex-1">
             Salud
           </TabsTrigger>
@@ -528,6 +536,10 @@ export default function SystemAdministrationPage() {
 
         <TabsContent value="billing" className="space-y-6">
           <POSBillingSettings />
+        </TabsContent>
+
+        <TabsContent value="formularios" className="space-y-6">
+          <FormOptionsConfig />
         </TabsContent>
 
         <TabsContent value="health" className="space-y-6">

@@ -5,7 +5,10 @@ import { createServerClient } from "@supabase/ssr";
 /**
  * Middleware: Refresca la sesión de Supabase y protege rutas /admin
  *
- * 1. SIEMPRE refresca la sesión (requerido para SSR - evita 401 en API routes)
+ * IMPORTANTE (docs Supabase): Usar SOLO getUser() para refrescar - getSession() no
+ * garantiza revalidar el token. getUser() valida con el servidor y actualiza cookies.
+ *
+ * 1. getUser() refresca el token si expiró y actualiza cookies vía setAll
  * 2. Para /admin: redirige a login si no hay sesión
  */
 export async function middleware(request: NextRequest) {
@@ -42,21 +45,25 @@ export async function middleware(request: NextRequest) {
           return request.cookies.getAll();
         },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) =>
-            response.cookies.set(name, value, options),
-          );
+          // Actualizar request (para downstream) y response (para cliente)
+          // Ref: https://supabase.com/docs/guides/auth/server-side/nextjs
+          cookiesToSet.forEach(({ name, value }) => {
+            request.cookies.set(name, value);
+          });
+          response = NextResponse.next({ request });
+          cookiesToSet.forEach(({ name, value, options }) => {
+            response.cookies.set(name, value, options);
+          });
         },
       },
     },
   );
 
-  // 1. Refrescar sesión: getSession() dispara refresh si el token expiró y actualiza cookies
-  //    (necesario para que la sesión persista al recargar la página)
-  await supabase.auth.getSession();
-
-  // 2. Obtener usuario para la verificación: getUser() valida el JWT con el servidor
+  // Refrescar sesión: SOLO getUser() - valida JWT con servidor, refresca si expiró,
+  // y dispara setAll para actualizar cookies (persistencia en refresh/nueva pestaña)
   const {
     data: { user },
+    error: userError,
   } = await supabase.auth.getUser();
 
   // Para /admin: redirigir a login si no hay sesión

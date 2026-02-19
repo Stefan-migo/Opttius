@@ -89,6 +89,14 @@ export async function POST(
       }
     }
 
+    // Compute lens_cost: for two_separate use far+near, otherwise single lens or contact
+    const lensCost =
+      quote.presbyopia_solution === "two_separate"
+        ? (quote.far_lens_cost || 0) + (quote.near_lens_cost || 0)
+        : quote.contact_lens_family_id
+          ? quote.contact_lens_cost || 0
+          : quote.lens_cost || 0;
+
     // Create work order from quote
     const { data: newWorkOrder, error: workOrderError } =
       await supabaseServiceRole
@@ -99,6 +107,7 @@ export async function POST(
           prescription_id: quote.prescription_id || null,
           quote_id: quote.id,
           branch_id: quote.branch_id,
+          organization_id: quote.organization_id || null,
           frame_product_id: quote.frame_product_id || null,
           frame_name: quote.frame_name,
           frame_brand: quote.frame_brand,
@@ -106,15 +115,55 @@ export async function POST(
           frame_color: quote.frame_color,
           frame_size: quote.frame_size,
           frame_sku: quote.frame_sku,
+          customer_own_frame: quote.customer_own_frame ?? false,
+          lens_family_id: quote.lens_family_id || null,
           lens_type: quote.lens_type,
           lens_material: quote.lens_material,
           lens_index: quote.lens_index,
           lens_treatments: quote.lens_treatments || [],
           lens_tint_color: quote.lens_tint_color,
           lens_tint_percentage: quote.lens_tint_percentage,
+          presbyopia_solution: quote.presbyopia_solution || "none",
+          far_lens_family_id: quote.far_lens_family_id || null,
+          near_lens_family_id: quote.near_lens_family_id || null,
+          far_lens_cost: quote.far_lens_cost ?? null,
+          near_lens_cost: quote.near_lens_cost ?? null,
+          contact_lens_family_id: quote.contact_lens_family_id || null,
+          contact_lens_rx_sphere_od: quote.contact_lens_rx_sphere_od ?? null,
+          contact_lens_rx_cylinder_od:
+            quote.contact_lens_rx_cylinder_od ?? null,
+          contact_lens_rx_axis_od: quote.contact_lens_rx_axis_od ?? null,
+          contact_lens_rx_add_od: quote.contact_lens_rx_add_od ?? null,
+          contact_lens_rx_base_curve_od:
+            quote.contact_lens_rx_base_curve_od ?? null,
+          contact_lens_rx_diameter_od:
+            quote.contact_lens_rx_diameter_od ?? null,
+          contact_lens_rx_sphere_os: quote.contact_lens_rx_sphere_os ?? null,
+          contact_lens_rx_cylinder_os:
+            quote.contact_lens_rx_cylinder_os ?? null,
+          contact_lens_rx_axis_os: quote.contact_lens_rx_axis_os ?? null,
+          contact_lens_rx_add_os: quote.contact_lens_rx_add_os ?? null,
+          contact_lens_rx_base_curve_os:
+            quote.contact_lens_rx_base_curve_os ?? null,
+          contact_lens_rx_diameter_os:
+            quote.contact_lens_rx_diameter_os ?? null,
+          contact_lens_quantity: quote.contact_lens_quantity ?? null,
+          contact_lens_cost: quote.contact_lens_cost ?? null,
+          near_frame_product_id: quote.near_frame_product_id ?? null,
+          near_frame_name: quote.near_frame_name ?? null,
+          near_frame_brand: quote.near_frame_brand ?? null,
+          near_frame_model: quote.near_frame_model ?? null,
+          near_frame_color: quote.near_frame_color ?? null,
+          near_frame_size: quote.near_frame_size ?? null,
+          near_frame_sku: quote.near_frame_sku ?? null,
+          near_frame_price: quote.near_frame_price ?? null,
+          near_frame_price_includes_tax:
+            quote.near_frame_price_includes_tax ?? false,
+          near_frame_cost: quote.near_frame_cost ?? null,
+          customer_own_near_frame: quote.customer_own_near_frame ?? false,
           prescription_snapshot: prescriptionSnapshot,
           frame_cost: quote.frame_cost || 0,
-          lens_cost: quote.lens_cost || 0,
+          lens_cost,
           treatments_cost: quote.treatments_cost || 0,
           labor_cost: quote.labor_cost || 0,
           lab_cost: 0,

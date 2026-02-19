@@ -275,8 +275,8 @@ export default function ScheduleSettingsPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-8">
-          {/* General Settings */}
-          <Card className="border-none bg-admin-bg-secondary shadow-premium-sm rounded-3xl overflow-hidden border border-admin-border-primary/30">
+          {/* General Settings - tertiary bg for form contrast (light in light mode) */}
+          <Card className="border-none bg-admin-bg-tertiary shadow-premium-sm rounded-3xl overflow-hidden border border-admin-border-primary/30">
             <CardHeader className="pb-4 border-b border-admin-border-primary/10">
               <CardTitle className="text-sm font-bold text-admin-text-primary flex items-center gap-2 uppercase tracking-widest">
                 <Settings className="h-4 w-4 text-admin-accent-primary" />
@@ -401,8 +401,8 @@ export default function ScheduleSettingsPage() {
             </CardContent>
           </Card>
 
-          {/* Working Hours */}
-          <Card className="border-none bg-admin-bg-secondary shadow-premium-sm rounded-3xl overflow-hidden border border-admin-border-primary/30">
+          {/* Working Hours - tertiary bg for form contrast */}
+          <Card className="border-none bg-admin-bg-tertiary shadow-premium-sm rounded-3xl overflow-hidden border border-admin-border-primary/30">
             <CardHeader className="pb-4 border-b border-admin-border-primary/10">
               <CardTitle className="text-sm font-bold text-admin-text-primary flex items-center gap-2 uppercase tracking-widest">
                 <Clock className="h-4 w-4 text-admin-info" />
@@ -521,8 +521,8 @@ export default function ScheduleSettingsPage() {
         </div>
 
         <div className="space-y-8">
-          {/* Blocked Dates */}
-          <Card className="border-none bg-admin-bg-secondary shadow-premium-sm rounded-3xl overflow-hidden border border-admin-border-primary/30 h-fit">
+          {/* Blocked Dates - tertiary bg for form contrast */}
+          <Card className="border-none bg-admin-bg-tertiary shadow-premium-sm rounded-3xl overflow-hidden border border-admin-border-primary/30 h-fit">
             <CardHeader className="pb-4 border-b border-admin-border-primary/10">
               <CardTitle className="text-sm font-bold text-admin-text-primary flex items-center gap-2 uppercase tracking-widest">
                 <Calendar className="h-4 w-4 text-admin-error" />

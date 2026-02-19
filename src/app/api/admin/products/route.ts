@@ -20,6 +20,7 @@ import {
   validateBody,
   validationErrorResponse,
 } from "@/lib/api/validation/zod-helpers";
+import { DEFAULT_LOW_STOCK_THRESHOLD } from "@/lib/inventory/constants";
 
 export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
@@ -386,14 +387,13 @@ export async function GET(request: NextRequest) {
           // This ensures that when searching without a specific branch, we see all products from the organization
 
           if (currentBranchId) {
-            // Filter stock by branch_id and take the first match
+            // Filter stock by branch_id - ONLY use this branch's stock (no fallback to other branches)
             let stockData = null;
             if (product.product_branch_stock) {
               if (Array.isArray(product.product_branch_stock)) {
-                stockData =
-                  product.product_branch_stock.find(
-                    (s: any) => s.branch_id === currentBranchId,
-                  ) || product.product_branch_stock[0]; // Fallback to first if no match
+                stockData = product.product_branch_stock.find(
+                  (s: any) => s.branch_id === currentBranchId,
+                );
               } else if (
                 product.product_branch_stock.branch_id === currentBranchId
               ) {
@@ -413,6 +413,8 @@ export async function GET(request: NextRequest) {
               product.total_inventory_quantity = quantity;
               product.total_available_quantity = availableQuantity;
               product.total_reserved_quantity = reservedQuantity;
+              product.total_low_stock_threshold =
+                stockData.low_stock_threshold ?? DEFAULT_LOW_STOCK_THRESHOLD;
             } else {
               // No stock record for this branch - check if product has legacy inventory_quantity
               // This handles products that were created before the stock refactor
@@ -420,6 +422,7 @@ export async function GET(request: NextRequest) {
               product.total_inventory_quantity = legacyQuantity;
               product.total_available_quantity = legacyQuantity;
               product.total_reserved_quantity = 0;
+              product.total_low_stock_threshold = DEFAULT_LOW_STOCK_THRESHOLD;
             }
           } else {
             // No branch selected - use legacy inventory_quantity if available
@@ -427,6 +430,7 @@ export async function GET(request: NextRequest) {
             product.total_inventory_quantity = legacyQuantity;
             product.total_available_quantity = legacyQuantity;
             product.total_reserved_quantity = 0;
+            product.total_low_stock_threshold = DEFAULT_LOW_STOCK_THRESHOLD;
           }
           return product;
         })
@@ -456,7 +460,9 @@ export async function GET(request: NextRequest) {
 
     if (stockFilters.lowStockOnly && currentBranchId) {
       processedProducts = processedProducts.filter(
-        (p: any) => (p.total_available_quantity || 0) <= 5,
+        (p: any) =>
+          (p.total_available_quantity || 0) <=
+          (p.total_low_stock_threshold ?? DEFAULT_LOW_STOCK_THRESHOLD),
       );
     }
 
@@ -1051,7 +1057,7 @@ export async function POST(request: NextRequest) {
                       branch_id: productBranchId,
                       quantity: stockQty,
                       reserved_quantity: 0,
-                      low_stock_threshold: 5,
+                      low_stock_threshold: DEFAULT_LOW_STOCK_THRESHOLD,
                     },
                     {
                       onConflict: "product_id,branch_id",

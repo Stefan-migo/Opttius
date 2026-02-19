@@ -265,6 +265,44 @@ class POSService {
   }
 
   /**
+   * Process a refund for an order
+   */
+  async processRefund(
+    request: {
+      order_id: string;
+      items: Array<{ order_item_id: string; quantity: number }>;
+      reason: string;
+      refund_type: "full" | "partial";
+    },
+    branchId?: string,
+  ): Promise<{
+    success: boolean;
+    refund_amount: number;
+    items_refunded: number;
+  } | null> {
+    try {
+      const response = await this.client.post<{
+        success: boolean;
+        refund_amount: number;
+        items_refunded: number;
+      }>(`${this.basePath}/refund`, request, {
+        headers: branchId ? { "x-branch-id": branchId } : undefined,
+      });
+
+      if (isSuccess(response)) {
+        return unwrapData(response);
+      }
+
+      handleApiError(response);
+      return null;
+    } catch (error) {
+      console.error("Error processing refund:", error);
+      handleApiError(error);
+      return null;
+    }
+  }
+
+  /**
    * Get billing settings
    */
   async getBillingSettings(branchId?: string) {

@@ -11,6 +11,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const fieldKey = searchParams.get("field_key");
     const category = searchParams.get("category");
+    const formType = searchParams.get("form_type"); // product|customer|prescription|quote|appointment|pos|global
     const includeInactive = searchParams.get("include_inactive") === "true";
 
     let query = supabase
@@ -29,6 +30,10 @@ export async function GET(request: NextRequest) {
 
     if (category) {
       query = query.eq("field_category", category);
+    }
+
+    if (formType) {
+      query = query.eq("form_type", formType);
     }
 
     if (!includeInactive) {

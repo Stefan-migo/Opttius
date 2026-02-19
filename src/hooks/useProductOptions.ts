@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 
 interface OptionValue {
   id: string;
@@ -36,9 +36,11 @@ export function useProductOptions(): UseProductOptionsReturn {
     try {
       setLoading(true);
       setError(null);
-      const response = await fetch('/api/admin/product-options');
+      const response = await fetch(
+        "/api/admin/product-options?form_type=product",
+      );
       const data = await response.json();
-      
+
       if (response.ok) {
         const optionsMap: Record<string, OptionValue[]> = {};
         (data.fields || []).forEach((field: OptionField) => {
@@ -48,11 +50,11 @@ export function useProductOptions(): UseProductOptionsReturn {
         });
         setOptions(optionsMap);
       } else {
-        setError(data.error || 'Error al cargar opciones');
+        setError(data.error || "Error al cargar opciones");
       }
     } catch (err) {
-      console.error('Error fetching product options:', err);
-      setError('Error al cargar opciones');
+      console.error("Error fetching product options:", err);
+      setError("Error al cargar opciones");
     } finally {
       setLoading(false);
     }
@@ -69,4 +71,3 @@ export function useProductOptions(): UseProductOptionsReturn {
     refresh: fetchOptions,
   };
 }
-

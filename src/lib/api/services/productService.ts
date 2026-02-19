@@ -278,13 +278,21 @@ export async function createProduct(data: CreateProductData): Promise<Product> {
 
 /**
  * Update an existing product
+ * @param branchId - Optional branch ID for stock updates (sent as x-branch-id header)
  */
 export async function updateProduct(
   id: string,
   data: UpdateProductData,
+  branchId?: string | null,
 ): Promise<Product> {
   try {
-    const response = await client.put(`/api/admin/products/${id}`, data);
+    const headers: HeadersInit = {};
+    if (branchId) {
+      headers["x-branch-id"] = branchId;
+    }
+    const response = await client.put(`/api/admin/products/${id}`, data, {
+      ...(Object.keys(headers).length && { headers }),
+    });
     return extractProductFromResponse(response);
   } catch (error) {
     handleApiError(error, "updateProduct");

@@ -608,10 +608,12 @@ export default function EditProductPage() {
         status: status || formData.status,
         price: parseFloat(formData.price),
         price_includes_tax: formData.price_includes_tax === true,
-        // Stock quantity for updating product_branch_stock
+        // Stock quantity - same as create: always send number for RPC update_product_stock
         stock_quantity: formData.stock_quantity
-          ? parseInt(formData.stock_quantity)
-          : undefined,
+          ? parseInt(String(formData.stock_quantity))
+          : 0,
+        // branch_id in body - same as create, required for stock update
+        branch_id: currentBranchId || null,
         // Optical fields
         frame_measurements: frameMeasurements,
         prescription_range: prescriptionRange,
@@ -649,6 +651,7 @@ export default function EditProductPage() {
       const result = await productService.updateProduct(
         productId,
         productData as any,
+        currentBranchId || (isSuperAdmin ? "global" : undefined),
       );
 
       // Invalidate React Query cache to refresh the products list

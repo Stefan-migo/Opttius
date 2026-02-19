@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useCallback } from "react";
 import { Product } from "./useProducts";
 
 export interface ProductFilters {
@@ -20,9 +20,9 @@ const defaultFilters: ProductFilters = {
 export function useProductFilters() {
   const [filters, setFilters] = useState<ProductFilters>(defaultFilters);
 
-  const updateFilter = (key: keyof ProductFilters, value: any) => {
+  const updateFilter = useCallback((key: keyof ProductFilters, value: any) => {
     setFilters((prev) => ({ ...prev, [key]: value }));
-  };
+  }, []);
 
   const resetFilters = () => {
     setFilters(defaultFilters);

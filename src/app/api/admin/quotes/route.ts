@@ -325,6 +325,26 @@ export async function POST(request: NextRequest) {
       throw error;
     }
 
+    // Validate prescription belongs to customer
+    if (validatedBody.prescription_id) {
+      const { data: prescription } = await supabaseServiceRole
+        .from("prescriptions")
+        .select("customer_id")
+        .eq("id", validatedBody.prescription_id)
+        .single();
+      if (
+        prescription &&
+        prescription.customer_id !== validatedBody.customer_id
+      ) {
+        return NextResponse.json(
+          {
+            error: "La receta no pertenece al cliente seleccionado",
+          },
+          { status: 400 },
+        );
+      }
+    }
+
     // Generate quote number
     const { data: quoteNumber, error: quoteNumberError } =
       await supabaseServiceRole.rpc("generate_quote_number");
@@ -393,6 +413,27 @@ export async function POST(request: NextRequest) {
       ? new Date(validatedBody.expiration_date)
       : new Date(Date.now() + defaultExpirationDays * 24 * 60 * 60 * 1000);
 
+    // Get organization_id for multi-tenancy (from branch or admin)
+    let quoteOrganizationId: string | null = null;
+    if (quoteBranchId) {
+      const { data: branch } = await supabaseServiceRole
+        .from("branches")
+        .select("organization_id")
+        .eq("id", quoteBranchId)
+        .single();
+      quoteOrganizationId = branch?.organization_id ?? null;
+    }
+    if (!quoteOrganizationId) {
+      const { data: adminUser } = await supabaseServiceRole
+        .from("admin_users")
+        .select("organization_id")
+        .eq("id", user.id)
+        .single();
+      quoteOrganizationId =
+        (adminUser as { organization_id?: string } | null)?.organization_id ??
+        null;
+    }
+
     // Create quote
     // Usar validatedBody para campos validados por Zod
     const { data: newQuote, error: quoteError } = await supabaseServiceRole
@@ -401,6 +442,7 @@ export async function POST(request: NextRequest) {
         quote_number: quoteNumber,
         customer_id: validatedBody.customer_id,
         branch_id: quoteBranchId,
+        organization_id: quoteOrganizationId,
         prescription_id: validatedBody.prescription_id || null,
         frame_product_id: validatedBody.frame_product_id || null,
         frame_name: validatedBody.frame_name || null,
@@ -413,12 +455,45 @@ export async function POST(request: NextRequest) {
           typeof validatedBody.frame_price === "number"
             ? validatedBody.frame_price
             : validatedBody.frame_price || 0,
+        customer_own_frame: validatedBody.customer_own_frame ?? false,
+        lens_family_id: validatedBody.lens_family_id || null,
         lens_type: validatedBody.lens_type || null,
         lens_material: validatedBody.lens_material || null,
         lens_index: validatedBody.lens_index || null,
         lens_treatments: validatedBody.lens_treatments || [],
         lens_tint_color: validatedBody.lens_tint_color || null,
         lens_tint_percentage: validatedBody.lens_tint_percentage || null,
+        // Presbyopia solution fields
+        presbyopia_solution: validatedBody.presbyopia_solution || "none",
+        far_lens_family_id: validatedBody.far_lens_family_id || null,
+        near_lens_family_id: validatedBody.near_lens_family_id || null,
+        far_lens_cost:
+          typeof validatedBody.far_lens_cost === "number"
+            ? validatedBody.far_lens_cost
+            : (validatedBody.far_lens_cost ?? null),
+        near_lens_cost:
+          typeof validatedBody.near_lens_cost === "number"
+            ? validatedBody.near_lens_cost
+            : (validatedBody.near_lens_cost ?? null),
+        // Near frame fields (for two_separate solution)
+        near_frame_product_id: validatedBody.near_frame_product_id || null,
+        near_frame_name: validatedBody.near_frame_name || null,
+        near_frame_brand: validatedBody.near_frame_brand || null,
+        near_frame_model: validatedBody.near_frame_model || null,
+        near_frame_color: validatedBody.near_frame_color || null,
+        near_frame_size: validatedBody.near_frame_size || null,
+        near_frame_sku: validatedBody.near_frame_sku || null,
+        near_frame_price:
+          typeof validatedBody.near_frame_price === "number"
+            ? validatedBody.near_frame_price
+            : (validatedBody.near_frame_price ?? 0),
+        near_frame_cost:
+          typeof validatedBody.near_frame_cost === "number"
+            ? validatedBody.near_frame_cost
+            : (validatedBody.near_frame_cost ?? 0),
+        near_frame_price_includes_tax:
+          validatedBody.near_frame_price_includes_tax ?? false,
+        customer_own_near_frame: validatedBody.customer_own_near_frame ?? false,
         // Contact lens fields
         contact_lens_family_id: validatedBody.contact_lens_family_id || null,
         contact_lens_rx_sphere_od:
