@@ -35,8 +35,9 @@ export function LandingHeader() {
 
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
+      setIsScrolled(window.scrollY > 10);
     };
+    handleScroll(); // Check initial position (e.g. if page loads scrolled)
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
@@ -98,7 +99,7 @@ export function LandingHeader() {
     <header
       className={`fixed top-0 w-full z-50 transition-all duration-500 py-6 px-4 md:px-8 ${
         isScrolled
-          ? "bg-epoch-surface/90 backdrop-blur-md py-4 shadow-xl"
+          ? "bg-epoch-surface py-4 shadow-xl backdrop-blur-md"
           : "bg-transparent"
       }`}
     >

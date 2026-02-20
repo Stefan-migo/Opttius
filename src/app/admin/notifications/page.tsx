@@ -284,10 +284,10 @@ export default function NotificationsPage() {
         ].map((stat, idx) => (
           <Card
             key={idx}
-            className="border-none shadow-soft overflow-hidden group"
+            className="border border-admin-border-primary/30 shadow-soft overflow-hidden group bg-white"
           >
             <CardContent className="p-0">
-              <div className="flex items-center p-6 bg-admin-bg-secondary relative">
+              <div className="flex items-center p-6 bg-white relative">
                 <div
                   className={cn(
                     "h-12 w-12 rounded-2xl flex items-center justify-center mr-4 transition-transform group-hover:scale-110",
@@ -323,7 +323,7 @@ export default function NotificationsPage() {
                 Filtros de búsqueda
               </h3>
 
-              <div className="space-y-5 bg-admin-bg-secondary p-6 rounded-2xl border border-admin-border-primary/50 shadow-soft">
+              <div className="space-y-5 bg-white p-6 rounded-2xl border border-admin-border-primary/50 shadow-soft">
                 <div className="space-y-2">
                   <label className="text-[11px] font-bold text-admin-text-secondary uppercase">
                     Estado
@@ -428,8 +428,8 @@ export default function NotificationsPage() {
 
         {/* Notifications Main Area */}
         <div className="lg:col-span-3 space-y-4">
-          <div className="bg-admin-bg-secondary rounded-2xl border border-admin-border-primary/50 shadow-soft overflow-hidden">
-            <div className="p-4 bg-admin-bg-tertiary/20 border-b border-admin-border-primary/50 flex justify-between items-center px-6">
+          <div className="bg-white rounded-2xl border border-admin-border-primary/50 shadow-soft overflow-hidden">
+            <div className="p-4 bg-admin-bg-tertiary/50 border-b border-admin-border-primary/50 flex justify-between items-center px-6">
               <h3 className="text-sm font-bold text-admin-text-primary">
                 Resultados ({filteredNotifications.length})
               </h3>
@@ -527,7 +527,7 @@ export default function NotificationsPage() {
                                         ? "bg-admin-error/10 text-admin-error"
                                         : notification.priority === "high"
                                           ? "bg-admin-warning/10 text-admin-warning"
-                                          : "bg-admin-bg-tertiary text-admin-text-tertiary border border-admin-border-primary/50 text-white dark:text-inherit",
+                                          : "bg-admin-bg-tertiary text-admin-text-tertiary border border-admin-border-primary/50",
                                     )}
                                   >
                                     {notification.priority}
@@ -582,7 +582,7 @@ export default function NotificationsPage() {
 
             {/* Pagination Component */}
             {totalPages > 1 && (
-              <div className="p-6 bg-admin-bg-tertiary/10 border-t border-admin-border-primary/50 flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="p-6 bg-admin-bg-tertiary/30 border-t border-admin-border-primary/50 flex flex-col sm:flex-row items-center justify-between gap-4">
                 <span className="text-[11px] font-bold text-admin-text-tertiary uppercase tracking-widest">
                   Página{" "}
                   <span className="text-admin-text-primary">

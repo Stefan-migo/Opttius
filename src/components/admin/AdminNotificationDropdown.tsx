@@ -203,11 +203,11 @@ export default function AdminNotificationDropdown() {
 
       <DropdownMenuContent
         align="end"
-        className="w-[380px] p-0 bg-admin-bg-secondary/95 backdrop-blur-xl border-admin-border-primary/50 shadow-2xl shadow-black/10 rounded-2xl overflow-hidden"
+        className="w-[380px] p-0 bg-white border border-admin-border-primary/50 shadow-2xl shadow-black/10 rounded-2xl overflow-hidden"
         sideOffset={12}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-4 bg-gradient-to-r from-admin-bg-tertiary/50 to-transparent border-b border-admin-border-primary/50">
+        <div className="flex items-center justify-between p-4 bg-admin-bg-tertiary/50 border-b border-admin-border-primary/50">
           <div>
             <h3 className="font-bold text-sm text-admin-text-primary tracking-tight">
               Notificaciones
@@ -275,7 +275,7 @@ export default function AdminNotificationDropdown() {
                         className={cn(
                           "flex-shrink-0 w-11 h-11 rounded-xl flex items-center justify-center shadow-sm transition-transform group-hover:scale-105",
                           isUnread
-                            ? "bg-admin-bg-secondary border border-admin-border-primary"
+                            ? "bg-admin-accent-primary/10 border border-admin-accent-primary/30"
                             : "bg-admin-bg-tertiary",
                         )}
                       >
@@ -349,7 +349,7 @@ export default function AdminNotificationDropdown() {
             <Button
               variant="outline"
               size="sm"
-              className="w-full justify-center text-[11px] font-bold h-9 bg-admin-bg-secondary hover:bg-admin-accent-primary hover:text-white border-admin-border-secondary/50 transition-all rounded-xl"
+              className="w-full justify-center text-[11px] font-bold h-9 bg-admin-accent-primary hover:bg-admin-accent-secondary text-white hover:text-epoch-primary border-admin-accent-primary/50 transition-all rounded-xl"
               onClick={() => {
                 setIsOpen(false);
                 router.push("/admin/notifications");
