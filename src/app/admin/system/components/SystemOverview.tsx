@@ -46,6 +46,13 @@ const getHealthStatusBadge = (status: string) => {
   );
 };
 
+/**
+ * Resumen del módulo Sistema con acciones rápidas y estado de salud.
+ * Permite navegar a Config, Email, Notificaciones, Salud y Mantenimiento.
+ *
+ * @param props.healthStatus - Estado de salud del sistema (healthy, warning, critical)
+ * @param props.onTabChange - Callback para cambiar de tab en el padre
+ */
 export default function SystemOverview({
   healthStatus,
   onTabChange,
@@ -134,19 +141,21 @@ export default function SystemOverview({
           <CardContent className="space-y-4">
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-sm text-tierra-media">
+                <span className="text-sm text-admin-text-tertiary">
                   Estado General
                 </span>
                 {healthStatus && getHealthStatusBadge(healthStatus.status)}
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-sm text-tierra-media">Advertencias</span>
+                <span className="text-sm text-admin-text-tertiary">
+                  Advertencias
+                </span>
                 <span className="font-semibold text-yellow-600">
                   {healthStatus?.warnings || 0}
                 </span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-sm text-tierra-media">
+                <span className="text-sm text-admin-text-tertiary">
                   Problemas Críticos
                 </span>
                 <span className="font-semibold text-red-600">
@@ -154,7 +163,7 @@ export default function SystemOverview({
                 </span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-sm text-tierra-media">
+                <span className="text-sm text-admin-text-tertiary">
                   Última Verificación
                 </span>
                 <span className="text-sm font-medium">

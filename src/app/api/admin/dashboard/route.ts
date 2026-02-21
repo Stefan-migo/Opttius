@@ -8,6 +8,7 @@ import {
   createApiErrorResponse,
 } from "@/lib/api/response";
 import { AuthenticationError, AuthorizationError } from "@/lib/api/errors";
+import { computeInventoryMetrics } from "@/lib/analytics/analytics-service";
 
 /**
  * Helper to get YYYY-MM-DD date string in local timezone (not UTC)
@@ -178,13 +179,38 @@ export async function GET(request: NextRequest) {
       closuresQuery = closuresQuery.in("branch_id", orgBranchIds);
     }
 
-    const [productsResult, ordersResult, customersResult, closuresResult] =
-      await Promise.all([
-        productsQuery,
-        ordersQuery,
-        applyBranchFilter(supabase.from("customers").select("*")),
-        closuresQuery,
-      ]);
+    // product_branch_stock for inventory metrics (replaces deprecated products.inventory_quantity)
+    let productBranchStockQuery = supabase
+      .from("product_branch_stock")
+      .select("product_id, branch_id, quantity, low_stock_threshold");
+    if (branchContext.branchId) {
+      productBranchStockQuery = productBranchStockQuery.eq(
+        "branch_id",
+        branchContext.branchId,
+      );
+    } else if (orgBranchIds.length > 0) {
+      productBranchStockQuery = productBranchStockQuery.in(
+        "branch_id",
+        orgBranchIds,
+      );
+    } else {
+      // No branch context - return empty
+      productBranchStockQuery = productBranchStockQuery.limit(0);
+    }
+
+    const [
+      productsResult,
+      ordersResult,
+      customersResult,
+      closuresResult,
+      productBranchStockResult,
+    ] = await Promise.all([
+      productsQuery,
+      ordersQuery,
+      applyBranchFilter(supabase.from("customers").select("*")),
+      closuresQuery,
+      productBranchStockQuery,
+    ]);
 
     if (productsResult.error) {
       logger.error("Error fetching products", productsResult.error);
@@ -197,6 +223,7 @@ export async function GET(request: NextRequest) {
     }
 
     const products = productsResult.data || [];
+    const productBranchStock = productBranchStockResult?.data || [];
     const orders = ordersResult.data || [];
     const customers = customersResult.data || []; // Now from customers table, not profiles
     const closures = closuresResult?.data || [];
@@ -227,40 +254,32 @@ export async function GET(request: NextRequest) {
     const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
     const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0);
 
-    // === PRODUCTS METRICS ===
-    // Use filteredProducts instead of products
+    // === PRODUCTS METRICS (from product_branch_stock via analytics-service) ===
     const activeProducts = filteredProducts.filter(
       (p: { status: string }) => p.status === "active",
     );
-    const lowStockProducts = activeProducts
-      .filter(
-        (p: { inventory_quantity?: number | null }) =>
-          (p.inventory_quantity || 0) <= 5 && (p.inventory_quantity || 0) > 0,
-      )
-      .map(
-        (p: {
-          id: string;
-          name: string;
-          inventory_quantity?: number | null;
-          slug: string;
-        }) => ({
+    const productIdsInCatalog = new Set<string>(
+      activeProducts.map((p: { id: string }) => p.id),
+    );
+    const inventoryMetrics = computeInventoryMetrics(
+      productBranchStock as Array<{
+        product_id: string;
+        branch_id: string;
+        quantity: number;
+        low_stock_threshold?: number | null;
+      }>,
+      productIdsInCatalog,
+      {
+        products: activeProducts.map((p: any) => ({
           id: p.id,
           name: p.name,
-          currentStock: p.inventory_quantity || 0,
-          threshold: 5,
           slug: p.slug,
-        }),
-      )
-      .sort(
-        (a: { currentStock: number }, b: { currentStock: number }) =>
-          a.currentStock - b.currentStock,
-      )
-      .slice(0, 5);
-
-    const outOfStockProducts = activeProducts.filter(
-      (p: { inventory_quantity?: number | null }) =>
-        (p.inventory_quantity || 0) === 0,
-    ).length;
+        })),
+        maxLowStockList: 5,
+      },
+    );
+    const lowStockProducts = inventoryMetrics.lowStockProductsList ?? [];
+    const outOfStockProducts = inventoryMetrics.outOfStock;
 
     // === ORDERS METRICS ===
     const pendingOrders = orders.filter(
@@ -681,7 +700,7 @@ export async function GET(request: NextRequest) {
       kpis: {
         products: {
           total: activeProducts.length,
-          lowStock: lowStockProducts.length,
+          lowStock: inventoryMetrics.lowStock,
           outOfStock: outOfStockProducts,
         },
         orders: {

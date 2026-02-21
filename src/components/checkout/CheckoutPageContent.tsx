@@ -438,10 +438,10 @@ export function CheckoutPageContent() {
             {/* 1. Tier Selection Section */}
             <div className="space-y-6">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center font-bold text-sm">
+                <div className="w-8 h-8 rounded-none bg-admin-accent-primary text-[#1A2B23] flex items-center justify-center font-bold text-sm">
                   1
                 </div>
-                <h2 className="text-2xl font-bold tracking-tight text-slate-800 dark:text-white">
+                <h2 className="text-2xl font-bold tracking-tight text-admin-text-primary">
                   Selecciona tu Plan
                 </h2>
               </div>
@@ -477,10 +477,10 @@ export function CheckoutPageContent() {
                       <div className="flex flex-col h-full space-y-4">
                         <div className="flex justify-between items-start w-full">
                           <div>
-                            <h3 className="text-xl font-black text-slate-800 dark:text-white uppercase tracking-tight">
+                            <h3 className="text-xl font-black text-admin-text-primary uppercase tracking-tight">
                               {tierLabels[tier.name]}
                             </h3>
-                            <p className="text-sm font-medium text-slate-500">
+                            <p className="text-sm font-medium text-admin-text-secondary">
                               {config.max_branches} Sedes / {config.max_users}{" "}
                               Colab.
                             </p>
@@ -500,24 +500,24 @@ export function CheckoutPageContent() {
                         </div>
 
                         <div className="flex items-baseline gap-1">
-                          <span className="text-3xl font-black text-slate-900 dark:text-white">
+                          <span className="text-3xl font-black text-admin-text-primary">
                             ${Number(tier.price_monthly).toLocaleString()}
                           </span>
-                          <span className="text-sm font-bold text-slate-400 uppercase">
+                          <span className="text-sm font-bold text-admin-text-tertiary uppercase">
                             /mes
                           </span>
                         </div>
 
-                        <div className="pt-4 border-t border-slate-100 dark:border-slate-800 space-y-2">
-                          <div className="flex items-center gap-2 text-xs font-semibold text-slate-600 dark:text-slate-400">
-                            <CheckCircle className="h-3 w-3 text-emerald-500" />
+                        <div className="pt-4 border-t border-admin-border-primary space-y-2">
+                          <div className="flex items-center gap-2 text-xs font-semibold text-admin-text-tertiary">
+                            <CheckCircle className="h-3 w-3 text-admin-success" />
                             <span>
                               Soporte{" "}
                               {tierName === "premium" ? "Directo" : "Premium"}
                             </span>
                           </div>
-                          <div className="flex items-center gap-2 text-xs font-semibold text-slate-600 dark:text-slate-400">
-                            <CheckCircle className="h-3 w-3 text-emerald-500" />
+                          <div className="flex items-center gap-2 text-xs font-semibold text-admin-text-tertiary">
+                            <CheckCircle className="h-3 w-3 text-admin-success" />
                             <span>Gestión de Inventario</span>
                           </div>
                         </div>
@@ -532,7 +532,7 @@ export function CheckoutPageContent() {
                                     ? "default"
                                     : "secondary"
                                 }
-                                className="w-full justify-center py-1.5 rounded-xl font-bold"
+                                className="w-full justify-center py-1.5 rounded-none font-bold"
                               >
                                 {tierChange === "upgrade" ? (
                                   <>
@@ -558,19 +558,19 @@ export function CheckoutPageContent() {
             {/* 2. Payment Method Selection */}
             <div className="space-y-6 animate-in fade-in duration-700 delay-200">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center font-bold text-sm">
+                <div className="w-8 h-8 rounded-none bg-admin-accent-primary text-[#1A2B23] flex items-center justify-center font-bold text-sm">
                   2
                 </div>
-                <h2 className="text-2xl font-bold tracking-tight text-slate-800 dark:text-white">
+                <h2 className="text-2xl font-bold tracking-tight text-admin-text-primary">
                   Método de Pago
                 </h2>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 {availableGateways.length === 0 ? (
-                  <div className="col-span-full py-10 text-center bg-slate-50 dark:bg-slate-900/40 rounded-3xl border-2 border-dashed border-slate-200 dark:border-slate-800">
-                    <Loader2 className="h-8 w-8 animate-spin mx-auto text-slate-300 mb-2" />
-                    <p className="text-slate-400 font-bold uppercase text-[10px] tracking-widest">
+                  <div className="col-span-full py-10 text-center bg-admin-bg-secondary rounded-none border-2 border-dashed border-admin-border-primary">
+                    <Loader2 className="h-8 w-8 animate-spin mx-auto text-admin-text-tertiary mb-2" />
+                    <p className="text-admin-text-tertiary font-bold uppercase text-[10px] tracking-widest">
                       Cargando pasarelas disponibles...
                     </p>
                   </div>
@@ -589,10 +589,10 @@ export function CheckoutPageContent() {
                     >
                       <div
                         className={cn(
-                          "w-14 h-14 rounded-2xl flex items-center justify-center mb-3 transition-colors",
+                          "w-14 h-14 rounded-none flex items-center justify-center mb-3 transition-colors",
                           selectedGateway === gw.gateway_id
-                            ? "bg-primary/10 text-primary"
-                            : "bg-slate-100 dark:bg-slate-800 text-slate-400 group-hover:text-primary/60",
+                            ? "bg-admin-accent-primary/10 text-admin-accent-primary"
+                            : "bg-admin-bg-tertiary text-admin-text-tertiary group-hover:text-admin-accent-primary/60",
                         )}
                       >
                         {gw.gateway_id === "mercadopago" && (
@@ -612,8 +612,8 @@ export function CheckoutPageContent() {
                         className={cn(
                           "font-bold transition-colors",
                           selectedGateway === gw.gateway_id
-                            ? "text-slate-900 dark:text-white"
-                            : "text-slate-500",
+                            ? "text-admin-text-primary"
+                            : "text-admin-text-tertiary",
                         )}
                       >
                         {gw.name}
@@ -625,8 +625,8 @@ export function CheckoutPageContent() {
                             "mt-2 border-none px-2 py-0 text-[10px] font-black uppercase tracking-wider",
                             gw.config.badge === "PROXIMAMENTE" ||
                               gw.config.badge === "PRÓXIMAMENTE"
-                              ? "bg-slate-200 text-slate-500"
-                              : "bg-green-500/10 text-green-600",
+                              ? "bg-admin-border-primary text-admin-text-tertiary"
+                              : "bg-admin-success/10 text-admin-success",
                           )}
                         >
                           {gw.config.badge}
@@ -641,10 +641,10 @@ export function CheckoutPageContent() {
             {/* 3. Finalization Section */}
             <div className="space-y-6">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center font-bold text-sm">
+                <div className="w-8 h-8 rounded-none bg-admin-accent-primary text-[#1A2B23] flex items-center justify-center font-bold text-sm">
                   3
                 </div>
-                <h2 className="text-2xl font-bold tracking-tight text-slate-800 dark:text-white">
+                <h2 className="text-2xl font-bold tracking-tight text-admin-text-primary">
                   Resumen y Pago
                 </h2>
               </div>
@@ -729,8 +729,8 @@ export function CheckoutPageContent() {
                   {/* Security Highlights */}
                   <div className="grid grid-cols-2 gap-4">
                     <div className="p-6 bg-admin-bg-secondary/60 rounded-none border border-admin-border-primary/10 flex items-center gap-4 transition-all hover:bg-admin-bg-secondary">
-                      <div className="p-3 bg-emerald-500/10 rounded-none border border-emerald-500/20">
-                        <ShieldCheck className="h-6 w-6 text-emerald-600" />
+                      <div className="p-3 bg-admin-success/10 rounded-none border border-admin-success/20">
+                        <ShieldCheck className="h-6 w-6 text-admin-success" />
                       </div>
                       <div>
                         <p className="text-[9px] font-display font-black uppercase tracking-[0.2em] text-admin-text-tertiary mb-1">
@@ -760,15 +760,15 @@ export function CheckoutPageContent() {
                 {/* Right: Payment Brick or Selection Guide */}
                 <div className="w-full">
                   {!paymentId ? (
-                    <div className="h-full min-h-[400px] border-4 border-dashed border-slate-200 dark:border-slate-800 rounded-[2.5rem] flex flex-col items-center justify-center p-10 text-center space-y-4">
-                      <div className="p-6 bg-slate-100 dark:bg-slate-800 rounded-3xl">
-                        <Star className="h-10 w-10 text-slate-300" />
+                    <div className="h-full min-h-[400px] border-4 border-dashed border-admin-border-primary rounded-none flex flex-col items-center justify-center p-10 text-center space-y-4">
+                      <div className="p-6 bg-admin-bg-secondary rounded-none">
+                        <Star className="h-10 w-10 text-admin-text-tertiary" />
                       </div>
                       <div>
-                        <h4 className="text-xl font-bold text-slate-400">
+                        <h4 className="text-xl font-bold text-admin-text-tertiary">
                           Completa los pasos anteriores
                         </h4>
-                        <p className="text-slate-400 text-sm max-w-xs mx-auto">
+                        <p className="text-admin-text-tertiary text-sm max-w-xs mx-auto">
                           Selecciona tu plan ideal
                           {selectedGateway !== "mercadopago"
                             ? " para ser redirigido a la pasarela de pago seleccionada."
@@ -779,11 +779,11 @@ export function CheckoutPageContent() {
                   ) : (
                     <Card
                       variant="glass"
-                      className="border-0 shadow-2xl bg-white dark:bg-slate-900 rounded-[2.5rem] overflow-hidden animate-in fade-in zoom-in-95 duration-500"
+                      className="border-0 shadow-2xl bg-admin-bg-secondary rounded-none overflow-hidden animate-in fade-in zoom-in-95 duration-500"
                     >
-                      <CardHeader className="p-8 border-b border-slate-50 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50">
+                      <CardHeader className="p-8 border-b border-admin-border-primary bg-admin-bg-secondary">
                         <div className="flex items-center gap-3">
-                          <div className="p-2 bg-blue-600 rounded-lg text-white">
+                          <div className="p-2 bg-admin-accent-primary rounded-none text-[#1A2B23]">
                             <CreditCard className="h-5 w-5" />
                           </div>
                           <div>
@@ -800,7 +800,7 @@ export function CheckoutPageContent() {
                         {error && (
                           <Alert
                             variant="destructive"
-                            className="mb-6 rounded-2xl border-none bg-red-500/10 text-red-600"
+                            className="mb-6 rounded-none border-none bg-admin-error/10 text-admin-error"
                           >
                             <AlertCircle className="h-4 w-4" />
                             <AlertDescription className="font-bold">
@@ -809,26 +809,26 @@ export function CheckoutPageContent() {
                           </Alert>
                         )}
 
-                        <div className="p-4 bg-blue-50 dark:bg-blue-900/10 rounded-2xl mb-6 flex justify-between items-center border border-blue-100 dark:border-blue-900/30">
+                        <div className="p-4 bg-admin-info/10 rounded-none mb-6 flex justify-between items-center border border-admin-info/20">
                           <div className="flex items-center gap-2">
-                            <div className="w-2 h-2 rounded-full bg-blue-600 animate-pulse" />
-                            <span className="text-xs font-bold text-blue-700 dark:text-blue-400 uppercase tracking-widest">
+                            <div className="w-2 h-2 rounded-none bg-admin-info animate-pulse" />
+                            <span className="text-xs font-bold text-admin-info uppercase tracking-widest">
                               Sesión de pago activa
                             </span>
                           </div>
-                          <span className="text-xl font-black text-blue-900 dark:text-blue-200">
+                          <span className="text-xl font-black text-admin-text-primary">
                             ${amount.toLocaleString()} CLP
                           </span>
                         </div>
 
-                        <label className="flex items-center gap-3 mb-6 p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/30 cursor-pointer">
+                        <label className="flex items-center gap-3 mb-6 p-3 rounded-none border border-admin-border-primary bg-admin-bg-secondary cursor-pointer">
                           <input
                             type="checkbox"
                             checked={saveCard}
                             onChange={(e) => setSaveCard(e.target.checked)}
-                            className="rounded border-slate-300 text-primary focus:ring-primary"
+                            className="rounded-none border-admin-border-primary text-admin-accent-primary focus:ring-admin-accent-primary"
                           />
-                          <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                          <span className="text-sm font-medium text-admin-text-primary">
                             Guardar tarjeta para próximos pagos y renovaciones
                           </span>
                         </label>
@@ -866,17 +866,18 @@ export function CheckoutPageContent() {
         </div>
 
         {/* Footer Security Badge */}
-        <div className="pt-10 border-t border-slate-200 dark:border-slate-800 flex flex-col items-center gap-6">
+        <div className="pt-10 border-t border-admin-border-primary flex flex-col items-center gap-6">
           <div className="flex items-center gap-8 opacity-50 grayscale hover:grayscale-0 transition-all duration-500">
             <Globe className="h-8 w-8" />
-            <div className="h-6 w-px bg-slate-200 dark:bg-slate-800" />
+            <div className="h-6 w-px bg-admin-border-primary" />
             <ShieldCheck className="h-8 w-8" />
-            <div className="h-6 w-px bg-slate-200 dark:bg-slate-800" />
+            <div className="h-6 w-px bg-admin-border-primary" />
             <span className="text-xl font-black tracking-tighter italic">
-              OPTTIUS<span className="text-primary not-italic">SAFE</span>
+              OPTTIUS
+              <span className="text-admin-accent-primary not-italic">SAFE</span>
             </span>
           </div>
-          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center">
+          <p className="text-[10px] font-bold text-admin-text-tertiary uppercase tracking-widest text-center">
             © {new Date().getFullYear()} Opttius Technology. Pagos procesados
             de forma segura mediante pasarelas PCI-DSS.
           </p>

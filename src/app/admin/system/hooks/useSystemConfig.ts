@@ -36,6 +36,14 @@ export interface UseSystemConfigOptions {
   branchId?: string | null;
 }
 
+/**
+ * Hook para obtener y actualizar la configuración del sistema.
+ * Soporta scope global (org-level) o por sucursal según branchId.
+ *
+ * @param options - Opciones del hook
+ * @param options.branchId - Si se proporciona, fetch/update aplica a la sucursal. Null = org-level (todas las sucursales).
+ * @returns configs, isLoading, error, refetch, updateConfig, isUpdating
+ */
 export function useSystemConfig(options?: UseSystemConfigOptions) {
   const branchId = options?.branchId ?? null;
   const queryClient = useQueryClient();

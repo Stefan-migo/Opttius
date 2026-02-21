@@ -289,10 +289,10 @@ export async function PUT(
       }
     }
 
-    // Get current admin user
+    // Get current admin user and target admin user for org validation
     const { data: currentAdmin } = await supabase
       .from("admin_users")
-      .select("email, role")
+      .select("email, role, organization_id")
       .eq("id", adminUserId)
       .single();
 
@@ -300,6 +300,27 @@ export async function PUT(
       return NextResponse.json(
         { error: "Admin user not found" },
         { status: 404 },
+      );
+    }
+
+    const { data: requesterAdmin } = await supabase
+      .from("admin_users")
+      .select("organization_id, role")
+      .eq("id", user.id)
+      .single();
+
+    const isRoot =
+      requesterAdmin?.role === "root" || requesterAdmin?.role === "dev";
+    if (
+      !isRoot &&
+      requesterAdmin?.organization_id !== currentAdmin.organization_id
+    ) {
+      return NextResponse.json(
+        {
+          error:
+            "No tienes permiso para modificar usuarios de otra organización",
+        },
+        { status: 403 },
       );
     }
 
@@ -414,7 +435,7 @@ export async function DELETE(
     // Get admin user info before deletion
     const { data: adminUser } = await supabase
       .from("admin_users")
-      .select("email, role")
+      .select("email, role, organization_id")
       .eq("id", adminUserId)
       .single();
 
@@ -425,21 +446,46 @@ export async function DELETE(
       );
     }
 
-    // Check if this is the last admin
-    const { count: adminCount } = await supabase
+    const { data: requesterAdmin } = await supabase
       .from("admin_users")
-      .select("*", { count: "exact", head: true })
-      .eq("role", "admin")
-      .eq("is_active", true);
+      .select("organization_id, role")
+      .eq("id", user.id)
+      .single();
 
-    if ((adminCount || 0) <= 1) {
+    const isRoot =
+      requesterAdmin?.role === "root" || requesterAdmin?.role === "dev";
+    if (
+      !isRoot &&
+      requesterAdmin?.organization_id !== adminUser.organization_id
+    ) {
       return NextResponse.json(
         {
           error:
-            "Cannot delete the last admin. At least one admin must remain.",
+            "No tienes permiso para eliminar usuarios de otra organización",
         },
-        { status: 400 },
+        { status: 403 },
       );
+    }
+
+    // Check if this is the last admin/super_admin of the organization
+    const targetOrgId = adminUser.organization_id;
+    if (targetOrgId) {
+      const { count: adminCount } = await supabase
+        .from("admin_users")
+        .select("*", { count: "exact", head: true })
+        .eq("organization_id", targetOrgId)
+        .eq("is_active", true)
+        .in("role", ["admin", "super_admin"]);
+
+      if ((adminCount || 0) <= 1) {
+        return NextResponse.json(
+          {
+            error:
+              "No se puede eliminar al último administrador. Debe quedar al menos un administrador activo en la organización.",
+          },
+          { status: 400 },
+        );
+      }
     }
 
     // Delete admin user (this will cascade to activity logs due to ON DELETE SET NULL)

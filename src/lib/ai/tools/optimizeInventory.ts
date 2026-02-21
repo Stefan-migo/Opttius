@@ -33,6 +33,7 @@ export const inventoryTools: ToolDefinition[] = [
         },
       },
     },
+    zodSchema: optimizeInventorySchema,
     execute: async (params, context): Promise<ToolResult> => {
       try {
         const validated = optimizeInventorySchema.parse(params);

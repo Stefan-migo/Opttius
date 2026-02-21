@@ -36,6 +36,7 @@ import { toast } from "sonner";
 import { useBranch } from "@/hooks/useBranch";
 import { BranchSelector } from "@/components/admin/BranchSelector";
 import EmailTemplatesManager from "@/components/admin/EmailTemplatesManager";
+import AutomaticEmailsInfo from "@/components/admin/AutomaticEmailsInfo";
 import NotificationSettings from "@/components/admin/NotificationSettings";
 import { useSystemConfig } from "./hooks/useSystemConfig";
 import { useSystemHealth } from "./hooks/useSystemHealth";
@@ -322,10 +323,10 @@ export default function SystemAdministrationPage() {
       <div className="space-y-6">
         <div className="flex justify-between items-start">
           <div>
-            <h1 className="text-3xl font-bold text-azul-profundo">
+            <h1 className="text-3xl font-bold text-epoch-primary">
               Administración del Sistema
             </h1>
-            <p className="text-tierra-media">
+            <p className="text-admin-text-tertiary">
               Cargando configuración del sistema...
             </p>
           </div>
@@ -349,10 +350,12 @@ export default function SystemAdministrationPage() {
       <div className="space-y-6">
         <div className="flex justify-between items-start">
           <div>
-            <h1 className="text-3xl font-bold text-azul-profundo">
+            <h1 className="text-3xl font-bold text-epoch-primary">
               Administración del Sistema
             </h1>
-            <p className="text-tierra-media">Error al cargar los datos</p>
+            <p className="text-admin-text-tertiary">
+              Error al cargar los datos
+            </p>
           </div>
         </div>
         <Card>
@@ -361,7 +364,7 @@ export default function SystemAdministrationPage() {
             <h3 className="text-lg font-semibold text-red-700 mb-2">
               Error al cargar sistema
             </h3>
-            <p className="text-tierra-media mb-4">{error}</p>
+            <p className="text-admin-text-tertiary mb-4">{error}</p>
             <Button onClick={() => window.location.reload()}>Reintentar</Button>
           </CardContent>
         </Card>
@@ -375,12 +378,12 @@ export default function SystemAdministrationPage() {
       <div className="flex justify-between items-start">
         <div>
           <h1
-            className="text-3xl font-bold text-azul-profundo"
+            className="text-3xl font-bold text-epoch-primary"
             data-tour="system-header"
           >
             Administración del Sistema
           </h1>
-          <p className="text-tierra-media">
+          <p className="text-admin-text-tertiary">
             Configuración, monitoreo y mantenimiento del sistema de gestión
             óptica
           </p>
@@ -406,10 +409,12 @@ export default function SystemAdministrationPage() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-tierra-media">Estado del Sistema</p>
+                <p className="text-sm text-admin-text-tertiary">
+                  Estado del Sistema
+                </p>
                 {healthStatus && getHealthStatusBadge(healthStatus.status)}
               </div>
-              <Monitor className="h-8 w-8 text-azul-profundo" />
+              <Monitor className="h-8 w-8 text-epoch-primary" />
             </div>
           </CardContent>
         </Card>
@@ -419,7 +424,7 @@ export default function SystemAdministrationPage() {
             <div className="flex items-center">
               <AlertTriangle className="h-8 w-8 text-yellow-500" />
               <div className="ml-4">
-                <p className="text-sm text-tierra-media">Advertencias</p>
+                <p className="text-sm text-admin-text-tertiary">Advertencias</p>
                 <p className="text-2xl font-bold text-yellow-600">
                   {healthStatus?.warnings || 0}
                 </p>
@@ -433,7 +438,7 @@ export default function SystemAdministrationPage() {
             <div className="flex items-center">
               <XCircle className="h-8 w-8 text-red-500" />
               <div className="ml-4">
-                <p className="text-sm text-tierra-media">Críticos</p>
+                <p className="text-sm text-admin-text-tertiary">Críticos</p>
                 <p className="text-2xl font-bold text-red-600">
                   {healthStatus?.criticals || 0}
                 </p>
@@ -445,10 +450,12 @@ export default function SystemAdministrationPage() {
         <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.4)]">
           <CardContent className="p-6">
             <div className="flex items-center">
-              <Clock className="h-8 w-8 text-verde-suave" />
+              <Clock className="h-8 w-8 text-admin-success" />
               <div className="ml-4">
-                <p className="text-sm text-tierra-media">Última Verificación</p>
-                <p className="text-sm font-medium text-verde-suave">
+                <p className="text-sm text-admin-text-tertiary">
+                  Última Verificación
+                </p>
+                <p className="text-sm font-medium text-admin-success">
                   {healthStatus?.last_check
                     ? new Date(healthStatus.last_check).toLocaleTimeString(
                         "es-AR",
@@ -518,10 +525,23 @@ export default function SystemAdministrationPage() {
         </TabsContent>
 
         <TabsContent value="email" className="space-y-6">
+          <AutomaticEmailsInfo />
           <EmailTemplatesManager />
         </TabsContent>
 
         <TabsContent value="notifications" className="space-y-6">
+          <p className="text-sm text-admin-text-tertiary">
+            Para ver qué emails se envían automáticamente a los clientes,
+            consulta la pestaña{" "}
+            <button
+              type="button"
+              onClick={() => setActiveTab("email")}
+              className="text-admin-accent-primary font-medium hover:underline"
+            >
+              Email
+            </button>
+            .
+          </p>
           <NotificationSettings
             branchId={configScope === "branch" ? currentBranchId : null}
             organizationId={organizationId ?? undefined}
@@ -609,7 +629,7 @@ export default function SystemAdministrationPage() {
                     {securityAuditResults.issues.map((issue, index) => (
                       <li
                         key={index}
-                        className="text-sm text-tierra-media pl-2"
+                        className="text-sm text-admin-text-tertiary pl-2"
                       >
                         {issue}
                       </li>
@@ -664,8 +684,8 @@ export default function SystemAdministrationPage() {
                 <Card className="bg-admin-bg-tertiary">
                   <CardContent className="p-4">
                     <div className="flex items-center gap-2 mb-2">
-                      <Monitor className="h-4 w-4 text-azul-profundo" />
-                      <span className="text-xs text-tierra-media">
+                      <Monitor className="h-4 w-4 text-epoch-primary" />
+                      <span className="text-xs text-admin-text-tertiary">
                         Usuarios Totales
                       </span>
                     </div>
@@ -678,8 +698,8 @@ export default function SystemAdministrationPage() {
                 <Card className="bg-admin-bg-tertiary">
                   <CardContent className="p-4">
                     <div className="flex items-center gap-2 mb-2">
-                      <Shield className="h-4 w-4 text-verde-suave" />
-                      <span className="text-xs text-tierra-media">
+                      <Shield className="h-4 w-4 text-admin-success" />
+                      <span className="text-xs text-admin-text-tertiary">
                         Admins Activos
                       </span>
                     </div>
@@ -693,7 +713,7 @@ export default function SystemAdministrationPage() {
                   <CardContent className="p-4">
                     <div className="flex items-center gap-2 mb-2">
                       <Database className="h-4 w-4 text-admin-accent-tertiary" />
-                      <span className="text-xs text-tierra-media">
+                      <span className="text-xs text-admin-text-tertiary">
                         Productos
                       </span>
                     </div>
@@ -707,7 +727,7 @@ export default function SystemAdministrationPage() {
                   <CardContent className="p-4">
                     <div className="flex items-center gap-2 mb-2">
                       <AlertTriangle className="h-4 w-4 text-yellow-500" />
-                      <span className="text-xs text-tierra-media">
+                      <span className="text-xs text-admin-text-tertiary">
                         Actividad 24h
                       </span>
                     </div>
@@ -720,8 +740,8 @@ export default function SystemAdministrationPage() {
                   <Card className="bg-admin-bg-tertiary">
                     <CardContent className="p-4">
                       <div className="flex items-center gap-2 mb-2">
-                        <Receipt className="h-4 w-4 text-azul-profundo" />
-                        <span className="text-xs text-tierra-media">
+                        <Receipt className="h-4 w-4 text-epoch-primary" />
+                        <span className="text-xs text-admin-text-tertiary">
                           Órdenes
                         </span>
                       </div>
@@ -735,8 +755,8 @@ export default function SystemAdministrationPage() {
                   <Card className="bg-admin-bg-tertiary">
                     <CardContent className="p-4">
                       <div className="flex items-center gap-2 mb-2">
-                        <Users className="h-4 w-4 text-verde-suave" />
-                        <span className="text-xs text-tierra-media">
+                        <Users className="h-4 w-4 text-admin-success" />
+                        <span className="text-xs text-admin-text-tertiary">
                           Clientes
                         </span>
                       </div>
@@ -753,7 +773,7 @@ export default function SystemAdministrationPage() {
                 <CardContent className="p-4">
                   <div className="space-y-3 text-sm">
                     <div className="flex justify-between">
-                      <span className="text-tierra-media">
+                      <span className="text-admin-text-tertiary">
                         Fecha del Reporte:
                       </span>
                       <span className="font-medium">
@@ -771,7 +791,7 @@ export default function SystemAdministrationPage() {
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-tierra-media">
+                      <span className="text-admin-text-tertiary">
                         Usuarios Registrados:
                       </span>
                       <span className="font-medium">
@@ -779,7 +799,7 @@ export default function SystemAdministrationPage() {
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-tierra-media">
+                      <span className="text-admin-text-tertiary">
                         Administradores Activos:
                       </span>
                       <span className="font-medium">
@@ -787,7 +807,7 @@ export default function SystemAdministrationPage() {
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-tierra-media">
+                      <span className="text-admin-text-tertiary">
                         Productos en Sistema:
                       </span>
                       <span className="font-medium">
@@ -795,7 +815,7 @@ export default function SystemAdministrationPage() {
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-tierra-media">
+                      <span className="text-admin-text-tertiary">
                         Actividad Admin (últimas 24h):
                       </span>
                       <span className="font-medium">
@@ -855,19 +875,21 @@ export default function SystemAdministrationPage() {
                 <CardContent className="p-4">
                   <div className="space-y-3 text-sm">
                     <div className="flex justify-between">
-                      <span className="text-tierra-media">ID del Backup:</span>
+                      <span className="text-admin-text-tertiary">
+                        ID del Backup:
+                      </span>
                       <span className="font-mono text-xs">
                         {backupResult.backup_id}
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-tierra-media">Archivo:</span>
+                      <span className="text-admin-text-tertiary">Archivo:</span>
                       <span className="font-medium">
                         {backupResult.backup_file}
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-tierra-media">
+                      <span className="text-admin-text-tertiary">
                         Tablas respaldadas:
                       </span>
                       <span className="font-medium">
@@ -875,7 +897,7 @@ export default function SystemAdministrationPage() {
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-tierra-media">
+                      <span className="text-admin-text-tertiary">
                         Total de registros:
                       </span>
                       <span className="font-medium">
@@ -883,13 +905,13 @@ export default function SystemAdministrationPage() {
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-tierra-media">Tamaño:</span>
+                      <span className="text-admin-text-tertiary">Tamaño:</span>
                       <span className="font-medium">
                         {backupResult.backup_size_mb} MB
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-tierra-media">
+                      <span className="text-admin-text-tertiary">
                         Tiempo de ejecución:
                       </span>
                       <span className="font-medium">
@@ -898,7 +920,9 @@ export default function SystemAdministrationPage() {
                     </div>
                     {backupResult.download_url_expires_at && (
                       <div className="flex justify-between">
-                        <span className="text-tierra-media">URL expira:</span>
+                        <span className="text-admin-text-tertiary">
+                          URL expira:
+                        </span>
                         <span className="font-medium text-xs">
                           {new Date(
                             backupResult.download_url_expires_at,
@@ -1031,25 +1055,27 @@ export default function SystemAdministrationPage() {
                 <CardContent className="p-4">
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
-                      <span className="text-tierra-media">ID del Backup:</span>
+                      <span className="text-admin-text-tertiary">
+                        ID del Backup:
+                      </span>
                       <span className="font-mono text-xs">
                         {selectedBackup.id}
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-tierra-media">Archivo:</span>
+                      <span className="text-admin-text-tertiary">Archivo:</span>
                       <span className="font-medium">
                         {selectedBackup.filename}
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-tierra-media">Tamaño:</span>
+                      <span className="text-admin-text-tertiary">Tamaño:</span>
                       <span className="font-medium">
                         {selectedBackup.size_mb} MB
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-tierra-media">
+                      <span className="text-admin-text-tertiary">
                         Fecha de creación:
                       </span>
                       <span className="font-medium">
@@ -1138,7 +1164,7 @@ export default function SystemAdministrationPage() {
                 <CardContent className="p-4">
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
-                      <span className="text-tierra-media">
+                      <span className="text-admin-text-tertiary">
                         Backup restaurado:
                       </span>
                       <span className="font-medium">
@@ -1146,14 +1172,16 @@ export default function SystemAdministrationPage() {
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-tierra-media">Backup ID:</span>
+                      <span className="text-admin-text-tertiary">
+                        Backup ID:
+                      </span>
                       <span className="font-mono text-xs">
                         {restoreResults.backup_id}
                       </span>
                     </div>
                     {restoreResults.safety_backup_id && (
                       <div className="flex justify-between">
-                        <span className="text-tierra-media">
+                        <span className="text-admin-text-tertiary">
                           Backup de seguridad creado:
                         </span>
                         <span className="font-mono text-xs">
@@ -1162,7 +1190,7 @@ export default function SystemAdministrationPage() {
                       </div>
                     )}
                     <div className="flex justify-between">
-                      <span className="text-tierra-media">
+                      <span className="text-admin-text-tertiary">
                         Tablas restauradas:
                       </span>
                       <span className="font-medium">
@@ -1170,7 +1198,7 @@ export default function SystemAdministrationPage() {
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-tierra-media">
+                      <span className="text-admin-text-tertiary">
                         Total de registros:
                       </span>
                       <span className="font-medium">
@@ -1178,7 +1206,7 @@ export default function SystemAdministrationPage() {
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-tierra-media">
+                      <span className="text-admin-text-tertiary">
                         Tiempo de ejecución:
                       </span>
                       <span className="font-medium">
@@ -1187,7 +1215,9 @@ export default function SystemAdministrationPage() {
                     </div>
                     {restoreResults.errors > 0 && (
                       <div className="flex justify-between">
-                        <span className="text-tierra-media">Errores:</span>
+                        <span className="text-admin-text-tertiary">
+                          Errores:
+                        </span>
                         <span className="font-medium text-red-600">
                           {restoreResults.errors}
                         </span>
@@ -1230,7 +1260,7 @@ export default function SystemAdministrationPage() {
                                   {tableName}
                                 </span>
                               </div>
-                              <div className="text-xs text-tierra-media">
+                              <div className="text-xs text-admin-text-tertiary">
                                 {result.status === "success" && (
                                   <span className="text-green-700 dark:text-green-400">
                                     {result.records_restored} registros
@@ -1243,7 +1273,7 @@ export default function SystemAdministrationPage() {
                                   </span>
                                 )}
                                 {result.status === "skipped" && (
-                                  <span className="text-tierra-media">
+                                  <span className="text-admin-text-tertiary">
                                     {result.reason}
                                   </span>
                                 )}
@@ -1326,25 +1356,27 @@ export default function SystemAdministrationPage() {
                 <CardContent className="p-4">
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
-                      <span className="text-tierra-media">ID del Backup:</span>
+                      <span className="text-admin-text-tertiary">
+                        ID del Backup:
+                      </span>
                       <span className="font-mono text-xs">
                         {selectedBackup.id}
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-tierra-media">Archivo:</span>
+                      <span className="text-admin-text-tertiary">Archivo:</span>
                       <span className="font-medium">
                         {selectedBackup.filename}
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-tierra-media">Tamaño:</span>
+                      <span className="text-admin-text-tertiary">Tamaño:</span>
                       <span className="font-medium">
                         {selectedBackup.size_mb} MB
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-tierra-media">
+                      <span className="text-admin-text-tertiary">
                         Fecha de creación:
                       </span>
                       <span className="font-medium">

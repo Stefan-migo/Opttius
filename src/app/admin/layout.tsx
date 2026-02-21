@@ -45,6 +45,7 @@ import { DemoModeBanner } from "@/components/onboarding/DemoModeBanner";
 import { TourProvider } from "@/components/onboarding/TourProvider";
 import { TourButton } from "@/components/onboarding/TourButton";
 import { SubscriptionGuard } from "@/components/admin/SubscriptionGuard";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { useBranch } from "@/hooks/useBranch";
 import { useRoot } from "@/hooks/useRoot";
 import { getBranchHeader } from "@/lib/utils/branch";
@@ -122,9 +123,9 @@ const createNavigationItems = (
   },
   {
     href: "/admin/support",
-    label: "Soporte Interno",
+    label: "Registro de Incidentes",
     icon: MessageSquare,
-    description: "Gestión de problemas internos con clientes",
+    description: "Registro de incidentes y problemas para análisis y mejora",
     badge:
       openTicketsCount !== undefined && openTicketsCount > 0
         ? openTicketsCount.toString()
@@ -983,7 +984,9 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
               <main className="admin-content">
                 {/* Demo Mode Banner */}
                 {organizationState.isDemoMode && <DemoModeBanner />}
-                {children}
+                <TooltipProvider delayDuration={300}>
+                  {children}
+                </TooltipProvider>
               </main>
             </div>
           </div>

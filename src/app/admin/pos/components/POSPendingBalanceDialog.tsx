@@ -104,32 +104,34 @@ export function POSPendingBalanceDialog({
         }
       }}
     >
-      <DialogContent className="max-w-3xl">
+      <DialogContent className="max-w-3xl rounded-none border-admin-border-primary">
         <DialogHeader>
-          <DialogTitle>Cobrar Saldos Pendientes</DialogTitle>
-          <DialogDescription>
+          <DialogTitle className="font-display">
+            Cobrar Saldos Pendientes
+          </DialogTitle>
+          <DialogDescription className="text-admin-text-secondary">
             Se cargan automáticamente todos los saldos pendientes de la
             sucursal. Usa el buscador para filtrar por cliente u orden.
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-4">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-admin-text-tertiary h-5 w-5" />
             <Input
               placeholder="Filtrar por nombre, RUT, número de orden, email..."
               value={searchTerm}
               onChange={(e) => onFilterSearch(e.target.value)}
-              className="pl-10"
+              className="pl-10 rounded-none"
             />
           </div>
 
           {loading ? (
             <div className="flex justify-center py-8">
-              <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
+              <Loader2 className="h-6 w-6 animate-spin text-admin-text-tertiary" />
             </div>
           ) : orders.length > 0 ? (
             <>
-              <div className="border rounded-lg overflow-hidden">
+              <div className="border border-admin-border-primary rounded-none overflow-hidden">
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -147,8 +149,8 @@ export function POSPendingBalanceDialog({
                         key={order.id}
                         className={
                           selectedOrder?.id === order.id
-                            ? "bg-blue-50"
-                            : "cursor-pointer hover:bg-gray-50"
+                            ? "bg-admin-info/5"
+                            : "cursor-pointer hover:bg-admin-bg-secondary"
                         }
                         onClick={() => {
                           onSelectOrder(order);
@@ -167,12 +169,12 @@ export function POSPendingBalanceDialog({
                               "Sin nombre"}
                           </div>
                           {order.customer_rut && (
-                            <div className="text-xs text-gray-600 font-mono">
+                            <div className="text-xs text-admin-text-secondary font-mono">
                               RUT: {order.customer_rut}
                             </div>
                           )}
                           {order.customer_email && (
-                            <div className="text-xs text-gray-500">
+                            <div className="text-xs text-admin-text-tertiary">
                               {order.customer_email}
                             </div>
                           )}
@@ -180,10 +182,10 @@ export function POSPendingBalanceDialog({
                         <TableCell className="text-right">
                           {formatCurrency(order.total_amount)}
                         </TableCell>
-                        <TableCell className="text-right text-green-600">
+                        <TableCell className="text-right text-admin-success">
                           {formatCurrency(order.total_paid)}
                         </TableCell>
-                        <TableCell className="text-right font-semibold text-orange-600">
+                        <TableCell className="text-right font-semibold text-admin-warning">
                           {formatCurrency(order.pending_amount)}
                         </TableCell>
                         <TableCell>
@@ -195,6 +197,7 @@ export function POSPendingBalanceDialog({
                                   ? "default"
                                   : "outline"
                               }
+                              className="rounded-none"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 onSelectOrder(order);
@@ -210,6 +213,7 @@ export function POSPendingBalanceDialog({
                             <Button
                               size="sm"
                               variant="outline"
+                              className="rounded-none"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 onRefundClick(order);
@@ -226,50 +230,54 @@ export function POSPendingBalanceDialog({
               </div>
 
               {selectedOrder && (
-                <Card className="bg-blue-50 border-blue-200">
+                <Card className="bg-admin-info/5 border-admin-border-primary rounded-none">
                   <CardContent className="pt-6 space-y-4">
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <Label className="text-xs text-gray-600">Orden</Label>
+                        <Label className="text-xs text-admin-text-secondary">
+                          Orden
+                        </Label>
                         <div className="font-semibold text-lg">
                           {selectedOrder.order_number}
                         </div>
                       </div>
                       <div>
-                        <Label className="text-xs text-gray-600">Cliente</Label>
-                        <div className="font-semibold">
+                        <Label className="text-xs text-admin-text-secondary">
+                          Cliente
+                        </Label>
+                        <div className="font-semibold text-admin-text-primary">
                           {selectedOrder.customer_name ||
                             selectedOrder.customer_email ||
                             "Sin nombre"}
                         </div>
                         {selectedOrder.customer_rut && (
-                          <div className="text-xs text-gray-600 font-mono">
+                          <div className="text-xs text-admin-text-secondary font-mono">
                             RUT: {selectedOrder.customer_rut}
                           </div>
                         )}
                         {selectedOrder.customer_email && (
-                          <div className="text-xs text-gray-600">
+                          <div className="text-xs text-admin-text-secondary">
                             {selectedOrder.customer_email}
                           </div>
                         )}
                       </div>
                       <div>
-                        <Label className="text-xs text-gray-600">
+                        <Label className="text-xs text-admin-text-secondary">
                           Saldo Pendiente
                         </Label>
-                        <div className="font-semibold text-lg text-orange-600">
+                        <div className="font-semibold text-lg text-admin-warning">
                           {formatCurrency(selectedOrder.pending_amount)}
                         </div>
                       </div>
                       <div>
-                        <Label className="text-xs text-gray-600">
+                        <Label className="text-xs text-admin-text-secondary">
                           Método de Pago
                         </Label>
                         <Select
                           value={pendingPaymentMethod}
                           onValueChange={onPaymentMethodChange}
                         >
-                          <SelectTrigger>
+                          <SelectTrigger className="rounded-none">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
@@ -284,15 +292,18 @@ export function POSPendingBalanceDialog({
                       </div>
                     </div>
                     <div>
-                      <Label>Monto a Pagar *</Label>
+                      <Label className="text-admin-text-primary">
+                        Monto a Pagar *
+                      </Label>
                       <Input
                         type="number"
                         placeholder="0"
                         value={pendingPaymentAmount}
                         onChange={(e) => onPaymentAmountChange(e.target.value)}
                         max={selectedOrder.pending_amount}
+                        className="rounded-none"
                       />
-                      <p className="text-xs text-gray-600 mt-1">
+                      <p className="text-xs text-admin-text-secondary mt-1">
                         Máximo: {formatCurrency(selectedOrder.pending_amount)}
                       </p>
                     </div>
@@ -300,7 +311,7 @@ export function POSPendingBalanceDialog({
                       pendingPaymentMethod === "credit" ||
                       pendingPaymentMethod === "transfer") && (
                       <div>
-                        <Label className="text-sm text-gray-600">
+                        <Label className="text-sm text-admin-text-secondary">
                           Número de referencia fiscal (opcional)
                         </Label>
                         <Input
@@ -309,9 +320,9 @@ export function POSPendingBalanceDialog({
                           onChange={(e) =>
                             onFiscalReferenceChange(e.target.value)
                           }
-                          className="mt-1"
+                          className="mt-1 rounded-none"
                         />
-                        <p className="text-xs text-amber-600 mt-1">
+                        <p className="text-xs text-admin-warning mt-1">
                           Se recomienda registrar el número para trazabilidad
                           con documentos fiscales reales
                         </p>
@@ -322,8 +333,8 @@ export function POSPendingBalanceDialog({
               )}
             </>
           ) : (
-            <div className="text-center py-8 text-gray-500">
-              <CreditCard className="h-12 w-12 mx-auto mb-2 text-gray-400" />
+            <div className="text-center py-8 text-admin-text-tertiary">
+              <CreditCard className="h-12 w-12 mx-auto mb-2 text-admin-text-tertiary" />
               <p>
                 {searchTerm
                   ? "No se encontraron resultados"
@@ -333,13 +344,18 @@ export function POSPendingBalanceDialog({
           )}
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+          <Button
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            className="rounded-none"
+          >
             Cerrar
           </Button>
           {selectedOrder && (
             <Button
               onClick={onProcessPayment}
               disabled={processingPayment || !pendingPaymentAmount}
+              className="rounded-none"
             >
               {processingPayment ? (
                 <>

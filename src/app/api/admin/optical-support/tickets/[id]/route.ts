@@ -35,7 +35,13 @@ export async function GET(
       .eq("id", user.id)
       .single();
 
-    if (!adminUser || !adminUser.organization_id) {
+    const isRoot = adminUser?.role === "root" || adminUser?.role === "dev";
+    let organizationId = adminUser?.organization_id;
+    if (!organizationId && isRoot) {
+      organizationId =
+        (process.env.NEXT_PUBLIC_ROOT_ORG_ID as string) || undefined;
+    }
+    if (!adminUser || !organizationId) {
       return NextResponse.json(
         { error: "No organization assigned" },
         { status: 403 },
@@ -60,7 +66,7 @@ export async function GET(
       `,
       )
       .eq("id", params.id)
-      .eq("organization_id", adminUser.organization_id) // Solo tickets de su organización
+      .eq("organization_id", organizationId)
       .single();
 
     if (ticketError || !ticket) {
@@ -109,7 +115,13 @@ export async function PATCH(
       .eq("id", user.id)
       .single();
 
-    if (!adminUser || !adminUser.organization_id) {
+    const isRootPatch = adminUser?.role === "root" || adminUser?.role === "dev";
+    let organizationIdPatch = adminUser?.organization_id;
+    if (!organizationIdPatch && isRootPatch) {
+      organizationIdPatch =
+        (process.env.NEXT_PUBLIC_ROOT_ORG_ID as string) || undefined;
+    }
+    if (!adminUser || !organizationIdPatch) {
       return NextResponse.json(
         { error: "No organization assigned" },
         { status: 403 },
@@ -120,9 +132,11 @@ export async function PATCH(
     const { data: currentTicket, error: currentError } =
       await supabaseServiceRole
         .from("optical_internal_support_tickets")
-        .select("id, organization_id, status, assigned_to, resolved_at")
+        .select(
+          "id, organization_id, status, assigned_to, resolved_at, created_at",
+        )
         .eq("id", params.id)
-        .eq("organization_id", adminUser.organization_id)
+        .eq("organization_id", organizationIdPatch)
         .single();
 
     if (currentError || !currentTicket) {
@@ -143,11 +157,16 @@ export async function PATCH(
     if (body.status !== undefined) {
       updateData.status = body.status;
 
-      // Si se resuelve, establecer resolved_at y resolved_by
+      // Si se resuelve, establecer resolved_at, resolved_by y resolution_time_minutes
       if (body.status === "resolved" || body.status === "closed") {
         if (!currentTicket.resolved_at) {
-          updateData.resolved_at = new Date().toISOString();
+          const resolvedAt = new Date();
+          updateData.resolved_at = resolvedAt.toISOString();
           updateData.resolved_by = adminUser.id;
+          const createdAt = new Date(currentTicket.created_at);
+          updateData.resolution_time_minutes = Math.round(
+            (resolvedAt.getTime() - createdAt.getTime()) / (1000 * 60),
+          );
         }
       }
     }
@@ -206,7 +225,7 @@ export async function PATCH(
         .insert({
           ticket_id: params.id,
           message: `Estado cambiado a: ${body.status}`,
-          is_internal: false,
+          is_internal: true,
           sender_id: adminUser.id,
           sender_name: user.email?.split("@")[0] || "Sistema",
           sender_email: adminUser.email || user.email || "",
@@ -234,12 +253,40 @@ export async function PATCH(
         .insert({
           ticket_id: params.id,
           message: `Ticket asignado a: ${assignedUserName}`,
-          is_internal: false,
+          is_internal: true,
           sender_id: adminUser.id,
           sender_name: user.email?.split("@")[0] || "Sistema",
           sender_email: adminUser.email || user.email || "",
           sender_role: adminUser.role,
           message_type: "assignment",
+        });
+    }
+
+    // Crear mensaje de resolución cuando se agregan resolution o resolution_notes
+    const hasResolution =
+      (body.resolution && body.resolution.trim()) ||
+      (body.resolution_notes && body.resolution_notes.trim());
+    if (hasResolution) {
+      const resolutionParts: string[] = [];
+      if (body.resolution?.trim()) {
+        resolutionParts.push(`Resolución: ${body.resolution.trim()}`);
+      }
+      if (body.resolution_notes?.trim()) {
+        resolutionParts.push(`Notas: ${body.resolution_notes.trim()}`);
+      }
+      const resolutionMessage = resolutionParts.join("\n\n");
+
+      await supabaseServiceRole
+        .from("optical_internal_support_messages")
+        .insert({
+          ticket_id: params.id,
+          message: resolutionMessage,
+          is_internal: true,
+          sender_id: adminUser.id,
+          sender_name: user.email?.split("@")[0] || "Sistema",
+          sender_email: adminUser.email || user.email || "",
+          sender_role: adminUser.role,
+          message_type: "resolution",
         });
     }
 

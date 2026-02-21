@@ -84,16 +84,16 @@ export default function SaasConfigPage() {
           <ArrowLeft className="h-5 w-5" />
         </Button>
         <div>
-          <h1 className="text-3xl font-bold text-azul-profundo">
+          <h1 className="text-3xl font-display font-bold text-epoch-primary tracking-tight">
             Configuración SaaS
           </h1>
-          <p className="text-tierra-media mt-2">
+          <p className="text-muted-foreground mt-2">
             Parámetros por defecto del período de prueba y suscripciones
           </p>
         </div>
       </div>
 
-      <Card>
+      <Card className="admin-card rounded-none">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Calendar className="h-5 w-5" />

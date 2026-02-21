@@ -1,3 +1,4 @@
+import type { z } from "zod";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 export interface ToolExecutionContext {
@@ -40,4 +41,6 @@ export interface ToolDefinition {
   execute: ToolFunction;
   requiresConfirmation?: boolean;
   category?: string;
+  /** Optional Zod schema for validating tool parameters before execution */
+  zodSchema?: z.ZodTypeAny;
 }

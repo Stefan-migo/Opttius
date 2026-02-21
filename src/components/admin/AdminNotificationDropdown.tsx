@@ -1,20 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import {
-  Bell,
-  Check,
-  CheckCheck,
-  ChevronRight,
-  X,
-  Package,
-  ShoppingCart,
-  AlertTriangle,
-  MessageSquare,
-  TrendingUp,
-  Shield,
-  Info,
-} from "lucide-react";
+import { Bell, CheckCheck, ChevronRight, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -30,6 +17,14 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useAuthContext } from "@/contexts/AuthContext";
+import { useBranch } from "@/hooks/useBranch";
+import { useRoot } from "@/hooks/useRoot";
+import { createClient } from "@/utils/supabase/client";
+import {
+  NOTIFICATION_ICONS,
+  PRIORITY_COLORS,
+  formatTimeSince,
+} from "@/lib/notifications/constants";
 
 interface AdminNotification {
   id: string;
@@ -46,28 +41,11 @@ interface AdminNotification {
   created_at: string;
 }
 
-const notificationIcons: Record<string, any> = {
-  order_new: ShoppingCart,
-  order_status_change: Package,
-  low_stock: AlertTriangle,
-  out_of_stock: AlertTriangle,
-  support_ticket_new: MessageSquare,
-  support_ticket_update: MessageSquare,
-  payment_received: TrendingUp,
-  system_alert: Shield,
-  custom: Info,
-};
-
-const priorityColors: Record<string, string> = {
-  low: "text-gray-500 bg-gray-100",
-  medium: "text-blue-600 bg-blue-100",
-  high: "text-orange-600 bg-orange-100",
-  urgent: "text-red-600 bg-red-100",
-};
-
 export default function AdminNotificationDropdown() {
   const router = useRouter();
   const { user, loading: authLoading } = useAuthContext();
+  const { currentBranchId, isGlobalView } = useBranch();
+  const { isRoot } = useRoot();
   const [notifications, setNotifications] = useState<AdminNotification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -81,7 +59,13 @@ export default function AdminNotificationDropdown() {
     }
 
     try {
-      const response = await fetch("/api/admin/notifications?limit=10", {
+      const params = new URLSearchParams({ limit: "10" });
+      // When branch is selected (not global view), filter by branch for multi-sucursal isolation.
+      // Root users see SaaS notifications (no branch_id); skip branch filter for them.
+      if (!isRoot && currentBranchId && !isGlobalView) {
+        params.set("branch_id", currentBranchId);
+      }
+      const response = await fetch(`/api/admin/notifications?${params}`, {
         credentials: "include",
       });
       if (!response.ok) {
@@ -104,20 +88,38 @@ export default function AdminNotificationDropdown() {
   };
 
   useEffect(() => {
-    // Only start fetching when user is authenticated
     if (!authLoading && user) {
       fetchNotifications();
 
-      // Poll for new notifications every 30 seconds
-      intervalRef.current = setInterval(fetchNotifications, 30000);
-    }
+      // Poll as fallback (Realtime is primary)
+      intervalRef.current = setInterval(fetchNotifications, 60000);
 
-    return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
-    };
-  }, [user, authLoading]);
+      // Supabase Realtime: instant updates on new notifications
+      const supabase = createClient();
+      const channel = supabase
+        .channel("admin-notifications")
+        .on(
+          "postgres_changes",
+          {
+            event: "INSERT",
+            schema: "public",
+            table: "admin_notifications",
+            ...(currentBranchId && !isGlobalView && !isRoot
+              ? { filter: `branch_id=eq.${currentBranchId}` }
+              : {}),
+          },
+          () => fetchNotifications(),
+        )
+        .subscribe();
+
+      return () => {
+        if (intervalRef.current) {
+          clearInterval(intervalRef.current);
+        }
+        supabase.removeChannel(channel);
+      };
+    }
+  }, [user, authLoading, currentBranchId, isGlobalView, isRoot]);
 
   const markAsRead = async (notificationId: string, actionUrl?: string) => {
     try {
@@ -171,17 +173,6 @@ export default function AdminNotificationDropdown() {
     } finally {
       setLoading(false);
     }
-  };
-
-  const getTimeSince = (date: string) => {
-    const seconds = Math.floor(
-      (new Date().getTime() - new Date(date).getTime()) / 1000,
-    );
-
-    if (seconds < 60) return "Hace un momento";
-    if (seconds < 3600) return `Hace ${Math.floor(seconds / 60)} min`;
-    if (seconds < 86400) return `Hace ${Math.floor(seconds / 3600)} h`;
-    return `Hace ${Math.floor(seconds / 86400)} días`;
   };
 
   return (
@@ -249,7 +240,7 @@ export default function AdminNotificationDropdown() {
           ) : (
             <div className="divide-y divide-admin-border-primary/30">
               {notifications.map((notification) => {
-                const Icon = notificationIcons[notification.type] || Info;
+                const Icon = NOTIFICATION_ICONS[notification.type] || Info;
                 const isUnread = !notification.is_read;
 
                 return (
@@ -303,7 +294,7 @@ export default function AdminNotificationDropdown() {
                             {notification.title}
                           </p>
                           <span className="text-[10px] font-bold text-admin-text-tertiary whitespace-nowrap pt-0.5">
-                            {getTimeSince(notification.created_at)}
+                            {formatTimeSince(notification.created_at)}
                           </span>
                         </div>
 
@@ -317,11 +308,8 @@ export default function AdminNotificationDropdown() {
                             <span
                               className={cn(
                                 "text-[9px] font-bold px-1.5 py-0.5 rounded-md uppercase tracking-tight",
-                                notification.priority === "urgent"
-                                  ? "bg-admin-error/10 text-admin-error"
-                                  : notification.priority === "high"
-                                    ? "bg-admin-warning/10 text-admin-warning"
-                                    : "bg-admin-bg-tertiary text-admin-text-tertiary",
+                                PRIORITY_COLORS[notification.priority] ||
+                                  PRIORITY_COLORS.medium,
                               )}
                             >
                               {notification.priority}

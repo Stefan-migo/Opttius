@@ -26,11 +26,12 @@ export function SubscriptionGuard({ children }: SubscriptionGuardProps) {
       setChecking(false);
       return;
     }
-    // Don't block on subscription-required, checkout, or help (user can pay or request SaaS support)
+    // Don't block on subscription-required, checkout, help, or saas-management (root-only)
     if (
       pathname?.includes("/subscription-required") ||
       pathname?.includes("/checkout") ||
-      pathname?.includes("/admin/help")
+      pathname?.includes("/admin/help") ||
+      pathname?.includes("/admin/saas-management")
     ) {
       setChecking(false);
       return;
@@ -59,7 +60,8 @@ export function SubscriptionGuard({ children }: SubscriptionGuardProps) {
   if (
     pathname?.includes("/subscription-required") ||
     pathname?.includes("/checkout") ||
-    pathname?.includes("/admin/help")
+    pathname?.includes("/admin/help") ||
+    pathname?.includes("/admin/saas-management")
   ) {
     return children;
   }

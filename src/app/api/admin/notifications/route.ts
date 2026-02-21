@@ -46,17 +46,22 @@ export async function GET(request: NextRequest) {
     const offset = parseInt(url.searchParams.get("offset") || "0");
     const unreadOnly = url.searchParams.get("unread_only") === "true";
     const type = url.searchParams.get("type");
+    const branchId = url.searchParams.get("branch_id") || undefined;
 
-    const isRoot = !!isRootUser;
-
-    // RLS policies handle filtering by organization_id and branch_id automatically
-    // We just need to apply additional filters (unread, type) and pagination
+    // RLS policies handle filtering by organization_id and branch_id automatically.
+    // When branch_id is provided (user has a branch selected), filter to that branch only.
+    // When not provided (global view), RLS shows all accessible branches for the user.
     let query = supabase
       .from("admin_notifications")
       .select("*", { count: "exact" })
       .eq("is_archived", false)
       .order("created_at", { ascending: false })
       .range(offset, offset + limit - 1);
+
+    // Filter by branch when user has a specific branch selected (multi-sucursal isolation)
+    if (branchId) {
+      query = query.eq("branch_id", branchId);
+    }
 
     // Apply filters
     if (unreadOnly) {
@@ -77,12 +82,16 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Unread count - RLS policies handle filtering automatically
-    const { count: unreadCount } = await supabase
+    // Unread count - apply same branch filter as main query
+    let unreadQuery = supabase
       .from("admin_notifications")
       .select("id", { count: "exact", head: true })
       .eq("is_archived", false)
       .eq("is_read", false);
+    if (branchId) {
+      unreadQuery = unreadQuery.eq("branch_id", branchId);
+    }
+    const { count: unreadCount } = await unreadQuery;
 
     return NextResponse.json({
       notifications: notifications || [],

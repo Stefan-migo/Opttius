@@ -28,6 +28,16 @@ interface SystemMaintenanceProps {
   deletingBackup: boolean;
 }
 
+/**
+ * Herramientas de mantenimiento: backup, logs, auditoría, test email, estado del sistema.
+ * Incluye BackupManager para listar, restaurar y eliminar backups.
+ *
+ * @param props.onMaintenanceAction - Ejecuta acción (backup_database, clean_logs, etc.)
+ * @param props.backups - Lista de backups disponibles
+ * @param props.onCreateBackup - Crear nuevo backup
+ * @param props.onRestoreBackup - Restaurar backup seleccionado
+ * @param props.onDeleteBackup - Eliminar backup
+ */
 export default function SystemMaintenance({
   onMaintenanceAction,
   maintenanceLoading,
@@ -111,7 +121,7 @@ export default function SystemMaintenance({
                     <Icon className="h-5 w-5" />
                     <span className="font-medium">{action.label}</span>
                   </div>
-                  <p className="text-sm text-tierra-media">
+                  <p className="text-sm text-admin-text-tertiary">
                     {action.description}
                   </p>
                   {isActive && (

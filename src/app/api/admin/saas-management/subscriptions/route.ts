@@ -3,6 +3,7 @@ import { requireRoot } from "@/lib/api/root-middleware";
 import { createServiceRoleClient } from "@/utils/supabase/service-role";
 import { appLogger as logger } from "@/lib/logger";
 import { AuthorizationError } from "@/lib/api/errors";
+import { createSubscriptionSchema } from "@/lib/api/validation/zod-schemas";
 
 /**
  * GET /api/admin/saas-management/subscriptions
@@ -153,32 +154,22 @@ export async function POST(request: NextRequest) {
     const supabaseServiceRole = createServiceRoleClient();
 
     const body = await request.json();
+    const parseResult = createSubscriptionSchema.safeParse(body);
+    if (!parseResult.success) {
+      const firstError = parseResult.error.errors[0];
+      return NextResponse.json(
+        { error: firstError?.message || "Datos inválidos" },
+        { status: 400 },
+      );
+    }
     const {
       organization_id,
-      status = "trialing",
+      status,
       trial_days,
       trial_ends_at,
       current_period_start,
       current_period_end,
-    } = body;
-
-    if (!organization_id) {
-      return NextResponse.json(
-        { error: "organization_id es requerido" },
-        { status: 400 },
-      );
-    }
-
-    const validStatuses = [
-      "active",
-      "past_due",
-      "cancelled",
-      "trialing",
-      "incomplete",
-    ];
-    if (!validStatuses.includes(status)) {
-      return NextResponse.json({ error: "status inválido" }, { status: 400 });
-    }
+    } = parseResult.data;
 
     let trialEndsAt: string | null = null;
     let periodEnd: string | null = null;

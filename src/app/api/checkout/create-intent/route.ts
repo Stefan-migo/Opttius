@@ -113,7 +113,8 @@ export async function POST(request: NextRequest) {
 
       // NOWPayments normalization: Convert CLP to USD because NOWPayments doesn't support CLP fiat price
       if (gateway === "nowpayments" && currency === "CLP") {
-        const CLP_TO_USD_RATE = 950; // Approximated rate for sandbox/testing
+        const CLP_TO_USD_RATE =
+          Number(process.env.NOWPAYMENTS_CLP_TO_USD_RATE || "950") || 950;
         const originalAmount = amountNum;
         amountNum = Math.round((amountNum / CLP_TO_USD_RATE) * 100) / 100;
         currency = "USD";

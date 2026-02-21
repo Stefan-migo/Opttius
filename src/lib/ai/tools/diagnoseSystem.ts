@@ -34,6 +34,7 @@ export const diagnoseSystemTools: ToolDefinition[] = [
         },
       },
     },
+    zodSchema: diagnoseSystemSchema,
     execute: async (params, context): Promise<ToolResult> => {
       try {
         const validated = diagnoseSystemSchema.parse(params);

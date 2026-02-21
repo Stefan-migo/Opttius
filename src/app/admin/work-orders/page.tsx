@@ -56,7 +56,10 @@ import { useBranch } from "@/hooks/useBranch";
 import { getBranchHeader } from "@/lib/utils/branch";
 import { BranchSelector } from "@/components/admin/BranchSelector";
 import { formatCurrency, formatDate } from "@/lib/utils";
-import { extractDataFromResponse, extractPaginationFromResponse } from "@/lib/api/response-helpers";
+import {
+  extractDataFromResponse,
+  extractPaginationFromResponse,
+} from "@/lib/api/response-helpers";
 
 // CreateWorkOrderForm eliminado: Los trabajos solo se crean desde POS (process-sale)
 // Esto previene trabajos "fantasma" sin vínculo financiero ni control de inventario
@@ -356,12 +359,12 @@ export default function WorkOrdersPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1
-            className="text-3xl font-bold text-azul-profundo"
+            className="text-3xl font-bold text-epoch-primary"
             data-tour="work-orders-header"
           >
             Trabajos
           </h1>
-          <p className="text-tierra-media">
+          <p className="text-admin-text-tertiary">
             {isGlobalView
               ? "Gestión de trabajos de laboratorio - Todas las sucursales"
               : "Gestión de trabajos de laboratorio"}
@@ -380,12 +383,14 @@ export default function WorkOrdersPage() {
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-tierra-media">Total Trabajos</p>
-                <p className="text-2xl font-bold text-azul-profundo">
+                <p className="text-sm text-admin-text-tertiary">
+                  Total Trabajos
+                </p>
+                <p className="text-2xl font-bold text-epoch-primary">
                   {totalWorkOrders}
                 </p>
               </div>
-              <Package className="h-8 w-8 text-azul-profundo" />
+              <Package className="h-8 w-8 text-epoch-primary" />
             </div>
           </CardContent>
         </Card>
@@ -393,7 +398,9 @@ export default function WorkOrdersPage() {
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-tierra-media">En Laboratorio</p>
+                <p className="text-sm text-admin-text-tertiary">
+                  En Laboratorio
+                </p>
                 <p className="text-2xl font-bold text-orange-600">
                   {
                     workOrders.filter((w) =>
@@ -414,7 +421,9 @@ export default function WorkOrdersPage() {
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-tierra-media">Listos para Retiro</p>
+                <p className="text-sm text-admin-text-tertiary">
+                  Listos para Retiro
+                </p>
                 <p className="text-2xl font-bold text-green-600">
                   {
                     workOrders.filter((w) => w.status === "ready_for_pickup")
@@ -430,12 +439,12 @@ export default function WorkOrdersPage() {
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-tierra-media">Entregados</p>
-                <p className="text-2xl font-bold text-verde-suave">
+                <p className="text-sm text-admin-text-tertiary">Entregados</p>
+                <p className="text-2xl font-bold text-admin-success">
                   {workOrders.filter((w) => w.status === "delivered").length}
                 </p>
               </div>
-              <Truck className="h-8 w-8 text-verde-suave" />
+              <Truck className="h-8 w-8 text-admin-success" />
             </div>
           </CardContent>
         </Card>
@@ -447,7 +456,7 @@ export default function WorkOrdersPage() {
           <div className="flex items-center gap-4">
             <div className="flex-1">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-tierra-media" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-admin-text-tertiary" />
                 <Input
                   placeholder="Buscar por número, cliente, marco, laboratorio..."
                   value={searchTerm}
@@ -489,16 +498,16 @@ export default function WorkOrdersPage() {
         <CardContent>
           {loading ? (
             <div className="text-center py-12">
-              <RefreshCw className="h-8 w-8 animate-spin text-azul-profundo mx-auto mb-4" />
-              <p className="text-tierra-media">Cargando trabajos...</p>
+              <RefreshCw className="h-8 w-8 animate-spin text-epoch-primary mx-auto mb-4" />
+              <p className="text-admin-text-tertiary">Cargando trabajos...</p>
             </div>
           ) : filteredWorkOrders.length === 0 ? (
             <div className="text-center py-12">
-              <Package className="h-12 w-12 text-tierra-media mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-azul-profundo mb-2">
+              <Package className="h-12 w-12 text-admin-text-tertiary mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-epoch-primary mb-2">
                 No hay trabajos
               </h3>
-              <p className="text-tierra-media mb-4">
+              <p className="text-admin-text-tertiary mb-4">
                 {searchTerm
                   ? "No se encontraron trabajos que coincidan con la búsqueda"
                   : "Los trabajos se crean automáticamente desde el POS al procesar una venta"}
@@ -532,7 +541,7 @@ export default function WorkOrdersPage() {
                             {workOrder.customer?.first_name || ""}{" "}
                             {workOrder.customer?.last_name || ""}
                           </div>
-                          <div className="text-sm text-tierra-media">
+                          <div className="text-sm text-admin-text-tertiary">
                             {workOrder.customer?.email}
                           </div>
                         </div>
@@ -543,7 +552,7 @@ export default function WorkOrdersPage() {
                           <div className="font-medium">
                             {workOrder.lens_type || "-"}
                           </div>
-                          <div className="text-sm text-tierra-media">
+                          <div className="text-sm text-admin-text-tertiary">
                             {workOrder.lens_material || ""}
                           </div>
                         </div>
@@ -593,7 +602,7 @@ export default function WorkOrdersPage() {
                               </SelectContent>
                             </Select>
                             {updatingPaymentStatus === workOrder.id && (
-                              <RefreshCw className="h-4 w-4 animate-spin text-azul-profundo" />
+                              <RefreshCw className="h-4 w-4 animate-spin text-epoch-primary" />
                             )}
                           </div>
                         ) : (
@@ -606,14 +615,14 @@ export default function WorkOrdersPage() {
                           >
                             <div className="flex items-center gap-1">
                               {getPaymentStatusBadge(workOrder.payment_status)}
-                              <span className="opacity-0 group-hover:opacity-50 text-xs text-tierra-media">
+                              <span className="opacity-0 group-hover:opacity-50 text-xs text-admin-text-tertiary">
                                 ✎
                               </span>
                             </div>
                           </div>
                         )}
                       </TableCell>
-                      <TableCell className="font-semibold text-verde-suave">
+                      <TableCell className="font-semibold text-admin-success">
                         {formatCurrency(workOrder.total_amount)}
                       </TableCell>
                       <TableCell>
@@ -647,7 +656,7 @@ export default function WorkOrdersPage() {
               {/* Pagination */}
               {totalPages > 1 && (
                 <div className="flex items-center justify-between mt-4">
-                  <div className="text-sm text-tierra-media">
+                  <div className="text-sm text-admin-text-tertiary">
                     Página {currentPage} de {totalPages}
                   </div>
                   <div className="flex gap-2">

@@ -884,8 +884,8 @@ export default function CashRegisterPage() {
             </Button>
           </Link>
           <div>
-            <h1 className="text-3xl font-bold text-azul-profundo">Caja</h1>
-            <p className="text-tierra-media">
+            <h1 className="text-3xl font-bold text-epoch-primary">Caja</h1>
+            <p className="text-admin-text-tertiary">
               {isGlobalView
                 ? "Gestión de caja - Todas las sucursales"
                 : "Gestión de caja diaria"}
@@ -1006,26 +1006,32 @@ export default function CashRegisterPage() {
           <CardContent>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div>
-                <p className="text-sm text-tierra-media">Total Ventas</p>
-                <p className="text-2xl font-bold text-azul-profundo">
+                <p className="text-sm text-admin-text-tertiary">Total Ventas</p>
+                <p className="text-2xl font-bold text-epoch-primary">
                   {formatCurrency(dailySummary.total_sales)}
                 </p>
               </div>
               <div>
-                <p className="text-sm text-tierra-media">Transacciones</p>
-                <p className="text-2xl font-bold text-azul-profundo">
+                <p className="text-sm text-admin-text-tertiary">
+                  Transacciones
+                </p>
+                <p className="text-2xl font-bold text-epoch-primary">
                   {dailySummary.total_transactions}
                 </p>
               </div>
               <div>
-                <p className="text-sm text-tierra-media">Efectivo Esperado</p>
-                <p className="text-2xl font-bold text-verde-suave">
+                <p className="text-sm text-admin-text-tertiary">
+                  Efectivo Esperado
+                </p>
+                <p className="text-2xl font-bold text-admin-success">
                   {formatCurrency(dailySummary.expected_cash)}
                 </p>
               </div>
               <div>
-                <p className="text-sm text-tierra-media">Ventas en Efectivo</p>
-                <p className="text-2xl font-bold text-azul-profundo">
+                <p className="text-sm text-admin-text-tertiary">
+                  Ventas en Efectivo
+                </p>
+                <p className="text-2xl font-bold text-epoch-primary">
                   {formatCurrency(dailySummary.cash_sales)}
                 </p>
               </div>
@@ -1054,16 +1060,18 @@ export default function CashRegisterPage() {
             <CardContent>
               {loading ? (
                 <div className="text-center py-12">
-                  <RefreshCw className="h-8 w-8 animate-spin text-azul-profundo mx-auto mb-4" />
-                  <p className="text-tierra-media">Cargando cierres...</p>
+                  <RefreshCw className="h-8 w-8 animate-spin text-epoch-primary mx-auto mb-4" />
+                  <p className="text-admin-text-tertiary">
+                    Cargando cierres...
+                  </p>
                 </div>
               ) : closures.length === 0 ? (
                 <div className="text-center py-12">
-                  <FileText className="h-12 w-12 text-tierra-media mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold text-azul-profundo mb-2">
+                  <FileText className="h-12 w-12 text-admin-text-tertiary mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold text-epoch-primary mb-2">
                     No hay cierres de caja
                   </h3>
-                  <p className="text-tierra-media">
+                  <p className="text-admin-text-tertiary">
                     {currentBranchId
                       ? "Aún no se ha cerrado la caja para esta sucursal"
                       : "Seleccione una sucursal para ver sus cierres de caja"}
@@ -1143,11 +1151,15 @@ export default function CashRegisterPage() {
                                     </span>
                                   </>
                                 ) : (
-                                  <span className="text-tierra-media">$0</span>
+                                  <span className="text-admin-text-tertiary">
+                                    $0
+                                  </span>
                                 )}
                               </div>
                             ) : (
-                              <span className="text-tierra-media">-</span>
+                              <span className="text-admin-text-tertiary">
+                                -
+                              </span>
                             )}
                           </TableCell>
                           <TableCell>
@@ -1347,16 +1359,18 @@ export default function CashRegisterPage() {
               {/* Orders Table */}
               {loadingOrders ? (
                 <div className="text-center py-12">
-                  <RefreshCw className="h-8 w-8 animate-spin text-azul-profundo mx-auto mb-4" />
-                  <p className="text-tierra-media">Cargando órdenes...</p>
+                  <RefreshCw className="h-8 w-8 animate-spin text-epoch-primary mx-auto mb-4" />
+                  <p className="text-admin-text-tertiary">
+                    Cargando órdenes...
+                  </p>
                 </div>
               ) : orders.length === 0 ? (
                 <div className="text-center py-12">
-                  <ShoppingBag className="h-12 w-12 text-tierra-media mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold text-azul-profundo mb-2">
+                  <ShoppingBag className="h-12 w-12 text-admin-text-tertiary mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold text-epoch-primary mb-2">
                     No hay órdenes
                   </h3>
-                  <p className="text-tierra-media">
+                  <p className="text-admin-text-tertiary">
                     {isGlobalView
                       ? "Seleccione una sucursal para ver sus órdenes"
                       : "No se encontraron órdenes con los filtros seleccionados"}
@@ -1394,7 +1408,7 @@ export default function CashRegisterPage() {
                                     "Cliente no registrado")}
                             </div>
                             {order.sii_rut && (
-                              <div className="text-xs text-tierra-media font-mono">
+                              <div className="text-xs text-admin-text-tertiary font-mono">
                                 {order.sii_rut}
                               </div>
                             )}
@@ -1405,14 +1419,14 @@ export default function CashRegisterPage() {
                                 order.billing_last_name)) && (
                               <>
                                 {order.customer_email && (
-                                  <div className="text-xs text-tierra-media">
+                                  <div className="text-xs text-admin-text-tertiary">
                                     {order.customer_email}
                                   </div>
                                 )}
                                 {(order.customer_phone ||
                                   order.billing_phone ||
                                   order.shipping_phone) && (
-                                  <div className="text-xs text-tierra-media">
+                                  <div className="text-xs text-admin-text-tertiary">
                                     {order.customer_phone ||
                                       order.billing_phone ||
                                       order.shipping_phone}
@@ -1439,7 +1453,7 @@ export default function CashRegisterPage() {
                                         </span>{" "}
                                         <span>{productName}</span>
                                         {item.sku && (
-                                          <span className="text-xs text-tierra-media ml-1">
+                                          <span className="text-xs text-admin-text-tertiary ml-1">
                                             ({item.sku})
                                           </span>
                                         )}
@@ -1453,7 +1467,7 @@ export default function CashRegisterPage() {
                                 )}
                               </>
                             ) : (
-                              <span className="text-sm text-tierra-media">
+                              <span className="text-sm text-admin-text-tertiary">
                                 Sin productos
                               </span>
                             )}
@@ -1656,18 +1670,18 @@ export default function CashRegisterPage() {
             <CardContent>
               {loadingCreditNotes ? (
                 <div className="text-center py-12">
-                  <RefreshCw className="h-8 w-8 animate-spin text-azul-profundo mx-auto mb-4" />
-                  <p className="text-tierra-media">
+                  <RefreshCw className="h-8 w-8 animate-spin text-epoch-primary mx-auto mb-4" />
+                  <p className="text-admin-text-tertiary">
                     Cargando notas de crédito...
                   </p>
                 </div>
               ) : creditNotes.length === 0 ? (
                 <div className="text-center py-12">
-                  <FileText className="h-12 w-12 text-tierra-media mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold text-azul-profundo mb-2">
+                  <FileText className="h-12 w-12 text-admin-text-tertiary mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold text-epoch-primary mb-2">
                     No hay notas de crédito
                   </h3>
-                  <p className="text-tierra-media">
+                  <p className="text-admin-text-tertiary">
                     Las notas de crédito se crean al anular una venta con la
                     opción correspondiente
                   </p>
@@ -1756,8 +1770,10 @@ export default function CashRegisterPage() {
 
           {loadingSummary ? (
             <div className="text-center py-8">
-              <RefreshCw className="h-8 w-8 animate-spin text-azul-profundo mx-auto mb-4" />
-              <p className="text-tierra-media">Cargando resumen del día...</p>
+              <RefreshCw className="h-8 w-8 animate-spin text-epoch-primary mx-auto mb-4" />
+              <p className="text-admin-text-tertiary">
+                Cargando resumen del día...
+              </p>
             </div>
           ) : dailySummary ? (
             <div className="space-y-6">
@@ -1768,25 +1784,31 @@ export default function CashRegisterPage() {
                 </CardHeader>
                 <CardContent className="grid grid-cols-2 md:grid-cols-3 gap-4">
                   <div>
-                    <p className="text-sm text-tierra-media">Total Ventas</p>
+                    <p className="text-sm text-admin-text-tertiary">
+                      Total Ventas
+                    </p>
                     <p className="text-xl font-bold">
                       {formatCurrency(dailySummary.total_sales)}
                     </p>
                   </div>
                   <div>
-                    <p className="text-sm text-tierra-media">Transacciones</p>
+                    <p className="text-sm text-admin-text-tertiary">
+                      Transacciones
+                    </p>
                     <p className="text-xl font-bold">
                       {dailySummary.total_transactions}
                     </p>
                   </div>
                   <div>
-                    <p className="text-sm text-tierra-media">Efectivo Neto</p>
+                    <p className="text-sm text-admin-text-tertiary">
+                      Efectivo Neto
+                    </p>
                     <p className="text-xl font-bold">
                       {formatCurrency(dailySummary.cash_sales)}
                     </p>
                     {(dailySummary.cash_inflows != null ||
                       dailySummary.cash_outflows != null) && (
-                      <p className="text-xs text-tierra-media mt-1">
+                      <p className="text-xs text-admin-text-tertiary mt-1">
                         Ingresos:{" "}
                         {formatCurrency(dailySummary.cash_inflows ?? 0)} |
                         Egresos: -
@@ -1795,28 +1817,34 @@ export default function CashRegisterPage() {
                     )}
                   </div>
                   <div>
-                    <p className="text-sm text-tierra-media">Tarjeta Débito</p>
+                    <p className="text-sm text-admin-text-tertiary">
+                      Tarjeta Débito
+                    </p>
                     <p className="text-xl font-bold">
                       {formatCurrency(dailySummary.debit_card_sales)}
                     </p>
                   </div>
                   <div>
-                    <p className="text-sm text-tierra-media">Tarjeta Crédito</p>
+                    <p className="text-sm text-admin-text-tertiary">
+                      Tarjeta Crédito
+                    </p>
                     <p className="text-xl font-bold">
                       {formatCurrency(dailySummary.credit_card_sales)}
                     </p>
                   </div>
                   <div>
-                    <p className="text-sm text-tierra-media">Transferencias</p>
+                    <p className="text-sm text-admin-text-tertiary">
+                      Transferencias
+                    </p>
                     <p className="text-xl font-bold">
                       {formatCurrency(dailySummary.transfer_sales || 0)}
                     </p>
                   </div>
                   <div>
-                    <p className="text-sm text-tierra-media">
+                    <p className="text-sm text-admin-text-tertiary">
                       Efectivo Esperado
                     </p>
-                    <p className="text-xl font-bold text-verde-suave">
+                    <p className="text-xl font-bold text-admin-success">
                       {formatCurrency(dailySummary.expected_cash)}
                     </p>
                   </div>
@@ -1939,18 +1967,18 @@ export default function CashRegisterPage() {
                 <CardContent>
                   {loadingMovements ? (
                     <div className="text-center py-8">
-                      <RefreshCw className="h-6 w-6 animate-spin text-azul-profundo mx-auto mb-2" />
-                      <p className="text-sm text-tierra-media">
+                      <RefreshCw className="h-6 w-6 animate-spin text-epoch-primary mx-auto mb-2" />
+                      <p className="text-sm text-admin-text-tertiary">
                         Cargando movimientos...
                       </p>
                     </div>
                   ) : movements.length === 0 ? (
-                    <div className="text-center py-8 text-tierra-media">
+                    <div className="text-center py-8 text-admin-text-tertiary">
                       <p>No hay movimientos registrados en esta sesión</p>
                     </div>
                   ) : (
                     <div className="space-y-4">
-                      <div className="text-sm text-tierra-media">
+                      <div className="text-sm text-admin-text-tertiary">
                         Total de movimientos:{" "}
                         <strong>{movements.length}</strong> | Total:{" "}
                         <strong>
@@ -2038,7 +2066,7 @@ export default function CashRegisterPage() {
                                           {movement.customer_name}
                                         </div>
                                         {movement.customer_rut && (
-                                          <div className="text-xs text-tierra-media font-mono truncate">
+                                          <div className="text-xs text-admin-text-tertiary font-mono truncate">
                                             {movement.customer_rut}
                                           </div>
                                         )}
@@ -2086,7 +2114,7 @@ export default function CashRegisterPage() {
                       }).length === 0 &&
                         (movementFilter !== "all" ||
                           movementTypeFilter !== "all") && (
-                          <div className="text-center py-4 text-tierra-media text-sm">
+                          <div className="text-center py-4 text-admin-text-tertiary text-sm">
                             No hay movimientos con el filtro seleccionado
                           </div>
                         )}
@@ -2118,7 +2146,7 @@ export default function CashRegisterPage() {
                     placeholder="Ingrese el monto contado físicamente"
                     required
                   />
-                  <p className="text-xs text-tierra-media mt-1">
+                  <p className="text-xs text-admin-text-tertiary mt-1">
                     Efectivo esperado:{" "}
                     {formatCurrency(dailySummary.expected_cash || 0)} (Monto
                     inicial{" "}
@@ -2188,8 +2216,8 @@ export default function CashRegisterPage() {
             </div>
           ) : (
             <div className="text-center py-8">
-              <AlertCircle className="h-8 w-8 text-tierra-media mx-auto mb-4" />
-              <p className="text-tierra-media">
+              <AlertCircle className="h-8 w-8 text-admin-text-tertiary mx-auto mb-4" />
+              <p className="text-admin-text-tertiary">
                 No hay datos disponibles para cerrar la caja
               </p>
             </div>

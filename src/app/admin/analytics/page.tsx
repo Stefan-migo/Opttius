@@ -45,6 +45,7 @@ import {
   Clock,
   CheckCircle,
   XCircle,
+  Headphones,
 } from "lucide-react";
 import { EnhancedPieChart } from "@/components/admin/charts/EnhancedPieChart";
 import { EnhancedBarChart } from "@/components/admin/charts/EnhancedBarChart";
@@ -54,6 +55,8 @@ import { EnhancedLineChart } from "@/components/admin/charts/EnhancedLineChart";
 import { useBranch } from "@/hooks/useBranch";
 import { getBranchHeader } from "@/lib/utils/branch";
 import { BranchSelector } from "@/components/admin/BranchSelector";
+import { MetricTooltip } from "@/components/admin/MetricTooltip";
+import { AIUsageCard } from "@/components/admin/AIUsageCard";
 
 interface AnalyticsData {
   kpis: {
@@ -124,6 +127,16 @@ interface AnalyticsData {
     customers: Array<{ date: string; value: number; count: number }>;
     workOrders: Array<{ date: string; value: number; count: number }>;
     quotes: Array<{ date: string; value: number; count: number }>;
+    supportTickets?: Array<{ date: string; value: number; count: number }>;
+  };
+  support?: {
+    total: number;
+    open: number;
+    resolved: number;
+    avgResolutionMinutes: number | null;
+    byStatus: Record<string, number>;
+    byCategory: Record<string, number>;
+    trends: Array<{ date: string; value: number; count: number }>;
   };
   period: {
     from: string;
@@ -249,20 +262,49 @@ export default function AnalyticsPage() {
     return labels[status] || status;
   };
 
+  const getSupportCategoryLabel = (category: string) => {
+    const labels: Record<string, string> = {
+      lens_issue: "Problema con lente",
+      frame_issue: "Problema con marco",
+      prescription_issue: "Problema con receta",
+      delivery_issue: "Problema con entrega",
+      payment_issue: "Problema con pago",
+      appointment_issue: "Problema con cita",
+      customer_complaint: "Queja del cliente",
+      quality_issue: "Problema de calidad",
+      other: "Otros",
+    };
+    return labels[category] || category;
+  };
+
+  const getSupportStatusLabel = (status: string) => {
+    const labels: Record<string, string> = {
+      open: "Abierto",
+      assigned: "Asignado",
+      in_progress: "En progreso",
+      waiting_customer: "Esperando cliente",
+      resolved: "Resuelto",
+      closed: "Cerrado",
+    };
+    return labels[status] || status;
+  };
+
   if (loading && !analytics) {
     return (
       <div className="space-y-6">
         <div className="flex justify-between items-start">
           <div>
-            <h1 className="text-3xl font-bold text-azul-profundo">
+            <h1 className="text-3xl font-bold text-epoch-primary">
               Analíticas y Reportes
             </h1>
-            <p className="text-tierra-media">Cargando datos analíticos...</p>
+            <p className="text-admin-text-tertiary">
+              Cargando datos analíticos...
+            </p>
           </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           {[...Array(8)].map((_, i) => (
-            <Card key={i} className="animate-pulse">
+            <Card key={i} rounded="none" className="animate-pulse">
               <CardContent className="p-6">
                 <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
                 <div className="h-8 bg-gray-200 rounded w-1/2"></div>
@@ -279,19 +321,21 @@ export default function AnalyticsPage() {
       <div className="space-y-6">
         <div className="flex justify-between items-start">
           <div>
-            <h1 className="text-3xl font-bold text-azul-profundo">
+            <h1 className="text-3xl font-bold text-epoch-primary">
               Analíticas y Reportes
             </h1>
-            <p className="text-tierra-media">Error al cargar los datos</p>
+            <p className="text-admin-text-tertiary">
+              Error al cargar los datos
+            </p>
           </div>
         </div>
-        <Card>
+        <Card rounded="none">
           <CardContent className="text-center py-16">
             <AlertTriangle className="h-12 w-12 text-red-500 mx-auto mb-4" />
             <h3 className="text-lg font-semibold text-red-700 mb-2">
               Error al cargar analíticas
             </h3>
-            <p className="text-tierra-media mb-4">
+            <p className="text-admin-text-tertiary mb-4">
               {error || "No se pudieron cargar los datos"}
             </p>
             <Button onClick={fetchAnalytics}>Reintentar</Button>
@@ -307,12 +351,12 @@ export default function AnalyticsPage() {
       <div className="flex justify-between items-start">
         <div>
           <h1
-            className="text-3xl font-bold text-azul-profundo"
+            className="text-3xl font-bold text-epoch-primary"
             data-tour="analytics-header"
           >
             Analíticas y Reportes
           </h1>
-          <p className="text-tierra-media">
+          <p className="text-admin-text-tertiary">
             {isGlobalView
               ? `Métricas y análisis - Todas las sucursales - Últimos ${analytics.period.days} días`
               : `Métricas y análisis - Últimos ${analytics.period.days} días`}
@@ -347,12 +391,18 @@ export default function AnalyticsPage() {
 
       {/* Main KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <Card className="bg-admin-bg-tertiary border border-admin-border-primary shadow-lg hover:shadow-xl transition-all duration-300">
+        <Card
+          rounded="none"
+          className="bg-admin-bg-tertiary border border-admin-border-primary shadow-lg hover:shadow-xl transition-all duration-300"
+        >
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-3">
-              <p className="text-sm font-semibold text-green-700 dark:text-green-300 uppercase tracking-wide">
-                Ingresos Totales
-              </p>
+              <div className="flex items-center gap-1.5">
+                <p className="text-sm font-semibold text-green-700 dark:text-green-300 uppercase tracking-wide">
+                  Ingresos Totales
+                </p>
+                <MetricTooltip metricKey="totalRevenue" />
+              </div>
               <div className="p-2 bg-green-200 dark:bg-green-800 rounded-lg">
                 <DollarSign className="h-5 w-5 text-green-700 dark:text-green-300" />
               </div>
@@ -376,12 +426,18 @@ export default function AnalyticsPage() {
           </CardContent>
         </Card>
 
-        <Card className="bg-admin-bg-tertiary border border-admin-border-primary shadow-lg hover:shadow-xl transition-all duration-300">
+        <Card
+          rounded="none"
+          className="bg-admin-bg-tertiary border border-admin-border-primary shadow-lg hover:shadow-xl transition-all duration-300"
+        >
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-3">
-              <p className="text-sm font-semibold text-blue-700 dark:text-blue-300 uppercase tracking-wide">
-                Trabajos de Laboratorio
-              </p>
+              <div className="flex items-center gap-1.5">
+                <p className="text-sm font-semibold text-blue-700 dark:text-blue-300 uppercase tracking-wide">
+                  Trabajos de Laboratorio
+                </p>
+                <MetricTooltip metricKey="workOrdersTotal" />
+              </div>
               <div className="p-2 bg-blue-200 dark:bg-blue-800 rounded-lg">
                 <Wrench className="h-5 w-5 text-blue-700 dark:text-blue-300" />
               </div>
@@ -408,12 +464,18 @@ export default function AnalyticsPage() {
           </CardContent>
         </Card>
 
-        <Card className="bg-admin-bg-tertiary border border-admin-border-primary shadow-lg hover:shadow-xl transition-all duration-300">
+        <Card
+          rounded="none"
+          className="bg-admin-bg-tertiary border border-admin-border-primary shadow-lg hover:shadow-xl transition-all duration-300"
+        >
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-3">
-              <p className="text-sm font-semibold text-amber-700 dark:text-amber-300 uppercase tracking-wide">
-                Presupuestos
-              </p>
+              <div className="flex items-center gap-1.5">
+                <p className="text-sm font-semibold text-amber-700 dark:text-amber-300 uppercase tracking-wide">
+                  Presupuestos
+                </p>
+                <MetricTooltip metricKey="quoteConversionRate" />
+              </div>
               <div className="p-2 bg-amber-200 dark:bg-amber-800 rounded-lg">
                 <Receipt className="h-5 w-5 text-amber-700 dark:text-amber-300" />
               </div>
@@ -433,12 +495,18 @@ export default function AnalyticsPage() {
           </CardContent>
         </Card>
 
-        <Card className="bg-admin-bg-tertiary border border-admin-border-primary shadow-lg hover:shadow-xl transition-all duration-300">
+        <Card
+          rounded="none"
+          className="bg-admin-bg-tertiary border border-admin-border-primary shadow-lg hover:shadow-xl transition-all duration-300"
+        >
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-3">
-              <p className="text-sm font-semibold text-purple-700 dark:text-purple-300 uppercase tracking-wide">
-                Citas
-              </p>
+              <div className="flex items-center gap-1.5">
+                <p className="text-sm font-semibold text-purple-700 dark:text-purple-300 uppercase tracking-wide">
+                  Citas
+                </p>
+                <MetricTooltip metricKey="appointmentsTotal" />
+              </div>
               <div className="p-2 bg-purple-200 dark:bg-purple-800 rounded-lg">
                 <Calendar className="h-5 w-5 text-purple-700 dark:text-purple-300" />
               </div>
@@ -461,13 +529,19 @@ export default function AnalyticsPage() {
 
       {/* Secondary KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <Card className="bg-admin-bg-tertiary border border-admin-border-primary shadow-md hover:shadow-lg transition-all duration-300">
+        <Card
+          rounded="none"
+          className="bg-admin-bg-tertiary border border-admin-border-primary shadow-md hover:shadow-lg transition-all duration-300"
+        >
           <CardContent className="p-5">
             <div className="flex items-start justify-between">
               <div className="flex-1">
-                <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">
-                  Ventas POS
-                </p>
+                <div className="flex items-center gap-1 mb-2">
+                  <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                    Ventas POS
+                  </p>
+                  <MetricTooltip metricKey="totalOrders" />
+                </div>
                 <p className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-1">
                   {formatPrice(analytics.kpis.posRevenue)}
                 </p>
@@ -487,13 +561,19 @@ export default function AnalyticsPage() {
           </CardContent>
         </Card>
 
-        <Card className="bg-admin-bg-tertiary border border-admin-border-primary shadow-md hover:shadow-lg transition-all duration-300">
+        <Card
+          rounded="none"
+          className="bg-admin-bg-tertiary border border-admin-border-primary shadow-md hover:shadow-lg transition-all duration-300"
+        >
           <CardContent className="p-5">
             <div className="flex items-start justify-between">
               <div className="flex-1">
-                <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">
-                  Ingresos Trabajos
-                </p>
+                <div className="flex items-center gap-1 mb-2">
+                  <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                    Ingresos Trabajos
+                  </p>
+                  <MetricTooltip metricKey="workOrdersTotal" />
+                </div>
                 <p className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-1">
                   {formatPrice(analytics.kpis.workOrdersRevenue)}
                 </p>
@@ -511,13 +591,19 @@ export default function AnalyticsPage() {
           </CardContent>
         </Card>
 
-        <Card className="bg-admin-bg-tertiary border border-admin-border-primary shadow-md hover:shadow-lg transition-all duration-300">
+        <Card
+          rounded="none"
+          className="bg-admin-bg-tertiary border border-admin-border-primary shadow-md hover:shadow-lg transition-all duration-300"
+        >
           <CardContent className="p-5">
             <div className="flex items-start justify-between">
               <div className="flex-1">
-                <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">
-                  Clientes
-                </p>
+                <div className="flex items-center gap-1 mb-2">
+                  <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                    Clientes
+                  </p>
+                  <MetricTooltip metricKey="totalCustomers" />
+                </div>
                 <p className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-1">
                   {analytics.kpis.totalCustomers}
                 </p>
@@ -535,13 +621,19 @@ export default function AnalyticsPage() {
           </CardContent>
         </Card>
 
-        <Card className="bg-admin-bg-tertiary border border-admin-border-primary shadow-md hover:shadow-lg transition-all duration-300">
+        <Card
+          rounded="none"
+          className="bg-admin-bg-tertiary border border-admin-border-primary shadow-md hover:shadow-lg transition-all duration-300"
+        >
           <CardContent className="p-5">
             <div className="flex items-start justify-between">
               <div className="flex-1">
-                <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">
-                  Productos
-                </p>
+                <div className="flex items-center gap-1 mb-2">
+                  <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                    Productos
+                  </p>
+                  <MetricTooltip metricKey="topProducts" />
+                </div>
                 <p className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-1">
                   {analytics.products.total}
                 </p>
@@ -580,18 +672,27 @@ export default function AnalyticsPage() {
 
       {/* Analytics Tabs */}
       <Tabs defaultValue="overview" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList
+          className={`grid w-full ${analytics.support ? "grid-cols-7" : "grid-cols-6"}`}
+        >
           <TabsTrigger value="overview">Resumen</TabsTrigger>
           <TabsTrigger value="work-orders">Trabajos</TabsTrigger>
           <TabsTrigger value="quotes">Presupuestos</TabsTrigger>
           <TabsTrigger value="sales">Ventas</TabsTrigger>
           <TabsTrigger value="products">Productos</TabsTrigger>
+          <TabsTrigger value="ai">IA</TabsTrigger>
+          {analytics.support && (
+            <TabsTrigger value="support">Incidentes</TabsTrigger>
+          )}
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Revenue Trend */}
-            <Card className="bg-admin-bg-tertiary border border-admin-border-primary shadow-soft hover:shadow-medium transition-all duration-300">
+            <Card
+              rounded="none"
+              className="bg-admin-bg-tertiary border border-admin-border-primary shadow-soft hover:shadow-medium transition-all duration-300"
+            >
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
@@ -629,7 +730,7 @@ export default function AnalyticsPage() {
                   <EnhancedColumnChart
                     data={analytics.trends.sales}
                     title="Ingresos por Período"
-                    color="#9DC65D"
+                    color="#C5A059"
                     formatValue={formatPrice}
                     height={300}
                   />
@@ -637,7 +738,7 @@ export default function AnalyticsPage() {
                   <EnhancedLineChart
                     data={analytics.trends.sales}
                     title="Evolución de Ingresos"
-                    color="#9DC65D"
+                    color="#C5A059"
                     formatValue={formatPrice}
                     showGrid={true}
                     height={300}
@@ -647,7 +748,10 @@ export default function AnalyticsPage() {
             </Card>
 
             {/* Work Orders Trend */}
-            <Card className="bg-admin-bg-tertiary border border-admin-border-primary shadow-soft hover:shadow-medium transition-all duration-300">
+            <Card
+              rounded="none"
+              className="bg-admin-bg-tertiary border border-admin-border-primary shadow-soft hover:shadow-medium transition-all duration-300"
+            >
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
@@ -685,7 +789,7 @@ export default function AnalyticsPage() {
                   <EnhancedColumnChart
                     data={analytics.trends.workOrders}
                     title="Trabajos por Período"
-                    color="#1E3A8A"
+                    color="#1A2B23"
                     formatValue={(val) => Math.round(val).toString()}
                     height={300}
                   />
@@ -693,7 +797,7 @@ export default function AnalyticsPage() {
                   <EnhancedLineChart
                     data={analytics.trends.workOrders}
                     title="Evolución de Trabajos"
-                    color="#1E3A8A"
+                    color="#1A2B23"
                     formatValue={(val) => Math.round(val).toString()}
                     showGrid={true}
                     height={300}
@@ -703,7 +807,10 @@ export default function AnalyticsPage() {
             </Card>
 
             {/* Work Orders Status Distribution */}
-            <Card className="bg-admin-bg-tertiary border border-admin-border-primary shadow-soft hover:shadow-medium transition-all duration-300">
+            <Card
+              rounded="none"
+              className="bg-admin-bg-tertiary border border-admin-border-primary shadow-soft hover:shadow-medium transition-all duration-300"
+            >
               <CardHeader>
                 <div className="flex items-center gap-2">
                   <PieChartIcon className="h-5 w-5" />
@@ -726,7 +833,7 @@ export default function AnalyticsPage() {
                     height={350}
                   />
                 ) : (
-                  <div className="text-center py-8 text-tierra-media">
+                  <div className="text-center py-8 text-admin-text-tertiary">
                     No hay trabajos en este período
                   </div>
                 )}
@@ -734,7 +841,10 @@ export default function AnalyticsPage() {
             </Card>
 
             {/* Quotes Status Distribution */}
-            <Card className="bg-admin-bg-tertiary border border-admin-border-primary shadow-soft hover:shadow-medium transition-all duration-300">
+            <Card
+              rounded="none"
+              className="bg-admin-bg-tertiary border border-admin-border-primary shadow-soft hover:shadow-medium transition-all duration-300"
+            >
               <CardHeader>
                 <div className="flex items-center gap-2">
                   <PieChartIcon className="h-5 w-5" />
@@ -757,7 +867,7 @@ export default function AnalyticsPage() {
                     height={350}
                   />
                 ) : (
-                  <div className="text-center py-8 text-tierra-media">
+                  <div className="text-center py-8 text-admin-text-tertiary">
                     No hay presupuestos en este período
                   </div>
                 )}
@@ -769,7 +879,10 @@ export default function AnalyticsPage() {
         <TabsContent value="work-orders" className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Work Orders Metrics */}
-            <Card className="bg-admin-bg-tertiary border border-admin-border-primary shadow-soft hover:shadow-medium transition-all duration-300">
+            <Card
+              rounded="none"
+              className="bg-admin-bg-tertiary border border-admin-border-primary shadow-soft hover:shadow-medium transition-all duration-300"
+            >
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <Target className="h-5 w-5 mr-2" />
@@ -778,36 +891,47 @@ export default function AnalyticsPage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="text-center p-4 bg-azul-profundo/10 rounded-lg border border-azul-profundo/20">
-                    <p className="text-2xl font-bold text-azul-profundo">
+                  <div className="text-center p-4 bg-epoch-primary/10 rounded-lg border border-epoch-primary/20">
+                    <p className="text-2xl font-bold text-epoch-primary">
                       {analytics.workOrders.total}
                     </p>
-                    <p className="text-sm text-tierra-media">Total Trabajos</p>
+                    <p className="text-sm text-admin-text-tertiary">
+                      Total Trabajos
+                    </p>
                   </div>
                   <div className="text-center p-4 bg-orange-50 rounded-lg border border-orange-200">
                     <p className="text-2xl font-bold text-orange-600">
                       {analytics.workOrders.pending}
                     </p>
-                    <p className="text-sm text-tierra-media">Pendientes</p>
+                    <p className="text-sm text-admin-text-tertiary">
+                      Pendientes
+                    </p>
                   </div>
                   <div className="text-center p-4 bg-green-50 rounded-lg border border-green-200">
                     <p className="text-2xl font-bold text-green-600">
                       {analytics.workOrders.completed}
                     </p>
-                    <p className="text-sm text-tierra-media">Completados</p>
+                    <p className="text-sm text-admin-text-tertiary">
+                      Completados
+                    </p>
                   </div>
                   <div className="text-center p-4 bg-blue-50 rounded-lg border border-blue-200">
                     <p className="text-2xl font-bold text-blue-600">
                       {analytics.kpis.avgDeliveryDays}
                     </p>
-                    <p className="text-sm text-tierra-media">Días Promedio</p>
+                    <p className="text-sm text-admin-text-tertiary">
+                      Días Promedio
+                    </p>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
             {/* Work Orders Trend */}
-            <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)]">
+            <Card
+              rounded="none"
+              className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)]"
+            >
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <LineChartIcon className="h-5 w-5 mr-2" />
@@ -818,7 +942,7 @@ export default function AnalyticsPage() {
                 <EnhancedAreaChart
                   data={analytics.trends.workOrders}
                   title="Trabajos Creados por Día"
-                  color="#1E3A8A"
+                  color="#1A2B23"
                   showGrid={true}
                   formatValue={(val) => Math.round(val).toString()}
                   height={300}
@@ -831,7 +955,10 @@ export default function AnalyticsPage() {
         <TabsContent value="quotes" className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Quotes Metrics */}
-            <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)]">
+            <Card
+              rounded="none"
+              className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)]"
+            >
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <Target className="h-5 w-5 mr-2" />
@@ -840,36 +967,42 @@ export default function AnalyticsPage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="text-center p-4 bg-dorado/10 rounded-lg border border-dorado/20">
-                    <p className="text-2xl font-bold text-dorado">
+                  <div className="text-center p-4 bg-epoch-accent/10 rounded-lg border border-epoch-accent/20">
+                    <p className="text-2xl font-bold text-epoch-accent">
                       {analytics.quotes.total}
                     </p>
-                    <p className="text-sm text-tierra-media">Total</p>
+                    <p className="text-sm text-admin-text-tertiary">Total</p>
                   </div>
                   <div className="text-center p-4 bg-green-50 rounded-lg border border-green-200">
                     <p className="text-2xl font-bold text-green-600">
                       {analytics.quotes.accepted + analytics.quotes.converted}
                     </p>
-                    <p className="text-sm text-tierra-media">Aceptados</p>
+                    <p className="text-sm text-admin-text-tertiary">
+                      Aceptados
+                    </p>
                   </div>
                   <div className="text-center p-4 bg-red-50 rounded-lg border border-red-200">
                     <p className="text-2xl font-bold text-red-600">
                       {analytics.quotes.rejected}
                     </p>
-                    <p className="text-sm text-tierra-media">Rechazados</p>
+                    <p className="text-sm text-admin-text-tertiary">
+                      Rechazados
+                    </p>
                   </div>
                   <div className="text-center p-4 bg-blue-50 rounded-lg border border-blue-200">
                     <p className="text-2xl font-bold text-blue-600">
                       {analytics.kpis.quoteConversionRate.toFixed(1)}%
                     </p>
-                    <p className="text-sm text-tierra-media">Tasa Conversión</p>
+                    <p className="text-sm text-admin-text-tertiary">
+                      Tasa Conversión
+                    </p>
                   </div>
                 </div>
                 <div className="mt-4 p-4 bg-gray-50 rounded-lg">
-                  <p className="text-sm text-tierra-media mb-2">
+                  <p className="text-sm text-admin-text-tertiary mb-2">
                     Valor Promedio
                   </p>
-                  <p className="text-xl font-bold text-azul-profundo">
+                  <p className="text-xl font-bold text-epoch-primary">
                     {formatPrice(analytics.kpis.avgQuoteValue)}
                   </p>
                 </div>
@@ -877,7 +1010,10 @@ export default function AnalyticsPage() {
             </Card>
 
             {/* Quotes Trend */}
-            <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)]">
+            <Card
+              rounded="none"
+              className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)]"
+            >
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
@@ -915,7 +1051,7 @@ export default function AnalyticsPage() {
                   <EnhancedColumnChart
                     data={analytics.trends.quotes}
                     title="Presupuestos por Período"
-                    color="#D4A853"
+                    color="#C5A059"
                     formatValue={(val) => Math.round(val).toString()}
                     height={300}
                   />
@@ -923,7 +1059,7 @@ export default function AnalyticsPage() {
                   <EnhancedLineChart
                     data={analytics.trends.quotes}
                     title="Presupuestos Creados por Día"
-                    color="#D4A853"
+                    color="#C5A059"
                     showGrid={true}
                     formatValue={(val) => Math.round(val).toString()}
                     height={300}
@@ -937,7 +1073,10 @@ export default function AnalyticsPage() {
         <TabsContent value="sales" className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Revenue by Category */}
-            <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)]">
+            <Card
+              rounded="none"
+              className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)]"
+            >
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <BarChart3 className="h-5 w-5 mr-2" />
@@ -952,7 +1091,7 @@ export default function AnalyticsPage() {
                       value: cat.revenue,
                     }))}
                     title="Categorías Más Rentables"
-                    color="#9DC65D"
+                    color="#C5A059"
                     horizontal={true}
                     formatValue={formatPrice}
                     height={Math.max(
@@ -961,7 +1100,7 @@ export default function AnalyticsPage() {
                     )}
                   />
                 ) : (
-                  <div className="text-center py-8 text-tierra-media">
+                  <div className="text-center py-8 text-admin-text-tertiary">
                     No hay datos de categorías
                   </div>
                 )}
@@ -969,7 +1108,10 @@ export default function AnalyticsPage() {
             </Card>
 
             {/* Payment Methods */}
-            <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)]">
+            <Card
+              rounded="none"
+              className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)]"
+            >
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <PieChartIcon className="h-5 w-5 mr-2" />
@@ -990,7 +1132,7 @@ export default function AnalyticsPage() {
                     height={350}
                   />
                 ) : (
-                  <div className="text-center py-8 text-tierra-media">
+                  <div className="text-center py-8 text-admin-text-tertiary">
                     No hay datos de métodos de pago
                   </div>
                 )}
@@ -998,7 +1140,10 @@ export default function AnalyticsPage() {
             </Card>
 
             {/* Sales Metrics */}
-            <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)]">
+            <Card
+              rounded="none"
+              className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)]"
+            >
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <Target className="h-5 w-5 mr-2" />
@@ -1007,27 +1152,29 @@ export default function AnalyticsPage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="text-center p-4 bg-verde-suave/10 rounded-lg border border-verde-suave/20">
-                    <p className="text-2xl font-bold text-verde-suave">
+                  <div className="text-center p-4 bg-admin-success/10 rounded-lg border border-admin-success/20">
+                    <p className="text-2xl font-bold text-admin-success">
                       {formatPrice(analytics.kpis.totalRevenue)}
                     </p>
-                    <p className="text-sm text-tierra-media">
+                    <p className="text-sm text-admin-text-tertiary">
                       Ingresos Totales
                     </p>
                   </div>
-                  <div className="text-center p-4 bg-azul-profundo/10 rounded-lg border border-azul-profundo/20">
-                    <p className="text-2xl font-bold text-azul-profundo">
+                  <div className="text-center p-4 bg-epoch-primary/10 rounded-lg border border-epoch-primary/20">
+                    <p className="text-2xl font-bold text-epoch-primary">
                       {formatPrice(analytics.kpis.avgOrderValue)}
                     </p>
-                    <p className="text-sm text-tierra-media">
+                    <p className="text-sm text-admin-text-tertiary">
                       Ticket Promedio POS
                     </p>
                   </div>
-                  <div className="text-center p-4 bg-dorado/10 rounded-lg border border-dorado/20">
-                    <p className="text-2xl font-bold text-dorado">
+                  <div className="text-center p-4 bg-epoch-accent/10 rounded-lg border border-epoch-accent/20">
+                    <p className="text-2xl font-bold text-epoch-accent">
                       {analytics.kpis.totalOrders}
                     </p>
-                    <p className="text-sm text-tierra-media">Ventas POS</p>
+                    <p className="text-sm text-admin-text-tertiary">
+                      Ventas POS
+                    </p>
                   </div>
                   <div className="text-center p-4 bg-green-50 rounded-lg border border-green-200">
                     <p
@@ -1035,7 +1182,9 @@ export default function AnalyticsPage() {
                     >
                       {formatPercentage(analytics.kpis.revenueGrowth)}
                     </p>
-                    <p className="text-sm text-tierra-media">Crecimiento</p>
+                    <p className="text-sm text-admin-text-tertiary">
+                      Crecimiento
+                    </p>
                   </div>
                 </div>
               </CardContent>
@@ -1046,7 +1195,10 @@ export default function AnalyticsPage() {
         <TabsContent value="products" className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Top Products */}
-            <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)]">
+            <Card
+              rounded="none"
+              className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)]"
+            >
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Package className="h-5 w-5" />
@@ -1063,7 +1215,7 @@ export default function AnalyticsPage() {
                         value: prod.revenue,
                       }))}
                     title="Por Ingresos"
-                    color="#D4A853"
+                    color="#C5A059"
                     horizontal={true}
                     formatValue={formatPrice}
                     height={Math.min(
@@ -1075,7 +1227,7 @@ export default function AnalyticsPage() {
                     )}
                   />
                 ) : (
-                  <div className="text-center py-8 text-tierra-media">
+                  <div className="text-center py-8 text-admin-text-tertiary">
                     No hay productos vendidos en este período
                   </div>
                 )}
@@ -1083,7 +1235,10 @@ export default function AnalyticsPage() {
             </Card>
 
             {/* Product Performance Table */}
-            <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)]">
+            <Card
+              rounded="none"
+              className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)]"
+            >
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <BarChart3 className="h-5 w-5 mr-2" />
@@ -1113,12 +1268,12 @@ export default function AnalyticsPage() {
                                 >
                                   {product.name}
                                 </div>
-                                <div className="text-sm text-tierra-media">
+                                <div className="text-sm text-admin-text-tertiary">
                                   {product.category}
                                 </div>
                               </div>
                             </TableCell>
-                            <TableCell className="font-medium text-verde-suave">
+                            <TableCell className="font-medium text-admin-success">
                               {formatPrice(product.revenue)}
                             </TableCell>
                             <TableCell>{product.quantity} unidades</TableCell>
@@ -1127,7 +1282,7 @@ export default function AnalyticsPage() {
                     </TableBody>
                   </Table>
                 ) : (
-                  <div className="text-center py-8 text-tierra-media">
+                  <div className="text-center py-8 text-admin-text-tertiary">
                     No hay productos vendidos en este período
                   </div>
                 )}
@@ -1135,7 +1290,10 @@ export default function AnalyticsPage() {
             </Card>
 
             {/* Inventory Alerts */}
-            <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)]">
+            <Card
+              rounded="none"
+              className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)]"
+            >
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <AlertTriangle className="h-5 w-5 mr-2" />
@@ -1148,18 +1306,182 @@ export default function AnalyticsPage() {
                     <p className="text-2xl font-bold text-orange-600">
                       {analytics.products.lowStock}
                     </p>
-                    <p className="text-sm text-tierra-media">Bajo Stock</p>
+                    <p className="text-sm text-admin-text-tertiary">
+                      Bajo Stock
+                    </p>
                   </div>
                   <div className="text-center p-4 bg-red-50 rounded-lg border border-red-200">
                     <p className="text-2xl font-bold text-red-600">
                       {analytics.products.outOfStock}
                     </p>
-                    <p className="text-sm text-tierra-media">Sin Stock</p>
+                    <p className="text-sm text-admin-text-tertiary">
+                      Sin Stock
+                    </p>
                   </div>
                 </div>
               </CardContent>
             </Card>
           </div>
+        </TabsContent>
+
+        {analytics.support && (
+          <TabsContent value="support" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Support KPIs */}
+              <Card
+                rounded="none"
+                className="bg-admin-bg-tertiary border border-admin-border-primary shadow-soft hover:shadow-medium transition-all duration-300"
+              >
+                <CardHeader>
+                  <div className="flex items-center gap-2">
+                    <Headphones className="h-5 w-5" />
+                    <CardTitle className="flex items-center gap-1.5">
+                      Métricas de Incidentes
+                      <MetricTooltip metricKey="supportTicketsTotal" />
+                    </CardTitle>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="text-center p-4 bg-epoch-primary/10 rounded-lg border border-epoch-primary/20">
+                      <p className="text-2xl font-bold text-epoch-primary">
+                        {analytics.support.total}
+                      </p>
+                      <p className="text-sm text-admin-text-tertiary">
+                        Total Tickets
+                      </p>
+                    </div>
+                    <div className="text-center p-4 bg-orange-50 rounded-lg border border-orange-200">
+                      <p className="text-2xl font-bold text-orange-600">
+                        {analytics.support.open}
+                      </p>
+                      <p className="text-sm text-admin-text-tertiary">
+                        Abiertos
+                      </p>
+                    </div>
+                    <div className="text-center p-4 bg-green-50 rounded-lg border border-green-200">
+                      <p className="text-2xl font-bold text-green-600">
+                        {analytics.support.resolved}
+                      </p>
+                      <p className="text-sm text-admin-text-tertiary">
+                        Resueltos
+                      </p>
+                    </div>
+                    <div className="text-center p-4 bg-blue-50 rounded-lg border border-blue-200">
+                      <p className="text-2xl font-bold text-blue-600">
+                        {analytics.support.avgResolutionMinutes != null
+                          ? `${analytics.support.avgResolutionMinutes} min`
+                          : "-"}
+                      </p>
+                      <p className="text-sm text-admin-text-tertiary">
+                        Tiempo Prom. Resolución
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Support Trend */}
+              <Card
+                rounded="none"
+                className="bg-admin-bg-tertiary border border-admin-border-primary shadow-soft hover:shadow-medium transition-all duration-300"
+              >
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <LineChartIcon className="h-5 w-5 mr-2" />
+                    Tendencia de Incidentes
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {analytics.support.trends.some((t) => t.value > 0) ? (
+                    <EnhancedColumnChart
+                      data={analytics.support.trends}
+                      title="Tickets por Día"
+                      color="#C5A059"
+                      formatValue={(val) => Math.round(val).toString()}
+                      height={300}
+                    />
+                  ) : (
+                    <div className="text-center py-8 text-admin-text-tertiary">
+                      No hay incidentes en este período
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* By Status */}
+              <Card
+                rounded="none"
+                className="bg-admin-bg-tertiary border border-admin-border-primary shadow-soft hover:shadow-medium transition-all duration-300"
+              >
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <PieChartIcon className="h-5 w-5 mr-2" />
+                    Por Estado
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {Object.keys(analytics.support.byStatus).length > 0 ? (
+                    <EnhancedPieChart
+                      data={Object.entries(analytics.support.byStatus).map(
+                        ([status, count]) => ({
+                          label: getSupportStatusLabel(status),
+                          value: count as number,
+                        }),
+                      )}
+                      title="Distribución por Estado"
+                      showLegend={true}
+                      showPercentage={true}
+                      formatValue={(val) => Math.round(val).toString()}
+                      height={350}
+                    />
+                  ) : (
+                    <div className="text-center py-8 text-admin-text-tertiary">
+                      No hay datos
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* By Category */}
+              <Card
+                rounded="none"
+                className="bg-admin-bg-tertiary border border-admin-border-primary shadow-soft hover:shadow-medium transition-all duration-300"
+              >
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <PieChartIcon className="h-5 w-5 mr-2" />
+                    Por Categoría
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {Object.keys(analytics.support.byCategory).length > 0 ? (
+                    <EnhancedPieChart
+                      data={Object.entries(analytics.support.byCategory).map(
+                        ([category, count]) => ({
+                          label: getSupportCategoryLabel(category),
+                          value: count as number,
+                        }),
+                      )}
+                      title="Distribución por Categoría"
+                      showLegend={true}
+                      showPercentage={true}
+                      formatValue={(val) => Math.round(val).toString()}
+                      height={350}
+                    />
+                  ) : (
+                    <div className="text-center py-8 text-admin-text-tertiary">
+                      No hay datos
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+        )}
+
+        <TabsContent value="ai" className="space-y-6">
+          <AIUsageCard />
         </TabsContent>
       </Tabs>
     </div>

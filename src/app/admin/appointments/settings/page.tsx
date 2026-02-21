@@ -200,7 +200,7 @@ export default function ScheduleSettingsPage() {
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div>
-            <h1 className="text-3xl font-bold text-azul-profundo">
+            <h1 className="text-3xl font-bold text-epoch-primary">
               Cargando...
             </h1>
           </div>
@@ -217,8 +217,8 @@ export default function ScheduleSettingsPage() {
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div>
-            <h1 className="text-3xl font-bold text-azul-profundo">Error</h1>
-            <p className="text-tierra-media">
+            <h1 className="text-3xl font-bold text-epoch-primary">Error</h1>
+            <p className="text-admin-text-tertiary">
               No se pudo cargar la configuración
             </p>
           </div>

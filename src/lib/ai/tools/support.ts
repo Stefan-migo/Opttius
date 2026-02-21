@@ -53,6 +53,7 @@ export const supportTools: ToolDefinition[] = [
         limit: { type: "number", default: 20 },
       },
     },
+    zodSchema: getTicketsSchema,
     execute: async (params, context): Promise<ToolResult> => {
       try {
         const validated = getTicketsSchema.parse(params);
@@ -112,6 +113,7 @@ export const supportTools: ToolDefinition[] = [
       },
       required: ["ticketId"],
     },
+    zodSchema: getTicketByIdSchema,
     execute: async (params, context): Promise<ToolResult> => {
       try {
         const validated = getTicketByIdSchema.parse(params);
@@ -181,6 +183,7 @@ export const supportTools: ToolDefinition[] = [
       },
       required: ["ticketId", "status"],
     },
+    zodSchema: updateTicketStatusSchema,
     execute: async (params, context): Promise<ToolResult> => {
       try {
         const validated = updateTicketStatusSchema.parse(params);
@@ -244,6 +247,7 @@ export const supportTools: ToolDefinition[] = [
       },
       required: ["ticketId", "message"],
     },
+    zodSchema: createTicketResponseSchema,
     execute: async (params, context): Promise<ToolResult> => {
       try {
         const validated = createTicketResponseSchema.parse(params);

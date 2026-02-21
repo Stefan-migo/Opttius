@@ -20,17 +20,22 @@ import {
   Check,
   CheckCheck,
   Filter,
-  Package,
-  ShoppingCart,
   AlertTriangle,
-  MessageSquare,
-  TrendingUp,
-  Shield,
   Info,
   RefreshCw,
   ChevronRight,
 } from "lucide-react";
 import { useAuthContext } from "@/contexts/AuthContext";
+import { useBranch } from "@/hooks/useBranch";
+import { useRoot } from "@/hooks/useRoot";
+import { BranchSelector } from "@/components/admin/BranchSelector";
+import { createClient } from "@/utils/supabase/client";
+import {
+  NOTIFICATION_ICONS,
+  NOTIFICATION_TYPE_LABELS,
+  PRIORITY_COLORS,
+  formatTimeSince,
+} from "@/lib/notifications/constants";
 
 interface AdminNotification {
   id: string;
@@ -47,40 +52,11 @@ interface AdminNotification {
   created_at: string;
 }
 
-const notificationIcons: Record<string, any> = {
-  order_new: ShoppingCart,
-  order_status_change: Package,
-  low_stock: AlertTriangle,
-  out_of_stock: AlertTriangle,
-  support_ticket_new: MessageSquare,
-  support_ticket_update: MessageSquare,
-  payment_received: TrendingUp,
-  system_alert: Shield,
-  custom: Info,
-};
-
-const priorityColors: Record<string, string> = {
-  low: "text-gray-500 bg-gray-100",
-  medium: "text-blue-600 bg-blue-100",
-  high: "text-orange-600 bg-orange-100",
-  urgent: "text-red-600 bg-red-100",
-};
-
-const typeLabels: Record<string, string> = {
-  order_new: "Nueva Orden",
-  order_status_change: "Cambio de Estado",
-  low_stock: "Stock Bajo",
-  out_of_stock: "Sin Stock",
-  support_ticket_new: "Nuevo Ticket",
-  support_ticket_update: "Actualización Ticket",
-  payment_received: "Pago Recibido",
-  system_alert: "Alerta del Sistema",
-  custom: "Personalizada",
-};
-
 export default function NotificationsPage() {
   const router = useRouter();
   const { user, loading: authLoading } = useAuthContext();
+  const { currentBranchId, isGlobalView, isSuperAdmin } = useBranch();
+  const { isRoot } = useRoot();
   const [notifications, setNotifications] = useState<AdminNotification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -105,7 +81,9 @@ export default function NotificationsPage() {
         limit: pageSize.toString(),
         offset: (currentPage * pageSize).toString(),
       });
-
+      if (!isRoot && currentBranchId && !isGlobalView) {
+        params.set("branch_id", currentBranchId);
+      }
       if (filters.unreadOnly) {
         params.append("unread_only", "true");
       }
@@ -136,8 +114,38 @@ export default function NotificationsPage() {
   useEffect(() => {
     if (!authLoading && user) {
       fetchNotifications();
+
+      // Supabase Realtime for instant updates
+      const supabase = createClient();
+      const channel = supabase
+        .channel("admin-notifications-page")
+        .on(
+          "postgres_changes",
+          {
+            event: "INSERT",
+            schema: "public",
+            table: "admin_notifications",
+            ...(currentBranchId && !isGlobalView && !isRoot
+              ? { filter: `branch_id=eq.${currentBranchId}` }
+              : {}),
+          },
+          () => fetchNotifications(),
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
     }
-  }, [user, authLoading, currentPage, filters]);
+  }, [
+    user,
+    authLoading,
+    currentPage,
+    filters,
+    currentBranchId,
+    isGlobalView,
+    isRoot,
+  ]);
 
   const markAsRead = async (notificationId: string, actionUrl?: string) => {
     try {
@@ -193,22 +201,6 @@ export default function NotificationsPage() {
     }
   };
 
-  const getTimeSince = (date: string) => {
-    const seconds = Math.floor(
-      (new Date().getTime() - new Date(date).getTime()) / 1000,
-    );
-
-    if (seconds < 60) return "Hace un momento";
-    if (seconds < 3600) return `Hace ${Math.floor(seconds / 60)} min`;
-    if (seconds < 86400) return `Hace ${Math.floor(seconds / 3600)} h`;
-    if (seconds < 604800) return `Hace ${Math.floor(seconds / 86400)} días`;
-    return new Date(date).toLocaleDateString("es-AR", {
-      day: "numeric",
-      month: "short",
-      year: "numeric",
-    });
-  };
-
   const filteredNotifications = notifications.filter((n) => {
     if (filters.priority && n.priority !== filters.priority) {
       return false;
@@ -231,7 +223,8 @@ export default function NotificationsPage() {
           </p>
         </div>
 
-        <div className="flex flex-wrap gap-3">
+        <div className="flex flex-wrap gap-3 items-center">
+          {isSuperAdmin && !isRoot && <BranchSelector />}
           {unreadCount > 0 && (
             <Button
               onClick={markAllAsRead}
@@ -362,15 +355,17 @@ export default function NotificationsPage() {
                     </SelectTrigger>
                     <SelectContent className="rounded-xl border-admin-border-primary">
                       <SelectItem value="all">Ver todas</SelectItem>
-                      {Object.entries(typeLabels).map(([value, label]) => (
-                        <SelectItem
-                          key={value}
-                          value={value}
-                          className="text-xs"
-                        >
-                          {label}
-                        </SelectItem>
-                      ))}
+                      {Object.entries(NOTIFICATION_TYPE_LABELS).map(
+                        ([value, label]) => (
+                          <SelectItem
+                            key={value}
+                            value={value}
+                            className="text-xs"
+                          >
+                            {label}
+                          </SelectItem>
+                        ),
+                      )}
                     </SelectContent>
                   </Select>
                 </div>
@@ -463,7 +458,8 @@ export default function NotificationsPage() {
                 <ScrollArea className="h-[750px]">
                   <div className="divide-y divide-admin-border-primary/30">
                     {filteredNotifications.map((notification) => {
-                      const Icon = notificationIcons[notification.type] || Info;
+                      const Icon =
+                        NOTIFICATION_ICONS[notification.type] || Info;
                       const isUnread = !notification.is_read;
 
                       return (
@@ -523,18 +519,15 @@ export default function NotificationsPage() {
                                   <span
                                     className={cn(
                                       "text-[9px] font-bold px-2 py-0.5 rounded-lg uppercase tracking-wider",
-                                      notification.priority === "urgent"
-                                        ? "bg-admin-error/10 text-admin-error"
-                                        : notification.priority === "high"
-                                          ? "bg-admin-warning/10 text-admin-warning"
-                                          : "bg-admin-bg-tertiary text-admin-text-tertiary border border-admin-border-primary/50",
+                                      PRIORITY_COLORS[notification.priority] ||
+                                        PRIORITY_COLORS.medium,
                                     )}
                                   >
                                     {notification.priority}
                                   </span>
                                 </div>
                                 <time className="text-[11px] font-bold text-admin-text-tertiary tracking-tighter bg-admin-bg-tertiary/50 px-2 py-1 rounded-md">
-                                  {getTimeSince(notification.created_at)}
+                                  {formatTimeSince(notification.created_at)}
                                 </time>
                               </div>
 
@@ -548,8 +541,9 @@ export default function NotificationsPage() {
                                     variant="outline"
                                     className="text-[10px] font-bold bg-admin-bg-tertiary/30 border-none text-admin-text-tertiary px-2 py-1 rounded-lg"
                                   >
-                                    {typeLabels[notification.type] ||
-                                      notification.type}
+                                    {NOTIFICATION_TYPE_LABELS[
+                                      notification.type
+                                    ] || notification.type}
                                   </Badge>
                                 </div>
                                 {notification.action_label && (

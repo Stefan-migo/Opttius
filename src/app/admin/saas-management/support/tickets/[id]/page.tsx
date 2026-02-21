@@ -344,7 +344,7 @@ export default function TicketDetailPage() {
     return (
       <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
-          <Card className="border-red-200">
+          <Card className="border-red-200 rounded-none border">
             <CardContent className="pt-6">
               <div className="text-center py-8">
                 <XCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
@@ -379,7 +379,7 @@ export default function TicketDetailPage() {
             </Button>
             <div>
               <div className="flex items-center gap-3">
-                <h1 className="text-3xl font-bold text-gray-900">
+                <h1 className="text-3xl font-display font-bold text-epoch-primary tracking-tight">
                   Ticket #{ticket.ticket_number}
                 </h1>
                 <Button
@@ -408,8 +408,8 @@ export default function TicketDetailPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Ticket Details */}
-            <Card>
+            {/* Ticket Details - sin admin-card para evitar hover conflictivo */}
+            <Card className="rounded-none border border-border">
               <CardHeader>
                 <CardTitle>Detalles del Ticket</CardTitle>
               </CardHeader>
@@ -456,8 +456,8 @@ export default function TicketDetailPage() {
               </CardContent>
             </Card>
 
-            {/* Messages */}
-            <Card>
+            {/* Messages - sin admin-card para evitar contraste en burbujas */}
+            <Card className="rounded-none border border-border">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <MessageSquare className="h-5 w-5" />
@@ -475,12 +475,13 @@ export default function TicketDetailPage() {
                     {messages.map((msg) => (
                       <div
                         key={msg.id}
-                        className={`p-4 rounded-lg border ${msg.is_internal
+                        className={`p-4 rounded-lg border ${
+                          msg.is_internal
                             ? "bg-yellow-50 border-yellow-200"
                             : msg.is_from_customer
                               ? "bg-blue-50 border-blue-200"
                               : "bg-gray-50 border-gray-200"
-                          }`}
+                        }`}
                       >
                         <div className="flex items-start justify-between mb-2">
                           <div className="flex items-center gap-2">
@@ -513,8 +514,8 @@ export default function TicketDetailPage() {
               </CardContent>
             </Card>
 
-            {/* Add Message Form */}
-            <Card>
+            {/* Add Message Form - sin admin-card para evitar contraste en textarea */}
+            <Card className="rounded-none border border-border">
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle>Responder</CardTitle>
@@ -587,8 +588,8 @@ export default function TicketDetailPage() {
 
           {/* Sidebar */}
           <div className="space-y-6">
-            {/* Quick Actions */}
-            <Card>
+            {/* Quick Actions - sin admin-card para evitar hover conflictivo */}
+            <Card className="rounded-none border border-border">
               <CardHeader>
                 <CardTitle className="text-lg">Acciones Rápidas</CardTitle>
               </CardHeader>
@@ -612,8 +613,8 @@ export default function TicketDetailPage() {
               </CardContent>
             </Card>
 
-            {/* Ticket Info */}
-            <Card>
+            {/* Ticket Info - sin admin-card para evitar hover conflictivo */}
+            <Card className="rounded-none border border-border">
               <CardHeader>
                 <CardTitle className="text-lg">Información</CardTitle>
               </CardHeader>
@@ -760,7 +761,7 @@ export default function TicketDetailPage() {
                 templates.map((template) => (
                   <div
                     key={template.id}
-                    className="p-3 border rounded-lg hover:bg-gray-50 cursor-pointer"
+                    className="p-3 border rounded-lg hover:bg-epoch-primary/5 cursor-pointer transition-colors"
                     onClick={() => handleUseTemplate(template)}
                   >
                     <div className="font-medium">{template.name}</div>

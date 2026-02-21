@@ -169,15 +169,15 @@ export function SmartContextWidget({
 
   const panelContent = (
     <>
-      {/* Header */}
-      <div className="flex items-center justify-between p-3 bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-200 dark:border-gray-700">
+      {/* Header - Epoch palette */}
+      <div className="flex items-center justify-between p-3 bg-epoch-background border-b border-epoch-primary/20 dark:border-gray-700">
         <div className="flex items-center gap-2">
-          <Sparkles className="w-4 h-4 text-blue-600" />
-          <span className="text-sm font-semibold text-gray-800 dark:text-gray-200">
+          <Sparkles className="w-4 h-4 text-epoch-primary" />
+          <span className="text-sm font-semibold text-epoch-primary dark:text-gray-200">
             Insights Inteligentes
           </span>
           {hasInsights && (
-            <span className="text-xs bg-blue-600 text-white px-1.5 py-0.5 rounded-full">
+            <span className="text-xs bg-epoch-accent text-epoch-surface px-1.5 py-0.5 rounded-none">
               {badgeCount}
             </span>
           )}
@@ -196,7 +196,7 @@ export function SmartContextWidget({
           >
             <RefreshCw
               className={cn(
-                "w-3.5 h-3.5 text-gray-600",
+                "w-3.5 h-3.5 text-epoch-primary",
                 isRegenerating && "animate-spin",
               )}
             />
@@ -210,7 +210,7 @@ export function SmartContextWidget({
               handleClose();
             }}
           >
-            <X className="w-4 h-4 text-gray-600" />
+            <X className="w-4 h-4 text-epoch-primary" />
           </Button>
         </div>
       </div>
@@ -219,13 +219,15 @@ export function SmartContextWidget({
       <div className="max-h-[600px] overflow-y-auto">
         {isLoading ? (
           <div className="p-6 flex flex-col items-center justify-center gap-2">
-            <Loader2 className="w-6 h-6 text-blue-600 animate-spin" />
-            <span className="text-sm text-gray-600">Cargando insights...</span>
+            <Loader2 className="w-6 h-6 text-epoch-primary animate-spin" />
+            <span className="text-sm text-epoch-primary/80">
+              Cargando insights...
+            </span>
           </div>
         ) : !hasInsights ? (
           <div className="p-6 flex flex-col items-center justify-center gap-3">
-            <Sparkles className="w-8 h-8 text-gray-400" />
-            <p className="text-sm text-gray-600 text-center">
+            <Sparkles className="w-8 h-8 text-epoch-primary/40" />
+            <p className="text-sm text-epoch-primary/80 text-center">
               No hay insights disponibles aún
             </p>
             <Button
@@ -254,8 +256,9 @@ export function SmartContextWidget({
               <div
                 key={insight.id}
                 className={cn(
-                  "p-3 border-b border-gray-100 last:border-b-0 dark:border-gray-800",
-                  index === 0 && "bg-blue-50/50 dark:bg-blue-950/20",
+                  "p-3 border-b border-epoch-primary/10 last:border-b-0 dark:border-gray-800",
+                  index === 0 &&
+                    "bg-epoch-background/80 dark:bg-epoch-primary/10",
                 )}
               >
                 <InsightCard
@@ -276,7 +279,7 @@ export function SmartContextWidget({
 
   if (variant === "embedded") {
     return (
-      <div className="w-full p-0 rounded-2xl overflow-hidden">
+      <div className="w-full p-0 rounded-none overflow-hidden">
         {panelContent}
       </div>
     );
@@ -290,10 +293,10 @@ export function SmartContextWidget({
             variant="outline"
             size="sm"
             className={cn(
-              "shadow-xl bg-white/80 backdrop-blur-md hover:bg-white border-2 transition-all hover:scale-105 active:scale-95",
+              "shadow-xl bg-epoch-background/80 backdrop-blur-md hover:bg-epoch-background border-2 transition-all hover:scale-105 active:scale-95 rounded-none",
               hasInsights
-                ? "border-blue-300 hover:border-blue-400"
-                : "border-gray-200 hover:border-gray-300",
+                ? "border-epoch-accent hover:border-epoch-primary"
+                : "border-epoch-primary/30 hover:border-epoch-primary/50",
               isLoading &&
                 "opacity-50 cursor-not-allowed border-[var(--accent-foreground)]",
             )}
@@ -302,11 +305,11 @@ export function SmartContextWidget({
             <Sparkles
               className={cn(
                 "w-4 h-4 mr-2",
-                hasInsights ? "text-blue-600" : "text-gray-500",
+                hasInsights ? "text-epoch-primary" : "text-epoch-primary/60",
                 isLoading && "animate-pulse",
               )}
             />
-            <span className="text-xs font-bold text-gray-700">
+            <span className="text-xs font-bold text-epoch-primary">
               {isLoading
                 ? "Cargando..."
                 : hasInsights
@@ -314,19 +317,19 @@ export function SmartContextWidget({
                   : "Insights"}
             </span>
             {hasInsights && (
-              <span className="ml-2 text-[10px] bg-blue-600 text-white px-1.5 py-0.5 rounded-full font-black">
+              <span className="ml-2 text-[10px] bg-epoch-accent text-epoch-surface px-1.5 py-0.5 rounded-none font-black">
                 {badgeCount}
               </span>
             )}
             {isOpen ? (
-              <ChevronUp className="w-4 h-4 ml-2 text-gray-500" />
+              <ChevronUp className="w-4 h-4 ml-2 text-epoch-primary/70" />
             ) : (
-              <ChevronDown className="w-4 h-4 ml-2 text-gray-500" />
+              <ChevronDown className="w-4 h-4 ml-2 text-epoch-primary/70" />
             )}
           </Button>
         </PopoverTrigger>
         <PopoverContent
-          className="w-96 max-w-[calc(100vw-2rem)] p-0 shadow-2xl border-blue-100 rounded-2xl overflow-hidden"
+          className="w-96 max-w-[calc(100vw-2rem)] p-0 shadow-2xl border-epoch-primary/20 rounded-none overflow-hidden"
           align="start"
           side="top"
           sideOffset={10}

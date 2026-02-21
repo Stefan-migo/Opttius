@@ -7,6 +7,7 @@ import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
 import { withRateLimit, rateLimitConfigs } from "@/lib/api/middleware";
 import { APIError, RateLimitError, ValidationError } from "@/lib/api/errors";
 import { processSaleSchema } from "@/lib/api/validation/zod-schemas";
+import { PAYMENT_METHOD_MAP } from "@/lib/payments/constants";
 import {
   parseAndValidateBody,
   validationErrorResponse,
@@ -741,24 +742,17 @@ export async function POST(request: NextRequest) {
           }
 
           // Register payment(s) in order_payments
-          const paymentMethodMap: Record<string, string> = {
-            cash: "cash",
-            card: "card",
-            debit_card: "debit",
-            credit_card: "credit",
-            transfer: "transfer",
-          };
           let paymentAmount: number;
           let dbPaymentMethod: string;
           if (paymentsArray && paymentsArray.length > 0) {
             paymentAmount = paymentsArray.reduce((s, p) => s + p.amount, 0);
             dbPaymentMethod =
-              paymentMethodMap[paymentsArray[0].method] ||
+              PAYMENT_METHOD_MAP[paymentsArray[0].method] ||
               paymentsArray[0].method ||
               "cash";
             for (let i = 0; i < paymentsArray.length; i++) {
               const p = paymentsArray[i];
-              const dbMethod = paymentMethodMap[p.method] || p.method;
+              const dbMethod = PAYMENT_METHOD_MAP[p.method] || p.method;
               const { error: payErr } = await supabaseServiceRole
                 .from("order_payments")
                 .insert({
@@ -783,7 +777,7 @@ export async function POST(request: NextRequest) {
           } else {
             paymentAmount = deposit_amount || cash_received || total_amount;
             dbPaymentMethod =
-              paymentMethodMap[payment_method_type] || payment_method_type;
+              PAYMENT_METHOD_MAP[payment_method_type] || payment_method_type;
             const { error: paymentError } = await supabaseServiceRole
               .from("order_payments")
               .insert({

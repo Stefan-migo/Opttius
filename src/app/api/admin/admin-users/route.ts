@@ -3,6 +3,7 @@ import { createClient } from "@/utils/supabase/server";
 import { createServiceRoleClient } from "@/utils/supabase/service-role";
 import { getBranchContext } from "@/lib/api/branch-middleware";
 import { appLogger as logger } from "@/lib/logger";
+import { getDefaultPermissions } from "@/lib/admin/permissions";
 import type {
   GetAdminRoleParams,
   GetAdminRoleResult,
@@ -17,6 +18,11 @@ export async function GET(request: NextRequest) {
     const role = searchParams.get("role") || "";
     const status = searchParams.get("status") || "";
     const search = searchParams.get("search") || "";
+    const limit = Math.min(
+      Math.max(1, parseInt(searchParams.get("limit") || "20", 10)),
+      100,
+    );
+    const offset = Math.max(0, parseInt(searchParams.get("offset") || "0", 10));
 
     const supabase = await createClient();
 
@@ -39,7 +45,9 @@ export async function GET(request: NextRequest) {
     // Verificar que el usuario tiene algún rol administrativo
     if (
       !adminRole ||
-      !["admin", "super_admin", "root", "dev", "employee"].includes(adminRole)
+      !["admin", "super_admin", "root", "dev", "employee", "vendedor"].includes(
+        adminRole,
+      )
     ) {
       return NextResponse.json(
         { error: "Admin access required" },
@@ -86,7 +94,8 @@ export async function GET(request: NextRequest) {
     // RLS en admin_branch_access solo permite ver la propia fila (o todas si super_admin),
     // por lo que con createClient() la relación venía vacía para otros usuarios.
     const supabaseServiceRole = createServiceRoleClient();
-    let query = supabaseServiceRole.from("admin_users").select(`
+    let query = supabaseServiceRole.from("admin_users").select(
+      `
         id,
         email,
         role,
@@ -107,7 +116,9 @@ export async function GET(request: NextRequest) {
             code
           )
         )
-      `);
+      `,
+      { count: "exact" },
+    );
 
     // CRITICAL: Apply organization filter - only root/dev can see all organizations
     // Super admins within an organization should only see users from their organization
@@ -125,7 +136,10 @@ export async function GET(request: NextRequest) {
         userId: user.id,
         role: currentAdminUser?.role,
       });
-      return NextResponse.json({ adminUsers: [] });
+      return NextResponse.json({
+        adminUsers: [],
+        pagination: { total: 0, page: 1, limit: 20, totalPages: 0 },
+      });
     }
     // Root/dev users can see all admin users (no filter applied)
 
@@ -139,13 +153,34 @@ export async function GET(request: NextRequest) {
       query = query.eq("is_active", isActive);
     }
 
-    if (search) {
-      query = query.ilike("email", `%${search}%`);
+    if (search.trim()) {
+      const searchPattern = `%${search.trim()}%`;
+      const { data: matchingProfiles, error: profileSearchError } =
+        await supabaseServiceRole
+          .from("profiles")
+          .select("id")
+          .or(
+            `email.ilike.${searchPattern},first_name.ilike.${searchPattern},last_name.ilike.${searchPattern}`,
+          );
+      if (profileSearchError) {
+        query = query.ilike("email", searchPattern);
+      } else {
+        const matchingIds = matchingProfiles?.map((p) => p.id) ?? [];
+        if (matchingIds.length > 0) {
+          query = query.in("id", matchingIds);
+        } else {
+          query = query.eq("id", "00000000-0000-0000-0000-000000000000");
+        }
+      }
     }
 
-    const { data: adminUsers, error } = await query.order("created_at", {
-      ascending: false,
-    });
+    const {
+      data: adminUsers,
+      error,
+      count,
+    } = await query
+      .order("created_at", { ascending: false })
+      .range(offset, offset + limit - 1);
 
     if (error) {
       logger.error("Error fetching admin users", error);
@@ -227,7 +262,19 @@ export async function GET(request: NextRequest) {
         };
       }) || [];
 
-    return NextResponse.json({ adminUsers: adminUsersWithStats });
+    const total = count ?? adminUsersWithStats.length;
+    const page = Math.floor(offset / limit) + 1;
+    const totalPages = Math.ceil(total / limit);
+
+    return NextResponse.json({
+      adminUsers: adminUsersWithStats,
+      pagination: {
+        total,
+        page,
+        limit,
+        totalPages,
+      },
+    });
   } catch (error) {
     logger.error("Error in admin users API GET", error);
     return NextResponse.json(
@@ -476,75 +523,4 @@ export async function POST(request: NextRequest) {
       { status: 500 },
     );
   }
-}
-
-// Helper function to get default permissions by role
-function getDefaultPermissions(role: string) {
-  // Permisos por defecto según rol
-  const rolePermissions: Record<string, any> = {
-    root: {
-      orders: ["read", "create", "update", "delete"],
-      products: ["read", "create", "update", "delete"],
-      customers: ["read", "create", "update", "delete"],
-      analytics: ["read"],
-      settings: ["read", "create", "update", "delete"],
-      admin_users: ["read", "create", "update", "delete"],
-      support: ["read", "create", "update", "delete"],
-      bulk_operations: ["read", "create", "update", "delete"],
-      saas_management: ["read", "create", "update", "delete"],
-    },
-    dev: {
-      // Igual que root
-      orders: ["read", "create", "update", "delete"],
-      products: ["read", "create", "update", "delete"],
-      customers: ["read", "create", "update", "delete"],
-      analytics: ["read"],
-      settings: ["read", "create", "update", "delete"],
-      admin_users: ["read", "create", "update", "delete"],
-      support: ["read", "create", "update", "delete"],
-      bulk_operations: ["read", "create", "update", "delete"],
-      saas_management: ["read", "create", "update", "delete"],
-    },
-    super_admin: {
-      orders: ["read", "create", "update", "delete"],
-      products: ["read", "create", "update", "delete"],
-      customers: ["read", "create", "update", "delete"],
-      analytics: ["read"],
-      settings: ["read", "create", "update", "delete"],
-      admin_users: ["read", "create", "update", "delete"],
-      support: ["read", "create", "update", "delete"],
-      bulk_operations: ["read", "create", "update", "delete"],
-      branches: ["read", "create", "update", "delete"],
-    },
-    admin: {
-      orders: ["read", "create", "update", "delete"],
-      products: ["read", "create", "update", "delete"],
-      customers: ["read", "create", "update", "delete"],
-      analytics: ["read"],
-      settings: ["read", "update"], // No puede eliminar config críticas
-      admin_users: ["read"], // Solo ver, no crear/modificar
-      support: ["read", "create", "update"],
-      bulk_operations: ["read", "create"],
-      appointments: ["read", "create", "update", "delete"],
-      quotes: ["read", "create", "update", "delete"],
-      work_orders: ["read", "create", "update", "delete"],
-    },
-    employee: {
-      // Acceso operativo sin administración
-      orders: ["read", "create", "update"], // No puede eliminar órdenes
-      products: ["read"], // Solo lectura de catálogo
-      customers: ["read", "create", "update"], // No puede eliminar clientes
-      analytics: [], // Sin acceso a analytics
-      settings: [], // Sin acceso a configuración
-      admin_users: [], // Sin acceso a usuarios
-      support: ["read", "create"], // Puede crear tickets, no resolver
-      bulk_operations: [], // Sin operaciones masivas
-      appointments: ["read", "create", "update"], // Puede agendar, no eliminar
-      quotes: ["read", "create", "update"], // Puede crear presupuestos
-      work_orders: ["read", "update"], // Puede actualizar estado, no crear/eliminar
-      pos: ["read", "create"], // Acceso completo a POS para ventas
-    },
-  };
-
-  return rolePermissions[role] || rolePermissions.admin;
 }

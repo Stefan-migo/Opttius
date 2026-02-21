@@ -60,8 +60,8 @@ const CreateQuoteForm = dynamic(
     loading: () => (
       <div className="flex items-center justify-center py-12">
         <div className="text-center space-y-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-azul-profundo mx-auto"></div>
-          <p className="text-tierra-media">Cargando formulario...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-epoch-primary mx-auto"></div>
+          <p className="text-admin-text-tertiary">Cargando formulario...</p>
         </div>
       </div>
     ),
@@ -72,8 +72,10 @@ import { BranchSelector } from "@/components/admin/BranchSelector";
 import { formatDate, formatCurrency } from "@/lib/utils";
 import { quoteService, Quote } from "@/lib/api/services";
 import type { UpdateQuoteData } from "@/lib/api/services/quoteService";
-import { extractDataFromResponse, extractPaginationFromResponse } from "@/lib/api/response-helpers";
-
+import {
+  extractDataFromResponse,
+  extractPaginationFromResponse,
+} from "@/lib/api/response-helpers";
 
 export default function QuotesPage() {
   // Branch context
@@ -105,7 +107,10 @@ export default function QuotesPage() {
         page: currentPage,
         limit: quotesPerPage,
         status: statusFilter !== "all" ? statusFilter : undefined,
-        branch_id: isGlobalView && isSuperAdmin ? "global" : currentBranchId || undefined,
+        branch_id:
+          isGlobalView && isSuperAdmin
+            ? "global"
+            : currentBranchId || undefined,
         search: searchTerm || undefined,
       });
 
@@ -202,12 +207,12 @@ export default function QuotesPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1
-            className="text-3xl font-bold text-azul-profundo"
+            className="text-3xl font-bold text-epoch-primary"
             data-tour="quotes-header"
           >
             Presupuestos
           </h1>
-          <p className="text-tierra-media">
+          <p className="text-admin-text-tertiary">
             {isGlobalView
               ? "Gestiona presupuestos de todas las sucursales"
               : "Gestiona presupuestos para trabajos de lentes"}
@@ -234,7 +239,7 @@ export default function QuotesPage() {
           <div className="flex items-center gap-4">
             <div className="flex-1">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-tierra-media" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-admin-text-tertiary" />
                 <Input
                   placeholder="Buscar por número, cliente, email..."
                   value={searchTerm}
@@ -269,16 +274,18 @@ export default function QuotesPage() {
         <CardContent>
           {loading ? (
             <div className="text-center py-12">
-              <RefreshCw className="h-8 w-8 animate-spin text-azul-profundo mx-auto mb-4" />
-              <p className="text-tierra-media">Cargando presupuestos...</p>
+              <RefreshCw className="h-8 w-8 animate-spin text-epoch-primary mx-auto mb-4" />
+              <p className="text-admin-text-tertiary">
+                Cargando presupuestos...
+              </p>
             </div>
           ) : filteredQuotes.length === 0 ? (
             <div className="text-center py-12">
-              <FileText className="h-12 w-12 text-tierra-media mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-azul-profundo mb-2">
+              <FileText className="h-12 w-12 text-admin-text-tertiary mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-epoch-primary mb-2">
                 No hay presupuestos
               </h3>
-              <p className="text-tierra-media mb-4">
+              <p className="text-admin-text-tertiary mb-4">
                 {searchTerm
                   ? "No se encontraron presupuestos que coincidan con la búsqueda"
                   : "Comienza creando tu primer presupuesto"}
@@ -318,7 +325,7 @@ export default function QuotesPage() {
                             {quote.customer?.first_name || ""}{" "}
                             {quote.customer?.last_name || ""}
                           </div>
-                          <div className="text-sm text-tierra-media">
+                          <div className="text-sm text-admin-text-tertiary">
                             {quote.customer?.email}
                           </div>
                         </div>
@@ -329,12 +336,12 @@ export default function QuotesPage() {
                           <div className="font-medium">
                             {quote.lens_type || "-"}
                           </div>
-                          <div className="text-sm text-tierra-media">
+                          <div className="text-sm text-admin-text-tertiary">
                             {quote.lens_material || ""}
                           </div>
                         </div>
                       </TableCell>
-                      <TableCell className="font-semibold text-verde-suave">
+                      <TableCell className="font-semibold text-admin-success">
                         {formatCurrency(quote.total_amount)}
                       </TableCell>
                       <TableCell>
@@ -350,7 +357,13 @@ export default function QuotesPage() {
                               value={displayStatus}
                               disabled={isConverted}
                               onValueChange={async (value) => {
-                                const newStatus = value as 'draft' | 'sent' | 'accepted' | 'rejected' | 'expired' | 'converted_to_work';
+                                const newStatus = value as
+                                  | "draft"
+                                  | "sent"
+                                  | "accepted"
+                                  | "rejected"
+                                  | "expired"
+                                  | "converted_to_work";
                                 if (isConverted) {
                                   toast.error(
                                     "No se puede cambiar el estado de un presupuesto convertido",
@@ -359,13 +372,20 @@ export default function QuotesPage() {
                                 }
 
                                 try {
-                                  await quoteService.updateQuote(quote.id, { status: newStatus as UpdateQuoteData['status'] });
+                                  await quoteService.updateQuote(quote.id, {
+                                    status:
+                                      newStatus as UpdateQuoteData["status"],
+                                  });
 
                                   // Update local state
                                   setQuotes((prev) =>
                                     prev.map((q) =>
                                       q.id === quote.id
-                                        ? { ...q, status: newStatus as Quote['status'] }
+                                        ? {
+                                            ...q,
+                                            status:
+                                              newStatus as Quote["status"],
+                                          }
                                         : q,
                                     ),
                                   );
@@ -438,7 +458,9 @@ export default function QuotesPage() {
                             Convertido
                           </Badge>
                         ) : (
-                          <span className="text-tierra-media text-sm">-</span>
+                          <span className="text-admin-text-tertiary text-sm">
+                            -
+                          </span>
                         )}
                       </TableCell>
                       <TableCell>
@@ -449,7 +471,7 @@ export default function QuotesPage() {
                               className={`text-xs ${
                                 new Date(quote.expiration_date) < new Date()
                                   ? "text-red-500"
-                                  : "text-tierra-media"
+                                  : "text-admin-text-tertiary"
                               }`}
                             >
                               Exp: {formatDate(quote.expiration_date)}
@@ -500,7 +522,7 @@ export default function QuotesPage() {
               {/* Pagination */}
               {totalPages > 1 && (
                 <div className="flex items-center justify-between mt-4">
-                  <div className="text-sm text-tierra-media">
+                  <div className="text-sm text-admin-text-tertiary">
                     Página {currentPage} de {totalPages}
                   </div>
                   <div className="flex gap-2">

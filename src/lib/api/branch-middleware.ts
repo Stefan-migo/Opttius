@@ -260,3 +260,40 @@ export function addBranchFilter(
 
   return query.eq("branch_id", "00000000-0000-0000-0000-000000000000");
 }
+
+/**
+ * Add branch filter for tables that only have branch_id (no organization_id).
+ * Use for: customers, etc.
+ * When in global view, fetches branch IDs for the org and filters by .in("branch_id", ids).
+ */
+export async function addBranchFilterForBranchScopedTable(
+  query: any,
+  branchContext: BranchContext,
+  supabase: SupabaseClient<any>,
+) {
+  const { branchId, isSuperAdmin, organizationId, accessibleBranches } =
+    branchContext;
+
+  if (branchId) {
+    return query.eq("branch_id", branchId);
+  }
+
+  if (isSuperAdmin && organizationId) {
+    const { data: branches } = await supabase
+      .from("branches")
+      .select("id")
+      .eq("organization_id", organizationId);
+    const branchIds = branches?.map((b: { id: string }) => b.id) || [];
+    if (branchIds.length > 0) {
+      return query.in("branch_id", branchIds);
+    }
+    return query.eq("branch_id", "00000000-0000-0000-0000-000000000000");
+  }
+
+  const primaryBranchId =
+    accessibleBranches.find((b: { isPrimary?: boolean }) => b.isPrimary)?.id ||
+    accessibleBranches[0]?.id;
+  return primaryBranchId
+    ? query.eq("branch_id", primaryBranchId)
+    : query.eq("branch_id", "00000000-0000-0000-0000-000000000000");
+}

@@ -3,6 +3,7 @@ import { requireRoot } from "@/lib/api/root-middleware";
 import { createServiceRoleClient } from "@/utils/supabase/service-role";
 import { appLogger as logger } from "@/lib/logger";
 import { AuthorizationError } from "@/lib/api/errors";
+import { updateOrganizationSchema } from "@/lib/api/validation/zod-schemas";
 
 /**
  * GET /api/admin/saas-management/organizations/[id]
@@ -161,7 +162,16 @@ export async function PATCH(
 
     const { id } = params;
     const body = await request.json();
-    const { name, slug, owner_id, subscription_tier, status, metadata } = body;
+    const parseResult = updateOrganizationSchema.safeParse(body);
+    if (!parseResult.success) {
+      const firstError = parseResult.error.errors[0];
+      return NextResponse.json(
+        { error: firstError?.message || "Datos inválidos" },
+        { status: 400 },
+      );
+    }
+    const { name, slug, owner_id, subscription_tier, status, metadata } =
+      parseResult.data;
 
     // Verificar que la organización existe
     const { data: existingOrg } = await supabaseServiceRole
@@ -182,18 +192,6 @@ export async function PATCH(
 
     if (name !== undefined) updates.name = name;
     if (slug !== undefined) {
-      // Validar formato de slug
-      const slugRegex = /^[a-z0-9-]+$/;
-      if (!slugRegex.test(slug)) {
-        return NextResponse.json(
-          {
-            error:
-              "El slug solo puede contener letras minúsculas, números y guiones",
-          },
-          { status: 400 },
-        );
-      }
-
       // Verificar que el slug no está en uso por otra organización
       if (slug !== existingOrg.slug) {
         const { data: slugExists } = await supabaseServiceRole
@@ -214,18 +212,9 @@ export async function PATCH(
       updates.slug = slug;
     }
     if (owner_id !== undefined) updates.owner_id = owner_id;
-    if (subscription_tier !== undefined) {
-      if (!["basic", "pro", "premium"].includes(subscription_tier)) {
-        return NextResponse.json({ error: "Tier inválido" }, { status: 400 });
-      }
+    if (subscription_tier !== undefined)
       updates.subscription_tier = subscription_tier;
-    }
-    if (status !== undefined) {
-      if (!["active", "suspended", "cancelled"].includes(status)) {
-        return NextResponse.json({ error: "Status inválido" }, { status: 400 });
-      }
-      updates.status = status;
-    }
+    if (status !== undefined) updates.status = status;
     if (metadata !== undefined) updates.metadata = metadata;
 
     // Actualizar

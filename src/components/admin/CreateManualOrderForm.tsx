@@ -264,7 +264,7 @@ export default function CreateManualOrderForm({
       {/* Customer Information */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-azul-profundo">
+          <CardTitle className="text-epoch-primary">
             Información del Cliente
           </CardTitle>
         </CardHeader>
@@ -329,7 +329,7 @@ export default function CreateManualOrderForm({
       {/* Order Details */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-azul-profundo">
+          <CardTitle className="text-epoch-primary">
             Detalles del Pedido
           </CardTitle>
         </CardHeader>
@@ -406,7 +406,7 @@ export default function CreateManualOrderForm({
       {/* Shipping Information */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-azul-profundo">
+          <CardTitle className="text-epoch-primary">
             Información de Envío
           </CardTitle>
         </CardHeader>
@@ -481,7 +481,7 @@ export default function CreateManualOrderForm({
       {/* Order Items */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-azul-profundo">
+          <CardTitle className="text-epoch-primary">
             Productos del Pedido
           </CardTitle>
         </CardHeader>
@@ -522,7 +522,7 @@ export default function CreateManualOrderForm({
                           Stock: {product.inventory_quantity} unidades
                         </div>
                       </div>
-                      <div className="text-verde-suave font-semibold">
+                      <div className="text-admin-success font-semibold">
                         ${product.price.toFixed(2)}
                       </div>
                     </div>
@@ -603,7 +603,7 @@ export default function CreateManualOrderForm({
           <div className="flex justify-between items-center pt-4 border-t">
             <div>
               <div className="text-sm text-gray-600">Subtotal</div>
-              <div className="text-2xl font-bold text-verde-suave">
+              <div className="text-2xl font-bold text-admin-success">
                 ${(form.values.total_amount ?? 0).toFixed(2)}
               </div>
             </div>

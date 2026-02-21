@@ -360,17 +360,22 @@ export default function OpticalInternalSupportPage() {
   ).length;
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6 p-6 bg-epoch-background min-h-screen">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Soporte Interno</h1>
-          <p className="text-gray-600 mt-2">
-            Gestiona problemas internos con clientes (lentes, entregas, pagos,
-            etc.)
+          <h1 className="text-3xl font-display font-bold text-epoch-primary tracking-tight">
+            Registro de Incidentes
+          </h1>
+          <p className="text-epoch-primary/80 mt-2">
+            Registra incidentes y problemas con clientes para análisis y mejora
+            del servicio (lentes, entregas, pagos, etc.)
           </p>
         </div>
-        <Button onClick={() => setShowCreateDialog(true)}>
+        <Button
+          onClick={() => setShowCreateDialog(true)}
+          className="rounded-none bg-epoch-primary hover:bg-epoch-surface text-white font-display font-bold text-[10px] tracking-[0.2em] uppercase"
+        >
           <Plus className="h-4 w-4 mr-2" />
           Crear Ticket
         </Button>
@@ -378,49 +383,59 @@ export default function OpticalInternalSupportPage() {
 
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
+        <Card className="admin-card rounded-none">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Total</p>
-                <p className="text-2xl font-bold">{pagination.total}</p>
+                <p className="text-sm font-medium text-epoch-primary/80">
+                  Total
+                </p>
+                <p className="text-2xl font-bold text-epoch-primary">
+                  {pagination.total}
+                </p>
               </div>
-              <MessageSquare className="h-8 w-8 text-gray-400" />
+              <MessageSquare className="h-8 w-8 text-epoch-accent" />
             </div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="admin-card rounded-none">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Abiertos</p>
-                <p className="text-2xl font-bold text-blue-600">
+                <p className="text-sm font-medium text-epoch-primary/80">
+                  Abiertos
+                </p>
+                <p className="text-2xl font-bold text-epoch-primary">
                   {openTicketsCount}
                 </p>
               </div>
-              <AlertCircle className="h-8 w-8 text-blue-400" />
+              <AlertCircle className="h-8 w-8 text-epoch-accent" />
             </div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="admin-card rounded-none">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">En Progreso</p>
-                <p className="text-2xl font-bold text-purple-600">
+                <p className="text-sm font-medium text-epoch-primary/80">
+                  En Progreso
+                </p>
+                <p className="text-2xl font-bold text-epoch-primary">
                   {tickets.filter((t) => t.status === "in_progress").length}
                 </p>
               </div>
-              <Clock className="h-8 w-8 text-purple-400" />
+              <Clock className="h-8 w-8 text-epoch-accent" />
             </div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="admin-card rounded-none">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Resueltos</p>
-                <p className="text-2xl font-bold text-green-600">
+                <p className="text-sm font-medium text-epoch-primary/80">
+                  Resueltos
+                </p>
+                <p className="text-2xl font-bold text-epoch-primary">
                   {
                     tickets.filter(
                       (t) => t.status === "resolved" || t.status === "closed",
@@ -428,14 +443,14 @@ export default function OpticalInternalSupportPage() {
                   }
                 </p>
               </div>
-              <CheckCircle2 className="h-8 w-8 text-green-400" />
+              <CheckCircle2 className="h-8 w-8 text-epoch-accent" />
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Filters */}
-      <Card>
+      {/* Filters - sin admin-card para evitar conflicto de contraste en botón/inputs */}
+      <Card className="rounded-none border border-border">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Filter className="h-5 w-5" />
@@ -452,7 +467,7 @@ export default function OpticalInternalSupportPage() {
                   setFilters((prev) => ({ ...prev, status: value, page: 1 }))
                 }
               >
-                <SelectTrigger>
+                <SelectTrigger className="rounded-none focus:border-epoch-primary focus:ring-epoch-primary/20">
                   <SelectValue placeholder="Todos los estados" />
                 </SelectTrigger>
                 <SelectContent>
@@ -474,7 +489,7 @@ export default function OpticalInternalSupportPage() {
                   setFilters((prev) => ({ ...prev, priority: value, page: 1 }))
                 }
               >
-                <SelectTrigger>
+                <SelectTrigger className="rounded-none focus:border-epoch-primary focus:ring-epoch-primary/20">
                   <SelectValue placeholder="Todas las prioridades" />
                 </SelectTrigger>
                 <SelectContent>
@@ -496,7 +511,7 @@ export default function OpticalInternalSupportPage() {
                   setFilters((prev) => ({ ...prev, category: value, page: 1 }))
                 }
               >
-                <SelectTrigger>
+                <SelectTrigger className="rounded-none focus:border-epoch-primary focus:ring-epoch-primary/20">
                   <SelectValue placeholder="Todas las categorías" />
                 </SelectTrigger>
                 <SelectContent>
@@ -522,7 +537,7 @@ export default function OpticalInternalSupportPage() {
                   }))
                 }
               >
-                <SelectTrigger>
+                <SelectTrigger className="rounded-none focus:border-epoch-primary focus:ring-epoch-primary/20">
                   <SelectValue placeholder="Todos los clientes" />
                 </SelectTrigger>
                 <SelectContent>
@@ -550,12 +565,14 @@ export default function OpticalInternalSupportPage() {
                       page: 1,
                     }))
                   }
+                  className="rounded-none focus:border-epoch-primary focus:ring-epoch-primary/20"
                 />
                 <Button
                   variant="outline"
                   size="icon"
                   onClick={loadTickets}
                   title="Refrescar"
+                  className="rounded-none border-admin-border-primary/20"
                 >
                   <RefreshCw className="h-4 w-4" />
                 </Button>
@@ -565,18 +582,18 @@ export default function OpticalInternalSupportPage() {
         </CardContent>
       </Card>
 
-      {/* Tickets List */}
-      <Card>
+      {/* Tickets List - sin admin-card para evitar doble hover y contraste en badges */}
+      <Card className="rounded-none border border-border">
         <CardHeader>
           <CardTitle>Tickets ({pagination.total})</CardTitle>
         </CardHeader>
         <CardContent>
           {loadingTickets ? (
             <div className="flex items-center justify-center py-12">
-              <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+              <Loader2 className="h-8 w-8 animate-spin text-epoch-primary" />
             </div>
           ) : tickets.length === 0 ? (
-            <div className="text-center py-12 text-gray-500">
+            <div className="text-center py-12 text-epoch-primary/70">
               <MessageSquare className="h-12 w-12 mx-auto mb-4 text-gray-400" />
               <p className="text-lg font-medium mb-2">No hay tickets</p>
               <p className="text-sm mb-4">
@@ -591,7 +608,10 @@ export default function OpticalInternalSupportPage() {
                 (!filters.priority || filters.priority === "all") &&
                 (!filters.category || filters.category !== "all") &&
                 !filters.search && (
-                  <Button onClick={() => setShowCreateDialog(true)}>
+                  <Button
+                    onClick={() => setShowCreateDialog(true)}
+                    className="rounded-none bg-epoch-primary hover:bg-epoch-surface text-white font-display font-bold text-[10px] tracking-[0.2em] uppercase"
+                  >
                     <Plus className="h-4 w-4 mr-2" />
                     Crear Ticket
                   </Button>
@@ -604,7 +624,7 @@ export default function OpticalInternalSupportPage() {
                   key={ticket.id}
                   href={`/admin/support/tickets/${ticket.id}`}
                 >
-                  <div className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 cursor-pointer">
+                  <div className="flex items-center justify-between p-4 border rounded-none hover:bg-epoch-primary/5 cursor-pointer transition-colors border-epoch-primary/10">
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1 flex-wrap">
                         <span className="font-mono font-semibold text-sm">
@@ -625,10 +645,10 @@ export default function OpticalInternalSupportPage() {
                           </Badge>
                         )}
                       </div>
-                      <h3 className="font-medium text-gray-900">
+                      <h3 className="font-medium text-epoch-primary">
                         {ticket.subject}
                       </h3>
-                      <div className="flex items-center gap-4 mt-2 text-sm text-gray-500 flex-wrap">
+                      <div className="flex items-center gap-4 mt-2 text-sm text-epoch-primary/70 flex-wrap">
                         {ticket.customer && (
                           <span className="flex items-center gap-1">
                             <User className="h-3 w-3" />
@@ -656,7 +676,7 @@ export default function OpticalInternalSupportPage() {
                         )}
                       </div>
                     </div>
-                    <ArrowRight className="h-5 w-5 text-gray-400" />
+                    <ArrowRight className="h-5 w-5 text-epoch-accent" />
                   </div>
                 </Link>
               ))}
@@ -666,13 +686,14 @@ export default function OpticalInternalSupportPage() {
           {/* Pagination */}
           {pagination.totalPages > 1 && (
             <div className="flex items-center justify-between mt-6 pt-4 border-t">
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-epoch-primary/80">
                 Página {pagination.page} de {pagination.totalPages}
               </p>
               <div className="flex gap-2">
                 <Button
                   variant="outline"
                   size="sm"
+                  className="rounded-none border-admin-border-primary/20"
                   onClick={() =>
                     setPagination((prev) => ({
                       ...prev,
@@ -686,6 +707,7 @@ export default function OpticalInternalSupportPage() {
                 <Button
                   variant="outline"
                   size="sm"
+                  className="rounded-none border-admin-border-primary/20"
                   onClick={() =>
                     setPagination((prev) => ({
                       ...prev,
@@ -706,10 +728,10 @@ export default function OpticalInternalSupportPage() {
       <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
         <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Crear Ticket de Soporte Interno</DialogTitle>
+            <DialogTitle>Registrar Incidente</DialogTitle>
             <DialogDescription>
-              Registra un problema interno relacionado con un cliente (lente,
-              entrega, pago, etc.)
+              Registra un incidente o problema relacionado con un cliente
+              (lente, entrega, pago, etc.) para análisis y mejora del servicio
             </DialogDescription>
           </DialogHeader>
           <form
@@ -729,7 +751,7 @@ export default function OpticalInternalSupportPage() {
                 >
                   <SelectTrigger
                     id="category"
-                    className={ticketErrors.category ? "border-red-500" : ""}
+                    className={`rounded-none focus:border-epoch-primary focus:ring-epoch-primary/20 ${ticketErrors.category ? "border-red-500" : ""}`}
                   >
                     <SelectValue placeholder="Selecciona una categoría" />
                   </SelectTrigger>
@@ -760,7 +782,7 @@ export default function OpticalInternalSupportPage() {
                 >
                   <SelectTrigger
                     id="priority"
-                    className={ticketErrors.priority ? "border-red-500" : ""}
+                    className={`rounded-none focus:border-epoch-primary focus:ring-epoch-primary/20 ${ticketErrors.priority ? "border-red-500" : ""}`}
                   >
                     <SelectValue placeholder="Selecciona una prioridad" />
                   </SelectTrigger>
@@ -783,7 +805,7 @@ export default function OpticalInternalSupportPage() {
             <div className="space-y-2">
               <Label htmlFor="customer_search">Cliente (opcional)</Label>
               {selectedCustomerForTicket ? (
-                <div className="flex items-center justify-between p-3 border rounded-lg bg-gray-50">
+                <div className="flex items-center justify-between p-3 border rounded-none bg-epoch-background">
                   <div>
                     <div className="font-medium">
                       {selectedCustomerForTicket.first_name}{" "}
@@ -797,6 +819,7 @@ export default function OpticalInternalSupportPage() {
                     type="button"
                     variant="outline"
                     size="sm"
+                    className="rounded-none border-admin-border-primary/20"
                     onClick={() => {
                       setSelectedCustomerForTicket(null);
                       setTicketValue("customer_id", undefined);
@@ -816,7 +839,7 @@ export default function OpticalInternalSupportPage() {
                     placeholder="Buscar por nombre, RUT o email..."
                     value={customerSearch}
                     onChange={(e) => setCustomerSearch(e.target.value)}
-                    className="pl-10"
+                    className="pl-10 rounded-none focus:border-epoch-primary focus:ring-epoch-primary/20"
                   />
                   {customerSearch.length >= 2 && (
                     <div className="absolute z-50 w-full mt-1 bg-white border rounded-lg shadow-lg max-h-60 overflow-y-auto">
@@ -881,7 +904,7 @@ export default function OpticalInternalSupportPage() {
                 id="subject"
                 {...registerTicket("subject")}
                 placeholder="Resumen breve del problema"
-                className={ticketErrors.subject ? "border-red-500" : ""}
+                className={`rounded-none focus:border-epoch-primary focus:ring-epoch-primary/20 ${ticketErrors.subject ? "border-red-500" : ""}`}
               />
               {ticketErrors.subject && (
                 <p className="text-sm text-red-500">
@@ -899,7 +922,7 @@ export default function OpticalInternalSupportPage() {
                 {...registerTicket("description")}
                 placeholder="Describe el problema en detalle..."
                 rows={6}
-                className={ticketErrors.description ? "border-red-500" : ""}
+                className={`rounded-none focus:border-epoch-primary focus:ring-epoch-primary/20 ${ticketErrors.description ? "border-red-500" : ""}`}
               />
               {ticketErrors.description && (
                 <p className="text-sm text-red-500">
@@ -916,11 +939,16 @@ export default function OpticalInternalSupportPage() {
               <Button
                 type="button"
                 variant="outline"
+                className="rounded-none border-admin-border-primary/20"
                 onClick={() => setShowCreateDialog(false)}
               >
                 Cancelar
               </Button>
-              <Button type="submit" disabled={creatingTicket}>
+              <Button
+                type="submit"
+                disabled={creatingTicket}
+                className="rounded-none bg-epoch-primary hover:bg-epoch-surface text-white font-display font-bold text-[10px] tracking-[0.2em] uppercase"
+              >
                 {creatingTicket ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />

@@ -2,96 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
 import { createServiceRoleClient } from "@/utils/supabase/service-role";
 import { appLogger as logger } from "@/lib/logger";
+import { getDefaultPermissions } from "@/lib/admin/permissions";
 import type {
   GetAdminRoleParams,
   GetAdminRoleResult,
 } from "@/types/supabase-rpc";
-
-// Helper function to get default permissions by role
-function getDefaultPermissions(role: string) {
-  // Permisos por defecto según rol
-  const rolePermissions: Record<string, any> = {
-    root: {
-      orders: ["read", "create", "update", "delete"],
-      products: ["read", "create", "update", "delete"],
-      customers: ["read", "create", "update", "delete"],
-      analytics: ["read"],
-      settings: ["read", "create", "update", "delete"],
-      admin_users: ["read", "create", "update", "delete"],
-      support: ["read", "create", "update", "delete"],
-      bulk_operations: ["read", "create", "update", "delete"],
-      saas_management: ["read", "create", "update", "delete"],
-    },
-    dev: {
-      // Igual que root
-      orders: ["read", "create", "update", "delete"],
-      products: ["read", "create", "update", "delete"],
-      customers: ["read", "create", "update", "delete"],
-      analytics: ["read"],
-      settings: ["read", "create", "update", "delete"],
-      admin_users: ["read", "create", "update", "delete"],
-      support: ["read", "create", "update", "delete"],
-      bulk_operations: ["read", "create", "update", "delete"],
-      saas_management: ["read", "create", "update", "delete"],
-    },
-    super_admin: {
-      orders: ["read", "create", "update", "delete"],
-      products: ["read", "create", "update", "delete"],
-      customers: ["read", "create", "update", "delete"],
-      analytics: ["read"],
-      settings: ["read", "create", "update", "delete"],
-      admin_users: ["read", "create", "update", "delete"],
-      support: ["read", "create", "update", "delete"],
-      bulk_operations: ["read", "create", "update", "delete"],
-      branches: ["read", "create", "update", "delete"],
-    },
-    admin: {
-      orders: ["read", "create", "update", "delete"],
-      products: ["read", "create", "update", "delete"],
-      customers: ["read", "create", "update", "delete"],
-      analytics: ["read"],
-      settings: ["read", "update"], // No puede eliminar config críticas
-      admin_users: ["read"], // Solo ver, no crear/modificar
-      support: ["read", "create", "update"],
-      bulk_operations: ["read", "create"],
-      appointments: ["read", "create", "update", "delete"],
-      quotes: ["read", "create", "update", "delete"],
-      work_orders: ["read", "create", "update", "delete"],
-    },
-    employee: {
-      // Acceso operativo sin administración
-      orders: ["read", "create", "update"], // No puede eliminar órdenes
-      products: ["read"], // Solo lectura de catálogo
-      customers: ["read", "create", "update"], // No puede eliminar clientes
-      analytics: [], // Sin acceso a analytics
-      settings: [], // Sin acceso a configuración
-      admin_users: [], // Sin acceso a usuarios
-      support: ["read", "create"], // Puede crear tickets, no resolver
-      bulk_operations: [], // Sin operaciones masivas
-      appointments: ["read", "create", "update"], // Puede agendar, no eliminar
-      quotes: ["read", "create", "update"], // Puede crear presupuestos
-      work_orders: ["read", "update"], // Puede actualizar estado, no crear/eliminar
-      pos: ["read", "create"], // Acceso completo a POS para ventas
-    },
-    vendedor: {
-      // Acceso a ventas y citas en sucursal asignada (igual que employee)
-      orders: ["read", "create", "update"],
-      products: ["read"],
-      customers: ["read", "create", "update"],
-      analytics: [],
-      settings: [],
-      admin_users: [],
-      support: ["read", "create"],
-      bulk_operations: [],
-      appointments: ["read", "create", "update"],
-      quotes: ["read", "create", "update"],
-      work_orders: ["read", "update"],
-      pos: ["read", "create"],
-    },
-  };
-
-  return rolePermissions[role] || rolePermissions.admin;
-}
 
 export const dynamic = "force-dynamic";
 export async function POST(request: NextRequest) {

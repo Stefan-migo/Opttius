@@ -73,6 +73,27 @@ export async function getSubscriptionStatus(
     };
   }
 
+  // Check organization status: suspended/cancelled orgs must block access
+  const { data: org } = await supabase
+    .from("organizations")
+    .select("status")
+    .eq("id", organizationId)
+    .maybeSingle();
+
+  if (org?.status === "suspended" || org?.status === "cancelled") {
+    return {
+      status: "expired",
+      isExpired: true,
+      isTrialExpired: true,
+      trialEndsAt: null,
+      currentPeriodStart: null,
+      currentPeriodEnd: null,
+      cancelAt: null,
+      canceledAt: null,
+      organizationId,
+    };
+  }
+
   if (!sub) {
     return {
       status: "none",
@@ -98,8 +119,27 @@ export async function getSubscriptionStatus(
   const cancelAt = sub.cancel_at ? new Date(sub.cancel_at) : null;
   const canceledAt = sub.canceled_at ? new Date(sub.canceled_at) : null;
 
+  // past_due = payment failed, block access until regularized
+  if (sub.status === "past_due") {
+    return {
+      status: "expired",
+      isExpired: true,
+      isTrialExpired: false,
+      trialEndsAt: null,
+      currentPeriodStart,
+      currentPeriodEnd,
+      cancelAt,
+      canceledAt,
+      organizationId,
+    };
+  }
+
   const isTrialExpired =
     sub.status === "trialing" && trialEndsAt !== null && trialEndsAt < now;
+
+  // Cancelled with canceled_at set = immediate block (admin cancelled from saas-management)
+  const cancelledImmediately =
+    sub.status === "cancelled" && canceledAt !== null;
 
   // For cancelled subscriptions: access until cancel_at (or current_period_end)
   // If cancel_at is in the future, subscription is still active until then
@@ -109,8 +149,9 @@ export async function getSubscriptionStatus(
       : currentPeriodEnd;
 
   const isExpired =
+    cancelledImmediately ||
     isTrialExpired ||
-    (sub.status === "cancelled" && cancelAt !== null && cancelAt < now) ||
+    (sub.status === "cancelled" && cancelAt !== null && cancelAt <= now) ||
     (effectiveEndDate !== null &&
       effectiveEndDate < now &&
       sub.status !== "cancelled");

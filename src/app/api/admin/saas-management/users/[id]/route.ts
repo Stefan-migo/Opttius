@@ -3,6 +3,7 @@ import { requireRoot } from "@/lib/api/root-middleware";
 import { createServiceRoleClient } from "@/utils/supabase/service-role";
 import { appLogger as logger } from "@/lib/logger";
 import { AuthorizationError } from "@/lib/api/errors";
+import { updateSaasUserSchema } from "@/lib/api/validation/zod-schemas";
 
 /**
  * GET /api/admin/saas-management/users/[id]
@@ -119,7 +120,15 @@ export async function PATCH(
 
     const { id } = params;
     const body = await request.json();
-    const { organization_id, role, is_active, permissions } = body;
+    const parseResult = updateSaasUserSchema.safeParse(body);
+    if (!parseResult.success) {
+      const firstError = parseResult.error.errors[0];
+      return NextResponse.json(
+        { error: firstError?.message || "Datos inválidos" },
+        { status: 400 },
+      );
+    }
+    const { organization_id, role, is_active, permissions } = parseResult.data;
 
     // Verificar que el usuario existe
     const { data: existingUser } = await supabaseServiceRole
@@ -154,13 +163,7 @@ export async function PATCH(
       updates.organization_id = organization_id;
     }
 
-    if (role !== undefined) {
-      // Validar rol
-      if (!["root", "dev", "super_admin", "admin", "employee"].includes(role)) {
-        return NextResponse.json({ error: "Invalid role" }, { status: 400 });
-      }
-      updates.role = role;
-    }
+    if (role !== undefined) updates.role = role;
 
     if (is_active !== undefined) {
       updates.is_active = is_active;

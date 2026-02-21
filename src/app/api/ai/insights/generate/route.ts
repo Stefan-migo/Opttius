@@ -150,6 +150,7 @@ export async function POST(request: NextRequest) {
         additionalContext: enhancedContext,
         temperature: 0.7,
         useMaturityAdaptation: true,
+        supabase,
       });
 
       // Save insights to database

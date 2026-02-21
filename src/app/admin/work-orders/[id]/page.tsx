@@ -687,7 +687,7 @@ export default function WorkOrderDetailPage() {
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div>
-            <h1 className="text-3xl font-bold text-azul-profundo">
+            <h1 className="text-3xl font-bold text-epoch-primary">
               Cargando...
             </h1>
           </div>
@@ -704,7 +704,7 @@ export default function WorkOrderDetailPage() {
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div>
-            <h1 className="text-3xl font-bold text-azul-profundo">
+            <h1 className="text-3xl font-bold text-epoch-primary">
               Trabajo no encontrado
             </h1>
           </div>
@@ -736,10 +736,12 @@ export default function WorkOrderDetailPage() {
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div>
-            <h1 className="text-3xl font-bold text-azul-profundo">
+            <h1 className="text-3xl font-bold text-epoch-primary">
               {workOrder.work_order_number}
             </h1>
-            <p className="text-tierra-media">Trabajo para {customerName}</p>
+            <p className="text-admin-text-tertiary">
+              Trabajo para {customerName}
+            </p>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -1119,18 +1121,18 @@ export default function WorkOrderDetailPage() {
               </CardHeader>
               <CardContent className="space-y-2">
                 <div>
-                  <p className="text-sm text-tierra-media">Nombre</p>
+                  <p className="text-sm text-admin-text-tertiary">Nombre</p>
                   <p className="font-medium">{customerName}</p>
                 </div>
                 {workOrder.customer?.email && (
                   <div>
-                    <p className="text-sm text-tierra-media">Email</p>
+                    <p className="text-sm text-admin-text-tertiary">Email</p>
                     <p className="font-medium">{workOrder.customer.email}</p>
                   </div>
                 )}
                 {workOrder.customer?.phone && (
                   <div>
-                    <p className="text-sm text-tierra-media">Teléfono</p>
+                    <p className="text-sm text-admin-text-tertiary">Teléfono</p>
                     <p className="font-medium">{workOrder.customer.phone}</p>
                   </div>
                 )}
@@ -1153,14 +1155,14 @@ export default function WorkOrderDetailPage() {
                 </CardHeader>
                 <CardContent className="space-y-2">
                   <div>
-                    <p className="text-sm text-tierra-media">Fecha</p>
+                    <p className="text-sm text-admin-text-tertiary">Fecha</p>
                     <p className="font-medium">
                       {formatDate(workOrder.prescription.prescription_date)}
                     </p>
                   </div>
                   {workOrder.prescription.prescription_type && (
                     <div>
-                      <p className="text-sm text-tierra-media">Tipo</p>
+                      <p className="text-sm text-admin-text-tertiary">Tipo</p>
                       <p className="font-medium">
                         {workOrder.prescription.prescription_type}
                       </p>
@@ -1180,24 +1182,30 @@ export default function WorkOrderDetailPage() {
               </CardHeader>
               <CardContent className="space-y-2">
                 <div>
-                  <p className="text-sm text-tierra-media">Fecha de Creación</p>
+                  <p className="text-sm text-admin-text-tertiary">
+                    Fecha de Creación
+                  </p>
                   <p className="font-medium">
                     {formatDate(workOrder.work_order_date)}
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-tierra-media">Estado de Pago</p>
+                  <p className="text-sm text-admin-text-tertiary">
+                    Estado de Pago
+                  </p>
                   {getPaymentStatusBadge(workOrder.payment_status)}
                 </div>
                 <div>
-                  <p className="text-sm text-tierra-media">Total</p>
-                  <p className="text-2xl font-bold text-verde-suave">
+                  <p className="text-sm text-admin-text-tertiary">Total</p>
+                  <p className="text-2xl font-bold text-admin-success">
                     {formatCurrency(workOrder.total_amount)}
                   </p>
                 </div>
                 {workOrder.deposit_amount > 0 && (
                   <div>
-                    <p className="text-sm text-tierra-media">Saldo Pendiente</p>
+                    <p className="text-sm text-admin-text-tertiary">
+                      Saldo Pendiente
+                    </p>
                     <p className="font-semibold text-orange-600">
                       {formatCurrency(workOrder.balance_amount)}
                     </p>
@@ -1250,23 +1258,23 @@ export default function WorkOrderDetailPage() {
               ) : (
                 <div className="space-y-2">
                   <div>
-                    <p className="text-sm text-tierra-media">Marco</p>
+                    <p className="text-sm text-admin-text-tertiary">Marco</p>
                     <p className="font-medium">{workOrder.frame_name}</p>
                     {workOrder.frame_brand && (
-                      <p className="text-sm text-tierra-media">
+                      <p className="text-sm text-admin-text-tertiary">
                         {workOrder.frame_brand}
                         {workOrder.frame_model && ` · ${workOrder.frame_model}`}
                       </p>
                     )}
                   </div>
                   <div>
-                    <p className="text-sm text-tierra-media">Lente</p>
+                    <p className="text-sm text-admin-text-tertiary">Lente</p>
                     <p className="font-medium">
                       {workOrder.lens_family?.name ||
                         workOrder.lens_type ||
                         "—"}
                     </p>
-                    <p className="text-sm text-tierra-media">
+                    <p className="text-sm text-admin-text-tertiary">
                       {workOrder.lens_material}
                       {workOrder.lens_index &&
                         ` · Índice ${workOrder.lens_index}`}
@@ -1298,24 +1306,28 @@ export default function WorkOrderDetailPage() {
               </CardHeader>
               <CardContent className="space-y-2">
                 <div>
-                  <p className="text-sm text-tierra-media">Nombre</p>
+                  <p className="text-sm text-admin-text-tertiary">Nombre</p>
                   <p className="font-medium">{workOrder.lab_name}</p>
                 </div>
                 {workOrder.lab_contact && (
                   <div>
-                    <p className="text-sm text-tierra-media">Contacto</p>
+                    <p className="text-sm text-admin-text-tertiary">Contacto</p>
                     <p className="font-medium">{workOrder.lab_contact}</p>
                   </div>
                 )}
                 {workOrder.lab_order_number && (
                   <div>
-                    <p className="text-sm text-tierra-media">Número de Orden</p>
+                    <p className="text-sm text-admin-text-tertiary">
+                      Número de Orden
+                    </p>
                     <p className="font-medium">{workOrder.lab_order_number}</p>
                   </div>
                 )}
                 {workOrder.lab_estimated_delivery_date && (
                   <div>
-                    <p className="text-sm text-tierra-media">Fecha Estimada</p>
+                    <p className="text-sm text-admin-text-tertiary">
+                      Fecha Estimada
+                    </p>
                     <p className="font-medium">
                       {formatDate(workOrder.lab_estimated_delivery_date)}
                     </p>
@@ -1360,42 +1372,44 @@ export default function WorkOrderDetailPage() {
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <p className="text-xs text-tierra-media">Nombre</p>
+                  <p className="text-xs text-admin-text-tertiary">Nombre</p>
                   <p className="font-medium">{workOrder.frame_name}</p>
                 </div>
                 {workOrder.frame_brand && (
                   <div>
-                    <p className="text-xs text-tierra-media">Marca</p>
+                    <p className="text-xs text-admin-text-tertiary">Marca</p>
                     <p className="font-medium">{workOrder.frame_brand}</p>
                   </div>
                 )}
                 {workOrder.frame_model && (
                   <div>
-                    <p className="text-xs text-tierra-media">Modelo</p>
+                    <p className="text-xs text-admin-text-tertiary">Modelo</p>
                     <p className="font-medium">{workOrder.frame_model}</p>
                   </div>
                 )}
                 {workOrder.frame_color && (
                   <div>
-                    <p className="text-xs text-tierra-media">Color</p>
+                    <p className="text-xs text-admin-text-tertiary">Color</p>
                     <p className="font-medium">{workOrder.frame_color}</p>
                   </div>
                 )}
                 {workOrder.frame_size && (
                   <div>
-                    <p className="text-xs text-tierra-media">Tamaño</p>
+                    <p className="text-xs text-admin-text-tertiary">Tamaño</p>
                     <p className="font-medium">{workOrder.frame_size}</p>
                   </div>
                 )}
                 {workOrder.frame_sku && (
                   <div>
-                    <p className="text-xs text-tierra-media">SKU</p>
+                    <p className="text-xs text-admin-text-tertiary">SKU</p>
                     <p className="font-medium">{workOrder.frame_sku}</p>
                   </div>
                 )}
                 {workOrder.frame_serial_number && (
                   <div>
-                    <p className="text-xs text-tierra-media">Número de Serie</p>
+                    <p className="text-xs text-admin-text-tertiary">
+                      Número de Serie
+                    </p>
                     <p className="font-medium">
                       {workOrder.frame_serial_number}
                     </p>
@@ -1419,16 +1433,16 @@ export default function WorkOrderDetailPage() {
               {workOrder.presbyopia_solution === "two_separate" ? (
                 <div className="space-y-6">
                   <div className="space-y-3 pb-4 border-b border-admin-border-primary/20">
-                    <h3 className="font-semibold text-azul-profundo border-b pb-2">
+                    <h3 className="font-semibold text-epoch-primary border-b pb-2">
                       Lente Lejos
                     </h3>
-                    <p className="text-xs text-tierra-media">Marco</p>
+                    <p className="text-xs text-admin-text-tertiary">Marco</p>
                     <p className="font-medium">
                       {workOrder.frame_name}
                       {workOrder.frame_brand && ` · ${workOrder.frame_brand}`}
                       {workOrder.frame_model && ` · ${workOrder.frame_model}`}
                     </p>
-                    <p className="text-xs text-tierra-media mt-2">
+                    <p className="text-xs text-admin-text-tertiary mt-2">
                       Familia de Lente
                     </p>
                     <p className="font-medium">
@@ -1436,16 +1450,16 @@ export default function WorkOrderDetailPage() {
                     </p>
                   </div>
                   <div className="space-y-3">
-                    <h3 className="font-semibold text-azul-profundo border-b pb-2">
+                    <h3 className="font-semibold text-epoch-primary border-b pb-2">
                       Lente Cerca
                     </h3>
-                    <p className="text-xs text-tierra-media">Marco</p>
+                    <p className="text-xs text-admin-text-tertiary">Marco</p>
                     <p className="font-medium">
                       {workOrder.frame_name}
                       {workOrder.frame_brand && ` · ${workOrder.frame_brand}`}
                       {workOrder.frame_model && ` · ${workOrder.frame_model}`}
                     </p>
-                    <p className="text-xs text-tierra-media mt-2">
+                    <p className="text-xs text-admin-text-tertiary mt-2">
                       Familia de Lente
                     </p>
                     <p className="font-medium">
@@ -1456,18 +1470,20 @@ export default function WorkOrderDetailPage() {
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <p className="text-xs text-tierra-media">Tipo de Lente</p>
+                    <p className="text-xs text-admin-text-tertiary">
+                      Tipo de Lente
+                    </p>
                     <p className="font-medium">
                       {workOrder.lens_family?.name || workOrder.lens_type}
                     </p>
                   </div>
                   <div>
-                    <p className="text-xs text-tierra-media">Material</p>
+                    <p className="text-xs text-admin-text-tertiary">Material</p>
                     <p className="font-medium">{workOrder.lens_material}</p>
                   </div>
                   {workOrder.lens_index && (
                     <div>
-                      <p className="text-xs text-tierra-media">
+                      <p className="text-xs text-admin-text-tertiary">
                         Índice de Refracción
                       </p>
                       <p className="font-medium">{workOrder.lens_index}</p>
@@ -1476,7 +1492,7 @@ export default function WorkOrderDetailPage() {
                   {workOrder.lens_treatments &&
                     workOrder.lens_treatments.length > 0 && (
                       <div>
-                        <p className="text-xs text-tierra-media">
+                        <p className="text-xs text-admin-text-tertiary">
                           Tratamientos
                         </p>
                         <div className="flex flex-wrap gap-1 mt-1">
@@ -1492,7 +1508,7 @@ export default function WorkOrderDetailPage() {
                     )}
                   {workOrder.lens_tint_color && (
                     <div>
-                      <p className="text-xs text-tierra-media">
+                      <p className="text-xs text-admin-text-tertiary">
                         Color del Tinte
                       </p>
                       <p className="font-medium">{workOrder.lens_tint_color}</p>
@@ -1500,7 +1516,7 @@ export default function WorkOrderDetailPage() {
                   )}
                   {workOrder.lens_tint_percentage && (
                     <div>
-                      <p className="text-xs text-tierra-media">
+                      <p className="text-xs text-admin-text-tertiary">
                         Porcentaje de Tinte
                       </p>
                       <p className="font-medium">
@@ -1524,18 +1540,18 @@ export default function WorkOrderDetailPage() {
               </CardHeader>
               <CardContent className="space-y-2">
                 <div>
-                  <p className="text-sm text-tierra-media">Nombre</p>
+                  <p className="text-sm text-admin-text-tertiary">Nombre</p>
                   <p className="font-medium">{workOrder.lab_name}</p>
                 </div>
                 {workOrder.lab_contact && (
                   <div>
-                    <p className="text-sm text-tierra-media">Contacto</p>
+                    <p className="text-sm text-admin-text-tertiary">Contacto</p>
                     <p className="font-medium">{workOrder.lab_contact}</p>
                   </div>
                 )}
                 {workOrder.lab_order_number && (
                   <div>
-                    <p className="text-sm text-tierra-media">
+                    <p className="text-sm text-admin-text-tertiary">
                       Número de Orden del Lab
                     </p>
                     <p className="font-medium">{workOrder.lab_order_number}</p>
@@ -1543,7 +1559,7 @@ export default function WorkOrderDetailPage() {
                 )}
                 {workOrder.lab_estimated_delivery_date && (
                   <div>
-                    <p className="text-sm text-tierra-media">
+                    <p className="text-sm text-admin-text-tertiary">
                       Fecha Estimada de Entrega
                     </p>
                     <p className="font-medium">
@@ -1563,7 +1579,7 @@ export default function WorkOrderDetailPage() {
             <CardContent className="space-y-4">
               {workOrder.internal_notes && (
                 <div>
-                  <p className="text-sm text-tierra-media mb-1">
+                  <p className="text-sm text-admin-text-tertiary mb-1">
                     Notas Internas
                   </p>
                   <p className="font-medium whitespace-pre-wrap text-sm text-admin-text-primary bg-admin-bg-tertiary p-3 rounded-none border border-admin-border-primary/20">
@@ -1573,7 +1589,7 @@ export default function WorkOrderDetailPage() {
               )}
               {workOrder.customer_notes && (
                 <div>
-                  <p className="text-sm text-tierra-media mb-1">
+                  <p className="text-sm text-admin-text-tertiary mb-1">
                     Notas para el Cliente
                   </p>
                   <p className="font-medium whitespace-pre-wrap text-sm text-admin-text-primary bg-admin-bg-tertiary p-3 rounded-none border border-admin-border-primary/20">
@@ -1583,7 +1599,7 @@ export default function WorkOrderDetailPage() {
               )}
               {workOrder.lab_notes && (
                 <div>
-                  <p className="text-sm text-tierra-media mb-1">
+                  <p className="text-sm text-admin-text-tertiary mb-1">
                     Notas del Laboratorio
                   </p>
                   <p className="font-medium whitespace-pre-wrap text-sm text-admin-text-primary bg-admin-bg-tertiary p-3 rounded-none border border-admin-border-primary/20">
@@ -1593,7 +1609,7 @@ export default function WorkOrderDetailPage() {
               )}
               {workOrder.quality_notes && (
                 <div>
-                  <p className="text-sm text-tierra-media mb-1">
+                  <p className="text-sm text-admin-text-tertiary mb-1">
                     Notas de Control de Calidad
                   </p>
                   <p className="font-medium whitespace-pre-wrap text-sm text-admin-text-primary bg-admin-bg-tertiary p-3 rounded-none border border-admin-border-primary/20">
@@ -1603,7 +1619,7 @@ export default function WorkOrderDetailPage() {
               )}
               {workOrder.assigned_staff && (
                 <div>
-                  <p className="text-sm text-tierra-media">Asignado a</p>
+                  <p className="text-sm text-admin-text-tertiary">Asignado a</p>
                   <p className="font-medium">
                     {workOrder.assigned_staff.first_name}{" "}
                     {workOrder.assigned_staff.last_name}
@@ -1626,7 +1642,9 @@ export default function WorkOrderDetailPage() {
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <div className="flex justify-between">
-                  <span className="text-tierra-media">Costo de Marco:</span>
+                  <span className="text-admin-text-tertiary">
+                    Costo de Marco:
+                  </span>
                   <span className="font-medium">
                     {formatCurrency(workOrder.frame_cost)}
                   </span>
@@ -1634,7 +1652,7 @@ export default function WorkOrderDetailPage() {
                 {workOrder.presbyopia_solution === "two_separate" ? (
                   <>
                     <div className="flex justify-between">
-                      <span className="text-tierra-media">
+                      <span className="text-admin-text-tertiary">
                         Costo Lente Lejos (
                         {workOrder.far_lens_family?.name || "Lejos"}):
                       </span>
@@ -1643,7 +1661,7 @@ export default function WorkOrderDetailPage() {
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-tierra-media">
+                      <span className="text-admin-text-tertiary">
                         Costo Lente Cerca (
                         {workOrder.near_lens_family?.name || "Cerca"}):
                       </span>
@@ -1654,14 +1672,16 @@ export default function WorkOrderDetailPage() {
                   </>
                 ) : (
                   <div className="flex justify-between">
-                    <span className="text-tierra-media">Costo de Lente:</span>
+                    <span className="text-admin-text-tertiary">
+                      Costo de Lente:
+                    </span>
                     <span className="font-medium">
                       {formatCurrency(workOrder.lens_cost)}
                     </span>
                   </div>
                 )}
                 <div className="flex justify-between">
-                  <span className="text-tierra-media">
+                  <span className="text-admin-text-tertiary">
                     Costo de Tratamientos:
                   </span>
                   <span className="font-medium">
@@ -1669,7 +1689,7 @@ export default function WorkOrderDetailPage() {
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-tierra-media">
+                  <span className="text-admin-text-tertiary">
                     Costo de Mano de Obra:
                   </span>
                   <span className="font-medium">
@@ -1678,7 +1698,7 @@ export default function WorkOrderDetailPage() {
                 </div>
                 {workOrder.lab_cost > 0 && (
                   <div className="flex justify-between">
-                    <span className="text-tierra-media">
+                    <span className="text-admin-text-tertiary">
                       Costo del Laboratorio:
                     </span>
                     <span className="font-medium">
@@ -1701,21 +1721,23 @@ export default function WorkOrderDetailPage() {
                   </div>
                 )}
                 <div className="flex justify-between">
-                  <span className="text-tierra-media">IVA (19%):</span>
+                  <span className="text-admin-text-tertiary">IVA (19%):</span>
                   <span className="font-medium">
                     {formatCurrency(workOrder.tax_amount)}
                   </span>
                 </div>
                 <div className="border-t pt-2 flex justify-between text-lg font-bold">
                   <span>Total:</span>
-                  <span className="text-verde-suave">
+                  <span className="text-admin-success">
                     {formatCurrency(workOrder.total_amount)}
                   </span>
                 </div>
                 {workOrder.deposit_amount > 0 && (
                   <>
                     <div className="border-t pt-2 flex justify-between">
-                      <span className="text-tierra-media">Seña/Depósito:</span>
+                      <span className="text-admin-text-tertiary">
+                        Seña/Depósito:
+                      </span>
                       <span className="font-medium">
                         {formatCurrency(workOrder.deposit_amount)}
                       </span>
@@ -1741,7 +1763,7 @@ export default function WorkOrderDetailPage() {
             </CardHeader>
             <CardContent>
               {statusHistory.length === 0 ? (
-                <div className="text-center py-8 text-tierra-media">
+                <div className="text-center py-8 text-admin-text-tertiary">
                   No hay historial de cambios de estado
                 </div>
               ) : (

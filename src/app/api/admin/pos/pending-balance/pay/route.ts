@@ -6,6 +6,13 @@ import {
   createApiSuccessResponse,
   createApiErrorResponse,
 } from "@/lib/api/response";
+import { z } from "zod";
+import { ValidationError } from "@/lib/api/errors";
+import {
+  parseAndValidateBody,
+  validationErrorResponse,
+} from "@/lib/api/validation/zod-helpers";
+import { pendingBalancePaySchema } from "@/lib/api/validation/zod-schemas";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
 
 /**
@@ -40,7 +47,16 @@ export async function POST(request: NextRequest) {
     // Get branch context
     const branchContext = await getBranchContext(request, user.id);
 
-    const body = await request.json();
+    let body: z.infer<typeof pendingBalancePaySchema>;
+    try {
+      body = await parseAndValidateBody(request, pendingBalancePaySchema);
+    } catch (error) {
+      if (error instanceof ValidationError) {
+        return validationErrorResponse(error);
+      }
+      throw error;
+    }
+
     const {
       order_id,
       payment_amount,
@@ -48,13 +64,6 @@ export async function POST(request: NextRequest) {
       notes,
       fiscal_reference,
     } = body;
-
-    if (!order_id || !payment_amount || !payment_method) {
-      return NextResponse.json(
-        { error: "Missing required fields" },
-        { status: 400 },
-      );
-    }
 
     // Get order with branch filter
     let orderQuery = supabaseServiceRole

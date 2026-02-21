@@ -86,6 +86,10 @@ interface OptionField {
   values?: OptionValue[];
 }
 
+/**
+ * Configuración de opciones de formularios (productos, clientes, citas, presupuestos, POS).
+ * Gestiona product_option_fields y product_option_values vía /api/admin/product-options.
+ */
 export default function FormOptionsConfig() {
   const [loading, setLoading] = useState(true);
   const [fieldsByFormType, setFieldsByFormType] = useState<

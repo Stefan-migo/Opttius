@@ -7,7 +7,7 @@ export default function NewContactLensFamilyPage() {
     <div className="container mx-auto py-6">
       <Link
         href="/admin/products?tab=contact-lens-families"
-        className="inline-flex items-center gap-2 text-sm text-tierra-media hover:text-azul-profundo transition-colors mb-4"
+        className="inline-flex items-center gap-2 text-sm text-admin-text-tertiary hover:text-epoch-primary transition-colors mb-4"
       >
         <ArrowLeft className="h-4 w-4" />
         Volver a Productos

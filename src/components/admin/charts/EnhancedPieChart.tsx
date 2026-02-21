@@ -82,7 +82,7 @@ export function EnhancedPieChart({
 
   if (!data || data.length === 0) {
     return (
-      <div className="flex items-center justify-center h-64 text-tierra-media">
+      <div className="flex items-center justify-center h-64 text-admin-text-tertiary">
         <p className="text-lg font-medium">No hay datos para mostrar</p>
       </div>
     );
@@ -141,7 +141,7 @@ export function EnhancedPieChart({
   return (
     <div className="space-y-4 w-full">
       {title && (
-        <h4 className="font-semibold text-lg text-azul-profundo dark:text-admin-text-primary text-center">
+        <h4 className="font-semibold text-lg text-epoch-primary dark:text-admin-text-primary text-center">
           {title}
         </h4>
       )}
@@ -171,10 +171,10 @@ export function EnhancedPieChart({
 
       {/* Summary */}
       <div className="text-center pt-2 border-t border-gray-200 dark:border-gray-700">
-        <p className="text-xs text-tierra-media dark:text-gray-400 mb-1">
+        <p className="text-xs text-admin-text-tertiary dark:text-gray-400 mb-1">
           Total
         </p>
-        <p className="font-bold text-lg text-azul-profundo dark:text-admin-text-primary">
+        <p className="font-bold text-lg text-epoch-primary dark:text-admin-text-primary">
           {formatValue(chartData.reduce((sum, item) => sum + item.value, 0))}
         </p>
       </div>

@@ -171,16 +171,16 @@ export default function RegisterUserPage() {
           </Button>
         </Link>
         <div>
-          <h1 className="text-3xl font-bold text-azul-profundo">
+          <h1 className="text-3xl font-bold text-epoch-primary">
             Registrar Nuevo Usuario
           </h1>
-          <p className="text-tierra-media">
+          <p className="text-muted-foreground">
             El usuario será registrado con tu organización actual
           </p>
         </div>
       </div>
 
-      <Card>
+      <Card className="admin-card bg-admin-bg-tertiary">
         <CardHeader>
           <CardTitle>Información del Usuario</CardTitle>
           <CardDescription>
@@ -251,7 +251,7 @@ export default function RegisterUserPage() {
                   ))}
                 </SelectContent>
               </Select>
-              <p className="text-sm text-tierra-media mt-1">
+              <p className="text-sm text-muted-foreground mt-1">
                 {formData.role === "employee"
                   ? "Acceso operativo sin permisos de administración"
                   : formData.role === "vendedor"
@@ -272,7 +272,7 @@ export default function RegisterUserPage() {
                 {loadingBranches ? (
                   <div className="flex items-center gap-2 p-2">
                     <Loader2 className="h-4 w-4 animate-spin" />
-                    <span className="text-sm text-tierra-media">
+                    <span className="text-sm text-muted-foreground">
                       Cargando sucursales...
                     </span>
                   </div>
@@ -333,7 +333,7 @@ export default function RegisterUserPage() {
                   )}
                 </Button>
               </div>
-              <p className="text-sm text-tierra-media mt-1">
+              <p className="text-sm text-muted-foreground mt-1">
                 Mínimo 8 caracteres
               </p>
             </div>

@@ -303,7 +303,7 @@ export default function ContactLensFamiliesPage() {
     <div className="container mx-auto py-6 space-y-6">
       <Link
         href="/admin/products"
-        className="inline-flex items-center gap-2 text-sm text-tierra-media hover:text-azul-profundo transition-colors"
+        className="inline-flex items-center gap-2 text-sm text-admin-text-tertiary hover:text-epoch-primary transition-colors"
       >
         <ArrowLeft className="h-4 w-4" />
         Volver a Productos

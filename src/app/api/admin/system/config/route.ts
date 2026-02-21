@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient, createServiceRoleClient } from "@/utils/supabase/server";
 import { appLogger as logger } from "@/lib/logger";
+import { createConfigValueSchema } from "@/lib/api/validation/zod-schemas";
+import { mergeConfigsByScope } from "@/lib/admin/system-config-utils";
 
 /** Detect if error is due to legacy schema (missing organization_id/branch_id columns). */
 function isLegacySchemaError(
@@ -14,30 +16,6 @@ function isLegacySchemaError(
     msg.includes("branch_id") ||
     msg.includes("does not exist")
   );
-}
-
-/** Merge configs: branch > org > global. Returns one config per config_key. */
-function mergeConfigsByScope(
-  configs: Array<{
-    config_key: string;
-    organization_id: string | null;
-    branch_id: string | null;
-    [k: string]: unknown;
-  }>,
-): typeof configs {
-  const byKey = new Map<
-    string,
-    { config: (typeof configs)[0]; priority: number }
-  >();
-  for (const c of configs) {
-    const priority =
-      c.branch_id != null ? 3 : c.organization_id != null ? 2 : 1;
-    const existing = byKey.get(c.config_key);
-    if (!existing || priority > existing.priority) {
-      byKey.set(c.config_key, { config: c, priority });
-    }
-  }
-  return Array.from(byKey.values()).map(({ config }) => config);
 }
 
 export const dynamic = "force-dynamic";
@@ -115,8 +93,8 @@ export async function GET(request: NextRequest) {
       return (res.data ?? []) as ConfigRow[];
     };
 
-    if (isSuperAdmin || !orgId) {
-      // Super admin or no org: global configs only
+    if (isSuperAdmin && !branchId) {
+      // Super admin, global view: global configs only
       const q = query
         .is("organization_id", null)
         .is("branch_id", null)
@@ -134,6 +112,72 @@ export async function GET(request: NextRequest) {
         configs = await fetchLegacyConfigs();
         error = null;
       }
+    } else if (isSuperAdmin && branchId && orgId) {
+      // Super admin, branch view: merge global + org + branch (validate branch first)
+      const { data: branch } = await supabase
+        .from("branches")
+        .select("id, organization_id")
+        .eq("id", branchId)
+        .maybeSingle();
+      if (branch && branch.organization_id === orgId) {
+        const baseQuery = () =>
+          supabaseAdmin
+            .from("system_config")
+            .select("*")
+            .order("category", { ascending: true })
+            .order("config_key", { ascending: true });
+        const [globalRes, orgRes, branchRes] = await Promise.all([
+          (() => {
+            let q = baseQuery();
+            if (public_only) q = q.eq("is_public", true);
+            if (category && category !== "all") q = q.eq("category", category);
+            return q.is("organization_id", null).is("branch_id", null);
+          })(),
+          (() => {
+            let q = baseQuery();
+            if (public_only) q = q.eq("is_public", true);
+            if (category && category !== "all") q = q.eq("category", category);
+            return q.eq("organization_id", orgId).is("branch_id", null);
+          })(),
+          (() => {
+            let q = baseQuery();
+            if (public_only) q = q.eq("is_public", true);
+            if (category && category !== "all") q = q.eq("category", category);
+            return q.eq("organization_id", orgId).eq("branch_id", branchId);
+          })(),
+        ]);
+        error = globalRes.error ?? orgRes.error ?? branchRes.error ?? null;
+        if (error && isLegacySchemaError(error)) {
+          configs = await fetchLegacyConfigs();
+          error = null;
+        } else if (!error) {
+          const all = [
+            ...(globalRes.data || []),
+            ...(orgRes.data || []),
+            ...(branchRes.data || []),
+          ];
+          configs = mergeConfigsByScope(all);
+        }
+      } else {
+        // Invalid branch, fallback to global only
+        const q = query
+          .is("organization_id", null)
+          .is("branch_id", null)
+          .order("category", { ascending: true })
+          .order("config_key", { ascending: true });
+        const res = (await q) as { data: ConfigRow[] | null; error: unknown };
+        configs = (res.data ?? []) as ConfigRow[];
+      }
+    } else if (!orgId) {
+      // Root/dev or no org: global configs only
+      const q = query
+        .is("organization_id", null)
+        .is("branch_id", null)
+        .order("category", { ascending: true })
+        .order("config_key", { ascending: true });
+      const res = (await q) as { data: ConfigRow[] | null; error: unknown };
+      configs = (res.data ?? []) as ConfigRow[];
+      error = null;
     } else {
       // Org admin: run separate queries and merge (avoids PostgREST or() syntax issues)
       const baseQuery = () =>
@@ -235,11 +279,13 @@ export async function POST(request: NextRequest) {
       is_sensitive = false,
       value_type = "string",
       validation_rules,
+      branch_id: bodyBranchId,
     } = body;
+
+    const branchId = bodyBranchId ?? request.headers.get("x-branch-id") ?? null;
 
     const supabase = await createClient();
 
-    // Check admin authorization (only super admin can create config)
     const {
       data: { user },
       error: userError,
@@ -248,11 +294,68 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Temporarily bypass admin role checks for testing
-    logger.debug("Testing config creation for user:", {
-      email: user.email,
-      config_key,
-    });
+    const { data: adminUser, error: adminCheckError } = await supabase
+      .from("admin_users")
+      .select("organization_id, role")
+      .eq("id", user.id)
+      .eq("is_active", true)
+      .maybeSingle();
+
+    if (adminCheckError || !adminUser) {
+      return NextResponse.json(
+        { error: "Admin access required" },
+        { status: 403 },
+      );
+    }
+
+    const orgId = adminUser.organization_id;
+    const isSuperAdmin = adminUser.role === "super_admin";
+
+    // Target scope: same logic as PUT
+    let targetOrgId: string | null;
+    let targetBranchId: string | null;
+
+    if (isSuperAdmin) {
+      if (branchId && orgId) {
+        const { data: branch, error: branchErr } = await supabase
+          .from("branches")
+          .select("id, organization_id")
+          .eq("id", branchId)
+          .maybeSingle();
+        if (branchErr || !branch || branch.organization_id !== orgId) {
+          return NextResponse.json(
+            {
+              error:
+                "Sucursal no válida o no pertenece a tu organización. Selecciona una sucursal válida.",
+            },
+            { status: 400 },
+          );
+        }
+        targetOrgId = orgId;
+        targetBranchId = branchId;
+      } else {
+        targetOrgId = null;
+        targetBranchId = null;
+      }
+    } else {
+      if (branchId && orgId) {
+        const { data: branch } = await supabase
+          .from("branches")
+          .select("id, organization_id")
+          .eq("id", branchId)
+          .maybeSingle();
+        if (!branch || branch.organization_id !== orgId) {
+          return NextResponse.json(
+            {
+              error: "Sucursal no válida o no pertenece a tu organización.",
+            },
+            { status: 400 },
+          );
+        }
+      }
+      targetOrgId = orgId;
+      targetBranchId = branchId || null;
+    }
 
     // Validate input
     if (!config_key || config_value === undefined) {
@@ -264,7 +367,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validate value type
     const validTypes = ["string", "number", "boolean", "json", "array"];
     if (!validTypes.includes(value_type)) {
       return NextResponse.json(
@@ -273,26 +375,69 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create the config
+    const valueParse =
+      createConfigValueSchema(value_type).safeParse(config_value);
+    if (!valueParse.success) {
+      const msg = valueParse.error.errors[0]?.message ?? "Valor inválido";
+      return NextResponse.json(
+        { error: `config_value: ${msg}` },
+        { status: 400 },
+      );
+    }
+
+    const insertPayload: Record<string, unknown> = {
+      config_key,
+      config_value: JSON.stringify(valueParse.data),
+      description,
+      category,
+      is_public,
+      is_sensitive,
+      value_type,
+      validation_rules: validation_rules
+        ? JSON.stringify(validation_rules)
+        : null,
+      last_modified_by: user.id,
+    };
+
+    if (targetOrgId != null) insertPayload.organization_id = targetOrgId;
+    if (targetBranchId != null) insertPayload.branch_id = targetBranchId;
+
     const { data: config, error: configError } = await supabase
       .from("system_config")
-      .insert({
-        config_key,
-        config_value: JSON.stringify(config_value),
-        description,
-        category,
-        is_public,
-        is_sensitive,
-        value_type,
-        validation_rules: validation_rules
-          ? JSON.stringify(validation_rules)
-          : null,
-        last_modified_by: user.id,
-      })
+      .insert(insertPayload)
       .select()
       .single();
 
     if (configError) {
+      if (isLegacySchemaError(configError)) {
+        delete insertPayload.organization_id;
+        delete insertPayload.branch_id;
+        const retryRes = await supabase
+          .from("system_config")
+          .insert(insertPayload)
+          .select()
+          .single();
+        if (retryRes.error) {
+          logger.error("Error creating system config:", {
+            error: retryRes.error,
+            config_key,
+          });
+          return NextResponse.json(
+            { error: "Failed to create system config" },
+            { status: 500 },
+          );
+        }
+        const retryConfig = retryRes.data;
+        let parsedValue: unknown = retryConfig?.config_value;
+        try {
+          parsedValue = JSON.parse(String(parsedValue ?? ""));
+        } catch {
+          /* keep as-is */
+        }
+        return NextResponse.json({
+          config: { ...retryConfig, config_value: parsedValue },
+        });
+      }
       logger.error("Error creating system config:", {
         error: configError,
         config_key,
@@ -303,16 +448,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Temporarily skip activity logging for testing
-    logger.info("Config created successfully, skipping activity log", {
-      config_key,
-    });
-
-    // Parse the config value safely
     let parsedConfigValue = config.config_value;
     try {
       parsedConfigValue = JSON.parse(config.config_value);
-    } catch (error) {
+    } catch {
       logger.warn(
         "Created config value is not valid JSON, keeping as string:",
         { config_key: config.config_key },
@@ -375,9 +514,41 @@ export async function PUT(request: NextRequest) {
     const orgId = adminUser.organization_id;
     const isSuperAdmin = adminUser.role === "super_admin";
 
-    // Target scope: super_admin -> global (null, null); org admin -> (orgId, branchId)
-    const targetOrgId = isSuperAdmin ? null : orgId;
-    const targetBranchId = isSuperAdmin ? null : branchId || null;
+    // Target scope:
+    // - super_admin + no branchId -> global (null, null) applies to all orgs
+    // - super_admin + branchId -> org-level branch config (orgId, branchId) for their org
+    // - admin -> (orgId, branchId or null for org-level)
+    let targetOrgId: string | null;
+    let targetBranchId: string | null;
+
+    if (isSuperAdmin) {
+      if (branchId && orgId) {
+        // Super admin can save per-branch config for their organization
+        const { data: branch, error: branchErr } = await supabase
+          .from("branches")
+          .select("id, organization_id")
+          .eq("id", branchId)
+          .maybeSingle();
+        if (branchErr || !branch || branch.organization_id !== orgId) {
+          return NextResponse.json(
+            {
+              error:
+                "Sucursal no válida o no pertenece a tu organización. Selecciona una sucursal válida.",
+            },
+            { status: 400 },
+          );
+        }
+        targetOrgId = orgId;
+        targetBranchId = branchId;
+      } else {
+        // Global config: applies to all organizations
+        targetOrgId = null;
+        targetBranchId = null;
+      }
+    } else {
+      targetOrgId = orgId;
+      targetBranchId = branchId || null;
+    }
 
     // Legacy schema: DB without organization_id/branch_id columns (e.g. production)
     let useLegacySchema: boolean | null = null;
@@ -440,6 +611,34 @@ export async function PUT(request: NextRequest) {
           continue;
         }
 
+        let valueTypeToUse = existingConfig?.value_type ?? "string";
+        if (!existingConfig) {
+          if (config_key.startsWith("mercadopago_")) {
+            if (
+              config_key.includes("test_mode") ||
+              config_key.includes("auto_return") ||
+              config_key.includes("binary_mode")
+            ) {
+              valueTypeToUse = "boolean";
+            } else if (config_key.includes("max_installments")) {
+              valueTypeToUse = "number";
+            } else if (config_key.includes("payment_methods")) {
+              valueTypeToUse = "array";
+            }
+          }
+        }
+        const valueParse =
+          createConfigValueSchema(valueTypeToUse).safeParse(config_value);
+        if (!valueParse.success) {
+          const msg = valueParse.error.errors[0]?.message ?? "Valor inválido";
+          results.push({
+            config_key,
+            error: `config_value: ${msg}`,
+          });
+          continue;
+        }
+        const validatedValue = valueParse.data;
+
         const isSensitive =
           existingConfig?.is_sensitive ??
           (config_key.includes("token") ||
@@ -485,7 +684,7 @@ export async function PUT(request: NextRequest) {
             : supabase;
           const insertPayload: Record<string, unknown> = {
             config_key,
-            config_value: JSON.stringify(config_value),
+            config_value: JSON.stringify(validatedValue),
             category,
             value_type: valueType,
             is_sensitive: configIsSensitive,
@@ -547,7 +746,7 @@ export async function PUT(request: NextRequest) {
         let updateQuery = dbClient
           .from("system_config")
           .update({
-            config_value: JSON.stringify(config_value),
+            config_value: JSON.stringify(validatedValue),
             last_modified_by: user.id,
             updated_at: new Date().toISOString(),
           })

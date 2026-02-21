@@ -167,10 +167,10 @@ export default function TiersPage() {
           <ArrowLeft className="h-5 w-5" />
         </Button>
         <div>
-          <h1 className="text-3xl font-bold text-azul-profundo">
+          <h1 className="text-3xl font-display font-bold text-epoch-primary tracking-tight">
             Gestión de Tiers de Suscripción
           </h1>
-          <p className="text-tierra-media mt-2">
+          <p className="text-muted-foreground mt-2">
             Administra los planes de suscripción disponibles
           </p>
         </div>
@@ -185,7 +185,10 @@ export default function TiersPage() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {tiers.map((tier) => (
-            <Card key={tier.id} className={`${getTierColor(tier.name)}`}>
+            <Card
+              key={tier.id}
+              className={`admin-card rounded-none ${getTierColor(tier.name)}`}
+            >
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle className="flex items-center gap-2">

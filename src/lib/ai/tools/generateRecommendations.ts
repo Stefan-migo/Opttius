@@ -26,6 +26,7 @@ export const recommendationTools: ToolDefinition[] = [
         },
       },
     },
+    zodSchema: generateRecommendationsSchema,
     execute: async (params, context): Promise<ToolResult> => {
       try {
         const validated = generateRecommendationsSchema.parse(params);

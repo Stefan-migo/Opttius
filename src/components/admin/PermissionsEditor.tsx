@@ -1,10 +1,9 @@
 "use client";
 
-import { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
-import { Badge } from '@/components/ui/badge';
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
   DialogContent,
@@ -12,10 +11,11 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Shield, Save, X } from 'lucide-react';
-import { toast } from 'sonner';
+} from "@/components/ui/dialog";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Shield, Save, X } from "lucide-react";
+import { toast } from "sonner";
+import { PERMISSION_RESOURCES, ACTION_LABELS } from "@/lib/admin/permissions";
 
 interface Permissions {
   [resource: string]: string[];
@@ -29,31 +29,12 @@ interface PermissionsEditorProps {
   onSave: () => void;
 }
 
-const PERMISSION_RESOURCES = [
-  { key: 'products', label: 'Productos', actions: ['read', 'write', 'delete'] },
-  { key: 'orders', label: 'Pedidos', actions: ['read', 'write', 'delete'] },
-  { key: 'customers', label: 'Clientes', actions: ['read', 'write', 'delete'] },
-  { key: 'analytics', label: 'Analíticas', actions: ['read'] },
-  { key: 'settings', label: 'Configuración', actions: ['read', 'write'] },
-  { key: 'admin_users', label: 'Usuarios Admin', actions: ['read', 'write', 'delete'] },
-  { key: 'support', label: 'Soporte', actions: ['read', 'write', 'delete'] },
-  { key: 'shipping', label: 'Envíos', actions: ['read', 'write'] },
-  { key: 'email_templates', label: 'Plantillas Email', actions: ['read', 'write'] },
-  { key: 'system', label: 'Sistema', actions: ['read', 'write'] }
-];
-
-const ACTION_LABELS: Record<string, string> = {
-  read: 'Leer',
-  write: 'Escribir',
-  delete: 'Eliminar'
-};
-
 export default function PermissionsEditor({
   userId,
   currentPermissions,
   open,
   onOpenChange,
-  onSave
+  onSave,
 }: PermissionsEditorProps) {
   const [permissions, setPermissions] = useState<Permissions>({});
   const [loading, setLoading] = useState(false);
@@ -69,49 +50,56 @@ export default function PermissionsEditor({
   };
 
   const togglePermission = (resource: string, action: string) => {
-    setPermissions(prev => {
+    setPermissions((prev) => {
       const resourcePerms = prev[resource] || [];
       const hasAction = resourcePerms.includes(action);
-      
+
       return {
         ...prev,
         [resource]: hasAction
-          ? resourcePerms.filter(a => a !== action)
-          : [...resourcePerms, action]
+          ? resourcePerms.filter((a) => a !== action)
+          : [...resourcePerms, action],
       };
     });
   };
 
-  const toggleAllForResource = (resource: string, actions: string[]) => {
-    const allSelected = actions.every(action => hasPermission(resource, action));
-    
-    setPermissions(prev => ({
+  const toggleAllForResource = (
+    resource: string,
+    actions: readonly string[],
+  ) => {
+    const allSelected = actions.every((action) =>
+      hasPermission(resource, action),
+    );
+
+    setPermissions((prev) => ({
       ...prev,
-      [resource]: allSelected ? [] : actions
+      [resource]: allSelected ? [] : [...actions],
     }));
   };
 
   const handleSave = async () => {
     try {
       setLoading(true);
-      
+
       const response = await fetch(`/api/admin/admin-users/${userId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ permissions })
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ permissions }),
       });
 
       if (!response.ok) {
         const data = await response.json();
-        throw new Error(data.error || 'Error al actualizar permisos');
+        throw new Error(data.error || "Error al actualizar permisos");
       }
 
-      toast.success('Permisos actualizados exitosamente');
+      toast.success("Permisos actualizados exitosamente");
       onSave();
       onOpenChange(false);
     } catch (error) {
-      console.error('Error saving permissions:', error);
-      toast.error(error instanceof Error ? error.message : 'Error al guardar permisos');
+      console.error("Error saving permissions:", error);
+      toast.error(
+        error instanceof Error ? error.message : "Error al guardar permisos",
+      );
     } finally {
       setLoading(false);
     }
@@ -131,19 +119,29 @@ export default function PermissionsEditor({
         </DialogHeader>
 
         <div className="space-y-6 py-4">
-          {PERMISSION_RESOURCES.map(resource => {
+          {PERMISSION_RESOURCES.map((resource) => {
             const resourcePerms = permissions[resource.key] || [];
-            const allSelected = resource.actions.every(action => hasPermission(resource.key, action));
-            const someSelected = resource.actions.some(action => hasPermission(resource.key, action));
+            const allSelected = resource.actions.every((action) =>
+              hasPermission(resource.key, action),
+            );
+            const someSelected = resource.actions.some((action) =>
+              hasPermission(resource.key, action),
+            );
 
             return (
-              <div key={resource.key} className="border rounded-lg p-4 space-y-3">
+              <div
+                key={resource.key}
+                className="border rounded-lg p-4 space-y-3"
+              >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Label className="font-semibold text-base">{resource.label}</Label>
+                    <Label className="font-semibold text-base">
+                      {resource.label}
+                    </Label>
                     {someSelected && (
                       <Badge variant="outline" className="text-xs">
-                        {resourcePerms.length} {resourcePerms.length === 1 ? 'permiso' : 'permisos'}
+                        {resourcePerms.length}{" "}
+                        {resourcePerms.length === 1 ? "permiso" : "permisos"}
                       </Badge>
                     )}
                   </div>
@@ -151,19 +149,23 @@ export default function PermissionsEditor({
                     type="button"
                     variant="ghost"
                     size="sm"
-                    onClick={() => toggleAllForResource(resource.key, resource.actions)}
+                    onClick={() =>
+                      toggleAllForResource(resource.key, resource.actions)
+                    }
                   >
-                    {allSelected ? 'Desmarcar todos' : 'Marcar todos'}
+                    {allSelected ? "Desmarcar todos" : "Marcar todos"}
                   </Button>
                 </div>
 
-                <div className="grid grid-cols-3 gap-3">
-                  {resource.actions.map(action => (
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  {resource.actions.map((action) => (
                     <div key={action} className="flex items-center space-x-2">
                       <Checkbox
                         id={`${resource.key}-${action}`}
                         checked={hasPermission(resource.key, action)}
-                        onCheckedChange={() => togglePermission(resource.key, action)}
+                        onCheckedChange={() =>
+                          togglePermission(resource.key, action)
+                        }
                       />
                       <Label
                         htmlFor={`${resource.key}-${action}`}
@@ -191,11 +193,10 @@ export default function PermissionsEditor({
           </Button>
           <Button onClick={handleSave} disabled={loading}>
             <Save className="h-4 w-4 mr-2" />
-            {loading ? 'Guardando...' : 'Guardar Permisos'}
+            {loading ? "Guardando..." : "Guardar Permisos"}
           </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
 }
-

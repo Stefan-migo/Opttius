@@ -133,6 +133,15 @@ const translateConfigKey = (key: string): string => {
   );
 };
 
+/**
+ * UI de configuración del sistema por categorías.
+ * Muestra system_config con filtros, scope global/branch, e información de la óptica.
+ *
+ * @param props.configs - Lista de configuraciones a mostrar
+ * @param props.onUpdateConfig - Callback para guardar una config por clave
+ * @param props.configScope - "global" (todas sucursales) o "branch" (sucursal actual)
+ * @param props.onConfigScopeChange - Callback al cambiar scope (solo si hasMultipleBranches)
+ */
 export default function SystemConfig({
   configs,
   onUpdateConfig,
@@ -344,7 +353,7 @@ export default function SystemConfig({
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-tierra-media">
+          <p className="text-sm text-admin-text-tertiary">
             Gestiona las configuraciones del sistema. Usa el botón "Guardar"
             para aplicar los cambios.
           </p>
@@ -444,7 +453,7 @@ export default function SystemConfig({
                   <Label htmlFor="clinic_name">
                     Nombre de la Óptica (Clínica) *
                   </Label>
-                  <p className="text-xs text-tierra-media">
+                  <p className="text-xs text-admin-text-tertiary">
                     Este nombre se mostrará en el header de las secciones
                   </p>
                   <Input
@@ -462,7 +471,7 @@ export default function SystemConfig({
                 {/* Slogan */}
                 <div className="space-y-2">
                   <Label htmlFor="slogan">Slogan (Opcional)</Label>
-                  <p className="text-xs text-tierra-media">
+                  <p className="text-xs text-admin-text-tertiary">
                     Slogan o tagline que aparecerá debajo del nombre en el
                     header
                   </p>
@@ -484,7 +493,7 @@ export default function SystemConfig({
                 {/* Logo */}
                 <div className="space-y-4">
                   <Label>Logo de la Clínica</Label>
-                  <p className="text-xs text-tierra-media">
+                  <p className="text-xs text-admin-text-tertiary">
                     Logo de la óptica que se mostrará en el header de todas las
                     sucursales.
                   </p>
@@ -547,8 +556,8 @@ export default function SystemConfig({
       {Object.keys(configsByCategory).length === 0 ? (
         <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)]">
           <CardContent className="p-12 text-center">
-            <Settings className="h-12 w-12 text-tierra-media mx-auto mb-4 opacity-50" />
-            <p className="text-tierra-media">
+            <Settings className="h-12 w-12 text-admin-text-tertiary mx-auto mb-4 opacity-50" />
+            <p className="text-admin-text-tertiary">
               No se encontraron configuraciones con los filtros seleccionados
             </p>
           </CardContent>
@@ -593,7 +602,7 @@ export default function SystemConfig({
                           <div className="flex items-start justify-between">
                             <div className="flex-1">
                               <div className="flex items-center gap-2 mb-1">
-                                <h4 className="font-semibold text-azul-profundo">
+                                <h4 className="font-semibold text-epoch-primary">
                                   {translateConfigKey(config.config_key)}
                                 </h4>
                                 {config.is_sensitive && (
@@ -620,7 +629,7 @@ export default function SystemConfig({
                                 )}
                               </div>
                               {config.description && (
-                                <p className="text-sm text-tierra-media mt-1">
+                                <p className="text-sm text-admin-text-tertiary mt-1">
                                   {config.description}
                                 </p>
                               )}
@@ -629,7 +638,7 @@ export default function SystemConfig({
 
                           <div className="flex items-end gap-4">
                             <div className="flex-1">
-                              <Label className="text-xs text-tierra-media mb-1 block">
+                              <Label className="text-xs text-admin-text-tertiary mb-1 block">
                                 Valor
                               </Label>
                               {config.value_type === "boolean" ? (
@@ -725,7 +734,7 @@ export default function SystemConfig({
                                 </Button>
                               )}
                               <div className="text-right">
-                                <p className="text-xs text-tierra-media">
+                                <p className="text-xs text-admin-text-tertiary">
                                   Actualizado
                                 </p>
                                 <p className="text-xs font-medium">

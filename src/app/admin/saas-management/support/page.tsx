@@ -2,7 +2,10 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { extractDataFromResponse, extractPaginationFromResponse } from "@/lib/api/response-helpers";
+import {
+  extractDataFromResponse,
+  extractPaginationFromResponse,
+} from "@/lib/api/response-helpers";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -252,32 +255,33 @@ export default function SupportPage() {
   };
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6 p-6 bg-epoch-background min-h-screen">
       <div className="flex items-center gap-4">
         <Button
           variant="ghost"
           size="icon"
           onClick={() => router.push("/admin/saas-management/dashboard")}
           title="Volver al dashboard"
+          className="rounded-none text-epoch-primary hover:bg-epoch-primary/10"
         >
           <ArrowLeft className="h-5 w-5" />
         </Button>
         <div>
-          <h1 className="text-3xl font-bold text-azul-profundo">
+          <h1 className="text-3xl font-display font-bold text-epoch-primary tracking-tight">
             Panel de Soporte
           </h1>
-          <p className="text-tierra-media mt-2">
+          <p className="text-epoch-primary/80 mt-2">
             Gestión de tickets de soporte SaaS y búsqueda rápida
           </p>
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-2 border-b">
+      <div className="flex gap-2 border-b border-epoch-primary/20">
         <Button
           variant={activeTab === "tickets" ? "default" : "ghost"}
           onClick={() => setActiveTab("tickets")}
-          className="rounded-b-none"
+          className={`rounded-none rounded-b-none ${activeTab === "tickets" ? "bg-epoch-primary hover:bg-epoch-surface text-white font-display font-bold text-[10px] tracking-[0.2em] uppercase" : "text-epoch-primary"}`}
         >
           <MessageSquare className="h-4 w-4 mr-2" />
           Tickets de Soporte
@@ -285,7 +289,7 @@ export default function SupportPage() {
         <Button
           variant={activeTab === "search" ? "default" : "ghost"}
           onClick={() => setActiveTab("search")}
-          className="rounded-b-none"
+          className={`rounded-none rounded-b-none ${activeTab === "search" ? "bg-epoch-primary hover:bg-epoch-surface text-white font-display font-bold text-[10px] tracking-[0.2em] uppercase" : "text-epoch-primary"}`}
         >
           <Search className="h-4 w-4 mr-2" />
           Búsqueda Rápida
@@ -303,10 +307,10 @@ export default function SupportPage() {
       {activeTab === "tickets" && (
         <div className="space-y-6">
           {/* Filters */}
-          <Card>
+          <Card className="rounded-none border border-border">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Filter className="h-5 w-5" />
+              <CardTitle className="flex items-center gap-2 font-display text-epoch-primary">
+                <Filter className="h-5 w-5 text-epoch-accent" />
                 Filtros
               </CardTitle>
             </CardHeader>
@@ -324,7 +328,7 @@ export default function SupportPage() {
                       }))
                     }
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="rounded-none focus:border-epoch-primary focus:ring-epoch-primary/20">
                       <SelectValue placeholder="Todos los estados" />
                     </SelectTrigger>
                     <SelectContent>
@@ -350,7 +354,7 @@ export default function SupportPage() {
                       }))
                     }
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="rounded-none focus:border-epoch-primary focus:ring-epoch-primary/20">
                       <SelectValue placeholder="Todas las prioridades" />
                     </SelectTrigger>
                     <SelectContent>
@@ -375,7 +379,7 @@ export default function SupportPage() {
                       }))
                     }
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="rounded-none focus:border-epoch-primary focus:ring-epoch-primary/20">
                       <SelectValue placeholder="Todas las categorías" />
                     </SelectTrigger>
                     <SelectContent>
@@ -402,12 +406,14 @@ export default function SupportPage() {
                           page: 1,
                         }))
                       }
+                      className="rounded-none focus:border-epoch-primary focus:ring-epoch-primary/20"
                     />
                     <Button
                       variant="outline"
                       size="icon"
                       onClick={loadTickets}
                       title="Refrescar"
+                      className="rounded-none border-admin-border-primary/20"
                     >
                       <RefreshCw className="h-4 w-4" />
                     </Button>
@@ -418,18 +424,20 @@ export default function SupportPage() {
           </Card>
 
           {/* Tickets List */}
-          <Card>
+          <Card className="rounded-none border border-border">
             <CardHeader>
-              <CardTitle>Tickets ({pagination.total})</CardTitle>
+              <CardTitle className="font-display text-epoch-primary">
+                Tickets ({pagination.total})
+              </CardTitle>
             </CardHeader>
             <CardContent>
               {loadingTickets ? (
                 <div className="flex items-center justify-center py-12">
-                  <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+                  <Loader2 className="h-8 w-8 animate-spin text-epoch-primary" />
                 </div>
               ) : tickets.length === 0 ? (
-                <div className="text-center py-12 text-gray-500">
-                  <MessageSquare className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+                <div className="text-center py-12 text-epoch-primary/70">
+                  <MessageSquare className="h-12 w-12 mx-auto mb-4 text-epoch-accent" />
                   <p>No hay tickets que coincidan con los filtros</p>
                 </div>
               ) : (
@@ -439,7 +447,7 @@ export default function SupportPage() {
                       key={ticket.id}
                       href={`/admin/saas-management/support/tickets/${ticket.id}`}
                     >
-                      <div className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 cursor-pointer">
+                      <div className="flex items-center justify-between p-4 border rounded-none hover:bg-epoch-primary/5 cursor-pointer transition-colors">
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-1">
                             <span className="font-mono font-semibold text-sm">
@@ -455,10 +463,10 @@ export default function SupportPage() {
                               {categoryLabels[ticket.category]}
                             </Badge>
                           </div>
-                          <h3 className="font-medium text-gray-900">
+                          <h3 className="font-medium text-epoch-primary">
                             {ticket.subject}
                           </h3>
-                          <div className="flex items-center gap-4 mt-2 text-sm text-gray-500">
+                          <div className="flex items-center gap-4 mt-2 text-sm text-epoch-primary/70">
                             {ticket.organization && (
                               <span className="flex items-center gap-1">
                                 <Building2 className="h-4 w-4" />
@@ -478,7 +486,7 @@ export default function SupportPage() {
                             </span>
                           </div>
                         </div>
-                        <ArrowRight className="h-5 w-5 text-gray-400" />
+                        <ArrowRight className="h-5 w-5 text-epoch-accent" />
                       </div>
                     </Link>
                   ))}
@@ -488,13 +496,14 @@ export default function SupportPage() {
               {/* Pagination */}
               {pagination.totalPages > 1 && (
                 <div className="flex items-center justify-between mt-6 pt-4 border-t">
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-epoch-primary/80">
                     Página {pagination.page} de {pagination.totalPages}
                   </p>
                   <div className="flex gap-2">
                     <Button
                       variant="outline"
                       size="sm"
+                      className="rounded-none border-admin-border-primary/20"
                       onClick={() =>
                         setPagination((prev) => ({
                           ...prev,
@@ -508,6 +517,7 @@ export default function SupportPage() {
                     <Button
                       variant="outline"
                       size="sm"
+                      className="rounded-none border-admin-border-primary/20"
                       onClick={() =>
                         setPagination((prev) => ({
                           ...prev,
@@ -522,174 +532,181 @@ export default function SupportPage() {
                 </div>
               )}
             </CardContent>
-          </Card >
-        </div >
-      )
-      }
+          </Card>
+        </div>
+      )}
 
       {/* Search Tab */}
-      {
-        activeTab === "search" && (
-          <div className="space-y-6">
-            {/* Búsqueda */}
-            <Card>
-              <CardContent className="pt-6">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-                  <Input
-                    placeholder="Buscar por nombre, slug, email..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10"
-                  />
+      {activeTab === "search" && (
+        <div className="space-y-6">
+          {/* Búsqueda */}
+          <Card className="rounded-none border border-border">
+            <CardContent className="pt-6">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-epoch-accent" />
+                <Input
+                  placeholder="Buscar por nombre, slug, email..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10 rounded-none focus:border-epoch-primary focus:ring-epoch-primary/20"
+                />
+              </div>
+              {searching && (
+                <div className="flex items-center gap-2 mt-4 text-sm text-epoch-primary/80">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Buscando...
                 </div>
-                {searching && (
-                  <div className="flex items-center gap-2 mt-4 text-sm text-gray-600">
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    Buscando...
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+              )}
+            </CardContent>
+          </Card>
 
-            {/* Resultados */}
-            {hasSearched && !searching && (
-              <div className="space-y-6">
-                {/* Organizaciones */}
-                {searchResults.organizations.length > 0 && (
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <Building2 className="h-5 w-5" />
-                        Organizaciones ({searchResults.organizations.length})
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-3">
-                        {searchResults.organizations.map((org) => (
-                          <div
-                            key={org.id}
-                            className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50"
-                          >
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2">
-                                <h3 className="font-medium">{org.name}</h3>
-                                {getStatusBadge(org.status)}
-                                <Badge variant="outline">
-                                  {org.subscription_tier}
-                                </Badge>
-                              </div>
-                              <p className="text-sm text-gray-500 mt-1">
-                                {org.slug}
-                              </p>
+          {/* Resultados */}
+          {hasSearched && !searching && (
+            <div className="space-y-6">
+              {/* Organizaciones */}
+              {searchResults.organizations.length > 0 && (
+                <Card className="rounded-none border border-border">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 font-display text-epoch-primary">
+                      <Building2 className="h-5 w-5 text-epoch-accent" />
+                      Organizaciones ({searchResults.organizations.length})
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      {searchResults.organizations.map((org) => (
+                        <div
+                          key={org.id}
+                          className="flex items-center justify-between p-4 border rounded-none hover:bg-epoch-primary/5 transition-colors"
+                        >
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2">
+                              <h3 className="font-medium text-epoch-primary">
+                                {org.name}
+                              </h3>
+                              {getStatusBadge(org.status)}
+                              <Badge variant="outline">
+                                {org.subscription_tier}
+                              </Badge>
                             </div>
-                            <Link
-                              href={`/admin/saas-management/organizations/${org.id}`}
-                            >
-                              <Button variant="outline" size="sm">
-                                Ver detalles
-                                <ArrowRight className="h-4 w-4 ml-2" />
-                              </Button>
-                            </Link>
+                            <p className="text-sm text-epoch-primary/70 mt-1">
+                              {org.slug}
+                            </p>
                           </div>
-                        ))}
-                      </div>
-                    </CardContent>
-                  </Card>
-                )}
-
-                {/* Usuarios */}
-                {searchResults.users.length > 0 && (
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <User className="h-5 w-5" />
-                        Usuarios ({searchResults.users.length})
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-3">
-                        {searchResults.users.map((user) => (
-                          <div
-                            key={user.id}
-                            className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50"
+                          <Link
+                            href={`/admin/saas-management/organizations/${org.id}`}
                           >
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2">
-                                <h3 className="font-medium">
-                                  {user.profiles?.first_name}{" "}
-                                  {user.profiles?.last_name}
-                                </h3>
-                                <Badge variant="outline">{user.role}</Badge>
-                                {user.is_active ? (
-                                  <Badge variant="default">
-                                    <CheckCircle2 className="h-3 w-3 mr-1" />
-                                    Activo
-                                  </Badge>
-                                ) : (
-                                  <Badge variant="secondary">
-                                    <XCircle className="h-3 w-3 mr-1" />
-                                    Inactivo
-                                  </Badge>
-                                )}
-                              </div>
-                              <p className="text-sm text-gray-500 mt-1">
-                                {user.email}
-                              </p>
-                              {user.organization && (
-                                <p className="text-xs text-gray-400 mt-1">
-                                  Organización: {user.organization.name}
-                                </p>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="rounded-none border-admin-border-primary/20"
+                            >
+                              Ver detalles
+                              <ArrowRight className="h-4 w-4 ml-2" />
+                            </Button>
+                          </Link>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Usuarios */}
+              {searchResults.users.length > 0 && (
+                <Card className="rounded-none border border-border">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 font-display text-epoch-primary">
+                      <User className="h-5 w-5 text-epoch-accent" />
+                      Usuarios ({searchResults.users.length})
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      {searchResults.users.map((user) => (
+                        <div
+                          key={user.id}
+                          className="flex items-center justify-between p-4 border rounded-none hover:bg-epoch-primary/5 transition-colors"
+                        >
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2">
+                              <h3 className="font-medium text-epoch-primary">
+                                {user.profiles?.first_name}{" "}
+                                {user.profiles?.last_name}
+                              </h3>
+                              <Badge variant="outline">{user.role}</Badge>
+                              {user.is_active ? (
+                                <Badge variant="default">
+                                  <CheckCircle2 className="h-3 w-3 mr-1" />
+                                  Activo
+                                </Badge>
+                              ) : (
+                                <Badge variant="secondary">
+                                  <XCircle className="h-3 w-3 mr-1" />
+                                  Inactivo
+                                </Badge>
                               )}
                             </div>
-                            <Link
-                              href={`/admin/saas-management/users/${user.id}`}
-                            >
-                              <Button variant="outline" size="sm">
-                                Ver detalles
-                                <ArrowRight className="h-4 w-4 ml-2" />
-                              </Button>
-                            </Link>
+                            <p className="text-sm text-epoch-primary/70 mt-1">
+                              {user.email}
+                            </p>
+                            {user.organization && (
+                              <p className="text-xs text-epoch-primary/60 mt-1">
+                                Organización: {user.organization.name}
+                              </p>
+                            )}
                           </div>
-                        ))}
+                          <Link
+                            href={`/admin/saas-management/users/${user.id}`}
+                          >
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="rounded-none border-admin-border-primary/20"
+                            >
+                              Ver detalles
+                              <ArrowRight className="h-4 w-4 ml-2" />
+                            </Button>
+                          </Link>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Sin resultados */}
+              {searchResults.organizations.length === 0 &&
+                searchResults.users.length === 0 && (
+                  <Card className="rounded-none border border-border">
+                    <CardContent className="pt-6">
+                      <div className="text-center py-8 text-epoch-primary/70">
+                        No se encontraron resultados para "{searchQuery}"
                       </div>
                     </CardContent>
                   </Card>
                 )}
+            </div>
+          )}
 
-                {/* Sin resultados */}
-                {searchResults.organizations.length === 0 &&
-                  searchResults.users.length === 0 && (
-                    <Card>
-                      <CardContent className="pt-6">
-                        <div className="text-center py-8 text-gray-500">
-                          No se encontraron resultados para "{searchQuery}"
-                        </div>
-                      </CardContent>
-                    </Card>
-                  )}
-              </div>
-            )}
-
-            {/* Instrucciones iniciales */}
-            {!hasSearched && (
-              <Card>
-                <CardContent className="pt-6">
-                  <div className="text-center py-8 text-gray-500">
-                    <Search className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-                    <p className="text-lg font-medium mb-2">
-                      Busca organizaciones o usuarios
-                    </p>
-                    <p className="text-sm">
-                      Ingresa al menos 2 caracteres para comenzar la búsqueda
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-          </div>
-        )
-      }
-    </div >
+          {/* Instrucciones iniciales */}
+          {!hasSearched && (
+            <Card className="rounded-none border border-border">
+              <CardContent className="pt-6">
+                <div className="text-center py-8 text-epoch-primary/70">
+                  <Search className="h-12 w-12 mx-auto mb-4 text-epoch-accent" />
+                  <p className="text-lg font-medium mb-2">
+                    Busca organizaciones o usuarios
+                  </p>
+                  <p className="text-sm">
+                    Ingresa al menos 2 caracteres para comenzar la búsqueda
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      )}
+    </div>
   );
 }

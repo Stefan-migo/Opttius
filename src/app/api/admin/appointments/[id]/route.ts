@@ -3,6 +3,7 @@ import { createClient } from "@/utils/supabase/server";
 import { createServiceRoleClient } from "@/utils/supabase/server";
 import { appLogger as logger } from "@/lib/logger";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
+import { NotificationService } from "@/lib/notifications/notification-service";
 
 export const dynamic = "force-dynamic";
 export async function GET(
@@ -128,6 +129,26 @@ export async function PUT(
 
     const { id } = await params;
     const body = await request.json();
+
+    // When cancelling, fetch appointment data before update (for notification)
+    let appointmentBeforeCancel: {
+      customer_id?: string | null;
+      guest_first_name?: string | null;
+      guest_last_name?: string | null;
+      appointment_date?: string;
+      appointment_time?: string;
+      branch_id?: string | null;
+    } | null = null;
+    if (body.status === "cancelled") {
+      const { data: apt } = await supabaseServiceRole
+        .from("appointments")
+        .select(
+          "customer_id, guest_first_name, guest_last_name, appointment_date, appointment_time, branch_id",
+        )
+        .eq("id", id)
+        .single();
+      appointmentBeforeCancel = apt;
+    }
 
     // If date/time is being changed, check availability
     if (
@@ -276,6 +297,63 @@ export async function PUT(
         },
         { status: 500 },
       );
+    }
+
+    // Notify when appointment is cancelled
+    if (
+      body.status === "cancelled" &&
+      appointmentBeforeCancel &&
+      updatedAppointment
+    ) {
+      try {
+        let customerName = "Cliente";
+        if (appointmentBeforeCancel.customer_id) {
+          const { data: customer } = await supabaseServiceRole
+            .from("customers")
+            .select("first_name, last_name")
+            .eq("id", appointmentBeforeCancel.customer_id)
+            .single();
+          if (customer) {
+            customerName =
+              [customer.first_name, customer.last_name]
+                .filter(Boolean)
+                .join(" ")
+                .trim() || "Cliente";
+          }
+        } else if (
+          appointmentBeforeCancel.guest_first_name ||
+          appointmentBeforeCancel.guest_last_name
+        ) {
+          customerName =
+            [
+              appointmentBeforeCancel.guest_first_name,
+              appointmentBeforeCancel.guest_last_name,
+            ]
+              .filter(Boolean)
+              .join(" ")
+              .trim() || "Cliente";
+        }
+        const aptDate =
+          appointmentBeforeCancel.appointment_date ||
+          updatedAppointment.appointment_date ||
+          "";
+        const aptTime =
+          appointmentBeforeCancel.appointment_time ||
+          updatedAppointment.appointment_time ||
+          "";
+        await NotificationService.notifyAppointmentCancelled(
+          id,
+          customerName,
+          aptDate,
+          aptTime,
+          appointmentBeforeCancel.branch_id ?? updatedAppointment.branch_id,
+        );
+      } catch (notifErr) {
+        logger.error(
+          "Error sending appointment cancelled notification",
+          notifErr,
+        );
+      }
     }
 
     // AUTO-REGISTRATION LOGIC: If appointment status is completed and it's a guest, register them

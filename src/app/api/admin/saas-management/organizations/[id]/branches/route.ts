@@ -3,6 +3,7 @@ import { requireRoot } from "@/lib/api/root-middleware";
 import { createServiceRoleClient } from "@/utils/supabase/service-role";
 import { appLogger as logger } from "@/lib/logger";
 import { AuthorizationError } from "@/lib/api/errors";
+import { createBranchSchema } from "@/lib/api/validation/zod-schemas";
 
 /**
  * GET /api/admin/saas-management/organizations/[id]/branches
@@ -75,6 +76,14 @@ export async function POST(
 
     const { id: organizationId } = params;
     const body = await request.json();
+    const parseResult = createBranchSchema.safeParse(body);
+    if (!parseResult.success) {
+      const firstError = parseResult.error.errors[0];
+      return NextResponse.json(
+        { error: firstError?.message || "Datos inválidos" },
+        { status: 400 },
+      );
+    }
     const {
       name,
       code,
@@ -85,16 +94,8 @@ export async function POST(
       postal_code,
       phone,
       email,
-      is_active = true,
-    } = body;
-
-    // Validaciones
-    if (!name) {
-      return NextResponse.json(
-        { error: "Nombre es requerido" },
-        { status: 400 },
-      );
-    }
+      is_active,
+    } = parseResult.data;
 
     // Verificar que la organización existe
     const { data: org } = await supabaseServiceRole

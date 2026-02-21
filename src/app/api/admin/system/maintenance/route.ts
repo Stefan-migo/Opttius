@@ -8,6 +8,13 @@ import type {
 } from "@/types/supabase-rpc";
 
 export const dynamic = "force-dynamic";
+
+/**
+ * POST /api/admin/system/maintenance
+ * Ejecuta acciones de mantenimiento (backup, logs, auditoría, etc.).
+ * @requires admin | super_admin | root | dev
+ * @requires organization_id (usuarios sin org reciben 400)
+ */
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();

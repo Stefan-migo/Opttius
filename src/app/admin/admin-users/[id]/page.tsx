@@ -98,7 +98,7 @@ export default function AdminUserDetailPage() {
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
           <div className="animate-spin h-8 w-8 border-4 border-admin-accent-tertiary border-t-transparent rounded-full mx-auto mb-4" />
-          <p className="text-tierra-media">Cargando administrador...</p>
+          <p className="text-muted-foreground">Cargando administrador...</p>
         </div>
       </div>
     );
@@ -107,13 +107,13 @@ export default function AdminUserDetailPage() {
   if (error || !adminUser) {
     return (
       <div className="container mx-auto py-8">
-        <Card className="bg-admin-bg-tertiary">
+        <Card className="admin-card bg-admin-bg-tertiary">
           <CardContent className="p-6">
             <div className="text-center">
-              <h2 className="text-2xl font-bold text-azul-profundo mb-4">
+              <h2 className="text-2xl font-bold text-epoch-primary mb-4">
                 Error
               </h2>
-              <p className="text-tierra-media mb-6">
+              <p className="text-muted-foreground mb-6">
                 {error || "Administrador no encontrado"}
               </p>
               <Button
@@ -203,10 +203,10 @@ export default function AdminUserDetailPage() {
           style={{ marginTop: "2rem" }}
         >
           <div>
-            <h1 className="text-3xl font-bold text-azul-profundo">
+            <h1 className="text-3xl font-bold text-epoch-primary">
               Detalles del Administrador
             </h1>
-            <p className="text-tierra-media">
+            <p className="text-muted-foreground">
               Información completa del usuario administrador
             </p>
           </div>
@@ -217,7 +217,7 @@ export default function AdminUserDetailPage() {
       </div>
 
       {/* Main Info Card */}
-      <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)]">
+      <Card className="admin-card bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)]">
         <CardHeader>
           <CardTitle className="flex items-center gap-3">
             <div className="h-12 w-12 rounded-full bg-admin-accent-tertiary/20 flex items-center justify-center">
@@ -225,7 +225,7 @@ export default function AdminUserDetailPage() {
             </div>
             <div>
               <div className="text-2xl">{fullName}</div>
-              <div className="text-sm font-normal text-tierra-media">
+              <div className="text-sm font-normal text-muted-foreground">
                 {adminUser.email}
               </div>
             </div>
@@ -235,16 +235,10 @@ export default function AdminUserDetailPage() {
           {/* Status and Role */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="text-sm text-tierra-media">Estado</label>
+              <label className="text-sm text-muted-foreground">Estado</label>
               <div className="mt-1 flex items-center gap-2">
                 {adminUser.is_active ? (
-                  <Badge
-                    className="bg-verde-suave text-primary"
-                    style={{
-                      backgroundColor: "var(--accent)",
-                      color: "var(--admin-bg-primary)",
-                    }}
-                  >
+                  <Badge className="bg-admin-success text-admin-text-on-dark">
                     Activo
                   </Badge>
                 ) : (
@@ -266,19 +260,19 @@ export default function AdminUserDetailPage() {
                 )}
               </div>
               {!isSuperAdmin && (
-                <p className="text-xs text-tierra-media mt-1">
+                <p className="text-xs text-muted-foreground mt-1">
                   Solo los super administradores pueden cambiar el estado
                 </p>
               )}
             </div>
             <div>
-              <label className="text-sm text-tierra-media">Rol</label>
+              <label className="text-sm text-muted-foreground">Rol</label>
               <div className="mt-1">
                 {adminUser.is_super_admin ||
                 adminUser.role === "super_admin" ? (
                   <Badge
                     variant="default"
-                    className="flex items-center gap-1 w-fit bg-dorado text-primary"
+                    className="flex items-center gap-1 w-fit bg-epoch-accent text-epoch-primary"
                   >
                     <Globe className="h-3 w-3" />
                     Super Administrador
@@ -315,17 +309,19 @@ export default function AdminUserDetailPage() {
           {/* Contact Info */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="flex items-center gap-3">
-              <Mail className="h-5 w-5 text-tierra-media" />
+              <Mail className="h-5 w-5 text-muted-foreground" />
               <div>
-                <label className="text-sm text-tierra-media">Email</label>
+                <label className="text-sm text-muted-foreground">Email</label>
                 <div className="font-medium">{adminUser.email}</div>
               </div>
             </div>
             {adminUser.profiles?.phone && (
               <div className="flex items-center gap-3">
-                <Phone className="h-5 w-5 text-tierra-media" />
+                <Phone className="h-5 w-5 text-muted-foreground" />
                 <div>
-                  <label className="text-sm text-tierra-media">Teléfono</label>
+                  <label className="text-sm text-muted-foreground">
+                    Teléfono
+                  </label>
                   <div className="font-medium">{adminUser.profiles.phone}</div>
                 </div>
               </div>
@@ -335,9 +331,9 @@ export default function AdminUserDetailPage() {
           {/* Dates */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="flex items-center gap-3">
-              <Calendar className="h-5 w-5 text-tierra-media" />
+              <Calendar className="h-5 w-5 text-muted-foreground" />
               <div>
-                <label className="text-sm text-tierra-media">
+                <label className="text-sm text-muted-foreground">
                   Fecha de Registro
                 </label>
                 <div className="font-medium">
@@ -351,9 +347,9 @@ export default function AdminUserDetailPage() {
             </div>
             {adminUser.last_login && (
               <div className="flex items-center gap-3">
-                <Clock className="h-5 w-5 text-tierra-media" />
+                <Clock className="h-5 w-5 text-muted-foreground" />
                 <div>
-                  <label className="text-sm text-tierra-media">
+                  <label className="text-sm text-muted-foreground">
                     Último Acceso
                   </label>
                   <div className="font-medium">
@@ -375,9 +371,9 @@ export default function AdminUserDetailPage() {
 
           {/* Activity */}
           <div className="flex items-center gap-3">
-            <Activity className="h-5 w-5 text-tierra-media" />
+            <Activity className="h-5 w-5 text-muted-foreground" />
             <div>
-              <label className="text-sm text-tierra-media">
+              <label className="text-sm text-muted-foreground">
                 Actividad (últimos 30 días)
               </label>
               <div className="font-medium">
@@ -399,19 +395,8 @@ export default function AdminUserDetailPage() {
         />
       )}
 
-      {/* Branch Access Manager - Only for super admin and admin */}
-      {(isSuperAdmin || adminUser.role === "admin") && (
-        <BranchAccessManager
-          adminUserId={adminId}
-          isSuperAdmin={
-            adminUser.is_super_admin || adminUser.role === "super_admin"
-          }
-          canEdit={isSuperAdmin || adminUser.role === "admin"}
-        />
-      )}
-
       {/* Permissions Card */}
-      <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)]">
+      <Card className="admin-card bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)]">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Shield className="h-5 w-5" />

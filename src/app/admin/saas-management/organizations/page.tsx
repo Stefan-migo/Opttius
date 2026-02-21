@@ -362,10 +362,10 @@ export default function OrganizationsPage() {
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div>
-            <h1 className="text-3xl font-bold text-azul-profundo">
+            <h1 className="text-3xl font-display font-bold text-epoch-primary tracking-tight">
               Gestión de Organizaciones
             </h1>
-            <p className="text-tierra-media mt-2">
+            <p className="text-muted-foreground mt-2">
               Administra todas las organizaciones del sistema
             </p>
           </div>
@@ -419,7 +419,7 @@ export default function OrganizationsPage() {
                     setNewOrgData({ ...newOrgData, subscription_tier: value })
                   }
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="rounded-none">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -453,7 +453,7 @@ export default function OrganizationsPage() {
       </div>
 
       {/* Filtros y búsqueda */}
-      <Card>
+      <Card className="admin-card rounded-none">
         <CardContent className="pt-6">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1">
@@ -466,12 +466,12 @@ export default function OrganizationsPage() {
                     setSearchTerm(e.target.value);
                     setCurrentPage(1);
                   }}
-                  className="pl-10"
+                  className="rounded-none pl-10"
                 />
               </div>
             </div>
             <Select value={tierFilter} onValueChange={setTierFilter}>
-              <SelectTrigger className="w-[180px]">
+              <SelectTrigger className="rounded-none w-[180px]">
                 <SelectValue placeholder="Filtrar por tier" />
               </SelectTrigger>
               <SelectContent>
@@ -482,7 +482,7 @@ export default function OrganizationsPage() {
               </SelectContent>
             </Select>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-[180px]">
+              <SelectTrigger className="rounded-none w-[180px]">
                 <SelectValue placeholder="Filtrar por estado" />
               </SelectTrigger>
               <SelectContent>
@@ -548,7 +548,7 @@ export default function OrganizationsPage() {
       </Card>
 
       {/* Tabla de organizaciones */}
-      <Card>
+      <Card className="admin-card rounded-none">
         <CardHeader>
           <CardTitle>Organizaciones ({totalCount})</CardTitle>
         </CardHeader>

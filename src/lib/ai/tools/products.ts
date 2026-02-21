@@ -103,6 +103,7 @@ export const productTools: ToolDefinition[] = [
         page: { type: "number", description: "Page number", default: 1 },
       },
     },
+    zodSchema: getProductsSchema,
     execute: async (params, context): Promise<ToolResult> => {
       try {
         const validated = getProductsSchema.parse(params);
@@ -205,6 +206,7 @@ export const productTools: ToolDefinition[] = [
       },
       required: ["productId"],
     },
+    zodSchema: getProductByIdSchema,
     execute: async (params, context): Promise<ToolResult> => {
       try {
         const validated = getProductByIdSchema.parse(params);
@@ -325,6 +327,7 @@ export const productTools: ToolDefinition[] = [
       },
       required: ["name", "price"],
     },
+    zodSchema: createProductSchema,
     execute: async (params, context): Promise<ToolResult> => {
       try {
         const validated = createProductSchema.parse(params);
@@ -457,6 +460,7 @@ export const productTools: ToolDefinition[] = [
       },
       required: ["productId", "updates"],
     },
+    zodSchema: updateProductSchema,
     execute: async (params, context): Promise<ToolResult> => {
       try {
         const validated = updateProductSchema.parse(params);
@@ -510,6 +514,7 @@ export const productTools: ToolDefinition[] = [
       },
       required: ["productId"],
     },
+    zodSchema: deleteProductSchema,
     execute: async (params, context): Promise<ToolResult> => {
       try {
         const validated = deleteProductSchema.parse(params);
@@ -572,6 +577,7 @@ export const productTools: ToolDefinition[] = [
       },
       required: ["productId", "quantity"],
     },
+    zodSchema: updateInventorySchema,
     execute: async (params, context): Promise<ToolResult> => {
       try {
         const validated = updateInventorySchema.parse(params);
@@ -728,6 +734,7 @@ export const productTools: ToolDefinition[] = [
         },
       },
     },
+    zodSchema: getLowStockProductsSchema,
     execute: async (params, context): Promise<ToolResult> => {
       try {
         const validated = getLowStockProductsSchema.parse(params);

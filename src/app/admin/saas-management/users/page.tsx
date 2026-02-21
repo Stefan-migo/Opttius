@@ -2,7 +2,10 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { extractDataFromResponse, extractPaginationFromResponse } from "@/lib/api/response-helpers";
+import {
+  extractDataFromResponse,
+  extractPaginationFromResponse,
+} from "@/lib/api/response-helpers";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -347,10 +350,10 @@ export default function UsersManagementPage() {
           <ArrowLeft className="h-5 w-5" />
         </Button>
         <div className="flex-1">
-          <h1 className="text-3xl font-bold text-azul-profundo">
+          <h1 className="text-3xl font-display font-bold text-epoch-primary tracking-tight">
             Gestión de Usuarios
           </h1>
-          <p className="text-tierra-media mt-2">
+          <p className="text-admin-text-tertiary mt-2">
             Administra todos los usuarios del sistema
           </p>
         </div>
@@ -361,7 +364,7 @@ export default function UsersManagementPage() {
       </div>
 
       {/* Filtros */}
-      <Card>
+      <Card className="admin-card rounded-none">
         <CardContent className="pt-6">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1">
@@ -382,7 +385,7 @@ export default function UsersManagementPage() {
               value={organizationFilter}
               onValueChange={setOrganizationFilter}
             >
-              <SelectTrigger className="w-[200px]">
+              <SelectTrigger className="rounded-none w-[200px]">
                 <SelectValue placeholder="Filtrar por organización" />
               </SelectTrigger>
               <SelectContent>
@@ -395,7 +398,7 @@ export default function UsersManagementPage() {
               </SelectContent>
             </Select>
             <Select value={roleFilter} onValueChange={setRoleFilter}>
-              <SelectTrigger className="w-[180px]">
+              <SelectTrigger className="rounded-none w-[180px]">
                 <SelectValue placeholder="Filtrar por rol" />
               </SelectTrigger>
               <SelectContent>
@@ -409,7 +412,7 @@ export default function UsersManagementPage() {
               </SelectContent>
             </Select>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-[180px]">
+              <SelectTrigger className="rounded-none w-[180px]">
                 <SelectValue placeholder="Filtrar por estado" />
               </SelectTrigger>
               <SelectContent>
@@ -423,7 +426,7 @@ export default function UsersManagementPage() {
       </Card>
 
       {/* Tabla de usuarios */}
-      <Card>
+      <Card className="admin-card rounded-none">
         <CardHeader>
           <CardTitle>Usuarios ({totalCount})</CardTitle>
         </CardHeader>
@@ -696,7 +699,7 @@ export default function UsersManagementPage() {
                   setCreateUserForm((f) => ({ ...f, role: v }))
                 }
               >
-                <SelectTrigger>
+                <SelectTrigger className="rounded-none">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -727,7 +730,7 @@ export default function UsersManagementPage() {
                   loadBranchesForOrg(orgId);
                 }}
               >
-                <SelectTrigger>
+                <SelectTrigger className="rounded-none">
                   <SelectValue placeholder="Sin organización" />
                 </SelectTrigger>
                 <SelectContent>
@@ -752,7 +755,7 @@ export default function UsersManagementPage() {
                       setCreateUserForm((f) => ({ ...f, branch_id: v }))
                     }
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="rounded-none">
                       <SelectValue placeholder="Seleccionar sucursal" />
                     </SelectTrigger>
                     <SelectContent>
@@ -805,7 +808,7 @@ export default function UsersManagementPage() {
                   setNewOrganizationId(v === "__none__" ? "" : v)
                 }
               >
-                <SelectTrigger>
+                <SelectTrigger className="rounded-none">
                   <SelectValue placeholder="Seleccionar organización" />
                 </SelectTrigger>
                 <SelectContent>

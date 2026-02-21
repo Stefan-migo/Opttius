@@ -9,6 +9,7 @@ import { diagnoseSystemTools } from "./diagnoseSystem";
 import { marketTrendsTools } from "./analyzeMarketTrends";
 import { inventoryTools } from "./optimizeInventory";
 import { recommendationTools } from "./generateRecommendations";
+import { importBulkTools } from "./importBulk";
 import type { ToolDefinition } from "./types";
 import type { LLMTool } from "../types";
 
@@ -24,6 +25,7 @@ export const allTools: ToolDefinition[] = [
   ...marketTrendsTools,
   ...inventoryTools,
   ...recommendationTools,
+  ...importBulkTools,
 ];
 
 export function getAllTools(): ToolDefinition[] {
@@ -69,6 +71,9 @@ export function validateToolCall(
   }
 }
 
-function getZodSchemaForTool(toolName: string): any {
-  return null;
+function getZodSchemaForTool(
+  toolName: string,
+): import("zod").ZodTypeAny | null {
+  const tool = getToolByName(toolName);
+  return tool?.zodSchema ?? null;
 }

@@ -153,8 +153,8 @@ export default function BillingSettingsPage() {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-azul-profundo mx-auto mb-4"></div>
-          <p className="text-tierra-media">Cargando configuración...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-epoch-primary mx-auto mb-4"></div>
+          <p className="text-admin-text-tertiary">Cargando configuración...</p>
         </div>
       </div>
     );
@@ -164,10 +164,10 @@ export default function BillingSettingsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-azul-profundo">
+          <h1 className="text-3xl font-bold text-epoch-primary">
             Configuración de Boletas
           </h1>
-          <p className="text-tierra-media mt-1">
+          <p className="text-admin-text-tertiary mt-1">
             Personaliza tus boletas y facturas
           </p>
         </div>
@@ -261,7 +261,7 @@ export default function BillingSettingsPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <Label className="text-sm font-bold text-azul-profundo mb-2 block">
+              <Label className="text-sm font-bold text-epoch-primary mb-2 block">
                 Logo de la Empresa (Boleta/Factura)
               </Label>
               <div className="bg-blue-50/50 border border-blue-100 rounded-lg p-3 mb-4">

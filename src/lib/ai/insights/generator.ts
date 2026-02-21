@@ -11,13 +11,20 @@
 import { LLMFactory } from "../factory";
 import {
   InsightsResponseSchema,
+  InsightSchema,
   type Insight,
   type InsightSection,
 } from "./schemas";
-import { getSectionPrompt, getUserMessage } from "./prompts";
+import {
+  getSectionPrompt,
+  getDailySummaryPrompt,
+  getUserMessage,
+} from "./prompts";
 import { OrganizationalMaturitySystem } from "./maturity";
 import { appLogger as logger } from "@/lib/logger";
+import { logAIUsage } from "../usage-logger";
 import type { MaturityLevel } from "../memory/organizational";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 export interface GenerateInsightsOptions {
   section: InsightSection;
@@ -29,6 +36,12 @@ export interface GenerateInsightsOptions {
   temperature?: number;
   maxRetries?: number;
   useMaturityAdaptation?: boolean;
+  /** Optional: if provided, AI usage will be logged for cost tracking */
+  supabase?: SupabaseClient;
+  /** Optional: "daily_summary" uses a specialized prompt for yesterday's executive summary */
+  variant?: "daily_summary";
+  /** For daily_summary: the date string (YYYY-MM-DD) */
+  variantDate?: string;
 }
 
 /**
@@ -51,6 +64,9 @@ export async function generateInsights(
     temperature = 0.7,
     maxRetries = 2,
     useMaturityAdaptation = true,
+    supabase,
+    variant,
+    variantDate,
   } = options;
 
   const factory = LLMFactory.getInstance();
@@ -89,6 +105,13 @@ export async function generateInsights(
       maturityLevel: maturityLevel.level,
       organizationAge: maturityLevel.daysSinceCreation,
     });
+  } else if (variant === "daily_summary" && variantDate) {
+    systemPrompt = getDailySummaryPrompt(
+      organizationName,
+      data,
+      variantDate,
+      additionalContext,
+    );
   } else {
     // Use standard prompts
     systemPrompt = getSectionPrompt(
@@ -99,7 +122,10 @@ export async function generateInsights(
     );
   }
 
-  const userMessage = getUserMessage(section, data);
+  const userMessage =
+    variant === "daily_summary"
+      ? `Genera el resumen ejecutivo del día ${variantDate} con los datos proporcionados.`
+      : getUserMessage(section, data);
 
   // Retry logic for LLM calls
   let lastError: Error | null = null;
@@ -117,6 +143,22 @@ export async function generateInsights(
       );
 
       lastResponseContent = response.content;
+
+      if (
+        supabase &&
+        organizationId &&
+        response.usage &&
+        (response.usage.promptTokens > 0 || response.usage.completionTokens > 0)
+      ) {
+        logAIUsage(supabase, {
+          organizationId,
+          provider: provider.name,
+          model: config.model || "unknown",
+          promptTokens: response.usage.promptTokens,
+          completionTokens: response.usage.completionTokens,
+          endpoint: "insights",
+        });
+      }
 
       // Parse JSON from response
       let parsedResponse: any;
@@ -215,9 +257,5 @@ export async function generateSingleInsight(
  * Useful for testing or re-validation
  */
 export function validateInsights(insights: any[]): Insight[] {
-  return insights.map((insight) => {
-    const validated =
-      InsightsResponseSchema.shape.insights.element.parse(insight);
-    return validated;
-  });
+  return insights.map((insight) => InsightSchema.parse(insight));
 }

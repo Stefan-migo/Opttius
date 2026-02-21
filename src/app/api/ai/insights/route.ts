@@ -50,7 +50,7 @@ export async function GET(request: NextRequest) {
       }
 
       // Fetch insights for the section
-      const { data: insights, error: insightsError } = await supabase
+      const { data: rawInsights, error: insightsError } = await supabase
         .from("ai_insights")
         .select("*")
         .eq("organization_id", adminUser.organization_id)
@@ -58,7 +58,7 @@ export async function GET(request: NextRequest) {
         .eq("is_dismissed", false)
         .order("priority", { ascending: false })
         .order("created_at", { ascending: false })
-        .limit(5);
+        .limit(10);
 
       if (insightsError) {
         logger.error("Error fetching insights", {
@@ -71,13 +71,33 @@ export async function GET(request: NextRequest) {
         );
       }
 
+      // For dashboard: prioritize daily_summary from yesterday first
+      let insights = rawInsights || [];
+      if (section === "dashboard" && insights.length > 0) {
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        const yesterdayStr = yesterday.toISOString().split("T")[0];
+
+        insights = [...insights].sort((a, b) => {
+          const aDaily =
+            (a.metadata as any)?.type === "daily_summary" &&
+            (a.metadata as any)?.date === yesterdayStr;
+          const bDaily =
+            (b.metadata as any)?.type === "daily_summary" &&
+            (b.metadata as any)?.date === yesterdayStr;
+          if (aDaily && !bDaily) return -1;
+          if (!aDaily && bDaily) return 1;
+          return 0;
+        });
+      }
+
       logger.debug("Insights fetched successfully", {
         section,
         count: insights?.length || 0,
       });
 
       return NextResponse.json({
-        insights: insights || [],
+        insights: insights.slice(0, 5),
       });
     } catch (error: any) {
       logger.error("Insights API error", {

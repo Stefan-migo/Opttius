@@ -28,6 +28,7 @@ export const analyticsTools: ToolDefinition[] = [
       type: "object",
       properties: {},
     },
+    zodSchema: getDashboardStatsSchema,
     execute: async (params, context): Promise<ToolResult> => {
       try {
         const validated = getDashboardStatsSchema.parse(params);
@@ -148,6 +149,7 @@ export const analyticsTools: ToolDefinition[] = [
         },
       },
     },
+    zodSchema: getRevenueTrendSchema,
     execute: async (params, context): Promise<ToolResult> => {
       try {
         const validated = getRevenueTrendSchema.parse(params);
@@ -226,6 +228,7 @@ export const analyticsTools: ToolDefinition[] = [
         },
       },
     },
+    zodSchema: getTopProductsSchema,
     execute: async (params, context): Promise<ToolResult> => {
       try {
         const validated = getTopProductsSchema.parse(params);
@@ -312,6 +315,7 @@ export const analyticsTools: ToolDefinition[] = [
         },
       },
     },
+    zodSchema: getSalesReportSchema,
     execute: async (params, context): Promise<ToolResult> => {
       try {
         const validated = getSalesReportSchema.parse(params);

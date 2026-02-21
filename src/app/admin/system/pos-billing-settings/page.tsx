@@ -307,8 +307,8 @@ export default function POSBillingSettingsPage() {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <Loader2 className="h-12 w-12 animate-spin text-azul-profundo mx-auto mb-4" />
-          <p className="text-tierra-media">Cargando configuración...</p>
+          <Loader2 className="h-12 w-12 animate-spin text-epoch-primary mx-auto mb-4" />
+          <p className="text-admin-text-tertiary">Cargando configuración...</p>
         </div>
       </div>
     );
@@ -319,10 +319,10 @@ export default function POSBillingSettingsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-azul-profundo">
+          <h1 className="text-3xl font-bold text-epoch-primary">
             Configuración POS y Boletas {isGlobalView && "(VISTA GLOBAL)"}
           </h1>
-          <p className="text-tierra-media mt-1">
+          <p className="text-admin-text-tertiary mt-1">
             {isGlobalView
               ? "Configuración global para todas las sucursales"
               : "Configura el punto de venta y personaliza tus boletas y facturas"}
@@ -392,7 +392,7 @@ export default function POSBillingSettingsPage() {
                   }
                   placeholder="50.00"
                 />
-                <p className="text-sm text-tierra-media">
+                <p className="text-sm text-admin-text-tertiary">
                   Porcentaje del total de la orden que se requiere como depósito
                   mínimo.
                 </p>
@@ -418,7 +418,7 @@ export default function POSBillingSettingsPage() {
                   }
                   placeholder="Dejar vacío para usar solo porcentaje"
                 />
-                <p className="text-sm text-tierra-media">
+                <p className="text-sm text-admin-text-tertiary">
                   Monto fijo mínimo de depósito. Si se establece, el sistema
                   usará el mayor valor entre el porcentaje calculado y este
                   monto fijo.
@@ -550,7 +550,7 @@ export default function POSBillingSettingsPage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <Label className="text-sm font-bold text-azul-profundo mb-2 block">
+                  <Label className="text-sm font-bold text-epoch-primary mb-2 block">
                     Logo de la Empresa (Boleta/Factura)
                   </Label>
                   <div className="bg-blue-50/50 border border-blue-100 rounded-lg p-3 mb-4">
@@ -757,7 +757,7 @@ export default function POSBillingSettingsPage() {
                 )}
               </div>
               {billingSettings.printer_type !== "custom" && (
-                <div className="text-sm text-tierra-media">
+                <div className="text-sm text-admin-text-tertiary">
                   Tamaño: {billingSettings.printer_width_mm}mm x{" "}
                   {billingSettings.printer_height_mm}mm
                 </div>

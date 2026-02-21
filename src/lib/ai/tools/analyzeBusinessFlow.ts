@@ -34,6 +34,7 @@ export const businessFlowTools: ToolDefinition[] = [
         },
       },
     },
+    zodSchema: analyzeBusinessFlowSchema,
     execute: async (params, context): Promise<ToolResult> => {
       try {
         const validated = analyzeBusinessFlowSchema.parse(params);

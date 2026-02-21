@@ -77,7 +77,7 @@ export const InsightSchema = z.object({
  * Schema for the response from LLM containing multiple insights
  */
 export const InsightsResponseSchema = z.object({
-  insights: z.array(InsightSchema).min(1, "At least one insight is required"),
+  insights: z.array(InsightSchema).default([]),
 });
 
 /**

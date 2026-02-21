@@ -53,7 +53,7 @@ export function EnhancedBarChart({
 
   if (!data || data.length === 0) {
     return (
-      <div className="flex items-center justify-center h-64 text-tierra-media">
+      <div className="flex items-center justify-center h-64 text-admin-text-tertiary">
         <p className="text-lg font-medium">No hay datos para mostrar</p>
       </div>
     );
@@ -81,7 +81,7 @@ export function EnhancedBarChart({
     return (
       <div className="space-y-4 w-full">
         {title && (
-          <h4 className="font-semibold text-lg text-azul-profundo dark:text-admin-text-primary">
+          <h4 className="font-semibold text-lg text-epoch-primary dark:text-admin-text-primary">
             {title}
           </h4>
         )}
@@ -142,7 +142,7 @@ export function EnhancedBarChart({
   return (
     <div className="space-y-4 w-full">
       {title && (
-        <h4 className="font-semibold text-lg text-azul-profundo dark:text-admin-text-primary text-center">
+        <h4 className="font-semibold text-lg text-epoch-primary dark:text-admin-text-primary text-center">
           {title}
         </h4>
       )}

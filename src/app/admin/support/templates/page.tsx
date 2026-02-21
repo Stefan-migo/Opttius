@@ -1,29 +1,29 @@
 "use client";
 
-import { useState, useEffect } from 'react';
-import { extractDataFromResponse } from '@/lib/api/response-helpers';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { 
+import { useState, useEffect } from "react";
+import { extractDataFromResponse } from "@/lib/api/response-helpers";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { 
+} from "@/components/ui/select";
+import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { 
-  FileText, 
+} from "@/components/ui/dialog";
+import {
+  FileText,
   ArrowLeft,
   Plus,
   Search,
@@ -35,9 +35,9 @@ import {
   Tag,
   BarChart3,
   Clock,
-  User
-} from 'lucide-react';
-import Link from 'next/link';
+  User,
+} from "lucide-react";
+import Link from "next/link";
 
 interface SupportTemplate {
   id: string;
@@ -76,28 +76,29 @@ export default function TemplatesPage() {
   const [error, setError] = useState<string | null>(null);
 
   // Filters
-  const [searchTerm, setSearchTerm] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState('all');
-  const [activeFilter, setActiveFilter] = useState('all');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("all");
+  const [activeFilter, setActiveFilter] = useState("all");
 
   // Template creation/editing
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [previewDialogOpen, setPreviewDialogOpen] = useState(false);
-  const [editingTemplate, setEditingTemplate] = useState<SupportTemplate | null>(null);
+  const [editingTemplate, setEditingTemplate] =
+    useState<SupportTemplate | null>(null);
   const [saving, setSaving] = useState(false);
 
   const [form, setForm] = useState({
-    name: '',
-    subject: '',
-    content: '',
-    category_id: '',
-    variables: [] as string[]
+    name: "",
+    subject: "",
+    content: "",
+    category_id: "",
+    variables: [] as string[],
   });
 
   const [previewData, setPreviewData] = useState({
-    subject: '',
-    content: '',
-    variables: {} as Record<string, string>
+    subject: "",
+    content: "",
+    variables: {} as Record<string, string>,
   });
 
   useEffect(() => {
@@ -109,20 +110,25 @@ export default function TemplatesPage() {
     try {
       setLoading(true);
       const params = new URLSearchParams();
-      if (categoryFilter !== 'all') params.append('category_id', categoryFilter);
-      if (activeFilter !== 'all') params.append('active_only', activeFilter === 'active' ? 'true' : 'false');
+      if (categoryFilter !== "all")
+        params.append("category_id", categoryFilter);
+      if (activeFilter !== "all")
+        params.append(
+          "active_only",
+          activeFilter === "active" ? "true" : "false",
+        );
 
       const response = await fetch(`/api/admin/support/templates?${params}`);
       if (!response.ok) {
-        throw new Error('Failed to fetch templates');
+        throw new Error("Failed to fetch templates");
       }
 
       const data = await response.json();
       setTemplates(data.templates || []);
       setError(null);
     } catch (err) {
-      console.error('Error fetching templates:', err);
-      setError(err instanceof Error ? err.message : 'Unknown error occurred');
+      console.error("Error fetching templates:", err);
+      setError(err instanceof Error ? err.message : "Unknown error occurred");
     } finally {
       setLoading(false);
     }
@@ -130,24 +136,24 @@ export default function TemplatesPage() {
 
   const fetchCategories = async () => {
     try {
-      const response = await fetch('/api/admin/support/categories');
+      const response = await fetch("/api/admin/support/categories");
       if (response.ok) {
         const data = await response.json();
         setCategories(extractDataFromResponse(data));
       }
     } catch (err) {
-      console.error('Error fetching categories:', err);
+      console.error("Error fetching categories:", err);
     }
   };
 
   const openCreateDialog = () => {
     setEditingTemplate(null);
     setForm({
-      name: '',
-      subject: '',
-      content: '',
-      category_id: '',
-      variables: []
+      name: "",
+      subject: "",
+      content: "",
+      category_id: "",
+      variables: [],
     });
     setEditDialogOpen(true);
   };
@@ -158,9 +164,12 @@ export default function TemplatesPage() {
       name: template.name,
       subject: template.subject,
       content: template.content,
-      category_id: template.category_id || '',
-      variables: Array.isArray(template.variables) ? template.variables : 
-                  typeof template.variables === 'string' ? JSON.parse(template.variables || '[]') : []
+      category_id: template.category_id || "",
+      variables: Array.isArray(template.variables)
+        ? template.variables
+        : typeof template.variables === "string"
+          ? JSON.parse(template.variables || "[]")
+          : [],
     });
     setEditDialogOpen(true);
   };
@@ -170,26 +179,28 @@ export default function TemplatesPage() {
     const variableMatches = template.content.match(/\{\{(\w+)\}\}/g) || [];
     const subjectMatches = template.subject.match(/\{\{(\w+)\}\}/g) || [];
     const allMatches = [...variableMatches, ...subjectMatches];
-    const uniqueVariables = [...new Set(allMatches.map(match => match.replace(/\{\{|\}\}/g, '')))];
+    const uniqueVariables = [
+      ...new Set(allMatches.map((match) => match.replace(/\{\{|\}\}/g, ""))),
+    ];
 
     // Create sample data for variables
     const sampleVariables: Record<string, string> = {};
-    uniqueVariables.forEach(variable => {
+    uniqueVariables.forEach((variable) => {
       switch (variable) {
-        case 'customer_name':
-          sampleVariables[variable] = 'María González';
+        case "customer_name":
+          sampleVariables[variable] = "María González";
           break;
-        case 'order_number':
-          sampleVariables[variable] = 'ORD-001';
+        case "order_number":
+          sampleVariables[variable] = "ORD-001";
           break;
-        case 'product_name':
-          sampleVariables[variable] = 'Crema Facial de Rosa Mosqueta';
+        case "product_name":
+          sampleVariables[variable] = "Crema Facial de Rosa Mosqueta";
           break;
-        case 'tracking_number':
-          sampleVariables[variable] = 'TR123456789';
+        case "tracking_number":
+          sampleVariables[variable] = "TR123456789";
           break;
-        case 'delivery_date':
-          sampleVariables[variable] = '25 de enero de 2025';
+        case "delivery_date":
+          sampleVariables[variable] = "25 de enero de 2025";
           break;
         default:
           sampleVariables[variable] = `[${variable}]`;
@@ -199,47 +210,47 @@ export default function TemplatesPage() {
     setPreviewData({
       subject: template.subject,
       content: template.content,
-      variables: sampleVariables
+      variables: sampleVariables,
     });
     setPreviewDialogOpen(true);
   };
 
   const handleSaveTemplate = async () => {
     if (!form.name.trim() || !form.content.trim()) {
-      alert('Por favor, completa los campos obligatorios.');
+      alert("Por favor, completa los campos obligatorios.");
       return;
     }
 
     try {
       setSaving(true);
-      const method = editingTemplate ? 'PUT' : 'POST';
-      const url = editingTemplate 
+      const method = editingTemplate ? "PUT" : "POST";
+      const url = editingTemplate
         ? `/api/admin/support/templates/${editingTemplate.id}`
-        : '/api/admin/support/templates';
+        : "/api/admin/support/templates";
 
       const response = await fetch(url, {
         method,
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           name: form.name.trim(),
           subject: form.subject.trim(),
           content: form.content.trim(),
           category_id: form.category_id || null,
-          variables: form.variables
+          variables: form.variables,
         }),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to save template');
+        throw new Error("Failed to save template");
       }
 
       await fetchTemplates();
       setEditDialogOpen(false);
     } catch (err) {
-      console.error('Error saving template:', err);
-      alert('Error al guardar la plantilla. Por favor, inténtalo de nuevo.');
+      console.error("Error saving template:", err);
+      alert("Error al guardar la plantilla. Por favor, inténtalo de nuevo.");
     } finally {
       setSaving(false);
     }
@@ -248,43 +259,49 @@ export default function TemplatesPage() {
   const handleCopyTemplate = async (template: SupportTemplate) => {
     try {
       await navigator.clipboard.writeText(template.content);
-      alert('Plantilla copiada al portapapeles');
+      alert("Plantilla copiada al portapapeles");
     } catch (err) {
-      console.error('Error copying template:', err);
-      alert('Error al copiar la plantilla');
+      console.error("Error copying template:", err);
+      alert("Error al copiar la plantilla");
     }
   };
 
-  const renderTemplateWithVariables = (text: string, variables: Record<string, string>) => {
+  const renderTemplateWithVariables = (
+    text: string,
+    variables: Record<string, string>,
+  ) => {
     let rendered = text;
     Object.entries(variables).forEach(([key, value]) => {
-      const regex = new RegExp(`\\{\\{${key}\\}\\}`, 'g');
+      const regex = new RegExp(`\\{\\{${key}\\}\\}`, "g");
       rendered = rendered.replace(regex, value);
     });
     return rendered;
   };
 
-  const filteredTemplates = templates.filter(template => {
-    const matchesSearch = searchTerm === '' || 
+  const filteredTemplates = templates.filter((template) => {
+    const matchesSearch =
+      searchTerm === "" ||
       template.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       template.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
       template.content.toLowerCase().includes(searchTerm.toLowerCase());
-    
+
     return matchesSearch;
   });
 
   const formatTimeAgo = (dateString: string) => {
     const date = new Date(dateString);
     const now = new Date();
-    const diffHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
-    
-    if (diffHours < 1) return 'Hace menos de 1 hora';
+    const diffHours = Math.floor(
+      (now.getTime() - date.getTime()) / (1000 * 60 * 60),
+    );
+
+    if (diffHours < 1) return "Hace menos de 1 hora";
     if (diffHours < 24) return `Hace ${diffHours} horas`;
-    
+
     const diffDays = Math.floor(diffHours / 24);
     if (diffDays < 7) return `Hace ${diffDays} días`;
-    
-    return date.toLocaleDateString('es-AR');
+
+    return date.toLocaleDateString("es-AR");
   };
 
   if (loading && templates.length === 0) {
@@ -292,8 +309,10 @@ export default function TemplatesPage() {
       <div className="space-y-6">
         <div className="flex justify-between items-start">
           <div>
-            <h1 className="text-3xl font-bold text-azul-profundo">Plantillas de Soporte</h1>
-            <p className="text-tierra-media">Cargando plantillas...</p>
+            <h1 className="text-3xl font-bold text-epoch-primary">
+              Plantillas de Soporte
+            </h1>
+            <p className="text-admin-text-tertiary">Cargando plantillas...</p>
           </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -322,13 +341,16 @@ export default function TemplatesPage() {
             </Button>
           </Link>
           <div>
-            <h1 className="text-3xl font-bold text-azul-profundo">Plantillas de Soporte</h1>
-            <p className="text-tierra-media">
-              Gestiona plantillas de respuestas para agilizar el soporte al cliente
+            <h1 className="text-3xl font-bold text-epoch-primary">
+              Plantillas de Soporte
+            </h1>
+            <p className="text-admin-text-tertiary">
+              Gestiona plantillas de respuestas para agilizar el soporte al
+              cliente
             </p>
           </div>
         </div>
-        
+
         <Button onClick={openCreateDialog}>
           <Plus className="h-4 w-4 mr-2" />
           Nueva Plantilla
@@ -340,23 +362,13 @@ export default function TemplatesPage() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center">
-              <FileText className="h-6 w-6 text-azul-profundo" />
+              <FileText className="h-6 w-6 text-epoch-primary" />
               <div className="ml-3">
-                <p className="text-xs text-tierra-media">Total Plantillas</p>
-                <p className="text-lg font-bold text-azul-profundo">{templates.length}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center">
-              <BarChart3 className="h-6 w-6 text-verde-suave" />
-              <div className="ml-3">
-                <p className="text-xs text-tierra-media">Más Usada</p>
-                <p className="text-lg font-bold text-verde-suave">
-                  {Math.max(...templates.map(t => t.usage_count), 0)}
+                <p className="text-xs text-admin-text-tertiary">
+                  Total Plantillas
+                </p>
+                <p className="text-lg font-bold text-epoch-primary">
+                  {templates.length}
                 </p>
               </div>
             </div>
@@ -366,10 +378,26 @@ export default function TemplatesPage() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center">
-              <Tag className="h-6 w-6 text-dorado" />
+              <BarChart3 className="h-6 w-6 text-admin-success" />
               <div className="ml-3">
-                <p className="text-xs text-tierra-media">Categorías</p>
-                <p className="text-lg font-bold text-dorado">{categories.length}</p>
+                <p className="text-xs text-admin-text-tertiary">Más Usada</p>
+                <p className="text-lg font-bold text-admin-success">
+                  {Math.max(...templates.map((t) => t.usage_count), 0)}
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center">
+              <Tag className="h-6 w-6 text-epoch-accent" />
+              <div className="ml-3">
+                <p className="text-xs text-admin-text-tertiary">Categorías</p>
+                <p className="text-lg font-bold text-epoch-accent">
+                  {categories.length}
+                </p>
               </div>
             </div>
           </CardContent>
@@ -380,9 +408,9 @@ export default function TemplatesPage() {
             <div className="flex items-center">
               <Clock className="h-6 w-6 text-blue-500" />
               <div className="ml-3">
-                <p className="text-xs text-tierra-media">Activas</p>
+                <p className="text-xs text-admin-text-tertiary">Activas</p>
                 <p className="text-lg font-bold text-blue-500">
-                  {templates.filter(t => t.is_active).length}
+                  {templates.filter((t) => t.is_active).length}
                 </p>
               </div>
             </div>
@@ -396,7 +424,7 @@ export default function TemplatesPage() {
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-tierra-media h-4 w-4" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-admin-text-tertiary h-4 w-4" />
                 <Input
                   placeholder="Buscar plantillas por nombre o contenido..."
                   value={searchTerm}
@@ -405,7 +433,7 @@ export default function TemplatesPage() {
                 />
               </div>
             </div>
-            
+
             <Select value={categoryFilter} onValueChange={setCategoryFilter}>
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Categoría" />
@@ -443,14 +471,22 @@ export default function TemplatesPage() {
                 <div className="flex-1">
                   <CardTitle className="text-lg">{template.name}</CardTitle>
                   {template.subject && (
-                    <p className="text-sm text-tierra-media mt-1 line-clamp-2">
+                    <p className="text-sm text-admin-text-tertiary mt-1 line-clamp-2">
                       {template.subject}
                     </p>
                   )}
                 </div>
                 <div className="flex items-center gap-2">
                   {template.category && (
-                    <Badge variant="outline" style={{ borderColor: template.category.name === 'Productos' ? '#10B981' : '#3B82F6' }}>
+                    <Badge
+                      variant="outline"
+                      style={{
+                        borderColor:
+                          template.category.name === "Productos"
+                            ? "#10B981"
+                            : "#3B82F6",
+                      }}
+                    >
                       {template.category.name}
                     </Badge>
                   )}
@@ -460,16 +496,16 @@ export default function TemplatesPage() {
                 </div>
               </div>
             </CardHeader>
-            
+
             <CardContent>
               <div className="space-y-3">
                 <div className="bg-gray-50 p-3 rounded-lg">
-                  <p className="text-sm text-tierra-media line-clamp-4">
+                  <p className="text-sm text-admin-text-tertiary line-clamp-4">
                     {template.content}
                   </p>
                 </div>
 
-                <div className="flex items-center justify-between text-xs text-tierra-media">
+                <div className="flex items-center justify-between text-xs text-admin-text-tertiary">
                   <div className="flex items-center gap-4">
                     <div className="flex items-center gap-1">
                       <BarChart3 className="h-3 w-3" />
@@ -477,12 +513,10 @@ export default function TemplatesPage() {
                     </div>
                     <div className="flex items-center gap-1">
                       <User className="h-3 w-3" />
-                      {template.creator?.email || 'Admin'}
+                      {template.creator?.email || "Admin"}
                     </div>
                   </div>
-                  <div>
-                    {formatTimeAgo(template.updated_at)}
-                  </div>
+                  <div>{formatTimeAgo(template.updated_at)}</div>
                 </div>
 
                 <div className="flex gap-2">
@@ -495,7 +529,7 @@ export default function TemplatesPage() {
                     <Eye className="h-3 w-3 mr-1" />
                     Vista previa
                   </Button>
-                  
+
                   <Button
                     variant="outline"
                     size="sm"
@@ -503,7 +537,7 @@ export default function TemplatesPage() {
                   >
                     <Copy className="h-3 w-3" />
                   </Button>
-                  
+
                   <Button
                     variant="outline"
                     size="sm"
@@ -521,10 +555,14 @@ export default function TemplatesPage() {
       {filteredTemplates.length === 0 && !loading && (
         <Card>
           <CardContent className="text-center py-16">
-            <FileText className="h-12 w-12 text-tierra-media mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-azul-profundo mb-2">No se encontraron plantillas</h3>
-            <p className="text-tierra-media mb-4">
-              {searchTerm ? 'Ajusta los filtros de búsqueda' : 'Crea tu primera plantilla de soporte'}
+            <FileText className="h-12 w-12 text-admin-text-tertiary mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-epoch-primary mb-2">
+              No se encontraron plantillas
+            </h3>
+            <p className="text-admin-text-tertiary mb-4">
+              {searchTerm
+                ? "Ajusta los filtros de búsqueda"
+                : "Crea tu primera plantilla de soporte"}
             </p>
             <Button onClick={openCreateDialog}>
               <Plus className="h-4 w-4 mr-2" />
@@ -539,31 +577,39 @@ export default function TemplatesPage() {
         <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
-              {editingTemplate ? 'Editar Plantilla' : 'Crear Nueva Plantilla'}
+              {editingTemplate ? "Editar Plantilla" : "Crear Nueva Plantilla"}
             </DialogTitle>
             <DialogDescription>
-              Las plantillas te permiten responder rápidamente con mensajes predefinidos
+              Las plantillas te permiten responder rápidamente con mensajes
+              predefinidos
             </DialogDescription>
           </DialogHeader>
-          
+
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-tierra-media mb-2">
+                <label className="block text-sm font-medium text-admin-text-tertiary mb-2">
                   Nombre de la Plantilla <span className="text-red-500">*</span>
                 </label>
                 <Input
                   placeholder="Ej: Respuesta entrega tardía"
                   value={form.name}
-                  onChange={(e) => setForm(prev => ({ ...prev, name: e.target.value }))}
+                  onChange={(e) =>
+                    setForm((prev) => ({ ...prev, name: e.target.value }))
+                  }
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-tierra-media mb-2">
+                <label className="block text-sm font-medium text-admin-text-tertiary mb-2">
                   Categoría
                 </label>
-                <Select value={form.category_id} onValueChange={(value) => setForm(prev => ({ ...prev, category_id: value }))}>
+                <Select
+                  value={form.category_id}
+                  onValueChange={(value) =>
+                    setForm((prev) => ({ ...prev, category_id: value }))
+                  }
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Seleccionar categoría" />
                   </SelectTrigger>
@@ -579,46 +625,53 @@ export default function TemplatesPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-tierra-media mb-2">
+              <label className="block text-sm font-medium text-admin-text-tertiary mb-2">
                 Asunto del Email
               </label>
               <Input
                 placeholder="Ej: Actualización sobre tu pedido {{order_number}}"
                 value={form.subject}
-                onChange={(e) => setForm(prev => ({ ...prev, subject: e.target.value }))}
+                onChange={(e) =>
+                  setForm((prev) => ({ ...prev, subject: e.target.value }))
+                }
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-tierra-media mb-2">
-                Contenido de la Plantilla <span className="text-red-500">*</span>
+              <label className="block text-sm font-medium text-admin-text-tertiary mb-2">
+                Contenido de la Plantilla{" "}
+                <span className="text-red-500">*</span>
               </label>
               <Textarea
                 placeholder="Hola {{customer_name}},&#10;&#10;Gracias por contactarnos sobre tu pedido {{order_number}}.&#10;&#10;[Continúa escribiendo tu mensaje...]"
                 value={form.content}
-                onChange={(e) => setForm(prev => ({ ...prev, content: e.target.value }))}
+                onChange={(e) =>
+                  setForm((prev) => ({ ...prev, content: e.target.value }))
+                }
                 rows={10}
                 className="min-h-[200px]"
               />
-              <p className="text-xs text-tierra-media mt-2">
-                Usa variables con doble llaves, ej: {`{{customer_name}}, {{order_number}}, {{product_name}}`}
+              <p className="text-xs text-admin-text-tertiary mt-2">
+                Usa variables con doble llaves, ej:{" "}
+                {`{{customer_name}}, {{order_number}}, {{product_name}}`}
               </p>
             </div>
           </div>
 
           <DialogFooter>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={() => setEditDialogOpen(false)}
               disabled={saving}
             >
               Cancelar
             </Button>
-            <Button 
-              onClick={handleSaveTemplate}
-              disabled={saving}
-            >
-              {saving ? 'Guardando...' : (editingTemplate ? 'Actualizar' : 'Crear Plantilla')}
+            <Button onClick={handleSaveTemplate} disabled={saving}>
+              {saving
+                ? "Guardando..."
+                : editingTemplate
+                  ? "Actualizar"
+                  : "Crear Plantilla"}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -633,35 +686,41 @@ export default function TemplatesPage() {
               Así se verá la plantilla con datos de ejemplo
             </DialogDescription>
           </DialogHeader>
-          
+
           <div className="space-y-4">
             {previewData.subject && (
               <div>
-                <label className="block text-sm font-medium text-tierra-media mb-2">
+                <label className="block text-sm font-medium text-admin-text-tertiary mb-2">
                   Asunto:
                 </label>
                 <div className="bg-gray-50 p-3 rounded-lg">
                   <p className="font-medium">
-                    {renderTemplateWithVariables(previewData.subject, previewData.variables)}
+                    {renderTemplateWithVariables(
+                      previewData.subject,
+                      previewData.variables,
+                    )}
                   </p>
                 </div>
               </div>
             )}
 
             <div>
-              <label className="block text-sm font-medium text-tierra-media mb-2">
+              <label className="block text-sm font-medium text-admin-text-tertiary mb-2">
                 Contenido:
               </label>
               <div className="bg-gray-50 p-4 rounded-lg border">
                 <div className="whitespace-pre-wrap">
-                  {renderTemplateWithVariables(previewData.content, previewData.variables)}
+                  {renderTemplateWithVariables(
+                    previewData.content,
+                    previewData.variables,
+                  )}
                 </div>
               </div>
             </div>
 
             {Object.keys(previewData.variables).length > 0 && (
               <div>
-                <label className="block text-sm font-medium text-tierra-media mb-2">
+                <label className="block text-sm font-medium text-admin-text-tertiary mb-2">
                   Variables utilizadas:
                 </label>
                 <div className="flex flex-wrap gap-2">
@@ -676,9 +735,7 @@ export default function TemplatesPage() {
           </div>
 
           <DialogFooter>
-            <Button onClick={() => setPreviewDialogOpen(false)}>
-              Cerrar
-            </Button>
+            <Button onClick={() => setPreviewDialogOpen(false)}>Cerrar</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

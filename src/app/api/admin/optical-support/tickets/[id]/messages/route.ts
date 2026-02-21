@@ -165,7 +165,7 @@ export async function POST(
       .insert({
         ticket_id: params.id,
         message: body.message,
-        is_internal: body.is_internal || false,
+        is_internal: body.is_internal ?? true,
         sender_id: adminUser.id,
         sender_name: user.email?.split("@")[0] || "Usuario",
         sender_email: adminUser.email || user.email || "",

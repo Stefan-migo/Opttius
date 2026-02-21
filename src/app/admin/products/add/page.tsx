@@ -752,7 +752,7 @@ export default function AddProductPage() {
                 onChange={(e) =>
                   handleInputChange("price_includes_tax", e.target.checked)
                 }
-                className="h-4 w-4 rounded border-gray-300 text-azul-profundo focus:ring-azul-profundo"
+                className="h-4 w-4 rounded border-gray-300 text-epoch-primary focus:ring-epoch-primary"
               />
               <Label
                 htmlFor="price_includes_tax"

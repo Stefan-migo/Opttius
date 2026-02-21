@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -101,9 +101,8 @@ export default function AdminUsersPage() {
   const [roleFilter, setRoleFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
 
-  // Search autocomplete state
-  const [showSearchSuggestions, setShowSearchSuggestions] = useState(false);
-  const [searchSuggestions, setSearchSuggestions] = useState<AdminUser[]>([]);
+  // Debounced search for server-side filtering
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
 
   // Permissions editor state
   const [showPermissionsEditor, setShowPermissionsEditor] = useState(false);
@@ -111,43 +110,18 @@ export default function AdminUsersPage() {
     useState<AdminUser | null>(null);
 
   useEffect(() => {
-    fetchAdminUsers();
-  }, [roleFilter, statusFilter, currentPage, itemsPerPage]);
+    const timer = setTimeout(
+      () => setDebouncedSearchTerm(searchTerm.trim()),
+      400,
+    );
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
 
-  // Close dropdown when clicking outside
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      const target = event.target as HTMLElement;
-      if (
-        showSearchSuggestions &&
-        !target.closest(".search-autocomplete-container")
-      ) {
-        setShowSearchSuggestions(false);
-      }
-    };
+    setCurrentPage(1);
+  }, [debouncedSearchTerm]);
 
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [showSearchSuggestions]);
-
-  // Generate search suggestions from existing admin users
-  useEffect(() => {
-    if (searchTerm.trim().length > 0) {
-      const filtered = adminUsers.filter((admin) => {
-        const searchLower = searchTerm.toLowerCase();
-        const email = admin.email.toLowerCase();
-        const fullName = (admin.analytics?.fullName || "").toLowerCase();
-        return email.includes(searchLower) || fullName.includes(searchLower);
-      });
-      setSearchSuggestions(filtered.slice(0, 5)); // Limit to 5 suggestions
-      setShowSearchSuggestions(filtered.length > 0);
-    } else {
-      setSearchSuggestions([]);
-      setShowSearchSuggestions(false);
-    }
-  }, [searchTerm, adminUsers]);
-
-  const fetchAdminUsers = async () => {
+  const fetchAdminUsers = useCallback(async () => {
     try {
       setLoading(true);
       const offset = (currentPage - 1) * itemsPerPage;
@@ -156,6 +130,7 @@ export default function AdminUsersPage() {
         offset: offset.toString(),
         ...(roleFilter !== "all" && { role: roleFilter }),
         ...(statusFilter !== "all" && { status: statusFilter }),
+        ...(debouncedSearchTerm && { search: debouncedSearchTerm }),
       });
 
       const response = await fetch(`/api/admin/admin-users?${params}`);
@@ -178,7 +153,17 @@ export default function AdminUsersPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [
+    currentPage,
+    itemsPerPage,
+    roleFilter,
+    statusFilter,
+    debouncedSearchTerm,
+  ]);
+
+  useEffect(() => {
+    fetchAdminUsers();
+  }, [fetchAdminUsers]);
 
   const handleToggleStatus = async (
     adminId: string,
@@ -259,7 +244,7 @@ export default function AdminUsersPage() {
       return (
         <Badge
           variant="default"
-          className="flex items-center gap-1 bg-dorado text-primary"
+          className="flex items-center gap-1 bg-epoch-accent text-epoch-primary"
         >
           <Globe className="h-3 w-3" />
           Super Administrador
@@ -308,10 +293,10 @@ export default function AdminUsersPage() {
       <div className="space-y-6">
         <div className="flex justify-between items-start">
           <div>
-            <h1 className="text-3xl font-bold text-azul-profundo">
+            <h1 className="text-3xl font-bold text-epoch-primary">
               Gestión de Administradores
             </h1>
-            <p className="text-tierra-media">
+            <p className="text-admin-text-tertiary">
               Cargando usuarios administradores...
             </p>
           </div>
@@ -335,10 +320,12 @@ export default function AdminUsersPage() {
       <div className="space-y-6">
         <div className="flex justify-between items-start">
           <div>
-            <h1 className="text-3xl font-bold text-azul-profundo">
+            <h1 className="text-3xl font-bold text-epoch-primary">
               Gestión de Administradores
             </h1>
-            <p className="text-tierra-media">Error al cargar los datos</p>
+            <p className="text-admin-text-tertiary">
+              Error al cargar los datos
+            </p>
           </div>
         </div>
         <Card>
@@ -347,7 +334,7 @@ export default function AdminUsersPage() {
             <h3 className="text-lg font-semibold text-red-700 mb-2">
               Error al cargar administradores
             </h3>
-            <p className="text-tierra-media mb-4">{error}</p>
+            <p className="text-admin-text-tertiary mb-4">{error}</p>
             <Button onClick={fetchAdminUsers}>Reintentar</Button>
           </CardContent>
         </Card>
@@ -360,10 +347,10 @@ export default function AdminUsersPage() {
       {/* Header */}
       <div className="flex justify-between items-start">
         <div>
-          <h1 className="text-3xl font-bold text-azul-profundo">
+          <h1 className="text-3xl font-bold text-epoch-primary">
             Gestión de Administradores
           </h1>
-          <p className="text-tierra-media">
+          <p className="text-admin-text-tertiary">
             Administra usuarios con acceso al panel de administración
           </p>
         </div>
@@ -378,15 +365,15 @@ export default function AdminUsersPage() {
 
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.4)]">
+        <Card className="admin-card bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.4)]">
           <CardContent className="p-6">
             <div className="flex items-center">
-              <Users className="h-8 w-8 text-azul-profundo" />
+              <Users className="h-8 w-8 text-epoch-primary" />
               <div className="ml-4">
-                <p className="text-sm text-tierra-media">
+                <p className="text-sm text-admin-text-tertiary">
                   Total Administradores
                 </p>
-                <p className="text-2xl font-bold text-azul-profundo">
+                <p className="text-2xl font-bold text-epoch-primary">
                   {adminUsers.length}
                 </p>
               </div>
@@ -394,15 +381,15 @@ export default function AdminUsersPage() {
           </CardContent>
         </Card>
 
-        <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.4)]">
+        <Card className="admin-card bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.4)]">
           <CardContent className="p-6">
             <div className="flex items-center">
-              <Globe className="h-8 w-8 text-dorado" />
+              <Globe className="h-8 w-8 text-epoch-accent" />
               <div className="ml-4">
-                <p className="text-sm text-tierra-media">
+                <p className="text-sm text-admin-text-tertiary">
                   Super Administradores
                 </p>
-                <p className="text-2xl font-bold text-dorado">
+                <p className="text-2xl font-bold text-epoch-accent">
                   {adminUsers.filter((admin) => admin.is_super_admin).length}
                 </p>
               </div>
@@ -410,13 +397,13 @@ export default function AdminUsersPage() {
           </CardContent>
         </Card>
 
-        <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.4)]">
+        <Card className="admin-card bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.4)]">
           <CardContent className="p-6">
             <div className="flex items-center">
-              <CheckCircle className="h-8 w-8 text-verde-suave" />
+              <CheckCircle className="h-8 w-8 text-admin-success" />
               <div className="ml-4">
-                <p className="text-sm text-tierra-media">Activos</p>
-                <p className="text-2xl font-bold text-verde-suave">
+                <p className="text-sm text-admin-text-tertiary">Activos</p>
+                <p className="text-2xl font-bold text-admin-success">
                   {adminUsers.filter((admin) => admin.is_active).length}
                 </p>
               </div>
@@ -424,12 +411,14 @@ export default function AdminUsersPage() {
           </CardContent>
         </Card>
 
-        <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.4)]">
+        <Card className="admin-card bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.4)]">
           <CardContent className="p-6">
             <div className="flex items-center">
               <Activity className="h-8 w-8 text-red-500" />
               <div className="ml-4">
-                <p className="text-sm text-tierra-media">Activos Recientes</p>
+                <p className="text-sm text-admin-text-tertiary">
+                  Activos Recientes
+                </p>
                 <p className="text-2xl font-bold text-red-500">
                   {
                     adminUsers.filter(
@@ -446,74 +435,18 @@ export default function AdminUsersPage() {
       </div>
 
       {/* Filters */}
-      <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.4)]">
+      <Card className="admin-card bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.4)]">
         <CardContent className="p-6">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1">
-              <div className="relative search-autocomplete-container">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-tierra-media h-4 w-4 z-10" />
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-admin-text-tertiary h-4 w-4 z-10" />
                 <Input
                   placeholder="Buscar por email o nombre..."
                   value={searchTerm}
-                  onChange={(e) => {
-                    setSearchTerm(e.target.value);
-                    setShowSearchSuggestions(true);
-                  }}
-                  onFocus={() => {
-                    if (
-                      searchTerm.trim().length > 0 &&
-                      searchSuggestions.length > 0
-                    ) {
-                      setShowSearchSuggestions(true);
-                    }
-                  }}
+                  onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10"
                 />
-
-                {/* Search Autocomplete Suggestions */}
-                {showSearchSuggestions && searchSuggestions.length > 0 && (
-                  <div className="absolute z-50 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg max-h-60 overflow-y-auto">
-                    {searchSuggestions.map((admin) => {
-                      const fullName = admin.analytics?.fullName || admin.email;
-                      return (
-                        <div
-                          key={admin.id}
-                          className="px-4 py-3 hover:bg-admin-bg-tertiary cursor-pointer transition-colors border-b border-gray-100 last:border-b-0"
-                          onClick={() => {
-                            setSearchTerm(admin.email);
-                            setShowSearchSuggestions(false);
-                          }}
-                        >
-                          <div className="flex items-center gap-3">
-                            <div className="flex flex-col min-w-0 flex-1">
-                              <span className="font-medium text-sm truncate">
-                                {fullName}
-                              </span>
-                              <span className="text-xs text-tierra-media truncate">
-                                {admin.email}
-                              </span>
-                            </div>
-                            {admin.is_active ? (
-                              <Badge
-                                className="bg-verde-suave text-primary text-xs"
-                                style={{
-                                  backgroundColor: "var(--accent)",
-                                  color: "var(--admin-bg-primary)",
-                                }}
-                              >
-                                Activo
-                              </Badge>
-                            ) : (
-                              <Badge variant="destructive" className="text-xs">
-                                Inactivo
-                              </Badge>
-                            )}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
               </div>
             </div>
 
@@ -532,27 +465,11 @@ export default function AdminUsersPage() {
       </Card>
 
       {/* Admin Users Table */}
-      <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.4)]">
+      <Card className="admin-card bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.4)]">
         <CardHeader>
           <CardTitle className="flex items-center">
             <Users className="h-5 w-5 mr-2" />
-            Usuarios Administradores (
-            {(() => {
-              // Client-side filtering for search
-              const filtered = adminUsers.filter((admin) => {
-                if (!searchTerm) return true;
-                const searchLower = searchTerm.toLowerCase();
-                const fullName = (
-                  admin.analytics?.fullName || ""
-                ).toLowerCase();
-                const email = admin.email.toLowerCase();
-                return (
-                  fullName.includes(searchLower) || email.includes(searchLower)
-                );
-              });
-              return filtered.length;
-            })()}
-            )
+            Usuarios Administradores ({totalCount})
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -570,185 +487,170 @@ export default function AdminUsersPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {(() => {
-                // Client-side filtering for search
-                const filteredAdminUsers = adminUsers.filter((admin) => {
-                  if (!searchTerm) return true;
-                  const searchLower = searchTerm.toLowerCase();
-                  const fullName = (
-                    admin.analytics?.fullName || ""
-                  ).toLowerCase();
-                  const email = admin.email.toLowerCase();
-                  return (
-                    fullName.includes(searchLower) ||
-                    email.includes(searchLower)
-                  );
-                });
-                return filteredAdminUsers.map((admin) => (
-                  <TableRow
-                    key={admin.id}
-                    className="hover:bg-[#AE000025] transition-colors"
-                  >
-                    <TableCell>
-                      <div>
-                        <div className="font-medium">
-                          {admin.analytics?.fullName || "Sin nombre"}
+              {adminUsers.map((admin) => (
+                <TableRow
+                  key={admin.id}
+                  className="hover:bg-[#AE000025] transition-colors"
+                >
+                  <TableCell>
+                    <div>
+                      <div className="font-medium">
+                        {admin.analytics?.fullName || "Sin nombre"}
+                      </div>
+                      <div className="text-sm text-admin-text-tertiary">
+                        {admin.email}
+                      </div>
+                      {admin.profiles?.phone && (
+                        <div className="flex items-center text-xs text-admin-text-tertiary mt-1">
+                          <Phone className="h-3 w-3 mr-1" />
+                          {admin.profiles.phone}
                         </div>
-                        <div className="text-sm text-tierra-media">
-                          {admin.email}
-                        </div>
-                        {admin.profiles?.phone && (
-                          <div className="flex items-center text-xs text-tierra-media mt-1">
-                            <Phone className="h-3 w-3 mr-1" />
-                            {admin.profiles.phone}
-                          </div>
+                      )}
+                    </div>
+                  </TableCell>
+
+                  <TableCell>{getRoleBadge(admin)}</TableCell>
+
+                  <TableCell>
+                    {admin.is_super_admin ? (
+                      <Badge
+                        variant="outline"
+                        className="flex items-center gap-1 w-fit"
+                      >
+                        <Globe className="h-3 w-3" />
+                        Todas las sucursales
+                      </Badge>
+                    ) : admin.branches && admin.branches.length > 0 ? (
+                      <div className="flex flex-col gap-1">
+                        {admin.branches.slice(0, 2).map((branch) => (
+                          <Badge
+                            key={branch.id}
+                            variant="outline"
+                            className="flex items-center gap-1 w-fit text-xs"
+                          >
+                            <Building2 className="h-3 w-3" />
+                            {branch.name}
+                            {branch.is_primary && (
+                              <span className="text-epoch-accent">★</span>
+                            )}
+                          </Badge>
+                        ))}
+                        {admin.branches.length > 2 && (
+                          <span className="text-xs text-admin-text-tertiary">
+                            +{admin.branches.length - 2} más
+                          </span>
                         )}
                       </div>
-                    </TableCell>
+                    ) : (
+                      <span className="text-sm text-admin-text-tertiary">
+                        Sin sucursales
+                      </span>
+                    )}
+                  </TableCell>
 
-                    <TableCell>{getRoleBadge(admin)}</TableCell>
+                  <TableCell>{getStatusBadge(admin.is_active)}</TableCell>
 
-                    <TableCell>
-                      {admin.is_super_admin ? (
-                        <Badge
-                          variant="outline"
-                          className="flex items-center gap-1 w-fit"
+                  <TableCell>
+                    <div className="flex items-center text-sm">
+                      <Clock className="h-3 w-3 mr-1 text-admin-text-tertiary" />
+                      {formatLastActivity(admin.last_login)}
+                    </div>
+                  </TableCell>
+
+                  <TableCell>
+                    <div className="text-center">
+                      <div className="font-medium">
+                        {admin.analytics?.activityCount30Days || 0}
+                      </div>
+                      <div className="text-xs text-admin-text-tertiary">
+                        acciones
+                      </div>
+                    </div>
+                  </TableCell>
+
+                  <TableCell className="text-sm text-admin-text-tertiary">
+                    {formatDate(admin.created_at, { locale: "es-AR" })}
+                  </TableCell>
+
+                  <TableCell>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 w-8 p-0"
                         >
-                          <Globe className="h-3 w-3" />
-                          Todas las sucursales
-                        </Badge>
-                      ) : admin.branches && admin.branches.length > 0 ? (
-                        <div className="flex flex-col gap-1">
-                          {admin.branches.slice(0, 2).map((branch) => (
-                            <Badge
-                              key={branch.id}
-                              variant="outline"
-                              className="flex items-center gap-1 w-fit text-xs"
-                            >
-                              <Building2 className="h-3 w-3" />
-                              {branch.name}
-                              {branch.is_primary && (
-                                <span className="text-dorado">★</span>
-                              )}
-                            </Badge>
-                          ))}
-                          {admin.branches.length > 2 && (
-                            <span className="text-xs text-tierra-media">
-                              +{admin.branches.length - 2} más
-                            </span>
-                          )}
-                        </div>
-                      ) : (
-                        <span className="text-sm text-tierra-media">
-                          Sin sucursales
-                        </span>
-                      )}
-                    </TableCell>
-
-                    <TableCell>{getStatusBadge(admin.is_active)}</TableCell>
-
-                    <TableCell>
-                      <div className="flex items-center text-sm">
-                        <Clock className="h-3 w-3 mr-1 text-tierra-media" />
-                        {formatLastActivity(admin.last_login)}
-                      </div>
-                    </TableCell>
-
-                    <TableCell>
-                      <div className="text-center">
-                        <div className="font-medium">
-                          {admin.analytics?.activityCount30Days || 0}
-                        </div>
-                        <div className="text-xs text-tierra-media">
-                          acciones
-                        </div>
-                      </div>
-                    </TableCell>
-
-                    <TableCell className="text-sm text-tierra-media">
-                      {formatDate(admin.created_at, { locale: "es-AR" })}
-                    </TableCell>
-
-                    <TableCell>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-8 w-8 p-0"
-                          >
-                            <span className="sr-only">Abrir menú</span>
-                            <MoreVertical className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuLabel>Acciones</DropdownMenuLabel>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem asChild>
-                            <Link
-                              href={`/admin/admin-users/${admin.id}`}
-                              className="flex items-center cursor-pointer"
-                            >
-                              <Eye className="mr-2 h-4 w-4" />
-                              Ver detalles
-                            </Link>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem asChild>
-                            <Link
-                              href={`/admin/admin-users/${admin.id}/edit`}
-                              className="flex items-center cursor-pointer"
-                            >
-                              <Edit className="mr-2 h-4 w-4" />
-                              Editar
-                            </Link>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => {
-                              setSelectedUserForPermissions(admin);
-                              setShowPermissionsEditor(true);
-                            }}
+                          <span className="sr-only">Abrir menú</span>
+                          <MoreVertical className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuLabel>Acciones</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem asChild>
+                          <Link
+                            href={`/admin/admin-users/${admin.id}`}
                             className="flex items-center cursor-pointer"
                           >
-                            <Shield className="mr-2 h-4 w-4" />
-                            Editar Permisos
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          {isSuperAdmin && (
-                            <DropdownMenuItem
-                              onClick={() =>
-                                handleToggleStatus(admin.id, admin.is_active)
-                              }
-                              className="flex items-center cursor-pointer"
-                            >
-                              {admin.is_active ? (
-                                <>
-                                  <AlertTriangle className="mr-2 h-4 w-4 text-red-500" />
-                                  Desactivar
-                                </>
-                              ) : (
-                                <>
-                                  <CheckCircle className="mr-2 h-4 w-4 text-green-500" />
-                                  Activar
-                                </>
-                              )}
-                            </DropdownMenuItem>
-                          )}
-                          <DropdownMenuSeparator />
+                            <Eye className="mr-2 h-4 w-4" />
+                            Ver detalles
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Link
+                            href={`/admin/admin-users/${admin.id}/edit`}
+                            className="flex items-center cursor-pointer"
+                          >
+                            <Edit className="mr-2 h-4 w-4" />
+                            Editar
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => {
+                            setSelectedUserForPermissions(admin);
+                            setShowPermissionsEditor(true);
+                          }}
+                          className="flex items-center cursor-pointer"
+                        >
+                          <Shield className="mr-2 h-4 w-4" />
+                          Editar Permisos
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        {isSuperAdmin && (
                           <DropdownMenuItem
                             onClick={() =>
-                              handleDeleteAdmin(admin.id, admin.email)
+                              handleToggleStatus(admin.id, admin.is_active)
                             }
-                            className="flex items-center cursor-pointer text-red-500 focus:text-red-500"
+                            className="flex items-center cursor-pointer"
                           >
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            Eliminar
+                            {admin.is_active ? (
+                              <>
+                                <AlertTriangle className="mr-2 h-4 w-4 text-red-500" />
+                                Desactivar
+                              </>
+                            ) : (
+                              <>
+                                <CheckCircle className="mr-2 h-4 w-4 text-green-500" />
+                                Activar
+                              </>
+                            )}
                           </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
-                ));
-              })()}
+                        )}
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem
+                          onClick={() =>
+                            handleDeleteAdmin(admin.id, admin.email)
+                          }
+                          className="flex items-center cursor-pointer text-red-500 focus:text-red-500"
+                        >
+                          <Trash2 className="mr-2 h-4 w-4" />
+                          Eliminar
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
+                </TableRow>
+              ))}
             </TableBody>
           </Table>
 
@@ -769,11 +671,11 @@ export default function AdminUsersPage() {
 
           {adminUsers.length === 0 && (
             <div className="text-center py-12">
-              <Users className="h-12 w-12 text-tierra-media mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-azul-profundo mb-2">
+              <Users className="h-12 w-12 text-admin-text-tertiary mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-epoch-primary mb-2">
                 No se encontraron administradores
               </h3>
-              <p className="text-tierra-media">
+              <p className="text-admin-text-tertiary">
                 Ajusta los filtros o crea un nuevo administrador.
               </p>
             </div>

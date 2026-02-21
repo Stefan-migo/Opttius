@@ -17,6 +17,14 @@ export type PaymentIntentResponse = {
   status: PaymentStatus;
 };
 
+/** Result of createPaymentWithToken (Bricks/embedded card flow) */
+export type CreatePaymentWithTokenResult = {
+  id: string;
+  status: PaymentStatus;
+  transaction_amount: number;
+  currency_id: string;
+};
+
 export interface IPaymentGateway {
   /**
    * Creates a payment intent and returns data for the frontend (client_secret, preferenceId, approval_url).
@@ -38,4 +46,21 @@ export interface IPaymentGateway {
    * Maps gateway status to application PaymentStatus.
    */
   mapStatus(gatewayStatus: string): PaymentStatus;
+
+  /**
+   * Optional: Creates payment with token (Bricks/embedded card flow).
+   * Only MercadoPago implements this; Flow, PayPal, NOWPayments use redirect-only.
+   */
+  createPaymentWithToken?(
+    token: string,
+    amount: number,
+    currency: string,
+    userId: string,
+    organizationId: string,
+    payerEmail: string,
+    paymentMethodId: string,
+    issuerId?: string,
+    description?: string,
+    metadata?: Record<string, unknown>,
+  ): Promise<CreatePaymentWithTokenResult>;
 }

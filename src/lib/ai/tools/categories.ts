@@ -40,6 +40,10 @@ const deleteCategorySchema = z.object({
   categoryId: z.string().uuid(),
 });
 
+const getCategoryTreeSchema = z.object({
+  activeOnly: z.boolean().default(false),
+});
+
 export const categoryTools: ToolDefinition[] = [
   {
     name: "getCategories",
@@ -66,6 +70,7 @@ export const categoryTools: ToolDefinition[] = [
         page: { type: "number", description: "Page number", default: 1 },
       },
     },
+    zodSchema: getCategoriesSchema,
     execute: async (params, context): Promise<ToolResult> => {
       try {
         const validated = getCategoriesSchema.parse(params);
@@ -132,6 +137,7 @@ export const categoryTools: ToolDefinition[] = [
       },
       required: ["categoryId"],
     },
+    zodSchema: getCategoryByIdSchema,
     execute: async (params, context): Promise<ToolResult> => {
       try {
         const validated = getCategoryByIdSchema.parse(params);
@@ -229,6 +235,7 @@ export const categoryTools: ToolDefinition[] = [
       },
       required: ["name"],
     },
+    zodSchema: createCategorySchema,
     execute: async (params, context): Promise<ToolResult> => {
       try {
         const validated = createCategorySchema.parse(params);
@@ -335,6 +342,7 @@ export const categoryTools: ToolDefinition[] = [
       },
       required: ["categoryId", "updates"],
     },
+    zodSchema: updateCategorySchema,
     execute: async (params, context): Promise<ToolResult> => {
       try {
         const validated = updateCategorySchema.parse(params);
@@ -402,6 +410,7 @@ export const categoryTools: ToolDefinition[] = [
       },
       required: ["categoryId"],
     },
+    zodSchema: deleteCategorySchema,
     execute: async (params, context): Promise<ToolResult> => {
       try {
         const validated = deleteCategorySchema.parse(params);
@@ -475,10 +484,12 @@ export const categoryTools: ToolDefinition[] = [
         },
       },
     },
+    zodSchema: getCategoryTreeSchema,
     execute: async (params, context): Promise<ToolResult> => {
       try {
+        const validated = getCategoryTreeSchema.parse(params);
         const { supabase, organizationId } = context;
-        const activeOnly = params?.activeOnly ?? false;
+        const activeOnly = validated.activeOnly;
 
         if (!organizationId) {
           return {

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -90,6 +90,9 @@ interface Organization {
 
 export default function SubscriptionsPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const orgIdFromUrl = searchParams.get("organization_id") || "";
+
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [loading, setLoading] = useState(true);
@@ -99,8 +102,10 @@ export default function SubscriptionsPage() {
   const [cancelConfirmId, setCancelConfirmId] = useState<string | null>(null);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
-  // Filtros
-  const [organizationFilter, setOrganizationFilter] = useState("all");
+  // Filtros - organization_id from URL pre-filters when navigating from org detail
+  const [organizationFilter, setOrganizationFilter] = useState(
+    orgIdFromUrl || "all",
+  );
   const [statusFilter, setStatusFilter] = useState("all");
   const [tierFilter, setTierFilter] = useState("all");
 
@@ -119,6 +124,13 @@ export default function SubscriptionsPage() {
   // Eliminar
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
+
+  // Sync organization filter when URL param changes (e.g. from org detail "Gestionar suscripciones")
+  useEffect(() => {
+    if (orgIdFromUrl && organizationFilter !== orgIdFromUrl) {
+      setOrganizationFilter(orgIdFromUrl);
+    }
+  }, [orgIdFromUrl]);
 
   useEffect(() => {
     fetchOrganizations();
@@ -357,10 +369,10 @@ export default function SubscriptionsPage() {
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div>
-            <h1 className="text-3xl font-bold text-azul-profundo">
+            <h1 className="text-3xl font-display font-bold text-epoch-primary tracking-tight">
               Gestión de Suscripciones
             </h1>
-            <p className="text-tierra-media mt-2">
+            <p className="text-admin-text-tertiary mt-2">
               Administra todas las suscripciones del sistema
             </p>
           </div>
@@ -384,7 +396,7 @@ export default function SubscriptionsPage() {
               <div className="space-y-2">
                 <Label>Organización</Label>
                 <Select value={createOrgId} onValueChange={setCreateOrgId}>
-                  <SelectTrigger>
+                  <SelectTrigger className="rounded-none">
                     <SelectValue placeholder="Selecciona organización" />
                   </SelectTrigger>
                   <SelectContent>
@@ -399,7 +411,7 @@ export default function SubscriptionsPage() {
               <div className="space-y-2">
                 <Label>Estado</Label>
                 <Select value={createStatus} onValueChange={setCreateStatus}>
-                  <SelectTrigger>
+                  <SelectTrigger className="rounded-none">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -439,7 +451,7 @@ export default function SubscriptionsPage() {
 
       {/* Alertas */}
       {subscriptions.some((sub) => sub.isExpiringSoon || sub.isExpired) && (
-        <Card className="border-yellow-200 bg-yellow-50">
+        <Card className="admin-card rounded-none border-yellow-200 bg-yellow-50">
           <CardContent className="pt-6">
             <div className="flex items-center gap-2">
               <AlertTriangle className="h-5 w-5 text-yellow-600" />
@@ -453,14 +465,14 @@ export default function SubscriptionsPage() {
       )}
 
       {/* Filtros */}
-      <Card>
+      <Card className="admin-card rounded-none">
         <CardContent className="pt-6">
           <div className="flex flex-col md:flex-row gap-4">
             <Select
               value={organizationFilter}
               onValueChange={setOrganizationFilter}
             >
-              <SelectTrigger className="w-[200px]">
+              <SelectTrigger className="rounded-none w-[200px]">
                 <SelectValue placeholder="Filtrar por organización" />
               </SelectTrigger>
               <SelectContent>
@@ -473,7 +485,7 @@ export default function SubscriptionsPage() {
               </SelectContent>
             </Select>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-[180px]">
+              <SelectTrigger className="rounded-none w-[180px]">
                 <SelectValue placeholder="Filtrar por estado" />
               </SelectTrigger>
               <SelectContent>
@@ -486,7 +498,7 @@ export default function SubscriptionsPage() {
               </SelectContent>
             </Select>
             <Select value={tierFilter} onValueChange={setTierFilter}>
-              <SelectTrigger className="w-[180px]">
+              <SelectTrigger className="rounded-none w-[180px]">
                 <SelectValue placeholder="Filtrar por tier" />
               </SelectTrigger>
               <SelectContent>
@@ -501,7 +513,7 @@ export default function SubscriptionsPage() {
       </Card>
 
       {/* Tabla de suscripciones */}
-      <Card>
+      <Card className="admin-card rounded-none">
         <CardHeader>
           <CardTitle>Suscripciones ({totalCount})</CardTitle>
         </CardHeader>
@@ -589,9 +601,11 @@ export default function SubscriptionsPage() {
                                 : ""
                             }
                           >
-                            {sub.daysUntilExpiry != null && sub.daysUntilExpiry > 0
+                            {sub.daysUntilExpiry != null &&
+                            sub.daysUntilExpiry > 0
                               ? `${sub.daysUntilExpiry} días`
-                              : sub.daysUntilExpiry != null && sub.daysUntilExpiry === 0
+                              : sub.daysUntilExpiry != null &&
+                                  sub.daysUntilExpiry === 0
                                 ? "Hoy"
                                 : sub.daysUntilExpiry != null
                                   ? `Vencida hace ${Math.abs(sub.daysUntilExpiry)} días`

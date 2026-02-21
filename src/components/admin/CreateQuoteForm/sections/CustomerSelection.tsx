@@ -66,7 +66,7 @@ export function CustomerSelection({
               <div className="font-medium">
                 {selectedCustomer.first_name} {selectedCustomer.last_name}
               </div>
-              <div className="text-sm text-tierra-media">
+              <div className="text-sm text-admin-text-tertiary">
                 {selectedCustomer.email}
               </div>
             </div>
@@ -95,7 +95,7 @@ export function CustomerSelection({
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-tierra-media" />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-admin-text-tertiary" />
           <Input
             placeholder="Buscar cliente por nombre o email..."
             value={search}
@@ -119,14 +119,14 @@ export function CustomerSelection({
                     <div className="font-medium">
                       {customer.first_name} {customer.last_name}
                     </div>
-                    <div className="text-sm text-tierra-media space-y-1">
+                    <div className="text-sm text-admin-text-tertiary space-y-1">
                       {customer.email && <div>{customer.email}</div>}
                       {customer.rut && <div>RUT: {customer.rut}</div>}
                     </div>
                   </div>
                 ))
               ) : (
-                <div className="p-4 text-center text-tierra-media">
+                <div className="p-4 text-center text-admin-text-tertiary">
                   No se encontraron clientes
                 </div>
               )}

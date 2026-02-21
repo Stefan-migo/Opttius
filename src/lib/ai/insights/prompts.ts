@@ -60,6 +60,48 @@ export function getSectionPrompt(
 }
 
 /**
+ * Daily summary prompt - Resumen ejecutivo del día anterior
+ * Used by cron to generate a highlighted "yesterday" summary
+ */
+export function getDailySummaryPrompt(
+  organizationName: string,
+  data: {
+    yesterdaySales?: number;
+    monthlyAverage?: number;
+    overdueWorkOrders?: number;
+    pendingQuotes?: number;
+  },
+  dateStr: string,
+  additionalContext?: Record<string, any>,
+): string {
+  const organizationAge = additionalContext?.organizationAge || 0;
+  const totalOrders = additionalContext?.totalOrders || 0;
+
+  return `
+Eres el Gerente General de la óptica "${organizationName}".
+
+Genera un RESUMEN EJECUTIVO del día ${dateStr} (día anterior). El usuario verá este resumen al abrir la app.
+
+Métricas del día ${dateStr}:
+- Ventas: ${data.yesterdaySales ?? 0}
+- Promedio mensual de referencia: ${data.monthlyAverage ?? 0}
+- Trabajos atrasados: ${data.overdueWorkOrders || 0}
+- Presupuestos pendientes: ${data.pendingQuotes || 0}
+- Edad de la óptica: ${organizationAge} días
+- Total órdenes históricas: ${totalOrders}
+
+Genera 1-3 insights que formen un resumen ejecutivo coherente:
+1. Resumen de ventas del día (si hubo o no)
+2. Alertas si hay trabajos atrasados o presupuestos pendientes
+3. Sugerencia para el día de hoy
+
+Prioridad: 6-8
+Tipos: 'info', 'opportunity' o 'warning' según corresponda
+Rutas: /admin/work-orders, /admin/quotes, /admin/analytics
+`;
+}
+
+/**
  * Dashboard prompt - El Gerente General
  * Trigger: Cron Job diario a las 8:00 AM
  */

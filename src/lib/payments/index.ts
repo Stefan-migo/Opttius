@@ -35,3 +35,8 @@ export class PaymentGatewayFactory {
 
 export type { IPaymentGateway, PaymentIntentResponse } from "./interfaces";
 export { PaymentService } from "./services/payment-service";
+export {
+  PAYMENT_METHOD_MAP,
+  PAYMENT_METHODS_ORDER_PAYMENTS,
+  type OrderPaymentMethod,
+} from "./constants";

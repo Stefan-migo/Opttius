@@ -30,6 +30,11 @@ import {
   ExternalLink,
 } from "lucide-react";
 import { toast } from "sonner";
+import {
+  NOTIFICATION_TYPE_LABELS,
+  PRIORITY_LABELS,
+  PRIORITY_BADGE_COLORS,
+} from "@/lib/notifications/constants";
 
 interface NotificationSetting {
   id: string;
@@ -43,45 +48,6 @@ interface NotificationSetting {
   updated_at: string;
 }
 
-const notificationTypeLabels: Record<string, string> = {
-  quote_new: "Nuevo Presupuesto",
-  quote_status_change: "Cambio de Estado de Presupuesto",
-  quote_converted: "Presupuesto Convertido",
-  work_order_new: "Nuevo Trabajo",
-  work_order_status_change: "Cambio de Estado de Trabajo",
-  work_order_completed: "Trabajo Completado",
-  new_customer: "Nuevo Cliente",
-  sale_new: "Nueva Venta",
-  appointment_new: "Nueva Cita",
-  appointment_cancelled: "Cita Cancelada",
-  order_new: "Nuevo Pedido",
-  order_status_change: "Cambio de Estado de Pedido",
-  low_stock: "Stock Bajo",
-  out_of_stock: "Producto Agotado",
-  payment_received: "Pago Recibido",
-  payment_failed: "Pago Fallido",
-  support_ticket_new: "Nuevo Ticket de Soporte",
-  support_ticket_update: "Actualización de Ticket",
-  system_alert: "Alerta del Sistema",
-  system_update: "Actualización del Sistema",
-  security_alert: "Alerta de Seguridad",
-  custom: "Personalizada",
-};
-
-const priorityLabels: Record<string, string> = {
-  low: "Baja",
-  medium: "Media",
-  high: "Alta",
-  urgent: "Urgente",
-};
-
-const priorityColors: Record<string, string> = {
-  low: "bg-gray-500",
-  medium: "bg-blue-500",
-  high: "bg-orange-500",
-  urgent: "bg-red-500",
-};
-
 interface NotificationSettingsProps {
   branchId?: string | null;
   organizationId?: string | null;
@@ -91,6 +57,15 @@ interface NotificationSettingsProps {
   hasMultipleBranches?: boolean;
 }
 
+/**
+ * Configuración de notificaciones por tipo (quote_new, work_order_new, low_stock, etc.).
+ * Soporta scope org o branch. Usa /api/admin/notifications/settings.
+ *
+ * @param props.branchId - Scope branch (opcional)
+ * @param props.organizationId - Scope org
+ * @param props.configScope - "global" (org) o "branch"
+ * @param props.onConfigScopeChange - Callback al cambiar scope
+ */
 export default function NotificationSettings({
   branchId,
   organizationId,
@@ -249,7 +224,7 @@ export default function NotificationSettings({
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <RefreshCw className="h-6 w-6 animate-spin text-tierra-media" />
+        <RefreshCw className="h-6 w-6 animate-spin text-admin-text-tertiary" />
       </div>
     );
   }
@@ -474,13 +449,17 @@ export default function NotificationSettings({
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
                           <Label className="font-medium">
-                            {notificationTypeLabels[
+                            {NOTIFICATION_TYPE_LABELS[
                               setting.notification_type
                             ] || setting.notification_type}
                           </Label>
                           {setting.priority && (
-                            <Badge className={priorityColors[setting.priority]}>
-                              {priorityLabels[setting.priority]}
+                            <Badge
+                              className={
+                                PRIORITY_BADGE_COLORS[setting.priority]
+                              }
+                            >
+                              {PRIORITY_LABELS[setting.priority]}
                             </Badge>
                           )}
                           {setting.enabled ? (
@@ -544,13 +523,17 @@ export default function NotificationSettings({
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
                           <Label className="font-medium">
-                            {notificationTypeLabels[
+                            {NOTIFICATION_TYPE_LABELS[
                               setting.notification_type
                             ] || setting.notification_type}
                           </Label>
                           {setting.priority && (
-                            <Badge className={priorityColors[setting.priority]}>
-                              {priorityLabels[setting.priority]}
+                            <Badge
+                              className={
+                                PRIORITY_BADGE_COLORS[setting.priority]
+                              }
+                            >
+                              {PRIORITY_LABELS[setting.priority]}
                             </Badge>
                           )}
                           {setting.enabled ? (
@@ -614,13 +597,17 @@ export default function NotificationSettings({
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
                           <Label className="font-medium">
-                            {notificationTypeLabels[
+                            {NOTIFICATION_TYPE_LABELS[
                               setting.notification_type
                             ] || setting.notification_type}
                           </Label>
                           {setting.priority && (
-                            <Badge className={priorityColors[setting.priority]}>
-                              {priorityLabels[setting.priority]}
+                            <Badge
+                              className={
+                                PRIORITY_BADGE_COLORS[setting.priority]
+                              }
+                            >
+                              {PRIORITY_LABELS[setting.priority]}
                             </Badge>
                           )}
                           {setting.enabled ? (

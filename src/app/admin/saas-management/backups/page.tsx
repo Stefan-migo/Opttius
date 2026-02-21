@@ -10,6 +10,14 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
   Database,
   Download,
   Trash2,
@@ -38,6 +46,9 @@ export default function SaasBackupsPage() {
   const [backups, setBackups] = useState<BackupFile[]>([]);
   const [loading, setLoading] = useState(true);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [createBackupConfirmOpen, setCreateBackupConfirmOpen] = useState(false);
+  const [deleteBackupConfirmFileName, setDeleteBackupConfirmFileName] =
+    useState<string | null>(null);
 
   const fetchBackups = async () => {
     try {
@@ -61,11 +72,6 @@ export default function SaasBackupsPage() {
   }, []);
 
   const handleCreateBackup = async () => {
-    const confirm = window.confirm(
-      "¿Confirmar generación de backup integral? Este proceso captura el 100% de la base de datos y podría tomar unos segundos dependiendo del volumen de datos.",
-    );
-    if (!confirm) return;
-
     setIsGenerating(true);
     const toastId = toast.loading("Generando volcado SQL completo...");
 
@@ -85,26 +91,23 @@ export default function SaasBackupsPage() {
       toast.error(err.message, { id: toastId });
     } finally {
       setIsGenerating(false);
+      setCreateBackupConfirmOpen(false);
     }
   };
 
-  const handleDeleteBackup = async (fileName: string) => {
-    if (
-      !window.confirm(
-        "¿Estás seguro de eliminar este backup? Esta acción es irreversible.",
-      )
-    )
-      return;
+  const handleDeleteBackup = async () => {
+    if (!deleteBackupConfirmFileName) return;
 
     try {
       const response = await fetch(
-        `/api/admin/saas-management/backups?fileName=${fileName}`,
+        `/api/admin/saas-management/backups?fileName=${deleteBackupConfirmFileName}`,
         { method: "DELETE" },
       );
       const data = await response.json();
 
       if (data.success) {
         toast.success("Backup eliminado");
+        setDeleteBackupConfirmFileName(null);
         fetchBackups();
       } else {
         toast.error(data.error || "Error al eliminar");
@@ -147,11 +150,11 @@ export default function SaasBackupsPage() {
     <div className="p-6 space-y-6">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-azul-profundo flex items-center gap-2">
+          <h1 className="text-3xl font-display font-bold text-epoch-primary tracking-tight flex items-center gap-2">
             <ShieldAlert className="h-8 w-8 text-blue-600" />
             Gestión de Backups Integrales SaaS
           </h1>
-          <p className="text-tierra-media mt-2">
+          <p className="text-muted-foreground mt-2">
             Panel central de recuperación ante desastres y respaldos de nivel
             servidor
           </p>
@@ -163,7 +166,10 @@ export default function SaasBackupsPage() {
             />
             Actualizar
           </Button>
-          <Button onClick={handleCreateBackup} disabled={isGenerating}>
+          <Button
+            onClick={() => setCreateBackupConfirmOpen(true)}
+            disabled={isGenerating}
+          >
             {isGenerating ? (
               <Loader2 className="h-4 w-4 mr-2 animate-spin" />
             ) : (
@@ -176,7 +182,7 @@ export default function SaasBackupsPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Panel de Estadísticas/Estado */}
-        <Card className="lg:col-span-1">
+        <Card className="admin-card rounded-none lg:col-span-1">
           <CardHeader>
             <CardTitle className="text-lg">Estado de Seguridad</CardTitle>
           </CardHeader>
@@ -221,7 +227,7 @@ export default function SaasBackupsPage() {
         </Card>
 
         {/* Lista de Backups */}
-        <Card className="lg:col-span-2">
+        <Card className="admin-card rounded-none lg:col-span-2">
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
               <FileText className="h-5 w-5" />
@@ -286,7 +292,9 @@ export default function SaasBackupsPage() {
                         variant="ghost"
                         size="icon"
                         className="text-red-500 hover:text-red-600 hover:bg-red-50"
-                        onClick={() => handleDeleteBackup(backup.name)}
+                        onClick={() =>
+                          setDeleteBackupConfirmFileName(backup.name)
+                        }
                         title="Eliminar permanentemente"
                       >
                         <Trash2 className="h-4 w-4" />
@@ -299,6 +307,74 @@ export default function SaasBackupsPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Create Backup Confirmation Dialog */}
+      <Dialog
+        open={createBackupConfirmOpen}
+        onOpenChange={setCreateBackupConfirmOpen}
+      >
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Database className="h-5 w-5" />
+              Generar backup integral
+            </DialogTitle>
+            <DialogDescription>
+              ¿Confirmar generación de backup integral? Este proceso captura el
+              100% de la base de datos y podría tomar unos segundos dependiendo
+              del volumen de datos.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setCreateBackupConfirmOpen(false)}
+            >
+              Cancelar
+            </Button>
+            <Button onClick={handleCreateBackup} disabled={isGenerating}>
+              {isGenerating ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Generando...
+                </>
+              ) : (
+                "Confirmar"
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Backup Confirmation Dialog */}
+      <Dialog
+        open={deleteBackupConfirmFileName !== null}
+        onOpenChange={(open) => !open && setDeleteBackupConfirmFileName(null)}
+      >
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-red-500" />
+              Eliminar backup
+            </DialogTitle>
+            <DialogDescription>
+              ¿Estás seguro de eliminar este backup? Esta acción es
+              irreversible.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setDeleteBackupConfirmFileName(null)}
+            >
+              Cancelar
+            </Button>
+            <Button variant="destructive" onClick={handleDeleteBackup}>
+              Eliminar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

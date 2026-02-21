@@ -132,7 +132,7 @@ export default function PaymentGatewaysPage() {
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div>
-            <h1 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+            <h1 className="text-3xl font-display font-bold text-epoch-primary tracking-tight">
               Gestión de Pasarelas
             </h1>
             <p className="text-slate-500 font-medium">
@@ -179,7 +179,7 @@ export default function PaymentGatewaysPage() {
             <Card
               key={gateway.id}
               className={cn(
-                "relative overflow-hidden rounded-3xl border-2 transition-all duration-300",
+                "admin-card relative overflow-hidden rounded-none border-2 transition-all duration-300",
                 gateway.is_enabled
                   ? gatewayColors[gateway.gateway_id]
                   : "border-slate-100 bg-slate-50/50 opacity-80",

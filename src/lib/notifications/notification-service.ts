@@ -422,6 +422,34 @@ export class NotificationService {
   }
 
   /**
+   * Create notification for cancelled appointment (branchId scopes to óptica)
+   */
+  static async notifyAppointmentCancelled(
+    appointmentId: string,
+    customerName: string,
+    appointmentDate: string,
+    appointmentTime: string,
+    branchId?: string | null,
+  ): Promise<void> {
+    await this.createNotification({
+      type: "appointment_cancelled",
+      priority: "medium",
+      title: "Cita Cancelada",
+      message: `Cita de ${customerName} del ${appointmentDate} a las ${appointmentTime} fue cancelada`,
+      relatedEntityType: "appointment",
+      relatedEntityId: appointmentId,
+      actionUrl: "/admin/appointments",
+      actionLabel: "Ver Citas",
+      metadata: {
+        customer_name: customerName,
+        appointment_date: appointmentDate,
+        appointment_time: appointmentTime,
+      },
+      branchId: branchId ?? null,
+    });
+  }
+
+  /**
    * Create notification for new appointment (branchId scopes to óptica)
    */
   static async notifyNewAppointment(

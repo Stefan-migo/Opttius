@@ -258,7 +258,7 @@ export default function SubscriptionDetailsPage() {
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
           <Loader2 className="h-8 w-8 animate-spin text-blue-600 mx-auto mb-4" />
-          <p className="text-tierra-media">
+          <p className="text-admin-text-tertiary">
             Cargando detalles de la suscripción...
           </p>
         </div>
@@ -279,7 +279,9 @@ export default function SubscriptionDetailsPage() {
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div>
-            <h1 className="text-3xl font-bold text-azul-profundo">Error</h1>
+            <h1 className="text-3xl font-display font-bold text-epoch-primary tracking-tight">
+              Error
+            </h1>
           </div>
         </div>
         <Card>
@@ -307,10 +309,10 @@ export default function SubscriptionDetailsPage() {
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div>
-            <h1 className="text-3xl font-bold text-azul-profundo">
+            <h1 className="text-3xl font-display font-bold text-epoch-primary tracking-tight">
               Detalles de la Suscripción
             </h1>
-            <p className="text-tierra-media mt-2">
+            <p className="text-admin-text-tertiary mt-2">
               Información completa de la suscripción
             </p>
           </div>
@@ -376,7 +378,8 @@ export default function SubscriptionDetailsPage() {
                         : ""
                   }`}
                 >
-                  {subscription.daysUntilExpiry != null && subscription.daysUntilExpiry < 0
+                  {subscription.daysUntilExpiry != null &&
+                  subscription.daysUntilExpiry < 0
                     ? `Vencida hace ${Math.abs(subscription.daysUntilExpiry)} días`
                     : subscription.daysUntilExpiry != null
                       ? `${subscription.daysUntilExpiry} días`

@@ -141,6 +141,14 @@ export default function OrganizationDetailsPage() {
     is_active: true,
   });
 
+  // Delete confirmations (Dialog instead of window.confirm)
+  const [deleteBranchConfirmId, setDeleteBranchConfirmId] = useState<
+    string | null
+  >(null);
+  const [deleteUserConfirmId, setDeleteUserConfirmId] = useState<string | null>(
+    null,
+  );
+
   // Users CRUD
   const [users, setUsers] = useState<Array<any>>([]);
   const [showUserDialog, setShowUserDialog] = useState(false);
@@ -154,26 +162,11 @@ export default function OrganizationDetailsPage() {
     branch_id: "",
   });
 
-  // Subscriptions CRUD
-  const [subscriptions, setSubscriptions] = useState<Array<any>>([]);
-  const [showSubscriptionDialog, setShowSubscriptionDialog] = useState(false);
-  const [editingSubscription, setEditingSubscription] = useState<any>(null);
-  const [subscriptionFormData, setSubscriptionFormData] = useState({
-    status: "trialing",
-    current_period_start: "",
-    current_period_end: "",
-    stripe_subscription_id: "",
-    stripe_customer_id: "",
-    gateway_subscription_id: "",
-    gateway_customer_id: "",
-  });
-
   useEffect(() => {
     fetchOrganizationDetails();
     if (orgId) {
       fetchBranches();
       fetchUsers();
-      fetchSubscriptions();
     }
   }, [orgId]);
 
@@ -370,17 +363,16 @@ export default function OrganizationDetailsPage() {
     }
   };
 
-  const handleDeleteBranch = async (branchId: string) => {
-    if (
-      !confirm(
-        "¿Estás seguro de eliminar esta sucursal? Esta acción eliminará todos los datos relacionados.",
-      )
-    )
-      return;
+  const handleDeleteBranchClick = (branchId: string) => {
+    setDeleteBranchConfirmId(branchId);
+  };
+
+  const handleDeleteBranchConfirm = async () => {
+    if (!deleteBranchConfirmId) return;
 
     try {
       const response = await fetch(
-        `/api/admin/saas-management/organizations/${orgId}/branches/${branchId}`,
+        `/api/admin/saas-management/organizations/${orgId}/branches/${deleteBranchConfirmId}`,
         {
           method: "DELETE",
           headers: { "Content-Type": "application/json" },
@@ -393,6 +385,7 @@ export default function OrganizationDetailsPage() {
         throw new Error(data.error || "Error al eliminar sucursal");
 
       toast.success("Sucursal eliminada exitosamente");
+      setDeleteBranchConfirmId(null);
       fetchBranches();
       fetchOrganizationDetails();
     } catch (err) {
@@ -482,17 +475,16 @@ export default function OrganizationDetailsPage() {
     }
   };
 
-  const handleDeleteUser = async (userId: string) => {
-    if (
-      !confirm(
-        "¿Estás seguro de eliminar este usuario? Esta acción no se puede deshacer.",
-      )
-    )
-      return;
+  const handleDeleteUserClick = (userId: string) => {
+    setDeleteUserConfirmId(userId);
+  };
+
+  const handleDeleteUserConfirm = async () => {
+    if (!deleteUserConfirmId) return;
 
     try {
       const response = await fetch(
-        `/api/admin/saas-management/users/${userId}`,
+        `/api/admin/saas-management/users/${deleteUserConfirmId}`,
         {
           method: "DELETE",
           headers: { "Content-Type": "application/json" },
@@ -505,114 +497,8 @@ export default function OrganizationDetailsPage() {
         throw new Error(data.error || "Error al eliminar usuario");
 
       toast.success("Usuario eliminado exitosamente");
+      setDeleteUserConfirmId(null);
       fetchUsers();
-      fetchOrganizationDetails();
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Error desconocido");
-    }
-  };
-
-  // Subscriptions functions
-  const fetchSubscriptions = async () => {
-    try {
-      const response = await fetch(
-        `/api/admin/saas-management/organizations/${orgId}/subscriptions`,
-      );
-      if (!response.ok) throw new Error("Error al cargar suscripciones");
-      const data = await response.json();
-      setSubscriptions(data.subscriptions || []);
-    } catch (err) {
-      toast.error("Error al cargar suscripciones");
-    }
-  };
-
-  const handleCreateSubscription = async () => {
-    try {
-      const response = await fetch(
-        `/api/admin/saas-management/organizations/${orgId}/subscriptions`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(subscriptionFormData),
-        },
-      );
-
-      const data = await response.json();
-      if (!response.ok)
-        throw new Error(data.error || "Error al crear suscripción");
-
-      toast.success("Suscripción creada exitosamente");
-      setShowSubscriptionDialog(false);
-      setSubscriptionFormData({
-        status: "trialing",
-        current_period_start: "",
-        current_period_end: "",
-        stripe_subscription_id: "",
-        stripe_customer_id: "",
-        gateway_subscription_id: "",
-        gateway_customer_id: "",
-      });
-      fetchSubscriptions();
-      fetchOrganizationDetails();
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Error desconocido");
-    }
-  };
-
-  const handleUpdateSubscription = async () => {
-    if (!editingSubscription) return;
-    try {
-      const response = await fetch(
-        `/api/admin/saas-management/subscriptions/${editingSubscription.id}`,
-        {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(subscriptionFormData),
-        },
-      );
-
-      const data = await response.json();
-      if (!response.ok)
-        throw new Error(data.error || "Error al actualizar suscripción");
-
-      toast.success("Suscripción actualizada exitosamente");
-      setShowSubscriptionDialog(false);
-      setEditingSubscription(null);
-      setSubscriptionFormData({
-        status: "trialing",
-        current_period_start: "",
-        current_period_end: "",
-        stripe_subscription_id: "",
-        stripe_customer_id: "",
-        gateway_subscription_id: "",
-        gateway_customer_id: "",
-      });
-      fetchSubscriptions();
-      fetchOrganizationDetails();
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Error desconocido");
-    }
-  };
-
-  const handleDeleteSubscription = async (subscriptionId: string) => {
-    if (!confirm("¿Estás seguro de eliminar esta suscripción?")) return;
-
-    try {
-      const response = await fetch(
-        `/api/admin/saas-management/subscriptions/${subscriptionId}`,
-        {
-          method: "DELETE",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ confirm: true }),
-        },
-      );
-
-      const data = await response.json();
-      if (!response.ok)
-        throw new Error(data.error || "Error al eliminar suscripción");
-
-      toast.success("Suscripción eliminada exitosamente");
-      fetchSubscriptions();
       fetchOrganizationDetails();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Error desconocido");
@@ -678,7 +564,7 @@ export default function OrganizationDetailsPage() {
   if (error || !organization) {
     return (
       <div className="p-6">
-        <Card>
+        <Card className="admin-card rounded-none">
           <CardContent className="pt-6">
             <div className="text-center text-red-600">
               <p>Error: {error || "Organización no encontrada"}</p>
@@ -707,13 +593,13 @@ export default function OrganizationDetailsPage() {
           </Link>
           <div>
             <div className="flex items-center gap-3">
-              <h1 className="text-3xl font-bold text-azul-profundo">
+              <h1 className="text-3xl font-display font-bold text-epoch-primary tracking-tight">
                 {organization.name}
               </h1>
               {getStatusBadge(organization.status)}
               {getTierBadge(organization.subscription_tier)}
             </div>
-            <p className="text-tierra-media mt-1">{organization.slug}</p>
+            <p className="text-admin-text-tertiary mt-1">{organization.slug}</p>
           </div>
         </div>
         <div className="flex gap-2">
@@ -744,7 +630,7 @@ export default function OrganizationDetailsPage() {
 
       {/* Estadísticas principales */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-        <Card>
+        <Card className="admin-card rounded-none">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
               Usuarios Activos
@@ -761,7 +647,7 @@ export default function OrganizationDetailsPage() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="admin-card rounded-none">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Sucursales</CardTitle>
             <MapPin className="h-4 w-4 text-muted-foreground" />
@@ -773,7 +659,7 @@ export default function OrganizationDetailsPage() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="admin-card rounded-none">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Órdenes</CardTitle>
             <ShoppingCart className="h-4 w-4 text-muted-foreground" />
@@ -785,7 +671,7 @@ export default function OrganizationDetailsPage() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="admin-card rounded-none">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Productos</CardTitle>
             <Package className="h-4 w-4 text-muted-foreground" />
@@ -797,7 +683,7 @@ export default function OrganizationDetailsPage() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="admin-card rounded-none">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Suscripción</CardTitle>
             <Crown className="h-4 w-4 text-muted-foreground" />
@@ -812,6 +698,18 @@ export default function OrganizationDetailsPage() {
                 {formatDate(organization.subscriptions[0].current_period_end)}
               </p>
             )}
+            <Button
+              variant="outline"
+              size="sm"
+              className="mt-2"
+              onClick={() =>
+                router.push(
+                  `/admin/saas-management/subscriptions?organization_id=${orgId}`,
+                )
+              }
+            >
+              Gestionar suscripciones
+            </Button>
           </CardContent>
         </Card>
       </div>
@@ -822,7 +720,7 @@ export default function OrganizationDetailsPage() {
         onValueChange={setActiveTab}
         className="space-y-6"
       >
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="overview">
             <Building2 className="h-4 w-4 mr-2" />
             Resumen
@@ -835,17 +733,13 @@ export default function OrganizationDetailsPage() {
             <Users className="h-4 w-4 mr-2" />
             Usuarios ({users.length})
           </TabsTrigger>
-          <TabsTrigger value="subscriptions">
-            <Crown className="h-4 w-4 mr-2" />
-            Suscripciones ({subscriptions.length})
-          </TabsTrigger>
         </TabsList>
 
         {/* Tab: Resumen */}
         <TabsContent value="overview" className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Información general */}
-            <Card>
+            <Card className="admin-card rounded-none">
               <CardHeader>
                 <CardTitle>Información General</CardTitle>
               </CardHeader>
@@ -907,7 +801,7 @@ export default function OrganizationDetailsPage() {
             </Card>
 
             {/* Usuarios recientes */}
-            <Card>
+            <Card className="admin-card rounded-none">
               <CardHeader>
                 <CardTitle>Usuarios Recientes</CardTitle>
               </CardHeader>
@@ -955,7 +849,7 @@ export default function OrganizationDetailsPage() {
 
         {/* Tab: Sucursales */}
         <TabsContent value="branches" className="space-y-6">
-          <Card>
+          <Card className="admin-card rounded-none">
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle>Sucursales</CardTitle>
               <Button
@@ -1038,7 +932,7 @@ export default function OrganizationDetailsPage() {
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => handleDeleteBranch(branch.id)}
+                              onClick={() => handleDeleteBranchClick(branch.id)}
                             >
                               <Trash2 className="h-4 w-4 text-red-600" />
                             </Button>
@@ -1055,7 +949,7 @@ export default function OrganizationDetailsPage() {
 
         {/* Tab: Usuarios */}
         <TabsContent value="users" className="space-y-6">
-          <Card>
+          <Card className="admin-card rounded-none">
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle>Usuarios</CardTitle>
               <Button
@@ -1132,123 +1026,7 @@ export default function OrganizationDetailsPage() {
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => handleDeleteUser(user.id)}
-                            >
-                              <Trash2 className="h-4 w-4 text-red-600" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* Tab: Suscripciones */}
-        <TabsContent value="subscriptions" className="space-y-6">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle>Suscripciones</CardTitle>
-              <Button
-                onClick={() => {
-                  setEditingSubscription(null);
-                  setSubscriptionFormData({
-                    status: "trialing",
-                    current_period_start: "",
-                    current_period_end: "",
-                    stripe_subscription_id: "",
-                    stripe_customer_id: "",
-                    gateway_subscription_id: "",
-                    gateway_customer_id: "",
-                  });
-                  setShowSubscriptionDialog(true);
-                }}
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Nueva Suscripción
-              </Button>
-            </CardHeader>
-            <CardContent>
-              {subscriptions.length === 0 ? (
-                <p className="text-gray-500 text-center py-4">
-                  No hay suscripciones registradas
-                </p>
-              ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Estado</TableHead>
-                      <TableHead>Período Inicio</TableHead>
-                      <TableHead>Período Fin</TableHead>
-                      <TableHead>ID Suscripción</TableHead>
-                      <TableHead>Creada</TableHead>
-                      <TableHead className="text-right">Acciones</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {subscriptions.map((sub) => (
-                      <TableRow key={sub.id}>
-                        <TableCell>
-                          <Badge
-                            variant={
-                              sub.status === "active"
-                                ? "default"
-                                : sub.status === "cancelled"
-                                  ? "destructive"
-                                  : "secondary"
-                            }
-                          >
-                            {sub.status}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          {sub.current_period_start
-                            ? formatDate(sub.current_period_start)
-                            : "-"}
-                        </TableCell>
-                        <TableCell>
-                          {sub.current_period_end
-                            ? formatDate(sub.current_period_end)
-                            : "-"}
-                        </TableCell>
-                        <TableCell className="font-mono text-xs">
-                          {sub.gateway_subscription_id || "-"}
-                        </TableCell>
-                        <TableCell>{formatDate(sub.created_at)}</TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex justify-end gap-2">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => {
-                                setEditingSubscription(sub);
-                                setSubscriptionFormData({
-                                  status: sub.status,
-                                  current_period_start:
-                                    sub.current_period_start || "",
-                                  current_period_end:
-                                    sub.current_period_end || "",
-                                  stripe_subscription_id:
-                                    sub.stripe_subscription_id || "",
-                                  stripe_customer_id:
-                                    sub.stripe_customer_id || "",
-                                  gateway_subscription_id:
-                                    sub.gateway_subscription_id || "",
-                                  gateway_customer_id:
-                                    sub.gateway_customer_id || "",
-                                });
-                                setShowSubscriptionDialog(true);
-                              }}
-                            >
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleDeleteSubscription(sub.id)}
+                              onClick={() => handleDeleteUserClick(user.id)}
                             >
                               <Trash2 className="h-4 w-4 text-red-600" />
                             </Button>
@@ -1473,7 +1251,7 @@ export default function OrganizationDetailsPage() {
                   setUserFormData({ ...userFormData, role: value })
                 }
               >
-                <SelectTrigger>
+                <SelectTrigger className="rounded-none">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -1498,7 +1276,7 @@ export default function OrganizationDetailsPage() {
                     })
                   }
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="rounded-none">
                     <SelectValue placeholder="Seleccionar sucursal" />
                   </SelectTrigger>
                   <SelectContent>
@@ -1527,126 +1305,6 @@ export default function OrganizationDetailsPage() {
             </Button>
             <Button onClick={editingUser ? handleUpdateUser : handleCreateUser}>
               {editingUser ? "Guardar Cambios" : "Crear Usuario"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Dialog de creación/edición de suscripción */}
-      <Dialog
-        open={showSubscriptionDialog}
-        onOpenChange={setShowSubscriptionDialog}
-      >
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>
-              {editingSubscription ? "Editar Suscripción" : "Nueva Suscripción"}
-            </DialogTitle>
-            <DialogDescription>
-              {editingSubscription
-                ? "Modifica los datos de la suscripción"
-                : "Completa los datos para crear una nueva suscripción"}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <label className="text-sm font-medium">Estado</label>
-              <Select
-                value={subscriptionFormData.status}
-                onValueChange={(value) =>
-                  setSubscriptionFormData({
-                    ...subscriptionFormData,
-                    status: value,
-                  })
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="active">Activa</SelectItem>
-                  <SelectItem value="trialing">En Prueba</SelectItem>
-                  <SelectItem value="past_due">Vencida</SelectItem>
-                  <SelectItem value="cancelled">Cancelada</SelectItem>
-                  <SelectItem value="incomplete">Incompleta</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="text-sm font-medium">Período Inicio</label>
-                <Input
-                  type="date"
-                  value={subscriptionFormData.current_period_start}
-                  onChange={(e) =>
-                    setSubscriptionFormData({
-                      ...subscriptionFormData,
-                      current_period_start: e.target.value,
-                    })
-                  }
-                />
-              </div>
-              <div>
-                <label className="text-sm font-medium">Período Fin</label>
-                <Input
-                  type="date"
-                  value={subscriptionFormData.current_period_end}
-                  onChange={(e) =>
-                    setSubscriptionFormData({
-                      ...subscriptionFormData,
-                      current_period_end: e.target.value,
-                    })
-                  }
-                />
-              </div>
-            </div>
-            <div>
-              <label className="text-sm font-medium">
-                ID Suscripción Pasarela
-              </label>
-              <Input
-                value={subscriptionFormData.gateway_subscription_id}
-                onChange={(e) =>
-                  setSubscriptionFormData({
-                    ...subscriptionFormData,
-                    gateway_subscription_id: e.target.value,
-                  })
-                }
-                placeholder="sub_xxxxx"
-              />
-            </div>
-            <div>
-              <label className="text-sm font-medium">ID Cliente Pasarela</label>
-              <Input
-                value={subscriptionFormData.gateway_customer_id}
-                onChange={(e) =>
-                  setSubscriptionFormData({
-                    ...subscriptionFormData,
-                    gateway_customer_id: e.target.value,
-                  })
-                }
-                placeholder="cus_xxxxx"
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => {
-                setShowSubscriptionDialog(false);
-                setEditingSubscription(null);
-              }}
-            >
-              Cancelar
-            </Button>
-            <Button
-              onClick={
-                editingSubscription
-                  ? handleUpdateSubscription
-                  : handleCreateSubscription
-              }
-            >
-              {editingSubscription ? "Guardar Cambios" : "Crear Suscripción"}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -1695,7 +1353,7 @@ export default function OrganizationDetailsPage() {
                   setEditData({ ...editData, subscription_tier: value })
                 }
               >
-                <SelectTrigger>
+                <SelectTrigger className="rounded-none">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -1713,7 +1371,7 @@ export default function OrganizationDetailsPage() {
                   setEditData({ ...editData, status: value })
                 }
               >
-                <SelectTrigger>
+                <SelectTrigger className="rounded-none">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -1829,6 +1487,66 @@ export default function OrganizationDetailsPage() {
                   Sí, Eliminar Permanentemente
                 </>
               )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Branch Confirmation Dialog */}
+      <Dialog
+        open={deleteBranchConfirmId !== null}
+        onOpenChange={(open) => !open && setDeleteBranchConfirmId(null)}
+      >
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-red-500" />
+              Eliminar sucursal
+            </DialogTitle>
+            <DialogDescription>
+              ¿Estás seguro de eliminar esta sucursal? Esta acción eliminará
+              todos los datos relacionados.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setDeleteBranchConfirmId(null)}
+            >
+              Cancelar
+            </Button>
+            <Button variant="destructive" onClick={handleDeleteBranchConfirm}>
+              Eliminar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete User Confirmation Dialog */}
+      <Dialog
+        open={deleteUserConfirmId !== null}
+        onOpenChange={(open) => !open && setDeleteUserConfirmId(null)}
+      >
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-red-500" />
+              Eliminar usuario
+            </DialogTitle>
+            <DialogDescription>
+              ¿Estás seguro de eliminar este usuario? Esta acción no se puede
+              deshacer.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setDeleteUserConfirmId(null)}
+            >
+              Cancelar
+            </Button>
+            <Button variant="destructive" onClick={handleDeleteUserConfirm}>
+              Eliminar
             </Button>
           </DialogFooter>
         </DialogContent>

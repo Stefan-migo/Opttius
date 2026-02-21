@@ -3,7 +3,6 @@ import type { ToolDefinition, ToolResult } from "./types";
 
 const getCustomersSchema = z.object({
   search: z.string().optional(),
-  membershipTier: z.string().optional(),
   limit: z.number().max(100).default(20),
   page: z.number().default(1),
 });
@@ -17,13 +16,14 @@ const updateCustomerSchema = z.object({
   updates: z.object({
     first_name: z.string().optional(),
     last_name: z.string().optional(),
+    email: z.string().email().optional(),
     phone: z.string().optional(),
     address_line_1: z.string().optional(),
     city: z.string().optional(),
     state: z.string().optional(),
     postal_code: z.string().optional(),
     country: z.string().optional(),
-    membership_tier: z.string().optional(),
+    notes: z.string().optional(),
   }),
 });
 
@@ -47,20 +47,17 @@ export const customerTools: ToolDefinition[] = [
       properties: {
         search: {
           type: "string",
-          description: "Search term for name or email",
-        },
-        membershipTier: {
-          type: "string",
-          description: "Filter by membership tier",
+          description: "Search term for name, email or RUT",
         },
         limit: { type: "number", default: 20, maximum: 100 },
         page: { type: "number", default: 1 },
       },
     },
+    zodSchema: getCustomersSchema,
     execute: async (params, context): Promise<ToolResult> => {
       try {
         const validated = getCustomersSchema.parse(params);
-        const { supabase, organizationId } = context;
+        const { supabase, organizationId, currentBranchId } = context;
 
         if (!organizationId) {
           return {
@@ -69,16 +66,39 @@ export const customerTools: ToolDefinition[] = [
           };
         }
 
-        let query = supabase.from("profiles").select("*", { count: "exact" });
+        let query = supabase
+          .from("customers")
+          .select("*", { count: "exact" })
+          .eq("is_active", true);
+
+        if (currentBranchId) {
+          query = query.eq("branch_id", currentBranchId);
+        } else {
+          const { data: branches } = await supabase
+            .from("branches")
+            .select("id")
+            .eq("organization_id", organizationId);
+          const branchIds = branches?.map((b: { id: string }) => b.id) || [];
+          if (branchIds.length > 0) {
+            query = query.in("branch_id", branchIds);
+          } else {
+            return {
+              success: true,
+              data: {
+                customers: [],
+                total: 0,
+                page: validated.page,
+                limit: validated.limit,
+              },
+              message: "No customers found",
+            };
+          }
+        }
 
         if (validated.search) {
           query = query.or(
-            `first_name.ilike.%${validated.search}%,last_name.ilike.%${validated.search}%,email.ilike.%${validated.search}%`,
+            `first_name.ilike.%${validated.search}%,last_name.ilike.%${validated.search}%,email.ilike.%${validated.search}%,rut.ilike.%${validated.search}%`,
           );
-        }
-
-        if (validated.membershipTier) {
-          query = query.eq("membership_tier", validated.membershipTier);
         }
 
         const offset = (validated.page - 1) * validated.limit;
@@ -119,6 +139,7 @@ export const customerTools: ToolDefinition[] = [
       },
       required: ["customerId"],
     },
+    zodSchema: getCustomerByIdSchema,
     execute: async (params, context): Promise<ToolResult> => {
       try {
         const validated = getCustomerByIdSchema.parse(params);
@@ -132,7 +153,7 @@ export const customerTools: ToolDefinition[] = [
         }
 
         const { data, error } = await supabase
-          .from("profiles")
+          .from("customers")
           .select("*")
           .eq("id", validated.customerId)
           .single();
@@ -142,6 +163,16 @@ export const customerTools: ToolDefinition[] = [
         }
 
         if (!data) {
+          return { success: false, error: "Customer not found" };
+        }
+
+        const { data: branch } = await supabase
+          .from("branches")
+          .select("organization_id")
+          .eq("id", data.branch_id)
+          .single();
+
+        if (!branch || branch.organization_id !== organizationId) {
           return { success: false, error: "Customer not found" };
         }
 
@@ -178,12 +209,13 @@ export const customerTools: ToolDefinition[] = [
             state: { type: "string" },
             postal_code: { type: "string" },
             country: { type: "string" },
-            membership_tier: { type: "string" },
+            notes: { type: "string" },
           },
         },
       },
       required: ["customerId", "updates"],
     },
+    zodSchema: updateCustomerSchema,
     execute: async (params, context): Promise<ToolResult> => {
       try {
         const validated = updateCustomerSchema.parse(params);
@@ -196,13 +228,32 @@ export const customerTools: ToolDefinition[] = [
           };
         }
 
+        const { data: existing } = await supabase
+          .from("customers")
+          .select("branch_id")
+          .eq("id", validated.customerId)
+          .single();
+
+        if (!existing) {
+          return { success: false, error: "Customer not found" };
+        }
+
+        const { data: branch } = await supabase
+          .from("branches")
+          .select("organization_id")
+          .eq("id", existing.branch_id)
+          .single();
+
+        if (!branch || branch.organization_id !== organizationId) {
+          return { success: false, error: "Customer not found" };
+        }
+
         const { data, error } = await supabase
-          .from("profiles")
+          .from("customers")
           .update({
             ...validated.updates,
             updated_at: new Date().toISOString(),
           })
-
           .eq("id", validated.customerId)
           .select()
           .single();
@@ -236,6 +287,7 @@ export const customerTools: ToolDefinition[] = [
       },
       required: ["customerId"],
     },
+    zodSchema: getCustomerOrdersSchema,
     execute: async (params, context): Promise<ToolResult> => {
       try {
         const validated = getCustomerOrdersSchema.parse(params);
@@ -265,7 +317,7 @@ export const customerTools: ToolDefinition[] = [
             )
           `,
           )
-          .eq("user_id", validated.customerId)
+          .eq("customer_id", validated.customerId)
           .eq("organization_id", organizationId)
           .order("created_at", { ascending: false })
           .limit(validated.limit);
@@ -300,6 +352,7 @@ export const customerTools: ToolDefinition[] = [
       },
       required: ["customerId"],
     },
+    zodSchema: getCustomerStatsSchema,
     execute: async (params, context): Promise<ToolResult> => {
       try {
         const validated = getCustomerStatsSchema.parse(params);
@@ -315,7 +368,7 @@ export const customerTools: ToolDefinition[] = [
         const { data: orders, error } = await supabase
           .from("orders")
           .select("total_amount, status, payment_status, created_at")
-          .eq("user_id", validated.customerId)
+          .eq("customer_id", validated.customerId)
           .eq("organization_id", organizationId);
 
         if (error) {

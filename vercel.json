@@ -1,8 +1,8 @@
 {
   "crons": [
-    {
-      "path": "/api/cron/backups",
-      "schedule": "0 3 * * 0"
-    }
+    { "path": "/api/cron/backups", "schedule": "0 3 * * 0" },
+    { "path": "/api/cron/cleanup-notifications", "schedule": "0 4 * * *" },
+    { "path": "/api/cron/cleanup-pending-payments", "schedule": "0 2 * * *" },
+    { "path": "/api/cron/generate-insights", "schedule": "0 8 * * *" }
   ]
 }

@@ -150,7 +150,12 @@ export function ChatbotContent({
       isLoadingMessages.current = false;
       setMessages([]);
     }
-  }, [currentSession?.id, loadMessagesFromSession, isHistoryLoading, setMessages]);
+  }, [
+    currentSession?.id,
+    loadMessagesFromSession,
+    isHistoryLoading,
+    setMessages,
+  ]);
 
   const handleNewSession = async () => {
     clearSession();
@@ -305,7 +310,7 @@ export function ChatbotContent({
             </div>
           )}
           <ChatInput
-            onSend={sendMessage}
+            onSend={(msg, fileId) => sendMessage(msg, fileId)}
             disabled={isStreaming}
             placeholder={
               currentSection

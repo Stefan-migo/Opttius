@@ -82,6 +82,7 @@ export const orderTools: ToolDefinition[] = [
         offset: { type: "number", default: 0 },
       },
     },
+    zodSchema: getOrdersSchema,
     execute: async (params, context): Promise<ToolResult> => {
       try {
         const validated = getOrdersSchema.parse(params);
@@ -163,6 +164,7 @@ export const orderTools: ToolDefinition[] = [
       },
       required: ["orderId"],
     },
+    zodSchema: getOrderByIdSchema,
     execute: async (params, context): Promise<ToolResult> => {
       try {
         const validated = getOrderByIdSchema.parse(params);
@@ -240,6 +242,7 @@ export const orderTools: ToolDefinition[] = [
       },
       required: ["orderId", "status"],
     },
+    zodSchema: updateOrderStatusSchema,
     execute: async (params, context): Promise<ToolResult> => {
       try {
         const validated = updateOrderStatusSchema.parse(params);
@@ -303,6 +306,7 @@ export const orderTools: ToolDefinition[] = [
       },
       required: ["orderId", "paymentStatus"],
     },
+    zodSchema: updatePaymentStatusSchema,
     execute: async (params, context): Promise<ToolResult> => {
       try {
         const validated = updatePaymentStatusSchema.parse(params);
@@ -353,6 +357,7 @@ export const orderTools: ToolDefinition[] = [
         limit: { type: "number", default: 20 },
       },
     },
+    zodSchema: getPendingOrdersSchema,
     execute: async (params, context): Promise<ToolResult> => {
       try {
         const validated = getPendingOrdersSchema.parse(params);
@@ -409,6 +414,7 @@ export const orderTools: ToolDefinition[] = [
         },
       },
     },
+    zodSchema: getOrderStatsSchema,
     execute: async (params, context): Promise<ToolResult> => {
       try {
         const validated = getOrderStatsSchema.parse(params);

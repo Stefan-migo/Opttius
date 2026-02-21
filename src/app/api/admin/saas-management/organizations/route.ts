@@ -3,6 +3,7 @@ import { requireRoot } from "@/lib/api/root-middleware";
 import { createServiceRoleClient } from "@/utils/supabase/service-role";
 import { appLogger as logger } from "@/lib/logger";
 import { AuthorizationError } from "@/lib/api/errors";
+import { createOrganizationSchema } from "@/lib/api/validation/zod-schemas";
 import { EmailNotificationService } from "@/lib/email/notifications";
 
 /**
@@ -55,57 +56,96 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Obtener estadísticas adicionales, owner info y suscripciones para cada organización
-    const organizationsWithStats = await Promise.all(
-      (organizations || []).map(async (org) => {
-        // Contar usuarios activos
-        const { count: userCount } = await supabaseServiceRole
-          .from("admin_users")
-          .select("*", { count: "exact", head: true })
-          .eq("organization_id", org.id)
-          .eq("is_active", true);
+    // Obtener estadísticas en batch (evita N+1)
+    const orgIds = (organizations || []).map((o) => o.id);
+    const ownerIds = (organizations || [])
+      .map((o) => o.owner_id)
+      .filter(Boolean) as string[];
 
-        // Contar sucursales
-        const { count: branchCount } = await supabaseServiceRole
-          .from("branches")
-          .select("*", { count: "exact", head: true })
-          .eq("organization_id", org.id);
+    const [usersData, branchesData, ownersData, subscriptionsData] =
+      await Promise.all([
+        orgIds.length > 0
+          ? supabaseServiceRole
+              .from("admin_users")
+              .select("organization_id")
+              .in("organization_id", orgIds)
+              .eq("is_active", true)
+          : Promise.resolve({ data: [] }),
+        orgIds.length > 0
+          ? supabaseServiceRole
+              .from("branches")
+              .select("organization_id")
+              .in("organization_id", orgIds)
+          : Promise.resolve({ data: [] }),
+        ownerIds.length > 0
+          ? supabaseServiceRole
+              .from("profiles")
+              .select("id, email, first_name, last_name")
+              .in("id", ownerIds)
+          : Promise.resolve({ data: [] }),
+        orgIds.length > 0
+          ? supabaseServiceRole
+              .from("subscriptions")
+              .select(
+                "id, organization_id, status, current_period_start, current_period_end, gateway_subscription_id",
+              )
+              .in("organization_id", orgIds)
+              .eq("status", "active")
+          : Promise.resolve({ data: [] }),
+      ]);
 
-        // Obtener información del owner si existe
-        let owner = null;
-        if (org.owner_id) {
-          const { data: ownerProfile } = await supabaseServiceRole
-            .from("profiles")
-            .select("id, email, first_name, last_name")
-            .eq("id", org.owner_id)
-            .maybeSingle();
-
-          if (ownerProfile) {
-            owner = ownerProfile;
-          }
-        }
-
-        // Obtener suscripción activa
-        const { data: subscription } = await supabaseServiceRole
-          .from("subscriptions")
-          .select(
-            "id, status, current_period_start, current_period_end, gateway_subscription_id",
-          )
-          .eq("organization_id", org.id)
-          .eq("status", "active")
-          .maybeSingle();
-
-        return {
-          ...org,
-          owner,
-          subscription: subscription || null,
-          stats: {
-            activeUsers: userCount || 0,
-            branches: branchCount || 0,
-          },
-        };
-      }),
+    const userCountByOrg = (usersData.data || []).reduce(
+      (acc: Record<string, number>, row: { organization_id: string }) => {
+        acc[row.organization_id] = (acc[row.organization_id] || 0) + 1;
+        return acc;
+      },
+      {},
     );
+    const branchCountByOrg = (branchesData.data || []).reduce(
+      (acc: Record<string, number>, row: { organization_id: string }) => {
+        acc[row.organization_id] = (acc[row.organization_id] || 0) + 1;
+        return acc;
+      },
+      {},
+    );
+    type OwnerRecord = {
+      id: string;
+      email?: string;
+      first_name?: string;
+      last_name?: string;
+    };
+    const ownerById = (ownersData.data || []).reduce(
+      (acc: Record<string, OwnerRecord>, p: OwnerRecord) => {
+        acc[p.id] = p;
+        return acc;
+      },
+      {} as Record<string, OwnerRecord>,
+    );
+    type SubscriptionRecord = {
+      id: string;
+      organization_id: string;
+      status?: string;
+      current_period_start?: string;
+      current_period_end?: string;
+      gateway_subscription_id?: string | null;
+    };
+    const subscriptionByOrg = (subscriptionsData.data || []).reduce(
+      (acc: Record<string, SubscriptionRecord>, s: SubscriptionRecord) => {
+        acc[s.organization_id] = s;
+        return acc;
+      },
+      {} as Record<string, SubscriptionRecord>,
+    );
+
+    const organizationsWithStats = (organizations || []).map((org) => ({
+      ...org,
+      owner: org.owner_id ? ownerById[org.owner_id] || null : null,
+      subscription: subscriptionByOrg[org.id] || null,
+      stats: {
+        activeUsers: userCountByOrg[org.id] || 0,
+        branches: branchCountByOrg[org.id] || 0,
+      },
+    }));
 
     return NextResponse.json({
       organizations: organizationsWithStats,
@@ -138,34 +178,16 @@ export async function POST(request: NextRequest) {
     const supabaseServiceRole = createServiceRoleClient();
 
     const body = await request.json();
-    const {
-      name,
-      slug,
-      owner_id,
-      subscription_tier = "basic",
-      status = "active",
-      metadata = {},
-    } = body;
-
-    // Validaciones
-    if (!name || !slug) {
+    const parseResult = createOrganizationSchema.safeParse(body);
+    if (!parseResult.success) {
+      const firstError = parseResult.error.errors[0];
       return NextResponse.json(
-        { error: "Nombre y slug son requeridos" },
+        { error: firstError?.message || "Datos inválidos" },
         { status: 400 },
       );
     }
-
-    // Validar formato de slug
-    const slugRegex = /^[a-z0-9-]+$/;
-    if (!slugRegex.test(slug)) {
-      return NextResponse.json(
-        {
-          error:
-            "El slug solo puede contener letras minúsculas, números y guiones",
-        },
-        { status: 400 },
-      );
-    }
+    const { name, slug, owner_id, subscription_tier, status, metadata } =
+      parseResult.data;
 
     // Verificar que el slug no existe
     const { data: existingOrg } = await supabaseServiceRole
@@ -177,22 +199,6 @@ export async function POST(request: NextRequest) {
     if (existingOrg) {
       return NextResponse.json(
         { error: "El slug ya está en uso" },
-        { status: 400 },
-      );
-    }
-
-    // Validar tier
-    if (!["basic", "pro", "premium"].includes(subscription_tier)) {
-      return NextResponse.json(
-        { error: "Tier inválido. Debe ser: basic, pro, o premium" },
-        { status: 400 },
-      );
-    }
-
-    // Validar status
-    if (!["active", "suspended", "cancelled"].includes(status)) {
-      return NextResponse.json(
-        { error: "Status inválido. Debe ser: active, suspended, o cancelled" },
         { status: 400 },
       );
     }

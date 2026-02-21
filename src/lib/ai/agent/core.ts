@@ -12,7 +12,12 @@ import type {
 import type { ToolExecutionContext } from "../tools/types";
 import type { MemoryManager } from "../memory";
 import type { OrganizationalMemory } from "../memory/organizational";
-import { getKnowledgeBase, type KnowledgeContext } from "../knowledge/base/knowledge-manager";
+import {
+  getKnowledgeBase,
+  type KnowledgeContext,
+} from "../knowledge/base/knowledge-manager";
+import { logAIUsage } from "../usage-logger";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 export interface AgentConfig {
   systemPrompt?: string;
@@ -40,6 +45,8 @@ export interface AgentOptions {
     isSuperAdmin?: boolean;
     name?: string;
   };
+  /** Optional: for AI usage logging (cost tracking) */
+  supabase?: SupabaseClient;
 }
 
 export class Agent {
@@ -63,6 +70,7 @@ export class Agent {
         name?: string;
       }
     | undefined;
+  private supabaseForUsageLog: SupabaseClient | undefined;
 
   constructor(options: AgentOptions) {
     this.userId = options.userId;
@@ -75,6 +83,7 @@ export class Agent {
     this.organizationId = options.organizationId || options.userId;
     this.currentBranchId = options.currentBranchId;
     this.userData = options.userData;
+    this.supabaseForUsageLog = options.supabase;
     this.knowledgeBaseEnabled = options.config?.enableKnowledgeBase ?? true;
   }
 
@@ -358,31 +367,31 @@ INSTRUCCIONES:
   private async getKnowledgeBaseContext(): Promise<string | null> {
     try {
       const knowledgeBase = getKnowledgeBase();
-      
+
       // Get the last user message to understand context
       const lastUserMessage = this.messages
         .slice()
         .reverse()
-        .find(msg => msg.role === "user");
-      
+        .find((msg) => msg.role === "user");
+
       if (!lastUserMessage) return null;
-      
+
       // Create knowledge context based on user role and recent conversation
       const knowledgeContext: KnowledgeContext = {
         userId: this.userId,
         organizationId: this.organizationId,
         userRole: this.userData?.role,
-        recentActions: this.extractRecentActions()
+        recentActions: this.extractRecentActions(),
       };
-      
+
       // Search for relevant knowledge
       const results = await knowledgeBase.searchKnowledge(
         lastUserMessage.content,
-        knowledgeContext
+        knowledgeContext,
       );
-      
+
       if (results.length === 0) return null;
-      
+
       // Format the most relevant knowledge into context
       const topResult = results[0];
       const contextSections = [
@@ -393,14 +402,17 @@ INSTRUCCIONES:
         ``,
         `Key Information:`,
         this.extractKeyInformation(topResult.document.content),
-        `========================`
+        `========================`,
       ];
-      
-      console.log(`Knowledge base context injected for query: "${lastUserMessage.content}"`);
-      console.log(`Top result: ${topResult.document.title} (${(topResult.similarity * 100).toFixed(1)}% confidence)`);
-      
+
+      console.log(
+        `Knowledge base context injected for query: "${lastUserMessage.content}"`,
+      );
+      console.log(
+        `Top result: ${topResult.document.title} (${(topResult.similarity * 100).toFixed(1)}% confidence)`,
+      );
+
       return contextSections.join("\n");
-      
     } catch (error) {
       console.error("Failed to get knowledge base context:", error);
       return null;
@@ -413,16 +425,29 @@ INSTRUCCIONES:
   private extractRecentActions(): string[] {
     const actions: string[] = [];
     const recentMessages = this.messages.slice(-10); // Last 10 messages
-    
+
     for (const message of recentMessages) {
       if (message.role === "user") {
         // Extract action verbs and key terms
         const actionWords = [
-          "create", "add", "delete", "update", "configure", "setup",
-          "install", "activate", "deactivate", "enable", "disable",
-          "schedule", "cancel", "modify", "change", "adjust"
+          "create",
+          "add",
+          "delete",
+          "update",
+          "configure",
+          "setup",
+          "install",
+          "activate",
+          "deactivate",
+          "enable",
+          "disable",
+          "schedule",
+          "cancel",
+          "modify",
+          "change",
+          "adjust",
         ];
-        
+
         const messageLower = message.content.toLowerCase();
         for (const action of actionWords) {
           if (messageLower.includes(action)) {
@@ -431,7 +456,7 @@ INSTRUCCIONES:
         }
       }
     }
-    
+
     return [...new Set(actions)]; // Remove duplicates
   }
 
@@ -443,33 +468,34 @@ INSTRUCCIONES:
     const keySections = [
       "## Overview",
       "## Key Workflows",
-      "## Configuration Options", 
+      "## Configuration Options",
       "## Troubleshooting",
       "## Steps:",
-      "**Steps:**"
+      "**Steps:**",
     ];
-    
+
     let extracted = "";
-    
+
     for (const section of keySections) {
       const sectionIndex = content.indexOf(section);
       if (sectionIndex !== -1) {
         // Extract the section content (up to next ## header or end)
         const sectionContent = content.substring(sectionIndex);
         const nextHeader = sectionContent.indexOf("\n## ", 3);
-        const relevantContent = nextHeader !== -1 
-          ? sectionContent.substring(0, nextHeader)
-          : sectionContent.substring(0, 500); // Limit length
-        
+        const relevantContent =
+          nextHeader !== -1
+            ? sectionContent.substring(0, nextHeader)
+            : sectionContent.substring(0, 500); // Limit length
+
         extracted += `${relevantContent}\n\n`;
       }
     }
-    
+
     // If no specific sections found, return first part of content
     if (!extracted) {
       extracted = content.substring(0, 300) + "...";
     }
-    
+
     return extracted.trim();
   }
 
@@ -599,8 +625,10 @@ INSTRUCCIONES:
 
           let assistantMessage = "";
           const collectedToolCallsMap = new Map<string, ToolCall>();
+          let lastChunk: LLMStreamChunk | null = null;
 
           for await (const chunk of stream) {
+            lastChunk = chunk;
             if (chunk.content) {
               assistantMessage += chunk.content;
               yield chunk;
@@ -641,6 +669,23 @@ INSTRUCCIONES:
               }
             }
             if (chunk.done) break;
+          }
+
+          if (
+            this.supabaseForUsageLog &&
+            this.organizationId &&
+            lastChunk?.usage &&
+            (lastChunk.usage.promptTokens > 0 ||
+              lastChunk.usage.completionTokens > 0)
+          ) {
+            logAIUsage(this.supabaseForUsageLog, {
+              organizationId: this.organizationId,
+              provider: providerInstance.name,
+              model: llmConfig.model || "unknown",
+              promptTokens: lastChunk.usage.promptTokens,
+              completionTokens: lastChunk.usage.completionTokens,
+              endpoint: "chat",
+            });
           }
 
           // Convert map to array

@@ -117,11 +117,11 @@ export default function AvatarUpload({
       {/* Main Avatar Container */}
       <div
         className={`
-          ${config.container} rounded-full bg-dorado/20 flex items-center justify-center mx-auto relative overflow-hidden
+          ${config.container} rounded-full bg-epoch-accent/20 flex items-center justify-center mx-auto relative overflow-hidden
           ${isEditing ? "cursor-pointer border-2 border-dashed" : ""}
-          ${isDragOver ? "border-dorado bg-dorado/10" : "border-transparent"}
+          ${isDragOver ? "border-epoch-accent bg-epoch-accent/10" : "border-transparent"}
           ${hasError ? "border-red-500" : ""}
-          ${isSuccess ? "border-verde-suave" : ""}
+          ${isSuccess ? "border-admin-success" : ""}
         `}
         onDrop={isEditing ? handleDrop : undefined}
         onDragOver={isEditing ? handleDragOver : undefined}
@@ -137,7 +137,7 @@ export default function AvatarUpload({
 
         {/* Success overlay */}
         {isSuccess && (
-          <div className="absolute inset-0 bg-verde-suave/80 flex items-center justify-center z-10 animate-pulse">
+          <div className="absolute inset-0 bg-admin-success/80 flex items-center justify-center z-10 animate-pulse">
             <Check className="h-6 w-6 text-white" />
           </div>
         )}
@@ -151,14 +151,14 @@ export default function AvatarUpload({
           />
         ) : (
           <User
-            className={`${size === "sm" ? "h-8 w-8" : size === "md" ? "h-12 w-12" : "h-16 w-16"} text-azul-profundo`}
+            className={`${size === "sm" ? "h-8 w-8" : size === "md" ? "h-12 w-12" : "h-16 w-16"} text-epoch-primary`}
           />
         )}
 
         {/* Upload hint for drag and drop */}
         {isEditing && isDragOver && (
-          <div className="absolute inset-0 bg-dorado/20 flex items-center justify-center">
-            <Upload className="h-6 w-6 text-azul-profundo" />
+          <div className="absolute inset-0 bg-epoch-accent/20 flex items-center justify-center">
+            <Upload className="h-6 w-6 text-epoch-primary" />
           </div>
         )}
       </div>
@@ -170,17 +170,17 @@ export default function AvatarUpload({
           variant="secondary"
           className={`
             absolute bottom-0 right-0 rounded-full ${config.button} 
-            bg-dorado hover:bg-dorado/90 disabled:opacity-50
+            bg-epoch-accent hover:bg-epoch-accent/90 disabled:opacity-50
           `}
           onClick={triggerFileInput}
           disabled={isUploading}
         >
           {isUploading ? (
             <Loader2
-              className={`${config.icon} animate-spin text-azul-profundo`}
+              className={`${config.icon} animate-spin text-epoch-primary`}
             />
           ) : (
-            <Camera className={`${config.icon} text-azul-profundo`} />
+            <Camera className={`${config.icon} text-epoch-primary`} />
           )}
         </Button>
       )}
@@ -198,7 +198,7 @@ export default function AvatarUpload({
       {isUploading && (
         <div className="mt-2">
           <Progress value={uploadState.progress} className="h-2" />
-          <p className="text-xs text-tierra-media text-center mt-1">
+          <p className="text-xs text-muted-foreground text-center mt-1">
             Subiendo... {uploadState.progress}%
           </p>
         </div>
@@ -216,10 +216,10 @@ export default function AvatarUpload({
       {/* Upload Instructions (when editing) */}
       {isEditing && !isUploading && !hasError && !currentImage && (
         <div className="text-center mt-2">
-          <p className="text-xs text-tierra-media">
+          <p className="text-xs text-muted-foreground">
             Haz clic o arrastra una imagen
           </p>
-          <p className="text-xs text-tierra-media/70">
+          <p className="text-xs text-muted-foreground/70">
             JPG, PNG, GIF, WebP (máx. 5MB)
           </p>
         </div>

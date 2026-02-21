@@ -1438,7 +1438,7 @@ export default function CreateQuoteForm({
                 <div className="font-medium">
                   {selectedCustomer.first_name} {selectedCustomer.last_name}
                 </div>
-                <div className="text-sm text-tierra-media">
+                <div className="text-sm text-admin-text-tertiary">
                   {selectedCustomer.email}
                 </div>
               </div>
@@ -1457,7 +1457,7 @@ export default function CreateQuoteForm({
             </div>
           ) : (
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-tierra-media" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-admin-text-tertiary" />
               <Input
                 placeholder="Buscar cliente por nombre o email..."
                 value={customerSearch}
@@ -1484,14 +1484,14 @@ export default function CreateQuoteForm({
                         <div className="font-medium">
                           {customer.first_name} {customer.last_name}
                         </div>
-                        <div className="text-sm text-tierra-media space-y-1">
+                        <div className="text-sm text-admin-text-tertiary space-y-1">
                           {customer.email && <div>{customer.email}</div>}
                           {customer.rut && <div>RUT: {customer.rut}</div>}
                         </div>
                       </div>
                     ))
                   ) : (
-                    <div className="p-4 text-center text-tierra-media">
+                    <div className="p-4 text-center text-admin-text-tertiary">
                       No se encontraron clientes
                     </div>
                   )}
@@ -1518,7 +1518,7 @@ export default function CreateQuoteForm({
               </div>
             ) : prescriptions.length === 0 ? (
               <div className="text-center py-4 space-y-3">
-                <p className="text-tierra-media">
+                <p className="text-admin-text-tertiary">
                   Este cliente no tiene recetas registradas
                 </p>
                 <Button
@@ -1761,7 +1761,7 @@ export default function CreateQuoteForm({
             >
               <div>
                 <div className="font-medium">{selectedFrame.name}</div>
-                <div className="text-sm text-tierra-media">
+                <div className="text-sm text-admin-text-tertiary">
                   {selectedFrame.frame_brand} {selectedFrame.frame_model} ·
                   Stock:{" "}
                   {selectedFrame.total_available_quantity !== undefined
@@ -1772,7 +1772,7 @@ export default function CreateQuoteForm({
                         selectedFrame.inventory_quantity ??
                         0)}
                 </div>
-                <div className="text-sm font-semibold text-verde-suave">
+                <div className="text-sm font-semibold text-admin-success">
                   {formatPrice(selectedFrame.price)}
                 </div>
               </div>
@@ -1801,7 +1801,7 @@ export default function CreateQuoteForm({
             </div>
           ) : (
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-tierra-media" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-admin-text-tertiary" />
               <Input
                 placeholder="Buscar marco por nombre, marca o SKU..."
                 value={frameSearch}
@@ -1822,19 +1822,19 @@ export default function CreateQuoteForm({
                         onClick={() => handleFrameSelect(frame)}
                       >
                         <div className="font-medium">{frame.name}</div>
-                        <div className="text-sm text-tierra-media">
+                        <div className="text-sm text-admin-text-tertiary">
                           {frame.frame_brand} {frame.frame_model} - Stock:{" "}
                           {frame.available_quantity ??
                             frame.inventory_quantity ??
                             0}
                         </div>
-                        <div className="text-sm font-semibold text-verde-suave">
+                        <div className="text-sm font-semibold text-admin-success">
                           {formatPrice(frame.price)}
                         </div>
                       </div>
                     ))
                   ) : (
-                    <div className="p-4 text-center text-tierra-media">
+                    <div className="p-4 text-center text-admin-text-tertiary">
                       No se encontraron marcos
                     </div>
                   )}
@@ -1953,14 +1953,14 @@ export default function CreateQuoteForm({
                 >
                   <div>
                     <div className="font-medium">{selectedNearFrame.name}</div>
-                    <div className="text-sm text-tierra-media">
+                    <div className="text-sm text-admin-text-tertiary">
                       {selectedNearFrame.frame_brand}{" "}
                       {selectedNearFrame.frame_model} · Stock:{" "}
                       {selectedNearFrame.available_quantity ??
                         selectedNearFrame.inventory_quantity ??
                         0}
                     </div>
-                    <div className="text-sm font-semibold text-verde-suave">
+                    <div className="text-sm font-semibold text-admin-success">
                       {formatPrice(selectedNearFrame.price)}
                     </div>
                   </div>
@@ -1989,7 +1989,7 @@ export default function CreateQuoteForm({
                 </div>
               ) : (
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-tierra-media" />
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-admin-text-tertiary" />
                   <Input
                     placeholder="Buscar marco para cerca por nombre, marca o SKU..."
                     value={nearFrameSearch}
@@ -2010,19 +2010,19 @@ export default function CreateQuoteForm({
                             onClick={() => handleNearFrameSelect(frame)}
                           >
                             <div className="font-medium">{frame.name}</div>
-                            <div className="text-sm text-tierra-media">
+                            <div className="text-sm text-admin-text-tertiary">
                               {frame.frame_brand} {frame.frame_model} - Stock:{" "}
                               {frame.available_quantity ??
                                 frame.inventory_quantity ??
                                 0}
                             </div>
-                            <div className="text-sm font-semibold text-verde-suave">
+                            <div className="text-sm font-semibold text-admin-success">
                               {formatPrice(frame.price)}
                             </div>
                           </div>
                         ))
                       ) : (
-                        <div className="p-4 text-center text-tierra-media">
+                        <div className="p-4 text-center text-admin-text-tertiary">
                           No se encontraron marcos
                         </div>
                       )}
@@ -2413,8 +2413,8 @@ export default function CreateQuoteForm({
                             key={treatment.value}
                             className={`p-3 border rounded-lg cursor-pointer transition-colors ${
                               isSelected
-                                ? "border-verde-suave bg-verde-suave/10"
-                                : "border-gray-200 hover:border-azul-profundo"
+                                ? "border-admin-success bg-admin-success/10"
+                                : "border-gray-200 hover:border-epoch-primary"
                             } ${disabled ? "opacity-60 cursor-not-allowed" : ""}`}
                             onClick={() =>
                               !disabled && handleTreatmentToggle(treatment)
@@ -2423,7 +2423,7 @@ export default function CreateQuoteForm({
                             <div className="flex items-center justify-between">
                               <div className="flex items-center">
                                 {isSelected && (
-                                  <CheckCircle className="h-4 w-4 text-verde-suave mr-2" />
+                                  <CheckCircle className="h-4 w-4 text-admin-success mr-2" />
                                 )}
                                 <span
                                   className={isSelected ? "font-medium" : ""}
@@ -2525,7 +2525,7 @@ export default function CreateQuoteForm({
             </div>
             <div className="flex justify-between text-lg font-bold border-t pt-2">
               <span>Total:</span>
-              <span className="text-verde-suave">
+              <span className="text-admin-success">
                 {formatPrice(formData.total_amount)}
               </span>
             </div>

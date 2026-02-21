@@ -3,6 +3,7 @@ import { requireRoot } from "@/lib/api/root-middleware";
 import { createServiceRoleClient } from "@/utils/supabase/service-role";
 import { appLogger as logger } from "@/lib/logger";
 import { AuthorizationError } from "@/lib/api/errors";
+import { updateSubscriptionSchema } from "@/lib/api/validation/zod-schemas";
 
 /**
  * GET /api/admin/saas-management/subscriptions/[id]
@@ -79,13 +80,21 @@ export async function PATCH(
 
     const { id } = params;
     const body = await request.json();
+    const parseResult = updateSubscriptionSchema.safeParse(body);
+    if (!parseResult.success) {
+      const firstError = parseResult.error.errors[0];
+      return NextResponse.json(
+        { error: firstError?.message || "Datos inválidos" },
+        { status: 400 },
+      );
+    }
     const {
       status,
       current_period_start,
       current_period_end,
       trial_ends_at,
       cancel_at,
-    } = body;
+    } = parseResult.data;
 
     // Verificar que la suscripción existe
     const { data: existingSub } = await supabaseServiceRole
@@ -104,16 +113,7 @@ export async function PATCH(
     // Preparar updates
     const updates: any = {};
 
-    if (status !== undefined) {
-      if (
-        !["active", "past_due", "cancelled", "trialing", "incomplete"].includes(
-          status,
-        )
-      ) {
-        return NextResponse.json({ error: "Invalid status" }, { status: 400 });
-      }
-      updates.status = status;
-    }
+    if (status !== undefined) updates.status = status;
 
     if (current_period_start !== undefined) {
       updates.current_period_start = current_period_start;

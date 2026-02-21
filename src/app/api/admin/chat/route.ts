@@ -56,6 +56,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const {
       message,
+      fileId,
       provider,
       model,
       sessionId,
@@ -228,6 +229,7 @@ export async function POST(request: NextRequest) {
                 systemPrompt: enhancedSystemPrompt,
               },
               currentBranchId, // Pass branch context
+              supabase,
               userData: {
                 // Pass user context
                 role: userData?.role,
@@ -245,7 +247,11 @@ export async function POST(request: NextRequest) {
               });
             }
 
-            for await (const chunk of fallbackAgent.streamChat(message)) {
+            const messageToSend = fileId
+              ? `[Archivo adjunto para importación: fileId="${fileId}"]\n\n${message}`
+              : message;
+
+            for await (const chunk of fallbackAgent.streamChat(messageToSend)) {
               if (chunk.content) {
                 providerContent += chunk.content;
                 assistantContent += chunk.content;

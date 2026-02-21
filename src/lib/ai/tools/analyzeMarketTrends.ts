@@ -32,6 +32,7 @@ export const marketTrendsTools: ToolDefinition[] = [
         },
       },
     },
+    zodSchema: analyzeMarketTrendsSchema,
     execute: async (params, context): Promise<ToolResult> => {
       try {
         const validated = analyzeMarketTrendsSchema.parse(params);

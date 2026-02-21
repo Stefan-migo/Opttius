@@ -78,7 +78,7 @@ export function EnhancedColumnChart({
 
   if (!chartData || chartData.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center h-64 text-tierra-media">
+      <div className="flex flex-col items-center justify-center h-64 text-admin-text-tertiary">
         <p className="text-lg font-medium">No hay datos para mostrar</p>
       </div>
     );
@@ -110,7 +110,7 @@ export function EnhancedColumnChart({
   return (
     <div className="space-y-4 w-full">
       {title && (
-        <h4 className="font-semibold text-lg text-azul-profundo dark:text-admin-text-primary text-center">
+        <h4 className="font-semibold text-lg text-epoch-primary dark:text-admin-text-primary text-center">
           {title}
         </h4>
       )}
@@ -172,10 +172,10 @@ export function EnhancedColumnChart({
       {/* Summary stats */}
       <div className="grid grid-cols-3 gap-3 pt-3 border-t border-gray-200 dark:border-gray-700">
         <div className="text-center p-2 bg-gray-50 dark:bg-gray-800 rounded-lg">
-          <p className="text-xs text-tierra-media dark:text-gray-400 mb-1">
+          <p className="text-xs text-admin-text-tertiary dark:text-gray-400 mb-1">
             Promedio
           </p>
-          <p className="font-bold text-sm text-azul-profundo dark:text-admin-text-primary">
+          <p className="font-bold text-sm text-epoch-primary dark:text-admin-text-primary">
             {formatValue(
               chartData.reduce((sum, item) => sum + item.value, 0) /
                 chartData.length,
@@ -186,7 +186,7 @@ export function EnhancedColumnChart({
           className="text-center p-2 rounded-lg"
           style={{ backgroundColor: `${color}15` }}
         >
-          <p className="text-xs text-tierra-media dark:text-gray-400 mb-1">
+          <p className="text-xs text-admin-text-tertiary dark:text-gray-400 mb-1">
             Total
           </p>
           <p className="font-bold text-sm" style={{ color }}>
@@ -194,10 +194,10 @@ export function EnhancedColumnChart({
           </p>
         </div>
         <div className="text-center p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-          <p className="text-xs text-tierra-media dark:text-gray-400 mb-1">
+          <p className="text-xs text-admin-text-tertiary dark:text-gray-400 mb-1">
             Períodos
           </p>
-          <p className="font-bold text-sm text-azul-profundo dark:text-blue-400">
+          <p className="font-bold text-sm text-epoch-primary dark:text-blue-400">
             {chartData.length}
           </p>
         </div>

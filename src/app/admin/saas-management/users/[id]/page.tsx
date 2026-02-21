@@ -165,7 +165,9 @@ export default function UserDetailsPage() {
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
           <Loader2 className="h-8 w-8 animate-spin text-blue-600 mx-auto mb-4" />
-          <p className="text-tierra-media">Cargando detalles del usuario...</p>
+          <p className="text-muted-foreground">
+            Cargando detalles del usuario...
+          </p>
         </div>
       </div>
     );
@@ -184,10 +186,12 @@ export default function UserDetailsPage() {
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div>
-            <h1 className="text-3xl font-bold text-azul-profundo">Error</h1>
+            <h1 className="text-3xl font-display font-bold text-epoch-primary tracking-tight">
+              Error
+            </h1>
           </div>
         </div>
-        <Card>
+        <Card className="admin-card rounded-none">
           <CardContent className="pt-6">
             <div className="text-center py-12 text-red-600">
               {error || "Usuario no encontrado"}
@@ -223,10 +227,10 @@ export default function UserDetailsPage() {
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div>
-            <h1 className="text-3xl font-bold text-azul-profundo">
+            <h1 className="text-3xl font-display font-bold text-epoch-primary tracking-tight">
               Detalles del Usuario
             </h1>
-            <p className="text-tierra-media mt-2">
+            <p className="text-muted-foreground mt-2">
               Información completa del usuario del sistema
             </p>
           </div>
@@ -234,7 +238,7 @@ export default function UserDetailsPage() {
       </div>
 
       {/* Información Principal */}
-      <Card>
+      <Card className="admin-card rounded-none">
         <CardHeader>
           <CardTitle className="flex items-center gap-3">
             <User className="h-5 w-5" />
@@ -306,7 +310,7 @@ export default function UserDetailsPage() {
 
       {/* Organización */}
       {user.organization && (
-        <Card>
+        <Card className="admin-card rounded-none">
           <CardHeader>
             <CardTitle className="flex items-center gap-3">
               <Building2 className="h-5 w-5" />
@@ -348,7 +352,7 @@ export default function UserDetailsPage() {
       )}
 
       {/* Acceso a Sucursales */}
-      <Card>
+      <Card className="admin-card rounded-none">
         <CardHeader>
           <CardTitle className="flex items-center gap-3">
             <MapPin className="h-5 w-5" />
@@ -389,7 +393,7 @@ export default function UserDetailsPage() {
 
       {/* Actividad Reciente */}
       {user.recentActivity && user.recentActivity.length > 0 && (
-        <Card>
+        <Card className="admin-card rounded-none">
           <CardHeader>
             <CardTitle className="flex items-center gap-3">
               <Activity className="h-5 w-5" />
@@ -420,7 +424,7 @@ export default function UserDetailsPage() {
       )}
 
       {/* Información del Sistema */}
-      <Card>
+      <Card className="admin-card rounded-none">
         <CardHeader>
           <CardTitle className="flex items-center gap-3">
             <Shield className="h-5 w-5" />

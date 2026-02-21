@@ -3,6 +3,7 @@ import { requireRoot } from "@/lib/api/root-middleware";
 import { createServiceRoleClient } from "@/utils/supabase/service-role";
 import { appLogger as logger } from "@/lib/logger";
 import { AuthorizationError } from "@/lib/api/errors";
+import { createOrgUserSchema } from "@/lib/api/validation/zod-schemas";
 
 /**
  * GET /api/admin/saas-management/organizations/[id]/users
@@ -91,29 +92,16 @@ export async function POST(
 
     const { id: organizationId } = params;
     const body = await request.json();
-    const {
-      email,
-      password,
-      first_name,
-      last_name,
-      role = "admin",
-      branch_id,
-    } = body;
-
-    // Validaciones
-    if (!email || !password) {
+    const parseResult = createOrgUserSchema.safeParse(body);
+    if (!parseResult.success) {
+      const firstError = parseResult.error.errors[0];
       return NextResponse.json(
-        { error: "Email y contraseña son requeridos" },
+        { error: firstError?.message || "Datos inválidos" },
         { status: 400 },
       );
     }
-
-    if (password.length < 8) {
-      return NextResponse.json(
-        { error: "La contraseña debe tener al menos 8 caracteres" },
-        { status: 400 },
-      );
-    }
+    const { email, password, first_name, last_name, role, branch_id } =
+      parseResult.data;
 
     // Verificar que la organización existe
     const { data: org } = await supabaseServiceRole

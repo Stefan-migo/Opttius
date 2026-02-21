@@ -171,7 +171,7 @@ export function PrescriptionSelection({
           </div>
         ) : prescriptions.length === 0 ? (
           <div className="text-center py-4 space-y-3">
-            <p className="text-tierra-media">
+            <p className="text-admin-text-tertiary">
               Este cliente no tiene recetas registradas
             </p>
             <Button

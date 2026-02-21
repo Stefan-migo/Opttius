@@ -111,41 +111,24 @@ export async function POST(request: NextRequest) {
 
       if (payment.gateway !== "mercadopago") {
         return NextResponse.json(
-          { error: "This endpoint only supports MercadoPago" },
+          {
+            error:
+              "Este método de pago requiere completar el pago en la ventana externa. Si fuiste redirigido, verifica el estado en el panel de suscripción.",
+          },
           { status: 400 },
         );
       }
 
-      // Create payment with MercadoPago
+      // Create payment with MercadoPago (only MP supports Bricks/token flow)
       const gatewayInstance = PaymentGatewayFactory.getGateway("mercadopago");
-      if (!("createPaymentWithToken" in gatewayInstance)) {
+      if (!gatewayInstance.createPaymentWithToken) {
         return NextResponse.json(
           { error: "Gateway does not support token payments" },
           { status: 400 },
         );
       }
 
-      const mpPayment = await (
-        gatewayInstance as {
-          createPaymentWithToken: (
-            token: string,
-            amount: number,
-            currency: string,
-            userId: string,
-            organizationId: string,
-            payerEmail: string,
-            paymentMethodId: string,
-            issuerId?: string,
-            description?: string,
-            metadata?: Record<string, unknown>,
-          ) => Promise<{
-            id: string;
-            status: "pending" | "succeeded" | "failed" | "refunded";
-            transaction_amount: number;
-            currency_id: string;
-          }>;
-        }
-      ).createPaymentWithToken(
+      const mpPayment = await gatewayInstance.createPaymentWithToken(
         token,
         payment.amount,
         payment.currency,
@@ -181,16 +164,16 @@ export async function POST(request: NextRequest) {
           mpPayment.id,
         );
         // Phase C: optionally save card (create MP customer + add card, store in subscription)
-        if (saveCard && "createCustomerAndAddCard" in gatewayInstance) {
+        const mpGateway = gatewayInstance as {
+          createCustomerAndAddCard?: (
+            email: string,
+            token: string,
+          ) => Promise<{ customerId: string; cardId: string }>;
+        };
+        if (saveCard && mpGateway.createCustomerAndAddCard) {
           try {
-            const { customerId, cardId } = await (
-              gatewayInstance as {
-                createCustomerAndAddCard: (
-                  email: string,
-                  token: string,
-                ) => Promise<{ customerId: string; cardId: string }>;
-              }
-            ).createCustomerAndAddCard(payerEmail, token);
+            const { customerId, cardId } =
+              await mpGateway.createCustomerAndAddCard(payerEmail, token);
             await paymentService.updateSubscriptionPaymentMethod(
               organizationId,
               customerId,

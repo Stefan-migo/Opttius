@@ -4,190 +4,193 @@ export type Json =
   | boolean
   | null
   | { [key: string]: Json | undefined }
-  | Json[]
+  | Json[];
 
 export type Database = {
   public: {
     Tables: {
       profiles: {
         Row: {
-          id: string
-          first_name: string | null
-          last_name: string | null
-          email: string
-          phone: string | null
-          date_of_birth: string | null
-          avatar_url: string | null
-          bio: string | null
-          address_line_1: string | null
-          address_line_2: string | null
-          city: string | null
-          state: string | null
-          postal_code: string | null
-          country: string | null
-          is_member: boolean | null
-          membership_tier: string | null
-          membership_start_date: string | null
-          membership_end_date: string | null
-          newsletter_subscribed: boolean | null
-          language: string | null
-          timezone: string | null
-          created_at: string
-          updated_at: string
-        }
+          id: string;
+          first_name: string | null;
+          last_name: string | null;
+          email: string;
+          phone: string | null;
+          date_of_birth: string | null;
+          avatar_url: string | null;
+          bio: string | null;
+          address_line_1: string | null;
+          address_line_2: string | null;
+          city: string | null;
+          state: string | null;
+          postal_code: string | null;
+          country: string | null;
+          is_member: boolean | null;
+          membership_tier: string | null;
+          membership_start_date: string | null;
+          membership_end_date: string | null;
+          newsletter_subscribed: boolean | null;
+          language: string | null;
+          timezone: string | null;
+          preferred_branch_id: string | null;
+          created_at: string;
+          updated_at: string;
+        };
         Insert: {
-          id: string
-          first_name?: string | null
-          last_name?: string | null
-          email: string
-          phone?: string | null
-          date_of_birth?: string | null
-          avatar_url?: string | null
-          bio?: string | null
-          address_line_1?: string | null
-          address_line_2?: string | null
-          city?: string | null
-          state?: string | null
-          postal_code?: string | null
-          country?: string | null
-          is_member?: boolean | null
-          membership_tier?: string | null
-          membership_start_date?: string | null
-          membership_end_date?: string | null
-          newsletter_subscribed?: boolean | null
-          language?: string | null
-          timezone?: string | null
-          created_at?: string
-          updated_at?: string
-        }
+          id: string;
+          first_name?: string | null;
+          last_name?: string | null;
+          email: string;
+          phone?: string | null;
+          date_of_birth?: string | null;
+          avatar_url?: string | null;
+          bio?: string | null;
+          address_line_1?: string | null;
+          address_line_2?: string | null;
+          city?: string | null;
+          state?: string | null;
+          postal_code?: string | null;
+          country?: string | null;
+          is_member?: boolean | null;
+          membership_tier?: string | null;
+          membership_start_date?: string | null;
+          membership_end_date?: string | null;
+          newsletter_subscribed?: boolean | null;
+          language?: string | null;
+          timezone?: string | null;
+          preferred_branch_id?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
         Update: {
-          id?: string
-          first_name?: string | null
-          last_name?: string | null
-          email?: string
-          phone?: string | null
-          date_of_birth?: string | null
-          avatar_url?: string | null
-          bio?: string | null
-          address_line_1?: string | null
-          address_line_2?: string | null
-          city?: string | null
-          state?: string | null
-          postal_code?: string | null
-          country?: string | null
-          is_member?: boolean | null
-          membership_tier?: string | null
-          membership_start_date?: string | null
-          membership_end_date?: string | null
-          newsletter_subscribed?: boolean | null
-          language?: string | null
-          timezone?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
+          id?: string;
+          first_name?: string | null;
+          last_name?: string | null;
+          email?: string;
+          phone?: string | null;
+          date_of_birth?: string | null;
+          avatar_url?: string | null;
+          bio?: string | null;
+          address_line_1?: string | null;
+          address_line_2?: string | null;
+          city?: string | null;
+          state?: string | null;
+          postal_code?: string | null;
+          country?: string | null;
+          is_member?: boolean | null;
+          membership_tier?: string | null;
+          membership_start_date?: string | null;
+          membership_end_date?: string | null;
+          newsletter_subscribed?: boolean | null;
+          language?: string | null;
+          timezone?: string | null;
+          preferred_branch_id?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       user_favorites: {
         Row: {
-          id: string
-          user_id: string
-          product_id: string
-          created_at: string
-          updated_at: string
-        }
+          id: string;
+          user_id: string;
+          product_id: string;
+          created_at: string;
+          updated_at: string;
+        };
         Insert: {
-          id?: string
-          user_id: string
-          product_id: string
-          created_at?: string
-          updated_at?: string
-        }
+          id?: string;
+          user_id: string;
+          product_id: string;
+          created_at?: string;
+          updated_at?: string;
+        };
         Update: {
-          id?: string
-          user_id?: string
-          product_id?: string
-          created_at?: string
-          updated_at?: string
-        }
+          id?: string;
+          user_id?: string;
+          product_id?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
         Relationships: [
           {
-            foreignKeyName: "user_favorites_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          }
-        ]
-      }
+            foreignKeyName: "user_favorites_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       products: {
         Row: {
-          id: string
-          name: string
-          description: string | null
-          price: number
-          original_price: number | null
-          category_id: string | null
-          image_url: string | null
-          rating: number | null
-          is_natural: boolean | null
-          is_new: boolean | null
-          is_on_sale: boolean | null
-          stock: number | null
-          size: string | null
-          created_at: string
-          updated_at: string
-        }
+          id: string;
+          name: string;
+          description: string | null;
+          price: number;
+          original_price: number | null;
+          category_id: string | null;
+          image_url: string | null;
+          rating: number | null;
+          is_natural: boolean | null;
+          is_new: boolean | null;
+          is_on_sale: boolean | null;
+          stock: number | null;
+          size: string | null;
+          created_at: string;
+          updated_at: string;
+        };
         Insert: {
-          id?: string
-          name: string
-          description?: string | null
-          price: number
-          original_price?: number | null
-          category_id?: string | null
-          image_url?: string | null
-          rating?: number | null
-          is_natural?: boolean | null
-          is_new?: boolean | null
-          is_on_sale?: boolean | null
-          stock?: number | null
-          size?: string | null
-          created_at?: string
-          updated_at?: string
-        }
+          id?: string;
+          name: string;
+          description?: string | null;
+          price: number;
+          original_price?: number | null;
+          category_id?: string | null;
+          image_url?: string | null;
+          rating?: number | null;
+          is_natural?: boolean | null;
+          is_new?: boolean | null;
+          is_on_sale?: boolean | null;
+          stock?: number | null;
+          size?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
         Update: {
-          id?: string
-          name?: string
-          description?: string | null
-          price?: number
-          original_price?: number | null
-          category_id?: string | null
-          image_url?: string | null
-          rating?: number | null
-          is_natural?: boolean | null
-          is_new?: boolean | null
-          is_on_sale?: boolean | null
-          stock?: number | null
-          size?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-    }
+          id?: string;
+          name?: string;
+          description?: string | null;
+          price?: number;
+          original_price?: number | null;
+          category_id?: string | null;
+          image_url?: string | null;
+          rating?: number | null;
+          is_natural?: boolean | null;
+          is_new?: boolean | null;
+          is_on_sale?: boolean | null;
+          stock?: number | null;
+          size?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+    };
     Views: {
-      [_ in never]: never
-    }
+      [_ in never]: never;
+    };
     Functions: {
-      [_ in never]: never
-    }
+      [_ in never]: never;
+    };
     Enums: {
-      [_ in never]: never
-    }
+      [_ in never]: never;
+    };
     CompositeTypes: {
-      [_ in never]: never
-    }
-  }
-}
+      [_ in never]: never;
+    };
+  };
+};
 
 export type Tables<
   PublicTableNameOrOptions extends
@@ -200,7 +203,7 @@ export type Tables<
 > = PublicTableNameOrOptions extends { schema: keyof Database }
   ? (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
       Database[PublicTableNameOrOptions["schema"]]["Views"])[TableName] extends {
-      Row: infer R
+      Row: infer R;
     }
     ? R
     : never
@@ -208,11 +211,11 @@ export type Tables<
         Database["public"]["Views"])
     ? (Database["public"]["Tables"] &
         Database["public"]["Views"])[PublicTableNameOrOptions] extends {
-        Row: infer R
+        Row: infer R;
       }
       ? R
       : never
-    : never
+    : never;
 
 export type TablesInsert<
   PublicTableNameOrOptions extends
@@ -223,17 +226,17 @@ export type TablesInsert<
     : never = never,
 > = PublicTableNameOrOptions extends { schema: keyof Database }
   ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Insert: infer I
+      Insert: infer I;
     }
     ? I
     : never
   : PublicTableNameOrOptions extends keyof Database["public"]["Tables"]
     ? Database["public"]["Tables"][PublicTableNameOrOptions] extends {
-        Insert: infer I
+        Insert: infer I;
       }
       ? I
       : never
-    : never
+    : never;
 
 export type TablesUpdate<
   PublicTableNameOrOptions extends
@@ -244,17 +247,17 @@ export type TablesUpdate<
     : never = never,
 > = PublicTableNameOrOptions extends { schema: keyof Database }
   ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Update: infer U
+      Update: infer U;
     }
     ? U
     : never
   : PublicTableNameOrOptions extends keyof Database["public"]["Tables"]
     ? Database["public"]["Tables"][PublicTableNameOrOptions] extends {
-        Update: infer U
+        Update: infer U;
       }
       ? U
       : never
-    : never
+    : never;
 
 export type Enums<
   PublicEnumNameOrOptions extends
@@ -267,4 +270,4 @@ export type Enums<
   ? Database[PublicEnumNameOrOptions["schema"]]["Enums"][EnumName]
   : PublicEnumNameOrOptions extends keyof Database["public"]["Enums"]
     ? Database["public"]["Enums"][PublicEnumNameOrOptions]
-    : never
+    : never;

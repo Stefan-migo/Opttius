@@ -50,6 +50,8 @@
     "redis:test": "node scripts/test-redis-connection.js",
     "validation:test": "node scripts/test-validation.js",
     "rate-limiting:test": "node scripts/test-rate-limiting.js",
+    "notebooklm:sync": "bash scripts/sync-notebooklm-sources.sh",
+    "notebooklm:sync-extended": "bash scripts/sync-notebooklm-extended.sh",
     "prepare": "husky"
   },
   "dependencies": {
@@ -75,6 +77,7 @@
     "@radix-ui/react-switch": "^1.2.5",
     "@radix-ui/react-tabs": "^1.1.12",
     "@radix-ui/react-toast": "^1.1.5",
+    "@radix-ui/react-tooltip": "^1.2.8",
     "@sentry/nextjs": "^10.38.0",
     "@supabase/ssr": "^0.6.1",
     "@supabase/supabase-js": "^2.52.0",
@@ -107,6 +110,7 @@
     "tailwind-merge": "^2.6.0",
     "tailwindcss-animate": "^1.0.7",
     "uuid": "^13.0.0",
+    "xlsx": "^0.18.5",
     "zod": "^3.25.76"
   },
   "devDependencies": {

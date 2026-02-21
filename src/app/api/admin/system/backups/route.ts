@@ -5,7 +5,9 @@ import { appLogger as logger } from "@/lib/logger";
 
 /**
  * GET /api/admin/system/backups
- * List all available backups from Supabase Storage for the user's organization
+ * List all available backups from Supabase Storage for the user's organization.
+ * @requires admin | super_admin | root | dev
+ * @requires organization_id (usuarios sin org reciben 400)
  */
 export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
@@ -181,7 +183,9 @@ export async function GET(request: NextRequest) {
 
 /**
  * POST /api/admin/system/backups
- * Restore a specific backup for the user's organization
+ * Restore a specific backup for the user's organization.
+ * @requires admin | super_admin | root | dev
+ * @requires organization_id
  */
 export async function POST(request: NextRequest) {
   try {
@@ -286,7 +290,9 @@ export async function POST(request: NextRequest) {
 
 /**
  * DELETE /api/admin/system/backups
- * Delete a specific backup file
+ * Delete a specific backup file. Solo backups de la org del usuario.
+ * @requires admin | super_admin | root | dev
+ * @requires organization_id
  */
 export async function DELETE(request: NextRequest) {
   try {

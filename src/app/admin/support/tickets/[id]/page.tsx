@@ -203,13 +203,6 @@ export default function OpticalInternalSupportTicketDetailPage() {
     Array<{ id: string; email: string; role: string }>
   >([]);
 
-  // Debug logging for render phase issues
-  console.log(
-    "OpticalInternalSupportTicketDetailPage rendering, ticketId:",
-    ticketId,
-  );
-  console.log("Current state - showUpdateDialog:", showUpdateDialog);
-
   const {
     register: registerMessage,
     handleSubmit: handleSubmitMessage,
@@ -218,7 +211,7 @@ export default function OpticalInternalSupportTicketDetailPage() {
   } = useForm<any>({
     resolver: zodResolver(createOpticalInternalSupportMessageSchema),
     defaultValues: {
-      is_internal: false,
+      is_internal: true,
       message_type: "message",
       attachments: [],
     },
@@ -246,20 +239,21 @@ export default function OpticalInternalSupportTicketDetailPage() {
   }, [ticket, setUpdateValue]);
 
   useEffect(() => {
-    console.log("useEffect triggered with ticketId:", ticketId);
     fetchTicket();
     fetchMessages();
     fetchAdminUsers();
   }, [ticketId]);
 
   const fetchAdminUsers = async () => {
-    console.log("fetchAdminUsers called");
     try {
       const response = await fetch("/api/admin/admin-users");
       if (response.ok) {
         const data = await response.json();
-        const adminUsers = extractDataFromResponse<{ id: string; email: string; role: string }>(data);
-        console.log("Admin users fetched:", adminUsers.length || 0);
+        const adminUsers = extractDataFromResponse<{
+          id: string;
+          email: string;
+          role: string;
+        }>(data);
         setAdminUsers(adminUsers);
       }
     } catch (err) {
@@ -268,7 +262,6 @@ export default function OpticalInternalSupportTicketDetailPage() {
   };
 
   const fetchTicket = async () => {
-    console.log("fetchTicket called for ticketId:", ticketId);
     try {
       const response = await fetch(
         `/api/admin/optical-support/tickets/${ticketId}`,
@@ -279,18 +272,15 @@ export default function OpticalInternalSupportTicketDetailPage() {
       }
 
       const data = await response.json();
-      console.log("Ticket fetched:", data.ticket?.id);
       setTicket(data.ticket);
     } catch (err) {
       toast.error("Error al cargar el ticket");
     } finally {
       setLoading(false);
-      console.log("Loading set to false");
     }
   };
 
   const fetchMessages = async () => {
-    console.log("fetchMessages called for ticketId:", ticketId);
     try {
       const response = await fetch(
         `/api/admin/optical-support/tickets/${ticketId}/messages`,
@@ -298,7 +288,6 @@ export default function OpticalInternalSupportTicketDetailPage() {
 
       if (response.ok) {
         const data = await response.json();
-        console.log("Messages fetched:", data.messages?.length || 0);
         setMessages(data.messages || []);
       }
     } catch (err) {
@@ -369,10 +358,10 @@ export default function OpticalInternalSupportTicketDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen bg-epoch-background py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+            <Loader2 className="h-8 w-8 animate-spin text-epoch-primary" />
           </div>
         </div>
       </div>
@@ -381,16 +370,19 @@ export default function OpticalInternalSupportTicketDetailPage() {
 
   if (!ticket) {
     return (
-      <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen bg-epoch-background py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
-          <Card className="border-red-200">
+          <Card className="border-red-200 rounded-none border">
             <CardContent className="pt-6">
               <div className="text-center py-8">
                 <XCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-                <h2 className="text-xl font-semibold text-gray-900 mb-2">
+                <h2 className="text-xl font-display font-semibold text-epoch-primary mb-2">
                   Ticket no encontrado
                 </h2>
-                <Button onClick={() => router.push("/admin/support")}>
+                <Button
+                  onClick={() => router.push("/admin/support")}
+                  className="rounded-none bg-epoch-primary hover:bg-epoch-surface text-white font-display font-bold text-[10px] tracking-[0.2em] uppercase"
+                >
                   Volver a Tickets
                 </Button>
               </div>
@@ -402,7 +394,7 @@ export default function OpticalInternalSupportTicketDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-6 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-epoch-background py-6 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -411,25 +403,22 @@ export default function OpticalInternalSupportTicketDetailPage() {
               variant="ghost"
               size="icon"
               onClick={() => router.push("/admin/support")}
+              className="rounded-none text-epoch-primary hover:bg-epoch-primary/10"
             >
               <ArrowLeft className="h-5 w-5" />
             </Button>
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">
+              <h1 className="text-3xl font-display font-bold text-epoch-primary tracking-tight">
                 Ticket #{ticket.ticket_number}
               </h1>
-              <p className="text-gray-600 mt-1">{ticket.subject}</p>
+              <p className="text-epoch-primary/80 mt-1">{ticket.subject}</p>
             </div>
           </div>
           <div className="flex gap-2">
             <Button
               variant="outline"
-              onClick={() => {
-                console.log(
-                  "Edit button clicked, setting showUpdateDialog to true",
-                );
-                setShowUpdateDialog(true);
-              }}
+              onClick={() => setShowUpdateDialog(true)}
+              className="rounded-none border-admin-border-primary/20"
             >
               <Edit className="h-4 w-4 mr-2" />
               Editar
@@ -447,36 +436,38 @@ export default function OpticalInternalSupportTicketDetailPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Ticket Details */}
-            <Card>
+            {/* Ticket Details - sin admin-card para evitar hover conflictivo */}
+            <Card className="rounded-none border border-border">
               <CardHeader>
-                <CardTitle>Detalles del Ticket</CardTitle>
+                <CardTitle className="font-display text-epoch-primary">
+                  Detalles del Ticket
+                </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <Label className="text-sm font-medium text-gray-700">
+                  <Label className="text-sm font-medium text-epoch-primary/80">
                     Descripción
                   </Label>
-                  <p className="mt-1 text-gray-900 whitespace-pre-wrap">
+                  <p className="mt-1 text-epoch-primary whitespace-pre-wrap">
                     {ticket.description}
                   </p>
                 </div>
                 {ticket.resolution && (
                   <div>
-                    <Label className="text-sm font-medium text-gray-700">
+                    <Label className="text-sm font-medium text-epoch-primary/80">
                       Resolución
                     </Label>
-                    <p className="mt-1 text-gray-900 whitespace-pre-wrap">
+                    <p className="mt-1 text-epoch-primary whitespace-pre-wrap">
                       {ticket.resolution}
                     </p>
                   </div>
                 )}
                 {ticket.resolution_notes && (
                   <div>
-                    <Label className="text-sm font-medium text-gray-700">
+                    <Label className="text-sm font-medium text-epoch-primary/80">
                       Notas de Resolución
                     </Label>
-                    <p className="mt-1 text-gray-900 whitespace-pre-wrap">
+                    <p className="mt-1 text-epoch-primary whitespace-pre-wrap">
                       {ticket.resolution_notes}
                     </p>
                   </div>
@@ -484,17 +475,17 @@ export default function OpticalInternalSupportTicketDetailPage() {
               </CardContent>
             </Card>
 
-            {/* Messages */}
-            <Card>
+            {/* Messages - sin admin-card para evitar contraste en burbujas de mensaje */}
+            <Card className="rounded-none border border-border">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <MessageSquare className="h-5 w-5" />
+                <CardTitle className="flex items-center gap-2 font-display text-epoch-primary">
+                  <MessageSquare className="h-5 w-5 text-epoch-accent" />
                   Conversación ({messages.length})
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 {messages.length === 0 ? (
-                  <div className="text-center py-8 text-gray-500">
+                  <div className="text-center py-8 text-epoch-primary/70">
                     <MessageSquare className="h-12 w-12 mx-auto mb-4 text-gray-400" />
                     <p>No hay mensajes aún</p>
                   </div>
@@ -503,22 +494,14 @@ export default function OpticalInternalSupportTicketDetailPage() {
                     {messages.map((msg) => (
                       <div
                         key={msg.id}
-                        className={`p-4 rounded-lg border ${msg.is_internal
-                          ? "bg-yellow-50 border-yellow-200"
-                          : "bg-gray-50 border-gray-200"
-                          }`}
+                        className="p-4 rounded-none border bg-white border-epoch-primary/20 text-epoch-primary"
                       >
                         <div className="flex items-start justify-between mb-2">
                           <div className="flex items-center gap-2">
-                            <User className="h-4 w-4 text-gray-500" />
-                            <span className="font-medium text-sm">
+                            <User className="h-4 w-4 text-epoch-primary/70" />
+                            <span className="font-medium text-sm text-epoch-primary">
                               {msg.sender_name}
                             </span>
-                            {msg.is_internal && (
-                              <Badge variant="outline" className="text-xs">
-                                Nota Interna
-                              </Badge>
-                            )}
                             {msg.message_type === "status_change" && (
                               <Badge variant="outline" className="text-xs">
                                 Cambio de Estado
@@ -535,11 +518,11 @@ export default function OpticalInternalSupportTicketDetailPage() {
                               </Badge>
                             )}
                           </div>
-                          <span className="text-xs text-gray-500">
+                          <span className="text-xs text-epoch-primary/70">
                             {new Date(msg.created_at).toLocaleString("es-CL")}
                           </span>
                         </div>
-                        <p className="text-gray-900 whitespace-pre-wrap">
+                        <p className="text-epoch-primary whitespace-pre-wrap">
                           {msg.message}
                         </p>
                       </div>
@@ -549,11 +532,13 @@ export default function OpticalInternalSupportTicketDetailPage() {
               </CardContent>
             </Card>
 
-            {/* Add Message Form */}
+            {/* Add Message Form - sin admin-card para evitar contraste en textarea */}
             {ticket.status !== "resolved" && ticket.status !== "closed" && (
-              <Card>
+              <Card className="rounded-none border border-border">
                 <CardHeader>
-                  <CardTitle>Agregar Mensaje</CardTitle>
+                  <CardTitle className="font-display text-epoch-primary">
+                    Agregar Mensaje
+                  </CardTitle>
                   <CardDescription>
                     Agrega información adicional o notas sobre la resolución del
                     problema
@@ -573,9 +558,7 @@ export default function OpticalInternalSupportTicketDetailPage() {
                         {...registerMessage("message")}
                         placeholder="Escribe tu mensaje aquí..."
                         rows={6}
-                        className={
-                          messageErrors.message ? "border-red-500" : ""
-                        }
+                        className={`rounded-none focus:border-epoch-primary focus:ring-epoch-primary/20 bg-white text-epoch-primary placeholder:text-epoch-primary/50 ${messageErrors.message ? "border-red-500" : ""}`}
                       />
                       {messageErrors.message && (
                         <p className="text-sm text-red-500">
@@ -584,22 +567,10 @@ export default function OpticalInternalSupportTicketDetailPage() {
                       )}
                     </div>
 
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="checkbox"
-                        id="is_internal"
-                        {...registerMessage("is_internal")}
-                        className="rounded"
-                      />
-                      <Label htmlFor="is_internal" className="text-sm">
-                        Nota interna (solo visible para el equipo)
-                      </Label>
-                    </div>
-
                     <Button
                       type="submit"
                       disabled={sendingMessage}
-                      className="w-full"
+                      className="w-full rounded-none bg-epoch-primary hover:bg-epoch-surface text-white font-display font-bold text-[10px] tracking-[0.2em] uppercase"
                     >
                       {sendingMessage ? (
                         <>
@@ -634,16 +605,20 @@ export default function OpticalInternalSupportTicketDetailPage() {
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Ticket Info */}
-            <Card>
+            <Card className="rounded-none border border-border">
               <CardHeader>
-                <CardTitle className="text-lg">Información</CardTitle>
+                <CardTitle className="text-lg font-display text-epoch-primary">
+                  Información
+                </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 {ticket.customer && (
                   <div className="flex items-start gap-3">
                     <User className="h-5 w-5 text-gray-400 mt-0.5" />
                     <div>
-                      <Label className="text-xs text-gray-500">Cliente</Label>
+                      <Label className="text-xs text-epoch-primary/70">
+                        Cliente
+                      </Label>
                       <p className="text-sm font-medium">
                         {ticket.customer.first_name} {ticket.customer.last_name}
                       </p>
@@ -657,7 +632,7 @@ export default function OpticalInternalSupportTicketDetailPage() {
                       )}
                       <Link
                         href={`/admin/customers/${ticket.customer.id}`}
-                        className="text-xs text-blue-600 hover:underline mt-1 inline-block"
+                        className="text-xs text-epoch-accent hover:text-epoch-primary hover:underline mt-1 inline-block"
                       >
                         Ver cliente →
                       </Link>
@@ -669,7 +644,9 @@ export default function OpticalInternalSupportTicketDetailPage() {
                   <div className="flex items-start gap-3">
                     <Building2 className="h-5 w-5 text-gray-400 mt-0.5" />
                     <div>
-                      <Label className="text-xs text-gray-500">Sucursal</Label>
+                      <Label className="text-xs text-epoch-primary/70">
+                        Sucursal
+                      </Label>
                       <p className="text-sm font-medium">
                         {ticket.branch.name}
                       </p>
@@ -684,12 +661,12 @@ export default function OpticalInternalSupportTicketDetailPage() {
                   <div className="flex items-start gap-3">
                     <Receipt className="h-5 w-5 text-gray-400 mt-0.5" />
                     <div>
-                      <Label className="text-xs text-gray-500">
+                      <Label className="text-xs text-epoch-primary/70">
                         Pedido Relacionado
                       </Label>
                       <Link
                         href={`/admin/orders/${ticket.related_order.id}`}
-                        className="text-sm font-medium text-blue-600 hover:underline"
+                        className="text-sm font-medium text-epoch-accent hover:text-epoch-primary hover:underline"
                       >
                         {ticket.related_order.order_number} →
                       </Link>
@@ -701,12 +678,12 @@ export default function OpticalInternalSupportTicketDetailPage() {
                   <div className="flex items-start gap-3">
                     <Package className="h-5 w-5 text-gray-400 mt-0.5" />
                     <div>
-                      <Label className="text-xs text-gray-500">
+                      <Label className="text-xs text-epoch-primary/70">
                         Trabajo Relacionado
                       </Label>
                       <Link
                         href={`/admin/work-orders/${ticket.related_work_order.id}`}
-                        className="text-sm font-medium text-blue-600 hover:underline"
+                        className="text-sm font-medium text-epoch-accent hover:text-epoch-primary hover:underline"
                       >
                         {ticket.related_work_order.work_order_number} →
                       </Link>
@@ -718,12 +695,12 @@ export default function OpticalInternalSupportTicketDetailPage() {
                   <div className="flex items-start gap-3">
                     <FileText className="h-5 w-5 text-gray-400 mt-0.5" />
                     <div>
-                      <Label className="text-xs text-gray-500">
+                      <Label className="text-xs text-epoch-primary/70">
                         Presupuesto Relacionado
                       </Label>
                       <Link
                         href={`/admin/quotes/${ticket.related_quote.id}`}
-                        className="text-sm font-medium text-blue-600 hover:underline"
+                        className="text-sm font-medium text-epoch-accent hover:text-epoch-primary hover:underline"
                       >
                         {ticket.related_quote.quote_number} →
                       </Link>
@@ -735,7 +712,7 @@ export default function OpticalInternalSupportTicketDetailPage() {
                   <div className="flex items-start gap-3">
                     <Calendar className="h-5 w-5 text-gray-400 mt-0.5" />
                     <div>
-                      <Label className="text-xs text-gray-500">
+                      <Label className="text-xs text-epoch-primary/70">
                         Cita Relacionada
                       </Label>
                       <p className="text-sm font-medium">
@@ -749,9 +726,11 @@ export default function OpticalInternalSupportTicketDetailPage() {
                 )}
 
                 <div className="flex items-start gap-3">
-                  <Calendar className="h-5 w-5 text-gray-400 mt-0.5" />
+                  <Calendar className="h-5 w-5 text-epoch-accent mt-0.5" />
                   <div>
-                    <Label className="text-xs text-gray-500">Creado</Label>
+                    <Label className="text-xs text-epoch-primary/70">
+                      Creado
+                    </Label>
                     <p className="text-sm font-medium">
                       {new Date(ticket.created_at).toLocaleString("es-CL")}
                     </p>
@@ -767,7 +746,7 @@ export default function OpticalInternalSupportTicketDetailPage() {
                   <div className="flex items-start gap-3">
                     <Clock className="h-5 w-5 text-gray-400 mt-0.5" />
                     <div>
-                      <Label className="text-xs text-gray-500">
+                      <Label className="text-xs text-epoch-primary/70">
                         Primera Respuesta
                       </Label>
                       <p className="text-sm font-medium">
@@ -783,7 +762,7 @@ export default function OpticalInternalSupportTicketDetailPage() {
                   <div className="flex items-start gap-3">
                     <UserPlus className="h-5 w-5 text-gray-400 mt-0.5" />
                     <div>
-                      <Label className="text-xs text-gray-500">
+                      <Label className="text-xs text-epoch-primary/70">
                         Asignado a
                       </Label>
                       <p className="text-sm font-medium">
@@ -804,7 +783,9 @@ export default function OpticalInternalSupportTicketDetailPage() {
                   <div className="flex items-start gap-3">
                     <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5" />
                     <div>
-                      <Label className="text-xs text-gray-500">Resuelto</Label>
+                      <Label className="text-xs text-epoch-primary/70">
+                        Resuelto
+                      </Label>
                       <p className="text-sm font-medium">
                         {new Date(ticket.resolved_at).toLocaleString("es-CL")}
                       </p>
@@ -821,7 +802,7 @@ export default function OpticalInternalSupportTicketDetailPage() {
 
         {/* Update Ticket Dialog */}
         <Dialog open={showUpdateDialog} onOpenChange={setShowUpdateDialog}>
-          <DialogContent className="max-w-2xl">
+          <DialogContent className="max-w-2xl rounded-none">
             <DialogHeader>
               <DialogTitle>Actualizar Ticket</DialogTitle>
               <DialogDescription>
@@ -841,7 +822,10 @@ export default function OpticalInternalSupportTicketDetailPage() {
                       setUpdateValue("status", value as any)
                     }
                   >
-                    <SelectTrigger id="status">
+                    <SelectTrigger
+                      id="status"
+                      className="rounded-none focus:border-epoch-primary focus:ring-epoch-primary/20"
+                    >
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -862,7 +846,10 @@ export default function OpticalInternalSupportTicketDetailPage() {
                       setUpdateValue("priority", value as any)
                     }
                   >
-                    <SelectTrigger id="priority">
+                    <SelectTrigger
+                      id="priority"
+                      className="rounded-none focus:border-epoch-primary focus:ring-epoch-primary/20"
+                    >
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -887,7 +874,10 @@ export default function OpticalInternalSupportTicketDetailPage() {
                     )
                   }
                 >
-                  <SelectTrigger id="assigned_to">
+                  <SelectTrigger
+                    id="assigned_to"
+                    className="rounded-none focus:border-epoch-primary focus:ring-epoch-primary/20"
+                  >
                     <SelectValue placeholder="Sin asignar" />
                   </SelectTrigger>
                   <SelectContent>
@@ -908,6 +898,7 @@ export default function OpticalInternalSupportTicketDetailPage() {
                   {...registerUpdate("resolution")}
                   placeholder="Describe cómo se resolvió el problema..."
                   rows={4}
+                  className="rounded-none focus:border-epoch-primary focus:ring-epoch-primary/20"
                 />
               </div>
 
@@ -918,6 +909,7 @@ export default function OpticalInternalSupportTicketDetailPage() {
                   {...registerUpdate("resolution_notes")}
                   placeholder="Notas adicionales sobre la resolución..."
                   rows={3}
+                  className="rounded-none focus:border-epoch-primary focus:ring-epoch-primary/20"
                 />
               </div>
 
@@ -925,11 +917,16 @@ export default function OpticalInternalSupportTicketDetailPage() {
                 <Button
                   type="button"
                   variant="outline"
+                  className="rounded-none border-admin-border-primary/20"
                   onClick={() => setShowUpdateDialog(false)}
                 >
                   Cancelar
                 </Button>
-                <Button type="submit" disabled={updatingTicket}>
+                <Button
+                  type="submit"
+                  disabled={updatingTicket}
+                  className="rounded-none bg-epoch-primary hover:bg-epoch-surface text-white font-display font-bold text-[10px] tracking-[0.2em] uppercase"
+                >
                   {updatingTicket ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />

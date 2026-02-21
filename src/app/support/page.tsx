@@ -120,30 +120,30 @@ export default function SupportPage() {
 
   if (isSuccess && ticketNumber) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white py-12 px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen bg-epoch-background py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-2xl mx-auto">
-          <Card className="border-green-200 bg-green-50/50">
+          <Card className="border-epoch-primary/20 bg-epoch-primary/5 rounded-none border">
             <CardHeader className="text-center">
-              <div className="mx-auto mb-4 w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
-                <CheckCircle2 className="h-8 w-8 text-green-600" />
+              <div className="mx-auto mb-4 w-16 h-16 bg-epoch-primary/10 rounded-none flex items-center justify-center">
+                <CheckCircle2 className="h-8 w-8 text-epoch-primary" />
               </div>
-              <CardTitle className="text-2xl text-green-900">
+              <CardTitle className="text-2xl font-display font-bold text-epoch-primary">
                 ¡Ticket Creado Exitosamente!
               </CardTitle>
-              <CardDescription className="text-green-700">
+              <CardDescription className="text-epoch-primary/80">
                 Tu solicitud de soporte ha sido recibida
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div className="bg-white p-6 rounded-lg border border-green-200">
+              <div className="bg-white p-6 rounded-none border border-epoch-primary/20">
                 <div className="space-y-2">
-                  <Label className="text-sm font-medium text-gray-700">
+                  <Label className="text-sm font-medium text-epoch-primary/80">
                     Número de Ticket
                   </Label>
-                  <div className="text-2xl font-mono font-bold text-green-600">
+                  <div className="text-2xl font-mono font-bold text-epoch-primary">
                     {ticketNumber}
                   </div>
-                  <p className="text-sm text-gray-600 mt-2">
+                  <p className="text-sm text-epoch-primary/70 mt-2">
                     Guarda este número para hacer seguimiento de tu ticket
                   </p>
                 </div>
@@ -165,13 +165,13 @@ export default function SupportPage() {
                     router.refresh();
                   }}
                   variant="outline"
-                  className="flex-1"
+                  className="flex-1 rounded-none border-admin-border-primary/20"
                 >
                   Crear Otro Ticket
                 </Button>
                 <Button
                   onClick={() => router.push(`/support/ticket/${ticketNumber}`)}
-                  className="flex-1"
+                  className="flex-1 rounded-none bg-epoch-primary hover:bg-epoch-surface text-white font-display font-bold text-[10px] tracking-[0.2em] uppercase"
                 >
                   Ver Estado del Ticket
                 </Button>
@@ -180,7 +180,7 @@ export default function SupportPage() {
               <div className="text-center pt-4 border-t">
                 <Link
                   href="/"
-                  className="text-sm text-gray-600 hover:text-gray-900 inline-flex items-center gap-1"
+                  className="text-sm text-epoch-primary/70 hover:text-epoch-primary inline-flex items-center gap-1"
                 >
                   <ArrowLeft className="h-4 w-4" />
                   Volver al inicio
@@ -194,37 +194,39 @@ export default function SupportPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-epoch-background py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-3xl mx-auto">
         {/* Header */}
         <div className="mb-8">
           <Link
             href="/"
-            className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 mb-4"
+            className="inline-flex items-center gap-2 text-sm text-epoch-primary/70 hover:text-epoch-primary mb-4"
           >
             <ArrowLeft className="h-4 w-4" />
             Volver al inicio
           </Link>
           <div className="flex items-center gap-3 mb-2">
-            <div className="p-2 bg-blue-100 rounded-lg">
-              <HelpCircle className="h-6 w-6 text-blue-600" />
+            <div className="p-2 bg-epoch-primary/10 rounded-none">
+              <HelpCircle className="h-6 w-6 text-epoch-accent" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">
+              <h1 className="text-3xl font-display font-bold text-epoch-primary tracking-tight">
                 Centro de Soporte
               </h1>
-              <p className="text-gray-600 mt-1">
+              <p className="text-epoch-primary/80 mt-1">
                 ¿Necesitas ayuda? Estamos aquí para asistirte
               </p>
             </div>
           </div>
         </div>
 
-        {/* Form Card */}
-        <Card>
+        {/* Form Card - sin admin-card para evitar conflicto de contraste en inputs/botones */}
+        <Card className="rounded-none border border-border">
           <CardHeader>
-            <CardTitle>Crear Ticket de Soporte</CardTitle>
-            <CardDescription>
+            <CardTitle className="font-display text-epoch-primary">
+              Crear Ticket de Soporte
+            </CardTitle>
+            <CardDescription className="text-epoch-primary/80">
               Completa el formulario y nuestro equipo se pondrá en contacto
               contigo lo antes posible
             </CardDescription>
@@ -233,8 +235,8 @@ export default function SupportPage() {
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
               {/* Información de Contacto */}
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                  <User className="h-5 w-5" />
+                <h3 className="text-lg font-display font-semibold text-epoch-primary flex items-center gap-2">
+                  <User className="h-5 w-5 text-epoch-accent" />
                   Información de Contacto
                 </h3>
 
@@ -261,14 +263,15 @@ export default function SupportPage() {
                       Email <span className="text-red-500">*</span>
                     </Label>
                     <div className="relative">
-                      <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                      <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-epoch-accent" />
                       <Input
                         id="requester_email"
                         type="email"
                         {...register("requester_email")}
                         placeholder="tu@email.com"
-                        className={`pl-10 ${errors.requester_email ? "border-red-500" : ""
-                          }`}
+                        className={`pl-10 ${
+                          errors.requester_email ? "border-red-500" : ""
+                        }`}
                       />
                     </div>
                     {errors.requester_email && (
@@ -284,7 +287,7 @@ export default function SupportPage() {
                     Organización (Opcional)
                   </Label>
                   <div className="relative">
-                    <Building2 className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                    <Building2 className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-epoch-accent" />
                     <Input
                       id="organization_name"
                       {...register("organization_name")}
@@ -292,7 +295,7 @@ export default function SupportPage() {
                       className="pl-10"
                     />
                   </div>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-epoch-primary/70">
                     Si perteneces a una organización, ingresa su nombre
                   </p>
                 </div>
@@ -300,8 +303,8 @@ export default function SupportPage() {
 
               {/* Detalles del Ticket */}
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                  <MessageSquare className="h-5 w-5" />
+                <h3 className="text-lg font-display font-semibold text-epoch-primary flex items-center gap-2">
+                  <MessageSquare className="h-5 w-5 text-epoch-accent" />
                   Detalles del Ticket
                 </h3>
 
@@ -318,7 +321,7 @@ export default function SupportPage() {
                     >
                       <SelectTrigger
                         id="category"
-                        className={errors.category ? "border-red-500" : ""}
+                        className={`rounded-none focus:border-epoch-primary focus:ring-epoch-primary/20 ${errors.category ? "border-red-500" : ""}`}
                       >
                         <SelectValue placeholder="Selecciona una categoría" />
                       </SelectTrigger>
@@ -351,7 +354,7 @@ export default function SupportPage() {
                     >
                       <SelectTrigger
                         id="priority"
-                        className={errors.priority ? "border-red-500" : ""}
+                        className={`rounded-none focus:border-epoch-primary focus:ring-epoch-primary/20 ${errors.priority ? "border-red-500" : ""}`}
                       >
                         <SelectValue placeholder="Selecciona una prioridad" />
                       </SelectTrigger>
@@ -406,7 +409,7 @@ export default function SupportPage() {
                       {String(errors.description.message)}
                     </p>
                   )}
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-epoch-primary/70">
                     Mínimo 10 caracteres. Sé lo más específico posible para
                     ayudarnos a resolver tu problema más rápido.
                   </p>
@@ -419,14 +422,14 @@ export default function SupportPage() {
                   type="button"
                   variant="outline"
                   onClick={() => router.push("/")}
-                  className="flex-1"
+                  className="flex-1 rounded-none border-admin-border-primary/20"
                 >
                   Cancelar
                 </Button>
                 <Button
                   type="submit"
                   disabled={isSubmitting}
-                  className="flex-1"
+                  className="flex-1 rounded-none bg-epoch-primary hover:bg-epoch-surface text-white font-display font-bold text-[10px] tracking-[0.2em] uppercase"
                 >
                   {isSubmitting ? (
                     <>
@@ -443,19 +446,19 @@ export default function SupportPage() {
         </Card>
 
         {/* Help Section */}
-        <Card className="mt-6 bg-blue-50 border-blue-200">
+        <Card className="mt-6 bg-epoch-primary/5 border-epoch-primary/20 rounded-none border">
           <CardContent className="pt-6">
             <div className="flex gap-4">
               <div className="flex-shrink-0">
-                <div className="p-2 bg-blue-100 rounded-lg">
-                  <HelpCircle className="h-6 w-6 text-blue-600" />
+                <div className="p-2 bg-epoch-primary/10 rounded-none">
+                  <HelpCircle className="h-6 w-6 text-epoch-accent" />
                 </div>
               </div>
               <div>
-                <h3 className="font-semibold text-blue-900 mb-2">
+                <h3 className="font-display font-semibold text-epoch-primary mb-2">
                   ¿Necesitas ayuda adicional?
                 </h3>
-                <p className="text-sm text-blue-800">
+                <p className="text-sm text-epoch-primary/80">
                   Nuestro equipo de soporte revisará tu ticket y te responderá
                   lo antes posible. Los tiempos de respuesta varían según la
                   prioridad del ticket.

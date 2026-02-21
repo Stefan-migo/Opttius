@@ -331,6 +331,19 @@ export function useAuth(initialUser?: User | null) {
       throw new Error("No user logged in");
     }
 
+    const previousProfile = authState.profile;
+    const optimisticProfile = previousProfile
+      ? { ...previousProfile, ...updates }
+      : null;
+
+    // Optimistic UI: update local state immediately
+    if (optimisticProfile) {
+      setAuthState((prev) => ({
+        ...prev,
+        profile: optimisticProfile as Profile,
+      }));
+    }
+
     const { data, error } = await supabase
       .from("profiles")
       .update(updates)
@@ -339,10 +352,14 @@ export function useAuth(initialUser?: User | null) {
       .single();
 
     if (error) {
+      // Revert on failure
+      setAuthState((prev) => ({
+        ...prev,
+        profile: previousProfile,
+      }));
       throw error;
     }
 
-    // Update local state
     setAuthState((prev) => ({
       ...prev,
       profile: data,

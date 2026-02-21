@@ -115,7 +115,7 @@ export default function QuoteDetailPage() {
   // Helper function to safely get customer ID
   const getCustomerId = (q: Quote | null): string => {
     if (!q) return "N/A";
-    if (typeof q.customer === 'object' && q.customer !== null) {
+    if (typeof q.customer === "object" && q.customer !== null) {
       return q.customer.id ?? "N/A";
     }
     return "N/A";
@@ -159,7 +159,7 @@ export default function QuoteDetailPage() {
       const quoteResult = await quoteService.getQuote(quoteId);
       // Cast to any to handle additional properties from API response
       const quote = quoteResult as unknown as any;
-      
+
       console.log("Quote loaded:", {
         quoteId: quote?.id,
         hasCustomer: !!quote?.customer,
@@ -508,7 +508,7 @@ export default function QuoteDetailPage() {
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div>
-            <h1 className="text-3xl font-bold text-azul-profundo">
+            <h1 className="text-3xl font-bold text-epoch-primary">
               Cargando...
             </h1>
           </div>
@@ -525,7 +525,7 @@ export default function QuoteDetailPage() {
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div>
-            <h1 className="text-3xl font-bold text-azul-profundo">
+            <h1 className="text-3xl font-bold text-epoch-primary">
               Presupuesto no encontrado
             </h1>
           </div>
@@ -548,10 +548,12 @@ export default function QuoteDetailPage() {
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div>
-            <h1 className="text-3xl font-bold text-azul-profundo">
+            <h1 className="text-3xl font-bold text-epoch-primary">
               {quote.quote_number}
             </h1>
-            <p className="text-tierra-media">Presupuesto para {customerName}</p>
+            <p className="text-admin-text-tertiary">
+              Presupuesto para {customerName}
+            </p>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -678,18 +680,22 @@ export default function QuoteDetailPage() {
                 {quote.customer ? (
                   <>
                     <div>
-                      <p className="text-sm text-tierra-media">Nombre</p>
+                      <p className="text-sm text-admin-text-tertiary">Nombre</p>
                       <p className="font-medium">{customerName}</p>
                     </div>
                     {quote.customer.email && (
                       <div>
-                        <p className="text-sm text-tierra-media">Email</p>
+                        <p className="text-sm text-admin-text-tertiary">
+                          Email
+                        </p>
                         <p className="font-medium">{quote.customer.email}</p>
                       </div>
                     )}
                     {quote.customer.phone && (
                       <div>
-                        <p className="text-sm text-tierra-media">Teléfono</p>
+                        <p className="text-sm text-admin-text-tertiary">
+                          Teléfono
+                        </p>
                         <p className="font-medium">{quote.customer.phone}</p>
                       </div>
                     )}
@@ -707,7 +713,7 @@ export default function QuoteDetailPage() {
                   </>
                 ) : (
                   <div>
-                    <p className="text-sm text-tierra-media text-red-500">
+                    <p className="text-sm text-admin-text-tertiary text-red-500">
                       Cliente no encontrado (ID: {getCustomerId(quote)})
                     </p>
                   </div>
@@ -726,14 +732,14 @@ export default function QuoteDetailPage() {
                 </CardHeader>
                 <CardContent className="space-y-2">
                   <div>
-                    <p className="text-sm text-tierra-media">Fecha</p>
+                    <p className="text-sm text-admin-text-tertiary">Fecha</p>
                     <p className="font-medium">
                       {formatDate(quote.prescription.prescription_date)}
                     </p>
                   </div>
                   {quote.prescription.prescription_type && (
                     <div>
-                      <p className="text-sm text-tierra-media">Tipo</p>
+                      <p className="text-sm text-admin-text-tertiary">Tipo</p>
                       <p className="font-medium">
                         {quote.prescription.prescription_type}
                       </p>
@@ -741,7 +747,9 @@ export default function QuoteDetailPage() {
                   )}
                   {quote.prescription.issued_by && (
                     <div>
-                      <p className="text-sm text-tierra-media">Emitida por</p>
+                      <p className="text-sm text-admin-text-tertiary">
+                        Emitida por
+                      </p>
                       <p className="font-medium">
                         {quote.prescription.issued_by}
                       </p>
@@ -761,12 +769,14 @@ export default function QuoteDetailPage() {
               </CardHeader>
               <CardContent className="space-y-2">
                 <div>
-                  <p className="text-sm text-tierra-media">Fecha</p>
+                  <p className="text-sm text-admin-text-tertiary">Fecha</p>
                   <p className="font-medium">{formatDate(quote.quote_date)}</p>
                 </div>
                 {quote.expiration_date && (
                   <div>
-                    <p className="text-sm text-tierra-media">Válido hasta</p>
+                    <p className="text-sm text-admin-text-tertiary">
+                      Válido hasta
+                    </p>
                     <p className="font-medium">
                       {new Date(quote.expiration_date).toLocaleDateString(
                         "es-CL",
@@ -775,8 +785,8 @@ export default function QuoteDetailPage() {
                   </div>
                 )}
                 <div>
-                  <p className="text-sm text-tierra-media">Total</p>
-                  <p className="text-2xl font-bold text-verde-suave">
+                  <p className="text-sm text-admin-text-tertiary">Total</p>
+                  <p className="text-2xl font-bold text-admin-success">
                     {formatCurrency(quote.total_amount)}
                   </p>
                 </div>
@@ -798,7 +808,7 @@ export default function QuoteDetailPage() {
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div className="border-b pb-3">
-                      <p className="text-xs text-tierra-media mb-2 font-semibold">
+                      <p className="text-xs text-admin-text-tertiary mb-2 font-semibold">
                         Marco de Lejos:
                       </p>
                       <div className="space-y-1">
@@ -806,17 +816,17 @@ export default function QuoteDetailPage() {
                           {quote.frame_name || "-"}
                         </p>
                         {quote.frame_brand && (
-                          <p className="text-xs text-tierra-media">
+                          <p className="text-xs text-admin-text-tertiary">
                             Marca: {quote.frame_brand}
                           </p>
                         )}
-                        <p className="text-sm font-semibold text-verde-suave">
+                        <p className="text-sm font-semibold text-admin-success">
                           Precio: {formatCurrency(quote.frame_price)}
                         </p>
                       </div>
                     </div>
                     <div>
-                      <p className="text-xs text-tierra-media mb-2 font-semibold">
+                      <p className="text-xs text-admin-text-tertiary mb-2 font-semibold">
                         Marco de Cerca:
                       </p>
                       <div className="space-y-1">
@@ -830,11 +840,11 @@ export default function QuoteDetailPage() {
                               {quote.near_frame_name || "-"}
                             </p>
                             {quote.near_frame_brand && (
-                              <p className="text-xs text-tierra-media">
+                              <p className="text-xs text-admin-text-tertiary">
                                 Marca: {quote.near_frame_brand}
                               </p>
                             )}
-                            <p className="text-sm font-semibold text-verde-suave">
+                            <p className="text-sm font-semibold text-admin-success">
                               Precio:{" "}
                               {formatCurrency(quote.near_frame_price || 0)}
                             </p>
@@ -843,8 +853,10 @@ export default function QuoteDetailPage() {
                       </div>
                     </div>
                     <div className="pt-2 border-t">
-                      <p className="text-xs text-tierra-media">Total Marcos</p>
-                      <p className="text-lg font-bold text-verde-suave">
+                      <p className="text-xs text-admin-text-tertiary">
+                        Total Marcos
+                      </p>
+                      <p className="text-lg font-bold text-admin-success">
                         {formatCurrency(
                           (quote.frame_price || 0) +
                             (quote.customer_own_near_frame
@@ -866,30 +878,30 @@ export default function QuoteDetailPage() {
                 </CardHeader>
                 <CardContent className="space-y-2">
                   <div>
-                    <p className="text-sm text-tierra-media">Nombre</p>
+                    <p className="text-sm text-admin-text-tertiary">Nombre</p>
                     <p className="font-medium">{quote.frame_name || "-"}</p>
                   </div>
                   {quote.frame_brand && (
                     <div>
-                      <p className="text-sm text-tierra-media">Marca</p>
+                      <p className="text-sm text-admin-text-tertiary">Marca</p>
                       <p className="font-medium">{quote.frame_brand}</p>
                     </div>
                   )}
                   {quote.frame_model && (
                     <div>
-                      <p className="text-sm text-tierra-media">Modelo</p>
+                      <p className="text-sm text-admin-text-tertiary">Modelo</p>
                       <p className="font-medium">{quote.frame_model}</p>
                     </div>
                   )}
                   {quote.frame_color && (
                     <div>
-                      <p className="text-sm text-tierra-media">Color</p>
+                      <p className="text-sm text-admin-text-tertiary">Color</p>
                       <p className="font-medium">{quote.frame_color}</p>
                     </div>
                   )}
                   <div>
-                    <p className="text-sm text-tierra-media">Precio</p>
-                    <p className="font-semibold text-verde-suave">
+                    <p className="text-sm text-admin-text-tertiary">Precio</p>
+                    <p className="font-semibold text-admin-success">
                       {formatCurrency(quote.frame_price)}
                     </p>
                   </div>
@@ -907,25 +919,27 @@ export default function QuoteDetailPage() {
               <CardContent className="space-y-2">
                 {quote.lens_type && (
                   <div>
-                    <p className="text-sm text-tierra-media">Tipo</p>
+                    <p className="text-sm text-admin-text-tertiary">Tipo</p>
                     <p className="font-medium">{quote.lens_type}</p>
                   </div>
                 )}
                 {quote.lens_material && (
                   <div>
-                    <p className="text-sm text-tierra-media">Material</p>
+                    <p className="text-sm text-admin-text-tertiary">Material</p>
                     <p className="font-medium">{quote.lens_material}</p>
                   </div>
                 )}
                 {quote.lens_index && (
                   <div>
-                    <p className="text-sm text-tierra-media">Índice</p>
+                    <p className="text-sm text-admin-text-tertiary">Índice</p>
                     <p className="font-medium">{quote.lens_index}</p>
                   </div>
                 )}
                 {quote.lens_treatments && quote.lens_treatments.length > 0 && (
                   <div>
-                    <p className="text-sm text-tierra-media">Tratamientos</p>
+                    <p className="text-sm text-admin-text-tertiary">
+                      Tratamientos
+                    </p>
                     <div className="flex flex-wrap gap-1 mt-1">
                       {quote.lens_treatments.map((treatment, idx) => (
                         <Badge key={idx} variant="outline">
@@ -955,14 +969,16 @@ export default function QuoteDetailPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* Right Eye (OD) */}
                   <div className="space-y-3">
-                    <h3 className="font-semibold text-azul-profundo border-b pb-2">
+                    <h3 className="font-semibold text-epoch-primary border-b pb-2">
                       Ojo Derecho (OD)
                     </h3>
                     <div className="grid grid-cols-2 gap-3">
                       {quote.prescription.od_sphere !== null &&
                         quote.prescription.od_sphere !== undefined && (
                           <div>
-                            <p className="text-xs text-tierra-media">Esfera</p>
+                            <p className="text-xs text-admin-text-tertiary">
+                              Esfera
+                            </p>
                             <p className="font-medium">
                               {quote.prescription.od_sphere > 0 ? "+" : ""}
                               {quote.prescription.od_sphere} D
@@ -972,7 +988,7 @@ export default function QuoteDetailPage() {
                       {quote.prescription.od_cylinder !== null &&
                         quote.prescription.od_cylinder !== undefined && (
                           <div>
-                            <p className="text-xs text-tierra-media">
+                            <p className="text-xs text-admin-text-tertiary">
                               Cilindro
                             </p>
                             <p className="font-medium">
@@ -984,7 +1000,9 @@ export default function QuoteDetailPage() {
                       {quote.prescription.od_axis !== null &&
                         quote.prescription.od_axis !== undefined && (
                           <div>
-                            <p className="text-xs text-tierra-media">Eje</p>
+                            <p className="text-xs text-admin-text-tertiary">
+                              Eje
+                            </p>
                             <p className="font-medium">
                               {quote.prescription.od_axis}°
                             </p>
@@ -993,7 +1011,9 @@ export default function QuoteDetailPage() {
                       {quote.prescription.od_add !== null &&
                         quote.prescription.od_add !== undefined && (
                           <div>
-                            <p className="text-xs text-tierra-media">Adición</p>
+                            <p className="text-xs text-admin-text-tertiary">
+                              Adición
+                            </p>
                             <p className="font-medium">
                               +{quote.prescription.od_add} D
                             </p>
@@ -1002,7 +1022,7 @@ export default function QuoteDetailPage() {
                       {quote.prescription.od_pd !== null &&
                         quote.prescription.od_pd !== undefined && (
                           <div>
-                            <p className="text-xs text-tierra-media">
+                            <p className="text-xs text-admin-text-tertiary">
                               DP Lejos
                             </p>
                             <p className="font-medium">
@@ -1013,7 +1033,7 @@ export default function QuoteDetailPage() {
                       {quote.prescription.od_near_pd !== null &&
                         quote.prescription.od_near_pd !== undefined && (
                           <div>
-                            <p className="text-xs text-tierra-media">
+                            <p className="text-xs text-admin-text-tertiary">
                               DP Cerca
                             </p>
                             <p className="font-medium">
@@ -1024,7 +1044,9 @@ export default function QuoteDetailPage() {
                     </div>
                     {quote.prescription.prism_od && (
                       <div className="mt-2">
-                        <p className="text-xs text-tierra-media">Prisma</p>
+                        <p className="text-xs text-admin-text-tertiary">
+                          Prisma
+                        </p>
                         <p className="font-medium">
                           {quote.prescription.prism_od}
                         </p>
@@ -1034,14 +1056,16 @@ export default function QuoteDetailPage() {
 
                   {/* Left Eye (OS) */}
                   <div className="space-y-3">
-                    <h3 className="font-semibold text-azul-profundo border-b pb-2">
+                    <h3 className="font-semibold text-epoch-primary border-b pb-2">
                       Ojo Izquierdo (OS)
                     </h3>
                     <div className="grid grid-cols-2 gap-3">
                       {quote.prescription.os_sphere !== null &&
                         quote.prescription.os_sphere !== undefined && (
                           <div>
-                            <p className="text-xs text-tierra-media">Esfera</p>
+                            <p className="text-xs text-admin-text-tertiary">
+                              Esfera
+                            </p>
                             <p className="font-medium">
                               {quote.prescription.os_sphere > 0 ? "+" : ""}
                               {quote.prescription.os_sphere} D
@@ -1051,7 +1075,7 @@ export default function QuoteDetailPage() {
                       {quote.prescription.os_cylinder !== null &&
                         quote.prescription.os_cylinder !== undefined && (
                           <div>
-                            <p className="text-xs text-tierra-media">
+                            <p className="text-xs text-admin-text-tertiary">
                               Cilindro
                             </p>
                             <p className="font-medium">
@@ -1063,7 +1087,9 @@ export default function QuoteDetailPage() {
                       {quote.prescription.os_axis !== null &&
                         quote.prescription.os_axis !== undefined && (
                           <div>
-                            <p className="text-xs text-tierra-media">Eje</p>
+                            <p className="text-xs text-admin-text-tertiary">
+                              Eje
+                            </p>
                             <p className="font-medium">
                               {quote.prescription.os_axis}°
                             </p>
@@ -1072,7 +1098,9 @@ export default function QuoteDetailPage() {
                       {quote.prescription.os_add !== null &&
                         quote.prescription.os_add !== undefined && (
                           <div>
-                            <p className="text-xs text-tierra-media">Adición</p>
+                            <p className="text-xs text-admin-text-tertiary">
+                              Adición
+                            </p>
                             <p className="font-medium">
                               +{quote.prescription.os_add} D
                             </p>
@@ -1081,7 +1109,7 @@ export default function QuoteDetailPage() {
                       {quote.prescription.os_pd !== null &&
                         quote.prescription.os_pd !== undefined && (
                           <div>
-                            <p className="text-xs text-tierra-media">
+                            <p className="text-xs text-admin-text-tertiary">
                               DP Lejos
                             </p>
                             <p className="font-medium">
@@ -1092,7 +1120,7 @@ export default function QuoteDetailPage() {
                       {quote.prescription.os_near_pd !== null &&
                         quote.prescription.os_near_pd !== undefined && (
                           <div>
-                            <p className="text-xs text-tierra-media">
+                            <p className="text-xs text-admin-text-tertiary">
                               DP Cerca
                             </p>
                             <p className="font-medium">
@@ -1103,7 +1131,9 @@ export default function QuoteDetailPage() {
                     </div>
                     {quote.prescription.prism_os && (
                       <div className="mt-2">
-                        <p className="text-xs text-tierra-media">Prisma</p>
+                        <p className="text-xs text-admin-text-tertiary">
+                          Prisma
+                        </p>
                         <p className="font-medium">
                           {quote.prescription.prism_os}
                         </p>
@@ -1117,7 +1147,7 @@ export default function QuoteDetailPage() {
                   {quote.prescription.frame_pd !== null &&
                     quote.prescription.frame_pd !== undefined && (
                       <div>
-                        <p className="text-xs text-tierra-media">
+                        <p className="text-xs text-admin-text-tertiary">
                           DP del Marco
                         </p>
                         <p className="font-medium">
@@ -1128,7 +1158,7 @@ export default function QuoteDetailPage() {
                   {quote.prescription.height_segmentation !== null &&
                     quote.prescription.height_segmentation !== undefined && (
                       <div>
-                        <p className="text-xs text-tierra-media">
+                        <p className="text-xs text-admin-text-tertiary">
                           Altura de Segmento
                         </p>
                         <p className="font-medium">
@@ -1138,7 +1168,9 @@ export default function QuoteDetailPage() {
                     )}
                   {quote.prescription.issued_by && (
                     <div>
-                      <p className="text-xs text-tierra-media">Prescrito por</p>
+                      <p className="text-xs text-admin-text-tertiary">
+                        Prescrito por
+                      </p>
                       <p className="font-medium">
                         {quote.prescription.issued_by}
                       </p>
@@ -1148,7 +1180,7 @@ export default function QuoteDetailPage() {
 
                 {quote.prescription.notes && (
                   <div className="mt-4 pt-4 border-t">
-                    <p className="text-xs text-tierra-media">
+                    <p className="text-xs text-admin-text-tertiary">
                       Notas de la Receta
                     </p>
                     <p className="font-medium whitespace-pre-wrap text-sm">
@@ -1174,42 +1206,50 @@ export default function QuoteDetailPage() {
                 <CardContent>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <p className="text-xs text-tierra-media">Nombre</p>
+                      <p className="text-xs text-admin-text-tertiary">Nombre</p>
                       <p className="font-medium">{quote.frame_name || "—"}</p>
                     </div>
                     {quote.frame_brand && (
                       <div>
-                        <p className="text-xs text-tierra-media">Marca</p>
+                        <p className="text-xs text-admin-text-tertiary">
+                          Marca
+                        </p>
                         <p className="font-medium">{quote.frame_brand}</p>
                       </div>
                     )}
                     {quote.frame_model && (
                       <div>
-                        <p className="text-xs text-tierra-media">Modelo</p>
+                        <p className="text-xs text-admin-text-tertiary">
+                          Modelo
+                        </p>
                         <p className="font-medium">{quote.frame_model}</p>
                       </div>
                     )}
                     {quote.frame_color && (
                       <div>
-                        <p className="text-xs text-tierra-media">Color</p>
+                        <p className="text-xs text-admin-text-tertiary">
+                          Color
+                        </p>
                         <p className="font-medium">{quote.frame_color}</p>
                       </div>
                     )}
                     {quote.frame_size && (
                       <div>
-                        <p className="text-xs text-tierra-media">Tamaño</p>
+                        <p className="text-xs text-admin-text-tertiary">
+                          Tamaño
+                        </p>
                         <p className="font-medium">{quote.frame_size}</p>
                       </div>
                     )}
                     {quote.frame_sku && (
                       <div>
-                        <p className="text-xs text-tierra-media">SKU</p>
+                        <p className="text-xs text-admin-text-tertiary">SKU</p>
                         <p className="font-medium">{quote.frame_sku}</p>
                       </div>
                     )}
                     <div>
-                      <p className="text-xs text-tierra-media">Precio</p>
-                      <p className="font-semibold text-verde-suave">
+                      <p className="text-xs text-admin-text-tertiary">Precio</p>
+                      <p className="font-semibold text-admin-success">
                         {formatCurrency(quote.frame_price)}
                       </p>
                     </div>
@@ -1235,14 +1275,18 @@ export default function QuoteDetailPage() {
                   ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <p className="text-xs text-tierra-media">Nombre</p>
+                        <p className="text-xs text-admin-text-tertiary">
+                          Nombre
+                        </p>
                         <p className="font-medium">
                           {quote.near_frame_name || "—"}
                         </p>
                       </div>
                       {quote.near_frame_brand && (
                         <div>
-                          <p className="text-xs text-tierra-media">Marca</p>
+                          <p className="text-xs text-admin-text-tertiary">
+                            Marca
+                          </p>
                           <p className="font-medium">
                             {quote.near_frame_brand}
                           </p>
@@ -1250,7 +1294,9 @@ export default function QuoteDetailPage() {
                       )}
                       {quote.near_frame_model && (
                         <div>
-                          <p className="text-xs text-tierra-media">Modelo</p>
+                          <p className="text-xs text-admin-text-tertiary">
+                            Modelo
+                          </p>
                           <p className="font-medium">
                             {quote.near_frame_model}
                           </p>
@@ -1258,7 +1304,9 @@ export default function QuoteDetailPage() {
                       )}
                       {quote.near_frame_color && (
                         <div>
-                          <p className="text-xs text-tierra-media">Color</p>
+                          <p className="text-xs text-admin-text-tertiary">
+                            Color
+                          </p>
                           <p className="font-medium">
                             {quote.near_frame_color}
                           </p>
@@ -1266,21 +1314,27 @@ export default function QuoteDetailPage() {
                       )}
                       {quote.near_frame_size && (
                         <div>
-                          <p className="text-xs text-tierra-media">Tamaño</p>
+                          <p className="text-xs text-admin-text-tertiary">
+                            Tamaño
+                          </p>
                           <p className="font-medium">{quote.near_frame_size}</p>
                         </div>
                       )}
                       {quote.near_frame_sku && (
                         <div>
-                          <p className="text-xs text-tierra-media">SKU</p>
+                          <p className="text-xs text-admin-text-tertiary">
+                            SKU
+                          </p>
                           <p className="font-medium">{quote.near_frame_sku}</p>
                         </div>
                       )}
                       {quote.near_frame_price !== undefined &&
                         quote.near_frame_price !== null && (
                           <div>
-                            <p className="text-xs text-tierra-media">Precio</p>
-                            <p className="font-semibold text-verde-suave">
+                            <p className="text-xs text-admin-text-tertiary">
+                              Precio
+                            </p>
+                            <p className="font-semibold text-admin-success">
                               {formatCurrency(quote.near_frame_price || 0)}
                             </p>
                           </div>
@@ -1301,36 +1355,36 @@ export default function QuoteDetailPage() {
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <p className="text-xs text-tierra-media">Nombre</p>
+                    <p className="text-xs text-admin-text-tertiary">Nombre</p>
                     <p className="font-medium">{quote.frame_name || "—"}</p>
                   </div>
                   {quote.frame_brand && (
                     <div>
-                      <p className="text-xs text-tierra-media">Marca</p>
+                      <p className="text-xs text-admin-text-tertiary">Marca</p>
                       <p className="font-medium">{quote.frame_brand}</p>
                     </div>
                   )}
                   {quote.frame_model && (
                     <div>
-                      <p className="text-xs text-tierra-media">Modelo</p>
+                      <p className="text-xs text-admin-text-tertiary">Modelo</p>
                       <p className="font-medium">{quote.frame_model}</p>
                     </div>
                   )}
                   {quote.frame_color && (
                     <div>
-                      <p className="text-xs text-tierra-media">Color</p>
+                      <p className="text-xs text-admin-text-tertiary">Color</p>
                       <p className="font-medium">{quote.frame_color}</p>
                     </div>
                   )}
                   {quote.frame_size && (
                     <div>
-                      <p className="text-xs text-tierra-media">Tamaño</p>
+                      <p className="text-xs text-admin-text-tertiary">Tamaño</p>
                       <p className="font-medium">{quote.frame_size}</p>
                     </div>
                   )}
                   {quote.frame_sku && (
                     <div>
-                      <p className="text-xs text-tierra-media">SKU</p>
+                      <p className="text-xs text-admin-text-tertiary">SKU</p>
                       <p className="font-medium">{quote.frame_sku}</p>
                     </div>
                   )}
@@ -1363,14 +1417,14 @@ export default function QuoteDetailPage() {
                       </div>
                     )}
                     <div>
-                      <p className="text-xs text-tierra-media">
+                      <p className="text-xs text-admin-text-tertiary">
                         Costo del Lente
                       </p>
-                      <p className="font-semibold text-verde-suave">
+                      <p className="font-semibold text-admin-success">
                         {formatCurrency(quote.far_lens_cost || 0)}
                       </p>
                     </div>
-                    <div className="text-xs text-tierra-media">
+                    <div className="text-xs text-admin-text-tertiary">
                       <p className="mb-1">Solución para Presbicia:</p>
                       <Badge variant="outline">
                         Dos lentes separados - Lejos
@@ -1401,14 +1455,14 @@ export default function QuoteDetailPage() {
                       </div>
                     )}
                     <div>
-                      <p className="text-xs text-tierra-media">
+                      <p className="text-xs text-admin-text-tertiary">
                         Costo del Lente
                       </p>
-                      <p className="font-semibold text-verde-suave">
+                      <p className="font-semibold text-admin-success">
                         {formatCurrency(quote.near_lens_cost || 0)}
                       </p>
                     </div>
-                    <div className="text-xs text-tierra-media">
+                    <div className="text-xs text-admin-text-tertiary">
                       <p className="mb-1">Solución para Presbicia:</p>
                       <Badge variant="outline">
                         Dos lentes separados - Cerca
@@ -1430,19 +1484,23 @@ export default function QuoteDetailPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {quote.lens_type && (
                     <div>
-                      <p className="text-xs text-tierra-media">Tipo de Lente</p>
+                      <p className="text-xs text-admin-text-tertiary">
+                        Tipo de Lente
+                      </p>
                       <p className="font-medium">{quote.lens_type}</p>
                     </div>
                   )}
                   {quote.lens_material && (
                     <div>
-                      <p className="text-xs text-tierra-media">Material</p>
+                      <p className="text-xs text-admin-text-tertiary">
+                        Material
+                      </p>
                       <p className="font-medium">{quote.lens_material}</p>
                     </div>
                   )}
                   {quote.lens_index && (
                     <div>
-                      <p className="text-xs text-tierra-media">
+                      <p className="text-xs text-admin-text-tertiary">
                         Índice de Refracción
                       </p>
                       <p className="font-medium">{quote.lens_index}</p>
@@ -1451,7 +1509,7 @@ export default function QuoteDetailPage() {
                   {quote.lens_treatments &&
                     quote.lens_treatments.length > 0 && (
                       <div>
-                        <p className="text-xs text-tierra-media">
+                        <p className="text-xs text-admin-text-tertiary">
                           Tratamientos
                         </p>
                         <div className="flex flex-wrap gap-1 mt-1">
@@ -1467,7 +1525,7 @@ export default function QuoteDetailPage() {
                     )}
                   {quote.lens_tint_color && (
                     <div>
-                      <p className="text-xs text-tierra-media">
+                      <p className="text-xs text-admin-text-tertiary">
                         Color del Tinte
                       </p>
                       <p className="font-medium">{quote.lens_tint_color}</p>
@@ -1475,7 +1533,7 @@ export default function QuoteDetailPage() {
                   )}
                   {quote.lens_tint_percentage && (
                     <div>
-                      <p className="text-xs text-tierra-media">
+                      <p className="text-xs text-admin-text-tertiary">
                         Porcentaje de Tinte
                       </p>
                       <p className="font-medium">
@@ -1486,7 +1544,7 @@ export default function QuoteDetailPage() {
                   {quote.presbyopia_solution &&
                     quote.presbyopia_solution !== "none" && (
                       <div>
-                        <p className="text-xs text-tierra-media">
+                        <p className="text-xs text-admin-text-tertiary">
                           Solución para Presbicia
                         </p>
                         <Badge variant="outline">
@@ -1513,7 +1571,7 @@ export default function QuoteDetailPage() {
             <CardContent className="space-y-4">
               {quote.notes && (
                 <div>
-                  <p className="text-sm text-tierra-media mb-1">
+                  <p className="text-sm text-admin-text-tertiary mb-1">
                     Notas Internas
                   </p>
                   <p className="font-medium whitespace-pre-wrap text-sm bg-admin-bg-secondary p-3 rounded">
@@ -1523,7 +1581,7 @@ export default function QuoteDetailPage() {
               )}
               {quote.customer_notes && (
                 <div>
-                  <p className="text-sm text-tierra-media mb-1">
+                  <p className="text-sm text-admin-text-tertiary mb-1">
                     Notas para el Cliente
                   </p>
                   <p className="font-medium whitespace-pre-wrap text-sm bg-admin-bg-secondary p-3 rounded">
@@ -1533,7 +1591,7 @@ export default function QuoteDetailPage() {
               )}
               {quote.terms_and_conditions && (
                 <div>
-                  <p className="text-sm text-tierra-media mb-1">
+                  <p className="text-sm text-admin-text-tertiary mb-1">
                     Términos y Condiciones
                   </p>
                   <p className="font-medium whitespace-pre-wrap text-sm bg-admin-bg-secondary p-3 rounded">
@@ -1560,11 +1618,11 @@ export default function QuoteDetailPage() {
                   <>
                     {/* Two separate lenses pricing breakdown */}
                     <div className="space-y-1 pb-2 border-b">
-                      <p className="text-sm font-semibold text-tierra-media mb-2">
+                      <p className="text-sm font-semibold text-admin-text-tertiary mb-2">
                         Marco y Lente de Lejos:
                       </p>
                       <div className="flex justify-between pl-4">
-                        <span className="text-xs text-tierra-media">
+                        <span className="text-xs text-admin-text-tertiary">
                           Marco de Lejos:
                         </span>
                         <span className="text-xs font-medium">
@@ -1572,7 +1630,7 @@ export default function QuoteDetailPage() {
                         </span>
                       </div>
                       <div className="flex justify-between pl-4">
-                        <span className="text-xs text-tierra-media">
+                        <span className="text-xs text-admin-text-tertiary">
                           Lente de Lejos:
                         </span>
                         <span className="text-xs font-medium">
@@ -1581,12 +1639,12 @@ export default function QuoteDetailPage() {
                       </div>
                     </div>
                     <div className="space-y-1 pb-2 border-b">
-                      <p className="text-sm font-semibold text-tierra-media mb-2">
+                      <p className="text-sm font-semibold text-admin-text-tertiary mb-2">
                         Marco y Lente de Cerca:
                       </p>
                       {quote.customer_own_near_frame ? (
                         <div className="flex justify-between pl-4">
-                          <span className="text-xs text-tierra-media">
+                          <span className="text-xs text-admin-text-tertiary">
                             Marco de Cerca:
                           </span>
                           <span className="text-xs font-medium">
@@ -1595,7 +1653,7 @@ export default function QuoteDetailPage() {
                         </div>
                       ) : (
                         <div className="flex justify-between pl-4">
-                          <span className="text-xs text-tierra-media">
+                          <span className="text-xs text-admin-text-tertiary">
                             Marco de Cerca:
                           </span>
                           <span className="text-xs font-medium">
@@ -1607,7 +1665,7 @@ export default function QuoteDetailPage() {
                         </div>
                       )}
                       <div className="flex justify-between pl-4">
-                        <span className="text-xs text-tierra-media">
+                        <span className="text-xs text-admin-text-tertiary">
                           Lente de Cerca:
                         </span>
                         <span className="text-xs font-medium">
@@ -1616,7 +1674,7 @@ export default function QuoteDetailPage() {
                       </div>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-tierra-media">
+                      <span className="text-admin-text-tertiary">
                         Costo de Tratamientos:
                       </span>
                       <span className="font-medium">
@@ -1624,7 +1682,7 @@ export default function QuoteDetailPage() {
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-tierra-media">
+                      <span className="text-admin-text-tertiary">
                         Costo de Mano de Obra:
                       </span>
                       <span className="font-medium">
@@ -1636,19 +1694,23 @@ export default function QuoteDetailPage() {
                   <>
                     {/* Single lens pricing breakdown */}
                     <div className="flex justify-between">
-                      <span className="text-tierra-media">Costo de Marco:</span>
+                      <span className="text-admin-text-tertiary">
+                        Costo de Marco:
+                      </span>
                       <span className="font-medium">
                         {formatCurrency(quote.frame_cost)}
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-tierra-media">Costo de Lente:</span>
+                      <span className="text-admin-text-tertiary">
+                        Costo de Lente:
+                      </span>
                       <span className="font-medium">
                         {formatCurrency(quote.lens_cost)}
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-tierra-media">
+                      <span className="text-admin-text-tertiary">
                         Costo de Tratamientos:
                       </span>
                       <span className="font-medium">
@@ -1656,7 +1718,7 @@ export default function QuoteDetailPage() {
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-tierra-media">
+                      <span className="text-admin-text-tertiary">
                         Costo de Mano de Obra:
                       </span>
                       <span className="font-medium">
@@ -1680,14 +1742,14 @@ export default function QuoteDetailPage() {
                   </div>
                 )}
                 <div className="flex justify-between">
-                  <span className="text-tierra-media">IVA (19%):</span>
+                  <span className="text-admin-text-tertiary">IVA (19%):</span>
                   <span className="font-medium">
                     {formatCurrency(quote.tax_amount)}
                   </span>
                 </div>
                 <div className="border-t pt-2 flex justify-between text-lg font-bold">
                   <span>Total:</span>
-                  <span className="text-verde-suave">
+                  <span className="text-admin-success">
                     {formatCurrency(quote.total_amount)}
                   </span>
                 </div>

@@ -5730,23 +5730,27 @@ export default function POSPage() {
           if (!open) setFiscalReference("");
         }}
       >
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-md rounded-none border-admin-border-primary">
           <DialogHeader>
-            <DialogTitle>Confirmar Venta</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="font-display">Confirmar Venta</DialogTitle>
+            <DialogDescription className="text-admin-text-secondary">
               Revisa los detalles antes de procesar el pago
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div>
-              <div className="text-sm text-gray-600 mb-2">Total a pagar:</div>
-              <div className="text-2xl font-bold text-green-600">
+              <div className="text-sm text-admin-text-secondary mb-2">
+                Total a pagar:
+              </div>
+              <div className="text-2xl font-bold text-admin-success">
                 {formatCurrency(total)}
               </div>
             </div>
             <div>
-              <div className="text-sm text-gray-600 mb-1">Método de pago:</div>
-              <div className="font-medium">
+              <div className="text-sm text-admin-text-secondary mb-1">
+                Método de pago:
+              </div>
+              <div className="font-medium text-admin-text-primary">
                 {paymentMethod === "cash" && "Efectivo"}
                 {paymentMethod === "debit_card" && "Tarjeta Débito"}
                 {paymentMethod === "credit_card" && "Tarjeta Crédito"}
@@ -5758,14 +5762,14 @@ export default function POSPage() {
               paymentMethod === "credit_card") &&
               depositAmount > 0 && (
                 <div>
-                  <div className="text-sm text-gray-600 mb-1">
+                  <div className="text-sm text-admin-text-secondary mb-1">
                     Monto de abono:
                   </div>
-                  <div className="font-medium text-blue-600">
+                  <div className="font-medium text-admin-info">
                     {formatCurrency(depositAmount)}
                   </div>
                   {depositAmount < total && (
-                    <div className="text-xs text-gray-500 mt-1">
+                    <div className="text-xs text-admin-text-tertiary mt-1">
                       Saldo pendiente: {formatCurrency(total - depositAmount)}
                     </div>
                   )}
@@ -5775,21 +5779,21 @@ export default function POSPage() {
               paymentMethod === "credit_card" ||
               paymentMethod === "transfer") && (
               <div>
-                <Label className="text-sm text-gray-600">
+                <Label className="text-sm text-admin-text-secondary">
                   Número de referencia fiscal (opcional)
                 </Label>
                 <Input
                   placeholder="Ej: Nº boleta, factura o transacción"
                   value={fiscalReference}
                   onChange={(e) => setFiscalReference(e.target.value)}
-                  className="mt-1"
+                  className="mt-1 rounded-none"
                 />
-                <p className="text-xs text-amber-600 mt-1">
+                <p className="text-xs text-admin-warning mt-1">
                   Se recomienda registrar el número para trazabilidad con
                   documentos fiscales reales
                 </p>
                 {!fiscalReference && (
-                  <p className="text-xs text-gray-500 mt-0.5">
+                  <p className="text-xs text-admin-text-tertiary mt-0.5">
                     Puede continuar sin ingresar (opcional)
                   </p>
                 )}
@@ -5797,22 +5801,26 @@ export default function POSPage() {
             )}
             {paymentMethod === "cash" && cashReceived > 0 && (
               <div>
-                <div className="text-sm text-gray-600 mb-1">Vuelto:</div>
-                <div className="font-medium">{formatCurrency(change)}</div>
+                <div className="text-sm text-admin-text-secondary mb-1">
+                  Vuelto:
+                </div>
+                <div className="font-medium text-admin-text-primary">
+                  {formatCurrency(change)}
+                </div>
               </div>
             )}
             <div className="flex gap-2 pt-4">
               <Button
                 variant="outline"
                 onClick={() => setShowPaymentDialog(false)}
-                className="flex-1"
+                className="flex-1 rounded-none"
               >
                 Cancelar
               </Button>
               <Button
                 onClick={processPayment}
                 disabled={processingPayment}
-                className="flex-1"
+                className="flex-1 rounded-none"
               >
                 {processingPayment ? (
                   <>

@@ -50,8 +50,8 @@ const AppointmentCalendar = dynamic(
     loading: () => (
       <div className="flex items-center justify-center py-12">
         <div className="text-center space-y-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-azul-profundo mx-auto"></div>
-          <p className="text-tierra-media">Cargando calendario...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-epoch-primary mx-auto"></div>
+          <p className="text-admin-text-tertiary">Cargando calendario...</p>
         </div>
       </div>
     ),
@@ -65,8 +65,8 @@ const CreateAppointmentForm = dynamic(
     loading: () => (
       <div className="flex items-center justify-center py-12">
         <div className="text-center space-y-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-azul-profundo mx-auto"></div>
-          <p className="text-tierra-media">Cargando formulario...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-epoch-primary mx-auto"></div>
+          <p className="text-admin-text-tertiary">Cargando formulario...</p>
         </div>
       </div>
     ),

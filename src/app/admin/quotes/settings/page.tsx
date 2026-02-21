@@ -43,7 +43,7 @@ interface TreatmentPrice {
 }
 
 // Extended QuoteSettings type for form state with additional UI-specific fields
-interface FormQuoteSettings extends Omit<QuoteSettings, 'treatment_prices'> {
+interface FormQuoteSettings extends Omit<QuoteSettings, "treatment_prices"> {
   treatment_prices: {
     anti_reflective: TreatmentPrice | number;
     blue_light_filter: TreatmentPrice | number;
@@ -253,7 +253,7 @@ export default function QuoteSettingsPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="h-8 w-8 animate-spin text-azul-profundo" />
+        <Loader2 className="h-8 w-8 animate-spin text-epoch-primary" />
       </div>
     );
   }
@@ -264,7 +264,9 @@ export default function QuoteSettingsPage() {
         <Card>
           <CardContent className="py-12 text-center">
             <AlertCircle className="h-12 w-12 mx-auto mb-4 text-red-500" />
-            <p className="text-tierra-media">Error al cargar configuración</p>
+            <p className="text-admin-text-tertiary">
+              Error al cargar configuración
+            </p>
             <Button onClick={fetchSettings} className="mt-4">
               Reintentar
             </Button>
@@ -290,10 +292,10 @@ export default function QuoteSettingsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-azul-profundo">
+          <h1 className="text-3xl font-bold text-epoch-primary">
             Configuración de Presupuestos {isGlobalView && "(VISTA GLOBAL)"}
           </h1>
-          <p className="text-tierra-media mt-2">
+          <p className="text-admin-text-tertiary mt-2">
             {isGlobalView
               ? "Configura los parámetros predeterminados para todas las sucursales de la organización"
               : "Personaliza los valores por defecto y parámetros del sistema de presupuestos"}
@@ -387,7 +389,7 @@ export default function QuoteSettingsPage() {
                     Mano de Obra por Defecto
                   </Label>
                   <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-tierra-media">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-admin-text-tertiary">
                       CLP
                     </span>
                     <Input
@@ -403,7 +405,7 @@ export default function QuoteSettingsPage() {
                       className="pl-12"
                     />
                   </div>
-                  <p className="text-xs text-tierra-media">
+                  <p className="text-xs text-admin-text-tertiary">
                     Este valor se aplicará automáticamente a nuevos presupuestos
                   </p>
                 </div>
@@ -416,7 +418,7 @@ export default function QuoteSettingsPage() {
                     Porcentaje de IVA
                   </Label>
                   <div className="relative">
-                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-tierra-media">
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-admin-text-tertiary">
                       %
                     </span>
                     <Input
@@ -433,7 +435,7 @@ export default function QuoteSettingsPage() {
                       className="pr-12"
                     />
                   </div>
-                  <p className="text-xs text-tierra-media">
+                  <p className="text-xs text-admin-text-tertiary">
                     Porcentaje de impuesto aplicado por defecto
                   </p>
                 </div>
@@ -446,7 +448,7 @@ export default function QuoteSettingsPage() {
                     Días de Validez
                   </Label>
                   <div className="relative">
-                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-tierra-media">
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-admin-text-tertiary">
                       días
                     </span>
                     <Input
@@ -463,7 +465,7 @@ export default function QuoteSettingsPage() {
                       className="pr-12"
                     />
                   </div>
-                  <p className="text-xs text-tierra-media">
+                  <p className="text-xs text-admin-text-tertiary">
                     Período de validez por defecto para presupuestos
                   </p>
                 </div>
@@ -473,7 +475,7 @@ export default function QuoteSettingsPage() {
                 <Label className="text-base font-semibold mb-4 block">
                   Configuración de IVA
                 </Label>
-                <p className="text-sm text-tierra-media mb-4">
+                <p className="text-sm text-admin-text-tertiary mb-4">
                   Indica si los costos ya incluyen IVA o si se debe calcular
                   adicionalmente
                 </p>
@@ -486,7 +488,7 @@ export default function QuoteSettingsPage() {
                       >
                         Mano de Obra incluye IVA
                       </Label>
-                      <p className="text-xs text-tierra-media">
+                      <p className="text-xs text-admin-text-tertiary">
                         El costo de mano de obra ya incluye el IVA
                       </p>
                     </div>
@@ -507,7 +509,7 @@ export default function QuoteSettingsPage() {
                       >
                         Lentes incluyen IVA
                       </Label>
-                      <p className="text-xs text-tierra-media">
+                      <p className="text-xs text-admin-text-tertiary">
                         El costo de lentes ya incluye el IVA
                       </p>
                     </div>
@@ -528,7 +530,7 @@ export default function QuoteSettingsPage() {
                       >
                         Tratamientos incluyen IVA
                       </Label>
-                      <p className="text-xs text-tierra-media">
+                      <p className="text-xs text-admin-text-tertiary">
                         El costo de tratamientos ya incluye el IVA
                       </p>
                     </div>
@@ -604,7 +606,7 @@ export default function QuoteSettingsPage() {
                           <div className="flex items-center space-x-2">
                             <Label
                               htmlFor={`enabled-${key}`}
-                              className="text-xs text-tierra-media cursor-pointer"
+                              className="text-xs text-admin-text-tertiary cursor-pointer"
                             >
                               Mostrar
                             </Label>
@@ -618,7 +620,7 @@ export default function QuoteSettingsPage() {
                           </div>
                         </div>
                         <div className="relative">
-                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-tierra-media text-sm">
+                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-admin-text-tertiary text-sm">
                             CLP
                           </span>
                           <Input
@@ -634,7 +636,7 @@ export default function QuoteSettingsPage() {
                             disabled={!enabled}
                           />
                         </div>
-                        <p className="text-xs text-tierra-media">
+                        <p className="text-xs text-admin-text-tertiary">
                           {formatCurrency(price)}
                         </p>
                         {!enabled && (
@@ -669,11 +671,11 @@ export default function QuoteSettingsPage() {
               <div className="space-y-4">
                 {settings.volume_discounts?.length === 0 ? (
                   <div className="text-center py-8 border-2 border-dashed rounded-lg">
-                    <Percent className="h-12 w-12 mx-auto mb-4 text-tierra-media" />
-                    <p className="text-tierra-media mb-2">
+                    <Percent className="h-12 w-12 mx-auto mb-4 text-admin-text-tertiary" />
+                    <p className="text-admin-text-tertiary mb-2">
                       No hay descuentos configurados
                     </p>
-                    <p className="text-xs text-tierra-media mb-4">
+                    <p className="text-xs text-admin-text-tertiary mb-4">
                       Agrega descuentos por volumen para aplicar automáticamente
                       según el monto del presupuesto
                     </p>
@@ -771,7 +773,7 @@ export default function QuoteSettingsPage() {
                   className="mt-1 font-mono text-sm"
                   placeholder="Ingresa los términos y condiciones por defecto para los presupuestos..."
                 />
-                <p className="text-xs text-tierra-media">
+                <p className="text-xs text-admin-text-tertiary">
                   Este texto aparecerá en la sección de términos y condiciones
                   de los presupuestos
                 </p>
@@ -789,7 +791,7 @@ export default function QuoteSettingsPage() {
                   className="mt-1 font-mono text-sm"
                   placeholder="Ingresa una plantilla de notas por defecto..."
                 />
-                <p className="text-xs text-tierra-media">
+                <p className="text-xs text-admin-text-tertiary">
                   Esta plantilla se usará como base para las notas en los
                   presupuestos
                 </p>

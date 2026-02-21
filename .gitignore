@@ -20,6 +20,8 @@ nul
 
 # Debug
 npm-debug.log*
+build-*.txt
+query_*.txt
 yarn-debug.log*
 yarn-error.log*
 
@@ -44,6 +46,11 @@ next-env.d.ts
 .supabase/
 
 # IDE / Tools
+.agent/
+.codex/
+.cursor/
+.gemini/
+.zed/
 .kilocode/
 .vscode/
 .idea/

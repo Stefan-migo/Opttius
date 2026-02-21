@@ -13,22 +13,22 @@ export default function SaasEmailsPage() {
     <div className="space-y-6 p-6">
       <div className="flex justify-between items-start">
         <div>
-          <h1 className="text-3xl font-bold text-azul-profundo">
+          <h1 className="text-3xl font-display font-bold text-epoch-primary tracking-tight">
             Gestión de Emails SaaS
           </h1>
-          <p className="text-tierra-media mt-2">
+          <p className="text-muted-foreground mt-2">
             Administra las comunicaciones B2B de la plataforma Opttius
           </p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)]">
+        <Card className="admin-card rounded-none bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)]">
           <CardContent className="p-6">
             <div className="flex items-center gap-4">
-              <Mail className="h-8 w-8 text-azul-profundo" />
+              <Mail className="h-8 w-8 text-epoch-primary" />
               <div>
-                <p className="text-sm text-tierra-media">
+                <p className="text-sm text-muted-foreground">
                   Total Enviados (vía Resend)
                 </p>
                 <p className="text-2xl font-bold">1,234</p>
@@ -36,26 +36,28 @@ export default function SaasEmailsPage() {
             </div>
           </CardContent>
         </Card>
-        <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)]">
+        <Card className="admin-card rounded-none bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)]">
           <CardContent className="p-6">
             <div className="flex items-center gap-4">
-              <BarChart3 className="h-8 w-8 text-verde-suave" />
+              <BarChart3 className="h-8 w-8 text-admin-success" />
               <div>
-                <p className="text-sm text-tierra-media">Tasa de Apertura</p>
+                <p className="text-sm text-muted-foreground">
+                  Tasa de Apertura
+                </p>
                 <p className="text-2xl font-bold">42.5%</p>
               </div>
             </div>
           </CardContent>
         </Card>
-        <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)]">
+        <Card className="admin-card rounded-none bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)]">
           <CardContent className="p-6">
             <div className="flex items-center gap-4">
               <Settings className="h-8 w-8 text-amber-600" />
               <div>
-                <p className="text-sm text-tierra-media">
+                <p className="text-sm text-muted-foreground">
                   Dominios Verificados
                 </p>
-                <p className="text-2xl font-bold text-verde-suave">Activo</p>
+                <p className="text-2xl font-bold text-admin-success">Activo</p>
               </div>
             </div>
           </CardContent>
@@ -94,20 +96,20 @@ export default function SaasEmailsPage() {
         </TabsContent>
 
         <TabsContent value="history" className="space-y-6">
-          <Card>
-            <CardContent className="py-12 text-center text-tierra-media">
+          <Card className="admin-card rounded-none">
+            <CardContent className="py-12 text-center text-muted-foreground">
               El historial de envíos de Resend estará disponible próximamente.
             </CardContent>
           </Card>
         </TabsContent>
 
         <TabsContent value="config" className="space-y-6">
-          <Card>
+          <Card className="admin-card rounded-none">
             <CardContent className="p-6">
               <h3 className="text-lg font-semibold mb-4">
                 Configuración Global de Correo
               </h3>
-              <p className="text-sm text-tierra-media mb-4">
+              <p className="text-sm text-muted-foreground mb-4">
                 La configuración de Resend se maneja a través de variables de
                 entorno y el panel de control de Resend.
               </p>

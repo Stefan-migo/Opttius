@@ -734,8 +734,8 @@ export default function EditProductPage() {
       {/* Header with changes indicator */}
       <div className="flex justify-between items-center gap-3 mb-6">
         <div className="flex items-center gap-2">
-          <Package className="h-5 w-5 text-azul-profundo" />
-          <h1 className="text-2xl font-bold text-azul-profundo">
+          <Package className="h-5 w-5 text-epoch-primary" />
+          <h1 className="text-2xl font-bold text-epoch-primary">
             Editar Producto
           </h1>
           {hasChanges && (
@@ -945,7 +945,7 @@ export default function EditProductPage() {
                 onChange={(e) =>
                   handleInputChange("price_includes_tax", e.target.checked)
                 }
-                className="h-4 w-4 rounded border-gray-300 text-azul-profundo focus:ring-azul-profundo"
+                className="h-4 w-4 rounded border-gray-300 text-epoch-primary focus:ring-epoch-primary"
               />
               <Label
                 htmlFor="price_includes_tax"

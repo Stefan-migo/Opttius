@@ -132,7 +132,7 @@ export default function EditAdminUserPage() {
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
           <div className="animate-spin h-8 w-8 border-4 border-admin-accent-tertiary border-t-transparent rounded-full mx-auto mb-4" />
-          <p className="text-tierra-media">Cargando administrador...</p>
+          <p className="text-muted-foreground">Cargando administrador...</p>
         </div>
       </div>
     );
@@ -141,13 +141,13 @@ export default function EditAdminUserPage() {
   if (error || !adminUser) {
     return (
       <div className="container mx-auto py-8">
-        <Card className="bg-admin-bg-tertiary">
+        <Card className="admin-card bg-admin-bg-tertiary">
           <CardContent className="p-6">
             <div className="text-center">
-              <h2 className="text-2xl font-bold text-azul-profundo mb-4">
+              <h2 className="text-2xl font-bold text-epoch-primary mb-4">
                 Error
               </h2>
-              <p className="text-tierra-media mb-6">
+              <p className="text-muted-foreground mb-6">
                 {error || "Administrador no encontrado"}
               </p>
               <Link href="/admin/admin-users">
@@ -168,10 +168,10 @@ export default function EditAdminUserPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-azul-profundo">
+          <h1 className="text-3xl font-bold text-epoch-primary">
             Editar Usuario
           </h1>
-          <p className="text-tierra-media">
+          <p className="text-muted-foreground">
             Modificar información del administrador
           </p>
         </div>
@@ -184,7 +184,7 @@ export default function EditAdminUserPage() {
       </div>
 
       {/* Form Card */}
-      <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)]">
+      <Card className="admin-card bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)]">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Crown className="h-5 w-5" />
@@ -202,7 +202,7 @@ export default function EditAdminUserPage() {
               disabled
               className="bg-admin-bg-tertiary"
             />
-            <p className="text-sm text-tierra-media mt-1">
+            <p className="text-sm text-muted-foreground mt-1">
               El email no puede ser modificado
             </p>
           </div>
@@ -248,7 +248,7 @@ export default function EditAdminUserPage() {
                 </SelectItem>
               </SelectContent>
             </Select>
-            <p className="text-sm text-tierra-media mt-1">
+            <p className="text-sm text-muted-foreground mt-1">
               El rol define el nivel de acceso del usuario en la organización
             </p>
           </div>
@@ -271,20 +271,14 @@ export default function EditAdminUserPage() {
                 </span>
               </label>
               {formData.is_active ? (
-                <Badge
-                  className="bg-verde-suave text-primary"
-                  style={{
-                    backgroundColor: "var(--accent)",
-                    color: "var(--admin-bg-primary)",
-                  }}
-                >
+                <Badge className="bg-admin-success text-admin-text-on-dark">
                   Activo
                 </Badge>
               ) : (
                 <Badge variant="destructive">Inactivo</Badge>
               )}
             </div>
-            <p className="text-sm text-tierra-media mt-1">
+            <p className="text-sm text-muted-foreground mt-1">
               Los administradores inactivos no pueden acceder al panel
             </p>
           </div>
@@ -293,9 +287,10 @@ export default function EditAdminUserPage() {
           <div>
             <Label>Permisos</Label>
             <div className="mt-2 p-4 bg-admin-bg-tertiary rounded-md">
-              <p className="text-sm text-tierra-media">
-                Los administradores tienen acceso completo a todas las funciones
-                del sistema. Los permisos se gestionan automáticamente.
+              <p className="text-sm text-muted-foreground">
+                Los permisos granulares se pueden editar desde el menú de
+                acciones del usuario en el listado de administradores (Editar
+                Permisos).
               </p>
             </div>
           </div>
