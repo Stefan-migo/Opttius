@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { getBranchHeader } from "@/lib/utils/branch";
 
 interface Customer {
   id: string;
@@ -41,11 +42,14 @@ interface UseCustomerSearchReturn {
 interface UseCustomerSearchProps {
   initialData?: any;
   initialCustomerId?: string;
+  /** Sucursal actual para filtrar clientes. Obligatorio para admins no super. */
+  currentBranchId?: string | null;
 }
 
 export function useCustomerSearch({
   initialData,
   initialCustomerId,
+  currentBranchId,
 }: UseCustomerSearchProps = {}): UseCustomerSearchReturn {
   // Registered customer search
   const [customerSearch, setCustomerSearch] = useState("");
@@ -69,7 +73,7 @@ export function useCustomerSearch({
     },
   );
 
-  // Search customers with debounce
+  // Search customers with debounce (filtered by branch)
   useEffect(() => {
     const searchCustomers = async () => {
       if (customerSearch.length < 1) {
@@ -79,12 +83,15 @@ export function useCustomerSearch({
 
       setSearchingCustomers(true);
       try {
+        const headers = getBranchHeader(currentBranchId ?? null);
         const response = await fetch(
           `/api/admin/customers/search?q=${encodeURIComponent(customerSearch)}`,
+          { headers },
         );
         if (response.ok) {
           const data = await response.json();
-          setCustomerResults(data.customers || []);
+          // API returns { success: true, data: [...] }
+          setCustomerResults(data.data ?? data.customers ?? []);
         }
       } catch (error) {
         console.error("Error searching customers:", error);
@@ -95,7 +102,7 @@ export function useCustomerSearch({
 
     const debounceTimer = setTimeout(searchCustomers, 300);
     return () => clearTimeout(debounceTimer);
-  }, [customerSearch]);
+  }, [customerSearch, currentBranchId]);
 
   // Load customer if initialCustomerId provided
   useEffect(() => {

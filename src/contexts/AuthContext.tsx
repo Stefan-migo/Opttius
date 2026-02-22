@@ -38,6 +38,8 @@ interface AuthContextType extends AuthState {
   updateProfile: (updates: Partial<Profile>) => Promise<Profile>;
   resetPassword: (email: string) => Promise<{ error: any }>;
   refetchProfile: () => Promise<Profile | null> | null;
+  /** Refresca isAdmin, isSuperAdmin, adminRole desde la DB. Usar tras onboarding (assign-demo, activate-real-org). */
+  refetchAdminStatus: () => Promise<void>;
   isAdmin: boolean;
   isSuperAdmin: boolean;
   adminRole: string | null;
@@ -96,6 +98,19 @@ export function AuthProvider({ children, initialUser }: AuthProviderProps) {
     adminRole: null,
   });
 
+  const refetchAdminStatus = async () => {
+    if (!auth.user) return;
+    const data = await checkAdminStatus(auth.user.id);
+    setAdminData({
+      isAdmin: data.isAdmin,
+      isSuperAdmin:
+        data.role === "super_admin" ||
+        data.role === "root" ||
+        data.role === "dev",
+      adminRole: data.role,
+    });
+  };
+
   useEffect(() => {
     let mounted = true;
 
@@ -123,6 +138,7 @@ export function AuthProvider({ children, initialUser }: AuthProviderProps) {
   const contextValue: AuthContextType = {
     ...auth,
     ...adminData,
+    refetchAdminStatus,
   };
 
   return (

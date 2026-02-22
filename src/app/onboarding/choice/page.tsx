@@ -25,7 +25,7 @@ import Link from "next/link";
 
 export default function OnboardingChoicePage() {
   const router = useRouter();
-  const { user, loading: authLoading } = useAuthContext();
+  const { user, loading: authLoading, refetchAdminStatus } = useAuthContext();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hasOrganization, setHasOrganization] = useState<boolean | null>(null);
@@ -86,6 +86,9 @@ export default function OnboardingChoicePage() {
       if (!response.ok) {
         throw new Error(data.error || "Error al asignar organización demo");
       }
+
+      // Refrescar rol admin para que isSuperAdmin se reconozca sin reload
+      await refetchAdminStatus();
 
       // Redirigir al admin con organización demo
       router.push("/admin");

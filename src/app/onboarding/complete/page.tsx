@@ -15,7 +15,7 @@ import { CheckCircle2, ArrowRight, Building2, Loader2 } from "lucide-react";
 
 export default function OnboardingCompletePage() {
   const router = useRouter();
-  const { user, loading: authLoading } = useAuthContext();
+  const { user, loading: authLoading, refetchAdminStatus } = useAuthContext();
   const [isLoading, setIsLoading] = useState(true);
   const [organizationInfo, setOrganizationInfo] = useState<{
     name: string;
@@ -59,7 +59,9 @@ export default function OnboardingCompletePage() {
     fetchOrganizationInfo();
   }, [user, authLoading]);
 
-  const handleGoToAdmin = () => {
+  const handleGoToAdmin = async () => {
+    // Refrescar rol admin para que isSuperAdmin se reconozca sin reload
+    await refetchAdminStatus();
     // Usar router.push en lugar de full reload para preservar la sesión.
     // router.refresh() invalida la caché de Next.js (branches, notifications).
     router.refresh();

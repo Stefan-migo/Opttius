@@ -225,6 +225,7 @@ describe("useCustomerSearch", () => {
     expect(result.current.customerResults).toEqual(mockCustomers);
     expect(global.fetch).toHaveBeenCalledWith(
       "/api/admin/customers/search?q=John",
+      expect.objectContaining({ headers: expect.any(Object) }),
     );
   });
 
@@ -326,7 +327,7 @@ describe("useCustomerSearch", () => {
     const mockCustomer = mockCustomers[0];
     const mockResponse = {
       ok: true,
-      json: () => Promise.resolve({ customer: mockCustomer }),
+      json: () => Promise.resolve({ data: mockCustomer }),
     };
 
     (global.fetch as any).mockResolvedValueOnce(mockResponse);

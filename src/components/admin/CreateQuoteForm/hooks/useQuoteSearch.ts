@@ -28,7 +28,8 @@ export function useCustomerSearch(initialCustomerId?: string) {
 
         if (response.ok) {
           const data = await response.json();
-          setResults(data.customers || []);
+          // API returns { success: true, data: [...] }
+          setResults(data.data ?? data.customers ?? []);
         }
       } catch (error) {
         console.error("Error searching customers:", error);
@@ -163,12 +164,14 @@ export function useFrameSearch() {
       try {
         setLoading(true);
         const response = await fetch(
-          `/api/admin/products/search?q=${encodeURIComponent(query)}&type=frames&branch_id=${currentBranchId}`,
+          `/api/admin/products/search?q=${encodeURIComponent(query)}&type=frame`,
+          { headers: getBranchHeader(currentBranchId ?? null) },
         );
 
         if (response.ok) {
           const data = await response.json();
-          setResults(data.products || []);
+          // API returns { success: true, data: [...] }
+          setResults(data.data ?? data.products ?? []);
         }
       } catch (error) {
         console.error("Error searching frames:", error);

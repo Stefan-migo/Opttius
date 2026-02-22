@@ -30,113 +30,80 @@ export function useAuth(initialUser?: User | null) {
 
   useEffect(() => {
     let mounted = true;
+    let initialized = false;
     const supabase = createClient();
 
-    // Si tenemos initialUser del servidor, cargar perfil y marcar listo (evita redirect prematuro)
+    const applyAuthState = (
+      user: User | null,
+      profile: Profile | null,
+      session: Session | null,
+    ) => {
+      if (!mounted || initialized) return;
+      initialized = true;
+      setAuthState({
+        user,
+        profile,
+        session,
+        loading: false,
+        error: null,
+      });
+    };
+
+    // Si tenemos initialUser del servidor: confiar en él, cargar perfil y no ejecutar getSession
+    // (evita race entre getSession e INITIAL_SESSION que causa loop en reload)
     if (initialUser) {
       fetchProfile(initialUser.id)
         .then((profile) => {
           if (!mounted) return;
-          setAuthState({
-            user: initialUser,
-            profile,
-            session: null, // Se llenará con onAuthStateChange
-            loading: false,
-            error: null,
-          });
+          applyAuthState(initialUser, profile, null);
         })
         .catch(() => {
           if (!mounted) return;
-          setAuthState({
-            user: initialUser,
-            profile: null,
-            session: null,
-            loading: false,
-            error: null,
-          });
+          applyAuthState(initialUser, null, null);
         });
-    }
-
-    // Add timeout to prevent infinite loading
-    const timeoutId = setTimeout(() => {
-      if (mounted) {
-        console.warn("Auth initialization timed out, setting loading to false");
-        setAuthState((prev) => ({ ...prev, loading: false }));
-      }
-    }, 10000); // 10 second timeout - increased for admin flows
-
-    // Get initial session
-    supabase.auth
-      .getSession()
-      .then(({ data: { session }, error }) => {
+    } else {
+      // Sin initialUser: usar getSession como fuente única inicial
+      supabase.auth.getSession().then(({ data: { session }, error }) => {
         if (!mounted) return;
-        clearTimeout(timeoutId);
-
         if (error) {
-          console.error("Auth session error:", error);
           setAuthState((prev) => ({ ...prev, error, loading: false }));
           return;
         }
-
         if (session?.user) {
-          // Fetch user profile with error handling
           fetchProfile(session.user.id)
             .then((profile) => {
               if (!mounted) return;
-              setAuthState({
-                user: session.user,
-                profile,
-                session,
-                loading: false,
-                error: null,
-              });
+              applyAuthState(session.user, profile, session);
             })
-            .catch((profileError) => {
-              console.error("Profile fetch error:", profileError);
-              // Still set user data even if profile fails
+            .catch(() => {
               if (!mounted) return;
-              setAuthState({
-                user: session.user,
-                profile: null,
-                session,
-                loading: false,
-                error: null,
-              });
+              applyAuthState(session.user, null, session);
             });
         } else {
-          setAuthState((prev) => ({ ...prev, loading: false }));
-        }
-      })
-      .catch((sessionError) => {
-        console.error("Session check error:", sessionError);
-        if (mounted) {
-          clearTimeout(timeoutId);
-          setAuthState((prev) => ({
-            ...prev,
-            loading: false,
-            error: sessionError,
-          }));
+          applyAuthState(null, null, null);
         }
       });
+    }
 
-    // Listen for auth changes
+    // Timeout de seguridad (5s)
+    const timeoutId = setTimeout(() => {
+      if (mounted && !initialized) {
+        initialized = true;
+        setAuthState((prev) => ({ ...prev, loading: false }));
+      }
+    }, 5000);
+
+    // Solo para eventos posteriores (SIGNED_IN, SIGNED_OUT, TOKEN_REFRESHED)
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (!mounted) return;
+      // Ignorar INITIAL_SESSION: ya manejado por initialUser o getSession
+      if (event === "INITIAL_SESSION") return;
 
-      // INITIAL_SESSION: aplica sesión al montar (refresh/nueva pestaña)
-      if (event === "INITIAL_SESSION" && session?.user) {
+      if (event === "SIGNED_IN" && session?.user) {
         const profile = await fetchProfile(session.user.id);
-        setAuthState({
-          user: session.user,
-          profile,
-          session,
-          loading: false,
-          error: null,
-        });
-      } else if (event === "SIGNED_IN" && session?.user) {
-        const profile = await fetchProfile(session.user.id);
+        if (!mounted) return;
         setAuthState({
           user: session.user,
           profile,
@@ -178,9 +145,8 @@ export function useAuth(initialUser?: User | null) {
         .eq("id", userId)
         .single();
 
-      const timeoutPromise = new Promise(
-        (_, reject) =>
-          setTimeout(() => reject(new Error("Profile fetch timeout")), 15000), // 15s for slow connections / new users
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error("Profile fetch timeout")), 5000),
       );
 
       const { data, error } = (await Promise.race([

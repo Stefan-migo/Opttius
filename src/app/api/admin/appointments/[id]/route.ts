@@ -356,7 +356,9 @@ export async function PUT(
       }
     }
 
-    // AUTO-REGISTRATION LOGIC: If appointment status is completed and it's a guest, register them
+    // AUTO-REGISTRATION: Solo para citas con invitado (guest). Si la cita tiene customer_id
+    // (cliente ya registrado), NUNCA creamos ni duplicamos customer. La condición
+    // !customer_id garantiza que solo se auto-registra cuando es walk-in sin cliente previo.
     let finalAppointmentSnapshot = updatedAppointment;
     if (
       updatedAppointment.status === "completed" &&

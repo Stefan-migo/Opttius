@@ -6,16 +6,32 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { formatRUT } from "@/lib/utils/rut";
-import { Eye, User, Package, Truck, Wrench, AlertCircle, RefreshCw, CheckCircle, Calendar, Clock, Loader2 } from "lucide-react";
+import {
+  Eye,
+  User,
+  Package,
+  Truck,
+  Wrench,
+  AlertCircle,
+  RefreshCw,
+  CheckCircle,
+  Calendar,
+  Clock,
+  Loader2,
+} from "lucide-react";
 
 // Hooks
+import { useBranch } from "@/hooks/useBranch";
 import { useAppointmentForm } from "./hooks/useAppointmentForm";
 import { useCustomerSearch } from "./hooks/useCustomerSearch";
 import { useAvailability } from "./hooks/useAvailability";
 import { useScheduleSettings } from "./hooks/useScheduleSettings";
 
 // Types
-import type { CreateAppointmentFormProps, AppointmentType } from "./types/appointment.types";
+import type {
+  CreateAppointmentFormProps,
+  AppointmentType,
+} from "./types/appointment.types";
 
 // Components (will be created next)
 import CustomerSelection from "./CustomerSelection";
@@ -41,12 +57,19 @@ export default function CreateAppointmentForm({
   lockDateTime = false,
 }: CreateAppointmentFormProps) {
   // Initialize hooks
+  const { currentBranchId } = useBranch();
   const scheduleSettingsHook = useScheduleSettings();
-  const customerSearchHook = useCustomerSearch({ initialData, initialCustomerId });
-  const availabilityHook = useAvailability({ scheduleSettings: scheduleSettingsHook.settings });
-  const appointmentFormHook = useAppointmentForm({ 
-    initialData, 
-    scheduleSettings: scheduleSettingsHook.settings 
+  const customerSearchHook = useCustomerSearch({
+    initialData,
+    initialCustomerId,
+    currentBranchId,
+  });
+  const availabilityHook = useAvailability({
+    scheduleSettings: scheduleSettingsHook.settings,
+  });
+  const appointmentFormHook = useAppointmentForm({
+    initialData,
+    scheduleSettings: scheduleSettingsHook.settings,
   });
 
   // Load availability when date or duration changes
@@ -58,13 +81,16 @@ export default function CreateAppointmentForm({
       hasSettings: !!scheduleSettingsHook.settings,
     });
 
-    if (appointmentFormHook.formData.appointment_date && scheduleSettingsHook.settings) {
+    if (
+      appointmentFormHook.formData.appointment_date &&
+      scheduleSettingsHook.settings
+    ) {
       // Add a small delay to ensure state is ready
       const timer = setTimeout(() => {
         console.log("⏰ Calling fetchAvailability after delay");
         availabilityHook.fetchAvailability(
           appointmentFormHook.formData.appointment_date,
-          appointmentFormHook.formData.duration_minutes
+          appointmentFormHook.formData.duration_minutes,
         );
       }, 100);
       return () => clearTimeout(timer);
@@ -72,12 +98,13 @@ export default function CreateAppointmentForm({
       console.log("⏸️ Skipping fetchAvailability - missing date or settings");
       if (!appointmentFormHook.formData.appointment_date)
         console.log("  - Missing appointment_date");
-      if (!scheduleSettingsHook.settings) console.log("  - Missing scheduleSettings");
+      if (!scheduleSettingsHook.settings)
+        console.log("  - Missing scheduleSettings");
     }
   }, [
-    appointmentFormHook.formData.appointment_date, 
-    appointmentFormHook.formData.duration_minutes, 
-    scheduleSettingsHook.settings
+    appointmentFormHook.formData.appointment_date,
+    appointmentFormHook.formData.duration_minutes,
+    scheduleSettingsHook.settings,
   ]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -87,7 +114,9 @@ export default function CreateAppointmentForm({
       // Validate customer first
       const customerValidation = customerSearchHook.validateCustomer();
       if (!customerValidation.isValid) {
-        Object.values(customerValidation.errors).forEach(error => toast.error(error));
+        Object.values(customerValidation.errors).forEach((error) =>
+          toast.error(error),
+        );
         return;
       }
 
@@ -98,19 +127,19 @@ export default function CreateAppointmentForm({
         customerSearchHook.isGuestCustomer,
         customerSearchHook.guestCustomerData,
         onSuccess,
-        lockDateTime
+        lockDateTime,
       );
 
       if (success) {
         if (appointmentFormHook.formData.status === "completed") {
           toast.success(
-            "Cita completada. El cliente ha sido registrado exitosamente en la base de datos de esta sucursal."
+            "Cita completada. El cliente ha sido registrado exitosamente en la base de datos de esta sucursal.",
           );
         } else {
           toast.success(
             initialData?.id
               ? "Cita actualizada exitosamente"
-              : "Cita creada exitosamente"
+              : "Cita creada exitosamente",
           );
         }
         onSuccess();
@@ -170,7 +199,9 @@ export default function CreateAppointmentForm({
           });
           availabilityHook.clearSlots();
         }}
-        onTimeChange={(time: string) => appointmentFormHook.updateField("appointment_time", time)}
+        onTimeChange={(time: string) =>
+          appointmentFormHook.updateField("appointment_time", time)
+        }
         onDurationChange={(duration: number) => {
           appointmentFormHook.updateFormData({
             duration_minutes: duration,
@@ -179,10 +210,13 @@ export default function CreateAppointmentForm({
           availabilityHook.clearSlots();
         }}
         onLoadAvailability={() => {
-          if (appointmentFormHook.formData.appointment_date && scheduleSettingsHook.settings) {
+          if (
+            appointmentFormHook.formData.appointment_date &&
+            scheduleSettingsHook.settings
+          ) {
             availabilityHook.fetchAvailability(
               appointmentFormHook.formData.appointment_date,
-              appointmentFormHook.formData.duration_minutes
+              appointmentFormHook.formData.duration_minutes,
             );
           }
         }}
@@ -199,12 +233,24 @@ export default function CreateAppointmentForm({
         followUpRequired={appointmentFormHook.formData.follow_up_required}
         followUpDate={appointmentFormHook.formData.follow_up_date}
         appointmentTypes={appointmentTypes}
-        onTypeChange={(type: string) => appointmentFormHook.updateField("appointment_type", type)}
-        onStatusChange={(status: string) => appointmentFormHook.updateField("status", status)}
-        onReasonChange={(reason: string) => appointmentFormHook.updateField("reason", reason)}
-        onNotesChange={(notes: string) => appointmentFormHook.updateField("notes", notes)}
-        onFollowUpToggle={(required: boolean) => appointmentFormHook.updateField("follow_up_required", required)}
-        onFollowUpDateChange={(date: string) => appointmentFormHook.updateField("follow_up_date", date)}
+        onTypeChange={(type: string) =>
+          appointmentFormHook.updateField("appointment_type", type)
+        }
+        onStatusChange={(status: string) =>
+          appointmentFormHook.updateField("status", status)
+        }
+        onReasonChange={(reason: string) =>
+          appointmentFormHook.updateField("reason", reason)
+        }
+        onNotesChange={(notes: string) =>
+          appointmentFormHook.updateField("notes", notes)
+        }
+        onFollowUpToggle={(required: boolean) =>
+          appointmentFormHook.updateField("follow_up_required", required)
+        }
+        onFollowUpDateChange={(date: string) =>
+          appointmentFormHook.updateField("follow_up_date", date)
+        }
       />
 
       {/* Actions */}
@@ -219,7 +265,10 @@ export default function CreateAppointmentForm({
         </Button>
         <Button
           type="submit"
-          disabled={appointmentFormHook.saving || !appointmentFormHook.formData.appointment_time}
+          disabled={
+            appointmentFormHook.saving ||
+            !appointmentFormHook.formData.appointment_time
+          }
           className="h-12 px-10 rounded-xl bg-admin-accent-primary hover:bg-admin-accent-primary/90 text-white shadow-premium-md font-bold uppercase text-[11px] tracking-widest transition-all active:scale-[0.98] disabled:opacity-50"
         >
           {appointmentFormHook.saving ? (
