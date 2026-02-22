@@ -230,7 +230,7 @@ export function PricingSection() {
         });
 
   return (
-    <section id="precios" className="py-32 bg-epoch-background">
+    <section id="precios" className="py-20 sm:py-32 bg-epoch-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-24 max-w-3xl mx-auto">
           <div className="inline-flex items-center gap-2 px-4 py-2 border border-epoch-primary/10 rounded-full text-epoch-primary text-[10px] font-display font-bold uppercase tracking-[0.2em] mb-6">
@@ -256,9 +256,9 @@ export function PricingSection() {
             {plans.map((plan) => (
               <div
                 key={plan.displayName}
-                className={`relative flex flex-col p-10 rounded-none transition-all duration-500 border ${
+                className={`relative flex flex-col p-6 sm:p-10 rounded-none transition-all duration-500 border ${
                   plan.popular
-                    ? "bg-white border-epoch-accent shadow-lg shadow-epoch-primary/10 scale-105 z-10"
+                    ? "bg-white border-epoch-accent shadow-lg shadow-epoch-primary/10 lg:scale-105 z-10"
                     : "bg-white border-epoch-primary/10 hover:border-epoch-primary/20 shadow-sm hover:shadow-md"
                 }`}
               >

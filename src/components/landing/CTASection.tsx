@@ -26,7 +26,7 @@ export function CTASection() {
           <div className="absolute inset-0 bg-gradient-to-t from-epoch-primary via-epoch-primary/50 to-transparent"></div>
         </div>
 
-        <div className="relative z-10 py-32 px-6 flex flex-col items-center text-center">
+        <div className="relative z-10 py-20 sm:py-32 px-4 sm:px-6 flex flex-col items-center text-center">
           <div className="inline-flex items-center gap-4 px-6 py-2 border border-epoch-accent/30 rounded-full text-epoch-accent text-[10px] font-display tracking-[0.4em] uppercase mb-10">
             <Sparkles className="h-3 w-3" />
             <span>Prueba sin compromiso</span>

@@ -213,9 +213,14 @@ export async function POST(request: NextRequest) {
             
             IMPORTANTE: Te estás comunicando con ${userName} (${isSuperAdmin ? "Super Admin" : "Administrador"}). Trátalo con respeto pero de forma cercana.
             
-            ${isSuperAdmin ? "NOTA SUPER ADMIN: Estás hablando con un Super Admin. Tienes permisos totales. Si te pide acciones sobre una sucursal específica y no está seleccionada, pregúntale sobre cuál actuar." : ""}`;
+            ${isSuperAdmin ? "NOTA SUPER ADMIN: Estás hablando con un Super Admin. Tienes permisos totales. Si la vista es GLOBAL (no hay sucursal seleccionada), DEBES preguntar explícitamente en qué sucursal realizar la acción antes de ejecutar herramientas que afecten sucursales (importación, inventario, clientes, etc.)." : ""}`;
 
-            const enhancedSystemPrompt = `${specializedIdentity}\n\n${section ? `ESTADO ACTUAL: El usuario está navegando en la sección de ${section === "dashboard" ? "Dashboard" : section === "inventory" ? "Inventario" : section === "clients" ? "Clientes" : section === "pos" ? "Punto de Venta" : "Analíticas"}.\n` : ""}\n${branchContext}\n${systemPrompt}`;
+            const branchInstruction =
+              isSuperAdmin && (currentBranchId === "global" || !currentBranchId)
+                ? "\n\nIMPORTANTE SUCURSAL: El usuario tiene vista global. Para cualquier acción que afecte una sucursal (importar, modificar inventario, crear clientes, etc.), DEBES preguntar primero en qué sucursal realizarla."
+                : "";
+
+            const enhancedSystemPrompt = `${specializedIdentity}\n\n${section ? `ESTADO ACTUAL: El usuario está navegando en la sección de ${section === "dashboard" ? "Dashboard" : section === "inventory" ? "Inventario" : section === "clients" ? "Clientes" : section === "pos" ? "Punto de Venta" : "Analíticas"}.\n` : ""}\n${branchContext}${branchInstruction}\n${systemPrompt}`;
 
             const fallbackAgent = await createAgent({
               userId: user.id,

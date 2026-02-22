@@ -812,7 +812,7 @@ export default function AppointmentsPage() {
         open={showCreateAppointment}
         onOpenChange={setShowCreateAppointment}
       >
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto border-2 border-admin-border-primary/20 bg-white shadow-premium-xl rounded-none p-0">
+        <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-2xl max-h-[90vh] overflow-y-auto border-2 border-admin-border-primary/20 bg-white shadow-premium-xl rounded-none p-0">
           <div className="p-0">
             <DialogHeader className="p-8 bg-admin-bg-tertiary border-b border-admin-border-primary/10">
               <div className="flex items-center gap-3 mb-2">
@@ -856,7 +856,7 @@ export default function AppointmentsPage() {
           open={!!selectedAppointment}
           onOpenChange={() => setSelectedAppointment(null)}
         >
-          <DialogContent className="max-w-lg border-2 border-admin-border-primary/20 bg-white shadow-premium-xl rounded-none p-0 overflow-hidden">
+          <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-lg border-2 border-admin-border-primary/20 bg-white shadow-premium-xl rounded-none p-0 overflow-hidden">
             <div className="bg-admin-bg-tertiary p-8 border-b border-admin-border-primary/10">
               <DialogHeader>
                 <div className="flex items-center justify-between mb-2">
@@ -1148,7 +1148,7 @@ export default function AppointmentsPage() {
 
       {/* Weekly Report Dialog */}
       <Dialog open={showWeeklyReport} onOpenChange={setShowWeeklyReport}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto border-2 border-admin-border-primary/20 bg-admin-bg-secondary shadow-premium-xl rounded-none p-0 print:overflow-visible print:max-h-none">
+        <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-2xl max-h-[90vh] overflow-y-auto border-2 border-admin-border-primary/20 bg-admin-bg-secondary shadow-premium-xl rounded-none p-0 print:overflow-visible print:max-h-none">
           <div
             ref={weeklyReportRef}
             id="weekly-report-print"

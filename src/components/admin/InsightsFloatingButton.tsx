@@ -32,7 +32,7 @@ export function InsightsFloatingButton() {
           variant="default"
           size="icon"
           className={cn(
-            "rounded-full w-14 h-14 shadow-xl transition-all duration-300 hover:scale-110 active:scale-95",
+            "rounded-full w-14 h-14 shadow-[0_8px_30px_rgb(0,0,0,0.12)] transition-all duration-300 hover:scale-110 active:scale-95",
             "bg-primary text-primary-foreground",
           )}
           title="Insights Inteligentes"

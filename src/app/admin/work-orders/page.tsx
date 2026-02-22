@@ -515,143 +515,156 @@ export default function WorkOrdersPage() {
             </div>
           ) : (
             <>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Número</TableHead>
-                    <TableHead>Cliente</TableHead>
-                    <TableHead>Marco</TableHead>
-                    <TableHead>Lente</TableHead>
-                    <TableHead>Laboratorio</TableHead>
-                    <TableHead>Estado</TableHead>
-                    <TableHead>Pago</TableHead>
-                    <TableHead>Total</TableHead>
-                    <TableHead>Acciones</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredWorkOrders.map((workOrder) => (
-                    <TableRow key={workOrder.id}>
-                      <TableCell className="font-medium">
-                        {workOrder.work_order_number}
-                      </TableCell>
-                      <TableCell>
-                        <div>
-                          <div className="font-medium">
-                            {workOrder.customer?.first_name || ""}{" "}
-                            {workOrder.customer?.last_name || ""}
-                          </div>
-                          <div className="text-sm text-admin-text-tertiary">
-                            {workOrder.customer?.email}
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell>{workOrder.frame_name || "-"}</TableCell>
-                      <TableCell>
-                        <div>
-                          <div className="font-medium">
-                            {workOrder.lens_type || "-"}
-                          </div>
-                          <div className="text-sm text-admin-text-tertiary">
-                            {workOrder.lens_material || ""}
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        {workOrder.lab_name ? (
-                          <div className="flex items-center gap-1">
-                            <Factory className="h-3 w-3" />
-                            <span className="text-sm">
-                              {workOrder.lab_name}
-                            </span>
-                          </div>
-                        ) : (
-                          "-"
-                        )}
-                      </TableCell>
-                      <TableCell>{getStatusBadge(workOrder.status)}</TableCell>
-                      <TableCell>
-                        {editingPaymentStatus === workOrder.id ? (
-                          <div className="flex items-center gap-2">
-                            <Select
-                              value={workOrder.payment_status}
-                              onValueChange={(value) => {
-                                handlePaymentStatusChange(workOrder.id, value);
-                                setEditingPaymentStatus(null);
-                              }}
-                              disabled={updatingPaymentStatus === workOrder.id}
-                              open={true}
-                              onOpenChange={(open) => {
-                                if (!open) {
-                                  setEditingPaymentStatus(null);
-                                }
-                              }}
-                            >
-                              <SelectTrigger className="w-[140px] h-7">
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="pending">
-                                  Pendiente
-                                </SelectItem>
-                                <SelectItem value="partial">Parcial</SelectItem>
-                                <SelectItem value="paid">Pagado</SelectItem>
-                                <SelectItem value="refunded">
-                                  Reembolsado
-                                </SelectItem>
-                              </SelectContent>
-                            </Select>
-                            {updatingPaymentStatus === workOrder.id && (
-                              <RefreshCw className="h-4 w-4 animate-spin text-epoch-primary" />
-                            )}
-                          </div>
-                        ) : (
-                          <div
-                            onClick={() =>
-                              setEditingPaymentStatus(workOrder.id)
-                            }
-                            className="cursor-pointer hover:opacity-80 transition-opacity inline-block group"
-                            title="Haz clic para editar el estado de pago"
-                          >
-                            <div className="flex items-center gap-1">
-                              {getPaymentStatusBadge(workOrder.payment_status)}
-                              <span className="opacity-0 group-hover:opacity-50 text-xs text-admin-text-tertiary">
-                                ✎
-                              </span>
+              <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Número</TableHead>
+                      <TableHead>Cliente</TableHead>
+                      <TableHead>Marco</TableHead>
+                      <TableHead>Lente</TableHead>
+                      <TableHead>Laboratorio</TableHead>
+                      <TableHead>Estado</TableHead>
+                      <TableHead>Pago</TableHead>
+                      <TableHead>Total</TableHead>
+                      <TableHead>Acciones</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredWorkOrders.map((workOrder) => (
+                      <TableRow key={workOrder.id}>
+                        <TableCell className="font-medium">
+                          {workOrder.work_order_number}
+                        </TableCell>
+                        <TableCell>
+                          <div>
+                            <div className="font-medium">
+                              {workOrder.customer?.first_name || ""}{" "}
+                              {workOrder.customer?.last_name || ""}
+                            </div>
+                            <div className="text-sm text-admin-text-tertiary">
+                              {workOrder.customer?.email}
                             </div>
                           </div>
-                        )}
-                      </TableCell>
-                      <TableCell className="font-semibold text-admin-success">
-                        {formatCurrency(workOrder.total_amount)}
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <Link href={`/admin/work-orders/${workOrder.id}`}>
-                            <Button variant="outline" size="sm">
-                              <Eye className="h-4 w-4 mr-1" />
-                              Ver
+                        </TableCell>
+                        <TableCell>{workOrder.frame_name || "-"}</TableCell>
+                        <TableCell>
+                          <div>
+                            <div className="font-medium">
+                              {workOrder.lens_type || "-"}
+                            </div>
+                            <div className="text-sm text-admin-text-tertiary">
+                              {workOrder.lens_material || ""}
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          {workOrder.lab_name ? (
+                            <div className="flex items-center gap-1">
+                              <Factory className="h-3 w-3" />
+                              <span className="text-sm">
+                                {workOrder.lab_name}
+                              </span>
+                            </div>
+                          ) : (
+                            "-"
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          {getStatusBadge(workOrder.status)}
+                        </TableCell>
+                        <TableCell>
+                          {editingPaymentStatus === workOrder.id ? (
+                            <div className="flex items-center gap-2">
+                              <Select
+                                value={workOrder.payment_status}
+                                onValueChange={(value) => {
+                                  handlePaymentStatusChange(
+                                    workOrder.id,
+                                    value,
+                                  );
+                                  setEditingPaymentStatus(null);
+                                }}
+                                disabled={
+                                  updatingPaymentStatus === workOrder.id
+                                }
+                                open={true}
+                                onOpenChange={(open) => {
+                                  if (!open) {
+                                    setEditingPaymentStatus(null);
+                                  }
+                                }}
+                              >
+                                <SelectTrigger className="w-[140px] h-7">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="pending">
+                                    Pendiente
+                                  </SelectItem>
+                                  <SelectItem value="partial">
+                                    Parcial
+                                  </SelectItem>
+                                  <SelectItem value="paid">Pagado</SelectItem>
+                                  <SelectItem value="refunded">
+                                    Reembolsado
+                                  </SelectItem>
+                                </SelectContent>
+                              </Select>
+                              {updatingPaymentStatus === workOrder.id && (
+                                <RefreshCw className="h-4 w-4 animate-spin text-epoch-primary" />
+                              )}
+                            </div>
+                          ) : (
+                            <div
+                              onClick={() =>
+                                setEditingPaymentStatus(workOrder.id)
+                              }
+                              className="cursor-pointer hover:opacity-80 transition-opacity inline-block group"
+                              title="Haz clic para editar el estado de pago"
+                            >
+                              <div className="flex items-center gap-1">
+                                {getPaymentStatusBadge(
+                                  workOrder.payment_status,
+                                )}
+                                <span className="opacity-0 group-hover:opacity-50 text-xs text-admin-text-tertiary">
+                                  ✎
+                                </span>
+                              </div>
+                            </div>
+                          )}
+                        </TableCell>
+                        <TableCell className="font-semibold text-admin-success">
+                          {formatCurrency(workOrder.total_amount)}
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <Link href={`/admin/work-orders/${workOrder.id}`}>
+                              <Button variant="outline" size="sm">
+                                <Eye className="h-4 w-4 mr-1" />
+                                Ver
+                              </Button>
+                            </Link>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleDeleteClick(workOrder.id)}
+                              disabled={
+                                workOrder.status === "delivered" ||
+                                workOrder.payment_status === "paid" ||
+                                workOrder.payment_status === "partial"
+                              }
+                              className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                            >
+                              <Trash2 className="h-4 w-4" />
                             </Button>
-                          </Link>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleDeleteClick(workOrder.id)}
-                            disabled={
-                              workOrder.status === "delivered" ||
-                              workOrder.payment_status === "paid" ||
-                              workOrder.payment_status === "partial"
-                            }
-                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
 
               {/* Pagination */}
               {totalPages > 1 && (

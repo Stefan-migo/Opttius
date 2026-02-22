@@ -65,10 +65,12 @@ interface EmailTemplate {
 
 interface EmailTemplatesManagerProps {
   mode?: "organization" | "saas";
+  organizationId?: string;
 }
 
 export default function EmailTemplatesManager({
   mode = "organization",
+  organizationId,
 }: EmailTemplatesManagerProps) {
   const [templates, setTemplates] = useState<EmailTemplate[]>([]);
   const [loading, setLoading] = useState(true);
@@ -77,6 +79,10 @@ export default function EmailTemplatesManager({
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showPreviewDialog, setShowPreviewDialog] = useState(false);
   const [showTestDialog, setShowTestDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [templateToDelete, setTemplateToDelete] =
+    useState<EmailTemplate | null>(null);
+  const [deleting, setDeleting] = useState(false);
   const [selectedTemplate, setSelectedTemplate] =
     useState<EmailTemplate | null>(null);
   const [testing, setTesting] = useState<string | null>(null);
@@ -108,7 +114,7 @@ export default function EmailTemplatesManager({
       }
 
       const data = await response.json();
-      setTemplates(data.templates || []);
+      setTemplates(data.templates ?? data.data ?? []);
     } catch (error) {
       console.error("Error fetching templates:", error);
       toast.error("Error al cargar plantillas");
@@ -117,16 +123,18 @@ export default function EmailTemplatesManager({
     }
   };
 
+  const templatesApiBase =
+    mode === "saas"
+      ? "/api/admin/saas-management/email-templates"
+      : "/api/admin/system/email-templates";
+
   const handleToggleActive = async (template: EmailTemplate) => {
     try {
-      const response = await fetch(
-        `/api/admin/system/email-templates/${template.id}`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ is_active: !template.is_active }),
-        },
-      );
+      const response = await fetch(`${templatesApiBase}/${template.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ is_active: !template.is_active }),
+      });
 
       if (!response.ok) {
         throw new Error("Failed to update template");
@@ -142,21 +150,22 @@ export default function EmailTemplatesManager({
     }
   };
 
-  const handleDelete = async (template: EmailTemplate) => {
+  const handleDeleteClick = (template: EmailTemplate) => {
     if (template.is_system) {
       toast.error("No se pueden eliminar plantillas del sistema");
       return;
     }
+    setTemplateToDelete(template);
+    setShowDeleteDialog(true);
+  };
 
-    if (
-      !confirm(`¿Estás seguro de eliminar la plantilla "${template.name}"?`)
-    ) {
-      return;
-    }
+  const confirmDelete = async () => {
+    if (!templateToDelete) return;
 
     try {
+      setDeleting(true);
       const response = await fetch(
-        `/api/admin/system/email-templates/${template.id}`,
+        `${templatesApiBase}/${templateToDelete.id}`,
         {
           method: "DELETE",
         },
@@ -167,10 +176,14 @@ export default function EmailTemplatesManager({
       }
 
       toast.success("Plantilla eliminada");
+      setShowDeleteDialog(false);
+      setTemplateToDelete(null);
       fetchTemplates();
     } catch (error) {
       console.error("Error deleting template:", error);
       toast.error("Error al eliminar plantilla");
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -189,7 +202,7 @@ export default function EmailTemplatesManager({
     try {
       setTesting(selectedTemplate.id);
       const response = await fetch(
-        `/api/admin/system/email-templates/${selectedTemplate.id}/test`,
+        `${templatesApiBase}/${selectedTemplate.id}/test`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -318,89 +331,91 @@ export default function EmailTemplatesManager({
               No se encontraron plantillas
             </div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Nombre</TableHead>
-                  <TableHead>Tipo</TableHead>
-                  <TableHead>Asunto</TableHead>
-                  <TableHead>Estado</TableHead>
-                  <TableHead>Uso</TableHead>
-                  <TableHead>Acciones</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredTemplates.map((template) => (
-                  <TableRow key={template.id}>
-                    <TableCell className="font-medium">
-                      {template.name}
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="outline">
-                        {getTypeLabel(template.type)}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="max-w-xs truncate">
-                      {template.subject}
-                    </TableCell>
-                    <TableCell>
-                      <Switch
-                        checked={template.is_active}
-                        onCheckedChange={() => handleToggleActive(template)}
-                      />
-                    </TableCell>
-                    <TableCell>{template.usage_count || 0}</TableCell>
-                    <TableCell>
-                      <div className="flex gap-2">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => {
-                            setSelectedTemplate(template);
-                            setShowPreviewDialog(true);
-                          }}
-                          title="Ver plantilla"
-                        >
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => {
-                            setSelectedTemplate(template);
-                            setShowEditDialog(true);
-                          }}
-                          title="Editar plantilla"
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleTestEmail(template)}
-                          disabled={testing === template.id}
-                          title="Enviar email de prueba"
-                        >
-                          <Send
-                            className={`h-4 w-4 ${testing === template.id ? "animate-spin" : ""}`}
-                          />
-                        </Button>
-                        {!template.is_system && (
+            <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Nombre</TableHead>
+                    <TableHead>Tipo</TableHead>
+                    <TableHead>Asunto</TableHead>
+                    <TableHead>Estado</TableHead>
+                    <TableHead>Uso</TableHead>
+                    <TableHead>Acciones</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredTemplates.map((template) => (
+                    <TableRow key={template.id}>
+                      <TableCell className="font-medium">
+                        {template.name}
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline">
+                          {getTypeLabel(template.type)}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="max-w-xs truncate">
+                        {template.subject}
+                      </TableCell>
+                      <TableCell>
+                        <Switch
+                          checked={template.is_active}
+                          onCheckedChange={() => handleToggleActive(template)}
+                        />
+                      </TableCell>
+                      <TableCell>{template.usage_count || 0}</TableCell>
+                      <TableCell>
+                        <div className="flex gap-2">
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => handleDelete(template)}
-                            className="text-red-600"
+                            onClick={() => {
+                              setSelectedTemplate(template);
+                              setShowPreviewDialog(true);
+                            }}
+                            title="Ver plantilla"
                           >
-                            <Trash2 className="h-4 w-4" />
+                            <Eye className="h-4 w-4" />
                           </Button>
-                        )}
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              setSelectedTemplate(template);
+                              setShowEditDialog(true);
+                            }}
+                            title="Editar plantilla"
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleTestEmail(template)}
+                            disabled={testing === template.id}
+                            title="Enviar email de prueba"
+                          >
+                            <Send
+                              className={`h-4 w-4 ${testing === template.id ? "animate-spin" : ""}`}
+                            />
+                          </Button>
+                          {!template.is_system && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleDeleteClick(template)}
+                              className="text-red-600"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          )}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           )}
         </CardContent>
       </Card>
@@ -409,6 +424,8 @@ export default function EmailTemplatesManager({
       {showEditDialog && selectedTemplate && (
         <EmailTemplateEditor
           template={selectedTemplate}
+          mode={mode}
+          organizationId={organizationId}
           open={showEditDialog}
           onOpenChange={setShowEditDialog}
           onSave={() => {
@@ -421,6 +438,8 @@ export default function EmailTemplatesManager({
       {/* Create Dialog */}
       {showCreateDialog && (
         <EmailTemplateEditor
+          mode={mode}
+          organizationId={organizationId}
           open={showCreateDialog}
           onOpenChange={setShowCreateDialog}
           onSave={() => {
@@ -433,7 +452,7 @@ export default function EmailTemplatesManager({
       {/* Preview Dialog */}
       {showPreviewDialog && selectedTemplate && (
         <Dialog open={showPreviewDialog} onOpenChange={setShowPreviewDialog}>
-          <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+          <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-3xl max-h-[80vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>{selectedTemplate.name}</DialogTitle>
               <DialogDescription>
@@ -465,10 +484,42 @@ export default function EmailTemplatesManager({
         </Dialog>
       )}
 
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Eliminar plantilla</DialogTitle>
+            <DialogDescription>
+              ¿Estás seguro de que deseas eliminar la plantilla &quot;
+              {templateToDelete?.name}&quot;? Esta acción no se puede deshacer.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowDeleteDialog(false);
+                setTemplateToDelete(null);
+              }}
+              disabled={deleting}
+            >
+              Cancelar
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={confirmDelete}
+              disabled={deleting}
+            >
+              {deleting ? "Eliminando..." : "Eliminar"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {/* Test Email Dialog */}
       {showTestDialog && selectedTemplate && (
         <Dialog open={showTestDialog} onOpenChange={setShowTestDialog}>
-          <DialogContent className="max-w-md">
+          <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-md">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 <Send className="h-5 w-5" />

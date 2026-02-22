@@ -2,7 +2,10 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { extractDataFromResponse, extractPaginationFromResponse } from "@/lib/api/response-helpers";
+import {
+  extractDataFromResponse,
+  extractPaginationFromResponse,
+} from "@/lib/api/response-helpers";
 import {
   Card,
   CardContent,
@@ -450,9 +453,9 @@ export default function HelpPage() {
               <p className="text-lg font-medium mb-2">No hay tickets</p>
               <p className="text-sm mb-4">
                 {(filters.status && filters.status !== "all") ||
-                  (filters.priority && filters.priority !== "all") ||
-                  (filters.category && filters.category !== "all") ||
-                  filters.search
+                (filters.priority && filters.priority !== "all") ||
+                (filters.category && filters.category !== "all") ||
+                filters.search
                   ? "No hay tickets que coincidan con los filtros"
                   : "Crea tu primer ticket de soporte"}
               </p>
@@ -558,7 +561,7 @@ export default function HelpPage() {
 
       {/* Create Ticket Dialog */}
       <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Crear Ticket de Soporte</DialogTitle>
             <DialogDescription>

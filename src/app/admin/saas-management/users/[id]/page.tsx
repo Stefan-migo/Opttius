@@ -191,7 +191,7 @@ export default function UserDetailsPage() {
             </h1>
           </div>
         </div>
-        <Card className="admin-card rounded-none">
+        <Card className="rounded-none border border-border">
           <CardContent className="pt-6">
             <div className="text-center py-12 text-red-600">
               {error || "Usuario no encontrado"}
@@ -238,7 +238,7 @@ export default function UserDetailsPage() {
       </div>
 
       {/* Información Principal */}
-      <Card className="admin-card rounded-none">
+      <Card className="rounded-none border border-border">
         <CardHeader>
           <CardTitle className="flex items-center gap-3">
             <User className="h-5 w-5" />
@@ -310,7 +310,7 @@ export default function UserDetailsPage() {
 
       {/* Organización */}
       {user.organization && (
-        <Card className="admin-card rounded-none">
+        <Card className="rounded-none border border-border">
           <CardHeader>
             <CardTitle className="flex items-center gap-3">
               <Building2 className="h-5 w-5" />
@@ -352,7 +352,7 @@ export default function UserDetailsPage() {
       )}
 
       {/* Acceso a Sucursales */}
-      <Card className="admin-card rounded-none">
+      <Card className="rounded-none border border-border">
         <CardHeader>
           <CardTitle className="flex items-center gap-3">
             <MapPin className="h-5 w-5" />
@@ -393,7 +393,7 @@ export default function UserDetailsPage() {
 
       {/* Actividad Reciente */}
       {user.recentActivity && user.recentActivity.length > 0 && (
-        <Card className="admin-card rounded-none">
+        <Card className="rounded-none border border-border">
           <CardHeader>
             <CardTitle className="flex items-center gap-3">
               <Activity className="h-5 w-5" />
@@ -424,7 +424,7 @@ export default function UserDetailsPage() {
       )}
 
       {/* Información del Sistema */}
-      <Card className="admin-card rounded-none">
+      <Card className="rounded-none border border-border">
         <CardHeader>
           <CardTitle className="flex items-center gap-3">
             <Shield className="h-5 w-5" />

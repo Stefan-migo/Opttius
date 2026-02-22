@@ -875,7 +875,10 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                       <Menu className="h-5 w-5 text-admin-text-primary" />
                     </Button>
                   </SheetTrigger>
-                  <SheetContent side="left" className="w-80 p-0">
+                  <SheetContent
+                    side="left"
+                    className="w-80 p-0 bg-admin-bg-secondary [&>button]:text-[#F9F7F2] [&>button:hover]:text-white"
+                  >
                     <AdminSidebar
                       pathname={pathname}
                       onNavigate={() => setSidebarOpen(false)}
@@ -1196,7 +1199,7 @@ function AdminSidebar({
             variant="outline"
             size="sm"
             onClick={handleSignOut}
-            className="admin-logout-button w-full text-[9px] font-display uppercase tracking-widest gap-1.5 h-9 text-red-300 border-red-300/20 rounded-none"
+            className="admin-logout-button w-full text-[9px] font-display uppercase tracking-widest gap-1.5 h-9 bg-transparent border-red-300/30 text-red-200 rounded-none"
           >
             <LogOut className="h-3.5 w-3.5 transition-colors" />
             Retiro

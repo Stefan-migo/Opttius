@@ -90,7 +90,7 @@ function FeatureCard({
 
   return (
     <div
-      className={`group relative overflow-hidden p-8 border border-epoch-primary/5 transition-all duration-700 flex flex-col justify-between hover:shadow-2xl hover:-translate-y-1 ${feature.className}`}
+      className={`group relative overflow-hidden p-6 sm:p-8 border border-epoch-primary/5 transition-all duration-700 flex flex-col justify-between hover:shadow-2xl hover:-translate-y-1 ${feature.className}`}
     >
       {showImage && (
         <div className="absolute inset-0 z-0">
@@ -172,7 +172,7 @@ function FeatureCard({
 export function FeaturesSection() {
   return (
     <section
-      className="py-32 bg-epoch-background relative"
+      className="py-20 sm:py-32 bg-epoch-background relative"
       id="caracteristicas"
     >
       {/* Texture Overlay */}
@@ -184,7 +184,7 @@ export function FeaturesSection() {
             <Sparkles className="h-3 w-3" />
             <span>Diseñado por quien conoce su óptica</span>
           </div>
-          <h2 className="text-5xl md:text-7xl font-display font-bold text-epoch-primary tracking-tight mb-8">
+          <h2 className="text-4xl sm:text-5xl md:text-7xl font-display font-bold text-epoch-primary tracking-tight mb-8">
             herramientas que
             <br />
             <span className="text-epoch-accent italic font-serif lowercase tracking-normal">
@@ -198,7 +198,7 @@ export function FeaturesSection() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 auto-rows-[180px]">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 auto-rows-[minmax(160px,auto)]">
           {features.map((feature, index) => (
             <FeatureCard key={index} feature={feature} index={index} />
           ))}

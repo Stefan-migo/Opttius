@@ -417,7 +417,7 @@ export async function bulkProductOperations(
     const response = await client.post<{
       success: string[];
       failed: { id?: string; error: string }[];
-    }>("/api/admin/products/bulk/operations", data);
+    }>("/api/admin/products/bulk", data);
     return unwrapData(response);
   } catch (error) {
     handleApiError(error, "bulkProductOperations");

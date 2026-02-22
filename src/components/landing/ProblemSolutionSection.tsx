@@ -58,7 +58,7 @@ export function ProblemSolutionSection() {
           <div className="inline-flex items-center gap-4 px-6 py-2 border border-epoch-primary/10 rounded-full text-epoch-primary/60 text-[10px] font-display tracking-[0.4em] uppercase mb-8">
             <span>Problemas reales. Soluciones concretas.</span>
           </div>
-          <h2 className="text-4xl md:text-6xl lg:text-7xl font-display font-bold text-epoch-primary tracking-tight leading-none mb-10">
+          <h2 className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-display font-bold text-epoch-primary tracking-tight leading-none mb-10">
             DE LOS PROBLEMAS QUE CONOCE
             <br />
             <span className="text-epoch-accent italic font-serif lowercase tracking-normal">

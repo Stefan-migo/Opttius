@@ -668,6 +668,22 @@ export async function POST(request: NextRequest) {
                 undefined,
             ).catch((err) => logger.error("Error creating notification", err));
 
+            // Send account welcome email when customer has email (non-blocking)
+            const customerEmail = validatedBody.email;
+            if (customerEmail) {
+              import("@/lib/email/notifications")
+                .then(({ EmailNotificationService }) =>
+                  EmailNotificationService.sendAccountWelcome(
+                    customerName,
+                    customerEmail,
+                    userOrganizationId,
+                  ),
+                )
+                .catch((err) =>
+                  logger.error("Error sending account welcome email", err),
+                );
+            }
+
             return createApiSuccessResponse(newCustomer, { statusCode: 201 });
           } else {
             // This is an analytics request

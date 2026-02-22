@@ -453,7 +453,7 @@ export default function OrganizationsPage() {
       </div>
 
       {/* Filtros y búsqueda */}
-      <Card className="admin-card rounded-none">
+      <Card className="rounded-none border border-border">
         <CardContent className="pt-6">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1">
@@ -548,7 +548,7 @@ export default function OrganizationsPage() {
       </Card>
 
       {/* Tabla de organizaciones */}
-      <Card className="admin-card rounded-none">
+      <Card className="rounded-none border border-border">
         <CardHeader>
           <CardTitle>Organizaciones ({totalCount})</CardTitle>
         </CardHeader>
@@ -565,167 +565,173 @@ export default function OrganizationsPage() {
             </div>
           ) : (
             <>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-12">
-                      <input
-                        type="checkbox"
-                        checked={
-                          selectedOrgs.size === organizations.length &&
-                          organizations.length > 0
-                        }
-                        onChange={(e) => {
-                          if (e.target.checked) {
-                            setSelectedOrgs(
-                              new Set(organizations.map((org) => org.id)),
-                            );
-                          } else {
-                            setSelectedOrgs(new Set());
-                          }
-                        }}
-                      />
-                    </TableHead>
-                    <TableHead>Organización</TableHead>
-                    <TableHead>Tier</TableHead>
-                    <TableHead>Estado</TableHead>
-                    <TableHead>Usuarios</TableHead>
-                    <TableHead>Sucursales</TableHead>
-                    <TableHead>Owner</TableHead>
-                    <TableHead>Creada</TableHead>
-                    <TableHead className="text-right">Acciones</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {organizations.map((org) => (
-                    <TableRow key={org.id}>
-                      <TableCell>
+              <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-12">
                         <input
                           type="checkbox"
-                          checked={selectedOrgs.has(org.id)}
+                          checked={
+                            selectedOrgs.size === organizations.length &&
+                            organizations.length > 0
+                          }
                           onChange={(e) => {
-                            const newSelected = new Set(selectedOrgs);
                             if (e.target.checked) {
-                              newSelected.add(org.id);
+                              setSelectedOrgs(
+                                new Set(organizations.map((org) => org.id)),
+                              );
                             } else {
-                              newSelected.delete(org.id);
+                              setSelectedOrgs(new Set());
                             }
-                            setSelectedOrgs(newSelected);
                           }}
                         />
-                      </TableCell>
-                      <TableCell>
-                        <div>
-                          <div className="font-medium">{org.name}</div>
-                          <div className="text-sm text-gray-500">
-                            {org.slug}
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        {getTierBadge(org.subscription_tier)}
-                      </TableCell>
-                      <TableCell>{getStatusBadge(org.status)}</TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-1">
-                          <Users className="h-4 w-4 text-gray-400" />
-                          {org.stats?.activeUsers || 0}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-1">
-                          <MapPin className="h-4 w-4 text-gray-400" />
-                          {org.stats?.branches || 0}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        {org.owner ? (
-                          <div>
-                            <div className="text-sm">
-                              {org.owner.first_name} {org.owner.last_name}
-                            </div>
-                            <div className="text-xs text-gray-500">
-                              {org.owner.email}
-                            </div>
-                          </div>
-                        ) : (
-                          <span className="text-gray-400">Sin owner</span>
-                        )}
-                      </TableCell>
-                      <TableCell className="text-sm text-gray-500">
-                        {formatDate(org.created_at)}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="sm">
-                              <MoreVertical className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem
-                              onClick={() =>
-                                router.push(
-                                  `/admin/saas-management/organizations/${org.id}`,
-                                )
-                              }
-                            >
-                              <Eye className="h-4 w-4 mr-2" />
-                              Ver detalles
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            {org.status === "active" ? (
-                              <DropdownMenuItem
-                                onClick={() => handleAction(org.id, "suspend")}
-                              >
-                                <Pause className="h-4 w-4 mr-2" />
-                                Suspender
-                              </DropdownMenuItem>
-                            ) : (
-                              <DropdownMenuItem
-                                onClick={() => handleAction(org.id, "activate")}
-                              >
-                                <Play className="h-4 w-4 mr-2" />
-                                Activar
-                              </DropdownMenuItem>
-                            )}
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem
-                              onClick={() =>
-                                handleAction(org.id, "change_tier", "basic")
-                              }
-                            >
-                              Cambiar a Básico
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() =>
-                                handleAction(org.id, "change_tier", "pro")
-                              }
-                            >
-                              Cambiar a Pro
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() =>
-                                handleAction(org.id, "change_tier", "premium")
-                              }
-                            >
-                              Cambiar a Premium
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem
-                              onClick={() => handleDeleteClick(org)}
-                              className="text-red-600 focus:text-red-600"
-                            >
-                              <Trash2 className="h-4 w-4 mr-2" />
-                              Eliminar Organización
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
+                      </TableHead>
+                      <TableHead>Organización</TableHead>
+                      <TableHead>Tier</TableHead>
+                      <TableHead>Estado</TableHead>
+                      <TableHead>Usuarios</TableHead>
+                      <TableHead>Sucursales</TableHead>
+                      <TableHead>Owner</TableHead>
+                      <TableHead>Creada</TableHead>
+                      <TableHead className="text-right">Acciones</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {organizations.map((org) => (
+                      <TableRow key={org.id}>
+                        <TableCell>
+                          <input
+                            type="checkbox"
+                            checked={selectedOrgs.has(org.id)}
+                            onChange={(e) => {
+                              const newSelected = new Set(selectedOrgs);
+                              if (e.target.checked) {
+                                newSelected.add(org.id);
+                              } else {
+                                newSelected.delete(org.id);
+                              }
+                              setSelectedOrgs(newSelected);
+                            }}
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <div>
+                            <div className="font-medium">{org.name}</div>
+                            <div className="text-sm text-gray-500">
+                              {org.slug}
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          {getTierBadge(org.subscription_tier)}
+                        </TableCell>
+                        <TableCell>{getStatusBadge(org.status)}</TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-1">
+                            <Users className="h-4 w-4 text-gray-400" />
+                            {org.stats?.activeUsers || 0}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-1">
+                            <MapPin className="h-4 w-4 text-gray-400" />
+                            {org.stats?.branches || 0}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          {org.owner ? (
+                            <div>
+                              <div className="text-sm">
+                                {org.owner.first_name} {org.owner.last_name}
+                              </div>
+                              <div className="text-xs text-gray-500">
+                                {org.owner.email}
+                              </div>
+                            </div>
+                          ) : (
+                            <span className="text-gray-400">Sin owner</span>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-sm text-gray-500">
+                          {formatDate(org.created_at)}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="sm">
+                                <MoreVertical className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem
+                                onClick={() =>
+                                  router.push(
+                                    `/admin/saas-management/organizations/${org.id}`,
+                                  )
+                                }
+                              >
+                                <Eye className="h-4 w-4 mr-2" />
+                                Ver detalles
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              {org.status === "active" ? (
+                                <DropdownMenuItem
+                                  onClick={() =>
+                                    handleAction(org.id, "suspend")
+                                  }
+                                >
+                                  <Pause className="h-4 w-4 mr-2" />
+                                  Suspender
+                                </DropdownMenuItem>
+                              ) : (
+                                <DropdownMenuItem
+                                  onClick={() =>
+                                    handleAction(org.id, "activate")
+                                  }
+                                >
+                                  <Play className="h-4 w-4 mr-2" />
+                                  Activar
+                                </DropdownMenuItem>
+                              )}
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem
+                                onClick={() =>
+                                  handleAction(org.id, "change_tier", "basic")
+                                }
+                              >
+                                Cambiar a Básico
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() =>
+                                  handleAction(org.id, "change_tier", "pro")
+                                }
+                              >
+                                Cambiar a Pro
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() =>
+                                  handleAction(org.id, "change_tier", "premium")
+                                }
+                              >
+                                Cambiar a Premium
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem
+                                onClick={() => handleDeleteClick(org)}
+                                className="text-red-600 focus:text-red-600"
+                              >
+                                <Trash2 className="h-4 w-4 mr-2" />
+                                Eliminar Organización
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
 
               {/* Paginación */}
               {totalPages > 1 && (
@@ -762,7 +768,7 @@ export default function OrganizationsPage() {
 
       {/* Delete Confirmation Dialog */}
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-lg">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <AlertTriangle className="h-5 w-5 text-red-500" />

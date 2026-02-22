@@ -39,37 +39,37 @@ El sistema de IA de Opttius ha evolucionado significativamente desde su concepci
 
 ### Core de Insights (src/lib/ai/insights/)
 
-| Archivo | Estado | Descripción |
-|---------|--------|-------------|
-| [`schemas.ts`](src/lib/ai/insights/schemas.ts) | ✅ Completo | Zod schemas para validación |
+| Archivo                                            | Estado      | Descripción                          |
+| -------------------------------------------------- | ----------- | ------------------------------------ |
+| [`schemas.ts`](src/lib/ai/insights/schemas.ts)     | ✅ Completo | Zod schemas para validación          |
 | [`generator.ts`](src/lib/ai/insights/generator.ts) | ✅ Completo | Generador con madurez organizacional |
-| [`prompts.ts`](src/lib/ai/insights/prompts.ts) | ✅ Completo | Prompts por sección |
-| [`maturity.ts`](src/lib/ai/insights/maturity.ts) | ✅ Completo | Sistema de madurez organizacional |
-| [`feedback.ts`](src/lib/ai/insights/feedback.ts) | ✅ Completo | Sistema de retroalimentación |
+| [`prompts.ts`](src/lib/ai/insights/prompts.ts)     | ✅ Completo | Prompts por sección                  |
+| [`maturity.ts`](src/lib/ai/insights/maturity.ts)   | ✅ Completo | Sistema de madurez organizacional    |
+| [`feedback.ts`](src/lib/ai/insights/feedback.ts)   | ✅ Completo | Sistema de retroalimentación         |
 
 ### Componentes Frontend (src/components/ai/)
 
-| Archivo | Estado | Descripción |
-|---------|--------|-------------|
-| [`InsightCard.tsx`](src/components/ai/InsightCard.tsx) | ✅ Completo | Tarjeta de insight visual |
+| Archivo                                                              | Estado      | Descripción                      |
+| -------------------------------------------------------------------- | ----------- | -------------------------------- |
+| [`InsightCard.tsx`](src/components/ai/InsightCard.tsx)               | ✅ Completo | Tarjeta de insight visual        |
 | [`SmartContextWidget.tsx`](src/components/ai/SmartContextWidget.tsx) | ✅ Completo | Widget principal con React Query |
 
 ### API Routes (src/app/api/ai/)
 
-| Archivo | Estado | Descripción |
-|---------|--------|-------------|
-| [`insights/route.ts`](src/app/api/ai/insights/route.ts) | ✅ Completo | GET insights |
-| [`insights/[id]/dismiss/route.ts`](src/app/api/ai/insights/[id]/dismiss/route.ts) | ✅ Completo | POST dismiss |
-| [`insights/[id]/feedback/route.ts`](src/app/api/ai/insights/[id]/feedback/route.ts) | ✅ Completo | POST feedback |
-| [`insights/generate/route.ts`](src/app/api/ai/insights/generate/route.ts) | ✅ Completo | POST generate con madurez |
+| Archivo                                                                             | Estado      | Descripción               |
+| ----------------------------------------------------------------------------------- | ----------- | ------------------------- |
+| [`insights/route.ts`](src/app/api/ai/insights/route.ts)                             | ✅ Completo | GET insights              |
+| [`insights/[id]/dismiss/route.ts`](src/app/api/ai/insights/[id]/dismiss/route.ts)   | ✅ Completo | POST dismiss              |
+| [`insights/[id]/feedback/route.ts`](src/app/api/ai/insights/[id]/feedback/route.ts) | ✅ Completo | POST feedback             |
+| [`insights/generate/route.ts`](src/app/api/ai/insights/generate/route.ts)           | ✅ Completo | POST generate con madurez |
 
-### Tests Unitarios (src/__tests__/)
+### Tests Unitarios (src/**tests**/)
 
-| Archivo | Estado | Tests |
-|---------|--------|-------|
-| `unit/lib/ai/insights/feedback.test.ts` | ✅ Completo | 13 tests passing |
-| `unit/lib/ai/insights/maturity.test.ts` | ✅ Completo | 8 tests passing |
-| `unit/lib/ai/providers/openrouter.test.ts` | ✅ Completo | 15 tests passing |
+| Archivo                                      | Estado      | Tests            |
+| -------------------------------------------- | ----------- | ---------------- |
+| `unit/lib/ai/insights/feedback.test.ts`      | ✅ Completo | 13 tests passing |
+| `unit/lib/ai/insights/maturity.test.ts`      | ✅ Completo | 8 tests passing  |
+| `unit/lib/ai/providers/openrouter.test.ts`   | ✅ Completo | 15 tests passing |
 | `integration/ai/insights-generation.test.ts` | ✅ Completo | 12 tests passing |
 
 **Total:** 48 tests passing ✅
@@ -90,6 +90,7 @@ El sistema de IA de Opttius ha evolucionado significativamente desde su concepci
 ### 2. Sistema de Madurez Organizacional
 
 Niveles implementados:
+
 - **new** (< 7 días o < 5 órdenes): Bienvenida y configuración inicial
 - **starting** (< 30 días o < 10 órdenes): Guía operativa
 - **growing** (< 90 días o < 50 órdenes): Consultor de negocios
@@ -98,6 +99,7 @@ Niveles implementados:
 ### 3. Integración en Páginas
 
 Secciones integradas con `SmartContextWidget`:
+
 - ✅ Dashboard (`/admin`)
 - ✅ Products (`/admin/products`)
 - ✅ POS (`/admin/pos`)
@@ -111,6 +113,22 @@ Secciones integradas con `SmartContextWidget`:
 - ✅ Contexto de sección en system prompt
 - ✅ Placeholder dinámico según sección
 - ✅ Removido del sidebar (integración flotante)
+- ✅ Modo expandible como sidebar derecho (similar a Insights)
+- ✅ Contexto de sucursal y flujo super_admin (pregunta sucursal en vista global)
+
+### 5. Cron de Insights
+
+- ✅ **Implementado** en `src/app/api/cron/generate-insights/route.ts`
+- ✅ Configurado en `vercel.json`: ejecución diaria a las 8:00 UTC
+- ✅ Secciones: dashboard, clients (diario); inventory (solo lunes)
+- Requiere `CRON_SECRET` configurado en Vercel para autorización
+
+### 6. Monitoreo de Costos LLM
+
+- ✅ Tabla `ai_usage_log` para registro de tokens
+- ✅ API `GET /api/admin/ai/usage` con coste estimado por modelo
+- ✅ Componente `AIUsageCard` integrado en `/admin/analytics`
+- ✅ Logging desde Agent y generator de insights
 
 ---
 
@@ -121,6 +139,7 @@ Secciones integradas con `SmartContextWidget`:
 Migración aplicada: `supabase/migrations/20260131000004_create_ai_insights.sql`
 
 Campos principales:
+
 - `id` UUID PK
 - `organization_id` UUID FK
 - `section` varchar (dashboard, inventory, pos, clients, analytics)
@@ -144,14 +163,14 @@ Campos principales:
 
 ### Proveedores Soportados
 
-| Proveedor | Estado | Modelos |
-|-----------|--------|---------|
-| OpenAI | ✅ Implementado | GPT-4o, GPT-4 Turbo |
-| Anthropic | ✅ Implementado | Claude 3.5 Sonnet, Claude 3 Opus |
-| Google | ✅ Implementado | Gemini Pro, Gemini Flash |
-| OpenRouter | ✅ Implementado | 100+ modelos agregados |
-| DeepSeek | ✅ Implementado | DeepSeek Chat |
-| Groq | ✅ Implementado | Llama 3.1, Mixtral |
+| Proveedor  | Estado          | Modelos                          |
+| ---------- | --------------- | -------------------------------- |
+| OpenAI     | ✅ Implementado | GPT-4o, GPT-4 Turbo              |
+| Anthropic  | ✅ Implementado | Claude 3.5 Sonnet, Claude 3 Opus |
+| Google     | ✅ Implementado | Gemini Pro, Gemini Flash         |
+| OpenRouter | ✅ Implementado | 100+ modelos agregados           |
+| DeepSeek   | ✅ Implementado | DeepSeek Chat                    |
+| Groq       | ✅ Implementado | Llama 3.1, Mixtral               |
 
 ### Características
 
@@ -166,13 +185,13 @@ Campos principales:
 
 ## 📊 Métricas de Éxito
 
-| Métrica | Objetivo | Estado |
-|---------|----------|--------|
-| Tests unitarios | >80% coverage | ✅ 48 tests passing |
-| Tests integración | >75% coverage | ✅ 12 tests passing |
-| Tiempo de respuesta | <3s | ✅ <2s típico |
-| Disponibilidad | 99% | ⚠️ Requiere monitoreo |
-| Precisión de insights | Feedback >3.5 | ⚠️ Requiere métricas |
+| Métrica               | Objetivo      | Estado                |
+| --------------------- | ------------- | --------------------- |
+| Tests unitarios       | >80% coverage | ✅ 48 tests passing   |
+| Tests integración     | >75% coverage | ✅ 12 tests passing   |
+| Tiempo de respuesta   | <3s           | ✅ <2s típico         |
+| Disponibilidad        | 99%           | ⚠️ Requiere monitoreo |
+| Precisión de insights | Feedback >3.5 | ⚠️ Requiere métricas  |
 
 ---
 
@@ -205,8 +224,8 @@ El único archivo remainente es este documento (`AI_IMPLEMENTATION_STATUS.md`).
 ### Corto Plazo (1-2 semanas)
 
 1. **Monitoreo de Costos**
-   - Implementar dashboard de costos LLM
-   - Alertas de presupuesto por organización
+   - Alertas de presupuesto por organización (cuando el coste supere umbral)
+   - Resumen mensual por organización
 
 2. **Optimización de Prompts**
    - Analizar feedback scores promedio
@@ -218,9 +237,9 @@ El único archivo remainente es este documento (`AI_IMPLEMENTATION_STATUS.md`).
 
 ### Mediano Plazo (1 mes)
 
-1. **Cron Jobs**
-   - Generación automática diaria de insights
+1. **Cron de Insights**
    - Personalización por horario/temporada
+   - Endpoint de health/status para verificar última ejecución
 
 2. **Dashboard de IA**
    - Métricas agregadas de efectividad
@@ -249,19 +268,14 @@ El único archivo remainente es este documento (`AI_IMPLEMENTATION_STATUS.md`).
 
 ## 🐛 Problemas Conocidos
 
-1. **Cron Jobs No Implementados**
-   - Estado: Pendiente
-   - Workaround: Generación manual desde widget
-
-2. **Feedback Limitado**
+1. **Feedback Limitado**
    - Estado: Solo score numérico
    - Impacto: Menor personalización
    - Solución: Feedback cualitativo futuro
 
-3. **Costos Variables**
-   - Estado: Sin monitoreo en tiempo real
-   - Impacto: Posible sobrecarga
-   - Solución: Dashboard de costos propuesto
+2. **Costos Variables**
+   - Estado: Monitoreo básico implementado (AIUsageCard, API usage)
+   - Mejora: Alertas de presupuesto por organización
 
 ---
 
@@ -275,6 +289,6 @@ El único archivo remainente es este documento (`AI_IMPLEMENTATION_STATUS.md`).
 
 ---
 
-**Última Actualización:** 2026-02-11  
-**Versión:** 2.0 Consolidada  
+**Última Actualización:** 2026-02-21  
+**Versión:** 2.1  
 **Estado del Sistema:** 🟢 OPERACIONAL

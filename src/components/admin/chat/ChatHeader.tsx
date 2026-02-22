@@ -23,6 +23,8 @@ import {
   Edit2,
   X,
   Bot,
+  PanelRightOpen,
+  PanelRightClose,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -37,6 +39,10 @@ interface ChatHeaderProps {
   onDelete: () => void;
   onDuplicate?: () => void;
   onClose?: () => void;
+  /** When provided, shows expand/collapse sidebar button */
+  onExpandClick?: () => void;
+  /** When true, shows collapse icon; when false, expand icon */
+  isSidebarMode?: boolean;
 }
 
 export function ChatHeader({
@@ -50,6 +56,8 @@ export function ChatHeader({
   onDelete,
   onDuplicate,
   onClose,
+  onExpandClick,
+  isSidebarMode = false,
 }: ChatHeaderProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState(title);
@@ -150,6 +158,26 @@ export function ChatHeader({
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
+
+        {onExpandClick && (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onExpandClick}
+            className="text-white hover:bg-white/10 rounded-none h-9 w-9"
+            title={
+              isSidebarMode
+                ? "Volver a ventana flotante"
+                : "Expandir como panel lateral"
+            }
+          >
+            {isSidebarMode ? (
+              <PanelRightClose className="w-5 h-5" />
+            ) : (
+              <PanelRightOpen className="w-5 h-5" />
+            )}
+          </Button>
+        )}
 
         {onClose && (
           <Button

@@ -475,11 +475,17 @@ export async function POST(request: NextRequest) {
     };
     await supabase.rpc("log_admin_activity", logParams);
 
+    // Extract IDs from results for frontend compatibility
+    const successIds = (results as { id?: string; product_id?: string }[])
+      .map((r) => r.id ?? r.product_id)
+      .filter(Boolean) as string[];
+
     return NextResponse.json({
       success: true,
-      operation,
-      affected_count: results.length,
-      results,
+      data: {
+        success: successIds,
+        failed: [] as { id?: string; error: string }[],
+      },
     });
   } catch (error) {
     logger.error("Error in bulk operations API", { error });

@@ -422,10 +422,7 @@ export function CheckoutPageContent() {
                   </p>
                 </div>
               </div>
-              <Badge
-                variant="healty"
-                className="bg-admin-accent-primary/10 text-admin-accent-primary border border-admin-accent-primary/20 rounded-none font-display font-black text-[10px] tracking-widest px-4 py-1"
-              >
+              <Badge className="bg-admin-success text-admin-text-on-dark border border-admin-success/30 rounded-none font-display font-black text-[10px] tracking-widest px-4 py-1">
                 ACTIVO
               </Badge>
             </CardContent>
@@ -463,7 +460,7 @@ export function CheckoutPageContent() {
                       className={cn(
                         "relative flex flex-col p-8 rounded-none border-2 text-left transition-all duration-500 group hover:scale-[1.02] active:scale-[0.98]",
                         isSelected
-                          ? "border-admin-accent-primary bg-admin-bg-secondary shadow-premium-xl ring-4 ring-admin-accent-primary/5"
+                          ? "border-admin-accent-primary bg-epoch-accent/10 shadow-premium-xl ring-4 ring-admin-accent-primary/5"
                           : "border-admin-border-primary/20 bg-admin-bg-secondary/40 hover:border-admin-accent-primary/40",
                         isCurrent && "opacity-60",
                       )}
@@ -583,7 +580,7 @@ export function CheckoutPageContent() {
                       className={cn(
                         "flex flex-col items-center justify-center p-8 rounded-none border-2 transition-all duration-500 group relative",
                         selectedGateway === gw.gateway_id
-                          ? "border-admin-accent-primary bg-admin-bg-secondary shadow-premium-xl ring-4 ring-admin-accent-primary/5"
+                          ? "border-admin-accent-primary bg-epoch-accent/10 shadow-premium-xl ring-4 ring-admin-accent-primary/5"
                           : "border-admin-border-primary/10 bg-admin-bg-secondary/40 hover:border-admin-accent-primary/30",
                       )}
                     >
@@ -652,7 +649,7 @@ export function CheckoutPageContent() {
               <div className="grid lg:grid-cols-2 gap-8">
                 {/* Left: Summary and Security */}
                 <div className="space-y-6">
-                  <Card className="border-2 border-admin-accent-primary bg-admin-bg-secondary shadow-premium-xl rounded-none relative overflow-hidden">
+                  <Card className="border-2 border-admin-accent-primary bg-epoch-accent/10 shadow-premium-xl rounded-none relative overflow-hidden">
                     <div className="absolute top-0 left-0 w-full h-1 bg-admin-accent-primary" />
                     <CardHeader className="p-8 pb-0">
                       <CardTitle className="text-[10px] font-display font-black text-admin-accent-primary uppercase tracking-[0.2em]">

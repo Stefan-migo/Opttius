@@ -78,14 +78,20 @@ function ProductGridComponent({
             product.total_inventory_quantity !== undefined
               ? product.total_inventory_quantity
               : product.inventory_quantity || 0;
-          const isLowStock = stockQuantity <= 5;
+          const p = product as {
+            low_stock_threshold?: number;
+            total_low_stock_threshold?: number;
+          };
+          const threshold =
+            p.total_low_stock_threshold ?? p.low_stock_threshold ?? 5;
+          const isLowStock = stockQuantity <= threshold;
           const hasImage =
             (product as any).featured_image || (product as any).gallery?.[0];
 
           return (
             <Card
               key={product.id}
-              className="group relative flex flex-col transition-all duration-300 border border-admin-border-primary/20 bg-admin-bg-tertiary rounded-none shadow-[0_1px_3px_rgba(0,0,0,0.3)] hover:bg-admin-bg-secondary hover:border-admin-accent-primary/30 overflow-hidden"
+              className="group relative flex flex-col transition-all duration-300 border border-admin-border-primary/20 bg-admin-bg-tertiary rounded-none shadow-[0_1px_3px_rgba(0,0,0,0.3)] hover:shadow-lg transition-shadow duration-300 overflow-hidden"
             >
               {/* Checkbox - Top Right */}
               <div className="absolute top-4 right-4 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -180,6 +186,9 @@ function ProductGridComponent({
                           <AlertTriangle className="h-3.5 w-3.5 text-admin-error animate-pulse" />
                         )}
                       </div>
+                      <p className="text-[9px] text-admin-text-tertiary">
+                        Umbral: {threshold}
+                      </p>
                     </div>
                   </div>
 

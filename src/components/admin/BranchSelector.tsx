@@ -1,16 +1,16 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { useBranch } from '@/hooks/useBranch'
+import { useState } from "react";
+import { useBranch } from "@/hooks/useBranch";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
-import { Building2, Globe } from 'lucide-react'
-import { cn } from '@/lib/utils'
+} from "@/components/ui/select";
+import { Building2, Globe } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export function BranchSelector() {
   const {
@@ -20,35 +20,37 @@ export function BranchSelector() {
     isSuperAdmin,
     isLoading,
     setCurrentBranch,
-  } = useBranch()
+  } = useBranch();
 
-  const [isChanging, setIsChanging] = useState(false)
+  const [isChanging, setIsChanging] = useState(false);
 
   const handleBranchChange = async (value: string) => {
-    setIsChanging(true)
+    setIsChanging(true);
     try {
-      await setCurrentBranch(value === 'global' ? 'global' : value)
+      await setCurrentBranch(value === "global" ? "global" : value);
     } catch (error) {
-      console.error('Error changing branch:', error)
+      console.error("Error changing branch:", error);
     } finally {
-      setIsChanging(false)
+      setIsChanging(false);
     }
-  }
+  };
 
   if (isLoading) {
     return (
-      <div className="flex items-center space-x-2 px-3 py-2">
+      <div className="flex items-center space-x-2 px-2 py-2 max-md:px-1">
         <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-        <span className="text-sm text-muted-foreground">Cargando...</span>
+        <span className="text-sm text-muted-foreground max-md:hidden">
+          Cargando...
+        </span>
       </div>
-    )
+    );
   }
 
   if (branches.length === 0) {
-    return null
+    return null;
   }
 
-  const currentValue = isGlobalView ? 'global' : currentBranch?.id || ''
+  const currentValue = isGlobalView ? "global" : currentBranch?.id || "";
 
   return (
     <div className="flex items-center space-x-2">
@@ -59,8 +61,10 @@ export function BranchSelector() {
       >
         <SelectTrigger
           className={cn(
-            'w-[200px] border-admin-border',
-            isChanging && 'opacity-50'
+            "min-w-0 flex-shrink border-admin-border",
+            "w-[200px] md:min-w-[140px]",
+            "max-md:w-10 max-md:px-2 max-md:justify-center max-md:[&_span]:hidden",
+            isChanging && "opacity-50",
           )}
         >
           <SelectValue placeholder="Seleccionar sucursal">
@@ -73,7 +77,7 @@ export function BranchSelector() {
               ) : (
                 <>
                   <Building2 className="h-4 w-4" />
-                  <span>{currentBranch?.name || 'Sin sucursal'}</span>
+                  <span>{currentBranch?.name || "Sin sucursal"}</span>
                 </>
               )}
             </div>
@@ -94,7 +98,9 @@ export function BranchSelector() {
                 <Building2 className="h-4 w-4" />
                 <span>{branch.name}</span>
                 {branch.is_primary && (
-                  <span className="text-xs text-muted-foreground">(Principal)</span>
+                  <span className="text-xs text-muted-foreground">
+                    (Principal)
+                  </span>
                 )}
               </div>
             </SelectItem>
@@ -102,5 +108,5 @@ export function BranchSelector() {
         </SelectContent>
       </Select>
     </div>
-  )
+  );
 }

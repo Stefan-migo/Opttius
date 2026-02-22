@@ -194,17 +194,18 @@ export async function PATCH(
           };
 
           // Send appropriate email based on status
-          if (status === "shipped") {
-            await EmailNotificationService.sendShippingNotification(emailOrder);
-            logger.info("Shipping notification email sent", {
-              orderId: params.id,
-            });
-          } else if (status === "delivered") {
-            await EmailNotificationService.sendDeliveryConfirmation(emailOrder);
-            logger.info("Delivery confirmation email sent", {
-              orderId: params.id,
-            });
-          }
+          // TODO: Habilitar cuando flujo de envío esté implementado
+          // if (status === "shipped") {
+          //   await EmailNotificationService.sendShippingNotification(emailOrder);
+          //   logger.info("Shipping notification email sent", {
+          //     orderId: params.id,
+          //   });
+          // } else if (status === "delivered") {
+          //   await EmailNotificationService.sendDeliveryConfirmation(emailOrder);
+          //   logger.info("Delivery confirmation email sent", {
+          //     orderId: params.id,
+          //   });
+          // }
         }
       } catch (emailError) {
         logger.warn(

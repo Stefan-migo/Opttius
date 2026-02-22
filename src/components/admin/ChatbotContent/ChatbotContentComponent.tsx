@@ -22,6 +22,10 @@ interface ChatbotContentProps {
   className?: string;
   currentSection?: InsightSection | null;
   onClose?: () => void;
+  /** When provided, shows expand/collapse button in header */
+  onExpandClick?: () => void;
+  /** When true, button shows collapse icon; when false, expand icon */
+  isSidebarMode?: boolean;
 }
 
 // Quick suggestions based on section
@@ -62,6 +66,8 @@ export function ChatbotContent({
   className,
   currentSection,
   onClose,
+  onExpandClick,
+  isSidebarMode = false,
 }: ChatbotContentProps) {
   const { currentBranch, isGlobalView } = useBranch();
   const [showHistory, setShowHistory] = useState(false);
@@ -253,6 +259,8 @@ export function ChatbotContent({
             onClear={handleClear}
             onDelete={handleDelete}
             onClose={onClose}
+            onExpandClick={onExpandClick}
+            isSidebarMode={isSidebarMode}
           />
         </div>
 

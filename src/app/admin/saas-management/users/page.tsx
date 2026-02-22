@@ -364,7 +364,7 @@ export default function UsersManagementPage() {
       </div>
 
       {/* Filtros */}
-      <Card className="admin-card rounded-none">
+      <Card className="rounded-none border border-border">
         <CardContent className="pt-6">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1">
@@ -426,7 +426,7 @@ export default function UsersManagementPage() {
       </Card>
 
       {/* Tabla de usuarios */}
-      <Card className="admin-card rounded-none">
+      <Card className="rounded-none border border-border">
         <CardHeader>
           <CardTitle>Usuarios ({totalCount})</CardTitle>
         </CardHeader>
@@ -443,142 +443,144 @@ export default function UsersManagementPage() {
             </div>
           ) : (
             <>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Usuario</TableHead>
-                    <TableHead>Rol</TableHead>
-                    <TableHead>Organización</TableHead>
-                    <TableHead>Sucursales</TableHead>
-                    <TableHead>Estado</TableHead>
-                    <TableHead>Último acceso</TableHead>
-                    <TableHead className="text-right">Acciones</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {users.map((user) => (
-                    <TableRow key={user.id}>
-                      <TableCell>
-                        <div>
-                          <div className="font-medium">
-                            {user.fullName || user.email}
-                          </div>
-                          <div className="text-sm text-gray-500">
-                            {user.email}
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell>{getRoleBadge(user.role)}</TableCell>
-                      <TableCell>
-                        {user.organization ? (
+              <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Usuario</TableHead>
+                      <TableHead>Rol</TableHead>
+                      <TableHead>Organización</TableHead>
+                      <TableHead>Sucursales</TableHead>
+                      <TableHead>Estado</TableHead>
+                      <TableHead>Último acceso</TableHead>
+                      <TableHead className="text-right">Acciones</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {users.map((user) => (
+                      <TableRow key={user.id}>
+                        <TableCell>
                           <div>
                             <div className="font-medium">
-                              {user.organization.name}
+                              {user.fullName || user.email}
                             </div>
-                            <div className="text-xs text-gray-500">
-                              {user.organization.slug}
+                            <div className="text-sm text-gray-500">
+                              {user.email}
                             </div>
                           </div>
-                        ) : (
-                          <span className="text-gray-400">
-                            Sin organización
-                          </span>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        {user.branches && user.branches.length > 0 ? (
-                          <div className="flex items-center gap-1">
-                            <MapPin className="h-4 w-4 text-gray-400" />
-                            <span>{user.branches.length}</span>
-                          </div>
-                        ) : user.is_super_admin ? (
-                          <Badge variant="outline">Todas</Badge>
-                        ) : (
-                          <span className="text-gray-400">-</span>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        {user.is_active ? (
-                          <Badge variant="default">
-                            <CheckCircle2 className="h-3 w-3 mr-1" />
-                            Activo
-                          </Badge>
-                        ) : (
-                          <Badge variant="secondary">
-                            <XCircle className="h-3 w-3 mr-1" />
-                            Inactivo
-                          </Badge>
-                        )}
-                      </TableCell>
-                      <TableCell className="text-sm text-gray-500">
-                        {user.last_login
-                          ? formatDate(user.last_login)
-                          : "Nunca"}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="sm">
-                              <MoreVertical className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem
-                              onClick={() =>
-                                router.push(
-                                  `/admin/saas-management/users/${user.id}`,
-                                )
-                              }
-                            >
-                              <Eye className="h-4 w-4 mr-2" />
-                              Ver detalles
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            {user.is_active ? (
+                        </TableCell>
+                        <TableCell>{getRoleBadge(user.role)}</TableCell>
+                        <TableCell>
+                          {user.organization ? (
+                            <div>
+                              <div className="font-medium">
+                                {user.organization.name}
+                              </div>
+                              <div className="text-xs text-gray-500">
+                                {user.organization.slug}
+                              </div>
+                            </div>
+                          ) : (
+                            <span className="text-gray-400">
+                              Sin organización
+                            </span>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          {user.branches && user.branches.length > 0 ? (
+                            <div className="flex items-center gap-1">
+                              <MapPin className="h-4 w-4 text-gray-400" />
+                              <span>{user.branches.length}</span>
+                            </div>
+                          ) : user.is_super_admin ? (
+                            <Badge variant="outline">Todas</Badge>
+                          ) : (
+                            <span className="text-gray-400">-</span>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          {user.is_active ? (
+                            <Badge variant="default">
+                              <CheckCircle2 className="h-3 w-3 mr-1" />
+                              Activo
+                            </Badge>
+                          ) : (
+                            <Badge variant="secondary">
+                              <XCircle className="h-3 w-3 mr-1" />
+                              Inactivo
+                            </Badge>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-sm text-gray-500">
+                          {user.last_login
+                            ? formatDate(user.last_login)
+                            : "Nunca"}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="sm">
+                                <MoreVertical className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
                               <DropdownMenuItem
                                 onClick={() =>
-                                  handleAction(user.id, "deactivate")
+                                  router.push(
+                                    `/admin/saas-management/users/${user.id}`,
+                                  )
                                 }
                               >
-                                <XCircle className="h-4 w-4 mr-2" />
-                                Desactivar
+                                <Eye className="h-4 w-4 mr-2" />
+                                Ver detalles
                               </DropdownMenuItem>
-                            ) : (
+                              <DropdownMenuSeparator />
+                              {user.is_active ? (
+                                <DropdownMenuItem
+                                  onClick={() =>
+                                    handleAction(user.id, "deactivate")
+                                  }
+                                >
+                                  <XCircle className="h-4 w-4 mr-2" />
+                                  Desactivar
+                                </DropdownMenuItem>
+                              ) : (
+                                <DropdownMenuItem
+                                  onClick={() =>
+                                    handleAction(user.id, "activate")
+                                  }
+                                >
+                                  <CheckCircle2 className="h-4 w-4 mr-2" />
+                                  Activar
+                                </DropdownMenuItem>
+                              )}
+                              <DropdownMenuItem
+                                onClick={() => {
+                                  setSelectedUser(user);
+                                  setNewOrganizationId(
+                                    user.organization_id || "",
+                                  );
+                                  setShowChangeOrgDialog(true);
+                                }}
+                              >
+                                <Building2 className="h-4 w-4 mr-2" />
+                                Cambiar organización
+                              </DropdownMenuItem>
                               <DropdownMenuItem
                                 onClick={() =>
-                                  handleAction(user.id, "activate")
+                                  handleAction(user.id, "reset_password")
                                 }
                               >
-                                <CheckCircle2 className="h-4 w-4 mr-2" />
-                                Activar
+                                Resetear contraseña
                               </DropdownMenuItem>
-                            )}
-                            <DropdownMenuItem
-                              onClick={() => {
-                                setSelectedUser(user);
-                                setNewOrganizationId(
-                                  user.organization_id || "",
-                                );
-                                setShowChangeOrgDialog(true);
-                              }}
-                            >
-                              <Building2 className="h-4 w-4 mr-2" />
-                              Cambiar organización
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() =>
-                                handleAction(user.id, "reset_password")
-                              }
-                            >
-                              Resetear contraseña
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
 
               {/* Paginación */}
               {totalPages > 1 && (
@@ -632,7 +634,7 @@ export default function UsersManagementPage() {
           }
         }}
       >
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Crear usuario</DialogTitle>
             <DialogDescription>

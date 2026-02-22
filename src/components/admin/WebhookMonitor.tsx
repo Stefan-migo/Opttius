@@ -1,11 +1,17 @@
 "use client";
 
-import { useState, useEffect, useCallback } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { useState, useEffect, useCallback } from "react";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Table,
   TableBody,
@@ -13,14 +19,14 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
+} from "@/components/ui/table";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
+} from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -28,19 +34,19 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { 
-  Zap, 
-  Copy, 
-  CheckCircle, 
-  XCircle, 
+} from "@/components/ui/dialog";
+import {
+  Zap,
+  Copy,
+  CheckCircle,
+  XCircle,
   Clock,
   RefreshCw,
   TestTube,
   Eye,
-  AlertCircle
-} from 'lucide-react';
-import { toast } from 'sonner';
+  AlertCircle,
+} from "lucide-react";
+import { toast } from "sonner";
 
 interface WebhookLog {
   id: string;
@@ -76,8 +82,8 @@ export default function WebhookMonitor() {
   const [logs, setLogs] = useState<WebhookLog[]>([]);
   const [status, setStatus] = useState<WebhookStatus | null>(null);
   const [loading, setLoading] = useState(true);
-  const [typeFilter, setTypeFilter] = useState('all');
-  const [statusFilter, setStatusFilter] = useState('all');
+  const [typeFilter, setTypeFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all");
   const [selectedLog, setSelectedLog] = useState<WebhookLog | null>(null);
   const [showDetailsDialog, setShowDetailsDialog] = useState(false);
 
@@ -85,12 +91,16 @@ export default function WebhookMonitor() {
     try {
       setLoading(true);
       const params = new URLSearchParams();
-      if (typeFilter !== 'all') params.set('type', typeFilter);
-      if (statusFilter !== 'all') params.set('status', statusFilter);
+      if (typeFilter !== "all") params.set("type", typeFilter);
+      if (statusFilter !== "all") params.set("status", statusFilter);
 
       const [logsRes, statusRes] = await Promise.all([
-        fetch(`/api/admin/system/webhooks/logs?${params}`).catch(() => ({ ok: false } as Response)),
-        fetch('/api/admin/system/webhooks/status').catch(() => ({ ok: false } as Response))
+        fetch(`/api/admin/system/webhooks/logs?${params}`).catch(
+          () => ({ ok: false }) as Response,
+        ),
+        fetch("/api/admin/system/webhooks/status").catch(
+          () => ({ ok: false }) as Response,
+        ),
       ]);
 
       if (logsRes.ok) {
@@ -98,7 +108,7 @@ export default function WebhookMonitor() {
           const logsData = await (logsRes as Response).json();
           setLogs(logsData.logs || []);
         } catch (error) {
-          console.error('Error parsing logs response:', error);
+          console.error("Error parsing logs response:", error);
           setLogs([]);
         }
       } else {
@@ -110,15 +120,15 @@ export default function WebhookMonitor() {
           const statusData = await (statusRes as Response).json();
           setStatus(statusData);
         } catch (error) {
-          console.error('Error parsing status response:', error);
+          console.error("Error parsing status response:", error);
           setStatus(null);
         }
       } else {
         setStatus(null);
       }
     } catch (error) {
-      console.error('Error fetching webhook data:', error);
-      toast.error('Error al cargar datos de webhooks');
+      console.error("Error fetching webhook data:", error);
+      toast.error("Error al cargar datos de webhooks");
       setLogs([]);
       setStatus(null);
     } finally {
@@ -139,10 +149,10 @@ export default function WebhookMonitor() {
 
   const handleTestWebhook = async (type: string) => {
     try {
-      const response = await fetch('/api/admin/system/webhooks/test', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ webhook_type: type })
+      const response = await fetch("/api/admin/system/webhooks/test", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ webhook_type: type }),
       });
 
       const data = await response.json();
@@ -150,11 +160,11 @@ export default function WebhookMonitor() {
         toast.success(data.message);
         fetchData();
       } else {
-        toast.error(data.error || 'Error al probar webhook');
+        toast.error(data.error || "Error al probar webhook");
       }
     } catch (error) {
-      console.error('Error testing webhook:', error);
-      toast.error('Error al probar webhook');
+      console.error("Error testing webhook:", error);
+      toast.error("Error al probar webhook");
     }
   };
 
@@ -165,29 +175,60 @@ export default function WebhookMonitor() {
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'success':
-        return <Badge className="bg-green-600"><CheckCircle className="h-3 w-3 mr-1" />Exitoso</Badge>;
-      case 'failed':
-        return <Badge variant="destructive"><XCircle className="h-3 w-3 mr-1" />Fallido</Badge>;
-      case 'pending':
-        return <Badge variant="outline"><Clock className="h-3 w-3 mr-1" />Pendiente</Badge>;
+      case "success":
+        return (
+          <Badge className="bg-green-600">
+            <CheckCircle className="h-3 w-3 mr-1" />
+            Exitoso
+          </Badge>
+        );
+      case "failed":
+        return (
+          <Badge variant="destructive">
+            <XCircle className="h-3 w-3 mr-1" />
+            Fallido
+          </Badge>
+        );
+      case "pending":
+        return (
+          <Badge variant="outline">
+            <Clock className="h-3 w-3 mr-1" />
+            Pendiente
+          </Badge>
+        );
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
   };
 
-  const mercadopagoStats = status?.status?.mercadopago || { total: 0, success: 0, failed: 0, last_delivery: null };
-  const sanityStats = status?.status?.sanity || { total: 0, success: 0, failed: 0, last_delivery: null };
+  const mercadopagoStats = status?.status?.mercadopago || {
+    total: 0,
+    success: 0,
+    failed: 0,
+    last_delivery: null,
+  };
+  const sanityStats = status?.status?.sanity || {
+    total: 0,
+    success: 0,
+    failed: 0,
+    last_delivery: null,
+  };
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold text-azul-profundo">Monitoreo de Webhooks</h2>
-          <p className="text-tierra-media">Monitorea el estado y las entregas de webhooks</p>
+          <h2 className="text-2xl font-bold text-azul-profundo">
+            Monitoreo de Webhooks
+          </h2>
+          <p className="text-tierra-media">
+            Monitorea el estado y las entregas de webhooks
+          </p>
         </div>
         <Button variant="outline" onClick={fetchData} disabled={loading}>
-          <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+          <RefreshCw
+            className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`}
+          />
           Actualizar
         </Button>
       </div>
@@ -195,9 +236,9 @@ export default function WebhookMonitor() {
       {/* Webhook URLs */}
       {status?.urls && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Card 
+          <Card
             className="bg-admin-bg-secondary shadow-[0_1px_3px_rgba(0,0,0,0.3)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.4)]"
-            style={{ backgroundColor: 'var(--admin-border-primary)' }}
+            style={{ backgroundColor: "var(--admin-border-primary)" }}
           >
             <CardHeader>
               <CardTitle className="text-sm flex items-center gap-2">
@@ -210,23 +251,25 @@ export default function WebhookMonitor() {
             </CardHeader>
             <CardContent>
               <div className="flex gap-2">
-                <Input 
-                  value={status.urls.mercadopago} 
-                  readOnly 
-                  className="font-mono text-xs" 
+                <Input
+                  value={status.urls.mercadopago}
+                  readOnly
+                  className="font-mono text-xs"
                 />
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={() => handleCopyUrl(status.urls.mercadopago, 'MercadoPago')}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() =>
+                    handleCopyUrl(status.urls.mercadopago, "MercadoPago")
+                  }
                   title="Copiar URL"
                 >
                   <Copy className="h-4 w-4" />
                 </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={() => handleTestWebhook('mercadopago')}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleTestWebhook("mercadopago")}
                   title="Probar webhook"
                 >
                   <TestTube className="h-4 w-4" />
@@ -234,20 +277,34 @@ export default function WebhookMonitor() {
               </div>
               <div className="mt-2 text-xs text-tierra-media space-y-1">
                 <p>
-                  Total (24h): <span className="font-semibold">{mercadopagoStats.total}</span> | 
-                  Exitosos: <span className="font-semibold text-green-600">{mercadopagoStats.success}</span> | 
-                  Fallidos: <span className="font-semibold text-red-600">{mercadopagoStats.failed}</span>
+                  Total (24h):{" "}
+                  <span className="font-semibold">
+                    {mercadopagoStats.total}
+                  </span>{" "}
+                  | Exitosos:{" "}
+                  <span className="font-semibold text-green-600">
+                    {mercadopagoStats.success}
+                  </span>{" "}
+                  | Fallidos:{" "}
+                  <span className="font-semibold text-red-600">
+                    {mercadopagoStats.failed}
+                  </span>
                 </p>
                 {mercadopagoStats.last_delivery && (
-                  <p>Última entrega: {new Date(mercadopagoStats.last_delivery).toLocaleString('es-AR')}</p>
+                  <p>
+                    Última entrega:{" "}
+                    {new Date(mercadopagoStats.last_delivery).toLocaleString(
+                      "es-AR",
+                    )}
+                  </p>
                 )}
               </div>
             </CardContent>
           </Card>
 
-          <Card 
+          <Card
             className="bg-admin-bg-secondary shadow-[0_1px_3px_rgba(0,0,0,0.3)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.4)]"
-            style={{ backgroundColor: 'var(--admin-border-primary)' }}
+            style={{ backgroundColor: "var(--admin-border-primary)" }}
           >
             <CardHeader>
               <CardTitle className="text-sm flex items-center gap-2">
@@ -260,23 +317,23 @@ export default function WebhookMonitor() {
             </CardHeader>
             <CardContent>
               <div className="flex gap-2">
-                <Input 
-                  value={status.urls.sanity} 
-                  readOnly 
-                  className="font-mono text-xs" 
+                <Input
+                  value={status.urls.sanity}
+                  readOnly
+                  className="font-mono text-xs"
                 />
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={() => handleCopyUrl(status.urls.sanity, 'Sanity')}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleCopyUrl(status.urls.sanity, "Sanity")}
                   title="Copiar URL"
                 >
                   <Copy className="h-4 w-4" />
                 </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={() => handleTestWebhook('sanity')}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleTestWebhook("sanity")}
                   title="Probar webhook"
                 >
                   <TestTube className="h-4 w-4" />
@@ -284,12 +341,24 @@ export default function WebhookMonitor() {
               </div>
               <div className="mt-2 text-xs text-tierra-media space-y-1">
                 <p>
-                  Total (24h): <span className="font-semibold">{sanityStats.total}</span> | 
-                  Exitosos: <span className="font-semibold text-green-600">{sanityStats.success}</span> | 
-                  Fallidos: <span className="font-semibold text-red-600">{sanityStats.failed}</span>
+                  Total (24h):{" "}
+                  <span className="font-semibold">{sanityStats.total}</span> |
+                  Exitosos:{" "}
+                  <span className="font-semibold text-green-600">
+                    {sanityStats.success}
+                  </span>{" "}
+                  | Fallidos:{" "}
+                  <span className="font-semibold text-red-600">
+                    {sanityStats.failed}
+                  </span>
                 </p>
                 {sanityStats.last_delivery && (
-                  <p>Última entrega: {new Date(sanityStats.last_delivery).toLocaleString('es-AR')}</p>
+                  <p>
+                    Última entrega:{" "}
+                    {new Date(sanityStats.last_delivery).toLocaleString(
+                      "es-AR",
+                    )}
+                  </p>
                 )}
               </div>
             </CardContent>
@@ -298,9 +367,9 @@ export default function WebhookMonitor() {
       )}
 
       {/* Filters */}
-      <Card 
+      <Card
         className="bg-admin-bg-secondary shadow-[0_1px_3px_rgba(0,0,0,0.3)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.4)]"
-        style={{ backgroundColor: 'var(--admin-border-primary)' }}
+        style={{ backgroundColor: "var(--admin-border-primary)" }}
       >
         <CardContent className="p-4">
           <div className="flex gap-4 items-center">
@@ -336,13 +405,15 @@ export default function WebhookMonitor() {
       </Card>
 
       {/* Logs Table */}
-      <Card 
+      <Card
         className="bg-admin-bg-secondary shadow-[0_1px_3px_rgba(0,0,0,0.3)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.4)]"
-        style={{ backgroundColor: 'var(--admin-border-primary)' }}
+        style={{ backgroundColor: "var(--admin-border-primary)" }}
       >
         <CardHeader>
           <CardTitle>Registro de Webhooks</CardTitle>
-          <CardDescription>Últimas entregas de webhooks (últimos 50 registros)</CardDescription>
+          <CardDescription>
+            Últimas entregas de webhooks (últimos 50 registros)
+          </CardDescription>
         </CardHeader>
         <CardContent>
           {loading ? (
@@ -351,7 +422,9 @@ export default function WebhookMonitor() {
             <div className="p-8 text-center text-tierra-media">
               <Zap className="h-12 w-12 mx-auto mb-4 opacity-50" />
               <p>No hay registros de webhooks</p>
-              <p className="text-xs mt-2">Los webhooks aparecerán aquí cuando se reciban</p>
+              <p className="text-xs mt-2">
+                Los webhooks aparecerán aquí cuando se reciban
+              </p>
             </div>
           ) : (
             <Table>
@@ -371,15 +444,23 @@ export default function WebhookMonitor() {
                     <TableCell>
                       <Badge variant="outline">{log.webhook_type}</Badge>
                     </TableCell>
-                    <TableCell className="font-mono text-xs">{log.event_type || 'N/A'}</TableCell>
+                    <TableCell className="font-mono text-xs">
+                      {log.event_type || "N/A"}
+                    </TableCell>
                     <TableCell>{getStatusBadge(log.status)}</TableCell>
                     <TableCell>
-                      <span className={log.response_code && log.response_code >= 400 ? 'text-red-600 font-semibold' : ''}>
-                        {log.response_code || 'N/A'}
+                      <span
+                        className={
+                          log.response_code && log.response_code >= 400
+                            ? "text-red-600 font-semibold"
+                            : ""
+                        }
+                      >
+                        {log.response_code || "N/A"}
                       </span>
                     </TableCell>
                     <TableCell className="text-xs">
-                      {new Date(log.created_at).toLocaleString('es-AR')}
+                      {new Date(log.created_at).toLocaleString("es-AR")}
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
@@ -408,7 +489,7 @@ export default function WebhookMonitor() {
 
       {/* Details Dialog */}
       <Dialog open={showDetailsDialog} onOpenChange={setShowDetailsDialog}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Zap className="h-5 w-5" />
@@ -422,36 +503,54 @@ export default function WebhookMonitor() {
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label className="text-sm font-semibold">Tipo de Webhook</Label>
+                  <Label className="text-sm font-semibold">
+                    Tipo de Webhook
+                  </Label>
                   <p className="text-sm mt-1">
                     <Badge variant="outline">{selectedLog.webhook_type}</Badge>
                   </p>
                 </div>
                 <div>
-                  <Label className="text-sm font-semibold">Tipo de Evento</Label>
-                  <p className="text-sm mt-1 font-mono">{selectedLog.event_type || 'N/A'}</p>
-                </div>
-                <div>
-                  <Label className="text-sm font-semibold">Estado</Label>
-                  <p className="text-sm mt-1">{getStatusBadge(selectedLog.status)}</p>
-                </div>
-                <div>
-                  <Label className="text-sm font-semibold">Código de Respuesta</Label>
-                  <p className={`text-sm mt-1 ${selectedLog.response_code && selectedLog.response_code >= 400 ? 'text-red-600 font-semibold' : ''}`}>
-                    {selectedLog.response_code || 'N/A'}
+                  <Label className="text-sm font-semibold">
+                    Tipo de Evento
+                  </Label>
+                  <p className="text-sm mt-1 font-mono">
+                    {selectedLog.event_type || "N/A"}
                   </p>
                 </div>
                 <div>
-                  <Label className="text-sm font-semibold">Fecha de Recepción</Label>
+                  <Label className="text-sm font-semibold">Estado</Label>
                   <p className="text-sm mt-1">
-                    {new Date(selectedLog.created_at).toLocaleString('es-AR')}
+                    {getStatusBadge(selectedLog.status)}
+                  </p>
+                </div>
+                <div>
+                  <Label className="text-sm font-semibold">
+                    Código de Respuesta
+                  </Label>
+                  <p
+                    className={`text-sm mt-1 ${selectedLog.response_code && selectedLog.response_code >= 400 ? "text-red-600 font-semibold" : ""}`}
+                  >
+                    {selectedLog.response_code || "N/A"}
+                  </p>
+                </div>
+                <div>
+                  <Label className="text-sm font-semibold">
+                    Fecha de Recepción
+                  </Label>
+                  <p className="text-sm mt-1">
+                    {new Date(selectedLog.created_at).toLocaleString("es-AR")}
                   </p>
                 </div>
                 {selectedLog.processed_at && (
                   <div>
-                    <Label className="text-sm font-semibold">Fecha de Procesamiento</Label>
+                    <Label className="text-sm font-semibold">
+                      Fecha de Procesamiento
+                    </Label>
                     <p className="text-sm mt-1">
-                      {new Date(selectedLog.processed_at).toLocaleString('es-AR')}
+                      {new Date(selectedLog.processed_at).toLocaleString(
+                        "es-AR",
+                      )}
                     </p>
                   </div>
                 )}
@@ -462,7 +561,9 @@ export default function WebhookMonitor() {
                   <div className="flex items-start gap-2">
                     <AlertCircle className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
                     <div>
-                      <Label className="text-sm font-semibold text-red-800 dark:text-red-300">Mensaje de Error</Label>
+                      <Label className="text-sm font-semibold text-red-800 dark:text-red-300">
+                        Mensaje de Error
+                      </Label>
                       <p className="text-sm text-red-700 dark:text-red-400 mt-1">
                         {selectedLog.error_message}
                       </p>
@@ -473,7 +574,9 @@ export default function WebhookMonitor() {
 
               {selectedLog.payload && (
                 <div>
-                  <Label className="text-sm font-semibold">Payload (Datos Recibidos)</Label>
+                  <Label className="text-sm font-semibold">
+                    Payload (Datos Recibidos)
+                  </Label>
                   <div className="mt-2 p-4 bg-admin-bg-tertiary rounded-lg border overflow-x-auto">
                     <pre className="text-xs font-mono whitespace-pre-wrap break-words">
                       {JSON.stringify(selectedLog.payload, null, 2)}
@@ -486,11 +589,21 @@ export default function WebhookMonitor() {
                 <div className="flex items-start gap-2">
                   <Zap className="h-5 w-5 text-blue-500 flex-shrink-0 mt-0.5" />
                   <div>
-                    <Label className="text-sm font-semibold text-blue-800 dark:text-blue-300">Información</Label>
+                    <Label className="text-sm font-semibold text-blue-800 dark:text-blue-300">
+                      Información
+                    </Label>
                     <ul className="text-xs text-blue-700 dark:text-blue-400 mt-1 space-y-1 list-disc list-inside">
-                      <li>Los webhooks se registran automáticamente cuando se reciben</li>
-                      <li>El estado se actualiza después de procesar el webhook</li>
-                      <li>Los webhooks fallidos pueden indicar problemas de configuración o de red</li>
+                      <li>
+                        Los webhooks se registran automáticamente cuando se
+                        reciben
+                      </li>
+                      <li>
+                        El estado se actualiza después de procesar el webhook
+                      </li>
+                      <li>
+                        Los webhooks fallidos pueden indicar problemas de
+                        configuración o de red
+                      </li>
                       <li>Los webhooks pendientes están siendo procesados</li>
                     </ul>
                   </div>
@@ -499,7 +612,10 @@ export default function WebhookMonitor() {
             </div>
           )}
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowDetailsDialog(false)}>
+            <Button
+              variant="outline"
+              onClick={() => setShowDetailsDialog(false)}
+            >
               Cerrar
             </Button>
           </DialogFooter>

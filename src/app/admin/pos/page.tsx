@@ -3113,13 +3113,13 @@ export default function POSPage() {
   return (
     <div className="h-screen flex flex-col bg-[var(--admin-bg-primary)]">
       {/* Header */}
-      <div className="border-b px-6 py-4 bg-[var(--admin-bg-tertiary)]">
+      <div className="border-b px-4 sm:px-6 py-4 bg-[var(--admin-bg-tertiary)]">
         <div className="flex flex-col gap-3">
           {/* First row: Branch selector and Caja button */}
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
               <h1
-                className="text-2xl font-bold text-gray-900"
+                className="text-xl sm:text-2xl font-bold text-gray-900"
                 data-tour="pos-header"
               >
                 Punto de Venta (POS)
@@ -3130,7 +3130,7 @@ export default function POSPage() {
                   : "Sistema de ventas"}
               </p>
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-4">
               {isSuperAdmin && <BranchSelector />}
               <Link href="/admin/cash-register">
                 <Button variant="outline">
@@ -3144,12 +3144,13 @@ export default function POSPage() {
                 title="Cobrar saldos pendientes de órdenes"
               >
                 <CreditCard className="h-4 w-4 mr-2" />
-                Saldos Pendientes
+                <span className="hidden sm:inline">Saldos Pendientes</span>
+                <span className="sm:hidden">Saldos</span>
               </Button>
             </div>
           </div>
           {/* Second row: Total and Clear button */}
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
             <Badge variant="outline" className="text-lg px-4 py-2">
               Total: {formatCurrency(total)}
             </Badge>
@@ -3168,7 +3169,7 @@ export default function POSPage() {
       {/* Cash Status Alert */}
       {!isSuperAdmin && currentBranchId && (
         <div
-          className={`px-6 py-3 ${isCashOpen === false ? "bg-red-50 border-b border-red-200" : isCashOpen === true ? "bg-green-50 border-b border-green-200" : ""}`}
+          className={`px-4 sm:px-6 py-3 ${isCashOpen === false ? "bg-red-50 border-b border-red-200" : isCashOpen === true ? "bg-green-50 border-b border-green-200" : ""}`}
         >
           {checkingCashStatus ? (
             <div className="flex items-center gap-2 text-sm text-gray-600">
@@ -3176,11 +3177,16 @@ export default function POSPage() {
               Verificando estado de caja...
             </div>
           ) : isCashOpen === false ? (
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
               <div className="flex items-center gap-2 text-sm text-red-800">
-                <AlertCircle className="h-4 w-4" />
-                <span className="font-semibold">La caja está cerrada</span>
-                <span> - Debe abrir la caja antes de realizar ventas</span>
+                <AlertCircle className="h-4 w-4 flex-shrink-0" />
+                <span>
+                  <span className="font-semibold">La caja está cerrada</span>
+                  <span className="hidden sm:inline">
+                    {" "}
+                    - Debe abrir la caja antes de realizar ventas
+                  </span>
+                </span>
               </div>
               <Link href="/admin/cash-register">
                 <Button size="sm" variant="default">
@@ -3197,9 +3203,9 @@ export default function POSPage() {
         </div>
       )}
 
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
         {/* Left Panel - Customer & Order Form */}
-        <div className="w-2/3 flex flex-col border-r overflow-hidden bg-[var(--admin-bg-primary)]">
+        <div className="w-full lg:w-2/3 flex flex-col border-r-0 lg:border-r overflow-hidden bg-[var(--admin-bg-primary)] min-h-0">
           {/* Scrollable Content - Customer & Order Form */}
           <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-[var(--admin-bg-primary)]">
             {/* Customer Info */}
@@ -5459,7 +5465,7 @@ export default function POSPage() {
         </div>
 
         {/* Right Panel - Cart, Payment Summary & Payment Method */}
-        <div className="w-1/3 flex flex-col bg-white border-l overflow-hidden">
+        <div className="w-full lg:w-1/3 flex flex-col bg-white border-l-0 lg:border-l overflow-hidden min-h-0">
           {/* Scrollable Content - Cart, Summary & Payment */}
           <div className="flex-1 overflow-y-auto bg-[var(--admin-bg-primary)]">
             {/* Cart - extracted component */}
@@ -5730,7 +5736,7 @@ export default function POSPage() {
           if (!open) setFiscalReference("");
         }}
       >
-        <DialogContent className="max-w-md rounded-none border-admin-border-primary">
+        <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-md rounded-none border-admin-border-primary">
           <DialogHeader>
             <DialogTitle className="font-display">Confirmar Venta</DialogTitle>
             <DialogDescription className="text-admin-text-secondary">
@@ -5841,7 +5847,7 @@ export default function POSPage() {
 
       {/* Quote Selection Dialog */}
       <Dialog open={showQuoteDialog} onOpenChange={setShowQuoteDialog}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-2xl">
           <DialogHeader>
             <DialogTitle>Presupuestos del Cliente</DialogTitle>
             <DialogDescription>

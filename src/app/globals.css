@@ -336,11 +336,17 @@
   border-bottom: 1px solid var(--admin-border-primary);
   color: #F9F7F2 !important;
   /* Force off-white for all themes with colored headers */
-  padding: 0.75rem 1.5rem;
+  padding: 0.5rem 1rem;
   position: sticky;
   top: 0;
   z-index: 40;
   transition: all 0.3s ease;
+}
+
+@media (min-width: 1024px) {
+  .admin-header {
+    padding: 0.75rem 1.5rem;
+  }
 }
 
 .admin-header *,
@@ -364,6 +370,8 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
   max-width: 100%;
 }
 
@@ -372,6 +380,25 @@
   font-size: 1.25rem;
   font-weight: 800;
   margin: 0;
+}
+
+@media (max-width: 768px) {
+  .admin-header-content .admin-header-title {
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .admin-header-actions {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+}
+
+@media (min-width: 769px) {
+  .admin-header-content .admin-header-title {
+    max-width: none;
+  }
 }
 
 html.dark .admin-header {
@@ -507,47 +534,6 @@ html.dark .admin-header {
   transition: background-color 0.4s ease;
 }
 
-/* Global Hover Contrast Fix for KPI Cards and Action Surfaces */
-.hover\:bg-admin-bg-secondary:hover,
-.admin-card:hover {
-  background-color: var(--admin-bg-secondary) !important;
-  color: #F9F7F2 !important;
-}
-
-.hover\:bg-admin-bg-secondary:hover *,
-.admin-card:hover *,
-.hover\:bg-admin-bg-secondary:hover p,
-.admin-card:hover p,
-.hover\:bg-admin-bg-secondary:hover span {
-  color: #F9F7F2 !important;
-  /* Force light text when hovering to dark brand background */
-}
-
-/* Specific fix for elements that should keep their accent color even on hover */
-.hover\:bg-admin-bg-secondary:hover .text-admin-accent-secondary,
-.admin-card:hover .text-admin-accent-secondary,
-.hover\:bg-admin-bg-secondary:hover .text-epoch-accent,
-.admin-card:hover .text-epoch-accent {
-  color: var(--admin-accent-secondary) !important;
-}
-
-/* Product grid: botones con fondo claro y texto oscuro cuando tarjeta en hover (solo si el botón NO está en hover) */
-.hover\:bg-admin-bg-secondary:hover .product-grid-actions .product-grid-card-btn:not(:hover) {
-  background-color: rgba(249, 247, 242, 0.2) !important;
-  color: #1A2B23 !important;
-  border-color: rgba(249, 247, 242, 0.3) !important;
-}
-.hover\:bg-admin-bg-secondary:hover .product-grid-actions .product-grid-card-btn:not(:hover) svg {
-  color: #1A2B23 !important;
-}
-.hover\:bg-admin-bg-secondary:hover .product-grid-actions .product-grid-card-btn-delete:not(:hover) {
-  color: var(--admin-error) !important;
-  border-color: rgba(139, 0, 0, 0.5) !important;
-}
-.hover\:bg-admin-bg-secondary:hover .product-grid-actions .product-grid-card-btn-delete:not(:hover) svg {
-  color: var(--admin-error) !important;
-}
-
 /* Sidebar Footer Buttons Contrast */
 .admin-sidebar button:hover {
   background: rgba(255, 255, 255, 0.12) !important;
@@ -617,7 +603,6 @@ html.dark .admin-header {
 .admin-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
-  border-color: var(--admin-accent-secondary);
 }
 
 .admin-card-content {

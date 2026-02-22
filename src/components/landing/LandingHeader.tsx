@@ -100,23 +100,29 @@ export function LandingHeader() {
       className={`fixed top-0 w-full z-50 transition-all duration-500 py-6 px-4 md:px-8 ${
         isScrolled
           ? "bg-epoch-surface py-4 shadow-xl backdrop-blur-md"
-          : "bg-transparent"
+          : "bg-epoch-surface/70 backdrop-blur-md"
       }`}
     >
       <nav className="max-w-7xl mx-auto flex justify-between items-center transition-all duration-300">
         {/* Logo - same structure as admin sidebar */}
-        <Link href="/" className="group flex items-center gap-4 pl-5">
+        <Link
+          href="/"
+          className="group flex items-center gap-2 sm:gap-4 pl-2 sm:pl-5"
+        >
           <div className="relative group-hover:scale-105 transition-all duration-700 flex-shrink-0">
             <Image
               src="/LogoCircle.svg"
               alt="Opttius"
               width={44}
               height={44}
-              className="h-10 w-10 md:h-11 md:w-11 transition-all duration-700"
+              className="h-8 w-8 sm:h-10 sm:w-10 md:h-11 md:w-11 transition-all duration-700"
             />
           </div>
           <div className="flex flex-col items-start justify-center">
-            <OpttiusLogoText forceLight={true} className="h-10 w-40 md:w-44" />
+            <OpttiusLogoText
+              forceLight={true}
+              className="h-8 w-32 sm:h-10 sm:w-40 md:w-44"
+            />
           </div>
         </Link>
 

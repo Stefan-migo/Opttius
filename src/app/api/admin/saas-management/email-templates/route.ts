@@ -1,15 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/utils/supabase/server";
+import { createServiceRoleClient } from "@/utils/supabase/server";
 import { appLogger as logger } from "@/lib/logger";
 import { requireRoot } from "@/lib/api/root-middleware";
-import { AuthorizationError } from "@/lib/api/errors";
-import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
-import {
-  handlePost,
-  handleGet,
-  validateRequestBody,
-  successResponse,
-} from "@/lib/middleware/error-handler";
 import {
   ValidationError,
   mapPostgresError,
@@ -17,79 +9,92 @@ import {
 
 export const dynamic = "force-dynamic";
 
-export const GET = handleGet(
-  async (request, { requestId }) => {
-    // Require root or dev role for SaaS management
+/**
+ * GET /api/admin/saas-management/email-templates
+ * List SaaS email templates (root/dev only)
+ * Uses service role to bypass RLS (root/dev can access; RLS only allows super_admin).
+ */
+export async function GET(request: NextRequest) {
+  try {
     await requireRoot(request);
 
-    const supabase = await createClient();
+    const supabase = createServiceRoleClient();
+    const { searchParams } = new URL(request.url);
+    const type = searchParams.get("type") || "";
 
-    // Fetch SaaS-level templates
-    const { data: templates, error } = await supabase
+    let query = supabase
       .from("system_email_templates")
       .select("*")
       .eq("category", "saas")
       .order("type", { ascending: true });
 
-    if (error) {
-      throw mapPostgresError(error);
+    if (type && type !== "all") {
+      query = query.eq("type", type);
     }
 
-    logger.info("SaaS email templates fetched successfully", {
-      requestId,
-      templateCount: templates?.length || 0,
-    });
+    const { data: templates, error } = await query;
 
-    return successResponse(templates || [], {
-      message: "Email templates retrieved successfully",
-    });
-  },
-  {
-    requireAuth: true,
-    requireAdmin: true,
-    allowedRoles: ["root", "dev"],
-  },
-);
+    if (error) {
+      logger.error("Error fetching SaaS email templates", { error });
+      return NextResponse.json(
+        { error: "Failed to fetch email templates" },
+        { status: 500 },
+      );
+    }
 
-export const POST = handlePost(
-  async (request, { requestId }) => {
-    // Require root or dev role for SaaS management
+    return NextResponse.json({ templates: templates || [] });
+  } catch (error) {
+    if (error && typeof error === "object" && "statusCode" in error) {
+      const err = error as { statusCode?: number; message?: string };
+      return NextResponse.json(
+        { error: err.message || "Unauthorized" },
+        { status: err.statusCode || 401 },
+      );
+    }
+    logger.error("Error in SaaS email templates GET", { error });
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 },
+    );
+  }
+}
+
+/**
+ * POST /api/admin/saas-management/email-templates
+ * Create SaaS email template (root/dev only)
+ */
+export async function POST(request: NextRequest) {
+  try {
     const { userId } = await requireRoot(request);
 
-    // Validate and parse request body
-    const body = await validateRequestBody(request, (data) => {
-      const requiredFields = ["name", "type", "subject", "content"];
-      const missingFields = requiredFields.filter((field) => !data[field]);
+    const body = await request.json();
+    const {
+      name,
+      type,
+      subject,
+      content,
+      variables = [],
+      is_active = true,
+    } = body;
 
-      if (missingFields.length > 0) {
-        throw new ValidationError("Missing required fields", {
-          missingFields,
-        });
-      }
+    if (!name || !type || !subject || !content) {
+      return NextResponse.json(
+        { error: "Name, type, subject, and content are required" },
+        { status: 400 },
+      );
+    }
 
-      return {
-        name: data.name,
-        type: data.type,
-        subject: data.subject,
-        content: data.content,
-        variables: Array.isArray(data.variables) ? data.variables : [],
-        is_active:
-          data.is_active !== undefined ? Boolean(data.is_active) : true,
-      };
-    });
+    const supabase = createServiceRoleClient();
 
-    const supabase = await createClient();
-
-    // Create the SaaS template
     const { data: template, error: templateError } = await supabase
       .from("system_email_templates")
       .insert({
-        name: body.name,
-        type: body.type,
-        subject: body.subject,
-        content: body.content,
-        variables: JSON.stringify(body.variables),
-        is_active: body.is_active,
+        name,
+        type,
+        subject,
+        content,
+        variables: Array.isArray(variables) ? JSON.stringify(variables) : "[]",
+        is_active: Boolean(is_active),
         is_system: false,
         category: "saas",
         created_by: userId,
@@ -98,23 +103,34 @@ export const POST = handlePost(
       .single();
 
     if (templateError) {
-      throw mapPostgresError(templateError);
+      logger.error("Error creating SaaS email template", {
+        error: templateError,
+      });
+      return NextResponse.json(
+        { error: templateError.message || "Failed to create template" },
+        { status: 500 },
+      );
     }
 
-    logger.info("SaaS email template created successfully", {
-      requestId,
+    logger.info("SaaS email template created", {
       templateId: template.id,
       templateName: template.name,
       createdBy: userId,
     });
 
-    return successResponse(template, {
-      message: "Email template created successfully",
-    });
-  },
-  {
-    requireAuth: true,
-    requireAdmin: true,
-    allowedRoles: ["root", "dev"],
-  },
-);
+    return NextResponse.json({ template });
+  } catch (error) {
+    if (error && typeof error === "object" && "statusCode" in error) {
+      const err = error as { statusCode?: number; message?: string };
+      return NextResponse.json(
+        { error: err.message || "Unauthorized" },
+        { status: err.statusCode || 401 },
+      );
+    }
+    logger.error("Error in SaaS email templates POST", { error });
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 },
+    );
+  }
+}

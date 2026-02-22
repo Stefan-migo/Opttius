@@ -108,143 +108,145 @@ function ProductTableComponent({
         </CardTitle>
       </CardHeader>
       <CardContent className="p-0">
-        <Table>
-          <TableHeader className="bg-admin-bg-tertiary/30">
-            <TableRow className="hover:bg-transparent border-admin-border-primary/10">
-              <TableHead className="w-12 text-center p-4">
-                <input
-                  type="checkbox"
-                  checked={allSelected}
-                  onChange={onSelectAll}
-                  className="w-4 h-4 rounded-none border-admin-border-primary/20 accent-epoch-primary"
-                />
-              </TableHead>
-              <TableHead className="text-[10px] font-display font-bold text-admin-text-primary uppercase tracking-[0.2em] p-4">
-                Archivo / SKU
-              </TableHead>
-              <TableHead className="text-[10px] font-display font-bold text-admin-text-primary uppercase tracking-[0.2em] p-4">
-                Clasificación
-              </TableHead>
-              <TableHead className="text-[10px] font-display font-bold text-admin-text-primary uppercase tracking-[0.2em] p-4">
-                PVP
-              </TableHead>
-              <TableHead className="text-[10px] font-display font-bold text-admin-text-primary uppercase tracking-[0.2em] p-4">
-                Existencias
-              </TableHead>
-              <TableHead className="text-[10px] font-display font-bold text-admin-text-primary uppercase tracking-[0.2em] p-4">
-                Estado
-              </TableHead>
-              <TableHead className="text-[10px] font-display font-bold text-admin-text-primary uppercase tracking-[0.2em] p-4 text-right">
-                Acciones
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {products.map((product) => (
-              <TableRow
-                key={product.id}
-                className="border-admin-border-primary/10 hover:bg-admin-bg-tertiary/10 transition-colors"
-              >
-                <TableCell className="text-center p-4">
+        <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0">
+          <Table>
+            <TableHeader className="bg-admin-bg-tertiary/30">
+              <TableRow className="hover:bg-transparent border-admin-border-primary/10">
+                <TableHead className="w-12 text-center p-4">
                   <input
                     type="checkbox"
-                    checked={selectedProducts.includes(product.id)}
-                    onChange={() => onSelectProduct(product.id)}
+                    checked={allSelected}
+                    onChange={onSelectAll}
                     className="w-4 h-4 rounded-none border-admin-border-primary/20 accent-epoch-primary"
                   />
-                </TableCell>
+                </TableHead>
+                <TableHead className="text-[10px] font-display font-bold text-admin-text-primary uppercase tracking-[0.2em] p-4">
+                  Archivo / SKU
+                </TableHead>
+                <TableHead className="text-[10px] font-display font-bold text-admin-text-primary uppercase tracking-[0.2em] p-4">
+                  Clasificación
+                </TableHead>
+                <TableHead className="text-[10px] font-display font-bold text-admin-text-primary uppercase tracking-[0.2em] p-4">
+                  PVP
+                </TableHead>
+                <TableHead className="text-[10px] font-display font-bold text-admin-text-primary uppercase tracking-[0.2em] p-4">
+                  Existencias
+                </TableHead>
+                <TableHead className="text-[10px] font-display font-bold text-admin-text-primary uppercase tracking-[0.2em] p-4">
+                  Estado
+                </TableHead>
+                <TableHead className="text-[10px] font-display font-bold text-admin-text-primary uppercase tracking-[0.2em] p-4 text-right">
+                  Acciones
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {products.map((product) => (
+                <TableRow
+                  key={product.id}
+                  className="border-admin-border-primary/10 hover:bg-admin-bg-tertiary/10 transition-colors"
+                >
+                  <TableCell className="text-center p-4">
+                    <input
+                      type="checkbox"
+                      checked={selectedProducts.includes(product.id)}
+                      onChange={() => onSelectProduct(product.id)}
+                      className="w-4 h-4 rounded-none border-admin-border-primary/20 accent-epoch-primary"
+                    />
+                  </TableCell>
 
-                <TableCell className="p-4">
-                  <div className="space-y-1">
-                    <p className="text-sm font-display font-bold text-admin-text-primary uppercase tracking-tight">
-                      {product.name}
-                    </p>
-                    <div className="flex items-center gap-2">
-                      <span className="text-[9px] font-display font-bold text-admin-text-tertiary tracking-widest uppercase bg-admin-bg-tertiary px-1.5 py-0.5 border border-admin-border-primary/5">
-                        {product.sku || "NO-SKU"}
-                      </span>
-                      {product.is_featured && (
-                        <span className="text-[8px] font-display font-bold text-epoch-primary tracking-widest uppercase">
-                          • PREMIUM
+                  <TableCell className="p-4">
+                    <div className="space-y-1">
+                      <p className="text-sm font-display font-bold text-admin-text-primary uppercase tracking-tight">
+                        {product.name}
+                      </p>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[9px] font-display font-bold text-admin-text-tertiary tracking-widest uppercase bg-admin-bg-tertiary px-1.5 py-0.5 border border-admin-border-primary/5">
+                          {product.sku || "NO-SKU"}
                         </span>
+                        {product.is_featured && (
+                          <span className="text-[8px] font-display font-bold text-epoch-primary tracking-widest uppercase">
+                            • PREMIUM
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </TableCell>
+
+                  <TableCell className="p-4">
+                    <span className="text-[10px] font-serif italic text-admin-text-tertiary uppercase tracking-wider">
+                      {product.categories?.name ||
+                        product.category?.name ||
+                        "Sin Clasificación"}
+                    </span>
+                  </TableCell>
+
+                  <TableCell className="p-4">
+                    <span className="text-sm font-display font-bold text-epoch-primary">
+                      {formatPrice(product.price)}
+                    </span>
+                  </TableCell>
+
+                  <TableCell className="p-4">
+                    <div className="flex items-center gap-2">
+                      <span
+                        className={`text-sm font-display font-bold ${
+                          (product.total_inventory_quantity || 0) <= 5
+                            ? "text-admin-error"
+                            : "text-admin-text-primary"
+                        }`}
+                      >
+                        {product.total_inventory_quantity !== undefined
+                          ? product.total_inventory_quantity
+                          : product.inventory_quantity || 0}
+                      </span>
+                      {(product.total_inventory_quantity !== undefined
+                        ? product.total_inventory_quantity
+                        : product.inventory_quantity || 0) <= 5 && (
+                        <AlertTriangle className="h-3.5 w-3.5 text-admin-error animate-pulse" />
                       )}
                     </div>
-                  </div>
-                </TableCell>
+                  </TableCell>
 
-                <TableCell className="p-4">
-                  <span className="text-[10px] font-serif italic text-admin-text-tertiary uppercase tracking-wider">
-                    {product.categories?.name ||
-                      product.category?.name ||
-                      "Sin Clasificación"}
-                  </span>
-                </TableCell>
+                  <TableCell className="p-4">
+                    <div className="flex">{getStatusBadge(product.status)}</div>
+                  </TableCell>
 
-                <TableCell className="p-4">
-                  <span className="text-sm font-display font-bold text-epoch-primary">
-                    {formatPrice(product.price)}
-                  </span>
-                </TableCell>
-
-                <TableCell className="p-4">
-                  <div className="flex items-center gap-2">
-                    <span
-                      className={`text-sm font-display font-bold ${
-                        (product.total_inventory_quantity || 0) <= 5
-                          ? "text-admin-error"
-                          : "text-admin-text-primary"
-                      }`}
-                    >
-                      {product.total_inventory_quantity !== undefined
-                        ? product.total_inventory_quantity
-                        : product.inventory_quantity || 0}
-                    </span>
-                    {(product.total_inventory_quantity !== undefined
-                      ? product.total_inventory_quantity
-                      : product.inventory_quantity || 0) <= 5 && (
-                      <AlertTriangle className="h-3.5 w-3.5 text-admin-error animate-pulse" />
-                    )}
-                  </div>
-                </TableCell>
-
-                <TableCell className="p-4">
-                  <div className="flex">{getStatusBadge(product.status)}</div>
-                </TableCell>
-
-                <TableCell className="p-4 text-right">
-                  <div className="flex items-center justify-end gap-1">
-                    <Link href={`/admin/products/${product.slug}`}>
+                  <TableCell className="p-4 text-right">
+                    <div className="flex items-center justify-end gap-1">
+                      <Link href={`/admin/products/${product.slug}`}>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 w-8 p-0 rounded-none hover:bg-admin-bg-tertiary text-epoch-primary"
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                      </Link>
+                      <Link href={`/admin/products/edit/${product.id}`}>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 w-8 p-0 rounded-none hover:bg-admin-bg-tertiary text-epoch-primary"
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                      </Link>
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="h-8 w-8 p-0 rounded-none hover:bg-admin-bg-tertiary text-epoch-primary"
+                        onClick={() => onDelete(product)}
+                        className="h-8 w-8 p-0 rounded-none hover:bg-admin-error/5 text-admin-error"
                       >
-                        <Eye className="h-4 w-4" />
+                        <Trash2 className="h-4 w-4" />
                       </Button>
-                    </Link>
-                    <Link href={`/admin/products/edit/${product.id}`}>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-8 w-8 p-0 rounded-none hover:bg-admin-bg-tertiary text-epoch-primary"
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                    </Link>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => onDelete(product)}
-                      className="h-8 w-8 p-0 rounded-none hover:bg-admin-error/5 text-admin-error"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
       </CardContent>
     </Card>
   );

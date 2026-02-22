@@ -451,7 +451,7 @@ export default function SubscriptionsPage() {
 
       {/* Alertas */}
       {subscriptions.some((sub) => sub.isExpiringSoon || sub.isExpired) && (
-        <Card className="admin-card rounded-none border-yellow-200 bg-yellow-50">
+        <Card className="rounded-none border border-border border-yellow-200 bg-yellow-50">
           <CardContent className="pt-6">
             <div className="flex items-center gap-2">
               <AlertTriangle className="h-5 w-5 text-yellow-600" />
@@ -465,7 +465,7 @@ export default function SubscriptionsPage() {
       )}
 
       {/* Filtros */}
-      <Card className="admin-card rounded-none">
+      <Card className="rounded-none border border-border">
         <CardContent className="pt-6">
           <div className="flex flex-col md:flex-row gap-4">
             <Select
@@ -513,7 +513,7 @@ export default function SubscriptionsPage() {
       </Card>
 
       {/* Tabla de suscripciones */}
-      <Card className="admin-card rounded-none">
+      <Card className="rounded-none border border-border">
         <CardHeader>
           <CardTitle>Suscripciones ({totalCount})</CardTitle>
         </CardHeader>
@@ -530,152 +530,155 @@ export default function SubscriptionsPage() {
             </div>
           ) : (
             <>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Organización</TableHead>
-                    <TableHead>Tier</TableHead>
-                    <TableHead>Estado</TableHead>
-                    <TableHead>Período</TableHead>
-                    <TableHead>Días restantes</TableHead>
-                    <TableHead>Stripe ID</TableHead>
-                    <TableHead className="text-right">Acciones</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {subscriptions.map((sub) => (
-                    <TableRow
-                      key={sub.id}
-                      className={
-                        sub.isExpiringSoon || sub.isExpired
-                          ? "bg-yellow-50"
-                          : ""
-                      }
-                    >
-                      <TableCell>
-                        {sub.organization ? (
-                          <div>
-                            <div className="font-medium">
-                              {sub.organization.name}
+              <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Organización</TableHead>
+                      <TableHead>Tier</TableHead>
+                      <TableHead>Estado</TableHead>
+                      <TableHead>Período</TableHead>
+                      <TableHead>Días restantes</TableHead>
+                      <TableHead>Stripe ID</TableHead>
+                      <TableHead className="text-right">Acciones</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {subscriptions.map((sub) => (
+                      <TableRow
+                        key={sub.id}
+                        className={
+                          sub.isExpiringSoon || sub.isExpired
+                            ? "bg-yellow-50"
+                            : ""
+                        }
+                      >
+                        <TableCell>
+                          {sub.organization ? (
+                            <div>
+                              <div className="font-medium">
+                                {sub.organization.name}
+                              </div>
+                              <div className="text-xs text-gray-500">
+                                {sub.organization.slug}
+                              </div>
                             </div>
-                            <div className="text-xs text-gray-500">
-                              {sub.organization.slug}
+                          ) : (
+                            <span className="text-gray-400">
+                              Sin organización
+                            </span>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          {sub.organization
+                            ? getTierBadge(sub.organization.subscription_tier)
+                            : "-"}
+                        </TableCell>
+                        <TableCell>
+                          {getStatusBadge(
+                            sub.status,
+                            sub.isExpiringSoon,
+                            sub.isExpired,
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          {sub.current_period_start &&
+                          sub.current_period_end ? (
+                            <div className="text-sm">
+                              <div>{formatDate(sub.current_period_start)}</div>
+                              <div className="text-gray-500">
+                                hasta {formatDate(sub.current_period_end)}
+                              </div>
                             </div>
-                          </div>
-                        ) : (
-                          <span className="text-gray-400">
-                            Sin organización
-                          </span>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        {sub.organization
-                          ? getTierBadge(sub.organization.subscription_tier)
-                          : "-"}
-                      </TableCell>
-                      <TableCell>
-                        {getStatusBadge(
-                          sub.status,
-                          sub.isExpiringSoon,
-                          sub.isExpired,
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        {sub.current_period_start && sub.current_period_end ? (
-                          <div className="text-sm">
-                            <div>{formatDate(sub.current_period_start)}</div>
-                            <div className="text-gray-500">
-                              hasta {formatDate(sub.current_period_end)}
-                            </div>
-                          </div>
-                        ) : (
-                          <span className="text-gray-400">-</span>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        {sub.daysUntilExpiry !== null ? (
-                          <div
-                            className={
-                              sub.isExpiringSoon || sub.isExpired
-                                ? "font-semibold text-yellow-600"
-                                : ""
-                            }
-                          >
-                            {sub.daysUntilExpiry != null &&
-                            sub.daysUntilExpiry > 0
-                              ? `${sub.daysUntilExpiry} días`
-                              : sub.daysUntilExpiry != null &&
-                                  sub.daysUntilExpiry === 0
-                                ? "Hoy"
-                                : sub.daysUntilExpiry != null
-                                  ? `Vencida hace ${Math.abs(sub.daysUntilExpiry)} días`
-                                  : "N/A"}
-                          </div>
-                        ) : (
-                          <span className="text-gray-400">-</span>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        {sub.gateway_subscription_id ? (
-                          <code className="text-xs bg-gray-100 px-2 py-1 rounded">
-                            {sub.gateway_subscription_id.substring(0, 20)}...
-                          </code>
-                        ) : (
-                          <span className="text-gray-400">-</span>
-                        )}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="sm">
-                              <MoreVertical className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem
-                              onClick={() =>
-                                router.push(
-                                  `/admin/saas-management/subscriptions/${sub.id}`,
-                                )
+                          ) : (
+                            <span className="text-gray-400">-</span>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          {sub.daysUntilExpiry !== null ? (
+                            <div
+                              className={
+                                sub.isExpiringSoon || sub.isExpired
+                                  ? "font-semibold text-yellow-600"
+                                  : ""
                               }
                             >
-                              <Eye className="h-4 w-4 mr-2" />
-                              Ver detalles
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            {sub.status === "cancelled" ? (
+                              {sub.daysUntilExpiry != null &&
+                              sub.daysUntilExpiry > 0
+                                ? `${sub.daysUntilExpiry} días`
+                                : sub.daysUntilExpiry != null &&
+                                    sub.daysUntilExpiry === 0
+                                  ? "Hoy"
+                                  : sub.daysUntilExpiry != null
+                                    ? `Vencida hace ${Math.abs(sub.daysUntilExpiry)} días`
+                                    : "N/A"}
+                            </div>
+                          ) : (
+                            <span className="text-gray-400">-</span>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          {sub.gateway_subscription_id ? (
+                            <code className="text-xs bg-gray-100 px-2 py-1 rounded">
+                              {sub.gateway_subscription_id.substring(0, 20)}...
+                            </code>
+                          ) : (
+                            <span className="text-gray-400">-</span>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="sm">
+                                <MoreVertical className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
                               <DropdownMenuItem
                                 onClick={() =>
-                                  handleAction(sub.id, "reactivate")
+                                  router.push(
+                                    `/admin/saas-management/subscriptions/${sub.id}`,
+                                  )
                                 }
                               >
-                                <Play className="h-4 w-4 mr-2" />
-                                Reactivar
+                                <Eye className="h-4 w-4 mr-2" />
+                                Ver detalles
                               </DropdownMenuItem>
-                            ) : (
+                              <DropdownMenuSeparator />
+                              {sub.status === "cancelled" ? (
+                                <DropdownMenuItem
+                                  onClick={() =>
+                                    handleAction(sub.id, "reactivate")
+                                  }
+                                >
+                                  <Play className="h-4 w-4 mr-2" />
+                                  Reactivar
+                                </DropdownMenuItem>
+                              ) : (
+                                <DropdownMenuItem
+                                  onClick={() => setCancelConfirmId(sub.id)}
+                                >
+                                  <Ban className="h-4 w-4 mr-2" />
+                                  Cancelar
+                                </DropdownMenuItem>
+                              )}
+                              <DropdownMenuSeparator />
                               <DropdownMenuItem
-                                onClick={() => setCancelConfirmId(sub.id)}
+                                className="text-destructive focus:text-destructive"
+                                onClick={() => setDeleteConfirmId(sub.id)}
+                                disabled={deleteId === sub.id && deleteLoading}
                               >
-                                <Ban className="h-4 w-4 mr-2" />
-                                Cancelar
+                                <Trash2 className="h-4 w-4 mr-2" />
+                                Eliminar
                               </DropdownMenuItem>
-                            )}
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem
-                              className="text-destructive focus:text-destructive"
-                              onClick={() => setDeleteConfirmId(sub.id)}
-                              disabled={deleteId === sub.id && deleteLoading}
-                            >
-                              <Trash2 className="h-4 w-4 mr-2" />
-                              Eliminar
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
 
               {/* Paginación */}
               {totalPages > 1 && (
@@ -715,7 +718,7 @@ export default function SubscriptionsPage() {
         open={cancelConfirmId !== null}
         onOpenChange={(open) => !open && setCancelConfirmId(null)}
       >
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-md">
           <DialogHeader>
             <div className="mx-auto bg-red-100 dark:bg-red-500/20 p-4 rounded-3xl w-fit mb-4">
               <AlertCircle className="h-10 w-10 text-red-600 dark:text-red-500" />
@@ -748,7 +751,7 @@ export default function SubscriptionsPage() {
         open={deleteConfirmId !== null}
         onOpenChange={(open) => !open && setDeleteConfirmId(null)}
       >
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-md">
           <DialogHeader>
             <div className="mx-auto bg-red-100 dark:bg-red-500/20 p-4 rounded-3xl w-fit mb-4">
               <AlertCircle className="h-10 w-10 text-red-600 dark:text-red-500" />

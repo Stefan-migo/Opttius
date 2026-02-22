@@ -39,7 +39,8 @@ add_source "docs/ai/AI_IMPLEMENTATION_STATUS.md" "AI_IMPLEMENTATION_STATUS"
 add_source "docs/payments/PAYMENTS_IMPLEMENTATION_STATUS.md" "PAYMENTS_IMPLEMENTATION_STATUS"
 add_source "docs/integrations/INTEGRATIONS_IMPLEMENTATION_STATUS.md" "INTEGRATIONS_IMPLEMENTATION_STATUS"
 add_source "docs/forms/FORMS_IMPLEMENTATION_STATUS.md" "FORMS_IMPLEMENTATION_STATUS"
-add_source "docs/email/EMAIL_IMPLEMENTATION_STATUS.md" "EMAIL_IMPLEMENTATION_STATUS"
+add_source "docs/email/EMAIL_SYSTEM_UPDATE_2026-02.md" "EMAIL_SYSTEM_UPDATE_2026-02"
+add_source ".cursor/skills/emails-optical-supabase/SKILL.md" "Skill_Emails_Optical_Supabase"
 add_source "docs/analysis/ANALYSIS_IMPLEMENTATION_STATUS.md" "ANALYSIS_IMPLEMENTATION_STATUS"
 
 # Análisis y evaluaciones
@@ -47,6 +48,19 @@ add_source "docs/DATABASE_EVALUATION_AND_RECOMMENDATIONS.md" "DATABASE_EVALUATIO
 add_source "docs/INVENTORY_ANALYSIS_AND_IMPROVEMENTS.md" "INVENTORY_ANALYSIS_AND_IMPROVEMENTS"
 add_source "docs/SEED_CONSTRAINTS_REFERENCE.md" "SEED_CONSTRAINTS_REFERENCE"
 add_source "docs/BRAIN_EVALUATION.md" "BRAIN_EVALUATION"
+
+# Dashboard - documentación y skill
+add_source "docs/dashboard/DASHBOARD_SYSTEM.md" "DASHBOARD_SYSTEM"
+add_source ".cursor/skills/dashboard-optical-supabase/SKILL.md" "Skill_Dashboard_Optical_Supabase"
+
+# Frontend responsivo (actualizado 2026-02)
+add_source "docs/FRONTEND_RESPONSIVITY.md" "FRONTEND_RESPONSIVITY"
+add_source "docs/FRONTEND_RESPONSIVE_UPDATE_2026-02.md" "FRONTEND_RESPONSIVE_UPDATE_2026-02"
+add_source ".cursor/skills/responsive-frontend-optical/SKILL.md" "Skill_Responsive_Frontend_Optical"
+
+# Guía de usuario
+add_source "docs/user-guide/README.md" "User_Guide_README"
+add_source "docs/user-guide/dashboard.md" "User_Guide_Dashboard"
 
 # Guías técnicas y planes
 add_source "docs/SUPABASE_FIX_INSTRUCTIONS.md" "SUPABASE_FIX_INSTRUCTIONS"

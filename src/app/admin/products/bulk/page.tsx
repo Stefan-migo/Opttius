@@ -113,7 +113,9 @@ export default function BulkOperationsPage() {
   const [bulkUpdates, setBulkUpdates] = useState<any>({});
   const [showBulkDialog, setShowBulkDialog] = useState(false);
   const [showImportDialog, setShowImportDialog] = useState(false);
-  const [importMode, setImportMode] = useState<"create" | "update" | "skip">("create");
+  const [importMode, setImportMode] = useState<"create" | "update" | "skip">(
+    "create",
+  );
   const [importResults, setImportResults] = useState<ImportResult | null>(null);
   const [isDeleteDialog, setIsDeleteDialog] = useState(false);
 
@@ -200,8 +202,8 @@ export default function BulkOperationsPage() {
       setProcessing(true);
 
       const result = await productService.bulkProducts({
-        products: selectedProducts.map(id => ({ id, ...bulkUpdates })),
-        action: bulkOperation as 'create' | 'update' | 'delete',
+        products: selectedProducts.map((id) => ({ id, ...bulkUpdates })),
+        action: bulkOperation as "create" | "update" | "delete",
       });
 
       // Invalidate React Query cache to refresh the products list
@@ -231,11 +233,11 @@ export default function BulkOperationsPage() {
 
   const handleExport = async () => {
     try {
-      const blob = await productService.exportProducts('csv', {
+      const blob = await productService.exportProducts("csv", {
         category: categoryFilter,
         status: statusFilter,
       });
-      
+
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
@@ -540,7 +542,7 @@ export default function BulkOperationsPage() {
                 Importar CSV
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-2xl">
+            <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-2xl">
               <DialogHeader>
                 <DialogTitle>Importar Productos desde CSV</DialogTitle>
                 <DialogDescription>
@@ -551,7 +553,12 @@ export default function BulkOperationsPage() {
               <div className="space-y-4">
                 <div>
                   <Label htmlFor="import_mode">Modo de Importación</Label>
-                  <Select value={importMode} onValueChange={(value) => setImportMode(value as "create" | "update" | "skip")}>
+                  <Select
+                    value={importMode}
+                    onValueChange={(value) =>
+                      setImportMode(value as "create" | "update" | "skip")
+                    }
+                  >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -602,24 +609,25 @@ export default function BulkOperationsPage() {
                       <div>Omitidos: {importResults.summary.skipped}</div>
                     </div>
 
-                    {importResults.results?.errors && importResults.results.errors.length > 0 && (
-                      <div className="mt-2">
-                        <h5 className="font-medium text-red-600">Errores:</h5>
-                        <ul className="text-sm text-red-600 list-disc list-inside">
-                          {importResults.results?.errors
-                            .slice(0, 5)
-                            .map((error, index) => (
-                              <li key={index}>{error}</li>
-                            ))}
-                          {importResults.results?.errors.length > 5 && (
-                            <li>
-                              ... y {importResults.results.errors.length - 5}{" "}
-                              más
-                            </li>
-                          )}
-                        </ul>
-                      </div>
-                    )}
+                    {importResults.results?.errors &&
+                      importResults.results.errors.length > 0 && (
+                        <div className="mt-2">
+                          <h5 className="font-medium text-red-600">Errores:</h5>
+                          <ul className="text-sm text-red-600 list-disc list-inside">
+                            {importResults.results?.errors
+                              .slice(0, 5)
+                              .map((error, index) => (
+                                <li key={index}>{error}</li>
+                              ))}
+                            {importResults.results?.errors.length > 5 && (
+                              <li>
+                                ... y {importResults.results.errors.length - 5}{" "}
+                                más
+                              </li>
+                            )}
+                          </ul>
+                        </div>
+                      )}
                   </div>
                 )}
               </div>
@@ -859,100 +867,104 @@ export default function BulkOperationsPage() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-12">
-                  <input
-                    type="checkbox"
-                    checked={
-                      selectedProducts.length === products.length &&
-                      products.length > 0
-                    }
-                    onChange={handleSelectAll}
-                    className="rounded border-gray-300"
-                  />
-                </TableHead>
-                <TableHead>Producto</TableHead>
-                <TableHead>Categoría</TableHead>
-                <TableHead>Precio</TableHead>
-                <TableHead>Stock</TableHead>
-                <TableHead>Estado</TableHead>
-                <TableHead>Fecha</TableHead>
-                <TableHead>Acciones</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {products.map((product) => (
-                <TableRow key={product.id}>
-                  <TableCell>
+          <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-12">
                     <input
                       type="checkbox"
-                      checked={selectedProducts.includes(product.id)}
-                      onChange={() => handleSelectProduct(product.id)}
+                      checked={
+                        selectedProducts.length === products.length &&
+                        products.length > 0
+                      }
+                      onChange={handleSelectAll}
                       className="rounded border-gray-300"
                     />
-                  </TableCell>
-
-                  <TableCell>
-                    <div>
-                      <div className="font-medium">{product.name}</div>
-                      <div className="text-sm text-tierra-media">
-                        {product.slug}
-                      </div>
-                      {product.is_featured && (
-                        <Badge variant="outline" className="text-xs">
-                          Destacado
-                        </Badge>
-                      )}
-                    </div>
-                  </TableCell>
-
-                  <TableCell>
-                    {product.category ? (
-                      <Badge variant="outline">{product.category.name}</Badge>
-                    ) : (
-                      <span className="text-tierra-media">Sin categoría</span>
-                    )}
-                  </TableCell>
-
-                  <TableCell className="font-medium">
-                    {formatCurrency(product.price)}
-                  </TableCell>
-
-                  <TableCell>
-                    <div className="flex items-center space-x-2">
-                      <span>{product.inventory_quantity}</span>
-                      {((product.inventory_quantity ?? 0) <= 5) && (
-                        <AlertTriangle className="h-4 w-4 text-red-500" />
-                      )}
-                    </div>
-                  </TableCell>
-
-                  <TableCell>{getStatusBadge(product.status ?? '')}</TableCell>
-
-                  <TableCell className="text-sm text-tierra-media">
-                    {formatDate(product.created_at, { locale: "es-AR" })}
-                  </TableCell>
-
-                  <TableCell>
-                    <div className="flex space-x-2">
-                      <Link href={`/admin/products/${product.id}`}>
-                        <Button variant="outline" size="sm">
-                          <Eye className="h-3 w-3" />
-                        </Button>
-                      </Link>
-                      <Link href={`/admin/products/edit/${product.id}`}>
-                        <Button variant="outline" size="sm">
-                          <Edit className="h-3 w-3" />
-                        </Button>
-                      </Link>
-                    </div>
-                  </TableCell>
+                  </TableHead>
+                  <TableHead>Producto</TableHead>
+                  <TableHead>Categoría</TableHead>
+                  <TableHead>Precio</TableHead>
+                  <TableHead>Stock</TableHead>
+                  <TableHead>Estado</TableHead>
+                  <TableHead>Fecha</TableHead>
+                  <TableHead>Acciones</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {products.map((product) => (
+                  <TableRow key={product.id}>
+                    <TableCell>
+                      <input
+                        type="checkbox"
+                        checked={selectedProducts.includes(product.id)}
+                        onChange={() => handleSelectProduct(product.id)}
+                        className="rounded border-gray-300"
+                      />
+                    </TableCell>
+
+                    <TableCell>
+                      <div>
+                        <div className="font-medium">{product.name}</div>
+                        <div className="text-sm text-tierra-media">
+                          {product.slug}
+                        </div>
+                        {product.is_featured && (
+                          <Badge variant="outline" className="text-xs">
+                            Destacado
+                          </Badge>
+                        )}
+                      </div>
+                    </TableCell>
+
+                    <TableCell>
+                      {product.category ? (
+                        <Badge variant="outline">{product.category.name}</Badge>
+                      ) : (
+                        <span className="text-tierra-media">Sin categoría</span>
+                      )}
+                    </TableCell>
+
+                    <TableCell className="font-medium">
+                      {formatCurrency(product.price)}
+                    </TableCell>
+
+                    <TableCell>
+                      <div className="flex items-center space-x-2">
+                        <span>{product.inventory_quantity}</span>
+                        {(product.inventory_quantity ?? 0) <= 5 && (
+                          <AlertTriangle className="h-4 w-4 text-red-500" />
+                        )}
+                      </div>
+                    </TableCell>
+
+                    <TableCell>
+                      {getStatusBadge(product.status ?? "")}
+                    </TableCell>
+
+                    <TableCell className="text-sm text-tierra-media">
+                      {formatDate(product.created_at, { locale: "es-AR" })}
+                    </TableCell>
+
+                    <TableCell>
+                      <div className="flex space-x-2">
+                        <Link href={`/admin/products/${product.id}`}>
+                          <Button variant="outline" size="sm">
+                            <Eye className="h-3 w-3" />
+                          </Button>
+                        </Link>
+                        <Link href={`/admin/products/edit/${product.id}`}>
+                          <Button variant="outline" size="sm">
+                            <Edit className="h-3 w-3" />
+                          </Button>
+                        </Link>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
 
           {products.length === 0 && (
             <div className="text-center py-12">

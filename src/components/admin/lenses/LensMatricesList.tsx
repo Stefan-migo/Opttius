@@ -92,7 +92,9 @@ export default function LensMatricesList() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedFamilyId, setSelectedFamilyId] = useState<string>("all");
   const [showDialog, setShowDialog] = useState(false);
-  const [editingMatrix, setEditingMatrix] = useState<LensPriceMatrix | null>(null);
+  const [editingMatrix, setEditingMatrix] = useState<LensPriceMatrix | null>(
+    null,
+  );
   const [includeInactive, setIncludeInactive] = useState(false);
 
   // Pagination state
@@ -161,14 +163,14 @@ export default function LensMatricesList() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     try {
-      const url = editingMatrix 
+      const url = editingMatrix
         ? `/api/admin/lens-matrices/${editingMatrix.id}`
         : "/api/admin/lens-matrices";
-      
+
       const method = editingMatrix ? "PUT" : "POST";
-      
+
       const response = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
@@ -247,7 +249,7 @@ export default function LensMatricesList() {
   const filteredMatrices = matrices.filter((matrix) => {
     const searchLower = searchTerm.toLowerCase();
     const family = matrix.lens_families;
-    
+
     return (
       family.name.toLowerCase().includes(searchLower) ||
       (family.brand || "").toLowerCase().includes(searchLower) ||
@@ -313,7 +315,10 @@ export default function LensMatricesList() {
             />
           </div>
           <div className="w-full sm:w-64">
-            <Select value={selectedFamilyId} onValueChange={setSelectedFamilyId}>
+            <Select
+              value={selectedFamilyId}
+              onValueChange={setSelectedFamilyId}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Todas las familias" />
               </SelectTrigger>
@@ -362,10 +367,13 @@ export default function LensMatricesList() {
                       </TableCell>
                       <TableCell>{family.brand || "-"}</TableCell>
                       <TableCell>
-                        {LENS_TYPES.find((t) => t.value === family.lens_type)?.label || family.lens_type}
+                        {LENS_TYPES.find((t) => t.value === family.lens_type)
+                          ?.label || family.lens_type}
                       </TableCell>
                       <TableCell>
-                        {LENS_MATERIALS.find((m) => m.value === family.lens_material)?.label || family.lens_material}
+                        {LENS_MATERIALS.find(
+                          (m) => m.value === family.lens_material,
+                        )?.label || family.lens_material}
                       </TableCell>
                       <TableCell>
                         {matrix.sphere_min} a {matrix.sphere_max}
@@ -425,7 +433,7 @@ export default function LensMatricesList() {
 
         {/* Create/Edit Dialog */}
         <Dialog open={showDialog} onOpenChange={setShowDialog}>
-          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>
                 {editingMatrix ? "Editar Matriz" : "Crear Nueva Matriz"}
@@ -436,7 +444,7 @@ export default function LensMatricesList() {
                   : "Ingresa los detalles para crear una nueva matriz de precios"}
               </DialogDescription>
             </DialogHeader>
-            
+
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="md:col-span-2">
@@ -454,7 +462,8 @@ export default function LensMatricesList() {
                     <SelectContent>
                       {families.map((family) => (
                         <SelectItem key={family.id} value={family.id}>
-                          {family.name} {family.brand ? `(${family.brand})` : ""}
+                          {family.name}{" "}
+                          {family.brand ? `(${family.brand})` : ""}
                         </SelectItem>
                       ))}
                     </SelectContent>

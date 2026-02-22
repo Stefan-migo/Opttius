@@ -42,6 +42,8 @@ interface EmailTemplate {
 
 interface EmailTemplateEditorProps {
   template?: EmailTemplate;
+  mode?: "organization" | "saas";
+  organizationId?: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSave: () => void;
@@ -58,7 +60,7 @@ const emailTemplates = {
   <style>
     body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
     .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-    .header { background: #8B4513; color: white; padding: 20px; text-align: center; }
+    .header { background: #1A2B23; color: white; padding: 20px; text-align: center; }
     .content { padding: 20px; background: #fff; }
     .footer { background: #f8f9fa; padding: 15px; text-align: center; font-size: 12px; color: #666; }
   </style>
@@ -88,9 +90,9 @@ const emailTemplates = {
   <style>
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; background: #f4f4f4; }
     .container { max-width: 600px; margin: 20px auto; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-    .header { background: linear-gradient(135deg, #8B5A2B 0%, #D4A574 100%); color: white; padding: 30px 20px; text-align: center; }
+    .header { background: linear-gradient(135deg, #1A2B23 0%, #2C3E33 100%); color: white; padding: 30px 20px; text-align: center; }
     .content { padding: 30px; }
-    .button { display: inline-block; padding: 12px 24px; background: #8B4513; color: white; text-decoration: none; border-radius: 6px; margin: 20px 0; }
+    .button { display: inline-block; padding: 12px 24px; background: #C5A059; color: #1A1A1A; text-decoration: none; border-radius: 0; margin: 20px 0; }
     .footer { background: #f8f9fa; padding: 20px; text-align: center; font-size: 14px; color: #666; border-top: 1px solid #eee; }
   </style>
 </head>
@@ -98,7 +100,7 @@ const emailTemplates = {
   <div class="container">
     <div class="header">
       <h1 style="margin: 0;">{{company_name}}</h1>
-      <p style="margin: 10px 0 0 0; opacity: 0.9;">Biocosmética & Bienestar Holístico</p>
+      <p style="margin: 10px 0 0 0; opacity: 0.9;">{{organization_name}}</p>
     </div>
     <div class="content">
       <h2>Hola {{customer_name}},</h2>
@@ -121,13 +123,13 @@ const emailTemplates = {
   <style>
     body { font-family: Georgia, serif; line-height: 1.8; color: #333; margin: 0; padding: 40px 20px; background: #fff; }
     .container { max-width: 600px; margin: 0 auto; }
-    .content { padding: 20px 0; border-top: 2px solid #8B4513; border-bottom: 2px solid #8B4513; margin: 20px 0; }
+    .content { padding: 20px 0; border-top: 2px solid #1A2B23; border-bottom: 2px solid #1A2B23; margin: 20px 0; }
     .signature { margin-top: 40px; font-style: italic; }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1 style="color: #8B4513; margin-bottom: 30px;">{{company_name}}</h1>
+    <h1 style="color: #1A2B23; margin-bottom: 30px;">{{company_name}}</h1>
     <div class="content">
       <p>Hola {{customer_name}},</p>
       <p>Tu mensaje aquí...</p>
@@ -143,12 +145,21 @@ const emailTemplates = {
 
 export default function EmailTemplateEditor({
   template,
+  mode = "organization",
+  organizationId,
   open,
   onOpenChange,
   onSave,
 }: EmailTemplateEditorProps) {
+  const apiBase =
+    mode === "saas"
+      ? "/api/admin/saas-management/email-templates"
+      : "/api/admin/system/email-templates";
   const [loading, setLoading] = useState(false);
   const [showPreview, setShowPreview] = useState(true);
+  const [showAiAssistDialog, setShowAiAssistDialog] = useState(false);
+  const [aiPrompt, setAiPrompt] = useState("");
+  const [aiLoading, setAiLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     type: "custom",
@@ -195,14 +206,11 @@ export default function EmailTemplateEditor({
 
       if (template) {
         // Update existing template
-        const response = await fetch(
-          `/api/admin/system/email-templates/${template.id}`,
-          {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(submitData),
-          },
-        );
+        const response = await fetch(`${apiBase}/${template.id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(submitData),
+        });
 
         if (!response.ok) {
           const data = await response.json();
@@ -212,7 +220,7 @@ export default function EmailTemplateEditor({
         toast.success("Plantilla actualizada exitosamente");
       } else {
         // Create new template
-        const response = await fetch("/api/admin/system/email-templates", {
+        const response = await fetch(apiBase, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(submitData),
@@ -235,6 +243,47 @@ export default function EmailTemplateEditor({
       );
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleAiAssist = async () => {
+    if (!aiPrompt.trim()) {
+      toast.error("Describe lo que quieres que genere la IA");
+      return;
+    }
+    try {
+      setAiLoading(true);
+      const res = await fetch("/api/admin/email-templates/ai-assist", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: formData.type,
+          organizationId: organizationId || null,
+          userPrompt: aiPrompt.trim(),
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Error al generar plantilla");
+      }
+      if (data.subject || data.content) {
+        setFormData((prev) => ({
+          ...prev,
+          subject: data.subject || prev.subject,
+          content: data.content || prev.content,
+        }));
+        setShowAiAssistDialog(false);
+        setAiPrompt("");
+        toast.success("Plantilla generada. Puedes editarla antes de guardar.");
+      } else {
+        toast.error(data.error || "No se pudo generar la plantilla");
+      }
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Error al generar plantilla",
+      );
+    } finally {
+      setAiLoading(false);
     }
   };
 
@@ -434,331 +483,436 @@ export default function EmailTemplateEditor({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-7xl max-h-[95vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>
-            {template ? "Editar Plantilla" : "Nueva Plantilla"}
-          </DialogTitle>
-          <DialogDescription>
-            {template
-              ? "Modifica la plantilla de email. Los cambios se aplicarán automáticamente en los próximos emails."
-              : "Crea una nueva plantilla de email para el sistema"}
-          </DialogDescription>
-        </DialogHeader>
+    <>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-7xl max-h-[95vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>
+              {template ? "Editar Plantilla" : "Nueva Plantilla"}
+            </DialogTitle>
+            <DialogDescription>
+              {template
+                ? "Modifica la plantilla de email. Los cambios se aplicarán automáticamente en los próximos emails."
+                : "Crea una nueva plantilla de email para el sistema"}
+            </DialogDescription>
+          </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Basic Info */}
-          <div className="grid grid-cols-2 gap-4">
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Basic Info */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="name">Nombre de la Plantilla *</Label>
+                <Input
+                  id="name"
+                  value={formData.name}
+                  onChange={(e) =>
+                    setFormData({ ...formData, name: e.target.value })
+                  }
+                  placeholder="Ej: Confirmación de Pedido"
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="type">Tipo *</Label>
+                <p className="text-xs text-muted-foreground">
+                  Los tipos con trigger automático se envían cuando ocurre el
+                  evento correspondiente. &quot;Personalizado&quot; y
+                  &quot;Marketing&quot; requieren envío manual.
+                </p>
+                <Select
+                  value={formData.type}
+                  onValueChange={(value) =>
+                    setFormData({ ...formData, type: value })
+                  }
+                  disabled={!!template?.is_system}
+                >
+                  <SelectTrigger id="type">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {mode === "saas" ? (
+                      <>
+                        <SelectItem value="saas_welcome">
+                          Bienvenida SaaS
+                        </SelectItem>
+                        <SelectItem value="saas_trial_ending">
+                          Fin de Prueba
+                        </SelectItem>
+                        <SelectItem value="saas_subscription_success">
+                          Suscripción Exitosa
+                        </SelectItem>
+                        <SelectItem value="saas_payment_failed">
+                          Pago Fallido SaaS
+                        </SelectItem>
+                        <SelectItem value="saas_payment_reminder">
+                          Recordatorio Pago
+                        </SelectItem>
+                        <SelectItem value="saas_security_alert">
+                          Alerta de Seguridad
+                        </SelectItem>
+                        <SelectItem value="saas_onboarding">
+                          Onboarding
+                        </SelectItem>
+                        <SelectItem value="saas_maintenance">
+                          Mantenimiento Programado
+                        </SelectItem>
+                        <SelectItem value="marketing">Marketing</SelectItem>
+                        <SelectItem value="custom">Personalizado</SelectItem>
+                      </>
+                    ) : (
+                      <>
+                        <SelectItem value="order_confirmation">
+                          Confirmación de Pedido
+                        </SelectItem>
+                        <SelectItem value="order_shipped">
+                          Pedido Enviado
+                        </SelectItem>
+                        <SelectItem value="order_delivered">
+                          Pedido Entregado
+                        </SelectItem>
+                        <SelectItem value="password_reset">
+                          Restablecer Contraseña
+                        </SelectItem>
+                        <SelectItem value="account_welcome">
+                          Bienvenida
+                        </SelectItem>
+                        <SelectItem value="appointment_confirmation">
+                          Confirmación de Cita
+                        </SelectItem>
+                        <SelectItem value="appointment_reminder">
+                          Recordatorio de Cita
+                        </SelectItem>
+                        <SelectItem value="quote_sent">
+                          Presupuesto Enviado
+                        </SelectItem>
+                        <SelectItem value="quote_expiring">
+                          Presupuesto Por Expirar
+                        </SelectItem>
+                        <SelectItem value="work_order_ready">
+                          Lentes Listo para Retiro
+                        </SelectItem>
+                        <SelectItem value="payment_success">
+                          Pago Exitoso
+                        </SelectItem>
+                        <SelectItem value="payment_failed">
+                          Pago Fallido
+                        </SelectItem>
+                        <SelectItem value="low_stock_alert">
+                          Alerta de Stock Bajo
+                        </SelectItem>
+                        <SelectItem value="marketing">Marketing</SelectItem>
+                        <SelectItem value="custom">Personalizado</SelectItem>
+                      </>
+                    )}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            {/* Subject */}
             <div className="space-y-2">
-              <Label htmlFor="name">Nombre de la Plantilla *</Label>
+              <Label htmlFor="subject">Asunto *</Label>
               <Input
-                id="name"
-                value={formData.name}
+                id="subject"
+                value={formData.subject}
                 onChange={(e) =>
-                  setFormData({ ...formData, name: e.target.value })
+                  setFormData({ ...formData, subject: e.target.value })
                 }
-                placeholder="Ej: Confirmación de Pedido"
+                placeholder="Ej: Confirmación de tu pedido {{order_number}}"
                 required
+              />
+              <p className="text-xs text-muted-foreground">
+                Puedes usar variables como {"{{customer_name}}"},{" "}
+                {"{{order_number}}"}, etc.
+              </p>
+            </div>
+
+            {/* Content Editor */}
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <Label>Contenido HTML del Email *</Label>
+                <div className="flex gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowPreview(!showPreview)}
+                  >
+                    <Eye className="h-4 w-4 mr-2" />
+                    {showPreview ? "Ocultar" : "Mostrar"} Vista Previa
+                  </Button>
+                </div>
+              </div>
+
+              <div
+                className={`grid gap-4 ${showPreview ? "grid-cols-2" : "grid-cols-1"}`}
+              >
+                {/* Editor Section */}
+                <div className="space-y-2">
+                  <div className="border rounded-lg p-2 bg-muted/50">
+                    <div className="flex gap-2 mb-2 flex-wrap">
+                      <Select
+                        onValueChange={(v) =>
+                          applyTemplate(v as keyof typeof emailTemplates)
+                        }
+                      >
+                        <SelectTrigger className="w-[200px]">
+                          <SelectValue placeholder="Aplicar plantilla" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="simple">
+                            <div className="flex items-center gap-2">
+                              <FileText className="h-4 w-4" />
+                              {emailTemplates.simple.name}
+                            </div>
+                          </SelectItem>
+                          <SelectItem value="modern">
+                            <div className="flex items-center gap-2">
+                              <Sparkles className="h-4 w-4" />
+                              {emailTemplates.modern.name}
+                            </div>
+                          </SelectItem>
+                          <SelectItem value="minimal">
+                            <div className="flex items-center gap-2">
+                              <Code className="h-4 w-4" />
+                              {emailTemplates.minimal.name}
+                            </div>
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setShowAiAssistDialog(true)}
+                        className="gap-2"
+                      >
+                        <Sparkles className="h-4 w-4" />
+                        Asistir con IA
+                      </Button>
+                    </div>
+                    <Textarea
+                      ref={textareaRef}
+                      id="content"
+                      value={formData.content}
+                      onChange={(e) =>
+                        setFormData({ ...formData, content: e.target.value })
+                      }
+                      placeholder="<html><body>...</body></html>"
+                      rows={20}
+                      className="font-mono text-sm"
+                      required
+                    />
+                  </div>
+
+                  {/* Variables Panel */}
+                  <div className="border rounded-lg p-3 bg-muted/30">
+                    <Label className="text-sm font-semibold mb-2 block">
+                      Variables Disponibles
+                    </Label>
+                    <div className="flex flex-wrap gap-2 max-h-32 overflow-y-auto">
+                      {availableVariables
+                        .filter((v) => {
+                          // Filter variables based on template type
+                          if (
+                            formData.type === "order_confirmation" ||
+                            formData.type === "order_shipped" ||
+                            formData.type === "order_delivered"
+                          ) {
+                            return [
+                              "customer_name",
+                              "order_number",
+                              "order_total",
+                              "order_date",
+                              "order_items",
+                              "company_name",
+                              "support_email",
+                              "website_url",
+                              "tracking_number",
+                              "carrier",
+                              "estimated_delivery",
+                              "delivery_date",
+                              "payment_method",
+                            ].includes(v.key);
+                          }
+                          if (formData.type === "password_reset") {
+                            return [
+                              "customer_name",
+                              "reset_link",
+                              "reset_url",
+                              "company_name",
+                              "support_email",
+                            ].includes(v.key);
+                          }
+                          if (formData.type === "account_welcome") {
+                            return [
+                              "customer_name",
+                              "account_url",
+                              "company_name",
+                              "support_email",
+                              "website_url",
+                            ].includes(v.key);
+                          }
+                          if (
+                            formData.type === "membership_welcome" ||
+                            formData.type === "membership_reminder"
+                          ) {
+                            return [
+                              "customer_name",
+                              "membership_tier",
+                              "membership_start_date",
+                              "access_url",
+                              "renewal_url",
+                              "days_remaining",
+                              "company_name",
+                              "support_email",
+                            ].includes(v.key);
+                          }
+                          if (
+                            formData.type === "payment_success" ||
+                            formData.type === "payment_failed"
+                          ) {
+                            return [
+                              "customer_name",
+                              "order_number",
+                              "amount",
+                              "payment_method",
+                              "transaction_id",
+                              "company_name",
+                              "support_email",
+                            ].includes(v.key);
+                          }
+                          if (formData.type === "low_stock_alert") {
+                            return [
+                              "low_stock_products",
+                              "product_count",
+                              "company_name",
+                              "support_email",
+                            ].includes(v.key);
+                          }
+                          return true; // Show all for custom type
+                        })
+                        .map((varItem) => (
+                          <Badge
+                            key={varItem.key}
+                            variant="outline"
+                            className="cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors"
+                            onClick={() => insertVariable(varItem.key)}
+                            title={varItem.description}
+                          >
+                            {varItem.label}
+                          </Badge>
+                        ))}
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-2">
+                      Haz clic en una variable para insertarla en el contenido
+                      HTML
+                    </p>
+                  </div>
+                </div>
+
+                {/* Preview Section */}
+                {showPreview && (
+                  <div className="space-y-2">
+                    <Label>Vista Previa en Tiempo Real</Label>
+                    <div className="border rounded-lg p-4 bg-white max-h-[600px] overflow-y-auto">
+                      <div className="mb-4 pb-4 border-b">
+                        <p className="text-sm font-semibold text-muted-foreground mb-1">
+                          Asunto:
+                        </p>
+                        <p className="text-base font-medium">
+                          {getPreviewSubject()}
+                        </p>
+                      </div>
+                      <div
+                        className="email-preview [&_img]:max-w-full [&_img]:h-auto [&_table]:w-full [&_table]:border-collapse [&_a]:text-[#8B4513] [&_a]:underline"
+                        dangerouslySetInnerHTML={{ __html: getPreviewHtml() }}
+                        style={{
+                          fontFamily: "Arial, sans-serif",
+                          lineHeight: "1.6",
+                          maxWidth: "100%",
+                        }}
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Active Toggle */}
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label htmlFor="is_active">Plantilla Activa</Label>
+                <p className="text-xs text-muted-foreground">
+                  Solo las plantillas activas se usarán para enviar emails
+                </p>
+              </div>
+              <Switch
+                id="is_active"
+                checked={formData.is_active}
+                onCheckedChange={(checked) =>
+                  setFormData({ ...formData, is_active: checked })
+                }
               />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="type">Tipo *</Label>
-              <Select
-                value={formData.type}
-                onValueChange={(value) =>
-                  setFormData({ ...formData, type: value })
-                }
-                disabled={!!template?.is_system}
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => onOpenChange(false)}
+                disabled={loading}
               >
-                <SelectTrigger id="type">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="order_confirmation">
-                    Confirmación de Pedido
-                  </SelectItem>
-                  <SelectItem value="order_shipped">Pedido Enviado</SelectItem>
-                  <SelectItem value="order_delivered">
-                    Pedido Entregado
-                  </SelectItem>
-                  <SelectItem value="password_reset">
-                    Restablecer Contraseña
-                  </SelectItem>
-                  <SelectItem value="account_welcome">Bienvenida</SelectItem>
-                  <SelectItem value="membership_welcome">
-                    Bienvenida Membresía
-                  </SelectItem>
-                  <SelectItem value="membership_reminder">
-                    Recordatorio Membresía
-                  </SelectItem>
-                  <SelectItem value="payment_success">Pago Exitoso</SelectItem>
-                  <SelectItem value="payment_failed">Pago Fallido</SelectItem>
-                  <SelectItem value="low_stock_alert">
-                    Alerta de Stock Bajo
-                  </SelectItem>
-                  <SelectItem value="marketing">Marketing</SelectItem>
-                  <SelectItem value="custom">Personalizado</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
+                <X className="h-4 w-4 mr-2" />
+                Cancelar
+              </Button>
+              <Button type="submit" disabled={loading}>
+                <Save className="h-4 w-4 mr-2" />
+                {loading ? "Guardando..." : "Guardar Plantilla"}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
 
-          {/* Subject */}
-          <div className="space-y-2">
-            <Label htmlFor="subject">Asunto *</Label>
-            <Input
-              id="subject"
-              value={formData.subject}
-              onChange={(e) =>
-                setFormData({ ...formData, subject: e.target.value })
-              }
-              placeholder="Ej: Confirmación de tu pedido {{order_number}}"
-              required
-            />
-            <p className="text-xs text-muted-foreground">
-              Puedes usar variables como {"{{customer_name}}"},{" "}
-              {"{{order_number}}"}, etc.
-            </p>
-          </div>
-
-          {/* Content Editor */}
-          <div className="space-y-2">
-            <div className="flex justify-between items-center">
-              <Label>Contenido HTML del Email *</Label>
-              <div className="flex gap-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setShowPreview(!showPreview)}
-                >
-                  <Eye className="h-4 w-4 mr-2" />
-                  {showPreview ? "Ocultar" : "Mostrar"} Vista Previa
-                </Button>
-              </div>
-            </div>
-
-            <div
-              className={`grid gap-4 ${showPreview ? "grid-cols-2" : "grid-cols-1"}`}
-            >
-              {/* Editor Section */}
-              <div className="space-y-2">
-                <div className="border rounded-lg p-2 bg-muted/50">
-                  <div className="flex gap-2 mb-2 flex-wrap">
-                    <Select
-                      onValueChange={(v) =>
-                        applyTemplate(v as keyof typeof emailTemplates)
-                      }
-                    >
-                      <SelectTrigger className="w-[200px]">
-                        <SelectValue placeholder="Aplicar plantilla" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="simple">
-                          <div className="flex items-center gap-2">
-                            <FileText className="h-4 w-4" />
-                            {emailTemplates.simple.name}
-                          </div>
-                        </SelectItem>
-                        <SelectItem value="modern">
-                          <div className="flex items-center gap-2">
-                            <Sparkles className="h-4 w-4" />
-                            {emailTemplates.modern.name}
-                          </div>
-                        </SelectItem>
-                        <SelectItem value="minimal">
-                          <div className="flex items-center gap-2">
-                            <Code className="h-4 w-4" />
-                            {emailTemplates.minimal.name}
-                          </div>
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <Textarea
-                    ref={textareaRef}
-                    id="content"
-                    value={formData.content}
-                    onChange={(e) =>
-                      setFormData({ ...formData, content: e.target.value })
-                    }
-                    placeholder="<html><body>...</body></html>"
-                    rows={20}
-                    className="font-mono text-sm"
-                    required
-                  />
-                </div>
-
-                {/* Variables Panel */}
-                <div className="border rounded-lg p-3 bg-muted/30">
-                  <Label className="text-sm font-semibold mb-2 block">
-                    Variables Disponibles
-                  </Label>
-                  <div className="flex flex-wrap gap-2 max-h-32 overflow-y-auto">
-                    {availableVariables
-                      .filter((v) => {
-                        // Filter variables based on template type
-                        if (
-                          formData.type === "order_confirmation" ||
-                          formData.type === "order_shipped" ||
-                          formData.type === "order_delivered"
-                        ) {
-                          return [
-                            "customer_name",
-                            "order_number",
-                            "order_total",
-                            "order_date",
-                            "order_items",
-                            "company_name",
-                            "support_email",
-                            "website_url",
-                            "tracking_number",
-                            "carrier",
-                            "estimated_delivery",
-                            "delivery_date",
-                            "payment_method",
-                          ].includes(v.key);
-                        }
-                        if (formData.type === "password_reset") {
-                          return [
-                            "customer_name",
-                            "reset_link",
-                            "reset_url",
-                            "company_name",
-                            "support_email",
-                          ].includes(v.key);
-                        }
-                        if (formData.type === "account_welcome") {
-                          return [
-                            "customer_name",
-                            "account_url",
-                            "company_name",
-                            "support_email",
-                            "website_url",
-                          ].includes(v.key);
-                        }
-                        if (
-                          formData.type === "membership_welcome" ||
-                          formData.type === "membership_reminder"
-                        ) {
-                          return [
-                            "customer_name",
-                            "membership_tier",
-                            "membership_start_date",
-                            "access_url",
-                            "renewal_url",
-                            "days_remaining",
-                            "company_name",
-                            "support_email",
-                          ].includes(v.key);
-                        }
-                        if (
-                          formData.type === "payment_success" ||
-                          formData.type === "payment_failed"
-                        ) {
-                          return [
-                            "customer_name",
-                            "order_number",
-                            "amount",
-                            "payment_method",
-                            "transaction_id",
-                            "company_name",
-                            "support_email",
-                          ].includes(v.key);
-                        }
-                        if (formData.type === "low_stock_alert") {
-                          return [
-                            "low_stock_products",
-                            "product_count",
-                            "company_name",
-                            "support_email",
-                          ].includes(v.key);
-                        }
-                        return true; // Show all for custom type
-                      })
-                      .map((varItem) => (
-                        <Badge
-                          key={varItem.key}
-                          variant="outline"
-                          className="cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors"
-                          onClick={() => insertVariable(varItem.key)}
-                          title={varItem.description}
-                        >
-                          {varItem.label}
-                        </Badge>
-                      ))}
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-2">
-                    Haz clic en una variable para insertarla en el contenido
-                    HTML
-                  </p>
-                </div>
-              </div>
-
-              {/* Preview Section */}
-              {showPreview && (
-                <div className="space-y-2">
-                  <Label>Vista Previa en Tiempo Real</Label>
-                  <div className="border rounded-lg p-4 bg-white max-h-[600px] overflow-y-auto">
-                    <div className="mb-4 pb-4 border-b">
-                      <p className="text-sm font-semibold text-muted-foreground mb-1">
-                        Asunto:
-                      </p>
-                      <p className="text-base font-medium">
-                        {getPreviewSubject()}
-                      </p>
-                    </div>
-                    <div
-                      className="email-preview [&_img]:max-w-full [&_img]:h-auto [&_table]:w-full [&_table]:border-collapse [&_a]:text-[#8B4513] [&_a]:underline"
-                      dangerouslySetInnerHTML={{ __html: getPreviewHtml() }}
-                      style={{
-                        fontFamily: "Arial, sans-serif",
-                        lineHeight: "1.6",
-                        maxWidth: "100%",
-                      }}
-                    />
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Active Toggle */}
-          <div className="flex items-center justify-between">
-            <div className="space-y-0.5">
-              <Label htmlFor="is_active">Plantilla Activa</Label>
-              <p className="text-xs text-muted-foreground">
-                Solo las plantillas activas se usarán para enviar emails
-              </p>
-            </div>
-            <Switch
-              id="is_active"
-              checked={formData.is_active}
-              onCheckedChange={(checked) =>
-                setFormData({ ...formData, is_active: checked })
-              }
-            />
-          </div>
-
+      <Dialog open={showAiAssistDialog} onOpenChange={setShowAiAssistDialog}>
+        <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Sparkles className="h-5 w-5" />
+              Asistir con IA
+            </DialogTitle>
+            <DialogDescription>
+              Describe lo que quieres que genere la IA (ej. &quot;Plantilla de
+              bienvenida para clientes nuevos&quot;). Usará el tipo de plantilla
+              actual y las variables disponibles.
+            </DialogDescription>
+          </DialogHeader>
+          <Textarea
+            value={aiPrompt}
+            onChange={(e) => setAiPrompt(e.target.value)}
+            placeholder="Ej: Plantilla de bienvenida cálida para clientes nuevos que acaban de registrarse..."
+            rows={4}
+            className="resize-none"
+          />
           <DialogFooter>
             <Button
               type="button"
               variant="outline"
-              onClick={() => onOpenChange(false)}
-              disabled={loading}
+              onClick={() => {
+                setShowAiAssistDialog(false);
+                setAiPrompt("");
+              }}
             >
-              <X className="h-4 w-4 mr-2" />
               Cancelar
             </Button>
-            <Button type="submit" disabled={loading}>
-              <Save className="h-4 w-4 mr-2" />
-              {loading ? "Guardando..." : "Guardar Plantilla"}
+            <Button type="button" onClick={handleAiAssist} disabled={aiLoading}>
+              {aiLoading ? "Generando..." : "Generar"}
             </Button>
           </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }

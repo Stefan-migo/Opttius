@@ -271,7 +271,7 @@ export default function BranchesPage() {
               Nueva Sucursal
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>
                 {selectedBranch ? "Editar Sucursal" : "Nueva Sucursal"}
@@ -502,98 +502,102 @@ export default function BranchesPage() {
               </Button>
             </div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="text-[var(--admin-accent-primary)]">
-                    Nombre
-                  </TableHead>
-                  <TableHead className="text-[var(--admin-accent-primary)]">
-                    Código
-                  </TableHead>
-                  <TableHead>Ubicación</TableHead>
-                  <TableHead>Contacto</TableHead>
-                  <TableHead>Estado</TableHead>
-                  <TableHead className="text-right">Acciones</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {branches.map((branch) => (
-                  <TableRow key={branch.id}>
-                    <TableCell className="font-medium">{branch.name}</TableCell>
-                    <TableCell>
-                      <Badge variant="outline">{branch.code}</Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2 text-sm text-foreground">
-                        <MapPin className="h-4 w-4 text-[var(--accent-foreground)]" />
-                        <span>
-                          {branch.city || branch.state
-                            ? `${branch.city || ""}${branch.city && branch.state ? ", " : ""}${branch.state || ""}`
-                            : "Sin ubicación"}
-                        </span>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="space-y-1">
-                        {branch.phone && (
-                          <div className="flex items-center gap-2 text-sm">
-                            <Phone className="h-3 w-3" />
-                            <span>{branch.phone}</span>
-                          </div>
-                        )}
-                        {branch.email && (
-                          <div className="flex items-center gap-2 text-sm">
-                            <Mail className="h-3 w-3" />
-                            <span>{branch.email}</span>
-                          </div>
-                        )}
-                        {!branch.phone && !branch.email && (
-                          <span className="text-sm text-foreground">
-                            Sin contacto
-                          </span>
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      {branch.is_active ? (
-                        <Badge variant="default" className="bg-green-600">
-                          <CheckCircle className="h-3 w-3 mr-1" />
-                          Activa
-                        </Badge>
-                      ) : (
-                        <Badge variant="secondary">
-                          <XCircle className="h-3 w-3 mr-1" />
-                          Inactiva
-                        </Badge>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleOpenDialog(branch)}
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => {
-                            setSelectedBranch(branch);
-                            setIsDeleteDialogOpen(true);
-                          }}
-                          disabled={branch.code === "MAIN"}
-                        >
-                          <Trash2 className="h-4 w-4 text-destructive" />
-                        </Button>
-                      </div>
-                    </TableCell>
+            <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="text-[var(--admin-accent-primary)]">
+                      Nombre
+                    </TableHead>
+                    <TableHead className="text-[var(--admin-accent-primary)]">
+                      Código
+                    </TableHead>
+                    <TableHead>Ubicación</TableHead>
+                    <TableHead>Contacto</TableHead>
+                    <TableHead>Estado</TableHead>
+                    <TableHead className="text-right">Acciones</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {branches.map((branch) => (
+                    <TableRow key={branch.id}>
+                      <TableCell className="font-medium">
+                        {branch.name}
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline">{branch.code}</Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2 text-sm text-foreground">
+                          <MapPin className="h-4 w-4 text-[var(--accent-foreground)]" />
+                          <span>
+                            {branch.city || branch.state
+                              ? `${branch.city || ""}${branch.city && branch.state ? ", " : ""}${branch.state || ""}`
+                              : "Sin ubicación"}
+                          </span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="space-y-1">
+                          {branch.phone && (
+                            <div className="flex items-center gap-2 text-sm">
+                              <Phone className="h-3 w-3" />
+                              <span>{branch.phone}</span>
+                            </div>
+                          )}
+                          {branch.email && (
+                            <div className="flex items-center gap-2 text-sm">
+                              <Mail className="h-3 w-3" />
+                              <span>{branch.email}</span>
+                            </div>
+                          )}
+                          {!branch.phone && !branch.email && (
+                            <span className="text-sm text-foreground">
+                              Sin contacto
+                            </span>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        {branch.is_active ? (
+                          <Badge variant="default" className="bg-green-600">
+                            <CheckCircle className="h-3 w-3 mr-1" />
+                            Activa
+                          </Badge>
+                        ) : (
+                          <Badge variant="secondary">
+                            <XCircle className="h-3 w-3 mr-1" />
+                            Inactiva
+                          </Badge>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleOpenDialog(branch)}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              setSelectedBranch(branch);
+                              setIsDeleteDialogOpen(true);
+                            }}
+                            disabled={branch.code === "MAIN"}
+                          >
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           )}
         </CardContent>
       </Card>

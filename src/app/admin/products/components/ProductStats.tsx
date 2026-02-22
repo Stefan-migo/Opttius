@@ -21,11 +21,11 @@ export default function ProductStats({
 }: ProductStatsProps) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-0 border border-admin-border-primary/20 bg-admin-border-primary/5">
-      <Card className="border-none bg-admin-bg-tertiary/50 rounded-none shadow-none hover:bg-admin-bg-secondary transition-all duration-500 group overflow-hidden border-r border-admin-border-primary/10">
+      <Card className="border-none bg-admin-bg-tertiary/50 rounded-none shadow-none hover:shadow-lg transition-shadow duration-300 group overflow-hidden border-r border-admin-border-primary/10">
         <CardContent className="p-8 relative">
           <div className="flex items-start justify-between">
             <div className="space-y-1">
-              <p className="text-[10px] font-display font-bold text-admin-text-tertiary uppercase tracking-[0.2em] group-hover:text-epoch-primary transition-colors">
+              <p className="text-[10px] font-display font-bold text-admin-text-tertiary uppercase tracking-[0.2em] ">
                 VALORACIÓN TOTAL
               </p>
               <p className="text-2xl font-display font-bold text-admin-text-primary tracking-tight">
@@ -35,16 +35,16 @@ export default function ProductStats({
                 {statsLabel}
               </p>
             </div>
-            <BarChart3 className="h-5 w-5 text-epoch-accent/40 group-hover:text-epoch-primary transition-colors" />
+            <BarChart3 className="h-5 w-5 text-epoch-accent/40 " />
           </div>
         </CardContent>
       </Card>
 
-      <Card className="border-none bg-admin-bg-tertiary/50 rounded-none shadow-none hover:bg-admin-bg-secondary transition-all duration-500 group overflow-hidden border-r border-admin-border-primary/10">
+      <Card className="border-none bg-admin-bg-tertiary/50 rounded-none shadow-none hover:shadow-lg transition-shadow duration-300 group overflow-hidden border-r border-admin-border-primary/10">
         <CardContent className="p-8 relative">
           <div className="flex items-start justify-between">
             <div className="space-y-1">
-              <p className="text-[10px] font-display font-bold text-admin-text-tertiary uppercase tracking-[0.2em] group-hover:text-epoch-primary transition-colors">
+              <p className="text-[10px] font-display font-bold text-admin-text-tertiary uppercase tracking-[0.2em] ">
                 REGISTRO GLOBAL
               </p>
               <p className="text-2xl font-display font-bold text-admin-text-primary tracking-tight">
@@ -54,16 +54,16 @@ export default function ProductStats({
                 Ítems en archivo
               </p>
             </div>
-            <Package className="h-5 w-5 text-epoch-accent/40 group-hover:text-epoch-primary transition-colors" />
+            <Package className="h-5 w-5 text-epoch-accent/40 " />
           </div>
         </CardContent>
       </Card>
 
-      <Card className="border-none bg-admin-bg-tertiary/50 rounded-none shadow-none hover:bg-admin-bg-secondary transition-all duration-500 group overflow-hidden border-r border-admin-border-primary/10">
+      <Card className="border-none bg-admin-bg-tertiary/50 rounded-none shadow-none hover:shadow-lg transition-shadow duration-300 group overflow-hidden border-r border-admin-border-primary/10">
         <CardContent className="p-8 relative">
           <div className="flex items-start justify-between">
             <div className="space-y-1">
-              <p className="text-[10px] font-display font-bold text-admin-text-tertiary uppercase tracking-[0.2em] group-hover:text-admin-success transition-colors">
+              <p className="text-[10px] font-display font-bold text-admin-text-tertiary uppercase tracking-[0.2em] ">
                 ESTADO ACTIVO
               </p>
               <p className="text-2xl font-display font-bold text-admin-text-primary tracking-tight">
@@ -73,16 +73,16 @@ export default function ProductStats({
                 Disponibilidad inmediata
               </p>
             </div>
-            <TrendingUp className="h-5 w-5 text-admin-success/40 group-hover:text-admin-success transition-colors" />
+            <TrendingUp className="h-5 w-5 text-admin-success/40 " />
           </div>
         </CardContent>
       </Card>
 
-      <Card className="border-none bg-admin-bg-tertiary/50 rounded-none shadow-none hover:bg-admin-bg-secondary transition-all duration-500 group overflow-hidden">
+      <Card className="border-none bg-admin-bg-tertiary/50 rounded-none shadow-none hover:shadow-lg transition-shadow duration-300 group overflow-hidden">
         <CardContent className="p-8 relative">
           <div className="flex items-start justify-between">
             <div className="space-y-1">
-              <p className="text-[10px] font-display font-bold text-admin-text-tertiary uppercase tracking-[0.2em] group-hover:text-admin-error transition-colors">
+              <p className="text-[10px] font-display font-bold text-admin-text-tertiary uppercase tracking-[0.2em] ">
                 ALERTA DE STOCK
               </p>
               <p className="text-2xl font-display font-bold text-admin-text-primary tracking-tight">
@@ -92,7 +92,7 @@ export default function ProductStats({
                 Reposición requerida
               </p>
             </div>
-            <AlertTriangle className="h-5 w-5 text-admin-error/30 group-hover:text-admin-error transition-colors" />
+            <AlertTriangle className="h-5 w-5 text-admin-error/30 " />
           </div>
         </CardContent>
       </Card>

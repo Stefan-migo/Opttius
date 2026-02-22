@@ -337,132 +337,134 @@ export default function CustomersPage() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Cliente</TableHead>
-                <TableHead>Contacto</TableHead>
-                <TableHead>RUT</TableHead>
-                <TableHead>Estado</TableHead>
-                <TableHead>Registro</TableHead>
-                <TableHead>Acciones</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {customers.length === 0 && !loading ? (
+          <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0">
+            <Table>
+              <TableHeader>
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-12">
-                    <Users className="h-12 w-12 text-admin-text-tertiary mx-auto mb-4" />
-                    <h3 className="text-lg font-semibold text-admin-text-primary mb-2">
-                      No se encontraron clientes
-                    </h3>
-                    <p className="text-admin-text-tertiary">
-                      Ajusta los filtros o agrega nuevos clientes.
-                    </p>
-                  </TableCell>
+                  <TableHead>Cliente</TableHead>
+                  <TableHead>Contacto</TableHead>
+                  <TableHead>RUT</TableHead>
+                  <TableHead>Estado</TableHead>
+                  <TableHead>Registro</TableHead>
+                  <TableHead>Acciones</TableHead>
                 </TableRow>
-              ) : (
-                customers.map((customer) => (
-                  <TableRow
-                    key={customer.id}
-                    className="hover:bg-[#AE000025] transition-colors"
-                  >
-                    <TableCell>
-                      <div>
-                        <div className="font-medium">
-                          {customer.first_name && customer.last_name
-                            ? `${customer.first_name} ${customer.last_name}`
-                            : customer.first_name ||
-                              customer.last_name ||
-                              "Sin nombre"}
-                        </div>
-                        {customer.email && (
-                          <div className="text-sm text-admin-text-tertiary">
-                            {customer.email}
-                          </div>
-                        )}
-                      </div>
-                    </TableCell>
-
-                    <TableCell>
-                      <div className="space-y-1">
-                        {customer.email && (
-                          <div className="flex items-center text-sm">
-                            <Mail className="h-3 w-3 mr-1 text-admin-text-tertiary" />
-                            <span className="text-admin-text-tertiary">
-                              {customer.email}
-                            </span>
-                          </div>
-                        )}
-                        {customer.phone && (
-                          <div className="flex items-center text-sm">
-                            <Phone className="h-3 w-3 mr-1 text-admin-text-tertiary" />
-                            <span className="text-admin-text-tertiary">
-                              {customer.phone}
-                            </span>
-                          </div>
-                        )}
-                        {!customer.email && !customer.phone && (
-                          <span className="text-xs text-admin-text-tertiary">
-                            Sin contacto
-                          </span>
-                        )}
-                      </div>
-                    </TableCell>
-
-                    <TableCell>
-                      {customer.rut ? (
-                        <span className="text-sm">{customer.rut}</span>
-                      ) : (
-                        <span className="text-xs text-admin-text-tertiary">
-                          -
-                        </span>
-                      )}
-                    </TableCell>
-
-                    <TableCell>
-                      {customer.is_active !== false ? (
-                        <Badge
-                          variant="default"
-                          className="bg-admin-success text-white"
-                          style={{ color: "var(--admin-accent-secondary)" }}
-                        >
-                          <CheckCircle className="h-3 w-3 mr-1" />
-                          Activo
-                        </Badge>
-                      ) : (
-                        <Badge variant="secondary">
-                          <AlertTriangle className="h-3 w-3 mr-1" />
-                          Inactivo
-                        </Badge>
-                      )}
-                    </TableCell>
-
-                    <TableCell className="text-sm text-admin-text-tertiary">
-                      {new Date(customer.created_at).toLocaleDateString(
-                        "es-AR",
-                      )}
-                    </TableCell>
-
-                    <TableCell>
-                      <div className="flex space-x-2">
-                        <Link href={`/admin/customers/${customer.id}`}>
-                          <Button variant="outline" size="sm">
-                            <Eye className="h-3 w-3" />
-                          </Button>
-                        </Link>
-                        <Link href={`/admin/customers/${customer.id}/edit`}>
-                          <Button variant="outline" size="sm">
-                            <Edit className="h-3 w-3" />
-                          </Button>
-                        </Link>
-                      </div>
+              </TableHeader>
+              <TableBody>
+                {customers.length === 0 && !loading ? (
+                  <TableRow>
+                    <TableCell colSpan={6} className="text-center py-12">
+                      <Users className="h-12 w-12 text-admin-text-tertiary mx-auto mb-4" />
+                      <h3 className="text-lg font-semibold text-admin-text-primary mb-2">
+                        No se encontraron clientes
+                      </h3>
+                      <p className="text-admin-text-tertiary">
+                        Ajusta los filtros o agrega nuevos clientes.
+                      </p>
                     </TableCell>
                   </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
+                ) : (
+                  customers.map((customer) => (
+                    <TableRow
+                      key={customer.id}
+                      className="hover:bg-[#AE000025] transition-colors"
+                    >
+                      <TableCell>
+                        <div>
+                          <div className="font-medium">
+                            {customer.first_name && customer.last_name
+                              ? `${customer.first_name} ${customer.last_name}`
+                              : customer.first_name ||
+                                customer.last_name ||
+                                "Sin nombre"}
+                          </div>
+                          {customer.email && (
+                            <div className="text-sm text-admin-text-tertiary">
+                              {customer.email}
+                            </div>
+                          )}
+                        </div>
+                      </TableCell>
+
+                      <TableCell>
+                        <div className="space-y-1">
+                          {customer.email && (
+                            <div className="flex items-center text-sm">
+                              <Mail className="h-3 w-3 mr-1 text-admin-text-tertiary" />
+                              <span className="text-admin-text-tertiary">
+                                {customer.email}
+                              </span>
+                            </div>
+                          )}
+                          {customer.phone && (
+                            <div className="flex items-center text-sm">
+                              <Phone className="h-3 w-3 mr-1 text-admin-text-tertiary" />
+                              <span className="text-admin-text-tertiary">
+                                {customer.phone}
+                              </span>
+                            </div>
+                          )}
+                          {!customer.email && !customer.phone && (
+                            <span className="text-xs text-admin-text-tertiary">
+                              Sin contacto
+                            </span>
+                          )}
+                        </div>
+                      </TableCell>
+
+                      <TableCell>
+                        {customer.rut ? (
+                          <span className="text-sm">{customer.rut}</span>
+                        ) : (
+                          <span className="text-xs text-admin-text-tertiary">
+                            -
+                          </span>
+                        )}
+                      </TableCell>
+
+                      <TableCell>
+                        {customer.is_active !== false ? (
+                          <Badge
+                            variant="default"
+                            className="bg-admin-success text-white"
+                            style={{ color: "var(--admin-accent-secondary)" }}
+                          >
+                            <CheckCircle className="h-3 w-3 mr-1" />
+                            Activo
+                          </Badge>
+                        ) : (
+                          <Badge variant="secondary">
+                            <AlertTriangle className="h-3 w-3 mr-1" />
+                            Inactivo
+                          </Badge>
+                        )}
+                      </TableCell>
+
+                      <TableCell className="text-sm text-admin-text-tertiary">
+                        {new Date(customer.created_at).toLocaleDateString(
+                          "es-AR",
+                        )}
+                      </TableCell>
+
+                      <TableCell>
+                        <div className="flex space-x-2">
+                          <Link href={`/admin/customers/${customer.id}`}>
+                            <Button variant="outline" size="sm">
+                              <Eye className="h-3 w-3" />
+                            </Button>
+                          </Link>
+                          <Link href={`/admin/customers/${customer.id}/edit`}>
+                            <Button variant="outline" size="sm">
+                              <Edit className="h-3 w-3" />
+                            </Button>
+                          </Link>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
 
           {/* Pagination */}
           {totalPages > 1 && (

@@ -802,7 +802,7 @@ export default function OpticalInternalSupportTicketDetailPage() {
 
         {/* Update Ticket Dialog */}
         <Dialog open={showUpdateDialog} onOpenChange={setShowUpdateDialog}>
-          <DialogContent className="max-w-2xl rounded-none">
+          <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-2xl rounded-none">
             <DialogHeader>
               <DialogTitle>Actualizar Ticket</DialogTitle>
               <DialogDescription>

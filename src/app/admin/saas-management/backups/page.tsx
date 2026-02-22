@@ -182,7 +182,7 @@ export default function SaasBackupsPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Panel de Estadísticas/Estado */}
-        <Card className="admin-card rounded-none lg:col-span-1">
+        <Card className="rounded-none border border-border lg:col-span-1">
           <CardHeader>
             <CardTitle className="text-lg">Estado de Seguridad</CardTitle>
           </CardHeader>
@@ -227,7 +227,7 @@ export default function SaasBackupsPage() {
         </Card>
 
         {/* Lista de Backups */}
-        <Card className="admin-card rounded-none lg:col-span-2">
+        <Card className="rounded-none border border-border lg:col-span-2">
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
               <FileText className="h-5 w-5" />

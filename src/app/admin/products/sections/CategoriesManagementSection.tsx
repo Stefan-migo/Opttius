@@ -138,7 +138,7 @@ export default function CategoriesManagementSection() {
   return (
     <>
       {/* Categories Management */}
-      <Card className="border border-admin-border-primary/20 bg-white rounded-none shadow-none overflow-hidden mb-8">
+      <Card className="border border-admin-border-primary/20 bg-admin-bg-tertiary rounded-none shadow-none overflow-hidden mb-8">
         <CardHeader className="bg-admin-bg-tertiary/50 border-b border-admin-border-primary/10 py-6">
           <div className="flex justify-between items-center">
             <div className="flex flex-col gap-1">
@@ -164,7 +164,7 @@ export default function CategoriesManagementSection() {
               {[...Array(6)].map((_, i) => (
                 <Card
                   key={i}
-                  className="bg-white border border-admin-border-primary/10 rounded-none shadow-none"
+                  className="bg-admin-bg-tertiary border border-admin-border-primary/10 rounded-none shadow-none"
                 >
                   <CardHeader className="p-6 pb-2">
                     <div className="flex items-start justify-between">
@@ -207,15 +207,15 @@ export default function CategoriesManagementSection() {
               {categories.map((category) => (
                 <Card
                   key={category.id}
-                  className="bg-white border border-admin-border-primary/10 rounded-none shadow-none group hover:border-epoch-primary/30 transition-all duration-300"
+                  className="bg-admin-bg-tertiary border border-admin-border-primary/10 rounded-none shadow-none group hover:shadow-lg transition-shadow duration-300"
                 >
                   <CardHeader className="p-6 pb-2">
                     <div className="flex items-start justify-between">
                       <div className="flex-1 space-y-1">
-                        <h4 className="text-base font-display font-bold text-admin-text-primary uppercase tracking-tight group-hover:text-epoch-primary transition-colors">
+                        <h4 className="text-base font-display font-bold text-admin-text-primary uppercase tracking-tight">
                           {category.name}
                         </h4>
-                        <p className="text-[9px] font-display font-bold text-admin-text-tertiary uppercase tracking-[0.2em] bg-admin-bg-tertiary px-2 py-0.5 inline-block border border-admin-border-primary/5">
+                        <p className="text-[9px] font-display font-bold text-admin-text-tertiary uppercase tracking-[0.2em] bg-admin-border-primary/5 px-2 py-0.5 inline-block border border-admin-border-primary/10">
                           ID: {category.slug}
                         </p>
                       </div>
@@ -259,7 +259,7 @@ export default function CategoriesManagementSection() {
 
       {/* Category Create/Edit Dialog */}
       <Dialog open={categoryDialogOpen} onOpenChange={setCategoryDialogOpen}>
-        <DialogContent className="sm:max-w-[450px] p-0 rounded-none border-2 border-admin-border-primary/20 bg-white">
+        <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-[450px] p-0 rounded-none border-2 border-admin-border-primary/20 bg-white">
           <DialogHeader className="p-8 pb-4 bg-admin-bg-tertiary/50 border-b border-admin-border-primary/10">
             <DialogTitle className="text-xl font-display font-bold text-admin-text-primary uppercase tracking-[0.2em]">
               {editingCategory ? "EDITAR REGISTRO" : "NUEVA CLASIFICACIÓN"}

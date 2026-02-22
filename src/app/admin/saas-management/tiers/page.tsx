@@ -187,7 +187,7 @@ export default function TiersPage() {
           {tiers.map((tier) => (
             <Card
               key={tier.id}
-              className={`admin-card rounded-none ${getTierColor(tier.name)}`}
+              className={`rounded-none border border-border ${getTierColor(tier.name)}`}
             >
               <CardHeader>
                 <div className="flex items-center justify-between">
@@ -296,7 +296,7 @@ export default function TiersPage() {
 
       {/* Dialog de edición */}
       <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-2xl">
           <DialogHeader>
             <DialogTitle>
               Editar Tier:{" "}

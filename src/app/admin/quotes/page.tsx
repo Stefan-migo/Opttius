@@ -299,225 +299,230 @@ export default function QuotesPage() {
             </div>
           ) : (
             <>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Número</TableHead>
-                    <TableHead>Cliente</TableHead>
-                    <TableHead>Marco</TableHead>
-                    <TableHead>Lente</TableHead>
-                    <TableHead>Total</TableHead>
-                    <TableHead>Estado</TableHead>
-                    <TableHead>Convertido</TableHead>
-                    <TableHead>Fecha</TableHead>
-                    <TableHead>Acciones</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredQuotes.map((quote) => (
-                    <TableRow key={quote.id}>
-                      <TableCell className="font-medium">
-                        {quote.quote_number}
-                      </TableCell>
-                      <TableCell>
-                        <div>
-                          <div className="font-medium">
-                            {quote.customer?.first_name || ""}{" "}
-                            {quote.customer?.last_name || ""}
-                          </div>
-                          <div className="text-sm text-admin-text-tertiary">
-                            {quote.customer?.email}
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell>{quote.frame_name || "-"}</TableCell>
-                      <TableCell>
-                        <div>
-                          <div className="font-medium">
-                            {quote.lens_type || "-"}
-                          </div>
-                          <div className="text-sm text-admin-text-tertiary">
-                            {quote.lens_material || ""}
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell className="font-semibold text-admin-success">
-                        {formatCurrency(quote.total_amount)}
-                      </TableCell>
-                      <TableCell>
-                        {(() => {
-                          const isConverted =
-                            quote.status === "accepted" &&
-                            !!quote.converted_to_work_order_id;
-                          // Always show the current status (which should be 'accepted' when converted)
-                          const displayStatus = quote.status;
-
-                          return (
-                            <Select
-                              value={displayStatus}
-                              disabled={isConverted}
-                              onValueChange={async (value) => {
-                                const newStatus = value as
-                                  | "draft"
-                                  | "sent"
-                                  | "accepted"
-                                  | "rejected"
-                                  | "expired"
-                                  | "converted_to_work";
-                                if (isConverted) {
-                                  toast.error(
-                                    "No se puede cambiar el estado de un presupuesto convertido",
-                                  );
-                                  return;
-                                }
-
-                                try {
-                                  await quoteService.updateQuote(quote.id, {
-                                    status:
-                                      newStatus as UpdateQuoteData["status"],
-                                  });
-
-                                  // Update local state
-                                  setQuotes((prev) =>
-                                    prev.map((q) =>
-                                      q.id === quote.id
-                                        ? {
-                                            ...q,
-                                            status:
-                                              newStatus as Quote["status"],
-                                          }
-                                        : q,
-                                    ),
-                                  );
-                                  toast.success("Estado actualizado");
-                                } catch (error) {
-                                  console.error(
-                                    "Error updating status:",
-                                    error,
-                                  );
-                                  const errorMessage =
-                                    error instanceof Error
-                                      ? error.message
-                                      : "Error al actualizar estado";
-                                  toast.error(errorMessage);
-                                }
-                              }}
-                            >
-                              <SelectTrigger className="w-auto border-0 p-0 h-auto bg-transparent hover:bg-transparent focus:ring-0 focus:ring-offset-0 shadow-none [&>svg]:hidden [&_svg]:hidden [&_[data-radix-select-icon]]:hidden">
-                                <SelectValue asChild>
-                                  <div
-                                    className={`cursor-pointer ${isConverted ? "cursor-not-allowed opacity-75" : ""}`}
-                                  >
-                                    {getStatusBadge(displayStatus, isConverted)}
-                                  </div>
-                                </SelectValue>
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="draft">
-                                  <div className="flex items-center gap-2">
-                                    <FileText className="h-3 w-3" />
-                                    Borrador
-                                  </div>
-                                </SelectItem>
-                                <SelectItem value="sent">
-                                  <div className="flex items-center gap-2">
-                                    <Send className="h-3 w-3" />
-                                    Enviado
-                                  </div>
-                                </SelectItem>
-                                <SelectItem value="accepted">
-                                  <div className="flex items-center gap-2">
-                                    <CheckCircle className="h-3 w-3" />
-                                    Aceptado
-                                  </div>
-                                </SelectItem>
-                                <SelectItem value="rejected">
-                                  <div className="flex items-center gap-2">
-                                    <XCircle className="h-3 w-3" />
-                                    Rechazado
-                                  </div>
-                                </SelectItem>
-                                <SelectItem value="expired">
-                                  <div className="flex items-center gap-2">
-                                    <Clock className="h-3 w-3" />
-                                    Expirado
-                                  </div>
-                                </SelectItem>
-                              </SelectContent>
-                            </Select>
-                          );
-                        })()}
-                      </TableCell>
-                      <TableCell>
-                        {quote.converted_to_work_order_id ? (
-                          <Badge
-                            variant="default"
-                            className="flex items-center gap-1 bg-green-600"
-                          >
-                            <RefreshCw className="h-3 w-3" />
-                            Convertido
-                          </Badge>
-                        ) : (
-                          <span className="text-admin-text-tertiary text-sm">
-                            -
-                          </span>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        <div>
-                          <div>{formatDate(quote.quote_date)}</div>
-                          {quote.expiration_date && (
-                            <div
-                              className={`text-xs ${
-                                new Date(quote.expiration_date) < new Date()
-                                  ? "text-red-500"
-                                  : "text-admin-text-tertiary"
-                              }`}
-                            >
-                              Exp: {formatDate(quote.expiration_date)}
-                            </div>
-                          )}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <Link href={`/admin/quotes/${quote.id}`}>
-                            <Button variant="outline" size="sm">
-                              <Eye className="h-4 w-4 mr-1" />
-                              Ver
-                            </Button>
-                          </Link>
-                          {quote.status !== "accepted" &&
-                            !quote.converted_to_work_order_id && (
-                              <Link href={`/admin/pos?quoteId=${quote.id}`}>
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  className="text-green-600 hover:text-green-700 hover:bg-green-50"
-                                >
-                                  <ShoppingCart className="h-4 w-4 mr-1" />
-                                  Cargar al POS
-                                </Button>
-                              </Link>
-                            )}
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleDeleteClick(quote.id)}
-                            disabled={
-                              quote.status === "accepted" ||
-                              !!quote.converted_to_work_order_id
-                            }
-                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
+              <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Número</TableHead>
+                      <TableHead>Cliente</TableHead>
+                      <TableHead>Marco</TableHead>
+                      <TableHead>Lente</TableHead>
+                      <TableHead>Total</TableHead>
+                      <TableHead>Estado</TableHead>
+                      <TableHead>Convertido</TableHead>
+                      <TableHead>Fecha</TableHead>
+                      <TableHead>Acciones</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredQuotes.map((quote) => (
+                      <TableRow key={quote.id}>
+                        <TableCell className="font-medium">
+                          {quote.quote_number}
+                        </TableCell>
+                        <TableCell>
+                          <div>
+                            <div className="font-medium">
+                              {quote.customer?.first_name || ""}{" "}
+                              {quote.customer?.last_name || ""}
+                            </div>
+                            <div className="text-sm text-admin-text-tertiary">
+                              {quote.customer?.email}
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell>{quote.frame_name || "-"}</TableCell>
+                        <TableCell>
+                          <div>
+                            <div className="font-medium">
+                              {quote.lens_type || "-"}
+                            </div>
+                            <div className="text-sm text-admin-text-tertiary">
+                              {quote.lens_material || ""}
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell className="font-semibold text-admin-success">
+                          {formatCurrency(quote.total_amount)}
+                        </TableCell>
+                        <TableCell>
+                          {(() => {
+                            const isConverted =
+                              quote.status === "accepted" &&
+                              !!quote.converted_to_work_order_id;
+                            // Always show the current status (which should be 'accepted' when converted)
+                            const displayStatus = quote.status;
+
+                            return (
+                              <Select
+                                value={displayStatus}
+                                disabled={isConverted}
+                                onValueChange={async (value) => {
+                                  const newStatus = value as
+                                    | "draft"
+                                    | "sent"
+                                    | "accepted"
+                                    | "rejected"
+                                    | "expired"
+                                    | "converted_to_work";
+                                  if (isConverted) {
+                                    toast.error(
+                                      "No se puede cambiar el estado de un presupuesto convertido",
+                                    );
+                                    return;
+                                  }
+
+                                  try {
+                                    await quoteService.updateQuote(quote.id, {
+                                      status:
+                                        newStatus as UpdateQuoteData["status"],
+                                    });
+
+                                    // Update local state
+                                    setQuotes((prev) =>
+                                      prev.map((q) =>
+                                        q.id === quote.id
+                                          ? {
+                                              ...q,
+                                              status:
+                                                newStatus as Quote["status"],
+                                            }
+                                          : q,
+                                      ),
+                                    );
+                                    toast.success("Estado actualizado");
+                                  } catch (error) {
+                                    console.error(
+                                      "Error updating status:",
+                                      error,
+                                    );
+                                    const errorMessage =
+                                      error instanceof Error
+                                        ? error.message
+                                        : "Error al actualizar estado";
+                                    toast.error(errorMessage);
+                                  }
+                                }}
+                              >
+                                <SelectTrigger className="w-auto border-0 p-0 h-auto bg-transparent hover:bg-transparent focus:ring-0 focus:ring-offset-0 shadow-none [&>svg]:hidden [&_svg]:hidden [&_[data-radix-select-icon]]:hidden">
+                                  <SelectValue asChild>
+                                    <div
+                                      className={`cursor-pointer ${isConverted ? "cursor-not-allowed opacity-75" : ""}`}
+                                    >
+                                      {getStatusBadge(
+                                        displayStatus,
+                                        isConverted,
+                                      )}
+                                    </div>
+                                  </SelectValue>
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="draft">
+                                    <div className="flex items-center gap-2">
+                                      <FileText className="h-3 w-3" />
+                                      Borrador
+                                    </div>
+                                  </SelectItem>
+                                  <SelectItem value="sent">
+                                    <div className="flex items-center gap-2">
+                                      <Send className="h-3 w-3" />
+                                      Enviado
+                                    </div>
+                                  </SelectItem>
+                                  <SelectItem value="accepted">
+                                    <div className="flex items-center gap-2">
+                                      <CheckCircle className="h-3 w-3" />
+                                      Aceptado
+                                    </div>
+                                  </SelectItem>
+                                  <SelectItem value="rejected">
+                                    <div className="flex items-center gap-2">
+                                      <XCircle className="h-3 w-3" />
+                                      Rechazado
+                                    </div>
+                                  </SelectItem>
+                                  <SelectItem value="expired">
+                                    <div className="flex items-center gap-2">
+                                      <Clock className="h-3 w-3" />
+                                      Expirado
+                                    </div>
+                                  </SelectItem>
+                                </SelectContent>
+                              </Select>
+                            );
+                          })()}
+                        </TableCell>
+                        <TableCell>
+                          {quote.converted_to_work_order_id ? (
+                            <Badge
+                              variant="default"
+                              className="flex items-center gap-1 bg-green-600"
+                            >
+                              <RefreshCw className="h-3 w-3" />
+                              Convertido
+                            </Badge>
+                          ) : (
+                            <span className="text-admin-text-tertiary text-sm">
+                              -
+                            </span>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          <div>
+                            <div>{formatDate(quote.quote_date)}</div>
+                            {quote.expiration_date && (
+                              <div
+                                className={`text-xs ${
+                                  new Date(quote.expiration_date) < new Date()
+                                    ? "text-red-500"
+                                    : "text-admin-text-tertiary"
+                                }`}
+                              >
+                                Exp: {formatDate(quote.expiration_date)}
+                              </div>
+                            )}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <Link href={`/admin/quotes/${quote.id}`}>
+                              <Button variant="outline" size="sm">
+                                <Eye className="h-4 w-4 mr-1" />
+                                Ver
+                              </Button>
+                            </Link>
+                            {quote.status !== "accepted" &&
+                              !quote.converted_to_work_order_id && (
+                                <Link href={`/admin/pos?quoteId=${quote.id}`}>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="text-green-600 hover:text-green-700 hover:bg-green-50"
+                                  >
+                                    <ShoppingCart className="h-4 w-4 mr-1" />
+                                    Cargar al POS
+                                  </Button>
+                                </Link>
+                              )}
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleDeleteClick(quote.id)}
+                              disabled={
+                                quote.status === "accepted" ||
+                                !!quote.converted_to_work_order_id
+                              }
+                              className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
 
               {/* Pagination */}
               {totalPages > 1 && (
@@ -554,7 +559,7 @@ export default function QuotesPage() {
 
       {/* Create Quote Dialog */}
       <Dialog open={showCreateQuote} onOpenChange={setShowCreateQuote}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Nuevo Presupuesto</DialogTitle>
             <DialogDescription>

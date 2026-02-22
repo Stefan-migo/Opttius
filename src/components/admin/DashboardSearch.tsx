@@ -80,7 +80,9 @@ export function DashboardSearch({ type, placeholder }: DashboardSearchProps) {
               name: p.name,
               type: "product" as const,
               subtitle:
-                p.sku || p.barcode || `Stock: ${p.inventory_quantity || 0}`,
+                p.sku ||
+                p.barcode ||
+                `Stock: ${p.available_quantity ?? p.inventory_quantity ?? 0}`,
             })),
           );
         }
@@ -122,7 +124,7 @@ export function DashboardSearch({ type, placeholder }: DashboardSearchProps) {
       </Button>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="sm:max-w-[500px]">
+        <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-[500px]">
           <DialogHeader>
             <DialogTitle>
               {type === "customer" ? "Buscar Cliente" : "Buscar Producto"}

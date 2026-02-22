@@ -383,7 +383,7 @@ export default function OpticalInternalSupportPage() {
 
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card className="admin-card rounded-none">
+        <Card className="rounded-none border border-border">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
@@ -398,7 +398,7 @@ export default function OpticalInternalSupportPage() {
             </div>
           </CardContent>
         </Card>
-        <Card className="admin-card rounded-none">
+        <Card className="rounded-none border border-border">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
@@ -413,7 +413,7 @@ export default function OpticalInternalSupportPage() {
             </div>
           </CardContent>
         </Card>
-        <Card className="admin-card rounded-none">
+        <Card className="rounded-none border border-border">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
@@ -428,7 +428,7 @@ export default function OpticalInternalSupportPage() {
             </div>
           </CardContent>
         </Card>
-        <Card className="admin-card rounded-none">
+        <Card className="rounded-none border border-border">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
@@ -726,7 +726,7 @@ export default function OpticalInternalSupportPage() {
 
       {/* Create Ticket Dialog */}
       <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Registrar Incidente</DialogTitle>
             <DialogDescription>

@@ -7,7 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Mail, Info } from "lucide-react";
+import { Mail, Info, AlertCircle } from "lucide-react";
 
 const AUTOMATIC_EMAILS = [
   {
@@ -29,40 +29,44 @@ const AUTOMATIC_EMAILS = [
     routes: "appointments/route",
   },
   {
-    name: "Trabajo listo para retiro",
+    name: "Lentes listo para retiro",
     trigger: "Cuando el trabajo cambia a estado 'Listo para retiro'",
     template: "work_order_ready",
     routes: "work-orders/[id]/status",
   },
   {
-    name: "Envío de pedido",
-    trigger: "Cuando el estado del pedido cambia a 'Enviado'",
-    template: "shipping_notification",
-    routes: "orders/[id]/route",
-  },
-  {
-    name: "Confirmación de entrega",
-    trigger: "Cuando el estado del pedido cambia a 'Entregado'",
-    template: "delivery_confirmation",
-    routes: "orders/[id]/route",
-  },
-];
-
-const AVAILABLE_NOT_INTEGRATED = [
-  {
     name: "Recordatorio de cita",
+    trigger: "Cron diario: 24h antes de la cita",
     template: "appointment_reminder",
-    note: "Requiere cron/scheduled job",
+    routes: "cron/appointment-reminders",
+    note: "Pendiente de cron",
   },
   {
     name: "Presupuesto por expirar",
+    trigger: "Cron diario: presupuestos que expiran en 24-48h",
     template: "quote_expiring",
-    note: "Requiere cron/scheduled job",
+    routes: "cron/quote-expiring",
+    note: "Pendiente de cron",
   },
   {
     name: "Bienvenida de cuenta",
+    trigger: "Cuando se crea un nuevo cliente con email",
     template: "account_welcome",
-    note: "Disponible para integración en registro de clientes",
+    routes: "customers/route",
+    note: "Pendiente de integración",
+  },
+];
+
+const BLOCKED_EMAILS = [
+  {
+    name: "Envío de pedido",
+    template: "order_shipped",
+    reason: "Bloqueado - funcionalidad de envío no implementada",
+  },
+  {
+    name: "Confirmación de entrega",
+    template: "order_delivered",
+    reason: "Bloqueado - funcionalidad de envío no implementada",
   },
 ];
 
@@ -76,7 +80,7 @@ export default function AutomaticEmailsInfo() {
         </CardTitle>
         <CardDescription>
           Lista de correos que se envían automáticamente a los clientes según
-          eventos del sistema. Las plantillas se gestionan más abajo.
+          eventos del sistema. Las plantillas se gestionan arriba.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -97,6 +101,11 @@ export default function AutomaticEmailsInfo() {
                   <p className="text-xs text-admin-text-tertiary mt-0.5">
                     {email.trigger}
                   </p>
+                  {email.note && (
+                    <p className="text-xs text-amber-600 mt-1 italic">
+                      {email.note}
+                    </p>
+                  )}
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-[10px] font-mono text-admin-text-tertiary bg-admin-bg-secondary px-2 py-1 rounded">
@@ -110,22 +119,24 @@ export default function AutomaticEmailsInfo() {
 
         <div className="pt-4 border-t border-admin-border-primary/30">
           <h4 className="text-sm font-semibold text-admin-text-secondary mb-2 flex items-center gap-2">
-            <Info className="h-4 w-4 text-admin-info" />
-            Plantillas disponibles (no integradas en flujos automáticos)
+            <AlertCircle className="h-4 w-4 text-amber-600" />
+            Emails bloqueados temporalmente
           </h4>
           <p className="text-xs text-admin-text-tertiary mb-3">
-            Estas plantillas existen pero requieren un cron o integración manual
-            para enviarse.
+            Estas plantillas están deshabilitadas hasta que se implemente el
+            flujo de envío de pedidos.
           </p>
           <div className="space-y-2">
-            {AVAILABLE_NOT_INTEGRATED.map((item, idx) => (
+            {BLOCKED_EMAILS.map((item, idx) => (
               <div
                 key={idx}
-                className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 p-2 rounded bg-admin-bg-tertiary/30 text-admin-text-tertiary"
+                className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 p-2 rounded bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/50 text-admin-text-tertiary"
               >
                 <span className="text-sm">{item.name}</span>
                 <span className="text-[10px] font-mono">{item.template}</span>
-                <span className="text-[10px] italic">{item.note}</span>
+                <span className="text-[10px] italic text-amber-700 dark:text-amber-400">
+                  {item.reason}
+                </span>
               </div>
             ))}
           </div>

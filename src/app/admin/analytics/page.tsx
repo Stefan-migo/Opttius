@@ -1247,40 +1247,42 @@ export default function AnalyticsPage() {
               </CardHeader>
               <CardContent>
                 {analytics.products.topProducts.length > 0 ? (
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Producto</TableHead>
-                        <TableHead>Ingresos</TableHead>
-                        <TableHead>Cantidad</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {analytics.products.topProducts
-                        .slice(0, 8)
-                        .map((product) => (
-                          <TableRow key={product.id}>
-                            <TableCell>
-                              <div>
-                                <div
-                                  className="font-medium truncate max-w-[150px]"
-                                  title={product.name}
-                                >
-                                  {product.name}
+                  <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Producto</TableHead>
+                          <TableHead>Ingresos</TableHead>
+                          <TableHead>Cantidad</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {analytics.products.topProducts
+                          .slice(0, 8)
+                          .map((product) => (
+                            <TableRow key={product.id}>
+                              <TableCell>
+                                <div>
+                                  <div
+                                    className="font-medium truncate max-w-[150px]"
+                                    title={product.name}
+                                  >
+                                    {product.name}
+                                  </div>
+                                  <div className="text-sm text-admin-text-tertiary">
+                                    {product.category}
+                                  </div>
                                 </div>
-                                <div className="text-sm text-admin-text-tertiary">
-                                  {product.category}
-                                </div>
-                              </div>
-                            </TableCell>
-                            <TableCell className="font-medium text-admin-success">
-                              {formatPrice(product.revenue)}
-                            </TableCell>
-                            <TableCell>{product.quantity} unidades</TableCell>
-                          </TableRow>
-                        ))}
-                    </TableBody>
-                  </Table>
+                              </TableCell>
+                              <TableCell className="font-medium text-admin-success">
+                                {formatPrice(product.revenue)}
+                              </TableCell>
+                              <TableCell>{product.quantity} unidades</TableCell>
+                            </TableRow>
+                          ))}
+                      </TableBody>
+                    </Table>
+                  </div>
                 ) : (
                   <div className="text-center py-8 text-admin-text-tertiary">
                     No hay productos vendidos en este período

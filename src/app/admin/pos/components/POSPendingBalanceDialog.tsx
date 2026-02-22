@@ -104,7 +104,7 @@ export function POSPendingBalanceDialog({
         }
       }}
     >
-      <DialogContent className="max-w-3xl rounded-none border-admin-border-primary">
+      <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-3xl rounded-none border-admin-border-primary">
         <DialogHeader>
           <DialogTitle className="font-display">
             Cobrar Saldos Pendientes

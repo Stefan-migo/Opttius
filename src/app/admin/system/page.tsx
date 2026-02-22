@@ -525,8 +525,8 @@ export default function SystemAdministrationPage() {
         </TabsContent>
 
         <TabsContent value="email" className="space-y-6">
+          <EmailTemplatesManager organizationId={organizationId ?? undefined} />
           <AutomaticEmailsInfo />
-          <EmailTemplatesManager />
         </TabsContent>
 
         <TabsContent value="notifications" className="space-y-6">
@@ -596,7 +596,7 @@ export default function SystemAdministrationPage() {
         open={showSecurityAuditDialog}
         onOpenChange={setShowSecurityAuditDialog}
       >
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-2xl">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Shield className="h-5 w-5" />
@@ -666,7 +666,7 @@ export default function SystemAdministrationPage() {
         open={showSystemStatusDialog}
         onOpenChange={setShowSystemStatusDialog}
       >
-        <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+        <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-3xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Monitor className="h-5 w-5" />
@@ -838,7 +838,7 @@ export default function SystemAdministrationPage() {
 
       {/* Backup Results Dialog */}
       <Dialog open={showBackupDialog} onOpenChange={setShowBackupDialog}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-2xl">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Database className="h-5 w-5" />
@@ -1012,7 +1012,7 @@ export default function SystemAdministrationPage() {
 
       {/* Restore Backup Confirmation Dialog */}
       <Dialog open={showRestoreDialog} onOpenChange={setShowRestoreDialog}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-2xl">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <AlertTriangle className="h-5 w-5 text-yellow-500" />
@@ -1132,7 +1132,7 @@ export default function SystemAdministrationPage() {
         open={showRestoreResultsDialog}
         onOpenChange={setShowRestoreResultsDialog}
       >
-        <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+        <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-3xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <CheckCircle className="h-5 w-5 text-green-600" />
@@ -1322,7 +1322,7 @@ export default function SystemAdministrationPage() {
         open={showDeleteBackupDialog}
         onOpenChange={setShowDeleteBackupDialog}
       >
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-lg">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <AlertTriangle className="h-5 w-5 text-red-500" />

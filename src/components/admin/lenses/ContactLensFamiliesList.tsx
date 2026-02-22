@@ -143,13 +143,14 @@ export default function ContactLensFamiliesList() {
         </div>
       </div>
 
-      <Card className="border border-admin-border-primary/20 bg-white rounded-none shadow-none overflow-hidden">
+      <Card className="border border-admin-border-primary/20 bg-admin-bg-tertiary rounded-none shadow-none overflow-hidden">
         <CardHeader className="bg-admin-bg-tertiary/50 border-b border-admin-border-primary/10 py-6">
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-2">
               <RefreshCw className="h-4 w-4 text-epoch-primary opacity-50" />
               <h3 className="text-[11px] font-display font-bold text-admin-text-primary uppercase tracking-[0.2em]">
-                HISTORIAL CLÍNICO DE CONTACTOLOGÍA ({filteredFamilies.length})
+                Registro de Familias de Lentes de Contacto (
+                {filteredFamilies.length})
               </h3>
             </div>
             <div className="flex gap-2">
@@ -247,7 +248,7 @@ export default function ContactLensFamiliesList() {
                   {paginatedFamilies.map((family) => (
                     <TableRow
                       key={family.id}
-                      className="border-admin-border-primary/10 hover:bg-admin-bg-tertiary/10 transition-colors"
+                      className="border-admin-border-primary/10 hover:bg-admin-bg-tertiary/50 transition-colors"
                     >
                       <TableCell className="p-6">
                         <div className="space-y-1">

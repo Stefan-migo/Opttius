@@ -31,30 +31,32 @@ export function HeroSection() {
         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10"></div>
       </div>
 
-      <div className="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 pb-72 text-center">
-        <div className="space-y-20 max-w-4xl mx-auto">
+      <div className="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 sm:pt-32 pb-48 sm:pb-72 text-center">
+        <div className="space-y-12 sm:space-y-20 max-w-4xl mx-auto">
           {/* Badge */}
-          <div className="inline-flex items-center gap-4 px-6 py-2 border border-epoch-accent/30 rounded-full text-epoch-accent text-[10px] font-display tracking-[0.4em] uppercase animate-in fade-in slide-in-from-bottom-4 duration-1000">
+          <div className="inline-flex items-center gap-2 sm:gap-4 px-4 sm:px-6 py-2 border border-epoch-accent/30 rounded-full text-epoch-accent text-[10px] font-display tracking-[0.4em] uppercase animate-in fade-in slide-in-from-bottom-4 duration-1000">
             <Sparkles className="h-3 w-3" />
-            <span>Creado por un tecnólogo médico. Exclusivo para ópticas.</span>
+            <span className="text-xs sm:text-[10px]">
+              Creado por un tecnólogo médico. Exclusivo para ópticas.
+            </span>
           </div>
 
           {/* Main Title */}
-          <div className="space-y-6">
-            <h1 className="text-5xl md:text-7xl lg:text-8xl font-display font-bold text-white leading-none tracking-tight animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-200">
+          <div className="space-y-4 sm:space-y-6">
+            <h1 className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-display font-bold text-white leading-none tracking-tight animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-200">
               GESTIÓN ÓPTICA DE
               <br />
               <span className="text-epoch-accent italic font-serif lowercase tracking-normal">
                 última generación
               </span>
             </h1>
-            <p className="font-serif italic text-xl md:text-2xl text-white/60 tracking-widest uppercase mt-4 animate-in fade-in slide-in-from-bottom-12 duration-1000 delay-400">
+            <p className="font-serif italic text-base sm:text-xl md:text-2xl text-white/60 tracking-widest uppercase mt-4 animate-in fade-in slide-in-from-bottom-12 duration-1000 delay-400">
               Recetas, presupuestos, laboratorio y agenda. En una sola
               plataforma. Sin adaptaciones.
             </p>
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-8 justify-center items-center animate-in fade-in slide-in-from-bottom-20 duration-1000 delay-600">
+          <div className="flex flex-col sm:flex-row gap-4 sm:gap-8 justify-center items-center animate-in fade-in slide-in-from-bottom-20 duration-1000 delay-600">
             <Button
               onClick={handleSignUpClick}
               size="lg"

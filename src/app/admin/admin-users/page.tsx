@@ -473,186 +473,188 @@ export default function AdminUsersPage() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Usuario</TableHead>
-                <TableHead>Rol</TableHead>
-                <TableHead>Sucursal</TableHead>
-                <TableHead>Estado</TableHead>
-                <TableHead>Última Actividad</TableHead>
-                <TableHead>Actividad (30d)</TableHead>
-                <TableHead>Fecha Registro</TableHead>
-                <TableHead>Acciones</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {adminUsers.map((admin) => (
-                <TableRow
-                  key={admin.id}
-                  className="hover:bg-[#AE000025] transition-colors"
-                >
-                  <TableCell>
-                    <div>
-                      <div className="font-medium">
-                        {admin.analytics?.fullName || "Sin nombre"}
-                      </div>
-                      <div className="text-sm text-admin-text-tertiary">
-                        {admin.email}
-                      </div>
-                      {admin.profiles?.phone && (
-                        <div className="flex items-center text-xs text-admin-text-tertiary mt-1">
-                          <Phone className="h-3 w-3 mr-1" />
-                          {admin.profiles.phone}
+          <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Usuario</TableHead>
+                  <TableHead>Rol</TableHead>
+                  <TableHead>Sucursal</TableHead>
+                  <TableHead>Estado</TableHead>
+                  <TableHead>Última Actividad</TableHead>
+                  <TableHead>Actividad (30d)</TableHead>
+                  <TableHead>Fecha Registro</TableHead>
+                  <TableHead>Acciones</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {adminUsers.map((admin) => (
+                  <TableRow
+                    key={admin.id}
+                    className="hover:bg-[#AE000025] transition-colors"
+                  >
+                    <TableCell>
+                      <div>
+                        <div className="font-medium">
+                          {admin.analytics?.fullName || "Sin nombre"}
                         </div>
-                      )}
-                    </div>
-                  </TableCell>
-
-                  <TableCell>{getRoleBadge(admin)}</TableCell>
-
-                  <TableCell>
-                    {admin.is_super_admin ? (
-                      <Badge
-                        variant="outline"
-                        className="flex items-center gap-1 w-fit"
-                      >
-                        <Globe className="h-3 w-3" />
-                        Todas las sucursales
-                      </Badge>
-                    ) : admin.branches && admin.branches.length > 0 ? (
-                      <div className="flex flex-col gap-1">
-                        {admin.branches.slice(0, 2).map((branch) => (
-                          <Badge
-                            key={branch.id}
-                            variant="outline"
-                            className="flex items-center gap-1 w-fit text-xs"
-                          >
-                            <Building2 className="h-3 w-3" />
-                            {branch.name}
-                            {branch.is_primary && (
-                              <span className="text-epoch-accent">★</span>
-                            )}
-                          </Badge>
-                        ))}
-                        {admin.branches.length > 2 && (
-                          <span className="text-xs text-admin-text-tertiary">
-                            +{admin.branches.length - 2} más
-                          </span>
+                        <div className="text-sm text-admin-text-tertiary">
+                          {admin.email}
+                        </div>
+                        {admin.profiles?.phone && (
+                          <div className="flex items-center text-xs text-admin-text-tertiary mt-1">
+                            <Phone className="h-3 w-3 mr-1" />
+                            {admin.profiles.phone}
+                          </div>
                         )}
                       </div>
-                    ) : (
-                      <span className="text-sm text-admin-text-tertiary">
-                        Sin sucursales
-                      </span>
-                    )}
-                  </TableCell>
+                    </TableCell>
 
-                  <TableCell>{getStatusBadge(admin.is_active)}</TableCell>
+                    <TableCell>{getRoleBadge(admin)}</TableCell>
 
-                  <TableCell>
-                    <div className="flex items-center text-sm">
-                      <Clock className="h-3 w-3 mr-1 text-admin-text-tertiary" />
-                      {formatLastActivity(admin.last_login)}
-                    </div>
-                  </TableCell>
-
-                  <TableCell>
-                    <div className="text-center">
-                      <div className="font-medium">
-                        {admin.analytics?.activityCount30Days || 0}
-                      </div>
-                      <div className="text-xs text-admin-text-tertiary">
-                        acciones
-                      </div>
-                    </div>
-                  </TableCell>
-
-                  <TableCell className="text-sm text-admin-text-tertiary">
-                    {formatDate(admin.created_at, { locale: "es-AR" })}
-                  </TableCell>
-
-                  <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-8 w-8 p-0"
+                    <TableCell>
+                      {admin.is_super_admin ? (
+                        <Badge
+                          variant="outline"
+                          className="flex items-center gap-1 w-fit"
                         >
-                          <span className="sr-only">Abrir menú</span>
-                          <MoreVertical className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Acciones</DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem asChild>
-                          <Link
-                            href={`/admin/admin-users/${admin.id}`}
+                          <Globe className="h-3 w-3" />
+                          Todas las sucursales
+                        </Badge>
+                      ) : admin.branches && admin.branches.length > 0 ? (
+                        <div className="flex flex-col gap-1">
+                          {admin.branches.slice(0, 2).map((branch) => (
+                            <Badge
+                              key={branch.id}
+                              variant="outline"
+                              className="flex items-center gap-1 w-fit text-xs"
+                            >
+                              <Building2 className="h-3 w-3" />
+                              {branch.name}
+                              {branch.is_primary && (
+                                <span className="text-epoch-accent">★</span>
+                              )}
+                            </Badge>
+                          ))}
+                          {admin.branches.length > 2 && (
+                            <span className="text-xs text-admin-text-tertiary">
+                              +{admin.branches.length - 2} más
+                            </span>
+                          )}
+                        </div>
+                      ) : (
+                        <span className="text-sm text-admin-text-tertiary">
+                          Sin sucursales
+                        </span>
+                      )}
+                    </TableCell>
+
+                    <TableCell>{getStatusBadge(admin.is_active)}</TableCell>
+
+                    <TableCell>
+                      <div className="flex items-center text-sm">
+                        <Clock className="h-3 w-3 mr-1 text-admin-text-tertiary" />
+                        {formatLastActivity(admin.last_login)}
+                      </div>
+                    </TableCell>
+
+                    <TableCell>
+                      <div className="text-center">
+                        <div className="font-medium">
+                          {admin.analytics?.activityCount30Days || 0}
+                        </div>
+                        <div className="text-xs text-admin-text-tertiary">
+                          acciones
+                        </div>
+                      </div>
+                    </TableCell>
+
+                    <TableCell className="text-sm text-admin-text-tertiary">
+                      {formatDate(admin.created_at, { locale: "es-AR" })}
+                    </TableCell>
+
+                    <TableCell>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 w-8 p-0"
+                          >
+                            <span className="sr-only">Abrir menú</span>
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuLabel>Acciones</DropdownMenuLabel>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem asChild>
+                            <Link
+                              href={`/admin/admin-users/${admin.id}`}
+                              className="flex items-center cursor-pointer"
+                            >
+                              <Eye className="mr-2 h-4 w-4" />
+                              Ver detalles
+                            </Link>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem asChild>
+                            <Link
+                              href={`/admin/admin-users/${admin.id}/edit`}
+                              className="flex items-center cursor-pointer"
+                            >
+                              <Edit className="mr-2 h-4 w-4" />
+                              Editar
+                            </Link>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => {
+                              setSelectedUserForPermissions(admin);
+                              setShowPermissionsEditor(true);
+                            }}
                             className="flex items-center cursor-pointer"
                           >
-                            <Eye className="mr-2 h-4 w-4" />
-                            Ver detalles
-                          </Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem asChild>
-                          <Link
-                            href={`/admin/admin-users/${admin.id}/edit`}
-                            className="flex items-center cursor-pointer"
-                          >
-                            <Edit className="mr-2 h-4 w-4" />
-                            Editar
-                          </Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() => {
-                            setSelectedUserForPermissions(admin);
-                            setShowPermissionsEditor(true);
-                          }}
-                          className="flex items-center cursor-pointer"
-                        >
-                          <Shield className="mr-2 h-4 w-4" />
-                          Editar Permisos
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        {isSuperAdmin && (
+                            <Shield className="mr-2 h-4 w-4" />
+                            Editar Permisos
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          {isSuperAdmin && (
+                            <DropdownMenuItem
+                              onClick={() =>
+                                handleToggleStatus(admin.id, admin.is_active)
+                              }
+                              className="flex items-center cursor-pointer"
+                            >
+                              {admin.is_active ? (
+                                <>
+                                  <AlertTriangle className="mr-2 h-4 w-4 text-red-500" />
+                                  Desactivar
+                                </>
+                              ) : (
+                                <>
+                                  <CheckCircle className="mr-2 h-4 w-4 text-green-500" />
+                                  Activar
+                                </>
+                              )}
+                            </DropdownMenuItem>
+                          )}
+                          <DropdownMenuSeparator />
                           <DropdownMenuItem
                             onClick={() =>
-                              handleToggleStatus(admin.id, admin.is_active)
+                              handleDeleteAdmin(admin.id, admin.email)
                             }
-                            className="flex items-center cursor-pointer"
+                            className="flex items-center cursor-pointer text-red-500 focus:text-red-500"
                           >
-                            {admin.is_active ? (
-                              <>
-                                <AlertTriangle className="mr-2 h-4 w-4 text-red-500" />
-                                Desactivar
-                              </>
-                            ) : (
-                              <>
-                                <CheckCircle className="mr-2 h-4 w-4 text-green-500" />
-                                Activar
-                              </>
-                            )}
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Eliminar
                           </DropdownMenuItem>
-                        )}
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem
-                          onClick={() =>
-                            handleDeleteAdmin(admin.id, admin.email)
-                          }
-                          className="flex items-center cursor-pointer text-red-500 focus:text-red-500"
-                        >
-                          <Trash2 className="mr-2 h-4 w-4" />
-                          Eliminar
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
 
           {/* Pagination */}
           {!loading && adminUsers.length > 0 && (

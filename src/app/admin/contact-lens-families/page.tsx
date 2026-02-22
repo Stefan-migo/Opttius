@@ -360,7 +360,7 @@ export default function ContactLensFamiliesPage() {
             <div className="text-center py-8">Cargando...</div>
           ) : (
             <>
-              <div className="rounded-md border">
+              <div className="rounded-md border overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0">
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -467,7 +467,7 @@ export default function ContactLensFamiliesPage() {
 
       {/* Create/Edit Dialog */}
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
               {editingFamily ? "Editar Familia" : "Nueva Familia"}

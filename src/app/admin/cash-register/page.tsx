@@ -1760,7 +1760,7 @@ export default function CashRegisterPage() {
 
       {/* Close Cash Register Dialog */}
       <Dialog open={showCloseDialog} onOpenChange={setShowCloseDialog}>
-        <DialogContent className="max-w-7xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-7xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Cerrar Caja</DialogTitle>
             <DialogDescription>

@@ -564,7 +564,7 @@ export default function OrganizationDetailsPage() {
   if (error || !organization) {
     return (
       <div className="p-6">
-        <Card className="admin-card rounded-none">
+        <Card className="rounded-none border border-border">
           <CardContent className="pt-6">
             <div className="text-center text-red-600">
               <p>Error: {error || "Organización no encontrada"}</p>
@@ -630,7 +630,7 @@ export default function OrganizationDetailsPage() {
 
       {/* Estadísticas principales */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-        <Card className="admin-card rounded-none">
+        <Card className="rounded-none border border-border">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
               Usuarios Activos
@@ -647,7 +647,7 @@ export default function OrganizationDetailsPage() {
           </CardContent>
         </Card>
 
-        <Card className="admin-card rounded-none">
+        <Card className="rounded-none border border-border">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Sucursales</CardTitle>
             <MapPin className="h-4 w-4 text-muted-foreground" />
@@ -659,7 +659,7 @@ export default function OrganizationDetailsPage() {
           </CardContent>
         </Card>
 
-        <Card className="admin-card rounded-none">
+        <Card className="rounded-none border border-border">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Órdenes</CardTitle>
             <ShoppingCart className="h-4 w-4 text-muted-foreground" />
@@ -671,7 +671,7 @@ export default function OrganizationDetailsPage() {
           </CardContent>
         </Card>
 
-        <Card className="admin-card rounded-none">
+        <Card className="rounded-none border border-border">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Productos</CardTitle>
             <Package className="h-4 w-4 text-muted-foreground" />
@@ -683,7 +683,7 @@ export default function OrganizationDetailsPage() {
           </CardContent>
         </Card>
 
-        <Card className="admin-card rounded-none">
+        <Card className="rounded-none border border-border">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Suscripción</CardTitle>
             <Crown className="h-4 w-4 text-muted-foreground" />
@@ -739,7 +739,7 @@ export default function OrganizationDetailsPage() {
         <TabsContent value="overview" className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Información general */}
-            <Card className="admin-card rounded-none">
+            <Card className="rounded-none border border-border">
               <CardHeader>
                 <CardTitle>Información General</CardTitle>
               </CardHeader>
@@ -801,7 +801,7 @@ export default function OrganizationDetailsPage() {
             </Card>
 
             {/* Usuarios recientes */}
-            <Card className="admin-card rounded-none">
+            <Card className="rounded-none border border-border">
               <CardHeader>
                 <CardTitle>Usuarios Recientes</CardTitle>
               </CardHeader>
@@ -849,7 +849,7 @@ export default function OrganizationDetailsPage() {
 
         {/* Tab: Sucursales */}
         <TabsContent value="branches" className="space-y-6">
-          <Card className="admin-card rounded-none">
+          <Card className="rounded-none border border-border">
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle>Sucursales</CardTitle>
               <Button
@@ -877,71 +877,75 @@ export default function OrganizationDetailsPage() {
                   No hay sucursales registradas
                 </p>
               ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Nombre</TableHead>
-                      <TableHead>Código</TableHead>
-                      <TableHead>Dirección</TableHead>
-                      <TableHead>Teléfono</TableHead>
-                      <TableHead>Estado</TableHead>
-                      <TableHead className="text-right">Acciones</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {branches.map((branch) => (
-                      <TableRow key={branch.id}>
-                        <TableCell className="font-medium">
-                          {branch.name}
-                        </TableCell>
-                        <TableCell>{branch.code}</TableCell>
-                        <TableCell>
-                          {branch.address_line_1 && branch.city
-                            ? `${branch.address_line_1}, ${branch.city}`
-                            : "-"}
-                        </TableCell>
-                        <TableCell>{branch.phone || "-"}</TableCell>
-                        <TableCell>
-                          {branch.is_active ? (
-                            <Badge variant="default">Activa</Badge>
-                          ) : (
-                            <Badge variant="secondary">Inactiva</Badge>
-                          )}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex justify-end gap-2">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => {
-                                setEditingBranch(branch);
-                                setBranchFormData({
-                                  name: branch.name,
-                                  code: branch.code,
-                                  address_line_1: branch.address_line_1 || "",
-                                  city: branch.city || "",
-                                  phone: branch.phone || "",
-                                  email: branch.email || "",
-                                  is_active: branch.is_active,
-                                });
-                                setShowBranchDialog(true);
-                              }}
-                            >
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleDeleteBranchClick(branch.id)}
-                            >
-                              <Trash2 className="h-4 w-4 text-red-600" />
-                            </Button>
-                          </div>
-                        </TableCell>
+                <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Nombre</TableHead>
+                        <TableHead>Código</TableHead>
+                        <TableHead>Dirección</TableHead>
+                        <TableHead>Teléfono</TableHead>
+                        <TableHead>Estado</TableHead>
+                        <TableHead className="text-right">Acciones</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                    </TableHeader>
+                    <TableBody>
+                      {branches.map((branch) => (
+                        <TableRow key={branch.id}>
+                          <TableCell className="font-medium">
+                            {branch.name}
+                          </TableCell>
+                          <TableCell>{branch.code}</TableCell>
+                          <TableCell>
+                            {branch.address_line_1 && branch.city
+                              ? `${branch.address_line_1}, ${branch.city}`
+                              : "-"}
+                          </TableCell>
+                          <TableCell>{branch.phone || "-"}</TableCell>
+                          <TableCell>
+                            {branch.is_active ? (
+                              <Badge variant="default">Activa</Badge>
+                            ) : (
+                              <Badge variant="secondary">Inactiva</Badge>
+                            )}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex justify-end gap-2">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => {
+                                  setEditingBranch(branch);
+                                  setBranchFormData({
+                                    name: branch.name,
+                                    code: branch.code,
+                                    address_line_1: branch.address_line_1 || "",
+                                    city: branch.city || "",
+                                    phone: branch.phone || "",
+                                    email: branch.email || "",
+                                    is_active: branch.is_active,
+                                  });
+                                  setShowBranchDialog(true);
+                                }}
+                              >
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() =>
+                                  handleDeleteBranchClick(branch.id)
+                                }
+                              >
+                                <Trash2 className="h-4 w-4 text-red-600" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
               )}
             </CardContent>
           </Card>
@@ -949,7 +953,7 @@ export default function OrganizationDetailsPage() {
 
         {/* Tab: Usuarios */}
         <TabsContent value="users" className="space-y-6">
-          <Card className="admin-card rounded-none">
+          <Card className="rounded-none border border-border">
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle>Usuarios</CardTitle>
               <Button
@@ -976,66 +980,69 @@ export default function OrganizationDetailsPage() {
                   No hay usuarios registrados
                 </p>
               ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Nombre</TableHead>
-                      <TableHead>Email</TableHead>
-                      <TableHead>Rol</TableHead>
-                      <TableHead>Estado</TableHead>
-                      <TableHead className="text-right">Acciones</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {users.map((user) => (
-                      <TableRow key={user.id}>
-                        <TableCell className="font-medium">
-                          {user.profiles?.first_name} {user.profiles?.last_name}
-                        </TableCell>
-                        <TableCell>{user.email}</TableCell>
-                        <TableCell>
-                          <Badge variant="outline">{user.role}</Badge>
-                        </TableCell>
-                        <TableCell>
-                          {user.is_active ? (
-                            <Badge variant="default">Activo</Badge>
-                          ) : (
-                            <Badge variant="secondary">Inactivo</Badge>
-                          )}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex justify-end gap-2">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => {
-                                setEditingUser(user);
-                                setUserFormData({
-                                  email: user.email,
-                                  password: "",
-                                  first_name: user.profiles?.first_name || "",
-                                  last_name: user.profiles?.last_name || "",
-                                  role: user.role,
-                                  branch_id: "",
-                                });
-                                setShowUserDialog(true);
-                              }}
-                            >
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleDeleteUserClick(user.id)}
-                            >
-                              <Trash2 className="h-4 w-4 text-red-600" />
-                            </Button>
-                          </div>
-                        </TableCell>
+                <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Nombre</TableHead>
+                        <TableHead>Email</TableHead>
+                        <TableHead>Rol</TableHead>
+                        <TableHead>Estado</TableHead>
+                        <TableHead className="text-right">Acciones</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                    </TableHeader>
+                    <TableBody>
+                      {users.map((user) => (
+                        <TableRow key={user.id}>
+                          <TableCell className="font-medium">
+                            {user.profiles?.first_name}{" "}
+                            {user.profiles?.last_name}
+                          </TableCell>
+                          <TableCell>{user.email}</TableCell>
+                          <TableCell>
+                            <Badge variant="outline">{user.role}</Badge>
+                          </TableCell>
+                          <TableCell>
+                            {user.is_active ? (
+                              <Badge variant="default">Activo</Badge>
+                            ) : (
+                              <Badge variant="secondary">Inactivo</Badge>
+                            )}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex justify-end gap-2">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => {
+                                  setEditingUser(user);
+                                  setUserFormData({
+                                    email: user.email,
+                                    password: "",
+                                    first_name: user.profiles?.first_name || "",
+                                    last_name: user.profiles?.last_name || "",
+                                    role: user.role,
+                                    branch_id: "",
+                                  });
+                                  setShowUserDialog(true);
+                                }}
+                              >
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleDeleteUserClick(user.id)}
+                              >
+                                <Trash2 className="h-4 w-4 text-red-600" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
               )}
             </CardContent>
           </Card>
@@ -1044,7 +1051,7 @@ export default function OrganizationDetailsPage() {
 
       {/* Dialog de creación/edición de sucursal */}
       <Dialog open={showBranchDialog} onOpenChange={setShowBranchDialog}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-2xl">
           <DialogHeader>
             <DialogTitle>
               {editingBranch ? "Editar Sucursal" : "Nueva Sucursal"}
@@ -1175,7 +1182,7 @@ export default function OrganizationDetailsPage() {
 
       {/* Dialog de creación/edición de usuario */}
       <Dialog open={showUserDialog} onOpenChange={setShowUserDialog}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-2xl">
           <DialogHeader>
             <DialogTitle>
               {editingUser ? "Editar Usuario" : "Nuevo Usuario"}
@@ -1402,7 +1409,7 @@ export default function OrganizationDetailsPage() {
 
       {/* Delete Confirmation Dialog */}
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-lg">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <AlertTriangle className="h-5 w-5 text-red-500" />
@@ -1497,7 +1504,7 @@ export default function OrganizationDetailsPage() {
         open={deleteBranchConfirmId !== null}
         onOpenChange={(open) => !open && setDeleteBranchConfirmId(null)}
       >
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <AlertTriangle className="h-5 w-5 text-red-500" />
@@ -1527,7 +1534,7 @@ export default function OrganizationDetailsPage() {
         open={deleteUserConfirmId !== null}
         onOpenChange={(open) => !open && setDeleteUserConfirmId(null)}
       >
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <AlertTriangle className="h-5 w-5 text-red-500" />

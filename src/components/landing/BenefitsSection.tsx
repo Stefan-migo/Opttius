@@ -39,7 +39,7 @@ import Image from "next/image";
 export function BenefitsSection() {
   return (
     <section
-      className="py-32 bg-epoch-primary text-white relative overflow-hidden"
+      className="py-20 sm:py-32 bg-epoch-primary text-white relative overflow-hidden"
       id="beneficios"
     >
       {/* Texture overlay */}
@@ -54,7 +54,7 @@ export function BenefitsSection() {
               <span>Resultados medibles</span>
             </div>
 
-            <h2 className="text-5xl md:text-7xl font-display font-bold text-white tracking-tight leading-none">
+            <h2 className="text-4xl sm:text-5xl md:text-7xl font-display font-bold text-white tracking-tight leading-none">
               MENOS ERRORES.
               <br />
               <span className="text-epoch-accent italic font-serif lowercase tracking-normal">

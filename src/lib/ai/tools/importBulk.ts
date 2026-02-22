@@ -17,11 +17,16 @@ const executeBulkImportSchema = z.object({
   entityType: z.enum(["customers", "products"]),
   columnMapping: z
     .record(z.string())
-    .describe("Map of file column names to Opttius field names"),
+    .describe(
+      "Map of file column names to Opttius field names. Keys MUST be exact column headers from the file.",
+    ),
   branchId: z
     .string()
     .uuid()
-    .describe("Branch ID where to import (required for customers)"),
+    .optional()
+    .describe(
+      "Branch ID where to import. Required for customers. If omitted, uses context.currentBranchId when available.",
+    ),
 });
 
 async function downloadFile(
@@ -196,16 +201,17 @@ export const importBulkTools: ToolDefinition[] = [
         },
         branchId: {
           type: "string",
-          description: "Branch UUID (required for customers)",
+          description:
+            "Branch UUID (required for customers). Use context.currentBranchId if user has a branch selected.",
         },
       },
-      required: ["fileId", "entityType", "columnMapping", "branchId"],
+      required: ["fileId", "entityType", "columnMapping"],
     },
     zodSchema: executeBulkImportSchema,
     execute: async (params, context): Promise<ToolResult> => {
       try {
         const validated = executeBulkImportSchema.parse(params);
-        const { organizationId } = context;
+        const { organizationId, currentBranchId, userData, currency } = context;
         const serviceSupabase = createServiceRoleClient();
 
         if (!organizationId) {
@@ -215,16 +221,91 @@ export const importBulkTools: ToolDefinition[] = [
           };
         }
 
+        // Resolve branchId: params > context.currentBranchId
+        let resolvedBranchId = validated.branchId;
+        if (!resolvedBranchId || resolvedBranchId === "global") {
+          if (currentBranchId && currentBranchId !== "global") {
+            resolvedBranchId = currentBranchId;
+          } else if (userData?.isSuperAdmin) {
+            return {
+              success: false,
+              error:
+                "Vista global activa. Por favor, selecciona una sucursal específica en el selector de sucursales antes de ejecutar la importación, o indica el ID de la sucursal en tu mensaje.",
+            };
+          } else {
+            return {
+              success: false,
+              error:
+                "Se requiere branchId para la importación. Selecciona una sucursal en el selector o indica la sucursal de destino.",
+            };
+          }
+        }
+
+        if (validated.entityType === "customers" && !resolvedBranchId) {
+          return {
+            success: false,
+            error: "branchId es obligatorio para importar clientes.",
+          };
+        }
+
         const buffer = await downloadFile(validated.fileId, serviceSupabase);
         const ext = validated.fileId.includes(".xlsx")
           ? "xlsx"
           : validated.fileId.includes(".xls")
             ? "xls"
             : "csv";
-        const { rows } = await parseImportFile(buffer, `file.${ext}`);
+        const { headers, rows } = await parseImportFile(buffer, `file.${ext}`);
 
+        // Validate columnMapping keys match file headers (case-insensitive, trim)
+        const headerSet = new Set(
+          headers.map((h) =>
+            String(h || "")
+              .trim()
+              .toLowerCase(),
+          ),
+        );
+        const invalidKeys: string[] = [];
+        for (const fileCol of Object.keys(validated.columnMapping)) {
+          const normalized = String(fileCol || "")
+            .trim()
+            .toLowerCase();
+          const matchingHeader = headers.find(
+            (h) =>
+              String(h || "")
+                .trim()
+                .toLowerCase() === normalized,
+          );
+          if (!matchingHeader && !headerSet.has(normalized)) {
+            invalidKeys.push(fileCol);
+          }
+        }
+        if (invalidKeys.length > 0) {
+          return {
+            success: false,
+            error: `Columnas del mapping no encontradas en el archivo: ${invalidKeys.join(", ")}. Headers del archivo: ${headers.join(", ")}. El columnMapping debe ser { "Header del archivo": "campo_opttius" } (clave = nombre exacto de la columna en el archivo).`,
+          };
+        }
+
+        const branchIdToUse = resolvedBranchId;
         let imported = 0;
         const failed: Array<{ row: number; error: string }> = [];
+
+        // Resolve column key: mapping key may differ by case/trim from actual header
+        const resolveVal = (
+          row: Record<string, string | number | null>,
+          fileCol: string,
+        ): string | number | null => {
+          const normalized = String(fileCol || "")
+            .trim()
+            .toLowerCase();
+          const match = headers.find(
+            (h) =>
+              String(h || "")
+                .trim()
+                .toLowerCase() === normalized,
+          );
+          return match != null ? (row[match] ?? null) : null;
+        };
 
         if (validated.entityType === "customers") {
           for (let i = 0; i < rows.length; i++) {
@@ -234,7 +315,7 @@ export const importBulkTools: ToolDefinition[] = [
               for (const [fileCol, opttiusField] of Object.entries(
                 validated.columnMapping,
               )) {
-                const val = row[fileCol];
+                const val = resolveVal(row, fileCol);
                 if (val !== null && val !== undefined && String(val).trim()) {
                   mapped[opttiusField] = String(val).trim();
                 }
@@ -248,7 +329,7 @@ export const importBulkTools: ToolDefinition[] = [
                 "Sin apellido";
 
               const { error } = await serviceSupabase.from("customers").insert({
-                branch_id: validated.branchId,
+                branch_id: branchIdToUse,
                 organization_id: organizationId,
                 first_name: firstName,
                 last_name: lastName,
@@ -281,7 +362,7 @@ export const importBulkTools: ToolDefinition[] = [
               for (const [fileCol, opttiusField] of Object.entries(
                 validated.columnMapping,
               )) {
-                const val = row[fileCol];
+                const val = resolveVal(row, fileCol);
                 if (val !== null && val !== undefined && String(val).trim()) {
                   mapped[opttiusField] = String(val).trim();
                 }
@@ -299,22 +380,44 @@ export const importBulkTools: ToolDefinition[] = [
                   .replace(/[^a-z0-9]+/g, "-")
                   .replace(/(^-|-$)/g, "") || `product-${Date.now()}`;
 
-              const { error } = await serviceSupabase.from("products").insert({
-                organization_id: organizationId,
-                branch_id: validated.branchId || null,
-                name,
-                price,
-                description: mapped.description || null,
-                slug,
-                status: "draft",
-                inventory_quantity:
-                  parseInt(mapped.inventory_quantity || "0", 10) || 0,
-              });
+              const { data: insertedProduct, error } = await serviceSupabase
+                .from("products")
+                .insert({
+                  organization_id: organizationId,
+                  branch_id: branchIdToUse || null,
+                  name,
+                  price,
+                  currency: currency || "CLP",
+                  description: mapped.description || null,
+                  slug,
+                  status: "draft",
+                  inventory_quantity:
+                    parseInt(mapped.inventory_quantity || "0", 10) || 0,
+                })
+                .select("id")
+                .single();
 
               if (error) {
                 failed.push({ row: i + 2, error: error.message });
               } else {
                 imported++;
+                // Create product_branch_stock when branch is specified
+                const qty = parseInt(mapped.inventory_quantity || "0", 10) || 0;
+                if (branchIdToUse && insertedProduct?.id) {
+                  const now = new Date().toISOString();
+                  await serviceSupabase.from("product_branch_stock").upsert(
+                    {
+                      product_id: insertedProduct.id,
+                      branch_id: branchIdToUse,
+                      quantity: qty,
+                      reserved_quantity: 0,
+                      low_stock_threshold: 5,
+                      created_at: now,
+                      updated_at: now,
+                    },
+                    { onConflict: "product_id, branch_id" },
+                  );
+                }
               }
             } catch (e: any) {
               failed.push({

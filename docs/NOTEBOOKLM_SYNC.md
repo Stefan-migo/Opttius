@@ -18,6 +18,8 @@
 | `docs/SYSTEM_CONFIGURATION.md`                   | SYSTEM_CONFIGURATION                      | Tras cambios en módulo Sistema, API config, scope     |
 | `docs/SYSTEM_CONFIGURATION_CHANGELOG_2026-02.md` | SYSTEM_CONFIGURATION_CHANGELOG            | Tras mejoras o correcciones del módulo Sistema        |
 | `docs/FRONTEND_IDENTITY.md`                      | Frontend Identity Documentation - Opttius | Tras cambios en paleta Epoch, componentes, tokens     |
+| `docs/FRONTEND_RESPONSIVITY.md`                  | FRONTEND_RESPONSIVITY                     | Tras cambios en responsividad, breakpoints, patrones  |
+| `docs/FRONTEND_RESPONSIVE_UPDATE_2026-02.md`     | FRONTEND_RESPONSIVE_UPDATE_2026-02        | Changelog de implementación mobile-first 2026-02      |
 | `docs/SAAS_MANAGEMENT_SYSTEM.md`                 | SAAS_MANAGEMENT_SYSTEM                    | Tras cambios en arquitectura o flujos del módulo SaaS |
 | `docs/SAAS_MANAGEMENT_IMPROVEMENTS_2026-02.md`   | SAAS_MANAGEMENT_IMPROVEMENTS_2026-02      | Tras nuevas mejoras o correcciones en SaaS Management |
 | `docs/USER_PROFILE_SYSTEM.md`                    | USER_PROFILE_SYSTEM                       | Tras cambios en perfil, RLS, preferencias             |
@@ -94,6 +96,7 @@ nlm source delete <source-id> --confirm
 - **Límite:** NotebookLM Standard tiene 50 fuentes por notebook. **Estado actual (2026-02-21):** 50/50 fuentes — límite alcanzado.
 - **Fuentes añadidas en sync completo (2026-02-21):** AI_SYSTEM, QUOTES_SYSTEM, SUPPORT_MODULE_IMPROVEMENTS_2026-02, IDENTITY_RECONCILIATION, SYSTEM_CONFIGURATION_ANALYSIS.
 - **Duplicados eliminados (2026-02-21):** Opttius CRM Documentation (→ CRM_SYSTEM.md), Integración Presupuestos-Trabajos (→ QUOTE_WORK_ORDER_INTEGRATION.md), Sistema de Citas y Agendas (→ APPOINTMENTS_SYSTEM.md).
+- **Limpieza Extendido (2026-02-22):** Ejecutar `bash scripts/notebooklm-cleanup-duplicates.sh` para eliminar ~22 fuentes duplicadas antes de añadir documentación nueva.
 - **Duplicados:** `nlm source add` con el mismo título puede crear fuentes duplicadas. Eliminar fuentes antiguas con:
 
 ```bash

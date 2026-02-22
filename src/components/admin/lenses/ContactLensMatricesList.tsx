@@ -68,7 +68,9 @@ const MODALITIES = [
 
 export default function ContactLensMatricesList() {
   const router = useRouter();
-  const [matrices, setMatrices] = useState<ContactLensPriceMatrixWithFamily[]>([]);
+  const [matrices, setMatrices] = useState<ContactLensPriceMatrixWithFamily[]>(
+    [],
+  );
   const [families, setFamilies] = useState<ContactLensFamily[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -111,7 +113,9 @@ export default function ContactLensMatricesList() {
       if (includeInactive) {
         params.append("include_inactive", "true");
       }
-      const response = await fetch(`/api/admin/contact-lens-families?${params}`);
+      const response = await fetch(
+        `/api/admin/contact-lens-families?${params}`,
+      );
       if (response.ok) {
         const data = await response.json();
         setFamilies(data.families || []);
@@ -131,7 +135,9 @@ export default function ContactLensMatricesList() {
       if (selectedFamilyId !== "all") {
         params.append("family_id", selectedFamilyId);
       }
-      const response = await fetch(`/api/admin/contact-lens-matrices?${params}`);
+      const response = await fetch(
+        `/api/admin/contact-lens-matrices?${params}`,
+      );
       if (response.ok) {
         const data = await response.json();
         setMatrices(data.matrices || []);
@@ -148,14 +154,14 @@ export default function ContactLensMatricesList() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     try {
-      const url = editingMatrix 
+      const url = editingMatrix
         ? `/api/admin/contact-lens-matrices/${editingMatrix.id}`
         : "/api/admin/contact-lens-matrices";
-      
+
       const method = editingMatrix ? "PUT" : "POST";
-      
+
       const response = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
@@ -242,7 +248,7 @@ export default function ContactLensMatricesList() {
   const filteredMatrices = matrices.filter((matrix) => {
     const searchLower = searchTerm.toLowerCase();
     const family = matrix.contact_lens_families;
-    
+
     return (
       family.name.toLowerCase().includes(searchLower) ||
       (family.brand || "").toLowerCase().includes(searchLower) ||
@@ -308,7 +314,10 @@ export default function ContactLensMatricesList() {
             />
           </div>
           <div className="w-full sm:w-64">
-            <Select value={selectedFamilyId} onValueChange={setSelectedFamilyId}>
+            <Select
+              value={selectedFamilyId}
+              onValueChange={setSelectedFamilyId}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Todas las familias" />
               </SelectTrigger>
@@ -358,7 +367,8 @@ export default function ContactLensMatricesList() {
                         {matrix.sphere_min} a {matrix.sphere_max}
                       </TableCell>
                       <TableCell>
-                        {matrix.cylinder_min !== null && matrix.cylinder_max !== null
+                        {matrix.cylinder_min !== null &&
+                        matrix.cylinder_max !== null
                           ? `${matrix.cylinder_min} a ${matrix.cylinder_max}`
                           : "N/A"}
                       </TableCell>
@@ -414,7 +424,7 @@ export default function ContactLensMatricesList() {
 
         {/* Create/Edit Dialog */}
         <Dialog open={showDialog} onOpenChange={setShowDialog}>
-          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>
                 {editingMatrix ? "Editar Matriz" : "Crear Nueva Matriz"}
@@ -425,15 +435,20 @@ export default function ContactLensMatricesList() {
                   : "Ingresa los detalles para crear una nueva matriz de precios"}
               </DialogDescription>
             </DialogHeader>
-            
+
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="md:col-span-2">
-                  <Label htmlFor="contact_lens_family_id">Familia de Lente *</Label>
+                  <Label htmlFor="contact_lens_family_id">
+                    Familia de Lente *
+                  </Label>
                   <Select
                     value={formData.contact_lens_family_id}
                     onValueChange={(value) =>
-                      setFormData({ ...formData, contact_lens_family_id: value })
+                      setFormData({
+                        ...formData,
+                        contact_lens_family_id: value,
+                      })
                     }
                     required
                   >
@@ -443,7 +458,8 @@ export default function ContactLensMatricesList() {
                     <SelectContent>
                       {families.map((family) => (
                         <SelectItem key={family.id} value={family.id}>
-                          {family.name} {family.brand ? `(${family.brand})` : ""}
+                          {family.name}{" "}
+                          {family.brand ? `(${family.brand})` : ""}
                         </SelectItem>
                       ))}
                     </SelectContent>

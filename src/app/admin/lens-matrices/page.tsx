@@ -790,7 +790,7 @@ export default function LensMatricesPage() {
 
       {/* Import CSV Dialog */}
       <Dialog open={showImportDialog} onOpenChange={setShowImportDialog}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Importar Matrices desde CSV</DialogTitle>
             <DialogDescription>

@@ -574,7 +574,7 @@ export default function TemplatesPage() {
 
       {/* Create/Edit Template Dialog */}
       <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
               {editingTemplate ? "Editar Plantilla" : "Crear Nueva Plantilla"}
@@ -679,7 +679,7 @@ export default function TemplatesPage() {
 
       {/* Preview Template Dialog */}
       <Dialog open={previewDialogOpen} onOpenChange={setPreviewDialogOpen}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-2xl">
           <DialogHeader>
             <DialogTitle>Vista Previa de la Plantilla</DialogTitle>
             <DialogDescription>

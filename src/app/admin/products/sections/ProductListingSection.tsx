@@ -219,8 +219,9 @@ export default function ProductListingSection({
         },
       });
 
+      const affectedCount = result?.success?.length ?? selectedProducts.length;
       toast.success(
-        `Operación completada: ${result.success.length} productos afectados`,
+        `Operación completada: ${affectedCount} productos afectados`,
       );
       setIsDeleteDialog(false);
       setSelectedProducts([]);
@@ -468,7 +469,10 @@ export default function ProductListingSection({
                 >
                   Seleccionar Operación
                 </Label>
-                <Select value={bulkOperation} onValueChange={setBulkOperation}>
+                <Select
+                  value={bulkOperation ?? ""}
+                  onValueChange={setBulkOperation}
+                >
                   <SelectTrigger className="mt-1.5 h-11 bg-admin-bg-tertiary border-admin-border-primary/10 rounded-none font-display text-[10px] tracking-widest uppercase">
                     <SelectValue placeholder="Seleccionar operación" />
                   </SelectTrigger>
@@ -595,7 +599,7 @@ export default function ProductListingSection({
 
       {/* Single Product Delete Dialog */}
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <DialogContent className="max-w-md border-2 border-admin-error/20 bg-white shadow-premium-xl rounded-none p-0 overflow-hidden">
+        <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-md border-2 border-admin-error/20 bg-white shadow-premium-xl rounded-none p-0 overflow-hidden">
           <div className="bg-admin-error/5 p-8 border-b border-admin-error/10">
             <DialogHeader>
               <div className="flex items-center gap-3">
@@ -680,6 +684,7 @@ function renderBulkOperationForm(
               Nuevo Estado
             </Label>
             <Select
+              value={bulkUpdates?.status ?? ""}
               onValueChange={(value) =>
                 setBulkUpdates({ ...bulkUpdates, status: value })
               }
@@ -708,6 +713,7 @@ function renderBulkOperationForm(
               Nueva Categoría
             </Label>
             <Select
+              value={bulkUpdates?.category_id ?? ""}
               onValueChange={(value) =>
                 setBulkUpdates({ ...bulkUpdates, category_id: value })
               }
@@ -738,7 +744,7 @@ function renderBulkOperationForm(
               Tipo de Ajuste
             </Label>
             <Select
-              value={bulkUpdates.adjustment_type || ""}
+              value={bulkUpdates?.adjustment_type ?? ""}
               onValueChange={(value) =>
                 setBulkUpdates({ ...bulkUpdates, adjustment_type: value })
               }
@@ -791,7 +797,7 @@ function renderBulkOperationForm(
               Tipo de Ajuste
             </Label>
             <Select
-              value={bulkUpdates.adjustment_type || ""}
+              value={bulkUpdates?.adjustment_type ?? ""}
               onValueChange={(value) =>
                 setBulkUpdates({ ...bulkUpdates, adjustment_type: value })
               }
@@ -874,7 +880,7 @@ function renderBulkOperationForm(
               suave&quot; (archivar) en su lugar.
             </p>
           </div>
-          <div className="p-2.5 bg-orange-50 border border-orange-200 rounded-lg">
+          <div className="p-2.5 bg-orange-50 border border-orange-200 rounded-none">
             <div className="flex items-start space-x-2">
               <input
                 type="checkbox"

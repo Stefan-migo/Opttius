@@ -1335,154 +1335,159 @@ export default function CustomerDetailPage() {
             </CardHeader>
             <CardContent>
               {customer.orders && customer.orders.length > 0 ? (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Pedido</TableHead>
-                      <TableHead>Fecha</TableHead>
-                      <TableHead>Estado</TableHead>
-                      <TableHead>Pago</TableHead>
-                      <TableHead>Total</TableHead>
-                      <TableHead>Acciones</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {customer.orders.map((order: any) => (
-                      <>
-                        <TableRow
-                          key={order.id}
-                          className="hover:bg-[#AE000010]"
-                        >
-                          <TableCell>
-                            <div className="flex items-center space-x-2">
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => toggleOrderExpansion(order.id)}
-                                className="h-6 w-6 p-0"
-                              >
-                                {expandedOrders.has(order.id) ? "−" : "+"}
-                              </Button>
-                              <div>
-                                <p className="font-medium">
-                                  #{order.order_number}
-                                </p>
-                                <p className="text-sm text-admin-text-tertiary">
-                                  {order.order_items?.length || 0} productos
-                                </p>
-                              </div>
-                            </div>
-                          </TableCell>
-
-                          <TableCell>
-                            {new Date(order.created_at).toLocaleDateString(
-                              "es-CL",
-                              {
-                                day: "2-digit",
-                                month: "short",
-                                year: "numeric",
-                              },
-                            )}
-                          </TableCell>
-
-                          <TableCell>
-                            {getOrderStatusBadge(order.status)}
-                          </TableCell>
-
-                          <TableCell>
-                            <Badge
-                              variant={
-                                order.payment_status === "paid"
-                                  ? "default"
-                                  : "outline"
-                              }
-                            >
-                              {order.payment_status === "paid"
-                                ? "Pagado"
-                                : order.payment_status === "pending"
-                                  ? "Pendiente"
-                                  : order.payment_status === "failed"
-                                    ? "Fallido"
-                                    : order.payment_status}
-                            </Badge>
-                          </TableCell>
-
-                          <TableCell className="font-medium text-admin-success">
-                            {formatCurrency(order.total_amount)}
-                          </TableCell>
-
-                          <TableCell>
-                            <Link href={`/admin/orders/${order.id}`}>
-                              <Button variant="outline" size="sm">
-                                Ver Detalle
-                              </Button>
-                            </Link>
-                          </TableCell>
-                        </TableRow>
-
-                        {/* Expanded Order Items */}
-                        {expandedOrders.has(order.id) &&
-                          order.order_items &&
-                          order.order_items.length > 0 && (
-                            <TableRow key={`${order.id}-items`}>
-                              <TableCell colSpan={6} className="bg-gray-50 p-4">
-                                <div className="space-y-2">
-                                  <p className="text-sm font-medium text-admin-text-primary mb-3">
-                                    Productos del Pedido:
+                <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Pedido</TableHead>
+                        <TableHead>Fecha</TableHead>
+                        <TableHead>Estado</TableHead>
+                        <TableHead>Pago</TableHead>
+                        <TableHead>Total</TableHead>
+                        <TableHead>Acciones</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {customer.orders.map((order: any) => (
+                        <>
+                          <TableRow
+                            key={order.id}
+                            className="hover:bg-[#AE000010]"
+                          >
+                            <TableCell>
+                              <div className="flex items-center space-x-2">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => toggleOrderExpansion(order.id)}
+                                  className="h-6 w-6 p-0"
+                                >
+                                  {expandedOrders.has(order.id) ? "−" : "+"}
+                                </Button>
+                                <div>
+                                  <p className="font-medium">
+                                    #{order.order_number}
                                   </p>
-                                  {order.order_items.map(
-                                    (item: any, idx: number) => {
-                                      const product =
-                                        item.products || item.product;
-                                      return (
-                                        <div
-                                          key={idx}
-                                          className="flex items-center justify-between p-2 bg-white rounded border"
-                                        >
-                                          <div className="flex items-center space-x-3">
-                                            {product?.featured_image ? (
-                                              <img
-                                                src={product.featured_image}
-                                                alt={
-                                                  product.name ||
-                                                  item.product_name
-                                                }
-                                                className="w-10 h-10 object-cover rounded"
-                                              />
-                                            ) : (
-                                              <div className="w-10 h-10 bg-gray-100 rounded flex items-center justify-center">
-                                                <Package className="h-5 w-5 text-gray-400" />
-                                              </div>
-                                            )}
-                                            <div>
-                                              <p className="text-sm font-medium">
-                                                {product?.name ||
-                                                  item.product_name ||
-                                                  "Producto"}
-                                              </p>
-                                              <p className="text-xs text-admin-text-tertiary">
-                                                Cantidad: {item.quantity} ×{" "}
-                                                {formatCurrency(
-                                                  item.unit_price,
-                                                )}
-                                              </p>
-                                            </div>
-                                          </div>
-                                          <p className="text-sm font-medium text-admin-success">
-                                            {formatCurrency(item.total_price)}
-                                          </p>
-                                        </div>
-                                      );
-                                    },
-                                  )}
+                                  <p className="text-sm text-admin-text-tertiary">
+                                    {order.order_items?.length || 0} productos
+                                  </p>
                                 </div>
-                              </TableCell>
-                            </TableRow>
-                          )}
-                      </>
-                    ))}
-                  </TableBody>
-                </Table>
+                              </div>
+                            </TableCell>
+
+                            <TableCell>
+                              {new Date(order.created_at).toLocaleDateString(
+                                "es-CL",
+                                {
+                                  day: "2-digit",
+                                  month: "short",
+                                  year: "numeric",
+                                },
+                              )}
+                            </TableCell>
+
+                            <TableCell>
+                              {getOrderStatusBadge(order.status)}
+                            </TableCell>
+
+                            <TableCell>
+                              <Badge
+                                variant={
+                                  order.payment_status === "paid"
+                                    ? "default"
+                                    : "outline"
+                                }
+                              >
+                                {order.payment_status === "paid"
+                                  ? "Pagado"
+                                  : order.payment_status === "pending"
+                                    ? "Pendiente"
+                                    : order.payment_status === "failed"
+                                      ? "Fallido"
+                                      : order.payment_status}
+                              </Badge>
+                            </TableCell>
+
+                            <TableCell className="font-medium text-admin-success">
+                              {formatCurrency(order.total_amount)}
+                            </TableCell>
+
+                            <TableCell>
+                              <Link href={`/admin/orders/${order.id}`}>
+                                <Button variant="outline" size="sm">
+                                  Ver Detalle
+                                </Button>
+                              </Link>
+                            </TableCell>
+                          </TableRow>
+
+                          {/* Expanded Order Items */}
+                          {expandedOrders.has(order.id) &&
+                            order.order_items &&
+                            order.order_items.length > 0 && (
+                              <TableRow key={`${order.id}-items`}>
+                                <TableCell
+                                  colSpan={6}
+                                  className="bg-gray-50 p-4"
+                                >
+                                  <div className="space-y-2">
+                                    <p className="text-sm font-medium text-admin-text-primary mb-3">
+                                      Productos del Pedido:
+                                    </p>
+                                    {order.order_items.map(
+                                      (item: any, idx: number) => {
+                                        const product =
+                                          item.products || item.product;
+                                        return (
+                                          <div
+                                            key={idx}
+                                            className="flex items-center justify-between p-2 bg-white rounded border"
+                                          >
+                                            <div className="flex items-center space-x-3">
+                                              {product?.featured_image ? (
+                                                <img
+                                                  src={product.featured_image}
+                                                  alt={
+                                                    product.name ||
+                                                    item.product_name
+                                                  }
+                                                  className="w-10 h-10 object-cover rounded"
+                                                />
+                                              ) : (
+                                                <div className="w-10 h-10 bg-gray-100 rounded flex items-center justify-center">
+                                                  <Package className="h-5 w-5 text-gray-400" />
+                                                </div>
+                                              )}
+                                              <div>
+                                                <p className="text-sm font-medium">
+                                                  {product?.name ||
+                                                    item.product_name ||
+                                                    "Producto"}
+                                                </p>
+                                                <p className="text-xs text-admin-text-tertiary">
+                                                  Cantidad: {item.quantity} ×{" "}
+                                                  {formatCurrency(
+                                                    item.unit_price,
+                                                  )}
+                                                </p>
+                                              </div>
+                                            </div>
+                                            <p className="text-sm font-medium text-admin-success">
+                                              {formatCurrency(item.total_price)}
+                                            </p>
+                                          </div>
+                                        );
+                                      },
+                                    )}
+                                  </div>
+                                </TableCell>
+                              </TableRow>
+                            )}
+                        </>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
               ) : (
                 <div className="text-center py-8">
                   <Package className="h-10 w-10 text-admin-text-tertiary mx-auto mb-3 opacity-50" />
