@@ -130,7 +130,7 @@ function CheckoutResultContent() {
           <p className="text-center text-[10px] font-bold text-admin-text-tertiary uppercase tracking-widest">
             ¿Necesitas ayuda? Contacta a{" "}
             <span className="text-admin-accent-primary group-hover:underline cursor-pointer">
-              soporte@opttius.com
+              soporte@opttius.cl
             </span>
           </p>
         </CardContent>

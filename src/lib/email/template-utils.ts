@@ -30,18 +30,18 @@ export function getDefaultVariables(organization?: {
   email?: string;
   support_email?: string;
 }): Record<string, string> {
-  const websiteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://opttius.com";
+  const websiteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://opttius.cl";
 
   return {
     organization_name: organization?.name || "Opttius",
-    organization_email: organization?.email || "contacto@opttius.com",
+    organization_email: organization?.email || "contacto@opttius.cl",
     organization_support_email:
-      organization?.support_email || "soporte@opttius.com",
+      organization?.support_email || "soporte@opttius.cl",
     website_url: websiteUrl,
     // Add legacy variables for backward compatibility if needed
     company_name: organization?.name || "Opttius",
-    support_email: organization?.support_email || "soporte@opttius.com",
-    contact_email: organization?.email || "contacto@opttius.com",
+    support_email: organization?.support_email || "soporte@opttius.cl",
+    contact_email: organization?.email || "contacto@opttius.cl",
   };
 }
 

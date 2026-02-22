@@ -124,7 +124,34 @@ vercel.json
 
 ---
 
-## 6. Referencias
+## 6. Configuración de Dominio y Ópticas B2C (2026-02)
+
+### Dominio de envío
+
+| Elemento                  | Valor                                  |
+| ------------------------- | -------------------------------------- |
+| **Dominio**               | `opttius.cl` (Resend + Cloudflare)     |
+| **From**                  | `noreply@opttius.cl`                   |
+| **Reply-To (global)**     | `contacto@opttius.cl`                  |
+| **Reply-To (por óptica)** | `organizations.metadata.support_email` |
+
+### Ópticas B2C
+
+- Todas las ópticas envían desde `noreply@opttius.cl`.
+- Las respuestas de clientes van a la óptica vía `replyTo` = `metadata.support_email`.
+- Configurar `metadata.support_email` por organización (ej. `contacto@opticaandina.cl`).
+- Dominio propio por óptica: opción futura (requiere verificar dominio en Resend por cada org).
+
+### Variables de entorno
+
+```bash
+RESEND_API_KEY=re_xxxxx
+RESEND_FROM_EMAIL=noreply@opttius.cl
+```
+
+---
+
+## 7. Referencias
 
 - **Arquitectura base:** `docs/email/EMAIL_SYSTEM.md`
 - **Plan original:** `c:\Users\El Mismisimo\.cursor\plans\mejoras_sistema_emails_ad137231.plan.md`

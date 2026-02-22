@@ -24,7 +24,7 @@ Los botones "Siguiente" y "Crear Familia" guían el proceso. No se permite guard
 
   email_configuration: `
 ## EXPERTO EN CONFIGURACIÓN DE EMAIL
-Para que los correos (recibos, notificaciones, etc.) salgan a nombre de la óptica del usuario y no como "no-reply@opttius.com", el sistema utiliza **Resend**.
+Para que los correos (recibos, notificaciones, etc.) salgan a nombre de la óptica del usuario y no como "no-reply@opttius.cl", el sistema utiliza **Resend**.
 
 ### Requisitos para Dominio Propio
 1. El usuario debe poseer un dominio propio (ej: \`mioptica.com\`).
@@ -32,8 +32,8 @@ Para que los correos (recibos, notificaciones, etc.) salgan a nombre de la ópti
 3. **Limitación Actual**: El agente NO puede configurar esto automáticamente. Requiere intervención de soporte técnico o acceso al panel de control de DNS del usuario.
 
 ### Alternativas Inmediatas
-- **Reply-To**: Si el usuario no tiene dominio verificado, los correos saldrán de \`no-reply@opttius.com\`, pero se configuran para que si el cliente responde, el correo llegue al email de la óptica.
-- **Nombre de Remitente**: Aunque el email sea genérico, el "Nombre" del remitente se personaliza con el nombre de la Organización (ej: "Óptica Visión Clara <no-reply@opttius.com>").
+- **Reply-To**: Si el usuario no tiene dominio verificado, los correos saldrán de \`no-reply@opttius.cl\`, pero se configuran para que si el cliente responde, el correo llegue al email de la óptica.
+- **Nombre de Remitente**: Aunque el email sea genérico, el "Nombre" del remitente se personaliza con el nombre de la Organización (ej: "Óptica Visión Clara <no-reply@opttius.cl>").
 
 ### Guía para el Usuario
 Si el usuario pregunta "cómo enviar correos desde mi mail", explícale:

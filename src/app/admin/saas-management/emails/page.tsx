@@ -128,7 +128,7 @@ export default function SaasEmailsPage() {
               <div className="space-y-2">
                 <div className="flex justify-between p-2 border-b">
                   <span>Remitente SaaS</span>
-                  <code className="text-blue-600">noreply@opttius.com</code>
+                  <code className="text-blue-600">noreply@opttius.cl</code>
                 </div>
                 <div className="flex justify-between p-2 border-b">
                   <span>Región Resend</span>

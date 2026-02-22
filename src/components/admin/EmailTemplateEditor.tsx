@@ -321,7 +321,7 @@ export default function EmailTemplateEditor({
     {
       key: "support_email",
       label: "Email de Soporte",
-      description: "soporte@opttius.com",
+      description: "soporte@opttius.cl",
     },
     {
       key: "contact_email",

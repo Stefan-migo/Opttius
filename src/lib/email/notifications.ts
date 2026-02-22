@@ -1235,7 +1235,7 @@ export class EmailNotificationService {
         "resend.dev",
       )
         ? process.env.RESEND_FROM_EMAIL // Use the onboarding email (registered email with Resend)
-        : "contacto@opttius.com"; // Use business email when domain is configured
+        : "contacto@opttius.cl"; // Use business email when domain is configured
 
       const html = `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">

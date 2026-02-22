@@ -15,7 +15,7 @@ const DEFAULT_VARIABLES: Record<string, string> = {
   order_date: new Date().toLocaleDateString("es-AR"),
   company_name: "Opttius",
   organization_name: "Opttius",
-  support_email: "soporte@opttius.com",
+  support_email: "soporte@opttius.cl",
   admin_first_name: "Administrador",
   trial_end_date: new Date(
     Date.now() + 7 * 24 * 60 * 60 * 1000,

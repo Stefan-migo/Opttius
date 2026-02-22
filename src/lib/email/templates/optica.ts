@@ -222,7 +222,7 @@ export async function sendAppointmentConfirmation(
       ...getDefaultVariables({
         name: orgInfo?.name,
         support_email:
-          orgInfo?.metadata?.support_email || "contacto@opttius.com",
+          orgInfo?.metadata?.support_email || "contacto@opttius.cl",
       }),
       customer_name: appointment.customer_name || "Cliente",
       customer_first_name: appointment.customer_first_name || "Cliente",
@@ -257,7 +257,7 @@ export async function sendAppointmentConfirmation(
       subject,
       html,
       text,
-      replyTo: orgInfo?.metadata?.support_email || "contacto@opttius.com",
+      replyTo: orgInfo?.metadata?.support_email || "contacto@opttius.cl",
     });
 
     if (result.success) {
@@ -305,7 +305,7 @@ export async function sendAppointmentReminder(
       ...getDefaultVariables({
         name: orgInfo?.name,
         support_email:
-          orgInfo?.metadata?.support_email || "contacto@opttius.com",
+          orgInfo?.metadata?.support_email || "contacto@opttius.cl",
       }),
       customer_name: appointment.customer_name || "Cliente",
       customer_first_name: appointment.customer_first_name || "Cliente",
@@ -331,7 +331,7 @@ export async function sendAppointmentReminder(
       subject,
       html,
       text,
-      replyTo: orgInfo?.metadata?.support_email || "contacto@opttius.com",
+      replyTo: orgInfo?.metadata?.support_email || "contacto@opttius.cl",
     });
 
     if (result.success) {
@@ -379,7 +379,7 @@ export async function sendAppointmentReminder2h(
       ...getDefaultVariables({
         name: orgInfo?.name,
         support_email:
-          orgInfo?.metadata?.support_email || "contacto@opttius.com",
+          orgInfo?.metadata?.support_email || "contacto@opttius.cl",
       }),
       customer_name: appointment.customer_name || "Cliente",
       customer_first_name: appointment.customer_first_name || "Cliente",
@@ -401,7 +401,7 @@ export async function sendAppointmentReminder2h(
       subject,
       html,
       text,
-      replyTo: orgInfo?.metadata?.support_email || "contacto@opttius.com",
+      replyTo: orgInfo?.metadata?.support_email || "contacto@opttius.cl",
     });
 
     if (result.success) {
@@ -449,7 +449,7 @@ export async function sendAppointmentCancellation(
       ...getDefaultVariables({
         name: orgInfo?.name,
         support_email:
-          orgInfo?.metadata?.support_email || "contacto@opttius.com",
+          orgInfo?.metadata?.support_email || "contacto@opttius.cl",
       }),
       customer_name: appointment.customer_name || "Cliente",
       customer_first_name: appointment.customer_first_name || "Cliente",
@@ -472,7 +472,7 @@ export async function sendAppointmentCancellation(
       subject,
       html,
       text,
-      replyTo: orgInfo?.metadata?.support_email || "contacto@opttius.com",
+      replyTo: orgInfo?.metadata?.support_email || "contacto@opttius.cl",
     });
 
     if (result.success) {
@@ -520,7 +520,7 @@ export async function sendPrescriptionReady(
       ...getDefaultVariables({
         name: orgInfo?.name,
         support_email:
-          orgInfo?.metadata?.support_email || "contacto@opttius.com",
+          orgInfo?.metadata?.support_email || "contacto@opttius.cl",
       }),
       customer_name: prescription.customer_name || "Cliente",
       customer_first_name: prescription.customer_first_name || "Cliente",
@@ -560,7 +560,7 @@ export async function sendPrescriptionReady(
       subject,
       html,
       text,
-      replyTo: orgInfo?.metadata?.support_email || "contacto@opttius.com",
+      replyTo: orgInfo?.metadata?.support_email || "contacto@opttius.cl",
     });
 
     if (result.success) {
@@ -608,7 +608,7 @@ export async function sendPrescriptionExpiring(
       ...getDefaultVariables({
         name: orgInfo?.name,
         support_email:
-          orgInfo?.metadata?.support_email || "contacto@opttius.com",
+          orgInfo?.metadata?.support_email || "contacto@opttius.cl",
       }),
       customer_name: prescription.customer_name || "Cliente",
       customer_first_name: prescription.customer_first_name || "Cliente",
@@ -633,7 +633,7 @@ export async function sendPrescriptionExpiring(
       subject,
       html,
       text,
-      replyTo: orgInfo?.metadata?.support_email || "contacto@opttius.com",
+      replyTo: orgInfo?.metadata?.support_email || "contacto@opttius.cl",
     });
 
     if (result.success) {
@@ -681,7 +681,7 @@ export async function sendWorkOrderReady(
       ...getDefaultVariables({
         name: orgInfo?.name,
         support_email:
-          orgInfo?.metadata?.support_email || "contacto@opttius.com",
+          orgInfo?.metadata?.support_email || "contacto@opttius.cl",
       }),
       customer_name: workOrder.customer_name || "Cliente",
       customer_first_name: workOrder.customer_first_name || "Cliente",
@@ -713,7 +713,7 @@ export async function sendWorkOrderReady(
       subject,
       html,
       text,
-      replyTo: orgInfo?.metadata?.support_email || "contacto@opttius.com",
+      replyTo: orgInfo?.metadata?.support_email || "contacto@opttius.cl",
     });
 
     if (result.success) {
@@ -773,7 +773,7 @@ export async function sendQuoteSent(
       ...getDefaultVariables({
         name: orgInfo?.name,
         support_email:
-          orgInfo?.metadata?.support_email || "contacto@opttius.com",
+          orgInfo?.metadata?.support_email || "contacto@opttius.cl",
       }),
       customer_name: quote.customer_name || "Cliente",
       customer_first_name: quote.customer_first_name || "Cliente",
@@ -811,7 +811,7 @@ export async function sendQuoteSent(
       subject,
       html,
       text,
-      replyTo: orgInfo?.metadata?.support_email || "contacto@opttius.com",
+      replyTo: orgInfo?.metadata?.support_email || "contacto@opttius.cl",
     });
 
     if (result.success) {
@@ -859,7 +859,7 @@ export async function sendQuoteExpiring(
       ...getDefaultVariables({
         name: orgInfo?.name,
         support_email:
-          orgInfo?.metadata?.support_email || "contacto@opttius.com",
+          orgInfo?.metadata?.support_email || "contacto@opttius.cl",
       }),
       customer_name: quote.customer_name || "Cliente",
       customer_first_name: quote.customer_first_name || "Cliente",
@@ -883,7 +883,7 @@ export async function sendQuoteExpiring(
       subject,
       html,
       text,
-      replyTo: orgInfo?.metadata?.support_email || "contacto@opttius.com",
+      replyTo: orgInfo?.metadata?.support_email || "contacto@opttius.cl",
     });
 
     if (result.success) {
@@ -931,13 +931,13 @@ export async function sendAccountWelcomeEmail(
       ...getDefaultVariables({
         name: orgInfo?.name,
         support_email:
-          orgInfo?.metadata?.support_email || "contacto@opttius.com",
+          orgInfo?.metadata?.support_email || "contacto@opttius.cl",
       }),
       customer_name: customer.name || "Cliente",
       customer_first_name: customer.first_name || "Cliente",
       dashboard_url:
         customer.dashboard_url ||
-        `${process.env.NEXT_PUBLIC_APP_URL || "https://opttius.com"}/mi-cuenta`,
+        `${process.env.NEXT_PUBLIC_APP_URL || "https://opttius.cl"}/mi-cuenta`,
       organization_name: orgInfo?.name || "Nuestra Óptica",
       branch_phone: "",
       branch_email: "",
@@ -953,7 +953,7 @@ export async function sendAccountWelcomeEmail(
       subject,
       html,
       text,
-      replyTo: orgInfo?.metadata?.support_email || "contacto@opttius.com",
+      replyTo: orgInfo?.metadata?.support_email || "contacto@opttius.cl",
     });
 
     if (result.success) {
@@ -982,7 +982,7 @@ export async function sendContactFormNotification(
 
     // El email se envía al negocio, no al cliente
     const recipientEmail =
-      orgInfo?.metadata?.support_email || "contacto@opttius.com";
+      orgInfo?.metadata?.support_email || "contacto@opttius.cl";
 
     const html = `
       <div style="font-family: 'Helvetica Neue', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
@@ -1087,7 +1087,7 @@ export async function sendBirthdayPromo(
       ...getDefaultVariables({
         name: orgInfo?.name,
         support_email:
-          orgInfo?.metadata?.support_email || "contacto@opttius.com",
+          orgInfo?.metadata?.support_email || "contacto@opttius.cl",
       }),
       customer_name: data.customer_name || "Cliente",
       customer_first_name: data.customer_first_name || "Cliente",
@@ -1109,7 +1109,7 @@ export async function sendBirthdayPromo(
       subject,
       html,
       text,
-      replyTo: orgInfo?.metadata?.support_email || "contacto@opttius.com",
+      replyTo: orgInfo?.metadata?.support_email || "contacto@opttius.cl",
     });
 
     if (result.success) {

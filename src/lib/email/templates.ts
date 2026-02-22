@@ -144,7 +144,7 @@ function createBaseLayout(content: string, title: string): string {
     </div>
     <div class="footer">
       <p><strong>OPTTIUS CONSCIENTE</strong></p>
-      <p>Argentina | contacto@opttius.com</p>
+      <p>Argentina | contacto@opttius.cl</p>
       <p style="margin-top: 15px;">
         <a href="${emailConfig.domain}" style="color: #8B5A2B;">Visitar sitio web</a> |
         <a href="${emailConfig.domain}/contacto" style="color: #8B5A2B;">Contacto</a>
@@ -217,7 +217,7 @@ ${data.estimatedDelivery ? `Entrega estimada: ${data.estimatedDelivery}` : ""}
 Ver detalles: ${emailConfig.domain}/mi-cuenta/pedidos
 
 OPTTIUS CONSCIENTE
-Argentina | contacto@opttius.com
+Argentina | contacto@opttius.cl
   `;
 
   return {
@@ -286,7 +286,7 @@ Tu pedido está siendo preparado y te notificaremos cuando esté listo para el e
 Ver mi pedido: ${emailConfig.domain}/mi-cuenta/pedidos
 
 OPTTIUS CONSCIENTE
-Argentina | contacto@opttius.com
+Argentina | contacto@opttius.cl
   `;
 
   return {
@@ -358,7 +358,7 @@ Intentar nuevamente: ${emailConfig.domain}/checkout?order=${data.orderNumber}
 Tu pedido se mantendrá reservado por 24 horas.
 
 OPTTIUS CONSCIENTE
-Argentina | contacto@opttius.com
+Argentina | contacto@opttius.cl
   `;
 
   return {
@@ -434,7 +434,7 @@ Acceder a mi área privada: ${data.accessUrl}
 Guarda este correo para futuras referencias.
 
 OPTTIUS CONSCIENTE
-Argentina | contacto@opttius.com
+Argentina | contacto@opttius.cl
   `;
 
   return {

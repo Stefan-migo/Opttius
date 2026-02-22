@@ -102,7 +102,7 @@ export async function sendTicketCreatedEmail(ticket: SupportTicket) {
               <table width="100%" cellpadding="0" cellspacing="0" style="margin: 30px 0;">
                 <tr>
                   <td align="center">
-                    <a href="${process.env.NEXT_PUBLIC_APP_URL || "https://opttius.com"}/soporte/tickets/${ticket.id}" 
+                    <a href="${process.env.NEXT_PUBLIC_APP_URL || "https://opttius.cl"}/soporte/tickets/${ticket.id}" 
                        style="display: inline-block; background: linear-gradient(135deg, #8B4513 0%, #D2691E 100%); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 6px; font-weight: 600; font-size: 16px;">
                       Ver Ticket
                     </a>
@@ -150,7 +150,7 @@ Detalles del ticket:
 
 Nos esforzamos por responder a todos los tickets dentro de las próximas 24 horas.
 
-Ver ticket: ${process.env.NEXT_PUBLIC_APP_URL || "https://opttius.com"}/soporte/tickets/${ticket.id}
+Ver ticket: ${process.env.NEXT_PUBLIC_APP_URL || "https://opttius.cl"}/soporte/tickets/${ticket.id}
 
 ¿Tienes preguntas? Responde a este email o contáctanos en contacto@daluzconsciente.com
 
@@ -162,7 +162,7 @@ Ver ticket: ${process.env.NEXT_PUBLIC_APP_URL || "https://opttius.com"}/soporte/
     subject,
     html,
     text,
-    replyTo: "soporte@opttius.com",
+    replyTo: "soporte@opttius.cl",
   });
 }
 
@@ -235,7 +235,7 @@ export async function sendNewResponseEmail(
               <table width="100%" cellpadding="0" cellspacing="0" style="margin: 30px 0;">
                 <tr>
                   <td align="center">
-                    <a href="${process.env.NEXT_PUBLIC_APP_URL || "https://opttius.com"}/soporte/tickets/${ticket.id}" 
+                    <a href="${process.env.NEXT_PUBLIC_APP_URL || "https://opttius.cl"}/soporte/tickets/${ticket.id}" 
                        style="display: inline-block; background: linear-gradient(135deg, #8B4513 0%, #D2691E 100%); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 6px; font-weight: 600; font-size: 16px;">
                       Ver Ticket Completo
                     </a>
@@ -252,7 +252,7 @@ export async function sendNewResponseEmail(
                 ¿Tienes preguntas? Responde a este email o contáctanos en:
               </p>
               <p style="margin: 0; color: #8B4513; font-size: 14px; font-weight: 600;">
-                soporte@opttius.com
+                soporte@opttius.cl
               </p>
               <p style="margin: 15px 0 0 0; color: #999999; font-size: 12px;">
                 © ${new Date().getFullYear()} OPTTIUS CONSCIENTE. Todos los derechos reservados.
@@ -280,7 +280,7 @@ Ticket: ${ticket.subject}
 Respuesta del equipo:
 ${message.message}
 
-Ver ticket completo: ${process.env.NEXT_PUBLIC_APP_URL || "https://opttius.com"}/soporte/tickets/${ticket.id}
+Ver ticket completo: ${process.env.NEXT_PUBLIC_APP_URL || "https://opttius.cl"}/soporte/tickets/${ticket.id}
 
 © ${new Date().getFullYear()} OPTTIUS CONSCIENTE
   `;
@@ -290,7 +290,7 @@ Ver ticket completo: ${process.env.NEXT_PUBLIC_APP_URL || "https://opttius.com"}
     subject,
     html,
     text,
-    replyTo: "soporte@opttius.com",
+    replyTo: "soporte@opttius.cl",
   });
 }
 
@@ -385,7 +385,7 @@ export async function sendStatusChangeEmail(
               <table width="100%" cellpadding="0" cellspacing="0" style="margin: 30px 0;">
                 <tr>
                   <td align="center">
-                    <a href="${process.env.NEXT_PUBLIC_APP_URL || "https://opttius.com"}/soporte/tickets/${ticket.id}" 
+                    <a href="${process.env.NEXT_PUBLIC_APP_URL || "https://opttius.cl"}/soporte/tickets/${ticket.id}" 
                        style="display: inline-block; background: linear-gradient(135deg, #8B4513 0%, #D2691E 100%); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 6px; font-weight: 600; font-size: 16px;">
                       Ver Ticket
                     </a>
@@ -402,7 +402,7 @@ export async function sendStatusChangeEmail(
                 ¿Tienes preguntas? Responde a este email o contáctanos en:
               </p>
               <p style="margin: 0; color: #8B4513; font-size: 14px; font-weight: 600;">
-                soporte@opttius.com
+                soporte@opttius.cl
               </p>
               <p style="margin: 15px 0 0 0; color: #999999; font-size: 12px;">
                 © ${new Date().getFullYear()} OPTTIUS CONSCIENTE. Todos los derechos reservados.
@@ -429,7 +429,7 @@ Ticket: ${ticket.subject}
 Estado anterior: ${getStatusLabel(oldStatus)}
 Nuevo estado: ${getStatusLabel(newStatus)}
 
-Ver ticket: ${process.env.NEXT_PUBLIC_APP_URL || "https://opttius.com"}/soporte/tickets/${ticket.id}
+Ver ticket: ${process.env.NEXT_PUBLIC_APP_URL || "https://opttius.cl"}/soporte/tickets/${ticket.id}
 
 © ${new Date().getFullYear()} OPTTIUS CONSCIENTE
   `;
@@ -439,7 +439,7 @@ Ver ticket: ${process.env.NEXT_PUBLIC_APP_URL || "https://opttius.com"}/soporte/
     subject,
     html,
     text,
-    replyTo: "soporte@opttius.com",
+    replyTo: "soporte@opttius.cl",
   });
 }
 

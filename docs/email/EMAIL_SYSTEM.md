@@ -163,12 +163,12 @@ Evento (ej: pedido creado)
 | Variable                   | Valor por defecto    |
 | -------------------------- | -------------------- |
 | organization_name          | Opttius / nombre org |
-| organization_email         | contacto@opttius.com |
-| organization_support_email | soporte@opttius.com  |
-| support_email              | soporte@opttius.com  |
+| organization_email         | contacto@opttius.cl  |
+| organization_support_email | soporte@opttius.cl   |
+| support_email              | soporte@opttius.cl   |
 | website_url                | NEXT_PUBLIC_APP_URL  |
 | company_name               | Opttius / nombre org |
-| contact_email              | contacto@opttius.com |
+| contact_email              | contacto@opttius.cl  |
 
 ### 5.2 Óptica (por contexto)
 
@@ -193,22 +193,27 @@ admin_first_name, organization_name, dashboard_url, support_url, trial_end_date,
 ### 6.1 Variables de Entorno
 
 ```bash
-RESEND_API_KEY=re_xxxxx           # Obligatorio para envío
-RESEND_FROM_EMAIL=noreply@opttius.com  # Remitente (default: noreply@opttius.com)
-NEXT_PUBLIC_APP_URL=https://opttius.com  # Para links en emails
+RESEND_API_KEY=re_xxxxx                  # Obligatorio para envío
+RESEND_FROM_EMAIL=noreply@opttius.cl     # Remitente (dominio opttius.cl verificado)
+NEXT_PUBLIC_APP_URL=https://opttius.cl   # Para links en emails
 ```
 
-### 6.2 Dominio Resend.dev (Testing)
+### 6.2 Dominio y Reply-To
+
+- **From:** `noreply@opttius.cl` (global, dominio verificado en Resend)
+- **Reply-To (global):** `contacto@opttius.cl`
+- **Reply-To (por óptica):** `organizations.metadata.support_email` (ej. `contacto@opticaandina.cl`)
+
+### 6.3 Dominio Resend.dev (Testing)
 
 - Con dominio `resend.dev`, Resend solo permite enviar al email verificado
 - `normalizeRecipient()` redirige todos los destinatarios al `RESEND_FROM_EMAIL`
 - Límite gratuito: 50 emails/día
 
-### 6.3 Producción
+### 6.4 Producción (opttius.cl)
 
-- Verificar dominio en Resend
-- Configurar DKIM/SPF
-- Usar dominio propio en `RESEND_FROM_EMAIL`
+- Dominio `opttius.cl` verificado en Resend (DKIM, SPF, MX en subdominio `send`)
+- Cloudflare Email Routing para recibir en `contacto@opttius.cl` → Gmail
 
 ---
 

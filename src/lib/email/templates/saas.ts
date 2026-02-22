@@ -147,7 +147,7 @@ export async function sendSaaSWelcome(
       login_url: user.login_url || `${process.env.NEXT_PUBLIC_APP_URL}/login`,
       dashboard_url:
         user.dashboard_url || `${process.env.NEXT_PUBLIC_APP_URL}/dashboard`,
-      support_email: "soporte@opttius.com",
+      support_email: "soporte@opttius.cl",
     };
 
     const subject = replaceTemplateVariables(template.subject, variables);
@@ -160,7 +160,7 @@ export async function sendSaaSWelcome(
       subject,
       html,
       text,
-      replyTo: "soporte@opttius.com",
+      replyTo: "soporte@opttius.cl",
     });
 
     if (result.success) {
@@ -213,7 +213,7 @@ export async function sendSaaSTrialEnding(
       subject,
       html,
       text,
-      replyTo: "soporte@opttius.com",
+      replyTo: "soporte@opttius.cl",
     });
 
     if (result.success) {
@@ -268,7 +268,7 @@ export async function sendSaaSSubscriptionSuccess(
       subject,
       html,
       text,
-      replyTo: "facturas@opttius.com",
+      replyTo: "facturas@opttius.cl",
     });
 
     if (result.success) {
@@ -322,7 +322,7 @@ export async function sendSaaSPaymentFailed(
       subject,
       html,
       text,
-      replyTo: "facturas@opttius.com",
+      replyTo: "facturas@opttius.cl",
     });
 
     if (result.success) {
@@ -375,7 +375,7 @@ export async function sendSaaSPaymentReminder(
       subject,
       html,
       text,
-      replyTo: "facturas@opttius.com",
+      replyTo: "facturas@opttius.cl",
     });
 
     if (result.success) {
@@ -441,7 +441,7 @@ export async function sendSaaSSecurityAlert(
       subject,
       html,
       text,
-      replyTo: "seguridad@opttius.com",
+      replyTo: "seguridad@opttius.cl",
     });
 
     if (result.success) {
@@ -496,7 +496,7 @@ export async function sendSaaSOnboardingStep(
       subject,
       html,
       text,
-      replyTo: "soporte@opttius.com",
+      replyTo: "soporte@opttius.cl",
     });
 
     if (result.success) {
@@ -537,7 +537,7 @@ export async function sendSaaSTermsUpdate(
       organization_name: organizationName,
       terms_url: terms_url,
       acceptance_url: acceptance_url,
-      support_email: "legal@opttius.com",
+      support_email: "legal@opttius.cl",
     };
 
     const subject = replaceTemplateVariables(template.subject, variables);
@@ -550,7 +550,7 @@ export async function sendSaaSTermsUpdate(
       subject,
       html,
       text,
-      replyTo: "legal@opttius.com",
+      replyTo: "legal@opttius.cl",
     });
 
     if (result.success) {
@@ -606,7 +606,7 @@ export async function sendSaaSMaintenanceNotice(
       subject,
       html,
       text,
-      replyTo: "soporte@opttius.com",
+      replyTo: "soporte@opttius.cl",
     });
 
     if (result.success) {
@@ -675,7 +675,7 @@ export async function sendSaaSUsageAlert(
       subject,
       html,
       text,
-      replyTo: "soporte@opttius.com",
+      replyTo: "soporte@opttius.cl",
     });
 
     if (result.success) {
@@ -733,7 +733,7 @@ export async function sendSaaSFeatureAnnouncement(
       subject,
       html,
       text,
-      replyTo: "producto@opttius.com",
+      replyTo: "producto@opttius.cl",
     });
 
     if (result.success) {

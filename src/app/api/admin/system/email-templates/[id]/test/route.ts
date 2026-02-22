@@ -15,7 +15,7 @@ const DEFAULT_VARIABLES: Record<string, string> = {
   order_date: new Date().toLocaleDateString("es-AR"),
   company_name: "Nuestra Óptica",
   organization_name: "Nuestra Óptica",
-  support_email: "soporte@opttius.com",
+  support_email: "soporte@opttius.cl",
   ...Object.fromEntries(
     [
       "order_items",

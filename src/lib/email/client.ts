@@ -13,9 +13,9 @@ export const resend = process.env.RESEND_API_KEY
 
 // Email configuration
 export const emailConfig = {
-  from: process.env.RESEND_FROM_EMAIL || "noreply@opttius.com",
-  replyTo: "contacto@opttius.com",
-  domain: process.env.NEXT_PUBLIC_APP_URL || "https://opttius.com",
+  from: process.env.RESEND_FROM_EMAIL || "noreply@opttius.cl",
+  replyTo: "contacto@opttius.cl",
+  domain: process.env.NEXT_PUBLIC_APP_URL || "https://opttius.cl",
 };
 
 // Email types

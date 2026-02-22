@@ -166,7 +166,7 @@ export async function sendSaasTicketCreatedEmail(ticket: SaasSupportTicket) {
               <table width="100%" cellpadding="0" cellspacing="0" style="margin: 30px 0;">
                 <tr>
                   <td align="center">
-                    <a href="${process.env.NEXT_PUBLIC_APP_URL || "https://opttius.com"}/support/ticket/${ticket.ticket_number}" 
+                    <a href="${process.env.NEXT_PUBLIC_APP_URL || "https://opttius.cl"}/support/ticket/${ticket.ticket_number}" 
                        style="display: inline-block; background: linear-gradient(135deg, #1E40AF 0%, #3B82F6 100%); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 6px; font-weight: 600; font-size: 16px;">
                       Ver Estado del Ticket
                     </a>
@@ -183,7 +183,7 @@ export async function sendSaasTicketCreatedEmail(ticket: SaasSupportTicket) {
                 ¿Tienes preguntas? Responde a este email o contáctanos en:
               </p>
               <p style="margin: 0; color: #1E40AF; font-size: 14px; font-weight: 600;">
-                soporte@opttius.com
+                soporte@opttius.cl
               </p>
               <p style="margin: 15px 0 0 0; color: #999999; font-size: 12px;">
                 © ${new Date().getFullYear()} OPTTIUS. Todos los derechos reservados.
@@ -216,9 +216,9 @@ ${ticket.organization ? `- Organización: ${ticket.organization.name}` : ""}
 
 Nos esforzamos por responder a todos los tickets dentro de las próximas 24 horas.
 
-Ver ticket: ${process.env.NEXT_PUBLIC_APP_URL || "https://opttius.com"}/support/ticket/${ticket.ticket_number}
+Ver ticket: ${process.env.NEXT_PUBLIC_APP_URL || "https://opttius.cl"}/support/ticket/${ticket.ticket_number}
 
-¿Tienes preguntas? Responde a este email o contáctanos en soporte@opttius.com
+¿Tienes preguntas? Responde a este email o contáctanos en soporte@opttius.cl
 
 © ${new Date().getFullYear()} OPTTIUS
   `;
@@ -228,7 +228,7 @@ Ver ticket: ${process.env.NEXT_PUBLIC_APP_URL || "https://opttius.com"}/support/
     subject,
     html,
     text,
-    replyTo: "soporte@opttius.com",
+    replyTo: "soporte@opttius.cl",
   });
 }
 
@@ -300,7 +300,7 @@ export async function sendSaasNewResponseEmail(
               <table width="100%" cellpadding="0" cellspacing="0" style="margin: 30px 0;">
                 <tr>
                   <td align="center">
-                    <a href="${process.env.NEXT_PUBLIC_APP_URL || "https://opttius.com"}/support/ticket/${ticket.ticket_number}" 
+                    <a href="${process.env.NEXT_PUBLIC_APP_URL || "https://opttius.cl"}/support/ticket/${ticket.ticket_number}" 
                        style="display: inline-block; background: linear-gradient(135deg, #1E40AF 0%, #3B82F6 100%); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 6px; font-weight: 600; font-size: 16px;">
                       Ver Ticket Completo
                     </a>
@@ -317,7 +317,7 @@ export async function sendSaasNewResponseEmail(
                 ¿Tienes preguntas? Responde a este email o contáctanos en:
               </p>
               <p style="margin: 0; color: #1E40AF; font-size: 14px; font-weight: 600;">
-                soporte@opttius.com
+                soporte@opttius.cl
               </p>
               <p style="margin: 15px 0 0 0; color: #999999; font-size: 12px;">
                 © ${new Date().getFullYear()} OPTTIUS. Todos los derechos reservados.
@@ -345,7 +345,7 @@ Ticket: ${ticket.subject}
 ${message.is_from_customer ? "Tu mensaje:" : "Respuesta del equipo:"}
 ${message.message}
 
-Ver ticket completo: ${process.env.NEXT_PUBLIC_APP_URL || "https://opttius.com"}/support/ticket/${ticket.ticket_number}
+Ver ticket completo: ${process.env.NEXT_PUBLIC_APP_URL || "https://opttius.cl"}/support/ticket/${ticket.ticket_number}
 
 © ${new Date().getFullYear()} OPTTIUS
   `;
@@ -355,7 +355,7 @@ Ver ticket completo: ${process.env.NEXT_PUBLIC_APP_URL || "https://opttius.com"}
     subject,
     html,
     text,
-    replyTo: "soporte@opttius.com",
+    replyTo: "soporte@opttius.cl",
   });
 }
 
@@ -450,7 +450,7 @@ export async function sendSaasTicketAssignedEmail(
               <table width="100%" cellpadding="0" cellspacing="0" style="margin: 30px 0;">
                 <tr>
                   <td align="center">
-                    <a href="${process.env.NEXT_PUBLIC_APP_URL || "https://opttius.com"}/admin/saas-management/support/tickets/${ticket.id}" 
+                    <a href="${process.env.NEXT_PUBLIC_APP_URL || "https://opttius.cl"}/admin/saas-management/support/tickets/${ticket.id}" 
                        style="display: inline-block; background: linear-gradient(135deg, #1E40AF 0%, #3B82F6 100%); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 6px; font-weight: 600; font-size: 16px;">
                       Ver Ticket
                     </a>
@@ -491,7 +491,7 @@ Detalles:
 - Solicitante: ${ticket.requester_name || ticket.requester_email}
 ${ticket.organization ? `- Organización: ${ticket.organization.name}` : ""}
 
-Ver ticket: ${process.env.NEXT_PUBLIC_APP_URL || "https://opttius.com"}/admin/saas-management/support/tickets/${ticket.id}
+Ver ticket: ${process.env.NEXT_PUBLIC_APP_URL || "https://opttius.cl"}/admin/saas-management/support/tickets/${ticket.id}
 
 © ${new Date().getFullYear()} OPTTIUS
   `;
@@ -577,7 +577,7 @@ export async function sendSaasTicketResolvedEmail(
               <table width="100%" cellpadding="0" cellspacing="0" style="margin: 30px 0;">
                 <tr>
                   <td align="center">
-                    <a href="${process.env.NEXT_PUBLIC_APP_URL || "https://opttius.com"}/support/ticket/${ticket.ticket_number}" 
+                    <a href="${process.env.NEXT_PUBLIC_APP_URL || "https://opttius.cl"}/support/ticket/${ticket.ticket_number}" 
                        style="display: inline-block; background: linear-gradient(135deg, #059669 0%, #10B981 100%); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 6px; font-weight: 600; font-size: 16px;">
                       Ver Ticket
                     </a>
@@ -594,7 +594,7 @@ export async function sendSaasTicketResolvedEmail(
                 ¿Necesitas más ayuda? Contáctanos en:
               </p>
               <p style="margin: 0; color: #1E40AF; font-size: 14px; font-weight: 600;">
-                soporte@opttius.com
+                soporte@opttius.cl
               </p>
               <p style="margin: 15px 0 0 0; color: #999999; font-size: 12px;">
                 © ${new Date().getFullYear()} OPTTIUS. Todos los derechos reservados.
@@ -622,9 +622,9 @@ ${resolution ? `\nResolución:\n${resolution}` : ""}
 
 Si tienes alguna pregunta adicional o necesitas más ayuda, no dudes en crear un nuevo ticket.
 
-Ver ticket: ${process.env.NEXT_PUBLIC_APP_URL || "https://opttius.com"}/support/ticket/${ticket.ticket_number}
+Ver ticket: ${process.env.NEXT_PUBLIC_APP_URL || "https://opttius.cl"}/support/ticket/${ticket.ticket_number}
 
-¿Necesitas más ayuda? Contáctanos en soporte@opttius.com
+¿Necesitas más ayuda? Contáctanos en soporte@opttius.cl
 
 © ${new Date().getFullYear()} OPTTIUS
   `;
@@ -634,6 +634,6 @@ Ver ticket: ${process.env.NEXT_PUBLIC_APP_URL || "https://opttius.com"}/support/
     subject,
     html,
     text,
-    replyTo: "soporte@opttius.com",
+    replyTo: "soporte@opttius.cl",
   });
 }
