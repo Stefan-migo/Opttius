@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
           { status: 400 },
         );
       }
-      // Si ya tiene la demo asignada, devolver éxito
+      // Ya tiene demo asignada. is_super_admin reconoce role=super_admin en admin_users.
       return NextResponse.json({
         success: true,
         organizationId: DEMO_ORG_ID,
