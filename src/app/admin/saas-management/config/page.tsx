@@ -93,7 +93,7 @@ export default function SaasConfigPage() {
         </div>
       </div>
 
-      <Card className="rounded-none border border-border">
+      <Card className="admin-card">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Calendar className="h-5 w-5" />

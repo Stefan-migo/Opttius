@@ -451,7 +451,7 @@ export default function SubscriptionsPage() {
 
       {/* Alertas */}
       {subscriptions.some((sub) => sub.isExpiringSoon || sub.isExpired) && (
-        <Card className="rounded-none border border-border border-yellow-200 bg-yellow-50">
+        <Card className="admin-card border-yellow-200 bg-yellow-50">
           <CardContent className="pt-6">
             <div className="flex items-center gap-2">
               <AlertTriangle className="h-5 w-5 text-yellow-600" />
@@ -465,7 +465,7 @@ export default function SubscriptionsPage() {
       )}
 
       {/* Filtros */}
-      <Card className="rounded-none border border-border">
+      <Card className="admin-card">
         <CardContent className="pt-6">
           <div className="flex flex-col md:flex-row gap-4">
             <Select
@@ -513,7 +513,7 @@ export default function SubscriptionsPage() {
       </Card>
 
       {/* Tabla de suscripciones */}
-      <Card className="rounded-none border border-border">
+      <Card className="admin-card">
         <CardHeader>
           <CardTitle>Suscripciones ({totalCount})</CardTitle>
         </CardHeader>

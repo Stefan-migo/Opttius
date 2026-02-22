@@ -564,7 +564,7 @@ export default function OrganizationDetailsPage() {
   if (error || !organization) {
     return (
       <div className="p-6">
-        <Card className="rounded-none border border-border">
+        <Card className="admin-card">
           <CardContent className="pt-6">
             <div className="text-center text-red-600">
               <p>Error: {error || "Organización no encontrada"}</p>
@@ -630,7 +630,7 @@ export default function OrganizationDetailsPage() {
 
       {/* Estadísticas principales */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-        <Card className="rounded-none border border-border">
+        <Card className="admin-card">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
               Usuarios Activos
@@ -647,7 +647,7 @@ export default function OrganizationDetailsPage() {
           </CardContent>
         </Card>
 
-        <Card className="rounded-none border border-border">
+        <Card className="admin-card">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Sucursales</CardTitle>
             <MapPin className="h-4 w-4 text-muted-foreground" />
@@ -659,7 +659,7 @@ export default function OrganizationDetailsPage() {
           </CardContent>
         </Card>
 
-        <Card className="rounded-none border border-border">
+        <Card className="admin-card">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Órdenes</CardTitle>
             <ShoppingCart className="h-4 w-4 text-muted-foreground" />
@@ -671,7 +671,7 @@ export default function OrganizationDetailsPage() {
           </CardContent>
         </Card>
 
-        <Card className="rounded-none border border-border">
+        <Card className="admin-card">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Productos</CardTitle>
             <Package className="h-4 w-4 text-muted-foreground" />
@@ -683,7 +683,7 @@ export default function OrganizationDetailsPage() {
           </CardContent>
         </Card>
 
-        <Card className="rounded-none border border-border">
+        <Card className="admin-card">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Suscripción</CardTitle>
             <Crown className="h-4 w-4 text-muted-foreground" />
@@ -739,7 +739,7 @@ export default function OrganizationDetailsPage() {
         <TabsContent value="overview" className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Información general */}
-            <Card className="rounded-none border border-border">
+            <Card className="admin-card">
               <CardHeader>
                 <CardTitle>Información General</CardTitle>
               </CardHeader>
@@ -801,7 +801,7 @@ export default function OrganizationDetailsPage() {
             </Card>
 
             {/* Usuarios recientes */}
-            <Card className="rounded-none border border-border">
+            <Card className="admin-card">
               <CardHeader>
                 <CardTitle>Usuarios Recientes</CardTitle>
               </CardHeader>
@@ -849,7 +849,7 @@ export default function OrganizationDetailsPage() {
 
         {/* Tab: Sucursales */}
         <TabsContent value="branches" className="space-y-6">
-          <Card className="rounded-none border border-border">
+          <Card className="admin-card">
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle>Sucursales</CardTitle>
               <Button
@@ -953,7 +953,7 @@ export default function OrganizationDetailsPage() {
 
         {/* Tab: Usuarios */}
         <TabsContent value="users" className="space-y-6">
-          <Card className="rounded-none border border-border">
+          <Card className="admin-card">
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle>Usuarios</CardTitle>
               <Button

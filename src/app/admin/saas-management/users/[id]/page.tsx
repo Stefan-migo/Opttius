@@ -19,10 +19,20 @@ import {
   XCircle,
   Crown,
   Loader2,
+  Trash2,
+  AlertTriangle,
 } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
 import { formatDate } from "@/lib/utils";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 interface UserDetails {
   id: string;
@@ -78,6 +88,8 @@ export default function UserDetailsPage() {
   const [user, setUser] = useState<UserDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     if (userId) {
@@ -160,6 +172,38 @@ export default function UserDetailsPage() {
     (access) => access.branch_id === null,
   );
 
+  const handleDeleteUser = async () => {
+    if (!user) return;
+    try {
+      setDeleting(true);
+      const response = await fetch(
+        `/api/admin/saas-management/users/${user.id}`,
+        {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ confirm: true }),
+        },
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.error || data.details || "Error al eliminar usuario",
+        );
+      }
+
+      toast.success("Usuario eliminado correctamente");
+      router.push("/admin/saas-management/users");
+    } catch (err) {
+      toast.error(
+        err instanceof Error ? err.message : "Error al eliminar usuario",
+      );
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -191,7 +235,7 @@ export default function UserDetailsPage() {
             </h1>
           </div>
         </div>
-        <Card className="rounded-none border border-border">
+        <Card className="admin-card">
           <CardContent className="pt-6">
             <div className="text-center py-12 text-red-600">
               {error || "Usuario no encontrado"}
@@ -235,10 +279,19 @@ export default function UserDetailsPage() {
             </p>
           </div>
         </div>
+        {user.role !== "root" && user.role !== "dev" && (
+          <Button
+            variant="destructive"
+            onClick={() => setDeleteDialogOpen(true)}
+          >
+            <Trash2 className="h-4 w-4 mr-2" />
+            Eliminar usuario
+          </Button>
+        )}
       </div>
 
       {/* Información Principal */}
-      <Card className="rounded-none border border-border">
+      <Card className="admin-card">
         <CardHeader>
           <CardTitle className="flex items-center gap-3">
             <User className="h-5 w-5" />
@@ -310,7 +363,7 @@ export default function UserDetailsPage() {
 
       {/* Organización */}
       {user.organization && (
-        <Card className="rounded-none border border-border">
+        <Card className="admin-card">
           <CardHeader>
             <CardTitle className="flex items-center gap-3">
               <Building2 className="h-5 w-5" />
@@ -352,7 +405,7 @@ export default function UserDetailsPage() {
       )}
 
       {/* Acceso a Sucursales */}
-      <Card className="rounded-none border border-border">
+      <Card className="admin-card">
         <CardHeader>
           <CardTitle className="flex items-center gap-3">
             <MapPin className="h-5 w-5" />
@@ -393,7 +446,7 @@ export default function UserDetailsPage() {
 
       {/* Actividad Reciente */}
       {user.recentActivity && user.recentActivity.length > 0 && (
-        <Card className="rounded-none border border-border">
+        <Card className="admin-card">
           <CardHeader>
             <CardTitle className="flex items-center gap-3">
               <Activity className="h-5 w-5" />
@@ -424,7 +477,7 @@ export default function UserDetailsPage() {
       )}
 
       {/* Información del Sistema */}
-      <Card className="rounded-none border border-border">
+      <Card className="admin-card">
         <CardHeader>
           <CardTitle className="flex items-center gap-3">
             <Shield className="h-5 w-5" />
@@ -454,6 +507,77 @@ export default function UserDetailsPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Dialog para eliminar usuario */}
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-red-500" />
+              Confirmar Eliminación de Usuario
+            </DialogTitle>
+            <DialogDescription>
+              <div className="space-y-4 mt-4">
+                <p className="font-semibold text-lg">
+                  ¿Estás seguro de que deseas eliminar al usuario{" "}
+                  <span className="text-red-600">&quot;{fullName}&quot;</span> (
+                  {user.email})?
+                </p>
+
+                <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                  <div className="flex items-start gap-3">
+                    <AlertTriangle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
+                    <div className="flex-1">
+                      <p className="font-semibold text-red-800 dark:text-red-300 mb-2">
+                        Esta acción es IRREVERSIBLE
+                      </p>
+                      <p className="text-sm text-red-700 dark:text-red-400 mb-3">
+                        Se eliminará permanentemente el usuario, su perfil y
+                        acceso al sistema.
+                      </p>
+                      <p className="text-sm text-red-700 dark:text-red-400">
+                        Si el usuario tiene una organización asignada, la
+                        organización permanecerá (sin owner). La organización se
+                        elimina desde la sección Organizaciones.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Esta acción no se puede deshacer.
+                </p>
+              </div>
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setDeleteDialogOpen(false)}
+              disabled={deleting}
+            >
+              Cancelar
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleDeleteUser}
+              disabled={deleting}
+            >
+              {deleting ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Eliminando...
+                </>
+              ) : (
+                <>
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Sí, Eliminar Permanentemente
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -179,7 +179,7 @@ export default function PaymentGatewaysPage() {
             <Card
               key={gateway.id}
               className={cn(
-                "rounded-none border-2 border-border relative overflow-hidden transition-all duration-300",
+                "admin-card border-2 border-border relative overflow-hidden transition-all duration-300",
                 gateway.is_enabled
                   ? gatewayColors[gateway.gateway_id]
                   : "border-slate-100 bg-slate-50/50 opacity-80",

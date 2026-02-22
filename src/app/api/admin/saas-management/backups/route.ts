@@ -1,33 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
+import { requireRoot } from "@/lib/api/root-middleware";
 import { createClient } from "@/utils/supabase/server";
 import { SaasBackupService } from "@/lib/saas-backup-service";
 import { appLogger as logger } from "@/lib/logger";
+import { AuthorizationError } from "@/lib/api/errors";
 
 /**
  * GET /api/admin/saas-management/backups
- * List all SaaS full backups
+ * List all SaaS full backups (root/dev only)
  */
 export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
   try {
-    const supabase = await createClient();
-
-    // Verificar autorización (Solo Root o Super Admin)
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user)
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
-    const { data: role } = await supabase.rpc("get_admin_role", {
-      user_id: user.id,
-    });
-    if (!["root", "dev", "super_admin"].includes(role as string)) {
-      return NextResponse.json(
-        { error: "Forbidden: Requiere privilegios de administrador SaaS" },
-        { status: 403 },
-      );
-    }
+    await requireRoot(request);
 
     const { searchParams } = new URL(request.url);
     const fileName = searchParams.get("fileName");
@@ -49,8 +34,13 @@ export async function GET(request: NextRequest) {
     }));
 
     return NextResponse.json({ success: true, backups: formattedBackups });
-  } catch (error: any) {
-    logger.error("Error en lista de backups SaaS", { error: error.message });
+  } catch (error: unknown) {
+    if (error instanceof AuthorizationError) {
+      return NextResponse.json({ error: error.message }, { status: 403 });
+    }
+    logger.error("Error en lista de backups SaaS", {
+      error: error instanceof Error ? error.message : String(error),
+    });
     return NextResponse.json(
       { error: "Internal Server Error" },
       { status: 500 },
@@ -60,31 +50,18 @@ export async function GET(request: NextRequest) {
 
 /**
  * POST /api/admin/saas-management/backups
- * Trigger a 100% full database backup
+ * Trigger a 100% full database backup (root/dev only)
  */
 export async function POST(request: NextRequest) {
   try {
+    const { userId } = await requireRoot(request);
     const supabase = await createClient();
 
-    // Autorización estricta
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user)
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
-    const { data: role } = await supabase.rpc("get_admin_role", {
-      user_id: user.id,
-    });
-    if (!["root", "dev", "super_admin"].includes(role as string)) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-    }
-
     logger.info("Solicitud de backup completo SaaS iniciada por", {
-      userEmail: user.email,
+      userId,
     });
 
-    const result = await SaasBackupService.generateFullBackup(user.id);
+    const result = await SaasBackupService.generateFullBackup(userId);
 
     if (result.success) {
       await supabase.rpc("log_admin_activity", {
@@ -104,8 +81,13 @@ export async function POST(request: NextRequest) {
         { status: 500 },
       );
     }
-  } catch (error: any) {
-    logger.error("Error en trigger de backup SaaS", { error: error.message });
+  } catch (error: unknown) {
+    if (error instanceof AuthorizationError) {
+      return NextResponse.json({ error: error.message }, { status: 403 });
+    }
+    logger.error("Error en trigger de backup SaaS", {
+      error: error instanceof Error ? error.message : String(error),
+    });
     return NextResponse.json(
       { error: "Internal Server Error" },
       { status: 500 },
@@ -114,10 +96,12 @@ export async function POST(request: NextRequest) {
 }
 
 /**
- * DELETE /api/admin/saas-management/backups
+ * DELETE /api/admin/saas-management/backups (root/dev only)
  */
 export async function DELETE(request: NextRequest) {
   try {
+    await requireRoot(request);
+
     const { searchParams } = new URL(request.url);
     const fileName = searchParams.get("fileName");
     if (!fileName)
@@ -126,24 +110,18 @@ export async function DELETE(request: NextRequest) {
         { status: 400 },
       );
 
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user)
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
-    const { data: role } = await supabase.rpc("get_admin_role", {
-      user_id: user.id,
-    });
-    if (!["root", "dev"].includes(role as string)) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-    }
-
     await SaasBackupService.deleteBackup(fileName);
 
     return NextResponse.json({ success: true, message: "Backup eliminado" });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    if (error instanceof AuthorizationError) {
+      return NextResponse.json({ error: error.message }, { status: 403 });
+    }
+    return NextResponse.json(
+      {
+        error: error instanceof Error ? error.message : "Internal Server Error",
+      },
+      { status: 500 },
+    );
   }
 }

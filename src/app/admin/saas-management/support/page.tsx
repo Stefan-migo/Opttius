@@ -307,7 +307,7 @@ export default function SupportPage() {
       {activeTab === "tickets" && (
         <div className="space-y-6">
           {/* Filters */}
-          <Card className="rounded-none border border-border">
+          <Card className="admin-card">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 font-display text-epoch-primary">
                 <Filter className="h-5 w-5 text-epoch-accent" />
@@ -424,7 +424,7 @@ export default function SupportPage() {
           </Card>
 
           {/* Tickets List */}
-          <Card className="rounded-none border border-border">
+          <Card className="admin-card">
             <CardHeader>
               <CardTitle className="font-display text-epoch-primary">
                 Tickets ({pagination.total})
@@ -540,7 +540,7 @@ export default function SupportPage() {
       {activeTab === "search" && (
         <div className="space-y-6">
           {/* Búsqueda */}
-          <Card className="rounded-none border border-border">
+          <Card className="admin-card">
             <CardContent className="pt-6">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-epoch-accent" />
@@ -565,7 +565,7 @@ export default function SupportPage() {
             <div className="space-y-6">
               {/* Organizaciones */}
               {searchResults.organizations.length > 0 && (
-                <Card className="rounded-none border border-border">
+                <Card className="admin-card">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2 font-display text-epoch-primary">
                       <Building2 className="h-5 w-5 text-epoch-accent" />
@@ -614,7 +614,7 @@ export default function SupportPage() {
 
               {/* Usuarios */}
               {searchResults.users.length > 0 && (
-                <Card className="rounded-none border border-border">
+                <Card className="admin-card">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2 font-display text-epoch-primary">
                       <User className="h-5 w-5 text-epoch-accent" />
@@ -678,7 +678,7 @@ export default function SupportPage() {
               {/* Sin resultados */}
               {searchResults.organizations.length === 0 &&
                 searchResults.users.length === 0 && (
-                  <Card className="rounded-none border border-border">
+                  <Card className="admin-card">
                     <CardContent className="pt-6">
                       <div className="text-center py-8 text-epoch-primary/70">
                         No se encontraron resultados para "{searchQuery}"
@@ -691,7 +691,7 @@ export default function SupportPage() {
 
           {/* Instrucciones iniciales */}
           {!hasSearched && (
-            <Card className="rounded-none border border-border">
+            <Card className="admin-card">
               <CardContent className="pt-6">
                 <div className="text-center py-8 text-epoch-primary/70">
                   <Search className="h-12 w-12 mx-auto mb-4 text-epoch-accent" />

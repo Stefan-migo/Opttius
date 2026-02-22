@@ -240,7 +240,7 @@ export async function DELETE(
       );
     }
 
-    // Verificar confirmación en el body (opcional pero recomendado)
+    // Verificar confirmación en el body (requerido para consistencia con organizations)
     let body: { confirm?: boolean } = {};
     try {
       const bodyText = await request.text();
@@ -248,7 +248,18 @@ export async function DELETE(
         body = JSON.parse(bodyText);
       }
     } catch {
-      // Si no hay body o no es JSON válido, continuar sin confirmación
+      // Si no hay body o no es JSON válido
+    }
+
+    if (body.confirm !== true) {
+      return NextResponse.json(
+        {
+          error: "Confirmación requerida",
+          details:
+            "Debe enviar { confirm: true } en el body para eliminar el usuario",
+        },
+        { status: 400 },
+      );
     }
 
     logger.info(`Deleting user ${id} (${existingUser.email})`);

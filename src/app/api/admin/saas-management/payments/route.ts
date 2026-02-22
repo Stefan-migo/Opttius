@@ -1,47 +1,18 @@
-import { NextResponse } from "next/server";
-import { createClient } from "@/utils/supabase/server";
+import { NextRequest, NextResponse } from "next/server";
+import { requireRoot } from "@/lib/api/root-middleware";
+import { createServiceRoleClient } from "@/utils/supabase/service-role";
 import { appLogger as logger } from "@/lib/logger";
+import { AuthorizationError } from "@/lib/api/errors";
 
 /**
  * GET /api/admin/saas-management/payments
- * Obtiene la configuración de todas las pasarelas
+ * Obtiene la configuración de todas las pasarelas (root/dev only)
  */
 export const dynamic = "force-dynamic";
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    const supabase = await createClient();
-
-    // Verificar que es super_admin
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user)
-      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
-
-    const { data: adminUser } = await supabase
-      .from("admin_users")
-      .select("role")
-      .eq("id", user.id)
-      .single();
-
-    if (
-      adminUser?.role !== "super_admin" &&
-      adminUser?.role !== "root" &&
-      adminUser?.role !== "dev"
-    ) {
-      logger.warn("Acceso denegado a SaaS Payments", {
-        userId: user.id,
-        userEmail: user.email,
-        role: adminUser?.role || "sin-registro",
-      });
-      return NextResponse.json(
-        {
-          error: "Prohibido: Se requiere rol de Super Admin, Root o Dev",
-          debug: { role: adminUser?.role || "no-role" },
-        },
-        { status: 403 },
-      );
-    }
+    await requireRoot(request);
+    const supabase = createServiceRoleClient();
 
     const { data: gateways, error } = await supabase
       .from("payment_gateways_config")
@@ -52,6 +23,9 @@ export async function GET() {
 
     return NextResponse.json({ gateways });
   } catch (error) {
+    if (error instanceof AuthorizationError) {
+      return NextResponse.json({ error: error.message }, { status: 403 });
+    }
     logger.error("Error al obtener config de pasarelas", error as Error);
     return NextResponse.json(
       { error: "Error interno del servidor" },
@@ -62,12 +36,14 @@ export async function GET() {
 
 /**
  * PATCH /api/admin/saas-management/payments
- * Actualiza el estado de una pasarela
+ * Actualiza el estado de una pasarela (root/dev only)
  */
-export async function PATCH(request: Request) {
+export async function PATCH(request: NextRequest) {
   try {
-    const supabase = await createClient();
-    let body;
+    const { userId } = await requireRoot(request);
+    const supabase = createServiceRoleClient();
+
+    let body: Record<string, unknown>;
     try {
       body = await request.json();
     } catch (err) {
@@ -79,30 +55,10 @@ export async function PATCH(request: Request) {
 
     const { id, is_enabled, display_order, name, description } = body;
 
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user)
-      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
-
-    const { data: adminUser } = await supabase
-      .from("admin_users")
-      .select("role")
-      .eq("id", user.id)
-      .single();
-
-    if (
-      adminUser?.role !== "super_admin" &&
-      adminUser?.role !== "root" &&
-      adminUser?.role !== "dev"
-    ) {
-      return NextResponse.json({ error: "Prohibido" }, { status: 403 });
-    }
-
     logger.info("Intentando actualizar pasarela", {
       id,
       is_enabled,
-      role: adminUser?.role,
+      userId,
     });
 
     if (!id)
@@ -145,13 +101,19 @@ export async function PATCH(request: Request) {
     });
 
     return NextResponse.json({ success: true, gateway: data });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    if (error instanceof AuthorizationError) {
+      return NextResponse.json({ error: error.message }, { status: 403 });
+    }
     logger.error("Error al actualizar pasarela", {
-      message: error?.message || String(error),
+      message: error instanceof Error ? error.message : String(error),
       error,
     });
     return NextResponse.json(
-      { error: "Error interno", details: error?.message },
+      {
+        error: "Error interno",
+        details: error instanceof Error ? error.message : undefined,
+      },
       { status: 500 },
     );
   }

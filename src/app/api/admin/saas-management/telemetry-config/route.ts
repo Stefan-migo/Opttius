@@ -1,38 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/utils/supabase/server";
+import { requireRoot } from "@/lib/api/root-middleware";
+import { createServiceRoleClient } from "@/utils/supabase/service-role";
 import { appLogger as logger } from "@/lib/logger";
+import { AuthorizationError } from "@/lib/api/errors";
 
 /**
  * GET /api/admin/saas-management/telemetry-config
- * Returns the global telemetry configuration
+ * Returns the global telemetry configuration (root/dev only)
  */
 export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
   try {
-    const supabase = await createClient();
-
-    // Check authorization (root or dev)
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
-    if (authError || !user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    // Check admin role
-    const { data: adminUser, error: adminError } = await supabase
-      .from("admin_users")
-      .select("role")
-      .eq("id", user.id)
-      .single();
-
-    if (
-      adminError ||
-      !["root", "dev", "super_admin"].includes(adminUser?.role)
-    ) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-    }
+    await requireRoot(request);
+    const supabase = createServiceRoleClient();
 
     // Get telemetry state from system_config
     const { data: config, error: configError } = await supabase
@@ -74,6 +54,9 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ enabled });
   } catch (error) {
+    if (error instanceof AuthorizationError) {
+      return NextResponse.json({ error: error.message }, { status: 403 });
+    }
     logger.error("Internal error in telemetry config GET:", error);
     return NextResponse.json(
       { error: "Internal server error" },
@@ -84,35 +67,13 @@ export async function GET(request: NextRequest) {
 
 /**
  * PUT /api/admin/saas-management/telemetry-config
- * Updates the global telemetry configuration
+ * Updates the global telemetry configuration (root/dev only)
  */
 export async function PUT(request: NextRequest) {
   try {
+    const { userId } = await requireRoot(request);
     const { enabled } = await request.json();
-    const supabase = await createClient();
-
-    // Check authorization
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
-    if (authError || !user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    // Check admin role
-    const { data: adminUser, error: adminError } = await supabase
-      .from("admin_users")
-      .select("role")
-      .eq("id", user.id)
-      .single();
-
-    if (
-      adminError ||
-      !["root", "dev", "super_admin"].includes(adminUser?.role)
-    ) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-    }
+    const supabase = createServiceRoleClient();
 
     // Update or Insert configuration
     const { error: updateError } = await supabase.from("system_config").upsert(
@@ -124,7 +85,7 @@ export async function PUT(request: NextRequest) {
           "Global toggle for usage tracking and performance monitoring",
         value_type: "boolean",
         updated_at: new Date().toISOString(),
-        last_modified_by: user.id,
+        last_modified_by: userId,
       },
       { onConflict: "config_key" },
     );
@@ -139,6 +100,9 @@ export async function PUT(request: NextRequest) {
 
     return NextResponse.json({ success: true, enabled });
   } catch (error) {
+    if (error instanceof AuthorizationError) {
+      return NextResponse.json({ error: error.message }, { status: 403 });
+    }
     logger.error("Internal error in telemetry config PUT:", error);
     return NextResponse.json(
       { error: "Internal server error" },

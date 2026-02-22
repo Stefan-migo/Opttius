@@ -140,7 +140,7 @@ export default function SaaSAnalyticsPage() {
 
       {/* Overview Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <Card className="rounded-none border border-border">
+        <Card className="admin-card">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -159,7 +159,7 @@ export default function SaaSAnalyticsPage() {
           </CardContent>
         </Card>
 
-        <Card className="rounded-none border border-border">
+        <Card className="admin-card">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -177,7 +177,7 @@ export default function SaaSAnalyticsPage() {
           </CardContent>
         </Card>
 
-        <Card className="rounded-none border border-border">
+        <Card className="admin-card">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -195,7 +195,7 @@ export default function SaaSAnalyticsPage() {
           </CardContent>
         </Card>
 
-        <Card className="rounded-none border border-border">
+        <Card className="admin-card">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -216,7 +216,7 @@ export default function SaaSAnalyticsPage() {
 
       {/* Charts and Analytics */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        <Card className="rounded-none border border-border">
+        <Card className="admin-card">
           <CardContent className="p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">
               Daily Active Users
@@ -233,7 +233,7 @@ export default function SaaSAnalyticsPage() {
           </CardContent>
         </Card>
 
-        <Card className="rounded-none border border-border">
+        <Card className="admin-card">
           <CardContent className="p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">
               Top Features Usage
@@ -268,7 +268,7 @@ export default function SaaSAnalyticsPage() {
       </div>
 
       {/* Performance Metrics */}
-      <Card className="rounded-none border border-border">
+      <Card className="admin-card">
         <CardContent className="p-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
             <TrendingUp className="h-5 w-5" />

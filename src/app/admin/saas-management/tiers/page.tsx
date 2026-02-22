@@ -187,7 +187,7 @@ export default function TiersPage() {
           {tiers.map((tier) => (
             <Card
               key={tier.id}
-              className={`rounded-none border border-border ${getTierColor(tier.name)}`}
+              className={`admin-card ${getTierColor(tier.name)}`}
             >
               <CardHeader>
                 <div className="flex items-center justify-between">

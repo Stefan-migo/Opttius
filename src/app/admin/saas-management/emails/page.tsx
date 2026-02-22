@@ -35,7 +35,7 @@ export default function SaasEmailsPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <Card className="rounded-none border border-border bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)]">
+        <Card className="admin-card bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)]">
           <CardContent className="p-6">
             <div className="flex items-center gap-4">
               <Mail className="h-8 w-8 text-epoch-primary" />
@@ -48,7 +48,7 @@ export default function SaasEmailsPage() {
             </div>
           </CardContent>
         </Card>
-        <Card className="rounded-none border border-border bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)]">
+        <Card className="admin-card bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)]">
           <CardContent className="p-6">
             <div className="flex items-center gap-4">
               <BarChart3 className="h-8 w-8 text-admin-success" />
@@ -61,7 +61,7 @@ export default function SaasEmailsPage() {
             </div>
           </CardContent>
         </Card>
-        <Card className="rounded-none border border-border bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)]">
+        <Card className="admin-card bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)]">
           <CardContent className="p-6">
             <div className="flex items-center gap-4">
               <Settings className="h-8 w-8 text-amber-600" />
@@ -108,7 +108,7 @@ export default function SaasEmailsPage() {
         </TabsContent>
 
         <TabsContent value="history" className="space-y-6">
-          <Card className="rounded-none border border-border">
+          <Card className="admin-card">
             <CardContent className="py-12 text-center text-muted-foreground">
               El historial de envíos de Resend estará disponible próximamente.
             </CardContent>
@@ -116,7 +116,7 @@ export default function SaasEmailsPage() {
         </TabsContent>
 
         <TabsContent value="config" className="space-y-6">
-          <Card className="rounded-none border border-border">
+          <Card className="admin-card">
             <CardContent className="p-6">
               <h3 className="text-lg font-semibold mb-4">
                 Configuración Global de Correo

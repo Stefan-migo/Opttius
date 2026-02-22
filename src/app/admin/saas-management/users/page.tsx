@@ -56,6 +56,8 @@ import {
   MapPin,
   ArrowLeft,
   UserPlus,
+  Trash2,
+  AlertTriangle,
 } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
@@ -121,6 +123,11 @@ export default function UsersManagementPage() {
     Array<{ id: string; name: string; code: string }>
   >([]);
   const [creatingUser, setCreatingUser] = useState(false);
+
+  // Delete user
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [userToDelete, setUserToDelete] = useState<User | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     fetchOrganizations();
@@ -225,6 +232,40 @@ export default function UsersManagementPage() {
     }
 
     handleAction(selectedUser.id, "change_organization", newOrganizationId);
+  };
+
+  const handleDeleteUser = async () => {
+    if (!userToDelete) return;
+    try {
+      setDeleting(true);
+      const response = await fetch(
+        `/api/admin/saas-management/users/${userToDelete.id}`,
+        {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ confirm: true }),
+        },
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.error || data.details || "Error al eliminar usuario",
+        );
+      }
+
+      toast.success("Usuario eliminado correctamente");
+      setDeleteDialogOpen(false);
+      setUserToDelete(null);
+      fetchUsers();
+    } catch (err) {
+      toast.error(
+        err instanceof Error ? err.message : "Error al eliminar usuario",
+      );
+    } finally {
+      setDeleting(false);
+    }
   };
 
   const loadBranchesForOrg = async (orgId: string) => {
@@ -364,7 +405,7 @@ export default function UsersManagementPage() {
       </div>
 
       {/* Filtros */}
-      <Card className="rounded-none border border-border">
+      <Card className="admin-card">
         <CardContent className="pt-6">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1">
@@ -426,7 +467,7 @@ export default function UsersManagementPage() {
       </Card>
 
       {/* Tabla de usuarios */}
-      <Card className="rounded-none border border-border">
+      <Card className="admin-card">
         <CardHeader>
           <CardTitle>Usuarios ({totalCount})</CardTitle>
         </CardHeader>
@@ -573,6 +614,21 @@ export default function UsersManagementPage() {
                               >
                                 Resetear contraseña
                               </DropdownMenuItem>
+                              {user.role !== "root" && user.role !== "dev" && (
+                                <>
+                                  <DropdownMenuSeparator />
+                                  <DropdownMenuItem
+                                    onClick={() => {
+                                      setUserToDelete(user);
+                                      setDeleteDialogOpen(true);
+                                    }}
+                                    className="text-red-600 focus:text-red-600"
+                                  >
+                                    <Trash2 className="h-4 w-4 mr-2" />
+                                    Eliminar
+                                  </DropdownMenuItem>
+                                </>
+                              )}
                             </DropdownMenuContent>
                           </DropdownMenu>
                         </TableCell>
@@ -846,6 +902,82 @@ export default function UsersManagementPage() {
               }}
             >
               Guardar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog para eliminar usuario */}
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-red-500" />
+              Confirmar Eliminación de Usuario
+            </DialogTitle>
+            <DialogDescription>
+              <div className="space-y-4 mt-4">
+                <p className="font-semibold text-lg">
+                  ¿Estás seguro de que deseas eliminar al usuario{" "}
+                  <span className="text-red-600">
+                    &quot;{userToDelete?.fullName || userToDelete?.email}&quot;
+                  </span>{" "}
+                  ({userToDelete?.email})?
+                </p>
+
+                <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                  <div className="flex items-start gap-3">
+                    <AlertTriangle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
+                    <div className="flex-1">
+                      <p className="font-semibold text-red-800 dark:text-red-300 mb-2">
+                        Esta acción es IRREVERSIBLE
+                      </p>
+                      <p className="text-sm text-red-700 dark:text-red-400 mb-3">
+                        Se eliminará permanentemente el usuario, su perfil y
+                        acceso al sistema.
+                      </p>
+                      <p className="text-sm text-red-700 dark:text-red-400">
+                        Si el usuario tiene una organización asignada, la
+                        organización permanecerá (sin owner). La organización se
+                        elimina desde la sección Organizaciones.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Esta acción no se puede deshacer.
+                </p>
+              </div>
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setDeleteDialogOpen(false);
+                setUserToDelete(null);
+              }}
+              disabled={deleting}
+            >
+              Cancelar
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleDeleteUser}
+              disabled={deleting}
+            >
+              {deleting ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Eliminando...
+                </>
+              ) : (
+                <>
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Sí, Eliminar Permanentemente
+                </>
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>

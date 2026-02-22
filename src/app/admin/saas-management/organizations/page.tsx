@@ -453,7 +453,7 @@ export default function OrganizationsPage() {
       </div>
 
       {/* Filtros y búsqueda */}
-      <Card className="rounded-none border border-border">
+      <Card className="admin-card">
         <CardContent className="pt-6">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1">
@@ -548,7 +548,7 @@ export default function OrganizationsPage() {
       </Card>
 
       {/* Tabla de organizaciones */}
-      <Card className="rounded-none border border-border">
+      <Card className="admin-card">
         <CardHeader>
           <CardTitle>Organizaciones ({totalCount})</CardTitle>
         </CardHeader>
