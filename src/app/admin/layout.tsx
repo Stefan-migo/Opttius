@@ -50,7 +50,6 @@ import { useBranch } from "@/hooks/useBranch";
 import { useRoot } from "@/hooks/useRoot";
 import { getBranchHeader } from "@/lib/utils/branch";
 import businessConfig from "@/config/business";
-import Image from "next/image";
 
 interface AdminLayoutProps {
   children: React.ReactNode;
