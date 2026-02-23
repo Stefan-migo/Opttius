@@ -12,7 +12,6 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { OpttiusLogoText } from "@/components/ui/brand";
 import { Card, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -80,9 +79,12 @@ export default function LoginPage() {
         <div className="relative z-10 p-20 w-full h-full flex flex-col justify-between">
           <Link href="/" className="group flex flex-col items-start w-fit">
             <div className="relative mb-1 group-hover:scale-110 transition-transform duration-500">
-              <OpttiusLogoText
-                forceLight={true}
-                className="h-14 w-48 opacity-100"
+              <Image
+                src="/logo-text-default.svg"
+                alt="Opttius"
+                width={192}
+                height={56}
+                className="h-14 w-48 opacity-100 object-contain object-left"
               />
             </div>
           </Link>

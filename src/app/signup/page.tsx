@@ -11,7 +11,6 @@ import { useAuthContext } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { OpttiusLogoText, OpttiusLogoCompact } from "@/components/ui/brand";
 import { Card, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -130,9 +129,12 @@ export default function SignupPage() {
         <div className="w-full max-w-md relative z-10 animate-in zoom-in-95 duration-700">
           <div className="text-center mb-10">
             <div className="relative mx-auto mb-10 flex justify-center">
-              <OpttiusLogoCompact
-                forceLight={false}
-                className="h-32 w-44 opacity-100"
+              <Image
+                src="/OpttiusTextCentered.svg"
+                alt="Opttius"
+                width={176}
+                height={128}
+                className="h-32 w-44 opacity-100 object-contain"
               />
             </div>
             <div className="inline-flex items-center justify-center w-24 h-24 bg-white border border-epoch-primary/5 rounded-full mb-8 shadow-premium">
@@ -209,9 +211,12 @@ export default function SignupPage() {
         <div className="relative z-10 p-20 w-full h-full flex flex-col justify-between">
           <Link href="/" className="group flex flex-col items-start w-fit">
             <div className="relative mb-1 group-hover:scale-110 transition-transform duration-500">
-              <OpttiusLogoText
-                forceLight={true}
-                className="h-14 w-48 opacity-100"
+              <Image
+                src="/logo-text-default.svg"
+                alt="Opttius"
+                width={192}
+                height={56}
+                className="h-14 w-48 opacity-100 object-contain object-left"
               />
             </div>
           </Link>

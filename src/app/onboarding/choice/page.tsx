@@ -20,7 +20,7 @@ import {
   CheckCircle2,
   Building2,
 } from "lucide-react";
-import { OpttiusIcon, OpttiusLogoCompact } from "@/components/ui/brand";
+import Image from "next/image";
 import Link from "next/link";
 
 export default function OnboardingChoicePage() {
@@ -136,9 +136,12 @@ export default function OnboardingChoicePage() {
         {/* Header */}
         <div className="text-center mb-16 animate-in fade-in slide-in-from-bottom-4 duration-1000">
           <div className="inline-flex items-center justify-center mb-10 relative group">
-            <OpttiusLogoCompact
-              forceLight={false}
-              className="h-28 w-36 relative z-10 transition-transform duration-500 group-hover:scale-105"
+            <Image
+              src="/OpttiusTextCentered.svg"
+              alt="Opttius"
+              width={144}
+              height={112}
+              className="h-28 w-36 relative z-10 transition-transform duration-500 group-hover:scale-105 object-contain"
             />
           </div>
           <h1 className="text-5xl md:text-6xl font-display font-bold text-epoch-primary mb-4 tracking-tight uppercase">

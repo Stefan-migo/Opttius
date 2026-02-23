@@ -9,7 +9,6 @@ import { createClient } from "@/utils/supabase/client";
 import Image from "next/image";
 import businessConfig from "@/config/business";
 import { useTheme } from "@/components/theme-provider";
-import { OpttiusLogoText } from "@/components/ui/brand";
 
 type OrgStatus = {
   hasOrganization: boolean;
@@ -111,7 +110,7 @@ export function LandingHeader() {
         >
           <div className="relative group-hover:scale-105 transition-all duration-700 flex-shrink-0">
             <Image
-              src="/LogoCircle.svg"
+              src="/logo-opttius.svg"
               alt="Opttius"
               width={44}
               height={44}
@@ -119,9 +118,12 @@ export function LandingHeader() {
             />
           </div>
           <div className="flex flex-col items-start justify-center">
-            <OpttiusLogoText
-              forceLight={true}
-              className="h-8 w-32 sm:h-10 sm:w-40 md:w-44"
+            <Image
+              src="/logo-text-default.svg"
+              alt="Opttius"
+              width={176}
+              height={40}
+              className="h-8 w-32 sm:h-10 sm:w-40 md:w-44 transition-all duration-700 object-contain object-left"
             />
           </div>
         </Link>

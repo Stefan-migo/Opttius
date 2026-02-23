@@ -50,7 +50,7 @@ import { useBranch } from "@/hooks/useBranch";
 import { useRoot } from "@/hooks/useRoot";
 import { getBranchHeader } from "@/lib/utils/branch";
 import businessConfig from "@/config/business";
-import { OpttiusBrand, OpttiusLogoCompact } from "@/components/ui/brand";
+import Image from "next/image";
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -773,9 +773,12 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         <div className="relative z-10 flex flex-col items-center justify-center space-y-10 animate-in fade-in zoom-in duration-1000">
           <div className="relative group">
             <div className="absolute inset-0 bg-epoch-accent/20 rounded-none blur-3xl animate-pulse scale-125 opacity-50 group-hover:opacity-100 transition-opacity duration-700" />
-            <OpttiusLogoCompact
-              forceLight={false}
-              className="h-28 w-36 relative z-10 transition-transform duration-700 group-hover:scale-105"
+            <Image
+              src="/OpttiusTextCentered.svg"
+              alt="Opttius"
+              width={144}
+              height={112}
+              className="h-28 w-36 relative z-10 transition-transform duration-700 group-hover:scale-105 object-contain"
             />
           </div>
 
@@ -1064,7 +1067,13 @@ function AdminSidebar({
           href="/"
           className="admin-sidebar-logo group py-4 px-6 flex items-center justify-center"
         >
-          <OpttiusBrand forceLight={true} />
+          <Image
+            src="/OpttiusTextCentered.svg"
+            alt="Opttius"
+            width={160}
+            height={80}
+            className="h-12 w-40 object-contain"
+          />
         </Link>
       </div>
 

@@ -5,7 +5,6 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
 import Image from "next/image";
-import { OpttiusLogoText } from "@/components/ui/brand/OpttiusLogo";
 
 interface MinimalLandingHeaderProps {
   /** Nav items to show (e.g. for legal: Privacidad, Términos, etc.) */
@@ -38,7 +37,7 @@ export function MinimalLandingHeader({
         <Link href="/" className="group flex items-center gap-4 pl-5">
           <div className="relative group-hover:scale-105 transition-all duration-700 flex-shrink-0">
             <Image
-              src="/LogoCircle.svg"
+              src="/logo-opttius.svg"
               alt="Opttius"
               width={44}
               height={44}
@@ -46,7 +45,13 @@ export function MinimalLandingHeader({
             />
           </div>
           <div className="flex flex-col items-start justify-center">
-            <OpttiusLogoText forceLight={true} className="h-10 w-40 md:w-44" />
+            <Image
+              src="/logo-text-default.svg"
+              alt="Opttius"
+              width={176}
+              height={40}
+              className="h-10 w-40 md:w-44 object-contain object-left"
+            />
           </div>
         </Link>
 

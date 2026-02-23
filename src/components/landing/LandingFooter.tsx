@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import {
   Building2,
   Mail,
@@ -13,7 +14,6 @@ import {
 } from "lucide-react";
 import businessConfig from "@/config/business";
 import { useTheme } from "@/components/theme-provider";
-import { OpttiusLogoText } from "@/components/ui/brand";
 
 export function LandingFooter() {
   const currentYear = new Date().getFullYear();
@@ -29,9 +29,12 @@ export function LandingFooter() {
           <div className="space-y-10">
             <Link href="/" className="group flex flex-col items-start">
               <div className="relative group-hover:scale-105 transition-all duration-700">
-                <OpttiusLogoText
-                  forceLight={true}
-                  className="h-14 w-48 opacity-90 group-hover:opacity-100 transition-opacity"
+                <Image
+                  src="/logo-text-default.svg"
+                  alt="Opttius"
+                  width={192}
+                  height={48}
+                  className="h-14 w-48 opacity-90 group-hover:opacity-100 transition-opacity object-contain object-left"
                 />
               </div>
             </Link>
