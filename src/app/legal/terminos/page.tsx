@@ -40,8 +40,8 @@ export default function TerminosPage() {
             Proveemos automatización integral: desde la agudeza visual
             (historiales clínicos y OD/OS) hasta la facturación, pasando por el
             control exacto de inventario, trazabilidad de laboratorio y agenda
-            inteligente. Nuestra tecnología está calibrada milimétricamente
-            para el flujo real de una óptica.
+            inteligente. Nuestra tecnología está calibrada milimétricamente para
+            el flujo real de una óptica.
           </p>
         </section>
 

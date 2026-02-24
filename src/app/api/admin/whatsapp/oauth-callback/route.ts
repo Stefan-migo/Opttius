@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
   if (errorParam) {
     logger.warn("WhatsApp OAuth error from Meta", { error: errorParam });
     return NextResponse.redirect(
-      `${redirectTarget}&whatsapp_error=${encodeURIComponent(errorParam)}`
+      `${redirectTarget}&whatsapp_error=${encodeURIComponent(errorParam)}`,
     );
   }
 
@@ -40,7 +40,7 @@ export async function GET(request: NextRequest) {
     } = await supabase.auth.getUser();
     if (userError || !user) {
       return NextResponse.redirect(
-        `${baseUrl}/login?redirect=/admin/system?tab=whatsapp`
+        `${baseUrl}/login?redirect=/admin/system?tab=whatsapp`,
       );
     }
 
@@ -52,18 +52,14 @@ export async function GET(request: NextRequest) {
       .single();
 
     if (!adminUser?.organization_id) {
-      return NextResponse.redirect(
-        `${redirectTarget}&whatsapp_error=no_org`
-      );
+      return NextResponse.redirect(`${redirectTarget}&whatsapp_error=no_org`);
     }
 
     const appId = process.env.NEXT_PUBLIC_META_APP_ID;
     const appSecret = process.env.META_APP_SECRET;
     if (!appId || !appSecret) {
       logger.error("META_APP_ID or META_APP_SECRET not configured");
-      return NextResponse.redirect(
-        `${redirectTarget}&whatsapp_error=config`
-      );
+      return NextResponse.redirect(`${redirectTarget}&whatsapp_error=config`);
     }
 
     const callbackUrl = `${baseUrl}/api/admin/whatsapp/oauth-callback`;
@@ -75,7 +71,7 @@ export async function GET(request: NextRequest) {
           redirect_uri: callbackUrl,
           code,
         }),
-      { method: "GET" }
+      { method: "GET" },
     );
 
     const tokenData = (await tokenRes.json()) as {
@@ -89,7 +85,7 @@ export async function GET(request: NextRequest) {
         data: tokenData,
       });
       return NextResponse.redirect(
-        `${redirectTarget}&whatsapp_error=token_exchange`
+        `${redirectTarget}&whatsapp_error=token_exchange`,
       );
     }
 
@@ -97,13 +93,16 @@ export async function GET(request: NextRequest) {
 
     // Obtener WABAs: probar varios endpoints según documentación Meta
     const wabaRes = await fetch(
-      `${META_GRAPH}/me?fields=id&access_token=${accessToken}`
+      `${META_GRAPH}/me?fields=id&access_token=${accessToken}`,
     );
-    const meData = (await wabaRes.json()) as { id?: string; error?: { message: string } };
+    const meData = (await wabaRes.json()) as {
+      id?: string;
+      error?: { message: string };
+    };
     if (meData.error) {
       logger.error("WhatsApp OAuth: me failed", meData);
       return NextResponse.redirect(
-        `${redirectTarget}&whatsapp_error=me_failed`
+        `${redirectTarget}&whatsapp_error=me_failed`,
       );
     }
 
@@ -112,10 +111,12 @@ export async function GET(request: NextRequest) {
 
     // 1. GET /me/assigned_waba_ids
     const wabaIdsRes = await fetch(
-      `${META_GRAPH}/me/assigned_waba_ids?access_token=${accessToken}`
+      `${META_GRAPH}/me/assigned_waba_ids?access_token=${accessToken}`,
     );
     const wabaIdsData = (await wabaIdsRes.json()) as Record<string, unknown>;
-    const wabaDataArr = wabaIdsData?.data as Array<{ waba_id?: string; id?: string }> | undefined;
+    const wabaDataArr = wabaIdsData?.data as
+      | Array<{ waba_id?: string; id?: string }>
+      | undefined;
     if (Array.isArray(wabaDataArr) && wabaDataArr.length > 0) {
       const first = wabaDataArr[0];
       wabaId = first?.waba_id ?? first?.id ?? null;
@@ -126,12 +127,15 @@ export async function GET(request: NextRequest) {
     // 2. Fallback: GET /me/businesses con owned_whatsapp_business_accounts
     if (!wabaId) {
       const bizRes = await fetch(
-        `${META_GRAPH}/me/businesses?fields=owned_whatsapp_business_accounts{id}&access_token=${accessToken}`
+        `${META_GRAPH}/me/businesses?fields=owned_whatsapp_business_accounts{id}&access_token=${accessToken}`,
       );
       const bizData = (await bizRes.json()) as {
-        data?: Array<{ owned_whatsapp_business_accounts?: { data?: Array<{ id: string }> } }>;
+        data?: Array<{
+          owned_whatsapp_business_accounts?: { data?: Array<{ id: string }> };
+        }>;
       };
-      const accounts = bizData.data?.[0]?.owned_whatsapp_business_accounts?.data;
+      const accounts =
+        bizData.data?.[0]?.owned_whatsapp_business_accounts?.data;
       if (accounts?.length) {
         wabaId = accounts[0].id;
       }
@@ -139,14 +143,12 @@ export async function GET(request: NextRequest) {
 
     if (!wabaId) {
       logger.warn("WhatsApp OAuth: no WABA found", { meData });
-      return NextResponse.redirect(
-        `${redirectTarget}&whatsapp_error=no_waba`
-      );
+      return NextResponse.redirect(`${redirectTarget}&whatsapp_error=no_waba`);
     }
 
     // GET /{waba_id}/phone_numbers
     const phonesRes = await fetch(
-      `${META_GRAPH}/${wabaId}/phone_numbers?access_token=${accessToken}`
+      `${META_GRAPH}/${wabaId}/phone_numbers?access_token=${accessToken}`,
     );
     const phonesData = (await phonesRes.json()) as {
       data?: Array<{
@@ -160,7 +162,7 @@ export async function GET(request: NextRequest) {
     if (phonesData.error || !phonesData.data?.length) {
       logger.warn("WhatsApp OAuth: no phone numbers", phonesData);
       return NextResponse.redirect(
-        `${redirectTarget}&whatsapp_error=no_phones`
+        `${redirectTarget}&whatsapp_error=no_phones`,
       );
     }
 
@@ -192,7 +194,7 @@ export async function GET(request: NextRequest) {
       if (updateError) {
         logger.error("WhatsApp OAuth: update failed", updateError);
         return NextResponse.redirect(
-          `${redirectTarget}&whatsapp_error=save_failed`
+          `${redirectTarget}&whatsapp_error=save_failed`,
         );
       }
     } else {
@@ -203,7 +205,7 @@ export async function GET(request: NextRequest) {
       if (insertError) {
         logger.error("WhatsApp OAuth: insert failed", insertError);
         return NextResponse.redirect(
-          `${redirectTarget}&whatsapp_error=save_failed`
+          `${redirectTarget}&whatsapp_error=save_failed`,
         );
       }
     }
@@ -211,8 +213,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(`${redirectTarget}&whatsapp_success=1`);
   } catch (err) {
     logger.error("WhatsApp OAuth callback error", err);
-    return NextResponse.redirect(
-      `${redirectTarget}&whatsapp_error=internal`
-    );
+    return NextResponse.redirect(`${redirectTarget}&whatsapp_error=internal`);
   }
 }

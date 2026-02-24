@@ -45,7 +45,7 @@ function normalizeForComparison(phone: string): string {
 export async function resolveWhatsAppContext(
   waId: string,
   phoneNumberId: string,
-  supabase: SupabaseClient
+  supabase: SupabaseClient,
 ): Promise<WhatsAppContext | null> {
   const normalizedWaId = normalizeForComparison(waId);
 

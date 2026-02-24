@@ -216,7 +216,9 @@ export async function sendSaaSTrialEnding(
 
     const toEmail = data.admin_email;
     if (!toEmail) {
-      console.warn("⚠️ No admin_email in SaaSTrialData, cannot send trial ending email");
+      console.warn(
+        "⚠️ No admin_email in SaaSTrialData, cannot send trial ending email",
+      );
       return { success: false, error: "admin_email required" };
     }
 
@@ -331,7 +333,9 @@ export async function sendSaaSPaymentFailed(
 
     const toEmail = data.admin_email;
     if (!toEmail) {
-      console.warn("⚠️ No admin_email in SaaSPaymentData, cannot send payment failed email");
+      console.warn(
+        "⚠️ No admin_email in SaaSPaymentData, cannot send payment failed email",
+      );
       return { success: false, error: "admin_email required" };
     }
 
@@ -390,7 +394,9 @@ export async function sendSaaSPaymentReminder(
 
     const toEmail = data.admin_email;
     if (!toEmail) {
-      console.warn("⚠️ No admin_email in SaaSPaymentData, cannot send payment reminder email");
+      console.warn(
+        "⚠️ No admin_email in SaaSPaymentData, cannot send payment reminder email",
+      );
       return { success: false, error: "admin_email required" };
     }
 

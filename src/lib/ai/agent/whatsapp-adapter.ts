@@ -21,7 +21,7 @@ export const CUSTOMER_SAFE_TOOLS: string[] = [
 export async function processWhatsAppMessage(
   userMessage: string,
   context: WhatsAppContext,
-  sessionId: string
+  sessionId: string,
 ): Promise<string> {
   const agentContext =
     context.role === "admin" ? "whatsapp" : "whatsapp_customer";
@@ -38,16 +38,12 @@ export async function processWhatsAppMessage(
     sessionId,
     context: agentContext,
     config: {
-      enabledTools:
-        context.role === "admin" ? undefined : CUSTOMER_SAFE_TOOLS,
+      enabledTools: context.role === "admin" ? undefined : CUSTOMER_SAFE_TOOLS,
       enableKnowledgeBase: true,
     },
     skipAdminActivityLog: context.role === "customer",
     customerId: context.customerId,
-    userData:
-      context.role === "admin"
-        ? { role: "admin" }
-        : undefined,
+    userData: context.role === "admin" ? { role: "admin" } : undefined,
   });
 
   await agent.loadSessionHistory(sessionId);

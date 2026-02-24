@@ -217,7 +217,8 @@ export async function PUT(
                   customer_name:
                     `${customer?.first_name || ""} ${customer?.last_name || ""}`.trim() ||
                     "Cliente",
-                  customer_email: customer?.email || (updatedWorkOrder as any).email,
+                  customer_email:
+                    customer?.email || (updatedWorkOrder as any).email,
                   work_order_number: updatedWorkOrder.work_order_number,
                 },
                 organizationId ?? undefined,
@@ -236,7 +237,7 @@ export async function PUT(
               await sendWorkOrderReadyWhatsApp(
                 customer.phone,
                 updatedWorkOrder.work_order_number,
-                branch?.name ?? undefined
+                branch?.name ?? undefined,
               );
             }
           } catch (err) {

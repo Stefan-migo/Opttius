@@ -636,11 +636,13 @@ export async function POST(request: NextRequest) {
                   ...(newOrder as any),
                   user_email: (newOrder as any).email,
                   email: (newOrder as any).email,
-                  currency: (newOrder as any).currency || orderData.currency || "CLP",
+                  currency:
+                    (newOrder as any).currency || orderData.currency || "CLP",
                   customer_name:
                     (newOrder as any).customer_name ||
                     orderData.customer_name?.trim() ||
-                    (orderData.shipping?.first_name && orderData.shipping?.last_name
+                    (orderData.shipping?.first_name &&
+                    orderData.shipping?.last_name
                       ? `${orderData.shipping.first_name} ${orderData.shipping.last_name}`.trim()
                       : null) ||
                     "Cliente",

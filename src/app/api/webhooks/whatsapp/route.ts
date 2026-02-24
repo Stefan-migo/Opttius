@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     logger.error(
       "WhatsApp webhook handler error",
-      error instanceof Error ? error : new Error(String(error))
+      error instanceof Error ? error : new Error(String(error)),
     );
     return new NextResponse("Internal Server Error", { status: 500 });
   }

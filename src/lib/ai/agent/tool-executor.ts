@@ -1,88 +1,95 @@
-import type { ToolDefinition, ToolExecutionContext, ToolResult } from '../tools/types'
-import { getToolByName } from '../tools'
-import { logAdminActivity } from '@/lib/api/middleware'
+import type {
+  ToolDefinition,
+  ToolExecutionContext,
+  ToolResult,
+} from "../tools/types";
+import { getToolByName } from "../tools";
+import { logAdminActivity } from "@/lib/api/middleware";
 
 export class ToolExecutor {
-  private context: ToolExecutionContext
-  
+  private context: ToolExecutionContext;
+
   constructor(context: ToolExecutionContext) {
-    this.context = context
+    this.context = context;
   }
-  
+
   async executeTool(toolName: string, params: any): Promise<ToolResult> {
-    const tool = getToolByName(toolName)
-    
+    const tool = getToolByName(toolName);
+
     if (!tool) {
       return {
         success: false,
-        error: `Tool ${toolName} not found`
-      }
+        error: `Tool ${toolName} not found`,
+      };
     }
-    
+
     try {
       if (!this.context.skipAdminActivityLog) {
         if (tool.requiresConfirmation) {
           await logAdminActivity(
             this.context.userId,
             `tool_call_${toolName}`,
-            'ai_agent',
+            "ai_agent",
             undefined,
-            { tool: toolName, params, requiresConfirmation: true }
-          )
+            { tool: toolName, params, requiresConfirmation: true },
+          );
         }
       }
-      
-      const result = await tool.execute(params, this.context)
-      
+
+      const result = await tool.execute(params, this.context);
+
       if (!this.context.skipAdminActivityLog) {
         await logAdminActivity(
           this.context.userId,
           `tool_executed_${toolName}`,
-          'ai_agent',
+          "ai_agent",
           undefined,
-          { 
-            tool: toolName, 
-            params, 
+          {
+            tool: toolName,
+            params,
             success: result.success,
-            error: result.error
-          }
-        )
+            error: result.error,
+          },
+        );
       }
-      
-      return result
+
+      return result;
     } catch (error: any) {
       if (!this.context.skipAdminActivityLog) {
         await logAdminActivity(
           this.context.userId,
           `tool_error_${toolName}`,
-          'ai_agent',
+          "ai_agent",
           undefined,
-          { tool: toolName, params, error: error.message }
-        )
+          { tool: toolName, params, error: error.message },
+        );
       }
-      
+
       return {
         success: false,
-        error: error.message || 'Tool execution failed'
-      }
+        error: error.message || "Tool execution failed",
+      };
     }
   }
-  
-  validateToolCall(toolName: string, params: any): { valid: boolean; error?: string } {
-    const tool = getToolByName(toolName)
+
+  validateToolCall(
+    toolName: string,
+    params: any,
+  ): { valid: boolean; error?: string } {
+    const tool = getToolByName(toolName);
     if (!tool) {
-      return { valid: false, error: `Tool ${toolName} not found` }
+      return { valid: false, error: `Tool ${toolName} not found` };
     }
-    
-    if (!params || typeof params !== 'object') {
-      return { valid: false, error: 'Invalid parameters' }
+
+    if (!params || typeof params !== "object") {
+      return { valid: false, error: "Invalid parameters" };
     }
-    
-    return { valid: true }
+
+    return { valid: true };
   }
-  
+
   requiresConfirmation(toolName: string): boolean {
-    const tool = getToolByName(toolName)
-    return tool?.requiresConfirmation || false
+    const tool = getToolByName(toolName);
+    return tool?.requiresConfirmation || false;
   }
 }

@@ -52,10 +52,9 @@ describe("replaceTemplateVariables", () => {
   });
 
   it("replaces all occurrences of same variable", () => {
-    const result = replaceTemplateVariables(
-      "{{org}} - {{org}} - {{org}}",
-      { org: "Opttius" },
-    );
+    const result = replaceTemplateVariables("{{org}} - {{org}} - {{org}}", {
+      org: "Opttius",
+    });
     expect(result).toBe("Opttius - Opttius - Opttius");
   });
 });
@@ -204,9 +203,7 @@ describe("variable completeness", () => {
   ];
 
   it("replaceTemplateVariables leaves no {{var}} when all variables provided", () => {
-    const template = ALL_TEMPLATE_VARIABLES.map(
-      (v) => `{{${v}}}`,
-    ).join(" | ");
+    const template = ALL_TEMPLATE_VARIABLES.map((v) => `{{${v}}}`).join(" | ");
     const variables = Object.fromEntries(
       ALL_TEMPLATE_VARIABLES.map((v) => [v, `val_${v}`]),
     );

@@ -110,7 +110,8 @@ export async function GET(request: NextRequest) {
       const guestPhone = (apt as { guest_phone?: string }).guest_phone;
       const phone = customer?.phone || guestPhone;
       const preferWhatsApp =
-        customer?.preferred_contact_method === "whatsapp" || (!customerEmail && !!phone);
+        customer?.preferred_contact_method === "whatsapp" ||
+        (!customerEmail && !!phone);
       if (phone && preferWhatsApp) {
         const msg = `Recordatorio: Tu cita en ${appointmentData.branch_name} es mañana ${appointmentData.date} a las ${appointmentData.time}. Responde CONFIRMAR para confirmar.`;
         const waSent = await sendAppointmentReminderWhatsApp(phone, msg);

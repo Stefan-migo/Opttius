@@ -93,7 +93,8 @@ export async function GET(request: NextRequest) {
         customer_name: customerName,
         customer_first_name: customer?.first_name || "Cliente",
         customer_email: customerEmail,
-        prescription_number: rx.prescription_number || `REC-${String(rx.id).slice(0, 8)}`,
+        prescription_number:
+          rx.prescription_number || `REC-${String(rx.id).slice(0, 8)}`,
         date: prescriptionDateStr,
         expiry_date: expiryDateStr,
         branch_name: branch?.name || "Nuestra Óptica",

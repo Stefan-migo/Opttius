@@ -1,8 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import {
-  createClient,
-  createServiceRoleClient,
-} from "@/utils/supabase/server";
+import { createClient, createServiceRoleClient } from "@/utils/supabase/server";
 import { appLogger as logger } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
@@ -127,7 +124,9 @@ export async function PUT(
     const dbClient = createServiceRoleClient();
     const { data: existingTemplate } = await dbClient
       .from("system_email_templates")
-      .select("organization_id, is_system, type, name, subject, content, variables")
+      .select(
+        "organization_id, is_system, type, name, subject, content, variables",
+      )
       .eq("id", params.id)
       .single();
 

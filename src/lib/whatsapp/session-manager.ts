@@ -16,7 +16,7 @@ const DEFAULT_MODEL = "deepseek-chat";
 export async function getOrCreateWhatsAppSession(
   waId: string,
   organizationId: string,
-  supabase: SupabaseClient
+  supabase: SupabaseClient,
 ): Promise<string | null> {
   const metadata = {
     channel: "whatsapp" as const,

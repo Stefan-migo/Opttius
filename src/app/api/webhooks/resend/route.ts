@@ -37,7 +37,10 @@ export async function POST(request: NextRequest) {
     const body = (await request.json()) as ResendWebhookPayload;
 
     const eventType = body.type;
-    if (!eventType || !ALLOWED_EVENTS.includes(eventType as (typeof ALLOWED_EVENTS)[number])) {
+    if (
+      !eventType ||
+      !ALLOWED_EVENTS.includes(eventType as (typeof ALLOWED_EVENTS)[number])
+    ) {
       logger.debug("Resend webhook: ignoring event type", { type: eventType });
       return NextResponse.json({ received: true }, { status: 200 });
     }
@@ -45,7 +48,7 @@ export async function POST(request: NextRequest) {
     const data = body.data || {};
     const emailId = data.email_id || "unknown";
     const recipient = Array.isArray(data.to)
-      ? data.to[0] ?? null
+      ? (data.to[0] ?? null)
       : typeof data.to === "string"
         ? data.to
         : null;

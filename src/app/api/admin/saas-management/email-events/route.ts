@@ -16,7 +16,10 @@ export async function GET(request: NextRequest) {
 
     const supabase = createServiceRoleClient();
     const { searchParams } = new URL(request.url);
-    const limit = Math.min(parseInt(searchParams.get("limit") || "50", 10), 100);
+    const limit = Math.min(
+      parseInt(searchParams.get("limit") || "50", 10),
+      100,
+    );
     const eventType = searchParams.get("event_type") || "";
 
     let query = supabase

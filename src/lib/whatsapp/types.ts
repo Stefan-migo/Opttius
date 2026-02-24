@@ -44,7 +44,12 @@ export interface WhatsAppIncomingMessage {
   audio?: { id: string };
   video?: { id: string; caption?: string };
   document?: { id: string; filename?: string; caption?: string };
-  location?: { latitude: number; longitude: number; name?: string; address?: string };
+  location?: {
+    latitude: number;
+    longitude: number;
+    name?: string;
+    address?: string;
+  };
 }
 
 export interface WhatsAppStatus {

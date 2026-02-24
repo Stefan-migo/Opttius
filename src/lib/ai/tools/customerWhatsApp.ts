@@ -28,7 +28,10 @@ export const customerWhatsAppTools: ToolDefinition[] = [
     parameters: {
       type: "object",
       properties: {
-        customerId: { type: "string", description: "ID del cliente (opcional si viene del contexto)" },
+        customerId: {
+          type: "string",
+          description: "ID del cliente (opcional si viene del contexto)",
+        },
       },
     },
     zodSchema: getAppointmentStatusSchema,
@@ -55,7 +58,7 @@ export const customerWhatsAppTools: ToolDefinition[] = [
         const { data: appointments } = await supabase
           .from("appointments")
           .select(
-            "id, appointment_date, appointment_time, status, branch_id, branch:branches(name)"
+            "id, appointment_date, appointment_time, status, branch_id, branch:branches(name)",
           )
           .eq("customer_id", customerId)
           .eq("organization_id", organizationId)
@@ -109,7 +112,10 @@ export const customerWhatsAppTools: ToolDefinition[] = [
     parameters: {
       type: "object",
       properties: {
-        customerId: { type: "string", description: "ID del cliente (opcional si viene del contexto)" },
+        customerId: {
+          type: "string",
+          description: "ID del cliente (opcional si viene del contexto)",
+        },
       },
     },
     zodSchema: getQuoteStatusSchema,
@@ -134,7 +140,9 @@ export const customerWhatsAppTools: ToolDefinition[] = [
         const { supabase, organizationId } = context;
         const { data: quotes } = await supabase
           .from("quotes")
-          .select("id, quote_number, status, total_amount, currency, expiration_date")
+          .select(
+            "id, quote_number, status, total_amount, currency, expiration_date",
+          )
           .eq("customer_id", customerId)
           .eq("organization_id", organizationId)
           .order("created_at", { ascending: false })
@@ -166,7 +174,9 @@ export const customerWhatsAppTools: ToolDefinition[] = [
         return {
           success: false,
           error:
-            error instanceof Error ? error.message : "Error al consultar presupuestos",
+            error instanceof Error
+              ? error.message
+              : "Error al consultar presupuestos",
         };
       }
     },
@@ -179,7 +189,10 @@ export const customerWhatsAppTools: ToolDefinition[] = [
     parameters: {
       type: "object",
       properties: {
-        customerId: { type: "string", description: "ID del cliente (opcional si viene del contexto)" },
+        customerId: {
+          type: "string",
+          description: "ID del cliente (opcional si viene del contexto)",
+        },
       },
     },
     zodSchema: getOrderStatusSchema,
@@ -205,7 +218,7 @@ export const customerWhatsAppTools: ToolDefinition[] = [
         const { data: orders } = await supabase
           .from("lab_work_orders")
           .select(
-            "id, work_order_number, status, total_amount, currency, branch_id, branch:branches(name), ready_at, delivered_at"
+            "id, work_order_number, status, total_amount, currency, branch_id, branch:branches(name), ready_at, delivered_at",
           )
           .eq("customer_id", customerId)
           .eq("organization_id", organizationId)
@@ -243,7 +256,9 @@ export const customerWhatsAppTools: ToolDefinition[] = [
         return {
           success: false,
           error:
-            error instanceof Error ? error.message : "Error al consultar órdenes",
+            error instanceof Error
+              ? error.message
+              : "Error al consultar órdenes",
         };
       }
     },
@@ -280,7 +295,9 @@ export const customerWhatsAppTools: ToolDefinition[] = [
 
         const { data: appointment, error: fetchError } = await supabase
           .from("appointments")
-          .select("id, customer_id, status, appointment_date, appointment_time, branch:branches(name)")
+          .select(
+            "id, customer_id, status, appointment_date, appointment_time, branch:branches(name)",
+          )
           .eq("id", appointmentId)
           .eq("organization_id", organizationId)
           .single();
@@ -328,8 +345,7 @@ export const customerWhatsAppTools: ToolDefinition[] = [
         if (updateError) {
           return {
             success: false,
-            error:
-              updateError.message || "Error al confirmar la cita",
+            error: updateError.message || "Error al confirmar la cita",
           };
         }
 
@@ -350,7 +366,9 @@ export const customerWhatsAppTools: ToolDefinition[] = [
         return {
           success: false,
           error:
-            error instanceof Error ? error.message : "Error al confirmar la cita",
+            error instanceof Error
+              ? error.message
+              : "Error al confirmar la cita",
         };
       }
     },

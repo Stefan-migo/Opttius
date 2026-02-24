@@ -73,8 +73,12 @@ export async function GET(request: NextRequest) {
             const q = supabaseServiceRole
               .from("customers")
               .select("id, first_name, last_name, email, phone, rut");
-            const { branchId, isSuperAdmin, organizationId, accessibleBranches } =
-              branchContext;
+            const {
+              branchId,
+              isSuperAdmin,
+              organizationId,
+              accessibleBranches,
+            } = branchContext;
             if (branchId) return q.eq("branch_id", branchId);
             if (isSuperAdmin && orgBranchIds && orgBranchIds.length > 0) {
               return q.in("branch_id", orgBranchIds);
@@ -83,8 +87,9 @@ export async function GET(request: NextRequest) {
               return q.eq("branch_id", "00000000-0000-0000-0000-000000000000");
             }
             const primaryBranchId =
-              accessibleBranches.find((b: { isPrimary?: boolean }) => b.isPrimary)
-                ?.id || accessibleBranches[0]?.id;
+              accessibleBranches.find(
+                (b: { isPrimary?: boolean }) => b.isPrimary,
+              )?.id || accessibleBranches[0]?.id;
             return q.eq(
               "branch_id",
               primaryBranchId || "00000000-0000-0000-0000-000000000000",
@@ -350,8 +355,7 @@ export async function GET(request: NextRequest) {
             });
             return NextResponse.json({ error: error.message }, { status: 429 });
           }
-          const err =
-            error instanceof Error ? error : new Error(String(error));
+          const err = error instanceof Error ? error : new Error(String(error));
           logger.error("Error in customer search API", err);
           return createApiErrorResponse(err, { requestId });
         }

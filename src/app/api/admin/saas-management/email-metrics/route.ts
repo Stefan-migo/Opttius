@@ -48,9 +48,13 @@ export async function GET(request: NextRequest) {
     const totalOpened = opened.size;
     const totalClicked = clicked.size;
     const openRate =
-      totalDelivered > 0 ? Math.round((totalOpened / totalDelivered) * 1000) / 10 : 0;
+      totalDelivered > 0
+        ? Math.round((totalOpened / totalDelivered) * 1000) / 10
+        : 0;
     const clickRate =
-      totalDelivered > 0 ? Math.round((totalClicked / totalDelivered) * 1000) / 10 : 0;
+      totalDelivered > 0
+        ? Math.round((totalClicked / totalDelivered) * 1000) / 10
+        : 0;
 
     return NextResponse.json({
       totalDelivered,

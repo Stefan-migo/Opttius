@@ -34,9 +34,14 @@ export function getDefaultVariables(organization?: {
 }): Record<string, string> {
   const websiteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://opttius.cl";
   const supportEmail =
-    organization?.support_email || organization?.contact_email || "soporte@opttius.cl";
+    organization?.support_email ||
+    organization?.contact_email ||
+    "soporte@opttius.cl";
   const contactEmail =
-    organization?.contact_email || organization?.email || organization?.support_email || "contacto@opttius.cl";
+    organization?.contact_email ||
+    organization?.email ||
+    organization?.support_email ||
+    "contacto@opttius.cl";
 
   return {
     organization_name: organization?.name || "Opttius",

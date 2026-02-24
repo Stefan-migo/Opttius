@@ -25,8 +25,8 @@ export default function CookiesPage() {
             Para garantizar la fluidez de su ecosistema operativo, Opttius
             utiliza microdatos temporales (cookies) en su dispositivo. Lejos de
             ser herramientas de invasión publicitaria, estos archivos son el
-            engranaje invisible que permite la autenticación segura, la velocidad
-            de carga y la personalización de su interfaz clínica.
+            engranaje invisible que permite la autenticación segura, la
+            velocidad de carga y la personalización de su interfaz clínica.
           </p>
         </section>
 
@@ -39,9 +39,9 @@ export default function CookiesPage() {
             operativas de primera parte. Utilizamos tokens de sesión encriptados
             para mantener su acceso seguro a los historiales de pacientes, y
             cookies de interfaz para recordar sus preferencias de trabajo (como
-            el modo oscuro o la organización de su dashboard). Opttius no inyecta
-            rastreadores de terceros ni comercializa su navegación con agencias
-            de publicidad.
+            el modo oscuro o la organización de su dashboard). Opttius no
+            inyecta rastreadores de terceros ni comercializa su navegación con
+            agencias de publicidad.
           </p>
         </section>
 

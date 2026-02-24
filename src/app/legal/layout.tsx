@@ -32,7 +32,6 @@ export default function LegalLayout({
           </Link>
         </div>
         {children}
-
       </main>
 
       <footer className="border-t border-epoch-primary/10 py-8 mt-auto">

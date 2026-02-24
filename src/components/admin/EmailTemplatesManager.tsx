@@ -86,14 +86,10 @@ const ESSENTIAL_TYPES = [
 ] as const;
 
 const TYPE_DESCRIPTIONS: Record<string, string> = {
-  appointment_confirmation:
-    "Se envía automáticamente al crear la cita",
-  appointment_reminder:
-    "Se envía automáticamente 24h antes (cron diario)",
-  appointment_reminder_2h:
-    "Se envía automáticamente 2h antes (cron cada hora)",
-  appointment_cancelation:
-    "Se envía cuando se cancela una cita",
+  appointment_confirmation: "Se envía automáticamente al crear la cita",
+  appointment_reminder: "Se envía automáticamente 24h antes (cron diario)",
+  appointment_reminder_2h: "Se envía automáticamente 2h antes (cron cada hora)",
+  appointment_cancelation: "Se envía cuando se cancela una cita",
   appointment_rescheduled:
     "Se envía cuando se reprograma una cita (cambio fecha/hora)",
   appointment_follow_up_reminder:
@@ -102,18 +98,14 @@ const TYPE_DESCRIPTIONS: Record<string, string> = {
     "Se envía 30 días antes de que venza la receta (cron diario)",
   low_stock_alert:
     "Se envía automáticamente al email de la óptica (contacto/reply-to)",
-  order_confirmation:
-    "Se envía automáticamente al crear la orden",
-  quote_sent:
-    "Se envía automáticamente al enviar el presupuesto",
+  order_confirmation: "Se envía automáticamente al crear la orden",
+  quote_sent: "Se envía automáticamente al enviar el presupuesto",
   work_order_ready:
     "Se envía automáticamente cuando los lentes están listos para retiro",
   order_delivered:
     "Se envía automáticamente al confirmar entrega (requiere flujo de entrega)",
-  quote_expiring:
-    "Se envía automáticamente 48h antes de expirar (cron diario)",
-  account_welcome:
-    "Se envía automáticamente al crear cliente con email",
+  quote_expiring: "Se envía automáticamente 48h antes de expirar (cron diario)",
+  account_welcome: "Se envía automáticamente al crear cliente con email",
 };
 
 export default function EmailTemplatesManager({
@@ -135,7 +127,9 @@ export default function EmailTemplatesManager({
     useState<EmailTemplate | null>(null);
   const [testing, setTesting] = useState<string | null>(null);
   const [testEmail, setTestEmail] = useState("");
-  const [createInitialType, setCreateInitialType] = useState<string | undefined>();
+  const [createInitialType, setCreateInitialType] = useState<
+    string | undefined
+  >();
 
   useEffect(() => {
     fetchTemplates();
@@ -187,7 +181,8 @@ export default function EmailTemplatesManager({
 
       if (!response.ok) {
         const errBody = await response.json().catch(() => ({}));
-        const details = errBody?.details ?? errBody?.error ?? response.statusText;
+        const details =
+          errBody?.details ?? errBody?.error ?? response.statusText;
         throw new Error(details);
       }
 
@@ -196,7 +191,10 @@ export default function EmailTemplatesManager({
       );
       fetchTemplates();
     } catch (error) {
-      const msg = error instanceof Error ? error.message : "Error al actualizar plantilla";
+      const msg =
+        error instanceof Error
+          ? error.message
+          : "Error al actualizar plantilla";
       console.error("Error updating template:", error);
       toast.error(msg);
     }
@@ -383,8 +381,12 @@ export default function EmailTemplatesManager({
                   ))}
                 {mode === "saas" && (
                   <>
-                    <SelectItem value="saas_welcome">Bienvenida SaaS</SelectItem>
-                    <SelectItem value="saas_trial_ending">Fin de Prueba</SelectItem>
+                    <SelectItem value="saas_welcome">
+                      Bienvenida SaaS
+                    </SelectItem>
+                    <SelectItem value="saas_trial_ending">
+                      Fin de Prueba
+                    </SelectItem>
                     <SelectItem value="saas_subscription_success">
                       Suscripción Exitosa
                     </SelectItem>
@@ -436,127 +438,122 @@ export default function EmailTemplatesManager({
                 </TableHeader>
                 <TableBody>
                   {filteredTemplates.map(({ type, template }) => (
-                      <TableRow
-                        key={type}
-                        className={
-                          template && !template.is_active ? "opacity-70" : undefined
-                        }
-                      >
-                        <TableCell className="font-medium">
-                          <span className="flex items-center gap-2">
-                            {template?.name ?? (
-                              <span className="text-admin-text-tertiary italic">
-                                Sin plantilla
-                              </span>
-                            )}
-                            {template && !template.is_active && (
-                              <Badge variant="secondary" className="text-xs">
-                                Inactiva
-                              </Badge>
-                            )}
+                    <TableRow
+                      key={type}
+                      className={
+                        template && !template.is_active
+                          ? "opacity-70"
+                          : undefined
+                      }
+                    >
+                      <TableCell className="font-medium">
+                        <span className="flex items-center gap-2">
+                          {template?.name ?? (
+                            <span className="text-admin-text-tertiary italic">
+                              Sin plantilla
+                            </span>
+                          )}
+                          {template && !template.is_active && (
+                            <Badge variant="secondary" className="text-xs">
+                              Inactiva
+                            </Badge>
+                          )}
+                        </span>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline">{getTypeLabel(type)}</Badge>
+                      </TableCell>
+                      <TableCell className="max-w-[200px]">
+                        {mode === "organization" && TYPE_DESCRIPTIONS[type] ? (
+                          <span
+                            className="text-xs text-admin-text-tertiary"
+                            title={TYPE_DESCRIPTIONS[type]}
+                          >
+                            {TYPE_DESCRIPTIONS[type]}
                           </span>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="outline">
-                            {getTypeLabel(type)}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="max-w-[200px]">
-                          {mode === "organization" &&
-                          TYPE_DESCRIPTIONS[type] ? (
-                            <span
-                              className="text-xs text-admin-text-tertiary"
-                              title={TYPE_DESCRIPTIONS[type]}
-                            >
-                              {TYPE_DESCRIPTIONS[type]}
-                            </span>
-                          ) : (
-                            <span className="text-xs text-admin-text-tertiary">
-                              —
-                            </span>
-                          )}
-                        </TableCell>
-                        <TableCell className="max-w-xs truncate">
-                          {template?.subject ?? "—"}
-                        </TableCell>
-                        <TableCell>
+                        ) : (
+                          <span className="text-xs text-admin-text-tertiary">
+                            —
+                          </span>
+                        )}
+                      </TableCell>
+                      <TableCell className="max-w-xs truncate">
+                        {template?.subject ?? "—"}
+                      </TableCell>
+                      <TableCell>
+                        {template ? (
+                          <Switch
+                            checked={template.is_active}
+                            onCheckedChange={() => handleToggleActive(template)}
+                          />
+                        ) : (
+                          <span className="text-admin-text-tertiary">—</span>
+                        )}
+                      </TableCell>
+                      <TableCell>{template?.usage_count ?? 0}</TableCell>
+                      <TableCell>
+                        <div className="flex gap-2">
                           {template ? (
-                            <Switch
-                              checked={template.is_active}
-                              onCheckedChange={() =>
-                                handleToggleActive(template)
-                              }
-                            />
-                          ) : (
-                            <span className="text-admin-text-tertiary">—</span>
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          {template?.usage_count ?? 0}
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex gap-2">
-                            {template ? (
-                              <>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => {
-                                    setSelectedTemplate(template);
-                                    setShowPreviewDialog(true);
-                                  }}
-                                  title="Ver plantilla"
-                                >
-                                  <Eye className="h-4 w-4" />
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => {
-                                    setSelectedTemplate(template);
-                                    setShowEditDialog(true);
-                                  }}
-                                  title="Editar plantilla"
-                                >
-                                  <Edit className="h-4 w-4" />
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => handleTestEmail(template)}
-                                  disabled={testing === template.id}
-                                  title="Enviar email de prueba"
-                                >
-                                  <Send
-                                    className={`h-4 w-4 ${testing === template.id ? "animate-spin" : ""}`}
-                                  />
-                                </Button>
-                                {!template.is_system && (
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => handleDeleteClick(template)}
-                                    className="text-red-600"
-                                  >
-                                    <Trash2 className="h-4 w-4" />
-                                  </Button>
-                                )}
-                              </>
-                            ) : (
+                            <>
                               <Button
+                                variant="ghost"
                                 size="sm"
                                 onClick={() => {
-                                  setCreateInitialType(type);
-                                  setShowCreateDialog(true);
+                                  setSelectedTemplate(template);
+                                  setShowPreviewDialog(true);
                                 }}
+                                title="Ver plantilla"
                               >
-                                <Plus className="h-4 w-4 mr-1" />
-                                Crear plantilla
+                                <Eye className="h-4 w-4" />
                               </Button>
-                            )}
-                          </div>
-                        </TableCell>
-                      </TableRow>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => {
+                                  setSelectedTemplate(template);
+                                  setShowEditDialog(true);
+                                }}
+                                title="Editar plantilla"
+                              >
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleTestEmail(template)}
+                                disabled={testing === template.id}
+                                title="Enviar email de prueba"
+                              >
+                                <Send
+                                  className={`h-4 w-4 ${testing === template.id ? "animate-spin" : ""}`}
+                                />
+                              </Button>
+                              {!template.is_system && (
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleDeleteClick(template)}
+                                  className="text-red-600"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              )}
+                            </>
+                          ) : (
+                            <Button
+                              size="sm"
+                              onClick={() => {
+                                setCreateInitialType(type);
+                                setShowCreateDialog(true);
+                              }}
+                            >
+                              <Plus className="h-4 w-4 mr-1" />
+                              Crear plantilla
+                            </Button>
+                          )}
+                        </div>
+                      </TableCell>
+                    </TableRow>
                   ))}
                 </TableBody>
               </Table>

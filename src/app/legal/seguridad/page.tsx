@@ -2,8 +2,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Arquitectura de Seguridad Clínica",
-  description:
-    "Información sobre seguridad y protección de datos en Opttius",
+  description: "Información sobre seguridad y protección de datos en Opttius",
 };
 
 export default function SeguridadPage() {
@@ -53,12 +52,11 @@ export default function SeguridadPage() {
             3. Aislamiento de Datos Clínicos (Privacidad por Diseño)
           </h2>
           <p>
-            En Opttius, la confidencialidad no es una opción, es la
-            arquitectura base. Implementamos Row-Level Security (RLS) estricto:
-            cada receta, paciente y transacción financiera está aislada
-            criptográficamente a nivel de base de datos. Nadie fuera de su
-            organización autorizada puede siquiera &quot;ver&quot; que esos datos
-            existen.
+            En Opttius, la confidencialidad no es una opción, es la arquitectura
+            base. Implementamos Row-Level Security (RLS) estricto: cada receta,
+            paciente y transacción financiera está aislada criptográficamente a
+            nivel de base de datos. Nadie fuera de su organización autorizada
+            puede siquiera &quot;ver&quot; que esos datos existen.
           </p>
         </section>
 
@@ -68,10 +66,11 @@ export default function SeguridadPage() {
           </h2>
           <p>
             Ante cualquier eventualidad, su información está replicada y segura.
-            Ejecutamos copias de seguridad automáticas y encriptadas en múltiples
-            zonas geográficas (redundancia). Garantizamos la disponibilidad
-            continua de su historial clínico y la capacidad de restauración
-            inmediata (Point-in-Time Recovery) ante incidentes críticos.
+            Ejecutamos copias de seguridad automáticas y encriptadas en
+            múltiples zonas geográficas (redundancia). Garantizamos la
+            disponibilidad continua de su historial clínico y la capacidad de
+            restauración inmediata (Point-in-Time Recovery) ante incidentes
+            críticos.
           </p>
         </section>
 

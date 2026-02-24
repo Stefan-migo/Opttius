@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
     if (!adminUser?.organization_id) {
       return NextResponse.json(
         { error: "Admin sin organización asignada" },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
     if (!waba_id || !phone_number_id) {
       return NextResponse.json(
         { error: "waba_id y phone_number_id son requeridos" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -73,7 +73,7 @@ export async function POST(request: NextRequest) {
         });
         return NextResponse.json(
           { error: "Error al actualizar configuración" },
-          { status: 500 }
+          { status: 500 },
         );
       }
       return NextResponse.json({
@@ -94,7 +94,7 @@ export async function POST(request: NextRequest) {
             error:
               "Este número ya está conectado a otra organización. Usa un número distinto.",
           },
-          { status: 409 }
+          { status: 409 },
         );
       }
       logger.error("WhatsApp connect insert failed", {
@@ -103,7 +103,7 @@ export async function POST(request: NextRequest) {
       });
       return NextResponse.json(
         { error: "Error al conectar WhatsApp" },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -114,11 +114,11 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     logger.error(
       "WhatsApp connect error",
-      error instanceof Error ? error : new Error(String(error))
+      error instanceof Error ? error : new Error(String(error)),
     );
     return NextResponse.json(
       { error: "Error interno del servidor" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

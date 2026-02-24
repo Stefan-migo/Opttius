@@ -24,11 +24,11 @@ export default function PrivacidadPage() {
           <p>
             Opttius no es un software genérico; es un ecosistema operativo
             diseñado por un tecnólogo médico. Entendemos que la información de
-            su óptica no son simples &quot;datos&quot;, sino historiales clínicos
-            y financieros sensibles. Tratamos su información con el mismo nivel
-            de confidencialidad y rigor que exige la práctica clínica
-            profesional, cumpliendo estrictamente con la normativa vigente de
-            protección de datos.
+            su óptica no son simples &quot;datos&quot;, sino historiales
+            clínicos y financieros sensibles. Tratamos su información con el
+            mismo nivel de confidencialidad y rigor que exige la práctica
+            clínica profesional, cumpliendo estrictamente con la normativa
+            vigente de protección de datos.
           </p>
         </section>
 
@@ -38,11 +38,11 @@ export default function PrivacidadPage() {
           </h2>
           <p>
             Nuestra arquitectura tecnológica está diseñada para recopilar
-            únicamente lo indispensable para el funcionamiento de su
-            ecosistema: información de contacto, datos de facturación, y el
-            núcleo operativo de su clínica (recetas, prescripciones, OD/OS e
-            historial de pacientes). Opttius no comercializa, transfiere ni
-            monetiza su base de datos con terceros bajo ninguna circunstancia.
+            únicamente lo indispensable para el funcionamiento de su ecosistema:
+            información de contacto, datos de facturación, y el núcleo operativo
+            de su clínica (recetas, prescripciones, OD/OS e historial de
+            pacientes). Opttius no comercializa, transfiere ni monetiza su base
+            de datos con terceros bajo ninguna circunstancia.
           </p>
         </section>
 
@@ -51,12 +51,12 @@ export default function PrivacidadPage() {
             3. Inteligencia Operativa (Finalidad del tratamiento)
           </h2>
           <p>
-            Cada dato ingresado tiene un único propósito: automatizar y controlar
-            su óptica. Utilizamos la información exclusivamente para habilitar
-            sus flujos de trabajo: trazabilidad de órdenes de laboratorio,
-            historiales clínicos instantáneos, gestión de agenda y reportes de
-            rentabilidad. Su información comercial y clínica está encriptada y
-            permanece bajo su control absoluto.
+            Cada dato ingresado tiene un único propósito: automatizar y
+            controlar su óptica. Utilizamos la información exclusivamente para
+            habilitar sus flujos de trabajo: trazabilidad de órdenes de
+            laboratorio, historiales clínicos instantáneos, gestión de agenda y
+            reportes de rentabilidad. Su información comercial y clínica está
+            encriptada y permanece bajo su control absoluto.
           </p>
         </section>
 

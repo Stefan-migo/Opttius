@@ -164,7 +164,11 @@ export async function PUT(
       guest_email?: string | null;
       branch_id?: string | null;
       organization_id?: string | null;
-      customer?: { first_name?: string; last_name?: string; email?: string } | null;
+      customer?: {
+        first_name?: string;
+        last_name?: string;
+        email?: string;
+      } | null;
       branch?: { name?: string; phone?: string; email?: string } | null;
     } | null = null;
     const isReschedule =
@@ -179,8 +183,13 @@ export async function PUT(
         .eq("id", id)
         .single();
       if (aptForReschedule) {
-        let customer: { first_name?: string; last_name?: string; email?: string } | null = null;
-        let branch: { name?: string; phone?: string; email?: string } | null = null;
+        let customer: {
+          first_name?: string;
+          last_name?: string;
+          email?: string;
+        } | null = null;
+        let branch: { name?: string; phone?: string; email?: string } | null =
+          null;
         if (aptForReschedule.customer_id) {
           const { data: c } = await supabaseServiceRole
             .from("customers")
@@ -388,10 +397,7 @@ export async function PUT(
                 .trim() || "Cliente";
             customerEmail = customer.email || null;
           }
-        } else if (
-          apt.guest_first_name ||
-          apt.guest_last_name
-        ) {
+        } else if (apt.guest_first_name || apt.guest_last_name) {
           customerName =
             [apt.guest_first_name, apt.guest_last_name]
               .filter(Boolean)
@@ -401,13 +407,9 @@ export async function PUT(
         }
 
         const aptDate =
-          apt.appointment_date ||
-          updatedAppointment.appointment_date ||
-          "";
+          apt.appointment_date || updatedAppointment.appointment_date || "";
         const aptTime =
-          apt.appointment_time ||
-          updatedAppointment.appointment_time ||
-          "";
+          apt.appointment_time || updatedAppointment.appointment_time || "";
 
         await NotificationService.notifyAppointmentCancelled(
           id,
@@ -434,9 +436,7 @@ export async function PUT(
               customer_email: customerEmail,
               date: aptDate,
               time:
-                typeof aptTime === "string"
-                  ? aptTime.substring(0, 5)
-                  : aptTime,
+                typeof aptTime === "string" ? aptTime.substring(0, 5) : aptTime,
               branch_name: branch?.name || "Nuestra Óptica",
               branch_phone: branch?.phone || "",
               branch_email: branch?.email || "",
@@ -462,30 +462,36 @@ export async function PUT(
     ) {
       const oldDate = appointmentBeforeReschedule.appointment_date;
       const oldTime = appointmentBeforeReschedule.appointment_time;
-      const newDate = body.appointment_date ?? updatedAppointment.appointment_date;
-      const newTime = body.appointment_time ?? updatedAppointment.appointment_time;
+      const newDate =
+        body.appointment_date ?? updatedAppointment.appointment_date;
+      const newTime =
+        body.appointment_time ?? updatedAppointment.appointment_time;
       const dateChanged =
         body.appointment_date && oldDate && newDate !== oldDate;
       const timeChanged =
         body.appointment_time && oldTime && newTime !== oldTime;
 
       if ((dateChanged || timeChanged) && (oldDate || oldTime)) {
-        const cust = appointmentBeforeReschedule.customer as
-          | { first_name?: string; last_name?: string; email?: string }
-          | null;
+        const cust = appointmentBeforeReschedule.customer as {
+          first_name?: string;
+          last_name?: string;
+          email?: string;
+        } | null;
         const customerEmail =
-          cust?.email ||
-          appointmentBeforeReschedule.guest_email ||
-          null;
+          cust?.email || appointmentBeforeReschedule.guest_email || null;
         const customerName = cust
-          ? [cust.first_name, cust.last_name].filter(Boolean).join(" ").trim() ||
-            "Cliente"
+          ? [cust.first_name, cust.last_name]
+              .filter(Boolean)
+              .join(" ")
+              .trim() || "Cliente"
           : "Cliente";
 
         if (customerEmail) {
-          const branch = appointmentBeforeReschedule.branch as
-            | { name?: string; phone?: string; email?: string }
-            | null;
+          const branch = appointmentBeforeReschedule.branch as {
+            name?: string;
+            phone?: string;
+            email?: string;
+          } | null;
           sendAppointmentRescheduled(
             {
               id,

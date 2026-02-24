@@ -43,7 +43,8 @@ const EVENT_LABELS: Record<string, string> = {
 function getEventBadgeVariant(
   type: string,
 ): "default" | "secondary" | "destructive" | "outline" {
-  if (type === "email.bounced" || type === "email.complained") return "destructive";
+  if (type === "email.bounced" || type === "email.complained")
+    return "destructive";
   if (type === "email.opened" || type === "email.clicked") return "default";
   return "secondary";
 }
@@ -58,7 +59,9 @@ export function EmailEventsHistory() {
     try {
       const params = new URLSearchParams();
       if (eventFilter !== "all") params.set("event_type", eventFilter);
-      const res = await fetch(`/api/admin/saas-management/email-events?${params}`);
+      const res = await fetch(
+        `/api/admin/saas-management/email-events?${params}`,
+      );
       if (res.ok) {
         const data = await res.json();
         setEvents(data.events || []);
@@ -122,7 +125,9 @@ export function EmailEventsHistory() {
             <p>No hay eventos registrados.</p>
             <p className="text-sm mt-2">
               Configura el webhook de Resend en{" "}
-              <code className="bg-muted px-1 rounded">/api/webhooks/resend</code>{" "}
+              <code className="bg-muted px-1 rounded">
+                /api/webhooks/resend
+              </code>{" "}
               para recibir eventos de envío, apertura y clics.
             </p>
           </div>

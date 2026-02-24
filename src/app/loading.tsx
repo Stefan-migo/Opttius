@@ -6,9 +6,7 @@ export default function Loading() {
           className="h-10 w-10 animate-spin rounded-full border-2 border-muted-foreground/30 border-t-accent"
           aria-hidden
         />
-        <p className="text-sm text-muted-foreground font-medium">
-          Cargando...
-        </p>
+        <p className="text-sm text-muted-foreground font-medium">Cargando...</p>
       </div>
     </div>
   );

@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
     if (!adminUser?.organization_id) {
       return NextResponse.json(
         { error: "Admin sin organización" },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
     if (error) {
       return NextResponse.json(
         { error: "Error al obtener estado" },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -52,7 +52,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     return NextResponse.json(
       { error: "Error interno del servidor" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

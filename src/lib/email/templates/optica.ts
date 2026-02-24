@@ -200,8 +200,7 @@ export async function sendAppointmentConfirmation(
     const variables = {
       ...getDefaultVariables({
         name: orgInfo?.name ?? undefined,
-        support_email:
-          orgInfo?.resolvedSupportEmail || "contacto@opttius.cl",
+        support_email: orgInfo?.resolvedSupportEmail || "contacto@opttius.cl",
       }),
       customer_name: appointment.customer_name || "Cliente",
       customer_first_name: appointment.customer_first_name || "Cliente",
@@ -284,8 +283,7 @@ export async function sendAppointmentReminder(
     const variables = {
       ...getDefaultVariables({
         name: orgInfo?.name ?? undefined,
-        support_email:
-          orgInfo?.resolvedSupportEmail || "contacto@opttius.cl",
+        support_email: orgInfo?.resolvedSupportEmail || "contacto@opttius.cl",
       }),
       customer_name: appointment.customer_name || "Cliente",
       customer_first_name: appointment.customer_first_name || "Cliente",
@@ -359,8 +357,7 @@ export async function sendAppointmentReminder2h(
     const variables = {
       ...getDefaultVariables({
         name: orgInfo?.name ?? undefined,
-        support_email:
-          orgInfo?.resolvedSupportEmail || "contacto@opttius.cl",
+        support_email: orgInfo?.resolvedSupportEmail || "contacto@opttius.cl",
       }),
       customer_name: appointment.customer_name || "Cliente",
       customer_first_name: appointment.customer_first_name || "Cliente",
@@ -430,8 +427,7 @@ export async function sendAppointmentCancellation(
     const variables = {
       ...getDefaultVariables({
         name: orgInfo?.name ?? undefined,
-        support_email:
-          orgInfo?.resolvedSupportEmail || "contacto@opttius.cl",
+        support_email: orgInfo?.resolvedSupportEmail || "contacto@opttius.cl",
       }),
       customer_name: appointment.customer_name || "Cliente",
       customer_first_name: appointment.customer_first_name || "Cliente",
@@ -507,8 +503,7 @@ export async function sendAppointmentRescheduled(
     const variables = {
       ...getDefaultVariables({
         name: orgInfo?.name ?? undefined,
-        support_email:
-          orgInfo?.resolvedSupportEmail || "contacto@opttius.cl",
+        support_email: orgInfo?.resolvedSupportEmail || "contacto@opttius.cl",
       }),
       customer_name: appointment.customer_name || "Cliente",
       customer_first_name: appointment.customer_first_name || "Cliente",
@@ -601,8 +596,7 @@ export async function sendAppointmentFollowUpReminder(
     const variables = {
       ...getDefaultVariables({
         name: orgInfo?.name ?? undefined,
-        support_email:
-          orgInfo?.resolvedSupportEmail || "contacto@opttius.cl",
+        support_email: orgInfo?.resolvedSupportEmail || "contacto@opttius.cl",
       }),
       customer_name: appointment.customer_name || "Cliente",
       customer_first_name: appointment.customer_first_name || "Cliente",
@@ -672,8 +666,7 @@ export async function sendPrescriptionReady(
     const variables = {
       ...getDefaultVariables({
         name: orgInfo?.name ?? undefined,
-        support_email:
-          orgInfo?.resolvedSupportEmail || "contacto@opttius.cl",
+        support_email: orgInfo?.resolvedSupportEmail || "contacto@opttius.cl",
       }),
       customer_name: prescription.customer_name || "Cliente",
       customer_first_name: prescription.customer_first_name || "Cliente",
@@ -761,8 +754,7 @@ export async function sendPrescriptionExpiring(
     const variables = {
       ...getDefaultVariables({
         name: orgInfo?.name ?? undefined,
-        support_email:
-          orgInfo?.resolvedSupportEmail || "contacto@opttius.cl",
+        support_email: orgInfo?.resolvedSupportEmail || "contacto@opttius.cl",
       }),
       customer_name: prescription.customer_name || "Cliente",
       customer_first_name: prescription.customer_first_name || "Cliente",
@@ -835,8 +827,7 @@ export async function sendWorkOrderReady(
     const variables = {
       ...getDefaultVariables({
         name: orgInfo?.name ?? undefined,
-        support_email:
-          orgInfo?.resolvedSupportEmail || "contacto@opttius.cl",
+        support_email: orgInfo?.resolvedSupportEmail || "contacto@opttius.cl",
       }),
       customer_name: workOrder.customer_name || "Cliente",
       customer_first_name: workOrder.customer_first_name || "Cliente",
@@ -928,8 +919,7 @@ export async function sendQuoteSent(
     const variables = {
       ...getDefaultVariables({
         name: orgInfo?.name ?? undefined,
-        support_email:
-          orgInfo?.resolvedSupportEmail || "contacto@opttius.cl",
+        support_email: orgInfo?.resolvedSupportEmail || "contacto@opttius.cl",
       }),
       customer_name: quote.customer_name || "Cliente",
       customer_first_name: quote.customer_first_name || "Cliente",
@@ -1015,8 +1005,7 @@ export async function sendQuoteExpiring(
     const variables = {
       ...getDefaultVariables({
         name: orgInfo?.name ?? undefined,
-        support_email:
-          orgInfo?.resolvedSupportEmail || "contacto@opttius.cl",
+        support_email: orgInfo?.resolvedSupportEmail || "contacto@opttius.cl",
       }),
       customer_name: quote.customer_name || "Cliente",
       customer_first_name: quote.customer_first_name || "Cliente",
@@ -1088,8 +1077,7 @@ export async function sendAccountWelcomeEmail(
     const variables = {
       ...getDefaultVariables({
         name: orgInfo?.name ?? undefined,
-        support_email:
-          orgInfo?.resolvedSupportEmail || "contacto@opttius.cl",
+        support_email: orgInfo?.resolvedSupportEmail || "contacto@opttius.cl",
       }),
       customer_name: customer.name || "Cliente",
       customer_first_name: customer.first_name || "Cliente",
@@ -1137,7 +1125,9 @@ export async function sendContactFormNotification(
   data: ContactFormData,
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const orgInfo = await getOrganizationInfoWithFallbacks(data.organization_id);
+    const orgInfo = await getOrganizationInfoWithFallbacks(
+      data.organization_id,
+    );
 
     // El email se envía al negocio, no al cliente
     const recipientEmail =
@@ -1245,8 +1235,7 @@ export async function sendBirthdayPromo(
     const variables = {
       ...getDefaultVariables({
         name: orgInfo?.name ?? undefined,
-        support_email:
-          orgInfo?.resolvedSupportEmail || "contacto@opttius.cl",
+        support_email: orgInfo?.resolvedSupportEmail || "contacto@opttius.cl",
       }),
       customer_name: data.customer_name || "Cliente",
       customer_first_name: data.customer_first_name || "Cliente",

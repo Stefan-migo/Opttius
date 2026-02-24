@@ -32,7 +32,11 @@ export async function GET(request: NextRequest) {
     const supabase = createServiceRoleClient();
 
     const now = new Date();
-    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const todayStart = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate(),
+    );
     const futureEnd = new Date(todayStart);
     futureEnd.setDate(futureEnd.getDate() + DAYS_BEFORE);
 
@@ -113,7 +117,8 @@ export async function GET(request: NextRequest) {
         organization_id: sub.organization_id,
         organization_name: org.name || "Tu organización",
         trial_start_date:
-          sub.current_period_start?.split("T")[0] || trialEndDate.toISOString().split("T")[0],
+          sub.current_period_start?.split("T")[0] ||
+          trialEndDate.toISOString().split("T")[0],
         trial_end_date: trialEndDate.toLocaleDateString("es-CL", {
           year: "numeric",
           month: "long",

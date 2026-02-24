@@ -495,7 +495,10 @@ export default function SystemConfig({
                     }));
                   }}
                   className="mt-2"
-                  disabled={isUpdating || savingConfigKeys.has("prescription_expiration_months")}
+                  disabled={
+                    isUpdating ||
+                    savingConfigKeys.has("prescription_expiration_months")
+                  }
                 />
               </div>
               <Button
@@ -529,8 +532,8 @@ export default function SystemConfig({
               </Button>
             </div>
             <p className="text-xs text-admin-text-tertiary mt-2">
-              Valor por defecto: 6 meses. Ejemplo: receta del 10/02 → vencimiento
-              10/08.
+              Valor por defecto: 6 meses. Ejemplo: receta del 10/02 →
+              vencimiento 10/08.
             </p>
           </CardContent>
         </Card>

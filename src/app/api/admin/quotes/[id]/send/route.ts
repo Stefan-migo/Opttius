@@ -95,7 +95,9 @@ export async function POST(
     if (quoteData.customer_id) {
       const { data: customerData } = await supabaseServiceRole
         .from("customers")
-        .select("id, first_name, last_name, email, phone, preferred_contact_method")
+        .select(
+          "id, first_name, last_name, email, phone, preferred_contact_method",
+        )
         .eq("id", quoteData.customer_id)
         .single();
       relations.customer = customerData || null;
@@ -432,13 +434,16 @@ Este presupuesto es válido hasta ${quote.expiration_date ? new Date(quote.expir
     }
 
     // También enviar por WhatsApp si el cliente tiene teléfono y prefiere WhatsApp
-    const customer = relations.customer as { phone?: string; preferred_contact_method?: string } | null;
+    const customer = relations.customer as {
+      phone?: string;
+      preferred_contact_method?: string;
+    } | null;
     if (customer?.phone && customer?.preferred_contact_method === "whatsapp") {
       sendQuoteWhatsApp(
         customer.phone,
         quote.quote_number,
         quote.total_amount,
-        quote.currency ?? "CLP"
+        quote.currency ?? "CLP",
       ).catch((err) => logger.warn("WhatsApp quote send failed", err));
     }
 

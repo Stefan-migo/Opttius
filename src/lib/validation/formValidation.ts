@@ -8,7 +8,11 @@
  */
 
 import { z } from "zod";
-import { isValidRUT, isValidRUTFormat, completeRUTIfNeeded } from "@/lib/utils/rut";
+import {
+  isValidRUT,
+  isValidRUTFormat,
+  completeRUTIfNeeded,
+} from "@/lib/utils/rut";
 
 /**
  * Esquema de validación para RUT chileno

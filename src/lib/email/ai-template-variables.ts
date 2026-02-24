@@ -153,22 +153,14 @@ export const VARIABLES_BY_TYPE: Record<string, string[]> = {
     "branch_email",
     "organization_name",
   ],
-  work_order_ready: [
-    "customer_name",
-    "work_order_number",
-    "organization_name",
-  ],
+  work_order_ready: ["customer_name", "work_order_number", "organization_name"],
   low_stock_alert: [
     "low_stock_products",
     "low_stock_products_text",
     "product_count",
     "organization_name",
   ],
-  account_welcome: [
-    "customer_name",
-    "account_url",
-    "organization_name",
-  ],
+  account_welcome: ["customer_name", "account_url", "organization_name"],
   password_reset: [
     "customer_name",
     "reset_link",

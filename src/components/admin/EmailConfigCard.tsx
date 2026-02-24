@@ -18,14 +18,18 @@ interface EmailConfigCardProps {
   configs?: SystemConfigItem[];
 }
 
-export default function EmailConfigCard({ configs = [] }: EmailConfigCardProps) {
+export default function EmailConfigCard({
+  configs = [],
+}: EmailConfigCardProps) {
   const [organizationName, setOrganizationName] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [replyTo, setReplyTo] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
-  const contactEmailConfig = configs.find((c) => c.config_key === "contact_email");
+  const contactEmailConfig = configs.find(
+    (c) => c.config_key === "contact_email",
+  );
   const suggestedContactEmail =
     typeof contactEmailConfig?.config_value === "string"
       ? contactEmailConfig.config_value
@@ -49,9 +53,7 @@ export default function EmailConfigCard({ configs = [] }: EmailConfigCardProps) 
           const metaDisplayName = meta.email_display_name as string | undefined;
           const metaSupportEmail = meta.support_email as string | undefined;
           setDisplayName(metaDisplayName?.trim() || org.name || "");
-          setReplyTo(
-            metaSupportEmail?.trim() || contactEmailVal || "",
-          );
+          setReplyTo(metaSupportEmail?.trim() || contactEmailVal || "");
         }
       } catch (error) {
         console.error("Error fetching organization:", error);
@@ -70,8 +72,7 @@ export default function EmailConfigCard({ configs = [] }: EmailConfigCardProps) 
       if (!res.ok) throw new Error("No se pudo cargar la organización");
       const data = await res.json();
       const org = data?.data ?? data?.organization;
-      const currentMeta =
-        (org?.metadata as Record<string, unknown>) || {};
+      const currentMeta = (org?.metadata as Record<string, unknown>) || {};
 
       const response = await fetch("/api/admin/organizations/current", {
         method: "PATCH",
@@ -93,7 +94,9 @@ export default function EmailConfigCard({ configs = [] }: EmailConfigCardProps) 
     } catch (error) {
       console.error("Error saving email config:", error);
       toast.error(
-        error instanceof Error ? error.message : "Error al guardar configuración",
+        error instanceof Error
+          ? error.message
+          : "Error al guardar configuración",
       );
     } finally {
       setSaving(false);
@@ -125,9 +128,8 @@ export default function EmailConfigCard({ configs = [] }: EmailConfigCardProps) 
           <div className="space-y-6">
             <div className="rounded-lg border border-admin-border-primary/20 bg-admin-bg-primary/30 p-3 text-xs text-admin-text-tertiary">
               <Info className="inline h-4 w-4 mr-2 align-middle" />
-              Valores sugeridos desde{" "}
-              <strong>Configuración</strong>: Nombre de la Óptica y Email de
-              Contacto.
+              Valores sugeridos desde <strong>Configuración</strong>: Nombre de
+              la Óptica y Email de Contacto.
             </div>
 
             <div className="space-y-2">

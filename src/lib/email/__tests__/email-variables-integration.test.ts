@@ -6,15 +6,20 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
 // Capture variables passed to replaceTemplateVariables
-let capturedVariables: Record<string, string | number | null | undefined>[] = [];
+let capturedVariables: Record<string, string | number | null | undefined>[] =
+  [];
 
 // Mock template-utils to capture variables
 vi.mock("@/lib/email/template-utils", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("@/lib/email/template-utils")>();
+  const actual =
+    await importOriginal<typeof import("@/lib/email/template-utils")>();
   return {
     ...actual,
     replaceTemplateVariables: vi.fn(
-      (template: string, variables: Record<string, string | number | null | undefined>) => {
+      (
+        template: string,
+        variables: Record<string, string | number | null | undefined>,
+      ) => {
         capturedVariables.push({ ...variables });
         return actual.replaceTemplateVariables(template, variables);
       },
@@ -60,7 +65,9 @@ describe("EmailNotificationService - variable correctness", () => {
 
   describe("sendOrderConfirmation", () => {
     it("passes correct variables from order data", async () => {
-      const { EmailNotificationService } = await import("@/lib/email/notifications");
+      const { EmailNotificationService } = await import(
+        "@/lib/email/notifications"
+      );
 
       const order = {
         id: "ord-1",
@@ -68,7 +75,13 @@ describe("EmailNotificationService - variable correctness", () => {
         user_email: "cliente@test.com",
         customer_name: "Juan Pérez",
         items: [
-          { id: "i1", name: "Lente", quantity: 1, price: 50000, variant_title: "Blue" },
+          {
+            id: "i1",
+            name: "Lente",
+            quantity: 1,
+            price: 50000,
+            variant_title: "Blue",
+          },
         ],
         total_amount: 50000,
         currency: "CLP",
@@ -78,7 +91,8 @@ describe("EmailNotificationService - variable correctness", () => {
         organization_id: "org-1",
       };
 
-      const result = await EmailNotificationService.sendOrderConfirmation(order);
+      const result =
+        await EmailNotificationService.sendOrderConfirmation(order);
       expect(result.success).toBe(true);
 
       const vars = capturedVariables[capturedVariables.length - 1];
@@ -95,7 +109,9 @@ describe("EmailNotificationService - variable correctness", () => {
 
   describe("sendLowStockAlert", () => {
     it("passes correct variables for low stock products", async () => {
-      const { EmailNotificationService } = await import("@/lib/email/notifications");
+      const { EmailNotificationService } = await import(
+        "@/lib/email/notifications"
+      );
 
       const products = [
         { name: "Lente A", current_stock: 2, min_stock: 5 },
@@ -120,7 +136,9 @@ describe("EmailNotificationService - variable correctness", () => {
 
   describe("sendPaymentSuccess", () => {
     it("passes correct variables including transaction_id", async () => {
-      const { EmailNotificationService } = await import("@/lib/email/notifications");
+      const { EmailNotificationService } = await import(
+        "@/lib/email/notifications"
+      );
 
       const order = {
         id: "ord-2",
@@ -151,7 +169,9 @@ describe("EmailNotificationService - variable correctness", () => {
 
   describe("sendPasswordReset", () => {
     it("passes reset_link and reset_url", async () => {
-      const { EmailNotificationService } = await import("@/lib/email/notifications");
+      const { EmailNotificationService } = await import(
+        "@/lib/email/notifications"
+      );
 
       const result = await EmailNotificationService.sendPasswordReset(
         "user@test.com",
@@ -169,7 +189,9 @@ describe("EmailNotificationService - variable correctness", () => {
 
   describe("sendMembershipWelcome", () => {
     it("passes membership_tier, access_url, membership_start_date", async () => {
-      const { EmailNotificationService } = await import("@/lib/email/notifications");
+      const { EmailNotificationService } = await import(
+        "@/lib/email/notifications"
+      );
 
       const result = await EmailNotificationService.sendMembershipWelcome(
         "Cliente",
@@ -189,7 +211,9 @@ describe("EmailNotificationService - variable correctness", () => {
 
   describe("sendMembershipReminder", () => {
     it("passes days_remaining and renewal_url", async () => {
-      const { EmailNotificationService } = await import("@/lib/email/notifications");
+      const { EmailNotificationService } = await import(
+        "@/lib/email/notifications"
+      );
 
       const result = await EmailNotificationService.sendMembershipReminder(
         "Cliente",
@@ -419,9 +443,7 @@ describe("optica send functions - variable correctness", () => {
 
   describe("sendQuoteSent", () => {
     it("passes quote_number, total, quote_url", async () => {
-      const { sendQuoteSent } = await import(
-        "@/lib/email/templates/optica"
-      );
+      const { sendQuoteSent } = await import("@/lib/email/templates/optica");
 
       const data = {
         id: "q-1",

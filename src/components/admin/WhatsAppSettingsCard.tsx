@@ -7,7 +7,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { MessageCircle, Loader2, CheckCircle, AlertCircle, ExternalLink } from "lucide-react";
+import {
+  MessageCircle,
+  Loader2,
+  CheckCircle,
+  AlertCircle,
+  ExternalLink,
+} from "lucide-react";
 import { toast } from "sonner";
 
 interface WhatsAppNumber {
@@ -125,8 +131,8 @@ export default function WhatsAppSettingsCard() {
             WhatsApp Business
           </CardTitle>
           <p className="text-sm text-admin-text-tertiary">
-            Conecta tu número de WhatsApp para que tus clientes puedan escribirte
-            y recibir respuestas del asistente IA.
+            Conecta tu número de WhatsApp para que tus clientes puedan
+            escribirte y recibir respuestas del asistente IA.
           </p>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -169,7 +175,10 @@ export default function WhatsAppSettingsCard() {
                   variant="outline"
                   className="w-full"
                   onClick={() => {
-                    const base = typeof window !== "undefined" ? window.location.origin : "";
+                    const base =
+                      typeof window !== "undefined"
+                        ? window.location.origin
+                        : "";
                     const callback = `${base}/api/admin/whatsapp/oauth-callback`;
                     const url = `https://www.facebook.com/v18.0/dialog/oauth?client_id=${process.env.NEXT_PUBLIC_META_APP_ID}&redirect_uri=${encodeURIComponent(callback)}&scope=${encodeURIComponent(OAUTH_SCOPES)}&response_type=code`;
                     window.location.href = url;
@@ -193,52 +202,55 @@ export default function WhatsAppSettingsCard() {
                 </span>
               </div>
             </div>
-          <form onSubmit={handleConnect} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="waba_id">WABA ID (Business Account ID)</Label>
-              <Input
-                id="waba_id"
-                value={form.waba_id}
-                onChange={(e) =>
-                  setForm((f) => ({ ...f, waba_id: e.target.value }))
-                }
-                placeholder="Ej: 123456789012345"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="phone_number_id">Phone Number ID</Label>
-              <Input
-                id="phone_number_id"
-                value={form.phone_number_id}
-                onChange={(e) =>
-                  setForm((f) => ({ ...f, phone_number_id: e.target.value }))
-                }
-                placeholder="Ej: 987654321098765"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="display_phone_number">
-                Número mostrado (opcional)
-              </Label>
-              <Input
-                id="display_phone_number"
-                value={form.display_phone_number}
-                onChange={(e) =>
-                  setForm((f) => ({ ...f, display_phone_number: e.target.value }))
-                }
-                placeholder="+56912345678"
-              />
-            </div>
-            <Button type="submit" disabled={saving}>
-              {saving ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : status?.connected ? (
-                "Actualizar"
-              ) : (
-                "Conectar WhatsApp"
-              )}
-            </Button>
-          </form>
+            <form onSubmit={handleConnect} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="waba_id">WABA ID (Business Account ID)</Label>
+                <Input
+                  id="waba_id"
+                  value={form.waba_id}
+                  onChange={(e) =>
+                    setForm((f) => ({ ...f, waba_id: e.target.value }))
+                  }
+                  placeholder="Ej: 123456789012345"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="phone_number_id">Phone Number ID</Label>
+                <Input
+                  id="phone_number_id"
+                  value={form.phone_number_id}
+                  onChange={(e) =>
+                    setForm((f) => ({ ...f, phone_number_id: e.target.value }))
+                  }
+                  placeholder="Ej: 987654321098765"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="display_phone_number">
+                  Número mostrado (opcional)
+                </Label>
+                <Input
+                  id="display_phone_number"
+                  value={form.display_phone_number}
+                  onChange={(e) =>
+                    setForm((f) => ({
+                      ...f,
+                      display_phone_number: e.target.value,
+                    }))
+                  }
+                  placeholder="+56912345678"
+                />
+              </div>
+              <Button type="submit" disabled={saving}>
+                {saving ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : status?.connected ? (
+                  "Actualizar"
+                ) : (
+                  "Conectar WhatsApp"
+                )}
+              </Button>
+            </form>
           </div>
         </CardContent>
       </Card>

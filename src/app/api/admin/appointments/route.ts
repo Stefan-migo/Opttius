@@ -507,12 +507,11 @@ export async function POST(request: NextRequest) {
 
     // Validate that registered customer belongs to the branch
     if (customerId) {
-      const { data: customer, error: customerError } =
-        await supabaseServiceRole
-          .from("customers")
-          .select("branch_id")
-          .eq("id", customerId)
-          .single();
+      const { data: customer, error: customerError } = await supabaseServiceRole
+        .from("customers")
+        .select("branch_id")
+        .eq("id", customerId)
+        .single();
       if (customerError || !customer) {
         return NextResponse.json(
           { error: "Cliente no encontrado" },

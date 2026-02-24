@@ -88,7 +88,9 @@ function htmlToText(html: string): string {
  */
 export async function sendSaasTicketCreatedEmail(ticket: SaasSupportTicket) {
   const ticketUrl = `${APP_URL}/support/ticket/${ticket.ticket_number}`;
-  const requesterName = ticket.requester_name ? ` ${ticket.requester_name}` : "";
+  const requesterName = ticket.requester_name
+    ? ` ${ticket.requester_name}`
+    : "";
   const organizationNameBlock = ticket.organization
     ? `<p style="margin: 0 0 8px 0;"><strong>Organización:</strong> ${ticket.organization.name}</p>`
     : "";
@@ -165,7 +167,13 @@ export async function sendSaasTicketCreatedEmail(ticket: SaasSupportTicket) {
 </body>
 </html>`;
   const text = `OPTTIUS - Ticket creado\n\nHola${requesterName},\n\nTicket #${ticket.ticket_number}: ${ticket.subject}\nVer: ${ticketUrl}`;
-  return sendEmail({ to: ticket.requester_email, subject, html, text, replyTo: "soporte@opttius.cl" });
+  return sendEmail({
+    to: ticket.requester_email,
+    subject,
+    html,
+    text,
+    replyTo: "soporte@opttius.cl",
+  });
 }
 
 /**
@@ -176,8 +184,12 @@ export async function sendSaasNewResponseEmail(
   message: SaasSupportMessage,
 ) {
   const ticketUrl = `${APP_URL}/support/ticket/${ticket.ticket_number}`;
-  const requesterName = ticket.requester_name ? ` ${ticket.requester_name}` : "";
-  const messageLabel = message.is_from_customer ? "Tu mensaje:" : "Respuesta del equipo:";
+  const requesterName = ticket.requester_name
+    ? ` ${ticket.requester_name}`
+    : "";
+  const messageLabel = message.is_from_customer
+    ? "Tu mensaje:"
+    : "Respuesta del equipo:";
   const createdAt = new Date(message.created_at).toLocaleString("es-CL");
 
   const template = await loadEmailTemplate("saas_support_new_response", true);
@@ -248,7 +260,13 @@ export async function sendSaasNewResponseEmail(
 </body>
 </html>`;
   const text = `OPTTIUS - Nueva respuesta\n\nHola${requesterName},\n\nTicket #${ticket.ticket_number}\n${messageLabel}\n${message.message}\nVer: ${ticketUrl}`;
-  return sendEmail({ to: ticket.requester_email, subject, html, text, replyTo: "soporte@opttius.cl" });
+  return sendEmail({
+    to: ticket.requester_email,
+    subject,
+    html,
+    text,
+    replyTo: "soporte@opttius.cl",
+  });
 }
 
 /**
@@ -266,7 +284,10 @@ export async function sendSaasTicketAssignedEmail(
     ? `<p style="margin: 0 0 8px 0;"><strong>Organización:</strong> ${ticket.organization.name}</p>`
     : "";
 
-  const template = await loadEmailTemplate("saas_support_ticket_assigned", true);
+  const template = await loadEmailTemplate(
+    "saas_support_ticket_assigned",
+    true,
+  );
 
   if (template) {
     const variables: Record<string, string> = {
@@ -345,7 +366,9 @@ export async function sendSaasTicketResolvedEmail(
   resolution?: string | null,
 ) {
   const ticketUrl = `${APP_URL}/support/ticket/${ticket.ticket_number}`;
-  const requesterName = ticket.requester_name ? ` ${ticket.requester_name}` : "";
+  const requesterName = ticket.requester_name
+    ? ` ${ticket.requester_name}`
+    : "";
   const resolutionBlock = resolution
     ? `<div style="background-color: #ffffff; border: 1px solid #e0e0e0; border-radius: 6px; padding: 20px; margin: 20px 0;">
   <p style="margin: 0 0 10px 0; color: #059669; font-weight: 600; font-size: 14px;">Resolución:</p>
@@ -353,7 +376,10 @@ export async function sendSaasTicketResolvedEmail(
 </div>`
     : "";
 
-  const template = await loadEmailTemplate("saas_support_ticket_resolved", true);
+  const template = await loadEmailTemplate(
+    "saas_support_ticket_resolved",
+    true,
+  );
 
   if (template) {
     const variables: Record<string, string> = {
@@ -418,5 +444,11 @@ export async function sendSaasTicketResolvedEmail(
 </body>
 </html>`;
   const text = `OPTTIUS - Ticket resuelto\n\nHola${requesterName},\n\nTicket #${ticket.ticket_number} resuelto.\n${resolution ? `Resolución:\n${resolution}\n` : ""}Ver: ${ticketUrl}`;
-  return sendEmail({ to: ticket.requester_email, subject, html, text, replyTo: "soporte@opttius.cl" });
+  return sendEmail({
+    to: ticket.requester_email,
+    subject,
+    html,
+    text,
+    replyTo: "soporte@opttius.cl",
+  });
 }

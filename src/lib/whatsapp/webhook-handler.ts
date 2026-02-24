@@ -25,7 +25,7 @@ export interface ProcessedMessage {
  * Procesa el payload del webhook y maneja mensajes entrantes
  */
 export async function handleWebhookPayload(
-  payload: WhatsAppWebhookPayload
+  payload: WhatsAppWebhookPayload,
 ): Promise<void> {
   if (payload.object !== "whatsapp_business_account") {
     return;
@@ -71,7 +71,7 @@ async function handleWebhookValue(value: WhatsAppWebhookValue): Promise<void> {
     const sessionId = await getOrCreateWhatsAppSession(
       waId,
       context.organizationId,
-      supabase
+      supabase,
     );
     if (!sessionId) {
       logger.error("WhatsApp webhook: could not create session", {
@@ -102,9 +102,12 @@ async function handleWebhookValue(value: WhatsAppWebhookValue): Promise<void> {
     if (client) {
       await client.sendText(waId, response);
     } else {
-      logger.error("WhatsApp webhook: could not create client to send response", {
-        phoneNumberId,
-      });
+      logger.error(
+        "WhatsApp webhook: could not create client to send response",
+        {
+          phoneNumberId,
+        },
+      );
     }
   }
 }
@@ -122,13 +125,13 @@ function extractTextFromMessage(msg: WhatsAppIncomingMessage): string | null {
 
 async function sendFallbackMessage(
   phoneNumberId: string,
-  waId: string
+  waId: string,
 ): Promise<void> {
   const client = WhatsAppClient.forOrganization(phoneNumberId);
   if (client) {
     await client.sendText(
       waId,
-      "Lo siento, no pude identificar tu cuenta. Por favor, contacta directamente a la sucursal."
+      "Lo siento, no pude identificar tu cuenta. Por favor, contacta directamente a la sucursal.",
     );
   }
 }

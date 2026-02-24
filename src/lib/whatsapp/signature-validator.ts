@@ -20,7 +20,7 @@ export class WhatsAppSignatureValidator {
     this.appSecret = appSecret || process.env.WHATSAPP_APP_SECRET || "";
     if (!this.appSecret) {
       logger.warn(
-        "WHATSAPP_APP_SECRET not configured. Webhook signature validation will be skipped."
+        "WHATSAPP_APP_SECRET not configured. Webhook signature validation will be skipped.",
       );
     }
   }
@@ -32,7 +32,7 @@ export class WhatsAppSignatureValidator {
    */
   validate(
     rawBody: string,
-    signatureHeader: string | null
+    signatureHeader: string | null,
   ): WhatsAppSignatureValidationResult {
     if (!this.appSecret) {
       if (process.env.NODE_ENV === "production") {
@@ -80,7 +80,7 @@ export class WhatsAppSignatureValidator {
     } catch (error) {
       logger.error(
         "Error validating WhatsApp webhook signature",
-        error instanceof Error ? error : new Error(String(error))
+        error instanceof Error ? error : new Error(String(error)),
       );
       return {
         isValid: false,

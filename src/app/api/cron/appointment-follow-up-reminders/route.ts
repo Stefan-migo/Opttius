@@ -71,7 +71,8 @@ export async function GET(request: NextRequest) {
         first_name?: string;
         last_name?: string;
       } | null;
-      const guestFirst = (apt as { guest_first_name?: string }).guest_first_name;
+      const guestFirst = (apt as { guest_first_name?: string })
+        .guest_first_name;
       const guestLast = (apt as { guest_last_name?: string }).guest_last_name;
 
       const customerName = customer
@@ -79,7 +80,11 @@ export async function GET(request: NextRequest) {
           "Cliente"
         : `${guestFirst || ""} ${guestLast || ""}`.trim() || "Cliente";
 
-      const branch = apt.branch as { name?: string; phone?: string; email?: string } | null;
+      const branch = apt.branch as {
+        name?: string;
+        phone?: string;
+        email?: string;
+      } | null;
       const followUpDate =
         typeof apt.follow_up_date === "string"
           ? apt.follow_up_date

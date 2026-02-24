@@ -43,7 +43,9 @@ export async function GET(request: NextRequest) {
     // Obtener información completa de la organización
     const { data: organization, error: orgError } = await supabaseServiceRole
       .from("organizations")
-      .select("id, name, slug, logo_url, slogan, subscription_tier, status, metadata")
+      .select(
+        "id, name, slug, logo_url, slogan, subscription_tier, status, metadata",
+      )
       .eq("id", adminUser.organization_id)
       .single();
 
@@ -140,7 +142,9 @@ export async function PATCH(request: NextRequest) {
       .from("organizations")
       .update(updates)
       .eq("id", adminUser.organization_id)
-      .select("id, name, slug, logo_url, slogan, subscription_tier, status, metadata")
+      .select(
+        "id, name, slug, logo_url, slogan, subscription_tier, status, metadata",
+      )
       .single();
 
     if (updateError) {

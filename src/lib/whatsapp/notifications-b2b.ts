@@ -18,7 +18,7 @@ function normalizePhone(phone: string): string {
  */
 export async function getOrgOwnerPhoneForWhatsApp(
   organizationId: string,
-  supabase: SupabaseClient
+  supabase: SupabaseClient,
 ): Promise<string | null> {
   const { data: config } = await supabase
     .from("system_config")
@@ -74,7 +74,7 @@ export async function getOrgOwnerPhoneForWhatsApp(
 export async function sendLowStockAlertWhatsApp(
   organizationId: string,
   products: Array<{ name: string; current_stock: number; min_stock: number }>,
-  supabase: SupabaseClient
+  supabase: SupabaseClient,
 ): Promise<boolean> {
   const phone = await getOrgOwnerPhoneForWhatsApp(organizationId, supabase);
   if (!phone) return false;
@@ -85,8 +85,7 @@ export async function sendLowStockAlertWhatsApp(
   const lines = products
     .slice(0, 10)
     .map(
-      (p) =>
-        `• ${p.name}: ${p.current_stock} unidades (mín: ${p.min_stock})`
+      (p) => `• ${p.name}: ${p.current_stock} unidades (mín: ${p.min_stock})`,
     );
   const body = `⚠️ Alerta de inventario bajo\n\n${lines.join("\n")}\n\nRevisa tu stock en Opttius.`;
 
@@ -107,7 +106,7 @@ export async function sendLowStockAlertWhatsApp(
  */
 export async function sendAppointmentReminderWhatsApp(
   toPhone: string,
-  message: string
+  message: string,
 ): Promise<boolean> {
   const client = WhatsAppClient.fromEnv();
   if (!client) return false;
@@ -133,7 +132,7 @@ export async function sendQuoteWhatsApp(
   toPhone: string,
   quoteNumber: string,
   totalAmount: number,
-  currency: string = "CLP"
+  currency: string = "CLP",
 ): Promise<boolean> {
   const client = WhatsAppClient.fromEnv();
   if (!client) return false;
@@ -166,7 +165,7 @@ export async function sendQuoteWhatsApp(
 export async function sendWorkOrderReadyWhatsApp(
   toPhone: string,
   workOrderNumber: string,
-  branchName?: string
+  branchName?: string,
 ): Promise<boolean> {
   const client = WhatsAppClient.fromEnv();
   if (!client) return false;

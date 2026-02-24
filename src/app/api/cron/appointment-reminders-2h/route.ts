@@ -80,7 +80,8 @@ export async function GET(request: NextRequest) {
         phone?: string;
         preferred_contact_method?: string;
       } | null;
-      const guestFirst = (apt as { guest_first_name?: string }).guest_first_name;
+      const guestFirst = (apt as { guest_first_name?: string })
+        .guest_first_name;
       const guestLast = (apt as { guest_last_name?: string }).guest_last_name;
 
       const customerName = customer

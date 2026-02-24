@@ -55,7 +55,7 @@ export class WhatsAppClient {
         to,
       });
       throw new Error(
-        data.error?.message || `WhatsApp API error: ${response.status}`
+        data.error?.message || `WhatsApp API error: ${response.status}`,
       );
     }
 
@@ -67,8 +67,7 @@ export class WhatsAppClient {
    */
   static fromEnv(): WhatsAppClient | null {
     const token = process.env.WHATSAPP_ACCESS_TOKEN;
-    const phoneNumberId =
-      process.env.WHATSAPP_PHONE_NUMBER_ID;
+    const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
     if (!token || !phoneNumberId) {
       return null;
     }
@@ -81,10 +80,9 @@ export class WhatsAppClient {
    */
   static forOrganization(
     phoneNumberId: string,
-    accessToken?: string
+    accessToken?: string,
   ): WhatsAppClient | null {
-    const token =
-      accessToken || process.env.WHATSAPP_ACCESS_TOKEN;
+    const token = accessToken || process.env.WHATSAPP_ACCESS_TOKEN;
     if (!token || !phoneNumberId) {
       return null;
     }

@@ -410,12 +410,11 @@ export async function POST(request: NextRequest) {
 
     // Validate that customer belongs to the branch
     if (validatedBody.customer_id && quoteBranchId) {
-      const { data: customer, error: customerError } =
-        await supabaseServiceRole
-          .from("customers")
-          .select("branch_id")
-          .eq("id", validatedBody.customer_id)
-          .single();
+      const { data: customer, error: customerError } = await supabaseServiceRole
+        .from("customers")
+        .select("branch_id")
+        .eq("id", validatedBody.customer_id)
+        .single();
       if (customerError || !customer) {
         return NextResponse.json(
           { error: "Cliente no encontrado" },
