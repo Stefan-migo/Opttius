@@ -128,3 +128,24 @@ export function isValidRUTFormat(rut: string): boolean {
   // RUT should have 7-8 digits + 1 verification digit (K or 0-9)
   return /^[0-9]{7,8}[0-9Kk]$/.test(normalized);
 }
+
+/**
+ * Full RUT validation: format + verification digit algorithm.
+ * Handles any input format (with/without dots, dashes, spaces).
+ *
+ * @param rut - RUT string to validate
+ * @returns true if RUT is valid
+ */
+export function isValidRUT(rut: string): boolean {
+  if (!rut || typeof rut !== "string") return false;
+
+  // Remove all non-digit, non-K characters (handles spaces, dots, dashes, etc.)
+  const clean = rut.replace(/[^0-9Kk]/g, "");
+  if (clean.length < 8 || clean.length > 9) return false;
+
+  const body = clean.slice(0, -1);
+  const dv = clean.slice(-1).toUpperCase();
+
+  const computed = computeRUTVerificationDigit(body);
+  return computed === dv;
+}

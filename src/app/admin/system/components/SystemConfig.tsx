@@ -29,6 +29,7 @@ import {
   Building2,
   Image as ImageIcon,
   Loader2,
+  FileText,
 } from "lucide-react";
 import { SystemConfig as SystemConfigType } from "../hooks/useSystemConfig";
 import { toast } from "sonner";
@@ -56,6 +57,7 @@ const getCategoryIcon = (category: string) => {
     system: Server,
     database: Database,
     business: BarChart3,
+    prescriptions: FileText,
   };
 
   return icons[category] || Settings;
@@ -186,13 +188,26 @@ export default function SystemConfig({
       if (["appointments", "branches", "telemetry"].includes(config.category))
         return false;
 
-      // Filter out redundant keys that are handled by the specific Organization Card
+      // Filter out redundant keys handled by dedicated cards
       const redundancyKeys = [
         "site_name",
         "site_description",
         "clinic_name", // Handled by Organization Name
         "clinic_rut", // Handled by Organization settings if added
         "clinic_specialty", // Handled by Organization Slogan/Desc
+        // Email card: only Display Name + Reply-To in dedicated card
+        "from_name",
+        "from_email",
+        "email_from_name",
+        "email_from_address",
+        "resend_enabled",
+        "resend_from_email",
+        "smtp_host",
+        "smtp_port",
+        "smtp_username",
+        "smtp_password",
+        "support_email", // Shown in Email tab (EmailConfigCard)
+        "prescription_expiration_months", // Shown in dedicated Recetas card
       ];
       if (redundancyKeys.includes(config.config_key)) return false;
 
@@ -223,6 +238,7 @@ export default function SystemConfig({
     system: "Sistema",
     database: "Base de Datos",
     business: "Negocio",
+    prescriptions: "Recetas",
   };
 
   const uniqueCategories = Array.from(
@@ -242,6 +258,12 @@ export default function SystemConfig({
     configs.forEach((config) => {
       initialValues[config.config_key] = config.config_value;
     });
+    // Default for prescription_expiration_months when not in DB (before migration)
+    if (
+      !configs.some((c) => c.config_key === "prescription_expiration_months")
+    ) {
+      initialValues["prescription_expiration_months"] = 6;
+    }
     setLocalConfigValues(initialValues);
   }, [configs]);
 
@@ -428,6 +450,91 @@ export default function SystemConfig({
           </div>
         </CardContent>
       </Card>
+
+      {/* Recetas (Prescriptions) Settings Card */}
+      {(categoryFilter === "all" || categoryFilter === "prescriptions") && (
+        <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.4)]">
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between">
+              <div className="flex items-center">
+                <FileText className="h-5 w-5 mr-2" />
+                Recetas
+              </div>
+              <Badge variant="default">Configuración</Badge>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-admin-text-tertiary mb-4">
+              Configura el tiempo de expiración por defecto de las recetas
+              oftalmológicas. Al crear una receta, la fecha de vencimiento se
+              calculará automáticamente sumando este valor a la fecha de
+              creación.
+            </p>
+            <div className="flex items-end gap-4">
+              <div className="flex-1 max-w-[200px]">
+                <Label htmlFor="prescription_expiration_months">
+                  Tiempo de expiración por defecto (meses)
+                </Label>
+                <Input
+                  id="prescription_expiration_months"
+                  type="number"
+                  min={1}
+                  max={24}
+                  value={
+                    localConfigValues["prescription_expiration_months"] ??
+                    configs.find(
+                      (c) => c.config_key === "prescription_expiration_months",
+                    )?.config_value ??
+                    6
+                  }
+                  onChange={(e) => {
+                    const value = parseInt(e.target.value, 10) || 6;
+                    setLocalConfigValues((prev) => ({
+                      ...prev,
+                      prescription_expiration_months: value,
+                    }));
+                  }}
+                  className="mt-2"
+                  disabled={isUpdating || savingConfigKeys.has("prescription_expiration_months")}
+                />
+              </div>
+              <Button
+                size="sm"
+                onClick={() =>
+                  handleSaveConfig("prescription_expiration_months")
+                }
+                disabled={
+                  savingConfigKeys.has("prescription_expiration_months") ||
+                  (localConfigValues["prescription_expiration_months"] ===
+                    configs.find(
+                      (c) => c.config_key === "prescription_expiration_months",
+                    )?.config_value &&
+                    !!configs.find(
+                      (c) => c.config_key === "prescription_expiration_months",
+                    ))
+                }
+                className="min-w-[100px]"
+              >
+                {savingConfigKeys.has("prescription_expiration_months") ? (
+                  <>
+                    <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                    Guardando...
+                  </>
+                ) : (
+                  <>
+                    <Save className="h-3 w-3 mr-1" />
+                    Guardar
+                  </>
+                )}
+              </Button>
+            </div>
+            <p className="text-xs text-admin-text-tertiary mt-2">
+              Valor por defecto: 6 meses. Ejemplo: receta del 10/02 → vencimiento
+              10/08.
+            </p>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Organization Settings Card - Special card for General category */}
       {categoryFilter === "all" || categoryFilter === "general" ? (

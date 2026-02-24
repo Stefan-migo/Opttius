@@ -21,7 +21,7 @@ Malisha no convencía para la estética Epoch (sobria, exclusiva). Cormorant Gar
 - `src/components/landing/TestimonialsSection.tsx` — font-malisha → font-cormorant
 - `src/app/admin/notifications/page.tsx` — font-malisha → font-cormorant
 
-## Jerarquía tipográfica actual
+## Jerarquía tipográfica (pre-pivote 2026-02-18)
 
 | Clase          | Fuente             | Uso                           |
 | -------------- | ------------------ | ----------------------------- |
@@ -29,3 +29,18 @@ Malisha no convencía para la estética Epoch (sobria, exclusiva). Cormorant Gar
 | font-cormorant | Cormorant Garamond | Títulos alternativos, precios |
 | font-serif     | Playfair Display   | Acentos, cursiva              |
 | font-body      | Lato               | Cuerpo, descripciones         |
+
+---
+
+## Pivote 2026-02-22: Lujo Tecnológico
+
+**Cambio:** Eliminación de Cinzel, Playfair Display, Lato. Adopción de Geist, Inter o DM Sans (sans-serif geométricas).
+
+**Jerarquía objetivo (ver IDENTITY.md):**
+
+| Clase          | Fuente                  | Uso                              |
+| -------------- | ----------------------- | -------------------------------- |
+| font-sans      | Geist / Inter / DM Sans | Display y body (principal)       |
+| font-cormorant | Cormorant Garamond      | Solo acentos decorativos mínimos |
+
+**Estado:** Documentado en IDENTITY.md. Pendiente migración en código.

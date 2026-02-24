@@ -6,42 +6,42 @@ export function ProblemSolutionSection() {
   const problems = [
     {
       icon: XCircle,
-      title: "RECETAS PERDIDAS",
+      title: "Fichas Fragmentadas",
       description:
-        "Recetas en papel que se pierden o se deterioran. Sin historial centralizado para consultar graduaciones anteriores.",
+        "Recetas físicas o en Excel. Sin un historial clínico rápido para consultar graduaciones anteriores frente al paciente.",
     },
     {
       icon: XCircle,
-      title: "TIEMPO ADMINISTRATIVO",
+      title: "Carga Operativa Manual",
       description:
-        "Horas en tareas repetitivas que podrían dedicarse a atender pacientes y cerrar ventas.",
+        "Horas perdidas cuadrando caja, contactando pacientes a mano y buscando presupuestos traspapelados.",
     },
     {
       icon: XCircle,
-      title: "ERRORES EN LABORATORIO",
+      title: "Fricción con el Laboratorio",
       description:
-        "Errores en órdenes de laboratorio que cuestan dinero, tiempo y reputación con sus pacientes.",
+        "Errores de transcripción manual que terminan en mermas económicas, cristales devueltos y pacientes molestos.",
     },
   ];
 
   const solutions = [
     {
       icon: CheckCircle2,
-      title: "HISTORIAL DIGITAL",
+      title: "Historial Clínico Unificado (Controla)",
       description:
-        "Historial digital con recetas OD/OS completas. Todo accesible desde un solo lugar, siempre actualizado.",
+        "Fichas nativas con OD/OS, ejes y adiciones. El perfil visual completo de tu paciente a un clic de distancia.",
     },
     {
       icon: CheckCircle2,
-      title: "IA QUE AUTOMATIZA",
+      title: "Piloto Automático con IA (Automatiza)",
       description:
-        "IA que automatiza citas, recordatorios vía WhatsApp y seguimiento de presupuestos. Recupere hasta 10 horas semanales.",
+        "Agenda inteligente, seguimientos automáticos y cotizaciones en segundos. Recupera hasta 10 horas semanales para enfocarte en vender.",
     },
     {
       icon: CheckCircle2,
-      title: "ÓRDENES VERIFICADAS",
+      title: "Trazabilidad Absoluta (Crece)",
       description:
-        "Órdenes verificadas antes de enviar al laboratorio. Cero errores en graduaciones. Menos devoluciones, más confianza.",
+        "Órdenes validadas por el sistema antes de enviarse. Cero errores de transcripción, cero mermas y entregas exactas.",
     },
   ];
 
@@ -55,46 +55,47 @@ export function ProblemSolutionSection() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="text-center mb-20 md:mb-24 max-w-4xl mx-auto">
-          <div className="inline-flex items-center gap-4 px-6 py-2 border border-epoch-primary/10 rounded-full text-epoch-primary/60 text-[10px] font-display tracking-[0.4em] uppercase mb-8">
-            <span>Problemas reales. Soluciones concretas.</span>
+          <div className="inline-flex items-center gap-3 px-5 py-2 bg-epoch-primary/10 border border-epoch-primary/40 rounded-full text-epoch-primary text-[10px] sm:text-[11px] font-sans font-semibold tracking-[0.35em] uppercase mb-8">
+            <span>Creado desde la experiencia.</span>
           </div>
-          <h2 className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-display font-bold text-epoch-primary tracking-tight leading-none mb-10">
-            DE LOS PROBLEMAS QUE CONOCE
-            <br />
-            <span className="text-epoch-accent italic font-serif lowercase tracking-normal">
-              a la solución que necesita
-            </span>
+          <h2 className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-sans font-bold text-epoch-primary tracking-tight leading-tight mb-4">
+            Usted conoce el problema.
           </h2>
-          <p className="text-xl md:text-2xl text-epoch-primary/90 font-serif italic tracking-wide max-w-2xl mx-auto">
-            Opttius fue creado por un tecnólogo médico que conoce el día a día
-            de una óptica. No es un CRM adaptado: está pensado para usted.
+          <p className="text-xl md:text-2xl text-epoch-accent font-sans font-semibold tracking-wide mb-8">
+            Nosotros construimos la respuesta.
+          </p>
+          <p className="text-lg md:text-xl text-epoch-primary/80 font-sans leading-relaxed max-w-2xl mx-auto">
+            Perder tiempo cuadrando el laboratorio con las ventas es cosa del
+            pasado. Opttius fue desarrollado por un tecnólogo médico que vivió
+            el día a día de una óptica. No adaptamos un sistema contable;
+            creamos el estándar definitivo para la visión.
           </p>
         </div>
 
         <div className="grid lg:grid-cols-2 gap-16 lg:gap-32 items-start">
-          {/* Problems Column */}
+          {/* Problems Column - El Problema */}
           <div className="space-y-16">
-            <div className="flex flex-col items-start gap-4">
-              <span className="font-display text-[9px] tracking-[0.5em] uppercase text-red-900/70">
-                El Pasado
-              </span>
-              <h3 className="text-3xl font-display font-bold text-epoch-primary">
-                Desafíos de Ayer
+            <div className="flex flex-col items-start gap-2">
+              <h3 className="text-2xl sm:text-3xl font-sans font-bold text-epoch-primary">
+                Gestión Tradicional ❌
               </h3>
+              <p className="text-sm text-epoch-primary/70 font-sans">
+                (Sistemas genéricos y papel)
+              </p>
               <div className="w-12 h-[1px] bg-red-900/40"></div>
             </div>
 
             <div className="space-y-12">
               {problems.map((problem, index) => (
                 <div key={index} className="group flex gap-8">
-                  <div className="flex-shrink-0 w-12 h-12 border border-red-900/30 rounded-full flex items-center justify-center text-red-900/60 group-hover:bg-red-900 group-hover:text-white transition-all duration-700">
+                  <div className="flex-shrink-0 w-12 h-12 border-2 border-red-900/40 rounded-full flex items-center justify-center text-red-900/70 group-hover:bg-red-900 group-hover:text-white group-hover:border-red-900 transition-all duration-700">
                     <problem.icon className="h-5 w-5 stroke-1" />
                   </div>
                   <div className="space-y-3">
-                    <h4 className="font-display font-bold text-xs tracking-[0.2em] text-epoch-primary">
+                    <h4 className="font-sans font-bold text-sm tracking-tight text-epoch-primary">
                       {problem.title}
                     </h4>
-                    <p className="font-serif italic text-sm text-epoch-primary/80 leading-relaxed">
+                    <p className="font-sans text-sm text-epoch-primary/80 leading-relaxed">
                       {problem.description}
                     </p>
                   </div>
@@ -103,29 +104,29 @@ export function ProblemSolutionSection() {
             </div>
           </div>
 
-          {/* Solutions Column */}
+          {/* Solutions Column - La Solución */}
           <div className="space-y-16">
-            <div className="flex flex-col items-start gap-4">
-              <span className="font-display text-[9px] tracking-[0.5em] uppercase text-epoch-accent">
-                El Futuro
-              </span>
-              <h3 className="text-3xl font-display font-bold text-epoch-primary">
-                El Estándar Opttius
+            <div className="flex flex-col items-start gap-2">
+              <h3 className="text-2xl sm:text-3xl font-sans font-bold text-epoch-primary">
+                El Ecosistema Opttius ✅
               </h3>
+              <p className="text-sm text-epoch-accent font-sans font-medium">
+                (Inteligencia Operativa)
+              </p>
               <div className="w-12 h-[1px] bg-epoch-accent/50"></div>
             </div>
 
             <div className="space-y-12">
               {solutions.map((solution, index) => (
                 <div key={index} className="group flex gap-8">
-                  <div className="flex-shrink-0 w-12 h-12 border border-epoch-accent/30 rounded-full flex items-center justify-center text-epoch-accent group-hover:bg-epoch-accent group-hover:text-epoch-primary transition-all duration-700">
+                  <div className="flex-shrink-0 w-12 h-12 border-2 border-epoch-accent/60 rounded-full flex items-center justify-center text-epoch-accent bg-epoch-accent/10 group-hover:bg-epoch-accent group-hover:text-epoch-primary transition-all duration-700">
                     <solution.icon className="h-5 w-5 stroke-1" />
                   </div>
                   <div className="space-y-3">
-                    <h4 className="font-display font-bold text-xs tracking-[0.2em] text-epoch-primary">
+                    <h4 className="font-sans font-bold text-sm tracking-tight text-epoch-primary">
                       {solution.title}
                     </h4>
-                    <p className="font-serif italic text-sm text-epoch-primary/70 leading-relaxed">
+                    <p className="font-sans text-sm text-epoch-primary/80 leading-relaxed">
                       {solution.description}
                     </p>
                   </div>

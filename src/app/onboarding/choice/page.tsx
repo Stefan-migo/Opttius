@@ -169,7 +169,7 @@ export default function OnboardingChoicePage() {
           {/* Demo Option */}
           <Card
             variant="interactive"
-            className="flex flex-col h-full group bg-white border border-epoch-primary/5 rounded-none shadow-premium hover:shadow-premium-xl hover:border-epoch-accent/30 transition-all duration-500 overflow-hidden"
+            className="flex flex-col h-full group bg-white border border-epoch-primary/5 rounded-xl shadow-premium hover:shadow-premium-xl hover:border-epoch-accent/30 transition-all duration-500 overflow-hidden"
           >
             <div className="h-2 w-full bg-epoch-primary group-hover:bg-epoch-accent transition-colors duration-500" />
             <CardHeader
@@ -177,10 +177,10 @@ export default function OnboardingChoicePage() {
               className="border-b border-epoch-primary/5"
             >
               <div className="flex items-center justify-between mb-6">
-                <div className="p-4 bg-epoch-primary/5 rounded-none group-hover:bg-epoch-primary group-hover:text-white transition-all duration-500 shadow-sm">
+                <div className="p-4 bg-epoch-primary/5 rounded-xl group-hover:bg-epoch-primary group-hover:text-white transition-all duration-500 shadow-sm">
                   <Sparkles className="h-8 w-8 text-epoch-primary group-hover:text-epoch-accent" />
                 </div>
-                <Badge className="bg-epoch-accent/10 text-epoch-accent border border-epoch-accent/20 px-3 py-1 font-display font-bold text-[9px] tracking-[0.2em] uppercase rounded-none">
+                <Badge className="bg-epoch-accent/10 text-epoch-accent border border-epoch-accent/20 px-3 py-1 font-display font-bold text-[9px] tracking-[0.2em] uppercase rounded-xl">
                   EXPERIENCIA INICIAL
                 </Badge>
               </div>
@@ -221,7 +221,7 @@ export default function OnboardingChoicePage() {
                 onClick={handleDemoChoice}
                 disabled={isLoading}
                 size="lg"
-                className="w-full bg-epoch-primary hover:bg-epoch-surface text-white rounded-none font-display font-bold uppercase text-[10px] tracking-[0.3em] h-14 transition-all shadow-xl group/btn overflow-hidden relative"
+                className="w-full bg-epoch-primary hover:bg-epoch-surface text-white rounded-xl font-display font-bold uppercase text-[10px] tracking-[0.3em] h-14 transition-all shadow-xl group/btn overflow-hidden relative"
               >
                 <span className="relative z-10 flex items-center justify-center">
                   {isLoading ? (
@@ -244,7 +244,7 @@ export default function OnboardingChoicePage() {
           {/* Real Option */}
           <Card
             variant="interactive"
-            className="flex flex-col h-full group bg-white border border-epoch-primary/5 rounded-none shadow-premium hover:shadow-premium-xl hover:border-epoch-accent/30 transition-all duration-500 overflow-hidden"
+            className="flex flex-col h-full group bg-white border border-epoch-primary/5 rounded-xl shadow-premium hover:shadow-premium-xl hover:border-epoch-accent/30 transition-all duration-500 overflow-hidden"
           >
             <div className="h-2 w-full bg-epoch-accent" />
             <CardHeader
@@ -252,10 +252,10 @@ export default function OnboardingChoicePage() {
               className="border-b border-epoch-primary/5"
             >
               <div className="flex items-center justify-between mb-6">
-                <div className="p-4 bg-epoch-accent/5 rounded-none group-hover:bg-epoch-accent group-hover:text-white transition-all duration-500 shadow-sm border border-epoch-accent/10">
+                <div className="p-4 bg-epoch-accent/5 rounded-xl group-hover:bg-epoch-accent group-hover:text-white transition-all duration-500 shadow-sm border border-epoch-accent/10">
                   <Building2 className="h-8 w-8 text-epoch-accent group-hover:text-epoch-primary" />
                 </div>
-                <Badge className="bg-epoch-primary/10 text-epoch-primary border border-epoch-primary/20 px-3 py-1 font-display font-bold text-[9px] tracking-[0.2em] uppercase rounded-none">
+                <Badge className="bg-epoch-primary/10 text-epoch-primary border border-epoch-primary/20 px-3 py-1 font-display font-bold text-[9px] tracking-[0.2em] uppercase rounded-xl">
                   PRODUCCIÓN REAL
                 </Badge>
               </div>
@@ -296,7 +296,7 @@ export default function OnboardingChoicePage() {
                 onClick={handleRealChoice}
                 disabled={isLoading}
                 size="lg"
-                className="w-full bg-epoch-primary hover:bg-epoch-surface text-white rounded-none font-display font-bold uppercase text-[10px] tracking-[0.3em] h-14 transition-all shadow-xl group/btn overflow-hidden relative"
+                className="w-full bg-epoch-primary hover:bg-epoch-surface text-white rounded-xl font-display font-bold uppercase text-[10px] tracking-[0.3em] h-14 transition-all shadow-xl group/btn overflow-hidden relative"
               >
                 <span className="relative z-10 flex items-center justify-center">
                   INICIAR PROTOCOLO

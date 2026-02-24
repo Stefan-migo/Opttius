@@ -19,12 +19,10 @@ export function useCustomerSearch(initialCustomerId?: string) {
 
       try {
         setLoading(true);
-        const response = await fetch(
-          `/api/admin/customers/search?q=${encodeURIComponent(query)}&branch_id=${currentBranchId}`,
-          {
-            headers: getBranchHeader(currentBranchId),
-          },
-        );
+        const url = `/api/admin/customers/search?q=${encodeURIComponent(query)}`;
+        const response = await fetch(url, {
+          headers: getBranchHeader(currentBranchId ?? null),
+        });
 
         if (response.ok) {
           const data = await response.json();

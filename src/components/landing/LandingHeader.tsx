@@ -150,7 +150,7 @@ export function LandingHeader() {
             orgStatus?.hasOrganization && !orgStatus?.isDemoMode ? (
               <Button
                 onClick={() => router.push("/admin")}
-                className="bg-transparent border border-white/30 hover:bg-white hover:text-epoch-surface text-white rounded-none px-8 py-2 font-display text-xs tracking-widest uppercase transition-all duration-500"
+                className="bg-transparent border border-white/30 hover:bg-white hover:text-epoch-surface text-white rounded-xl px-8 py-2 font-display text-xs tracking-widest uppercase transition-all duration-500"
               >
                 <LayoutDashboard className="mr-2 h-3 w-3" />
                 Dashboard
@@ -159,14 +159,14 @@ export function LandingHeader() {
               <div className="flex gap-4">
                 <Button
                   onClick={() => router.push("/onboarding/create")}
-                  className="bg-epoch-accent hover:bg-white text-epoch-surface rounded-none px-8 py-2 font-display text-xs tracking-widest uppercase transition-all duration-500"
+                  className="bg-epoch-accent hover:bg-white text-epoch-surface rounded-xl px-8 py-2 font-display text-xs tracking-widest uppercase transition-all duration-500"
                 >
                   Activar
                 </Button>
                 <Button
                   onClick={() => router.push("/onboarding/choice")}
                   variant="outline"
-                  className="bg-transparent border-white/30 hover:border-white text-white rounded-none px-8 py-2 font-display text-xs tracking-widest uppercase transition-all duration-500"
+                  className="bg-transparent border-white/30 hover:border-white text-white rounded-xl px-8 py-2 font-display text-xs tracking-widest uppercase transition-all duration-500"
                 >
                   Demo
                 </Button>
@@ -182,7 +182,7 @@ export function LandingHeader() {
               </button>
               <Button
                 onClick={() => router.push("/signup")}
-                className="bg-transparent border border-white/30 hover:bg-white hover:text-epoch-surface text-white rounded-none px-10 py-5 font-display text-xs tracking-widest uppercase transition-all duration-502 animate-in fade-in zoom-in"
+                className="bg-transparent border border-white/30 hover:bg-white hover:text-epoch-surface text-white rounded-xl px-10 py-5 font-display text-xs tracking-widest uppercase transition-all duration-502 animate-in fade-in zoom-in"
               >
                 Empezar Ahora
               </Button>
@@ -229,14 +229,14 @@ export function LandingHeader() {
           </div>
           <div className="pt-12 w-full max-w-xs space-y-6 border-t border-white/10 flex flex-col items-center">
             {isLoading ? (
-              <div className="h-12 w-full bg-white/10 animate-pulse rounded-none" />
+              <div className="h-12 w-full bg-white/10 animate-pulse rounded-xl" />
             ) : isAuthenticated ? (
               <Button
                 onClick={() => {
                   router.push("/admin");
                   setMobileMenuOpen(false);
                 }}
-                className="w-full bg-epoch-accent text-epoch-surface rounded-none h-14 font-display tracking-widest uppercase"
+                className="w-full bg-epoch-accent text-epoch-surface rounded-xl h-14 font-display tracking-widest uppercase"
               >
                 <LayoutDashboard className="mr-2 h-5 w-5" />
                 Dashboard
@@ -257,7 +257,7 @@ export function LandingHeader() {
                     router.push("/signup");
                     setMobileMenuOpen(false);
                   }}
-                  className="w-full bg-transparent border border-white/30 text-white rounded-none h-14 font-display tracking-widest uppercase transition-colors hover:bg-white hover:text-epoch-surface"
+                  className="w-full bg-transparent border border-white/30 text-white rounded-xl h-14 font-display tracking-widest uppercase transition-colors hover:bg-white hover:text-epoch-surface"
                 >
                   Registrarse
                 </Button>

@@ -396,7 +396,7 @@ export default function SubscriptionsPage() {
               <div className="space-y-2">
                 <Label>Organización</Label>
                 <Select value={createOrgId} onValueChange={setCreateOrgId}>
-                  <SelectTrigger className="rounded-none">
+                  <SelectTrigger className="rounded-xl">
                     <SelectValue placeholder="Selecciona organización" />
                   </SelectTrigger>
                   <SelectContent>
@@ -411,7 +411,7 @@ export default function SubscriptionsPage() {
               <div className="space-y-2">
                 <Label>Estado</Label>
                 <Select value={createStatus} onValueChange={setCreateStatus}>
-                  <SelectTrigger className="rounded-none">
+                  <SelectTrigger className="rounded-xl">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -472,7 +472,7 @@ export default function SubscriptionsPage() {
               value={organizationFilter}
               onValueChange={setOrganizationFilter}
             >
-              <SelectTrigger className="rounded-none w-[200px]">
+              <SelectTrigger className="rounded-xl w-[200px]">
                 <SelectValue placeholder="Filtrar por organización" />
               </SelectTrigger>
               <SelectContent>
@@ -485,7 +485,7 @@ export default function SubscriptionsPage() {
               </SelectContent>
             </Select>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="rounded-none w-[180px]">
+              <SelectTrigger className="rounded-xl w-[180px]">
                 <SelectValue placeholder="Filtrar por estado" />
               </SelectTrigger>
               <SelectContent>
@@ -498,7 +498,7 @@ export default function SubscriptionsPage() {
               </SelectContent>
             </Select>
             <Select value={tierFilter} onValueChange={setTierFilter}>
-              <SelectTrigger className="rounded-none w-[180px]">
+              <SelectTrigger className="rounded-xl w-[180px]">
                 <SelectValue placeholder="Filtrar por tier" />
               </SelectTrigger>
               <SelectContent>

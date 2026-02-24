@@ -1,12 +1,14 @@
 # Identidad de Marca — Opttius
 
-Documento base de la identidad del sistema. Sirve como referencia para copy, diseño y marketing.
+Documento base de la identidad del sistema. Fuente de verdad para copy, diseño y marketing.
+
+**Última actualización:** 2026-02-22 — Pivote a Lujo Tecnológico y Precisión Clínica.
 
 ---
 
 ## 1. Resumen Ejecutivo
 
-**Opttius** es un sistema de gestión para ópticas creado por un tecnólogo médico (profesional de salud y oftalmología). No es una adaptación de un CRM genérico: está diseñado desde cero para el manejo cotidiano de una óptica. Su arquetipo es el de un **sistema de última generación** con **estética sobria** que transmite **exclusividad**, combinando **funcionalidad** y **pragmatismo**.
+**Opttius** es el motor inteligente para ópticas modernas. Creado por un tecnólogo médico (profesional de salud y oftalmología), está diseñado desde cero para el sector óptico — no es una adaptación de un CRM genérico. Su arquetipo combina **autoridad clínica** con el **pragmatismo y velocidad de una startup de Silicon Valley**. No vendemos "software"; vendemos el sistema que automatiza, controla y hace crecer tu óptica.
 
 ---
 
@@ -14,124 +16,123 @@ Documento base de la identidad del sistema. Sirve como referencia para copy, dis
 
 ### Definición
 
-| Dimensión         | Descripción                                                |
-| ----------------- | ---------------------------------------------------------- |
-| **Tipo**          | Sistema de última generación                               |
-| **Estética**      | Sobria, exclusiva, sin ruido visual                        |
-| **Valores**       | Funcionalidad, pragmatismo, precisión técnica              |
-| **Audiencia**     | Ópticas y profesionales de la visión                       |
-| **Diferenciador** | Creado por experto en oftalmología, exclusivo para ópticas |
+| Dimensión         | Descripción                                                                    |
+| ----------------- | ------------------------------------------------------------------------------ |
+| **Tipo**          | Software médico de alta gama / Minimalismo SaaS                                |
+| **Estética**      | Lujo tecnológico, precisión clínica, espacios limpios, tipografías geométricas |
+| **Valores**       | Automatización, control, crecimiento, precisión técnica                        |
+| **Audiencia**     | Ópticas y profesionales de la visión que buscan eficiencia                     |
+| **Diferenciador** | De la clínica al código. 100% nativo para ópticas.                             |
 
 ### Inspiración Visual
 
-- **Lujo sobrio**: Relojería suiza, instrumentos médicos de precisión, ópticas de alta gama
-- **No**: Startup colorida, SaaS genérico, marketing agresivo
+- **Referencias:** Stripe, Apple, Vercel — minimalismo SaaS, alta tecnología
+- **No:** Estilo vintage, fuentes romanas, arcos arquitectónicos, lenguaje poético
 
 ---
 
-## 3. Narrativa
+## 3. Narrativa y Copy
 
-### Origen
+### Eslogan Principal
 
-> Opttius fue creado por un tecnólogo médico con experiencia en oftalmología. Conoce el día a día de una óptica: recetas, prescripciones, laboratorio, presupuestos, agenda. Por eso el sistema no es una adaptación de otro gestor de negocios: está pensado desde cero para el manejo cotidiano de una óptica.
+> **Automatiza. Controla. Crece.**
 
-### Propuesta de Valor
+### Badge / Micro-copy
 
-1. **Especialización**: Exclusivo para ópticas. Campos, flujos y reportes pensados para el sector.
-2. **Origen técnico**: Diseñado por quien entiende la práctica clínica y operativa.
-3. **Tecnología de última generación**: IA, integraciones, precisión de datos.
-4. **Pragmatismo**: Resuelve problemas reales sin complejidad innecesaria.
+> De la clínica al código. 100% nativo para ópticas.
 
----
+### Hero Subtitle
 
-## 4. Copy Guidelines
+> Desde el examen visual hasta la entrega del lente. Centraliza tus recetas, inventario, flujos de laboratorio y ventas en una única plataforma.
 
 ### Tono de Voz
 
-- **Profesional**: Vocabulario técnico cuando corresponda (recetas, OD/OS, prescripciones).
-- **Sobrio**: Evitar exceso de metáforas literarias.
-- **Confiable**: Transmitir seguridad y precisión.
-- **Exclusivo sin ser inaccesible**: "Sistema de élite" sí; "santuario" o "orden" con moderación.
+- **Autoridad clínica:** Creado por un tecnólogo médico que conoce el día a día de una óptica.
+- **Pragmatismo startup:** Beneficios concretos, velocidad, eficiencia. Sin metáforas literarias.
+- **Precisión técnica:** Vocabulario óptico cuando corresponda (recetas, OD/OS, prescripciones, laboratorio).
 
-### Palabras Clave (usar con frecuencia)
+### Palabras Clave (usar)
 
-| Categoría       | Ejemplos                                                                  |
-| --------------- | ------------------------------------------------------------------------- |
-| Especialización | Exclusivo para ópticas, diseñado para ópticas, pensado en óptica          |
-| Origen          | Tecnólogo médico, profesional oftalmológico, creado por experto en visión |
-| Funcionalidad   | Recetas, presupuestos, laboratorio, agenda, pacientes, inventario         |
-| Calidad         | Precisión, última generación, eficiencia, datos clínicos                  |
-| Exclusividad    | Estándar Opttius, sistema de élite, profesionales exigentes               |
+| Categoría       | Ejemplos                                                       |
+| --------------- | -------------------------------------------------------------- |
+| Acción          | Automatiza, controla, crece, centraliza, optimiza              |
+| Origen          | Tecnólogo médico, de la clínica al código, 100% nativo         |
+| Especialización | Exclusivo para ópticas, diseñado para ópticas                  |
+| Funcionalidad   | Recetas, inventario, laboratorio, ventas, presupuestos, agenda |
+| Calidad         | Precisión, eficiencia, datos clínicos, última generación       |
 
-### Palabras a Moderar
+### Palabras Prohibidas (eliminar por completo)
 
-Usar solo cuando aporten valor y no confundan:
-
-- Legado, forjar, orden, santuario, pergamino, manuscritos, corresponsal, exploración
+- Legado, forjar, santuario, maestría, pergamino, credencial, llave de acceso
+- Cualquier término medieval o excesivamente literario
 
 ### Palabras a Evitar
 
 - Genéricos de SaaS: "revolucionario", "disruptivo", "game-changer"
-- Exceso literario que opaque la funcionalidad
 - Promesas vagas sin sustento técnico
 
-### Copy Orientado a Conversión
+### CTAs Principales
 
-Cada bloque de copy debe responder: **¿Qué problema tengo? ¿Por qué Opttius lo resuelve mejor? ¿Por qué puedo confiar?**
-
-- **Problema identificable**: Recetas perdidas, tiempo en papeles, errores en laboratorio.
-- **Credibilidad**: Tecnólogo médico, exclusivo para ópticas, no es adaptación.
-- **Solución concreta**: Historial digital, IA que automatiza, órdenes verificadas.
-- **CTA claro**: "Probar Gratis", "Comenzar prueba gratis" — beneficio + reducción de fricción.
-
-### Ejemplos de Copy Bien Alineados
-
-**Hero**:
-
-> Creado por un tecnólogo médico. Exclusivo para ópticas. Recetas, presupuestos, laboratorio y agenda en una sola plataforma. Sin adaptaciones.
-
-**Body (problema → solución)**:
-
-> Errores en recetas. Tiempo perdido en papeles. Presupuestos que no cierran. Opttius fue diseñado desde cero para resolver los problemas reales de su óptica.
-
-**CTA**:
-
-> Probar Gratis — Sin tarjeta. Configuración guiada. Soporte especializado.
-
-**Beneficios**:
-
-> Menos errores. Más tiempo. Más ventas. Ópticas que usan Opttius reportan ahorro de tiempo y mayor tasa de cierre.
+- **Primario:** "Probar Gratis", "Comenzar ahora", "Empezar Ahora"
+- **Secundario:** "Ver demo en vivo", "Solicitar demo"
+- **Auth:** "Iniciar sesión", "Registrarse", "Crear cuenta", "Email", "Contraseña"
 
 ---
 
-## 5. Sistema Visual (Epoch)
+## 4. Sistema Visual (Epoch)
 
-### Paleta de Colores
+### Paleta de Colores (intacta)
 
-| Token            | Hex               | Uso                                                               |
-| ---------------- | ----------------- | ----------------------------------------------------------------- |
-| epoch-primary    | #1A2B23 / #2C3E33 | Verde bosque profundo. Títulos, fondos oscuros, botones primarios |
-| epoch-accent     | #C5A059 / #C4B28C | Dorado vintage sobrio. Acentos, CTAs, highlights                  |
-| epoch-surface    | #1A1A1A           | Charcoal. Fondos oscuros, header scroll                           |
-| epoch-background | #F9F7F2 / #EAE8DD | Crema elegante. Fondos claros, cards                              |
+| Token            | Hex               | Uso                                                        |
+| ---------------- | ----------------- | ---------------------------------------------------------- |
+| epoch-primary    | #1A2B23 / #2C3E33 | Verde profundo. Títulos, fondos oscuros, botones primarios |
+| epoch-accent     | #C5A059 / #C4B28C | Dorado. Acentos, CTAs, highlights                          |
+| epoch-surface    | #1A1A1A           | Charcoal. Fondos oscuros, header scroll                    |
+| epoch-background | #F9F7F2 / #EAE8DD | Crema. Fondos claros, cards                                |
 
-### Tipografía
+La paleta Epoch es un **diferenciador clave** — se mantiene intacta.
 
-| Familia                             | Uso                                                  | Ejemplo                |
-| ----------------------------------- | ---------------------------------------------------- | ---------------------- |
-| font-display (Cinzel)               | Títulos principales, mayúsculas, tracking amplio     | FORJANDO LA visión     |
-| font-cormorant (Cormorant Garamond) | Títulos alternativos, precios, secciones secundarias | Planes, testimonios    |
-| font-serif (Playfair Display)       | Acentos, subtítulos, cursiva                         | _visión_, _maestría_   |
-| font-body (Lato)                    | Cuerpo, descripciones, formularios                   | Texto legible y limpio |
+---
 
-**Nota:** Cormorant Garamond reemplazó a Malisha (2026-02). Fuente elegante y sobria, adecuada para la estética Epoch.
+## 5. Sistema Tipográfico (Minimalismo SaaS)
 
-### Formas y Layout
+### Fuentes Principales
 
-- **Arcos**: `rounded-arch` (100px 100px 0 0) para transiciones entre secciones
-- **Bordes rectos**: `rounded-none` en botones y cards
-- **Bento grid**: Layout asimétrico para features (4 columnas en desktop)
-- **Espaciado**: Generoso, sin saturación visual
+| Familia                             | Variable CSS  | Uso                                                       |
+| ----------------------------------- | ------------- | --------------------------------------------------------- |
+| **Geist** / **Inter** / **DM Sans** | `--font-sans` | Display y body. Sans-serif geométricas, modernas, limpias |
+
+**Eliminadas:** Cinzel, Playfair Display, Lato — daban aspecto antiguo.
+
+### Fuente de Acento (uso mínimo)
+
+| Familia                | Variable CSS       | Uso                                                                                                     |
+| ---------------------- | ------------------ | ------------------------------------------------------------------------------------------------------- |
+| **Cormorant Garamond** | `--font-cormorant` | EXCLUSIVAMENTE para itálicas decorativas sutiles (ej: una palabra clave en un título). No para lectura. |
+
+### Jerarquía
+
+- **Títulos:** font-sans, bold, tracking ajustado
+- **Body:** font-sans, regular/medium
+- **Acento decorativo:** font-cormorant italic, solo donde aporte valor visual
+
+---
+
+## 6. Formas y Layout (Estilo Apple/Stripe)
+
+### Bordes
+
+- **Cards y modales:** `rounded-xl` o `rounded-2xl` (sutiles y modernos)
+- **Botones:** `rounded-xl` para coherencia
+- **Badges:** `rounded-full` para pills de estado
+
+**Eliminado:** `rounded-arch` (100px) — arcos arquitectónicos. Ya no se usan.
+
+### Espaciado
+
+- **Espacio negativo generoso:** `p-8`, `p-12` en secciones
+- Interfaz limpia, sin ruido visual
+- Bento grids minimalistas (4 columnas en desktop)
 
 ### Imágenes
 
@@ -141,51 +142,29 @@ Cada bloque de copy debe responder: **¿Qué problema tengo? ¿Por qué Opttius 
 
 ---
 
-## 6. Estructura de la Landing
+## 7. Estructura de la Landing
 
-### Secciones Recomendadas
+### Secciones
 
-1. **Hero**: Propuesta clara + CTA principal
-2. **Problema / Solución**: Contraste entre gestión manual y maestría digital
-3. **Características**: Bento grid con features concretas
-4. **Beneficios**: Métricas y resultados (ahorro de tiempo, precisión, etc.)
-5. **Precios**: Planes claros, trial destacado
-6. **CTA final**: Refuerzo de exclusividad y acción
+1. **Hero:** Eslogan "Automatiza. Controla. Crece." + subtitle + CTA principal
+2. **Problema / Solución:** Contraste entre gestión manual y automatización
+3. **Características:** Bento grid minimalista con features concretas
+4. **Beneficios:** Métricas y resultados
+5. **Precios:** Planes claros, trial destacado
+6. **CTA final:** Refuerzo de acción
 
-### CTAs Principales
+### Navegación y Footer
 
-- **Primario**: "Empezar Legado" / "Comience su prueba" / "Forjar Mi Futuro"
-- **Secundario**: "Solicitar Audiencia Demo" / "Ver demo"
-- **Auth**: "Acceso" / "Empezar Ahora" / "Registrarse"
-
----
-
-## 7. Navegación y Footer
-
-### Navegación
-
-- Inicio, Características, Beneficios, Precios
-- Acceso / Empezar Ahora (cuando no autenticado)
-- Dashboard / Demo (cuando autenticado)
-
-### Footer
-
-- **Brand**: Descripción breve + redes
-- **Exploración**: Links a secciones (Inicio, Características, etc.)
-- **Legal**: Privacidad, Términos, Cookies, Seguridad
-- **Contacto**: Email, teléfono
-
-**Nota**: Evitar términos excesivamente literarios en labels ("Manuscritos" → "Legal", "Corresponsal" → "Contacto") si generan confusión.
+- Inicio, Características, Beneficios, Precios, Nosotros
+- Labels claros: Navegación, Legal, Contacto (sin términos literarios)
 
 ---
 
 ## 8. Páginas de Auth (Login / Signup)
 
-### Principios
-
-- Mantener estética Epoch (fondos, tipografía, paleta)
-- Copy claro: "Credencial (Email)", "Llave de Acceso" pueden mantenerse si el tono general lo soporta; alternativas: "Email", "Contraseña"
-- Mensajes de éxito: Evitar "pergamino digital"; preferir "correo de confirmación"
+- Mantener paleta Epoch
+- Copy directo: "Email", "Contraseña" (no "Credencial", "Llave de Acceso")
+- Mensajes de éxito: "correo de confirmación" (no "pergamino digital")
 - CTAs: "Iniciar sesión", "Registrarse", "Crear cuenta"
 
 ---
@@ -194,9 +173,9 @@ Cada bloque de copy debe responder: **¿Qué problema tengo? ¿Por qué Opttius 
 
 El panel de administración debe compartir:
 
-- Paleta Epoch (o admin tokens alineados)
-- Tipografía (font-display, font-serif, font-body)
-- Estética sobria y profesional
+- Paleta Epoch
+- Tipografía sans-serif geométrica
+- Estética minimalista y profesional
 - Sin rupturas visuales entre landing y app
 
 ---
@@ -205,19 +184,18 @@ El panel de administración debe compartir:
 
 Antes de publicar cambios de copy o diseño:
 
-- [ ] ¿El copy hace que el usuario quiera probar? ¿Resuelve un problema identificable?
-- [ ] ¿El copy menciona o implica que es exclusivo para ópticas?
-- [ ] ¿Se evita lenguaje excesivamente literario que opaque la funcionalidad?
-- [ ] ¿Los beneficios son concretos y medibles?
-- [ ] ¿La narrativa de "creado por tecnólogo médico" está presente donde aplica?
-- [ ] ¿Se usa la paleta Epoch y tipografía correcta?
-- [ ] ¿El CTA es claro y accionable (ej. "Probar Gratis" vs "Forjar Legado")?
-- [ ] ¿Hay coherencia entre landing, auth y admin?
+- [ ] ¿El copy evita por completo legado, forjar, santuario, maestría, pergamino, credencial, llave de acceso?
+- [ ] ¿El eslogan "Automatiza. Controla. Crece." está presente donde aplica?
+- [ ] ¿El badge "De la clínica al código. 100% nativo para ópticas." está visible?
+- [ ] ¿Se usa tipografía sans-serif geométrica (Geist/Inter/DM Sans)?
+- [ ] ¿Las formas usan rounded-xl/2xl (no rounded-arch ni rounded-none)?
+- [ ] ¿El espacio negativo es generoso (p-8, p-12)?
+- [ ] ¿La paleta Epoch se mantiene intacta?
+- [ ] ¿Los CTAs son claros y accionables?
 
 ---
 
 ## 11. Changelog
 
-- **2026-02-18**: Creación inicial del documento de identidad como base de la documentación del programa.
-- **2026-02-18**: Reemplazo de Malisha por Cormorant Garamond (font-cormorant). Fuente elegante y sobria para títulos alternativos.
-- **2026-02-18**: Fase 2 — Copy orientado a conversión. Hero, Problem/Solution, CTA, Benefits, Features, Footer, Auth y Pricing actualizados. Narrativa tecnólogo médico y exclusivo para ópticas como pilares.
+- **2026-02-22:** Pivote a Lujo Tecnológico y Precisión Clínica. Nuevo eslogan "Automatiza. Controla. Crece.". Eliminación de Cinzel, Playfair, Lato; adopción de Geist/Inter/DM Sans. Eliminación de rounded-arch; adopción de rounded-xl/2xl. Paleta Epoch intacta.
+- **2026-02-18:** Creación inicial. Reemplazo Malisha por Cormorant Garamond. Copy orientado a conversión.

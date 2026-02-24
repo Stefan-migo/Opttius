@@ -34,25 +34,20 @@ export function HeroSection() {
       <div className="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 sm:pt-32 pb-48 sm:pb-72 text-center">
         <div className="space-y-12 sm:space-y-20 max-w-4xl mx-auto">
           {/* Badge */}
-          <div className="inline-flex items-center gap-2 sm:gap-4 px-4 sm:px-6 py-2 border border-epoch-accent/30 rounded-full text-epoch-accent text-[10px] font-display tracking-[0.4em] uppercase animate-in fade-in slide-in-from-bottom-4 duration-1000">
-            <Sparkles className="h-3 w-3" />
-            <span className="text-xs sm:text-[10px]">
-              Creado por un tecnólogo médico. Exclusivo para ópticas.
-            </span>
+          <div className="inline-flex items-center gap-2 sm:gap-3 px-4 sm:px-5 py-2 bg-epoch-accent/20 border border-epoch-accent/80 rounded-full text-epoch-accent text-[10px] sm:text-[11px] font-sans font-semibold tracking-[0.35em] uppercase animate-in fade-in slide-in-from-bottom-4 duration-1000 shadow-lg shadow-black/20">
+            <Sparkles className="h-3.5 w-3.5 flex-shrink-0" />
+            <span>De la clínica al código. 100% nativo para ópticas.</span>
           </div>
 
           {/* Main Title */}
           <div className="space-y-4 sm:space-y-6">
-            <h1 className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-display font-bold text-white leading-none tracking-tight animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-200">
-              GESTIÓN ÓPTICA DE
-              <br />
-              <span className="text-epoch-accent italic font-serif lowercase tracking-normal">
-                última generación
-              </span>
+            <h1 className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-sans font-bold text-white leading-tight tracking-tight animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-200">
+              El motor inteligente para las ópticas modernas.
             </h1>
-            <p className="font-serif italic text-base sm:text-xl md:text-2xl text-white/60 tracking-widest uppercase mt-4 animate-in fade-in slide-in-from-bottom-12 duration-1000 delay-400">
-              Recetas, presupuestos, laboratorio y agenda. En una sola
-              plataforma. Sin adaptaciones.
+            <p className="font-sans text-base sm:text-xl md:text-2xl text-white/70 mt-4 animate-in fade-in slide-in-from-bottom-12 duration-1000 delay-400">
+              Desde el examen visual hasta la entrega del lente. Centraliza tus
+              recetas, inventario, flujos de laboratorio y ventas en una única
+              plataforma.
             </p>
           </div>
 
@@ -60,14 +55,14 @@ export function HeroSection() {
             <Button
               onClick={handleSignUpClick}
               size="lg"
-              className="bg-epoch-accent hover:bg-white text-epoch-surface rounded-none h-16 px-16 text-xs font-display tracking-[0.3em] uppercase transition-all duration-500 shadow-2xl"
+              className="bg-epoch-accent hover:bg-white text-epoch-surface rounded-xl h-16 px-16 text-xs font-sans font-semibold tracking-[0.2em] uppercase transition-all duration-500 shadow-2xl"
             >
               Probar Gratis
               <ArrowRight className="ml-3 h-4 w-4" />
             </Button>
             <button
               onClick={handleDemoClick}
-              className="text-white/60 hover:text-white font-serif italic text-lg tracking-wide transition-all duration-300 border-b border-white/20 hover:border-white pb-1"
+              className="text-white/60 hover:text-white font-sans text-lg tracking-wide transition-all duration-300 border-b border-white/20 hover:border-white pb-1"
             >
               Ver demo en vivo
             </button>
@@ -76,7 +71,7 @@ export function HeroSection() {
       </div>
 
       {/* Aesthetic Arches */}
-      <div className="absolute bottom-0 left-0 right-0 h-40 bg-epoch-background rounded-arch z-10"></div>
+      <div className="absolute bottom-0 left-0 right-0 h-40 bg-epoch-background rounded-b-2xl z-10"></div>
     </section>
   );
 }

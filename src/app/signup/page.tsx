@@ -126,41 +126,41 @@ export default function SignupPage() {
           <div className="absolute bottom-[-10%] right-[-5%] w-[40%] h-[40%] bg-epoch-primary/5 rounded-full blur-[120px]" />
         </div>
 
-        <div className="w-full max-w-md relative z-10 animate-in zoom-in-95 duration-700">
-          <div className="text-center mb-10">
-            <div className="relative mx-auto mb-10 flex justify-center">
-              <Image
-                src="/OpttiusTextCentered.svg"
-                alt="Opttius"
-                width={176}
-                height={128}
-                className="h-32 w-44 opacity-100 object-contain"
-              />
-            </div>
-            <div className="inline-flex items-center justify-center w-24 h-24 bg-white border border-epoch-primary/5 rounded-full mb-8 shadow-premium">
-              <div className="w-20 h-20 border border-epoch-accent/20 rounded-full flex items-center justify-center">
-                <CheckCircle2 className="h-10 w-10 text-[#2C5E43] stroke-[1px]" />
+        <div className="w-full max-w-md relative z-10 animate-in zoom-in-95 duration-700 rounded-3xl overflow-hidden">
+          <Card className="overflow-hidden rounded-3xl shadow-2xl border-0 bg-epoch-primary">
+            {/* Header: mismo tamaño visual que el contenido */}
+            <div className="bg-epoch-primary p-10 text-center">
+              <div className="relative mx-auto mb-6 flex justify-center">
+                <Image
+                  src="/logoYopttius.png"
+                  alt="Opttius"
+                  width={248}
+                  height={227}
+                  className="h-24 w-28 object-contain"
+                />
               </div>
+              <div className="inline-flex items-center justify-center w-20 h-20 border-2 border-epoch-accent/40 rounded-full mb-6">
+                <CheckCircle2 className="h-10 w-10 text-epoch-accent stroke-[1.5px]" />
+              </div>
+              <h1 className="text-2xl sm:text-3xl font-display font-bold text-white tracking-tight mb-2">
+                Bienvenido al Nuevo Estándar
+              </h1>
+              <p className="text-white/95 font-serif italic text-base uppercase tracking-[0.2em]">
+                Registro Exitoso
+              </p>
             </div>
-            <h1 className="text-3xl sm:text-4xl font-display font-bold text-epoch-primary tracking-tight mb-2 uppercase">
-              BIENVENIDO A LA ORDEN
-            </h1>
-            <p className="text-epoch-accent font-serif italic text-lg opacity-80 uppercase tracking-[0.2em]">
-              Registro Exitoso
-            </p>
-          </div>
 
-          <Card className="border-epoch-primary/10 bg-white/90 backdrop-blur-sm shadow-2xl rounded-none overflow-hidden border-t-4 border-t-epoch-accent">
-            <CardContent className="p-10 text-center">
+            {/* Contenido: verde oscuro con texto y botón en contraste */}
+            <CardContent className="p-10 text-center bg-epoch-primary border-t border-white/10">
               {requiresEmailConfirmation ? (
                 <div className="space-y-8">
-                  <p className="text-[15px] font-serif italic text-epoch-primary/80 leading-relaxed">
-                    Hemos enviado un correo de confirmación. Por favor,
-                    verifíquelo para activar su cuenta en Opttius.
+                  <p className="text-[15px] font-serif italic text-white/90 leading-relaxed">
+                    Su óptica está a un paso de la automatización. Revise su
+                    bandeja de entrada y active su cuenta para comenzar.
                   </p>
                   <Button
                     onClick={() => router.push("/login")}
-                    className="w-full h-16 bg-epoch-primary hover:bg-epoch-surface text-white rounded-none font-display font-bold uppercase text-[11px] tracking-[0.3em] transition-all shadow-xl group"
+                    className="w-full h-16 bg-epoch-accent hover:bg-epoch-accent/90 text-epoch-primary rounded-xl font-display font-bold uppercase text-[11px] tracking-[0.3em] transition-all shadow-xl group"
                   >
                     REGRESAR AL ACCESO
                     <ArrowRight className="ml-3 h-4 w-4 transition-transform group-hover:translate-x-2" />
@@ -168,13 +168,13 @@ export default function SignupPage() {
                 </div>
               ) : (
                 <div className="space-y-8">
-                  <p className="text-[15px] font-serif italic text-epoch-primary/80 leading-relaxed">
+                  <p className="text-[15px] font-serif italic text-white/90 leading-relaxed">
                     Su cuenta ha sido creada. Redirigiéndole a la configuración
                     inicial...
                   </p>
                   <Button
                     onClick={() => router.push("/onboarding/choice")}
-                    className="w-full h-16 bg-epoch-primary hover:bg-epoch-surface text-white rounded-none font-display font-bold uppercase text-[11px] tracking-[0.3em] transition-all shadow-xl group"
+                    className="w-full h-16 bg-epoch-accent hover:bg-epoch-accent/90 text-epoch-primary rounded-xl font-display font-bold uppercase text-[11px] tracking-[0.3em] transition-all shadow-xl group"
                   >
                     CONTINUAR
                     <ArrowRight className="ml-3 h-4 w-4 transition-transform group-hover:translate-x-2" />
@@ -184,8 +184,8 @@ export default function SignupPage() {
             </CardContent>
           </Card>
 
-          <p className="mt-12 text-center text-[8px] font-display font-bold text-epoch-primary/40 uppercase tracking-[0.4em]">
-            © OPTTIUS ELITE SERVICES MMXXIV
+          <p className="mt-12 text-center text-[10px] font-body text-epoch-primary/50">
+            © 2026 Opttius. Ingeniería clínica para ópticas.
           </p>
         </div>
       </div>
@@ -223,7 +223,7 @@ export default function SignupPage() {
 
           <div className="space-y-12 animate-in fade-in slide-in-from-left-10 duration-1000">
             <div className="space-y-6">
-              <Badge className="bg-epoch-accent/20 text-epoch-accent border-epoch-accent/30 rounded-none px-4 py-1 text-[10px] uppercase font-display tracking-[0.3em]">
+              <Badge className="bg-epoch-accent/20 text-epoch-accent border-epoch-accent/30 rounded-xl px-4 py-1 text-[10px] uppercase font-display tracking-[0.3em]">
                 Registro
               </Badge>
               <h2 className="text-6xl xl:text-7xl font-display font-bold text-white leading-tight tracking-tight">
@@ -278,13 +278,13 @@ export default function SignupPage() {
             </p>
           </div>
 
-          <Card className="border-epoch-primary/5 bg-white shadow-2xl rounded-none">
+          <Card className="border-epoch-primary/5 bg-white shadow-2xl rounded-xl">
             <CardContent className="p-8 sm:p-12">
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
                 {error && (
                   <Alert
                     variant="destructive"
-                    className="bg-red-500/10 border-red-500/20 rounded-none"
+                    className="bg-red-500/10 border-red-500/20 rounded-xl"
                   >
                     <AlertDescription className="text-red-950 font-serif italic text-xs">
                       {error}
@@ -302,7 +302,7 @@ export default function SignupPage() {
                         placeholder="Alejandro"
                         {...register("firstName")}
                         className={cn(
-                          "h-14 rounded-none border-epoch-primary/10 bg-epoch-background/50 pl-12 focus:bg-white transition-all font-body text-epoch-primary shadow-inner",
+                          "h-14 rounded-xl border-epoch-primary/10 bg-epoch-background/50 pl-12 focus:bg-white transition-all font-body text-epoch-primary shadow-inner",
                           errors.firstName &&
                             "border-red-900 focus-visible:ring-red-900",
                         )}
@@ -321,7 +321,7 @@ export default function SignupPage() {
                         placeholder="Valdivia"
                         {...register("lastName")}
                         className={cn(
-                          "h-14 rounded-none border-epoch-primary/10 bg-epoch-background/50 pl-12 focus:bg-white transition-all font-body text-epoch-primary shadow-inner",
+                          "h-14 rounded-xl border-epoch-primary/10 bg-epoch-background/50 pl-12 focus:bg-white transition-all font-body text-epoch-primary shadow-inner",
                           errors.lastName &&
                             "border-red-900 focus-visible:ring-red-900",
                         )}
@@ -343,7 +343,7 @@ export default function SignupPage() {
                         placeholder="directorio@optica.com"
                         {...register("email")}
                         className={cn(
-                          "h-14 rounded-none border-epoch-primary/10 bg-epoch-background/50 pl-12 focus:bg-white transition-all font-body text-epoch-primary shadow-inner",
+                          "h-14 rounded-xl border-epoch-primary/10 bg-epoch-background/50 pl-12 focus:bg-white transition-all font-body text-epoch-primary shadow-inner",
                           errors.email &&
                             "border-red-900 focus-visible:ring-red-900",
                         )}
@@ -362,7 +362,7 @@ export default function SignupPage() {
                         type="tel"
                         placeholder="+1 555-0100"
                         {...register("phone")}
-                        className="h-14 rounded-none border-epoch-primary/10 bg-epoch-background/50 pl-12 focus:bg-white transition-all font-body text-epoch-primary shadow-inner"
+                        className="h-14 rounded-xl border-epoch-primary/10 bg-epoch-background/50 pl-12 focus:bg-white transition-all font-body text-epoch-primary shadow-inner"
                         disabled={loading}
                       />
                       <Phone className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-epoch-primary/30 group-focus-within:text-epoch-primary transition-colors stroke-[1px]" />
@@ -373,7 +373,7 @@ export default function SignupPage() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
                   <div className="space-y-3">
                     <Label className="text-[10px] font-display font-bold text-epoch-primary/40 uppercase tracking-widest ml-1">
-                      Llave Maestra
+                      Contraseña
                     </Label>
                     <div className="relative group">
                       <Input
@@ -381,7 +381,7 @@ export default function SignupPage() {
                         placeholder="••••••••"
                         {...register("password")}
                         className={cn(
-                          "h-14 rounded-none border-epoch-primary/10 bg-epoch-background/50 pl-12 pr-12 focus:bg-white transition-all font-body text-epoch-primary shadow-inner",
+                          "h-14 rounded-xl border-epoch-primary/10 bg-epoch-background/50 pl-12 pr-12 focus:bg-white transition-all font-body text-epoch-primary shadow-inner",
                           errors.password &&
                             "border-red-900 focus-visible:ring-red-900",
                         )}
@@ -406,7 +406,7 @@ export default function SignupPage() {
 
                   <div className="space-y-3">
                     <Label className="text-[10px] font-display font-bold text-epoch-primary/40 uppercase tracking-widest ml-1">
-                      Confirmar Llave
+                      Confirmar contraseña
                     </Label>
                     <div className="relative group">
                       <Input
@@ -414,7 +414,7 @@ export default function SignupPage() {
                         placeholder="••••••••"
                         {...register("confirmPassword")}
                         className={cn(
-                          "h-14 rounded-none border-epoch-primary/10 bg-epoch-background/50 pl-12 pr-12 focus:bg-white transition-all font-body text-epoch-primary shadow-inner",
+                          "h-14 rounded-xl border-epoch-primary/10 bg-epoch-background/50 pl-12 pr-12 focus:bg-white transition-all font-body text-epoch-primary shadow-inner",
                           errors.confirmPassword &&
                             "border-red-900 focus-visible:ring-red-900",
                         )}
@@ -443,7 +443,7 @@ export default function SignupPage() {
                 <Button
                   type="submit"
                   size="lg"
-                  className="w-full h-16 rounded-none bg-epoch-primary hover:bg-epoch-surface text-white font-display font-bold uppercase text-xs tracking-[0.4em] group transition-all shadow-xl"
+                  className="w-full h-16 rounded-xl bg-epoch-primary hover:bg-epoch-surface text-white font-display font-bold uppercase text-xs tracking-[0.4em] group transition-all shadow-xl"
                   disabled={loading}
                 >
                   {loading ? (

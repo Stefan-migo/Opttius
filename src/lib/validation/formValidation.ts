@@ -8,6 +8,7 @@
  */
 
 import { z } from "zod";
+import { isValidRUT, isValidRUTFormat, completeRUTIfNeeded } from "@/lib/utils/rut";
 
 /**
  * Esquema de validación para RUT chileno
@@ -190,15 +191,25 @@ const optionalOrEmpty = <T extends z.ZodTypeAny>(schema: T) =>
   z.union([z.literal(""), schema]).optional();
 
 /**
- * RUT opcional: vacío permitido; si hay valor, validar con validateRUT.
+ * RUT opcional: vacío permitido; si hay valor, validar formato (7-8 dígitos + DV).
+ * Usa isValidRUTFormat para aceptar RUTs de ejemplo (12.345.678-9) y evitar rechazos
+ * por errores de tipeo en el DV. Para validación estricta del algoritmo Módulo 11,
+ * usar rutSchema (requerido) o isValidRUT directamente.
  */
 const optionalRutSchema = z
-  .string()
-  .optional()
-  .transform((val) => (val === "" || val == null ? undefined : val))
-  .refine((val) => !val || val.trim() === "" || validateRUT(val), {
-    message: "RUT inválido",
-  });
+  .union([z.string(), z.undefined(), z.null()])
+  .transform((val) => {
+    if (val == null || (typeof val === "string" && val.trim() === ""))
+      return undefined;
+    return String(val).trim();
+  })
+  .refine(
+    (val) =>
+      val === undefined ||
+      val === "" ||
+      isValidRUTFormat(completeRUTIfNeeded(val) || val),
+    { message: "RUT inválido" },
+  );
 
 /**
  * Teléfono requerido: al menos 8 dígitos, formato flexible.
@@ -392,28 +403,10 @@ export const prescriptionSchema = z.object({
 });
 
 /**
- * Función para validar RUT
+ * Función para validar RUT (delega a lib/utils/rut para consistencia)
  */
 export function validateRUT(rut: string): boolean {
-  const cleanRut = rut.replace(/\./g, "").replace(/-/g, "");
-  if (cleanRut.length < 8 || cleanRut.length > 9) return false;
-
-  const rutNumber = cleanRut.slice(0, -1);
-  const dv = cleanRut.slice(-1).toUpperCase();
-
-  let sum = 0;
-  let multiplier = 2;
-
-  for (let i = rutNumber.length - 1; i >= 0; i--) {
-    sum += parseInt(rutNumber[i]) * multiplier;
-    multiplier = multiplier === 7 ? 2 : multiplier + 1;
-  }
-
-  const expectedDv = 11 - (sum % 11);
-  const calculatedDv =
-    expectedDv === 11 ? "0" : expectedDv === 10 ? "K" : expectedDv.toString();
-
-  return calculatedDv === dv;
+  return isValidRUT(rut);
 }
 
 /**

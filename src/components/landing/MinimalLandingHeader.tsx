@@ -27,10 +27,8 @@ export function MinimalLandingHeader({
 
   return (
     <header
-      className={`fixed top-0 w-full z-50 transition-all duration-500 py-6 px-4 md:px-8 ${
-        isScrolled
-          ? "bg-epoch-surface/90 backdrop-blur-md py-4 shadow-xl"
-          : "bg-epoch-surface/95 backdrop-blur-sm"
+      className={`fixed top-0 w-full z-50 transition-all duration-500 py-6 px-4 md:px-8 bg-epoch-surface shadow-lg ${
+        isScrolled ? "py-4 shadow-xl" : ""
       }`}
     >
       <nav className="max-w-7xl mx-auto flex justify-between items-center transition-all duration-300">

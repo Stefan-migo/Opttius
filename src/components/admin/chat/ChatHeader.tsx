@@ -164,7 +164,7 @@ export function ChatHeader({
             variant="ghost"
             size="icon"
             onClick={onExpandClick}
-            className="text-white hover:bg-white/10 rounded-none h-9 w-9"
+            className="text-white hover:bg-white/10 rounded-xl h-9 w-9"
             title={
               isSidebarMode
                 ? "Volver a ventana flotante"

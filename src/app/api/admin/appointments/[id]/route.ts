@@ -4,6 +4,10 @@ import { createServiceRoleClient } from "@/utils/supabase/server";
 import { appLogger as logger } from "@/lib/logger";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
 import { NotificationService } from "@/lib/notifications/notification-service";
+import {
+  sendAppointmentCancellation,
+  sendAppointmentRescheduled,
+} from "@/lib/email/templates/optica";
 
 export const dynamic = "force-dynamic";
 export async function GET(
@@ -135,19 +139,70 @@ export async function PUT(
       customer_id?: string | null;
       guest_first_name?: string | null;
       guest_last_name?: string | null;
+      guest_email?: string | null;
       appointment_date?: string;
       appointment_time?: string;
       branch_id?: string | null;
+      organization_id?: string | null;
     } | null = null;
     if (body.status === "cancelled") {
       const { data: apt } = await supabaseServiceRole
         .from("appointments")
         .select(
-          "customer_id, guest_first_name, guest_last_name, appointment_date, appointment_time, branch_id",
+          "customer_id, guest_first_name, guest_last_name, guest_email, appointment_date, appointment_time, branch_id, organization_id",
         )
         .eq("id", id)
         .single();
       appointmentBeforeCancel = apt;
+    }
+
+    // When rescheduling (date/time change, not cancelling), fetch current for email
+    let appointmentBeforeReschedule: {
+      appointment_date?: string;
+      appointment_time?: string;
+      customer_id?: string | null;
+      guest_email?: string | null;
+      branch_id?: string | null;
+      organization_id?: string | null;
+      customer?: { first_name?: string; last_name?: string; email?: string } | null;
+      branch?: { name?: string; phone?: string; email?: string } | null;
+    } | null = null;
+    const isReschedule =
+      (body.appointment_date || body.appointment_time) &&
+      body.status !== "cancelled";
+    if (isReschedule) {
+      const { data: aptForReschedule } = await supabaseServiceRole
+        .from("appointments")
+        .select(
+          "appointment_date, appointment_time, customer_id, guest_email, branch_id, organization_id",
+        )
+        .eq("id", id)
+        .single();
+      if (aptForReschedule) {
+        let customer: { first_name?: string; last_name?: string; email?: string } | null = null;
+        let branch: { name?: string; phone?: string; email?: string } | null = null;
+        if (aptForReschedule.customer_id) {
+          const { data: c } = await supabaseServiceRole
+            .from("customers")
+            .select("first_name, last_name, email")
+            .eq("id", aptForReschedule.customer_id)
+            .single();
+          customer = c;
+        }
+        if (aptForReschedule.branch_id) {
+          const { data: b } = await supabaseServiceRole
+            .from("branches")
+            .select("name, phone, email")
+            .eq("id", aptForReschedule.branch_id)
+            .single();
+          branch = b;
+        }
+        appointmentBeforeReschedule = {
+          ...aptForReschedule,
+          customer,
+          branch,
+        };
+      }
     }
 
     // If date/time is being changed, check availability
@@ -299,7 +354,7 @@ export async function PUT(
       );
     }
 
-    // Notify when appointment is cancelled
+    // Notify when appointment is cancelled (in-app + email B2C)
     if (
       body.status === "cancelled" &&
       appointmentBeforeCancel &&
@@ -307,11 +362,23 @@ export async function PUT(
     ) {
       try {
         let customerName = "Cliente";
-        if (appointmentBeforeCancel.customer_id) {
+        let customerEmail: string | null = null;
+        const apt = appointmentBeforeCancel as {
+          customer_id?: string | null;
+          guest_first_name?: string | null;
+          guest_last_name?: string | null;
+          guest_email?: string | null;
+          appointment_date?: string;
+          appointment_time?: string;
+          branch_id?: string | null;
+          organization_id?: string | null;
+        };
+
+        if (apt.customer_id) {
           const { data: customer } = await supabaseServiceRole
             .from("customers")
-            .select("first_name, last_name")
-            .eq("id", appointmentBeforeCancel.customer_id)
+            .select("first_name, last_name, email")
+            .eq("id", apt.customer_id)
             .single();
           if (customer) {
             customerName =
@@ -319,40 +386,129 @@ export async function PUT(
                 .filter(Boolean)
                 .join(" ")
                 .trim() || "Cliente";
+            customerEmail = customer.email || null;
           }
         } else if (
-          appointmentBeforeCancel.guest_first_name ||
-          appointmentBeforeCancel.guest_last_name
+          apt.guest_first_name ||
+          apt.guest_last_name
         ) {
           customerName =
-            [
-              appointmentBeforeCancel.guest_first_name,
-              appointmentBeforeCancel.guest_last_name,
-            ]
+            [apt.guest_first_name, apt.guest_last_name]
               .filter(Boolean)
               .join(" ")
               .trim() || "Cliente";
+          customerEmail = apt.guest_email || null;
         }
+
         const aptDate =
-          appointmentBeforeCancel.appointment_date ||
+          apt.appointment_date ||
           updatedAppointment.appointment_date ||
           "";
         const aptTime =
-          appointmentBeforeCancel.appointment_time ||
+          apt.appointment_time ||
           updatedAppointment.appointment_time ||
           "";
+
         await NotificationService.notifyAppointmentCancelled(
           id,
           customerName,
           aptDate,
           aptTime,
-          appointmentBeforeCancel.branch_id ?? updatedAppointment.branch_id,
+          apt.branch_id ?? updatedAppointment.branch_id,
         );
+
+        // Email B2C: appointment_cancelation
+        if (customerEmail) {
+          const { data: branch } = apt.branch_id
+            ? await supabaseServiceRole
+                .from("branches")
+                .select("name, phone, email")
+                .eq("id", apt.branch_id)
+                .single()
+            : { data: null };
+          sendAppointmentCancellation(
+            {
+              id,
+              customer_name: customerName,
+              customer_first_name: customerName.split(" ")[0] || "Cliente",
+              customer_email: customerEmail,
+              date: aptDate,
+              time:
+                typeof aptTime === "string"
+                  ? aptTime.substring(0, 5)
+                  : aptTime,
+              branch_name: branch?.name || "Nuestra Óptica",
+              branch_phone: branch?.phone || "",
+              branch_email: branch?.email || "",
+            },
+            apt.organization_id ?? undefined,
+          ).catch((err) =>
+            logger.error("Error sending appointment cancellation email", err),
+          );
+        }
       } catch (notifErr) {
         logger.error(
           "Error sending appointment cancelled notification",
           notifErr,
         );
+      }
+    }
+
+    // Email B2C: appointment_rescheduled (when date/time changed)
+    if (
+      appointmentBeforeReschedule &&
+      updatedAppointment &&
+      body.status !== "cancelled"
+    ) {
+      const oldDate = appointmentBeforeReschedule.appointment_date;
+      const oldTime = appointmentBeforeReschedule.appointment_time;
+      const newDate = body.appointment_date ?? updatedAppointment.appointment_date;
+      const newTime = body.appointment_time ?? updatedAppointment.appointment_time;
+      const dateChanged =
+        body.appointment_date && oldDate && newDate !== oldDate;
+      const timeChanged =
+        body.appointment_time && oldTime && newTime !== oldTime;
+
+      if ((dateChanged || timeChanged) && (oldDate || oldTime)) {
+        const cust = appointmentBeforeReschedule.customer as
+          | { first_name?: string; last_name?: string; email?: string }
+          | null;
+        const customerEmail =
+          cust?.email ||
+          appointmentBeforeReschedule.guest_email ||
+          null;
+        const customerName = cust
+          ? [cust.first_name, cust.last_name].filter(Boolean).join(" ").trim() ||
+            "Cliente"
+          : "Cliente";
+
+        if (customerEmail) {
+          const branch = appointmentBeforeReschedule.branch as
+            | { name?: string; phone?: string; email?: string }
+            | null;
+          sendAppointmentRescheduled(
+            {
+              id,
+              customer_name: customerName,
+              customer_first_name: customerName.split(" ")[0] || "Cliente",
+              customer_email: customerEmail,
+              date: newDate || "",
+              time:
+                typeof newTime === "string" ? newTime.substring(0, 5) : newTime,
+              old_date: oldDate || "",
+              old_time:
+                typeof oldTime === "string"
+                  ? oldTime.substring(0, 5)
+                  : (oldTime ?? ""),
+              branch_name: branch?.name || "Nuestra Óptica",
+              branch_phone: branch?.phone || "",
+              branch_email: branch?.email || "",
+            },
+            appointmentBeforeReschedule.organization_id ?? undefined,
+          ).catch((err) =>
+            logger.error("Error sending appointment rescheduled email", err),
+          );
+        }
       }
     }
 

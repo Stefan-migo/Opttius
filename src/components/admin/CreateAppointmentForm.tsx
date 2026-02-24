@@ -44,6 +44,8 @@ interface CreateAppointmentFormProps {
   initialData?: any;
   initialCustomerId?: string;
   lockDateTime?: boolean; // Lock date and time when opened from calendar slot
+  /** When in global view, branch to scope customer search and appointment creation */
+  effectiveBranchId?: string;
 }
 
 export default function CreateAppointmentForm({
@@ -52,9 +54,11 @@ export default function CreateAppointmentForm({
   initialData,
   initialCustomerId,
   lockDateTime = false,
+  effectiveBranchId,
 }: CreateAppointmentFormProps) {
   const { user, loading: authLoading } = useAuthContext();
   const { currentBranchId } = useBranch();
+  const branchIdForSearch = effectiveBranchId ?? currentBranchId ?? undefined;
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [loadingAvailability, setLoadingAvailability] = useState(false);
@@ -341,8 +345,13 @@ export default function CreateAppointmentForm({
 
       setSearchingCustomers(true);
       try {
+        const headers: Record<string, string> = {};
+        if (branchIdForSearch) {
+          headers["x-branch-id"] = branchIdForSearch;
+        }
         const response = await fetch(
           `/api/admin/customers/search?q=${encodeURIComponent(customerSearch)}`,
+          { headers },
         );
         if (response.ok) {
           const data = await response.json();
@@ -357,7 +366,7 @@ export default function CreateAppointmentForm({
 
     const debounce = setTimeout(searchCustomers, 300);
     return () => clearTimeout(debounce);
-  }, [customerSearch]);
+  }, [customerSearch, branchIdForSearch]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

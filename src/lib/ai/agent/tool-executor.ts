@@ -20,40 +20,46 @@ export class ToolExecutor {
     }
     
     try {
-      if (tool.requiresConfirmation) {
-        await logAdminActivity(
-          this.context.userId,
-          `tool_call_${toolName}`,
-          'ai_agent',
-          undefined,
-          { tool: toolName, params, requiresConfirmation: true }
-        )
+      if (!this.context.skipAdminActivityLog) {
+        if (tool.requiresConfirmation) {
+          await logAdminActivity(
+            this.context.userId,
+            `tool_call_${toolName}`,
+            'ai_agent',
+            undefined,
+            { tool: toolName, params, requiresConfirmation: true }
+          )
+        }
       }
       
       const result = await tool.execute(params, this.context)
       
-      await logAdminActivity(
-        this.context.userId,
-        `tool_executed_${toolName}`,
-        'ai_agent',
-        undefined,
-        { 
-          tool: toolName, 
-          params, 
-          success: result.success,
-          error: result.error
-        }
-      )
+      if (!this.context.skipAdminActivityLog) {
+        await logAdminActivity(
+          this.context.userId,
+          `tool_executed_${toolName}`,
+          'ai_agent',
+          undefined,
+          { 
+            tool: toolName, 
+            params, 
+            success: result.success,
+            error: result.error
+          }
+        )
+      }
       
       return result
     } catch (error: any) {
-      await logAdminActivity(
-        this.context.userId,
-        `tool_error_${toolName}`,
-        'ai_agent',
-        undefined,
-        { tool: toolName, params, error: error.message }
-      )
+      if (!this.context.skipAdminActivityLog) {
+        await logAdminActivity(
+          this.context.userId,
+          `tool_error_${toolName}`,
+          'ai_agent',
+          undefined,
+          { tool: toolName, params, error: error.message }
+        )
+      }
       
       return {
         success: false,

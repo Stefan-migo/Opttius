@@ -18,7 +18,7 @@ export function ChartCard({
   headerActions,
 }: ChartCardProps) {
   return (
-    <Card className="border border-admin-border-primary/20 bg-admin-border-primary/5 rounded-none shadow-none overflow-hidden group">
+    <Card className="border border-admin-border-primary/20 bg-admin-border-primary/5 rounded-xl shadow-none overflow-hidden group">
       <CardHeader className="pb-2 border-b border-admin-border-primary/10">
         <div
           className={

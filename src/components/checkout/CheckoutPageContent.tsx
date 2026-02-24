@@ -378,7 +378,7 @@ export function CheckoutPageContent() {
         <div className="text-center space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-1000">
           <Badge
             variant="outline"
-            className="px-4 py-1 border-admin-accent-primary/20 bg-admin-accent-primary/5 text-admin-accent-primary rounded-none font-display font-black text-[10px] uppercase tracking-[0.3em]"
+            className="px-4 py-1 border-admin-accent-primary/20 bg-admin-accent-primary/5 text-admin-accent-primary rounded-xl font-display font-black text-[10px] uppercase tracking-[0.3em]"
           >
             Protocolo de Pago Seguro
           </Badge>
@@ -394,11 +394,11 @@ export function CheckoutPageContent() {
         {currentSubscription?.currentTier && (
           <Card
             variant="glass"
-            className="border-admin-accent-secondary/20 bg-admin-bg-secondary/80 backdrop-blur-md rounded-none shadow-premium-lg animate-in zoom-in-95 duration-700"
+            className="border-admin-accent-secondary/20 bg-admin-bg-secondary/80 backdrop-blur-md rounded-xl shadow-premium-lg animate-in zoom-in-95 duration-700"
           >
             <CardContent className="p-6 flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <div className="p-3 bg-admin-accent-secondary/10 rounded-none border border-admin-accent-secondary/20">
+                <div className="p-3 bg-admin-accent-secondary/10 rounded-xl border border-admin-accent-secondary/20">
                   <Zap className="h-6 w-6 text-admin-accent-secondary" />
                 </div>
                 <div>
@@ -422,7 +422,7 @@ export function CheckoutPageContent() {
                   </p>
                 </div>
               </div>
-              <Badge className="bg-admin-success text-admin-text-on-dark border border-admin-success/30 rounded-none font-display font-black text-[10px] tracking-widest px-4 py-1">
+              <Badge className="bg-admin-success text-admin-text-on-dark border border-admin-success/30 rounded-xl font-display font-black text-[10px] tracking-widest px-4 py-1">
                 ACTIVO
               </Badge>
             </CardContent>
@@ -435,7 +435,7 @@ export function CheckoutPageContent() {
             {/* 1. Tier Selection Section */}
             <div className="space-y-6">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-none bg-admin-accent-primary text-[#1A2B23] flex items-center justify-center font-bold text-sm">
+                <div className="w-8 h-8 rounded-xl bg-admin-accent-primary text-[#1A2B23] flex items-center justify-center font-bold text-sm">
                   1
                 </div>
                 <h2 className="text-2xl font-bold tracking-tight text-admin-text-primary">
@@ -458,7 +458,7 @@ export function CheckoutPageContent() {
                       type="button"
                       onClick={() => handleTierSelect(tierName)}
                       className={cn(
-                        "relative flex flex-col p-8 rounded-none border-2 text-left transition-all duration-500 group hover:scale-[1.02] active:scale-[0.98]",
+                        "relative flex flex-col p-8 rounded-xl border-2 text-left transition-all duration-500 group hover:scale-[1.02] active:scale-[0.98]",
                         isSelected
                           ? "border-admin-accent-primary bg-epoch-accent/10 shadow-premium-xl ring-4 ring-admin-accent-primary/5"
                           : "border-admin-border-primary/20 bg-admin-bg-secondary/40 hover:border-admin-accent-primary/40",
@@ -466,7 +466,7 @@ export function CheckoutPageContent() {
                       )}
                     >
                       {isCurrent && (
-                        <div className="absolute -top-3 left-6 px-4 py-1.5 bg-admin-accent-secondary text-[#1A2B23] text-[9px] font-display font-black rounded-none uppercase tracking-widest shadow-lg border border-admin-accent-secondary/20">
+                        <div className="absolute -top-3 left-6 px-4 py-1.5 bg-admin-accent-secondary text-[#1A2B23] text-[9px] font-display font-black rounded-xl uppercase tracking-widest shadow-lg border border-admin-accent-secondary/20">
                           Plan Actual
                         </div>
                       )}
@@ -484,7 +484,7 @@ export function CheckoutPageContent() {
                           </div>
                           <div
                             className={cn(
-                              "w-6 h-6 rounded-none border-2 flex items-center justify-center transition-all duration-500",
+                              "w-6 h-6 rounded-xl border-2 flex items-center justify-center transition-all duration-500",
                               isSelected
                                 ? "border-admin-accent-primary bg-admin-accent-primary text-[#1A2B23]"
                                 : "border-admin-border-primary/30",
@@ -529,7 +529,7 @@ export function CheckoutPageContent() {
                                     ? "default"
                                     : "secondary"
                                 }
-                                className="w-full justify-center py-1.5 rounded-none font-bold"
+                                className="w-full justify-center py-1.5 rounded-xl font-bold"
                               >
                                 {tierChange === "upgrade" ? (
                                   <>
@@ -555,7 +555,7 @@ export function CheckoutPageContent() {
             {/* 2. Payment Method Selection */}
             <div className="space-y-6 animate-in fade-in duration-700 delay-200">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-none bg-admin-accent-primary text-[#1A2B23] flex items-center justify-center font-bold text-sm">
+                <div className="w-8 h-8 rounded-xl bg-admin-accent-primary text-[#1A2B23] flex items-center justify-center font-bold text-sm">
                   2
                 </div>
                 <h2 className="text-2xl font-bold tracking-tight text-admin-text-primary">
@@ -565,7 +565,7 @@ export function CheckoutPageContent() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 {availableGateways.length === 0 ? (
-                  <div className="col-span-full py-10 text-center bg-admin-bg-secondary rounded-none border-2 border-dashed border-admin-border-primary">
+                  <div className="col-span-full py-10 text-center bg-admin-bg-secondary rounded-xl border-2 border-dashed border-admin-border-primary">
                     <Loader2 className="h-8 w-8 animate-spin mx-auto text-admin-text-tertiary mb-2" />
                     <p className="text-admin-text-tertiary font-bold uppercase text-[10px] tracking-widest">
                       Cargando pasarelas disponibles...
@@ -578,7 +578,7 @@ export function CheckoutPageContent() {
                       type="button"
                       onClick={() => setSelectedGateway(gw.gateway_id)}
                       className={cn(
-                        "flex flex-col items-center justify-center p-8 rounded-none border-2 transition-all duration-500 group relative",
+                        "flex flex-col items-center justify-center p-8 rounded-xl border-2 transition-all duration-500 group relative",
                         selectedGateway === gw.gateway_id
                           ? "border-admin-accent-primary bg-epoch-accent/10 shadow-premium-xl ring-4 ring-admin-accent-primary/5"
                           : "border-admin-border-primary/10 bg-admin-bg-secondary/40 hover:border-admin-accent-primary/30",
@@ -586,7 +586,7 @@ export function CheckoutPageContent() {
                     >
                       <div
                         className={cn(
-                          "w-14 h-14 rounded-none flex items-center justify-center mb-3 transition-colors",
+                          "w-14 h-14 rounded-xl flex items-center justify-center mb-3 transition-colors",
                           selectedGateway === gw.gateway_id
                             ? "bg-admin-accent-primary/10 text-admin-accent-primary"
                             : "bg-admin-bg-tertiary text-admin-text-tertiary group-hover:text-admin-accent-primary/60",
@@ -638,7 +638,7 @@ export function CheckoutPageContent() {
             {/* 3. Finalization Section */}
             <div className="space-y-6">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-none bg-admin-accent-primary text-[#1A2B23] flex items-center justify-center font-bold text-sm">
+                <div className="w-8 h-8 rounded-xl bg-admin-accent-primary text-[#1A2B23] flex items-center justify-center font-bold text-sm">
                   3
                 </div>
                 <h2 className="text-2xl font-bold tracking-tight text-admin-text-primary">
@@ -649,7 +649,7 @@ export function CheckoutPageContent() {
               <div className="grid lg:grid-cols-2 gap-8">
                 {/* Left: Summary and Security */}
                 <div className="space-y-6">
-                  <Card className="border-2 border-admin-accent-primary bg-epoch-accent/10 shadow-premium-xl rounded-none relative overflow-hidden">
+                  <Card className="border-2 border-admin-accent-primary bg-epoch-accent/10 shadow-premium-xl rounded-xl relative overflow-hidden">
                     <div className="absolute top-0 left-0 w-full h-1 bg-admin-accent-primary" />
                     <CardHeader className="p-8 pb-0">
                       <CardTitle className="text-[10px] font-display font-black text-admin-accent-primary uppercase tracking-[0.2em]">
@@ -694,7 +694,7 @@ export function CheckoutPageContent() {
                           <Button
                             onClick={handleCreateIntent}
                             disabled={!selectedTier || processing}
-                            className="w-full h-16 bg-admin-accent-primary text-[#1A2B23] hover:bg-admin-accent-secondary rounded-none font-display font-black text-[12px] tracking-[0.2em] uppercase transition-all shadow-premium-sm"
+                            className="w-full h-16 bg-admin-accent-primary text-[#1A2B23] hover:bg-admin-accent-secondary rounded-xl font-display font-black text-[12px] tracking-[0.2em] uppercase transition-all shadow-premium-sm"
                           >
                             {processing ? (
                               <>
@@ -725,8 +725,8 @@ export function CheckoutPageContent() {
 
                   {/* Security Highlights */}
                   <div className="grid grid-cols-2 gap-4">
-                    <div className="p-6 bg-admin-bg-secondary/60 rounded-none border border-admin-border-primary/10 flex items-center gap-4 transition-all hover:bg-admin-bg-secondary">
-                      <div className="p-3 bg-admin-success/10 rounded-none border border-admin-success/20">
+                    <div className="p-6 bg-admin-bg-secondary/60 rounded-xl border border-admin-border-primary/10 flex items-center gap-4 transition-all hover:bg-admin-bg-secondary">
+                      <div className="p-3 bg-admin-success/10 rounded-xl border border-admin-success/20">
                         <ShieldCheck className="h-6 w-6 text-admin-success" />
                       </div>
                       <div>
@@ -738,8 +738,8 @@ export function CheckoutPageContent() {
                         </p>
                       </div>
                     </div>
-                    <div className="p-6 bg-admin-bg-secondary/60 rounded-none border border-admin-border-primary/10 flex items-center gap-4 transition-all hover:bg-admin-bg-secondary">
-                      <div className="p-3 bg-admin-accent-secondary/10 rounded-none border border-admin-accent-secondary/20">
+                    <div className="p-6 bg-admin-bg-secondary/60 rounded-xl border border-admin-border-primary/10 flex items-center gap-4 transition-all hover:bg-admin-bg-secondary">
+                      <div className="p-3 bg-admin-accent-secondary/10 rounded-xl border border-admin-accent-secondary/20">
                         <Lock className="h-6 w-6 text-admin-accent-secondary" />
                       </div>
                       <div>
@@ -757,8 +757,8 @@ export function CheckoutPageContent() {
                 {/* Right: Payment Brick or Selection Guide */}
                 <div className="w-full">
                   {!paymentId ? (
-                    <div className="h-full min-h-[400px] border-4 border-dashed border-admin-border-primary rounded-none flex flex-col items-center justify-center p-10 text-center space-y-4">
-                      <div className="p-6 bg-admin-bg-secondary rounded-none">
+                    <div className="h-full min-h-[400px] border-4 border-dashed border-admin-border-primary rounded-xl flex flex-col items-center justify-center p-10 text-center space-y-4">
+                      <div className="p-6 bg-admin-bg-secondary rounded-xl">
                         <Star className="h-10 w-10 text-admin-text-tertiary" />
                       </div>
                       <div>
@@ -776,11 +776,11 @@ export function CheckoutPageContent() {
                   ) : (
                     <Card
                       variant="glass"
-                      className="border-0 shadow-2xl bg-admin-bg-secondary rounded-none overflow-hidden animate-in fade-in zoom-in-95 duration-500"
+                      className="border-0 shadow-2xl bg-admin-bg-secondary rounded-xl overflow-hidden animate-in fade-in zoom-in-95 duration-500"
                     >
                       <CardHeader className="p-8 border-b border-admin-border-primary bg-admin-bg-secondary">
                         <div className="flex items-center gap-3">
-                          <div className="p-2 bg-admin-accent-primary rounded-none text-[#1A2B23]">
+                          <div className="p-2 bg-admin-accent-primary rounded-xl text-[#1A2B23]">
                             <CreditCard className="h-5 w-5" />
                           </div>
                           <div>
@@ -797,7 +797,7 @@ export function CheckoutPageContent() {
                         {error && (
                           <Alert
                             variant="destructive"
-                            className="mb-6 rounded-none border-none bg-admin-error/10 text-admin-error"
+                            className="mb-6 rounded-xl border-none bg-admin-error/10 text-admin-error"
                           >
                             <AlertCircle className="h-4 w-4" />
                             <AlertDescription className="font-bold">
@@ -806,9 +806,9 @@ export function CheckoutPageContent() {
                           </Alert>
                         )}
 
-                        <div className="p-4 bg-admin-info/10 rounded-none mb-6 flex justify-between items-center border border-admin-info/20">
+                        <div className="p-4 bg-admin-info/10 rounded-xl mb-6 flex justify-between items-center border border-admin-info/20">
                           <div className="flex items-center gap-2">
-                            <div className="w-2 h-2 rounded-none bg-admin-info animate-pulse" />
+                            <div className="w-2 h-2 rounded-xl bg-admin-info animate-pulse" />
                             <span className="text-xs font-bold text-admin-info uppercase tracking-widest">
                               Sesión de pago activa
                             </span>
@@ -818,12 +818,12 @@ export function CheckoutPageContent() {
                           </span>
                         </div>
 
-                        <label className="flex items-center gap-3 mb-6 p-3 rounded-none border border-admin-border-primary bg-admin-bg-secondary cursor-pointer">
+                        <label className="flex items-center gap-3 mb-6 p-3 rounded-xl border border-admin-border-primary bg-admin-bg-secondary cursor-pointer">
                           <input
                             type="checkbox"
                             checked={saveCard}
                             onChange={(e) => setSaveCard(e.target.checked)}
-                            className="rounded-none border-admin-border-primary text-admin-accent-primary focus:ring-admin-accent-primary"
+                            className="rounded-xl border-admin-border-primary text-admin-accent-primary focus:ring-admin-accent-primary"
                           />
                           <span className="text-sm font-medium text-admin-text-primary">
                             Guardar tarjeta para próximos pagos y renovaciones

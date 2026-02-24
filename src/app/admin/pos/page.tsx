@@ -5736,7 +5736,7 @@ export default function POSPage() {
           if (!open) setFiscalReference("");
         }}
       >
-        <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-md rounded-none border-admin-border-primary">
+        <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-md rounded-xl border-admin-border-primary">
           <DialogHeader>
             <DialogTitle className="font-display">Confirmar Venta</DialogTitle>
             <DialogDescription className="text-admin-text-secondary">
@@ -5792,7 +5792,7 @@ export default function POSPage() {
                   placeholder="Ej: Nº boleta, factura o transacción"
                   value={fiscalReference}
                   onChange={(e) => setFiscalReference(e.target.value)}
-                  className="mt-1 rounded-none"
+                  className="mt-1 rounded-xl"
                 />
                 <p className="text-xs text-admin-warning mt-1">
                   Se recomienda registrar el número para trazabilidad con
@@ -5819,14 +5819,14 @@ export default function POSPage() {
               <Button
                 variant="outline"
                 onClick={() => setShowPaymentDialog(false)}
-                className="flex-1 rounded-none"
+                className="flex-1 rounded-xl"
               >
                 Cancelar
               </Button>
               <Button
                 onClick={processPayment}
                 disabled={processingPayment}
-                className="flex-1 rounded-none"
+                className="flex-1 rounded-xl"
               >
                 {processingPayment ? (
                   <>

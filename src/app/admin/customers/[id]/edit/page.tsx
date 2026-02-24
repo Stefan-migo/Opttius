@@ -15,7 +15,7 @@ import {
   error as notifyError,
 } from "@/lib/services/notificationService";
 import { handleApiError } from "@/lib/services/errorService";
-import { formatRUT } from "@/lib/utils/rut";
+import { formatRUT, completeRUTIfNeeded } from "@/lib/utils/rut";
 import { customerService } from "@/lib/api/services";
 
 // Extended Customer interface with all form fields
@@ -85,12 +85,18 @@ export default function CustomerEditPage() {
       const customerData = await customerService.getCustomer(customerId);
 
       // Map customer data to form data
+      // Normalizar RUT: completar DV si falta y formatear para consistencia
+      const rawRut = (customerData.rut || "").trim();
+      const normalizedRut = rawRut
+        ? formatRUT(completeRUTIfNeeded(rawRut) || rawRut)
+        : "";
+
       const formData: FormCustomerData = {
         first_name: customerData.first_name || "",
         last_name: customerData.last_name || "",
         email: customerData.email || "",
         phone: customerData.phone || "",
-        rut: customerData.rut || "",
+        rut: normalizedRut,
         address_line_1: (customerData as any).address_line_1 || "",
         address_line_2: (customerData as any).address_line_2 || "",
         city: (customerData as any).city || "",

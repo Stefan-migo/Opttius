@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/utils/supabase/server";
+import {
+  createClient,
+  createServiceRoleClient,
+} from "@/utils/supabase/server";
 import { appLogger as logger } from "@/lib/logger";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
 
@@ -40,8 +43,11 @@ export async function GET(request: NextRequest) {
       adminUser.role === "dev" ||
       adminUser.role === "super_admin";
 
+    // Use service role to bypass RLS - auth already verified, ensures inactive templates are visible
+    const dbClient = createServiceRoleClient();
+
     // Build the query for system email templates
-    let query = supabase.from("system_email_templates").select(`
+    let query = dbClient.from("system_email_templates").select(`
         id,
         name,
         type,
@@ -89,8 +95,8 @@ export async function GET(request: NextRequest) {
       query = query.eq("type", type);
     }
 
-    // Order by organization_id (to put custom ones first in list) then type
-    const { data: templates, error } = await query
+    // Order by organization_id (to put custom/override first) then type
+    const { data: rawTemplates, error } = await query
       .order("organization_id", { ascending: false, nullsFirst: false })
       .order("type", { ascending: true });
 
@@ -102,7 +108,19 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    return NextResponse.json({ templates: templates || [] });
+    // For org admins: deduplicate by type - org override takes precedence over system template
+    let templates = rawTemplates || [];
+    if (!isGlobalAdmin && adminUser.organization_id) {
+      const byType = new Map<string, (typeof templates)[0]>();
+      for (const t of templates) {
+        if (!byType.has(t.type)) byType.set(t.type, t);
+      }
+      templates = Array.from(byType.values()).sort((a, b) =>
+        (a.type || "").localeCompare(b.type || ""),
+      );
+    }
+
+    return NextResponse.json({ templates });
   } catch (error) {
     logger.error("Error in email templates API", { error });
     return NextResponse.json(
@@ -166,7 +184,12 @@ export async function POST(request: NextRequest) {
       "account_welcome",
       "appointment_confirmation",
       "appointment_reminder",
+      "appointment_reminder_2h",
+      "appointment_cancelation",
+      "appointment_rescheduled",
+      "appointment_follow_up_reminder",
       "prescription_ready",
+      "prescription_expiring",
       "quote_sent",
       "work_order_ready",
       "low_stock_alert",

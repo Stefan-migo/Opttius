@@ -43,7 +43,7 @@ export async function GET(request: NextRequest) {
     // Obtener información completa de la organización
     const { data: organization, error: orgError } = await supabaseServiceRole
       .from("organizations")
-      .select("id, name, slug, logo_url, slogan, subscription_tier, status")
+      .select("id, name, slug, logo_url, slogan, subscription_tier, status, metadata")
       .eq("id", adminUser.organization_id)
       .single();
 
@@ -110,13 +110,23 @@ export async function PATCH(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { name, logo_url, slogan } = body;
+    const { name, logo_url, slogan, metadata } = body;
 
     // Preparar updates
-    const updates: any = {};
+    const updates: Record<string, unknown> = {};
     if (name !== undefined) updates.name = name;
     if (logo_url !== undefined) updates.logo_url = logo_url;
     if (slogan !== undefined) updates.slogan = slogan;
+    if (metadata !== undefined) {
+      const { data: currentOrg } = await supabaseServiceRole
+        .from("organizations")
+        .select("metadata")
+        .eq("id", adminUser.organization_id)
+        .single();
+      const currentMeta =
+        (currentOrg?.metadata as Record<string, unknown>) || {};
+      updates.metadata = { ...currentMeta, ...metadata };
+    }
 
     if (Object.keys(updates).length === 0) {
       return NextResponse.json(
@@ -130,7 +140,7 @@ export async function PATCH(request: NextRequest) {
       .from("organizations")
       .update(updates)
       .eq("id", adminUser.organization_id)
-      .select("id, name, slug, logo_url, slogan, subscription_tier, status")
+      .select("id, name, slug, logo_url, slogan, subscription_tier, status, metadata")
       .single();
 
     if (updateError) {

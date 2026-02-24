@@ -344,7 +344,7 @@ export default function TicketDetailPage() {
     return (
       <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
-          <Card className="border-red-200 rounded-none border">
+          <Card className="border-red-200 rounded-xl border">
             <CardContent className="pt-6">
               <div className="text-center py-8">
                 <XCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
@@ -409,7 +409,7 @@ export default function TicketDetailPage() {
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
             {/* Ticket Details - sin admin-card para evitar hover conflictivo */}
-            <Card className="rounded-none border border-border">
+            <Card className="rounded-xl border border-border">
               <CardHeader>
                 <CardTitle>Detalles del Ticket</CardTitle>
               </CardHeader>
@@ -457,7 +457,7 @@ export default function TicketDetailPage() {
             </Card>
 
             {/* Messages - sin admin-card para evitar contraste en burbujas */}
-            <Card className="rounded-none border border-border">
+            <Card className="rounded-xl border border-border">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <MessageSquare className="h-5 w-5" />
@@ -515,7 +515,7 @@ export default function TicketDetailPage() {
             </Card>
 
             {/* Add Message Form - sin admin-card para evitar contraste en textarea */}
-            <Card className="rounded-none border border-border">
+            <Card className="rounded-xl border border-border">
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle>Responder</CardTitle>
@@ -589,7 +589,7 @@ export default function TicketDetailPage() {
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Quick Actions - sin admin-card para evitar hover conflictivo */}
-            <Card className="rounded-none border border-border">
+            <Card className="rounded-xl border border-border">
               <CardHeader>
                 <CardTitle className="text-lg">Acciones Rápidas</CardTitle>
               </CardHeader>
@@ -614,7 +614,7 @@ export default function TicketDetailPage() {
             </Card>
 
             {/* Ticket Info - sin admin-card para evitar hover conflictivo */}
-            <Card className="rounded-none border border-border">
+            <Card className="rounded-xl border border-border">
               <CardHeader>
                 <CardTitle className="text-lg">Información</CardTitle>
               </CardHeader>

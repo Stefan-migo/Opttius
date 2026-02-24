@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Términos de Uso",
+  title: "Condiciones del Ecosistema Operativo",
   description:
     "Términos de uso del servicio Opttius - Sistema de gestión para ópticas",
 };
@@ -10,72 +10,78 @@ export default function TerminosPage() {
   return (
     <article className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
       <h1 className="text-4xl md:text-5xl font-display font-bold text-epoch-primary tracking-tight mb-4">
-        Términos de Uso
+        Condiciones del Ecosistema Operativo
       </h1>
       <p className="text-epoch-primary/70 font-body text-sm mb-12">
-        Última actualización:{" "}
-        {new Date().toLocaleDateString("es-CL", {
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-        })}
+        Última actualización: 22 de febrero de 2026
       </p>
 
       <div className="prose prose-epoch max-w-none space-y-10 font-body text-epoch-primary/90 leading-relaxed">
         <section>
           <h2 className="text-xl font-display font-bold text-epoch-primary uppercase tracking-wider mb-4">
-            1. Aceptación de los términos
+            1. El Estándar Profesional (Aceptación de los términos)
           </h2>
           <p>
-            Al utilizar Opttius, usted acepta los presentes términos de uso.
-            Opttius es un sistema de gestión diseñado exclusivamente para
-            ópticas y profesionales de la visión. El uso del servicio implica el
-            cumplimiento de estas condiciones.
+            Al acceder a la infraestructura de Opttius, usted ingresa a un
+            sistema operativo diseñado exclusivamente para clínicas
+            oftalmológicas, tecnólogos médicos y negocios ópticos de alto
+            rendimiento. El uso continuo de nuestra plataforma implica la
+            aceptación de estos términos, diseñados para proteger la integridad
+            y la velocidad de sus operaciones diarias.
           </p>
         </section>
 
         <section>
           <h2 className="text-xl font-display font-bold text-epoch-primary uppercase tracking-wider mb-4">
-            2. Descripción del servicio
+            2. Arquitectura del Servicio (Descripción funcional)
           </h2>
           <p>
-            Opttius ofrece gestión integral para ópticas: historial de
-            pacientes, recetas digitales, presupuestos, órdenes de laboratorio,
-            agenda de citas, punto de venta y reportes. El servicio está pensado
-            desde cero para el flujo operativo de una óptica.
+            Opttius no es un CRM genérico; es el motor central de su negocio.
+            Proveemos automatización integral: desde la agudeza visual
+            (historiales clínicos y OD/OS) hasta la facturación, pasando por el
+            control exacto de inventario, trazabilidad de laboratorio y agenda
+            inteligente. Nuestra tecnología está calibrada milimétricamente
+            para el flujo real de una óptica.
           </p>
         </section>
 
         <section>
           <h2 className="text-xl font-display font-bold text-epoch-primary uppercase tracking-wider mb-4">
-            3. Uso responsable
+            3. Integridad y Práctica Clínica (Uso responsable)
           </h2>
           <p>
-            Usted se compromete a utilizar el servicio de forma lícita y a
-            mantener la confidencialidad de los datos de sus pacientes. No está
-            permitido el uso del sistema para fines distintos a la gestión
-            óptica profesional.
+            Como usuario del ecosistema, usted asume la responsabilidad de
+            mantener la confidencialidad absoluta de los historiales de sus
+            pacientes y utilizar la plataforma bajo los más altos estándares
+            éticos y comerciales. Queda estrictamente prohibido el uso de la
+            infraestructura de Opttius para fines ajenos a la gestión óptica
+            profesional o la alteración de flujos de trabajo validados.
           </p>
         </section>
 
         <section>
           <h2 className="text-xl font-display font-bold text-epoch-primary uppercase tracking-wider mb-4">
-            4. Suscripción y facturación
+            4. Escalabilidad y Suscripciones (Facturación clara)
           </h2>
           <p>
-            Los planes de suscripción se facturan según la modalidad contratada.
-            La prueba gratuita no requiere tarjeta de crédito. Puede cancelar su
-            suscripción en cualquier momento desde el panel de administración.
+            Nuestro modelo de negocio es transparente y escalable junto con su
+            óptica. La fase de evaluación inicial (prueba gratuita) se despliega
+            sin fricción y sin requerir tarjeta de crédito. Posteriormente, la
+            facturación se automatiza según el plan contratado, permitiéndole
+            gestionar, actualizar o pausar su suscripción directamente desde su
+            panel de control en cualquier momento.
           </p>
         </section>
 
         <section>
           <h2 className="text-xl font-display font-bold text-epoch-primary uppercase tracking-wider mb-4">
-            5. Contacto
+            5. Soporte y Auditoría Legal (Contacto)
           </h2>
           <p>
-            Para consultas sobre estos términos, utilice los canales de contacto
-            indicados en la página principal de Opttius.
+            Si requiere clarificación técnica o legal sobre estos términos de
+            servicio, nuestro equipo de soporte especializado está disponible.
+            Puede auditar nuestras políticas comunicándose a través de los
+            canales oficiales habilitados en la plataforma de Opttius.
           </p>
         </section>
       </div>

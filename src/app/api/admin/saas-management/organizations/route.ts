@@ -273,7 +273,7 @@ export async function POST(request: NextRequest) {
             "saas_welcome",
             ownerProfile.email,
             {
-              customer_name: ownerProfile.first_name || "Admin",
+              user_name: ownerProfile.first_name || "Admin",
               organization_name: name,
               dashboard_url: `${process.env.NEXT_PUBLIC_APP_URL}/admin`,
             },

@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
 import Image from "next/image";
+import { OpttiusLogoCompact } from "@/components/ui/brand/OpttiusLogo";
 import {
   LayoutDashboard,
   ShoppingCart,
@@ -168,6 +169,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   const { user, profile, loading, signOut } = useAuthContext();
   const { isSuperAdmin, currentBranchId } = useBranch();
   const { isRoot, isLoading: isRootLoading } = useRoot();
+  const { theme } = useTheme();
   const router = useRouter();
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -762,29 +764,26 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
   if (isStillChecking) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-epoch-background relative overflow-hidden">
-        {/* Decorative Background Elements */}
+      <div className="min-h-screen flex items-center justify-center bg-background relative overflow-hidden">
+        {/* Decorative Background Elements - theme-aware */}
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
-          <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-epoch-accent/10 rounded-full blur-[120px] animate-pulse" />
-          <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-epoch-primary/5 rounded-full blur-[120px] animate-pulse delay-700" />
+          <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-accent/10 rounded-full blur-[120px] animate-pulse" />
+          <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-foreground/5 rounded-full blur-[120px] animate-pulse delay-700" />
         </div>
 
         <div className="relative z-10 flex flex-col items-center justify-center space-y-10 animate-in fade-in zoom-in duration-1000">
           <div className="relative group">
-            <div className="absolute inset-0 bg-epoch-accent/20 rounded-none blur-3xl animate-pulse scale-125 opacity-50 group-hover:opacity-100 transition-opacity duration-700" />
-            <Image
-              src="/OpttiusTextCentered.svg"
-              alt="Opttius"
-              width={144}
-              height={112}
-              className="h-28 w-36 relative z-10 transition-transform duration-700 group-hover:scale-105 object-contain"
+            <div className="absolute inset-0 bg-accent/20 rounded-xl blur-3xl animate-pulse scale-125 opacity-50 group-hover:opacity-100 transition-opacity duration-700" />
+            <OpttiusLogoCompact
+              forceLight={theme === "dark"}
+              className="h-28 w-36 relative z-10 transition-transform duration-700 group-hover:scale-105"
             />
           </div>
 
           <div className="flex flex-col items-center space-y-6">
-            <div className="flex items-center gap-4 px-6 py-2 border border-epoch-primary/5 bg-white shadow-sm rounded-none animate-in slide-in-from-bottom-4 duration-1000 delay-300">
-              <Loader2 className="h-4 w-4 animate-spin text-epoch-accent" />
-              <p className="text-[10px] font-display font-bold text-epoch-primary uppercase tracking-[0.4em]">
+            <div className="flex items-center gap-4 px-6 py-2 border border-border bg-card shadow-sm rounded-xl animate-in slide-in-from-bottom-4 duration-1000 delay-300">
+              <Loader2 className="h-4 w-4 animate-spin text-accent" />
+              <p className="text-[10px] font-display font-bold text-foreground uppercase tracking-[0.4em]">
                 {loading
                   ? "Sincronizando Identidad"
                   : adminState.isChecking
@@ -793,7 +792,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
               </p>
             </div>
 
-            <p className="text-[11px] font-serif italic text-epoch-primary/40 text-center uppercase tracking-[0.2em] animate-in fade-in duration-1000 delay-500">
+            <p className="text-[11px] font-serif italic text-muted-foreground text-center uppercase tracking-[0.2em] animate-in fade-in duration-1000 delay-500">
               {user?.email
                 ? `Estableciendo acceso seguro para ${user.email}`
                 : "Estructurando entorno de trabajo..."}
@@ -819,21 +818,25 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     const isRedirectingToOnboarding = user && !adminState.isAdmin;
 
     return (
-      <div className="min-h-screen flex items-center justify-center bg-epoch-background relative overflow-hidden">
+      <div className="min-h-screen flex items-center justify-center bg-background relative overflow-hidden">
         <div className="relative z-10 flex flex-col items-center justify-center space-y-8 animate-in fade-in duration-700">
-          <div className="p-6 bg-epoch-primary/5 border border-epoch-primary/10 rounded-none shadow-premium animate-pulse">
-            <Loader2 className="h-10 w-10 text-epoch-primary animate-spin" />
+          <OpttiusLogoCompact
+            forceLight={theme === "dark"}
+            className="h-20 w-24"
+          />
+          <div className="p-6 bg-muted border border-border rounded-xl shadow-sm animate-pulse">
+            <Loader2 className="h-10 w-10 text-accent animate-spin" />
           </div>
 
           <div className="text-center space-y-3">
-            <h2 className="text-xl font-display font-bold text-epoch-primary uppercase tracking-tighter">
+            <h2 className="text-xl font-display font-bold text-foreground uppercase tracking-tighter">
               {isRedirectingToLogin
                 ? "Redirigiendo"
                 : isRedirectingToOnboarding
                   ? "Completando configuración"
                   : "Redirigiendo"}
             </h2>
-            <p className="text-[11px] font-serif italic text-epoch-primary/50 uppercase tracking-[0.2em]">
+            <p className="text-[11px] font-serif italic text-muted-foreground uppercase tracking-[0.2em]">
               {isRedirectingToLogin
                 ? "Redirigiendo al portal de acceso"
                 : isRedirectingToOnboarding
@@ -842,7 +845,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             </p>
           </div>
 
-          <div className="w-48 h-[1px] bg-epoch-primary/20" />
+          <div className="w-48 h-[1px] bg-border" />
         </div>
       </div>
     );
@@ -973,7 +976,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                     {organizationState.isDemoMode && (
                       <Button
                         onClick={() => router.push("/onboarding/create")}
-                        className="bg-admin-accent-secondary hover:bg-admin-accent-secondary/90 text-[#1A2B23] flex items-center gap-2 font-display font-bold uppercase tracking-widest text-[9px] rounded-none shadow-lg shadow-admin-accent-secondary/10"
+                        className="bg-admin-accent-secondary hover:bg-admin-accent-secondary/90 text-[#1A2B23] flex items-center gap-2 font-display font-bold uppercase tracking-widest text-[9px] rounded-xl shadow-lg shadow-admin-accent-secondary/10"
                         size="sm"
                       >
                         <Sparkles className="h-3.5 w-3.5" />
@@ -1064,14 +1067,21 @@ function AdminSidebar({
       <div className="admin-sidebar-header relative z-10 border-b border-admin-border-primary/10">
         <Link
           href="/"
-          className="admin-sidebar-logo group py-4 px-6 flex items-center justify-center"
+          className="admin-sidebar-logo group py-4 px-6 flex items-center justify-center gap-3"
         >
           <Image
-            src="/OpttiusTextCentered.svg"
+            src="/logo-opttius.svg"
             alt="Opttius"
-            width={160}
-            height={80}
-            className="h-12 w-40 object-contain"
+            width={44}
+            height={44}
+            className="h-10 w-10 flex-shrink-0 object-contain"
+          />
+          <Image
+            src="/logo-text-default.svg"
+            alt="Opttius"
+            width={176}
+            height={40}
+            className="h-9 w-36 object-contain object-left"
           />
         </Link>
       </div>
@@ -1108,7 +1118,7 @@ function AdminSidebar({
                     href={item.href}
                     onClick={onNavigate}
                     className={cn(
-                      "admin-nav-item rounded-none relative group overflow-hidden transition-all duration-300",
+                      "admin-nav-item rounded-xl relative group overflow-hidden transition-all duration-300",
                       isActive
                         ? "active" // Usar la clase definida en globals.css para manejo de colores por CSS variables
                         : "",
@@ -1143,7 +1153,7 @@ function AdminSidebar({
                         {item.badge && (
                           <Badge
                             variant="secondary"
-                            className="admin-sidebar-badge bg-admin-accent-secondary text-[#1A2B23] rounded-none px-1.5 py-0.5 text-[10px] font-display font-black leading-none shadow-[0_2px_4px_rgba(0,0,0,0.2)]"
+                            className="admin-sidebar-badge bg-admin-accent-secondary text-[#1A2B23] rounded-xl px-1.5 py-0.5 text-[10px] font-display font-black leading-none shadow-[0_2px_4px_rgba(0,0,0,0.2)]"
                           >
                             {item.badge}
                           </Badge>
@@ -1160,10 +1170,10 @@ function AdminSidebar({
       {/* User & Footer Section */}
       <div className="mt-auto p-4 space-y-4 border-t border-white/10 bg-black/5">
         {/* User Profile Hookup */}
-        <div className="flex items-center gap-3 p-4 bg-white/5 border border-white/10 rounded-none relative overflow-hidden group">
+        <div className="flex items-center gap-3 p-4 bg-white/5 border border-white/10 rounded-xl relative overflow-hidden group">
           <div className="absolute inset-0 bg-gradient-to-br from-admin-accent-secondary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
-          <div className="h-10 w-10 rounded-none bg-admin-accent-primary/10 border border-admin-accent-secondary/20 flex items-center justify-center text-admin-accent-secondary font-display font-bold relative z-10">
+          <div className="h-10 w-10 rounded-xl bg-admin-accent-primary/10 border border-admin-accent-secondary/20 flex items-center justify-center text-admin-accent-secondary font-display font-bold relative z-10">
             {profile?.first_name?.[0] || user?.email?.[0]?.toUpperCase() || "U"}
           </div>
           <div className="flex-1 min-w-0 relative z-10">
@@ -1184,7 +1194,7 @@ function AdminSidebar({
             <Button
               variant="ghost"
               size="icon-sm"
-              className="rounded-none hover:bg-white/10 text-[#F9F7F2]"
+              className="rounded-xl hover:bg-white/10 text-[#F9F7F2]"
             >
               <User className="h-4 w-4" />
             </Button>
@@ -1197,7 +1207,7 @@ function AdminSidebar({
             <Button
               variant="outline"
               size="sm"
-              className="w-full text-[9px] font-display uppercase tracking-widest gap-1.5 h-9 bg-transparent border-white/20 text-[#F9F7F2] rounded-none"
+              className="w-full text-[9px] font-display uppercase tracking-widest gap-1.5 h-9 bg-transparent border-white/20 text-[#F9F7F2] rounded-xl"
             >
               <HelpCircle className="h-3.5 w-3.5 text-admin-accent-secondary transition-colors" />
               Auxilio
@@ -1207,7 +1217,7 @@ function AdminSidebar({
             variant="outline"
             size="sm"
             onClick={handleSignOut}
-            className="admin-logout-button w-full text-[9px] font-display uppercase tracking-widest gap-1.5 h-9 bg-transparent border-red-300/30 text-red-200 rounded-none"
+            className="admin-logout-button w-full text-[9px] font-display uppercase tracking-widest gap-1.5 h-9 bg-transparent border-red-300/30 text-red-200 rounded-xl"
           >
             <LogOut className="h-3.5 w-3.5 transition-colors" />
             Retiro

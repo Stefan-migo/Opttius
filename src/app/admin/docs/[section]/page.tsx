@@ -34,7 +34,7 @@ export default function DocSectionPage() {
             Volver a Documentación
           </Button>
         </Link>
-        <Card className="rounded-none">
+        <Card className="rounded-xl">
           <CardContent className="py-12 text-center">
             <p className="text-admin-text-tertiary">Sección no encontrada</p>
             <Button asChild className="mt-4">
@@ -49,7 +49,7 @@ export default function DocSectionPage() {
   return (
     <div className="space-y-6">
       <Link href="/admin/docs">
-        <Button variant="ghost" size="sm" className="gap-2 rounded-none">
+        <Button variant="ghost" size="sm" className="gap-2 rounded-xl">
           <ArrowLeft className="h-4 w-4" />
           Volver a Documentación
         </Button>

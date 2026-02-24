@@ -67,7 +67,7 @@ export function DemoModeBanner() {
   }
 
   return (
-    <Alert className="border-admin-accent-secondary/30 bg-admin-bg-secondary/5 mb-6 relative rounded-none overflow-hidden group shadow-xl backdrop-blur-md">
+    <Alert className="border-admin-accent-secondary/30 bg-admin-bg-secondary/5 mb-6 relative rounded-xl overflow-hidden group shadow-xl backdrop-blur-md">
       {/* Decorative background element */}
       <div className="absolute top-0 right-0 p-4 opacity-[0.03] pointer-events-none group-hover:opacity-[0.06] transition-opacity">
         <Sparkles size={80} />
@@ -98,7 +98,7 @@ export function DemoModeBanner() {
             <Button
               onClick={handleActivate}
               size="sm"
-              className="bg-admin-accent-secondary hover:bg-admin-accent-secondary/90 text-[#1A2B23] font-display font-bold rounded-none uppercase tracking-widest text-[9px] h-9 px-4 shadow-lg shadow-admin-accent-secondary/10"
+              className="bg-admin-accent-secondary hover:bg-admin-accent-secondary/90 text-[#1A2B23] font-display font-bold rounded-xl uppercase tracking-widest text-[9px] h-9 px-4 shadow-lg shadow-admin-accent-secondary/10"
             >
               Activar mi Óptica
               <ArrowRight className="ml-2 h-3.5 w-3.5" />
@@ -107,7 +107,7 @@ export function DemoModeBanner() {
               onClick={handleDismiss}
               variant="ghost"
               size="sm"
-              className="text-admin-text-tertiary hover:text-admin-text-primary hover:bg-admin-bg-secondary/10 font-display font-bold rounded-none uppercase tracking-widest text-[9px] h-9"
+              className="text-admin-text-tertiary hover:text-admin-text-primary hover:bg-admin-bg-secondary/10 font-display font-bold rounded-xl uppercase tracking-widest text-[9px] h-9"
             >
               Más tarde
             </Button>
@@ -117,7 +117,7 @@ export function DemoModeBanner() {
             onClick={handleDismiss}
             variant="ghost"
             size="icon"
-            className="h-8 w-8 text-admin-text-tertiary/40 hover:text-admin-error hover:bg-admin-error/5 rounded-none transition-colors"
+            className="h-8 w-8 text-admin-text-tertiary/40 hover:text-admin-error hover:bg-admin-error/5 rounded-xl transition-colors"
           >
             <X className="h-4 w-4" />
           </Button>

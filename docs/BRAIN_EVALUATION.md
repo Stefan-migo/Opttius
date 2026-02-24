@@ -72,10 +72,11 @@ Este documento sirve como la base de conocimiento principal para el "Cerebro" de
 
 ## 🎨 Identidad de Marca (Fuente de Verdad: docs/IDENTITY.md)
 
-- **Arquetipo:** Sistema de última generación con estética sobria y exclusiva. Creado por tecnólogo médico (oftalmología), exclusivo para ópticas.
-- **Paleta oficial:** Sistema **Epoch** (verde bosque #1A2B23, dorado #C5A059, crema #F9F7F2). El Brand Red (#AE0000) en businessConfig es legacy; debe sincronizarse con Epoch.
-- **Tipografía:** font-display (Cinzel), font-cormorant (Cormorant Garamond, reemplazó Malisha 2026-02), font-serif (Playfair Display), font-body (Lato).
-- **Documentos clave:** IDENTITY.md (guía completa), IDENTITY_AUDIT.md (auditoría y mejoras).
+- **Arquetipo (pivote 2026-02-22):** Lujo Tecnológico y Precisión Clínica. Estilo Stripe, Apple, Vercel. Eslogan: "Automatiza. Controla. Crece."
+- **Paleta oficial:** Sistema **Epoch** intacta (verde #1A2B23, dorado #C5A059, crema #F9F7F2). El Brand Red (#AE0000) en businessConfig es legacy; debe sincronizarse con Epoch.
+- **Tipografía:** Geist/Inter/DM Sans (sans-serif geométricas). Cormorant Garamond solo para acentos decorativos mínimos. Eliminadas: Cinzel, Playfair, Lato.
+- **Formas:** rounded-xl / rounded-2xl (eliminado rounded-arch).
+- **Documentos clave:** IDENTITY.md (guía completa), IDENTITY_AUDIT.md (registro del pivote), FRONTEND_IDENTITY.md (implementación técnica).
 
 ## 🎯 Conclusión para NotebookLM
 

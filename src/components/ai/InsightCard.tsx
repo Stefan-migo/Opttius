@@ -99,7 +99,7 @@ export function InsightCard({
     return (
       <div
         className={cn(
-          "relative rounded-none border-l-2 p-2.5 transition-all",
+          "relative rounded-xl border-l-2 p-2.5 transition-all",
           config.bgColor,
           config.borderColor,
         )}
@@ -234,7 +234,7 @@ export function InsightCard({
   return (
     <div
       className={cn(
-        "relative rounded-none border-l-4 p-4 transition-all hover:shadow-md",
+        "relative rounded-xl border-l-4 p-4 transition-all hover:shadow-md",
         config.bgColor,
         config.borderColor,
       )}

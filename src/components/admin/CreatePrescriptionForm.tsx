@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { useSystemConfig } from "@/app/admin/system/hooks/useSystemConfig";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -24,12 +25,24 @@ interface CreatePrescriptionFormProps {
   initialData?: any;
 }
 
+/** Add months to a date string (YYYY-MM-DD), returns YYYY-MM-DD */
+function addMonthsToDate(dateStr: string, months: number): string {
+  const d = new Date(dateStr + "T12:00:00");
+  d.setMonth(d.getMonth() + months);
+  return d.toISOString().split("T")[0];
+}
+
 export default function CreatePrescriptionForm({
   customerId,
   onSuccess,
   onCancel,
   initialData,
 }: CreatePrescriptionFormProps) {
+  const { configs } = useSystemConfig({ branchId: null });
+  const expirationMonths =
+    (configs?.find((c) => c.config_key === "prescription_expiration_months")
+      ?.config_value as number) ?? 6;
+
   const [saving, setSaving] = useState(false);
   const [formData, setFormData] = useState({
     prescription_date:
@@ -95,6 +108,20 @@ export default function CreatePrescriptionForm({
     is_current:
       initialData?.is_current !== undefined ? initialData.is_current : false,
   });
+
+  // Auto-calculate expiration_date when prescription_date changes (from system config)
+  useEffect(() => {
+    if (!formData.prescription_date) return;
+    const expiration = addMonthsToDate(
+      formData.prescription_date,
+      expirationMonths,
+    );
+    setFormData((prev) =>
+      prev.expiration_date !== expiration
+        ? { ...prev, expiration_date: expiration }
+        : prev,
+    );
+  }, [formData.prescription_date, expirationMonths]);
 
   const prescriptionTypes = [
     { value: "single_vision", label: "Visión Simple" },
@@ -230,7 +257,7 @@ export default function CreatePrescriptionForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-6 min-w-0">
       {/* Prescription Header */}
       <Card>
         <CardHeader>
@@ -240,7 +267,7 @@ export default function CreatePrescriptionForm({
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             <div>
               <Label>Fecha de Receta *</Label>
               <Input
@@ -340,7 +367,7 @@ export default function CreatePrescriptionForm({
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             <div>
               <Label>Esfera (SPH)</Label>
               <Input
@@ -431,7 +458,7 @@ export default function CreatePrescriptionForm({
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             <div>
               <Label>Esfera (SPH)</Label>
               <Input
@@ -522,7 +549,7 @@ export default function CreatePrescriptionForm({
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div>
               <Label>PD Lejos (Distancia)</Label>
               <Input
@@ -584,7 +611,7 @@ export default function CreatePrescriptionForm({
           <CardTitle>Recomendaciones de Lente</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             <div>
               <Label>Tipo de Lente</Label>
               <Select
@@ -628,7 +655,7 @@ export default function CreatePrescriptionForm({
           </div>
           <div>
             <Label>Recubrimientos Recomendados</Label>
-            <div className="grid grid-cols-2 gap-2 mt-2">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 mt-2">
               {availableCoatings.map((coating) => {
                 const isSelected = formData.coatings?.includes(coating.value);
                 return (

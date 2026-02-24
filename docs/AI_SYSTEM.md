@@ -2,8 +2,8 @@
 
 **Documento base del módulo de IA** — Chat, Insights y Herramientas para ópticas.
 
-**Versión:** 1.0  
-**Fecha:** 2026-02-21  
+**Versión:** 1.1  
+**Fecha:** 2026-02-23  
 **Skill asociado:** `.cursor/skills/ai-optical-supabase/SKILL.md`
 
 ---
@@ -12,11 +12,13 @@
 
 El sistema de IA de Opttius es un módulo integral que proporciona:
 
-1. **Chat IA**: Asistente conversacional con acceso a datos en tiempo real mediante herramientas (tool calling).
+1. **Chat IA**: Asistente conversacional con acceso a datos en tiempo real mediante herramientas (tool calling). Disponible en **chat web** (admin) y **WhatsApp** (admin o cliente).
 2. **Insights Inteligentes**: Recomendaciones contextuales generadas por LLM, adaptadas a la madurez organizacional.
 3. **Knowledge Base**: RAG (Retrieval Augmented Generation) para documentación del sistema.
 
 Está diseñado específicamente para ópticas: terminología óptica, flujos de laboratorio, prescripciones, inventario de lentes y marcos.
+
+**Canal WhatsApp:** El mismo Agent se reutiliza para WhatsApp. Ver `docs/WHATSAPP_AI_AGENT.md` y `docs/WHATSAPP_AGENT_TRAINING.md`.
 
 ---
 
@@ -108,6 +110,7 @@ Definidas en `src/lib/ai/tools/`:
 - **marketTrendsTools**: analyzeMarketTrends
 - **inventoryTools**: optimizeInventory
 - **recommendationTools**: generateRecommendations
+- **importBulkTools**: analyzeImportFile, executeBulkImport
 
 Cada tool recibe `ToolExecutionContext` (userId, organizationId, supabase, currency, currentBranchId, userData).
 
@@ -254,4 +257,5 @@ AI_FALLBACK_PROVIDERS=google,openai
 
 - Skill: `.cursor/skills/ai-optical-supabase/SKILL.md`
 - Estado: `docs/ai/AI_IMPLEMENTATION_STATUS.md`
-- Repowiki: `.qoder/repowiki/en/content/AI-Powered Insights System/`
+- WhatsApp: `docs/WHATSAPP_AI_AGENT.md`, `docs/WHATSAPP_AGENT_TRAINING.md`
+- Skills WhatsApp: `.cursor/skills/whatsapp-ai-agent-optical/`, `.cursor/skills/whatsapp-agent-training-optical/`

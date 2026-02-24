@@ -177,7 +177,7 @@ export function SmartContextWidget({
             Insights Inteligentes
           </span>
           {hasInsights && (
-            <span className="text-xs bg-epoch-accent text-epoch-surface px-1.5 py-0.5 rounded-none">
+            <span className="text-xs bg-epoch-accent text-epoch-surface px-1.5 py-0.5 rounded-xl">
               {badgeCount}
             </span>
           )}
@@ -279,7 +279,7 @@ export function SmartContextWidget({
 
   if (variant === "embedded") {
     return (
-      <div className="w-full p-0 rounded-none overflow-hidden">
+      <div className="w-full p-0 rounded-xl overflow-hidden">
         {panelContent}
       </div>
     );
@@ -293,7 +293,7 @@ export function SmartContextWidget({
             variant="outline"
             size="sm"
             className={cn(
-              "shadow-xl bg-epoch-background/80 backdrop-blur-md hover:bg-epoch-background border-2 transition-all hover:scale-105 active:scale-95 rounded-none",
+              "shadow-xl bg-epoch-background/80 backdrop-blur-md hover:bg-epoch-background border-2 transition-all hover:scale-105 active:scale-95 rounded-xl",
               hasInsights
                 ? "border-epoch-accent hover:border-epoch-primary"
                 : "border-epoch-primary/30 hover:border-epoch-primary/50",
@@ -317,7 +317,7 @@ export function SmartContextWidget({
                   : "Insights"}
             </span>
             {hasInsights && (
-              <span className="ml-2 text-[10px] bg-epoch-accent text-epoch-surface px-1.5 py-0.5 rounded-none font-black">
+              <span className="ml-2 text-[10px] bg-epoch-accent text-epoch-surface px-1.5 py-0.5 rounded-xl font-black">
                 {badgeCount}
               </span>
             )}
@@ -329,7 +329,7 @@ export function SmartContextWidget({
           </Button>
         </PopoverTrigger>
         <PopoverContent
-          className="w-96 max-w-[calc(100vw-2rem)] p-0 shadow-2xl border-epoch-primary/20 rounded-none overflow-hidden"
+          className="w-96 max-w-[calc(100vw-2rem)] p-0 shadow-2xl border-epoch-primary/20 rounded-xl overflow-hidden"
           align="start"
           side="top"
           sideOffset={10}

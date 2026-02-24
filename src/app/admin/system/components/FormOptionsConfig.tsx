@@ -49,6 +49,11 @@ const FORM_TYPES = [
     label: "Presupuestos",
     description: "Opciones de lentes y presbicia",
   },
+  {
+    value: "prescription",
+    label: "Recetas",
+    description: "Opciones del formulario de recetas (tipo, material, etc.)",
+  },
   { value: "pos", label: "POS", description: "Opciones del punto de venta" },
   {
     value: "global",
@@ -283,8 +288,8 @@ export default function FormOptionsConfig() {
     return (
       <div className="space-y-4">
         <div className="animate-pulse space-y-4">
-          <div className="h-8 bg-admin-border-primary/30 rounded-none w-64" />
-          <div className="h-32 bg-admin-border-primary/20 rounded-none" />
+          <div className="h-8 bg-admin-border-primary/30 rounded-xl w-64" />
+          <div className="h-32 bg-admin-border-primary/20 rounded-xl" />
         </div>
       </div>
     );
@@ -308,10 +313,10 @@ export default function FormOptionsConfig() {
             Formulario
           </Label>
           <Select value={selectedFormType} onValueChange={setSelectedFormType}>
-            <SelectTrigger className="h-11 bg-admin-bg-tertiary border-admin-border-primary/10 rounded-none font-display text-[10px] tracking-widest uppercase">
+            <SelectTrigger className="h-11 bg-admin-bg-tertiary border-admin-border-primary/10 rounded-xl font-display text-[10px] tracking-widest uppercase">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent className="rounded-none border-admin-border-primary/20">
+            <SelectContent className="rounded-xl border-admin-border-primary/20">
               {FORM_TYPES.map((ft) => (
                 <SelectItem
                   key={ft.value}
@@ -326,7 +331,7 @@ export default function FormOptionsConfig() {
         </div>
       </div>
 
-      <Card className="bg-admin-bg-tertiary border border-admin-border-primary/20 rounded-none shadow-[0_1px_3px_rgba(0,0,0,0.08)]">
+      <Card className="bg-admin-bg-tertiary border border-admin-border-primary/20 rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.08)]">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-lg font-display font-bold text-admin-text-primary uppercase tracking-tight">
             <FileText className="h-5 w-5 text-admin-accent-primary" />
@@ -345,7 +350,7 @@ export default function FormOptionsConfig() {
             currentFields.map((field) => (
               <div
                 key={field.id}
-                className="border border-admin-border-primary/20 rounded-none p-4 bg-admin-bg-primary/50"
+                className="border border-admin-border-primary/20 rounded-xl p-4 bg-admin-bg-primary/50"
               >
                 <div className="flex justify-between items-start mb-3">
                   <div>
@@ -354,13 +359,13 @@ export default function FormOptionsConfig() {
                     </h3>
                     <p className="text-[11px] font-serif italic text-admin-text-tertiary mt-1">
                       Campo:{" "}
-                      <code className="bg-admin-bg-tertiary border border-admin-border-primary/10 px-1.5 py-0.5 rounded-none text-admin-text-secondary font-display text-[10px]">
+                      <code className="bg-admin-bg-tertiary border border-admin-border-primary/10 px-1.5 py-0.5 rounded-xl text-admin-text-secondary font-display text-[10px]">
                         {field.field_key}
                       </code>
                       {field.is_array && (
                         <Badge
                           variant="secondary"
-                          className="ml-2 rounded-none text-[9px] font-display font-bold uppercase tracking-wider border-admin-border-primary/20"
+                          className="ml-2 rounded-xl text-[9px] font-display font-bold uppercase tracking-wider border-admin-border-primary/20"
                         >
                           Múltiples valores
                         </Badge>
@@ -370,7 +375,7 @@ export default function FormOptionsConfig() {
                   <Button
                     size="sm"
                     onClick={() => openAddDialog(field)}
-                    className="flex items-center gap-2 h-9 rounded-none border-admin-border-primary/20 font-display font-bold text-[10px] tracking-widest uppercase bg-admin-accent-primary hover:bg-admin-accent-secondary text-[#1A2B23]"
+                    className="flex items-center gap-2 h-9 rounded-xl border-admin-border-primary/20 font-display font-bold text-[10px] tracking-widest uppercase bg-admin-accent-primary hover:bg-admin-accent-secondary text-[#1A2B23]"
                   >
                     <Plus className="h-4 w-4" />
                     Agregar Opción
@@ -382,7 +387,7 @@ export default function FormOptionsConfig() {
                     field.values.map((value) => (
                       <div
                         key={value.id}
-                        className={`flex items-center justify-between p-3 rounded-none border border-admin-border-primary/20 ${
+                        className={`flex items-center justify-between p-3 rounded-xl border border-admin-border-primary/20 ${
                           !value.is_active
                             ? "bg-admin-bg-tertiary/50 opacity-60"
                             : "bg-admin-bg-tertiary"
@@ -393,18 +398,18 @@ export default function FormOptionsConfig() {
                           <span className="font-display font-bold text-admin-text-primary text-sm uppercase tracking-tight">
                             {value.label}
                           </span>
-                          <code className="text-[10px] bg-admin-bg-primary/50 border border-admin-border-primary/10 px-1.5 py-0.5 rounded-none text-admin-text-secondary font-display">
+                          <code className="text-[10px] bg-admin-bg-primary/50 border border-admin-border-primary/10 px-1.5 py-0.5 rounded-xl text-admin-text-secondary font-display">
                             {value.value}
                           </code>
                           {value.is_default && (
-                            <Badge className="text-[9px] font-display font-bold uppercase tracking-wider rounded-none bg-admin-accent-primary/20 text-admin-accent-primary border border-admin-accent-primary/30">
+                            <Badge className="text-[9px] font-display font-bold uppercase tracking-wider rounded-xl bg-admin-accent-primary/20 text-admin-accent-primary border border-admin-accent-primary/30">
                               Por defecto
                             </Badge>
                           )}
                           {!value.is_active && (
                             <Badge
                               variant="secondary"
-                              className="text-[9px] font-display font-bold uppercase rounded-none border-admin-border-primary/20 text-admin-text-tertiary"
+                              className="text-[9px] font-display font-bold uppercase rounded-xl border-admin-border-primary/20 text-admin-text-tertiary"
                             >
                               Inactivo
                             </Badge>
@@ -416,7 +421,7 @@ export default function FormOptionsConfig() {
                             variant="ghost"
                             onClick={() => handleToggleValueActive(value)}
                             title={value.is_active ? "Desactivar" : "Activar"}
-                            className="text-admin-text-tertiary hover:text-admin-text-primary hover:bg-admin-accent-primary/10 rounded-none h-8 w-8 p-0"
+                            className="text-admin-text-tertiary hover:text-admin-text-primary hover:bg-admin-accent-primary/10 rounded-xl h-8 w-8 p-0"
                           >
                             {value.is_active ? (
                               <Eye className="h-4 w-4" />
@@ -428,7 +433,7 @@ export default function FormOptionsConfig() {
                             size="sm"
                             variant="ghost"
                             onClick={() => openEditDialog(value)}
-                            className="text-admin-text-tertiary hover:text-admin-text-primary hover:bg-admin-accent-primary/10 rounded-none h-8 w-8 p-0"
+                            className="text-admin-text-tertiary hover:text-admin-text-primary hover:bg-admin-accent-primary/10 rounded-xl h-8 w-8 p-0"
                           >
                             <Edit2 className="h-4 w-4" />
                           </Button>
@@ -436,7 +441,7 @@ export default function FormOptionsConfig() {
                             size="sm"
                             variant="ghost"
                             onClick={() => handleDeleteValue(value)}
-                            className="text-admin-error hover:text-admin-error hover:bg-admin-error/10 rounded-none h-8 w-8 p-0"
+                            className="text-admin-error hover:text-admin-error hover:bg-admin-error/10 rounded-xl h-8 w-8 p-0"
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
@@ -457,7 +462,7 @@ export default function FormOptionsConfig() {
 
       {/* Add Value Dialog */}
       <Dialog open={showAddValueDialog} onOpenChange={setShowAddValueDialog}>
-        <DialogContent className="rounded-none border-admin-border-primary/20 bg-admin-bg-primary">
+        <DialogContent className="rounded-xl border-admin-border-primary/20 bg-admin-bg-primary">
           <DialogHeader>
             <DialogTitle className="text-xl font-display font-bold text-admin-text-primary uppercase tracking-tight">
               Agregar Nueva Opción
@@ -487,7 +492,7 @@ export default function FormOptionsConfig() {
                   })
                 }
                 placeholder="Ej: nuevo_tipo"
-                className="h-11 bg-admin-bg-tertiary border-admin-border-primary/10 rounded-none font-display text-sm"
+                className="h-11 bg-admin-bg-tertiary border-admin-border-primary/10 rounded-xl font-display text-sm"
               />
             </div>
             <div>
@@ -504,7 +509,7 @@ export default function FormOptionsConfig() {
                   setNewValue({ ...newValue, label: e.target.value })
                 }
                 placeholder="Ej: Nuevo Tipo"
-                className="h-11 bg-admin-bg-tertiary border-admin-border-primary/10 rounded-none font-display text-sm"
+                className="h-11 bg-admin-bg-tertiary border-admin-border-primary/10 rounded-xl font-display text-sm"
               />
             </div>
             <div className="flex items-center space-x-2">
@@ -529,13 +534,13 @@ export default function FormOptionsConfig() {
             <Button
               variant="outline"
               onClick={() => setShowAddValueDialog(false)}
-              className="rounded-none border-admin-border-primary/20 font-display font-bold text-[10px] tracking-widest uppercase"
+              className="rounded-xl border-admin-border-primary/20 font-display font-bold text-[10px] tracking-widest uppercase"
             >
               Cancelar
             </Button>
             <Button
               onClick={handleAddValue}
-              className="rounded-none bg-admin-accent-primary hover:bg-admin-accent-secondary text-[#1A2B23] font-display font-bold text-[10px] tracking-widest uppercase"
+              className="rounded-xl bg-admin-accent-primary hover:bg-admin-accent-secondary text-[#1A2B23] font-display font-bold text-[10px] tracking-widest uppercase"
             >
               Agregar
             </Button>
@@ -545,7 +550,7 @@ export default function FormOptionsConfig() {
 
       {/* Edit Value Dialog */}
       <Dialog open={showEditValueDialog} onOpenChange={setShowEditValueDialog}>
-        <DialogContent className="rounded-none border-admin-border-primary/20 bg-admin-bg-primary">
+        <DialogContent className="rounded-xl border-admin-border-primary/20 bg-admin-bg-primary">
           <DialogHeader>
             <DialogTitle className="text-xl font-display font-bold text-admin-text-primary uppercase tracking-tight">
               Editar Opción
@@ -566,7 +571,7 @@ export default function FormOptionsConfig() {
                 id="edit_value"
                 value={newValue.value}
                 disabled
-                className="h-11 bg-admin-bg-tertiary border-admin-border-primary/10 rounded-none font-display text-sm text-admin-text-tertiary"
+                className="h-11 bg-admin-bg-tertiary border-admin-border-primary/10 rounded-xl font-display text-sm text-admin-text-tertiary"
               />
               <p className="text-[11px] font-serif italic text-admin-text-tertiary mt-1">
                 El valor no se puede modificar
@@ -586,7 +591,7 @@ export default function FormOptionsConfig() {
                   setNewValue({ ...newValue, label: e.target.value })
                 }
                 placeholder="Ej: Nuevo Tipo"
-                className="h-11 bg-admin-bg-tertiary border-admin-border-primary/10 rounded-none font-display text-sm"
+                className="h-11 bg-admin-bg-tertiary border-admin-border-primary/10 rounded-xl font-display text-sm"
               />
             </div>
             <div className="flex items-center space-x-2">
@@ -611,13 +616,13 @@ export default function FormOptionsConfig() {
             <Button
               variant="outline"
               onClick={() => setShowEditValueDialog(false)}
-              className="rounded-none border-admin-border-primary/20 font-display font-bold text-[10px] tracking-widest uppercase"
+              className="rounded-xl border-admin-border-primary/20 font-display font-bold text-[10px] tracking-widest uppercase"
             >
               Cancelar
             </Button>
             <Button
               onClick={handleEditValue}
-              className="rounded-none bg-admin-accent-primary hover:bg-admin-accent-secondary text-[#1A2B23] font-display font-bold text-[10px] tracking-widest uppercase"
+              className="rounded-xl bg-admin-accent-primary hover:bg-admin-accent-secondary text-[#1A2B23] font-display font-bold text-[10px] tracking-widest uppercase"
             >
               Guardar Cambios
             </Button>

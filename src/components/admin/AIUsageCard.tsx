@@ -80,7 +80,7 @@ export function AIUsageCard() {
 
   if (loading && !data) {
     return (
-      <Card className="rounded-none border-epoch-primary/20">
+      <Card className="rounded-xl border-epoch-primary/20">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-epoch-primary">
             <Cpu className="h-5 w-5" />
@@ -98,7 +98,7 @@ export function AIUsageCard() {
   }
 
   return (
-    <Card className="rounded-none border-epoch-primary/20">
+    <Card className="rounded-xl border-epoch-primary/20">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="flex items-center gap-2 text-epoch-primary">
           <Cpu className="h-5 w-5" />
@@ -129,7 +129,7 @@ export function AIUsageCard() {
         {data && !error && (
           <>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-              <div className="rounded-none border border-epoch-primary/20 p-3">
+              <div className="rounded-xl border border-epoch-primary/20 p-3">
                 <div className="flex items-center gap-2 text-muted-foreground text-xs">
                   <Zap className="h-4 w-4" />
                   Total tokens
@@ -138,7 +138,7 @@ export function AIUsageCard() {
                   {data.summary.totalTokens.toLocaleString()}
                 </div>
               </div>
-              <div className="rounded-none border border-epoch-primary/20 p-3">
+              <div className="rounded-xl border border-epoch-primary/20 p-3">
                 <div className="flex items-center gap-2 text-muted-foreground text-xs">
                   <DollarSign className="h-4 w-4" />
                   Coste estimado
@@ -147,13 +147,13 @@ export function AIUsageCard() {
                   ${data.summary.estimatedCostUsd.toFixed(4)}
                 </div>
               </div>
-              <div className="rounded-none border border-epoch-primary/20 p-3">
+              <div className="rounded-xl border border-epoch-primary/20 p-3">
                 <div className="text-muted-foreground text-xs">Llamadas</div>
                 <div className="text-lg font-semibold text-epoch-primary mt-1">
                   {data.summary.requestCount}
                 </div>
               </div>
-              <div className="rounded-none border border-epoch-primary/20 p-3">
+              <div className="rounded-xl border border-epoch-primary/20 p-3">
                 <div className="text-muted-foreground text-xs">
                   Input tokens
                 </div>

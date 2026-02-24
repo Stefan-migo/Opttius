@@ -1,3 +1,4 @@
+import { createServiceRoleClient } from "@/utils/supabase/server";
 import { sendEmail } from "./client";
 import { loadEmailTemplate, incrementTemplateUsage } from "./template-loader";
 import {
@@ -6,23 +7,42 @@ import {
   formatOrderItemsText,
   getDefaultVariables,
 } from "./template-utils";
-import { ARGENTINA_PAYMENT_LABELS } from "@/lib/mercadopago";
-import { createServiceRoleClient } from "@/utils/supabase/server";
+import { getOrganizationInfoWithFallbacks } from "./org-utils";
 
-// Helper function to format currency
-function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat("es-AR", {
+/** Etiquetas legibles para métodos de pago (POS y e-commerce) */
+const PAYMENT_METHOD_LABELS: Record<string, string> = {
+  cash: "Efectivo",
+  card: "Tarjeta",
+  credit: "Crédito",
+  debit: "Débito",
+  debit_card: "Tarjeta de Débito",
+  credit_card: "Tarjeta de Crédito",
+  deposit: "Depósito",
+  transfer: "Transferencia",
+  check: "Cheque",
+  installments: "Cuotas",
+  manual: "Manual",
+  MercadoPago: "Mercado Pago",
+  mercadopago: "Mercado Pago",
+  "n/a": "N/A",
+};
+
+// Helper function to format currency (default CLP for Chile/óptica)
+function formatCurrency(amount: number, currency = "CLP"): string {
+  return new Intl.NumberFormat("es-CL", {
     style: "currency",
-    currency: "ARS",
+    currency,
   }).format(amount);
 }
 
 // Helper function to get payment method label
 function getPaymentMethodLabel(paymentMethod: string): string {
+  if (!paymentMethod?.trim()) return "N/A";
+  const key = paymentMethod.toLowerCase().replace(/\s+/g, "_");
   return (
-    ARGENTINA_PAYMENT_LABELS[
-      paymentMethod as keyof typeof ARGENTINA_PAYMENT_LABELS
-    ] || paymentMethod
+    PAYMENT_METHOD_LABELS[paymentMethod] ||
+    PAYMENT_METHOD_LABELS[key] ||
+    paymentMethod
   );
 }
 
@@ -43,6 +63,7 @@ export interface Order {
   customer_name: string;
   items: OrderItem[];
   total_amount: number;
+  currency?: string;
   payment_method: string;
   status: string;
   created_at: string;
@@ -59,34 +80,13 @@ export interface Order {
 
 // Notification service class
 export class EmailNotificationService {
-  /**
-   * Helper to get organization info for email branding
-   */
-  private static async getOrganizationInfo(organizationId?: string) {
-    if (!organizationId) return null;
-
-    try {
-      const supabase = createServiceRoleClient();
-      const { data: org } = await supabase
-        .from("organizations")
-        .select("name, metadata")
-        .eq("id", organizationId)
-        .single();
-
-      return org;
-    } catch (error) {
-      console.error("Error fetching organization info for email:", error);
-      return null;
-    }
-  }
-
   // Send order confirmation email using DB template
   static async sendOrderConfirmation(
     order: Order & { organization_id?: string },
   ): Promise<{ success: boolean; error?: string }> {
     try {
       const organizationId = order.organization_id;
-      const orgInfo = await this.getOrganizationInfo(organizationId);
+      const orgInfo = await getOrganizationInfoWithFallbacks(organizationId);
 
       const template = await loadEmailTemplate(
         "order_confirmation",
@@ -106,7 +106,7 @@ export class EmailNotificationService {
         return { success: false, error: "No customer email found" };
       }
 
-      const orderDate = new Date(order.created_at).toLocaleDateString("es-AR", {
+      const orderDate = new Date(order.created_at).toLocaleDateString("es-CL", {
         year: "numeric",
         month: "long",
         day: "numeric",
@@ -114,18 +114,19 @@ export class EmailNotificationService {
         minute: "2-digit",
       });
 
-      const orderItemsHTML = formatOrderItemsHTML(order.items);
-      const orderItemsText = formatOrderItemsText(order.items);
+      const orderCurrency = order.currency || "CLP";
+      const orderItemsHTML = formatOrderItemsHTML(order.items, orderCurrency);
+      const orderItemsText = formatOrderItemsText(order.items, orderCurrency);
 
       const variables = {
         ...getDefaultVariables({
-          name: orgInfo?.name,
-          support_email: orgInfo?.metadata?.support_email,
+          name: orgInfo?.name ?? undefined,
+          support_email: orgInfo?.resolvedSupportEmail ?? undefined,
         }),
         customer_name: order.customer_name || "Cliente",
         order_number: order.order_number,
         order_date: orderDate,
-        order_total: formatCurrency(order.total_amount),
+        order_total: formatCurrency(order.total_amount, order.currency),
         order_items: orderItemsHTML,
         payment_method: getPaymentMethodLabel(order.payment_method),
         order_items_text: orderItemsText,
@@ -140,7 +141,10 @@ export class EmailNotificationService {
       const { wrapInModernLayout } = await import("./layout");
       html = wrapInModernLayout(html, {
         organizationName: orgInfo?.name || "Nuestra Óptica",
-        organizationColor: orgInfo?.metadata?.primary_color || "#1e40af",
+        organizationColor:
+          typeof orgInfo?.metadata?.primary_color === "string"
+            ? orgInfo.metadata.primary_color
+            : "#1e40af",
         previewText: `Confirmación de tu orden ${order.order_number}`,
       });
 
@@ -156,7 +160,8 @@ export class EmailNotificationService {
         subject,
         html,
         text,
-        replyTo: orgInfo?.metadata?.support_email,
+        replyTo: orgInfo?.resolvedSupportEmail,
+        fromDisplayName: orgInfo?.resolvedDisplayName,
       });
 
       if (result.success) {
@@ -179,7 +184,7 @@ export class EmailNotificationService {
     organizationId?: string,
   ): Promise<{ success: boolean; error?: string }> {
     try {
-      const orgInfo = await this.getOrganizationInfo(organizationId);
+      const orgInfo = await getOrganizationInfoWithFallbacks(organizationId);
       const template = await loadEmailTemplate(
         "appointment_confirmation",
         true,
@@ -190,8 +195,8 @@ export class EmailNotificationService {
 
       const variables = {
         ...getDefaultVariables({
-          name: orgInfo?.name,
-          support_email: orgInfo?.metadata?.support_email,
+          name: orgInfo?.name ?? undefined,
+          support_email: orgInfo?.resolvedSupportEmail ?? undefined,
         }),
         customer_name: appointment.customer_name || "Paciente",
         appointment_date: appointment.date,
@@ -208,7 +213,10 @@ export class EmailNotificationService {
       const { wrapInModernLayout } = await import("./layout");
       html = wrapInModernLayout(html, {
         organizationName: orgInfo?.name || "Nuestra Óptica",
-        organizationColor: orgInfo?.metadata?.primary_color || "#1e40af",
+        organizationColor:
+          typeof orgInfo?.metadata?.primary_color === "string"
+            ? orgInfo.metadata.primary_color
+            : "#1e40af",
         previewText: `Tu cita ha sido confirmada para el ${appointment.date}`,
       });
 
@@ -216,7 +224,8 @@ export class EmailNotificationService {
         to: appointment.customer_email,
         subject,
         html,
-        replyTo: orgInfo?.metadata?.support_email,
+        replyTo: orgInfo?.resolvedSupportEmail,
+        fromDisplayName: orgInfo?.resolvedDisplayName,
       });
     } catch (error) {
       console.error("Error sending appointment confirmation:", error);
@@ -230,7 +239,7 @@ export class EmailNotificationService {
     organizationId?: string,
   ): Promise<{ success: boolean; error?: string }> {
     try {
-      const orgInfo = await this.getOrganizationInfo(organizationId);
+      const orgInfo = await getOrganizationInfoWithFallbacks(organizationId);
       const template = await loadEmailTemplate(
         "appointment_reminder",
         true,
@@ -241,8 +250,8 @@ export class EmailNotificationService {
 
       const variables = {
         ...getDefaultVariables({
-          name: orgInfo?.name,
-          support_email: orgInfo?.metadata?.support_email,
+          name: orgInfo?.name ?? undefined,
+          support_email: orgInfo?.resolvedSupportEmail ?? undefined,
         }),
         customer_name: appointment.customer_name || "Paciente",
         appointment_date: appointment.date,
@@ -257,7 +266,10 @@ export class EmailNotificationService {
       const { wrapInModernLayout } = await import("./layout");
       html = wrapInModernLayout(html, {
         organizationName: orgInfo?.name || "Nuestra Óptica",
-        organizationColor: orgInfo?.metadata?.primary_color || "#1e40af",
+        organizationColor:
+          typeof orgInfo?.metadata?.primary_color === "string"
+            ? orgInfo.metadata.primary_color
+            : "#1e40af",
         previewText: `Recordatorio: Tienes una cita mañana a las ${appointment.time}`,
       });
 
@@ -265,7 +277,8 @@ export class EmailNotificationService {
         to: appointment.customer_email,
         subject,
         html,
-        replyTo: orgInfo?.metadata?.support_email,
+        replyTo: orgInfo?.resolvedSupportEmail,
+        fromDisplayName: orgInfo?.resolvedDisplayName,
       });
     } catch (error) {
       console.error("Error sending appointment reminder:", error);
@@ -279,7 +292,7 @@ export class EmailNotificationService {
     organizationId?: string,
   ): Promise<{ success: boolean; error?: string }> {
     try {
-      const orgInfo = await this.getOrganizationInfo(organizationId);
+      const orgInfo = await getOrganizationInfoWithFallbacks(organizationId);
       const template = await loadEmailTemplate(
         "quote_sent",
         true,
@@ -290,8 +303,8 @@ export class EmailNotificationService {
 
       const variables = {
         ...getDefaultVariables({
-          name: orgInfo?.name,
-          support_email: orgInfo?.metadata?.support_email,
+          name: orgInfo?.name ?? undefined,
+          support_email: orgInfo?.resolvedSupportEmail ?? undefined,
         }),
         customer_name: quote.customer_name || "Cliente",
         quote_number: quote.quote_number,
@@ -308,7 +321,10 @@ export class EmailNotificationService {
       const { wrapInModernLayout } = await import("./layout");
       html = wrapInModernLayout(html, {
         organizationName: orgInfo?.name || "Nuestra Óptica",
-        organizationColor: orgInfo?.metadata?.primary_color || "#1e40af",
+        organizationColor:
+          typeof orgInfo?.metadata?.primary_color === "string"
+            ? orgInfo.metadata.primary_color
+            : "#1e40af",
         previewText: `Presupuesto disponible #${quote.quote_number}`,
       });
 
@@ -316,7 +332,8 @@ export class EmailNotificationService {
         to: quote.customer_email,
         subject,
         html,
-        replyTo: orgInfo?.metadata?.support_email,
+        replyTo: orgInfo?.resolvedSupportEmail,
+        fromDisplayName: orgInfo?.resolvedDisplayName,
       });
     } catch (error) {
       console.error("Error sending quote email:", error);
@@ -330,7 +347,7 @@ export class EmailNotificationService {
     organizationId?: string,
   ): Promise<{ success: boolean; error?: string }> {
     try {
-      const orgInfo = await this.getOrganizationInfo(organizationId);
+      const orgInfo = await getOrganizationInfoWithFallbacks(organizationId);
       const template = await loadEmailTemplate(
         "work_order_ready",
         true,
@@ -341,8 +358,8 @@ export class EmailNotificationService {
 
       const variables = {
         ...getDefaultVariables({
-          name: orgInfo?.name,
-          support_email: orgInfo?.metadata?.support_email,
+          name: orgInfo?.name ?? undefined,
+          support_email: orgInfo?.resolvedSupportEmail ?? undefined,
         }),
         customer_name: workOrder.customer_name || "Cliente",
         work_order_number: workOrder.work_order_number,
@@ -355,7 +372,10 @@ export class EmailNotificationService {
       const { wrapInModernLayout } = await import("./layout");
       html = wrapInModernLayout(html, {
         organizationName: orgInfo?.name || "Nuestra Óptica",
-        organizationColor: orgInfo?.metadata?.primary_color || "#1e40af",
+        organizationColor:
+          typeof orgInfo?.metadata?.primary_color === "string"
+            ? orgInfo.metadata.primary_color
+            : "#1e40af",
         previewText: `Tu trabajo #${workOrder.work_order_number} está listo para retirar`,
       });
 
@@ -363,7 +383,8 @@ export class EmailNotificationService {
         to: workOrder.customer_email,
         subject,
         html,
-        replyTo: orgInfo?.metadata?.support_email,
+        replyTo: orgInfo?.resolvedSupportEmail,
+        fromDisplayName: orgInfo?.resolvedDisplayName,
       });
     } catch (error) {
       console.error("Error sending work order email:", error);
@@ -377,7 +398,7 @@ export class EmailNotificationService {
     organizationId?: string,
   ): Promise<{ success: boolean; error?: string }> {
     try {
-      const orgInfo = await this.getOrganizationInfo(organizationId);
+      const orgInfo = await getOrganizationInfoWithFallbacks(organizationId);
       const template = await loadEmailTemplate(
         "prescription_ready",
         true,
@@ -388,8 +409,8 @@ export class EmailNotificationService {
 
       const variables = {
         ...getDefaultVariables({
-          name: orgInfo?.name,
-          support_email: orgInfo?.metadata?.support_email,
+          name: orgInfo?.name ?? undefined,
+          support_email: orgInfo?.resolvedSupportEmail ?? undefined,
         }),
         customer_name: prescription.customer_name || "Cliente",
         prescription_date: prescription.date,
@@ -402,7 +423,10 @@ export class EmailNotificationService {
       const { wrapInModernLayout } = await import("./layout");
       html = wrapInModernLayout(html, {
         organizationName: orgInfo?.name || "Nuestra Óptica",
-        organizationColor: orgInfo?.metadata?.primary_color || "#1e40af",
+        organizationColor:
+          typeof orgInfo?.metadata?.primary_color === "string"
+            ? orgInfo.metadata.primary_color
+            : "#1e40af",
         previewText: `Tu receta de fecha ${prescription.date} está disponible`,
       });
 
@@ -410,7 +434,8 @@ export class EmailNotificationService {
         to: prescription.customer_email,
         subject,
         html,
-        replyTo: orgInfo?.metadata?.support_email,
+        replyTo: orgInfo?.resolvedSupportEmail,
+        fromDisplayName: orgInfo?.resolvedDisplayName,
       });
     } catch (error) {
       console.error("Error sending prescription email:", error);
@@ -424,7 +449,7 @@ export class EmailNotificationService {
   ): Promise<{ success: boolean; error?: string }> {
     try {
       const organizationId = order.organization_id;
-      const orgInfo = await this.getOrganizationInfo(organizationId);
+      const orgInfo = await getOrganizationInfoWithFallbacks(organizationId);
 
       const template = await loadEmailTemplate(
         "order_shipped",
@@ -457,8 +482,8 @@ export class EmailNotificationService {
 
       const variables = {
         ...getDefaultVariables({
-          name: orgInfo?.name,
-          support_email: orgInfo?.metadata?.support_email,
+          name: orgInfo?.name ?? undefined,
+          support_email: orgInfo?.resolvedSupportEmail ?? undefined,
         }),
         customer_name: customerName,
         order_number: order.order_number,
@@ -478,7 +503,10 @@ export class EmailNotificationService {
       const { wrapInModernLayout } = await import("./layout");
       html = wrapInModernLayout(html, {
         organizationName: orgInfo?.name || "Nuestra Óptica",
-        organizationColor: orgInfo?.metadata?.primary_color || "#1e40af",
+        organizationColor:
+          typeof orgInfo?.metadata?.primary_color === "string"
+            ? orgInfo.metadata.primary_color
+            : "#1e40af",
         previewText: `Tu orden ${order.order_number} está en camino`,
       });
 
@@ -493,7 +521,8 @@ export class EmailNotificationService {
         subject,
         html,
         text,
-        replyTo: orgInfo?.metadata?.support_email,
+        replyTo: orgInfo?.resolvedSupportEmail,
+        fromDisplayName: orgInfo?.resolvedDisplayName,
       });
 
       if (result.success) {
@@ -516,7 +545,7 @@ export class EmailNotificationService {
   ): Promise<{ success: boolean; error?: string }> {
     try {
       const organizationId = order.organization_id;
-      const orgInfo = await this.getOrganizationInfo(organizationId);
+      const orgInfo = await getOrganizationInfoWithFallbacks(organizationId);
 
       const template = await loadEmailTemplate(
         "order_delivered",
@@ -542,8 +571,8 @@ export class EmailNotificationService {
 
       const variables = {
         ...getDefaultVariables({
-          name: orgInfo?.name,
-          support_email: orgInfo?.metadata?.support_email,
+          name: orgInfo?.name ?? undefined,
+          support_email: orgInfo?.resolvedSupportEmail ?? undefined,
         }),
         customer_name: customerName,
         order_number: order.order_number,
@@ -567,7 +596,10 @@ export class EmailNotificationService {
       const { wrapInModernLayout } = await import("./layout");
       html = wrapInModernLayout(html, {
         organizationName: orgInfo?.name || "Nuestra Óptica",
-        organizationColor: orgInfo?.metadata?.primary_color || "#1e40af",
+        organizationColor:
+          typeof orgInfo?.metadata?.primary_color === "string"
+            ? orgInfo.metadata.primary_color
+            : "#1e40af",
         previewText: `Tu orden ${order.order_number} ha sido entregada`,
       });
 
@@ -582,7 +614,8 @@ export class EmailNotificationService {
         subject,
         html,
         text,
-        replyTo: orgInfo?.metadata?.support_email,
+        replyTo: orgInfo?.resolvedSupportEmail,
+        fromDisplayName: orgInfo?.resolvedDisplayName,
       });
 
       if (result.success) {
@@ -606,7 +639,7 @@ export class EmailNotificationService {
   ): Promise<{ success: boolean; error?: string }> {
     try {
       const organizationId = order.organization_id;
-      const orgInfo = await this.getOrganizationInfo(organizationId);
+      const orgInfo = await getOrganizationInfoWithFallbacks(organizationId);
 
       // Try to use custom template first, fallback to order_confirmation if not found
       let template = await loadEmailTemplate(
@@ -636,12 +669,12 @@ export class EmailNotificationService {
 
       const variables = {
         ...getDefaultVariables({
-          name: orgInfo?.name,
-          support_email: orgInfo?.metadata?.support_email,
+          name: orgInfo?.name ?? undefined,
+          support_email: orgInfo?.resolvedSupportEmail ?? undefined,
         }),
         customer_name: order.customer_name || "Cliente",
         order_number: order.order_number,
-        amount: formatCurrency(order.total_amount),
+        amount: formatCurrency(order.total_amount, order.currency),
         payment_method: getPaymentMethodLabel(order.payment_method),
         transaction_id: transactionId || order.payment_id || "N/A",
         organization_name: orgInfo?.name || "Nuestra Óptica",
@@ -653,7 +686,10 @@ export class EmailNotificationService {
       const { wrapInModernLayout } = await import("./layout");
       html = wrapInModernLayout(html, {
         organizationName: orgInfo?.name || "Nuestra Óptica",
-        organizationColor: orgInfo?.metadata?.primary_color || "#1e40af",
+        organizationColor:
+          typeof orgInfo?.metadata?.primary_color === "string"
+            ? orgInfo.metadata.primary_color
+            : "#1e40af",
         previewText: `Pago recibido para la orden ${order.order_number}`,
       });
 
@@ -668,7 +704,8 @@ export class EmailNotificationService {
         subject,
         html,
         text,
-        replyTo: orgInfo?.metadata?.support_email,
+        replyTo: orgInfo?.resolvedSupportEmail,
+        fromDisplayName: orgInfo?.resolvedDisplayName,
       });
 
       if (result.success && template) {
@@ -687,10 +724,16 @@ export class EmailNotificationService {
 
   // Send payment failed notification
   static async sendPaymentFailed(
-    order: Order,
+    order: Order & { organization_id?: string },
   ): Promise<{ success: boolean; error?: string }> {
     try {
-      const template = await loadEmailTemplate("payment_failed", true);
+      const organizationId = order.organization_id;
+      const orgInfo = await getOrganizationInfoWithFallbacks(organizationId);
+      const template = await loadEmailTemplate(
+        "payment_failed",
+        true,
+        organizationId,
+      );
 
       if (!template) {
         console.warn(
@@ -705,11 +748,15 @@ export class EmailNotificationService {
       }
 
       const variables = {
-        ...getDefaultVariables(),
+        ...getDefaultVariables({
+          name: orgInfo?.name ?? undefined,
+          support_email: orgInfo?.resolvedSupportEmail ?? undefined,
+        }),
         customer_name: order.customer_name || "Cliente",
         order_number: order.order_number,
-        amount: formatCurrency(order.total_amount),
+        amount: formatCurrency(order.total_amount, order.currency),
         payment_method: getPaymentMethodLabel(order.payment_method),
+        organization_name: orgInfo?.name || "Nuestra Óptica",
       };
 
       const subject = replaceTemplateVariables(template.subject, variables);
@@ -726,6 +773,8 @@ export class EmailNotificationService {
         subject,
         html,
         text,
+        replyTo: orgInfo?.resolvedSupportEmail,
+        fromDisplayName: orgInfo?.resolvedDisplayName,
       });
 
       if (result.success) {
@@ -749,7 +798,7 @@ export class EmailNotificationService {
     organizationId?: string,
   ): Promise<{ success: boolean; error?: string }> {
     try {
-      const orgInfo = await this.getOrganizationInfo(organizationId);
+      const orgInfo = await getOrganizationInfoWithFallbacks(organizationId);
       const template = await loadEmailTemplate(
         "account_welcome",
         true,
@@ -765,8 +814,8 @@ export class EmailNotificationService {
 
       const variables = {
         ...getDefaultVariables({
-          name: orgInfo?.name,
-          support_email: orgInfo?.metadata?.support_email,
+          name: orgInfo?.name ?? undefined,
+          support_email: orgInfo?.resolvedSupportEmail ?? undefined,
         }),
         customer_name: customerName,
         account_url: `${getDefaultVariables().website_url}/mi-cuenta`,
@@ -779,7 +828,10 @@ export class EmailNotificationService {
       const { wrapInModernLayout } = await import("./layout");
       html = wrapInModernLayout(html, {
         organizationName: orgInfo?.name || "Nuestra Óptica",
-        organizationColor: orgInfo?.metadata?.primary_color || "#1e40af",
+        organizationColor:
+          typeof orgInfo?.metadata?.primary_color === "string"
+            ? orgInfo.metadata.primary_color
+            : "#1e40af",
         previewText: `Bienvenido a ${orgInfo?.name || "Nuestra Óptica"}`,
       });
 
@@ -794,7 +846,8 @@ export class EmailNotificationService {
         subject,
         html,
         text,
-        replyTo: orgInfo?.metadata?.support_email,
+        replyTo: orgInfo?.resolvedSupportEmail,
+        fromDisplayName: orgInfo?.resolvedDisplayName,
       });
 
       if (result.success) {
@@ -845,12 +898,19 @@ export class EmailNotificationService {
         .replace(/\n\s*\n/g, "\n")
         .trim();
 
-      return await sendEmail({
+      const result = await sendEmail({
         to: recipients,
         subject,
         html,
         text,
       });
+
+      if (result.success && template.id) {
+        const { incrementTemplateUsage } = await import("./template-loader");
+        await incrementTemplateUsage(template.id);
+      }
+
+      return result;
     } catch (error) {
       console.error(`Error sending SaaS notification (${type}):`, error);
       return {
@@ -982,9 +1042,15 @@ export class EmailNotificationService {
   static async sendLowStockAlert(
     adminEmails: string[],
     products: Array<{ name: string; current_stock: number; min_stock: number }>,
+    organizationId?: string,
   ): Promise<{ success: boolean; error?: string }> {
     try {
-      const template = await loadEmailTemplate("low_stock_alert", true);
+      const orgInfo = await getOrganizationInfoWithFallbacks(organizationId);
+      const template = await loadEmailTemplate(
+        "low_stock_alert",
+        true,
+        organizationId,
+      );
 
       if (!template) {
         console.warn(
@@ -1012,10 +1078,14 @@ export class EmailNotificationService {
         .join("\n");
 
       const variables = {
-        ...getDefaultVariables(),
+        ...getDefaultVariables({
+          name: orgInfo?.name ?? undefined,
+          support_email: orgInfo?.resolvedSupportEmail ?? undefined,
+        }),
         low_stock_products: productsHTML,
         low_stock_products_text: productsText,
         product_count: products.length.toString(),
+        organization_name: orgInfo?.name || "Tu Óptica",
       };
 
       const subject = replaceTemplateVariables(template.subject, variables);
@@ -1035,6 +1105,8 @@ export class EmailNotificationService {
             subject,
             html,
             text,
+            replyTo: orgInfo?.resolvedSupportEmail,
+            fromDisplayName: orgInfo?.resolvedDisplayName,
           }),
         ),
       );

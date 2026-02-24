@@ -34,11 +34,11 @@ export function AppointmentsList({
   getAppointmentStatusBadge,
 }: AppointmentsListProps) {
   return (
-    <Card className="border-none bg-admin-bg-tertiary/50 rounded-none shadow-none group transition-all duration-300">
+    <Card className="border-none bg-admin-bg-tertiary/50 rounded-xl shadow-none group transition-all duration-300">
       <CardHeader className="pb-4 border-b border-admin-border-primary/5">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 bg-epoch-primary/5 border border-epoch-primary/10 flex items-center justify-center">
+            <div className="h-10 w-10 rounded-xl bg-epoch-primary/5 border border-epoch-primary/10 flex items-center justify-center">
               <Calendar className="h-5 w-5 text-epoch-primary" />
             </div>
             <div>
@@ -54,7 +54,7 @@ export function AppointmentsList({
             <Button
               variant="ghost"
               size="sm"
-              className="h-9 px-4 font-display font-bold text-[10px] text-epoch-primary hover:bg-epoch-primary/5 rounded-none group transition-all tracking-widest uppercase"
+              className="h-9 px-4 font-display font-bold text-[10px] text-epoch-primary hover:bg-epoch-primary/5 rounded-xl group transition-all tracking-widest uppercase"
             >
               GESTIONAR AGENDA
               <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
@@ -70,7 +70,7 @@ export function AppointmentsList({
                 key={appointment.id}
                 className="group flex items-center p-6 hover:bg-admin-bg-tertiary/60 transition-all duration-300 relative overflow-hidden border-l-2 border-l-transparent hover:border-l-epoch-accent/50"
               >
-                <div className="flex-shrink-0 mr-6 text-center min-w-[70px] border-r border-admin-border-primary/10 pr-6">
+                <div className="flex-shrink-0 mr-6 text-center min-w-[70px] pr-6">
                   <p className="text-sm font-display font-bold text-admin-text-primary leading-none tracking-wider">
                     {formatTime(appointment.appointment_time)}
                   </p>
@@ -98,7 +98,7 @@ export function AppointmentsList({
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-8 w-8 text-admin-text-tertiary hover:text-epoch-primary hover:bg-admin-bg-secondary border border-transparent hover:border-admin-border-primary/10 rounded-none shadow-sm"
+                    className="h-8 w-8 text-admin-text-tertiary hover:text-epoch-primary hover:bg-admin-bg-secondary border border-transparent hover:border-admin-border-primary/10 rounded-xl shadow-sm"
                   >
                     <ChevronRight className="h-4 w-4" />
                   </Button>
@@ -107,7 +107,7 @@ export function AppointmentsList({
             ))
           ) : (
             <div className="flex flex-col items-center justify-center h-[300px] text-center p-8">
-              <div className="h-12 w-12 bg-admin-bg-tertiary border border-admin-border-primary/10 flex items-center justify-center mb-4">
+              <div className="h-12 w-12 rounded-xl bg-admin-bg-tertiary border border-admin-border-primary/10 flex items-center justify-center mb-4">
                 <Clock className="h-6 w-6 text-admin-text-tertiary/20" />
               </div>
               <p className="text-[10px] font-display font-bold text-admin-text-tertiary uppercase tracking-widest">

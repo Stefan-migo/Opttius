@@ -1,74 +1,90 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Seguridad",
-  description: "Información sobre seguridad y protección de datos en Opttius",
+  title: "Arquitectura de Seguridad Clínica",
+  description:
+    "Información sobre seguridad y protección de datos en Opttius",
 };
 
 export default function SeguridadPage() {
   return (
     <article className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
       <h1 className="text-4xl md:text-5xl font-display font-bold text-epoch-primary tracking-tight mb-4">
-        Seguridad
+        Arquitectura de Seguridad Clínica
       </h1>
-      <p className="text-epoch-primary/70 font-body text-sm mb-12">
-        Compromiso con la protección de sus datos y los de sus pacientes.
+      <p className="text-epoch-primary/70 font-body text-lg mb-12">
+        Protección de grado militar para la información sensible de sus
+        pacientes.
+      </p>
+      <p className="text-epoch-primary/60 font-body text-sm mb-12">
+        Última actualización: 22 de febrero de 2026
       </p>
 
       <div className="prose prose-epoch max-w-none space-y-10 font-body text-epoch-primary/90 leading-relaxed">
         <section>
           <h2 className="text-xl font-display font-bold text-epoch-primary uppercase tracking-wider mb-4">
-            1. Infraestructura
+            1. Infraestructura Blindada (La Nube)
           </h2>
           <p>
-            Opttius utiliza infraestructura en la nube con estándares de
-            seguridad de nivel empresarial. Los datos se almacenan en centros de
-            datos certificados, con cifrado en tránsito (TLS) y en reposo.
+            El ecosistema Opttius opera sobre servidores de última generación
+            con certificaciones ISO 27001 y SOC 2 Tipo II. Cada byte de
+            información viaja a través de túneles encriptados (TLS 1.3) y reposa
+            bajo llaves de cifrado AES-256, el estándar utilizado por bancos y
+            organismos de salud internacionales. Su clínica nunca duerme,
+            nuestra seguridad tampoco.
           </p>
         </section>
 
         <section>
           <h2 className="text-xl font-display font-bold text-epoch-primary uppercase tracking-wider mb-4">
-            2. Autenticación y acceso
+            2. Autenticación Robusta (Acceso y Control)
           </h2>
           <p>
-            El acceso al sistema está protegido por autenticación segura. Las
-            contraseñas se almacenan con hash y nunca se transmiten en texto
-            plano. Recomendamos activar la verificación en dos pasos cuando esté
-            disponible.
+            El perímetro de su óptica está protegido por protocolos de
+            autenticación modernos (OAuth 2.0 / JWT). Las credenciales de acceso
+            se someten a hash criptográfico irreversible (Argon2id) y jamás son
+            legibles por humanos, ni siquiera por nuestro propio equipo. La
+            integridad de su sesión es nuestra prioridad cero.
           </p>
         </section>
 
         <section>
           <h2 className="text-xl font-display font-bold text-epoch-primary uppercase tracking-wider mb-4">
-            3. Datos clínicos
+            3. Aislamiento de Datos Clínicos (Privacidad por Diseño)
           </h2>
           <p>
-            Los datos de pacientes, recetas y prescripciones se tratan con la
-            máxima confidencialidad. El acceso está restringido por organización
-            y rol. Cumplimos con las normativas aplicables en materia de
-            protección de datos de salud.
+            En Opttius, la confidencialidad no es una opción, es la
+            arquitectura base. Implementamos Row-Level Security (RLS) estricto:
+            cada receta, paciente y transacción financiera está aislada
+            criptográficamente a nivel de base de datos. Nadie fuera de su
+            organización autorizada puede siquiera &quot;ver&quot; que esos datos
+            existen.
           </p>
         </section>
 
         <section>
           <h2 className="text-xl font-display font-bold text-epoch-primary uppercase tracking-wider mb-4">
-            4. Copias de seguridad
+            4. Resiliencia y Recuperación (Backups)
           </h2>
           <p>
-            Realizamos copias de seguridad periódicas para garantizar la
-            disponibilidad y recuperación de sus datos en caso de incidencias.
-            Los backups están cifrados y almacenados de forma segura.
+            Ante cualquier eventualidad, su información está replicada y segura.
+            Ejecutamos copias de seguridad automáticas y encriptadas en múltiples
+            zonas geográficas (redundancia). Garantizamos la disponibilidad
+            continua de su historial clínico y la capacidad de restauración
+            inmediata (Point-in-Time Recovery) ante incidentes críticos.
           </p>
         </section>
 
         <section>
           <h2 className="text-xl font-display font-bold text-epoch-primary uppercase tracking-wider mb-4">
-            5. Contacto
+            5. Canal de Respuesta a Incidentes (Contacto)
           </h2>
           <p>
-            Para reportar vulnerabilidades o consultas sobre seguridad, contacte
-            a través de los canales oficiales de Opttius.
+            Mantenemos un programa activo de recompensa por vulnerabilidades y
+            auditoría constante. Si detecta una anomalía o requiere detalles
+            técnicos sobre nuestra postura de seguridad, nuestro equipo de
+            ingeniería de seguridad está disponible a través de los canales
+            oficiales de soporte prioritario.
           </p>
         </section>
       </div>

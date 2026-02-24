@@ -1,11 +1,5 @@
 import type { Metadata } from "next";
-import {
-  Inter,
-  Cinzel,
-  Playfair_Display,
-  Lato,
-  Cormorant_Garamond,
-} from "next/font/google";
+import { Inter, Cormorant_Garamond } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { BranchProvider } from "@/contexts/BranchContext";
@@ -19,25 +13,6 @@ import "./globals.css";
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-inter",
-  display: "swap",
-});
-
-const cinzel = Cinzel({
-  subsets: ["latin"],
-  variable: "--font-cinzel",
-  display: "swap",
-});
-
-const playfair = Playfair_Display({
-  subsets: ["latin"],
-  variable: "--font-playfair",
-  display: "swap",
-});
-
-const lato = Lato({
-  subsets: ["latin"],
-  weight: ["300", "400", "700"],
-  variable: "--font-lato",
   display: "swap",
 });
 
@@ -76,7 +51,7 @@ export default async function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${inter.variable} ${cinzel.variable} ${playfair.variable} ${lato.variable} ${cormorantGaramond.variable} font-sans antialiased`}
+        className={`${inter.variable} ${cormorantGaramond.variable} font-sans antialiased`}
       >
         <ThemeProvider
           attribute="class"

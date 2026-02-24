@@ -138,7 +138,7 @@ export default function CategoriesManagementSection() {
   return (
     <>
       {/* Categories Management */}
-      <Card className="border border-admin-border-primary/20 bg-admin-bg-tertiary rounded-none shadow-none overflow-hidden mb-8">
+      <Card className="border border-admin-border-primary/20 bg-admin-bg-tertiary rounded-xl shadow-none overflow-hidden mb-8">
         <CardHeader className="bg-admin-bg-tertiary/50 border-b border-admin-border-primary/10 py-6">
           <div className="flex justify-between items-center">
             <div className="flex flex-col gap-1">
@@ -151,7 +151,7 @@ export default function CategoriesManagementSection() {
             </div>
             <Button
               onClick={openCreateCategoryDialog}
-              className="bg-epoch-primary hover:bg-epoch-primary/90 text-white rounded-none text-[10px] font-display font-bold tracking-widest uppercase px-6 py-4 h-auto border-none shadow-premium-sm"
+              className="bg-epoch-primary hover:bg-epoch-primary/90 text-white rounded-xl text-[10px] font-display font-bold tracking-widest uppercase px-6 py-4 h-auto border-none shadow-premium-sm"
             >
               <Plus className="h-4 w-4 mr-2" />
               NUEVO REGISTRO
@@ -164,7 +164,7 @@ export default function CategoriesManagementSection() {
               {[...Array(6)].map((_, i) => (
                 <Card
                   key={i}
-                  className="bg-admin-bg-tertiary border border-admin-border-primary/10 rounded-none shadow-none"
+                  className="bg-admin-bg-tertiary border border-admin-border-primary/10 rounded-xl shadow-none"
                 >
                   <CardHeader className="p-6 pb-2">
                     <div className="flex items-start justify-between">
@@ -196,7 +196,7 @@ export default function CategoriesManagementSection() {
               <Button
                 onClick={openCreateCategoryDialog}
                 variant="outline"
-                className="rounded-none border-admin-border-primary/30 text-[10px] font-display font-bold tracking-widest uppercase px-8 py-4 h-auto hover:bg-admin-bg-tertiary"
+                className="rounded-xl border-admin-border-primary/30 text-[10px] font-display font-bold tracking-widest uppercase px-8 py-4 h-auto hover:bg-admin-bg-tertiary"
               >
                 <Plus className="h-4 w-4 mr-2 text-epoch-primary" />
                 DEFINIR PRIMER REGISTRO
@@ -207,7 +207,7 @@ export default function CategoriesManagementSection() {
               {categories.map((category) => (
                 <Card
                   key={category.id}
-                  className="bg-admin-bg-tertiary border border-admin-border-primary/10 rounded-none shadow-none group hover:shadow-lg transition-shadow duration-300"
+                  className="bg-admin-bg-tertiary border border-admin-border-primary/10 rounded-xl shadow-none group hover:shadow-lg transition-shadow duration-300"
                 >
                   <CardHeader className="p-6 pb-2">
                     <div className="flex items-start justify-between">
@@ -223,7 +223,7 @@ export default function CategoriesManagementSection() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="h-8 w-8 p-0 rounded-none hover:bg-admin-bg-tertiary text-epoch-primary"
+                          className="h-8 w-8 p-0 rounded-xl hover:bg-admin-bg-tertiary text-epoch-primary"
                           onClick={() => openEditCategoryDialog(category)}
                         >
                           <Edit className="h-3.5 w-3.5" />
@@ -231,7 +231,7 @@ export default function CategoriesManagementSection() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="h-8 w-8 p-0 rounded-none hover:bg-admin-error/5 text-admin-error"
+                          className="h-8 w-8 p-0 rounded-xl hover:bg-admin-error/5 text-admin-error"
                           onClick={() => handleDeleteCategory(category)}
                         >
                           <Trash2 className="h-3.5 w-3.5" />
@@ -259,7 +259,7 @@ export default function CategoriesManagementSection() {
 
       {/* Category Create/Edit Dialog */}
       <Dialog open={categoryDialogOpen} onOpenChange={setCategoryDialogOpen}>
-        <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-[450px] p-0 rounded-none border-2 border-admin-border-primary/20 bg-white">
+        <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-[450px] p-0 rounded-xl border-2 border-admin-border-primary/20 bg-white">
           <DialogHeader className="p-8 pb-4 bg-admin-bg-tertiary/50 border-b border-admin-border-primary/10">
             <DialogTitle className="text-xl font-display font-bold text-admin-text-primary uppercase tracking-[0.2em]">
               {editingCategory ? "EDITAR REGISTRO" : "NUEVA CLASIFICACIÓN"}
@@ -286,7 +286,7 @@ export default function CategoriesManagementSection() {
                   }
                   placeholder="Ej: HIGH-END EYEWEAR"
                   required
-                  className="rounded-none border-admin-border-primary/20 focus:border-epoch-primary focus:ring-0 p-6 text-sm font-display"
+                  className="rounded-xl border-admin-border-primary/20 focus:border-epoch-primary focus:ring-0 p-6 text-sm font-display"
                 />
               </div>
 
@@ -305,7 +305,7 @@ export default function CategoriesManagementSection() {
                       handleCategoryInputChange("slug", e.target.value)
                     }
                     placeholder="lentes-de-lujo"
-                    className="rounded-none border-admin-border-primary/20 bg-admin-bg-tertiary/30 focus:border-epoch-primary focus:ring-0 p-6 pl-10 text-xs font-mono lowercase"
+                    className="rounded-xl border-admin-border-primary/20 bg-admin-bg-tertiary/30 focus:border-epoch-primary focus:ring-0 p-6 pl-10 text-xs font-mono lowercase"
                   />
                   <Tag className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-admin-text-tertiary opacity-30" />
                 </div>
@@ -329,7 +329,7 @@ export default function CategoriesManagementSection() {
                   }
                   placeholder="Escriba una breve descripción técnica o comercial..."
                   rows={4}
-                  className="rounded-none border-admin-border-primary/20 focus:border-epoch-primary focus:ring-0 p-4 text-xs font-serif italic resize-none"
+                  className="rounded-xl border-admin-border-primary/20 focus:border-epoch-primary focus:ring-0 p-4 text-xs font-serif italic resize-none"
                 />
               </div>
             </div>
@@ -340,14 +340,14 @@ export default function CategoriesManagementSection() {
                 variant="ghost"
                 onClick={() => setCategoryDialogOpen(false)}
                 disabled={categoryFormLoading}
-                className="rounded-none text-[10px] font-display font-bold tracking-widest uppercase hover:bg-admin-bg-tertiary"
+                className="rounded-xl text-[10px] font-display font-bold tracking-widest uppercase hover:bg-admin-bg-tertiary"
               >
                 DESCARTAR
               </Button>
               <Button
                 type="submit"
                 disabled={categoryFormLoading}
-                className="bg-epoch-primary hover:bg-epoch-primary/90 text-white rounded-none text-[10px] font-display font-bold tracking-widest uppercase px-8 border-none shadow-premium-sm"
+                className="bg-epoch-primary hover:bg-epoch-primary/90 text-white rounded-xl text-[10px] font-display font-bold tracking-widest uppercase px-8 border-none shadow-premium-sm"
               >
                 {categoryFormLoading ? (
                   <Package className="h-3 w-3 mr-2 animate-spin" />

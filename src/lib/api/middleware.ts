@@ -351,12 +351,13 @@ export function withSecurityHeaders(response: NextResponse): NextResponse {
       (supabaseDomain !== "https://*.supabase.co"
         ? supabaseDomain
         : "https://*.supabase.co"),
-    // Connect: allow API calls, WebSocket connections, and Supabase
-    "connect-src 'self' https: wss: " +
+    // Connect: allow API calls, WebSocket connections, and Supabase (ws for local dev)
+    "connect-src 'self' https: wss: ws: " +
       (supabaseDomain !== "https://*.supabase.co"
         ? supabaseDomain
         : "https://*.supabase.co") +
-      " https://*.supabase.co",
+      " https://*.supabase.co" +
+      (supabaseUrl.includes("127.0.0.1") ? " ws://127.0.0.1:54321" : ""),
     // Frames: allow trusted iframes (MercadoPago Bricks secure fields, MercadoLibre, ML static, Google, Supabase)
     "frame-src 'self' https://www.mercadopago.com https://www.mercadolibre.com https://http2.mlstatic.com https://secure-fields.mercadopago.com https://www.google.com " +
       (supabaseDomain !== "https://*.supabase.co"

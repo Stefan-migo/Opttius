@@ -104,7 +104,7 @@ export function POSPendingBalanceDialog({
         }
       }}
     >
-      <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-3xl rounded-none border-admin-border-primary">
+      <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-3xl rounded-xl border-admin-border-primary">
         <DialogHeader>
           <DialogTitle className="font-display">
             Cobrar Saldos Pendientes
@@ -121,7 +121,7 @@ export function POSPendingBalanceDialog({
               placeholder="Filtrar por nombre, RUT, número de orden, email..."
               value={searchTerm}
               onChange={(e) => onFilterSearch(e.target.value)}
-              className="pl-10 rounded-none"
+              className="pl-10 rounded-xl"
             />
           </div>
 
@@ -131,7 +131,7 @@ export function POSPendingBalanceDialog({
             </div>
           ) : orders.length > 0 ? (
             <>
-              <div className="border border-admin-border-primary rounded-none overflow-hidden">
+              <div className="border border-admin-border-primary rounded-xl overflow-hidden">
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -197,7 +197,7 @@ export function POSPendingBalanceDialog({
                                   ? "default"
                                   : "outline"
                               }
-                              className="rounded-none"
+                              className="rounded-xl"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 onSelectOrder(order);
@@ -213,7 +213,7 @@ export function POSPendingBalanceDialog({
                             <Button
                               size="sm"
                               variant="outline"
-                              className="rounded-none"
+                              className="rounded-xl"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 onRefundClick(order);
@@ -230,7 +230,7 @@ export function POSPendingBalanceDialog({
               </div>
 
               {selectedOrder && (
-                <Card className="bg-admin-info/5 border-admin-border-primary rounded-none">
+                <Card className="bg-admin-info/5 border-admin-border-primary rounded-xl">
                   <CardContent className="pt-6 space-y-4">
                     <div className="grid grid-cols-2 gap-4">
                       <div>
@@ -277,7 +277,7 @@ export function POSPendingBalanceDialog({
                           value={pendingPaymentMethod}
                           onValueChange={onPaymentMethodChange}
                         >
-                          <SelectTrigger className="rounded-none">
+                          <SelectTrigger className="rounded-xl">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
@@ -301,7 +301,7 @@ export function POSPendingBalanceDialog({
                         value={pendingPaymentAmount}
                         onChange={(e) => onPaymentAmountChange(e.target.value)}
                         max={selectedOrder.pending_amount}
-                        className="rounded-none"
+                        className="rounded-xl"
                       />
                       <p className="text-xs text-admin-text-secondary mt-1">
                         Máximo: {formatCurrency(selectedOrder.pending_amount)}
@@ -320,7 +320,7 @@ export function POSPendingBalanceDialog({
                           onChange={(e) =>
                             onFiscalReferenceChange(e.target.value)
                           }
-                          className="mt-1 rounded-none"
+                          className="mt-1 rounded-xl"
                         />
                         <p className="text-xs text-admin-warning mt-1">
                           Se recomienda registrar el número para trazabilidad
@@ -347,7 +347,7 @@ export function POSPendingBalanceDialog({
           <Button
             variant="outline"
             onClick={() => onOpenChange(false)}
-            className="rounded-none"
+            className="rounded-xl"
           >
             Cerrar
           </Button>
@@ -355,7 +355,7 @@ export function POSPendingBalanceDialog({
             <Button
               onClick={onProcessPayment}
               disabled={processingPayment || !pendingPaymentAmount}
-              className="rounded-none"
+              className="rounded-xl"
             >
               {processingPayment ? (
                 <>

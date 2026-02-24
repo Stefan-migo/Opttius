@@ -17,6 +17,8 @@ import FormField, { FormFieldActions } from "@/components/ui/FormField";
 import { Plus, Trash2, Search, User, Loader2 } from "lucide-react";
 import { extractDataFromResponse } from "@/lib/api/response-helpers";
 import { useFormSimple } from "@/hooks/useForm";
+import { useBranch } from "@/hooks/useBranch";
+import { getBranchHeader } from "@/lib/utils/branch";
 import {
   success,
   error as notifyError,
@@ -64,6 +66,7 @@ export default function CreateManualOrderForm({
   onSubmit,
   onCancel,
 }: CreateManualOrderFormProps) {
+  const { currentBranchId } = useBranch();
   const form = useFormSimple<OrderFormData>(
     {
       email: "",
@@ -119,6 +122,7 @@ export default function CreateManualOrderForm({
       try {
         const response = await fetch(
           `/api/admin/customers/search?q=${encodeURIComponent(customerSearch)}`,
+          { headers: getBranchHeader(currentBranchId ?? null) },
         );
         if (response.ok) {
           const data = await response.json();
@@ -133,7 +137,7 @@ export default function CreateManualOrderForm({
 
     const debounce = setTimeout(searchCustomers, 300);
     return () => clearTimeout(debounce);
-  }, [customerSearch]);
+  }, [customerSearch, currentBranchId]);
 
   // Search products
   useEffect(() => {

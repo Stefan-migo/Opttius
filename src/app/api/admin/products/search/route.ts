@@ -118,12 +118,11 @@ export async function GET(request: NextRequest) {
             .eq("is_active", true)
             .single();
 
-          filteredProducts = (products || []).filter((product: any) => {
-            return (
-              product.product_type === "frame" ||
-              (marcosCategory && product.category_id === marcosCategory.id)
-            );
-          });
+          // Filter only by category - product_type has DEFAULT 'frame' so it's unreliable
+          filteredProducts = (products || []).filter(
+            (product: any) =>
+              marcosCategory && product.category_id === marcosCategory.id,
+          );
         }
 
         if (currentBranchId) {

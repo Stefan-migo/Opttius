@@ -14,6 +14,11 @@ export interface ToolExecutionContext {
     name?: string;
   };
   currentBranchId?: string | null; // null for global/unselected
+
+  /** When true, skip logAdminActivity (e.g. WhatsApp customer - no auth.uid()) */
+  skipAdminActivityLog?: boolean;
+  /** Customer ID when context is WhatsApp customer (for customer-scoped tools) */
+  customerId?: string | null;
 }
 
 export interface ToolResult<T = any> {

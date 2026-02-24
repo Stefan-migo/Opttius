@@ -36,20 +36,21 @@ Esta guía explica cuándo usar cada cuaderno de NotebookLM según el tipo de co
 
 ### Usa el **Cuaderno Extendido** cuando:
 
-| Situación                          | Ejemplo de consulta                                      |
-| ---------------------------------- | -------------------------------------------------------- |
-| **Análisis y evaluaciones**        | "¿Qué recomendaciones hay en el análisis de inventario?" |
-| **Estado de implementación**       | "¿Qué integraciones están implementadas?"                |
-| **Changelogs y mejoras**           | "¿Qué cambios se hicieron en el POS en 2026?"            |
-| **Guías de setup**                 | "¿Cómo configurar el entorno de desarrollo?"             |
-| **Planes de corrección**           | "¿Cuál es el plan de bugs pendientes?"                   |
-| **Documentación de archivo**       | "¿Qué pasó en el proceso de salvataje?"                  |
-| **Bases de datos**                 | "¿Qué restricciones tiene el seed?"                      |
-| **Integraciones técnicas**         | "¿Qué APIs externas están implementadas?"                |
-| **Formularios y emails**           | "¿Qué templates de email existen?"                       |
-| **Búsqueda de contexto histórico** | "¿Cómo evolucionó el sistema de identidad?"              |
+| Situación                          | Ejemplo de consulta                                             |
+| ---------------------------------- | --------------------------------------------------------------- |
+| **Análisis y evaluaciones**        | "¿Qué recomendaciones hay en el análisis de inventario?"        |
+| **Estado de implementación**       | "¿Qué integraciones están implementadas?"                       |
+| **Changelogs y mejoras**           | "¿Qué cambios se hicieron en el POS en 2026?"                   |
+| **Guías de setup**                 | "¿Cómo configurar el entorno de desarrollo?"                    |
+| **Planes de corrección**           | "¿Cuál es el plan de bugs pendientes?"                          |
+| **Documentación de archivo**       | "¿Qué pasó en el proceso de salvataje?"                         |
+| **Bases de datos**                 | "¿Qué restricciones tiene el seed?"                             |
+| **Integraciones técnicas**         | "¿Qué APIs externas están implementadas?"                       |
+| **Formularios y emails**           | "¿Qué templates de email existen?"                              |
+| **Búsqueda de contexto histórico** | "¿Cómo evolucionó el sistema de identidad?"                     |
+| **Testing y QA**                   | "¿Qué flujos críticos debo verificar?" "¿Cómo validar backups?" |
 
-**Contenido:** Archive (salvataje, CTO briefing), estado de implementación (setup, API, AI, payments, integrations, forms, email, analysis), evaluaciones (database, inventory, brain), guías (Supabase, typography, identity audit), NOTEBOOKLM_CUADERNOS_GUIA, PROJECT_SUMMARY.
+**Contenido:** Archive (salvataje, CTO briefing), estado de implementación (setup, API, AI, payments, integrations, forms, email, analysis), evaluaciones (database, inventory, brain), guías (Supabase, typography, identity audit), testing (TESTING_GUIDE, skill testing), NOTEBOOKLM_CUADERNOS_GUIA, PROJECT_SUMMARY.
 
 ---
 

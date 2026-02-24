@@ -24,24 +24,28 @@ export function replaceTemplateVariables(
 
 /**
  * Get default variables for email templates
+ * organization.support_email y organization.contact_email se usan para reply-to y variables de plantilla
  */
 export function getDefaultVariables(organization?: {
   name?: string;
   email?: string;
   support_email?: string;
+  contact_email?: string;
 }): Record<string, string> {
   const websiteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://opttius.cl";
+  const supportEmail =
+    organization?.support_email || organization?.contact_email || "soporte@opttius.cl";
+  const contactEmail =
+    organization?.contact_email || organization?.email || organization?.support_email || "contacto@opttius.cl";
 
   return {
     organization_name: organization?.name || "Opttius",
-    organization_email: organization?.email || "contacto@opttius.cl",
-    organization_support_email:
-      organization?.support_email || "soporte@opttius.cl",
+    organization_email: contactEmail,
+    organization_support_email: supportEmail,
     website_url: websiteUrl,
-    // Add legacy variables for backward compatibility if needed
     company_name: organization?.name || "Opttius",
-    support_email: organization?.support_email || "soporte@opttius.cl",
-    contact_email: organization?.email || "contacto@opttius.cl",
+    support_email: supportEmail,
+    contact_email: contactEmail,
   };
 }
 
@@ -55,11 +59,12 @@ export function formatOrderItemsHTML(
     price: number;
     variant_title?: string;
   }>,
+  currency = "CLP",
 ): string {
   const formatCurrency = (amount: number): string => {
-    return new Intl.NumberFormat("es-AR", {
+    return new Intl.NumberFormat("es-CL", {
       style: "currency",
-      currency: "ARS",
+      currency,
     }).format(amount);
   };
 
@@ -90,11 +95,12 @@ export function formatOrderItemsText(
     price: number;
     variant_title?: string;
   }>,
+  currency = "CLP",
 ): string {
   const formatCurrency = (amount: number): string => {
-    return new Intl.NumberFormat("es-AR", {
+    return new Intl.NumberFormat("es-CL", {
       style: "currency",
-      currency: "ARS",
+      currency,
     }).format(amount);
   };
 

@@ -4,11 +4,14 @@ import {
   createServiceRoleClient,
 } from "@/utils/supabase/server";
 import { normalizeRUT, formatRUT } from "@/lib/utils/rut";
-import { getBranchContext, addBranchFilter } from "@/lib/api/branch-middleware";
+import { getBranchContext } from "@/lib/api/branch-middleware";
 import { appLogger as logger } from "@/lib/logger";
 import { withRateLimit, rateLimitConfigs } from "@/lib/api/middleware";
 import { RateLimitError } from "@/lib/api/errors";
-import { createApiSuccessResponse } from "@/lib/api/response";
+import {
+  createApiSuccessResponse,
+  createApiErrorResponse,
+} from "@/lib/api/response";
 
 export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
@@ -48,15 +51,60 @@ export async function GET(request: NextRequest) {
             supabase,
           );
 
-          // Build branch filter function
-          const applyBranchFilter = (query: any) => {
-            return addBranchFilter(
-              query,
-              branchContext.branchId,
-              branchContext.isSuperAdmin,
-              branchContext.organizationId,
+          // Use service role client to bypass RLS and ensure we can search all customers
+          const supabaseServiceRole = createServiceRoleClient();
+
+          // Pre-fetch branch IDs for org when in global view (needed for both RPC and standard search)
+          let orgBranchIds: string[] | null = null;
+          if (
+            !branchContext.branchId &&
+            branchContext.isSuperAdmin &&
+            branchContext.organizationId
+          ) {
+            const { data: branches } = await supabaseServiceRole
+              .from("branches")
+              .select("id")
+              .eq("organization_id", branchContext.organizationId);
+            orgBranchIds = branches?.map((b: { id: string }) => b.id) || [];
+          }
+
+          // Build a customers query with branch filter (sync, no async return)
+          const buildFilteredCustomersQuery = () => {
+            const q = supabaseServiceRole
+              .from("customers")
+              .select("id, first_name, last_name, email, phone, rut");
+            const { branchId, isSuperAdmin, organizationId, accessibleBranches } =
+              branchContext;
+            if (branchId) return q.eq("branch_id", branchId);
+            if (isSuperAdmin && orgBranchIds && orgBranchIds.length > 0) {
+              return q.in("branch_id", orgBranchIds);
+            }
+            if (isSuperAdmin && organizationId) {
+              return q.eq("branch_id", "00000000-0000-0000-0000-000000000000");
+            }
+            const primaryBranchId =
+              accessibleBranches.find((b: { isPrimary?: boolean }) => b.isPrimary)
+                ?.id || accessibleBranches[0]?.id;
+            return q.eq(
+              "branch_id",
+              primaryBranchId || "00000000-0000-0000-0000-000000000000",
             );
           };
+
+          // Get branch params for RPC (p_branch_id or p_branch_ids)
+          let rpcBranchId: string | null = null;
+          let rpcBranchIds: string[] | null = null;
+          if (branchContext.branchId) {
+            rpcBranchId = branchContext.branchId;
+          } else if (
+            branchContext.isSuperAdmin &&
+            branchContext.organizationId
+          ) {
+            rpcBranchIds = orgBranchIds;
+          } else if (!branchContext.isSuperAdmin) {
+            // Regular admin without branch - no results
+            rpcBranchIds = [];
+          }
 
           const searchParams = request.nextUrl.searchParams;
           const query = searchParams.get("q") || "";
@@ -64,9 +112,6 @@ export async function GET(request: NextRequest) {
           if (query.length < 1) {
             return createApiSuccessResponse([], { requestId });
           }
-
-          // Use service role client to bypass RLS and ensure we can search all customers
-          const supabaseServiceRole = createServiceRoleClient();
           const searchTerm = query.trim();
 
           // Normalize RUT: remove dots, dashes, and spaces for searching
@@ -95,73 +140,72 @@ export async function GET(request: NextRequest) {
           let error: any = null;
 
           // If this looks like a RUT search, try the SQL function first (handles partial matches better)
-          // Note: RPC doesn't have branch context, so we'll filter results after
           if (isRutSearch) {
             try {
               logger.debug("Using RUT search function", {
                 searchTerm,
                 normalized: normalizedSearchTerm,
+                rpcBranchId,
+                rpcBranchIdsCount: rpcBranchIds?.length,
               });
 
-              // Try with original search term (handles formatted RUTs like "12.345.678-9")
-              const { data: rutCustomers1, error: rutError1 } =
-                await supabaseServiceRole.rpc("search_customers_by_rut", {
-                  rut_search_term: searchTerm,
-                });
-
-              // Also try with normalized term (handles unformatted RUTs like "123456789")
-              const { data: rutCustomers2, error: rutError2 } =
-                await supabaseServiceRole.rpc("search_customers_by_rut", {
-                  rut_search_term: normalizedSearchTerm,
-                });
-
-              // Combine results and remove duplicates
-              const rutCustomersMap = new Map();
-              [...(rutCustomers1 || []), ...(rutCustomers2 || [])].forEach(
-                (c: any) => {
-                  if (!rutCustomersMap.has(c.id)) {
-                    rutCustomersMap.set(c.id, c);
-                  }
-                },
-              );
-              const rutCustomers = Array.from(rutCustomersMap.values());
-
-              if ((rutCustomers1 || rutCustomers2) && rutCustomers.length > 0) {
-                // Filter by branch if not in global view
-                let filteredRutCustomers = rutCustomers;
-                if (branchContext.branchId) {
-                  // Get customer IDs that belong to the selected branch
-                  const { data: branchCustomers } = await supabaseServiceRole
-                    .from("customers")
-                    .select("id")
-                    .eq("branch_id", branchContext.branchId);
-
-                  const branchCustomerIds = new Set(
-                    (branchCustomers || []).map((c) => c.id),
-                  );
-                  filteredRutCustomers = rutCustomers.filter((c: any) =>
-                    branchCustomerIds.has(c.id),
-                  );
-                } else if (!branchContext.isSuperAdmin) {
-                  // Regular admin without branch selected - no results
-                  filteredRutCustomers = [];
+              const rpcParams = (term: string) => {
+                const params: Record<string, unknown> = {
+                  rut_search_term: term,
+                };
+                if (rpcBranchIds && rpcBranchIds.length === 0) {
+                  return null;
                 }
+                if (rpcBranchId) {
+                  params.p_branch_id = rpcBranchId;
+                } else if (rpcBranchIds && rpcBranchIds.length > 0) {
+                  params.p_branch_ids = rpcBranchIds;
+                }
+                return params;
+              };
 
-                customers.push(...filteredRutCustomers);
+              const params1 = rpcParams(searchTerm);
+              const params2 = rpcParams(normalizedSearchTerm);
+
+              if (params1 === null || params2 === null) {
+                customers = [];
+              } else {
+                const { data: rutCustomers1, error: rutError1 } =
+                  await supabaseServiceRole.rpc(
+                    "search_customers_by_rut",
+                    params1,
+                  );
+
+                const { data: rutCustomers2, error: rutError2 } =
+                  await supabaseServiceRole.rpc(
+                    "search_customers_by_rut",
+                    params2,
+                  );
+
+                const rutCustomersMap = new Map();
+                [...(rutCustomers1 || []), ...(rutCustomers2 || [])].forEach(
+                  (c: any) => {
+                    if (!rutCustomersMap.has(c.id)) {
+                      rutCustomersMap.set(c.id, c);
+                    }
+                  },
+                );
+                const rutCustomers = Array.from(rutCustomersMap.values());
+                customers.push(...rutCustomers);
+
+                if (rutError1 || rutError2) {
+                  logger.warn("RUT function error", {
+                    error: rutError1?.message || rutError2?.message,
+                  });
+                }
                 logger.debug("Found customers via RUT function", {
-                  count: filteredRutCustomers.length,
-                });
-              } else if (rutError1 || rutError2) {
-                logger.warn("RUT function error", {
-                  error: rutError1?.message || rutError2?.message,
+                  count: rutCustomers.length,
                 });
               }
             } catch (rpcError: any) {
               logger.debug(
-                "RUT function not available, using standard search",
-                {
-                  error: rpcError.message,
-                },
+                "RUT function not available or old signature, using standard search",
+                { error: rpcError.message },
               );
             }
           }
@@ -193,13 +237,8 @@ export async function GET(request: NextRequest) {
 
             logger.debug("OR query", { orQuery });
 
-            const result = await applyBranchFilter(
-              supabaseServiceRole
-                .from("customers")
-                .select("id, first_name, last_name, email, phone, rut"),
-            )
-              .or(orQuery)
-              .limit(20);
+            const filteredQuery = buildFilteredCustomersQuery();
+            const result = await filteredQuery.or(orQuery).limit(20);
 
             // Combine results from RUT function and standard search
             const standardResults = result.data || [];
@@ -226,7 +265,6 @@ export async function GET(request: NextRequest) {
             );
 
             // Fallback: Try individual queries and combine results
-            // For RUT, we need to search both formatted and normalized versions
             try {
               const searchPattern = `%${searchTerm}%`;
               const normalizedPattern = `%${normalizedSearchTerm}%`;
@@ -234,122 +272,37 @@ export async function GET(request: NextRequest) {
 
               const allCustomers: any[] = [];
 
-              const queries = [
-                applyBranchFilter(
-                  supabaseServiceRole
-                    .from("customers")
-                    .select("id, first_name, last_name, email, phone, rut"),
-                )
+              const queries: Promise<any>[] = [
+                buildFilteredCustomersQuery()
                   .or(
                     `first_name.ilike.${searchPattern},last_name.ilike.${searchPattern}`,
                   )
-                  .limit(20),
-                applyBranchFilter(
-                  supabaseServiceRole
-                    .from("customers")
-                    .select("id, first_name, last_name, email, phone, rut"),
-                )
+                  .limit(20) as unknown as Promise<any>,
+                buildFilteredCustomersQuery()
                   .ilike("email", searchPattern)
-                  .limit(20),
-                applyBranchFilter(
-                  supabaseServiceRole
-                    .from("customers")
-                    .select("id, first_name, last_name, email, phone, rut"),
-                )
+                  .limit(20) as unknown as Promise<any>,
+                buildFilteredCustomersQuery()
                   .ilike("phone", searchPattern)
-                  .limit(20),
+                  .limit(20) as unknown as Promise<any>,
               ];
 
-              // For RUT search, try original, normalized, and formatted patterns
-              // Also try the SQL function for normalized RUT search (partial matches)
               if (isRutSearch) {
-                // Try SQL function first for better partial matching
-                // Pass both original and normalized terms to handle all cases
-                try {
-                  // Try with original search term (handles formatted RUTs)
-                  const { data: rutCustomers1 } = await supabaseServiceRole.rpc(
-                    "search_customers_by_rut",
-                    { rut_search_term: searchTerm },
-                  );
-
-                  // Also try with normalized term (handles unformatted RUTs)
-                  const { data: rutCustomers2 } = await supabaseServiceRole.rpc(
-                    "search_customers_by_rut",
-                    { rut_search_term: normalizedSearchTerm },
-                  );
-
-                  // Combine results and remove duplicates
-                  const rutCustomersMap = new Map();
-                  [...(rutCustomers1 || []), ...(rutCustomers2 || [])].forEach(
-                    (c: any) => {
-                      if (!rutCustomersMap.has(c.id)) {
-                        rutCustomersMap.set(c.id, c);
-                      }
-                    },
-                  );
-                  const rutCustomers = Array.from(rutCustomersMap.values());
-
-                  if (rutCustomers.length > 0) {
-                    // Filter by branch if not in global view
-                    let filteredRutCustomers = rutCustomers;
-                    if (branchContext.branchId) {
-                      // Get customer IDs that belong to the selected branch
-                      const { data: branchCustomers } =
-                        await supabaseServiceRole
-                          .from("customers")
-                          .select("id")
-                          .eq("branch_id", branchContext.branchId);
-
-                      const branchCustomerIds = new Set(
-                        (branchCustomers || []).map((c) => c.id),
-                      );
-                      filteredRutCustomers = rutCustomers.filter((c: any) =>
-                        branchCustomerIds.has(c.id),
-                      );
-                    } else if (!branchContext.isSuperAdmin) {
-                      // Regular admin without branch selected - no results
-                      filteredRutCustomers = [];
-                    }
-
-                    allCustomers.push(...filteredRutCustomers);
-                  }
-                } catch (rpcError) {
-                  logger.debug("RUT function not available in fallback");
-                }
-
                 queries.push(
-                  applyBranchFilter(
-                    supabaseServiceRole
-                      .from("customers")
-                      .select("id, first_name, last_name, email, phone, rut"),
-                  )
+                  buildFilteredCustomersQuery()
                     .ilike("rut", searchPattern)
-                    .limit(20),
-                  applyBranchFilter(
-                    supabaseServiceRole
-                      .from("customers")
-                      .select("id, first_name, last_name, email, phone, rut"),
-                  )
+                    .limit(20) as unknown as Promise<any>,
+                  buildFilteredCustomersQuery()
                     .ilike("rut", normalizedPattern)
-                    .limit(20),
-                  applyBranchFilter(
-                    supabaseServiceRole
-                      .from("customers")
-                      .select("id, first_name, last_name, email, phone, rut"),
-                  )
+                    .limit(20) as unknown as Promise<any>,
+                  buildFilteredCustomersQuery()
                     .ilike("rut", formattedPattern)
-                    .limit(20),
+                    .limit(20) as unknown as Promise<any>,
                 );
               } else {
-                // For non-RUT searches, still try RUT field with original pattern
                 queries.push(
-                  applyBranchFilter(
-                    supabaseServiceRole
-                      .from("customers")
-                      .select("id, first_name, last_name, email, phone, rut"),
-                  )
+                  buildFilteredCustomersQuery()
                     .ilike("rut", searchPattern)
-                    .limit(20),
+                    .limit(20) as unknown as Promise<any>,
                 );
               }
 
@@ -397,14 +350,10 @@ export async function GET(request: NextRequest) {
             });
             return NextResponse.json({ error: error.message }, { status: 429 });
           }
-          logger.error("Error in customer search API", error);
-          return NextResponse.json(
-            {
-              error: "Internal server error",
-              details: error instanceof Error ? error.message : "Unknown error",
-            },
-            { status: 500 },
-          );
+          const err =
+            error instanceof Error ? error : new Error(String(error));
+          logger.error("Error in customer search API", err);
+          return createApiErrorResponse(err, { requestId });
         }
       },
     );

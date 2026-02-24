@@ -66,7 +66,7 @@ export default function ProductsPage() {
           {activeTab === "products" && (
             <Button
               onClick={() => router.push("/admin/products/add")}
-              className="h-11 px-8 bg-admin-accent-primary hover:bg-admin-accent-secondary text-[#1A2B23] font-display font-black text-[10px] tracking-[0.2em] uppercase rounded-none transition-all shadow-premium-sm flex items-center gap-2 border border-admin-accent-secondary/20"
+              className="h-11 px-8 bg-admin-accent-primary hover:bg-admin-accent-secondary text-[#1A2B23] font-display font-black text-[10px] tracking-[0.2em] uppercase rounded-xl transition-all shadow-premium-sm flex items-center gap-2 border border-admin-accent-secondary/20"
             >
               <Plus className="h-4 w-4" />
               <span>Alta de Producto</span>
@@ -75,7 +75,7 @@ export default function ProductsPage() {
           {activeTab === "lens-families" && (
             <Button
               onClick={() => router.push("/admin/lens-families/new")}
-              className="h-11 px-8 bg-admin-accent-primary hover:bg-admin-accent-secondary text-[#1A2B23] font-display font-black text-[10px] tracking-[0.2em] uppercase rounded-none transition-all shadow-premium-sm flex items-center gap-2 border border-admin-accent-secondary/20"
+              className="h-11 px-8 bg-admin-accent-primary hover:bg-admin-accent-secondary text-[#1A2B23] font-display font-black text-[10px] tracking-[0.2em] uppercase rounded-xl transition-all shadow-premium-sm flex items-center gap-2 border border-admin-accent-secondary/20"
             >
               <Plus className="h-4 w-4" />
               <span>Nueva Familia Óptica</span>
@@ -84,7 +84,7 @@ export default function ProductsPage() {
           {activeTab === "contact-lens-families" && (
             <Button
               onClick={() => router.push("/admin/contact-lens-families/new")}
-              className="h-11 px-8 bg-admin-accent-primary hover:bg-admin-accent-secondary text-[#1A2B23] font-display font-black text-[10px] tracking-[0.2em] uppercase rounded-none transition-all shadow-premium-sm flex items-center gap-2 border border-admin-accent-secondary/20"
+              className="h-11 px-8 bg-admin-accent-primary hover:bg-admin-accent-secondary text-[#1A2B23] font-display font-black text-[10px] tracking-[0.2em] uppercase rounded-xl transition-all shadow-premium-sm flex items-center gap-2 border border-admin-accent-secondary/20"
             >
               <Plus className="h-4 w-4" />
               <span>Nueva Familia Contacto</span>
@@ -139,28 +139,28 @@ export default function ProductsPage() {
         }}
         className="w-full"
       >
-        <TabsList className="flex items-center bg-transparent border-b border-admin-border-primary/20 w-full justify-start rounded-none h-auto p-0 gap-8">
+        <TabsList className="flex items-center bg-transparent border-b border-admin-border-primary/20 w-full justify-start rounded-xl h-auto p-0 gap-8">
           <TabsTrigger
             value="products"
-            className="rounded-none border-b-2 border-transparent data-[state=active]:border-admin-accent-primary data-[state=active]:bg-transparent bg-transparent text-admin-text-tertiary data-[state=active]:text-admin-text-primary px-0 pb-4 font-display font-bold text-[10px] tracking-[0.2em] uppercase transition-all"
+            className="rounded-xl border-b-2 border-transparent data-[state=active]:border-admin-accent-primary data-[state=active]:bg-transparent bg-transparent text-admin-text-tertiary data-[state=active]:text-admin-text-primary px-0 pb-4 font-display font-bold text-[10px] tracking-[0.2em] uppercase transition-all"
           >
             Productos
           </TabsTrigger>
           <TabsTrigger
             value="categories"
-            className="rounded-none border-b-2 border-transparent data-[state=active]:border-admin-accent-primary data-[state=active]:bg-transparent bg-transparent text-admin-text-tertiary data-[state=active]:text-admin-text-primary px-0 pb-4 font-display font-bold text-[10px] tracking-[0.2em] uppercase transition-all"
+            className="rounded-xl border-b-2 border-transparent data-[state=active]:border-admin-accent-primary data-[state=active]:bg-transparent bg-transparent text-admin-text-tertiary data-[state=active]:text-admin-text-primary px-0 pb-4 font-display font-bold text-[10px] tracking-[0.2em] uppercase transition-all"
           >
             Categorías
           </TabsTrigger>
           <TabsTrigger
             value="lens-families"
-            className="rounded-none border-b-2 border-transparent data-[state=active]:border-admin-accent-primary data-[state=active]:bg-transparent bg-transparent text-admin-text-tertiary data-[state=active]:text-admin-text-primary px-0 pb-4 font-display font-bold text-[10px] tracking-[0.2em] uppercase transition-all"
+            className="rounded-xl border-b-2 border-transparent data-[state=active]:border-admin-accent-primary data-[state=active]:bg-transparent bg-transparent text-admin-text-tertiary data-[state=active]:text-admin-text-primary px-0 pb-4 font-display font-bold text-[10px] tracking-[0.2em] uppercase transition-all"
           >
             Oftálmicos
           </TabsTrigger>
           <TabsTrigger
             value="contact-lens-families"
-            className="rounded-none border-b-2 border-transparent data-[state=active]:border-admin-accent-primary data-[state=active]:bg-transparent bg-transparent text-admin-text-tertiary data-[state=active]:text-admin-text-primary px-0 pb-4 font-display font-bold text-[10px] tracking-[0.2em] uppercase transition-all"
+            className="rounded-xl border-b-2 border-transparent data-[state=active]:border-admin-accent-primary data-[state=active]:bg-transparent bg-transparent text-admin-text-tertiary data-[state=active]:text-admin-text-primary px-0 pb-4 font-display font-bold text-[10px] tracking-[0.2em] uppercase transition-all"
           >
             Contactología
           </TabsTrigger>

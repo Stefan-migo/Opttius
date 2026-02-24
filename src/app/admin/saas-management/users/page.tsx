@@ -426,7 +426,7 @@ export default function UsersManagementPage() {
               value={organizationFilter}
               onValueChange={setOrganizationFilter}
             >
-              <SelectTrigger className="rounded-none w-[200px]">
+              <SelectTrigger className="rounded-xl w-[200px]">
                 <SelectValue placeholder="Filtrar por organización" />
               </SelectTrigger>
               <SelectContent>
@@ -439,7 +439,7 @@ export default function UsersManagementPage() {
               </SelectContent>
             </Select>
             <Select value={roleFilter} onValueChange={setRoleFilter}>
-              <SelectTrigger className="rounded-none w-[180px]">
+              <SelectTrigger className="rounded-xl w-[180px]">
                 <SelectValue placeholder="Filtrar por rol" />
               </SelectTrigger>
               <SelectContent>
@@ -453,7 +453,7 @@ export default function UsersManagementPage() {
               </SelectContent>
             </Select>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="rounded-none w-[180px]">
+              <SelectTrigger className="rounded-xl w-[180px]">
                 <SelectValue placeholder="Filtrar por estado" />
               </SelectTrigger>
               <SelectContent>
@@ -757,7 +757,7 @@ export default function UsersManagementPage() {
                   setCreateUserForm((f) => ({ ...f, role: v }))
                 }
               >
-                <SelectTrigger className="rounded-none">
+                <SelectTrigger className="rounded-xl">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -788,7 +788,7 @@ export default function UsersManagementPage() {
                   loadBranchesForOrg(orgId);
                 }}
               >
-                <SelectTrigger className="rounded-none">
+                <SelectTrigger className="rounded-xl">
                   <SelectValue placeholder="Sin organización" />
                 </SelectTrigger>
                 <SelectContent>
@@ -813,7 +813,7 @@ export default function UsersManagementPage() {
                       setCreateUserForm((f) => ({ ...f, branch_id: v }))
                     }
                   >
-                    <SelectTrigger className="rounded-none">
+                    <SelectTrigger className="rounded-xl">
                       <SelectValue placeholder="Seleccionar sucursal" />
                     </SelectTrigger>
                     <SelectContent>
@@ -866,7 +866,7 @@ export default function UsersManagementPage() {
                   setNewOrganizationId(v === "__none__" ? "" : v)
                 }
               >
-                <SelectTrigger className="rounded-none">
+                <SelectTrigger className="rounded-xl">
                   <SelectValue placeholder="Seleccionar organización" />
                 </SelectTrigger>
                 <SelectContent>

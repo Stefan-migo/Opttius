@@ -55,14 +55,18 @@ export default function CreateAppointmentForm({
   initialData,
   initialCustomerId,
   lockDateTime = false,
+  effectiveBranchId,
 }: CreateAppointmentFormProps) {
   // Initialize hooks
   const { currentBranchId } = useBranch();
   const scheduleSettingsHook = useScheduleSettings();
+  // Use effectiveBranchId when provided (e.g. super admin selected branch in dropdown), else currentBranchId
+  const branchIdForSearch =
+    effectiveBranchId !== undefined ? effectiveBranchId : currentBranchId;
   const customerSearchHook = useCustomerSearch({
     initialData,
     initialCustomerId,
-    currentBranchId,
+    currentBranchId: branchIdForSearch,
   });
   const availabilityHook = useAvailability({
     scheduleSettings: scheduleSettingsHook.settings,
@@ -74,13 +78,6 @@ export default function CreateAppointmentForm({
 
   // Load availability when date or duration changes
   useEffect(() => {
-    console.log("🔄 Availability useEffect triggered:", {
-      hasDate: !!appointmentFormHook.formData.appointment_date,
-      date: appointmentFormHook.formData.appointment_date,
-      duration: appointmentFormHook.formData.duration_minutes,
-      hasSettings: !!scheduleSettingsHook.settings,
-    });
-
     if (
       appointmentFormHook.formData.appointment_date &&
       scheduleSettingsHook.settings
@@ -94,12 +91,6 @@ export default function CreateAppointmentForm({
         );
       }, 100);
       return () => clearTimeout(timer);
-    } else {
-      console.log("⏸️ Skipping fetchAvailability - missing date or settings");
-      if (!appointmentFormHook.formData.appointment_date)
-        console.log("  - Missing appointment_date");
-      if (!scheduleSettingsHook.settings)
-        console.log("  - Missing scheduleSettings");
     }
   }, [
     appointmentFormHook.formData.appointment_date,

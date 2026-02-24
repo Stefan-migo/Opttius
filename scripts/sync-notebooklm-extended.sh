@@ -68,6 +68,21 @@ add_source "docs/COPY_IMPROVEMENT_PLAN.md" "COPY_IMPROVEMENT_PLAN"
 add_source "docs/CHANGELOG_TYPOGRAPHY.md" "CHANGELOG_TYPOGRAPHY"
 add_source "docs/IDENTITY_AUDIT.md" "IDENTITY_AUDIT"
 
+# WhatsApp + Agente IA
+add_source "docs/WHATSAPP_AI_AGENT.md" "Módulo WhatsApp + Agente IA"
+add_source ".cursor/skills/whatsapp-ai-agent-optical/SKILL.md" "Skill WhatsApp AI Agent Óptico"
+add_source "docs/WHATSAPP_AGENT_TRAINING.md" "Entrenamiento Agente WhatsApp"
+add_source ".cursor/skills/whatsapp-agent-training-optical/SKILL.md" "Skill Entrenamiento Agente WhatsApp"
+add_source "docs/WHATSAPP_IMPLEMENTATION_PROMPT.md" "Prompt Implementación WhatsApp"
+
+# Testing - guía y skill
+add_source "docs/TESTING_GUIDE.md" "Guía de Testing Opttius"
+add_source "docs/PLAN_TESTING_IMPLEMENTATION.md" "Plan Implementación Testing"
+add_source ".cursor/skills/testing-optical-supabase/SKILL.md" "Skill Testing Optical Supabase"
+
+# Índice consolidado de skills (23 guías de dominio)
+add_source "docs/OPTTIUS_SKILLS_INDEX.md" "OPTTIUS_SKILLS_INDEX"
+
 # Guías de NotebookLM
 add_source "docs/NOTEBOOKLM_CUADERNOS_GUIA.md" "NOTEBOOKLM_CUADERNOS_GUIA"
 add_source "docs/NOTEBOOKLM_SYNC.md" "NOTEBOOKLM_SYNC"

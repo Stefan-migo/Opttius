@@ -1,7 +1,9 @@
 # Plan de Mejora del Copy — Resumen Ejecutivo
 
 **Fecha:** 2026-02-18  
-**Estado:** Implementado
+**Estado:** Implementado (parcialmente supersedido por pivote 2026-02-22)
+
+**Nota:** El pivote a Lujo Tecnológico (IDENTITY.md, 2026-02-22) elimina por completo legado, forjar, santuario, maestría, pergamino. Eslogan actual: "Automatiza. Controla. Crece."
 
 ---
 
@@ -34,11 +36,10 @@
 
 ---
 
-## Metáforas: Reorientar, No Eliminar
+## Metáforas (actualizado 2026-02-22)
 
-- **Conservar**: precisión, excelencia, estándar Opttius, profesionales exigentes.
-- **Reorientar**: legado como resultado, no como verbo.
-- **Reducir**: santuario, sinfonía, cúspide — sustituir por beneficios concretos.
+- **Eliminar por completo:** legado, forjar, santuario, maestría, pergamino, credencial, llave de acceso.
+- **Conservar:** precisión, excelencia, estándar Opttius, profesionales exigentes.
 
 ---
 

@@ -1582,7 +1582,7 @@ export default function WorkOrderDetailPage() {
                   <p className="text-sm text-admin-text-tertiary mb-1">
                     Notas Internas
                   </p>
-                  <p className="font-medium whitespace-pre-wrap text-sm text-admin-text-primary bg-admin-bg-tertiary p-3 rounded-none border border-admin-border-primary/20">
+                  <p className="font-medium whitespace-pre-wrap text-sm text-admin-text-primary bg-admin-bg-tertiary p-3 rounded-xl border border-admin-border-primary/20">
                     {workOrder.internal_notes}
                   </p>
                 </div>
@@ -1592,7 +1592,7 @@ export default function WorkOrderDetailPage() {
                   <p className="text-sm text-admin-text-tertiary mb-1">
                     Notas para el Cliente
                   </p>
-                  <p className="font-medium whitespace-pre-wrap text-sm text-admin-text-primary bg-admin-bg-tertiary p-3 rounded-none border border-admin-border-primary/20">
+                  <p className="font-medium whitespace-pre-wrap text-sm text-admin-text-primary bg-admin-bg-tertiary p-3 rounded-xl border border-admin-border-primary/20">
                     {workOrder.customer_notes}
                   </p>
                 </div>
@@ -1602,7 +1602,7 @@ export default function WorkOrderDetailPage() {
                   <p className="text-sm text-admin-text-tertiary mb-1">
                     Notas del Laboratorio
                   </p>
-                  <p className="font-medium whitespace-pre-wrap text-sm text-admin-text-primary bg-admin-bg-tertiary p-3 rounded-none border border-admin-border-primary/20">
+                  <p className="font-medium whitespace-pre-wrap text-sm text-admin-text-primary bg-admin-bg-tertiary p-3 rounded-xl border border-admin-border-primary/20">
                     {workOrder.lab_notes}
                   </p>
                 </div>
@@ -1612,7 +1612,7 @@ export default function WorkOrderDetailPage() {
                   <p className="text-sm text-admin-text-tertiary mb-1">
                     Notas de Control de Calidad
                   </p>
-                  <p className="font-medium whitespace-pre-wrap text-sm text-admin-text-primary bg-admin-bg-tertiary p-3 rounded-none border border-admin-border-primary/20">
+                  <p className="font-medium whitespace-pre-wrap text-sm text-admin-text-primary bg-admin-bg-tertiary p-3 rounded-xl border border-admin-border-primary/20">
                     {workOrder.quality_notes}
                   </p>
                 </div>

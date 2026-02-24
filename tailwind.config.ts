@@ -142,7 +142,6 @@ const config = {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
-        arch: "100px 100px 0 0",
         oval: "50%",
       },
       keyframes: {
@@ -209,10 +208,10 @@ const config = {
         "fade-in-down": "fade-in-down 0.6s ease-out",
       },
       fontFamily: {
-        // Epoch Fonts
-        display: ["var(--font-cinzel)", "serif"],
-        serif: ["var(--font-playfair)", "serif"],
-        body: ["var(--font-lato)", "sans-serif"],
+        // Lujo Tecnológico: Inter como principal (Geist/Inter/DM Sans)
+        display: ["var(--font-inter)", "Inter", "sans-serif"],
+        serif: ["var(--font-inter)", "Inter", "sans-serif"],
+        body: ["var(--font-inter)", "Inter", "sans-serif"],
 
         // Opttius Font Hierarchy
         title: ["var(--font-title)", "VELISTA", "serif"],

@@ -14,7 +14,7 @@ export function CTASection() {
 
   return (
     <section className="py-24 px-4 md:px-8 bg-epoch-background">
-      <div className="max-w-7xl mx-auto bg-epoch-primary rounded-arch overflow-hidden relative shadow-2xl">
+      <div className="max-w-7xl mx-auto bg-epoch-primary rounded-2xl overflow-hidden relative shadow-2xl">
         {/* Background Image Overlay */}
         <div className="absolute inset-0 z-0">
           <Image
@@ -27,19 +27,16 @@ export function CTASection() {
         </div>
 
         <div className="relative z-10 py-20 sm:py-32 px-4 sm:px-6 flex flex-col items-center text-center">
-          <div className="inline-flex items-center gap-4 px-6 py-2 border border-epoch-accent/30 rounded-full text-epoch-accent text-[10px] font-display tracking-[0.4em] uppercase mb-10">
+          <div className="inline-flex items-center gap-3 px-5 py-2 bg-epoch-accent/20 border border-epoch-accent/80 rounded-full text-epoch-accent text-[10px] sm:text-[11px] font-sans font-semibold tracking-[0.35em] uppercase mb-10 shadow-lg shadow-black/20">
             <Sparkles className="h-3 w-3" />
             <span>Prueba sin compromiso</span>
           </div>
 
-          <h2 className="text-4xl md:text-6xl font-display font-bold text-white tracking-tight mb-8">
-            PRUEBE OPTTIUS <br />
-            <span className="text-epoch-accent italic font-serif lowercase tracking-normal">
-              hoy
-            </span>
+          <h2 className="text-4xl md:text-6xl font-sans font-bold text-white tracking-tight mb-8">
+            PRUEBE OPTTIUS hoy
           </h2>
 
-          <p className="text-lg md:text-xl text-white/60 max-w-2xl mx-auto font-body italic mb-12">
+          <p className="text-lg md:text-xl text-white/60 max-w-2xl mx-auto font-sans mb-12">
             Únase a ópticas que ya gestionan recetas, presupuestos y laboratorio
             con precisión. Prueba gratuita. Sin tarjeta. Configuración guiada.
           </p>
@@ -48,14 +45,14 @@ export function CTASection() {
             <Button
               onClick={() => router.push("/signup")}
               size="lg"
-              className="bg-epoch-accent hover:bg-white text-epoch-surface rounded-none h-16 px-16 text-xs font-display tracking-[0.3em] uppercase transition-all duration-500 w-full sm:w-auto shadow-2xl"
+              className="bg-epoch-accent hover:bg-white text-epoch-surface rounded-xl h-16 px-16 text-xs font-sans font-semibold tracking-[0.2em] uppercase transition-all duration-500 w-full sm:w-auto shadow-2xl"
             >
               Comenzar prueba gratis
               <ArrowRight className="ml-3 h-4 w-4" />
             </Button>
             <button
               onClick={handleDemoClick}
-              className="text-white/60 hover:text-white font-serif italic text-lg tracking-wide transition-all duration-300 border-b border-white/20 hover:border-white pb-1"
+              className="text-white/60 hover:text-white font-sans text-lg tracking-wide transition-all duration-300 border-b border-white/20 hover:border-white pb-1"
             >
               Ver demo en vivo
             </button>

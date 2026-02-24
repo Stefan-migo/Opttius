@@ -90,9 +90,9 @@ export function formatBranchName(
  * @see {@link getBranchQueryParam} Para usar como query parameter en lugar de header
  */
 export function getBranchHeader(
-  branchId: string | null,
+  branchId: string | null | undefined,
 ): Record<string, string> {
-  if (branchId === null) {
+  if (branchId == null || branchId === "") {
     return { "x-branch-id": "global" };
   }
   return { "x-branch-id": branchId };

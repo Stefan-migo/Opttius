@@ -61,7 +61,7 @@ export default function ProductFilters({
                     e.preventDefault();
                   }
                 }}
-                className="pl-12 h-11 bg-admin-bg-tertiary border-admin-border-primary/10 rounded-none focus:border-epoch-primary focus:ring-1 focus:ring-epoch-primary/20 font-serif italic text-sm transition-all"
+                className="pl-12 h-11 bg-admin-bg-tertiary border-admin-border-primary/10 rounded-xl focus:border-epoch-primary focus:ring-1 focus:ring-epoch-primary/20 font-serif italic text-sm transition-all"
               />
             </div>
           </div>
@@ -73,10 +73,10 @@ export default function ProductFilters({
                 Filtrado por Categoría
               </label>
               <Select value={categoryFilter} onValueChange={onCategoryChange}>
-                <SelectTrigger className="h-11 bg-admin-bg-tertiary border-admin-border-primary/10 rounded-none font-display text-[10px] tracking-widest uppercase">
+                <SelectTrigger className="h-11 bg-admin-bg-tertiary border-admin-border-primary/10 rounded-xl font-display text-[10px] tracking-widest uppercase">
                   <SelectValue placeholder="Todas las categorías" />
                 </SelectTrigger>
-                <SelectContent className="rounded-none border-admin-border-primary/20">
+                <SelectContent className="rounded-xl border-admin-border-primary/20">
                   <SelectItem
                     value="all"
                     className="font-display text-[10px] tracking-widest uppercase"
@@ -102,10 +102,10 @@ export default function ProductFilters({
                 Estado de Ficha
               </label>
               <Select value={statusFilter} onValueChange={onStatusChange}>
-                <SelectTrigger className="h-11 bg-admin-bg-tertiary border-admin-border-primary/10 rounded-none font-display text-[10px] tracking-widest uppercase">
+                <SelectTrigger className="h-11 bg-admin-bg-tertiary border-admin-border-primary/10 rounded-xl font-display text-[10px] tracking-widest uppercase">
                   <SelectValue placeholder="Estado" />
                 </SelectTrigger>
-                <SelectContent className="rounded-none border-admin-border-primary/20">
+                <SelectContent className="rounded-xl border-admin-border-primary/20">
                   <SelectItem
                     value="all"
                     className="font-display text-[10px] tracking-widest uppercase text-admin-text-tertiary"
@@ -140,7 +140,7 @@ export default function ProductFilters({
               <Button
                 variant="outline"
                 onClick={onLowStockToggle}
-                className={`h-11 px-6 rounded-none border-admin-border-primary/10 font-display font-bold text-[10px] tracking-[0.2em] uppercase transition-all ${
+                className={`h-11 px-6 rounded-xl border-admin-border-primary/10 font-display font-bold text-[10px] tracking-[0.2em] uppercase transition-all ${
                   showLowStockOnly
                     ? "bg-admin-error text-white border-admin-error"
                     : "bg-white text-admin-text-primary hover:bg-admin-bg-tertiary"

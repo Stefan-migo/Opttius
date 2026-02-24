@@ -84,7 +84,7 @@ function ProductTableComponent({
                 type="checkbox"
                 checked={allSelected}
                 onChange={onSelectAll}
-                className="w-4 h-4 rounded-none border-admin-border-primary/20 accent-epoch-primary cursor-pointer"
+                className="w-4 h-4 rounded-xl border-admin-border-primary/20 accent-epoch-primary cursor-pointer"
               />
               <span className="text-[10px] font-display font-bold text-admin-text-tertiary uppercase tracking-widest">
                 Seleccionar Todos
@@ -96,7 +96,7 @@ function ProductTableComponent({
                 size="sm"
                 onClick={onRefresh}
                 disabled={isRefreshing}
-                className="h-9 px-4 rounded-none border-admin-border-primary/10 font-display font-bold text-[10px] tracking-widest uppercase"
+                className="h-9 px-4 rounded-xl border-admin-border-primary/10 font-display font-bold text-[10px] tracking-widest uppercase"
               >
                 <RefreshCw
                   className={`h-4 w-4 mr-2 ${isRefreshing ? "animate-spin" : ""}`}
@@ -117,7 +117,7 @@ function ProductTableComponent({
                     type="checkbox"
                     checked={allSelected}
                     onChange={onSelectAll}
-                    className="w-4 h-4 rounded-none border-admin-border-primary/20 accent-epoch-primary"
+                    className="w-4 h-4 rounded-xl border-admin-border-primary/20 accent-epoch-primary"
                   />
                 </TableHead>
                 <TableHead className="text-[10px] font-display font-bold text-admin-text-primary uppercase tracking-[0.2em] p-4">
@@ -151,7 +151,7 @@ function ProductTableComponent({
                       type="checkbox"
                       checked={selectedProducts.includes(product.id)}
                       onChange={() => onSelectProduct(product.id)}
-                      className="w-4 h-4 rounded-none border-admin-border-primary/20 accent-epoch-primary"
+                      className="w-4 h-4 rounded-xl border-admin-border-primary/20 accent-epoch-primary"
                     />
                   </TableCell>
 
@@ -218,7 +218,7 @@ function ProductTableComponent({
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="h-8 w-8 p-0 rounded-none hover:bg-admin-bg-tertiary text-epoch-primary"
+                          className="h-8 w-8 p-0 rounded-xl hover:bg-admin-bg-tertiary text-epoch-primary"
                         >
                           <Eye className="h-4 w-4" />
                         </Button>
@@ -227,7 +227,7 @@ function ProductTableComponent({
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="h-8 w-8 p-0 rounded-none hover:bg-admin-bg-tertiary text-epoch-primary"
+                          className="h-8 w-8 p-0 rounded-xl hover:bg-admin-bg-tertiary text-epoch-primary"
                         >
                           <Edit className="h-4 w-4" />
                         </Button>
@@ -236,7 +236,7 @@ function ProductTableComponent({
                         variant="ghost"
                         size="sm"
                         onClick={() => onDelete(product)}
-                        className="h-8 w-8 p-0 rounded-none hover:bg-admin-error/5 text-admin-error"
+                        className="h-8 w-8 p-0 rounded-xl hover:bg-admin-error/5 text-admin-error"
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>

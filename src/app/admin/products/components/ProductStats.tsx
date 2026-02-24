@@ -21,7 +21,7 @@ export default function ProductStats({
 }: ProductStatsProps) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-0 border border-admin-border-primary/20 bg-admin-border-primary/5">
-      <Card className="border-none bg-admin-bg-tertiary/50 rounded-none shadow-none hover:shadow-lg transition-shadow duration-300 group overflow-hidden border-r border-admin-border-primary/10">
+      <Card className="border-none bg-admin-bg-tertiary/50 rounded-xl shadow-none hover:shadow-lg transition-shadow duration-300 group overflow-hidden border-r border-admin-border-primary/10">
         <CardContent className="p-8 relative">
           <div className="flex items-start justify-between">
             <div className="space-y-1">
@@ -40,7 +40,7 @@ export default function ProductStats({
         </CardContent>
       </Card>
 
-      <Card className="border-none bg-admin-bg-tertiary/50 rounded-none shadow-none hover:shadow-lg transition-shadow duration-300 group overflow-hidden border-r border-admin-border-primary/10">
+      <Card className="border-none bg-admin-bg-tertiary/50 rounded-xl shadow-none hover:shadow-lg transition-shadow duration-300 group overflow-hidden border-r border-admin-border-primary/10">
         <CardContent className="p-8 relative">
           <div className="flex items-start justify-between">
             <div className="space-y-1">
@@ -59,7 +59,7 @@ export default function ProductStats({
         </CardContent>
       </Card>
 
-      <Card className="border-none bg-admin-bg-tertiary/50 rounded-none shadow-none hover:shadow-lg transition-shadow duration-300 group overflow-hidden border-r border-admin-border-primary/10">
+      <Card className="border-none bg-admin-bg-tertiary/50 rounded-xl shadow-none hover:shadow-lg transition-shadow duration-300 group overflow-hidden border-r border-admin-border-primary/10">
         <CardContent className="p-8 relative">
           <div className="flex items-start justify-between">
             <div className="space-y-1">
@@ -78,7 +78,7 @@ export default function ProductStats({
         </CardContent>
       </Card>
 
-      <Card className="border-none bg-admin-bg-tertiary/50 rounded-none shadow-none hover:shadow-lg transition-shadow duration-300 group overflow-hidden">
+      <Card className="border-none bg-admin-bg-tertiary/50 rounded-xl shadow-none hover:shadow-lg transition-shadow duration-300 group overflow-hidden">
         <CardContent className="p-8 relative">
           <div className="flex items-start justify-between">
             <div className="space-y-1">

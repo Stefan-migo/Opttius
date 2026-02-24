@@ -525,7 +525,12 @@ export default function BranchesPage() {
                         {branch.name}
                       </TableCell>
                       <TableCell>
-                        <Badge variant="outline">{branch.code}</Badge>
+                        <Badge
+                          variant="outline"
+                          className="border-[var(--admin-border-secondary)] bg-[var(--admin-bg-tertiary)]/60 text-[var(--admin-text-primary)] font-medium"
+                        >
+                          {branch.code}
+                        </Badge>
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2 text-sm text-foreground">
@@ -560,12 +565,12 @@ export default function BranchesPage() {
                       </TableCell>
                       <TableCell>
                         {branch.is_active ? (
-                          <Badge variant="default" className="bg-green-600">
+                          <Badge className="bg-[var(--admin-success)] text-[var(--admin-text-on-dark)] border border-[var(--admin-success)]/40 rounded-lg font-medium">
                             <CheckCircle className="h-3 w-3 mr-1" />
                             Activa
                           </Badge>
                         ) : (
-                          <Badge variant="secondary">
+                          <Badge className="bg-[var(--admin-bg-tertiary)] border border-[var(--admin-border-secondary)] text-[var(--admin-text-secondary)] rounded-lg font-medium">
                             <XCircle className="h-3 w-3 mr-1" />
                             Inactiva
                           </Badge>

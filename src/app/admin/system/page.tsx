@@ -31,12 +31,13 @@ import {
   Receipt,
   Users,
   FileText,
+  MessageCircle,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useBranch } from "@/hooks/useBranch";
 import { BranchSelector } from "@/components/admin/BranchSelector";
 import EmailTemplatesManager from "@/components/admin/EmailTemplatesManager";
-import AutomaticEmailsInfo from "@/components/admin/AutomaticEmailsInfo";
+import EmailConfigCard from "@/components/admin/EmailConfigCard";
 import NotificationSettings from "@/components/admin/NotificationSettings";
 import { useSystemConfig } from "./hooks/useSystemConfig";
 import { useSystemHealth } from "./hooks/useSystemHealth";
@@ -46,6 +47,7 @@ import SystemConfig from "./components/SystemConfig";
 import SystemHealth from "./components/SystemHealth";
 import SystemMaintenance from "./components/SystemMaintenance";
 import FormOptionsConfig from "./components/FormOptionsConfig";
+import WhatsAppSettingsCard from "@/components/admin/WhatsAppSettingsCard";
 import dynamic from "next/dynamic";
 
 const POSBillingSettings = dynamic(
@@ -78,6 +80,7 @@ export default function SystemAdministrationPage() {
         "notifications",
         "billing",
         "formularios",
+        "whatsapp",
         "health",
         "maintenance",
       ].includes(tabFromUrl)
@@ -95,6 +98,7 @@ export default function SystemAdministrationPage() {
         "notifications",
         "billing",
         "formularios",
+        "whatsapp",
         "health",
         "maintenance",
       ].includes(tabFromUrl)
@@ -497,6 +501,10 @@ export default function SystemAdministrationPage() {
             <FileText className="h-4 w-4 mr-1" />
             Formularios
           </TabsTrigger>
+          <TabsTrigger value="whatsapp" className="flex-1">
+            <MessageCircle className="h-4 w-4 mr-1" />
+            WhatsApp
+          </TabsTrigger>
           <TabsTrigger value="health" className="flex-1">
             Salud
           </TabsTrigger>
@@ -526,7 +534,7 @@ export default function SystemAdministrationPage() {
 
         <TabsContent value="email" className="space-y-6">
           <EmailTemplatesManager organizationId={organizationId ?? undefined} />
-          <AutomaticEmailsInfo />
+          <EmailConfigCard configs={configs} />
         </TabsContent>
 
         <TabsContent value="notifications" className="space-y-6">
@@ -560,6 +568,10 @@ export default function SystemAdministrationPage() {
 
         <TabsContent value="formularios" className="space-y-6">
           <FormOptionsConfig />
+        </TabsContent>
+
+        <TabsContent value="whatsapp" className="space-y-6">
+          <WhatsAppSettingsCard />
         </TabsContent>
 
         <TabsContent value="health" className="space-y-6">

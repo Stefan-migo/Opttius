@@ -1706,7 +1706,7 @@ export default function CustomerDetailPage() {
         open={showCreatePrescription}
         onOpenChange={setShowCreatePrescription}
       >
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-7xl max-h-[90vh] overflow-y-auto p-6 sm:p-8">
           <DialogHeader>
             <DialogTitle>
               {editingPrescription ? "Editar Receta" : "Nueva Receta"}

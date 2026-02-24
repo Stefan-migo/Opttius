@@ -635,7 +635,15 @@ export async function POST(request: NextRequest) {
                 const emailOrder = {
                   ...(newOrder as any),
                   user_email: (newOrder as any).email,
-                  customer_name: (newOrder as any).customer_name || "Cliente",
+                  email: (newOrder as any).email,
+                  currency: (newOrder as any).currency || orderData.currency || "CLP",
+                  customer_name:
+                    (newOrder as any).customer_name ||
+                    orderData.customer_name?.trim() ||
+                    (orderData.shipping?.first_name && orderData.shipping?.last_name
+                      ? `${orderData.shipping.first_name} ${orderData.shipping.last_name}`.trim()
+                      : null) ||
+                    "Cliente",
                   items:
                     orderData.items?.map((item: any) => ({
                       id: item.product_id,
@@ -644,6 +652,10 @@ export async function POST(request: NextRequest) {
                       price: item.unit_price,
                       variant_title: item.variant_title,
                     })) || [],
+                  payment_method:
+                    (newOrder as any).mp_payment_method ||
+                    orderData.payment_method ||
+                    "manual",
                   organization_id: (newOrder as any).organization_id,
                 };
 

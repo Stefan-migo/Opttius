@@ -31,6 +31,8 @@ interface TableConfig {
   name: string;
   filter: string;
   anchor?: string;
+  /** When true, backup all rows (shared tables). On restore, upsert without delete. */
+  isGlobal?: boolean;
 }
 
 const TABLES_CONFIG: TableConfig[] = [
@@ -44,6 +46,8 @@ const TABLES_CONFIG: TableConfig[] = [
   { name: "schedule_settings", filter: "organization_id" },
   { name: "quote_settings", filter: "organization_id" },
   { name: "system_email_templates", filter: "organization_id" },
+  { name: "notification_settings", filter: "organization_id" },
+  { name: "system_config", filter: "organization_id" },
 
   // --- Nivel 2: Catalogos Maestros ---
   { name: "lens_families", filter: "organization_id" },
@@ -60,11 +64,15 @@ const TABLES_CONFIG: TableConfig[] = [
   },
   { name: "products", filter: "organization_id" },
   { name: "product_variants", filter: "product_id", anchor: "products" },
-  { name: "product_option_fields", filter: "product_id", anchor: "products" },
+  {
+    name: "product_option_fields",
+    filter: "id",
+    isGlobal: true,
+  },
   {
     name: "product_option_values",
-    filter: "variant_id",
-    anchor: "product_variants",
+    filter: "field_id",
+    anchor: "product_option_fields",
   },
   { name: "customers", filter: "organization_id" },
 
@@ -96,6 +104,8 @@ const TABLES_CONFIG: TableConfig[] = [
   },
   { name: "payments", filter: "organization_id" },
   { name: "product_branch_stock", filter: "branch_id", anchor: "branches" },
+  { name: "inventory_movements", filter: "branch_id", anchor: "branches" },
+  { name: "admin_notifications", filter: "organization_id" },
 
   // --- Nivel 4: Inteligencia y Soporte ---
   { name: "ai_insights", filter: "organization_id" },
@@ -121,7 +131,7 @@ export class BackupService {
       created_by: userIdOrEmail || "system",
       organization_id: organizationId,
       tables: {},
-      version: "1.3",
+      version: "1.4",
     };
 
     const idsCache: Record<string, string[]> = {};
@@ -134,7 +144,19 @@ export class BackupService {
       try {
         const query = supabaseService.from(config.name).select("*");
 
-        if (config.anchor) {
+        if (config.isGlobal) {
+          // Shared tables: backup all rows
+          const { data, error } = await query;
+          if (error) throw error;
+          backupData.tables[config.name] = {
+            data: data || [],
+            record_count: data?.length || 0,
+          };
+          if (data && data.length > 0)
+            idsCache[config.name] = data
+              .map((row: any) => row.id ?? row[config.filter])
+              .filter(Boolean);
+        } else if (config.anchor) {
           const anchorIds = idsCache[config.anchor] || [];
           if (anchorIds.length === 0) {
             backupData.tables[config.name] = {
@@ -220,8 +242,9 @@ export class BackupService {
 
     // --- PASO 1: LIMPIEZA ESTRATEGICA ---
     // Limpiamos las tablas base. El CASCADE se encarga de la mayoria de las dependencias.
+    // Skip: anchor tables (cleaned via cascade) and global tables (shared, no delete)
     for (const config of [...TABLES_CONFIG].reverse()) {
-      if (config.anchor) continue;
+      if (config.anchor || config.isGlobal) continue;
 
       const { error: deleteError } = await supabaseService
         .from(config.name)
@@ -252,9 +275,8 @@ export class BackupService {
 
         for (let i = 0; i < tableData.length; i += batchSize) {
           const batch = tableData.slice(i, i + batchSize).map((row) => {
-            if (!config.anchor)
-              return { ...row, [config.filter]: organizationId };
-            return row;
+            if (config.isGlobal || config.anchor) return row;
+            return { ...row, [config.filter]: organizationId };
           });
 
           const { error: upsertError } = await supabaseService

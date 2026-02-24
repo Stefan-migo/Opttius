@@ -12,7 +12,7 @@ export function DocSectionContent({ section }: DocSectionContentProps) {
 
   if (!content) {
     return (
-      <Card className="rounded-none">
+      <Card className="rounded-xl">
         <CardContent className="py-12 text-center">
           <p className="text-admin-text-tertiary">
             Documentación en preparación para esta sección.
@@ -23,7 +23,7 @@ export function DocSectionContent({ section }: DocSectionContentProps) {
   }
 
   return (
-    <Card className="border border-admin-border-primary/20 bg-admin-border-primary/5 rounded-none shadow-none">
+    <Card className="border border-admin-border-primary/20 bg-admin-border-primary/5 rounded-xl shadow-none">
       <CardHeader className="pb-4 border-b border-admin-border-primary/10">
         <CardTitle className="text-2xl font-display font-bold text-admin-text-primary uppercase tracking-tight">
           {content.title}

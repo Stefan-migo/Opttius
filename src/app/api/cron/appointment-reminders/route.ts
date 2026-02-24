@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceRoleClient } from "@/utils/supabase/server";
 import { EmailNotificationService } from "@/lib/email/notifications";
+import { sendAppointmentReminderWhatsApp } from "@/lib/whatsapp/notifications-b2b";
 import { appLogger as logger } from "@/lib/logger";
 
 /**
@@ -39,12 +40,13 @@ export async function GET(request: NextRequest) {
         status,
         customer_id,
         guest_email,
+        guest_phone,
         guest_first_name,
         guest_last_name,
         branch_id,
         organization_id,
         branch:branches(id, name, organization_id),
-        customer:customers(id, first_name, last_name, email)
+        customer:customers(id, first_name, last_name, email, phone, preferred_contact_method)
       `,
       )
       .eq("appointment_date", tomorrowStr)
@@ -70,6 +72,8 @@ export async function GET(request: NextRequest) {
       const customer = apt.customer as {
         first_name?: string;
         last_name?: string;
+        phone?: string;
+        preferred_contact_method?: string;
       } | null;
       const guestFirst = (apt as { guest_first_name?: string })
         .guest_first_name;
@@ -102,6 +106,16 @@ export async function GET(request: NextRequest) {
       );
 
       if (result.success) totalSent++;
+
+      const guestPhone = (apt as { guest_phone?: string }).guest_phone;
+      const phone = customer?.phone || guestPhone;
+      const preferWhatsApp =
+        customer?.preferred_contact_method === "whatsapp" || (!customerEmail && !!phone);
+      if (phone && preferWhatsApp) {
+        const msg = `Recordatorio: Tu cita en ${appointmentData.branch_name} es mañana ${appointmentData.date} a las ${appointmentData.time}. Responde CONFIRMAR para confirmar.`;
+        const waSent = await sendAppointmentReminderWhatsApp(phone, msg);
+        if (waSent) totalSent++;
+      }
     }
 
     logger.info("Appointment reminders cron completed", {

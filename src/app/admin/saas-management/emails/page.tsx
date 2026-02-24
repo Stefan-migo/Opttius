@@ -1,16 +1,41 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Mail, Settings, History, BarChart3, ArrowLeft } from "lucide-react";
+import {
+  Mail,
+  Settings,
+  History,
+  BarChart3,
+  ArrowLeft,
+  MousePointer,
+} from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import EmailTemplatesManager from "@/components/admin/EmailTemplatesManager";
+import { EmailEventsHistory } from "@/components/admin/EmailEventsHistory";
+
+interface EmailMetrics {
+  totalDelivered: number;
+  totalOpened: number;
+  totalClicked: number;
+  openRate: number;
+  clickRate: number;
+  period: string;
+}
 
 export default function SaasEmailsPage() {
   const [activeTab, setActiveTab] = useState("templates");
   const router = useRouter();
+  const [metrics, setMetrics] = useState<EmailMetrics | null>(null);
+
+  useEffect(() => {
+    fetch("/api/admin/saas-management/email-metrics")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => data && setMetrics(data))
+      .catch(() => {});
+  }, []);
 
   return (
     <div className="space-y-6 p-6">
@@ -20,7 +45,7 @@ export default function SaasEmailsPage() {
           size="icon"
           onClick={() => router.push("/admin/saas-management/dashboard")}
           title="Volver al dashboard"
-          className="rounded-none text-epoch-primary hover:bg-epoch-primary/10"
+          className="rounded-xl text-epoch-primary hover:bg-epoch-primary/10"
         >
           <ArrowLeft className="h-5 w-5" />
         </Button>
@@ -41,9 +66,11 @@ export default function SaasEmailsPage() {
               <Mail className="h-8 w-8 text-epoch-primary" />
               <div>
                 <p className="text-sm text-muted-foreground">
-                  Total Enviados (vía Resend)
+                  Total Entregados (30d)
                 </p>
-                <p className="text-2xl font-bold">1,234</p>
+                <p className="text-2xl font-bold">
+                  {metrics ? metrics.totalDelivered.toLocaleString() : "—"}
+                </p>
               </div>
             </div>
           </CardContent>
@@ -56,7 +83,9 @@ export default function SaasEmailsPage() {
                 <p className="text-sm text-muted-foreground">
                   Tasa de Apertura
                 </p>
-                <p className="text-2xl font-bold">42.5%</p>
+                <p className="text-2xl font-bold">
+                  {metrics ? `${metrics.openRate}%` : "—"}
+                </p>
               </div>
             </div>
           </CardContent>
@@ -64,12 +93,12 @@ export default function SaasEmailsPage() {
         <Card className="admin-card bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)]">
           <CardContent className="p-6">
             <div className="flex items-center gap-4">
-              <Settings className="h-8 w-8 text-amber-600" />
+              <MousePointer className="h-8 w-8 text-epoch-primary" />
               <div>
-                <p className="text-sm text-muted-foreground">
-                  Dominios Verificados
+                <p className="text-sm text-muted-foreground">Tasa de Clics</p>
+                <p className="text-2xl font-bold">
+                  {metrics ? `${metrics.clickRate}%` : "—"}
                 </p>
-                <p className="text-2xl font-bold text-admin-success">Activo</p>
               </div>
             </div>
           </CardContent>
@@ -81,7 +110,7 @@ export default function SaasEmailsPage() {
         onValueChange={setActiveTab}
         className="space-y-6"
       >
-        <TabsList className="flex w-full justify-start gap-1 h-auto bg-transparent border-b rounded-none">
+        <TabsList className="flex w-full justify-start gap-1 h-auto bg-transparent border-b rounded-xl">
           <TabsTrigger
             value="templates"
             className="rounded-t-lg data-[state=active]:bg-white"
@@ -108,11 +137,7 @@ export default function SaasEmailsPage() {
         </TabsContent>
 
         <TabsContent value="history" className="space-y-6">
-          <Card className="admin-card">
-            <CardContent className="py-12 text-center text-muted-foreground">
-              El historial de envíos de Resend estará disponible próximamente.
-            </CardContent>
-          </Card>
+          <EmailEventsHistory />
         </TabsContent>
 
         <TabsContent value="config" className="space-y-6">

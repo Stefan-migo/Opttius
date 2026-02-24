@@ -1258,7 +1258,7 @@ export default function OrganizationDetailsPage() {
                   setUserFormData({ ...userFormData, role: value })
                 }
               >
-                <SelectTrigger className="rounded-none">
+                <SelectTrigger className="rounded-xl">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -1283,7 +1283,7 @@ export default function OrganizationDetailsPage() {
                     })
                   }
                 >
-                  <SelectTrigger className="rounded-none">
+                  <SelectTrigger className="rounded-xl">
                     <SelectValue placeholder="Seleccionar sucursal" />
                   </SelectTrigger>
                   <SelectContent>
@@ -1360,7 +1360,7 @@ export default function OrganizationDetailsPage() {
                   setEditData({ ...editData, subscription_tier: value })
                 }
               >
-                <SelectTrigger className="rounded-none">
+                <SelectTrigger className="rounded-xl">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -1378,7 +1378,7 @@ export default function OrganizationDetailsPage() {
                   setEditData({ ...editData, status: value })
                 }
               >
-                <SelectTrigger className="rounded-none">
+                <SelectTrigger className="rounded-xl">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>

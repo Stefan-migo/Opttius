@@ -10,7 +10,8 @@ export const businessConfig = {
   name: "Opttius",
   displayName: "Opttius",
   tagline: "Sistema de Gestión Óptica",
-  contactEmail: "admin@yourbusiness.com",
+  contactEmail: "contacto@opttius.cl",
+  contactPhone: "+5492979242298",
 
   // Branding
   colors: {

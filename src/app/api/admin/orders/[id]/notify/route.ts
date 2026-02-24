@@ -56,26 +56,36 @@ export async function POST(
       return NextResponse.json({ error: "Order not found" }, { status: 404 });
     }
 
-    // Get customer name from order or use default
+    // Customer name: prefer orders.customer_name (POS), fallback to shipping names (e-commerce)
     const customerName =
-      order.shipping_first_name && order.shipping_last_name
-        ? `${order.shipping_first_name} ${order.shipping_last_name}`
-        : "Cliente";
+      order.customer_name?.trim() ||
+      (order.shipping_first_name && order.shipping_last_name
+        ? `${order.shipping_first_name} ${order.shipping_last_name}`.trim()
+        : null) ||
+      "Cliente";
+
+    // Payment method: POS uses payment_method_type, e-commerce uses mp_payment_method
+    const paymentMethod =
+      order.payment_method_type || order.mp_payment_method || "N/A";
 
     // Prepare order data for email
     const emailOrder = {
       id: order.id,
       order_number: order.order_number,
       user_email: order.email,
+      email: order.email,
       customer_name: customerName,
+      currency: order.currency,
       items:
         order.order_items?.map((item: any) => ({
+          id: item.id,
           name: item.product_name,
           quantity: item.quantity,
           price: item.unit_price,
+          variant_title: item.variant_title,
         })) || [],
       total_amount: order.total_amount,
-      payment_method: order.mp_payment_method || "MercadoPago",
+      payment_method: paymentMethod,
       created_at: order.created_at,
       payment_id: order.mp_payment_id,
       status: order.status,

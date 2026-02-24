@@ -9,7 +9,7 @@ import {
   replaceTemplateVariables,
   getDefaultVariables,
 } from "../template-utils";
-import { createServiceRoleClient } from "@/utils/supabase/server";
+import { getOrganizationInfoWithFallbacks } from "../org-utils";
 
 // ============================================================================
 // Interfaces para tipos de datos
@@ -160,27 +160,6 @@ export interface BirthdayPromoData {
 // ============================================================================
 
 /**
- * Obtiene la información de la organización para el branding del email
- */
-async function getOrganizationInfo(organizationId?: string) {
-  if (!organizationId) return null;
-
-  try {
-    const supabase = createServiceRoleClient();
-    const { data: org } = await supabase
-      .from("organizations")
-      .select("name, metadata")
-      .eq("id", organizationId)
-      .single();
-
-    return org;
-  } catch (error) {
-    console.error("Error fetching organization info for email:", error);
-    return null;
-  }
-}
-
-/**
  * Genera versión de texto plano del HTML
  */
 function htmlToText(html: string): string {
@@ -200,7 +179,7 @@ export async function sendAppointmentConfirmation(
   organizationId?: string,
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const orgInfo = await getOrganizationInfo(organizationId);
+    const orgInfo = await getOrganizationInfoWithFallbacks(organizationId);
     const template = await loadEmailTemplate(
       "appointment_confirmation",
       true,
@@ -220,9 +199,9 @@ export async function sendAppointmentConfirmation(
 
     const variables = {
       ...getDefaultVariables({
-        name: orgInfo?.name,
+        name: orgInfo?.name ?? undefined,
         support_email:
-          orgInfo?.metadata?.support_email || "contacto@opttius.cl",
+          orgInfo?.resolvedSupportEmail || "contacto@opttius.cl",
       }),
       customer_name: appointment.customer_name || "Cliente",
       customer_first_name: appointment.customer_first_name || "Cliente",
@@ -257,7 +236,8 @@ export async function sendAppointmentConfirmation(
       subject,
       html,
       text,
-      replyTo: orgInfo?.metadata?.support_email || "contacto@opttius.cl",
+      replyTo: orgInfo?.resolvedSupportEmail || "contacto@opttius.cl",
+      fromDisplayName: orgInfo?.resolvedDisplayName,
     });
 
     if (result.success) {
@@ -283,7 +263,7 @@ export async function sendAppointmentReminder(
   organizationId?: string,
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const orgInfo = await getOrganizationInfo(organizationId);
+    const orgInfo = await getOrganizationInfoWithFallbacks(organizationId);
     const template = await loadEmailTemplate(
       "appointment_reminder",
       true,
@@ -303,9 +283,9 @@ export async function sendAppointmentReminder(
 
     const variables = {
       ...getDefaultVariables({
-        name: orgInfo?.name,
+        name: orgInfo?.name ?? undefined,
         support_email:
-          orgInfo?.metadata?.support_email || "contacto@opttius.cl",
+          orgInfo?.resolvedSupportEmail || "contacto@opttius.cl",
       }),
       customer_name: appointment.customer_name || "Cliente",
       customer_first_name: appointment.customer_first_name || "Cliente",
@@ -331,7 +311,8 @@ export async function sendAppointmentReminder(
       subject,
       html,
       text,
-      replyTo: orgInfo?.metadata?.support_email || "contacto@opttius.cl",
+      replyTo: orgInfo?.resolvedSupportEmail || "contacto@opttius.cl",
+      fromDisplayName: orgInfo?.resolvedDisplayName,
     });
 
     if (result.success) {
@@ -357,7 +338,7 @@ export async function sendAppointmentReminder2h(
   organizationId?: string,
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const orgInfo = await getOrganizationInfo(organizationId);
+    const orgInfo = await getOrganizationInfoWithFallbacks(organizationId);
     const template = await loadEmailTemplate(
       "appointment_reminder_2h",
       true,
@@ -377,9 +358,9 @@ export async function sendAppointmentReminder2h(
 
     const variables = {
       ...getDefaultVariables({
-        name: orgInfo?.name,
+        name: orgInfo?.name ?? undefined,
         support_email:
-          orgInfo?.metadata?.support_email || "contacto@opttius.cl",
+          orgInfo?.resolvedSupportEmail || "contacto@opttius.cl",
       }),
       customer_name: appointment.customer_name || "Cliente",
       customer_first_name: appointment.customer_first_name || "Cliente",
@@ -401,7 +382,8 @@ export async function sendAppointmentReminder2h(
       subject,
       html,
       text,
-      replyTo: orgInfo?.metadata?.support_email || "contacto@opttius.cl",
+      replyTo: orgInfo?.resolvedSupportEmail || "contacto@opttius.cl",
+      fromDisplayName: orgInfo?.resolvedDisplayName,
     });
 
     if (result.success) {
@@ -427,7 +409,7 @@ export async function sendAppointmentCancellation(
   organizationId?: string,
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const orgInfo = await getOrganizationInfo(organizationId);
+    const orgInfo = await getOrganizationInfoWithFallbacks(organizationId);
     const template = await loadEmailTemplate(
       "appointment_cancelation",
       true,
@@ -447,9 +429,9 @@ export async function sendAppointmentCancellation(
 
     const variables = {
       ...getDefaultVariables({
-        name: orgInfo?.name,
+        name: orgInfo?.name ?? undefined,
         support_email:
-          orgInfo?.metadata?.support_email || "contacto@opttius.cl",
+          orgInfo?.resolvedSupportEmail || "contacto@opttius.cl",
       }),
       customer_name: appointment.customer_name || "Cliente",
       customer_first_name: appointment.customer_first_name || "Cliente",
@@ -472,7 +454,8 @@ export async function sendAppointmentCancellation(
       subject,
       html,
       text,
-      replyTo: orgInfo?.metadata?.support_email || "contacto@opttius.cl",
+      replyTo: orgInfo?.resolvedSupportEmail || "contacto@opttius.cl",
+      fromDisplayName: orgInfo?.resolvedDisplayName,
     });
 
     if (result.success) {
@@ -490,6 +473,176 @@ export async function sendAppointmentCancellation(
 }
 
 // ============================================================================
+// 4b. Cita Reprogramada
+// ============================================================================
+
+export interface AppointmentRescheduleData extends AppointmentData {
+  old_date: string;
+  old_time: string;
+}
+
+export async function sendAppointmentRescheduled(
+  appointment: AppointmentRescheduleData,
+  organizationId?: string,
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const orgInfo = await getOrganizationInfoWithFallbacks(organizationId);
+    const template = await loadEmailTemplate(
+      "appointment_rescheduled",
+      true,
+      organizationId,
+    );
+
+    if (!template) {
+      console.warn(
+        "⚠️ No active appointment_rescheduled template found, skipping email",
+      );
+      return { success: false, error: "Template not found" };
+    }
+
+    if (!appointment.customer_email) {
+      return { success: false, error: "No customer email found" };
+    }
+
+    const variables = {
+      ...getDefaultVariables({
+        name: orgInfo?.name ?? undefined,
+        support_email:
+          orgInfo?.resolvedSupportEmail || "contacto@opttius.cl",
+      }),
+      customer_name: appointment.customer_name || "Cliente",
+      customer_first_name: appointment.customer_first_name || "Cliente",
+      appointment_date: appointment.date,
+      appointment_time: appointment.time,
+      old_appointment_date: appointment.old_date,
+      old_appointment_time: appointment.old_time,
+      branch_name: appointment.branch_name || orgInfo?.name || "Nuestra Óptica",
+      branch_phone: appointment.branch_phone || "",
+      branch_email: appointment.branch_email || "",
+      professional_name: appointment.professional_name || "Especialista",
+      organization_name: orgInfo?.name || "Nuestra Óptica",
+    };
+
+    const subject = replaceTemplateVariables(template.subject, variables);
+    const html = replaceTemplateVariables(template.content, variables);
+
+    const text = htmlToText(html);
+
+    const result = await sendEmail({
+      to: appointment.customer_email,
+      subject,
+      html,
+      text,
+      replyTo: orgInfo?.resolvedSupportEmail || "contacto@opttius.cl",
+      fromDisplayName: orgInfo?.resolvedDisplayName,
+    });
+
+    if (result.success) {
+      await incrementTemplateUsage(template.id);
+    }
+
+    return result;
+  } catch (error) {
+    console.error("Error sending appointment rescheduled:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Unknown error",
+    };
+  }
+}
+
+// ============================================================================
+// 4c. Recordatorio de Seguimiento (Requiere Seguimiento - follow_up_date)
+// ============================================================================
+
+export interface AppointmentFollowUpData {
+  id: string;
+  customer_name: string;
+  customer_first_name: string;
+  customer_email: string;
+  follow_up_date: string;
+  branch_name?: string;
+  branch_phone?: string;
+  branch_email?: string;
+  booking_url?: string;
+}
+
+export async function sendAppointmentFollowUpReminder(
+  appointment: AppointmentFollowUpData,
+  organizationId?: string,
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const orgInfo = await getOrganizationInfoWithFallbacks(organizationId);
+    const template = await loadEmailTemplate(
+      "appointment_follow_up_reminder",
+      true,
+      organizationId,
+    );
+
+    if (!template) {
+      console.warn(
+        "⚠️ No active appointment_follow_up_reminder template found, skipping email",
+      );
+      return { success: false, error: "Template not found" };
+    }
+
+    if (!appointment.customer_email) {
+      return { success: false, error: "No customer email found" };
+    }
+
+    const followUpDateFormatted = appointment.follow_up_date
+      ? new Date(appointment.follow_up_date).toLocaleDateString("es-AR", {
+          day: "numeric",
+          month: "long",
+          year: "numeric",
+        })
+      : appointment.follow_up_date;
+
+    const variables = {
+      ...getDefaultVariables({
+        name: orgInfo?.name ?? undefined,
+        support_email:
+          orgInfo?.resolvedSupportEmail || "contacto@opttius.cl",
+      }),
+      customer_name: appointment.customer_name || "Cliente",
+      customer_first_name: appointment.customer_first_name || "Cliente",
+      follow_up_date: followUpDateFormatted,
+      branch_name: appointment.branch_name || orgInfo?.name || "Nuestra Óptica",
+      branch_phone: appointment.branch_phone || "",
+      branch_email: appointment.branch_email || "",
+      booking_url: appointment.booking_url || "",
+      organization_name: orgInfo?.name || "Nuestra Óptica",
+    };
+
+    const subject = replaceTemplateVariables(template.subject, variables);
+    const html = replaceTemplateVariables(template.content, variables);
+
+    const text = htmlToText(html);
+
+    const result = await sendEmail({
+      to: appointment.customer_email,
+      subject,
+      html,
+      text,
+      replyTo: orgInfo?.resolvedSupportEmail || "contacto@opttius.cl",
+      fromDisplayName: orgInfo?.resolvedDisplayName,
+    });
+
+    if (result.success) {
+      await incrementTemplateUsage(template.id);
+    }
+
+    return result;
+  } catch (error) {
+    console.error("Error sending appointment follow-up reminder:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Unknown error",
+    };
+  }
+}
+
+// ============================================================================
 // 5. Receta Lista Para Retirar
 // ============================================================================
 
@@ -498,7 +651,7 @@ export async function sendPrescriptionReady(
   organizationId?: string,
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const orgInfo = await getOrganizationInfo(organizationId);
+    const orgInfo = await getOrganizationInfoWithFallbacks(organizationId);
     const template = await loadEmailTemplate(
       "prescription_ready",
       true,
@@ -518,9 +671,9 @@ export async function sendPrescriptionReady(
 
     const variables = {
       ...getDefaultVariables({
-        name: orgInfo?.name,
+        name: orgInfo?.name ?? undefined,
         support_email:
-          orgInfo?.metadata?.support_email || "contacto@opttius.cl",
+          orgInfo?.resolvedSupportEmail || "contacto@opttius.cl",
       }),
       customer_name: prescription.customer_name || "Cliente",
       customer_first_name: prescription.customer_first_name || "Cliente",
@@ -560,7 +713,8 @@ export async function sendPrescriptionReady(
       subject,
       html,
       text,
-      replyTo: orgInfo?.metadata?.support_email || "contacto@opttius.cl",
+      replyTo: orgInfo?.resolvedSupportEmail || "contacto@opttius.cl",
+      fromDisplayName: orgInfo?.resolvedDisplayName,
     });
 
     if (result.success) {
@@ -586,7 +740,7 @@ export async function sendPrescriptionExpiring(
   organizationId?: string,
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const orgInfo = await getOrganizationInfo(organizationId);
+    const orgInfo = await getOrganizationInfoWithFallbacks(organizationId);
     const template = await loadEmailTemplate(
       "prescription_expiring",
       true,
@@ -606,9 +760,9 @@ export async function sendPrescriptionExpiring(
 
     const variables = {
       ...getDefaultVariables({
-        name: orgInfo?.name,
+        name: orgInfo?.name ?? undefined,
         support_email:
-          orgInfo?.metadata?.support_email || "contacto@opttius.cl",
+          orgInfo?.resolvedSupportEmail || "contacto@opttius.cl",
       }),
       customer_name: prescription.customer_name || "Cliente",
       customer_first_name: prescription.customer_first_name || "Cliente",
@@ -633,7 +787,8 @@ export async function sendPrescriptionExpiring(
       subject,
       html,
       text,
-      replyTo: orgInfo?.metadata?.support_email || "contacto@opttius.cl",
+      replyTo: orgInfo?.resolvedSupportEmail || "contacto@opttius.cl",
+      fromDisplayName: orgInfo?.resolvedDisplayName,
     });
 
     if (result.success) {
@@ -659,7 +814,7 @@ export async function sendWorkOrderReady(
   organizationId?: string,
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const orgInfo = await getOrganizationInfo(organizationId);
+    const orgInfo = await getOrganizationInfoWithFallbacks(organizationId);
     const template = await loadEmailTemplate(
       "work_order_ready",
       true,
@@ -679,9 +834,9 @@ export async function sendWorkOrderReady(
 
     const variables = {
       ...getDefaultVariables({
-        name: orgInfo?.name,
+        name: orgInfo?.name ?? undefined,
         support_email:
-          orgInfo?.metadata?.support_email || "contacto@opttius.cl",
+          orgInfo?.resolvedSupportEmail || "contacto@opttius.cl",
       }),
       customer_name: workOrder.customer_name || "Cliente",
       customer_first_name: workOrder.customer_first_name || "Cliente",
@@ -713,7 +868,8 @@ export async function sendWorkOrderReady(
       subject,
       html,
       text,
-      replyTo: orgInfo?.metadata?.support_email || "contacto@opttius.cl",
+      replyTo: orgInfo?.resolvedSupportEmail || "contacto@opttius.cl",
+      fromDisplayName: orgInfo?.resolvedDisplayName,
     });
 
     if (result.success) {
@@ -739,7 +895,7 @@ export async function sendQuoteSent(
   organizationId?: string,
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const orgInfo = await getOrganizationInfo(organizationId);
+    const orgInfo = await getOrganizationInfoWithFallbacks(organizationId);
     const template = await loadEmailTemplate(
       "quote_sent",
       true,
@@ -771,9 +927,9 @@ export async function sendQuoteSent(
 
     const variables = {
       ...getDefaultVariables({
-        name: orgInfo?.name,
+        name: orgInfo?.name ?? undefined,
         support_email:
-          orgInfo?.metadata?.support_email || "contacto@opttius.cl",
+          orgInfo?.resolvedSupportEmail || "contacto@opttius.cl",
       }),
       customer_name: quote.customer_name || "Cliente",
       customer_first_name: quote.customer_first_name || "Cliente",
@@ -811,7 +967,8 @@ export async function sendQuoteSent(
       subject,
       html,
       text,
-      replyTo: orgInfo?.metadata?.support_email || "contacto@opttius.cl",
+      replyTo: orgInfo?.resolvedSupportEmail || "contacto@opttius.cl",
+      fromDisplayName: orgInfo?.resolvedDisplayName,
     });
 
     if (result.success) {
@@ -837,7 +994,7 @@ export async function sendQuoteExpiring(
   organizationId?: string,
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const orgInfo = await getOrganizationInfo(organizationId);
+    const orgInfo = await getOrganizationInfoWithFallbacks(organizationId);
     const template = await loadEmailTemplate(
       "quote_expiring",
       true,
@@ -857,9 +1014,9 @@ export async function sendQuoteExpiring(
 
     const variables = {
       ...getDefaultVariables({
-        name: orgInfo?.name,
+        name: orgInfo?.name ?? undefined,
         support_email:
-          orgInfo?.metadata?.support_email || "contacto@opttius.cl",
+          orgInfo?.resolvedSupportEmail || "contacto@opttius.cl",
       }),
       customer_name: quote.customer_name || "Cliente",
       customer_first_name: quote.customer_first_name || "Cliente",
@@ -883,7 +1040,8 @@ export async function sendQuoteExpiring(
       subject,
       html,
       text,
-      replyTo: orgInfo?.metadata?.support_email || "contacto@opttius.cl",
+      replyTo: orgInfo?.resolvedSupportEmail || "contacto@opttius.cl",
+      fromDisplayName: orgInfo?.resolvedDisplayName,
     });
 
     if (result.success) {
@@ -909,7 +1067,7 @@ export async function sendAccountWelcomeEmail(
   organizationId?: string,
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const orgInfo = await getOrganizationInfo(organizationId);
+    const orgInfo = await getOrganizationInfoWithFallbacks(organizationId);
     const template = await loadEmailTemplate(
       "account_welcome",
       true,
@@ -929,9 +1087,9 @@ export async function sendAccountWelcomeEmail(
 
     const variables = {
       ...getDefaultVariables({
-        name: orgInfo?.name,
+        name: orgInfo?.name ?? undefined,
         support_email:
-          orgInfo?.metadata?.support_email || "contacto@opttius.cl",
+          orgInfo?.resolvedSupportEmail || "contacto@opttius.cl",
       }),
       customer_name: customer.name || "Cliente",
       customer_first_name: customer.first_name || "Cliente",
@@ -953,7 +1111,8 @@ export async function sendAccountWelcomeEmail(
       subject,
       html,
       text,
-      replyTo: orgInfo?.metadata?.support_email || "contacto@opttius.cl",
+      replyTo: orgInfo?.resolvedSupportEmail || "contacto@opttius.cl",
+      fromDisplayName: orgInfo?.resolvedDisplayName,
     });
 
     if (result.success) {
@@ -978,11 +1137,11 @@ export async function sendContactFormNotification(
   data: ContactFormData,
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const orgInfo = await getOrganizationInfo(data.organization_id);
+    const orgInfo = await getOrganizationInfoWithFallbacks(data.organization_id);
 
     // El email se envía al negocio, no al cliente
     const recipientEmail =
-      orgInfo?.metadata?.support_email || "contacto@opttius.cl";
+      orgInfo?.resolvedSupportEmail || "contacto@opttius.cl";
 
     const html = `
       <div style="font-family: 'Helvetica Neue', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
@@ -1064,7 +1223,7 @@ export async function sendBirthdayPromo(
   organizationId?: string,
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const orgInfo = await getOrganizationInfo(organizationId);
+    const orgInfo = await getOrganizationInfoWithFallbacks(organizationId);
     const template = await loadEmailTemplate("birthday", true, organizationId);
 
     if (!template) {
@@ -1085,9 +1244,9 @@ export async function sendBirthdayPromo(
 
     const variables = {
       ...getDefaultVariables({
-        name: orgInfo?.name,
+        name: orgInfo?.name ?? undefined,
         support_email:
-          orgInfo?.metadata?.support_email || "contacto@opttius.cl",
+          orgInfo?.resolvedSupportEmail || "contacto@opttius.cl",
       }),
       customer_name: data.customer_name || "Cliente",
       customer_first_name: data.customer_first_name || "Cliente",
@@ -1109,7 +1268,8 @@ export async function sendBirthdayPromo(
       subject,
       html,
       text,
-      replyTo: orgInfo?.metadata?.support_email || "contacto@opttius.cl",
+      replyTo: orgInfo?.resolvedSupportEmail || "contacto@opttius.cl",
+      fromDisplayName: orgInfo?.resolvedDisplayName,
     });
 
     if (result.success) {

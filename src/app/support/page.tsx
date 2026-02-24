@@ -122,9 +122,9 @@ export default function SupportPage() {
     return (
       <div className="min-h-screen bg-epoch-background py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-2xl mx-auto">
-          <Card className="border-epoch-primary/20 bg-epoch-primary/5 rounded-none border">
+          <Card className="border-epoch-primary/20 bg-epoch-primary/5 rounded-xl border">
             <CardHeader className="text-center">
-              <div className="mx-auto mb-4 w-16 h-16 bg-epoch-primary/10 rounded-none flex items-center justify-center">
+              <div className="mx-auto mb-4 w-16 h-16 bg-epoch-primary/10 rounded-xl flex items-center justify-center">
                 <CheckCircle2 className="h-8 w-8 text-epoch-primary" />
               </div>
               <CardTitle className="text-2xl font-display font-bold text-epoch-primary">
@@ -135,7 +135,7 @@ export default function SupportPage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div className="bg-white p-6 rounded-none border border-epoch-primary/20">
+              <div className="bg-white p-6 rounded-xl border border-epoch-primary/20">
                 <div className="space-y-2">
                   <Label className="text-sm font-medium text-epoch-primary/80">
                     Número de Ticket
@@ -165,13 +165,13 @@ export default function SupportPage() {
                     router.refresh();
                   }}
                   variant="outline"
-                  className="flex-1 rounded-none border-admin-border-primary/20"
+                  className="flex-1 rounded-xl border-admin-border-primary/20"
                 >
                   Crear Otro Ticket
                 </Button>
                 <Button
                   onClick={() => router.push(`/support/ticket/${ticketNumber}`)}
-                  className="flex-1 rounded-none bg-epoch-primary hover:bg-epoch-surface text-white font-display font-bold text-[10px] tracking-[0.2em] uppercase"
+                  className="flex-1 rounded-xl bg-epoch-primary hover:bg-epoch-surface text-white font-display font-bold text-[10px] tracking-[0.2em] uppercase"
                 >
                   Ver Estado del Ticket
                 </Button>
@@ -206,7 +206,7 @@ export default function SupportPage() {
             Volver al inicio
           </Link>
           <div className="flex items-center gap-3 mb-2">
-            <div className="p-2 bg-epoch-primary/10 rounded-none">
+            <div className="p-2 bg-epoch-primary/10 rounded-xl">
               <HelpCircle className="h-6 w-6 text-epoch-accent" />
             </div>
             <div>
@@ -221,7 +221,7 @@ export default function SupportPage() {
         </div>
 
         {/* Form Card - sin admin-card para evitar conflicto de contraste en inputs/botones */}
-        <Card className="rounded-none border border-border">
+        <Card className="rounded-xl border border-border">
           <CardHeader>
             <CardTitle className="font-display text-epoch-primary">
               Crear Ticket de Soporte
@@ -321,7 +321,7 @@ export default function SupportPage() {
                     >
                       <SelectTrigger
                         id="category"
-                        className={`rounded-none focus:border-epoch-primary focus:ring-epoch-primary/20 ${errors.category ? "border-red-500" : ""}`}
+                        className={`rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20 ${errors.category ? "border-red-500" : ""}`}
                       >
                         <SelectValue placeholder="Selecciona una categoría" />
                       </SelectTrigger>
@@ -354,7 +354,7 @@ export default function SupportPage() {
                     >
                       <SelectTrigger
                         id="priority"
-                        className={`rounded-none focus:border-epoch-primary focus:ring-epoch-primary/20 ${errors.priority ? "border-red-500" : ""}`}
+                        className={`rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20 ${errors.priority ? "border-red-500" : ""}`}
                       >
                         <SelectValue placeholder="Selecciona una prioridad" />
                       </SelectTrigger>
@@ -422,14 +422,14 @@ export default function SupportPage() {
                   type="button"
                   variant="outline"
                   onClick={() => router.push("/")}
-                  className="flex-1 rounded-none border-admin-border-primary/20"
+                  className="flex-1 rounded-xl border-admin-border-primary/20"
                 >
                   Cancelar
                 </Button>
                 <Button
                   type="submit"
                   disabled={isSubmitting}
-                  className="flex-1 rounded-none bg-epoch-primary hover:bg-epoch-surface text-white font-display font-bold text-[10px] tracking-[0.2em] uppercase"
+                  className="flex-1 rounded-xl bg-epoch-primary hover:bg-epoch-surface text-white font-display font-bold text-[10px] tracking-[0.2em] uppercase"
                 >
                   {isSubmitting ? (
                     <>
@@ -446,11 +446,11 @@ export default function SupportPage() {
         </Card>
 
         {/* Help Section */}
-        <Card className="mt-6 bg-epoch-primary/5 border-epoch-primary/20 rounded-none border">
+        <Card className="mt-6 bg-epoch-primary/5 border-epoch-primary/20 rounded-xl border">
           <CardContent className="pt-6">
             <div className="flex gap-4">
               <div className="flex-shrink-0">
-                <div className="p-2 bg-epoch-primary/10 rounded-none">
+                <div className="p-2 bg-epoch-primary/10 rounded-xl">
                   <HelpCircle className="h-6 w-6 text-epoch-accent" />
                 </div>
               </div>

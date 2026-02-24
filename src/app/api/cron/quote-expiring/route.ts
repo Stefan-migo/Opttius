@@ -26,12 +26,8 @@ export async function GET(request: NextRequest) {
     const supabase = createServiceRoleClient();
 
     const now = new Date();
-    const in24h = new Date(now);
-    in24h.setDate(in24h.getDate() + 1);
     const in48h = new Date(now);
     in48h.setDate(in48h.getDate() + 2);
-
-    const in24hStr = in24h.toISOString().split("T")[0];
     const in48hStr = in48h.toISOString().split("T")[0];
 
     const { data: quotes } = await supabase
@@ -51,7 +47,7 @@ export async function GET(request: NextRequest) {
       `,
       )
       .eq("status", "sent")
-      .in("expiration_date", [in24hStr, in48hStr]);
+      .eq("expiration_date", in48hStr);
 
     if (!quotes || quotes.length === 0) {
       return NextResponse.json({

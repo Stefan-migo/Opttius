@@ -26,8 +26,20 @@ export async function loadEmailTemplate(
       ? createServiceRoleClient()
       : await createClient();
 
-    // Strategy: Search for organization-specific template first
-    // If not found, fall back to the system default template (organization_id IS NULL)
+    // Strategy: Org override (is_active=false) = disabled for that org. Otherwise: org-specific first, then system default.
+    if (organizationId) {
+      const { data: orgOverride } = await supabase
+        .from("system_email_templates")
+        .select("id, is_active")
+        .eq("type", type)
+        .eq("organization_id", organizationId)
+        .maybeSingle();
+
+      if (orgOverride && orgOverride.is_active === false) {
+        return null;
+      }
+    }
+
     let query = supabase
       .from("system_email_templates")
       .select("*")
@@ -35,7 +47,6 @@ export async function loadEmailTemplate(
       .eq("is_active", true);
 
     if (organizationId) {
-      // Prioritize organization template then system default
       query = query.or(
         `organization_id.eq.${organizationId},organization_id.is.null`,
       );
@@ -53,7 +64,6 @@ export async function loadEmailTemplate(
       return null;
     }
 
-    // Since we order by organization_id DESC (nulls last), the one with organizationId will be first
     const template = templates[0];
 
     return {

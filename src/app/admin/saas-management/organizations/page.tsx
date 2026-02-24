@@ -419,7 +419,7 @@ export default function OrganizationsPage() {
                     setNewOrgData({ ...newOrgData, subscription_tier: value })
                   }
                 >
-                  <SelectTrigger className="rounded-none">
+                  <SelectTrigger className="rounded-xl">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -466,12 +466,12 @@ export default function OrganizationsPage() {
                     setSearchTerm(e.target.value);
                     setCurrentPage(1);
                   }}
-                  className="rounded-none pl-10"
+                  className="rounded-xl pl-10"
                 />
               </div>
             </div>
             <Select value={tierFilter} onValueChange={setTierFilter}>
-              <SelectTrigger className="rounded-none w-[180px]">
+              <SelectTrigger className="rounded-xl w-[180px]">
                 <SelectValue placeholder="Filtrar por tier" />
               </SelectTrigger>
               <SelectContent>
@@ -482,7 +482,7 @@ export default function OrganizationsPage() {
               </SelectContent>
             </Select>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="rounded-none w-[180px]">
+              <SelectTrigger className="rounded-xl w-[180px]">
                 <SelectValue placeholder="Filtrar por estado" />
               </SelectTrigger>
               <SelectContent>

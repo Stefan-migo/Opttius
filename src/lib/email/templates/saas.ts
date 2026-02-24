@@ -47,6 +47,8 @@ export interface SaaSTrialData {
   days_remaining: number;
   plan_name: string;
   upgrade_url?: string;
+  /** Email to send the notification to (org owner). Required for sending. */
+  admin_email?: string;
 }
 
 export interface SaaSPaymentData {
@@ -60,6 +62,8 @@ export interface SaaSPaymentData {
   status: "paid" | "pending" | "failed";
   payment_url?: string;
   invoice_url?: string;
+  /** Email to send the notification to (org owner). Required for sending. */
+  admin_email?: string;
 }
 
 export interface SaaSSecurityData {
@@ -197,7 +201,9 @@ export async function sendSaaSTrialEnding(
       organization_name: data.organization_name,
       trial_end_date: data.trial_end_date,
       days_remaining: data.days_remaining.toString(),
+      days_left: data.days_remaining.toString(),
       plan_name: data.plan_name,
+      user_name: "",
       upgrade_url:
         data.upgrade_url ||
         `${process.env.NEXT_PUBLIC_APP_URL}/admin/saas-management/billing`,
@@ -208,8 +214,14 @@ export async function sendSaaSTrialEnding(
 
     const text = htmlToText(html);
 
+    const toEmail = data.admin_email;
+    if (!toEmail) {
+      console.warn("⚠️ No admin_email in SaaSTrialData, cannot send trial ending email");
+      return { success: false, error: "admin_email required" };
+    }
+
     const result = await sendEmail({
-      to: data.organization_id,
+      to: toEmail,
       subject,
       html,
       text,
@@ -317,8 +329,14 @@ export async function sendSaaSPaymentFailed(
 
     const text = htmlToText(html);
 
+    const toEmail = data.admin_email;
+    if (!toEmail) {
+      console.warn("⚠️ No admin_email in SaaSPaymentData, cannot send payment failed email");
+      return { success: false, error: "admin_email required" };
+    }
+
     const result = await sendEmail({
-      to: data.organization_id,
+      to: toEmail,
       subject,
       html,
       text,
@@ -370,8 +388,14 @@ export async function sendSaaSPaymentReminder(
 
     const text = htmlToText(html);
 
+    const toEmail = data.admin_email;
+    if (!toEmail) {
+      console.warn("⚠️ No admin_email in SaaSPaymentData, cannot send payment reminder email");
+      return { success: false, error: "admin_email required" };
+    }
+
     const result = await sendEmail({
-      to: data.organization_id,
+      to: toEmail,
       subject,
       html,
       text,

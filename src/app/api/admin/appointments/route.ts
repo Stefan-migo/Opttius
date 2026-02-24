@@ -505,6 +505,31 @@ export async function POST(request: NextRequest) {
     const customerId = validatedBody.customer_id || null;
     let guestData = null;
 
+    // Validate that registered customer belongs to the branch
+    if (customerId) {
+      const { data: customer, error: customerError } =
+        await supabaseServiceRole
+          .from("customers")
+          .select("branch_id")
+          .eq("id", customerId)
+          .single();
+      if (customerError || !customer) {
+        return NextResponse.json(
+          { error: "Cliente no encontrado" },
+          { status: 404 },
+        );
+      }
+      if (customer.branch_id !== finalBranchId) {
+        return NextResponse.json(
+          {
+            error:
+              "El cliente no pertenece a esta sucursal. Seleccione un cliente de la sucursal actual.",
+          },
+          { status: 400 },
+        );
+      }
+    }
+
     if (body?.guest_customer) {
       const guest = body.guest_customer;
 

@@ -20,59 +20,72 @@ import Image from "next/image";
 const features = [
   {
     icon: Users,
-    title: "Gestión de Pacientes IA",
+    title: "Expediente Clínico Unificado",
     description:
-      "Historiales inteligentes con análisis predictivo de graduación y recetas digitales completas.",
+      "Centraliza la salud visual y el historial comercial. Recetas, citas, presupuestos y órdenes de laboratorio sincronizados en una línea de tiempo perfecta.",
     className: "lg:col-span-2 lg:row-span-2 bg-epoch-primary text-white",
     image: "/images/landing/LamparaW.webp",
   },
   {
     icon: ShoppingCart,
-    title: "POS de Nueva Generación",
-    description: "Venta rápida e intuitiva con integración de inventario.",
+    title: "POS (Punto de Venta)",
+    subtitle: "Punto de Venta Clínico",
+    description:
+      "Facturación ágil integrada al historial del paciente. Descuentos de laboratorio, pagos mixtos y sincronización de stock en tiempo real.",
     className: "lg:col-span-1 bg-white",
     image: "/images/landing/pos.webp",
   },
   {
     icon: Building2,
     title: "Multi-Sucursal",
-    description: "Gestiona tu imperio óptico 24/7.",
+    subtitle: "Control Multi-Sede",
+    description:
+      "Gestione una o diez sucursales desde un solo panel. Inventarios compartidos, reportes consolidados y permisos por ubicación.",
     className: "lg:col-span-1 bg-epoch-accent/10",
     image: "/images/landing/multisucursal.webp",
   },
   {
     icon: MessageSquare,
-    title: "Asistente AI",
-    description: "Atención automatizada que agenda citas.",
+    title: "Asistente AI (Agenda)",
+    subtitle: "Recepción Automatizada",
+    description:
+      "Su asistente virtual trabaja 24/7. Responde consultas básicas, agenda citas y confirma asistencias automáticamente.",
     className: "lg:col-span-1 bg-white",
     image: "/images/landing/asistente.webp",
   },
   {
     icon: BarChart3,
     title: "Inteligencia de Negocio",
-    description: "Reportes ejecutivos que revelan su rentabilidad real.",
+    subtitle: "Analítica Comercial",
+    description:
+      "Tome decisiones con datos reales. Visualice márgenes de ganancia, productos estrella y rendimiento por vendedor al instante.",
     className: "lg:col-span-1 bg-epoch-surface text-white",
     image: "/images/landing/analytics.webp",
   },
   {
     icon: Calendar,
-    title: "Agenda",
-    description: "Recordatorios vía WhatsApp.",
+    title: "Agenda (Comunicación)",
+    subtitle: "Agenda Inteligente",
+    description:
+      "Reduzca el ausentismo con recordatorios automáticos por WhatsApp. Confirmaciones directas y reprogramación sin fricción.",
     className: "lg:col-span-1 bg-white",
     image: "/images/landing/agenda.webp",
   },
   {
     icon: FileText,
     title: "Laboratorio",
-    description: "Seguimiento de órdenes en tiempo real.",
+    subtitle: "Trazabilidad de Órdenes",
+    description:
+      "Adiós a las llamadas al laboratorio. Monitoree el estado de cada trabajo (tallado, biselado, entrega) paso a paso en el sistema.",
     className: "lg:col-span-1 bg-epoch-accent/10",
     image: "/images/landing/laboratorio.webp",
   },
   {
     icon: Package,
-    title: "Inventario Infinito",
+    title: "Inventario",
+    subtitle: "Inventario Inteligente",
     description:
-      "Control de stock con IA predictiva para reposición artesanal.",
+      "Control de armazones, lentes y accesorios con alertas de stock bajo. Movimientos, ajustes y valoración de inventario al día.",
     className: "lg:col-span-2 bg-white",
     image: "/images/landing/mesaW.webp",
   },
@@ -90,7 +103,7 @@ function FeatureCard({
 
   return (
     <div
-      className={`group relative overflow-hidden p-6 sm:p-8 border border-epoch-primary/5 transition-all duration-700 flex flex-col justify-between hover:shadow-2xl hover:-translate-y-1 ${feature.className}`}
+      className={`group relative overflow-hidden rounded-xl p-6 sm:p-8 border border-epoch-primary/5 transition-all duration-700 flex flex-col justify-between hover:shadow-2xl hover:-translate-y-1 ${feature.className}`}
     >
       {showImage && (
         <div className="absolute inset-0 z-0">
@@ -113,7 +126,7 @@ function FeatureCard({
 
       <div className="relative z-10">
         <div
-          className={`mb-6 p-3 inline-block rounded-none border ${
+          className={`mb-6 p-3 inline-block rounded-xl border ${
             feature.className.includes("text-white")
               ? "border-white/20 text-epoch-accent"
               : "border-epoch-primary/10 text-epoch-primary group-hover:bg-epoch-primary group-hover:text-white"
@@ -123,7 +136,7 @@ function FeatureCard({
         </div>
 
         <h3
-          className={`text-lg font-display font-bold tracking-widest uppercase mb-3 ${
+          className={`text-lg font-display font-bold tracking-widest uppercase mb-1 ${
             feature.className.includes("text-white")
               ? "text-white"
               : "text-epoch-primary"
@@ -131,6 +144,19 @@ function FeatureCard({
         >
           {feature.title}
         </h3>
+        {"subtitle" in feature && feature.subtitle ? (
+          <p
+            className={`text-[10px] font-display font-medium tracking-wider uppercase mb-3 ${
+              feature.className.includes("text-white")
+                ? "text-white/60"
+                : "text-epoch-primary/60"
+            }`}
+          >
+            {feature.subtitle}
+          </p>
+        ) : (
+          <div className="mb-3" />
+        )}
 
         <p
           className={`text-xs leading-relaxed font-body italic ${
@@ -180,7 +206,7 @@ export function FeaturesSection() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="text-center mb-24 max-w-3xl mx-auto">
-          <div className="inline-flex items-center gap-4 px-6 py-2 border border-epoch-primary/10 rounded-full text-epoch-primary/60 text-[10px] font-display tracking-[0.4em] uppercase mb-8">
+          <div className="inline-flex items-center gap-3 px-5 py-2 bg-epoch-primary/10 border border-epoch-primary/40 rounded-full text-epoch-primary text-[10px] sm:text-[11px] font-sans font-semibold tracking-[0.35em] uppercase mb-8">
             <Sparkles className="h-3 w-3" />
             <span>Diseñado por quien conoce su óptica</span>
           </div>

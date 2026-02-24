@@ -13,19 +13,27 @@
 
 ## Fuentes que deben mantenerse actualizadas
 
-| Documento                                        | Título en NotebookLM                      | Cuándo actualizar                                     |
-| ------------------------------------------------ | ----------------------------------------- | ----------------------------------------------------- |
-| `docs/SYSTEM_CONFIGURATION.md`                   | SYSTEM_CONFIGURATION                      | Tras cambios en módulo Sistema, API config, scope     |
-| `docs/SYSTEM_CONFIGURATION_CHANGELOG_2026-02.md` | SYSTEM_CONFIGURATION_CHANGELOG            | Tras mejoras o correcciones del módulo Sistema        |
-| `docs/FRONTEND_IDENTITY.md`                      | Frontend Identity Documentation - Opttius | Tras cambios en paleta Epoch, componentes, tokens     |
-| `docs/FRONTEND_RESPONSIVITY.md`                  | FRONTEND_RESPONSIVITY                     | Tras cambios en responsividad, breakpoints, patrones  |
-| `docs/FRONTEND_RESPONSIVE_UPDATE_2026-02.md`     | FRONTEND_RESPONSIVE_UPDATE_2026-02        | Changelog de implementación mobile-first 2026-02      |
-| `docs/SAAS_MANAGEMENT_SYSTEM.md`                 | SAAS_MANAGEMENT_SYSTEM                    | Tras cambios en arquitectura o flujos del módulo SaaS |
-| `docs/SAAS_MANAGEMENT_IMPROVEMENTS_2026-02.md`   | SAAS_MANAGEMENT_IMPROVEMENTS_2026-02      | Tras nuevas mejoras o correcciones en SaaS Management |
-| `docs/USER_PROFILE_SYSTEM.md`                    | USER_PROFILE_SYSTEM                       | Tras cambios en perfil, RLS, preferencias             |
-| `docs/USER_PROFILE_IMPROVEMENTS_2026-02.md`      | USER_PROFILE_IMPROVEMENTS_2026-02         | Tras nuevas mejoras o correcciones en User Profile    |
-| `docs/PAYMENT_WORKFLOW_SYSTEM.md`                | PAYMENT_WORKFLOW_SYSTEM                   | Tras cambios en checkout, POS, cron, pasarelas        |
-| `docs/PAYMENT_WORKFLOW_TEST_CHECKLIST.md`        | PAYMENT_WORKFLOW_TEST_CHECKLIST           | Checklist de pruebas manuales del payment workflow    |
+| Documento                                                 | Título en NotebookLM                      | Cuándo actualizar                                     |
+| --------------------------------------------------------- | ----------------------------------------- | ----------------------------------------------------- |
+| `docs/SYSTEM_CONFIGURATION.md`                            | SYSTEM_CONFIGURATION                      | Tras cambios en módulo Sistema, API config, scope     |
+| `docs/SYSTEM_CONFIGURATION_CHANGELOG_2026-02.md`          | SYSTEM_CONFIGURATION_CHANGELOG            | Tras mejoras o correcciones del módulo Sistema        |
+| `docs/FRONTEND_IDENTITY.md`                               | Frontend Identity Documentation - Opttius | Tras cambios en paleta Epoch, componentes, tokens     |
+| `docs/FRONTEND_RESPONSIVITY.md`                           | FRONTEND_RESPONSIVITY                     | Tras cambios en responsividad, breakpoints, patrones  |
+| `docs/FRONTEND_RESPONSIVE_UPDATE_2026-02.md`              | FRONTEND_RESPONSIVE_UPDATE_2026-02        | Changelog de implementación mobile-first 2026-02      |
+| `docs/SAAS_MANAGEMENT_SYSTEM.md`                          | SAAS_MANAGEMENT_SYSTEM                    | Tras cambios en arquitectura o flujos del módulo SaaS |
+| `docs/SAAS_MANAGEMENT_IMPROVEMENTS_2026-02.md`            | SAAS_MANAGEMENT_IMPROVEMENTS_2026-02      | Tras nuevas mejoras o correcciones en SaaS Management |
+| `docs/USER_PROFILE_SYSTEM.md`                             | USER_PROFILE_SYSTEM                       | Tras cambios en perfil, RLS, preferencias             |
+| `docs/USER_PROFILE_IMPROVEMENTS_2026-02.md`               | USER_PROFILE_IMPROVEMENTS_2026-02         | Tras nuevas mejoras o correcciones en User Profile    |
+| `docs/PAYMENT_WORKFLOW_SYSTEM.md`                         | PAYMENT_WORKFLOW_SYSTEM                   | Tras cambios en checkout, POS, cron, pasarelas        |
+| `docs/PAYMENT_WORKFLOW_TEST_CHECKLIST.md`                 | PAYMENT_WORKFLOW_TEST_CHECKLIST           | Checklist de pruebas manuales del payment workflow    |
+| `docs/OPTTIUS_SKILLS_INDEX.md`                            | OPTTIUS_SKILLS_INDEX                      | Índice consolidado de 25 skills (.cursor/skills)      |
+| `docs/WHATSAPP_AI_AGENT.md`                               | Módulo WhatsApp + Agente IA               | Tras cambios en módulo WhatsApp, webhook, Agent       |
+| `.cursor/skills/whatsapp-ai-agent-optical/SKILL.md`       | Skill WhatsApp AI Agent Óptico            | Tras cambios en guía del skill WhatsApp               |
+| `docs/WHATSAPP_AGENT_TRAINING.md`                         | Entrenamiento Agente WhatsApp             | Tras cambios en guía de entrenamiento                 |
+| `.cursor/skills/whatsapp-agent-training-optical/SKILL.md` | Skill Entrenamiento Agente WhatsApp       | Tras cambios en skill de entrenamiento                |
+| `docs/WHATSAPP_IMPLEMENTATION_PROMPT.md`                  | Prompt Implementación WhatsApp            | Prompt para agente que crea plan de implementación    |
+
+**Evitar duplicados en NotebookLM:** Si ya existen fuentes con estos títulos, elimínalas antes de volver a sincronizar (`nlm source delete <source-id> --confirm`). El script `add_source` siempre añade; no actualiza fuentes existentes.
 
 ---
 
@@ -94,7 +102,7 @@ nlm source delete <source-id> --confirm
 ## Nota sobre duplicados y límite
 
 - **Límite:** NotebookLM Standard tiene 50 fuentes por notebook. **Estado actual (2026-02-21):** 50/50 fuentes — límite alcanzado.
-- **Fuentes añadidas en sync completo (2026-02-21):** AI_SYSTEM, QUOTES_SYSTEM, SUPPORT_MODULE_IMPROVEMENTS_2026-02, IDENTITY_RECONCILIATION, SYSTEM_CONFIGURATION_ANALYSIS.
+- **Fuentes añadidas en sync completo (2026-02-21):** AI_SYSTEM, QUOTES_SYSTEM, SUPPORT_MODULE_IMPROVEMENTS_2026-02, SYSTEM_CONFIGURATION_ANALYSIS. (IDENTITY_RECONCILIATION eliminado 2026-02-22 — contenido consolidado en IDENTITY.md e IDENTITY_AUDIT.md)
 - **Duplicados eliminados (2026-02-21):** Opttius CRM Documentation (→ CRM_SYSTEM.md), Integración Presupuestos-Trabajos (→ QUOTE_WORK_ORDER_INTEGRATION.md), Sistema de Citas y Agendas (→ APPOINTMENTS_SYSTEM.md).
 - **Limpieza Extendido (2026-02-22):** Ejecutar `bash scripts/notebooklm-cleanup-duplicates.sh` para eliminar ~22 fuentes duplicadas antes de añadir documentación nueva.
 - **Duplicados:** `nlm source add` con el mismo título puede crear fuentes duplicadas. Eliminar fuentes antiguas con:

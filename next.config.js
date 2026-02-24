@@ -126,7 +126,7 @@ const nextConfig = {
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "font-src 'self' https://fonts.gstatic.com https://http2.mlstatic.com data:",
       `img-src 'self' data: https: blob: ${supabaseDomain !== 'https://*.supabase.co' ? supabaseDomain : 'https://*.supabase.co'}`,
-      `connect-src 'self' https: wss: ${supabaseDomain !== 'https://*.supabase.co' ? supabaseDomain : 'https://*.supabase.co'} https://*.supabase.co`,
+      `connect-src 'self' https: wss: ws: ${supabaseDomain !== 'https://*.supabase.co' ? supabaseDomain : 'https://*.supabase.co'} https://*.supabase.co${supabaseUrl.includes('127.0.0.1') ? ' ws://127.0.0.1:54321' : ''}`,
       `frame-src 'self' https://www.mercadopago.com https://www.mercadolibre.com https://http2.mlstatic.com https://secure-fields.mercadopago.com https://www.google.com ${supabaseDomain !== 'https://*.supabase.co' ? supabaseDomain : 'https://*.supabase.co'}`,
       "media-src 'self' https:",
       "object-src 'none'",

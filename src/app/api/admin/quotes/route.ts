@@ -408,6 +408,31 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Validate that customer belongs to the branch
+    if (validatedBody.customer_id && quoteBranchId) {
+      const { data: customer, error: customerError } =
+        await supabaseServiceRole
+          .from("customers")
+          .select("branch_id")
+          .eq("id", validatedBody.customer_id)
+          .single();
+      if (customerError || !customer) {
+        return NextResponse.json(
+          { error: "Cliente no encontrado" },
+          { status: 404 },
+        );
+      }
+      if (customer.branch_id !== quoteBranchId) {
+        return NextResponse.json(
+          {
+            error:
+              "El cliente no pertenece a esta sucursal. Seleccione un cliente de la sucursal actual.",
+          },
+          { status: 400 },
+        );
+      }
+    }
+
     // Calculate expiration date
     const expirationDate = validatedBody.expiration_date
       ? new Date(validatedBody.expiration_date)

@@ -28,10 +28,10 @@
     --space-16: 4rem;
     --space-24: 6rem;
 
-    /* Font System */
+    /* Font System - Lujo Tecnológico (Inter principal, Cormorant acento) */
     --font-heading: "Inter", system-ui, -apple-system, sans-serif;
     --font-body: "Inter", system-ui, -apple-system, sans-serif;
-    --font-display: "Cinzel", serif;
+    --font-display: "Inter", system-ui, -apple-system, sans-serif;
     --font-cormorant: "Cormorant Garamond", serif;
     --font-velista: "VELISTA", serif;
   }

@@ -315,7 +315,7 @@ export default function ProductListingSection({
           {[...Array(8)].map((_, i) => (
             <Card
               key={i}
-              className="border border-admin-border-primary/10 rounded-none shadow-none bg-white"
+              className="border border-admin-border-primary/10 rounded-xl shadow-none bg-white"
             >
               <div className="aspect-square bg-admin-bg-tertiary/20 relative overflow-hidden">
                 <Skeleton className="absolute inset-0" />
@@ -355,7 +355,7 @@ export default function ProductListingSection({
               </p>
               <button
                 onClick={() => refetchProducts()}
-                className="px-4 py-2 bg-epoch-primary text-white rounded-none hover:bg-epoch-surface transition-all font-display font-bold text-[10px] tracking-widest uppercase"
+                className="px-4 py-2 bg-epoch-primary text-white rounded-xl hover:bg-epoch-surface transition-all font-display font-bold text-[10px] tracking-widest uppercase"
               >
                 Reintentar
               </button>
@@ -412,14 +412,14 @@ export default function ProductListingSection({
       {selectedProducts.length > 0 && (
         <Card
           data-bulk-panel
-          className="w-full bg-admin-bg-tertiary border border-admin-border-primary/20 shadow-premium-xl rounded-none animate-in slide-in-from-top-4 duration-500 overflow-hidden sticky top-6 z-40"
+          className="w-full bg-admin-bg-tertiary border border-admin-border-primary/20 shadow-premium-xl rounded-xl animate-in slide-in-from-top-4 duration-500 overflow-hidden sticky top-6 z-40"
           style={{ position: "relative" }}
         >
           <div className="absolute top-0 left-0 w-1 h-full bg-admin-accent-primary" />
           <CardContent className="pt-6 pb-6">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center space-x-4">
-                <div className="p-3 bg-admin-accent-primary/10 border border-admin-accent-primary/20 rounded-none">
+                <div className="p-3 bg-admin-accent-primary/10 border border-admin-accent-primary/20 rounded-xl">
                   <Edit className="h-5 w-5 text-admin-accent-primary" />
                 </div>
                 <div>
@@ -473,10 +473,10 @@ export default function ProductListingSection({
                   value={bulkOperation ?? ""}
                   onValueChange={setBulkOperation}
                 >
-                  <SelectTrigger className="mt-1.5 h-11 bg-admin-bg-tertiary border-admin-border-primary/10 rounded-none font-display text-[10px] tracking-widest uppercase">
+                  <SelectTrigger className="mt-1.5 h-11 bg-admin-bg-tertiary border-admin-border-primary/10 rounded-xl font-display text-[10px] tracking-widest uppercase">
                     <SelectValue placeholder="Seleccionar operación" />
                   </SelectTrigger>
-                  <SelectContent className="rounded-none border-admin-border-primary/20">
+                  <SelectContent className="rounded-xl border-admin-border-primary/20">
                     <SelectItem value="update_status">
                       Cambiar Estado
                     </SelectItem>
@@ -547,7 +547,7 @@ export default function ProductListingSection({
                     : "default"
                 }
                 className={cn(
-                  "min-w-[180px] h-12 rounded-none font-display font-black text-[10px] tracking-[0.2em] uppercase transition-all shadow-premium-sm",
+                  "min-w-[180px] h-12 rounded-xl font-display font-black text-[10px] tracking-[0.2em] uppercase transition-all shadow-premium-sm",
                   bulkOperation !== "delete" &&
                     bulkOperation !== "hard_delete" &&
                     "bg-admin-accent-primary text-[#1A2B23] hover:bg-admin-accent-secondary",
@@ -599,7 +599,7 @@ export default function ProductListingSection({
 
       {/* Single Product Delete Dialog */}
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-md border-2 border-admin-error/20 bg-white shadow-premium-xl rounded-none p-0 overflow-hidden">
+        <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-md border-2 border-admin-error/20 bg-white shadow-premium-xl rounded-xl p-0 overflow-hidden">
           <div className="bg-admin-error/5 p-8 border-b border-admin-error/10">
             <DialogHeader>
               <div className="flex items-center gap-3">
@@ -633,7 +633,7 @@ export default function ProductListingSection({
                   setProductToDelete(null);
                 }}
                 disabled={deleteLoading}
-                className="h-10 px-6 font-display font-bold text-[10px] tracking-widest uppercase rounded-none border-admin-border-primary/20"
+                className="h-10 px-6 font-display font-bold text-[10px] tracking-widest uppercase rounded-xl border-admin-border-primary/20"
               >
                 CANCELAR
               </Button>
@@ -641,7 +641,7 @@ export default function ProductListingSection({
                 variant="destructive"
                 onClick={handleDeleteProduct}
                 disabled={deleteLoading}
-                className="h-10 px-8 font-display font-bold text-[10px] tracking-widest uppercase rounded-none bg-admin-error hover:bg-admin-error/90"
+                className="h-10 px-8 font-display font-bold text-[10px] tracking-widest uppercase rounded-xl bg-admin-error hover:bg-admin-error/90"
               >
                 {deleteLoading ? (
                   <>
@@ -689,7 +689,7 @@ function renderBulkOperationForm(
                 setBulkUpdates({ ...bulkUpdates, status: value })
               }
             >
-              <SelectTrigger className="h-11 mt-1 bg-admin-bg-tertiary border-admin-border-primary/10 rounded-none font-display text-[10px] tracking-widest uppercase">
+              <SelectTrigger className="h-11 mt-1 bg-admin-bg-tertiary border-admin-border-primary/10 rounded-xl font-display text-[10px] tracking-widest uppercase">
                 <SelectValue placeholder="Seleccionar estado" />
               </SelectTrigger>
               <SelectContent>
@@ -718,7 +718,7 @@ function renderBulkOperationForm(
                 setBulkUpdates({ ...bulkUpdates, category_id: value })
               }
             >
-              <SelectTrigger className="h-11 mt-1 bg-admin-bg-tertiary border-admin-border-primary/10 rounded-none font-display text-[10px] tracking-widest uppercase">
+              <SelectTrigger className="h-11 mt-1 bg-admin-bg-tertiary border-admin-border-primary/10 rounded-xl font-display text-[10px] tracking-widest uppercase">
                 <SelectValue placeholder="Seleccionar categoría" />
               </SelectTrigger>
               <SelectContent>
@@ -749,7 +749,7 @@ function renderBulkOperationForm(
                 setBulkUpdates({ ...bulkUpdates, adjustment_type: value })
               }
             >
-              <SelectTrigger className="h-11 mt-1 bg-admin-bg-tertiary border-admin-border-primary/10 rounded-none font-display text-[10px] tracking-widest uppercase">
+              <SelectTrigger className="h-11 mt-1 bg-admin-bg-tertiary border-admin-border-primary/10 rounded-xl font-display text-[10px] tracking-widest uppercase">
                 <SelectValue placeholder="Tipo de ajuste" />
               </SelectTrigger>
               <SelectContent>
@@ -769,7 +769,7 @@ function renderBulkOperationForm(
             <Input
               type="number"
               step="0.01"
-              className="h-11 mt-1 bg-admin-bg-tertiary border-admin-border-primary/10 rounded-none font-display text-[10px] tracking-widest"
+              className="h-11 mt-1 bg-admin-bg-tertiary border-admin-border-primary/10 rounded-xl font-display text-[10px] tracking-widest"
               placeholder={
                 bulkUpdates.adjustment_type === "percentage"
                   ? "ej: 10 para +10%"
@@ -802,7 +802,7 @@ function renderBulkOperationForm(
                 setBulkUpdates({ ...bulkUpdates, adjustment_type: value })
               }
             >
-              <SelectTrigger className="h-11 mt-1 bg-admin-bg-tertiary border-admin-border-primary/10 rounded-none font-display text-[10px] tracking-widest uppercase">
+              <SelectTrigger className="h-11 mt-1 bg-admin-bg-tertiary border-admin-border-primary/10 rounded-xl font-display text-[10px] tracking-widest uppercase">
                 <SelectValue placeholder="Tipo de ajuste" />
               </SelectTrigger>
               <SelectContent>
@@ -822,7 +822,7 @@ function renderBulkOperationForm(
             </Label>
             <Input
               type="number"
-              className="h-11 mt-1 bg-admin-bg-tertiary border-admin-border-primary/10 rounded-none font-display text-[10px] tracking-widest"
+              className="h-11 mt-1 bg-admin-bg-tertiary border-admin-border-primary/10 rounded-xl font-display text-[10px] tracking-widest"
               placeholder={
                 bulkUpdates.adjustment_type === "set"
                   ? "ej: 50"
@@ -842,7 +842,7 @@ function renderBulkOperationForm(
     case "delete":
       return (
         <div className="space-y-2">
-          <div className="flex items-start space-x-2 p-3 bg-admin-error/5 border border-admin-error/20 rounded-none">
+          <div className="flex items-start space-x-2 p-3 bg-admin-error/5 border border-admin-error/20 rounded-xl">
             <AlertTriangle className="h-4 w-4 text-admin-error mt-0.5 flex-shrink-0" />
             <div>
               <p className="font-display font-bold text-admin-error text-sm uppercase tracking-wider">
@@ -860,7 +860,7 @@ function renderBulkOperationForm(
     case "hard_delete":
       return (
         <div className="space-y-2">
-          <div className="flex items-start space-x-2 p-3 bg-admin-error/10 border border-admin-error/30 rounded-none">
+          <div className="flex items-start space-x-2 p-3 bg-admin-error/10 border border-admin-error/30 rounded-xl">
             <AlertTriangle className="h-4 w-4 text-admin-error mt-0.5 flex-shrink-0" />
             <div>
               <p className="font-display font-bold text-admin-error text-sm uppercase tracking-wider">
@@ -874,13 +874,13 @@ function renderBulkOperationForm(
               </p>
             </div>
           </div>
-          <div className="p-2.5 bg-admin-warning/10 border border-admin-warning/30 rounded-none">
+          <div className="p-2.5 bg-admin-warning/10 border border-admin-warning/30 rounded-xl">
             <p className="text-[11px] font-serif italic text-admin-text-secondary">
               <strong>Recomendación:</strong> Considera usar &quot;Eliminación
               suave&quot; (archivar) en su lugar.
             </p>
           </div>
-          <div className="p-2.5 bg-orange-50 border border-orange-200 rounded-none">
+          <div className="p-2.5 bg-orange-50 border border-orange-200 rounded-xl">
             <div className="flex items-start space-x-2">
               <input
                 type="checkbox"

@@ -130,13 +130,13 @@ export default function LoginPage() {
             </h1>
           </div>
 
-          <Card className="border-epoch-primary/5 bg-white shadow-2xl rounded-none">
+          <Card className="border-epoch-primary/5 bg-white shadow-2xl rounded-xl">
             <CardContent className="p-8 sm:p-12">
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
                 {error && (
                   <Alert
                     variant="destructive"
-                    className="bg-red-500/10 border-red-500/20 rounded-none animate-in shake-in duration-500"
+                    className="bg-red-500/10 border-red-500/20 rounded-xl animate-in shake-in duration-500"
                   >
                     <AlertDescription className="text-red-950 font-serif italic text-xs">
                       {error}
@@ -149,7 +149,7 @@ export default function LoginPage() {
                     htmlFor="email"
                     className="text-[10px] font-display font-bold text-epoch-primary/40 uppercase tracking-[0.3em] ml-1"
                   >
-                    Credencial (Email)
+                    Email
                   </Label>
                   <div className="relative group">
                     <Input
@@ -158,7 +158,7 @@ export default function LoginPage() {
                       placeholder="maestro@opttius.com"
                       {...register("email")}
                       className={cn(
-                        "h-14 rounded-none border-epoch-primary/10 bg-epoch-background/50 pl-14 focus:bg-white transition-all font-body text-epoch-primary shadow-inner",
+                        "h-14 rounded-xl border-epoch-primary/10 bg-epoch-background/50 pl-14 focus:bg-white transition-all font-body text-epoch-primary shadow-inner",
                         errors.email &&
                           "border-red-900 focus-visible:ring-red-900",
                       )}
@@ -179,14 +179,14 @@ export default function LoginPage() {
                       htmlFor="password"
                       className="text-[10px] font-display font-bold text-epoch-primary/40 uppercase tracking-[0.3em]"
                     >
-                      Llave de Acceso
+                      Contraseña
                     </Label>
                     <Link
                       href="/reset-password"
                       title="Restablecer"
                       className="text-[10px] font-display font-bold text-epoch-accent hover:text-epoch-primary uppercase tracking-widest transition-colors"
                     >
-                      ¿Olvidó su llave?
+                      ¿Olvidó su contraseña?
                     </Link>
                   </div>
                   <div className="relative group">
@@ -196,7 +196,7 @@ export default function LoginPage() {
                       placeholder="••••••••"
                       {...register("password")}
                       className={cn(
-                        "h-14 rounded-none border-epoch-primary/10 bg-epoch-background/50 pl-14 pr-14 focus:bg-white transition-all font-body text-epoch-primary shadow-inner",
+                        "h-14 rounded-xl border-epoch-primary/10 bg-epoch-background/50 pl-14 pr-14 focus:bg-white transition-all font-body text-epoch-primary shadow-inner",
                         errors.password &&
                           "border-red-900 focus-visible:ring-red-900",
                       )}
@@ -207,7 +207,7 @@ export default function LoginPage() {
                       type="button"
                       variant="ghost"
                       size="sm"
-                      className="absolute right-3 top-1/2 -translate-y-1/2 h-10 w-10 p-0 rounded-none hover:bg-epoch-primary/5 text-epoch-primary/30"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 h-10 w-10 p-0 rounded-xl hover:bg-epoch-primary/5 text-epoch-primary/30"
                       onClick={() => setShowPassword(!showPassword)}
                       disabled={loading}
                     >
@@ -223,7 +223,7 @@ export default function LoginPage() {
                 <Button
                   type="submit"
                   size="lg"
-                  className="w-full h-16 rounded-none bg-epoch-primary hover:bg-epoch-surface text-white font-display font-bold uppercase text-xs tracking-[0.4em] group overflow-hidden transition-all duration-500 shadow-xl"
+                  className="w-full h-16 rounded-xl bg-epoch-primary hover:bg-epoch-surface text-white font-display font-bold uppercase text-xs tracking-[0.4em] group overflow-hidden transition-all duration-500 shadow-xl"
                   disabled={loading}
                 >
                   {loading ? (

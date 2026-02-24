@@ -277,7 +277,7 @@ export default function AdminDashboard() {
         return (
           <Badge
             variant="outline"
-            className="bg-transparent text-admin-info border-admin-info/30 font-bold text-[10px] uppercase tracking-wider rounded-none"
+            className="bg-transparent text-admin-info border-admin-info/30 font-bold text-[10px] uppercase tracking-wider rounded-xl"
           >
             <Clock className="h-3 w-3 mr-1" />
             Programada
@@ -287,7 +287,7 @@ export default function AdminDashboard() {
         return (
           <Badge
             variant="outline"
-            className="bg-transparent text-admin-success border-admin-success/30 font-bold text-[10px] uppercase tracking-wider rounded-none"
+            className="bg-transparent text-admin-success border-admin-success/30 font-bold text-[10px] uppercase tracking-wider rounded-xl"
           >
             <CheckCircle className="h-3 w-3 mr-1" />
             Confirmada
@@ -297,7 +297,7 @@ export default function AdminDashboard() {
         return (
           <Badge
             variant="outline"
-            className="bg-admin-accent-primary/10 text-admin-accent-primary border-admin-accent-primary/20 font-bold text-[10px] uppercase tracking-wider rounded-none"
+            className="bg-admin-accent-primary/10 text-admin-accent-primary border-admin-accent-primary/20 font-bold text-[10px] uppercase tracking-wider rounded-xl"
           >
             <CheckCircle className="h-3 w-3 mr-1" />
             Completada
@@ -307,7 +307,7 @@ export default function AdminDashboard() {
         return (
           <Badge
             variant="outline"
-            className="bg-admin-error/10 text-admin-error border-admin-error/30 font-bold text-[10px] uppercase tracking-wider rounded-none"
+            className="bg-admin-error/10 text-admin-error border-admin-error/30 font-bold text-[10px] uppercase tracking-wider rounded-xl"
           >
             <XCircle className="h-3 w-3 mr-1" />
             Cancelada
@@ -317,7 +317,7 @@ export default function AdminDashboard() {
         return (
           <Badge
             variant="outline"
-            className="bg-transparent text-admin-text-tertiary border-admin-border-secondary font-bold text-[10px] uppercase tracking-wider rounded-none"
+            className="bg-transparent text-admin-text-tertiary border-admin-border-secondary font-bold text-[10px] uppercase tracking-wider rounded-xl"
           >
             <XCircle className="h-3 w-3 mr-1" />
             No asistó
@@ -327,7 +327,7 @@ export default function AdminDashboard() {
         return (
           <Badge
             variant="secondary"
-            className="text-[10px] font-bold uppercase tracking-wider rounded-none"
+            className="text-[10px] font-bold uppercase tracking-wider rounded-xl"
           >
             {status}
           </Badge>
@@ -358,14 +358,14 @@ export default function AdminDashboard() {
         </div>
 
         {/* Banner Skeleton */}
-        <Skeleton className="h-20 w-full" />
+        <Skeleton className="h-20 w-full rounded-xl" />
 
         {/* KPI Cards Skeleton */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-0 border border-admin-border-primary/20 bg-admin-border-primary/5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {[...Array(4)].map((_, i) => (
             <div
               key={i}
-              className="p-8 border-r border-admin-border-primary/10 bg-admin-bg-tertiary/20"
+              className="p-8 rounded-xl border border-admin-border-primary/20 bg-admin-bg-tertiary/20"
             >
               <div className="flex justify-between mb-6">
                 <Skeleton className="h-12 w-12" />
@@ -384,7 +384,7 @@ export default function AdminDashboard() {
 
         {/* Charts Skeleton */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Card className="border border-admin-border-primary/20 bg-admin-border-primary/5 rounded-none shadow-none">
+          <Card className="border border-admin-border-primary/20 bg-admin-border-primary/5 rounded-xl shadow-none">
             <CardHeader className="pb-2 border-b border-admin-border-primary/10">
               <Skeleton className="h-8 w-48" />
             </CardHeader>
@@ -392,7 +392,7 @@ export default function AdminDashboard() {
               <Skeleton className="h-[320px] w-full" />
             </CardContent>
           </Card>
-          <Card className="border border-admin-border-primary/20 bg-admin-border-primary/5 rounded-none shadow-none">
+          <Card className="border border-admin-border-primary/20 bg-admin-border-primary/5 rounded-xl shadow-none">
             <CardHeader className="pb-2 border-b border-admin-border-primary/10">
               <Skeleton className="h-8 w-48" />
             </CardHeader>
@@ -408,7 +408,7 @@ export default function AdminDashboard() {
   if (error) {
     return (
       <div className="flex items-center justify-center min-h-[500px] animate-in fade-in duration-500">
-        <div className="text-center max-w-md p-8 bg-admin-bg-secondary rounded-none border border-admin-error/20 shadow-xl shadow-admin-error/5">
+        <div className="text-center max-w-md p-8 bg-admin-bg-secondary rounded-xl border border-admin-error/20 shadow-xl shadow-admin-error/5">
           <div className="h-16 w-16 bg-admin-error/10 rounded-full flex items-center justify-center mx-auto mb-6">
             <AlertTriangle className="h-8 w-8 text-admin-error" />
           </div>
@@ -421,7 +421,7 @@ export default function AdminDashboard() {
           </p>
           <Button
             onClick={() => window.location.reload()}
-            className="w-full h-11 bg-admin-accent-primary hover:bg-admin-accent-secondary text-white font-bold rounded-none transition-all shadow-lg shadow-admin-accent-primary/20"
+            className="w-full h-11 bg-admin-accent-primary hover:bg-admin-accent-secondary text-white font-bold rounded-xl transition-all shadow-lg shadow-admin-accent-primary/20"
           >
             Sincronizar Panel
           </Button>
@@ -451,7 +451,7 @@ export default function AdminDashboard() {
             variant="outline"
             onClick={() => fetchDashboardData(true)}
             disabled={refreshing}
-            className="h-10 px-4 bg-admin-bg-tertiary/50 border-admin-border-primary/30 text-admin-text-primary font-bold rounded-none transition-all flex items-center gap-2 hover:shadow-md hover:border-epoch-accent/30"
+            className="h-10 px-4 bg-admin-bg-tertiary/50 border-admin-border-primary/30 text-admin-text-primary font-bold rounded-xl transition-all flex items-center gap-2 hover:shadow-md hover:border-epoch-accent/30"
           >
             <RefreshCw
               className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`}
@@ -461,7 +461,7 @@ export default function AdminDashboard() {
             </span>
           </Button>
           <Link href="/admin/pos">
-            <Button className="h-10 px-6 bg-epoch-primary hover:bg-epoch-surface text-white font-bold rounded-none transition-all shadow-xl flex items-center gap-2 border border-admin-border-primary/10">
+            <Button className="h-10 px-6 bg-epoch-primary hover:bg-epoch-surface text-white font-bold rounded-xl transition-all shadow-xl flex items-center gap-2 border border-admin-border-primary/10">
               <ShoppingCart className="h-4 w-4" />
               <span className="font-display tracking-widest text-xs">
                 VENTA RÁPIDA
@@ -471,7 +471,7 @@ export default function AdminDashboard() {
           <Link href="/admin/appointments">
             <Button
               variant="outline"
-              className="h-10 px-6 bg-admin-bg-tertiary/50 border-admin-border-primary/30 text-admin-text-primary font-bold rounded-none transition-all flex items-center gap-2 hover:shadow-md hover:border-admin-accent-primary/30"
+              className="h-10 px-6 bg-admin-bg-tertiary/50 border-admin-border-primary/30 text-admin-text-primary font-bold rounded-xl transition-all flex items-center gap-2 hover:shadow-md hover:border-admin-accent-primary/30"
             >
               <Calendar className="h-4 w-4" />
               <span className="font-display tracking-widest text-xs">
@@ -482,7 +482,7 @@ export default function AdminDashboard() {
           <Link href="/admin/work-orders">
             <Button
               variant="outline"
-              className="h-10 px-6 bg-admin-bg-tertiary/50 border-admin-border-primary/30 text-admin-text-primary font-bold rounded-none transition-all flex items-center gap-2 hover:shadow-md hover:border-admin-accent-primary/30 relative"
+              className="h-10 px-6 bg-admin-bg-tertiary/50 border-admin-border-primary/30 text-admin-text-primary font-bold rounded-xl transition-all flex items-center gap-2 hover:shadow-md hover:border-admin-accent-primary/30 relative"
             >
               <div className="relative">
                 <Package className="h-4 w-4" />
@@ -502,14 +502,14 @@ export default function AdminDashboard() {
 
       {/* Stock Alert Banner - Compact */}
       {data?.lowStockProducts?.length > 0 && (
-        <Card className="border border-admin-error/20 bg-admin-error/[0.02] rounded-none shadow-none overflow-hidden animate-in slide-in-from-top duration-500 relative">
+        <Card className="border border-admin-error/20 bg-admin-error/[0.02] rounded-xl shadow-none overflow-hidden animate-in slide-in-from-top duration-500 relative">
           <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
             <AlertTriangle size={60} />
           </div>
           <CardContent className="p-4 relative z-10">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <div className="h-10 w-10 bg-admin-error/10 border border-admin-error/20 flex items-center justify-center">
+                <div className="h-10 w-10 rounded-xl bg-admin-error/10 border border-admin-error/20 flex items-center justify-center">
                   <AlertTriangle className="h-5 w-5 text-admin-error" />
                 </div>
                 <div>
@@ -533,7 +533,7 @@ export default function AdminDashboard() {
                 <Button
                   variant="outline"
                   size="sm"
-                  className="h-9 font-display tracking-widest text-[10px] bg-admin-bg-tertiary/50 text-admin-error border-admin-error/30 hover:bg-admin-error hover:text-white rounded-none transition-all"
+                  className="h-9 font-display tracking-widest text-[10px] bg-admin-bg-tertiary/50 text-admin-error border-admin-error/30 hover:bg-admin-error hover:text-white rounded-xl transition-all"
                 >
                   GESTIONAR ARCHIVO
                   <ArrowRight className="h-4 w-4 ml-2" />
@@ -554,12 +554,12 @@ export default function AdminDashboard() {
             : "Sucursal seleccionada";
 
         return (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-0 border border-admin-border-primary/20 bg-admin-border-primary/5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Revenue Card */}
-            <Card className="border-none bg-admin-bg-tertiary/50 rounded-none shadow-none hover:shadow-md transition-shadow duration-300 group overflow-hidden border-r border-admin-border-primary/10">
+            <Card className="border border-admin-border-primary/20 bg-admin-bg-tertiary/50 rounded-xl shadow-none hover:shadow-md transition-shadow duration-300 group overflow-hidden">
               <CardContent className="p-8 relative">
                 <div className="flex items-start justify-between mb-6">
-                  <div className="h-12 w-12 bg-epoch-primary/5 border border-epoch-primary/10 flex items-center justify-center transition-transform group-hover:scale-110">
+                  <div className="h-12 w-12 rounded-xl bg-epoch-primary/5 border border-epoch-primary/10 flex items-center justify-center transition-transform group-hover:scale-110">
                     <DollarSign className="h-6 w-6 text-epoch-primary" />
                   </div>
                   <div
@@ -606,15 +606,15 @@ export default function AdminDashboard() {
             </Card>
 
             {/* Appointments Card */}
-            <Card className="border-none bg-admin-bg-tertiary/50 rounded-none shadow-none hover:shadow-md transition-shadow duration-300 group overflow-hidden border-r border-admin-border-primary/10">
+            <Card className="border border-admin-border-primary/20 bg-admin-bg-tertiary/50 rounded-xl shadow-none hover:shadow-md transition-shadow duration-300 group overflow-hidden">
               <CardContent className="p-8 relative">
                 <div className="flex items-start justify-between mb-6">
-                  <div className="h-12 w-12 bg-epoch-accent/5 border border-epoch-accent/10 flex items-center justify-center transition-transform group-hover:scale-110">
+                  <div className="h-12 w-12 rounded-xl bg-epoch-accent/5 border border-epoch-accent/10 flex items-center justify-center transition-transform group-hover:scale-110">
                     <Calendar className="h-6 w-6 text-epoch-accent" />
                   </div>
                   <Badge
                     variant="outline"
-                    className="bg-epoch-primary text-white border-none rounded-none text-[9px] font-display font-bold tracking-widest px-2"
+                    className="bg-epoch-primary text-white border-none rounded-xl text-[9px] font-display font-bold tracking-widest px-2"
                   >
                     HOY
                   </Badge>
@@ -645,10 +645,10 @@ export default function AdminDashboard() {
             </Card>
 
             {/* Products Card */}
-            <Card className="border-none bg-admin-bg-tertiary/50 rounded-none shadow-none hover:shadow-md transition-shadow duration-300 group overflow-hidden border-r border-admin-border-primary/10">
+            <Card className="border border-admin-border-primary/20 bg-admin-bg-tertiary/50 rounded-xl shadow-none hover:shadow-md transition-shadow duration-300 group overflow-hidden">
               <CardContent className="p-8 relative">
                 <div className="flex items-start justify-between mb-6">
-                  <div className="h-12 w-12 bg-epoch-primary/5 border border-epoch-primary/10 flex items-center justify-center transition-transform group-hover:scale-110">
+                  <div className="h-12 w-12 rounded-xl bg-epoch-primary/5 border border-epoch-primary/10 flex items-center justify-center transition-transform group-hover:scale-110">
                     <Package className="h-6 w-6 text-epoch-primary" />
                   </div>
                   {data.kpis.products.lowStock > 0 && (
@@ -697,10 +697,10 @@ export default function AdminDashboard() {
             </Card>
 
             {/* Customers Card */}
-            <Card className="border-none bg-admin-bg-tertiary/50 rounded-none shadow-none hover:shadow-md transition-shadow duration-300 group overflow-hidden">
+            <Card className="border border-admin-border-primary/20 bg-admin-bg-tertiary/50 rounded-xl shadow-none hover:shadow-md transition-shadow duration-300 group overflow-hidden">
               <CardContent className="p-8 relative">
                 <div className="flex items-start justify-between mb-6">
-                  <div className="h-12 w-12 bg-epoch-accent/5 border border-epoch-accent/10 flex items-center justify-center transition-transform group-hover:scale-110">
+                  <div className="h-12 w-12 rounded-xl bg-epoch-accent/5 border border-epoch-accent/10 flex items-center justify-center transition-transform group-hover:scale-110">
                     <Users className="h-6 w-6 text-epoch-accent" />
                   </div>
                   <div className="bg-epoch-accent/10 p-1 text-epoch-accent">
@@ -735,11 +735,11 @@ export default function AdminDashboard() {
       {/* Charts Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Revenue Trend Chart */}
-        <Card className="border border-admin-border-primary/20 bg-admin-border-primary/5 rounded-none shadow-none overflow-hidden group">
+        <Card className="border border-admin-border-primary/20 bg-admin-border-primary/5 rounded-xl shadow-none overflow-hidden group">
           <CardHeader className="pb-2 border-b border-admin-border-primary/10">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div className="flex items-center gap-3">
-                <div className="h-10 w-10 bg-epoch-primary/5 border border-epoch-primary/10 flex items-center justify-center">
+                <div className="h-10 w-10 rounded-xl bg-epoch-primary/5 border border-epoch-primary/10 flex items-center justify-center">
                   <TrendingUp className="h-5 w-5 text-epoch-primary" />
                 </div>
                 <div>
@@ -749,10 +749,10 @@ export default function AdminDashboard() {
                 </div>
               </div>
               <Select value={revenuePeriod} onValueChange={setRevenuePeriod}>
-                <SelectTrigger className="w-[140px] h-9 text-[10px] font-display font-bold uppercase tracking-widest border-admin-border-primary/30 bg-admin-bg-tertiary/50 hover:bg-admin-bg-secondary transition-colors rounded-none">
+                <SelectTrigger className="w-[140px] h-9 text-[10px] font-display font-bold uppercase tracking-widest border-admin-border-primary/30 bg-admin-bg-tertiary/50 hover:bg-admin-bg-secondary transition-colors rounded-xl">
                   <SelectValue placeholder="Período" />
                 </SelectTrigger>
-                <SelectContent className="rounded-none border-admin-border-primary/30">
+                <SelectContent className="rounded-xl border-admin-border-primary/30">
                   <SelectItem
                     value="7"
                     className="text-[10px] font-display uppercase tracking-widest"
@@ -906,7 +906,7 @@ export default function AdminDashboard() {
               </div>
             ) : (
               <div className="flex flex-col items-center justify-center h-[300px] text-center space-y-4">
-                <div className="h-12 w-12 bg-admin-bg-tertiary border border-admin-border-primary/10 flex items-center justify-center">
+                <div className="h-12 w-12 rounded-xl bg-admin-bg-tertiary border border-admin-border-primary/10 flex items-center justify-center">
                   <BarChart className="h-6 w-6 text-admin-text-tertiary/20" />
                 </div>
                 <p className="text-[10px] font-display font-bold text-admin-text-tertiary uppercase tracking-widest">
@@ -918,10 +918,10 @@ export default function AdminDashboard() {
         </Card>
 
         {/* Work Orders Status Distribution */}
-        <Card className="border border-admin-border-primary/20 bg-admin-border-primary/5 rounded-none shadow-none overflow-hidden group">
+        <Card className="border border-admin-border-primary/20 bg-admin-border-primary/5 rounded-xl shadow-none overflow-hidden group">
           <CardHeader className="pb-2 border-b border-admin-border-primary/10">
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 bg-epoch-accent/5 border border-epoch-accent/10 flex items-center justify-center">
+              <div className="h-10 w-10 rounded-xl bg-epoch-accent/5 border border-epoch-accent/10 flex items-center justify-center">
                 <Target className="h-5 w-5 text-epoch-accent" />
               </div>
               <div>
@@ -1025,7 +1025,7 @@ export default function AdminDashboard() {
               </div>
             ) : (
               <div className="flex flex-col items-center justify-center h-[300px] text-center space-y-4">
-                <div className="h-12 w-12 bg-admin-bg-tertiary border border-admin-border-primary/10 flex items-center justify-center">
+                <div className="h-12 w-12 rounded-xl bg-admin-bg-tertiary border border-admin-border-primary/10 flex items-center justify-center">
                   <PieChart className="h-6 w-6 text-admin-text-tertiary/20" />
                 </div>
                 <p className="text-[10px] font-display font-bold text-admin-text-tertiary uppercase tracking-widest">
@@ -1039,10 +1039,10 @@ export default function AdminDashboard() {
 
       {/* Top Products Chart */}
       {data?.charts?.topProducts?.length > 0 && (
-        <Card className="border border-admin-border-primary/20 bg-admin-border-primary/5 rounded-none shadow-none overflow-hidden group">
+        <Card className="border border-admin-border-primary/20 bg-admin-border-primary/5 rounded-xl shadow-none overflow-hidden group">
           <CardHeader className="pb-2 border-b border-admin-border-primary/10">
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 bg-epoch-primary/5 border border-epoch-primary/10 flex items-center justify-center">
+              <div className="h-10 w-10 rounded-xl bg-epoch-primary/5 border border-epoch-primary/10 flex items-center justify-center">
                 <Award className="h-5 w-5 text-epoch-primary" />
               </div>
               <div>
@@ -1127,8 +1127,8 @@ export default function AdminDashboard() {
       )}
 
       {/* Today's Appointments & Quick Actions */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-0 border border-admin-border-primary/20">
-        <div className="lg:col-span-2 border-r border-admin-border-primary/10">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div className="lg:col-span-2">
           <AppointmentsList
             appointments={data?.todayAppointments ?? []}
             formatTime={formatTime}
@@ -1147,10 +1147,10 @@ export default function AdminDashboard() {
         open={isAppointmentModalOpen}
         onOpenChange={setIsAppointmentModalOpen}
       >
-        <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto rounded-none border-2 border-admin-border-primary/20 shadow-premium-lg p-0">
+        <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto rounded-xl border-2 border-admin-border-primary/20 shadow-premium-lg p-0">
           <DialogHeader className="p-8 bg-admin-bg-tertiary border-b border-admin-border-primary/10">
             <div className="flex items-center gap-3 mb-2">
-              <div className="h-10 w-10 bg-epoch-primary flex items-center justify-center">
+              <div className="h-10 w-10 rounded-xl bg-epoch-primary flex items-center justify-center">
                 <CalendarPlus className="h-5 w-5 text-white" />
               </div>
               <DialogTitle className="text-2xl font-display font-bold text-admin-text-primary tracking-tight uppercase">

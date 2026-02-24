@@ -128,7 +128,7 @@ export default function NewCustomerPage() {
       <form onSubmit={form.handleSubmit} className="space-y-6">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Personal Information */}
-          <Card className="border-none bg-admin-bg-secondary shadow-premium-sm rounded-none overflow-hidden border border-admin-border-primary/30">
+          <Card className="border-none bg-admin-bg-secondary shadow-premium-sm rounded-xl overflow-hidden border border-admin-border-primary/30">
             <CardHeader className="border-b border-admin-border-primary/10">
               <CardTitle className="flex items-center">
                 <User className="h-5 w-5 mr-2" />
@@ -215,7 +215,7 @@ export default function NewCustomerPage() {
           </Card>
 
           {/* Address Information */}
-          <Card className="border-none bg-admin-bg-secondary shadow-premium-sm rounded-none overflow-hidden border border-admin-border-primary/30">
+          <Card className="border-none bg-admin-bg-secondary shadow-premium-sm rounded-xl overflow-hidden border border-admin-border-primary/30">
             <CardHeader className="border-b border-admin-border-primary/10">
               <CardTitle className="flex items-center">
                 <MapPin className="h-5 w-5 mr-2" />
@@ -306,7 +306,7 @@ export default function NewCustomerPage() {
           </Card>
 
           {/* Additional Notes */}
-          <Card className="border-none bg-admin-bg-secondary shadow-premium-sm rounded-none overflow-hidden border border-admin-border-primary/30 lg:col-span-2">
+          <Card className="border-none bg-admin-bg-secondary shadow-premium-sm rounded-xl overflow-hidden border border-admin-border-primary/30 lg:col-span-2">
             <CardHeader className="border-b border-admin-border-primary/10">
               <CardTitle>Notas Adicionales</CardTitle>
             </CardHeader>

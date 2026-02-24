@@ -20,7 +20,7 @@ export default function QuickActions({
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
       {/* Agregar Nuevo Producto */}
-      <Card className="group cursor-pointer transition-shadow duration-300 border border-admin-border-primary/20 bg-admin-bg-tertiary/50 rounded-none shadow-none hover:shadow-lg overflow-hidden">
+      <Card className="group cursor-pointer transition-shadow duration-300 border border-admin-border-primary/20 bg-admin-bg-tertiary/50 rounded-xl shadow-none hover:shadow-lg overflow-hidden">
         <CardContent className="p-4">
           <Link href="/admin/products/add" className="block">
             <div className="flex flex-col items-center justify-center text-center space-y-2 min-h-[80px]">
@@ -42,7 +42,7 @@ export default function QuickActions({
 
       {/* Ver Stock Bajo */}
       <Card
-        className="group cursor-pointer transition-shadow duration-300 border border-admin-border-primary/20 bg-admin-bg-tertiary/50 rounded-none shadow-none hover:shadow-lg overflow-hidden"
+        className="group cursor-pointer transition-shadow duration-300 border border-admin-border-primary/20 bg-admin-bg-tertiary/50 rounded-xl shadow-none hover:shadow-lg overflow-hidden"
         onClick={onShowLowStock}
       >
         <CardContent className="p-4">
@@ -69,7 +69,7 @@ export default function QuickActions({
 
       {/* Gestión de Categorías */}
       <Card
-        className="group cursor-pointer transition-shadow duration-300 border border-admin-border-primary/20 bg-admin-bg-tertiary/50 rounded-none shadow-none hover:shadow-lg overflow-hidden"
+        className="group cursor-pointer transition-shadow duration-300 border border-admin-border-primary/20 bg-admin-bg-tertiary/50 rounded-xl shadow-none hover:shadow-lg overflow-hidden"
         onClick={onShowCategories}
       >
         <CardContent className="p-4">
@@ -90,7 +90,7 @@ export default function QuickActions({
       </Card>
 
       {/* Opciones de Producto */}
-      <Card className="group cursor-pointer transition-shadow duration-300 border border-admin-border-primary/20 bg-admin-bg-tertiary/50 rounded-none shadow-none hover:shadow-lg overflow-hidden">
+      <Card className="group cursor-pointer transition-shadow duration-300 border border-admin-border-primary/20 bg-admin-bg-tertiary/50 rounded-xl shadow-none hover:shadow-lg overflow-hidden">
         <CardContent className="p-4">
           <Link href="/admin/products/options" className="block">
             <div className="flex flex-col items-center justify-center text-center space-y-2 min-h-[80px]">

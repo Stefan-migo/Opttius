@@ -51,12 +51,14 @@ function normalizeRecipient(to: string | string[]): string | string[] {
 }
 
 // Send email utility
+// fromDisplayName: "Óptica Los Andes" -> "Óptica Los Andes <noreply@opttius.cl>"
 export async function sendEmail(data: {
   to: string | string[];
   subject: string;
   html: string;
   text?: string;
   replyTo?: string;
+  fromDisplayName?: string;
 }) {
   // Check if Resend is configured
   if (!resend) {
@@ -65,10 +67,15 @@ export async function sendEmail(data: {
   }
 
   const to = normalizeRecipient(data.to);
+  const fromEmail = emailConfig.from;
+  const from =
+    data.fromDisplayName && data.fromDisplayName.trim()
+      ? `${data.fromDisplayName.trim()} <${fromEmail}>`
+      : fromEmail;
 
   try {
     const result = await resend.emails.send({
-      from: emailConfig.from,
+      from,
       to,
       subject: data.subject,
       html: data.html,

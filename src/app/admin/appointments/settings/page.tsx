@@ -411,19 +411,25 @@ export default function ScheduleSettingsPage() {
             </CardHeader>
             <CardContent className="p-6 space-y-4">
               {(
-                Object.keys(settings.working_hours) as Array<
-                  keyof ScheduleSettings["working_hours"]
-                >
+                [
+                  "monday",
+                  "tuesday",
+                  "wednesday",
+                  "thursday",
+                  "friday",
+                  "saturday",
+                  "sunday",
+                ] as Array<keyof ScheduleSettings["working_hours"]>
               ).map((day) => {
                 const dayConfig = settings.working_hours[day];
                 return (
                   <div
                     key={day}
                     className={cn(
-                      "rounded-2xl p-4 transition-all duration-300 border",
+                      "rounded-xl p-4 transition-all duration-300 border",
                       dayConfig.enabled
-                        ? "bg-white border-admin-border-primary/40 shadow-premium-sm"
-                        : "bg-admin-bg-tertiary/10 border-transparent opacity-60",
+                        ? "bg-admin-bg-tertiary/50 border-admin-border-primary/20 shadow-none hover:shadow-md"
+                        : "bg-admin-bg-tertiary/20 border-admin-border-primary/10 opacity-70",
                     )}
                   >
                     <div className="flex items-center justify-between mb-4 px-2">
@@ -432,11 +438,11 @@ export default function ScheduleSettingsPage() {
                           className={cn(
                             "h-2 w-2 rounded-full",
                             dayConfig.enabled
-                              ? "bg-admin-success animate-pulse"
+                              ? "bg-epoch-primary"
                               : "bg-admin-text-tertiary",
                           )}
                         />
-                        <span className="text-sm font-black text-admin-text-primary uppercase tracking-tight">
+                        <span className="text-sm font-bold text-admin-text-primary uppercase tracking-tight">
                           {dayLabels[day]}
                         </span>
                       </div>

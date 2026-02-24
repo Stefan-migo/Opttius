@@ -274,7 +274,7 @@ export default function CreateQuoteForm({
         open={showCreatePrescription}
         onOpenChange={setShowCreatePrescription}
       >
-        <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-2xl">
+        <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-7xl max-h-[90vh] overflow-y-auto p-6 sm:p-8">
           <DialogHeader>
             <DialogTitle>Crear Nueva Receta</DialogTitle>
             <DialogDescription>

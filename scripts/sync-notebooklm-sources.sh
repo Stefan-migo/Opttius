@@ -21,6 +21,11 @@ if [ -f "$ROOT/docs/SYSTEM_CONFIGURATION_CHANGELOG_2026-02.md" ]; then
   nlm source add "$NB_ID" --file "$ROOT/docs/SYSTEM_CONFIGURATION_CHANGELOG_2026-02.md" --title "SYSTEM_CONFIGURATION_CHANGELOG" 2>/dev/null || true
 fi
 
+if [ -f "$ROOT/docs/IDENTITY.md" ]; then
+  echo "  - IDENTITY.md"
+  nlm source add "$NB_ID" --file "$ROOT/docs/IDENTITY.md" --title "IDENTITY" 2>/dev/null || true
+fi
+
 if [ -f "$ROOT/docs/FRONTEND_IDENTITY.md" ]; then
   echo "  - FRONTEND_IDENTITY.md"
   nlm source add "$NB_ID" --file "$ROOT/docs/FRONTEND_IDENTITY.md" --title "Frontend Identity Documentation - Opttius" 2>/dev/null || true

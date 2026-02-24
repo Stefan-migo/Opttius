@@ -233,7 +233,7 @@ export function PricingSection() {
     <section id="precios" className="py-20 sm:py-32 bg-epoch-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-24 max-w-3xl mx-auto">
-          <div className="inline-flex items-center gap-2 px-4 py-2 border border-epoch-primary/10 rounded-full text-epoch-primary text-[10px] font-display font-bold uppercase tracking-[0.2em] mb-6">
+          <div className="inline-flex items-center gap-3 px-5 py-2 bg-epoch-primary/10 border border-epoch-primary/40 rounded-full text-epoch-primary text-[10px] sm:text-[11px] font-sans font-semibold tracking-[0.35em] uppercase mb-6">
             <Sparkles className="h-4 w-4" />
             <span>Planes para cada óptica</span>
           </div>
@@ -256,7 +256,7 @@ export function PricingSection() {
             {plans.map((plan) => (
               <div
                 key={plan.displayName}
-                className={`relative flex flex-col p-6 sm:p-10 rounded-none transition-all duration-500 border ${
+                className={`relative flex flex-col p-6 sm:p-10 rounded-xl transition-all duration-500 border ${
                   plan.popular
                     ? "bg-white border-epoch-accent shadow-lg shadow-epoch-primary/10 lg:scale-105 z-10"
                     : "bg-white border-epoch-primary/10 hover:border-epoch-primary/20 shadow-sm hover:shadow-md"
@@ -264,7 +264,7 @@ export function PricingSection() {
               >
                 {plan.popular && (
                   <div className="absolute -top-5 left-1/2 -translate-x-1/2">
-                    <span className="bg-epoch-primary text-white px-6 py-2 rounded-none text-[10px] font-display font-bold uppercase tracking-widest shadow-lg">
+                    <span className="bg-epoch-primary text-white px-6 py-2 rounded-xl text-[10px] font-display font-bold uppercase tracking-widest shadow-lg">
                       Más Solicitado
                     </span>
                   </div>
@@ -297,7 +297,7 @@ export function PricingSection() {
                   <ul className="space-y-4">
                     {plan.features.map((feature, featureIndex) => (
                       <li key={featureIndex} className="flex items-start gap-3">
-                        <div className="mt-1 h-5 w-5 rounded-none border border-epoch-accent/30 flex items-center justify-center text-epoch-accent flex-shrink-0">
+                        <div className="mt-1 h-5 w-5 rounded-xl border border-epoch-accent/30 flex items-center justify-center text-epoch-accent flex-shrink-0">
                           <Check className="h-3 w-3" strokeWidth={3} />
                         </div>
                         <span className="text-epoch-primary/80 text-sm font-body leading-tight">
@@ -310,7 +310,7 @@ export function PricingSection() {
 
                 <Button
                   onClick={handleGetStarted}
-                  className={`w-full h-14 rounded-none font-display font-bold transition-all duration-300 ${
+                  className={`w-full h-14 rounded-xl font-display font-bold transition-all duration-300 ${
                     plan.popular
                       ? "bg-epoch-primary text-white hover:bg-epoch-surface shadow-md hover:scale-[1.02]"
                       : "bg-epoch-background text-epoch-primary hover:bg-epoch-primary/10 border border-epoch-primary/10"

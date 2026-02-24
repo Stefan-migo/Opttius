@@ -39,9 +39,8 @@ export function LandingFooter() {
               </div>
             </Link>
 
-            <p className="text-white/40 text-sm font-body leading-relaxed italic max-w-xs">
-              Sistema de gestión para ópticas creado por un tecnólogo médico.
-              Exclusivo para el sector. Última generación.
+            <p className="text-white/40 text-sm font-sans leading-relaxed max-w-xs">
+              De la clínica al código. 100% nativo para ópticas.
             </p>
 
             <div className="flex gap-8">
@@ -113,7 +112,7 @@ export function LandingFooter() {
             <h3 className="font-display text-xs font-bold text-epoch-accent uppercase tracking-[0.4em] mb-12">
               Contacto
             </h3>
-            <ul className="space-y-8 font-serif italic text-sm">
+            <ul className="space-y-8 font-sans text-sm">
               <li className="flex flex-col gap-2">
                 <span className="text-[10px] font-display tracking-[0.3em] uppercase text-white/30">
                   Email
@@ -130,11 +129,16 @@ export function LandingFooter() {
                   Teléfono
                 </span>
                 <a
-                  href="tel:+1234567890"
+                  href={`https://wa.me/${businessConfig.contactPhone?.replace(/\D/g, "")}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="text-white/60 hover:text-white transition-colors"
                 >
-                  +1 (234) 567-890
+                  {businessConfig.contactPhone}
                 </a>
+                <span className="text-[9px] text-white/40 font-sans">
+                  Solo disponible por WhatsApp
+                </span>
               </li>
             </ul>
           </div>

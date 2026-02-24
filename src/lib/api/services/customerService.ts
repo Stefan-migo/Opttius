@@ -7,6 +7,7 @@
 
 import { ApiClient, isSuccess, unwrapData } from "../client-helpers";
 import { handleApiError } from "@/lib/services/errorService";
+import { getBranchHeader } from "@/lib/utils/branch";
 
 // Import shared types from other services to avoid duplication
 import type { Appointment } from "./appointmentService";
@@ -331,12 +332,19 @@ export async function deleteCustomer(id: string): Promise<void> {
 }
 
 /**
- * Search customers by query
+ * Search customers by query.
+ * @param query - Search term (name, email, phone, RUT)
+ * @param branchId - Optional branch ID to filter customers. When provided, only customers from this branch are returned. Required for branch-scoped forms (quotes, appointments).
  */
-export async function searchCustomers(query: string): Promise<Customer[]> {
+export async function searchCustomers(
+  query: string,
+  branchId?: string | null,
+): Promise<Customer[]> {
   try {
+    const headers = getBranchHeader(branchId ?? null);
     const response = await client.get<Customer[]>(
       `/api/admin/customers/search?q=${encodeURIComponent(query)}`,
+      { headers },
     );
     const data = unwrapData(response);
     return Array.isArray(data) ? data : [];

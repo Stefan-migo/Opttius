@@ -47,6 +47,10 @@ export interface AgentOptions {
   };
   /** Optional: for AI usage logging (cost tracking) */
   supabase?: SupabaseClient;
+  /** Skip logAdminActivity (e.g. WhatsApp customer - no auth context) */
+  skipAdminActivityLog?: boolean;
+  /** Customer ID for WhatsApp customer context (customer-scoped tools) */
+  customerId?: string | null;
 }
 
 export class Agent {
@@ -71,6 +75,8 @@ export class Agent {
       }
     | undefined;
   private supabaseForUsageLog: SupabaseClient | undefined;
+  private skipAdminActivityLog: boolean;
+  private customerId: string | null | undefined;
 
   constructor(options: AgentOptions) {
     this.userId = options.userId;
@@ -85,6 +91,8 @@ export class Agent {
     this.userData = options.userData;
     this.supabaseForUsageLog = options.supabase;
     this.knowledgeBaseEnabled = options.config?.enableKnowledgeBase ?? true;
+    this.skipAdminActivityLog = options.skipAdminActivityLog ?? false;
+    this.customerId = options.customerId;
   }
 
   /**
@@ -211,6 +219,8 @@ export class Agent {
         currency,
         userData: this.userData,
         currentBranchId: this.currentBranchId,
+        skipAdminActivityLog: this.skipAdminActivityLog,
+        customerId: this.customerId,
       };
       this.toolExecutor = new ToolExecutor(context);
     }

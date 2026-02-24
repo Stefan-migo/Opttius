@@ -262,7 +262,7 @@ export default function SupportPage() {
           size="icon"
           onClick={() => router.push("/admin/saas-management/dashboard")}
           title="Volver al dashboard"
-          className="rounded-none text-epoch-primary hover:bg-epoch-primary/10"
+          className="rounded-xl text-epoch-primary hover:bg-epoch-primary/10"
         >
           <ArrowLeft className="h-5 w-5" />
         </Button>
@@ -281,7 +281,7 @@ export default function SupportPage() {
         <Button
           variant={activeTab === "tickets" ? "default" : "ghost"}
           onClick={() => setActiveTab("tickets")}
-          className={`rounded-none rounded-b-none ${activeTab === "tickets" ? "bg-epoch-primary hover:bg-epoch-surface text-white font-display font-bold text-[10px] tracking-[0.2em] uppercase" : "text-epoch-primary"}`}
+          className={`rounded-xl rounded-b-none ${activeTab === "tickets" ? "bg-epoch-primary hover:bg-epoch-surface text-white font-display font-bold text-[10px] tracking-[0.2em] uppercase" : "text-epoch-primary"}`}
         >
           <MessageSquare className="h-4 w-4 mr-2" />
           Tickets de Soporte
@@ -289,7 +289,7 @@ export default function SupportPage() {
         <Button
           variant={activeTab === "search" ? "default" : "ghost"}
           onClick={() => setActiveTab("search")}
-          className={`rounded-none rounded-b-none ${activeTab === "search" ? "bg-epoch-primary hover:bg-epoch-surface text-white font-display font-bold text-[10px] tracking-[0.2em] uppercase" : "text-epoch-primary"}`}
+          className={`rounded-xl rounded-b-none ${activeTab === "search" ? "bg-epoch-primary hover:bg-epoch-surface text-white font-display font-bold text-[10px] tracking-[0.2em] uppercase" : "text-epoch-primary"}`}
         >
           <Search className="h-4 w-4 mr-2" />
           Búsqueda Rápida
@@ -328,7 +328,7 @@ export default function SupportPage() {
                       }))
                     }
                   >
-                    <SelectTrigger className="rounded-none focus:border-epoch-primary focus:ring-epoch-primary/20">
+                    <SelectTrigger className="rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20">
                       <SelectValue placeholder="Todos los estados" />
                     </SelectTrigger>
                     <SelectContent>
@@ -354,7 +354,7 @@ export default function SupportPage() {
                       }))
                     }
                   >
-                    <SelectTrigger className="rounded-none focus:border-epoch-primary focus:ring-epoch-primary/20">
+                    <SelectTrigger className="rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20">
                       <SelectValue placeholder="Todas las prioridades" />
                     </SelectTrigger>
                     <SelectContent>
@@ -379,7 +379,7 @@ export default function SupportPage() {
                       }))
                     }
                   >
-                    <SelectTrigger className="rounded-none focus:border-epoch-primary focus:ring-epoch-primary/20">
+                    <SelectTrigger className="rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20">
                       <SelectValue placeholder="Todas las categorías" />
                     </SelectTrigger>
                     <SelectContent>
@@ -406,14 +406,14 @@ export default function SupportPage() {
                           page: 1,
                         }))
                       }
-                      className="rounded-none focus:border-epoch-primary focus:ring-epoch-primary/20"
+                      className="rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20"
                     />
                     <Button
                       variant="outline"
                       size="icon"
                       onClick={loadTickets}
                       title="Refrescar"
-                      className="rounded-none border-admin-border-primary/20"
+                      className="rounded-xl border-admin-border-primary/20"
                     >
                       <RefreshCw className="h-4 w-4" />
                     </Button>
@@ -447,7 +447,7 @@ export default function SupportPage() {
                       key={ticket.id}
                       href={`/admin/saas-management/support/tickets/${ticket.id}`}
                     >
-                      <div className="flex items-center justify-between p-4 border rounded-none hover:bg-epoch-primary/5 cursor-pointer transition-colors">
+                      <div className="flex items-center justify-between p-4 border rounded-xl hover:bg-epoch-primary/5 cursor-pointer transition-colors">
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-1">
                             <span className="font-mono font-semibold text-sm">
@@ -503,7 +503,7 @@ export default function SupportPage() {
                     <Button
                       variant="outline"
                       size="sm"
-                      className="rounded-none border-admin-border-primary/20"
+                      className="rounded-xl border-admin-border-primary/20"
                       onClick={() =>
                         setPagination((prev) => ({
                           ...prev,
@@ -517,7 +517,7 @@ export default function SupportPage() {
                     <Button
                       variant="outline"
                       size="sm"
-                      className="rounded-none border-admin-border-primary/20"
+                      className="rounded-xl border-admin-border-primary/20"
                       onClick={() =>
                         setPagination((prev) => ({
                           ...prev,
@@ -548,7 +548,7 @@ export default function SupportPage() {
                   placeholder="Buscar por nombre, slug, email..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 rounded-none focus:border-epoch-primary focus:ring-epoch-primary/20"
+                  className="pl-10 rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20"
                 />
               </div>
               {searching && (
@@ -577,7 +577,7 @@ export default function SupportPage() {
                       {searchResults.organizations.map((org) => (
                         <div
                           key={org.id}
-                          className="flex items-center justify-between p-4 border rounded-none hover:bg-epoch-primary/5 transition-colors"
+                          className="flex items-center justify-between p-4 border rounded-xl hover:bg-epoch-primary/5 transition-colors"
                         >
                           <div className="flex-1">
                             <div className="flex items-center gap-2">
@@ -599,7 +599,7 @@ export default function SupportPage() {
                             <Button
                               variant="outline"
                               size="sm"
-                              className="rounded-none border-admin-border-primary/20"
+                              className="rounded-xl border-admin-border-primary/20"
                             >
                               Ver detalles
                               <ArrowRight className="h-4 w-4 ml-2" />
@@ -626,7 +626,7 @@ export default function SupportPage() {
                       {searchResults.users.map((user) => (
                         <div
                           key={user.id}
-                          className="flex items-center justify-between p-4 border rounded-none hover:bg-epoch-primary/5 transition-colors"
+                          className="flex items-center justify-between p-4 border rounded-xl hover:bg-epoch-primary/5 transition-colors"
                         >
                           <div className="flex-1">
                             <div className="flex items-center gap-2">
@@ -662,7 +662,7 @@ export default function SupportPage() {
                             <Button
                               variant="outline"
                               size="sm"
-                              className="rounded-none border-admin-border-primary/20"
+                              className="rounded-xl border-admin-border-primary/20"
                             >
                               Ver detalles
                               <ArrowRight className="h-4 w-4 ml-2" />

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, Sparkles } from "lucide-react";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 import { MinimalLandingHeader } from "@/components/landing/MinimalLandingHeader";
 
 export const metadata: Metadata = {
@@ -17,24 +17,22 @@ const aboutNavItems = [
 
 const pillars = [
   {
-    title: "Especialización",
+    title: "ADN Clínico (No Adaptaciones)",
+    subtitle: "Anti-Genérico por Diseño",
     description:
-      "Exclusivo para ópticas. Campos, flujos y reportes pensados para el sector. No es una adaptación de un CRM genérico.",
+      'Mientras otros sistemas intentan venderle un punto de venta de supermercado "adaptado", nosotros diseñamos flujos para recetas, curvas base y distancias pupilares. Opttius respira óptica porque fue forjado por especialistas de la visión.',
   },
   {
-    title: "Origen técnico",
+    title: "Ingeniería de Precisión",
+    subtitle: "Obsesión por el Detalle",
     description:
-      "Diseñado por quien entiende la práctica clínica y operativa. Recetas, prescripciones, laboratorio y agenda desde el día a día real.",
+      "En nuestra profesión, un milímetro cambia todo. Trasladamos ese rigor clínico al código: validaciones automáticas, trazabilidad de laboratorio y cero tolerancia al error de transcripción.",
   },
   {
-    title: "Tecnología de última generación",
+    title: "El Socio Invisible",
+    subtitle: "Tecnología que Trabaja por Usted",
     description:
-      "IA, integraciones y precisión de datos. Historiales inteligentes, automatización de citas y órdenes verificadas.",
-  },
-  {
-    title: "Pragmatismo",
-    description:
-      "Resuelve problemas reales sin complejidad innecesaria. Menos errores, más tiempo, más ventas.",
+      "No creemos en el software pasivo. Integramos Inteligencia Artificial y automatización para que el sistema agende, cobre y notifique por usted. Su foco debe estar en el paciente, no en la administración.",
   },
 ];
 
@@ -44,32 +42,52 @@ export default function AboutPage() {
       <MinimalLandingHeader navItems={aboutNavItems} />
 
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-24 md:py-32 pt-32">
-        <div className="mb-16">
+        <Link
+          href="/"
+          className="inline-flex items-center gap-2 text-epoch-primary/70 hover:text-epoch-primary font-sans text-sm font-medium transition-colors mb-12"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Volver al inicio
+        </Link>
+
+        {/* Hero: La Historia */}
+        <section className="mb-24">
           <div className="inline-flex items-center gap-4 px-6 py-2 border border-epoch-primary/10 rounded-full text-epoch-primary/70 text-[10px] font-display tracking-[0.4em] uppercase mb-8">
-            <Sparkles className="h-3 w-3" />
-            <span>Nuestra historia</span>
+            <span>La Historia</span>
           </div>
           <h1 className="text-4xl md:text-6xl font-display font-bold text-epoch-primary tracking-tight leading-tight mb-6">
-            CREADO POR QUIEN
-            <br />
-            <span className="text-epoch-accent italic font-serif lowercase tracking-normal">
-              conoce su óptica
-            </span>
+            De la Clínica al Código
           </h1>
-          <p className="text-xl text-epoch-primary/80 font-body leading-relaxed max-w-2xl">
-            Opttius fue creado por un tecnólogo médico con experiencia en
-            oftalmología. Conoce el día a día de una óptica: recetas,
-            prescripciones, laboratorio, presupuestos, agenda. Por eso el
-            sistema no es una adaptación de otro gestor de negocios: está
-            pensado desde cero para el manejo cotidiano de su óptica.
+          <p className="text-xl text-epoch-primary/80 font-body leading-relaxed mb-12 max-w-2xl">
+            Opttius no nació en una sala de juntas. Nació en el laboratorio,
+            entre recetas complejas y pacientes reales.
           </p>
-        </div>
+          <blockquote className="border-l-4 border-epoch-accent pl-8 py-4 space-y-6">
+            <p className="text-epoch-primary/90 font-body text-lg leading-relaxed italic">
+              Durante años, vi cómo las ópticas más brillantes luchaban contra
+              herramientas mediocres. Usaban un software para cobrar, un Excel
+              para el laboratorio y notas adhesivas para los pacientes. El
+              resultado siempre era el mismo: caos operativo y errores humanos.
+            </p>
+            <p className="text-epoch-primary/90 font-body text-lg leading-relaxed italic">
+              Como Tecnólogo Médico, entendí que un CRM genérico nunca podría
+              entender la diferencia entre un eje y una adición. Por eso
+              construí Opttius. No para adaptar un sistema contable, sino para
+              crear el primer Sistema Operativo Nativo que habla el idioma
+              exacto de la oftalmología.
+            </p>
+            <footer className="text-epoch-primary/70 font-display text-sm uppercase tracking-wider">
+              — Fundador de Opttius
+            </footer>
+          </blockquote>
+        </section>
 
-        <div className="space-y-16">
+        {/* Grid: Nuestra Filosofía */}
+        <section className="space-y-16">
           <h2 className="text-2xl font-display font-bold text-epoch-primary uppercase tracking-wider">
-            Propuesta de valor
+            Nuestra Filosofía
           </h2>
-          <div className="grid md:grid-cols-2 gap-12">
+          <div className="grid md:grid-cols-1 gap-12">
             {pillars.map((pillar, index) => (
               <div
                 key={index}
@@ -77,29 +95,36 @@ export default function AboutPage() {
               >
                 <div className="w-12 h-[1px] bg-epoch-accent" />
                 <h3 className="text-lg font-display font-bold text-epoch-primary uppercase tracking-wider">
-                  {pillar.title}
+                  Pilar {index + 1}: {pillar.title}
                 </h3>
+                <p className="text-epoch-accent font-display text-sm uppercase tracking-wider">
+                  {pillar.subtitle}
+                </p>
                 <p className="text-epoch-primary/80 font-body leading-relaxed">
                   {pillar.description}
                 </p>
               </div>
             ))}
           </div>
-        </div>
+        </section>
 
-        <div className="mt-24 pt-16 border-t border-epoch-primary/10">
-          <p className="text-epoch-primary/70 font-serif italic text-lg mb-8 max-w-2xl">
-            Menos errores. Más tiempo. Más ventas. Ópticas que usan Opttius
-            reportan ahorro de tiempo y mayor tasa de cierre en presupuestos.
+        {/* Cierre: El Manifiesto */}
+        <section className="mt-24 pt-16 border-t border-epoch-primary/10">
+          <h2 className="text-2xl font-display font-bold text-epoch-primary uppercase tracking-wider mb-6">
+            El Nuevo Estándar
+          </h2>
+          <p className="text-epoch-primary/70 font-body text-lg mb-8 max-w-2xl">
+            Ya no es necesario elegir entre la precisión clínica y la
+            rentabilidad comercial. Hemos unido ambos mundos.
           </p>
           <Link
             href="/signup"
             className="inline-flex items-center gap-3 px-10 py-4 bg-epoch-primary hover:bg-epoch-surface text-white font-display font-bold uppercase text-xs tracking-[0.3em] transition-all duration-500 group"
           >
-            Probar Gratis
+            Elevar el Estándar de mi Óptica
             <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-2" />
           </Link>
-        </div>
+        </section>
       </main>
 
       <footer className="border-t border-epoch-primary/10 py-8 mt-24">

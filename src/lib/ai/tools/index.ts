@@ -10,6 +10,7 @@ import { marketTrendsTools } from "./analyzeMarketTrends";
 import { inventoryTools } from "./optimizeInventory";
 import { recommendationTools } from "./generateRecommendations";
 import { importBulkTools } from "./importBulk";
+import { customerWhatsAppTools } from "./customerWhatsApp";
 import type { ToolDefinition } from "./types";
 import type { LLMTool } from "../types";
 
@@ -18,6 +19,7 @@ export const allTools: ToolDefinition[] = [
   ...categoryTools,
   ...orderTools,
   ...customerTools,
+  ...customerWhatsAppTools,
   ...analyticsTools,
   ...supportTools,
   ...businessFlowTools,

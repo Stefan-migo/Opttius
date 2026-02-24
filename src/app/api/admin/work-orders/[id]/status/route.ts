@@ -5,6 +5,7 @@ import { NotificationService } from "@/lib/notifications/notification-service";
 import { validateBranchAccess } from "@/lib/api/branch-middleware";
 import { appLogger as logger } from "@/lib/logger";
 import { EmailNotificationService } from "@/lib/email/notifications";
+import { sendWorkOrderReadyWhatsApp } from "@/lib/whatsapp/notifications-b2b";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
 
 export const dynamic = "force-dynamic";
@@ -146,7 +147,7 @@ export async function PUT(
         .select(
           `
         *,
-        customer:customers!lab_work_orders_customer_id_fkey(id, first_name, last_name, email, phone),
+        customer:customers!lab_work_orders_customer_id_fkey(id, first_name, last_name, email, phone, preferred_contact_method),
         prescription:prescriptions!lab_work_orders_prescription_id_fkey(*)
       `,
         )
@@ -189,36 +190,57 @@ export async function PUT(
         ).catch((err) => logger.warn("Error creating notification", err));
       }
 
-      // If status is ready_for_pickup, send email to customer
-      if (
-        status === "ready_for_pickup" &&
-        (updatedWorkOrder.customer?.email || (updatedWorkOrder as any).email)
-      ) {
+      // If status is ready_for_pickup, send email and optionally WhatsApp to customer
+      if (status === "ready_for_pickup") {
         (async () => {
           try {
-            // Get organization_id
-            const { data: adminUser } = await supabaseServiceRole
-              .from("admin_users")
-              .select("organization_id")
-              .eq("id", user.id)
-              .single();
+            const customer = updatedWorkOrder.customer as {
+              email?: string;
+              phone?: string;
+              preferred_contact_method?: string;
+              first_name?: string;
+              last_name?: string;
+            } | null;
+            const hasEmail = customer?.email || (updatedWorkOrder as any).email;
 
-            const organizationId = adminUser?.organization_id;
+            if (hasEmail) {
+              const { data: adminUser } = await supabaseServiceRole
+                .from("admin_users")
+                .select("organization_id")
+                .eq("id", user.id)
+                .single();
 
-            await EmailNotificationService.sendWorkOrderReady(
-              {
-                customer_name:
-                  `${updatedWorkOrder.customer?.first_name || ""} ${updatedWorkOrder.customer?.last_name || ""}`.trim() ||
-                  "Cliente",
-                customer_email:
-                  updatedWorkOrder.customer?.email ||
-                  (updatedWorkOrder as any).email,
-                work_order_number: updatedWorkOrder.work_order_number,
-              },
-              organizationId ?? undefined,
-            );
+              const organizationId = adminUser?.organization_id;
+
+              await EmailNotificationService.sendWorkOrderReady(
+                {
+                  customer_name:
+                    `${customer?.first_name || ""} ${customer?.last_name || ""}`.trim() ||
+                    "Cliente",
+                  customer_email: customer?.email || (updatedWorkOrder as any).email,
+                  work_order_number: updatedWorkOrder.work_order_number,
+                },
+                organizationId ?? undefined,
+              );
+            }
+
+            if (
+              customer?.phone &&
+              customer?.preferred_contact_method === "whatsapp"
+            ) {
+              const { data: branch } = await supabaseServiceRole
+                .from("branches")
+                .select("name")
+                .eq("id", updatedWorkOrder.branch_id)
+                .single();
+              await sendWorkOrderReadyWhatsApp(
+                customer.phone,
+                updatedWorkOrder.work_order_number,
+                branch?.name ?? undefined
+              );
+            }
           } catch (err) {
-            logger.error("Error sending work order ready email", err);
+            logger.error("Error sending work order ready notification", err);
           }
         })();
       }

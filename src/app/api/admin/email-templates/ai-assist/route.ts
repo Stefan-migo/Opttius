@@ -4,6 +4,7 @@ import { LLMFactory } from "@/lib/ai/factory";
 import { appLogger as logger } from "@/lib/logger";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
 import type { LLMProvider } from "@/lib/ai/types";
+import { buildVariablesPromptForAgent } from "@/lib/email/ai-template-variables";
 
 /**
  * POST /api/admin/email-templates/ai-assist
@@ -11,67 +12,10 @@ import type { LLMProvider } from "@/lib/ai/types";
  * Receives: { type, organizationId?, userPrompt }
  * Returns: { subject, content }
  *
- * The agent receives template type, available variables, and org metadata (if organizationId).
- * Tools for org metadata will be added when defined by the user.
+ * El agente usa las variables definidas en ai-template-variables.ts,
+ * alineadas con notifications.ts y optica.ts. Usar organization_name (no company_name).
  */
 export const dynamic = "force-dynamic";
-
-const VARIABLES_BY_TYPE: Record<string, string[]> = {
-  order_confirmation: [
-    "customer_name",
-    "order_number",
-    "order_total",
-    "order_date",
-    "order_items",
-    "company_name",
-    "support_email",
-  ],
-  account_welcome: [
-    "customer_name",
-    "account_url",
-    "company_name",
-    "support_email",
-    "website_url",
-  ],
-  appointment_reminder: [
-    "customer_name",
-    "appointment_date",
-    "appointment_time",
-    "branch_name",
-    "company_name",
-    "support_email",
-  ],
-  quote_sent: [
-    "customer_name",
-    "quote_number",
-    "quote_date",
-    "quote_total",
-    "company_name",
-    "support_email",
-  ],
-  quote_expiring: [
-    "customer_name",
-    "quote_number",
-    "quote_expiry_date",
-    "total",
-    "company_name",
-    "support_email",
-  ],
-  work_order_ready: [
-    "customer_name",
-    "work_order_number",
-    "branch_name",
-    "company_name",
-    "support_email",
-  ],
-  low_stock_alert: [
-    "low_stock_products",
-    "product_count",
-    "company_name",
-    "support_email",
-  ],
-  custom: ["customer_name", "company_name", "support_email", "website_url"],
-};
 
 export async function POST(request: NextRequest) {
   try {
@@ -105,8 +49,7 @@ export async function POST(request: NextRequest) {
     }
 
     const templateType = type || "custom";
-    const variables =
-      VARIABLES_BY_TYPE[templateType] || VARIABLES_BY_TYPE.custom;
+    const variablesPrompt = buildVariablesPromptForAgent(templateType);
 
     let orgInfo: { name?: string; primary_color?: string } | null = null;
     if (organizationId) {
@@ -127,9 +70,13 @@ export async function POST(request: NextRequest) {
     const systemPrompt = `Eres un asistente que genera plantillas de email para una óptica. El usuario describe lo que quiere y tú devuelves un subject (asunto) y content (HTML del cuerpo del email).
 
 Tipo de plantilla: ${templateType}
-Variables disponibles (usar con {{variable_name}}): ${variables.join(", ")}
-${orgInfo?.name ? `Nombre de la óptica: ${orgInfo.name}` : ""}
-${orgInfo?.primary_color ? `Color primario: ${orgInfo.primary_color}` : ""}
+
+Variables disponibles (OBLIGATORIO usar solo estas, con sintaxis {{variable_name}}):
+${variablesPrompt}
+
+IMPORTANTE: Usa organization_name para el nombre de la óptica, NUNCA company_name.
+${orgInfo?.name ? `Nombre de la óptica en este contexto: ${orgInfo.name}` : ""}
+${orgInfo?.primary_color ? `Color primario sugerido: ${orgInfo.primary_color}` : ""}
 
 Responde ÚNICAMENTE con un JSON válido en este formato exacto, sin markdown ni texto adicional:
 {"subject":"Asunto del email","content":"<html>...</html>"}

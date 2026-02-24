@@ -144,7 +144,7 @@ export default function LensFamiliesList() {
         </div>
       </div>
 
-      <Card className="border border-admin-border-primary/20 bg-admin-bg-tertiary rounded-none shadow-none overflow-hidden">
+      <Card className="border border-admin-border-primary/20 bg-admin-bg-tertiary rounded-xl shadow-none overflow-hidden">
         <CardHeader className="bg-admin-bg-tertiary/50 border-b border-admin-border-primary/10 py-6">
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-2">
@@ -158,7 +158,7 @@ export default function LensFamiliesList() {
               <Button
                 variant="ghost"
                 size="sm"
-                className={`rounded-none text-[9px] font-display font-bold tracking-widest uppercase h-auto py-2 border-none ${
+                className={`rounded-xl text-[9px] font-display font-bold tracking-widest uppercase h-auto py-2 border-none ${
                   includeInactive
                     ? "bg-admin-error/10 text-admin-error"
                     : "hover:bg-admin-bg-tertiary text-admin-text-tertiary"
@@ -198,7 +198,7 @@ export default function LensFamiliesList() {
                 placeholder="BUSCAR EN MATRIZ POR NOMBRE, MARCA O MATERIAL TÉCNICO..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-12 rounded-none border-admin-border-primary/10 focus:border-epoch-primary focus:ring-0 bg-white p-6 text-[10px] font-display font-bold tracking-widest uppercase"
+                className="pl-12 rounded-xl border-admin-border-primary/10 focus:border-epoch-primary focus:ring-0 bg-white p-6 text-[10px] font-display font-bold tracking-widest uppercase"
               />
             </div>
           </div>
@@ -299,7 +299,7 @@ export default function LensFamiliesList() {
                           <Button
                             variant="ghost"
                             size="sm"
-                            className="h-8 w-8 p-0 rounded-none hover:bg-admin-bg-tertiary text-epoch-primary"
+                            className="h-8 w-8 p-0 rounded-xl hover:bg-admin-bg-tertiary text-epoch-primary"
                             onClick={() =>
                               router.push(`/admin/lens-families/${family.id}`)
                             }
@@ -309,7 +309,7 @@ export default function LensFamiliesList() {
                           <Button
                             variant="ghost"
                             size="sm"
-                            className="h-8 w-8 p-0 rounded-none hover:bg-admin-error/5 text-admin-error"
+                            className="h-8 w-8 p-0 rounded-xl hover:bg-admin-error/5 text-admin-error"
                             onClick={() => handleDelete(family.id)}
                           >
                             <Trash2 className="h-3.5 w-3.5" />

@@ -1,0 +1,71 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - generic [ref=e4]:
+      - img [ref=e6]
+      - heading "BIENVENIDO A la orden" [level=1] [ref=e20]
+      - paragraph [ref=e21]: Configuración de Infraestructura Digital
+    - generic [ref=e22]:
+      - generic [ref=e23] [cursor=pointer]:
+        - generic [ref=e25]:
+          - generic [ref=e26]:
+            - img [ref=e28]
+            - generic [ref=e30]: EXPERIENCIA INICIAL
+          - generic [ref=e31]: Entorno de Prueba
+          - generic [ref=e32]: Acceda al sistema con una arquitectura pre-configurada. Ideal para conocer la suite técnica de Opttius en segundos.
+        - generic [ref=e33]:
+          - generic [ref=e34]:
+            - generic [ref=e35]:
+              - img [ref=e37]
+              - generic [ref=e40]: Dashboard con analíticas realistas
+            - generic [ref=e41]:
+              - img [ref=e43]
+              - generic [ref=e46]: Catálogo completo de armazones y micas
+            - generic [ref=e47]:
+              - img [ref=e49]
+              - generic [ref=e52]: Flujo integrado de ventas y agenda
+            - generic [ref=e53]:
+              - img [ref=e55]
+              - generic [ref=e58]: Sin compromiso, migre cuando esté listo
+          - button "COMENZAR DEMO" [ref=e59]:
+            - generic [ref=e60]:
+              - text: COMENZAR DEMO
+              - img
+      - generic [ref=e62] [cursor=pointer]:
+        - generic [ref=e64]:
+          - generic [ref=e65]:
+            - img [ref=e67]
+            - generic [ref=e71]: PRODUCCIÓN REAL
+          - generic [ref=e72]: Configurar mi Óptica
+          - generic [ref=e73]: Inicie hoy mismo con su propia infraestructura digital. Configure su marca, sucursales y equipo de trabajo profesional.
+        - generic [ref=e74]:
+          - generic [ref=e75]:
+            - generic [ref=e76]:
+              - img [ref=e78]
+              - generic [ref=e81]: Firma e identidad única de su marca
+            - generic [ref=e82]:
+              - img [ref=e84]
+              - generic [ref=e87]: Configuración de sedes y laboratorios
+            - generic [ref=e88]:
+              - img [ref=e90]
+              - generic [ref=e93]: Personalización total de flujos de trabajo
+            - generic [ref=e94]:
+              - img [ref=e96]
+              - generic [ref=e99]: Arquitectura escalable para crecimiento
+          - button "INICIAR PROTOCOLO" [ref=e100]:
+            - generic [ref=e101]:
+              - text: INICIAR PROTOCOLO
+              - img
+    - paragraph [ref=e104]:
+      - text: ¿Requiere asistencia especializada?
+      - link "Contactar Soporte de Élite" [ref=e105] [cursor=pointer]:
+        - /url: /support
+  - region "Notifications alt+T"
+  - generic [ref=e106]:
+    - img [ref=e108]
+    - button "Open Tanstack query devtools" [ref=e156] [cursor=pointer]:
+      - img [ref=e157]
+  - alert [ref=e205]
+```

@@ -27,7 +27,7 @@ export function KpiCard({
   return (
     <Card
       className={cn(
-        "border-none bg-admin-bg-tertiary/50 rounded-none shadow-none hover:shadow-md transition-shadow duration-300 group overflow-hidden",
+        "border-none bg-admin-bg-tertiary/50 rounded-xl shadow-none hover:shadow-md transition-shadow duration-300 group overflow-hidden",
         showRightBorder && "border-r border-admin-border-primary/10",
       )}
     >

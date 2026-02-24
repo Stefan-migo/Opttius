@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceRoleClient } from "@/utils/supabase/server";
 import { EmailNotificationService } from "@/lib/email/notifications";
+import { sendLowStockAlertWhatsApp } from "@/lib/whatsapp/notifications-b2b";
 import { appLogger as logger } from "@/lib/logger";
 
 /**
@@ -27,7 +28,7 @@ export async function GET(request: NextRequest) {
 
     const { data: orgs } = await supabase
       .from("organizations")
-      .select("id, owner_id")
+      .select("id, owner_id, metadata")
       .eq("status", "active");
 
     if (!orgs || orgs.length === 0) {
@@ -109,37 +110,80 @@ export async function GET(request: NextRequest) {
         }),
       );
 
-      const { data: admins } = await supabase
-        .from("admin_users")
-        .select("id")
-        .eq("organization_id", org.id)
-        .eq("is_active", true)
-        .in("role", ["admin", "super_admin"]);
+      // Prefer optica email (contact_email or support_email) over admin emails
+      let recipientEmails: string[] = [];
 
-      const adminIds = (admins || []).map((a) => a.id);
-      if (org.owner_id && !adminIds.includes(org.owner_id)) {
-        adminIds.push(org.owner_id);
+      const { data: contactConfig } = await supabase
+        .from("system_config")
+        .select("config_value")
+        .eq("config_key", "contact_email")
+        .eq("organization_id", org.id)
+        .maybeSingle();
+
+      const { data: globalContactConfig } = contactConfig
+        ? { data: null }
+        : await supabase
+            .from("system_config")
+            .select("config_value")
+            .eq("config_key", "contact_email")
+            .is("organization_id", null)
+            .maybeSingle();
+
+      const contactEmailRow = contactConfig ?? globalContactConfig;
+      const contactEmail =
+        contactEmailRow?.config_value != null
+          ? typeof contactEmailRow.config_value === "string"
+            ? contactEmailRow.config_value
+            : String(contactEmailRow.config_value)
+          : "";
+
+      const meta = (org.metadata as Record<string, unknown>) || {};
+      const supportEmail = (meta.support_email as string) || "";
+
+      const opticaEmail = (contactEmail || supportEmail || "").trim();
+      if (opticaEmail) {
+        recipientEmails = [opticaEmail];
+      } else {
+        const { data: admins } = await supabase
+          .from("admin_users")
+          .select("id")
+          .eq("organization_id", org.id)
+          .eq("is_active", true)
+          .in("role", ["admin", "super_admin"]);
+
+        const adminIds = (admins || []).map((a) => a.id);
+        if (org.owner_id && !adminIds.includes(org.owner_id)) {
+          adminIds.push(org.owner_id);
+        }
+
+        if (adminIds.length === 0) continue;
+
+        const { data: profiles } = await supabase
+          .from("profiles")
+          .select("email")
+          .in("id", adminIds);
+
+        recipientEmails = (profiles || [])
+          .map((p) => p.email)
+          .filter((e): e is string => !!e);
       }
 
-      if (adminIds.length === 0) continue;
-
-      const { data: profiles } = await supabase
-        .from("profiles")
-        .select("email")
-        .in("id", adminIds);
-
-      const adminEmails = (profiles || [])
-        .map((p) => p.email)
-        .filter((e): e is string => !!e);
-
-      if (adminEmails.length === 0) continue;
+      if (recipientEmails.length === 0) continue;
 
       const result = await EmailNotificationService.sendLowStockAlert(
-        adminEmails,
+        recipientEmails,
         products,
+        org.id,
       );
 
       if (result.success) totalSent++;
+
+      const whatsappSent = await sendLowStockAlertWhatsApp(
+        org.id,
+        products,
+        supabase,
+      );
+      if (whatsappSent) totalSent++;
     }
 
     logger.info("Low stock alerts cron completed", { totalSent });

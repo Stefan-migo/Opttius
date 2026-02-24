@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/utils/supabase/server";
+import {
+  createClient,
+  createServiceRoleClient,
+} from "@/utils/supabase/server";
 import { appLogger as logger } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
@@ -34,8 +37,12 @@ export async function GET(
       .select("*")
       .eq("id", params.id);
 
-    // Apply tenant isolation
-    if (adminUser.role !== "super_admin") {
+    // Apply tenant isolation (root, dev, super_admin see all)
+    const isGlobalAdminGet =
+      adminUser.role === "super_admin" ||
+      adminUser.role === "root" ||
+      adminUser.role === "dev";
+    if (!isGlobalAdminGet) {
       const orgId = adminUser.organization_id;
       if (orgId) {
         query = query.or(`organization_id.eq.${orgId},organization_id.is.null`);
@@ -109,13 +116,18 @@ export async function PUT(
       .single();
 
     if (!adminUser) {
+      logger.warn("Email template PUT 403: adminUser null", {
+        userId: user?.id,
+        templateId: params.id,
+      });
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 
-    // Check if user owns the template OR is super admin
-    const { data: existingTemplate } = await supabase
+    // Fetch template with service role (RLS may hide inactive templates from user client)
+    const dbClient = createServiceRoleClient();
+    const { data: existingTemplate } = await dbClient
       .from("system_email_templates")
-      .select("organization_id, is_system")
+      .select("organization_id, is_system, type, name, subject, content, variables")
       .eq("id", params.id)
       .single();
 
@@ -126,18 +138,111 @@ export async function PUT(
       );
     }
 
-    const canUpdate =
+    const isOnlyToggleActive =
+      Object.keys(body).filter((k) => k !== "is_active").length === 0 &&
+      is_active !== undefined;
+
+    // Global admin: role in admin_users OR is_super_admin RPC (admin_branch_access.branch_id=null)
+    let isGlobalAdmin =
       adminUser.role === "super_admin" ||
+      adminUser.role === "root" ||
+      adminUser.role === "dev";
+    if (!isGlobalAdmin) {
+      const { data: isSuperAdminRpc } = await supabase.rpc("is_super_admin", {
+        user_id: user.id,
+      });
+      isGlobalAdmin = !!isSuperAdminRpc;
+    }
+
+    const canUpdate =
+      isGlobalAdmin ||
       existingTemplate.organization_id === adminUser.organization_id ||
       (existingTemplate.organization_id === null &&
-        !existingTemplate.is_system);
+        !existingTemplate.is_system) ||
+      (existingTemplate.organization_id === null &&
+        existingTemplate.is_system &&
+        adminUser.organization_id &&
+        isOnlyToggleActive);
 
     if (!canUpdate) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    // Organizations cannot update system-level templates (is_system = true)
-    if (adminUser.role !== "super_admin" && existingTemplate.is_system) {
+    // Org admin toggling is_active on system template: create/delete org override
+    if (
+      !isGlobalAdmin &&
+      existingTemplate.is_system &&
+      adminUser.organization_id &&
+      is_active !== undefined
+    ) {
+      const orgId = adminUser.organization_id;
+      const { data: orgOverride } = await supabase
+        .from("system_email_templates")
+        .select("id")
+        .eq("type", existingTemplate.type)
+        .eq("organization_id", orgId)
+        .is("is_system", false)
+        .maybeSingle();
+
+      if (is_active === false) {
+        // Disable: create org override with is_active=false (copy from system)
+        if (!orgOverride) {
+          const { data: created, error: insertErr } = await supabase
+            .from("system_email_templates")
+            .insert({
+              name: existingTemplate.name,
+              type: existingTemplate.type,
+              subject: existingTemplate.subject,
+              content: existingTemplate.content,
+              variables: existingTemplate.variables ?? [],
+              is_active: false,
+              is_system: false,
+              organization_id: orgId,
+            })
+            .select()
+            .single();
+          if (!insertErr && created) {
+            return NextResponse.json({
+              success: true,
+              template: { ...created, _is_override: true },
+            });
+          }
+        } else {
+          const { data: updated, error: updErr } = await supabase
+            .from("system_email_templates")
+            .update({ is_active: false, updated_at: new Date().toISOString() })
+            .eq("id", orgOverride.id)
+            .select()
+            .single();
+          if (!updErr && updated) {
+            return NextResponse.json({
+              success: true,
+              template: { ...updated, _is_override: true },
+            });
+          }
+        }
+      } else {
+        // Enable: delete org override
+        if (orgOverride) {
+          await supabase
+            .from("system_email_templates")
+            .delete()
+            .eq("id", orgOverride.id);
+          return NextResponse.json({
+            success: true,
+            template: { ...existingTemplate, is_active: true },
+          });
+        }
+      }
+    }
+
+    // Organizations cannot update system-level templates (except is_active toggle above)
+    // Global admins (root, dev, super_admin) can modify system templates
+    if (!isGlobalAdmin && existingTemplate.is_system) {
+      logger.warn("Email template PUT 403: cannot modify system template", {
+        adminRole: adminUser.role,
+        templateId: params.id,
+      });
       return NextResponse.json(
         {
           error: "Cannot modify system templates. Create a custom one instead.",
@@ -168,17 +273,21 @@ export async function PUT(
         ? variables
         : JSON.parse(variables || "[]");
 
-    const { data: template, error } = await supabase
+    // Use service role for update - auth already verified, bypasses RLS
+    const { data: template, error } = await dbClient
       .from("system_email_templates")
       .update(updateData)
       .eq("id", params.id)
       .select()
-      .single();
+      .maybeSingle();
 
     if (error) {
       logger.error("Error updating email template", {
-        error,
+        errorCode: error.code,
+        errorMessage: error.message,
+        errorDetails: error.details,
         templateId: params.id,
+        updateData,
       });
       return NextResponse.json(
         {
@@ -186,6 +295,13 @@ export async function PUT(
           details: error.message,
         },
         { status: 500 },
+      );
+    }
+
+    if (!template) {
+      return NextResponse.json(
+        { error: "Template not found or update had no effect" },
+        { status: 404 },
       );
     }
 
@@ -247,8 +363,12 @@ export async function DELETE(
       );
     }
 
+    const isGlobalAdminDel =
+      adminUser.role === "super_admin" ||
+      adminUser.role === "root" ||
+      adminUser.role === "dev";
     if (
-      adminUser.role !== "super_admin" &&
+      !isGlobalAdminDel &&
       (existingTemplate.organization_id !== adminUser.organization_id ||
         existingTemplate.is_system)
     ) {

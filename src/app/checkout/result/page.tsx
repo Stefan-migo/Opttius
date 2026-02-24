@@ -75,14 +75,14 @@ function CheckoutResultContent() {
 
       <Card
         variant="glass"
-        className="max-w-xl w-full border-admin-border-primary shadow-2xl overflow-hidden relative z-10 animate-in zoom-in-95 duration-500 rounded-none"
+        className="max-w-xl w-full border-admin-border-primary shadow-2xl overflow-hidden relative z-10 animate-in zoom-in-95 duration-500 rounded-xl"
       >
         <div
           className={`h-2 w-full ${statusInfo.bgColor} ${statusInfo.color.replace("text-", "bg-")}`}
         />
         <CardHeader className="text-center pt-10">
           <div
-            className={`mx-auto mb-6 p-4 rounded-none ${statusInfo.bgColor} w-fit animate-bounce-subtle`}
+            className={`mx-auto mb-6 p-4 rounded-xl ${statusInfo.bgColor} w-fit animate-bounce-subtle`}
           >
             <Icon
               className={`h-16 w-16 ${statusInfo.color}`}
@@ -98,7 +98,7 @@ function CheckoutResultContent() {
         </CardHeader>
         <CardContent className="space-y-8 p-10 pt-0">
           {paymentId && (
-            <div className="bg-admin-bg-secondary p-4 rounded-none border border-admin-border-primary flex flex-col items-center">
+            <div className="bg-admin-bg-secondary p-4 rounded-xl border border-admin-border-primary flex flex-col items-center">
               <span className="text-[10px] font-black text-admin-text-tertiary uppercase tracking-widest mb-1">
                 Comprobante de operación
               </span>
@@ -112,7 +112,7 @@ function CheckoutResultContent() {
             <Button
               asChild
               variant="outline"
-              className="h-14 rounded-none border-2 font-bold group"
+              className="h-14 rounded-xl border-2 font-bold group"
             >
               <Link href="/profile?tab=subscription">
                 Gestionar Suscripción
@@ -120,7 +120,7 @@ function CheckoutResultContent() {
             </Button>
             <Button
               asChild
-              className="h-14 rounded-none font-bold shadow-xl shadow-admin-accent-primary/20 group hover:scale-[1.02] transition-transform"
+              className="h-14 rounded-xl font-bold shadow-xl shadow-admin-accent-primary/20 group hover:scale-[1.02] transition-transform"
               shimmer
             >
               <Link href="/admin">Ir al Dashboard</Link>

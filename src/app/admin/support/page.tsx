@@ -374,7 +374,7 @@ export default function OpticalInternalSupportPage() {
         </div>
         <Button
           onClick={() => setShowCreateDialog(true)}
-          className="rounded-none bg-epoch-primary hover:bg-epoch-surface text-white font-display font-bold text-[10px] tracking-[0.2em] uppercase"
+          className="rounded-xl bg-epoch-primary hover:bg-epoch-surface text-white font-display font-bold text-[10px] tracking-[0.2em] uppercase"
         >
           <Plus className="h-4 w-4 mr-2" />
           Crear Ticket
@@ -383,7 +383,7 @@ export default function OpticalInternalSupportPage() {
 
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card className="rounded-none border border-border">
+        <Card className="rounded-xl border border-border">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
@@ -398,7 +398,7 @@ export default function OpticalInternalSupportPage() {
             </div>
           </CardContent>
         </Card>
-        <Card className="rounded-none border border-border">
+        <Card className="rounded-xl border border-border">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
@@ -413,7 +413,7 @@ export default function OpticalInternalSupportPage() {
             </div>
           </CardContent>
         </Card>
-        <Card className="rounded-none border border-border">
+        <Card className="rounded-xl border border-border">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
@@ -428,7 +428,7 @@ export default function OpticalInternalSupportPage() {
             </div>
           </CardContent>
         </Card>
-        <Card className="rounded-none border border-border">
+        <Card className="rounded-xl border border-border">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
@@ -450,7 +450,7 @@ export default function OpticalInternalSupportPage() {
       </div>
 
       {/* Filters - sin admin-card para evitar conflicto de contraste en botón/inputs */}
-      <Card className="rounded-none border border-border">
+      <Card className="rounded-xl border border-border">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Filter className="h-5 w-5" />
@@ -467,7 +467,7 @@ export default function OpticalInternalSupportPage() {
                   setFilters((prev) => ({ ...prev, status: value, page: 1 }))
                 }
               >
-                <SelectTrigger className="rounded-none focus:border-epoch-primary focus:ring-epoch-primary/20">
+                <SelectTrigger className="rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20">
                   <SelectValue placeholder="Todos los estados" />
                 </SelectTrigger>
                 <SelectContent>
@@ -489,7 +489,7 @@ export default function OpticalInternalSupportPage() {
                   setFilters((prev) => ({ ...prev, priority: value, page: 1 }))
                 }
               >
-                <SelectTrigger className="rounded-none focus:border-epoch-primary focus:ring-epoch-primary/20">
+                <SelectTrigger className="rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20">
                   <SelectValue placeholder="Todas las prioridades" />
                 </SelectTrigger>
                 <SelectContent>
@@ -511,7 +511,7 @@ export default function OpticalInternalSupportPage() {
                   setFilters((prev) => ({ ...prev, category: value, page: 1 }))
                 }
               >
-                <SelectTrigger className="rounded-none focus:border-epoch-primary focus:ring-epoch-primary/20">
+                <SelectTrigger className="rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20">
                   <SelectValue placeholder="Todas las categorías" />
                 </SelectTrigger>
                 <SelectContent>
@@ -537,7 +537,7 @@ export default function OpticalInternalSupportPage() {
                   }))
                 }
               >
-                <SelectTrigger className="rounded-none focus:border-epoch-primary focus:ring-epoch-primary/20">
+                <SelectTrigger className="rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20">
                   <SelectValue placeholder="Todos los clientes" />
                 </SelectTrigger>
                 <SelectContent>
@@ -565,14 +565,14 @@ export default function OpticalInternalSupportPage() {
                       page: 1,
                     }))
                   }
-                  className="rounded-none focus:border-epoch-primary focus:ring-epoch-primary/20"
+                  className="rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20"
                 />
                 <Button
                   variant="outline"
                   size="icon"
                   onClick={loadTickets}
                   title="Refrescar"
-                  className="rounded-none border-admin-border-primary/20"
+                  className="rounded-xl border-admin-border-primary/20"
                 >
                   <RefreshCw className="h-4 w-4" />
                 </Button>
@@ -583,7 +583,7 @@ export default function OpticalInternalSupportPage() {
       </Card>
 
       {/* Tickets List - sin admin-card para evitar doble hover y contraste en badges */}
-      <Card className="rounded-none border border-border">
+      <Card className="rounded-xl border border-border">
         <CardHeader>
           <CardTitle>Tickets ({pagination.total})</CardTitle>
         </CardHeader>
@@ -610,7 +610,7 @@ export default function OpticalInternalSupportPage() {
                 !filters.search && (
                   <Button
                     onClick={() => setShowCreateDialog(true)}
-                    className="rounded-none bg-epoch-primary hover:bg-epoch-surface text-white font-display font-bold text-[10px] tracking-[0.2em] uppercase"
+                    className="rounded-xl bg-epoch-primary hover:bg-epoch-surface text-white font-display font-bold text-[10px] tracking-[0.2em] uppercase"
                   >
                     <Plus className="h-4 w-4 mr-2" />
                     Crear Ticket
@@ -624,7 +624,7 @@ export default function OpticalInternalSupportPage() {
                   key={ticket.id}
                   href={`/admin/support/tickets/${ticket.id}`}
                 >
-                  <div className="flex items-center justify-between p-4 border rounded-none hover:bg-epoch-primary/5 cursor-pointer transition-colors border-epoch-primary/10">
+                  <div className="flex items-center justify-between p-4 border rounded-xl hover:bg-epoch-primary/5 cursor-pointer transition-colors border-epoch-primary/10">
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1 flex-wrap">
                         <span className="font-mono font-semibold text-sm">
@@ -693,7 +693,7 @@ export default function OpticalInternalSupportPage() {
                 <Button
                   variant="outline"
                   size="sm"
-                  className="rounded-none border-admin-border-primary/20"
+                  className="rounded-xl border-admin-border-primary/20"
                   onClick={() =>
                     setPagination((prev) => ({
                       ...prev,
@@ -707,7 +707,7 @@ export default function OpticalInternalSupportPage() {
                 <Button
                   variant="outline"
                   size="sm"
-                  className="rounded-none border-admin-border-primary/20"
+                  className="rounded-xl border-admin-border-primary/20"
                   onClick={() =>
                     setPagination((prev) => ({
                       ...prev,
@@ -751,7 +751,7 @@ export default function OpticalInternalSupportPage() {
                 >
                   <SelectTrigger
                     id="category"
-                    className={`rounded-none focus:border-epoch-primary focus:ring-epoch-primary/20 ${ticketErrors.category ? "border-red-500" : ""}`}
+                    className={`rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20 ${ticketErrors.category ? "border-red-500" : ""}`}
                   >
                     <SelectValue placeholder="Selecciona una categoría" />
                   </SelectTrigger>
@@ -782,7 +782,7 @@ export default function OpticalInternalSupportPage() {
                 >
                   <SelectTrigger
                     id="priority"
-                    className={`rounded-none focus:border-epoch-primary focus:ring-epoch-primary/20 ${ticketErrors.priority ? "border-red-500" : ""}`}
+                    className={`rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20 ${ticketErrors.priority ? "border-red-500" : ""}`}
                   >
                     <SelectValue placeholder="Selecciona una prioridad" />
                   </SelectTrigger>
@@ -805,7 +805,7 @@ export default function OpticalInternalSupportPage() {
             <div className="space-y-2">
               <Label htmlFor="customer_search">Cliente (opcional)</Label>
               {selectedCustomerForTicket ? (
-                <div className="flex items-center justify-between p-3 border rounded-none bg-epoch-background">
+                <div className="flex items-center justify-between p-3 border rounded-xl bg-epoch-background">
                   <div>
                     <div className="font-medium">
                       {selectedCustomerForTicket.first_name}{" "}
@@ -819,7 +819,7 @@ export default function OpticalInternalSupportPage() {
                     type="button"
                     variant="outline"
                     size="sm"
-                    className="rounded-none border-admin-border-primary/20"
+                    className="rounded-xl border-admin-border-primary/20"
                     onClick={() => {
                       setSelectedCustomerForTicket(null);
                       setTicketValue("customer_id", undefined);
@@ -839,7 +839,7 @@ export default function OpticalInternalSupportPage() {
                     placeholder="Buscar por nombre, RUT o email..."
                     value={customerSearch}
                     onChange={(e) => setCustomerSearch(e.target.value)}
-                    className="pl-10 rounded-none focus:border-epoch-primary focus:ring-epoch-primary/20"
+                    className="pl-10 rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20"
                   />
                   {customerSearch.length >= 2 && (
                     <div className="absolute z-50 w-full mt-1 bg-white border rounded-lg shadow-lg max-h-60 overflow-y-auto">
@@ -904,7 +904,7 @@ export default function OpticalInternalSupportPage() {
                 id="subject"
                 {...registerTicket("subject")}
                 placeholder="Resumen breve del problema"
-                className={`rounded-none focus:border-epoch-primary focus:ring-epoch-primary/20 ${ticketErrors.subject ? "border-red-500" : ""}`}
+                className={`rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20 ${ticketErrors.subject ? "border-red-500" : ""}`}
               />
               {ticketErrors.subject && (
                 <p className="text-sm text-red-500">
@@ -922,7 +922,7 @@ export default function OpticalInternalSupportPage() {
                 {...registerTicket("description")}
                 placeholder="Describe el problema en detalle..."
                 rows={6}
-                className={`rounded-none focus:border-epoch-primary focus:ring-epoch-primary/20 ${ticketErrors.description ? "border-red-500" : ""}`}
+                className={`rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20 ${ticketErrors.description ? "border-red-500" : ""}`}
               />
               {ticketErrors.description && (
                 <p className="text-sm text-red-500">
@@ -939,7 +939,7 @@ export default function OpticalInternalSupportPage() {
               <Button
                 type="button"
                 variant="outline"
-                className="rounded-none border-admin-border-primary/20"
+                className="rounded-xl border-admin-border-primary/20"
                 onClick={() => setShowCreateDialog(false)}
               >
                 Cancelar
@@ -947,7 +947,7 @@ export default function OpticalInternalSupportPage() {
               <Button
                 type="submit"
                 disabled={creatingTicket}
-                className="rounded-none bg-epoch-primary hover:bg-epoch-surface text-white font-display font-bold text-[10px] tracking-[0.2em] uppercase"
+                className="rounded-xl bg-epoch-primary hover:bg-epoch-surface text-white font-display font-bold text-[10px] tracking-[0.2em] uppercase"
               >
                 {creatingTicket ? (
                   <>

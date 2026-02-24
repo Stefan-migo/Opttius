@@ -63,7 +63,7 @@ function ProductGridComponent({
             size="sm"
             onClick={onRefresh}
             disabled={isRefreshing}
-            className="h-9 px-4 rounded-none border-admin-border-primary/10 font-display font-bold text-[10px] tracking-widest uppercase"
+            className="h-9 px-4 rounded-xl border-admin-border-primary/10 font-display font-bold text-[10px] tracking-widest uppercase"
           >
             <RefreshCw
               className={`h-4 w-4 mr-2 ${isRefreshing ? "animate-spin" : ""}`}
@@ -91,7 +91,7 @@ function ProductGridComponent({
           return (
             <Card
               key={product.id}
-              className="group relative flex flex-col transition-all duration-300 border border-admin-border-primary/20 bg-admin-bg-tertiary rounded-none shadow-[0_1px_3px_rgba(0,0,0,0.3)] hover:shadow-lg transition-shadow duration-300 overflow-hidden"
+              className="group relative flex flex-col transition-all duration-300 border border-admin-border-primary/20 bg-admin-bg-tertiary rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.3)] hover:shadow-lg transition-shadow duration-300 overflow-hidden"
             >
               {/* Checkbox - Top Right */}
               <div className="absolute top-4 right-4 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -99,7 +99,7 @@ function ProductGridComponent({
                   type="checkbox"
                   checked={selectedProducts.includes(product.id)}
                   onChange={() => onSelectProduct(product.id)}
-                  className="w-4 h-4 rounded-none border-admin-border-primary/20 cursor-pointer accent-epoch-primary"
+                  className="w-4 h-4 rounded-xl border-admin-border-primary/20 cursor-pointer accent-epoch-primary"
                   onClick={(e) => e.stopPropagation()}
                 />
               </div>
@@ -212,7 +212,7 @@ function ProductGridComponent({
                     <Button
                       variant="outline"
                       size="sm"
-                      className="product-grid-card-btn w-full h-9 rounded-none border-admin-border-primary/20 text-[10px] font-display font-bold tracking-widest uppercase hover:bg-epoch-primary/10 hover:border-epoch-primary/30 text-epoch-primary transition-all"
+                      className="product-grid-card-btn w-full h-9 rounded-xl border-admin-border-primary/20 text-[10px] font-display font-bold tracking-widest uppercase hover:bg-epoch-primary/10 hover:border-epoch-primary/30 text-epoch-primary transition-all"
                     >
                       <Eye className="h-3.5 w-3.5 mr-2" />
                       ARCHIVO
@@ -225,7 +225,7 @@ function ProductGridComponent({
                     <Button
                       variant="outline"
                       size="sm"
-                      className="product-grid-card-btn w-full h-9 rounded-none border-admin-border-primary/20 text-[10px] font-display font-bold tracking-widest uppercase hover:bg-epoch-primary/10 hover:border-epoch-primary/30 text-epoch-primary transition-all"
+                      className="product-grid-card-btn w-full h-9 rounded-xl border-admin-border-primary/20 text-[10px] font-display font-bold tracking-widest uppercase hover:bg-epoch-primary/10 hover:border-epoch-primary/30 text-epoch-primary transition-all"
                     >
                       <Edit className="h-3.5 w-3.5 mr-2" />
                       EDITAR
@@ -235,7 +235,7 @@ function ProductGridComponent({
                     variant="outline"
                     size="sm"
                     onClick={() => onDelete(product)}
-                    className="product-grid-card-btn product-grid-card-btn-delete h-9 px-4 rounded-none border-admin-error/30 text-admin-error hover:bg-admin-error/10 hover:border-admin-error/50 transition-all shrink-0"
+                    className="product-grid-card-btn product-grid-card-btn-delete h-9 px-4 rounded-xl border-admin-error/30 text-admin-error hover:bg-admin-error/10 hover:border-admin-error/50 transition-all shrink-0"
                   >
                     <Trash2 className="h-3.5 w-3.5" />
                   </Button>

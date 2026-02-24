@@ -47,6 +47,8 @@ interface EmailTemplateEditorProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSave: () => void;
+  /** Tipo pre-seleccionado al crear (ej. desde placeholder) */
+  initialType?: string;
 }
 
 // Predefined email templates
@@ -150,6 +152,7 @@ export default function EmailTemplateEditor({
   open,
   onOpenChange,
   onSave,
+  initialType,
 }: EmailTemplateEditorProps) {
   const apiBase =
     mode === "saas"
@@ -181,13 +184,13 @@ export default function EmailTemplateEditor({
     } else {
       setFormData({
         name: "",
-        type: "custom",
+        type: initialType || "custom",
         subject: "",
         content: emailTemplates.modern.html,
         is_active: true,
       });
     }
-  }, [template, open]);
+  }, [template, open, initialType]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -557,6 +560,18 @@ export default function EmailTemplateEditor({
                         <SelectItem value="saas_maintenance">
                           Mantenimiento Programado
                         </SelectItem>
+                        <SelectItem value="saas_support_ticket_created">
+                          Ticket Creado
+                        </SelectItem>
+                        <SelectItem value="saas_support_new_response">
+                          Nueva Respuesta
+                        </SelectItem>
+                        <SelectItem value="saas_support_ticket_assigned">
+                          Ticket Asignado
+                        </SelectItem>
+                        <SelectItem value="saas_support_ticket_resolved">
+                          Ticket Resuelto
+                        </SelectItem>
                         <SelectItem value="marketing">Marketing</SelectItem>
                         <SelectItem value="custom">Personalizado</SelectItem>
                       </>
@@ -581,7 +596,22 @@ export default function EmailTemplateEditor({
                           Confirmación de Cita
                         </SelectItem>
                         <SelectItem value="appointment_reminder">
-                          Recordatorio de Cita
+                          Recordatorio de Cita (24h)
+                        </SelectItem>
+                        <SelectItem value="appointment_reminder_2h">
+                          Recordatorio de Cita (2h)
+                        </SelectItem>
+                        <SelectItem value="appointment_cancelation">
+                          Cancelación de Cita
+                        </SelectItem>
+                        <SelectItem value="appointment_rescheduled">
+                          Cita Reprogramada
+                        </SelectItem>
+                        <SelectItem value="appointment_follow_up_reminder">
+                          Recordatorio de Control
+                        </SelectItem>
+                        <SelectItem value="prescription_expiring">
+                          Receta por Vencer
                         </SelectItem>
                         <SelectItem value="quote_sent">
                           Presupuesto Enviado

@@ -372,7 +372,7 @@ export default function OpticalInternalSupportTicketDetailPage() {
     return (
       <div className="min-h-screen bg-epoch-background py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
-          <Card className="border-red-200 rounded-none border">
+          <Card className="border-red-200 rounded-xl border">
             <CardContent className="pt-6">
               <div className="text-center py-8">
                 <XCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
@@ -381,7 +381,7 @@ export default function OpticalInternalSupportTicketDetailPage() {
                 </h2>
                 <Button
                   onClick={() => router.push("/admin/support")}
-                  className="rounded-none bg-epoch-primary hover:bg-epoch-surface text-white font-display font-bold text-[10px] tracking-[0.2em] uppercase"
+                  className="rounded-xl bg-epoch-primary hover:bg-epoch-surface text-white font-display font-bold text-[10px] tracking-[0.2em] uppercase"
                 >
                   Volver a Tickets
                 </Button>
@@ -403,7 +403,7 @@ export default function OpticalInternalSupportTicketDetailPage() {
               variant="ghost"
               size="icon"
               onClick={() => router.push("/admin/support")}
-              className="rounded-none text-epoch-primary hover:bg-epoch-primary/10"
+              className="rounded-xl text-epoch-primary hover:bg-epoch-primary/10"
             >
               <ArrowLeft className="h-5 w-5" />
             </Button>
@@ -418,7 +418,7 @@ export default function OpticalInternalSupportTicketDetailPage() {
             <Button
               variant="outline"
               onClick={() => setShowUpdateDialog(true)}
-              className="rounded-none border-admin-border-primary/20"
+              className="rounded-xl border-admin-border-primary/20"
             >
               <Edit className="h-4 w-4 mr-2" />
               Editar
@@ -437,7 +437,7 @@ export default function OpticalInternalSupportTicketDetailPage() {
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
             {/* Ticket Details - sin admin-card para evitar hover conflictivo */}
-            <Card className="rounded-none border border-border">
+            <Card className="rounded-xl border border-border">
               <CardHeader>
                 <CardTitle className="font-display text-epoch-primary">
                   Detalles del Ticket
@@ -476,7 +476,7 @@ export default function OpticalInternalSupportTicketDetailPage() {
             </Card>
 
             {/* Messages - sin admin-card para evitar contraste en burbujas de mensaje */}
-            <Card className="rounded-none border border-border">
+            <Card className="rounded-xl border border-border">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 font-display text-epoch-primary">
                   <MessageSquare className="h-5 w-5 text-epoch-accent" />
@@ -494,7 +494,7 @@ export default function OpticalInternalSupportTicketDetailPage() {
                     {messages.map((msg) => (
                       <div
                         key={msg.id}
-                        className="p-4 rounded-none border bg-white border-epoch-primary/20 text-epoch-primary"
+                        className="p-4 rounded-xl border bg-white border-epoch-primary/20 text-epoch-primary"
                       >
                         <div className="flex items-start justify-between mb-2">
                           <div className="flex items-center gap-2">
@@ -534,7 +534,7 @@ export default function OpticalInternalSupportTicketDetailPage() {
 
             {/* Add Message Form - sin admin-card para evitar contraste en textarea */}
             {ticket.status !== "resolved" && ticket.status !== "closed" && (
-              <Card className="rounded-none border border-border">
+              <Card className="rounded-xl border border-border">
                 <CardHeader>
                   <CardTitle className="font-display text-epoch-primary">
                     Agregar Mensaje
@@ -558,7 +558,7 @@ export default function OpticalInternalSupportTicketDetailPage() {
                         {...registerMessage("message")}
                         placeholder="Escribe tu mensaje aquí..."
                         rows={6}
-                        className={`rounded-none focus:border-epoch-primary focus:ring-epoch-primary/20 bg-white text-epoch-primary placeholder:text-epoch-primary/50 ${messageErrors.message ? "border-red-500" : ""}`}
+                        className={`rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20 bg-white text-epoch-primary placeholder:text-epoch-primary/50 ${messageErrors.message ? "border-red-500" : ""}`}
                       />
                       {messageErrors.message && (
                         <p className="text-sm text-red-500">
@@ -570,7 +570,7 @@ export default function OpticalInternalSupportTicketDetailPage() {
                     <Button
                       type="submit"
                       disabled={sendingMessage}
-                      className="w-full rounded-none bg-epoch-primary hover:bg-epoch-surface text-white font-display font-bold text-[10px] tracking-[0.2em] uppercase"
+                      className="w-full rounded-xl bg-epoch-primary hover:bg-epoch-surface text-white font-display font-bold text-[10px] tracking-[0.2em] uppercase"
                     >
                       {sendingMessage ? (
                         <>
@@ -605,7 +605,7 @@ export default function OpticalInternalSupportTicketDetailPage() {
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Ticket Info */}
-            <Card className="rounded-none border border-border">
+            <Card className="rounded-xl border border-border">
               <CardHeader>
                 <CardTitle className="text-lg font-display text-epoch-primary">
                   Información
@@ -802,7 +802,7 @@ export default function OpticalInternalSupportTicketDetailPage() {
 
         {/* Update Ticket Dialog */}
         <Dialog open={showUpdateDialog} onOpenChange={setShowUpdateDialog}>
-          <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-2xl rounded-none">
+          <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-2xl rounded-xl">
             <DialogHeader>
               <DialogTitle>Actualizar Ticket</DialogTitle>
               <DialogDescription>
@@ -824,7 +824,7 @@ export default function OpticalInternalSupportTicketDetailPage() {
                   >
                     <SelectTrigger
                       id="status"
-                      className="rounded-none focus:border-epoch-primary focus:ring-epoch-primary/20"
+                      className="rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20"
                     >
                       <SelectValue />
                     </SelectTrigger>
@@ -848,7 +848,7 @@ export default function OpticalInternalSupportTicketDetailPage() {
                   >
                     <SelectTrigger
                       id="priority"
-                      className="rounded-none focus:border-epoch-primary focus:ring-epoch-primary/20"
+                      className="rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20"
                     >
                       <SelectValue />
                     </SelectTrigger>
@@ -876,7 +876,7 @@ export default function OpticalInternalSupportTicketDetailPage() {
                 >
                   <SelectTrigger
                     id="assigned_to"
-                    className="rounded-none focus:border-epoch-primary focus:ring-epoch-primary/20"
+                    className="rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20"
                   >
                     <SelectValue placeholder="Sin asignar" />
                   </SelectTrigger>
@@ -898,7 +898,7 @@ export default function OpticalInternalSupportTicketDetailPage() {
                   {...registerUpdate("resolution")}
                   placeholder="Describe cómo se resolvió el problema..."
                   rows={4}
-                  className="rounded-none focus:border-epoch-primary focus:ring-epoch-primary/20"
+                  className="rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20"
                 />
               </div>
 
@@ -909,7 +909,7 @@ export default function OpticalInternalSupportTicketDetailPage() {
                   {...registerUpdate("resolution_notes")}
                   placeholder="Notas adicionales sobre la resolución..."
                   rows={3}
-                  className="rounded-none focus:border-epoch-primary focus:ring-epoch-primary/20"
+                  className="rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20"
                 />
               </div>
 
@@ -917,7 +917,7 @@ export default function OpticalInternalSupportTicketDetailPage() {
                 <Button
                   type="button"
                   variant="outline"
-                  className="rounded-none border-admin-border-primary/20"
+                  className="rounded-xl border-admin-border-primary/20"
                   onClick={() => setShowUpdateDialog(false)}
                 >
                   Cancelar
@@ -925,7 +925,7 @@ export default function OpticalInternalSupportTicketDetailPage() {
                 <Button
                   type="submit"
                   disabled={updatingTicket}
-                  className="rounded-none bg-epoch-primary hover:bg-epoch-surface text-white font-display font-bold text-[10px] tracking-[0.2em] uppercase"
+                  className="rounded-xl bg-epoch-primary hover:bg-epoch-surface text-white font-display font-bold text-[10px] tracking-[0.2em] uppercase"
                 >
                   {updatingTicket ? (
                     <>

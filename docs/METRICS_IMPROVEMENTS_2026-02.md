@@ -121,9 +121,11 @@ Documento que detalla las modificaciones implementadas y el checklist de pruebas
 
 ### 1.9 Implementado Feb 2026: Bordes rectos (rounded-none)
 
-**Objetivo**: Alinear con FRONTEND_IDENTITY.md que especifica `rounded-none` para cards.
+**Objetivo**: Alinear con FRONTEND_IDENTITY.md (versión pre-pivote).
 
 **Implementación**: Todas las Cards en la página de analytics usan `rounded="none"`.
+
+**Nota (2026-02-22):** El design system ha pivotado a `rounded-xl`/`rounded-2xl`. Evaluar migración de analytics cards en futuras iteraciones.
 
 ---
 

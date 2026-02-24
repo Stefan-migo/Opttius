@@ -80,7 +80,7 @@ export default function DocsPage() {
         </p>
       </div>
 
-      <Card className="border border-admin-border-primary/20 bg-admin-border-primary/5 rounded-none shadow-none">
+      <Card className="border border-admin-border-primary/20 bg-admin-border-primary/5 rounded-xl shadow-none">
         <CardHeader className="pb-2 border-b border-admin-border-primary/10">
           <div className="flex items-center gap-3">
             <div className="h-10 w-10 bg-epoch-primary/5 border border-epoch-primary/10 flex items-center justify-center">
@@ -98,7 +98,7 @@ export default function DocsPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {DOC_SECTIONS.map((section) => (
               <Link key={section.href} href={section.href}>
-                <Card className="border border-admin-border-primary/20 bg-admin-bg-tertiary/50 rounded-none shadow-none hover:shadow-md hover:border-epoch-accent/30 transition-all duration-300 group h-full">
+                <Card className="border border-admin-border-primary/20 bg-admin-bg-tertiary/50 rounded-xl shadow-none hover:shadow-md hover:border-epoch-accent/30 transition-all duration-300 group h-full">
                   <CardContent className="p-6">
                     <div className="flex items-start justify-between">
                       <div className="h-10 w-10 bg-epoch-primary/5 border border-epoch-primary/10 flex items-center justify-center group-hover:bg-epoch-accent/10 transition-colors">
