@@ -289,6 +289,14 @@ export async function prepareInsightData(
     };
   }
 
+  if (!section || section === "pos") {
+    // POS insights use prescription/customerHistory - for bulk regenerate use empty context
+    data.pos = data.pos || {
+      prescription: {},
+      customerHistory: {},
+    };
+  }
+
   if (!section || section === "analytics") {
     const now = new Date();
     const currentPeriodStart = new Date(now);

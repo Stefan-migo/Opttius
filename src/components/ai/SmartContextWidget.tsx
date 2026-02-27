@@ -109,47 +109,42 @@ export function SmartContextWidget({
     },
   });
 
-  // Regenerate insights mutation
+  // Regenerate insights for ALL sections
   const regenerateInsights = async () => {
     setIsRegenerating(true);
     try {
-      // Paso 1: Obtener datos reales
-      const prepareResponse = await fetch(
-        `/api/ai/insights/prepare-data?section=${section}`,
-      );
-      if (!prepareResponse.ok) {
-        throw new Error("Error obteniendo datos del sistema");
-      }
-      const prepareData = await prepareResponse.json();
-
-      // Paso 2: Generar insights
-      const generateResponse = await fetch("/api/ai/insights/generate", {
+      const response = await fetch("/api/ai/insights/generate-all", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          section,
-          data: prepareData.data[section] || prepareData.data,
-        }),
       });
 
-      if (!generateResponse.ok) {
-        const errorData = await generateResponse
+      if (!response.ok) {
+        const errorData = await response
           .json()
-          .catch(() => ({ error: generateResponse.statusText }));
+          .catch(() => ({ error: response.statusText }));
         throw new Error(errorData.error || "Error generando insights");
       }
 
-      const result = await generateResponse.json();
+      const result = await response.json();
 
       toast.success(
-        `✅ ${result.count} insight${result.count !== 1 ? "s" : ""} generado${result.count !== 1 ? "s" : ""}`,
+        `✅ ${result.count} insight${result.count !== 1 ? "s" : ""} generado${result.count !== 1 ? "s" : ""} en todas las secciones`,
         {
           description: "Los insights se actualizarán automáticamente",
         },
       );
 
-      // Invalidar cache para refrescar
-      queryClient.invalidateQueries({ queryKey: ["ai-insights", section] });
+      // Invalidar cache de todas las secciones
+      const sections: InsightSection[] = [
+        "dashboard",
+        "inventory",
+        "clients",
+        "pos",
+        "analytics",
+      ];
+      sections.forEach((s) => {
+        queryClient.invalidateQueries({ queryKey: ["ai-insights", s] });
+      });
     } catch (error: any) {
       toast.error("Error generando insights", {
         description: error.message || "Intenta nuevamente",
