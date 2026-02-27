@@ -224,7 +224,7 @@ export default function NotificationSettings({
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <RefreshCw className="h-6 w-6 animate-spin text-admin-text-tertiary" />
+        <RefreshCw className="h-6 w-6 animate-spin text-epoch-primary/60" />
       </div>
     );
   }
@@ -265,16 +265,16 @@ export default function NotificationSettings({
   );
 
   return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
+    <div className="space-y-4 sm:space-y-6">
+      <Card className="rounded-xl border border-border overflow-hidden">
+        <CardHeader className="p-4 sm:p-6">
+          <div className="flex flex-col gap-4 sm:gap-6">
             <div>
-              <CardTitle className="flex items-center">
-                <Bell className="h-5 w-5 mr-2" />
+              <CardTitle className="flex items-center font-display text-epoch-primary text-base sm:text-lg">
+                <Bell className="h-4 w-4 sm:h-5 sm:w-5 mr-2 shrink-0" />
                 Configuración de Notificaciones
               </CardTitle>
-              <CardDescription>
+              <CardDescription className="text-xs sm:text-sm text-epoch-primary/80 mt-1">
                 {branchName
                   ? `Configuración para sucursal: ${branchName}`
                   : branchId
@@ -282,10 +282,10 @@ export default function NotificationSettings({
                     : "Configuración global de notificaciones. Activa o desactiva y personaliza prioridad."}
               </CardDescription>
             </div>
-            <div className="flex items-center gap-2 flex-wrap">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-2 flex-wrap">
               {hasMultipleBranches && onConfigScopeChange && (
-                <div className="flex items-center gap-2">
-                  <Label className="text-sm text-muted-foreground">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2 w-full sm:w-auto">
+                  <Label className="text-xs sm:text-sm text-epoch-primary/80">
                     Alcance:
                   </Label>
                   <Select
@@ -294,7 +294,7 @@ export default function NotificationSettings({
                       onConfigScopeChange(v as "global" | "branch")
                     }
                   >
-                    <SelectTrigger className="w-[140px]">
+                    <SelectTrigger className="w-full sm:w-[140px] rounded-xl min-h-[44px]">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -308,6 +308,7 @@ export default function NotificationSettings({
                 variant="outline"
                 size="sm"
                 onClick={() => toggleAll(true)}
+                className="rounded-xl min-h-[44px] w-full sm:w-auto"
               >
                 Activar Todas
               </Button>
@@ -315,10 +316,15 @@ export default function NotificationSettings({
                 variant="outline"
                 size="sm"
                 onClick={() => toggleAll(false)}
+                className="rounded-xl min-h-[44px] w-full sm:w-auto"
               >
                 Desactivar Todas
               </Button>
-              <Button onClick={saveSettings} disabled={!hasChanges || saving}>
+              <Button
+                onClick={saveSettings}
+                disabled={!hasChanges || saving}
+                className="rounded-xl min-h-[44px] w-full sm:w-auto"
+              >
                 {saving ? (
                   <>
                     <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
@@ -439,52 +445,39 @@ export default function NotificationSettings({
             <>
               {/* Optical Shop Settings */}
               <div>
-                <h3 className="text-lg font-semibold mb-4">Óptica</h3>
-                <div className="space-y-3">
+                <h3 className="text-sm sm:text-base font-semibold mb-2 sm:mb-3">
+                  Óptica
+                </h3>
+                <div className="space-y-2">
                   {opticalSettings.map((setting) => (
                     <div
                       key={setting.id}
-                      className="flex items-center justify-between p-4 border rounded-lg"
+                      className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 p-2.5 sm:p-3 border border-border rounded-lg overflow-hidden"
                     >
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <Label className="font-medium">
-                            {NOTIFICATION_TYPE_LABELS[
-                              setting.notification_type
-                            ] || setting.notification_type}
-                          </Label>
-                          {setting.priority && (
-                            <Badge
-                              className={
-                                PRIORITY_BADGE_COLORS[setting.priority]
-                              }
-                            >
-                              {PRIORITY_LABELS[setting.priority]}
-                            </Badge>
-                          )}
-                          {setting.enabled ? (
-                            <CheckCircle className="h-4 w-4 text-green-500" />
-                          ) : (
-                            <XCircle className="h-4 w-4 text-gray-400" />
-                          )}
-                        </div>
+                      <div className="flex items-center gap-2 min-w-0 flex-1">
+                        <Label className="font-medium text-xs sm:text-sm truncate">
+                          {NOTIFICATION_TYPE_LABELS[
+                            setting.notification_type
+                          ] || setting.notification_type}
+                        </Label>
+                        {setting.enabled ? (
+                          <CheckCircle className="h-3.5 w-3.5 text-green-500 shrink-0" />
+                        ) : (
+                          <XCircle className="h-3.5 w-3.5 text-epoch-primary/40 shrink-0" />
+                        )}
                       </div>
-                      <div className="flex items-center gap-4">
-                        <div className="flex items-center gap-2">
-                          <Switch
-                            checked={setting.enabled}
-                            onCheckedChange={(checked) =>
-                              updateSetting(
-                                setting.notification_type,
-                                "enabled",
-                                checked,
-                              )
-                            }
-                          />
-                          <span className="text-sm text-muted-foreground">
-                            {setting.enabled ? "Activada" : "Desactivada"}
-                          </span>
-                        </div>
+                      <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+                        <Switch
+                          checked={setting.enabled}
+                          onCheckedChange={(checked) =>
+                            updateSetting(
+                              setting.notification_type,
+                              "enabled",
+                              checked,
+                            )
+                          }
+                          className="scale-90 sm:scale-100"
+                        />
                         <Select
                           value={setting.priority || "medium"}
                           onValueChange={(value) =>
@@ -495,7 +488,7 @@ export default function NotificationSettings({
                             )
                           }
                         >
-                          <SelectTrigger className="w-32">
+                          <SelectTrigger className="h-8 w-24 sm:w-28 rounded-lg text-xs">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
@@ -513,52 +506,39 @@ export default function NotificationSettings({
 
               {/* General Settings */}
               <div>
-                <h3 className="text-lg font-semibold mb-4">General</h3>
-                <div className="space-y-3">
+                <h3 className="text-sm sm:text-base font-semibold mb-2 sm:mb-3">
+                  General
+                </h3>
+                <div className="space-y-2">
                   {generalSettings.map((setting) => (
                     <div
                       key={setting.id}
-                      className="flex items-center justify-between p-4 border rounded-lg"
+                      className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 p-2.5 sm:p-3 border border-border rounded-lg overflow-hidden"
                     >
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <Label className="font-medium">
-                            {NOTIFICATION_TYPE_LABELS[
-                              setting.notification_type
-                            ] || setting.notification_type}
-                          </Label>
-                          {setting.priority && (
-                            <Badge
-                              className={
-                                PRIORITY_BADGE_COLORS[setting.priority]
-                              }
-                            >
-                              {PRIORITY_LABELS[setting.priority]}
-                            </Badge>
-                          )}
-                          {setting.enabled ? (
-                            <CheckCircle className="h-4 w-4 text-green-500" />
-                          ) : (
-                            <XCircle className="h-4 w-4 text-gray-400" />
-                          )}
-                        </div>
+                      <div className="flex items-center gap-2 min-w-0 flex-1">
+                        <Label className="font-medium text-xs sm:text-sm truncate">
+                          {NOTIFICATION_TYPE_LABELS[
+                            setting.notification_type
+                          ] || setting.notification_type}
+                        </Label>
+                        {setting.enabled ? (
+                          <CheckCircle className="h-3.5 w-3.5 text-green-500 shrink-0" />
+                        ) : (
+                          <XCircle className="h-3.5 w-3.5 text-epoch-primary/40 shrink-0" />
+                        )}
                       </div>
-                      <div className="flex items-center gap-4">
-                        <div className="flex items-center gap-2">
-                          <Switch
-                            checked={setting.enabled}
-                            onCheckedChange={(checked) =>
-                              updateSetting(
-                                setting.notification_type,
-                                "enabled",
-                                checked,
-                              )
-                            }
-                          />
-                          <span className="text-sm text-muted-foreground">
-                            {setting.enabled ? "Activada" : "Desactivada"}
-                          </span>
-                        </div>
+                      <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+                        <Switch
+                          checked={setting.enabled}
+                          onCheckedChange={(checked) =>
+                            updateSetting(
+                              setting.notification_type,
+                              "enabled",
+                              checked,
+                            )
+                          }
+                          className="scale-90 sm:scale-100"
+                        />
                         <Select
                           value={setting.priority || "medium"}
                           onValueChange={(value) =>
@@ -569,7 +549,7 @@ export default function NotificationSettings({
                             )
                           }
                         >
-                          <SelectTrigger className="w-32">
+                          <SelectTrigger className="h-8 w-24 sm:w-28 rounded-lg text-xs">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
@@ -587,52 +567,39 @@ export default function NotificationSettings({
 
               {/* System Settings */}
               <div>
-                <h3 className="text-lg font-semibold mb-4">Sistema</h3>
-                <div className="space-y-3">
+                <h3 className="text-sm sm:text-base font-semibold mb-2 sm:mb-3">
+                  Sistema
+                </h3>
+                <div className="space-y-2">
                   {systemSettings.map((setting) => (
                     <div
                       key={setting.id}
-                      className="flex items-center justify-between p-4 border rounded-lg"
+                      className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 p-2.5 sm:p-3 border border-border rounded-lg overflow-hidden"
                     >
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <Label className="font-medium">
-                            {NOTIFICATION_TYPE_LABELS[
-                              setting.notification_type
-                            ] || setting.notification_type}
-                          </Label>
-                          {setting.priority && (
-                            <Badge
-                              className={
-                                PRIORITY_BADGE_COLORS[setting.priority]
-                              }
-                            >
-                              {PRIORITY_LABELS[setting.priority]}
-                            </Badge>
-                          )}
-                          {setting.enabled ? (
-                            <CheckCircle className="h-4 w-4 text-green-500" />
-                          ) : (
-                            <XCircle className="h-4 w-4 text-gray-400" />
-                          )}
-                        </div>
+                      <div className="flex items-center gap-2 min-w-0 flex-1">
+                        <Label className="font-medium text-xs sm:text-sm truncate">
+                          {NOTIFICATION_TYPE_LABELS[
+                            setting.notification_type
+                          ] || setting.notification_type}
+                        </Label>
+                        {setting.enabled ? (
+                          <CheckCircle className="h-3.5 w-3.5 text-green-500 shrink-0" />
+                        ) : (
+                          <XCircle className="h-3.5 w-3.5 text-epoch-primary/40 shrink-0" />
+                        )}
                       </div>
-                      <div className="flex items-center gap-4">
-                        <div className="flex items-center gap-2">
-                          <Switch
-                            checked={setting.enabled}
-                            onCheckedChange={(checked) =>
-                              updateSetting(
-                                setting.notification_type,
-                                "enabled",
-                                checked,
-                              )
-                            }
-                          />
-                          <span className="text-sm text-muted-foreground">
-                            {setting.enabled ? "Activada" : "Desactivada"}
-                          </span>
-                        </div>
+                      <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+                        <Switch
+                          checked={setting.enabled}
+                          onCheckedChange={(checked) =>
+                            updateSetting(
+                              setting.notification_type,
+                              "enabled",
+                              checked,
+                            )
+                          }
+                          className="scale-90 sm:scale-100"
+                        />
                         <Select
                           value={setting.priority || "medium"}
                           onValueChange={(value) =>
@@ -643,7 +610,7 @@ export default function NotificationSettings({
                             )
                           }
                         >
-                          <SelectTrigger className="w-32">
+                          <SelectTrigger className="h-8 w-24 sm:w-28 rounded-lg text-xs">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>

@@ -123,14 +123,14 @@ export default function WhatsAppSettingsCard() {
   }
 
   return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <MessageCircle className="h-5 w-5" />
+    <div className="space-y-4 sm:space-y-6">
+      <Card className="rounded-xl border border-border overflow-hidden">
+        <CardHeader className="p-4 sm:p-6">
+          <CardTitle className="flex items-center gap-2 font-display text-epoch-primary text-base sm:text-lg">
+            <MessageCircle className="h-4 w-4 sm:h-5 sm:w-5 shrink-0" />
             WhatsApp Business
           </CardTitle>
-          <p className="text-sm text-admin-text-tertiary">
+          <p className="text-xs sm:text-sm text-epoch-primary/80 mt-1">
             Conecta tu número de WhatsApp para que tus clientes puedan
             escribirte y recibir respuestas del asistente IA.
           </p>
@@ -272,21 +272,21 @@ export default function WhatsAppSettingsCard() {
             </a>{" "}
             y añade el producto WhatsApp Cloud API.
           </p>
-          <p>
+          <p className="break-words">
             <strong>Paso 2:</strong> Configura el webhook en Meta:{" "}
-            <code className="bg-admin-surface-secondary px-1 rounded">
+            <code className="bg-epoch-background/50 px-1 rounded text-[10px] sm:text-xs break-all">
               {typeof window !== "undefined"
                 ? `${window.location.origin}/api/webhooks/whatsapp`
                 : "/api/webhooks/whatsapp"}
             </code>
           </p>
-          <p>
+          <p className="break-words">
             <strong>Paso 3:</strong>{" "}
             {process.env.NEXT_PUBLIC_META_APP_ID
               ? "Usa el botón «Conectar con Meta» para el flujo oficial, o ingresa manualmente el WABA ID y Phone Number ID desde el panel de Meta (WhatsApp &gt; API Setup)."
               : "Obtén el WABA ID y Phone Number ID desde el panel de Meta (WhatsApp &gt; API Setup) e ingrésalos arriba."}
           </p>
-          <p>
+          <p className="break-words">
             <strong>Paso 4:</strong> Configura la facturación en tu Business
             Manager de Meta. Meta te cobrará directamente según el volumen de
             mensajes.

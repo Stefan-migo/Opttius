@@ -46,8 +46,11 @@ export default function Chatbot(
   const pathname = usePathname();
   const currentSection = getSectionFromPathname(pathname);
 
-  const isOpen = controlledOpen !== undefined ? controlledOpen : internalOpen;
-  const setIsOpen = controlledOnOpenChange || setInternalOpen;
+  const isControlled = controlledOpen !== undefined;
+  const isOpen = isControlled ? controlledOpen : internalOpen;
+  const setIsOpen = isControlled
+    ? (controlledOnOpenChange ?? (() => {}))
+    : setInternalOpen;
 
   useEffect(() => {
     try {
@@ -84,18 +87,21 @@ export default function Chatbot(
       currentSection={currentSection}
       onClose={() => setIsOpen(false)}
       onExpandClick={isExpanded ? handleCollapseClick : handleExpandClick}
-      isSidebarMode={isExpanded}
+      isSidebarMode={isExpanded || isControlled}
     />
   );
 
+  // When controlled (mobile nav) or expanded: use Sheet. Full-screen on mobile.
+  const useSheet = isExpanded || (isControlled && isOpen);
+
   return (
     <div className="relative z-[100] flex flex-col items-end justify-end w-fit">
-      {isExpanded ? (
+      {useSheet ? (
         <Sheet open={isOpen} onOpenChange={setIsOpen}>
           <SheetContent
             side="right"
             elevateZIndex
-            className="w-[400px] sm:w-[420px] p-0 flex flex-col overflow-hidden"
+            className="w-full max-w-full sm:w-[420px] p-0 flex flex-col overflow-hidden"
           >
             <div className="flex-1 overflow-hidden min-h-0 flex flex-col">
               {chatContent}
@@ -115,28 +121,30 @@ export default function Chatbot(
         </div>
       )}
 
-      {/* Trigger Bubble */}
-      <Button
-        variant="default"
-        size="icon"
-        onClick={() => setIsOpen(!isOpen)}
-        className={cn(
-          "rounded-full w-14 h-14 shadow-[0_8px_30px_rgb(0,0,0,0.12)] transition-all duration-500 hover:scale-110 active:scale-95",
-          isOpen
-            ? "bg-slate-100 dark:bg-slate-800 text-slate-500 rotate-90 shadow-none"
-            : "bg-gradient-to-tr from-primary via-primary to-primary/80 text-white",
-        )}
-        title="Asistente de Inteligencia Opttius"
-      >
-        {isOpen ? (
-          <X className="w-6 h-6" />
-        ) : (
-          <div className="relative">
-            <MessageSquare className="w-6 h-6" />
-            <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-primary animate-pulse" />
-          </div>
-        )}
-      </Button>
+      {/* Trigger Bubble - desktop only (mobile uses bottom nav) */}
+      <div className="hidden lg:flex">
+        <Button
+          variant="default"
+          size="icon"
+          onClick={() => setIsOpen(!isOpen)}
+          className={cn(
+            "rounded-full w-14 h-14 shadow-[0_8px_30px_rgb(0,0,0,0.12)] transition-all duration-500 hover:scale-110 active:scale-95",
+            isOpen
+              ? "bg-slate-100 dark:bg-slate-800 text-slate-500 rotate-90 shadow-none"
+              : "bg-gradient-to-tr from-primary via-primary to-primary/80 text-white",
+          )}
+          title="Asistente de Inteligencia Opttius"
+        >
+          {isOpen ? (
+            <X className="w-6 h-6" />
+          ) : (
+            <div className="relative">
+              <MessageSquare className="w-6 h-6" />
+              <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-primary animate-pulse" />
+            </div>
+          )}
+        </Button>
+      </div>
     </div>
   );
 }

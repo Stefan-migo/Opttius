@@ -240,20 +240,20 @@ export default function CustomerDetailPage() {
   if (loading) {
     return (
       <div className="space-y-6">
-        <div className="flex items-center space-x-4">
-          <Button variant="outline" size="sm">
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-          <div>
-            <h1 className="text-3xl font-bold text-admin-text-primary">
+        <div className="space-y-4">
+          <div className="flex items-center gap-3">
+            <Button variant="outline" size="sm" className="min-h-[44px]">
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+            <h1 className="text-2xl sm:text-3xl font-bold text-admin-text-primary">
               Cargando cliente...
             </h1>
-            <p className="text-admin-text-tertiary">
-              Obteniendo información del cliente
-            </p>
           </div>
+          <p className="text-sm text-admin-text-tertiary">
+            Obteniendo información del cliente
+          </p>
         </div>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
           {[...Array(6)].map((_, i) => (
             <Card key={i} className="animate-pulse">
               <CardContent className="p-6">
@@ -270,18 +270,23 @@ export default function CustomerDetailPage() {
   if (error || !customer) {
     return (
       <div className="space-y-6">
-        <div className="flex items-center space-x-4">
-          <Button variant="outline" size="sm" onClick={() => router.back()}>
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-          <div>
-            <h1 className="text-3xl font-bold text-admin-text-primary">
+        <div className="space-y-4">
+          <div className="flex items-center gap-3">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => router.back()}
+              className="min-h-[44px]"
+            >
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+            <h1 className="text-2xl sm:text-3xl font-bold text-admin-text-primary">
               Error
             </h1>
-            <p className="text-admin-text-tertiary">
-              No se pudo cargar la información del cliente
-            </p>
           </div>
+          <p className="text-sm text-admin-text-tertiary">
+            No se pudo cargar la información del cliente
+          </p>
         </div>
         <Card>
           <CardContent className="text-center py-16">
@@ -307,26 +312,28 @@ export default function CustomerDetailPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <Button variant="outline" size="sm" onClick={() => router.back()}>
+      <div className="space-y-4">
+        <div className="flex items-center gap-3">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => router.back()}
+            className="min-h-[44px] shrink-0"
+          >
             <ArrowLeft className="h-4 w-4" />
           </Button>
-          <div>
-            <h1 className="text-3xl font-bold text-admin-text-primary">
-              {customerName}
-            </h1>
-            <p className="text-admin-text-tertiary">
-              {customer.email || "Sin email"}
-            </p>
-          </div>
+          <h1 className="text-2xl sm:text-3xl font-bold text-admin-text-primary truncate">
+            {customerName}
+          </h1>
         </div>
-
-        <div className="flex items-center space-x-2">
+        <p className="text-sm text-admin-text-tertiary">
+          {customer.email || "Sin email"}
+        </p>
+        <div className="flex flex-wrap items-center gap-2">
           {customer.analytics?.segment &&
             getSegmentBadge(customer.analytics.segment)}
           <Link href={`/admin/customers/${customer.id}/edit`}>
-            <Button>
+            <Button className="min-h-[44px]">
               <Edit className="h-4 w-4 mr-2" />
               Editar
             </Button>
@@ -335,16 +342,16 @@ export default function CustomerDetailPage() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
         <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)]">
-          <CardContent className="p-6">
+          <CardContent className="p-4 sm:p-6">
             <div className="flex items-center">
-              <DollarSign className="h-8 w-8 text-admin-success" />
-              <div className="ml-4">
-                <p className="text-sm text-admin-text-tertiary">
+              <DollarSign className="h-6 w-6 sm:h-8 sm:w-8 text-admin-success shrink-0" />
+              <div className="ml-3 sm:ml-4 min-w-0">
+                <p className="text-xs sm:text-sm text-admin-text-tertiary">
                   Total Gastado
                 </p>
-                <p className="text-2xl font-bold text-admin-success">
+                <p className="text-lg sm:text-2xl font-bold text-admin-success truncate">
                   {formatCurrency(customer.analytics?.totalSpent || 0)}
                 </p>
               </div>
@@ -353,14 +360,14 @@ export default function CustomerDetailPage() {
         </Card>
 
         <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)]">
-          <CardContent className="p-6">
+          <CardContent className="p-4 sm:p-6">
             <div className="flex items-center">
-              <ShoppingBag className="h-8 w-8 text-admin-text-primary" />
-              <div className="ml-4">
-                <p className="text-sm text-admin-text-tertiary">
+              <ShoppingBag className="h-6 w-6 sm:h-8 sm:w-8 text-admin-text-primary shrink-0" />
+              <div className="ml-3 sm:ml-4 min-w-0">
+                <p className="text-xs sm:text-sm text-admin-text-tertiary">
                   Total Pedidos
                 </p>
-                <p className="text-2xl font-bold text-admin-text-primary">
+                <p className="text-lg sm:text-2xl font-bold text-admin-text-primary">
                   {customer.analytics?.orderCount || 0}
                 </p>
               </div>
@@ -369,14 +376,14 @@ export default function CustomerDetailPage() {
         </Card>
 
         <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)]">
-          <CardContent className="p-6">
+          <CardContent className="p-4 sm:p-6">
             <div className="flex items-center">
-              <TrendingUp className="h-8 w-8 text-admin-accent-primary" />
-              <div className="ml-4">
-                <p className="text-sm text-admin-text-tertiary">
+              <TrendingUp className="h-6 w-6 sm:h-8 sm:w-8 text-admin-accent-primary shrink-0" />
+              <div className="ml-3 sm:ml-4 min-w-0">
+                <p className="text-xs sm:text-sm text-admin-text-tertiary">
                   Ticket Promedio
                 </p>
-                <p className="text-2xl font-bold text-admin-accent-primary">
+                <p className="text-lg sm:text-2xl font-bold text-admin-accent-primary truncate">
                   {formatCurrency(customer.analytics?.avgOrderValue || 0)}
                 </p>
               </div>
@@ -385,14 +392,14 @@ export default function CustomerDetailPage() {
         </Card>
 
         <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)]">
-          <CardContent className="p-6">
+          <CardContent className="p-4 sm:p-6">
             <div className="flex items-center">
-              <Calendar className="h-8 w-8 text-red-500" />
-              <div className="ml-4">
-                <p className="text-sm text-admin-text-tertiary">
+              <Calendar className="h-6 w-6 sm:h-8 sm:w-8 text-red-500 shrink-0" />
+              <div className="ml-3 sm:ml-4 min-w-0">
+                <p className="text-xs sm:text-sm text-admin-text-tertiary">
                   Cliente Desde
                 </p>
-                <p className="text-lg font-bold text-red-500">
+                <p className="text-base sm:text-lg font-bold text-red-500">
                   {formatDate(customer.created_at)}
                 </p>
               </div>
@@ -403,36 +410,70 @@ export default function CustomerDetailPage() {
 
       {/* Main Content */}
       <Tabs defaultValue="overview" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-6">
-          <TabsTrigger value="overview">Resumen</TabsTrigger>
-          <TabsTrigger value="prescriptions">Recetas</TabsTrigger>
-          <TabsTrigger value="appointments">Citas</TabsTrigger>
-          <TabsTrigger value="quotes">Presupuestos</TabsTrigger>
-          <TabsTrigger value="purchases">Compras</TabsTrigger>
-          <TabsTrigger value="analytics">Analíticas</TabsTrigger>
+        <TabsList className="flex items-center w-full justify-start overflow-x-auto overflow-y-hidden gap-2 sm:gap-4 p-0 h-auto rounded-xl border-b border-admin-border-primary/20 bg-transparent min-w-0 [scrollbar-width:thin] [&::-webkit-scrollbar]:h-1 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-admin-border-primary/40">
+          <TabsTrigger
+            value="overview"
+            className="shrink-0 rounded-xl border-b-2 border-transparent data-[state=active]:border-admin-accent-primary data-[state=active]:bg-transparent bg-transparent text-admin-text-tertiary data-[state=active]:text-admin-text-primary px-2 sm:px-3 pb-3 sm:pb-4 text-[10px] sm:text-sm font-medium transition-all"
+          >
+            Resumen
+          </TabsTrigger>
+          <TabsTrigger
+            value="prescriptions"
+            className="shrink-0 rounded-xl border-b-2 border-transparent data-[state=active]:border-admin-accent-primary data-[state=active]:bg-transparent bg-transparent text-admin-text-tertiary data-[state=active]:text-admin-text-primary px-2 sm:px-3 pb-3 sm:pb-4 text-[10px] sm:text-sm font-medium transition-all"
+          >
+            Recetas
+          </TabsTrigger>
+          <TabsTrigger
+            value="appointments"
+            className="shrink-0 rounded-xl border-b-2 border-transparent data-[state=active]:border-admin-accent-primary data-[state=active]:bg-transparent bg-transparent text-admin-text-tertiary data-[state=active]:text-admin-text-primary px-2 sm:px-3 pb-3 sm:pb-4 text-[10px] sm:text-sm font-medium transition-all"
+          >
+            Citas
+          </TabsTrigger>
+          <TabsTrigger
+            value="quotes"
+            className="shrink-0 rounded-xl border-b-2 border-transparent data-[state=active]:border-admin-accent-primary data-[state=active]:bg-transparent bg-transparent text-admin-text-tertiary data-[state=active]:text-admin-text-primary px-2 sm:px-3 pb-3 sm:pb-4 text-[10px] sm:text-sm font-medium transition-all"
+          >
+            Presupuestos
+          </TabsTrigger>
+          <TabsTrigger
+            value="purchases"
+            className="shrink-0 rounded-xl border-b-2 border-transparent data-[state=active]:border-admin-accent-primary data-[state=active]:bg-transparent bg-transparent text-admin-text-tertiary data-[state=active]:text-admin-text-primary px-2 sm:px-3 pb-3 sm:pb-4 text-[10px] sm:text-sm font-medium transition-all"
+          >
+            Compras
+          </TabsTrigger>
+          <TabsTrigger
+            value="analytics"
+            className="shrink-0 rounded-xl border-b-2 border-transparent data-[state=active]:border-admin-accent-primary data-[state=active]:bg-transparent bg-transparent text-admin-text-tertiary data-[state=active]:text-admin-text-primary px-2 sm:px-3 pb-3 sm:pb-4 text-[10px] sm:text-sm font-medium transition-all"
+          >
+            Analíticas
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
             {/* Customer Information */}
             <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)]">
-              <CardHeader>
-                <CardTitle className="flex items-center">
+              <CardHeader className="p-4 sm:p-6">
+                <CardTitle className="flex items-center text-admin-text-primary">
                   <User className="h-5 w-5 mr-2" />
                   Información Personal
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+              <CardContent className="space-y-4 p-4 sm:p-6 pt-0">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <p className="text-sm text-admin-text-tertiary">Nombre</p>
-                    <p className="font-medium">
+                    <p className="text-xs sm:text-sm text-admin-text-tertiary">
+                      Nombre
+                    </p>
+                    <p className="font-medium text-admin-text-primary">
                       {customer.first_name || "No especificado"}
                     </p>
                   </div>
                   <div>
-                    <p className="text-sm text-admin-text-tertiary">Apellido</p>
-                    <p className="font-medium">
+                    <p className="text-xs sm:text-sm text-admin-text-tertiary">
+                      Apellido
+                    </p>
+                    <p className="font-medium text-admin-text-primary">
                       {customer.last_name || "No especificado"}
                     </p>
                   </div>
@@ -440,29 +481,41 @@ export default function CustomerDetailPage() {
 
                 {customer.rut && (
                   <div>
-                    <p className="text-sm text-admin-text-tertiary">RUT</p>
-                    <p className="font-medium">{customer.rut}</p>
+                    <p className="text-xs sm:text-sm text-admin-text-tertiary">
+                      RUT
+                    </p>
+                    <p className="font-medium text-admin-text-primary">
+                      {customer.rut}
+                    </p>
                   </div>
                 )}
 
                 <div>
-                  <p className="text-sm text-admin-text-tertiary">Email</p>
-                  <p className="font-medium">{customer.email}</p>
+                  <p className="text-xs sm:text-sm text-admin-text-tertiary">
+                    Email
+                  </p>
+                  <p className="font-medium text-admin-text-primary">
+                    {customer.email}
+                  </p>
                 </div>
 
                 {customer.phone && (
                   <div>
-                    <p className="text-sm text-admin-text-tertiary">Teléfono</p>
-                    <p className="font-medium">{customer.phone}</p>
+                    <p className="text-xs sm:text-sm text-admin-text-tertiary">
+                      Teléfono
+                    </p>
+                    <p className="font-medium text-admin-text-primary">
+                      {customer.phone}
+                    </p>
                   </div>
                 )}
 
                 {customer.date_of_birth && (
                   <div>
-                    <p className="text-sm text-admin-text-tertiary">
+                    <p className="text-xs sm:text-sm text-admin-text-tertiary">
                       Fecha de Nacimiento
                     </p>
-                    <p className="font-medium">
+                    <p className="font-medium text-admin-text-primary">
                       {new Date(customer.date_of_birth).toLocaleDateString(
                         "es-CL",
                       )}
@@ -564,13 +617,13 @@ export default function CustomerDetailPage() {
 
             {/* Address Information */}
             <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)]">
-              <CardHeader>
-                <CardTitle className="flex items-center">
+              <CardHeader className="p-4 sm:p-6">
+                <CardTitle className="flex items-center text-admin-text-primary">
                   <MapPin className="h-5 w-5 mr-2" />
                   Dirección
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-4 p-4 sm:p-6 pt-0">
                 {customer.address_line_1 ? (
                   <>
                     <div>
@@ -682,8 +735,8 @@ export default function CustomerDetailPage() {
         </TabsContent>
 
         <TabsContent value="prescriptions" className="space-y-6">
-          <div className="flex justify-between items-center">
-            <CardTitle className="flex items-center">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+            <CardTitle className="flex items-center text-admin-text-primary">
               <Eye className="h-5 w-5 mr-2" />
               Recetas Ópticas ({customer.prescriptions?.length || 0})
             </CardTitle>
@@ -692,6 +745,7 @@ export default function CustomerDetailPage() {
                 setEditingPrescription(null);
                 setShowCreatePrescription(true);
               }}
+              className="min-h-[44px] w-full sm:w-auto"
             >
               <Plus className="h-4 w-4 mr-2" />
               Nueva Receta
@@ -705,15 +759,15 @@ export default function CustomerDetailPage() {
                   key={prescription.id}
                   className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)]"
                 >
-                  <CardHeader>
-                    <div className="flex justify-between items-start">
+                  <CardHeader className="p-4 sm:p-6">
+                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
                       <div>
-                        <CardTitle className="text-lg">
+                        <CardTitle className="text-base sm:text-lg text-admin-text-primary">
                           Receta #
                           {prescription.prescription_number ||
                             prescription.id.slice(0, 8)}
                         </CardTitle>
-                        <p className="text-sm text-admin-text-tertiary mt-1">
+                        <p className="text-xs sm:text-sm text-admin-text-tertiary mt-1">
                           Fecha:{" "}
                           {new Date(
                             prescription.prescription_date,
@@ -729,7 +783,7 @@ export default function CustomerDetailPage() {
                           )}
                         </p>
                       </div>
-                      <div className="flex gap-2">
+                      <div className="flex flex-wrap gap-2">
                         {prescription.is_current && (
                           <Badge variant="default">Actual</Badge>
                         )}
@@ -745,6 +799,7 @@ export default function CustomerDetailPage() {
                             setEditingPrescription(prescription);
                             setShowCreatePrescription(true);
                           }}
+                          className="min-h-[44px] w-full sm:w-auto"
                         >
                           <Edit className="h-3 w-3 mr-1" />
                           Editar
@@ -752,7 +807,7 @@ export default function CustomerDetailPage() {
                       </div>
                     </div>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="p-4 sm:p-6 pt-0">
                     <PrescriptionFullDisplay
                       prescription={prescription}
                       showCard={false}
@@ -786,8 +841,8 @@ export default function CustomerDetailPage() {
         </TabsContent>
 
         <TabsContent value="appointments" className="space-y-6">
-          <div className="flex justify-between items-center">
-            <CardTitle className="flex items-center">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+            <CardTitle className="flex items-center text-admin-text-primary">
               <CalendarIcon className="h-5 w-5 mr-2" />
               Citas y Agendas ({customer.appointments?.length || 0})
             </CardTitle>
@@ -796,6 +851,7 @@ export default function CustomerDetailPage() {
                 setEditingAppointment(null);
                 setShowCreateAppointment(true);
               }}
+              className="min-h-[44px] w-full sm:w-auto"
             >
               <Plus className="h-4 w-4 mr-2" />
               Nueva Cita
@@ -822,10 +878,10 @@ export default function CustomerDetailPage() {
                     key={appointment.id}
                     className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)]"
                   >
-                    <CardHeader>
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <CardTitle className="text-lg">
+                    <CardHeader className="p-4 sm:p-6">
+                      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
+                        <div className="min-w-0">
+                          <CardTitle className="text-base sm:text-lg text-admin-text-primary">
                             {appointment.appointment_type === "eye_exam" &&
                               "Examen de la Vista"}
                             {appointment.appointment_type === "consultation" &&
@@ -850,7 +906,7 @@ export default function CustomerDetailPage() {
                               "emergency",
                             ].includes(appointment.appointment_type) && "Cita"}
                           </CardTitle>
-                          <div className="flex items-center gap-4 mt-2 text-sm text-admin-text-tertiary">
+                          <div className="flex flex-wrap items-center gap-2 sm:gap-4 mt-2 text-xs sm:text-sm text-admin-text-tertiary">
                             <div className="flex items-center gap-1">
                               <Calendar className="h-4 w-4" />
                               {appointmentDate.toLocaleDateString("es-CL", {
@@ -886,7 +942,7 @@ export default function CustomerDetailPage() {
                         </Badge>
                       </div>
                     </CardHeader>
-                    <CardContent>
+                    <CardContent className="p-4 sm:p-6 pt-0">
                       {appointment.reason && (
                         <div className="mb-3">
                           <p className="text-sm text-admin-text-tertiary">
@@ -932,6 +988,7 @@ export default function CustomerDetailPage() {
                             setEditingAppointment(appointment);
                             setShowCreateAppointment(true);
                           }}
+                          className="min-h-[44px] w-full sm:w-auto"
                         >
                           <Edit className="h-4 w-4 mr-2" />
                           Editar Cita
@@ -967,12 +1024,15 @@ export default function CustomerDetailPage() {
         </TabsContent>
 
         <TabsContent value="quotes" className="space-y-6">
-          <div className="flex justify-between items-center">
-            <CardTitle className="flex items-center">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+            <CardTitle className="flex items-center text-admin-text-primary">
               <FileText className="h-5 w-5 mr-2" />
               Presupuestos ({customer.quotes?.length || 0})
             </CardTitle>
-            <Button onClick={() => setShowCreateQuote(true)}>
+            <Button
+              onClick={() => setShowCreateQuote(true)}
+              className="min-h-[44px] w-full sm:w-auto"
+            >
               <Plus className="h-4 w-4 mr-2" />
               Nuevo Presupuesto
             </Button>
@@ -1012,10 +1072,10 @@ export default function CustomerDetailPage() {
                     key={quote.id}
                     className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)]"
                   >
-                    <CardHeader>
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <CardTitle className="text-lg">
+                    <CardHeader className="p-4 sm:p-6">
+                      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
+                        <div className="min-w-0">
+                          <CardTitle className="text-base sm:text-lg text-admin-text-primary">
                             Presupuesto {quote.quote_number}
                           </CardTitle>
                           <p className="text-sm text-admin-text-tertiary mt-1">
@@ -1034,7 +1094,7 @@ export default function CustomerDetailPage() {
                             )}
                           </p>
                         </div>
-                        <div className="flex gap-2 items-center">
+                        <div className="flex flex-wrap gap-2 items-center">
                           {getStatusBadge(quote.status)}
                           {quote.converted_to_work_order_id && (
                             <Link
@@ -1053,8 +1113,8 @@ export default function CustomerDetailPage() {
                         </div>
                       </div>
                     </CardHeader>
-                    <CardContent>
-                      <div className="grid grid-cols-2 gap-6">
+                    <CardContent className="p-4 sm:p-6 pt-0">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                         <div>
                           <p className="text-sm text-admin-text-tertiary mb-2">
                             Detalles del Presupuesto
@@ -1178,13 +1238,13 @@ export default function CustomerDetailPage() {
         <TabsContent value="purchases" className="space-y-6">
           {/* Lens Purchases Section */}
           <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)]">
-            <CardHeader>
-              <CardTitle className="flex items-center">
+            <CardHeader className="p-4 sm:p-6">
+              <CardTitle className="flex items-center text-admin-text-primary">
                 <ShoppingBag className="h-5 w-5 mr-2" />
                 Lentes y Armazones ({customer.lensPurchases?.length || 0})
               </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-4 sm:p-6 pt-0">
               {customer.lensPurchases && customer.lensPurchases.length > 0 ? (
                 <div className="space-y-4">
                   {customer.lensPurchases.map((purchase: LensPurchase) => {
@@ -1197,11 +1257,14 @@ export default function CustomerDetailPage() {
                     };
 
                     return (
-                      <Card key={purchase.id} className="bg-white shadow-sm">
-                        <CardHeader>
-                          <div className="flex justify-between items-start">
-                            <div>
-                              <CardTitle className="text-lg">
+                      <Card
+                        key={purchase.id}
+                        className="bg-admin-bg-primary border border-admin-border-primary/20 shadow-sm"
+                      >
+                        <CardHeader className="p-4 sm:p-6">
+                          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
+                            <div className="min-w-0">
+                              <CardTitle className="text-base sm:text-lg text-admin-text-primary">
                                 {purchase.product_name}
                               </CardTitle>
                               <p className="text-sm text-admin-text-tertiary mt-1">
@@ -1235,8 +1298,8 @@ export default function CustomerDetailPage() {
                             </Badge>
                           </div>
                         </CardHeader>
-                        <CardContent>
-                          <div className="grid grid-cols-2 gap-6">
+                        <CardContent className="p-4 sm:p-6 pt-0">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                             <div>
                               <p className="text-sm text-admin-text-tertiary mb-2">
                                 Detalles del Producto
@@ -1327,13 +1390,13 @@ export default function CustomerDetailPage() {
 
           {/* Orders Section */}
           <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)]">
-            <CardHeader>
-              <CardTitle className="flex items-center">
+            <CardHeader className="p-4 sm:p-6">
+              <CardTitle className="flex items-center text-admin-text-primary">
                 <Package className="h-5 w-5 mr-2" />
                 Pedidos ({customer.orders?.length || 0})
               </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-4 sm:p-6 pt-0">
               {customer.orders && customer.orders.length > 0 ? (
                 <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0">
                   <Table>
@@ -1360,7 +1423,7 @@ export default function CustomerDetailPage() {
                                   variant="ghost"
                                   size="sm"
                                   onClick={() => toggleOrderExpansion(order.id)}
-                                  className="h-6 w-6 p-0"
+                                  className="min-h-[44px] min-w-[44px] p-0"
                                 >
                                   {expandedOrders.has(order.id) ? "−" : "+"}
                                 </Button>
@@ -1428,57 +1491,61 @@ export default function CustomerDetailPage() {
                               <TableRow key={`${order.id}-items`}>
                                 <TableCell
                                   colSpan={6}
-                                  className="bg-gray-50 p-4"
+                                  className="bg-admin-bg-tertiary/50 p-4"
                                 >
                                   <div className="space-y-2">
-                                    <p className="text-sm font-medium text-admin-text-primary mb-3">
+                                    <p className="text-xs sm:text-sm font-medium text-admin-text-primary mb-3">
                                       Productos del Pedido:
                                     </p>
-                                    {order.order_items.map(
-                                      (item: any, idx: number) => {
-                                        const product =
-                                          item.products || item.product;
-                                        return (
-                                          <div
-                                            key={idx}
-                                            className="flex items-center justify-between p-2 bg-white rounded border"
-                                          >
-                                            <div className="flex items-center space-x-3">
-                                              {product?.featured_image ? (
-                                                <img
-                                                  src={product.featured_image}
-                                                  alt={
-                                                    product.name ||
-                                                    item.product_name
-                                                  }
-                                                  className="w-10 h-10 object-cover rounded"
-                                                />
-                                              ) : (
-                                                <div className="w-10 h-10 bg-gray-100 rounded flex items-center justify-center">
-                                                  <Package className="h-5 w-5 text-gray-400" />
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                      {order.order_items.map(
+                                        (item: any, idx: number) => {
+                                          const product =
+                                            item.products || item.product;
+                                          return (
+                                            <div
+                                              key={idx}
+                                              className="flex items-center justify-between p-2 bg-admin-bg-primary rounded border border-admin-border-primary/20"
+                                            >
+                                              <div className="flex items-center space-x-3">
+                                                {product?.featured_image ? (
+                                                  <img
+                                                    src={product.featured_image}
+                                                    alt={
+                                                      product.name ||
+                                                      item.product_name
+                                                    }
+                                                    className="w-10 h-10 object-cover rounded"
+                                                  />
+                                                ) : (
+                                                  <div className="w-10 h-10 bg-admin-bg-tertiary rounded flex items-center justify-center shrink-0">
+                                                    <Package className="h-5 w-5 text-admin-text-tertiary" />
+                                                  </div>
+                                                )}
+                                                <div>
+                                                  <p className="text-sm font-medium">
+                                                    {product?.name ||
+                                                      item.product_name ||
+                                                      "Producto"}
+                                                  </p>
+                                                  <p className="text-xs text-admin-text-tertiary">
+                                                    Cantidad: {item.quantity} ×{" "}
+                                                    {formatCurrency(
+                                                      item.unit_price,
+                                                    )}
+                                                  </p>
                                                 </div>
-                                              )}
-                                              <div>
-                                                <p className="text-sm font-medium">
-                                                  {product?.name ||
-                                                    item.product_name ||
-                                                    "Producto"}
-                                                </p>
-                                                <p className="text-xs text-admin-text-tertiary">
-                                                  Cantidad: {item.quantity} ×{" "}
-                                                  {formatCurrency(
-                                                    item.unit_price,
-                                                  )}
-                                                </p>
                                               </div>
+                                              <p className="text-sm font-medium text-admin-success">
+                                                {formatCurrency(
+                                                  item.total_price,
+                                                )}
+                                              </p>
                                             </div>
-                                            <p className="text-sm font-medium text-admin-success">
-                                              {formatCurrency(item.total_price)}
-                                            </p>
-                                          </div>
-                                        );
-                                      },
-                                    )}
+                                          );
+                                        },
+                                      )}
+                                    </div>
                                   </div>
                                 </TableCell>
                               </TableRow>
@@ -1521,43 +1588,43 @@ export default function CustomerDetailPage() {
           {/* Customer Analytics Content */}
           {(customer.analytics?.orderCount ?? 0) > 0 && (
             <>
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                 {/* Favorite Products */}
                 {customer.analytics?.favoriteProducts &&
                   customer.analytics.favoriteProducts.length > 0 && (
                     <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)]">
-                      <CardHeader>
-                        <CardTitle className="flex items-center">
+                      <CardHeader className="p-4 sm:p-6">
+                        <CardTitle className="flex items-center text-admin-text-primary">
                           <Heart className="h-5 w-5 mr-2" />
                           Productos Favoritos
                         </CardTitle>
                       </CardHeader>
-                      <CardContent>
+                      <CardContent className="p-4 sm:p-6 pt-0">
                         <div className="space-y-3">
                           {customer.analytics.favoriteProducts
                             .slice(0, 5)
                             .map((item: any, index: number) => (
                               <div
                                 key={index}
-                                className="flex items-center justify-between p-3 border rounded-lg hover:bg-[#AE000010] transition-colors"
+                                className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-3 border rounded-lg hover:bg-[#AE000010] transition-colors"
                               >
-                                <div className="flex items-center space-x-3">
+                                <div className="flex items-center space-x-3 min-w-0">
                                   {item.product?.featured_image ? (
                                     <img
                                       src={item.product.featured_image}
                                       alt={item.product.name || "Product"}
-                                      className="w-12 h-12 object-cover rounded border border-gray-200"
+                                      className="w-10 h-10 sm:w-12 sm:h-12 object-cover rounded border border-admin-border-primary/20 shrink-0"
                                     />
                                   ) : (
-                                    <div className="w-12 h-12 bg-gray-100 rounded border border-gray-200 flex items-center justify-center">
-                                      <Package className="h-6 w-6 text-gray-400" />
+                                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-admin-bg-primary rounded border border-admin-border-primary/20 flex items-center justify-center shrink-0">
+                                      <Package className="h-5 w-5 sm:h-6 sm:w-6 text-admin-text-tertiary" />
                                     </div>
                                   )}
-                                  <div>
-                                    <p className="font-medium">
+                                  <div className="min-w-0">
+                                    <p className="font-medium text-admin-text-primary truncate">
                                       {item.product?.name || "Producto"}
                                     </p>
-                                    <p className="text-sm text-admin-text-tertiary">
+                                    <p className="text-xs sm:text-sm text-admin-text-tertiary">
                                       {item.quantity}{" "}
                                       {item.quantity === 1
                                         ? "unidad"
@@ -1566,7 +1633,7 @@ export default function CustomerDetailPage() {
                                     </p>
                                   </div>
                                 </div>
-                                <div className="text-right">
+                                <div className="text-left sm:text-right shrink-0">
                                   <p className="font-medium text-admin-success">
                                     {formatCurrency(item.totalSpent)}
                                   </p>
@@ -1587,13 +1654,13 @@ export default function CustomerDetailPage() {
                 {/* Order Status Distribution */}
                 {customer.analytics?.orderStatusCounts && (
                   <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)]">
-                    <CardHeader>
-                      <CardTitle className="flex items-center">
+                    <CardHeader className="p-4 sm:p-6">
+                      <CardTitle className="flex items-center text-admin-text-primary">
                         <Activity className="h-5 w-5 mr-2" />
                         Distribución de Estados
                       </CardTitle>
                     </CardHeader>
-                    <CardContent>
+                    <CardContent className="p-4 sm:p-6 pt-0">
                       <div className="space-y-3">
                         {Object.entries(
                           customer.analytics.orderStatusCounts,
@@ -1738,7 +1805,7 @@ export default function CustomerDetailPage() {
         open={showCreateAppointment}
         onOpenChange={setShowCreateAppointment}
       >
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
               {editingAppointment ? "Editar Cita" : "Nueva Cita"}
@@ -1767,7 +1834,7 @@ export default function CustomerDetailPage() {
 
       {/* Create Quote Dialog */}
       <Dialog open={showCreateQuote} onOpenChange={setShowCreateQuote}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Nuevo Presupuesto</DialogTitle>
             <DialogDescription>

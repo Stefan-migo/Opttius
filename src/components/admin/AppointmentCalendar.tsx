@@ -60,7 +60,7 @@ interface ScheduleSettings {
 }
 
 interface AppointmentCalendarProps {
-  view: "week" | "month";
+  view: "day" | "week" | "month";
   currentDate: Date;
   appointments: Appointment[];
   onAppointmentClick: (appointment: Appointment) => void;
@@ -356,182 +356,366 @@ export default function AppointmentCalendar({
     return checkDate < today;
   };
 
+  // Day view: single column, optimized for mobile
+  if (view === "day") {
+    const dayDate = new Date(currentDate);
+    const dayAppointments = getAppointmentsForDate(dayDate);
+
+    return (
+      <div
+        className="space-y-4 pb-4"
+        key={`day-view-${lastRefresh}-${appointments.length}`}
+      >
+        <style dangerouslySetInnerHTML={{ __html: CUSTOM_SCROLLBAR_CSS }} />
+        <div className="border border-admin-border-primary/20 rounded-2xl overflow-hidden bg-white/40">
+          <div className="max-h-[70vh] sm:max-h-[700px] overflow-y-auto pr-1 custom-scrollbar relative z-10">
+            {/* Day header - compact on mobile */}
+            <div className="grid grid-cols-[auto_1fr] gap-2 sm:gap-3 bg-admin-bg-tertiary/20 p-2 sm:p-3 border-b border-admin-border-primary/30 backdrop-blur-md sticky top-0 z-20 [isolation:isolate]">
+              <div className="flex items-center justify-center font-bold text-[9px] sm:text-[10px] text-admin-text-tertiary uppercase tracking-widest">
+                <Clock className="h-3 w-3 sm:h-3.5 sm:w-3.5 mr-1 sm:mr-2 opacity-30" />
+                Hora
+              </div>
+              <div
+                className={cn(
+                  "text-center py-2 px-1 rounded-xl border border-transparent",
+                  isToday(dayDate)
+                    ? "bg-admin-accent-primary/10 border-admin-accent-primary/20 shadow-premium-sm"
+                    : "hover:bg-white/40",
+                )}
+              >
+                <div
+                  className={cn(
+                    "text-[9px] sm:text-[10px] font-bold uppercase tracking-tight",
+                    isToday(dayDate)
+                      ? "text-admin-accent-primary"
+                      : "text-admin-text-tertiary",
+                  )}
+                >
+                  {dayDate.toLocaleDateString("es-CL", { weekday: "long" })}
+                </div>
+                <div
+                  className={cn(
+                    "text-lg sm:text-xl font-black tracking-tighter",
+                    isToday(dayDate)
+                      ? "text-admin-accent-primary"
+                      : "text-admin-text-primary",
+                  )}
+                >
+                  {dayDate.getDate()}{" "}
+                  {dayDate.toLocaleDateString("es-CL", { month: "short" })}
+                </div>
+              </div>
+            </div>
+
+            {/* Time slots - single column */}
+            <div className="p-2 sm:p-3 space-y-1 w-full">
+              {timeSlots.map((timeSlot) => {
+                const slotAppointments = getAppointmentsForTimeSlot(
+                  dayDate,
+                  timeSlot,
+                );
+                const isSlotPast = isPast(dayDate, timeSlot);
+                const hasAppointments = slotAppointments.length > 0;
+                const isSlotAvailable = isSlotAvailableForDate(
+                  dayDate,
+                  timeSlot,
+                );
+                const isPastDate = dayDate < new Date() && !isToday(dayDate);
+                const isPastTime = isSlotPast;
+                const isClickable =
+                  !hasAppointments &&
+                  !isPastDate &&
+                  !isPastTime &&
+                  isSlotAvailable;
+
+                return (
+                  <div
+                    key={timeSlot}
+                    className="grid grid-cols-[auto_1fr] gap-2 sm:gap-3 min-h-[60px] sm:min-h-[70px] w-full items-stretch"
+                  >
+                    <div className="text-[9px] sm:text-[10px] font-black text-admin-text-tertiary py-3 sm:py-4 text-right pr-2 sm:pr-4 flex flex-col justify-start opacity-40">
+                      <span>{timeSlot.split(":")[0]}</span>
+                      <span className="text-[7px] sm:text-[8px] font-bold opacity-50">
+                        {timeSlot.split(":")[1]}
+                      </span>
+                    </div>
+                    <div
+                      onClick={(e) => {
+                        if (isClickable && onSlotClick) {
+                          e.stopPropagation();
+                          onSlotClick(dayDate, timeSlot);
+                        }
+                      }}
+                      className={cn(
+                        "min-h-[60px] sm:min-h-[70px] border border-admin-border-primary/20 rounded-xl p-1.5 sm:p-2 relative transition-all duration-300 group",
+                        (!isSlotAvailable || isPastDate || isPastTime) &&
+                          "bg-admin-bg-tertiary/10 opacity-40 cursor-not-allowed",
+                        isToday(dayDate) &&
+                          !isSlotPast &&
+                          isSlotAvailable &&
+                          "bg-admin-accent-primary/[0.02]",
+                        isClickable &&
+                          onSlotClick &&
+                          "cursor-pointer hover:bg-white hover:border-admin-accent-primary/30 hover:shadow-premium-sm",
+                      )}
+                    >
+                      {isClickable && (
+                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                          <div className="h-6 w-6 bg-admin-accent-primary/10 rounded-full flex items-center justify-center">
+                            <Plus className="h-3 w-3 text-admin-accent-primary" />
+                          </div>
+                        </div>
+                      )}
+
+                      {hasAppointments
+                        ? slotAppointments.map((apt) => {
+                            const Icon = getAppointmentTypeIcon(
+                              apt.appointment_type,
+                            );
+                            const isMainSlot =
+                              apt.appointment_time.substring(0, 5) === timeSlot;
+
+                            if (!isMainSlot) return null;
+
+                            return (
+                              <div
+                                key={apt.id}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  onAppointmentClick(apt);
+                                }}
+                                className={cn(
+                                  "text-[9px] sm:text-[10px] p-2 rounded-xl cursor-pointer hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 border backdrop-blur-md z-10 flex flex-col justify-between overflow-hidden",
+                                  getAppointmentStatusColor(apt.status),
+                                )}
+                                style={{
+                                  height: `${Math.max(56, (apt.duration_minutes / (scheduleSettings?.slot_duration_minutes || 15)) * 60 - 4)}px`,
+                                  position: "absolute",
+                                  width: "calc(100% - 8px)",
+                                  top: "4px",
+                                  left: "4px",
+                                }}
+                              >
+                                <div className="space-y-0.5 sm:space-y-1">
+                                  <div className="flex items-center gap-1 sm:gap-1.5">
+                                    <Icon className="h-2.5 w-2.5 sm:h-3 sm:w-3 opacity-70 shrink-0" />
+                                    <span className="font-black truncate uppercase tracking-tighter">
+                                      {apt.customer
+                                        ? `${apt.customer.first_name || ""} ${apt.customer.last_name || ""}`.trim()
+                                        : `${apt.guest_first_name || ""} ${apt.guest_last_name || ""}`.trim()}
+                                    </span>
+                                  </div>
+                                  <div className="text-[8px] sm:text-[9px] font-bold opacity-60 uppercase tracking-widest truncate">
+                                    {apt.appointment_type.replace(/_/g, " ")}
+                                  </div>
+                                </div>
+                                <div className="flex items-center justify-between pt-1 border-t border-current/10 mt-auto">
+                                  <span className="font-bold opacity-70 text-[8px] sm:text-[9px]">
+                                    {apt.appointment_time.substring(0, 5)}
+                                  </span>
+                                  <span className="px-1 sm:px-1.5 py-0.5 rounded bg-white/30 font-black text-[7px] sm:text-[8px] uppercase">
+                                    {apt.duration_minutes}m
+                                  </span>
+                                </div>
+                              </div>
+                            );
+                          })
+                        : null}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (view === "week") {
     return (
-      <div className="space-y-4 pb-4" key={`week-view-${lastRefresh}-${appointments.length}`}>
+      <div
+        className="space-y-4 pb-4"
+        key={`week-view-${lastRefresh}-${appointments.length}`}
+      >
         {/* Style for custom scrollbar to ensure visibility and interaction */}
         <style dangerouslySetInnerHTML={{ __html: CUSTOM_SCROLLBAR_CSS }} />
 
         {/* Wrapper with border so backdrop-blur on header doesn't clip the top-left corner */}
         <div className="border border-admin-border-primary/20 rounded-2xl overflow-hidden bg-white/40">
-          <div className="max-h-[700px] overflow-y-auto pr-1 custom-scrollbar custom-calendar-grid relative z-10">
-            {/* Week Header - Now inside the scrollable container for proper sticky behavior */}
-            {/* Week Header - Synchronized gap with slots; isolation so blur doesn't break corner */}
-            <div className="grid grid-cols-8 gap-2 bg-admin-bg-tertiary/20 p-2 border-b border-admin-border-primary/30 backdrop-blur-md sticky top-0 z-20 w-full [isolation:isolate]">
-              <div className="flex items-center justify-center font-bold text-[10px] text-admin-text-tertiary uppercase tracking-widest pl-2">
-                <Clock className="h-3.5 w-3.5 mr-2 opacity-30" />
-                Hora
-              </div>
-              {weekDays.map((day, idx) => (
-                <div
-                  key={idx}
-                  className={cn(
-                    "relative text-center py-2 px-1 rounded-xl transition-all duration-300 border border-transparent",
-                    isToday(day)
-                      ? "bg-admin-accent-primary/10 border-admin-accent-primary/20 shadow-premium-sm"
-                      : "hover:bg-white/40",
-                  )}
-                >
-                  <div
-                    className={cn(
-                      "text-[10px] font-bold uppercase tracking-tight",
-                      isToday(day)
-                        ? "text-admin-accent-primary"
-                        : "text-admin-text-tertiary",
-                    )}
-                  >
-                    {day.toLocaleDateString("es-CL", { weekday: "short" })}
-                  </div>
-                  <div
-                    className={cn(
-                      "text-xl font-black tracking-tighter",
-                      isToday(day)
-                        ? "text-admin-accent-primary"
-                        : "text-admin-text-primary",
-                    )}
-                  >
-                    {day.getDate()}
-                  </div>
-                  {isToday(day) && (
-                    <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-admin-accent-primary rounded-full" />
-                  )}
+          <div className="max-h-[70vh] sm:max-h-[700px] overflow-auto pr-1 custom-scrollbar custom-calendar-grid relative z-10">
+            {/* Week view: min-w enables horizontal scroll on narrow screens */}
+            <div className="inline-block min-w-[520px] w-full">
+              {/* Week Header */}
+              <div className="grid grid-cols-8 gap-1.5 sm:gap-2 bg-admin-bg-tertiary/20 p-2 border-b border-admin-border-primary/30 backdrop-blur-md sticky top-0 z-20 [isolation:isolate]">
+                <div className="flex items-center justify-center font-bold text-[10px] text-admin-text-tertiary uppercase tracking-widest pl-2">
+                  <Clock className="h-3.5 w-3.5 mr-2 opacity-30" />
+                  Hora
                 </div>
-              ))}
-            </div>
-
-            {/* Time Slots */}
-            <div className="p-2 space-y-1 w-full relative">
-              {timeSlots.map((timeSlot) => (
-                <div
-                  key={timeSlot}
-                  className="grid grid-cols-8 gap-2 min-h-[70px] w-full"
-                >
-                  <div className="text-[10px] font-black text-admin-text-tertiary py-4 text-right pr-4 flex flex-col justify-start opacity-40">
-                    <span>{timeSlot.split(":")[0]}</span>
-                    <span className="text-[8px] font-bold opacity-50">
-                      {timeSlot.split(":")[1]}
-                    </span>
+                {weekDays.map((day, idx) => (
+                  <div
+                    key={idx}
+                    className={cn(
+                      "relative text-center py-2 px-1 rounded-xl transition-all duration-300 border border-transparent",
+                      isToday(day)
+                        ? "bg-admin-accent-primary/10 border-admin-accent-primary/20 shadow-premium-sm"
+                        : "hover:bg-white/40",
+                    )}
+                  >
+                    <div
+                      className={cn(
+                        "text-[10px] font-bold uppercase tracking-tight",
+                        isToday(day)
+                          ? "text-admin-accent-primary"
+                          : "text-admin-text-tertiary",
+                      )}
+                    >
+                      {day.toLocaleDateString("es-CL", { weekday: "short" })}
+                    </div>
+                    <div
+                      className={cn(
+                        "text-xl font-black tracking-tighter",
+                        isToday(day)
+                          ? "text-admin-accent-primary"
+                          : "text-admin-text-primary",
+                      )}
+                    >
+                      {day.getDate()}
+                    </div>
+                    {isToday(day) && (
+                      <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-admin-accent-primary rounded-full" />
+                    )}
                   </div>
-                  {weekDays.map((day, dayIdx) => {
-                    const slotAppointments = getAppointmentsForTimeSlot(
-                      day,
-                      timeSlot,
-                    );
-                    const isSlotPast = isPast(day, timeSlot);
-                    const hasAppointments = slotAppointments.length > 0;
-                    const isSlotAvailable = isSlotAvailableForDate(
-                      day,
-                      timeSlot,
-                    );
-                    const isPastDate = day < new Date() && !isToday(day);
-                    const isPastTime = isSlotPast;
-                    const isClickable =
-                      !hasAppointments &&
-                      !isPastDate &&
-                      !isPastTime &&
-                      isSlotAvailable;
+                ))}
+              </div>
 
-                    return (
-                      <div
-                        key={dayIdx}
-                        onClick={(e) => {
-                          if (isClickable && onSlotClick) {
-                            e.stopPropagation();
-                            onSlotClick(day, timeSlot);
-                          }
-                        }}
-                        className={cn(
-                          "min-h-[70px] border border-admin-border-primary/20 rounded-xl p-1 relative transition-all duration-300 group",
-                          (!isSlotAvailable || isPastDate || isPastTime) &&
-                            "bg-admin-bg-tertiary/10 opacity-40 cursor-not-allowed",
-                          isToday(day) &&
-                            !isSlotPast &&
-                            isSlotAvailable &&
-                            "bg-admin-accent-primary/[0.02]",
-                          isClickable &&
-                            onSlotClick &&
-                            "cursor-pointer hover:bg-white hover:border-admin-accent-primary/30 hover:shadow-premium-sm",
-                        )}
-                      >
-                        {isClickable && (
-                          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                            <div className="h-6 w-6 bg-admin-accent-primary/10 rounded-full flex items-center justify-center">
-                              <Plus className="h-3 w-3 text-admin-accent-primary" />
+              {/* Time Slots */}
+              <div className="p-2 space-y-1 w-full relative">
+                {timeSlots.map((timeSlot) => (
+                  <div
+                    key={timeSlot}
+                    className="grid grid-cols-8 gap-1.5 sm:gap-2 min-h-[60px] sm:min-h-[70px] w-full"
+                  >
+                    <div className="text-[10px] font-black text-admin-text-tertiary py-4 text-right pr-4 flex flex-col justify-start opacity-40">
+                      <span>{timeSlot.split(":")[0]}</span>
+                      <span className="text-[8px] font-bold opacity-50">
+                        {timeSlot.split(":")[1]}
+                      </span>
+                    </div>
+                    {weekDays.map((day, dayIdx) => {
+                      const slotAppointments = getAppointmentsForTimeSlot(
+                        day,
+                        timeSlot,
+                      );
+                      const isSlotPast = isPast(day, timeSlot);
+                      const hasAppointments = slotAppointments.length > 0;
+                      const isSlotAvailable = isSlotAvailableForDate(
+                        day,
+                        timeSlot,
+                      );
+                      const isPastDate = day < new Date() && !isToday(day);
+                      const isPastTime = isSlotPast;
+                      const isClickable =
+                        !hasAppointments &&
+                        !isPastDate &&
+                        !isPastTime &&
+                        isSlotAvailable;
+
+                      return (
+                        <div
+                          key={dayIdx}
+                          onClick={(e) => {
+                            if (isClickable && onSlotClick) {
+                              e.stopPropagation();
+                              onSlotClick(day, timeSlot);
+                            }
+                          }}
+                          className={cn(
+                            "min-h-[70px] border border-admin-border-primary/20 rounded-xl p-1 relative transition-all duration-300 group",
+                            (!isSlotAvailable || isPastDate || isPastTime) &&
+                              "bg-admin-bg-tertiary/10 opacity-40 cursor-not-allowed",
+                            isToday(day) &&
+                              !isSlotPast &&
+                              isSlotAvailable &&
+                              "bg-admin-accent-primary/[0.02]",
+                            isClickable &&
+                              onSlotClick &&
+                              "cursor-pointer hover:bg-white hover:border-admin-accent-primary/30 hover:shadow-premium-sm",
+                          )}
+                        >
+                          {isClickable && (
+                            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                              <div className="h-6 w-6 bg-admin-accent-primary/10 rounded-full flex items-center justify-center">
+                                <Plus className="h-3 w-3 text-admin-accent-primary" />
+                              </div>
                             </div>
-                          </div>
-                        )}
+                          )}
 
-                        {hasAppointments
-                          ? slotAppointments.map((apt) => {
-                              const Icon = getAppointmentTypeIcon(
-                                apt.appointment_type,
-                              );
-                              const isMainSlot =
-                                apt.appointment_time.substring(0, 5) ===
-                                timeSlot;
+                          {hasAppointments
+                            ? slotAppointments.map((apt) => {
+                                const Icon = getAppointmentTypeIcon(
+                                  apt.appointment_type,
+                                );
+                                const isMainSlot =
+                                  apt.appointment_time.substring(0, 5) ===
+                                  timeSlot;
 
-                              if (!isMainSlot) return null; // Only show on the start slot
+                                if (!isMainSlot) return null; // Only show on the start slot
 
-                              return (
-                                <div
-                                  key={apt.id}
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    onAppointmentClick(apt);
-                                  }}
-                                  className={cn(
-                                    "text-[10px] p-2 rounded-xl cursor-pointer hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 border backdrop-blur-md z-10 flex flex-col justify-between overflow-hidden",
-                                    getAppointmentStatusColor(apt.status),
-                                  )}
-                                  style={{
-                                    height: `${(apt.duration_minutes / (scheduleSettings?.slot_duration_minutes || 15)) * 70 - 4}px`,
-                                    position: "absolute",
-                                    width: "calc(100% - 8px)",
-                                    top: "4px",
-                                    left: "4px",
-                                  }}
-                                >
-                                  <div className="space-y-1">
-                                    <div className="flex items-center gap-1.5">
-                                      <Icon className="h-3 w-3 opacity-70" />
-                                      <span className="font-black truncate uppercase tracking-tighter">
-                                        {apt.customer
-                                          ? `${apt.customer.first_name || ""} ${apt.customer.last_name || ""}`.trim()
-                                          : `${apt.guest_first_name || ""} ${apt.guest_last_name || ""}`.trim()}
+                                return (
+                                  <div
+                                    key={apt.id}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      onAppointmentClick(apt);
+                                    }}
+                                    className={cn(
+                                      "text-[10px] p-2 rounded-xl cursor-pointer hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 border backdrop-blur-md z-10 flex flex-col justify-between overflow-hidden",
+                                      getAppointmentStatusColor(apt.status),
+                                    )}
+                                    style={{
+                                      height: `${(apt.duration_minutes / (scheduleSettings?.slot_duration_minutes || 15)) * 70 - 4}px`,
+                                      position: "absolute",
+                                      width: "calc(100% - 8px)",
+                                      top: "4px",
+                                      left: "4px",
+                                    }}
+                                  >
+                                    <div className="space-y-1">
+                                      <div className="flex items-center gap-1.5">
+                                        <Icon className="h-3 w-3 opacity-70" />
+                                        <span className="font-black truncate uppercase tracking-tighter">
+                                          {apt.customer
+                                            ? `${apt.customer.first_name || ""} ${apt.customer.last_name || ""}`.trim()
+                                            : `${apt.guest_first_name || ""} ${apt.guest_last_name || ""}`.trim()}
+                                        </span>
+                                      </div>
+                                      <div className="text-[9px] font-bold opacity-60 uppercase tracking-widest truncate">
+                                        {apt.appointment_type.replace(
+                                          /_/g,
+                                          " ",
+                                        )}
+                                      </div>
+                                    </div>
+
+                                    <div className="flex items-center justify-between pt-1 border-t border-current/10 mt-auto">
+                                      <span className="font-bold opacity-70">
+                                        {apt.appointment_time.substring(0, 5)}
+                                      </span>
+                                      <span className="px-1.5 py-0.5 rounded bg-white/30 font-black text-[8px] uppercase">
+                                        {apt.duration_minutes}m
                                       </span>
                                     </div>
-                                    <div className="text-[9px] font-bold opacity-60 uppercase tracking-widest truncate">
-                                      {apt.appointment_type.replace(/_/g, " ")}
-                                    </div>
                                   </div>
-
-                                  <div className="flex items-center justify-between pt-1 border-t border-current/10 mt-auto">
-                                    <span className="font-bold opacity-70">
-                                      {apt.appointment_time.substring(0, 5)}
-                                    </span>
-                                    <span className="px-1.5 py-0.5 rounded bg-white/30 font-black text-[8px] uppercase">
-                                      {apt.duration_minutes}m
-                                    </span>
-                                  </div>
-                                </div>
-                              );
-                            })
-                          : null}
-                      </div>
-                    );
-                  })}
-                </div>
-              ))}
+                                );
+                              })
+                            : null}
+                        </div>
+                      );
+                    })}
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
@@ -541,7 +725,10 @@ export default function AppointmentCalendar({
 
   // Month view
   return (
-    <div className="space-y-4 pb-4" key={`month-view-${lastRefresh}-${appointments.length}`}>
+    <div
+      className="space-y-4 pb-4"
+      key={`month-view-${lastRefresh}-${appointments.length}`}
+    >
       {/* Month Header */}
       <div className="grid grid-cols-7 gap-2 bg-admin-bg-tertiary/20 p-2 rounded-2xl border border-admin-border-primary/30 backdrop-blur-sm">
         {["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"].map((day) => (

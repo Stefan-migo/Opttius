@@ -433,48 +433,48 @@ export default function AdminDashboard() {
   return (
     <div className="space-y-8 animate-in fade-in duration-700">
       {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 pb-4 border-b border-admin-border-primary/20">
+      <div className="flex flex-col md:flex-col lg:flex-col xl:flex-row justify-between items-start gap-4 xl:items-end xl:gap-6 pb-4 border-b border-admin-border-primary/20">
         <div className="space-y-1">
           <h1
-            className="text-4xl font-display font-bold tracking-tight text-admin-text-primary uppercase"
+            className="text-2xl md:text-3xl lg:text-4xl font-display font-bold tracking-tight text-admin-text-primary uppercase"
             data-tour="dashboard-header"
           >
             Resumen Ejecutivo
           </h1>
-          <p className="text-xs font-serif italic text-admin-text-tertiary tracking-[0.2em] uppercase">
+          <p className="text-[10px] sm:text-xs font-serif italic text-admin-text-tertiary tracking-[0.15em] sm:tracking-[0.2em] uppercase">
             Visión general del negocio • Operaciones del día
           </p>
         </div>
 
-        <div className="flex flex-wrap gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2">
           <Button
             variant="outline"
             onClick={() => fetchDashboardData(true)}
             disabled={refreshing}
-            className="h-10 px-4 bg-admin-bg-tertiary/50 border-admin-border-primary/30 text-admin-text-primary font-bold rounded-xl transition-all flex items-center gap-2 hover:shadow-md hover:border-epoch-accent/30"
+            size="icon"
+            className="h-9 w-9 bg-admin-bg-tertiary/50 border-admin-border-primary/30 text-admin-text-primary font-bold rounded-xl transition-all hover:shadow-md hover:border-epoch-accent/30"
+            aria-label="Actualizar"
           >
             <RefreshCw
               className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`}
             />
-            <span className="font-display tracking-widest text-xs">
-              ACTUALIZAR
-            </span>
           </Button>
           <Link href="/admin/pos">
-            <Button className="h-10 px-6 bg-epoch-primary hover:bg-epoch-surface text-white font-bold rounded-xl transition-all shadow-xl flex items-center gap-2 border border-admin-border-primary/10">
+            <Button className="h-9 sm:h-10 px-3 sm:px-6 bg-epoch-primary hover:bg-epoch-surface text-white font-bold rounded-xl transition-all shadow-xl flex items-center gap-1.5 sm:gap-2 border border-admin-border-primary/10">
               <ShoppingCart className="h-4 w-4" />
-              <span className="font-display tracking-widest text-xs">
-                VENTA RÁPIDA
+              <span className="font-display tracking-widest text-[10px] sm:text-xs">
+                POS
               </span>
             </Button>
           </Link>
           <Link href="/admin/appointments">
             <Button
               variant="outline"
-              className="h-10 px-6 bg-admin-bg-tertiary/50 border-admin-border-primary/30 text-admin-text-primary font-bold rounded-xl transition-all flex items-center gap-2 hover:shadow-md hover:border-admin-accent-primary/30"
+              size="icon"
+              className="h-9 w-9 sm:h-10 sm:w-auto sm:px-6 bg-admin-bg-tertiary/50 border-admin-border-primary/30 text-admin-text-primary font-bold rounded-xl transition-all hover:shadow-md hover:border-admin-accent-primary/30"
             >
               <Calendar className="h-4 w-4" />
-              <span className="font-display tracking-widest text-xs">
+              <span className="font-display tracking-widest text-xs hidden sm:inline ml-2">
                 AGENDA
               </span>
             </Button>
@@ -482,7 +482,8 @@ export default function AdminDashboard() {
           <Link href="/admin/work-orders">
             <Button
               variant="outline"
-              className="h-10 px-6 bg-admin-bg-tertiary/50 border-admin-border-primary/30 text-admin-text-primary font-bold rounded-xl transition-all flex items-center gap-2 hover:shadow-md hover:border-admin-accent-primary/30 relative"
+              size="icon"
+              className="h-9 w-9 sm:h-10 sm:w-auto sm:px-6 bg-admin-bg-tertiary/50 border-admin-border-primary/30 text-admin-text-primary font-bold rounded-xl transition-all hover:shadow-md hover:border-admin-accent-primary/30 relative"
             >
               <div className="relative">
                 <Package className="h-4 w-4" />
@@ -492,7 +493,7 @@ export default function AdminDashboard() {
                   </span>
                 )}
               </div>
-              <span className="font-display tracking-widest text-xs">
+              <span className="font-display tracking-widest text-xs hidden sm:inline ml-2">
                 TALLER
               </span>
             </Button>
@@ -554,17 +555,45 @@ export default function AdminDashboard() {
             : "Sucursal seleccionada";
 
         return (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             {/* Revenue Card */}
             <Card className="border border-admin-border-primary/20 bg-admin-bg-tertiary/50 rounded-xl shadow-none hover:shadow-md transition-shadow duration-300 group overflow-hidden">
-              <CardContent className="p-8 relative">
-                <div className="flex items-start justify-between mb-6">
-                  <div className="h-12 w-12 rounded-xl bg-epoch-primary/5 border border-epoch-primary/10 flex items-center justify-center transition-transform group-hover:scale-110">
+              <CardContent className="p-3 sm:p-8 relative">
+                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between sm:mb-6">
+                  <div className="hidden sm:flex h-12 w-12 rounded-xl bg-epoch-primary/5 border border-epoch-primary/10 items-center justify-center transition-transform group-hover:scale-110">
                     <DollarSign className="h-6 w-6 text-epoch-primary" />
+                  </div>
+                  <div className="sm:hidden">
+                    <p className="text-[9px] font-display font-bold text-admin-text-tertiary uppercase tracking-[0.15em]">
+                      Rendimiento
+                    </p>
+                    <p className="text-lg font-display font-bold text-admin-text-primary tracking-tight leading-tight mt-0.5">
+                      {formatCurrency(data.kpis.revenue.current)}
+                    </p>
+                    <div
+                      className={cn(
+                        "flex items-center text-[9px] font-display font-bold gap-0.5 mt-1",
+                        data.kpis.revenue.change >= 0
+                          ? "text-epoch-primary"
+                          : "text-admin-error",
+                      )}
+                    >
+                      {data.kpis.revenue.change >= 0 ? (
+                        <>
+                          <ArrowUpRight className="h-3 w-3" />
+                          <span>+{data.kpis.revenue.change.toFixed(1)}%</span>
+                        </>
+                      ) : (
+                        <>
+                          <ArrowDownRight className="h-3 w-3" />
+                          <span>{data.kpis.revenue.change.toFixed(1)}%</span>
+                        </>
+                      )}
+                    </div>
                   </div>
                   <div
                     className={cn(
-                      "flex items-center text-[10px] font-display font-bold px-2 py-1 gap-1",
+                      "hidden sm:flex items-center text-[10px] font-display font-bold px-2 py-1 gap-1",
                       data.kpis.revenue.change >= 0
                         ? "text-epoch-primary"
                         : "text-admin-error",
@@ -584,7 +613,7 @@ export default function AdminDashboard() {
                   </div>
                 </div>
 
-                <div className="space-y-1">
+                <div className="hidden sm:block space-y-1">
                   <p className="text-[10px] font-display font-bold text-admin-text-tertiary uppercase tracking-[0.2em]">
                     Rendimiento Mensual
                   </p>
@@ -599,7 +628,7 @@ export default function AdminDashboard() {
                   </div>
                 </div>
 
-                <div className="absolute -top-4 -right-4 opacity-[0.03] group-hover:opacity-[0.06] transition-opacity pointer-events-none">
+                <div className="absolute -top-4 -right-4 opacity-[0.03] group-hover:opacity-[0.06] transition-opacity pointer-events-none hidden sm:block">
                   <DollarSign size={120} />
                 </div>
               </CardContent>
@@ -607,20 +636,42 @@ export default function AdminDashboard() {
 
             {/* Appointments Card */}
             <Card className="border border-admin-border-primary/20 bg-admin-bg-tertiary/50 rounded-xl shadow-none hover:shadow-md transition-shadow duration-300 group overflow-hidden">
-              <CardContent className="p-8 relative">
-                <div className="flex items-start justify-between mb-6">
-                  <div className="h-12 w-12 rounded-xl bg-epoch-accent/5 border border-epoch-accent/10 flex items-center justify-center transition-transform group-hover:scale-110">
+              <CardContent className="p-3 sm:p-8 relative">
+                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between sm:mb-6">
+                  <div className="hidden sm:flex h-12 w-12 rounded-xl bg-epoch-accent/5 border border-epoch-accent/10 items-center justify-center transition-transform group-hover:scale-110">
                     <Calendar className="h-6 w-6 text-epoch-accent" />
+                  </div>
+                  <div className="sm:hidden">
+                    <div className="flex items-center justify-between">
+                      <p className="text-[9px] font-display font-bold text-admin-text-tertiary uppercase tracking-[0.15em]">
+                        Agenda
+                      </p>
+                      <Badge
+                        variant="outline"
+                        className="bg-epoch-primary text-white border-none rounded-lg text-[8px] font-display font-bold tracking-widest px-1.5 py-0"
+                      >
+                        HOY
+                      </Badge>
+                    </div>
+                    <p className="text-lg font-display font-bold text-admin-text-primary tracking-tight leading-tight mt-0.5">
+                      {data.kpis.appointments?.today || 0}{" "}
+                      <span className="text-[10px] font-serif italic text-admin-text-tertiary">
+                        Citas
+                      </span>
+                    </p>
+                    <p className="text-[9px] text-admin-text-tertiary/60 font-display mt-0.5">
+                      {data.kpis.appointments?.confirmed || 0} confirmadas
+                    </p>
                   </div>
                   <Badge
                     variant="outline"
-                    className="bg-epoch-primary text-white border-none rounded-xl text-[9px] font-display font-bold tracking-widest px-2"
+                    className="hidden sm:inline-flex bg-epoch-primary text-white border-none rounded-xl text-[9px] font-display font-bold tracking-widest px-2"
                   >
                     HOY
                   </Badge>
                 </div>
 
-                <div className="space-y-1">
+                <div className="hidden sm:block space-y-1">
                   <p className="text-[10px] font-display font-bold text-admin-text-tertiary uppercase tracking-[0.2em]">
                     Agenda del Día
                   </p>
@@ -638,7 +689,7 @@ export default function AdminDashboard() {
                   </div>
                 </div>
 
-                <div className="absolute -top-4 -right-4 opacity-[0.03] group-hover:opacity-[0.06] transition-opacity pointer-events-none">
+                <div className="absolute -top-4 -right-4 opacity-[0.03] group-hover:opacity-[0.06] transition-opacity pointer-events-none hidden sm:block">
                   <Calendar size={120} />
                 </div>
               </CardContent>
@@ -646,17 +697,42 @@ export default function AdminDashboard() {
 
             {/* Products Card */}
             <Card className="border border-admin-border-primary/20 bg-admin-bg-tertiary/50 rounded-xl shadow-none hover:shadow-md transition-shadow duration-300 group overflow-hidden">
-              <CardContent className="p-8 relative">
-                <div className="flex items-start justify-between mb-6">
-                  <div className="h-12 w-12 rounded-xl bg-epoch-primary/5 border border-epoch-primary/10 flex items-center justify-center transition-transform group-hover:scale-110">
+              <CardContent className="p-3 sm:p-8 relative">
+                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between sm:mb-6">
+                  <div className="hidden sm:flex h-12 w-12 rounded-xl bg-epoch-primary/5 border border-epoch-primary/10 items-center justify-center transition-transform group-hover:scale-110">
                     <Package className="h-6 w-6 text-epoch-primary" />
                   </div>
-                  {data.kpis.products.lowStock > 0 && (
-                    <div className="h-2 w-2 bg-admin-error shadow-[0_0_10px_rgba(174,0,0,0.5)] animate-pulse" />
-                  )}
+                  <div className="sm:hidden">
+                    <p className="text-[9px] font-display font-bold text-admin-text-tertiary uppercase tracking-[0.15em]">
+                      Inventario
+                    </p>
+                    <p className="text-lg font-display font-bold text-admin-text-primary tracking-tight leading-tight mt-0.5">
+                      {data.kpis.products.total}{" "}
+                      <span className="text-[10px] font-serif italic text-admin-text-tertiary">
+                        Uds
+                      </span>
+                    </p>
+                    <span
+                      className={cn(
+                        "text-[9px] font-display font-medium",
+                        data.kpis.products.lowStock > 0
+                          ? "text-admin-error"
+                          : "text-epoch-primary/60",
+                      )}
+                    >
+                      {data.kpis.products.lowStock > 0
+                        ? `${data.kpis.products.lowStock} alertas`
+                        : "Saludable"}
+                    </span>
+                  </div>
+                  <div className="hidden sm:block">
+                    {data.kpis.products.lowStock > 0 && (
+                      <div className="h-2 w-2 bg-admin-error shadow-[0_0_10px_rgba(174,0,0,0.5)] animate-pulse" />
+                    )}
+                  </div>
                 </div>
 
-                <div className="space-y-1">
+                <div className="hidden sm:block space-y-1">
                   <p className="text-[10px] font-display font-bold text-admin-text-tertiary uppercase tracking-[0.2em]">
                     Inventario Activo
                   </p>
@@ -690,7 +766,7 @@ export default function AdminDashboard() {
                   </div>
                 </div>
 
-                <div className="absolute -top-4 -right-4 opacity-[0.03] group-hover:opacity-[0.06] transition-opacity pointer-events-none">
+                <div className="absolute -top-4 -right-4 opacity-[0.03] group-hover:opacity-[0.06] transition-opacity pointer-events-none hidden sm:block">
                   <Package size={120} />
                 </div>
               </CardContent>
@@ -698,17 +774,28 @@ export default function AdminDashboard() {
 
             {/* Customers Card */}
             <Card className="border border-admin-border-primary/20 bg-admin-bg-tertiary/50 rounded-xl shadow-none hover:shadow-md transition-shadow duration-300 group overflow-hidden">
-              <CardContent className="p-8 relative">
-                <div className="flex items-start justify-between mb-6">
-                  <div className="h-12 w-12 rounded-xl bg-epoch-accent/5 border border-epoch-accent/10 flex items-center justify-center transition-transform group-hover:scale-110">
+              <CardContent className="p-3 sm:p-8 relative">
+                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between sm:mb-6">
+                  <div className="hidden sm:flex h-12 w-12 rounded-xl bg-epoch-accent/5 border border-epoch-accent/10 items-center justify-center transition-transform group-hover:scale-110">
                     <Users className="h-6 w-6 text-epoch-accent" />
                   </div>
-                  <div className="bg-epoch-accent/10 p-1 text-epoch-accent">
+                  <div className="sm:hidden">
+                    <p className="text-[9px] font-display font-bold text-admin-text-tertiary uppercase tracking-[0.15em]">
+                      Clientes
+                    </p>
+                    <p className="text-lg font-display font-bold text-admin-text-primary tracking-tight leading-tight mt-0.5">
+                      {data.kpis.customers.total}
+                    </p>
+                    <span className="text-[9px] font-display font-medium text-epoch-primary">
+                      +{data.kpis.customers.new} este ciclo
+                    </span>
+                  </div>
+                  <div className="hidden sm:block bg-epoch-accent/10 p-1 text-epoch-accent">
                     <Plus className="h-3 w-3" />
                   </div>
                 </div>
 
-                <div className="space-y-1">
+                <div className="hidden sm:block space-y-1">
                   <p className="text-[10px] font-display font-bold text-admin-text-tertiary uppercase tracking-[0.2em]">
                     Cartera de Clientes
                   </p>
@@ -723,7 +810,7 @@ export default function AdminDashboard() {
                   </div>
                 </div>
 
-                <div className="absolute -top-4 -right-4 opacity-[0.03] group-hover:opacity-[0.06] transition-opacity pointer-events-none">
+                <div className="absolute -top-4 -right-4 opacity-[0.03] group-hover:opacity-[0.06] transition-opacity pointer-events-none hidden sm:block">
                   <Users size={120} />
                 </div>
               </CardContent>
@@ -731,6 +818,13 @@ export default function AdminDashboard() {
           </div>
         );
       })()}
+
+      {/* Quick Actions - mobile only (above charts) */}
+      <div className="lg:hidden">
+        <QuickActionsPanel
+          onNewAppointment={() => setIsAppointmentModalOpen(true)}
+        />
+      </div>
 
       {/* Charts Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -790,14 +884,14 @@ export default function AdminDashboard() {
                 "Informe anual de crecimiento corporativo"}
             </p>
           </CardHeader>
-          <CardContent className="p-8">
+          <CardContent className="p-4 sm:p-8">
             {data?.charts?.revenueTrend?.length > 0 ? (
-              <div className="h-[320px] w-full">
+              <div className="h-[220px] sm:h-[320px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart
                     id="dashboard-revenue-chart"
                     data={data.charts.revenueTrend}
-                    margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
+                    margin={{ top: 10, right: 10, left: -10, bottom: 0 }}
                   >
                     <defs>
                       <linearGradient
@@ -934,9 +1028,9 @@ export default function AdminDashboard() {
               Distribución técnica en taller y manufactura
             </p>
           </CardHeader>
-          <CardContent className="p-8">
+          <CardContent className="p-4 sm:p-8">
             {data.kpis.workOrders && data.kpis.workOrders.total > 0 ? (
-              <div className="h-[320px] w-full">
+              <div className="h-[240px] sm:h-[320px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart id="dashboard-ops-chart">
                     <Pie
@@ -956,8 +1050,8 @@ export default function AdminDashboard() {
                       ].filter((item) => item.value > 0)}
                       cx="50%"
                       cy="50%"
-                      innerRadius={70}
-                      outerRadius={100}
+                      innerRadius={55}
+                      outerRadius={80}
                       paddingAngle={8}
                       dataKey="value"
                       strokeWidth={0}
@@ -1024,9 +1118,9 @@ export default function AdminDashboard() {
                 </ResponsiveContainer>
               </div>
             ) : (
-              <div className="flex flex-col items-center justify-center h-[300px] text-center space-y-4">
-                <div className="h-12 w-12 rounded-xl bg-admin-bg-tertiary border border-admin-border-primary/10 flex items-center justify-center">
-                  <PieChart className="h-6 w-6 text-admin-text-tertiary/20" />
+              <div className="flex items-center justify-center gap-3 h-[80px] sm:h-[300px] text-center sm:flex-col sm:space-y-4">
+                <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-xl bg-admin-bg-tertiary border border-admin-border-primary/10 flex items-center justify-center flex-shrink-0">
+                  <PieChart className="h-5 w-5 sm:h-6 sm:w-6 text-admin-text-tertiary/20" />
                 </div>
                 <p className="text-[10px] font-display font-bold text-admin-text-tertiary uppercase tracking-widest">
                   Sin actividad operativa en el taller
@@ -1055,8 +1149,39 @@ export default function AdminDashboard() {
               Excelencia en catálogo: Productos de mayor desempeño comercial
             </p>
           </CardHeader>
-          <CardContent className="p-8">
-            <div className="h-[380px] w-full pt-4">
+          <CardContent className="p-4 sm:p-8">
+            {/* Mobile: list view */}
+            <div className="sm:hidden space-y-3 pt-2">
+              {data.charts.topProducts.map(
+                (
+                  product: { name: string; revenue: number; quantity: number },
+                  index: number,
+                ) => (
+                  <div key={index} className="flex items-center gap-3">
+                    <div
+                      className="h-8 w-1 rounded-full flex-shrink-0"
+                      style={{
+                        backgroundColor:
+                          CHART_COLORS[index % CHART_COLORS.length],
+                      }}
+                    />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-display font-bold text-admin-text-primary truncate">
+                        {product.name}
+                      </p>
+                      <p className="text-[10px] text-admin-text-tertiary">
+                        {product.quantity} vendidos
+                      </p>
+                    </div>
+                    <p className="text-sm font-display font-bold text-admin-text-primary flex-shrink-0">
+                      {formatCurrency(product.revenue)}
+                    </p>
+                  </div>
+                ),
+              )}
+            </div>
+            {/* Desktop: horizontal bar chart */}
+            <div className="hidden sm:block h-[380px] w-full pt-4">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart
                   data={data.charts.topProducts}
@@ -1128,16 +1253,16 @@ export default function AdminDashboard() {
 
       {/* Today's Appointments & Quick Actions */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <div className="lg:col-span-2">
+        <div className="hidden lg:block lg:order-2">
+          <QuickActionsPanel
+            onNewAppointment={() => setIsAppointmentModalOpen(true)}
+          />
+        </div>
+        <div className="lg:col-span-2 lg:order-1">
           <AppointmentsList
             appointments={data?.todayAppointments ?? []}
             formatTime={formatTime}
             getAppointmentStatusBadge={getAppointmentStatusBadge}
-          />
-        </div>
-        <div>
-          <QuickActionsPanel
-            onNewAppointment={() => setIsAppointmentModalOpen(true)}
           />
         </div>
       </div>

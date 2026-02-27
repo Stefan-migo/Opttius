@@ -63,7 +63,7 @@ export function BranchSelector() {
           className={cn(
             "min-w-0 flex-shrink border-admin-border",
             "w-[200px] md:min-w-[140px]",
-            "max-md:w-10 max-md:px-2 max-md:justify-center max-md:[&_span]:hidden",
+            "max-md:w-10 max-md:px-2 max-md:justify-center max-md:[&>:last-child]:hidden",
             isChanging && "opacity-50",
           )}
         >
@@ -71,13 +71,15 @@ export function BranchSelector() {
             <div className="flex items-center space-x-2">
               {isGlobalView ? (
                 <>
-                  <Globe className="h-4 w-4" />
-                  <span>Vista Global</span>
+                  <Globe className="h-4 w-4 flex-shrink-0" />
+                  <span className="max-md:sr-only">Vista Global</span>
                 </>
               ) : (
                 <>
-                  <Building2 className="h-4 w-4" />
-                  <span>{currentBranch?.name || "Sin sucursal"}</span>
+                  <Building2 className="h-4 w-4 flex-shrink-0" />
+                  <span className="max-md:sr-only">
+                    {currentBranch?.name || "Sin sucursal"}
+                  </span>
                 </>
               )}
             </div>

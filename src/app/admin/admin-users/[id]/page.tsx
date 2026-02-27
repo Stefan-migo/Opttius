@@ -95,10 +95,12 @@ export default function AdminUserDetailPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex items-center justify-center min-h-screen bg-epoch-background py-8">
         <div className="text-center">
-          <div className="animate-spin h-8 w-8 border-4 border-admin-accent-tertiary border-t-transparent rounded-full mx-auto mb-4" />
-          <p className="text-muted-foreground">Cargando administrador...</p>
+          <div className="animate-spin h-8 w-8 border-4 border-epoch-accent border-t-transparent rounded-full mx-auto mb-4" />
+          <p className="text-sm text-epoch-primary/80">
+            Cargando administrador...
+          </p>
         </div>
       </div>
     );
@@ -106,19 +108,20 @@ export default function AdminUserDetailPage() {
 
   if (error || !adminUser) {
     return (
-      <div className="container mx-auto py-8">
-        <Card className="admin-card bg-admin-bg-tertiary">
-          <CardContent className="p-6">
-            <div className="text-center">
-              <h2 className="text-2xl font-bold text-epoch-primary mb-4">
+      <div className="p-4 sm:p-6 bg-epoch-background min-h-screen">
+        <Card className="rounded-xl border border-border">
+          <CardContent className="p-4 sm:p-6">
+            <div className="text-center py-6 sm:py-8">
+              <h2 className="text-lg sm:text-xl font-bold text-epoch-primary mb-2">
                 Error
               </h2>
-              <p className="text-muted-foreground mb-6">
+              <p className="text-sm text-epoch-primary/80 mb-6">
                 {error || "Administrador no encontrado"}
               </p>
               <Button
                 onClick={() => router.push("/admin/admin-users")}
                 variant="outline"
+                className="rounded-xl border-epoch-primary/20 min-h-[44px] px-6"
               >
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Volver a Administradores
@@ -181,66 +184,63 @@ export default function AdminUserDetailPage() {
     : adminUser.email;
 
   return (
-    <div
-      className="container mx-auto py-8 space-y-6"
-      style={{ paddingTop: "1rem" }}
-    >
-      {/* Header */}
-      <div className="space-y-4">
-        {/* First Row: Back Button */}
-        <div>
+    <div className="p-4 sm:p-6 bg-epoch-background min-h-screen space-y-4 sm:space-y-6">
+      {/* Header - reorganizado en filas */}
+      <div className="flex flex-col gap-4 sm:gap-6">
+        <div className="flex items-center gap-3">
           <Link href="/admin/admin-users">
-            <Button variant="default" size="sm">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="rounded-xl text-epoch-primary hover:bg-epoch-primary/10 min-h-[44px] shrink-0"
+            >
               <ArrowLeft className="h-4 w-4 mr-2" />
               Volver
             </Button>
           </Link>
         </div>
-
-        {/* Second Row: Title and Edit Button */}
-        <div
-          className="flex items-center justify-between"
-          style={{ marginTop: "2rem" }}
-        >
-          <div>
-            <h1 className="text-3xl font-bold text-epoch-primary">
-              Detalles del Administrador
-            </h1>
-            <p className="text-muted-foreground">
-              Información completa del usuario administrador
-            </p>
-          </div>
+        <h1 className="text-xl sm:text-2xl md:text-3xl font-display font-bold text-epoch-primary tracking-tight">
+          Detalles del Administrador
+        </h1>
+        <p className="text-sm sm:text-base text-epoch-primary/80 max-w-2xl">
+          Información completa del usuario administrador
+        </p>
+        <div className="flex justify-start sm:justify-end">
           <Link href={`/admin/admin-users/${adminId}/edit`}>
-            <Button>Editar Usuario</Button>
+            <Button className="rounded-xl bg-epoch-primary hover:bg-epoch-surface text-white font-display font-bold text-[10px] tracking-[0.2em] uppercase min-h-[44px] px-6 w-full sm:w-auto">
+              Editar Usuario
+            </Button>
           </Link>
         </div>
       </div>
 
       {/* Main Info Card */}
-      <Card className="admin-card bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)]">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-3">
-            <div className="h-12 w-12 rounded-full bg-admin-accent-tertiary/20 flex items-center justify-center">
-              <Crown className="h-6 w-6 text-admin-accent-tertiary" />
+      <Card className="rounded-xl border border-border">
+        <CardHeader className="p-4 sm:p-6 pb-0">
+          <CardTitle className="flex flex-col sm:flex-row items-start gap-3">
+            <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-epoch-accent/20 flex items-center justify-center shrink-0">
+              <Crown className="h-5 w-5 sm:h-6 sm:w-6 text-epoch-accent" />
             </div>
-            <div>
-              <div className="text-2xl">{fullName}</div>
-              <div className="text-sm font-normal text-muted-foreground">
+            <div className="min-w-0">
+              <div className="text-lg sm:text-xl md:text-2xl font-display font-bold text-epoch-primary truncate">
+                {fullName}
+              </div>
+              <div className="text-xs sm:text-sm font-normal text-epoch-primary/70 truncate">
                 {adminUser.email}
               </div>
             </div>
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-6">
+        <CardContent className="p-4 sm:p-6 pt-4 space-y-4 sm:space-y-6">
           {/* Status and Role */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="text-sm text-muted-foreground">Estado</label>
-              <div className="mt-1 flex items-center gap-2">
+            <div className="space-y-2">
+              <label className="text-xs sm:text-sm text-epoch-primary/80">
+                Estado
+              </label>
+              <div className="flex flex-wrap items-center gap-2">
                 {adminUser.is_active ? (
-                  <Badge className="bg-admin-success text-admin-text-on-dark">
-                    Activo
-                  </Badge>
+                  <Badge className="bg-epoch-primary text-white">Activo</Badge>
                 ) : (
                   <Badge variant="destructive">Inactivo</Badge>
                 )}
@@ -250,6 +250,7 @@ export default function AdminUserDetailPage() {
                     size="sm"
                     onClick={handleToggleStatus}
                     disabled={togglingStatus}
+                    className="rounded-xl border-epoch-primary/20 min-h-[44px]"
                   >
                     {togglingStatus
                       ? "Actualizando..."
@@ -260,13 +261,15 @@ export default function AdminUserDetailPage() {
                 )}
               </div>
               {!isSuperAdmin && (
-                <p className="text-xs text-muted-foreground mt-1">
+                <p className="text-[10px] sm:text-xs text-epoch-primary/70 mt-1">
                   Solo los super administradores pueden cambiar el estado
                 </p>
               )}
             </div>
-            <div>
-              <label className="text-sm text-muted-foreground">Rol</label>
+            <div className="space-y-2">
+              <label className="text-xs sm:text-sm text-epoch-primary/80">
+                Rol
+              </label>
               <div className="mt-1">
                 {adminUser.is_super_admin ||
                 adminUser.role === "super_admin" ? (
@@ -309,20 +312,26 @@ export default function AdminUserDetailPage() {
           {/* Contact Info */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="flex items-center gap-3">
-              <Mail className="h-5 w-5 text-muted-foreground" />
-              <div>
-                <label className="text-sm text-muted-foreground">Email</label>
-                <div className="font-medium">{adminUser.email}</div>
+              <Mail className="h-4 w-4 sm:h-5 sm:w-5 text-epoch-primary/70 shrink-0" />
+              <div className="min-w-0">
+                <label className="text-[10px] sm:text-xs text-epoch-primary/70">
+                  Email
+                </label>
+                <div className="font-medium text-sm sm:text-base text-epoch-primary truncate">
+                  {adminUser.email}
+                </div>
               </div>
             </div>
             {adminUser.profiles?.phone && (
               <div className="flex items-center gap-3">
-                <Phone className="h-5 w-5 text-muted-foreground" />
-                <div>
-                  <label className="text-sm text-muted-foreground">
+                <Phone className="h-4 w-4 sm:h-5 sm:w-5 text-epoch-primary/70 shrink-0" />
+                <div className="min-w-0">
+                  <label className="text-[10px] sm:text-xs text-epoch-primary/70">
                     Teléfono
                   </label>
-                  <div className="font-medium">{adminUser.profiles.phone}</div>
+                  <div className="font-medium text-sm sm:text-base text-epoch-primary">
+                    {adminUser.profiles.phone}
+                  </div>
                 </div>
               </div>
             )}
@@ -331,12 +340,12 @@ export default function AdminUserDetailPage() {
           {/* Dates */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="flex items-center gap-3">
-              <Calendar className="h-5 w-5 text-muted-foreground" />
-              <div>
-                <label className="text-sm text-muted-foreground">
+              <Calendar className="h-4 w-4 sm:h-5 sm:w-5 text-epoch-primary/70 shrink-0" />
+              <div className="min-w-0">
+                <label className="text-[10px] sm:text-xs text-epoch-primary/70">
                   Fecha de Registro
                 </label>
-                <div className="font-medium">
+                <div className="font-medium text-sm sm:text-base text-epoch-primary">
                   {new Date(adminUser.created_at).toLocaleDateString("es-AR", {
                     year: "numeric",
                     month: "long",
@@ -347,12 +356,12 @@ export default function AdminUserDetailPage() {
             </div>
             {adminUser.last_login && (
               <div className="flex items-center gap-3">
-                <Clock className="h-5 w-5 text-muted-foreground" />
-                <div>
-                  <label className="text-sm text-muted-foreground">
+                <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-epoch-primary/70 shrink-0" />
+                <div className="min-w-0">
+                  <label className="text-[10px] sm:text-xs text-epoch-primary/70">
                     Último Acceso
                   </label>
-                  <div className="font-medium">
+                  <div className="font-medium text-sm sm:text-base text-epoch-primary">
                     {new Date(adminUser.last_login).toLocaleDateString(
                       "es-AR",
                       {
@@ -371,12 +380,12 @@ export default function AdminUserDetailPage() {
 
           {/* Activity */}
           <div className="flex items-center gap-3">
-            <Activity className="h-5 w-5 text-muted-foreground" />
-            <div>
-              <label className="text-sm text-muted-foreground">
+            <Activity className="h-4 w-4 sm:h-5 sm:w-5 text-epoch-primary/70 shrink-0" />
+            <div className="min-w-0">
+              <label className="text-[10px] sm:text-xs text-epoch-primary/70">
                 Actividad (últimos 30 días)
               </label>
-              <div className="font-medium">
+              <div className="font-medium text-sm sm:text-base text-epoch-primary">
                 {adminUser.analytics?.activityCount30Days || 0} acciones
               </div>
             </div>
@@ -396,27 +405,31 @@ export default function AdminUserDetailPage() {
       )}
 
       {/* Permissions Card */}
-      <Card className="admin-card bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)]">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Shield className="h-5 w-5" />
+      <Card className="rounded-xl border border-border">
+        <CardHeader className="p-4 sm:p-6 pb-0">
+          <CardTitle className="flex items-center gap-2 font-display text-epoch-primary text-base sm:text-lg">
+            <Shield className="h-4 w-4 sm:h-5 sm:w-5 shrink-0" />
             Permisos
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <CardContent className="p-4 sm:p-6 pt-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
             {Object.entries(adminUser.permissions || {}).map(
               ([resource, actions]) => (
                 <div
                   key={resource}
-                  className="p-3 bg-admin-bg-tertiary rounded-md"
+                  className="p-3 rounded-xl border border-epoch-primary/10 bg-epoch-background/50"
                 >
-                  <div className="font-medium capitalize mb-2">
+                  <div className="font-medium text-sm capitalize mb-2 text-epoch-primary">
                     {resource.replace("_", " ")}
                   </div>
                   <div className="flex flex-wrap gap-1">
                     {actions.map((action) => (
-                      <Badge key={action} variant="outline" className="text-xs">
+                      <Badge
+                        key={action}
+                        variant="outline"
+                        className="text-[10px] sm:text-xs border-epoch-primary/20"
+                      >
                         {action}
                       </Badge>
                     ))}

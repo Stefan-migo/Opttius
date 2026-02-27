@@ -729,24 +729,31 @@ export default function WorkOrderDetailPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <Button variant="outline" size="sm" onClick={() => router.back()}>
+      {/* Header - multi-row on mobile */}
+      <div className="flex flex-col gap-2 sm:gap-3">
+        {/* Row 1: Back + Title */}
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => router.back()}
+            className="h-9 w-9 shrink-0"
+            aria-label="Volver"
+          >
             <ArrowLeft className="h-4 w-4" />
           </Button>
-          <div>
-            <h1 className="text-3xl font-bold text-epoch-primary">
-              {workOrder.work_order_number}
-            </h1>
-            <p className="text-admin-text-tertiary">
-              Trabajo para {customerName}
-            </p>
-          </div>
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-epoch-primary truncate min-w-0">
+            {workOrder.work_order_number}
+          </h1>
         </div>
-        <div className="flex items-center gap-2">
+        {/* Row 2: Subtitle */}
+        <p className="text-xs sm:text-sm text-admin-text-tertiary">
+          Trabajo para {customerName}
+        </p>
+        {/* Row 3: Badge + Actions */}
+        <div className="flex flex-wrap items-center gap-2">
           <div className="relative inline-block">
-            <Badge className="bg-green-500 hover:bg-green-600 text-white border-green-600 font-semibold flex items-center gap-1.5 px-3 py-1.5 shadow-md">
+            <Badge className="bg-green-500 hover:bg-green-600 text-white border-green-600 font-semibold flex items-center gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 shadow-md text-xs sm:text-sm">
               {(() => {
                 const statusConfig: Record<
                   string,
@@ -776,9 +783,9 @@ export default function WorkOrderDetailPage() {
                 const Icon = config.icon;
                 return (
                   <>
-                    <Icon className="h-3.5 w-3.5" />
+                    <Icon className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                     <span>{config.label}</span>
-                    <span className="ml-1.5 text-xs bg-green-600 px-2 py-0.5 rounded-full font-bold border border-green-700">
+                    <span className="hidden sm:inline ml-1.5 text-xs bg-green-600 px-2 py-0.5 rounded-full font-bold border border-green-700">
                       ACTUAL
                     </span>
                   </>
@@ -796,10 +803,17 @@ export default function WorkOrderDetailPage() {
             {availableStatuses.length > 0 && (
               <DialogTrigger asChild>
                 <Button
+                  variant="outline"
+                  size="sm"
                   onClick={() => setStatusDialogOpenedFromTimeline(false)}
+                  className="h-9 min-w-0 sm:w-auto sm:px-3 gap-1.5"
+                  aria-label="Cambiar estado"
                 >
-                  <ArrowRight className="h-4 w-4 mr-2" />
-                  Cambiar Estado
+                  <Edit className="h-4 w-4 shrink-0" />
+                  <span className="text-xs sm:text-sm whitespace-nowrap">
+                    <span className="sm:hidden">Cambiar</span>
+                    <span className="hidden sm:inline">Cambiar Estado</span>
+                  </span>
                 </Button>
               </DialogTrigger>
             )}
@@ -923,17 +937,25 @@ export default function WorkOrderDetailPage() {
               </div>
             </DialogContent>
           </Dialog>
-          <Button variant="outline" onClick={handlePrint}>
-            <Printer className="h-4 w-4 mr-2" />
-            Imprimir
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handlePrint}
+            className="h-9 w-9 sm:w-auto sm:px-3"
+            aria-label="Imprimir"
+          >
+            <Printer className="h-4 w-4 sm:mr-2 shrink-0" />
+            <span className="hidden lg:inline">Imprimir</span>
           </Button>
           <Button
             variant="outline"
+            size="sm"
             onClick={() => setDeleteDialogOpen(true)}
-            className="text-red-600 hover:text-red-700 hover:bg-red-50"
+            className="h-9 w-9 sm:w-auto sm:px-3 text-red-600 hover:text-red-700 hover:bg-red-50"
+            aria-label="Eliminar"
           >
-            <Trash2 className="h-4 w-4 mr-2" />
-            Eliminar
+            <Trash2 className="h-4 w-4 sm:mr-2 shrink-0" />
+            <span className="hidden lg:inline">Eliminar</span>
           </Button>
         </div>
       </div>
@@ -944,8 +966,8 @@ export default function WorkOrderDetailPage() {
           <CardTitle>Flujo de Trabajo</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center justify-between overflow-x-auto pb-4">
-            {[
+          {(() => {
+            const steps = [
               {
                 status: "quote",
                 label: "Presupuesto",
@@ -993,109 +1015,202 @@ export default function WorkOrderDetailPage() {
                 label: "Entregado",
                 date: workOrder.delivered_at,
               },
-            ].map((step, idx, array) => {
-              // Find the index of current status
-              const currentStatusIndex = array.findIndex(
-                (s) => s.status === workOrder.status,
-              );
-              const isCompleted =
-                currentStatusIndex !== -1 && idx < currentStatusIndex;
-              const isCurrent = workOrder.status === step.status;
-              const isFuture =
-                currentStatusIndex !== -1 && idx > currentStatusIndex;
+            ];
+            const currentStatusIndex = steps.findIndex(
+              (s) => s.status === workOrder.status,
+            );
 
-              return (
-                <div
-                  key={step.status}
-                  className="flex items-center flex-shrink-0"
-                >
-                  <div className="flex flex-col items-center">
-                    <div
-                      role="button"
-                      tabIndex={0}
-                      onClick={() => {
-                        if (step.status === "delivered") {
-                          setDeliveryDialogOpen(true);
-                        } else {
-                          setNewStatus(step.status);
-                          setStatusDialogOpenedFromTimeline(true);
-                          setShowStatusDialog(true);
-                        }
-                      }}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter" || e.key === " ") {
-                          e.preventDefault();
-                          if (step.status === "delivered") {
-                            setDeliveryDialogOpen(true);
-                          } else {
-                            setNewStatus(step.status);
-                            setStatusDialogOpenedFromTimeline(true);
-                            setShowStatusDialog(true);
-                          }
-                        }
-                      }}
-                      className={`w-14 h-14 rounded-full flex items-center justify-center border-2 relative cursor-pointer transition-transform hover:scale-105 ${
-                        isCurrent
-                          ? "bg-green-500 border-green-600 text-white shadow-lg shadow-green-500/50"
-                          : isCompleted
-                            ? "bg-gray-300 border-gray-400 text-gray-600"
-                            : "bg-gray-200 border-gray-300 text-gray-400"
-                      }`}
-                    >
-                      {isCurrent ? (
-                        <>
-                          <CheckCircle className="h-7 w-7" />
-                          <span className="absolute -top-1 -right-1 bg-green-600 text-white text-xs font-bold px-1.5 py-0.5 rounded-full border-2 border-white">
-                            ACTUAL
-                          </span>
-                        </>
-                      ) : isCompleted ? (
-                        <CheckCircle className="h-6 w-6" />
-                      ) : (
-                        <div className="w-2 h-2 rounded-full bg-current" />
-                      )}
-                    </div>
-                    <p
-                      className={`text-xs mt-2 text-center max-w-[80px] ${
-                        isCurrent
-                          ? "font-bold text-green-600"
-                          : isCompleted || isFuture
-                            ? "font-medium text-gray-500"
-                            : "text-gray-400"
-                      }`}
-                    >
-                      {step.label}
-                    </p>
-                    <p
-                      className={`text-xs mt-1 min-h-[16px] ${
-                        step.date
-                          ? isCurrent
-                            ? "text-green-600 font-medium"
-                            : "text-gray-500"
-                          : "text-transparent"
-                      }`}
-                    >
-                      {step.date
-                        ? formatDate(step.date, {
-                            format: "medium",
-                            locale: "es-CL",
-                          })
-                        : "\u00A0"}
-                    </p>
-                  </div>
-                  {idx < array.length - 1 && (
-                    <div
-                      className={`w-16 h-0.5 mx-2 ${
-                        isCurrent || (isCompleted && idx < currentStatusIndex)
-                          ? "bg-green-500"
-                          : "bg-gray-300"
-                      }`}
-                    />
-                  )}
+            const handleStepClick = (step: (typeof steps)[0]) => {
+              if (step.status === "delivered") {
+                setDeliveryDialogOpen(true);
+              } else {
+                setNewStatus(step.status);
+                setStatusDialogOpenedFromTimeline(true);
+                setShowStatusDialog(true);
+              }
+            };
+
+            return (
+              <>
+                {/* Mobile: Vertical timeline */}
+                <div className="flex flex-col md:hidden">
+                  {steps.map((step, idx) => {
+                    const isCompleted =
+                      currentStatusIndex !== -1 && idx < currentStatusIndex;
+                    const isCurrent = workOrder.status === step.status;
+                    const isFuture =
+                      currentStatusIndex !== -1 && idx > currentStatusIndex;
+                    const lineActive =
+                      currentStatusIndex !== -1 && currentStatusIndex > idx;
+
+                    return (
+                      <div
+                        key={step.status}
+                        className="relative flex items-start gap-3 pb-5 last:pb-0"
+                      >
+                        {idx < steps.length - 1 && (
+                          <div
+                            className={`absolute left-[11px] top-8 bottom-0 w-0.5 ${
+                              lineActive ? "bg-green-500" : "bg-gray-300"
+                            }`}
+                          />
+                        )}
+                        <div
+                          role="button"
+                          tabIndex={0}
+                          onClick={() => handleStepClick(step)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" || e.key === " ") {
+                              e.preventDefault();
+                              handleStepClick(step);
+                            }
+                          }}
+                          className={`relative z-10 flex-shrink-0 w-11 h-11 rounded-full flex items-center justify-center border-2 cursor-pointer transition-transform active:scale-95 ${
+                            isCurrent
+                              ? "bg-green-500 border-green-600 text-white shadow-lg shadow-green-500/50"
+                              : isCompleted
+                                ? "bg-gray-300 border-gray-400 text-gray-600"
+                                : "bg-gray-200 border-gray-300 text-gray-400"
+                          }`}
+                        >
+                          {isCurrent ? (
+                            <>
+                              <CheckCircle className="h-5 w-5" />
+                              <span className="absolute -top-0.5 -right-0.5 bg-green-600 text-white text-[10px] font-bold px-1 py-0.5 rounded-full border-2 border-white">
+                                ACTUAL
+                              </span>
+                            </>
+                          ) : isCompleted ? (
+                            <CheckCircle className="h-5 w-5" />
+                          ) : (
+                            <div className="w-2 h-2 rounded-full bg-current" />
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0 pt-1">
+                          <p
+                            className={`text-sm font-medium ${
+                              isCurrent
+                                ? "text-green-600"
+                                : isCompleted || isFuture
+                                  ? "text-gray-600"
+                                  : "text-gray-400"
+                            }`}
+                          >
+                            {step.label}
+                          </p>
+                          <p
+                            className={`text-xs mt-0.5 ${
+                              step.date
+                                ? isCurrent
+                                  ? "text-green-600"
+                                  : "text-gray-500"
+                                : "text-gray-400"
+                            }`}
+                          >
+                            {step.date
+                              ? formatDate(step.date, {
+                                  format: "medium",
+                                  locale: "es-CL",
+                                })
+                              : "—"}
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
-              );
-            })}
-          </div>
+
+                {/* Desktop: Horizontal timeline */}
+                <div className="hidden md:flex items-center justify-between overflow-x-auto pb-4">
+                  {steps.map((step, idx) => {
+                    const isCompleted =
+                      currentStatusIndex !== -1 && idx < currentStatusIndex;
+                    const isCurrent = workOrder.status === step.status;
+                    const isFuture =
+                      currentStatusIndex !== -1 && idx > currentStatusIndex;
+
+                    return (
+                      <div
+                        key={step.status}
+                        className="flex items-center flex-shrink-0"
+                      >
+                        <div className="flex flex-col items-center">
+                          <div
+                            role="button"
+                            tabIndex={0}
+                            onClick={() => handleStepClick(step)}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter" || e.key === " ") {
+                                e.preventDefault();
+                                handleStepClick(step);
+                              }
+                            }}
+                            className={`w-14 h-14 rounded-full flex items-center justify-center border-2 relative cursor-pointer transition-transform hover:scale-105 ${
+                              isCurrent
+                                ? "bg-green-500 border-green-600 text-white shadow-lg shadow-green-500/50"
+                                : isCompleted
+                                  ? "bg-gray-300 border-gray-400 text-gray-600"
+                                  : "bg-gray-200 border-gray-300 text-gray-400"
+                            }`}
+                          >
+                            {isCurrent ? (
+                              <>
+                                <CheckCircle className="h-7 w-7" />
+                                <span className="absolute -top-1 -right-1 bg-green-600 text-white text-xs font-bold px-1.5 py-0.5 rounded-full border-2 border-white">
+                                  ACTUAL
+                                </span>
+                              </>
+                            ) : isCompleted ? (
+                              <CheckCircle className="h-6 w-6" />
+                            ) : (
+                              <div className="w-2 h-2 rounded-full bg-current" />
+                            )}
+                          </div>
+                          <p
+                            className={`text-xs mt-2 text-center max-w-[80px] ${
+                              isCurrent
+                                ? "font-bold text-green-600"
+                                : isCompleted || isFuture
+                                  ? "font-medium text-gray-500"
+                                  : "text-gray-400"
+                            }`}
+                          >
+                            {step.label}
+                          </p>
+                          <p
+                            className={`text-xs mt-1 min-h-[16px] ${
+                              step.date
+                                ? isCurrent
+                                  ? "text-green-600 font-medium"
+                                  : "text-gray-500"
+                                : "text-transparent"
+                            }`}
+                          >
+                            {step.date
+                              ? formatDate(step.date, {
+                                  format: "medium",
+                                  locale: "es-CL",
+                                })
+                              : "\u00A0"}
+                          </p>
+                        </div>
+                        {idx < steps.length - 1 && (
+                          <div
+                            className={`w-16 h-0.5 mx-2 ${
+                              isCurrent ||
+                              (isCompleted && idx < currentStatusIndex)
+                                ? "bg-green-500"
+                                : "bg-gray-300"
+                            }`}
+                          />
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </>
+            );
+          })()}
         </CardContent>
       </Card>
 

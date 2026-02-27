@@ -22,7 +22,6 @@ import { useRouter } from "next/navigation";
 import { useBranch } from "@/hooks/useBranch";
 import { getBranchHeader } from "@/lib/utils/branch";
 import { useAuthContext } from "@/contexts/AuthContext";
-import { BranchSelector } from "@/components/admin/BranchSelector";
 
 interface DayConfig {
   enabled: boolean;
@@ -87,18 +86,12 @@ export default function ScheduleSettingsPage() {
     }
   }, [currentBranchId, user, authLoading]);
 
-  useEffect(() => {
-    if (!branchLoading && !authLoading && user && !settings && !loading) {
-      fetchSettings();
-    }
-  }, [branchLoading, authLoading, user, fetchSettings, settings, loading]);
-
-  // Initial fetch
+  // Fetch settings when user is ready or when global branch selection changes
   useEffect(() => {
     if (!branchLoading && !authLoading && user) {
       fetchSettings();
     }
-  }, []);
+  }, [currentBranchId, branchLoading, authLoading, user, fetchSettings]);
 
   const updateDayConfig = (
     day: keyof ScheduleSettings["working_hours"],
@@ -194,13 +187,18 @@ export default function ScheduleSettingsPage() {
 
   if (loading) {
     return (
-      <div className="space-y-6">
-        <div className="flex items-center space-x-4">
-          <Button variant="outline" size="sm" onClick={() => router.back()}>
+      <div className="space-y-6 max-w-6xl mx-auto pb-12">
+        <div className="flex items-center gap-4">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => router.back()}
+            className="h-10 w-10 sm:h-11 sm:w-11 rounded-xl shrink-0"
+          >
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div>
-            <h1 className="text-3xl font-bold text-epoch-primary">
+            <h1 className="text-xl sm:text-3xl font-bold text-epoch-primary">
               Cargando...
             </h1>
           </div>
@@ -211,14 +209,21 @@ export default function ScheduleSettingsPage() {
 
   if (!settings) {
     return (
-      <div className="space-y-6">
-        <div className="flex items-center space-x-4">
-          <Button variant="outline" size="sm" onClick={() => router.back()}>
+      <div className="space-y-6 max-w-6xl mx-auto pb-12">
+        <div className="flex items-center gap-4">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => router.back()}
+            className="h-10 w-10 sm:h-11 sm:w-11 rounded-xl shrink-0"
+          >
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div>
-            <h1 className="text-3xl font-bold text-epoch-primary">Error</h1>
-            <p className="text-admin-text-tertiary">
+            <h1 className="text-xl sm:text-3xl font-bold text-epoch-primary">
+              Error
+            </h1>
+            <p className="text-sm text-admin-text-tertiary mt-1">
               No se pudo cargar la configuración
             </p>
           </div>
@@ -229,62 +234,66 @@ export default function ScheduleSettingsPage() {
 
   return (
     <div className="space-y-8 max-w-6xl mx-auto pb-12">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 border-b border-admin-border-primary/10">
-        <div className="flex items-center space-x-4">
+      {/* Header - multi-row layout for harmony */}
+      <div className="flex flex-col gap-4 sm:gap-6 pb-6 border-b border-admin-border-primary/10">
+        <div className="flex flex-col sm:flex-row sm:items-start gap-4">
           <Button
             variant="ghost"
             size="icon"
             onClick={() => router.back()}
-            className="h-11 w-11 rounded-xl bg-white shadow-soft border border-admin-border-primary/30 text-admin-text-tertiary hover:text-admin-accent-primary transition-all"
+            className="h-10 w-10 sm:h-11 sm:w-11 rounded-xl bg-white shadow-soft border border-admin-border-primary/30 text-admin-text-tertiary hover:text-admin-accent-primary transition-all shrink-0"
           >
-            <ArrowLeft className="h-5 w-5" />
+            <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
           </Button>
-          <div>
-            <h1 className="text-3xl font-black text-admin-text-primary tracking-tight">
-              Configuración de Horarios {isGlobalView && "(VISTA GLOBAL)"}
+          <div className="min-w-0">
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-black text-admin-text-primary tracking-tight">
+              Configuración de Horarios
+              {isGlobalView && (
+                <span className="block sm:inline sm:ml-2 text-sm sm:text-base font-bold text-admin-text-tertiary mt-1 sm:mt-0">
+                  (Vista global)
+                </span>
+              )}
             </h1>
-            <p className="text-xs font-bold text-admin-text-tertiary uppercase tracking-widest mt-1">
+            <p className="text-[10px] sm:text-xs font-bold text-admin-text-tertiary uppercase tracking-widest mt-1.5 max-w-xl">
               {isGlobalView
                 ? "Configura los horarios de operación para toda la organización"
                 : "Personaliza los horarios de trabajo y disponibilidad de esta sucursal"}
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-4">
-          {isSuperAdmin && <BranchSelector />}
+        <div className="flex justify-end">
           <Button
             onClick={handleSave}
             disabled={saving}
-            className="h-12 px-8 rounded-xl bg-admin-accent-primary hover:bg-admin-accent-primary/90 text-white shadow-premium-md font-bold uppercase text-[11px] tracking-widest transition-all active:scale-[0.98]"
+            className="h-10 w-10 sm:h-12 sm:w-auto sm:px-8 rounded-xl bg-admin-accent-primary hover:bg-admin-accent-primary/90 text-white shadow-premium-md font-bold uppercase text-[10px] sm:text-[11px] tracking-widest transition-all active:scale-[0.98]"
           >
             {saving ? (
               <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Sincronizando...
+                <Loader2 className="h-4 w-4 sm:mr-2 animate-spin" />
+                <span className="hidden sm:inline">Sincronizando...</span>
               </>
             ) : (
               <>
-                <Save className="h-4 w-4 mr-2" />
-                Guardar Cambios
+                <Save className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Guardar Cambios</span>
               </>
             )}
           </Button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 space-y-8">
-          {/* General Settings - tertiary bg for form contrast (light in light mode) */}
-          <Card className="border-none bg-admin-bg-tertiary shadow-premium-sm rounded-3xl overflow-hidden border border-admin-border-primary/30">
-            <CardHeader className="pb-4 border-b border-admin-border-primary/10">
-              <CardTitle className="text-sm font-bold text-admin-text-primary flex items-center gap-2 uppercase tracking-widest">
-                <Settings className="h-4 w-4 text-admin-accent-primary" />
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
+        <div className="lg:col-span-2 space-y-4 sm:space-y-6 md:space-y-8">
+          {/* General Settings */}
+          <Card className="border-none bg-admin-bg-tertiary shadow-premium-sm rounded-2xl sm:rounded-3xl overflow-hidden border border-admin-border-primary/30">
+            <CardHeader className="pb-3 sm:pb-4 border-b border-admin-border-primary/10 px-4 sm:px-6 pt-4 sm:pt-6">
+              <CardTitle className="text-xs sm:text-sm font-bold text-admin-text-primary flex items-center gap-2 uppercase tracking-widest">
+                <Settings className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-admin-accent-primary" />
                 Configuración General
               </CardTitle>
             </CardHeader>
-            <CardContent className="p-8">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 text-center sm:text-left">
+            <CardContent className="p-4 sm:p-6 md:p-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 md:gap-8">
                 <div className="space-y-2">
                   <Label className="text-[10px] font-bold text-admin-text-tertiary uppercase tracking-widest ml-1">
                     Duración de Slot
@@ -302,7 +311,7 @@ export default function ScheduleSettingsPage() {
                           slot_duration_minutes: parseInt(e.target.value) || 15,
                         })
                       }
-                      className="h-12 rounded-xl border-admin-border-primary/50 bg-white/50 focus:bg-white transition-all font-bold pl-4"
+                      className="h-10 sm:h-12 rounded-xl border-admin-border-primary/50 bg-white/50 focus:bg-white transition-all font-bold pl-4"
                     />
                     <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-black text-admin-text-tertiary uppercase tracking-tight">
                       min
@@ -331,7 +340,7 @@ export default function ScheduleSettingsPage() {
                             parseInt(e.target.value) || 30,
                         })
                       }
-                      className="h-12 rounded-xl border-admin-border-primary/50 bg-white/50 focus:bg-white transition-all font-bold pl-4"
+                      className="h-10 sm:h-12 rounded-xl border-admin-border-primary/50 bg-white/50 focus:bg-white transition-all font-bold pl-4"
                     />
                     <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-black text-admin-text-tertiary uppercase tracking-tight">
                       min
@@ -359,7 +368,7 @@ export default function ScheduleSettingsPage() {
                             parseInt(e.target.value) || 0,
                         })
                       }
-                      className="h-12 rounded-xl border-admin-border-primary/50 bg-white/50 focus:bg-white transition-all font-bold pl-4"
+                      className="h-10 sm:h-12 rounded-xl border-admin-border-primary/50 bg-white/50 focus:bg-white transition-all font-bold pl-4"
                     />
                     <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-black text-admin-text-tertiary uppercase tracking-tight">
                       horas
@@ -387,7 +396,7 @@ export default function ScheduleSettingsPage() {
                             parseInt(e.target.value) || 90,
                         })
                       }
-                      className="h-12 rounded-xl border-admin-border-primary/50 bg-white/50 focus:bg-white transition-all font-bold pl-4"
+                      className="h-10 sm:h-12 rounded-xl border-admin-border-primary/50 bg-white/50 focus:bg-white transition-all font-bold pl-4"
                     />
                     <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-black text-admin-text-tertiary uppercase tracking-tight">
                       días
@@ -401,15 +410,15 @@ export default function ScheduleSettingsPage() {
             </CardContent>
           </Card>
 
-          {/* Working Hours - tertiary bg for form contrast */}
-          <Card className="border-none bg-admin-bg-tertiary shadow-premium-sm rounded-3xl overflow-hidden border border-admin-border-primary/30">
-            <CardHeader className="pb-4 border-b border-admin-border-primary/10">
-              <CardTitle className="text-sm font-bold text-admin-text-primary flex items-center gap-2 uppercase tracking-widest">
-                <Clock className="h-4 w-4 text-admin-info" />
+          {/* Working Hours - mobile-optimized UX */}
+          <Card className="border-none bg-admin-bg-tertiary shadow-premium-sm rounded-2xl sm:rounded-3xl overflow-hidden border border-admin-border-primary/30">
+            <CardHeader className="pb-3 sm:pb-4 border-b border-admin-border-primary/10 px-4 sm:px-6 pt-4 sm:pt-6">
+              <CardTitle className="text-xs sm:text-sm font-bold text-admin-text-primary flex items-center gap-2 uppercase tracking-widest">
+                <Clock className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-admin-info" />
                 Horarios de Operación
               </CardTitle>
             </CardHeader>
-            <CardContent className="p-6 space-y-4">
+            <CardContent className="p-3 sm:p-6 space-y-3 sm:space-y-4">
               {(
                 [
                   "monday",
@@ -426,23 +435,23 @@ export default function ScheduleSettingsPage() {
                   <div
                     key={day}
                     className={cn(
-                      "rounded-xl p-4 transition-all duration-300 border",
+                      "rounded-xl p-3 sm:p-4 transition-all duration-300 border",
                       dayConfig.enabled
                         ? "bg-admin-bg-tertiary/50 border-admin-border-primary/20 shadow-none hover:shadow-md"
                         : "bg-admin-bg-tertiary/20 border-admin-border-primary/10 opacity-70",
                     )}
                   >
-                    <div className="flex items-center justify-between mb-4 px-2">
-                      <div className="flex items-center gap-3">
+                    <div className="flex items-center justify-between mb-3 sm:mb-4 px-0 sm:px-2">
+                      <div className="flex items-center gap-2 sm:gap-3">
                         <div
                           className={cn(
-                            "h-2 w-2 rounded-full",
+                            "h-2 w-2 rounded-full shrink-0",
                             dayConfig.enabled
                               ? "bg-epoch-primary"
                               : "bg-admin-text-tertiary",
                           )}
                         />
-                        <span className="text-sm font-bold text-admin-text-primary uppercase tracking-tight">
+                        <span className="text-xs sm:text-sm font-bold text-admin-text-primary uppercase tracking-tight">
                           {dayLabels[day]}
                         </span>
                       </div>
@@ -451,12 +460,12 @@ export default function ScheduleSettingsPage() {
                         onCheckedChange={(checked) =>
                           updateDayConfig(day, "enabled", checked)
                         }
-                        className="data-[state=checked]:bg-admin-accent-primary"
+                        className="data-[state=checked]:bg-admin-accent-primary shrink-0"
                       />
                     </div>
 
                     {dayConfig.enabled && (
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 animate-in slide-in-from-top-2 duration-300">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 animate-in slide-in-from-top-2 duration-300">
                         <div className="space-y-1.5">
                           <Label className="text-[9px] font-bold text-admin-text-tertiary uppercase ml-1">
                             Apertura
@@ -467,12 +476,15 @@ export default function ScheduleSettingsPage() {
                             onChange={(e) =>
                               updateDayConfig(day, "start_time", e.target.value)
                             }
-                            className="h-10 rounded-xl bg-admin-bg-tertiary/20 border-admin-border-primary/40 focus:bg-white transition-all font-bold text-xs"
+                            className="h-11 sm:h-10 rounded-xl bg-admin-bg-tertiary/20 border-admin-border-primary/40 focus:bg-white transition-all font-bold text-xs min-h-[44px]"
                           />
                         </div>
                         <div className="space-y-1.5">
                           <Label className="text-[9px] font-bold text-admin-text-tertiary uppercase ml-1">
-                            Cierre Profesional
+                            <span className="hidden sm:inline">
+                              Cierre Profesional
+                            </span>
+                            <span className="sm:hidden">Cierre</span>
                           </Label>
                           <Input
                             type="time"
@@ -480,12 +492,15 @@ export default function ScheduleSettingsPage() {
                             onChange={(e) =>
                               updateDayConfig(day, "end_time", e.target.value)
                             }
-                            className="h-10 rounded-xl bg-admin-bg-tertiary/20 border-admin-border-primary/40 focus:bg-white transition-all font-bold text-xs"
+                            className="h-11 sm:h-10 rounded-xl bg-admin-bg-tertiary/20 border-admin-border-primary/40 focus:bg-white transition-all font-bold text-xs min-h-[44px]"
                           />
                         </div>
                         <div className="space-y-1.5">
                           <Label className="text-[9px] font-bold text-admin-text-tertiary uppercase ml-1">
-                            Ini. Almuerzo
+                            <span className="hidden sm:inline">
+                              Ini. Almuerzo
+                            </span>
+                            <span className="sm:hidden">Almuerzo Inicio</span>
                           </Label>
                           <Input
                             type="time"
@@ -497,12 +512,15 @@ export default function ScheduleSettingsPage() {
                                 e.target.value || null,
                               )
                             }
-                            className="h-10 rounded-xl bg-admin-bg-tertiary/20 border-admin-border-primary/40 focus:bg-white transition-all font-bold text-xs"
+                            className="h-11 sm:h-10 rounded-xl bg-admin-bg-tertiary/20 border-admin-border-primary/40 focus:bg-white transition-all font-bold text-xs min-h-[44px]"
                           />
                         </div>
                         <div className="space-y-1.5">
                           <Label className="text-[9px] font-bold text-admin-text-tertiary uppercase ml-1">
-                            Fin Almuerzo
+                            <span className="hidden sm:inline">
+                              Fin Almuerzo
+                            </span>
+                            <span className="sm:hidden">Almuerzo Fin</span>
                           </Label>
                           <Input
                             type="time"
@@ -514,7 +532,7 @@ export default function ScheduleSettingsPage() {
                                 e.target.value || null,
                               )
                             }
-                            className="h-10 rounded-xl bg-admin-bg-tertiary/20 border-admin-border-primary/40 focus:bg-white transition-all font-bold text-xs"
+                            className="h-11 sm:h-10 rounded-xl bg-admin-bg-tertiary/20 border-admin-border-primary/40 focus:bg-white transition-all font-bold text-xs min-h-[44px]"
                           />
                         </div>
                       </div>
@@ -526,17 +544,17 @@ export default function ScheduleSettingsPage() {
           </Card>
         </div>
 
-        <div className="space-y-8">
-          {/* Blocked Dates - tertiary bg for form contrast */}
-          <Card className="border-none bg-admin-bg-tertiary shadow-premium-sm rounded-3xl overflow-hidden border border-admin-border-primary/30 h-fit">
-            <CardHeader className="pb-4 border-b border-admin-border-primary/10">
-              <CardTitle className="text-sm font-bold text-admin-text-primary flex items-center gap-2 uppercase tracking-widest">
-                <Calendar className="h-4 w-4 text-admin-error" />
+        <div className="space-y-4 sm:space-y-6 md:space-y-8">
+          {/* Blocked Dates */}
+          <Card className="border-none bg-admin-bg-tertiary shadow-premium-sm rounded-2xl sm:rounded-3xl overflow-hidden border border-admin-border-primary/30 h-fit">
+            <CardHeader className="pb-3 sm:pb-4 border-b border-admin-border-primary/10 px-4 sm:px-6 pt-4 sm:pt-6">
+              <CardTitle className="text-xs sm:text-sm font-bold text-admin-text-primary flex items-center gap-2 uppercase tracking-widest">
+                <Calendar className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-admin-error" />
                 Fechas No Laborales
               </CardTitle>
             </CardHeader>
-            <CardContent className="p-6 space-y-6">
-              <div className="flex flex-col gap-3">
+            <CardContent className="p-4 sm:p-6 space-y-4 sm:space-y-6">
+              <div className="flex flex-col gap-2 sm:gap-3">
                 <Label className="text-[10px] font-bold text-admin-text-tertiary uppercase tracking-widest ml-1">
                   Agregar Nueva Fecha
                 </Label>
@@ -545,27 +563,27 @@ export default function ScheduleSettingsPage() {
                     type="date"
                     value={newBlockedDate}
                     onChange={(e) => setNewBlockedDate(e.target.value)}
-                    className="h-11 rounded-xl bg-admin-bg-tertiary/20 border-admin-border-primary/40 focus:bg-white transition-all font-bold text-xs flex-1"
+                    className="h-10 sm:h-11 rounded-xl bg-admin-bg-tertiary/20 border-admin-border-primary/40 focus:bg-white transition-all font-bold text-xs flex-1 min-h-[44px]"
                   />
                   <Button
                     type="button"
                     onClick={addBlockedDate}
-                    className="h-11 rounded-xl bg-admin-bg-tertiary text-admin-text-primary hover:bg-admin-bg-tertiary/80 font-bold px-4"
+                    className="h-10 sm:h-11 w-11 sm:w-auto sm:px-4 rounded-xl bg-admin-bg-tertiary text-admin-text-primary hover:bg-admin-bg-tertiary/80 font-bold shrink-0"
                   >
                     +
                   </Button>
                 </div>
               </div>
 
-              <div className="space-y-3">
+              <div className="space-y-2 sm:space-y-3">
                 {settings.blocked_dates.length > 0 ? (
                   <div className="flex flex-col gap-2">
                     {settings.blocked_dates.map((date) => (
                       <div
                         key={date}
-                        className="flex items-center justify-between bg-admin-bg-tertiary/20 border border-admin-border-primary/30 rounded-xl px-4 py-3 hover:bg-white transition-all group"
+                        className="flex items-center justify-between bg-admin-bg-tertiary/20 border border-admin-border-primary/30 rounded-xl px-3 sm:px-4 py-2.5 sm:py-3 hover:bg-white transition-all group"
                       >
-                        <span className="text-xs font-bold text-admin-text-primary">
+                        <span className="text-[11px] sm:text-xs font-bold text-admin-text-primary truncate">
                           {new Date(date).toLocaleDateString("es-CL", {
                             day: "2-digit",
                             month: "long",
@@ -577,7 +595,7 @@ export default function ScheduleSettingsPage() {
                           variant="ghost"
                           size="sm"
                           onClick={() => removeBlockedDate(date)}
-                          className="h-7 w-7 p-0 rounded-lg text-admin-text-tertiary hover:text-admin-error hover:bg-admin-error/5 transition-all"
+                          className="h-8 w-8 sm:h-7 sm:w-7 p-0 rounded-lg text-admin-text-tertiary hover:text-admin-error hover:bg-admin-error/5 transition-all shrink-0"
                         >
                           ×
                         </Button>
@@ -585,8 +603,8 @@ export default function ScheduleSettingsPage() {
                     ))}
                   </div>
                 ) : (
-                  <div className="text-center py-10 px-4 rounded-3xl bg-admin-bg-tertiary/10 border border-dashed border-admin-border-primary/40">
-                    <AlertCircle className="h-10 w-10 mx-auto mb-4 text-admin-text-tertiary opacity-30" />
+                  <div className="text-center py-6 sm:py-10 px-4 rounded-2xl sm:rounded-3xl bg-admin-bg-tertiary/10 border border-dashed border-admin-border-primary/40">
+                    <AlertCircle className="h-8 w-8 sm:h-10 sm:w-10 mx-auto mb-3 sm:mb-4 text-admin-text-tertiary opacity-30" />
                     <p className="text-[10px] font-bold text-admin-text-tertiary uppercase tracking-widest">
                       Todo laborable
                     </p>
@@ -600,15 +618,15 @@ export default function ScheduleSettingsPage() {
           </Card>
 
           {/* Tips Card */}
-          <Card className="border-none bg-admin-accent-primary/5 shadow-soft rounded-3xl overflow-hidden border border-admin-accent-primary/10">
-            <CardContent className="p-6 space-y-3">
+          <Card className="border-none bg-admin-accent-primary/5 shadow-soft rounded-2xl sm:rounded-3xl overflow-hidden border border-admin-accent-primary/10">
+            <CardContent className="p-4 sm:p-6 space-y-4 sm:space-y-3">
               <div className="flex items-center gap-2 mb-1">
-                <Sparkles className="h-4 w-4 text-admin-accent-primary" />
-                <span className="text-[11px] font-black text-admin-accent-primary uppercase tracking-wider">
+                <Sparkles className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-admin-accent-primary" />
+                <span className="text-[10px] sm:text-[11px] font-black text-admin-accent-primary uppercase tracking-wider">
                   Tip de Agenda
                 </span>
               </div>
-              <p className="text-xs leading-relaxed text-admin-text-secondary font-medium">
+              <p className="text-[11px] sm:text-xs leading-relaxed text-admin-text-secondary font-medium">
                 Recuerda que los **Slots** definen la rejilla visual, mientras
                 que la **Duración por Defecto** determina el tamaño inicial de
                 cada cita nueva. Mantén esta última como múltiplo del slot para

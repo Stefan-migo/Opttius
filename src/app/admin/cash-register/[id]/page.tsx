@@ -228,8 +228,8 @@ export default function CashClosureDetailPage() {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <RefreshCw className="h-8 w-8 animate-spin text-azul-profundo mx-auto mb-4" />
-          <p className="text-tierra-media">Cargando cierre de caja...</p>
+          <RefreshCw className="h-8 w-8 animate-spin text-epoch-primary mx-auto mb-4" />
+          <p className="text-admin-text-tertiary">Cargando cierre de caja...</p>
         </div>
       </div>
     );
@@ -240,26 +240,26 @@ export default function CashClosureDetailPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-20 lg:pb-0 min-w-0">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Link href="/admin/cash-register">
-            <Button variant="outline" size="sm">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4 min-w-0">
+          <Link href="/admin/cash-register" className="shrink-0">
+            <Button variant="outline" size="sm" className="w-full sm:w-auto">
               <ArrowLeft className="h-4 w-4 mr-2" />
               Volver
             </Button>
           </Link>
-          <div>
-            <h1 className="text-3xl font-bold text-azul-profundo">
+          <div className="min-w-0">
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-epoch-primary truncate">
               Cierre de Caja
             </h1>
-            <p className="text-tierra-media">
+            <p className="text-sm text-admin-text-tertiary">
               {formatDateTime(closure.closure_date)}
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 shrink-0">
           {getStatusBadge(closure.status, closure.reopened_at)}
         </div>
       </div>
@@ -268,16 +268,16 @@ export default function CashClosureDetailPage() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card className="bg-admin-bg-tertiary">
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-tierra-media flex items-center gap-2">
+            <CardTitle className="text-sm font-medium text-admin-text-tertiary flex items-center gap-2">
               <DollarSign className="h-4 w-4" />
               Total Ventas
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-bold text-azul-profundo">
+            <p className="text-2xl sm:text-3xl font-bold text-epoch-primary">
               {formatCurrency(closure.total_sales)}
             </p>
-            <p className="text-sm text-tierra-media mt-1">
+            <p className="text-xs sm:text-sm text-admin-text-tertiary mt-1">
               {closure.total_transactions} transacciones
             </p>
           </CardContent>
@@ -285,17 +285,17 @@ export default function CashClosureDetailPage() {
 
         <Card className="bg-admin-bg-tertiary">
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-tierra-media flex items-center gap-2">
+            <CardTitle className="text-sm font-medium text-admin-text-tertiary flex items-center gap-2">
               <Banknote className="h-4 w-4" />
               Efectivo
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-bold text-verde-suave">
+            <p className="text-2xl sm:text-3xl font-bold text-admin-success">
               {formatCurrency(closure.cash_sales)}
             </p>
             {closure.actual_cash !== null && (
-              <p className="text-sm text-tierra-media mt-1">
+              <p className="text-xs sm:text-sm text-admin-text-tertiary mt-1">
                 Físico: {formatCurrency(closure.actual_cash)}
               </p>
             )}
@@ -304,18 +304,18 @@ export default function CashClosureDetailPage() {
 
         <Card className="bg-admin-bg-tertiary">
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-tierra-media flex items-center gap-2">
+            <CardTitle className="text-sm font-medium text-admin-text-tertiary flex items-center gap-2">
               <CreditCard className="h-4 w-4" />
               Tarjetas
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold text-azul-profundo">
+            <p className="text-xl sm:text-2xl font-bold text-epoch-primary">
               {formatCurrency(
                 closure.debit_card_sales + closure.credit_card_sales,
               )}
             </p>
-            <p className="text-sm text-tierra-media mt-1">
+            <p className="text-xs sm:text-sm text-admin-text-tertiary mt-1">
               Débito: {formatCurrency(closure.debit_card_sales)} | Crédito:{" "}
               {formatCurrency(closure.credit_card_sales)}
             </p>
@@ -328,39 +328,45 @@ export default function CashClosureDetailPage() {
         {/* Cash Reconciliation */}
         <Card className="bg-admin-bg-tertiary">
           <CardHeader>
-            <CardTitle>Reconciliación de Efectivo</CardTitle>
+            <CardTitle className="text-base sm:text-lg">
+              Reconciliación de Efectivo
+            </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex justify-between">
-              <span className="text-tierra-media">Monto Inicial:</span>
+              <span className="text-admin-text-tertiary">Monto Inicial:</span>
               <span className="font-semibold">
                 {formatCurrency(closure.opening_cash_amount)}
               </span>
             </div>
             <div className="flex justify-between">
-              <span className="text-tierra-media">Ventas en Efectivo:</span>
+              <span className="text-admin-text-tertiary">
+                Ventas en Efectivo:
+              </span>
               <span className="font-semibold">
                 {formatCurrency(closure.cash_sales)}
               </span>
             </div>
             <div className="flex justify-between border-t pt-2">
-              <span className="text-tierra-media font-semibold">
+              <span className="text-admin-text-tertiary font-semibold">
                 Efectivo Esperado:
               </span>
-              <span className="font-bold text-verde-suave">
+              <span className="font-bold text-admin-success">
                 {formatCurrency(closure.expected_cash)}
               </span>
             </div>
             {closure.actual_cash !== null && (
               <>
                 <div className="flex justify-between border-t pt-2">
-                  <span className="text-tierra-media">Efectivo Físico:</span>
+                  <span className="text-admin-text-tertiary">
+                    Efectivo Físico:
+                  </span>
                   <span className="font-semibold">
                     {formatCurrency(closure.actual_cash)}
                   </span>
                 </div>
                 <div className="flex justify-between border-t pt-2">
-                  <span className="text-tierra-media font-semibold">
+                  <span className="text-admin-text-tertiary font-semibold">
                     Diferencia:
                   </span>
                   <span
@@ -369,7 +375,7 @@ export default function CashClosureDetailPage() {
                         ? "text-green-600"
                         : closure.cash_difference < 0
                           ? "text-red-600"
-                          : "text-tierra-media"
+                          : "text-admin-text-tertiary"
                     }`}
                   >
                     {closure.cash_difference !== 0 &&
@@ -389,36 +395,38 @@ export default function CashClosureDetailPage() {
         {/* Card Machine Reconciliation */}
         <Card className="bg-admin-bg-tertiary">
           <CardHeader>
-            <CardTitle>Reconciliación de Tarjetas</CardTitle>
+            <CardTitle className="text-base sm:text-lg">
+              Reconciliación de Tarjetas
+            </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex justify-between">
-              <span className="text-tierra-media">Ventas Débito:</span>
+              <span className="text-admin-text-tertiary">Ventas Débito:</span>
               <span className="font-semibold">
                 {formatCurrency(closure.debit_card_sales)}
               </span>
             </div>
             <div className="flex justify-between">
-              <span className="text-tierra-media">Máquina Débito:</span>
+              <span className="text-admin-text-tertiary">Máquina Débito:</span>
               <span className="font-semibold">
                 {formatCurrency(closure.card_machine_debit_total)}
               </span>
             </div>
             <div className="flex justify-between border-t pt-2">
-              <span className="text-tierra-media">Ventas Crédito:</span>
+              <span className="text-admin-text-tertiary">Ventas Crédito:</span>
               <span className="font-semibold">
                 {formatCurrency(closure.credit_card_sales)}
               </span>
             </div>
             <div className="flex justify-between">
-              <span className="text-tierra-media">Máquina Crédito:</span>
+              <span className="text-admin-text-tertiary">Máquina Crédito:</span>
               <span className="font-semibold">
                 {formatCurrency(closure.card_machine_credit_total)}
               </span>
             </div>
             {closure.card_machine_difference !== 0 && (
               <div className="flex justify-between border-t pt-2">
-                <span className="text-tierra-media font-semibold">
+                <span className="text-admin-text-tertiary font-semibold">
                   Diferencia:
                 </span>
                 <span
@@ -444,38 +452,50 @@ export default function CashClosureDetailPage() {
       {/* Payment Method Breakdown */}
       <Card className="bg-admin-bg-tertiary">
         <CardHeader>
-          <CardTitle>Desglose por Método de Pago</CardTitle>
+          <CardTitle className="text-base sm:text-lg">
+            Desglose por Método de Pago
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div>
-              <p className="text-sm text-tierra-media">Efectivo</p>
-              <p className="text-xl font-bold">
+              <p className="text-xs sm:text-sm text-admin-text-tertiary">
+                Efectivo
+              </p>
+              <p className="text-base sm:text-xl font-bold">
                 {formatCurrency(closure.cash_sales)}
               </p>
             </div>
             <div>
-              <p className="text-sm text-tierra-media">Tarjeta Débito</p>
-              <p className="text-xl font-bold">
+              <p className="text-xs sm:text-sm text-admin-text-tertiary">
+                Tarjeta Débito
+              </p>
+              <p className="text-base sm:text-xl font-bold">
                 {formatCurrency(closure.debit_card_sales)}
               </p>
             </div>
             <div>
-              <p className="text-sm text-tierra-media">Tarjeta Crédito</p>
-              <p className="text-xl font-bold">
+              <p className="text-xs sm:text-sm text-admin-text-tertiary">
+                Tarjeta Crédito
+              </p>
+              <p className="text-base sm:text-xl font-bold">
                 {formatCurrency(closure.credit_card_sales)}
               </p>
             </div>
             <div>
-              <p className="text-sm text-tierra-media">Cuotas</p>
-              <p className="text-xl font-bold">
+              <p className="text-xs sm:text-sm text-admin-text-tertiary">
+                Cuotas
+              </p>
+              <p className="text-base sm:text-xl font-bold">
                 {formatCurrency(closure.installments_sales)}
               </p>
             </div>
             {closure.other_payment_sales > 0 && (
               <div>
-                <p className="text-sm text-tierra-media">Otros</p>
-                <p className="text-xl font-bold">
+                <p className="text-xs sm:text-sm text-admin-text-tertiary">
+                  Otros
+                </p>
+                <p className="text-base sm:text-xl font-bold">
                   {formatCurrency(closure.other_payment_sales)}
                 </p>
               </div>
@@ -487,30 +507,34 @@ export default function CashClosureDetailPage() {
       {/* Financial Summary */}
       <Card className="bg-admin-bg-tertiary">
         <CardHeader>
-          <CardTitle>Resumen Financiero</CardTitle>
+          <CardTitle className="text-base sm:text-lg">
+            Resumen Financiero
+          </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
           <div className="flex justify-between">
-            <span className="text-tierra-media">Subtotal:</span>
+            <span className="text-admin-text-tertiary">Subtotal:</span>
             <span className="font-semibold">
               {formatCurrency(closure.total_subtotal)}
             </span>
           </div>
           <div className="flex justify-between">
-            <span className="text-tierra-media">IVA:</span>
+            <span className="text-admin-text-tertiary">IVA:</span>
             <span className="font-semibold">
               {formatCurrency(closure.total_tax)}
             </span>
           </div>
           <div className="flex justify-between">
-            <span className="text-tierra-media">Descuentos:</span>
+            <span className="text-admin-text-tertiary">Descuentos:</span>
             <span className="font-semibold">
               {formatCurrency(closure.total_discounts)}
             </span>
           </div>
           <div className="flex justify-between border-t pt-2">
-            <span className="text-tierra-media font-semibold">Total:</span>
-            <span className="font-bold text-2xl text-azul-profundo">
+            <span className="text-admin-text-tertiary font-semibold">
+              Total:
+            </span>
+            <span className="font-bold text-xl sm:text-2xl text-epoch-primary">
               {formatCurrency(closure.total_sales)}
             </span>
           </div>
@@ -520,21 +544,21 @@ export default function CashClosureDetailPage() {
       {/* Information */}
       <Card className="bg-admin-bg-tertiary">
         <CardHeader>
-          <CardTitle>Información</CardTitle>
+          <CardTitle className="text-base sm:text-lg">Información</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
           {closure.branch && (
             <div className="flex items-center gap-2">
-              <Building2 className="h-4 w-4 text-tierra-media" />
-              <span className="text-tierra-media">Sucursal:</span>
+              <Building2 className="h-4 w-4 text-admin-text-tertiary" />
+              <span className="text-admin-text-tertiary">Sucursal:</span>
               <span className="font-semibold">
                 {closure.branch.name} ({closure.branch.code})
               </span>
             </div>
           )}
           <div className="flex items-center gap-2">
-            <User className="h-4 w-4 text-tierra-media" />
-            <span className="text-tierra-media">Cerrado por:</span>
+            <User className="h-4 w-4 text-admin-text-tertiary" />
+            <span className="text-admin-text-tertiary">Cerrado por:</span>
             <span className="font-semibold">
               {closure.closed_by_user
                 ? `${closure.closed_by_user.first_name} ${closure.closed_by_user.last_name}`
@@ -542,23 +566,23 @@ export default function CashClosureDetailPage() {
             </span>
           </div>
           <div className="flex items-center gap-2">
-            <Calendar className="h-4 w-4 text-tierra-media" />
-            <span className="text-tierra-media">Abierto:</span>
+            <Calendar className="h-4 w-4 text-admin-text-tertiary" />
+            <span className="text-admin-text-tertiary">Abierto:</span>
             <span className="font-semibold">
               {formatDateTime(closure.opened_at)}
             </span>
           </div>
           <div className="flex items-center gap-2">
-            <Calendar className="h-4 w-4 text-tierra-media" />
-            <span className="text-tierra-media">Cerrado:</span>
+            <Calendar className="h-4 w-4 text-admin-text-tertiary" />
+            <span className="text-admin-text-tertiary">Cerrado:</span>
             <span className="font-semibold">
               {formatDateTime(closure.closed_at)}
             </span>
           </div>
           {closure.confirmed_at && (
             <div className="flex items-center gap-2">
-              <CheckCircle className="h-4 w-4 text-tierra-media" />
-              <span className="text-tierra-media">Confirmado:</span>
+              <CheckCircle className="h-4 w-4 text-admin-text-tertiary" />
+              <span className="text-admin-text-tertiary">Confirmado:</span>
               <span className="font-semibold">
                 {formatDateTime(closure.confirmed_at)}
               </span>
@@ -587,13 +611,15 @@ export default function CashClosureDetailPage() {
           )}
           {closure.notes && (
             <div className="mt-4">
-              <p className="text-sm text-tierra-media mb-1">Notas:</p>
+              <p className="text-sm text-admin-text-tertiary mb-1">Notas:</p>
               <p className="text-sm">{closure.notes}</p>
             </div>
           )}
           {closure.discrepancies && (
             <div className="mt-4">
-              <p className="text-sm text-tierra-media mb-1">Discrepancias:</p>
+              <p className="text-sm text-admin-text-tertiary mb-1">
+                Discrepancias:
+              </p>
               <p className="text-sm text-red-600">{closure.discrepancies}</p>
             </div>
           )}
@@ -604,17 +630,17 @@ export default function CashClosureDetailPage() {
       {closure.pos_session_id && (
         <Card className="bg-admin-bg-tertiary">
           <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-lg flex items-center gap-2">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <CardTitle className="text-base sm:text-lg flex items-center gap-2">
                 <FileText className="h-5 w-5" />
                 Detalle de Movimientos
               </CardTitle>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 w-full sm:w-auto">
                 <Select
                   value={movementFilter}
                   onValueChange={setMovementFilter}
                 >
-                  <SelectTrigger className="w-40">
+                  <SelectTrigger className="w-full sm:w-40">
                     <SelectValue placeholder="Filtrar" />
                   </SelectTrigger>
                   <SelectContent>
@@ -631,18 +657,18 @@ export default function CashClosureDetailPage() {
           <CardContent>
             {loadingMovements ? (
               <div className="text-center py-8">
-                <RefreshCw className="h-6 w-6 animate-spin text-azul-profundo mx-auto mb-2" />
-                <p className="text-sm text-tierra-media">
+                <RefreshCw className="h-6 w-6 animate-spin text-epoch-primary mx-auto mb-2" />
+                <p className="text-sm text-admin-text-tertiary">
                   Cargando movimientos...
                 </p>
               </div>
             ) : movements.length === 0 ? (
-              <div className="text-center py-8 text-tierra-media">
+              <div className="text-center py-8 text-admin-text-tertiary">
                 <p>No hay movimientos registrados en esta sesión</p>
               </div>
             ) : (
               <div className="space-y-4">
-                <div className="text-sm text-tierra-media">
+                <div className="text-sm text-admin-text-tertiary">
                   Total de movimientos: <strong>{movements.length}</strong> |
                   Total:{" "}
                   <strong>
@@ -718,7 +744,7 @@ export default function CashClosureDetailPage() {
                                     {movement.customer_name}
                                   </div>
                                   {movement.customer_rut && (
-                                    <div className="text-xs text-tierra-media font-mono truncate">
+                                    <div className="text-xs text-admin-text-tertiary font-mono truncate">
                                       {movement.customer_rut}
                                     </div>
                                   )}
@@ -754,7 +780,7 @@ export default function CashClosureDetailPage() {
                   return m.payment_method_code === movementFilter;
                 }).length === 0 &&
                   movementFilter !== "all" && (
-                    <div className="text-center py-4 text-tierra-media text-sm">
+                    <div className="text-center py-4 text-admin-text-tertiary text-sm">
                       No hay movimientos con el filtro seleccionado
                     </div>
                   )}
@@ -768,18 +794,20 @@ export default function CashClosureDetailPage() {
       {orders.length > 0 && (
         <Card className="bg-admin-bg-tertiary">
           <CardHeader>
-            <CardTitle>Órdenes del Día ({orders.length})</CardTitle>
+            <CardTitle className="text-base sm:text-lg">
+              Órdenes del Día ({orders.length})
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-2 max-h-96 overflow-y-auto">
               {orders.map((order) => (
                 <div
                   key={order.id}
-                  className="flex items-center justify-between p-3 border rounded-lg"
+                  className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 p-3 border rounded-lg"
                 >
                   <div>
                     <p className="font-semibold">{order.order_number}</p>
-                    <p className="text-sm text-tierra-media">
+                    <p className="text-sm text-admin-text-tertiary">
                       {getPaymentMethodLabel(order.payment_method_type)} •{" "}
                       {formatDateTime(order.created_at)}
                     </p>

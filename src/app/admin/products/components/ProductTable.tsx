@@ -68,11 +68,11 @@ function ProductTableComponent({
 
   return (
     <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)] overflow-hidden">
-      <CardHeader className="bg-admin-bg-tertiary/50 border-b border-admin-border-primary/10 py-6">
-        <CardTitle className="flex items-center justify-between">
+      <CardHeader className="bg-admin-bg-tertiary/50 border-b border-admin-border-primary/10 py-4 sm:py-6 px-3 sm:px-6">
+        <CardTitle className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
           <div className="flex flex-col gap-1">
-            <h3 className="text-sm font-display font-bold text-admin-text-primary uppercase tracking-widest flex items-center">
-              Registros de Inventario ({products.length})
+            <h3 className="text-xs sm:text-sm font-display font-bold text-admin-text-primary uppercase tracking-widest flex items-center">
+              Registros ({products.length})
             </h3>
             <p className="text-[10px] font-serif italic text-admin-text-tertiary uppercase tracking-widest">
               Consulta de Fichas Técnicas Activas
@@ -108,11 +108,11 @@ function ProductTableComponent({
         </CardTitle>
       </CardHeader>
       <CardContent className="p-0">
-        <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0">
+        <div className="overflow-x-auto -mx-2 sm:-mx-4 px-2 sm:px-4 md:mx-0 md:px-0 min-w-0 [scrollbar-width:thin]">
           <Table>
             <TableHeader className="bg-admin-bg-tertiary/30">
               <TableRow className="hover:bg-transparent border-admin-border-primary/10">
-                <TableHead className="w-12 text-center p-4">
+                <TableHead className="w-10 sm:w-12 text-center p-2 sm:p-4">
                   <input
                     type="checkbox"
                     checked={allSelected}
@@ -120,19 +120,19 @@ function ProductTableComponent({
                     className="w-4 h-4 rounded-xl border-admin-border-primary/20 accent-epoch-primary"
                   />
                 </TableHead>
-                <TableHead className="text-[10px] font-display font-bold text-admin-text-primary uppercase tracking-[0.2em] p-4">
+                <TableHead className="text-[9px] sm:text-[10px] font-display font-bold text-admin-text-primary uppercase tracking-[0.2em] p-2 sm:p-4 whitespace-nowrap">
                   Archivo / SKU
                 </TableHead>
-                <TableHead className="text-[10px] font-display font-bold text-admin-text-primary uppercase tracking-[0.2em] p-4">
+                <TableHead className="text-[9px] sm:text-[10px] font-display font-bold text-admin-text-primary uppercase tracking-[0.2em] p-2 sm:p-4 whitespace-nowrap">
                   Clasificación
                 </TableHead>
-                <TableHead className="text-[10px] font-display font-bold text-admin-text-primary uppercase tracking-[0.2em] p-4">
+                <TableHead className="text-[9px] sm:text-[10px] font-display font-bold text-admin-text-primary uppercase tracking-[0.2em] p-2 sm:p-4 whitespace-nowrap">
                   PVP
                 </TableHead>
-                <TableHead className="text-[10px] font-display font-bold text-admin-text-primary uppercase tracking-[0.2em] p-4">
+                <TableHead className="text-[9px] sm:text-[10px] font-display font-bold text-admin-text-primary uppercase tracking-[0.2em] p-2 sm:p-4 whitespace-nowrap">
                   Existencias
                 </TableHead>
-                <TableHead className="text-[10px] font-display font-bold text-admin-text-primary uppercase tracking-[0.2em] p-4">
+                <TableHead className="text-[9px] sm:text-[10px] font-display font-bold text-admin-text-primary uppercase tracking-[0.2em] p-2 sm:p-4 whitespace-nowrap">
                   Estado
                 </TableHead>
                 <TableHead className="text-[10px] font-display font-bold text-admin-text-primary uppercase tracking-[0.2em] p-4 text-right">
@@ -146,7 +146,7 @@ function ProductTableComponent({
                   key={product.id}
                   className="border-admin-border-primary/10 hover:bg-admin-bg-tertiary/10 transition-colors"
                 >
-                  <TableCell className="text-center p-4">
+                  <TableCell className="text-center p-2 sm:p-4">
                     <input
                       type="checkbox"
                       checked={selectedProducts.includes(product.id)}
@@ -155,7 +155,7 @@ function ProductTableComponent({
                     />
                   </TableCell>
 
-                  <TableCell className="p-4">
+                  <TableCell className="p-2 sm:p-4">
                     <div className="space-y-1">
                       <p className="text-sm font-display font-bold text-admin-text-primary uppercase tracking-tight">
                         {product.name}
@@ -173,7 +173,7 @@ function ProductTableComponent({
                     </div>
                   </TableCell>
 
-                  <TableCell className="p-4">
+                  <TableCell className="p-2 sm:p-4">
                     <span className="text-[10px] font-serif italic text-admin-text-tertiary uppercase tracking-wider">
                       {product.categories?.name ||
                         product.category?.name ||
@@ -181,13 +181,13 @@ function ProductTableComponent({
                     </span>
                   </TableCell>
 
-                  <TableCell className="p-4">
+                  <TableCell className="p-2 sm:p-4">
                     <span className="text-sm font-display font-bold text-epoch-primary">
                       {formatPrice(product.price)}
                     </span>
                   </TableCell>
 
-                  <TableCell className="p-4">
+                  <TableCell className="p-2 sm:p-4">
                     <div className="flex items-center gap-2">
                       <span
                         className={`text-sm font-display font-bold ${
@@ -208,11 +208,11 @@ function ProductTableComponent({
                     </div>
                   </TableCell>
 
-                  <TableCell className="p-4">
+                  <TableCell className="p-2 sm:p-4">
                     <div className="flex">{getStatusBadge(product.status)}</div>
                   </TableCell>
 
-                  <TableCell className="p-4 text-right">
+                  <TableCell className="p-2 sm:p-4 text-right">
                     <div className="flex items-center justify-end gap-1">
                       <Link href={`/admin/products/${product.slug}`}>
                         <Button

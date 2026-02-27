@@ -89,25 +89,33 @@ export default function SystemHealth({
   clearingMemory,
 }: SystemHealthProps) {
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
       {/* Health Metrics */}
-      <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.4)]">
-        <CardHeader>
-          <CardTitle className="flex items-center justify-between">
-            <div className="flex items-center">
-              <Activity className="h-5 w-5 mr-2" />
-              Métricas de Salud
+      <Card className="rounded-xl border border-border">
+        <CardHeader className="p-4 sm:p-6 pb-0">
+          <CardTitle className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 font-display text-epoch-primary text-base sm:text-lg">
+            <div className="flex items-center min-w-0 flex-1">
+              <Activity className="h-4 w-4 sm:h-5 sm:w-5 mr-2 shrink-0" />
+              <span className="truncate break-words">Métricas de Salud</span>
             </div>
-            <Button variant="outline" size="sm" onClick={onRefresh}>
-              <RefreshCw className="h-3 w-3" />
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onRefresh}
+              disabled={refreshing}
+              className="rounded-xl border-epoch-primary/20 min-h-[44px] min-w-[44px] shrink-0"
+            >
+              <RefreshCw
+                className={`h-3 w-3 sm:h-4 sm:w-4 ${refreshing ? "animate-spin" : ""}`}
+              />
             </Button>
           </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-4 sm:p-6 pt-4">
           {healthMetrics.length === 0 ? (
-            <div className="text-center py-8">
-              <Activity className="h-12 w-12 text-tierra-media mx-auto mb-4 opacity-50" />
-              <p className="text-sm text-tierra-media mb-4">
+            <div className="text-center py-6 sm:py-8">
+              <Activity className="h-10 w-10 sm:h-12 sm:w-12 text-epoch-primary/40 mx-auto mb-3 sm:mb-4 opacity-50" />
+              <p className="text-xs sm:text-sm text-epoch-primary/80 mb-4">
                 No hay métricas de salud disponibles
               </p>
               <Button
@@ -115,6 +123,7 @@ export default function SystemHealth({
                 size="sm"
                 onClick={onRefresh}
                 disabled={refreshing}
+                className="rounded-xl border-epoch-primary/20 min-h-[44px]"
               >
                 <RefreshCw
                   className={`h-3 w-3 mr-2 ${refreshing ? "animate-spin" : ""}`}
@@ -123,37 +132,48 @@ export default function SystemHealth({
               </Button>
             </div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Métrica</TableHead>
-                  <TableHead>Valor</TableHead>
-                  <TableHead>Estado</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {healthMetrics.map((metric) => (
-                  <TableRow key={metric.id}>
-                    <TableCell className="capitalize">
-                      {translateMetricName(metric.metric_name)}
-                    </TableCell>
-                    <TableCell>
-                      {formatMetricValue(
-                        metric.metric_value,
-                        metric.metric_unit,
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        variant={metric.is_healthy ? "default" : "destructive"}
-                      >
-                        {metric.is_healthy ? "Saludable" : "Problema"}
-                      </Badge>
-                    </TableCell>
+            <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="text-epoch-primary/80 text-xs sm:text-sm">
+                      Métrica
+                    </TableHead>
+                    <TableHead className="text-epoch-primary/80 text-xs sm:text-sm">
+                      Valor
+                    </TableHead>
+                    <TableHead className="text-epoch-primary/80 text-xs sm:text-sm">
+                      Estado
+                    </TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {healthMetrics.map((metric) => (
+                    <TableRow key={metric.id}>
+                      <TableCell className="capitalize text-xs sm:text-sm text-epoch-primary break-words max-w-[120px] sm:max-w-none">
+                        {translateMetricName(metric.metric_name)}
+                      </TableCell>
+                      <TableCell className="text-xs sm:text-sm text-epoch-primary/80">
+                        {formatMetricValue(
+                          metric.metric_value,
+                          metric.metric_unit,
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          variant={
+                            metric.is_healthy ? "default" : "destructive"
+                          }
+                          className="text-[10px] sm:text-xs"
+                        >
+                          {metric.is_healthy ? "Saludable" : "Problema"}
+                        </Badge>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           )}
         </CardContent>
       </Card>
@@ -162,11 +182,11 @@ export default function SystemHealth({
       {healthStatus &&
         (healthStatus.critical_metrics.length > 0 ||
           healthStatus.warning_metrics.length > 0) && (
-          <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.4)]">
-            <CardHeader>
-              <CardTitle className="flex items-center justify-between">
+          <Card className="rounded-xl border border-border">
+            <CardHeader className="p-4 sm:p-6 pb-0">
+              <CardTitle className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 font-display text-epoch-primary text-base sm:text-lg">
                 <div className="flex items-center">
-                  <AlertTriangle className="h-5 w-5 mr-2" />
+                  <AlertTriangle className="h-4 w-4 sm:h-5 sm:w-5 mr-2 shrink-0" />
                   Problemas Detectados
                 </div>
                 {healthStatus.critical_metrics.some(
@@ -177,6 +197,7 @@ export default function SystemHealth({
                     size="sm"
                     onClick={onClearMemory}
                     disabled={clearingMemory}
+                    className="rounded-xl border-epoch-primary/20 min-h-[44px] w-full sm:w-auto"
                   >
                     <RefreshCw
                       className={`h-4 w-4 mr-2 ${clearingMemory ? "animate-spin" : ""}`}
@@ -186,12 +207,12 @@ export default function SystemHealth({
                 )}
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
+            <CardContent className="p-4 sm:p-6 pt-4">
+              <div className="space-y-3 sm:space-y-4">
                 {healthStatus.critical_metrics.map((metric) => (
                   <div
                     key={metric.id}
-                    className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg"
+                    className="p-3 sm:p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl"
                   >
                     <div className="flex items-start space-x-3">
                       <XCircle className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
@@ -238,7 +259,7 @@ export default function SystemHealth({
                 {healthStatus.warning_metrics.map((metric) => (
                   <div
                     key={metric.id}
-                    className="p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg"
+                    className="p-3 sm:p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-xl"
                   >
                     <div className="flex items-start space-x-3">
                       <AlertTriangle className="h-5 w-5 text-yellow-500 flex-shrink-0 mt-0.5" />
@@ -255,7 +276,7 @@ export default function SystemHealth({
                               size="sm"
                               onClick={onClearMemory}
                               disabled={clearingMemory}
-                              className="h-7 text-xs"
+                              className="h-7 text-xs rounded-xl min-h-[44px] sm:min-h-7"
                             >
                               <RefreshCw
                                 className={`h-3 w-3 mr-1 ${clearingMemory ? "animate-spin" : ""}`}

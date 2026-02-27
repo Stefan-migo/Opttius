@@ -162,65 +162,89 @@ export default function RegisterUserPage() {
     formData.role === "vendedor";
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-4">
-        <Link href="/admin/admin-users">
-          <Button variant="ghost" size="sm">
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Volver
-          </Button>
-        </Link>
-        <div>
-          <h1 className="text-3xl font-bold text-epoch-primary">
-            Registrar Nuevo Usuario
-          </h1>
-          <p className="text-muted-foreground">
-            El usuario será registrado con tu organización actual
-          </p>
+    <div className="space-y-4 sm:space-y-6 p-4 sm:p-6 bg-epoch-background min-h-screen">
+      {/* Header - reorganizado en filas */}
+      <div className="flex flex-col gap-4 sm:gap-6">
+        <div className="flex items-center gap-3">
+          <Link href="/admin/admin-users">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="rounded-xl text-epoch-primary hover:bg-epoch-primary/10 min-h-[44px] shrink-0"
+            >
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Volver
+            </Button>
+          </Link>
         </div>
+        <h1 className="text-xl sm:text-2xl md:text-3xl font-display font-bold text-epoch-primary tracking-tight">
+          Registrar Nuevo Usuario
+        </h1>
+        <p className="text-sm sm:text-base text-epoch-primary/80 max-w-2xl">
+          El usuario será registrado con tu organización actual
+        </p>
       </div>
 
-      <Card className="admin-card bg-admin-bg-tertiary">
-        <CardHeader>
-          <CardTitle>Información del Usuario</CardTitle>
-          <CardDescription>
+      <Card className="rounded-xl border border-border">
+        <CardHeader className="p-4 sm:p-6 pb-0">
+          <CardTitle className="font-display text-epoch-primary text-base sm:text-lg">
+            Información del Usuario
+          </CardTitle>
+          <CardDescription className="text-xs sm:text-sm text-epoch-primary/80">
             Completa los datos para registrar un nuevo usuario en tu
             organización
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-4 sm:p-6 pt-4">
           <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
               <Alert variant="destructive">
-                <AlertDescription>{error}</AlertDescription>
+                <AlertDescription className="text-sm">{error}</AlertDescription>
               </Alert>
             )}
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="firstName">Nombre</Label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label
+                  htmlFor="firstName"
+                  className="text-xs sm:text-sm text-epoch-primary/80"
+                >
+                  Nombre
+                </Label>
                 <Input
                   id="firstName"
                   value={formData.firstName}
                   onChange={(e) =>
                     setFormData({ ...formData, firstName: e.target.value })
                   }
+                  className="rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20 min-h-[44px]"
                 />
               </div>
-              <div>
-                <Label htmlFor="lastName">Apellido</Label>
+              <div className="space-y-2">
+                <Label
+                  htmlFor="lastName"
+                  className="text-xs sm:text-sm text-epoch-primary/80"
+                >
+                  Apellido
+                </Label>
                 <Input
                   id="lastName"
                   value={formData.lastName}
                   onChange={(e) =>
                     setFormData({ ...formData, lastName: e.target.value })
                   }
+                  className="rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20 min-h-[44px]"
                 />
               </div>
             </div>
 
-            <div>
-              <Label htmlFor="email">Email *</Label>
+            <div className="space-y-2">
+              <Label
+                htmlFor="email"
+                className="text-xs sm:text-sm text-epoch-primary/80"
+              >
+                Email *
+              </Label>
               <Input
                 id="email"
                 type="email"
@@ -229,18 +253,24 @@ export default function RegisterUserPage() {
                 onChange={(e) =>
                   setFormData({ ...formData, email: e.target.value })
                 }
+                className="rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20 min-h-[44px]"
               />
             </div>
 
-            <div>
-              <Label htmlFor="role">Rol *</Label>
+            <div className="space-y-2">
+              <Label
+                htmlFor="role"
+                className="text-xs sm:text-sm text-epoch-primary/80"
+              >
+                Rol *
+              </Label>
               <Select
                 value={formData.role}
                 onValueChange={(value) => {
                   setFormData({ ...formData, role: value, branch_id: "" });
                 }}
               >
-                <SelectTrigger>
+                <SelectTrigger className="rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20 min-h-[44px]">
                   <SelectValue placeholder="Seleccionar rol" />
                 </SelectTrigger>
                 <SelectContent>
@@ -251,7 +281,7 @@ export default function RegisterUserPage() {
                   ))}
                 </SelectContent>
               </Select>
-              <p className="text-sm text-muted-foreground mt-1">
+              <p className="text-xs sm:text-sm text-epoch-primary/70 mt-1">
                 {formData.role === "employee"
                   ? "Acceso operativo sin permisos de administración"
                   : formData.role === "vendedor"
@@ -265,14 +295,17 @@ export default function RegisterUserPage() {
             </div>
 
             {requiresBranch && (
-              <div>
-                <Label htmlFor="branch_id">
+              <div className="space-y-2">
+                <Label
+                  htmlFor="branch_id"
+                  className="text-xs sm:text-sm text-epoch-primary/80"
+                >
                   Sucursal {branches.length > 0 ? "*" : ""}
                 </Label>
                 {loadingBranches ? (
                   <div className="flex items-center gap-2 p-2">
                     <Loader2 className="h-4 w-4 animate-spin" />
-                    <span className="text-sm text-muted-foreground">
+                    <span className="text-xs sm:text-sm text-epoch-primary/70">
                       Cargando sucursales...
                     </span>
                   </div>
@@ -290,7 +323,7 @@ export default function RegisterUserPage() {
                       setFormData({ ...formData, branch_id: value })
                     }
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20 min-h-[44px]">
                       <SelectValue placeholder="Seleccionar sucursal" />
                     </SelectTrigger>
                     <SelectContent>
@@ -305,8 +338,13 @@ export default function RegisterUserPage() {
               </div>
             )}
 
-            <div>
-              <Label htmlFor="password">Contraseña *</Label>
+            <div className="space-y-2">
+              <Label
+                htmlFor="password"
+                className="text-xs sm:text-sm text-epoch-primary/80"
+              >
+                Contraseña *
+              </Label>
               <div className="relative">
                 <Input
                   id="password"
@@ -317,29 +355,34 @@ export default function RegisterUserPage() {
                     setFormData({ ...formData, password: e.target.value })
                   }
                   minLength={8}
-                  className="pr-10"
+                  className="pr-12 rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20 min-h-[44px]"
                 />
                 <Button
                   type="button"
                   variant="ghost"
                   size="sm"
-                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent min-h-[44px] min-w-[44px]"
                   onClick={() => setShowPassword(!showPassword)}
                 >
                   {showPassword ? (
-                    <EyeOff className="h-4 w-4 text-gray-500" />
+                    <EyeOff className="h-4 w-4 text-epoch-primary/70" />
                   ) : (
-                    <Eye className="h-4 w-4 text-gray-500" />
+                    <Eye className="h-4 w-4 text-epoch-primary/70" />
                   )}
                 </Button>
               </div>
-              <p className="text-sm text-muted-foreground mt-1">
+              <p className="text-xs sm:text-sm text-epoch-primary/70 mt-1">
                 Mínimo 8 caracteres
               </p>
             </div>
 
-            <div>
-              <Label htmlFor="confirmPassword">Confirmar Contraseña *</Label>
+            <div className="space-y-2">
+              <Label
+                htmlFor="confirmPassword"
+                className="text-xs sm:text-sm text-epoch-primary/80"
+              >
+                Confirmar Contraseña *
+              </Label>
               <div className="relative">
                 <Input
                   id="confirmPassword"
@@ -353,26 +396,38 @@ export default function RegisterUserPage() {
                     })
                   }
                   minLength={8}
-                  className="pr-10"
+                  className="pr-12 rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20 min-h-[44px]"
                 />
                 <Button
                   type="button"
                   variant="ghost"
                   size="sm"
-                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent min-h-[44px] min-w-[44px]"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                 >
                   {showConfirmPassword ? (
-                    <EyeOff className="h-4 w-4 text-gray-500" />
+                    <EyeOff className="h-4 w-4 text-epoch-primary/70" />
                   ) : (
-                    <Eye className="h-4 w-4 text-gray-500" />
+                    <Eye className="h-4 w-4 text-epoch-primary/70" />
                   )}
                 </Button>
               </div>
             </div>
 
-            <div className="flex gap-4">
-              <Button type="submit" disabled={loading}>
+            <div className="flex flex-col-reverse sm:flex-row gap-3 pt-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => router.back()}
+                className="rounded-xl border-epoch-primary/20 min-h-[44px] w-full sm:w-auto order-2 sm:order-1"
+              >
+                Cancelar
+              </Button>
+              <Button
+                type="submit"
+                disabled={loading}
+                className="rounded-xl bg-epoch-primary hover:bg-epoch-surface text-white font-display font-bold text-[10px] tracking-[0.2em] uppercase min-h-[44px] w-full sm:w-auto order-1 sm:order-2"
+              >
                 {loading ? (
                   <>
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -384,13 +439,6 @@ export default function RegisterUserPage() {
                     Registrar Usuario
                   </>
                 )}
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => router.back()}
-              >
-                Cancelar
               </Button>
             </div>
           </form>

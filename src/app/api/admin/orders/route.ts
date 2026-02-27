@@ -15,6 +15,7 @@ import {
   createApiErrorResponse,
   extractPaginationParams,
 } from "@/lib/api/response";
+import { getLocalDateBoundsUTC } from "@/lib/utils/date-timezone";
 
 export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
@@ -154,11 +155,14 @@ export async function GET(request: NextRequest) {
     }
 
     // Apply date range (e.g. from Caja section)
+    // Usar zona horaria Chile (America/Santiago) para que "hoy" sea correcto
     if (dateFrom) {
-      query = query.gte("created_at", `${dateFrom}T00:00:00.000Z`);
+      const { start } = getLocalDateBoundsUTC(dateFrom);
+      query = query.gte("created_at", start);
     }
     if (dateTo) {
-      query = query.lte("created_at", `${dateTo}T23:59:59.999Z`);
+      const { end } = getLocalDateBoundsUTC(dateTo);
+      query = query.lte("created_at", end);
     }
 
     const { data: orders, error: ordersError, count } = await query;

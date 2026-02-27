@@ -1,7 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { extractDataFromResponse } from "@/lib/api/response-helpers";
+import {
+  extractDataFromResponse,
+  extractTotalFromResponse,
+} from "@/lib/api/response-helpers";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -48,14 +51,17 @@ import {
   ShoppingBag,
   Search,
   RotateCcw,
+  Filter,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useBranch } from "@/hooks/useBranch";
 import { getBranchHeader } from "@/lib/utils/branch";
-import { BranchSelector } from "@/components/admin/BranchSelector";
 import { Pagination } from "@/components/ui/pagination";
 import Link from "next/link";
 import { formatCurrency, formatDate, formatDateTime } from "@/lib/utils";
+import { getTodayInTimezone } from "@/lib/utils/date-timezone";
 
 interface CashClosure {
   id: string;
@@ -143,12 +149,7 @@ interface Movement {
 }
 
 export default function CashRegisterPage() {
-  const {
-    currentBranchId,
-    isSuperAdmin,
-    branches,
-    isLoading: branchLoading,
-  } = useBranch();
+  const { currentBranchId, isSuperAdmin } = useBranch();
   const [closures, setClosures] = useState<CashClosure[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCloseDialog, setShowCloseDialog] = useState(false);
@@ -172,12 +173,14 @@ export default function CashRegisterPage() {
   const [orders, setOrders] = useState<any[]>([]);
   const [loadingOrders, setLoadingOrders] = useState(false);
   const [ordersTab, setOrdersTab] = useState(false);
-  const [orderFilters, setOrderFilters] = useState({
+  // Fecha en zona Chile (America/Santiago) para filtros
+  const getTodayLocal = () => getTodayInTimezone("America/Santiago");
+  const [orderFilters, setOrderFilters] = useState(() => ({
     payment_status: "all",
     payment_method: "all",
-    date_from: new Date().toISOString().split("T")[0],
-    date_to: new Date().toISOString().split("T")[0],
-  });
+    date_from: getTodayLocal(),
+    date_to: getTodayLocal(),
+  }));
   const [orderSearchTerm, setOrderSearchTerm] = useState("");
   const [orderProductFilter, setOrderProductFilter] = useState("");
   const [selectedOrderForAction, setSelectedOrderForAction] =
@@ -221,16 +224,25 @@ export default function CashRegisterPage() {
   const [movementFilter, setMovementFilter] = useState<string>("all");
   const [movementTypeFilter, setMovementTypeFilter] = useState<string>("all");
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
+  const [orderFiltersExpanded, setOrderFiltersExpanded] = useState(false);
 
   const isGlobalView = !currentBranchId && isSuperAdmin;
+
+  // Reset filtros de fecha al día actual (Chile) al cambiar sucursal
+  useEffect(() => {
+    const today = getTodayInTimezone("America/Santiago");
+    setOrderFilters((prev) => ({
+      ...prev,
+      date_from: today,
+      date_to: today,
+    }));
+  }, [currentBranchId]);
 
   useEffect(() => {
     fetchClosures();
     checkCashStatus();
-    // Load orders by default
-    if (!isGlobalView) {
-      fetchOrders();
-    }
+    // Load orders by default (incl. super admin Vista Global - API filters by org)
+    fetchOrders();
   }, [currentBranchId, isGlobalView]);
 
   // Refetch closures when pagination changes
@@ -240,7 +252,7 @@ export default function CashRegisterPage() {
 
   // Refetch orders when pagination changes
   useEffect(() => {
-    if (!isGlobalView && ordersTab) {
+    if (!isGlobalView) {
       fetchOrders();
     }
   }, [ordersCurrentPage, ordersItemsPerPage, orderFilters, currentBranchId]);
@@ -324,8 +336,6 @@ export default function CashRegisterPage() {
   };
 
   const fetchOrders = async () => {
-    if (isGlobalView) return;
-
     setLoadingOrders(true);
     try {
       const headers: HeadersInit = {
@@ -410,8 +420,10 @@ export default function CashRegisterPage() {
         }
 
         setOrders(filteredOrders);
-        // Set total count from API response (if available) or use filtered count
-        setOrdersTotalCount(data.count || filteredOrders.length);
+        // Use API pagination total (standardized: meta.pagination.total)
+        setOrdersTotalCount(
+          extractTotalFromResponse(data) || filteredOrders.length,
+        );
       } else {
         const error = await response.json();
         toast.error(error.error || "Error al cargar órdenes");
@@ -435,9 +447,7 @@ export default function CashRegisterPage() {
 
   // Fetch orders when filters change
   useEffect(() => {
-    if (!isGlobalView) {
-      fetchOrders();
-    }
+    fetchOrders();
   }, [orderFilters, orderSearchTerm, orderProductFilter]);
 
   const fetchClosures = async () => {
@@ -482,7 +492,7 @@ export default function CashRegisterPage() {
         ...getBranchHeader(currentBranchId),
       };
 
-      const today = new Date().toISOString().split("T")[0];
+      const today = getTodayInTimezone("America/Santiago");
       const response = await fetch(
         `/api/admin/cash-register/close?date=${today}`,
         { headers },
@@ -602,7 +612,7 @@ export default function CashRegisterPage() {
         return;
       }
 
-      const today = new Date().toISOString().split("T")[0];
+      const today = getTodayInTimezone("America/Santiago");
 
       // Validar que actual_cash sea un número válido
       const actualCashValue = Number(actualCash);
@@ -873,30 +883,30 @@ export default function CashRegisterPage() {
       : null;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-20 lg:pb-0 min-w-0">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-bold text-epoch-primary">
+            Caja
+          </h1>
+          <p className="text-sm text-admin-text-tertiary">
+            {isGlobalView
+              ? "Gestión de caja - Todas las sucursales"
+              : "Gestión de caja diaria"}
+          </p>
+        </div>
+        <div className="flex items-center justify-between gap-2 w-full sm:min-w-[280px]">
           <Link href="/admin/pos">
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" className="shrink-0">
               <ArrowLeft className="h-4 w-4 mr-2" />
               Volver al POS
             </Button>
           </Link>
-          <div>
-            <h1 className="text-3xl font-bold text-epoch-primary">Caja</h1>
-            <p className="text-admin-text-tertiary">
-              {isGlobalView
-                ? "Gestión de caja - Todas las sucursales"
-                : "Gestión de caja diaria"}
-            </p>
-          </div>
-        </div>
-        <div className="flex items-center gap-2">
-          {isSuperAdmin && <BranchSelector />}
           <Button
             onClick={() => setShowCloseDialog(true)}
             disabled={!currentBranchId && !isSuperAdmin}
+            className="shrink-0"
           >
             <DollarSign className="h-4 w-4 mr-2" />
             Cerrar Caja
@@ -904,17 +914,17 @@ export default function CashRegisterPage() {
         </div>
       </div>
 
-      {/* Cash Status Card */}
+      {/* Cash Status Card - visible and usable on mobile */}
       {!isGlobalView && (
         <Card
           className={
             isCashOpen
-              ? "bg-green-50 border-green-200"
-              : "bg-red-50 border-red-200"
+              ? "bg-green-50 border-green-200 dark:bg-green-950/20 dark:border-green-800"
+              : "bg-red-50 border-red-200 dark:bg-red-950/20 dark:border-red-800"
           }
         >
-          <CardHeader>
-            <CardTitle className="flex items-center justify-between">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
               <span className="flex items-center gap-2">
                 <DollarSign
                   className={`h-5 w-5 ${isCashOpen ? "text-green-600" : "text-red-600"}`}
@@ -924,7 +934,10 @@ export default function CashRegisterPage() {
               {checkingCashStatus ? (
                 <RefreshCw className="h-4 w-4 animate-spin text-gray-400" />
               ) : (
-                <Badge variant={isCashOpen ? "default" : "destructive"}>
+                <Badge
+                  variant={isCashOpen ? "default" : "destructive"}
+                  className="w-fit text-sm px-3 py-1"
+                >
                   {isCashOpen ? "Abierta" : "Cerrada"}
                 </Badge>
               )}
@@ -950,14 +963,14 @@ export default function CashRegisterPage() {
               </div>
             ) : (
               <div className="space-y-4">
-                <div className="bg-red-100 border border-red-300 rounded-lg p-4">
-                  <p className="text-sm font-semibold text-red-800 mb-2">
+                <div className="bg-red-100 dark:bg-red-900/20 border border-red-300 dark:border-red-800 rounded-lg p-4">
+                  <p className="text-sm font-semibold text-red-800 dark:text-red-200 mb-2">
                     La caja está cerrada
                   </p>
-                  <p className="text-sm text-red-700 mb-4">
+                  <p className="text-sm text-red-700 dark:text-red-300 mb-4">
                     Debe abrir la caja antes de realizar ventas en el POS.
                   </p>
-                  <div className="space-y-2">
+                  <div className="space-y-3">
                     <Label htmlFor="opening_cash">Monto Inicial de Caja</Label>
                     <Input
                       id="opening_cash"
@@ -967,12 +980,12 @@ export default function CashRegisterPage() {
                       value={openingCashInput}
                       onChange={(e) => setOpeningCashInput(e.target.value)}
                       placeholder="0"
-                      className="max-w-xs"
+                      className="w-full sm:max-w-xs h-12"
                     />
                     <Button
                       onClick={handleOpenCashRegister}
                       disabled={openingCashRegister || !openingCashInput}
-                      className="w-full sm:w-auto"
+                      className="w-full sm:w-auto h-12"
                     >
                       {openingCashRegister ? (
                         <>
@@ -997,41 +1010,43 @@ export default function CashRegisterPage() {
       {/* Daily Summary Card (if branch selected) */}
       {currentBranchId && dailySummary && (
         <Card className="bg-admin-bg-tertiary">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Calendar className="h-5 w-5" />
+          <CardHeader className="pb-2 pt-4 sm:pt-6">
+            <CardTitle className="text-sm sm:text-base flex items-center gap-2">
+              <Calendar className="h-4 w-4 shrink-0" />
               Resumen del Día - {formatDate(new Date())}
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <CardContent className="pt-0">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
               <div>
-                <p className="text-sm text-admin-text-tertiary">Total Ventas</p>
-                <p className="text-2xl font-bold text-epoch-primary">
+                <p className="text-[10px] sm:text-xs text-admin-text-tertiary uppercase tracking-wide">
+                  Total Ventas
+                </p>
+                <p className="text-base sm:text-lg font-bold text-epoch-primary mt-0.5">
                   {formatCurrency(dailySummary.total_sales)}
                 </p>
               </div>
               <div>
-                <p className="text-sm text-admin-text-tertiary">
+                <p className="text-[10px] sm:text-xs text-admin-text-tertiary uppercase tracking-wide">
                   Transacciones
                 </p>
-                <p className="text-2xl font-bold text-epoch-primary">
+                <p className="text-base sm:text-lg font-bold text-epoch-primary mt-0.5">
                   {dailySummary.total_transactions}
                 </p>
               </div>
               <div>
-                <p className="text-sm text-admin-text-tertiary">
+                <p className="text-[10px] sm:text-xs text-admin-text-tertiary uppercase tracking-wide">
                   Efectivo Esperado
                 </p>
-                <p className="text-2xl font-bold text-admin-success">
+                <p className="text-base sm:text-lg font-bold text-admin-success mt-0.5">
                   {formatCurrency(dailySummary.expected_cash)}
                 </p>
               </div>
               <div>
-                <p className="text-sm text-admin-text-tertiary">
-                  Ventas en Efectivo
+                <p className="text-[10px] sm:text-xs text-admin-text-tertiary uppercase tracking-wide">
+                  Ventas Efectivo
                 </p>
-                <p className="text-2xl font-bold text-epoch-primary">
+                <p className="text-base sm:text-lg font-bold text-epoch-primary mt-0.5">
                   {formatCurrency(dailySummary.cash_sales)}
                 </p>
               </div>
@@ -1040,20 +1055,33 @@ export default function CashRegisterPage() {
         </Card>
       )}
 
-      {/* Tabs for Closures, Orders and Credit Notes */}
+      {/* Tabs for Closures, Orders and Credit Notes - responsive */}
       <Tabs defaultValue="orders" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="closures">Cierres de Caja</TabsTrigger>
-          <TabsTrigger value="orders" onClick={() => setOrdersTab(true)}>
+        <TabsList className="flex flex-col sm:flex-row h-auto w-full sm:w-auto">
+          <TabsTrigger
+            value="closures"
+            className="w-full sm:w-auto data-[state=active]:bg-admin-accent-secondary data-[state=active]:text-[#1A2B23]"
+          >
+            Cierres de Caja
+          </TabsTrigger>
+          <TabsTrigger
+            value="orders"
+            onClick={() => setOrdersTab(true)}
+            className="w-full sm:w-auto data-[state=active]:bg-admin-accent-secondary data-[state=active]:text-[#1A2B23]"
+          >
             Ventas / Órdenes
           </TabsTrigger>
-          <TabsTrigger value="credit_notes" onClick={() => fetchCreditNotes()}>
+          <TabsTrigger
+            value="credit_notes"
+            onClick={() => fetchCreditNotes()}
+            className="w-full sm:w-auto data-[state=active]:bg-admin-accent-secondary data-[state=active]:text-[#1A2B23]"
+          >
             Notas de Crédito
           </TabsTrigger>
         </TabsList>
 
         <TabsContent value="closures">
-          <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)]">
+          <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)] min-w-0">
             <CardHeader>
               <CardTitle>Cierres de Caja</CardTitle>
             </CardHeader>
@@ -1078,151 +1106,158 @@ export default function CashRegisterPage() {
                   </p>
                 </div>
               ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      {isSuperAdmin && <TableHead>Sucursal</TableHead>}
-                      <TableHead>Fecha</TableHead>
-                      <TableHead>Ventas Totales</TableHead>
-                      <TableHead>Transacciones</TableHead>
-                      <TableHead>Efectivo</TableHead>
-                      <TableHead>Tarjeta Débito</TableHead>
-                      <TableHead>Tarjeta Crédito</TableHead>
-                      <TableHead>Transferencias</TableHead>
-                      <TableHead>Diferencia</TableHead>
-                      <TableHead>Estado</TableHead>
-                      <TableHead>Cerrado por</TableHead>
-                      <TableHead>Acciones</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {closures.map((closure) => {
-                      const shouldShowReopen =
-                        isSuperAdmin &&
-                        (closure.status === "closed" ||
-                          closure.status === "draft") &&
-                        closure.pos_session_id;
-                      // Extract transfer sales from other_payment_sales (since DB doesn't have separate field)
-                      // This is a workaround - ideally we'd have transfer_sales in the DB
-                      const transferSales = closure.other_payment_sales || 0;
-                      return (
-                        <TableRow key={closure.id}>
-                          {isSuperAdmin && (
+                <div className="w-full min-w-0 overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0">
+                  <Table className="min-w-[800px]">
+                    <TableHeader>
+                      <TableRow>
+                        {isSuperAdmin && <TableHead>Sucursal</TableHead>}
+                        <TableHead>Fecha</TableHead>
+                        <TableHead>Ventas Totales</TableHead>
+                        <TableHead>Transacciones</TableHead>
+                        <TableHead>Efectivo</TableHead>
+                        <TableHead>Tarjeta Débito</TableHead>
+                        <TableHead>Tarjeta Crédito</TableHead>
+                        <TableHead>Transferencias</TableHead>
+                        <TableHead>Diferencia</TableHead>
+                        <TableHead>Estado</TableHead>
+                        <TableHead>Cerrado por</TableHead>
+                        <TableHead>Acciones</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {closures.map((closure) => {
+                        const shouldShowReopen =
+                          isSuperAdmin &&
+                          (closure.status === "closed" ||
+                            closure.status === "draft") &&
+                          closure.pos_session_id;
+                        // Extract transfer sales from other_payment_sales (since DB doesn't have separate field)
+                        // This is a workaround - ideally we'd have transfer_sales in the DB
+                        const transferSales = closure.other_payment_sales || 0;
+                        return (
+                          <TableRow key={closure.id}>
+                            {isSuperAdmin && (
+                              <TableCell>
+                                {closure.branch?.name || "N/A"}
+                              </TableCell>
+                            )}
                             <TableCell>
-                              {closure.branch?.name || "N/A"}
+                              {formatDate(closure.closure_date)}
                             </TableCell>
-                          )}
-                          <TableCell>
-                            {formatDate(closure.closure_date)}
-                          </TableCell>
-                          <TableCell className="font-semibold">
-                            {formatCurrency(closure.total_sales)}
-                          </TableCell>
-                          <TableCell>{closure.total_transactions}</TableCell>
-                          <TableCell>
-                            {formatCurrency(closure.cash_sales)}
-                          </TableCell>
-                          <TableCell>
-                            {formatCurrency(closure.debit_card_sales)}
-                          </TableCell>
-                          <TableCell>
-                            {formatCurrency(closure.credit_card_sales)}
-                          </TableCell>
-                          <TableCell>{formatCurrency(transferSales)}</TableCell>
-                          <TableCell>
-                            {closure.cash_difference !== null &&
-                            closure.cash_difference !== undefined ? (
-                              <div className="flex items-center gap-1">
-                                {closure.cash_difference > 0 ? (
-                                  <>
-                                    <TrendingUp className="h-4 w-4 text-green-600" />
-                                    <span className="text-green-600 font-semibold">
-                                      +
-                                      {formatCurrency(
-                                        Math.abs(closure.cash_difference),
-                                      )}
+                            <TableCell className="font-semibold">
+                              {formatCurrency(closure.total_sales)}
+                            </TableCell>
+                            <TableCell>{closure.total_transactions}</TableCell>
+                            <TableCell>
+                              {formatCurrency(closure.cash_sales)}
+                            </TableCell>
+                            <TableCell>
+                              {formatCurrency(closure.debit_card_sales)}
+                            </TableCell>
+                            <TableCell>
+                              {formatCurrency(closure.credit_card_sales)}
+                            </TableCell>
+                            <TableCell>
+                              {formatCurrency(transferSales)}
+                            </TableCell>
+                            <TableCell>
+                              {closure.cash_difference !== null &&
+                              closure.cash_difference !== undefined ? (
+                                <div className="flex items-center gap-1">
+                                  {closure.cash_difference > 0 ? (
+                                    <>
+                                      <TrendingUp className="h-4 w-4 text-green-600" />
+                                      <span className="text-green-600 font-semibold">
+                                        +
+                                        {formatCurrency(
+                                          Math.abs(closure.cash_difference),
+                                        )}
+                                      </span>
+                                    </>
+                                  ) : closure.cash_difference < 0 ? (
+                                    <>
+                                      <TrendingDown className="h-4 w-4 text-red-600" />
+                                      <span className="text-red-600 font-semibold">
+                                        {formatCurrency(
+                                          closure.cash_difference,
+                                        )}
+                                      </span>
+                                    </>
+                                  ) : (
+                                    <span className="text-admin-text-tertiary">
+                                      $0
                                     </span>
-                                  </>
-                                ) : closure.cash_difference < 0 ? (
-                                  <>
-                                    <TrendingDown className="h-4 w-4 text-red-600" />
-                                    <span className="text-red-600 font-semibold">
-                                      {formatCurrency(closure.cash_difference)}
-                                    </span>
-                                  </>
-                                ) : (
-                                  <span className="text-admin-text-tertiary">
-                                    $0
-                                  </span>
+                                  )}
+                                </div>
+                              ) : (
+                                <span className="text-admin-text-tertiary">
+                                  -
+                                </span>
+                              )}
+                            </TableCell>
+                            <TableCell>
+                              {getStatusBadge(
+                                closure.status,
+                                closure.reopened_at,
+                                closure.pos_session_id,
+                              )}
+                            </TableCell>
+                            <TableCell>
+                              {closure.closed_by_user
+                                ? `${closure.closed_by_user.first_name} ${closure.closed_by_user.last_name}`
+                                : "N/A"}
+                            </TableCell>
+                            <TableCell className="space-x-2">
+                              {isSuperAdmin &&
+                                (closure.status === "closed" ||
+                                  closure.status === "draft") &&
+                                closure.pos_session_id && (
+                                  <Button
+                                    onClick={() =>
+                                      handleReopenCash(
+                                        closure.pos_session_id || "",
+                                      )
+                                    }
+                                    variant="outline"
+                                    size="sm"
+                                    disabled={reopening}
+                                    title="Solo superadmin puede reabrir cajas cerradas"
+                                  >
+                                    <RotateCcw className="h-4 w-4 mr-1" />
+                                    Reabrir
+                                  </Button>
                                 )}
-                              </div>
-                            ) : (
-                              <span className="text-admin-text-tertiary">
-                                -
-                              </span>
-                            )}
-                          </TableCell>
-                          <TableCell>
-                            {getStatusBadge(
-                              closure.status,
-                              closure.reopened_at,
-                              closure.pos_session_id,
-                            )}
-                          </TableCell>
-                          <TableCell>
-                            {closure.closed_by_user
-                              ? `${closure.closed_by_user.first_name} ${closure.closed_by_user.last_name}`
-                              : "N/A"}
-                          </TableCell>
-                          <TableCell className="space-x-2">
-                            {isSuperAdmin &&
-                              (closure.status === "closed" ||
-                                closure.status === "draft") &&
-                              closure.pos_session_id && (
+                              <Link href={`/admin/cash-register/${closure.id}`}>
                                 <Button
-                                  onClick={() =>
-                                    handleReopenCash(
-                                      closure.pos_session_id || "",
-                                    )
-                                  }
                                   variant="outline"
                                   size="sm"
-                                  disabled={reopening}
-                                  title="Solo superadmin puede reabrir cajas cerradas"
+                                  title={
+                                    closure.reopened_at
+                                      ? `Caja reabierta${closure.reopen_count && closure.reopen_count > 1 ? ` ${closure.reopen_count} veces` : ""}${closure.reopen_notes ? `. Notas: ${closure.reopen_notes}` : ""}`
+                                      : undefined
+                                  }
                                 >
-                                  <RotateCcw className="h-4 w-4 mr-1" />
-                                  Reabrir
+                                  <Eye className="h-4 w-4 mr-1" />
+                                  Ver
+                                  {closure.reopened_at && (
+                                    <RefreshCw className="h-3 w-3 ml-1 text-blue-600" />
+                                  )}
                                 </Button>
-                              )}
-                            <Link href={`/admin/cash-register/${closure.id}`}>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                title={
-                                  closure.reopened_at
-                                    ? `Caja reabierta${closure.reopen_count && closure.reopen_count > 1 ? ` ${closure.reopen_count} veces` : ""}${closure.reopen_notes ? `. Notas: ${closure.reopen_notes}` : ""}`
-                                    : undefined
-                                }
-                              >
-                                <Eye className="h-4 w-4 mr-1" />
-                                Ver
-                                {closure.reopened_at && (
-                                  <RefreshCw className="h-3 w-3 ml-1 text-blue-600" />
-                                )}
-                              </Button>
-                            </Link>
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })}
-                  </TableBody>
-                </Table>
+                              </Link>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                </div>
               )}
 
               {/* Pagination for Closures */}
               {!loading && closures.length > 0 && (
-                <div className="mt-4">
+                <div className="mt-4 w-full min-w-0 overflow-x-auto">
                   <Pagination
+                    className="flex-wrap gap-y-2"
                     currentPage={closuresCurrentPage}
                     totalPages={Math.ceil(
                       closuresTotalCount / closuresItemsPerPage,
@@ -1240,7 +1275,7 @@ export default function CashRegisterPage() {
         </TabsContent>
 
         <TabsContent value="orders">
-          <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)]">
+          <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)] min-w-0">
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle>Ventas / Órdenes</CardTitle>
@@ -1251,107 +1286,155 @@ export default function CashRegisterPage() {
               </div>
             </CardHeader>
             <CardContent>
-              {/* Filters */}
+              {/* Filters - mobile: search + collapsible; desktop: all visible */}
               <div className="mb-4 space-y-3">
-                <div className="flex flex-col sm:flex-row gap-3">
-                  <div className="flex-1">
-                    <Label>Buscar</Label>
-                    <div className="relative">
-                      <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-400" />
-                      <Input
-                        placeholder="Buscar por número de orden o email..."
-                        value={orderSearchTerm}
-                        onChange={(e) => {
-                          setOrderSearchTerm(e.target.value);
-                          fetchOrders();
+                <div className="flex flex-col gap-3">
+                  <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+                    <div className="flex-1 min-w-0">
+                      <Label className="text-xs sm:text-sm">Buscar</Label>
+                      <div className="relative">
+                        <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-400" />
+                        <Input
+                          placeholder="Orden, email, cliente..."
+                          value={orderSearchTerm}
+                          onChange={(e) => {
+                            setOrderSearchTerm(e.target.value);
+                            fetchOrders();
+                          }}
+                          className="pl-8 text-sm"
+                        />
+                      </div>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="md:hidden w-full sm:w-auto flex items-center justify-center gap-2"
+                      onClick={() => setOrderFiltersExpanded((v) => !v)}
+                    >
+                      <Filter className="h-4 w-4" />
+                      Filtros
+                      {orderFiltersExpanded ? (
+                        <ChevronUp className="h-4 w-4" />
+                      ) : (
+                        <ChevronDown className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </div>
+                  <div
+                    className={`grid gap-3 transition-all md:grid md:grid-cols-2 lg:grid-cols-5 ${
+                      orderFiltersExpanded ? "grid" : "hidden md:grid"
+                    }`}
+                  >
+                    <div className="md:col-span-2 lg:col-span-1">
+                      <Label className="text-xs sm:text-sm">
+                        Estado de Pago
+                      </Label>
+                      <Select
+                        value={orderFilters.payment_status}
+                        onValueChange={(value) => {
+                          setOrderFilters({
+                            ...orderFilters,
+                            payment_status: value,
+                          });
                         }}
-                        className="pl-8"
+                      >
+                        <SelectTrigger className="h-9 text-sm">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">Todos</SelectItem>
+                          <SelectItem value="paid">Pagado</SelectItem>
+                          <SelectItem value="partial">Parcial</SelectItem>
+                          <SelectItem value="pending">Pendiente</SelectItem>
+                          <SelectItem value="cancelled">Anulado</SelectItem>
+                          <SelectItem value="refunded">Reembolsado</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label className="text-xs sm:text-sm">
+                        Método de Pago
+                      </Label>
+                      <Select
+                        value={orderFilters.payment_method}
+                        onValueChange={(value) => {
+                          setOrderFilters({
+                            ...orderFilters,
+                            payment_method: value,
+                          });
+                        }}
+                      >
+                        <SelectTrigger className="h-9 text-sm">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">Todos</SelectItem>
+                          <SelectItem value="cash">Efectivo</SelectItem>
+                          <SelectItem value="debit">Débito</SelectItem>
+                          <SelectItem value="credit">Crédito</SelectItem>
+                          <SelectItem value="transfer">
+                            Transferencia
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label className="text-xs sm:text-sm">Producto</Label>
+                      <Input
+                        placeholder="Ej: Kit Limpieza"
+                        value={orderProductFilter}
+                        onChange={(e) => setOrderProductFilter(e.target.value)}
+                        className="text-sm h-9"
                       />
                     </div>
-                  </div>
-                  <div className="w-full sm:w-48">
-                    <Label>Estado de Pago</Label>
-                    <Select
-                      value={orderFilters.payment_status}
-                      onValueChange={(value) => {
-                        setOrderFilters({
-                          ...orderFilters,
-                          payment_status: value,
-                        });
-                      }}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">Todos</SelectItem>
-                        <SelectItem value="paid">Pagado</SelectItem>
-                        <SelectItem value="partial">Parcial</SelectItem>
-                        <SelectItem value="pending">Pendiente</SelectItem>
-                        <SelectItem value="cancelled">Anulado</SelectItem>
-                        <SelectItem value="refunded">Reembolsado</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="w-full sm:w-48">
-                    <Label>Método de Pago</Label>
-                    <Select
-                      value={orderFilters.payment_method}
-                      onValueChange={(value) => {
-                        setOrderFilters({
-                          ...orderFilters,
-                          payment_method: value,
-                        });
-                      }}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">Todos</SelectItem>
-                        <SelectItem value="cash">Efectivo</SelectItem>
-                        <SelectItem value="debit">Débito</SelectItem>
-                        <SelectItem value="credit">Crédito</SelectItem>
-                        <SelectItem value="transfer">Transferencia</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-                <div className="flex flex-col sm:flex-row gap-3">
-                  <div className="flex-1">
-                    <Label>Producto (filtrar por nombre)</Label>
-                    <Input
-                      placeholder="Ej: test, Kit Limpieza..."
-                      value={orderProductFilter}
-                      onChange={(e) => setOrderProductFilter(e.target.value)}
-                      className="pl-2"
-                    />
-                  </div>
-                  <div className="flex-1">
-                    <Label>Fecha Desde</Label>
-                    <Input
-                      type="date"
-                      value={orderFilters.date_from}
-                      onChange={(e) => {
-                        setOrderFilters({
-                          ...orderFilters,
-                          date_from: e.target.value,
-                        });
-                      }}
-                    />
-                  </div>
-                  <div className="flex-1">
-                    <Label>Fecha Hasta</Label>
-                    <Input
-                      type="date"
-                      value={orderFilters.date_to}
-                      onChange={(e) => {
-                        setOrderFilters({
-                          ...orderFilters,
-                          date_to: e.target.value,
-                        });
-                      }}
-                    />
+                    <div>
+                      <Label className="text-xs sm:text-sm">Fecha Desde</Label>
+                      <Input
+                        type="date"
+                        value={orderFilters.date_from}
+                        onChange={(e) => {
+                          setOrderFilters({
+                            ...orderFilters,
+                            date_from: e.target.value,
+                          });
+                        }}
+                        className="text-sm h-9"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-xs sm:text-sm">Fecha Hasta</Label>
+                      <Input
+                        type="date"
+                        value={orderFilters.date_to}
+                        onChange={(e) => {
+                          setOrderFilters({
+                            ...orderFilters,
+                            date_to: e.target.value,
+                          });
+                        }}
+                        className="text-sm h-9"
+                      />
+                    </div>
+                    <div className="flex items-end">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="h-9 text-xs"
+                        onClick={() => {
+                          const today = getTodayInTimezone("America/Santiago");
+                          setOrderFilters((prev) => ({
+                            ...prev,
+                            date_from: today,
+                            date_to: today,
+                          }));
+                        }}
+                      >
+                        <Calendar className="h-3.5 w-3.5 mr-1" />
+                        Hoy
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1377,275 +1460,278 @@ export default function CashRegisterPage() {
                   </p>
                 </div>
               ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Número</TableHead>
-                      <TableHead>Cliente</TableHead>
-                      <TableHead>Productos</TableHead>
-                      <TableHead>Total</TableHead>
-                      <TableHead>Método de Pago</TableHead>
-                      <TableHead>Estado de Pago</TableHead>
-                      <TableHead>Fecha</TableHead>
-                      <TableHead>Acciones</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {orders.map((order) => (
-                      <TableRow key={order.id}>
-                        <TableCell className="font-medium">
-                          {order.order_number}
-                        </TableCell>
-                        <TableCell>
-                          <div className="text-sm">
-                            <div className="font-medium">
-                              {order.customer_name ||
+                <div className="w-full min-w-0 overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0">
+                  <Table className="min-w-[700px]">
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Número</TableHead>
+                        <TableHead>Cliente</TableHead>
+                        <TableHead>Productos</TableHead>
+                        <TableHead>Total</TableHead>
+                        <TableHead>Método de Pago</TableHead>
+                        <TableHead>Estado de Pago</TableHead>
+                        <TableHead>Fecha</TableHead>
+                        <TableHead>Acciones</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {orders.map((order) => (
+                        <TableRow key={order.id}>
+                          <TableCell className="font-medium">
+                            {order.order_number}
+                          </TableCell>
+                          <TableCell>
+                            <div className="text-sm">
+                              <div className="font-medium">
+                                {order.customer_name ||
+                                  order.sii_business_name ||
+                                  (order.billing_first_name &&
+                                  order.billing_last_name
+                                    ? `${order.billing_first_name} ${order.billing_last_name}`.trim()
+                                    : order.customer_email ||
+                                      "Cliente no registrado")}
+                              </div>
+                              {order.sii_rut && (
+                                <div className="text-xs text-admin-text-tertiary font-mono">
+                                  {order.sii_rut}
+                                </div>
+                              )}
+                              {/* Mostrar email o teléfono solo si hay nombre arriba, para evitar duplicación */}
+                              {(order.customer_name ||
                                 order.sii_business_name ||
                                 (order.billing_first_name &&
-                                order.billing_last_name
-                                  ? `${order.billing_first_name} ${order.billing_last_name}`.trim()
-                                  : order.customer_email ||
-                                    "Cliente no registrado")}
-                            </div>
-                            {order.sii_rut && (
-                              <div className="text-xs text-admin-text-tertiary font-mono">
-                                {order.sii_rut}
-                              </div>
-                            )}
-                            {/* Mostrar email o teléfono solo si hay nombre arriba, para evitar duplicación */}
-                            {(order.customer_name ||
-                              order.sii_business_name ||
-                              (order.billing_first_name &&
-                                order.billing_last_name)) && (
-                              <>
-                                {order.customer_email && (
-                                  <div className="text-xs text-admin-text-tertiary">
-                                    {order.customer_email}
-                                  </div>
-                                )}
-                                {(order.customer_phone ||
-                                  order.billing_phone ||
-                                  order.shipping_phone) && (
-                                  <div className="text-xs text-admin-text-tertiary">
-                                    {order.customer_phone ||
-                                      order.billing_phone ||
-                                      order.shipping_phone}
-                                  </div>
-                                )}
-                              </>
-                            )}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="max-w-xs">
-                            {order.order_items &&
-                            order.order_items.length > 0 ? (
-                              <>
-                                {order.order_items
-                                  .slice(0, 2)
-                                  .map((item: any, idx: number) => {
-                                    const productName =
-                                      item.product_name || "Producto";
-                                    return (
-                                      <div key={idx} className="text-sm">
-                                        <span className="font-medium">
-                                          {item.quantity}x
-                                        </span>{" "}
-                                        <span>{productName}</span>
-                                        {item.sku && (
-                                          <span className="text-xs text-admin-text-tertiary ml-1">
-                                            ({item.sku})
-                                          </span>
-                                        )}
-                                      </div>
-                                    );
-                                  })}
-                                {order.order_items.length > 2 && (
-                                  <div className="text-xs text-gray-500">
-                                    +{order.order_items.length - 2} más
-                                  </div>
-                                )}
-                              </>
-                            ) : (
-                              <span className="text-sm text-admin-text-tertiary">
-                                Sin productos
-                              </span>
-                            )}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="font-semibold">
-                            {formatCurrency(order.total_amount)}
-                          </div>
-                          {(() => {
-                            const paid =
-                              order.order_payments?.reduce(
-                                (sum: number, p: any) =>
-                                  sum + Number(p.amount || 0),
-                                0,
-                              ) || 0;
-                            const pending = Math.max(
-                              0,
-                              order.total_amount - paid,
-                            );
-                            if (pending > 0 && order.status !== "cancelled") {
-                              return (
-                                <div className="text-xs text-red-600 font-medium">
-                                  Pdte: {formatCurrency(pending)}
-                                </div>
-                              );
-                            }
-                            return null;
-                          })()}
-                        </TableCell>
-                        <TableCell>
-                          {(() => {
-                            const methodsFromPayments =
-                              order.order_payments?.map(
-                                (p: any) => p.payment_method,
-                              ) || [];
-                            const uniqueMethods = Array.from(
-                              new Set(methodsFromPayments),
-                            );
-
-                            if (uniqueMethods.length > 0) {
-                              return (
-                                <div className="flex flex-wrap gap-1">
-                                  {uniqueMethods.map(
-                                    (method: any, idx: number) => (
-                                      <Badge
-                                        key={idx}
-                                        variant="outline"
-                                        className="text-[10px] px-1 h-5 capitalize"
-                                      >
-                                        {method === "cash"
-                                          ? "Efectivo"
-                                          : method === "debit"
-                                            ? "Débito"
-                                            : method === "credit"
-                                              ? "Crédito"
-                                              : method === "transfer"
-                                                ? "Transf."
-                                                : method}
-                                      </Badge>
-                                    ),
+                                  order.billing_last_name)) && (
+                                <>
+                                  {order.customer_email && (
+                                    <div className="text-xs text-admin-text-tertiary">
+                                      {order.customer_email}
+                                    </div>
                                   )}
-                                </div>
+                                  {(order.customer_phone ||
+                                    order.billing_phone ||
+                                    order.shipping_phone) && (
+                                    <div className="text-xs text-admin-text-tertiary">
+                                      {order.customer_phone ||
+                                        order.billing_phone ||
+                                        order.shipping_phone}
+                                    </div>
+                                  )}
+                                </>
+                              )}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="max-w-xs">
+                              {order.order_items &&
+                              order.order_items.length > 0 ? (
+                                <>
+                                  {order.order_items
+                                    .slice(0, 2)
+                                    .map((item: any, idx: number) => {
+                                      const productName =
+                                        item.product_name || "Producto";
+                                      return (
+                                        <div key={idx} className="text-sm">
+                                          <span className="font-medium">
+                                            {item.quantity}x
+                                          </span>{" "}
+                                          <span>{productName}</span>
+                                          {item.sku && (
+                                            <span className="text-xs text-admin-text-tertiary ml-1">
+                                              ({item.sku})
+                                            </span>
+                                          )}
+                                        </div>
+                                      );
+                                    })}
+                                  {order.order_items.length > 2 && (
+                                    <div className="text-xs text-gray-500">
+                                      +{order.order_items.length - 2} más
+                                    </div>
+                                  )}
+                                </>
+                              ) : (
+                                <span className="text-sm text-admin-text-tertiary">
+                                  Sin productos
+                                </span>
+                              )}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="font-semibold">
+                              {formatCurrency(order.total_amount)}
+                            </div>
+                            {(() => {
+                              const paid =
+                                order.order_payments?.reduce(
+                                  (sum: number, p: any) =>
+                                    sum + Number(p.amount || 0),
+                                  0,
+                                ) || 0;
+                              const pending = Math.max(
+                                0,
+                                order.total_amount - paid,
                               );
-                            }
+                              if (pending > 0 && order.status !== "cancelled") {
+                                return (
+                                  <div className="text-xs text-red-600 font-medium">
+                                    Pdte: {formatCurrency(pending)}
+                                  </div>
+                                );
+                              }
+                              return null;
+                            })()}
+                          </TableCell>
+                          <TableCell>
+                            {(() => {
+                              const methodsFromPayments =
+                                order.order_payments?.map(
+                                  (p: any) => p.payment_method,
+                                ) || [];
+                              const uniqueMethods = Array.from(
+                                new Set(methodsFromPayments),
+                              );
 
-                            return (
-                              <Badge
-                                variant="outline"
-                                className="text-[10px] px-1 h-5"
-                              >
-                                {order.payment_method_type === "cash" &&
-                                  "Efectivo"}
-                                {order.payment_method_type === "debit_card" &&
-                                  "Débito"}
-                                {order.payment_method_type === "credit_card" &&
-                                  "Crédito"}
-                                {order.payment_method_type === "transfer" &&
-                                  "Transf."}
-                                {order.payment_method_type === "deposit" &&
-                                  "Abono"}
-                                {order.payment_method_type === "installments" &&
-                                  "Cuotas"}
-                                {![
-                                  "cash",
-                                  "debit_card",
-                                  "credit_card",
-                                  "transfer",
-                                  "deposit",
-                                  "installments",
-                                ].includes(order.payment_method_type) &&
-                                  (order.payment_method_type || "N/A")}
-                              </Badge>
-                            );
-                          })()}
-                        </TableCell>
-                        <TableCell>
-                          <Badge
-                            variant={
-                              order.status === "cancelled"
-                                ? "destructive"
-                                : order.payment_status === "paid"
-                                  ? "default"
-                                  : order.payment_status === "partial"
-                                    ? "secondary"
-                                    : order.payment_status === "refunded"
-                                      ? "destructive"
-                                      : "outline"
-                            }
-                          >
-                            {order.status === "cancelled" && "Anulado"}
-                            {order.status !== "cancelled" &&
-                              order.payment_status === "paid" &&
-                              "Pagado"}
-                            {order.status !== "cancelled" &&
-                              order.payment_status === "partial" &&
-                              "Parcial"}
-                            {order.status !== "cancelled" &&
-                              order.payment_status === "pending" &&
-                              "Pendiente"}
-                            {order.status !== "cancelled" &&
-                              order.payment_status === "refunded" &&
-                              "Reembolsado"}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          {formatDateTime(order.created_at)}
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            <Link
-                              href={`/admin/cash-register/orders/${order.id}`}
+                              if (uniqueMethods.length > 0) {
+                                return (
+                                  <div className="flex flex-wrap gap-1">
+                                    {uniqueMethods.map(
+                                      (method: any, idx: number) => (
+                                        <Badge
+                                          key={idx}
+                                          variant="outline"
+                                          className="text-[10px] px-1 h-5 capitalize"
+                                        >
+                                          {method === "cash"
+                                            ? "Efectivo"
+                                            : method === "debit"
+                                              ? "Débito"
+                                              : method === "credit"
+                                                ? "Crédito"
+                                                : method === "transfer"
+                                                  ? "Transf."
+                                                  : method}
+                                        </Badge>
+                                      ),
+                                    )}
+                                  </div>
+                                );
+                              }
+
+                              return (
+                                <Badge
+                                  variant="outline"
+                                  className="text-[10px] px-1 h-5"
+                                >
+                                  {order.payment_method_type === "cash" &&
+                                    "Efectivo"}
+                                  {order.payment_method_type === "debit_card" &&
+                                    "Débito"}
+                                  {order.payment_method_type ===
+                                    "credit_card" && "Crédito"}
+                                  {order.payment_method_type === "transfer" &&
+                                    "Transf."}
+                                  {order.payment_method_type === "deposit" &&
+                                    "Abono"}
+                                  {order.payment_method_type ===
+                                    "installments" && "Cuotas"}
+                                  {![
+                                    "cash",
+                                    "debit_card",
+                                    "credit_card",
+                                    "transfer",
+                                    "deposit",
+                                    "installments",
+                                  ].includes(order.payment_method_type) &&
+                                    (order.payment_method_type || "N/A")}
+                                </Badge>
+                              );
+                            })()}
+                          </TableCell>
+                          <TableCell>
+                            <Badge
+                              variant={
+                                order.status === "cancelled"
+                                  ? "destructive"
+                                  : order.payment_status === "paid"
+                                    ? "default"
+                                    : order.payment_status === "partial"
+                                      ? "secondary"
+                                      : order.payment_status === "refunded"
+                                        ? "destructive"
+                                        : "outline"
+                              }
                             >
-                              <Button variant="outline" size="sm">
-                                <Eye className="h-4 w-4 mr-1" />
-                                Ver
-                              </Button>
-                            </Link>
-                            {isSuperAdmin && order.status !== "cancelled" && (
-                              <>
+                              {order.status === "cancelled" && "Anulado"}
+                              {order.status !== "cancelled" &&
+                                order.payment_status === "paid" &&
+                                "Pagado"}
+                              {order.status !== "cancelled" &&
+                                order.payment_status === "partial" &&
+                                "Parcial"}
+                              {order.status !== "cancelled" &&
+                                order.payment_status === "pending" &&
+                                "Pendiente"}
+                              {order.status !== "cancelled" &&
+                                order.payment_status === "refunded" &&
+                                "Reembolsado"}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            {formatDateTime(order.created_at)}
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <Link
+                                href={`/admin/cash-register/orders/${order.id}`}
+                              >
+                                <Button variant="outline" size="sm">
+                                  <Eye className="h-4 w-4 mr-1" />
+                                  Ver
+                                </Button>
+                              </Link>
+                              {isSuperAdmin && order.status !== "cancelled" && (
+                                <>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="text-red-600 hover:text-red-700"
+                                    onClick={() => {
+                                      setSelectedOrderForAction(order);
+                                      setOrderActionDialog("cancel");
+                                    }}
+                                  >
+                                    Anular
+                                  </Button>
+                                </>
+                              )}
+                              {isSuperAdmin && order.status === "cancelled" && (
                                 <Button
                                   variant="outline"
                                   size="sm"
                                   className="text-red-600 hover:text-red-700"
                                   onClick={() => {
                                     setSelectedOrderForAction(order);
-                                    setOrderActionDialog("cancel");
+                                    setOrderActionDialog("delete");
                                   }}
                                 >
-                                  Anular
+                                  Eliminar
                                 </Button>
-                              </>
-                            )}
-                            {isSuperAdmin && order.status === "cancelled" && (
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="text-red-600 hover:text-red-700"
-                                onClick={() => {
-                                  setSelectedOrderForAction(order);
-                                  setOrderActionDialog("delete");
-                                }}
-                              >
-                                Eliminar
-                              </Button>
-                            )}
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                              )}
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
               )}
 
               {/* Pagination for Orders */}
               {!loadingOrders && orders.length > 0 && (
-                <div className="mt-4">
+                <div className="mt-4 w-full min-w-0 overflow-x-auto">
                   <Pagination
+                    className="flex-wrap gap-y-2"
                     currentPage={ordersCurrentPage}
                     totalPages={Math.ceil(
                       ordersTotalCount / ordersItemsPerPage,
@@ -1663,7 +1749,7 @@ export default function CashRegisterPage() {
         </TabsContent>
 
         <TabsContent value="credit_notes">
-          <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)]">
+          <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)] min-w-0">
             <CardHeader>
               <CardTitle>Notas de Crédito</CardTitle>
             </CardHeader>
@@ -1687,71 +1773,73 @@ export default function CashRegisterPage() {
                   </p>
                 </div>
               ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Número</TableHead>
-                      <TableHead>Orden</TableHead>
-                      <TableHead>Monto</TableHead>
-                      <TableHead>Método Reembolso</TableHead>
-                      <TableHead>Motivo</TableHead>
-                      <TableHead>Fecha</TableHead>
-                      <TableHead>Acción</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {creditNotes.map((cn) => (
-                      <TableRow key={cn.id}>
-                        <TableCell className="font-mono font-medium">
-                          {cn.credit_note_number}
-                        </TableCell>
-                        <TableCell>
-                          {cn.order_id ? (
-                            <Link
-                              href={`/admin/cash-register/orders/${cn.order_id}`}
-                            >
-                              <Button variant="link" className="p-0 h-auto">
-                                {cn.order_number || "Ver orden"}
-                              </Button>
-                            </Link>
-                          ) : (
-                            "-"
-                          )}
-                        </TableCell>
-                        <TableCell className="font-semibold text-red-600">
-                          -{formatCurrency(cn.amount)}
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="outline">
-                            {cn.refund_method === "cash"
-                              ? "Efectivo"
-                              : cn.refund_method === "debit"
-                                ? "Débito"
-                                : cn.refund_method === "credit"
-                                  ? "Crédito"
-                                  : "Transferencia"}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="max-w-xs truncate">
-                          {cn.reason}
-                        </TableCell>
-                        <TableCell>{formatDateTime(cn.created_at)}</TableCell>
-                        <TableCell>
-                          {cn.order_id && (
-                            <Link
-                              href={`/admin/cash-register/orders/${cn.order_id}`}
-                            >
-                              <Button variant="outline" size="sm">
-                                <Eye className="h-4 w-4 mr-1" />
-                                Ver orden
-                              </Button>
-                            </Link>
-                          )}
-                        </TableCell>
+                <div className="w-full min-w-0 overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0">
+                  <Table className="min-w-[550px]">
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Número</TableHead>
+                        <TableHead>Orden</TableHead>
+                        <TableHead>Monto</TableHead>
+                        <TableHead>Método Reembolso</TableHead>
+                        <TableHead>Motivo</TableHead>
+                        <TableHead>Fecha</TableHead>
+                        <TableHead>Acción</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                    </TableHeader>
+                    <TableBody>
+                      {creditNotes.map((cn) => (
+                        <TableRow key={cn.id}>
+                          <TableCell className="font-mono font-medium">
+                            {cn.credit_note_number}
+                          </TableCell>
+                          <TableCell>
+                            {cn.order_id ? (
+                              <Link
+                                href={`/admin/cash-register/orders/${cn.order_id}`}
+                              >
+                                <Button variant="link" className="p-0 h-auto">
+                                  {cn.order_number || "Ver orden"}
+                                </Button>
+                              </Link>
+                            ) : (
+                              "-"
+                            )}
+                          </TableCell>
+                          <TableCell className="font-semibold text-red-600">
+                            -{formatCurrency(cn.amount)}
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="outline">
+                              {cn.refund_method === "cash"
+                                ? "Efectivo"
+                                : cn.refund_method === "debit"
+                                  ? "Débito"
+                                  : cn.refund_method === "credit"
+                                    ? "Crédito"
+                                    : "Transferencia"}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="max-w-xs truncate">
+                            {cn.reason}
+                          </TableCell>
+                          <TableCell>{formatDateTime(cn.created_at)}</TableCell>
+                          <TableCell>
+                            {cn.order_id && (
+                              <Link
+                                href={`/admin/cash-register/orders/${cn.order_id}`}
+                              >
+                                <Button variant="outline" size="sm">
+                                  <Eye className="h-4 w-4 mr-1" />
+                                  Ver orden
+                                </Button>
+                              </Link>
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
               )}
             </CardContent>
           </Card>
@@ -1760,91 +1848,93 @@ export default function CashRegisterPage() {
 
       {/* Close Cash Register Dialog */}
       <Dialog open={showCloseDialog} onOpenChange={setShowCloseDialog}>
-        <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-7xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-[calc(100vw-1rem)] sm:max-w-2xl md:max-w-4xl lg:max-w-6xl max-h-[90dvh] overflow-y-auto p-4 sm:p-6 gap-4">
           <DialogHeader>
-            <DialogTitle>Cerrar Caja</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-base sm:text-lg">
+              Cerrar Caja
+            </DialogTitle>
+            <DialogDescription className="text-xs sm:text-sm">
               Complete los datos para cerrar la caja del día
             </DialogDescription>
           </DialogHeader>
 
           {loadingSummary ? (
-            <div className="text-center py-8">
-              <RefreshCw className="h-8 w-8 animate-spin text-epoch-primary mx-auto mb-4" />
-              <p className="text-admin-text-tertiary">
+            <div className="text-center py-6 sm:py-8">
+              <RefreshCw className="h-6 w-6 sm:h-8 sm:w-8 animate-spin text-epoch-primary mx-auto mb-3 sm:mb-4" />
+              <p className="text-xs sm:text-sm text-admin-text-tertiary">
                 Cargando resumen del día...
               </p>
             </div>
           ) : dailySummary ? (
-            <div className="space-y-6">
+            <div className="space-y-4 sm:space-y-6">
               {/* Summary */}
               <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Resumen del Día</CardTitle>
+                <CardHeader className="pb-1 pt-4 sm:pt-6">
+                  <CardTitle className="text-sm sm:text-base">
+                    Resumen del Día
+                  </CardTitle>
                 </CardHeader>
-                <CardContent className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                <CardContent className="pt-2 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-3">
                   <div>
-                    <p className="text-sm text-admin-text-tertiary">
+                    <p className="text-[10px] sm:text-xs text-admin-text-tertiary">
                       Total Ventas
                     </p>
-                    <p className="text-xl font-bold">
+                    <p className="text-sm sm:text-base font-bold mt-0.5">
                       {formatCurrency(dailySummary.total_sales)}
                     </p>
                   </div>
                   <div>
-                    <p className="text-sm text-admin-text-tertiary">
+                    <p className="text-[10px] sm:text-xs text-admin-text-tertiary">
                       Transacciones
                     </p>
-                    <p className="text-xl font-bold">
+                    <p className="text-sm sm:text-base font-bold mt-0.5">
                       {dailySummary.total_transactions}
                     </p>
                   </div>
                   <div>
-                    <p className="text-sm text-admin-text-tertiary">
+                    <p className="text-[10px] sm:text-xs text-admin-text-tertiary">
                       Efectivo Neto
                     </p>
-                    <p className="text-xl font-bold">
+                    <p className="text-sm sm:text-base font-bold mt-0.5">
                       {formatCurrency(dailySummary.cash_sales)}
                     </p>
                     {(dailySummary.cash_inflows != null ||
                       dailySummary.cash_outflows != null) && (
-                      <p className="text-xs text-admin-text-tertiary mt-1">
-                        Ingresos:{" "}
-                        {formatCurrency(dailySummary.cash_inflows ?? 0)} |
-                        Egresos: -
-                        {formatCurrency(dailySummary.cash_outflows ?? 0)}
+                      <p className="text-[9px] sm:text-[10px] text-admin-text-tertiary mt-0.5 break-words">
+                        Ing: {formatCurrency(dailySummary.cash_inflows ?? 0)} |
+                        Eg: -{formatCurrency(dailySummary.cash_outflows ?? 0)}
                       </p>
                     )}
                   </div>
                   <div>
-                    <p className="text-sm text-admin-text-tertiary">
-                      Tarjeta Débito
+                    <p className="text-[10px] sm:text-xs text-admin-text-tertiary">
+                      Débito
                     </p>
-                    <p className="text-xl font-bold">
+                    <p className="text-sm sm:text-base font-bold mt-0.5">
                       {formatCurrency(dailySummary.debit_card_sales)}
                     </p>
                   </div>
                   <div>
-                    <p className="text-sm text-admin-text-tertiary">
-                      Tarjeta Crédito
+                    <p className="text-[10px] sm:text-xs text-admin-text-tertiary">
+                      Crédito
                     </p>
-                    <p className="text-xl font-bold">
+                    <p className="text-sm sm:text-base font-bold mt-0.5">
                       {formatCurrency(dailySummary.credit_card_sales)}
                     </p>
                   </div>
                   <div>
-                    <p className="text-sm text-admin-text-tertiary">
+                    <p className="text-[10px] sm:text-xs text-admin-text-tertiary">
                       Transferencias
                     </p>
-                    <p className="text-xl font-bold">
+                    <p className="text-sm sm:text-base font-bold mt-0.5">
                       {formatCurrency(dailySummary.transfer_sales || 0)}
                     </p>
                   </div>
                   <div>
-                    <p className="text-sm text-admin-text-tertiary">
+                    <p className="text-[10px] sm:text-xs text-admin-text-tertiary">
                       Efectivo Esperado
                     </p>
-                    <p className="text-xl font-bold text-admin-success">
+                    <p className="text-sm sm:text-base font-bold text-admin-success mt-0.5">
                       {formatCurrency(dailySummary.expected_cash)}
                     </p>
                   </div>
@@ -1852,31 +1942,33 @@ export default function CashRegisterPage() {
               </Card>
 
               {/* Instructions for Cash Reconciliation */}
-              <Card className="bg-blue-50 border-blue-200">
-                <CardHeader>
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <AlertCircle className="h-5 w-5 text-blue-600" />
-                    Instrucciones para Cuadre de Caja
+              <Card className="bg-blue-50 border-blue-200 dark:bg-blue-950/30 dark:border-blue-800/50">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-base sm:text-lg flex items-center gap-2">
+                    <AlertCircle className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600 shrink-0" />
+                    <span className="break-words">
+                      Instrucciones para Cuadre de Caja
+                    </span>
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-3 text-sm">
-                  <p>
+                <CardContent className="space-y-2 sm:space-y-3 text-xs sm:text-sm">
+                  <p className="break-words">
                     <strong>1. Efectivo Físico Contado:</strong> Cuente el
                     dinero en su caja física
                   </p>
-                  <p>
+                  <p className="break-words">
                     <strong>2. Máquina Débito:</strong> Ingrese el total de la
-                    máquina de débito (total de vouchers de débito)
+                    máquina de débito (total de vouchers)
                   </p>
-                  <p>
+                  <p className="break-words">
                     <strong>3. Máquina Crédito:</strong> Ingrese el total de la
-                    máquina de crédito (total de vouchers de crédito)
+                    máquina de crédito (total de vouchers)
                   </p>
                   <p>
                     <strong>Referencia para cuadre:</strong>
                   </p>
-                  <ul className="list-disc list-inside space-y-1 ml-2">
-                    <li>
+                  <ul className="list-disc list-inside space-y-1 ml-2 space-y-1">
+                    <li className="break-words">
                       Efectivo esperado:{" "}
                       <strong>
                         {formatCurrency(dailySummary.expected_cash)}
@@ -1887,8 +1979,8 @@ export default function CashRegisterPage() {
                     </li>
                     {(dailySummary.cash_inflows != null ||
                       dailySummary.cash_outflows != null) && (
-                      <li className="text-xs">
-                        Desglose efectivo: Ingresos{" "}
+                      <li className="text-[10px] sm:text-xs break-words">
+                        Desglose: Ingresos{" "}
                         {formatCurrency(dailySummary.cash_inflows ?? 0)} -
                         Egresos{" "}
                         {formatCurrency(dailySummary.cash_outflows ?? 0)}
@@ -1906,7 +1998,7 @@ export default function CashRegisterPage() {
                         {formatCurrency(dailySummary.credit_card_sales)}
                       </strong>
                     </li>
-                    <li>
+                    <li className="break-words">
                       Ventas transferencia:{" "}
                       <strong>
                         {formatCurrency(dailySummary.transfer_sales || 0)}
@@ -1919,18 +2011,18 @@ export default function CashRegisterPage() {
 
               {/* Movements Detail */}
               <Card>
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-lg flex items-center gap-2">
-                      <FileText className="h-5 w-5" />
+                <CardHeader className="pb-2">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                    <CardTitle className="text-base sm:text-lg flex items-center gap-2">
+                      <FileText className="h-4 w-4 sm:h-5 sm:w-5 shrink-0" />
                       Detalle de Movimientos
                     </CardTitle>
-                    <div className="flex items-center gap-2 flex-wrap">
+                    <div className="flex flex-wrap gap-2">
                       <Select
                         value={movementTypeFilter}
                         onValueChange={setMovementTypeFilter}
                       >
-                        <SelectTrigger className="w-40">
+                        <SelectTrigger className="w-full sm:w-36 min-h-[44px] sm:min-h-0 text-sm">
                           <SelectValue placeholder="Tipo" />
                         </SelectTrigger>
                         <SelectContent>
@@ -1948,7 +2040,7 @@ export default function CashRegisterPage() {
                         value={movementFilter}
                         onValueChange={setMovementFilter}
                       >
-                        <SelectTrigger className="w-40">
+                        <SelectTrigger className="w-full sm:w-36 min-h-[44px] sm:min-h-0 text-sm">
                           <SelectValue placeholder="Método" />
                         </SelectTrigger>
                         <SelectContent>
@@ -1964,21 +2056,21 @@ export default function CashRegisterPage() {
                     </div>
                   </div>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="px-2 sm:px-6">
                   {loadingMovements ? (
-                    <div className="text-center py-8">
-                      <RefreshCw className="h-6 w-6 animate-spin text-epoch-primary mx-auto mb-2" />
-                      <p className="text-sm text-admin-text-tertiary">
+                    <div className="text-center py-6 sm:py-8">
+                      <RefreshCw className="h-5 w-5 sm:h-6 sm:w-6 animate-spin text-epoch-primary mx-auto mb-2" />
+                      <p className="text-xs sm:text-sm text-admin-text-tertiary">
                         Cargando movimientos...
                       </p>
                     </div>
                   ) : movements.length === 0 ? (
-                    <div className="text-center py-8 text-admin-text-tertiary">
+                    <div className="text-center py-6 sm:py-8 text-admin-text-tertiary text-xs sm:text-sm">
                       <p>No hay movimientos registrados en esta sesión</p>
                     </div>
                   ) : (
-                    <div className="space-y-4">
-                      <div className="text-sm text-admin-text-tertiary">
+                    <div className="space-y-3 sm:space-y-4">
+                      <div className="text-xs sm:text-sm text-admin-text-tertiary">
                         Total de movimientos:{" "}
                         <strong>{movements.length}</strong> | Total:{" "}
                         <strong>
@@ -1987,30 +2079,30 @@ export default function CashRegisterPage() {
                           )}
                         </strong>
                       </div>
-                      <div className="border rounded-lg overflow-x-visible">
+                      <div className="border rounded-lg overflow-hidden">
                         <div className="overflow-x-auto">
-                          <Table>
+                          <Table className="min-w-[520px]">
                             <TableHeader>
                               <TableRow>
-                                <TableHead className="w-[100px] whitespace-nowrap">
+                                <TableHead className="w-[70px] sm:w-[100px] text-xs sm:text-sm whitespace-nowrap">
                                   Hora
                                 </TableHead>
-                                <TableHead className="w-[100px] whitespace-nowrap">
+                                <TableHead className="w-[80px] sm:w-[100px] text-xs sm:text-sm whitespace-nowrap">
                                   Tipo
                                 </TableHead>
-                                <TableHead className="w-[120px] whitespace-nowrap">
+                                <TableHead className="w-[90px] sm:w-[120px] text-xs sm:text-sm whitespace-nowrap">
                                   Orden
                                 </TableHead>
-                                <TableHead className="min-w-[200px] whitespace-nowrap">
+                                <TableHead className="min-w-[100px] sm:min-w-[140px] text-xs sm:text-sm whitespace-nowrap">
                                   Cliente
                                 </TableHead>
-                                <TableHead className="w-[120px] whitespace-nowrap">
+                                <TableHead className="w-[80px] sm:w-[100px] text-xs sm:text-sm whitespace-nowrap">
                                   Método
                                 </TableHead>
-                                <TableHead className="w-[120px] text-right whitespace-nowrap">
+                                <TableHead className="w-[90px] sm:w-[120px] text-xs sm:text-sm text-right whitespace-nowrap">
                                   Monto
                                 </TableHead>
-                                <TableHead className="w-[120px] whitespace-nowrap">
+                                <TableHead className="w-[80px] sm:w-[100px] text-xs sm:text-sm whitespace-nowrap">
                                   Estado
                                 </TableHead>
                               </TableRow>
@@ -2030,7 +2122,7 @@ export default function CashRegisterPage() {
                                 })
                                 .map((movement) => (
                                   <TableRow key={movement.id}>
-                                    <TableCell className="text-sm whitespace-nowrap">
+                                    <TableCell className="text-xs sm:text-sm whitespace-nowrap py-2 sm:py-3">
                                       {new Date(
                                         movement.paid_at,
                                       ).toLocaleTimeString("es-CL", {
@@ -2038,7 +2130,7 @@ export default function CashRegisterPage() {
                                         minute: "2-digit",
                                       })}
                                     </TableCell>
-                                    <TableCell className="whitespace-nowrap">
+                                    <TableCell className="whitespace-nowrap py-2 sm:py-3">
                                       <Badge
                                         variant={
                                           movement.movement_type === "sale"
@@ -2057,28 +2149,31 @@ export default function CashRegisterPage() {
                                             : "Pago Saldo"}
                                       </Badge>
                                     </TableCell>
-                                    <TableCell className="font-mono text-sm whitespace-nowrap">
+                                    <TableCell className="font-mono text-xs sm:text-sm whitespace-nowrap py-2 sm:py-3">
                                       {movement.order_number}
                                     </TableCell>
-                                    <TableCell className="min-w-[200px]">
-                                      <div className="text-sm">
-                                        <div className="truncate">
+                                    <TableCell className="min-w-[100px] sm:min-w-[140px] py-2 sm:py-3">
+                                      <div className="text-xs sm:text-sm">
+                                        <div className="truncate max-w-[80px] sm:max-w-none">
                                           {movement.customer_name}
                                         </div>
                                         {movement.customer_rut && (
-                                          <div className="text-xs text-admin-text-tertiary font-mono truncate">
+                                          <div className="text-[10px] sm:text-xs text-admin-text-tertiary font-mono truncate max-w-[80px] sm:max-w-none">
                                             {movement.customer_rut}
                                           </div>
                                         )}
                                       </div>
                                     </TableCell>
-                                    <TableCell className="whitespace-nowrap">
-                                      <Badge variant="outline">
+                                    <TableCell className="whitespace-nowrap py-2 sm:py-3">
+                                      <Badge
+                                        variant="outline"
+                                        className="text-[10px] sm:text-xs"
+                                      >
                                         {movement.payment_method}
                                       </Badge>
                                     </TableCell>
                                     <TableCell
-                                      className={`text-right font-semibold whitespace-nowrap ${
+                                      className={`text-right font-semibold whitespace-nowrap text-xs sm:text-sm py-2 sm:py-3 ${
                                         movement.amount < 0
                                           ? "text-red-600"
                                           : ""
@@ -2086,13 +2181,14 @@ export default function CashRegisterPage() {
                                     >
                                       {formatCurrency(movement.amount)}
                                     </TableCell>
-                                    <TableCell className="whitespace-nowrap">
+                                    <TableCell className="whitespace-nowrap py-2 sm:py-3">
                                       <Badge
                                         variant={
                                           movement.payment_status === "Completo"
                                             ? "default"
                                             : "secondary"
                                         }
+                                        className="text-[10px] sm:text-xs"
                                       >
                                         {movement.payment_status}
                                       </Badge>
@@ -2114,7 +2210,7 @@ export default function CashRegisterPage() {
                       }).length === 0 &&
                         (movementFilter !== "all" ||
                           movementTypeFilter !== "all") && (
-                          <div className="text-center py-4 text-admin-text-tertiary text-sm">
+                          <div className="text-center py-4 text-admin-text-tertiary text-xs sm:text-sm">
                             No hay movimientos con el filtro seleccionado
                           </div>
                         )}
@@ -2123,19 +2219,24 @@ export default function CashRegisterPage() {
                 </CardContent>
               </Card>
 
-              {/* Cash Reconciliation */}
-              <div className="space-y-4">
-                <div>
-                  <Label>Monto Inicial de Caja</Label>
+              {/* Cash Reconciliation - responsive form */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                <div className="sm:col-span-2">
+                  <Label className="text-xs sm:text-sm">
+                    Monto Inicial de Caja
+                  </Label>
                   <Input
                     type="number"
                     value={openingCash}
                     onChange={(e) => setOpeningCash(Number(e.target.value))}
                     placeholder="0"
+                    className="h-11 sm:h-12 text-sm sm:text-base mt-1"
                   />
                 </div>
-                <div>
-                  <Label>Efectivo Físico Contado *</Label>
+                <div className="sm:col-span-2">
+                  <Label className="text-xs sm:text-sm">
+                    Efectivo Físico Contado *
+                  </Label>
                   <Input
                     type="number"
                     value={actualCash ?? ""}
@@ -2143,22 +2244,21 @@ export default function CashRegisterPage() {
                       const value = e.target.value;
                       setActualCash(value === "" ? null : Number(value));
                     }}
-                    placeholder="Ingrese el monto contado físicamente"
+                    placeholder="Monto contado físicamente"
                     required
+                    className="h-11 sm:h-12 text-sm sm:text-base mt-1"
                   />
-                  <p className="text-xs text-admin-text-tertiary mt-1">
+                  <p className="text-[10px] sm:text-xs text-admin-text-tertiary mt-1 break-words">
                     Efectivo esperado:{" "}
-                    {formatCurrency(dailySummary.expected_cash || 0)} (Monto
-                    inicial{" "}
+                    {formatCurrency(dailySummary.expected_cash || 0)} (Inicial{" "}
                     {formatCurrency(dailySummary.opening_cash_amount || 0)} +
-                    ventas en efectivo{" "}
-                    {formatCurrency(dailySummary.cash_sales || 0)})
+                    efectivo {formatCurrency(dailySummary.cash_sales || 0)})
                   </p>
                   {actualCash !== null &&
                     actualCash !== undefined &&
                     cashDifference !== null && (
                       <p
-                        className={`text-sm mt-1 font-semibold ${cashDifference > 0 ? "text-green-600" : cashDifference < 0 ? "text-red-600" : "text-gray-600"}`}
+                        className={`text-xs sm:text-sm mt-1 font-semibold ${cashDifference > 0 ? "text-green-600" : cashDifference < 0 ? "text-red-600" : "text-muted-foreground"}`}
                       >
                         Diferencia: {cashDifference > 0 ? "+" : ""}
                         {formatCurrency(cashDifference)}
@@ -2166,7 +2266,9 @@ export default function CashRegisterPage() {
                     )}
                 </div>
                 <div>
-                  <Label>Total Máquina Débito</Label>
+                  <Label className="text-xs sm:text-sm">
+                    Total Máquina Débito
+                  </Label>
                   <Input
                     type="number"
                     value={cardMachineDebit}
@@ -2174,10 +2276,13 @@ export default function CashRegisterPage() {
                       setCardMachineDebit(Number(e.target.value))
                     }
                     placeholder="0"
+                    className="h-11 sm:h-12 text-sm sm:text-base mt-1"
                   />
                 </div>
                 <div>
-                  <Label>Total Máquina Crédito</Label>
+                  <Label className="text-xs sm:text-sm">
+                    Total Máquina Crédito
+                  </Label>
                   <Input
                     type="number"
                     value={cardMachineCredit}
@@ -2185,51 +2290,62 @@ export default function CashRegisterPage() {
                       setCardMachineCredit(Number(e.target.value))
                     }
                     placeholder="0"
+                    className="h-11 sm:h-12 text-sm sm:text-base mt-1"
                   />
                 </div>
                 <div>
-                  <Label>Total Transferencias</Label>
+                  <Label className="text-xs sm:text-sm">
+                    Total Transferencias
+                  </Label>
                   <Input
                     type="number"
                     value={transferTotal}
                     onChange={(e) => setTransferTotal(Number(e.target.value))}
                     placeholder="0"
+                    className="h-11 sm:h-12 text-sm sm:text-base mt-1"
                   />
                 </div>
                 <div>
-                  <Label>Notas</Label>
+                  <Label className="text-xs sm:text-sm">Notas</Label>
                   <Input
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
                     placeholder="Notas adicionales..."
+                    className="h-11 sm:h-12 text-sm sm:text-base mt-1"
                   />
                 </div>
                 <div>
-                  <Label>Discrepancias</Label>
+                  <Label className="text-xs sm:text-sm">Discrepancias</Label>
                   <Input
                     value={discrepancies}
                     onChange={(e) => setDiscrepancies(e.target.value)}
-                    placeholder="Describa cualquier discrepancia encontrada..."
+                    placeholder="Describa discrepancia..."
+                    className="h-11 sm:h-12 text-sm sm:text-base mt-1"
                   />
                 </div>
               </div>
             </div>
           ) : (
-            <div className="text-center py-8">
-              <AlertCircle className="h-8 w-8 text-admin-text-tertiary mx-auto mb-4" />
-              <p className="text-admin-text-tertiary">
+            <div className="text-center py-6 sm:py-8">
+              <AlertCircle className="h-6 w-6 sm:h-8 sm:w-8 text-admin-text-tertiary mx-auto mb-3 sm:mb-4" />
+              <p className="text-xs sm:text-sm text-admin-text-tertiary">
                 No hay datos disponibles para cerrar la caja
               </p>
             </div>
           )}
 
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowCloseDialog(false)}>
+          <DialogFooter className="flex-col-reverse sm:flex-row gap-2 sm:gap-0 pt-2">
+            <Button
+              variant="outline"
+              onClick={() => setShowCloseDialog(false)}
+              className="w-full sm:w-auto min-h-[44px] sm:min-h-0 order-2 sm:order-1"
+            >
               Cancelar
             </Button>
             <Button
               onClick={handleCloseCashRegister}
               disabled={closing || !dailySummary}
+              className="w-full sm:w-auto min-h-[44px] sm:min-h-0 order-1 sm:order-2"
             >
               {closing ? (
                 <>

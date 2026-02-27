@@ -174,7 +174,7 @@ export default function LoginPage() {
                 </div>
 
                 <div className="space-y-3">
-                  <div className="flex items-center justify-between mb-1 px-1">
+                  <div className="flex items-center justify-between gap-4 mb-1 px-1">
                     <Label
                       htmlFor="password"
                       className="text-[10px] font-display font-bold text-epoch-primary/40 uppercase tracking-[0.3em]"
@@ -184,7 +184,7 @@ export default function LoginPage() {
                     <Link
                       href="/reset-password"
                       title="Restablecer"
-                      className="text-[10px] font-display font-bold text-epoch-accent hover:text-epoch-primary uppercase tracking-widest transition-colors"
+                      className="text-[10px] font-display font-bold text-epoch-accent hover:text-epoch-primary uppercase tracking-widest transition-colors shrink-0"
                     >
                       ¿Olvidó su contraseña?
                     </Link>
@@ -223,15 +223,18 @@ export default function LoginPage() {
                 <Button
                   type="submit"
                   size="lg"
-                  className="w-full h-16 rounded-xl bg-epoch-primary hover:bg-epoch-surface text-white font-display font-bold uppercase text-xs tracking-[0.4em] group overflow-hidden transition-all duration-500 shadow-xl"
+                  className="w-full h-16 rounded-xl bg-epoch-primary hover:bg-epoch-surface text-white font-display font-bold uppercase text-[10px] sm:text-xs tracking-[0.2em] sm:tracking-[0.4em] group overflow-hidden transition-all duration-500 shadow-xl"
                   disabled={loading}
                 >
                   {loading ? (
                     <Loader2 className="h-5 w-5 animate-spin" />
                   ) : (
-                    <span className="flex items-center gap-3">
-                      Sincronizar Acceso
-                      <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-2" />
+                    <span className="flex items-center justify-center gap-2 sm:gap-3">
+                      <span className="sm:hidden">Acceder</span>
+                      <span className="hidden sm:inline">
+                        Sincronizar Acceso
+                      </span>
+                      <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-2 shrink-0" />
                     </span>
                   )}
                 </Button>

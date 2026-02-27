@@ -255,42 +255,51 @@ export default function ProductOptionsPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-6xl">
-      <div className="flex justify-between items-center mb-6">
-        <div className="flex items-center gap-3">
-          <h1 className="text-3xl font-bold">
+    <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8 max-w-6xl">
+      <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4 mb-4 sm:mb-6">
+        <div>
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-admin-text-primary">
             Personalizar Opciones de Productos
           </h1>
         </div>
-        <Button variant="outline" onClick={() => router.back()}>
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Volver
+        <Button
+          variant="outline"
+          onClick={() => router.back()}
+          className="h-10 w-10 sm:h-auto sm:w-auto sm:px-4 shrink-0"
+        >
+          <ArrowLeft className="h-4 w-4 sm:mr-2" />
+          <span className="hidden sm:inline">Volver</span>
         </Button>
       </div>
 
-      <div className="mb-6">
-        <p className="text-gray-600">
+      <div className="mb-4 sm:mb-6">
+        <p className="text-sm text-admin-text-secondary">
           Personaliza las opciones disponibles en los menús desplegables del
           formulario de productos. Puedes agregar, editar, eliminar y
           activar/desactivar opciones.
         </p>
       </div>
 
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-6">
         {groupedFields.map((category) => (
-          <Card key={category.value} className="bg-admin-bg-tertiary">
-            <CardHeader>
-              <CardTitle>{category.label}</CardTitle>
+          <Card
+            key={category.value}
+            className="bg-admin-bg-tertiary overflow-hidden"
+          >
+            <CardHeader className="px-4 sm:px-6 py-4 sm:py-6">
+              <CardTitle className="text-base sm:text-lg">
+                {category.label}
+              </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-4 px-4 sm:px-6 pb-4 sm:pb-6">
               {category.fields.length === 0 ? (
                 <p className="text-gray-500 text-sm">
                   No hay campos en esta categoría
                 </p>
               ) : (
                 category.fields.map((field) => (
-                  <div key={field.id} className="border rounded-lg p-4">
-                    <div className="flex justify-between items-start mb-3">
+                  <div key={field.id} className="border rounded-lg p-3 sm:p-4">
+                    <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-start gap-3 mb-3">
                       <div>
                         <h3 className="font-semibold text-lg">
                           {field.field_label}

@@ -290,23 +290,24 @@ export default function AdminUsersPage() {
 
   if (loading) {
     return (
-      <div className="space-y-6">
-        <div className="flex justify-between items-start">
-          <div>
-            <h1 className="text-3xl font-bold text-epoch-primary">
-              Gestión de Administradores
-            </h1>
-            <p className="text-admin-text-tertiary">
-              Cargando usuarios administradores...
-            </p>
-          </div>
+      <div className="space-y-4 sm:space-y-6 p-4 sm:p-6 bg-epoch-background min-h-screen">
+        <div className="flex flex-col gap-4">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-display font-bold text-epoch-primary">
+            Gestión de Administradores
+          </h1>
+          <p className="text-sm text-epoch-primary/80">
+            Cargando usuarios administradores...
+          </p>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
           {[...Array(4)].map((_, i) => (
-            <Card key={i} className="animate-pulse">
-              <CardContent className="p-6">
-                <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-                <div className="h-8 bg-gray-200 rounded w-1/2"></div>
+            <Card
+              key={i}
+              className="rounded-xl border border-border animate-pulse"
+            >
+              <CardContent className="p-4 sm:p-6">
+                <div className="h-3 bg-epoch-primary/10 rounded w-3/4 mb-2"></div>
+                <div className="h-6 bg-epoch-primary/10 rounded w-1/2"></div>
               </CardContent>
             </Card>
           ))}
@@ -317,25 +318,28 @@ export default function AdminUsersPage() {
 
   if (error) {
     return (
-      <div className="space-y-6">
-        <div className="flex justify-between items-start">
-          <div>
-            <h1 className="text-3xl font-bold text-epoch-primary">
-              Gestión de Administradores
-            </h1>
-            <p className="text-admin-text-tertiary">
-              Error al cargar los datos
-            </p>
-          </div>
+      <div className="space-y-4 sm:space-y-6 p-4 sm:p-6 bg-epoch-background min-h-screen">
+        <div className="flex flex-col gap-4">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-display font-bold text-epoch-primary">
+            Gestión de Administradores
+          </h1>
+          <p className="text-sm text-epoch-primary/80">
+            Error al cargar los datos
+          </p>
         </div>
-        <Card>
-          <CardContent className="text-center py-16">
-            <AlertTriangle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-red-700 mb-2">
+        <Card className="rounded-xl border border-border">
+          <CardContent className="text-center py-8 sm:py-16">
+            <AlertTriangle className="h-10 w-10 sm:h-12 sm:w-12 text-red-500 mx-auto mb-3 sm:mb-4" />
+            <h3 className="text-base sm:text-lg font-semibold text-red-700 mb-2">
               Error al cargar administradores
             </h3>
-            <p className="text-admin-text-tertiary mb-4">{error}</p>
-            <Button onClick={fetchAdminUsers}>Reintentar</Button>
+            <p className="text-sm text-epoch-primary/80 mb-4">{error}</p>
+            <Button
+              onClick={fetchAdminUsers}
+              className="rounded-xl bg-epoch-primary hover:bg-epoch-surface text-white min-h-[44px]"
+            >
+              Reintentar
+            </Button>
           </CardContent>
         </Card>
       </div>
@@ -343,83 +347,83 @@ export default function AdminUsersPage() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex justify-between items-start">
-        <div>
-          <h1 className="text-3xl font-bold text-epoch-primary">
-            Gestión de Administradores
-          </h1>
-          <p className="text-admin-text-tertiary">
-            Administra usuarios con acceso al panel de administración
-          </p>
+    <div className="space-y-4 sm:space-y-6 p-4 sm:p-6 bg-epoch-background min-h-screen">
+      {/* Header - reorganizado en filas */}
+      <div className="flex flex-col gap-4 sm:gap-6">
+        <h1 className="text-xl sm:text-2xl md:text-3xl font-display font-bold text-epoch-primary tracking-tight">
+          Gestión de Administradores
+        </h1>
+        <p className="text-sm sm:text-base text-epoch-primary/80 max-w-2xl">
+          Administra usuarios con acceso al panel de administración
+        </p>
+        <div className="flex justify-start sm:justify-end">
+          <Link href="/admin/admin-users/register">
+            <Button className="rounded-xl bg-epoch-primary hover:bg-epoch-surface text-white font-display font-bold text-[10px] tracking-[0.2em] uppercase min-h-[44px] px-6 w-full sm:w-auto">
+              <UserPlus className="h-4 w-4 mr-2 shrink-0" />
+              Registrar Nuevo Usuario
+            </Button>
+          </Link>
         </div>
-
-        <Link href="/admin/admin-users/register">
-          <Button>
-            <UserPlus className="h-4 w-4 mr-2" />
-            Registrar Nuevo Usuario
-          </Button>
-        </Link>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <Card className="admin-card bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.4)]">
-          <CardContent className="p-6">
-            <div className="flex items-center">
-              <Users className="h-8 w-8 text-epoch-primary" />
-              <div className="ml-4">
-                <p className="text-sm text-admin-text-tertiary">
-                  Total Administradores
+      {/* Stats - optimizado para móvil */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+        <Card className="rounded-xl border border-border">
+          <CardContent className="p-4 sm:p-6">
+            <div className="flex items-center justify-between gap-2">
+              <div className="min-w-0">
+                <p className="text-[10px] sm:text-xs font-medium text-epoch-primary/80 uppercase tracking-wider">
+                  Total
                 </p>
-                <p className="text-2xl font-bold text-epoch-primary">
+                <p className="text-lg sm:text-xl md:text-2xl font-bold text-epoch-primary truncate">
                   {adminUsers.length}
                 </p>
               </div>
+              <Users className="h-6 w-6 sm:h-8 sm:w-8 text-epoch-primary shrink-0" />
             </div>
           </CardContent>
         </Card>
 
-        <Card className="admin-card bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.4)]">
-          <CardContent className="p-6">
-            <div className="flex items-center">
-              <Globe className="h-8 w-8 text-epoch-accent" />
-              <div className="ml-4">
-                <p className="text-sm text-admin-text-tertiary">
-                  Super Administradores
+        <Card className="rounded-xl border border-border">
+          <CardContent className="p-4 sm:p-6">
+            <div className="flex items-center justify-between gap-2">
+              <div className="min-w-0">
+                <p className="text-[10px] sm:text-xs font-medium text-epoch-primary/80 uppercase tracking-wider">
+                  Super Admin
                 </p>
-                <p className="text-2xl font-bold text-epoch-accent">
+                <p className="text-lg sm:text-xl md:text-2xl font-bold text-epoch-accent truncate">
                   {adminUsers.filter((admin) => admin.is_super_admin).length}
                 </p>
               </div>
+              <Globe className="h-6 w-6 sm:h-8 sm:w-8 text-epoch-accent shrink-0" />
             </div>
           </CardContent>
         </Card>
 
-        <Card className="admin-card bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.4)]">
-          <CardContent className="p-6">
-            <div className="flex items-center">
-              <CheckCircle className="h-8 w-8 text-admin-success" />
-              <div className="ml-4">
-                <p className="text-sm text-admin-text-tertiary">Activos</p>
-                <p className="text-2xl font-bold text-admin-success">
+        <Card className="rounded-xl border border-border">
+          <CardContent className="p-4 sm:p-6">
+            <div className="flex items-center justify-between gap-2">
+              <div className="min-w-0">
+                <p className="text-[10px] sm:text-xs font-medium text-epoch-primary/80 uppercase tracking-wider">
+                  Activos
+                </p>
+                <p className="text-lg sm:text-xl md:text-2xl font-bold text-epoch-primary truncate">
                   {adminUsers.filter((admin) => admin.is_active).length}
                 </p>
               </div>
+              <CheckCircle className="h-6 w-6 sm:h-8 sm:w-8 text-epoch-accent shrink-0" />
             </div>
           </CardContent>
         </Card>
 
-        <Card className="admin-card bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.4)]">
-          <CardContent className="p-6">
-            <div className="flex items-center">
-              <Activity className="h-8 w-8 text-red-500" />
-              <div className="ml-4">
-                <p className="text-sm text-admin-text-tertiary">
-                  Activos Recientes
+        <Card className="rounded-xl border border-border">
+          <CardContent className="p-4 sm:p-6">
+            <div className="flex items-center justify-between gap-2">
+              <div className="min-w-0">
+                <p className="text-[10px] sm:text-xs font-medium text-epoch-primary/80 uppercase tracking-wider">
+                  Activos (30d)
                 </p>
-                <p className="text-2xl font-bold text-red-500">
+                <p className="text-lg sm:text-xl md:text-2xl font-bold text-epoch-primary truncate">
                   {
                     adminUsers.filter(
                       (admin) =>
@@ -429,29 +433,30 @@ export default function AdminUsersPage() {
                   }
                 </p>
               </div>
+              <Activity className="h-6 w-6 sm:h-8 sm:w-8 text-epoch-accent shrink-0" />
             </div>
           </CardContent>
         </Card>
       </div>
 
       {/* Filters */}
-      <Card className="admin-card bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.4)]">
-        <CardContent className="p-6">
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="flex-1">
+      <Card className="rounded-xl border border-border">
+        <CardContent className="p-4 sm:p-6">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+            <div className="flex-1 min-w-0">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-admin-text-tertiary h-4 w-4 z-10" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-epoch-primary/70 h-4 w-4 z-10" />
                 <Input
                   placeholder="Buscar por email o nombre..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
+                  className="pl-10 rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20 min-h-[44px]"
                 />
               </div>
             </div>
 
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-[180px]">
+              <SelectTrigger className="w-full sm:w-[180px] rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20 min-h-[44px]">
                 <SelectValue placeholder="Estado" />
               </SelectTrigger>
               <SelectContent>
@@ -465,14 +470,14 @@ export default function AdminUsersPage() {
       </Card>
 
       {/* Admin Users Table */}
-      <Card className="admin-card bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.4)]">
-        <CardHeader>
-          <CardTitle className="flex items-center">
-            <Users className="h-5 w-5 mr-2" />
+      <Card className="rounded-xl border border-border">
+        <CardHeader className="p-4 sm:p-6 pb-0">
+          <CardTitle className="flex items-center gap-2 font-display text-epoch-primary text-base sm:text-lg">
+            <Users className="h-4 w-4 sm:h-5 sm:w-5 shrink-0" />
             Usuarios Administradores ({totalCount})
           </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-4 sm:p-6 pt-4">
           <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0">
             <Table>
               <TableHeader>
@@ -495,15 +500,15 @@ export default function AdminUsersPage() {
                   >
                     <TableCell>
                       <div>
-                        <div className="font-medium">
+                        <div className="font-medium text-epoch-primary text-sm">
                           {admin.analytics?.fullName || "Sin nombre"}
                         </div>
-                        <div className="text-sm text-admin-text-tertiary">
+                        <div className="text-xs sm:text-sm text-epoch-primary/70">
                           {admin.email}
                         </div>
                         {admin.profiles?.phone && (
-                          <div className="flex items-center text-xs text-admin-text-tertiary mt-1">
-                            <Phone className="h-3 w-3 mr-1" />
+                          <div className="flex items-center text-[10px] sm:text-xs text-epoch-primary/70 mt-1">
+                            <Phone className="h-3 w-3 mr-1 shrink-0" />
                             {admin.profiles.phone}
                           </div>
                         )}
@@ -537,13 +542,13 @@ export default function AdminUsersPage() {
                             </Badge>
                           ))}
                           {admin.branches.length > 2 && (
-                            <span className="text-xs text-admin-text-tertiary">
+                            <span className="text-[10px] sm:text-xs text-epoch-primary/70">
                               +{admin.branches.length - 2} más
                             </span>
                           )}
                         </div>
                       ) : (
-                        <span className="text-sm text-admin-text-tertiary">
+                        <span className="text-xs sm:text-sm text-epoch-primary/70">
                           Sin sucursales
                         </span>
                       )}
@@ -552,24 +557,24 @@ export default function AdminUsersPage() {
                     <TableCell>{getStatusBadge(admin.is_active)}</TableCell>
 
                     <TableCell>
-                      <div className="flex items-center text-sm">
-                        <Clock className="h-3 w-3 mr-1 text-admin-text-tertiary" />
+                      <div className="flex items-center text-xs sm:text-sm text-epoch-primary/70">
+                        <Clock className="h-3 w-3 mr-1 shrink-0" />
                         {formatLastActivity(admin.last_login)}
                       </div>
                     </TableCell>
 
                     <TableCell>
                       <div className="text-center">
-                        <div className="font-medium">
+                        <div className="font-medium text-epoch-primary text-sm">
                           {admin.analytics?.activityCount30Days || 0}
                         </div>
-                        <div className="text-xs text-admin-text-tertiary">
+                        <div className="text-[10px] sm:text-xs text-epoch-primary/70">
                           acciones
                         </div>
                       </div>
                     </TableCell>
 
-                    <TableCell className="text-sm text-admin-text-tertiary">
+                    <TableCell className="text-xs sm:text-sm text-epoch-primary/70">
                       {formatDate(admin.created_at, { locale: "es-AR" })}
                     </TableCell>
 
@@ -579,7 +584,7 @@ export default function AdminUsersPage() {
                           <Button
                             variant="ghost"
                             size="sm"
-                            className="h-8 w-8 p-0"
+                            className="h-8 w-8 p-0 min-h-[44px] min-w-[44px] sm:min-h-8 sm:min-w-8"
                           >
                             <span className="sr-only">Abrir menú</span>
                             <MoreVertical className="h-4 w-4" />
@@ -672,12 +677,12 @@ export default function AdminUsersPage() {
           )}
 
           {adminUsers.length === 0 && (
-            <div className="text-center py-12">
-              <Users className="h-12 w-12 text-admin-text-tertiary mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-epoch-primary mb-2">
+            <div className="text-center py-8 sm:py-12">
+              <Users className="h-10 w-10 sm:h-12 sm:w-12 text-epoch-primary/40 mx-auto mb-3 sm:mb-4" />
+              <h3 className="text-base sm:text-lg font-semibold text-epoch-primary mb-2">
                 No se encontraron administradores
               </h3>
-              <p className="text-admin-text-tertiary">
+              <p className="text-sm text-epoch-primary/80">
                 Ajusta los filtros o crea un nuevo administrador.
               </p>
             </div>

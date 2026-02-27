@@ -72,7 +72,7 @@ function ProductGridComponent({
           </Button>
         </div>
       )}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-4">
         {products.map((product) => {
           const stockQuantity =
             product.total_inventory_quantity !== undefined
@@ -115,7 +115,7 @@ function ProductGridComponent({
               )}
 
               {/* Product Image or Placeholder */}
-              <div className="relative w-full h-56 bg-admin-border-primary/5 overflow-hidden border-b border-admin-border-primary/10">
+              <div className="relative w-full h-28 sm:h-40 md:h-48 lg:h-56 bg-admin-border-primary/5 overflow-hidden border-b border-admin-border-primary/10 shrink-0">
                 {hasImage ? (
                   <img
                     src={
@@ -138,7 +138,7 @@ function ProductGridComponent({
                 </div>
               </div>
 
-              <CardHeader className="p-6 pb-2 space-y-1 bg-transparent">
+              <CardHeader className="p-3 sm:p-4 md:p-6 pb-2 space-y-1 bg-transparent">
                 {/* Category Badge */}
                 <p className="text-[10px] font-serif italic text-admin-text-tertiary uppercase tracking-wider">
                   {product.categories?.name ||
@@ -150,31 +150,31 @@ function ProductGridComponent({
                 </p>
 
                 {/* Product Name */}
-                <CardTitle className="text-lg font-display font-bold text-admin-text-primary tracking-tight line-clamp-2 min-h-[3.5rem] uppercase">
+                <CardTitle className="text-xs sm:text-sm md:text-lg font-display font-bold text-admin-text-primary tracking-tight line-clamp-2 min-h-[2rem] sm:min-h-[2.5rem] md:min-h-[3.5rem] uppercase">
                   {product.name || product.title}
                 </CardTitle>
               </CardHeader>
 
-              <CardContent className="p-6 pt-0 flex-1 flex flex-col justify-between bg-transparent">
-                <div className="space-y-4">
+              <CardContent className="p-3 sm:p-4 md:p-6 pt-0 flex-1 flex flex-col justify-between bg-transparent min-h-0">
+                <div className="space-y-2 sm:space-y-4">
                   {/* Price and Stock Section */}
-                  <div className="flex items-end justify-between border-t border-admin-border-primary/10 pt-4">
-                    <div className="space-y-1">
-                      <p className="text-[9px] font-display font-bold text-admin-text-tertiary uppercase tracking-widest">
+                  <div className="flex items-end justify-between border-t border-admin-border-primary/10 pt-2 sm:pt-4 gap-2">
+                    <div className="space-y-0.5 sm:space-y-1 min-w-0">
+                      <p className="text-[8px] sm:text-[9px] font-display font-bold text-admin-text-tertiary uppercase tracking-widest">
                         Valor Unitario
                       </p>
-                      <p className="text-2xl font-display font-bold text-epoch-primary tracking-tighter">
+                      <p className="text-xs sm:text-base md:text-lg lg:text-2xl font-display font-bold text-epoch-primary tracking-tighter truncate">
                         {formatPrice(product.price || 0)}
                       </p>
                     </div>
 
-                    <div className="text-right space-y-1">
-                      <p className="text-[9px] font-display font-bold text-admin-text-tertiary uppercase tracking-widest">
+                    <div className="text-right space-y-0.5 sm:space-y-1 shrink-0">
+                      <p className="text-[8px] sm:text-[9px] font-display font-bold text-admin-text-tertiary uppercase tracking-widest">
                         Existencias
                       </p>
-                      <div className="flex items-center justify-end gap-1.5">
+                      <div className="flex items-center justify-end gap-1">
                         <span
-                          className={`text-lg font-display font-bold ${
+                          className={`text-sm sm:text-lg font-display font-bold ${
                             isLowStock
                               ? "text-admin-error"
                               : "text-admin-text-primary"
@@ -183,10 +183,10 @@ function ProductGridComponent({
                           {stockQuantity}
                         </span>
                         {isLowStock && (
-                          <AlertTriangle className="h-3.5 w-3.5 text-admin-error animate-pulse" />
+                          <AlertTriangle className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-admin-error animate-pulse" />
                         )}
                       </div>
-                      <p className="text-[9px] text-admin-text-tertiary">
+                      <p className="text-[8px] sm:text-[9px] text-admin-text-tertiary">
                         Umbral: {threshold}
                       </p>
                     </div>
@@ -194,7 +194,7 @@ function ProductGridComponent({
 
                   {/* Info Labels */}
                   {product.sku && (
-                    <p className="text-[9px] font-display font-bold text-admin-text-tertiary uppercase tracking-[0.2em]">
+                    <p className="text-[8px] sm:text-[9px] font-display font-bold text-admin-text-tertiary uppercase tracking-[0.2em] truncate">
                       REF:{" "}
                       <span className="text-admin-text-secondary ml-1">
                         {product.sku}
@@ -204,7 +204,7 @@ function ProductGridComponent({
                 </div>
 
                 {/* Action Buttons - fondo claro cuando tarjeta en hover para contraste */}
-                <div className="product-grid-actions flex items-center gap-2 pt-4 mt-4 border-t border-admin-border-primary/10">
+                <div className="product-grid-actions flex flex-wrap items-center gap-1.5 sm:gap-2 pt-3 sm:pt-4 mt-3 sm:mt-4 border-t border-admin-border-primary/10">
                   <Link
                     href={`/admin/products/${product.slug}`}
                     className="flex-1"
@@ -212,10 +212,10 @@ function ProductGridComponent({
                     <Button
                       variant="outline"
                       size="sm"
-                      className="product-grid-card-btn w-full h-9 rounded-xl border-admin-border-primary/20 text-[10px] font-display font-bold tracking-widest uppercase hover:bg-epoch-primary/10 hover:border-epoch-primary/30 text-epoch-primary transition-all"
+                      className="product-grid-card-btn w-full h-8 sm:h-9 rounded-lg sm:rounded-xl border-admin-border-primary/20 text-[8px] sm:text-[10px] font-display font-bold tracking-widest uppercase hover:bg-epoch-primary/10 hover:border-epoch-primary/30 text-epoch-primary transition-all"
                     >
-                      <Eye className="h-3.5 w-3.5 mr-2" />
-                      ARCHIVO
+                      <Eye className="h-3 w-3 sm:h-3.5 sm:w-3.5 sm:mr-2" />
+                      <span className="hidden sm:inline">ARCHIVO</span>
                     </Button>
                   </Link>
                   <Link
@@ -225,17 +225,17 @@ function ProductGridComponent({
                     <Button
                       variant="outline"
                       size="sm"
-                      className="product-grid-card-btn w-full h-9 rounded-xl border-admin-border-primary/20 text-[10px] font-display font-bold tracking-widest uppercase hover:bg-epoch-primary/10 hover:border-epoch-primary/30 text-epoch-primary transition-all"
+                      className="product-grid-card-btn w-full h-8 sm:h-9 rounded-lg sm:rounded-xl border-admin-border-primary/20 text-[8px] sm:text-[10px] font-display font-bold tracking-widest uppercase hover:bg-epoch-primary/10 hover:border-epoch-primary/30 text-epoch-primary transition-all"
                     >
-                      <Edit className="h-3.5 w-3.5 mr-2" />
-                      EDITAR
+                      <Edit className="h-3 w-3 sm:h-3.5 sm:w-3.5 sm:mr-2" />
+                      <span className="hidden sm:inline">EDITAR</span>
                     </Button>
                   </Link>
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => onDelete(product)}
-                    className="product-grid-card-btn product-grid-card-btn-delete h-9 px-4 rounded-xl border-admin-error/30 text-admin-error hover:bg-admin-error/10 hover:border-admin-error/50 transition-all shrink-0"
+                    className="product-grid-card-btn product-grid-card-btn-delete h-8 sm:h-9 px-2 sm:px-4 rounded-lg sm:rounded-xl border-admin-error/30 text-admin-error hover:bg-admin-error/10 hover:border-admin-error/50 transition-all shrink-0"
                   >
                     <Trash2 className="h-3.5 w-3.5" />
                   </Button>

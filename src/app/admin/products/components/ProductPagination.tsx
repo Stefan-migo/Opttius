@@ -37,23 +37,24 @@ export default function ProductPagination({
 
   return (
     <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.4)]">
-      <CardContent className="p-4">
-        <div className="flex items-center justify-between">
-          <div className="text-sm text-tierra-media">
-            Mostrando {startItem} - {endItem} de {totalProducts} productos
+      <CardContent className="p-3 sm:p-4">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+          <div className="text-xs sm:text-sm text-tierra-media text-center sm:text-left order-2 sm:order-1">
+            {startItem} - {endItem} de {totalProducts}
           </div>
 
-          <div className="flex items-center space-x-2">
+          <div className="flex flex-wrap items-center justify-center sm:justify-end gap-2 order-1 sm:order-2">
             <Button
               variant="outline"
               size="sm"
               onClick={() => onPageChange(Math.max(1, currentPage - 1))}
               disabled={currentPage === 1}
+              className="h-8 sm:h-9 text-xs px-2 sm:px-3"
             >
-              Anterior
+              Ant
             </Button>
 
-            <div className="flex items-center space-x-1">
+            <div className="flex items-center gap-0.5 sm:gap-1 flex-wrap justify-center">
               {/* First page */}
               {currentPage > 3 && (
                 <>
@@ -85,6 +86,7 @@ export default function ProductPagination({
                     variant={currentPage === page ? "default" : "outline"}
                     size="sm"
                     onClick={() => onPageChange(page)}
+                    className="h-8 w-8 sm:h-9 sm:w-9 p-0 min-w-0"
                   >
                     {page}
                   </Button>
@@ -114,8 +116,9 @@ export default function ProductPagination({
                 onPageChange(Math.min(totalPages, currentPage + 1))
               }
               disabled={currentPage === totalPages}
+              className="h-8 sm:h-9 text-xs px-2 sm:px-3"
             >
-              Siguiente
+              Sig
             </Button>
 
             <Select
@@ -125,7 +128,7 @@ export default function ProductPagination({
                 onPageChange(1);
               }}
             >
-              <SelectTrigger className="w-[100px]">
+              <SelectTrigger className="w-[70px] sm:w-[100px] h-8 sm:h-9 text-xs">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>

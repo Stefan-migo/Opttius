@@ -79,10 +79,10 @@ export function ProblemSolutionSection() {
               <h3 className="text-2xl sm:text-3xl font-sans font-bold text-epoch-primary">
                 Gestión Tradicional ❌
               </h3>
-              <p className="text-sm text-epoch-primary/70 font-sans">
+              <p className="text-sm text-epoch-accent font-sans font-medium">
                 (Sistemas genéricos y papel)
               </p>
-              <div className="w-12 h-[1px] bg-red-900/40"></div>
+              <div className="w-12 h-[1px] bg-red-900/60"></div>
             </div>
 
             <div className="space-y-12">
@@ -113,7 +113,7 @@ export function ProblemSolutionSection() {
               <p className="text-sm text-epoch-accent font-sans font-medium">
                 (Inteligencia Operativa)
               </p>
-              <div className="w-12 h-[1px] bg-epoch-accent/50"></div>
+              <div className="w-12 h-[1px] bg-epoch-accent"></div>
             </div>
 
             <div className="space-y-12">

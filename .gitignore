@@ -21,6 +21,7 @@ node_modules/
 nul
 
 # Debug
+debug-*.log
 npm-debug.log*
 build-*.txt
 query_*.txt

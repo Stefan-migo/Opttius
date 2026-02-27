@@ -315,64 +315,77 @@ export default function POSBillingSettingsPage() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
+    <div className="space-y-4 sm:space-y-6">
+      {/* Header - reorganizado en filas para móvil */}
+      <div className="flex flex-col gap-4 sm:gap-6">
         <div>
-          <h1 className="text-3xl font-bold text-epoch-primary">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-epoch-primary font-display">
             Configuración POS y Boletas {isGlobalView && "(VISTA GLOBAL)"}
           </h1>
-          <p className="text-admin-text-tertiary mt-1">
+          <p className="text-xs sm:text-sm text-epoch-primary/80 mt-1">
             {isGlobalView
               ? "Configuración global para todas las sucursales"
               : "Configura el punto de venta y personaliza tus boletas y facturas"}
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
           {isSuperAdmin && <BranchSelector />}
-          <Button variant="outline" onClick={() => router.back()}>
-            <ArrowLeft className="h-4 w-4 mr-2" />
+          <Button
+            variant="outline"
+            onClick={() => router.back()}
+            className="rounded-xl min-h-[44px] w-full sm:w-auto"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2 shrink-0" />
             Volver
           </Button>
         </div>
       </div>
 
-      {/* Tabs */}
+      {/* Tabs - scroll horizontal en móvil */}
       <Tabs
         value={activeTab}
         onValueChange={(v) => setActiveTab(v as any)}
-        className="space-y-6"
+        className="space-y-4 sm:space-y-6"
       >
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="pos">
-            <Settings className="h-4 w-4 mr-2" />
+        <TabsList className="flex w-full justify-start gap-1 overflow-x-auto overflow-y-hidden min-w-0 p-1 rounded-xl border border-border [scrollbar-width:thin] flex-shrink-0">
+          <TabsTrigger
+            value="pos"
+            className="flex-shrink-0 min-h-[44px] text-xs sm:text-sm px-3 py-2"
+          >
+            <Settings className="h-4 w-4 mr-2 shrink-0" />
             Configuración POS
           </TabsTrigger>
-          <TabsTrigger value="billing">
-            <FileText className="h-4 w-4 mr-2" />
+          <TabsTrigger
+            value="billing"
+            className="flex-shrink-0 min-h-[44px] text-xs sm:text-sm px-3 py-2"
+          >
+            <FileText className="h-4 w-4 mr-2 shrink-0" />
             Configuración de Boletas
           </TabsTrigger>
-          <TabsTrigger value="preview">
-            <Eye className="h-4 w-4 mr-2" />
+          <TabsTrigger
+            value="preview"
+            className="flex-shrink-0 min-h-[44px] text-xs sm:text-sm px-3 py-2"
+          >
+            <Eye className="h-4 w-4 mr-2 shrink-0" />
             Previsualización
           </TabsTrigger>
         </TabsList>
 
         {/* POS Settings Tab */}
-        <TabsContent value="pos" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Settings className="h-5 w-5" />
+        <TabsContent value="pos" className="space-y-4 sm:space-y-6">
+          <Card className="rounded-xl border border-border overflow-hidden">
+            <CardHeader className="p-4 sm:p-6">
+              <CardTitle className="flex items-center gap-2 font-display text-epoch-primary text-base sm:text-lg">
+                <Settings className="h-4 w-4 sm:h-5 sm:w-5 shrink-0" />
                 Configuración de Depósito Mínimo
               </CardTitle>
-              <CardDescription>
+              <CardDescription className="text-xs sm:text-sm text-epoch-primary/80 mt-1">
                 Configura el depósito mínimo requerido para procesar trabajos.
                 El sistema usará el mayor valor entre el porcentaje y el monto
                 fijo.
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6">
+            <CardContent className="p-4 sm:p-6 space-y-6">
               <div className="space-y-2">
                 <Label htmlFor="min_deposit_percent">
                   Porcentaje Mínimo de Depósito (%)
@@ -392,7 +405,7 @@ export default function POSBillingSettingsPage() {
                   }
                   placeholder="50.00"
                 />
-                <p className="text-sm text-admin-text-tertiary">
+                <p className="text-xs sm:text-sm text-epoch-primary/80">
                   Porcentaje del total de la orden que se requiere como depósito
                   mínimo.
                 </p>
@@ -418,7 +431,7 @@ export default function POSBillingSettingsPage() {
                   }
                   placeholder="Dejar vacío para usar solo porcentaje"
                 />
-                <p className="text-sm text-admin-text-tertiary">
+                <p className="text-xs sm:text-sm text-epoch-primary/80">
                   Monto fijo mínimo de depósito. Si se establece, el sistema
                   usará el mayor valor entre el porcentaje calculado y este
                   monto fijo.
@@ -783,21 +796,25 @@ export default function POSBillingSettingsPage() {
         </TabsContent>
 
         {/* Preview Tab */}
-        <TabsContent value="preview" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Eye className="h-5 w-5" />
-                Previsualización de Boleta
+        <TabsContent value="preview" className="space-y-4 sm:space-y-6">
+          <Card className="rounded-xl border border-border overflow-hidden">
+            <CardHeader className="p-4 sm:p-6">
+              <CardTitle className="flex flex-col sm:flex-row sm:items-center gap-2 font-display text-epoch-primary text-base sm:text-lg">
+                <span className="flex items-center gap-2">
+                  <Eye className="h-4 w-4 sm:h-5 sm:w-5 shrink-0" />
+                  Previsualización de Boleta
+                </span>
               </CardTitle>
-              <CardDescription>
+              <CardDescription className="text-xs sm:text-sm text-epoch-primary/80 mt-1">
                 Vista previa de cómo se verá la boleta o factura impresa
               </CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-4 sm:p-6 pt-0">
               <div className="space-y-4">
-                <div className="flex items-center gap-4">
-                  <Label>Tipo de Documento:</Label>
+                <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+                  <Label className="text-xs sm:text-sm">
+                    Tipo de Documento:
+                  </Label>
                   <Select
                     value={billingSettings.default_document_type}
                     onValueChange={(v: any) =>
@@ -807,7 +824,7 @@ export default function POSBillingSettingsPage() {
                       })
                     }
                   >
-                    <SelectTrigger className="w-48">
+                    <SelectTrigger className="w-full sm:w-48 rounded-xl min-h-[44px]">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -815,12 +832,12 @@ export default function POSBillingSettingsPage() {
                       <SelectItem value="factura">Factura</SelectItem>
                     </SelectContent>
                   </Select>
-                  <Label>Formato:</Label>
+                  <Label className="text-xs sm:text-sm">Formato:</Label>
                   <Select
                     value={billingSettings.printer_type || "thermal"}
                     onValueChange={(v: any) => handlePrinterTypeChange(v)}
                   >
-                    <SelectTrigger className="w-48">
+                    <SelectTrigger className="w-full sm:w-48 rounded-xl min-h-[44px]">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -832,138 +849,140 @@ export default function POSBillingSettingsPage() {
                   </Select>
                 </div>
 
-                {/* Preview Container */}
-                <div
-                  className="border-2 border-gray-300 bg-white mx-auto shadow-lg"
-                  style={{
-                    width: `${(billingSettings.printer_width_mm || 80) * 3.779527559}px`, // Convert mm to px (1mm = 3.779527559px at 96dpi)
-                    minHeight: `${(billingSettings.printer_height_mm || 297) * 3.779527559}px`,
-                    maxWidth: "100%",
-                  }}
-                >
+                {/* Preview Container - scroll horizontal en móvil si el ancho excede */}
+                <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
                   <div
-                    className="p-4"
+                    className="border-2 border-border bg-white mx-auto shadow-lg shrink-0"
                     style={{
-                      fontSize:
-                        billingSettings.printer_type === "thermal"
-                          ? "10px"
-                          : "12px",
+                      width: `${(billingSettings.printer_width_mm || 80) * 3.779527559}px`,
+                      minHeight: `${(billingSettings.printer_height_mm || 297) * 3.779527559}px`,
+                      maxWidth: "min(100%, 100vw - 2rem)",
                     }}
                   >
-                    {/* Header */}
-                    <div className="text-center mb-4">
-                      {billingSettings.logo_url && (
-                        <img
-                          src={billingSettings.logo_url}
-                          alt="Logo"
-                          className="h-16 mx-auto mb-2 object-contain"
-                        />
-                      )}
-                      <h2 className="font-bold text-lg">
-                        {billingSettings.business_name ||
-                          "Nombre de la Empresa"}
-                      </h2>
-                      <p className="text-xs">
-                        RUT: {billingSettings.business_rut || "XX.XXX.XXX-X"}
-                      </p>
-                      {billingSettings.business_address && (
+                    <div
+                      className="p-4"
+                      style={{
+                        fontSize:
+                          billingSettings.printer_type === "thermal"
+                            ? "10px"
+                            : "12px",
+                      }}
+                    >
+                      {/* Header */}
+                      <div className="text-center mb-4">
+                        {billingSettings.logo_url && (
+                          <img
+                            src={billingSettings.logo_url}
+                            alt="Logo"
+                            className="h-16 mx-auto mb-2 object-contain"
+                          />
+                        )}
+                        <h2 className="font-bold text-lg">
+                          {billingSettings.business_name ||
+                            "Nombre de la Empresa"}
+                        </h2>
                         <p className="text-xs">
-                          {billingSettings.business_address}
+                          RUT: {billingSettings.business_rut || "XX.XXX.XXX-X"}
                         </p>
+                        {billingSettings.business_address && (
+                          <p className="text-xs">
+                            {billingSettings.business_address}
+                          </p>
+                        )}
+                        {billingSettings.business_phone && (
+                          <p className="text-xs">
+                            Tel: {billingSettings.business_phone}
+                          </p>
+                        )}
+                      </div>
+
+                      {billingSettings.header_text && (
+                        <div className="text-center mb-4 text-xs border-b pb-2">
+                          {billingSettings.header_text}
+                        </div>
                       )}
-                      {billingSettings.business_phone && (
+
+                      {/* Document Type */}
+                      <div className="text-center mb-4">
+                        <h3 className="font-bold text-base">
+                          {billingSettings.default_document_type === "boleta"
+                            ? "BOLETA"
+                            : "FACTURA"}
+                        </h3>
+                        <p className="text-xs">Folio: BOL-000001</p>
                         <p className="text-xs">
-                          Tel: {billingSettings.business_phone}
+                          Fecha: {new Date().toLocaleDateString("es-CL")}
                         </p>
+                      </div>
+
+                      {/* Customer Info */}
+                      <div className="mb-4 border-b pb-2">
+                        <p className="font-semibold text-xs mb-1">Cliente:</p>
+                        <p className="text-xs">Nombre: Cliente Ejemplo</p>
+                        <p className="text-xs">RUT: 12.345.678-9</p>
+                      </div>
+
+                      {/* Items Table */}
+                      <div className="mb-4">
+                        <table className="w-full text-xs border-collapse">
+                          <thead>
+                            <tr className="border-b">
+                              <th className="text-left py-1">Cant.</th>
+                              <th className="text-left py-1">Descripción</th>
+                              <th className="text-right py-1">Precio</th>
+                              <th className="text-right py-1">Total</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr className="border-b">
+                              <td className="py-1">1</td>
+                              <td className="py-1">Producto Ejemplo</td>
+                              <td className="text-right py-1">$10.000</td>
+                              <td className="text-right py-1">$10.000</td>
+                            </tr>
+                            <tr className="border-b">
+                              <td className="py-1">2</td>
+                              <td className="py-1">Otro Producto</td>
+                              <td className="text-right py-1">$5.000</td>
+                              <td className="text-right py-1">$10.000</td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+
+                      {/* Totals */}
+                      <div className="mb-4 border-t pt-2">
+                        <div className="flex justify-between text-xs mb-1">
+                          <span>Subtotal:</span>
+                          <span>$20.000</span>
+                        </div>
+                        <div className="flex justify-between text-xs mb-1">
+                          <span>IVA (19%):</span>
+                          <span>$3.800</span>
+                        </div>
+                        <div className="flex justify-between font-bold text-sm border-t pt-1 mt-2">
+                          <span>TOTAL:</span>
+                          <span>$23.800</span>
+                        </div>
+                      </div>
+
+                      {billingSettings.footer_text && (
+                        <div className="text-center mt-4 text-xs border-t pt-2">
+                          {billingSettings.footer_text}
+                        </div>
+                      )}
+
+                      {billingSettings.terms_and_conditions && (
+                        <div className="mt-4 text-xs border-t pt-2">
+                          <p className="font-semibold mb-1">
+                            Términos y Condiciones:
+                          </p>
+                          <p className="text-xs">
+                            {billingSettings.terms_and_conditions}
+                          </p>
+                        </div>
                       )}
                     </div>
-
-                    {billingSettings.header_text && (
-                      <div className="text-center mb-4 text-xs border-b pb-2">
-                        {billingSettings.header_text}
-                      </div>
-                    )}
-
-                    {/* Document Type */}
-                    <div className="text-center mb-4">
-                      <h3 className="font-bold text-base">
-                        {billingSettings.default_document_type === "boleta"
-                          ? "BOLETA"
-                          : "FACTURA"}
-                      </h3>
-                      <p className="text-xs">Folio: BOL-000001</p>
-                      <p className="text-xs">
-                        Fecha: {new Date().toLocaleDateString("es-CL")}
-                      </p>
-                    </div>
-
-                    {/* Customer Info */}
-                    <div className="mb-4 border-b pb-2">
-                      <p className="font-semibold text-xs mb-1">Cliente:</p>
-                      <p className="text-xs">Nombre: Cliente Ejemplo</p>
-                      <p className="text-xs">RUT: 12.345.678-9</p>
-                    </div>
-
-                    {/* Items Table */}
-                    <div className="mb-4">
-                      <table className="w-full text-xs border-collapse">
-                        <thead>
-                          <tr className="border-b">
-                            <th className="text-left py-1">Cant.</th>
-                            <th className="text-left py-1">Descripción</th>
-                            <th className="text-right py-1">Precio</th>
-                            <th className="text-right py-1">Total</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          <tr className="border-b">
-                            <td className="py-1">1</td>
-                            <td className="py-1">Producto Ejemplo</td>
-                            <td className="text-right py-1">$10.000</td>
-                            <td className="text-right py-1">$10.000</td>
-                          </tr>
-                          <tr className="border-b">
-                            <td className="py-1">2</td>
-                            <td className="py-1">Otro Producto</td>
-                            <td className="text-right py-1">$5.000</td>
-                            <td className="text-right py-1">$10.000</td>
-                          </tr>
-                        </tbody>
-                      </table>
-                    </div>
-
-                    {/* Totals */}
-                    <div className="mb-4 border-t pt-2">
-                      <div className="flex justify-between text-xs mb-1">
-                        <span>Subtotal:</span>
-                        <span>$20.000</span>
-                      </div>
-                      <div className="flex justify-between text-xs mb-1">
-                        <span>IVA (19%):</span>
-                        <span>$3.800</span>
-                      </div>
-                      <div className="flex justify-between font-bold text-sm border-t pt-1 mt-2">
-                        <span>TOTAL:</span>
-                        <span>$23.800</span>
-                      </div>
-                    </div>
-
-                    {billingSettings.footer_text && (
-                      <div className="text-center mt-4 text-xs border-t pt-2">
-                        {billingSettings.footer_text}
-                      </div>
-                    )}
-
-                    {billingSettings.terms_and_conditions && (
-                      <div className="mt-4 text-xs border-t pt-2">
-                        <p className="font-semibold mb-1">
-                          Términos y Condiciones:
-                        </p>
-                        <p className="text-xs">
-                          {billingSettings.terms_and_conditions}
-                        </p>
-                      </div>
-                    )}
                   </div>
                 </div>
               </div>

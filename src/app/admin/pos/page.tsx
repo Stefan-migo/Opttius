@@ -52,6 +52,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Label } from "@/components/ui/label";
 import {
   formatRUT,
@@ -66,6 +67,7 @@ import {
 } from "@/lib/utils/tax";
 import { getTaxPercentage } from "@/lib/utils/tax-config";
 import { formatCurrency, formatDate, formatPrice } from "@/lib/utils";
+import { getTodayInTimezone } from "@/lib/utils/date-timezone";
 import { extractDataFromResponse } from "@/lib/api/response-helpers";
 import {
   posService,
@@ -82,7 +84,6 @@ import { ContactLensFamilyCombobox } from "@/components/admin/lenses/ContactLens
 import type { QuoteSearchParams } from "@/lib/api/services";
 import { useBranch } from "@/hooks/useBranch";
 import { getBranchHeader } from "@/lib/utils/branch";
-import { BranchSelector } from "@/components/admin/BranchSelector";
 import { useLensPriceCalculation } from "@/hooks/useLensPriceCalculation";
 import {
   hasAddition,
@@ -204,6 +205,7 @@ export default function POSPage() {
   const [searching, setSearching] = useState(false);
   const [processingPayment, setProcessingPayment] = useState(false);
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
+  const [mobilePaymentDrawerOpen, setMobilePaymentDrawerOpen] = useState(false);
   const [showPendingBalanceDialog, setShowPendingBalanceDialog] =
     useState(false);
   const [pendingBalanceOrders, setPendingBalanceOrders] = useState<any[]>([]);
@@ -304,7 +306,7 @@ export default function POSPage() {
     email: "",
   });
   const [externalPrescriptionData, setExternalPrescriptionData] = useState({
-    prescription_date: new Date().toISOString().split("T")[0],
+    prescription_date: getTodayInTimezone("America/Santiago"),
     expiration_date: "",
     prescription_number: "",
     issued_by: "",
@@ -437,6 +439,9 @@ export default function POSPage() {
 
   // Tab activo del formulario "Crear orden completa" (para abrir Lentes al cargar presupuesto de lentes de contacto)
   const [orderFormTab, setOrderFormTab] = useState("customer");
+  const [mainSectionTab, setMainSectionTab] = useState<
+    "cliente" | "productos" | "orden"
+  >("cliente");
 
   // Tax percentage state
   const [taxPercentage, setTaxPercentage] = useState<number>(19.0);
@@ -1453,7 +1458,7 @@ export default function POSPage() {
         email: "",
       });
       setExternalPrescriptionData({
-        prescription_date: new Date().toISOString().split("T")[0],
+        prescription_date: getTodayInTimezone("America/Santiago"),
         expiration_date: "",
         prescription_number: "",
         issued_by: "",
@@ -3111,53 +3116,60 @@ export default function POSPage() {
   };
 
   return (
-    <div className="h-screen flex flex-col bg-[var(--admin-bg-primary)]">
-      {/* Header */}
-      <div className="border-b px-4 sm:px-6 py-4 bg-[var(--admin-bg-tertiary)]">
+    <div className="h-screen flex flex-col bg-[var(--admin-bg-primary)] pb-40 lg:pb-0">
+      {/* Header - title, subtitle, Caja | Saldos (no card) */}
+      <div className="border-b px-4 sm:px-6 py-3 sm:py-4 bg-[var(--admin-bg-primary)] flex-shrink-0">
         <div className="flex flex-col gap-3">
-          {/* First row: Branch selector and Caja button */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <div>
-              <h1
-                className="text-xl sm:text-2xl font-bold text-gray-900"
-                data-tour="pos-header"
-              >
-                Punto de Venta (POS)
-              </h1>
-              <p className="text-sm text-gray-600">
-                {!currentBranchId && isSuperAdmin
-                  ? "Sistema de ventas - Todas las sucursales"
-                  : "Sistema de ventas"}
-              </p>
-            </div>
-            <div className="flex flex-wrap items-center gap-2 sm:gap-4">
-              {isSuperAdmin && <BranchSelector />}
-              <Link href="/admin/cash-register">
-                <Button variant="outline">
-                  <DollarSign className="h-4 w-4 mr-2" />
-                  Caja
-                </Button>
-              </Link>
+          <div className="min-w-0">
+            <h1
+              className="text-lg sm:text-2xl font-bold text-gray-900 truncate"
+              data-tour="pos-header"
+            >
+              Punto de Venta (POS)
+            </h1>
+            <p className="text-sm text-gray-600">
+              {!currentBranchId && isSuperAdmin
+                ? "Sistema de ventas - Todas las sucursales"
+                : "Sistema de ventas"}
+            </p>
+          </div>
+          <div className="flex items-center justify-between gap-2">
+            <Link href="/admin/cash-register">
               <Button
                 variant="outline"
-                onClick={() => setShowPendingBalanceDialog(true)}
-                title="Cobrar saldos pendientes de órdenes"
+                size="sm"
+                className="min-h-[44px] sm:min-h-0"
               >
-                <CreditCard className="h-4 w-4 mr-2" />
-                <span className="hidden sm:inline">Saldos Pendientes</span>
-                <span className="sm:hidden">Saldos</span>
+                <DollarSign className="h-4 w-4 mr-2" />
+                Caja
               </Button>
-            </div>
+            </Link>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowPendingBalanceDialog(true)}
+              title="Cobrar saldos pendientes de órdenes"
+              className="min-h-[44px] sm:min-h-0"
+            >
+              <CreditCard className="h-4 w-4 mr-2" />
+              <span className="hidden sm:inline">Saldos Pendientes</span>
+              <span className="sm:hidden">Saldos</span>
+            </Button>
           </div>
-          {/* Second row: Total and Clear button */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-            <Badge variant="outline" className="text-lg px-4 py-2">
+          {/* Desktop only: Total and Clear */}
+          <div className="hidden lg:flex flex-row items-center justify-between gap-2">
+            <Badge
+              variant="outline"
+              className="text-base sm:text-lg px-3 sm:px-4 py-1.5 sm:py-2"
+            >
               Total: {formatCurrency(total)}
             </Badge>
             <Button
               variant="outline"
+              size="sm"
               onClick={clearCart}
               disabled={cart.length === 0}
+              className="min-h-[40px] sm:min-h-0"
             >
               <X className="h-4 w-4 mr-2" />
               Limpiar
@@ -3166,10 +3178,10 @@ export default function POSPage() {
         </div>
       </div>
 
-      {/* Cash Status Alert */}
+      {/* Cash Status Alert - desktop only; mobile uses fixed alert above Cobrar bar */}
       {!isSuperAdmin && currentBranchId && (
         <div
-          className={`px-4 sm:px-6 py-3 ${isCashOpen === false ? "bg-red-50 border-b border-red-200" : isCashOpen === true ? "bg-green-50 border-b border-green-200" : ""}`}
+          className={`hidden lg:block px-4 sm:px-6 py-3 ${isCashOpen === false ? "bg-red-50 border-b border-red-200" : isCashOpen === true ? "bg-green-50 border-b border-green-200" : ""}`}
         >
           {checkingCashStatus ? (
             <div className="flex items-center gap-2 text-sm text-gray-600">
@@ -3203,1059 +3215,1224 @@ export default function POSPage() {
         </div>
       )}
 
-      <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
-        {/* Left Panel - Customer & Order Form */}
-        <div className="w-full lg:w-2/3 flex flex-col border-r-0 lg:border-r overflow-hidden bg-[var(--admin-bg-primary)] min-h-0">
-          {/* Scrollable Content - Customer & Order Form */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-[var(--admin-bg-primary)]">
-            {/* Customer Info */}
-            <Card className="bg-[var(--admin-bg-tertiary)]">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-lg">Cliente</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {/* Customer Search Input */}
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                  <Input
-                    ref={customerSearchInputRef as React.Ref<HTMLInputElement>}
-                    placeholder="Buscar cliente (nombre, email, teléfono, RUT)..."
-                    value={customerSearchTerm}
-                    onChange={(e) => {
-                      setCustomerSearchTerm(e.target.value);
-                      setSelectedCustomerIndex(-1);
-                      // Si se borra el término de búsqueda, limpiar cliente seleccionado
-                      if (e.target.value.trim().length === 0) {
-                        setSelectedCustomer(null);
-                        setCustomerBusinessName("");
-                        setCustomerRUT("");
-                      }
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        e.preventDefault();
-                        if (
-                          selectedCustomerIndex >= 0 &&
-                          customerSearchResults[selectedCustomerIndex]
-                        ) {
-                          handleSelectCustomer(
-                            customerSearchResults[selectedCustomerIndex],
-                          );
-                        } else if (customerSearchResults.length > 0) {
-                          handleSelectCustomer(customerSearchResults[0]);
+      <div className="flex-1 flex flex-col lg:flex-row overflow-y-auto lg:overflow-hidden min-h-0">
+        {/* Left Panel - Customer & Order Form (order-2 on mobile = below cart) */}
+        <div className="w-full lg:w-2/3 flex flex-col border-r-0 lg:border-r overflow-hidden bg-[var(--admin-bg-primary)] min-h-0 order-2 lg:order-1">
+          {/* Mobile: Tabs for sections | Desktop: all visible */}
+          <div className="flex-1 overflow-y-auto p-4 bg-[var(--admin-bg-primary)] min-h-0">
+            {/* Mobile-only: Section switcher - touch-friendly 44px min */}
+            <div className="lg:hidden flex gap-2 mb-4">
+              <Button
+                type="button"
+                variant={mainSectionTab === "cliente" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setMainSectionTab("cliente")}
+                className="flex-1 min-h-[44px] text-xs sm:text-sm"
+              >
+                Cliente
+              </Button>
+              <Button
+                type="button"
+                variant={mainSectionTab === "productos" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setMainSectionTab("productos")}
+                className="flex-1 min-h-[44px] text-xs sm:text-sm"
+              >
+                Productos
+              </Button>
+              <Button
+                type="button"
+                variant={mainSectionTab === "orden" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setMainSectionTab("orden")}
+                className="flex-1 min-h-[44px] text-xs sm:text-sm"
+              >
+                Orden
+              </Button>
+            </div>
+            <div className="space-y-4">
+              {/* Customer Info - visible on mobile when tab=cliente, always on desktop */}
+              <div
+                className={
+                  mainSectionTab === "cliente" ? "block" : "hidden lg:block"
+                }
+              >
+                <Card className="bg-[var(--admin-bg-tertiary)]">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg">Cliente</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {/* Customer Search Input */}
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                      <Input
+                        ref={
+                          customerSearchInputRef as React.Ref<HTMLInputElement>
                         }
-                      } else if (e.key === "ArrowDown") {
-                        e.preventDefault();
-                        setSelectedCustomerIndex((prev) =>
-                          prev < customerSearchResults.length - 1
-                            ? prev + 1
-                            : prev,
-                        );
-                      } else if (e.key === "ArrowUp") {
-                        e.preventDefault();
-                        setSelectedCustomerIndex((prev) =>
-                          prev > 0 ? prev - 1 : -1,
-                        );
-                      } else if (e.key === "Escape") {
-                        setCustomerSearchResults([]);
-                        setCustomerSearchTerm("");
-                        setSelectedCustomerIndex(-1);
-                      }
-                    }}
-                    className="pl-10"
-                    autoComplete="off"
-                  />
-                </div>
+                        placeholder="Buscar cliente (nombre, email, teléfono, RUT)..."
+                        value={customerSearchTerm}
+                        onChange={(e) => {
+                          setCustomerSearchTerm(e.target.value);
+                          setSelectedCustomerIndex(-1);
+                          // Si se borra el término de búsqueda, limpiar cliente seleccionado
+                          if (e.target.value.trim().length === 0) {
+                            setSelectedCustomer(null);
+                            setCustomerBusinessName("");
+                            setCustomerRUT("");
+                          }
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            if (
+                              selectedCustomerIndex >= 0 &&
+                              customerSearchResults[selectedCustomerIndex]
+                            ) {
+                              handleSelectCustomer(
+                                customerSearchResults[selectedCustomerIndex],
+                              );
+                            } else if (customerSearchResults.length > 0) {
+                              handleSelectCustomer(customerSearchResults[0]);
+                            }
+                          } else if (e.key === "ArrowDown") {
+                            e.preventDefault();
+                            setSelectedCustomerIndex((prev) =>
+                              prev < customerSearchResults.length - 1
+                                ? prev + 1
+                                : prev,
+                            );
+                          } else if (e.key === "ArrowUp") {
+                            e.preventDefault();
+                            setSelectedCustomerIndex((prev) =>
+                              prev > 0 ? prev - 1 : -1,
+                            );
+                          } else if (e.key === "Escape") {
+                            setCustomerSearchResults([]);
+                            setCustomerSearchTerm("");
+                            setSelectedCustomerIndex(-1);
+                          }
+                        }}
+                        className="pl-10"
+                        autoComplete="off"
+                      />
+                    </div>
 
-                {/* Customer Search Results Dropdown */}
-                {customerSearchTerm.trim().length > 0 && (
-                  <div className="relative">
-                    {searchingCustomers && (
-                      <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center z-10 rounded-lg border">
-                        <Loader2 className="h-5 w-5 animate-spin text-gray-400" />
+                    {/* Customer Search Results Dropdown */}
+                    {customerSearchTerm.trim().length > 0 && (
+                      <div className="relative">
+                        {searchingCustomers && (
+                          <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center z-10 rounded-lg border">
+                            <Loader2 className="h-5 w-5 animate-spin text-gray-400" />
+                          </div>
+                        )}
+
+                        {!searchingCustomers &&
+                          customerSearchResults.length > 0 && (
+                            <div
+                              ref={
+                                customerSuggestionsRef as React.Ref<HTMLDivElement>
+                              }
+                              className="max-h-60 overflow-y-auto border rounded-lg bg-white shadow-lg z-20"
+                            >
+                              {customerSearchResults.map((customer, index) => (
+                                <button
+                                  key={customer.id}
+                                  onClick={() => handleSelectCustomer(customer)}
+                                  onMouseEnter={() =>
+                                    setSelectedCustomerIndex(index)
+                                  }
+                                  className={`w-full p-3 text-left border-b last:border-b-0 flex justify-between items-center transition-colors ${
+                                    selectedCustomerIndex === index
+                                      ? "bg-blue-50 border-blue-200"
+                                      : "hover:bg-gray-50"
+                                  }`}
+                                >
+                                  <div className="flex-1 min-w-0">
+                                    <div className="font-semibold text-gray-900 truncate">
+                                      {customer.name}
+                                    </div>
+                                    <div className="text-xs text-gray-600 mt-1 flex flex-wrap gap-2">
+                                      {customer.email && (
+                                        <span>{customer.email}</span>
+                                      )}
+                                      {customer.phone && (
+                                        <span>Tel: {customer.phone}</span>
+                                      )}
+                                      {customer.rut && (
+                                        <span>RUT: {customer.rut}</span>
+                                      )}
+                                    </div>
+                                  </div>
+                                  {selectedCustomerIndex === index && (
+                                    <div className="text-xs text-blue-600 ml-2">
+                                      Enter
+                                    </div>
+                                  )}
+                                </button>
+                              ))}
+                            </div>
+                          )}
+
+                        {!searchingCustomers &&
+                          !selectedCustomer &&
+                          customerSearchTerm.trim().length > 0 &&
+                          customerSearchResults.length === 0 && (
+                            <div className="border rounded-lg bg-white p-3 text-center text-gray-500 text-sm">
+                              <p>No se encontraron clientes</p>
+                              <p className="text-xs mt-1">
+                                Puedes continuar sin cliente o ingresar datos
+                                manualmente
+                              </p>
+                            </div>
+                          )}
                       </div>
                     )}
 
-                    {!searchingCustomers &&
-                      customerSearchResults.length > 0 && (
-                        <div
-                          ref={
-                            customerSuggestionsRef as React.Ref<HTMLDivElement>
-                          }
-                          className="max-h-60 overflow-y-auto border rounded-lg bg-white shadow-lg z-20"
-                        >
-                          {customerSearchResults.map((customer, index) => (
-                            <button
-                              key={customer.id}
-                              onClick={() => handleSelectCustomer(customer)}
-                              onMouseEnter={() =>
-                                setSelectedCustomerIndex(index)
-                              }
-                              className={`w-full p-3 text-left border-b last:border-b-0 flex justify-between items-center transition-colors ${
-                                selectedCustomerIndex === index
-                                  ? "bg-blue-50 border-blue-200"
-                                  : "hover:bg-gray-50"
-                              }`}
-                            >
-                              <div className="flex-1 min-w-0">
-                                <div className="font-semibold text-gray-900 truncate">
-                                  {customer.name}
-                                </div>
-                                <div className="text-xs text-gray-600 mt-1 flex flex-wrap gap-2">
-                                  {customer.email && (
-                                    <span>{customer.email}</span>
-                                  )}
-                                  {customer.phone && (
-                                    <span>Tel: {customer.phone}</span>
-                                  )}
-                                  {customer.rut && (
-                                    <span>RUT: {customer.rut}</span>
-                                  )}
-                                </div>
+                    {/* Selected Customer Info or Manual Input */}
+                    {selectedCustomer ? (
+                      <div className="space-y-2 p-3 bg-green-50 border border-green-200 rounded-lg">
+                        <div className="flex items-center justify-between">
+                          <div className="flex-1">
+                            <div className="font-medium text-green-900">
+                              {selectedCustomer.name || selectedCustomer.email}
+                            </div>
+                            {selectedCustomer.rut && (
+                              <div className="text-sm text-green-700 mt-1">
+                                RUT: {selectedCustomer.rut}
                               </div>
-                              {selectedCustomerIndex === index && (
-                                <div className="text-xs text-blue-600 ml-2">
-                                  Enter
-                                </div>
-                              )}
-                            </button>
-                          ))}
+                            )}
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              setSelectedCustomer(null);
+                              setCustomerBusinessName("");
+                              setCustomerRUT("");
+                              setCustomerSearchTerm("");
+                              setCustomerSearchResults([]);
+                            }}
+                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
                         </div>
-                      )}
-
-                    {!searchingCustomers &&
-                      !selectedCustomer &&
-                      customerSearchTerm.trim().length > 0 &&
-                      customerSearchResults.length === 0 && (
-                        <div className="border rounded-lg bg-white p-3 text-center text-gray-500 text-sm">
-                          <p>No se encontraron clientes</p>
-                          <p className="text-xs mt-1">
-                            Puedes continuar sin cliente o ingresar datos
-                            manualmente
-                          </p>
-                        </div>
-                      )}
-                  </div>
-                )}
-
-                {/* Selected Customer Info or Manual Input */}
-                {selectedCustomer ? (
-                  <div className="space-y-2 p-3 bg-green-50 border border-green-200 rounded-lg">
-                    <div className="flex items-center justify-between">
-                      <div className="flex-1">
-                        <div className="font-medium text-green-900">
-                          {selectedCustomer.name || selectedCustomer.email}
-                        </div>
-                        {selectedCustomer.rut && (
-                          <div className="text-sm text-green-700 mt-1">
-                            RUT: {selectedCustomer.rut}
+                        {customerQuotes.length > 0 && (
+                          <div className="mt-2 text-xs text-green-700">
+                            {customerQuotes.length} presupuesto(s) disponible(s)
                           </div>
                         )}
                       </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => {
-                          setSelectedCustomer(null);
-                          setCustomerBusinessName("");
-                          setCustomerRUT("");
-                          setCustomerSearchTerm("");
-                          setCustomerSearchResults([]);
-                        }}
-                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </div>
-                    {customerQuotes.length > 0 && (
-                      <div className="mt-2 text-xs text-green-700">
-                        {customerQuotes.length} presupuesto(s) disponible(s)
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <div className="space-y-3 bg-[var(--admin-bg-tertiary)]">
-                    <div className="text-xs text-gray-500">
-                      Cliente no seleccionado (opcional para ventas simples)
-                    </div>
-                    {/* Manual input fields for unregistered customers */}
-                    <div>
-                      <Label className="text-xs text-gray-600">
-                        Nombre (opcional)
-                      </Label>
-                      <Input
-                        type="text"
-                        placeholder="Nombre del cliente"
-                        value={customerBusinessName}
-                        onChange={(e) =>
-                          setCustomerBusinessName(e.target.value)
-                        }
-                        className="text-sm"
-                      />
-                    </div>
-                    <div>
-                      <Label className="text-xs text-gray-600">
-                        RUT (opcional)
-                      </Label>
-                      <Input
-                        type="text"
-                        placeholder="Ej: 12.345.678-9"
-                        value={customerRUT}
-                        onChange={(e) => {
-                          const formatted = formatRUT(e.target.value);
-                          setCustomerRUT(formatted);
-                        }}
-                        className="text-sm font-mono"
-                      />
-                    </div>
-                  </div>
-                )}
-
-                {/* SII Invoice Type */}
-                <div>
-                  <Label>Tipo de Documento</Label>
-                  <Select
-                    value={siiInvoiceType}
-                    onValueChange={(v: any) => setSiiInvoiceType(v)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="boleta">Boleta</SelectItem>
-                      <SelectItem value="factura">Factura</SelectItem>
-                      <SelectItem value="none">Sin Documento</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {siiInvoiceType === "factura" && (
-                  <div>
-                    <Label>Razón Social</Label>
-                    <Input
-                      placeholder="Nombre de la empresa"
-                      value={customerBusinessName}
-                      onChange={(e) => setCustomerBusinessName(e.target.value)}
-                    />
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Product Search */}
-            <Card className="bg-[var(--admin-bg-tertiary)]">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-lg flex items-center">
-                  <span className="flex items-center">
-                    <Search className="h-5 w-5 mr-2" />
-                    Búsqueda Rápida de Productos
-                  </span>
-                </CardTitle>
-                <p className="text-sm text-gray-600 mt-1">
-                  Busca accesorios, lentes de sol, servicios u otros productos
-                  para agregar al carrito
-                </p>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="relative">
-                  <POSBarcodeInput
-                    value={searchTerm}
-                    onChange={(v) => {
-                      setSearchTerm(v);
-                      setSelectedProductIndex(-1);
-                    }}
-                    onScan={handleBarcodeScan}
-                    onSearch={() => {
-                      if (
-                        selectedProductIndex >= 0 &&
-                        products[selectedProductIndex]
-                      ) {
-                        addToCart(products[selectedProductIndex]);
-                      } else if (products.length > 0) {
-                        addToCart(products[0]);
-                      }
-                    }}
-                    onKeyDown={handleSearchKeyPress}
-                    inputRef={searchInputRef}
-                    placeholder="Escanear código o buscar (nombre, SKU)..."
-                    className="h-12 text-base"
-                  />
-                  {searching && (
-                    <Loader2 className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 animate-spin text-gray-400" />
-                  )}
-                </div>
-
-                {/* Product Search Results */}
-                {searchTerm.trim().length > 0 && (
-                  <div className="relative">
-                    {searching && (
-                      <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center z-10 rounded-lg border">
-                        <Loader2 className="h-5 w-5 animate-spin text-gray-400" />
-                      </div>
-                    )}
-
-                    {!searching && products.length > 0 && (
-                      <div
-                        ref={suggestionsRef as React.Ref<HTMLDivElement>}
-                        className="max-h-96 overflow-y-auto border rounded-lg bg-white shadow-lg divide-y"
-                      >
-                        {products.map((product, index) => (
-                          <button
-                            key={product.id}
-                            type="button"
-                            onClick={() => addToCart(product)}
-                            className={`w-full p-3 text-left hover:bg-gray-50 transition-colors ${
-                              index === selectedProductIndex
-                                ? "bg-gray-100 border-l-4 border-gray-400"
-                                : ""
-                            }`}
-                          >
-                            <div className="flex items-center justify-between">
-                              <div className="flex-1">
-                                <div className="font-medium text-gray-900">
-                                  {product.name}
-                                </div>
-                                <div className="text-sm text-gray-600 mt-1">
-                                  {product.brand && (
-                                    <span className="mr-2">
-                                      Marca: {product.brand}
-                                    </span>
-                                  )}
-                                  {product.sku && (
-                                    <span className="mr-2">
-                                      SKU: {product.sku}
-                                    </span>
-                                  )}
-                                  {product.category?.name && (
-                                    <span className="inline-block px-2 py-0.5 bg-gray-100 rounded text-xs">
-                                      {product.category.name}
-                                    </span>
-                                  )}
-                                </div>
-                                <div className="text-sm font-semibold text-green-600 mt-1">
-                                  {formatCurrency(product.price)}
-                                  {product.price_includes_tax && (
-                                    <span className="text-xs text-gray-500 ml-1">
-                                      (IVA incluido)
-                                    </span>
-                                  )}
-                                </div>
-                              </div>
-                              <div className="ml-4">
-                                <Button
-                                  size="sm"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    addToCart(product);
-                                  }}
-                                  variant="default"
-                                >
-                                  <Plus className="h-4 w-4 mr-1" />
-                                  Agregar
-                                </Button>
-                              </div>
-                            </div>
-                          </button>
-                        ))}
-                      </div>
-                    )}
-
-                    {!searching &&
-                      searchTerm.trim().length > 0 &&
-                      products.length === 0 && (
-                        <div className="border rounded-lg bg-white p-4 text-center text-gray-500">
-                          <Search className="h-8 w-8 mx-auto mb-2 text-gray-400" />
-                          <p>No se encontraron productos</p>
-                          <p className="text-xs mt-1">
-                            Intenta con otro término de búsqueda
-                          </p>
+                    ) : (
+                      <div className="space-y-3 bg-[var(--admin-bg-tertiary)]">
+                        <div className="text-xs text-gray-500">
+                          Cliente no seleccionado (opcional para ventas simples)
                         </div>
+                        {/* Manual input fields for unregistered customers */}
+                        <div>
+                          <Label className="text-xs text-gray-600">
+                            Nombre (opcional)
+                          </Label>
+                          <Input
+                            type="text"
+                            placeholder="Nombre del cliente"
+                            value={customerBusinessName}
+                            onChange={(e) =>
+                              setCustomerBusinessName(e.target.value)
+                            }
+                            className="text-sm"
+                          />
+                        </div>
+                        <div>
+                          <Label className="text-xs text-gray-600">
+                            RUT (opcional)
+                          </Label>
+                          <Input
+                            type="text"
+                            placeholder="Ej: 12.345.678-9"
+                            value={customerRUT}
+                            onChange={(e) => {
+                              const formatted = formatRUT(e.target.value);
+                              setCustomerRUT(formatted);
+                            }}
+                            className="text-sm font-mono"
+                          />
+                        </div>
+                      </div>
+                    )}
+
+                    {/* SII Invoice Type */}
+                    <div>
+                      <Label>Tipo de Documento</Label>
+                      <Select
+                        value={siiInvoiceType}
+                        onValueChange={(v: any) => setSiiInvoiceType(v)}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="boleta">Boleta</SelectItem>
+                          <SelectItem value="factura">Factura</SelectItem>
+                          <SelectItem value="none">Sin Documento</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {siiInvoiceType === "factura" && (
+                      <div>
+                        <Label>Razón Social</Label>
+                        <Input
+                          placeholder="Nombre de la empresa"
+                          value={customerBusinessName}
+                          onChange={(e) =>
+                            setCustomerBusinessName(e.target.value)
+                          }
+                        />
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Product Search - visible on mobile when tab=productos */}
+              <div
+                className={
+                  mainSectionTab === "productos" ? "block" : "hidden lg:block"
+                }
+              >
+                <Card className="bg-[var(--admin-bg-tertiary)]">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg flex items-center">
+                      <span className="flex items-center">
+                        <Search className="h-5 w-5 mr-2" />
+                        Búsqueda Rápida de Productos
+                      </span>
+                    </CardTitle>
+                    <p className="text-sm text-gray-600 mt-1">
+                      Busca accesorios, lentes de sol, servicios u otros
+                      productos para agregar al carrito
+                    </p>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="relative">
+                      <POSBarcodeInput
+                        value={searchTerm}
+                        onChange={(v) => {
+                          setSearchTerm(v);
+                          setSelectedProductIndex(-1);
+                        }}
+                        onScan={handleBarcodeScan}
+                        onSearch={() => {
+                          if (
+                            selectedProductIndex >= 0 &&
+                            products[selectedProductIndex]
+                          ) {
+                            addToCart(products[selectedProductIndex]);
+                          } else if (products.length > 0) {
+                            addToCart(products[0]);
+                          }
+                        }}
+                        onKeyDown={handleSearchKeyPress}
+                        inputRef={searchInputRef}
+                        placeholder="Escanear código o buscar (nombre, SKU)..."
+                        className="h-12 text-base"
+                      />
+                      {searching && (
+                        <Loader2 className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 animate-spin text-gray-400" />
                       )}
-                  </div>
-                )}
+                    </div>
 
-                {/* Quick Tips */}
-                {searchTerm.trim().length === 0 && (
-                  <div className="text-xs text-gray-500 bg-gray-50 p-3 rounded-lg border border-gray-200">
-                    <p className="font-medium mb-1">💡 Consejos de búsqueda:</p>
-                    <ul className="list-disc list-inside space-y-0.5">
-                      <li>Busca por nombre, marca, SKU o código de barras</li>
-                      <li>Presiona Enter para agregar el primer resultado</li>
-                      <li>Usa las flechas ↑↓ para navegar entre resultados</li>
-                      <li>Presiona Esc para limpiar la búsqueda</li>
-                    </ul>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+                    {/* Product Search Results */}
+                    {searchTerm.trim().length > 0 && (
+                      <div className="relative">
+                        {searching && (
+                          <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center z-10 rounded-lg border">
+                            <Loader2 className="h-5 w-5 animate-spin text-gray-400" />
+                          </div>
+                        )}
 
-            {/* Complete Order Form - Always visible */}
-            <Card className="bg-[var(--admin-bg-tertiary)]">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-lg flex items-center">
-                  <span className="flex items-center">
-                    <Package className="h-5 w-5 mr-2" />
-                    Crear Orden Completa
-                  </span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <Tabs
-                  value={orderFormTab}
-                  onValueChange={setOrderFormTab}
-                  className="w-full"
-                >
-                  <TabsList className="grid w-full grid-cols-4">
-                    <TabsTrigger value="customer">Cliente</TabsTrigger>
-                    <TabsTrigger value="frame">Marco</TabsTrigger>
-                    <TabsTrigger value="lenses">Lentes</TabsTrigger>
-                    <TabsTrigger value="pricing">Precios</TabsTrigger>
-                  </TabsList>
+                        {!searching && products.length > 0 && (
+                          <div
+                            ref={suggestionsRef as React.Ref<HTMLDivElement>}
+                            className="max-h-96 overflow-y-auto border rounded-lg bg-white shadow-lg divide-y"
+                          >
+                            {products.map((product, index) => (
+                              <button
+                                key={product.id}
+                                type="button"
+                                onClick={() => addToCart(product)}
+                                className={`w-full p-3 text-left hover:bg-gray-50 transition-colors ${
+                                  index === selectedProductIndex
+                                    ? "bg-gray-100 border-l-4 border-gray-400"
+                                    : ""
+                                }`}
+                              >
+                                <div className="flex items-center justify-between">
+                                  <div className="flex-1">
+                                    <div className="font-medium text-gray-900">
+                                      {product.name}
+                                    </div>
+                                    <div className="text-sm text-gray-600 mt-1">
+                                      {product.brand && (
+                                        <span className="mr-2">
+                                          Marca: {product.brand}
+                                        </span>
+                                      )}
+                                      {product.sku && (
+                                        <span className="mr-2">
+                                          SKU: {product.sku}
+                                        </span>
+                                      )}
+                                      {product.category?.name && (
+                                        <span className="inline-block px-2 py-0.5 bg-gray-100 rounded text-xs">
+                                          {product.category.name}
+                                        </span>
+                                      )}
+                                    </div>
+                                    <div className="text-sm font-semibold text-green-600 mt-1">
+                                      {formatCurrency(product.price)}
+                                      {product.price_includes_tax && (
+                                        <span className="text-xs text-gray-500 ml-1">
+                                          (IVA incluido)
+                                        </span>
+                                      )}
+                                    </div>
+                                  </div>
+                                  <div className="ml-4">
+                                    <Button
+                                      size="sm"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        addToCart(product);
+                                      }}
+                                      variant="default"
+                                    >
+                                      <Plus className="h-4 w-4 mr-1" />
+                                      Agregar
+                                    </Button>
+                                  </div>
+                                </div>
+                              </button>
+                            ))}
+                          </div>
+                        )}
 
-                  {/* Customer & Prescription Tab */}
-                  <TabsContent value="customer" className="space-y-4 mt-4">
-                    {/* Customer and Prescription Section */}
-                    <Tabs defaultValue="customer" className="w-full">
-                      <TabsList className="grid w-full grid-cols-2">
-                        <TabsTrigger value="customer">
-                          Cliente & Receta
+                        {!searching &&
+                          searchTerm.trim().length > 0 &&
+                          products.length === 0 && (
+                            <div className="border rounded-lg bg-white p-4 text-center text-gray-500">
+                              <Search className="h-8 w-8 mx-auto mb-2 text-gray-400" />
+                              <p>No se encontraron productos</p>
+                              <p className="text-xs mt-1">
+                                Intenta con otro término de búsqueda
+                              </p>
+                            </div>
+                          )}
+                      </div>
+                    )}
+
+                    {/* Quick Tips */}
+                    {searchTerm.trim().length === 0 && (
+                      <div className="text-xs text-gray-500 bg-gray-50 p-3 rounded-lg border border-gray-200">
+                        <p className="font-medium mb-1">
+                          💡 Consejos de búsqueda:
+                        </p>
+                        <ul className="list-disc list-inside space-y-0.5">
+                          <li>
+                            Busca por nombre, marca, SKU o código de barras
+                          </li>
+                          <li>
+                            Presiona Enter para agregar el primer resultado
+                          </li>
+                          <li>
+                            Usa las flechas ↑↓ para navegar entre resultados
+                          </li>
+                          <li>Presiona Esc para limpiar la búsqueda</li>
+                        </ul>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Complete Order Form - visible on mobile when tab=orden */}
+              <div
+                className={
+                  mainSectionTab === "orden" ? "block" : "hidden lg:block"
+                }
+              >
+                <Card className="bg-[var(--admin-bg-tertiary)]">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg flex items-center">
+                      <span className="flex items-center">
+                        <Package className="h-5 w-5 mr-2" />
+                        Crear Orden Completa
+                      </span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <Tabs
+                      value={orderFormTab}
+                      onValueChange={setOrderFormTab}
+                      className="w-full"
+                    >
+                      <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 gap-1 h-auto min-h-[44px]">
+                        <TabsTrigger
+                          value="customer"
+                          className="text-xs sm:text-sm py-2"
+                        >
+                          Cliente
                         </TabsTrigger>
-                        <TabsTrigger value="prescription">
-                          Receta Externa
+                        <TabsTrigger
+                          value="frame"
+                          className="text-xs sm:text-sm py-2"
+                        >
+                          Marco
+                        </TabsTrigger>
+                        <TabsTrigger
+                          value="lenses"
+                          className="text-xs sm:text-sm py-2"
+                        >
+                          Lentes
+                        </TabsTrigger>
+                        <TabsTrigger
+                          value="pricing"
+                          className="text-xs sm:text-sm py-2"
+                        >
+                          Precios
                         </TabsTrigger>
                       </TabsList>
 
+                      {/* Customer & Prescription Tab */}
                       <TabsContent value="customer" className="space-y-4 mt-4">
-                        {/* Selected Customer Display */}
-                        <div>
-                          <Label>Cliente</Label>
-                          {selectedCustomer ? (
-                            <div className="mt-1 p-2 border rounded bg-gray-50">
-                              <div className="font-medium text-sm">
-                                {selectedCustomer.name ||
-                                  selectedCustomer.email}
-                              </div>
-                              {selectedCustomer.rut && (
-                                <div className="text-xs text-gray-600 mt-1">
-                                  RUT: {selectedCustomer.rut}
+                        {/* Customer and Prescription Section */}
+                        <Tabs defaultValue="customer" className="w-full">
+                          <TabsList className="grid w-full grid-cols-2 h-auto min-h-[40px]">
+                            <TabsTrigger
+                              value="customer"
+                              className="text-xs sm:text-sm py-2"
+                            >
+                              Cliente & Receta
+                            </TabsTrigger>
+                            <TabsTrigger
+                              value="prescription"
+                              className="text-xs sm:text-sm py-2"
+                            >
+                              Receta Externa
+                            </TabsTrigger>
+                          </TabsList>
+
+                          <TabsContent
+                            value="customer"
+                            className="space-y-4 mt-4"
+                          >
+                            {/* Selected Customer Display */}
+                            <div>
+                              <Label>Cliente</Label>
+                              {selectedCustomer ? (
+                                <div className="mt-1 p-2 border rounded bg-gray-50">
+                                  <div className="font-medium text-sm">
+                                    {selectedCustomer.name ||
+                                      selectedCustomer.email}
+                                  </div>
+                                  {selectedCustomer.rut && (
+                                    <div className="text-xs text-gray-600 mt-1">
+                                      RUT: {selectedCustomer.rut}
+                                    </div>
+                                  )}
+                                </div>
+                              ) : (
+                                <div className="mt-1 p-2 border rounded bg-gray-50 text-sm text-gray-500">
+                                  Selecciona un cliente en el card superior
                                 </div>
                               )}
                             </div>
-                          ) : (
-                            <div className="mt-1 p-2 border rounded bg-gray-50 text-sm text-gray-500">
-                              Selecciona un cliente en el card superior
-                            </div>
-                          )}
-                        </div>
 
-                        {/* Prescription Selection */}
-                        {selectedCustomer && (
-                          <div>
-                            <Label>Receta</Label>
-                            {(() => {
-                              const prescriptionsList =
-                                prescriptions.length > 0
-                                  ? prescriptions
-                                  : selectedPrescription
-                                    ? [selectedPrescription]
-                                    : [];
-                              if (prescriptionsList.length === 0) {
-                                return (
-                                  <div className="text-sm text-gray-500 py-2">
-                                    Este cliente no tiene recetas registradas.
+                            {/* Prescription Selection */}
+                            {selectedCustomer && (
+                              <div>
+                                <Label>Receta</Label>
+                                {(() => {
+                                  const prescriptionsList =
+                                    prescriptions.length > 0
+                                      ? prescriptions
+                                      : selectedPrescription
+                                        ? [selectedPrescription]
+                                        : [];
+                                  if (prescriptionsList.length === 0) {
+                                    return (
+                                      <div className="text-sm text-gray-500 py-2">
+                                        Este cliente no tiene recetas
+                                        registradas.
+                                      </div>
+                                    );
+                                  }
+                                  return (
+                                    <Select
+                                      value={selectedPrescription?.id || ""}
+                                      onValueChange={(value) => {
+                                        const prescription =
+                                          prescriptionsList.find(
+                                            (p) => p.id === value,
+                                          );
+                                        setSelectedPrescription(
+                                          prescription || null,
+                                        );
+                                      }}
+                                    >
+                                      <SelectTrigger>
+                                        <SelectValue placeholder="Selecciona una receta" />
+                                      </SelectTrigger>
+                                      <SelectContent>
+                                        {prescriptionsList.map(
+                                          (prescription) => (
+                                            <SelectItem
+                                              key={prescription.id}
+                                              value={prescription.id}
+                                            >
+                                              {prescription.prescription_date
+                                                ? formatDate(
+                                                    prescription.prescription_date,
+                                                  )
+                                                : "Sin fecha"}
+                                              {prescription.issued_by &&
+                                                ` - ${prescription.issued_by}`}
+                                              {prescription.is_current &&
+                                                " (Actual)"}
+                                            </SelectItem>
+                                          ),
+                                        )}
+                                      </SelectContent>
+                                    </Select>
+                                  );
+                                })()}
+                              </div>
+                            )}
+
+                            {/* Resumen de receta (mediciones) cuando hay receta seleccionada */}
+                            {selectedPrescription && (
+                              <div className="p-4 border rounded-lg bg-blue-50 text-blue-900">
+                                <p className="font-medium mb-2 text-sm">
+                                  Resumen de Receta
+                                </p>
+                                <div className="grid grid-cols-2 gap-2 text-sm">
+                                  <div>
+                                    <span className="font-semibold">OD:</span>{" "}
+                                    Esf {selectedPrescription.od_sphere ?? "—"}{" "}
+                                    / Cil{" "}
+                                    {selectedPrescription.od_cylinder ?? "—"}
+                                    {selectedPrescription.od_axis != null && (
+                                      <span>
+                                        {" "}
+                                        Eje {selectedPrescription.od_axis}°
+                                      </span>
+                                    )}
+                                    {selectedPrescription.od_add != null &&
+                                      selectedPrescription.od_add > 0 && (
+                                        <span className="ml-2 text-orange-600">
+                                          Add: +{selectedPrescription.od_add}
+                                        </span>
+                                      )}
                                   </div>
-                                );
-                              }
-                              return (
+                                  <div>
+                                    <span className="font-semibold">OS:</span>{" "}
+                                    Esf {selectedPrescription.os_sphere ?? "—"}{" "}
+                                    / Cil{" "}
+                                    {selectedPrescription.os_cylinder ?? "—"}
+                                    {selectedPrescription.os_axis != null && (
+                                      <span>
+                                        {" "}
+                                        Eje {selectedPrescription.os_axis}°
+                                      </span>
+                                    )}
+                                    {selectedPrescription.os_add != null &&
+                                      selectedPrescription.os_add > 0 && (
+                                        <span className="ml-2 text-orange-600">
+                                          Add: +{selectedPrescription.os_add}
+                                        </span>
+                                      )}
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Quote Selection */}
+                            <div>
+                              <Label>Presupuesto</Label>
+                              {!selectedCustomer ? (
+                                <div className="text-sm text-gray-500 py-2">
+                                  Selecciona un cliente para ver sus
+                                  presupuestos
+                                </div>
+                              ) : loadingQuotes ? (
+                                <div className="text-sm text-gray-500 py-2 flex items-center gap-2">
+                                  <Loader2 className="h-4 w-4 animate-spin" />
+                                  Cargando presupuestos...
+                                </div>
+                              ) : customerQuotes.length === 0 ? (
+                                <div className="text-sm text-gray-500 py-2">
+                                  Este cliente no tiene presupuestos. Puedes
+                                  crear una orden manualmente.
+                                </div>
+                              ) : (
                                 <Select
-                                  value={selectedPrescription?.id || ""}
-                                  onValueChange={(value) => {
-                                    const prescription = prescriptionsList.find(
-                                      (p) => p.id === value,
+                                  value={selectedQuote?.id || "__none__"}
+                                  onValueChange={async (value) => {
+                                    if (value === "__none__") {
+                                      setSelectedQuote(null);
+                                      resetCompleteOrderForm();
+                                      return;
+                                    }
+                                    const quote = customerQuotes.find(
+                                      (q) => q.id === value,
                                     );
-                                    setSelectedPrescription(
-                                      prescription || null,
-                                    );
+                                    if (quote) {
+                                      await handleLoadQuoteToForm(quote);
+                                    } else {
+                                      setSelectedQuote(null);
+                                      resetCompleteOrderForm();
+                                    }
                                   }}
                                 >
                                   <SelectTrigger>
-                                    <SelectValue placeholder="Selecciona una receta" />
+                                    <SelectValue placeholder="Selecciona un presupuesto" />
                                   </SelectTrigger>
                                   <SelectContent>
-                                    {prescriptionsList.map((prescription) => (
+                                    <SelectItem value="__none__">
+                                      Ninguno / Sin presupuesto
+                                    </SelectItem>
+                                    {customerQuotes.map((quote) => (
                                       <SelectItem
-                                        key={prescription.id}
-                                        value={prescription.id}
+                                        key={quote.id}
+                                        value={quote.id}
                                       >
-                                        {prescription.prescription_date
-                                          ? formatDate(
-                                              prescription.prescription_date,
-                                            )
-                                          : "Sin fecha"}
-                                        {prescription.issued_by &&
-                                          ` - ${prescription.issued_by}`}
-                                        {prescription.is_current && " (Actual)"}
+                                        {quote.quote_number} -{" "}
+                                        {formatDate(quote.created_at)}
+                                        {quote.status && ` (${quote.status})`}
                                       </SelectItem>
                                     ))}
                                   </SelectContent>
                                 </Select>
-                              );
-                            })()}
-                          </div>
-                        )}
-
-                        {/* Resumen de receta (mediciones) cuando hay receta seleccionada */}
-                        {selectedPrescription && (
-                          <div className="p-4 border rounded-lg bg-blue-50 text-blue-900">
-                            <p className="font-medium mb-2 text-sm">
-                              Resumen de Receta
-                            </p>
-                            <div className="grid grid-cols-2 gap-2 text-sm">
-                              <div>
-                                <span className="font-semibold">OD:</span> Esf{" "}
-                                {selectedPrescription.od_sphere ?? "—"} / Cil{" "}
-                                {selectedPrescription.od_cylinder ?? "—"}
-                                {selectedPrescription.od_axis != null && (
-                                  <span>
-                                    {" "}
-                                    Eje {selectedPrescription.od_axis}°
-                                  </span>
-                                )}
-                                {selectedPrescription.od_add != null &&
-                                  selectedPrescription.od_add > 0 && (
-                                    <span className="ml-2 text-orange-600">
-                                      Add: +{selectedPrescription.od_add}
-                                    </span>
-                                  )}
-                              </div>
-                              <div>
-                                <span className="font-semibold">OS:</span> Esf{" "}
-                                {selectedPrescription.os_sphere ?? "—"} / Cil{" "}
-                                {selectedPrescription.os_cylinder ?? "—"}
-                                {selectedPrescription.os_axis != null && (
-                                  <span>
-                                    {" "}
-                                    Eje {selectedPrescription.os_axis}°
-                                  </span>
-                                )}
-                                {selectedPrescription.os_add != null &&
-                                  selectedPrescription.os_add > 0 && (
-                                    <span className="ml-2 text-orange-600">
-                                      Add: +{selectedPrescription.os_add}
-                                    </span>
-                                  )}
-                              </div>
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Quote Selection */}
-                        <div>
-                          <Label>Presupuesto</Label>
-                          {!selectedCustomer ? (
-                            <div className="text-sm text-gray-500 py-2">
-                              Selecciona un cliente para ver sus presupuestos
-                            </div>
-                          ) : loadingQuotes ? (
-                            <div className="text-sm text-gray-500 py-2 flex items-center gap-2">
-                              <Loader2 className="h-4 w-4 animate-spin" />
-                              Cargando presupuestos...
-                            </div>
-                          ) : customerQuotes.length === 0 ? (
-                            <div className="text-sm text-gray-500 py-2">
-                              Este cliente no tiene presupuestos. Puedes crear
-                              una orden manualmente.
-                            </div>
-                          ) : (
-                            <Select
-                              value={selectedQuote?.id || "__none__"}
-                              onValueChange={async (value) => {
-                                if (value === "__none__") {
-                                  setSelectedQuote(null);
-                                  resetCompleteOrderForm();
-                                  return;
-                                }
-                                const quote = customerQuotes.find(
-                                  (q) => q.id === value,
-                                );
-                                if (quote) {
-                                  await handleLoadQuoteToForm(quote);
-                                } else {
-                                  setSelectedQuote(null);
-                                  resetCompleteOrderForm();
-                                }
-                              }}
-                            >
-                              <SelectTrigger>
-                                <SelectValue placeholder="Selecciona un presupuesto" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="__none__">
-                                  Ninguno / Sin presupuesto
-                                </SelectItem>
-                                {customerQuotes.map((quote) => (
-                                  <SelectItem key={quote.id} value={quote.id}>
-                                    {quote.quote_number} -{" "}
-                                    {formatDate(quote.created_at)}
-                                    {quote.status && ` (${quote.status})`}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          )}
-                        </div>
-                      </TabsContent>
-
-                      <TabsContent
-                        value="prescription"
-                        className="space-y-4 mt-4"
-                      >
-                        <Alert>
-                          <AlertCircle className="h-4 w-4" />
-                          <AlertDescription>
-                            Cliente nuevo con receta externa. Completa los datos
-                            del cliente y su receta.
-                          </AlertDescription>
-                        </Alert>
-
-                        <div className="space-y-3">
-                          <div className="grid grid-cols-2 gap-3">
-                            <div>
-                              <Label>Nombre *</Label>
-                              <Input
-                                placeholder="Juan"
-                                value={externalCustomerData.first_name}
-                                onChange={(e) =>
-                                  setExternalCustomerData((prev) => ({
-                                    ...prev,
-                                    first_name: e.target.value,
-                                  }))
-                                }
-                                className="h-9 text-sm"
-                              />
-                            </div>
-                            <div>
-                              <Label>Apellido *</Label>
-                              <Input
-                                placeholder="Pérez"
-                                value={externalCustomerData.last_name}
-                                onChange={(e) =>
-                                  setExternalCustomerData((prev) => ({
-                                    ...prev,
-                                    last_name: e.target.value,
-                                  }))
-                                }
-                                className="h-9 text-sm"
-                              />
-                            </div>
-                          </div>
-
-                          <div className="grid grid-cols-2 gap-3">
-                            <div>
-                              <Label>RUT *</Label>
-                              <Input
-                                placeholder="12345678-9"
-                                value={externalCustomerData.rut}
-                                onChange={(e) => {
-                                  const formatted = formatRUT(e.target.value);
-                                  setExternalCustomerData((prev) => ({
-                                    ...prev,
-                                    rut: formatted,
-                                  }));
-                                }}
-                                className="h-9 text-sm"
-                                maxLength={12}
-                              />
-                            </div>
-                            <div>
-                              <Label>Teléfono</Label>
-                              <Input
-                                placeholder="+56 9 1234 5678"
-                                value={externalCustomerData.phone}
-                                onChange={(e) =>
-                                  setExternalCustomerData((prev) => ({
-                                    ...prev,
-                                    phone: e.target.value,
-                                  }))
-                                }
-                                className="h-9 text-sm"
-                              />
-                            </div>
-                          </div>
-
-                          <div>
-                            <Label>Email</Label>
-                            <Input
-                              type="email"
-                              placeholder="cliente@ejemplo.com"
-                              value={externalCustomerData.email}
-                              onChange={(e) =>
-                                setExternalCustomerData((prev) => ({
-                                  ...prev,
-                                  email: e.target.value,
-                                }))
-                              }
-                              className="h-9 text-sm"
-                            />
-                          </div>
-
-                          <Separator className="my-4" />
-
-                          <div className="space-y-3">
-                            <h4 className="text-sm font-semibold">
-                              Datos de la Receta Externa
-                            </h4>
-
-                            <div className="grid grid-cols-2 gap-3">
-                              <div>
-                                <Label>Fecha de Receta</Label>
-                                <Input
-                                  type="date"
-                                  value={
-                                    externalPrescriptionData.prescription_date
-                                  }
-                                  onChange={(e) =>
-                                    setExternalPrescriptionData((prev) => ({
-                                      ...prev,
-                                      prescription_date: e.target.value,
-                                    }))
-                                  }
-                                  className="h-9 text-sm"
-                                />
-                              </div>
-                              <div>
-                                <Label>Fecha de Vencimiento</Label>
-                                <Input
-                                  type="date"
-                                  value={
-                                    externalPrescriptionData.expiration_date
-                                  }
-                                  onChange={(e) =>
-                                    setExternalPrescriptionData((prev) => ({
-                                      ...prev,
-                                      expiration_date: e.target.value,
-                                    }))
-                                  }
-                                  className="h-9 text-sm"
-                                />
-                              </div>
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-3">
-                              <div>
-                                <Label>Número de Receta</Label>
-                                <Input
-                                  placeholder="12345"
-                                  value={
-                                    externalPrescriptionData.prescription_number
-                                  }
-                                  onChange={(e) =>
-                                    setExternalPrescriptionData((prev) => ({
-                                      ...prev,
-                                      prescription_number: e.target.value,
-                                    }))
-                                  }
-                                  className="h-9 text-sm"
-                                />
-                              </div>
-                              <div>
-                                <Label>Emitida por</Label>
-                                <Input
-                                  placeholder="Dr. Juan Pérez"
-                                  value={externalPrescriptionData.issued_by}
-                                  onChange={(e) =>
-                                    setExternalPrescriptionData((prev) => ({
-                                      ...prev,
-                                      issued_by: e.target.value,
-                                    }))
-                                  }
-                                  className="h-9 text-sm"
-                                />
-                              </div>
-                            </div>
-
-                            <Separator className="my-4" />
-
-                            <div className="space-y-3">
-                              <h5 className="text-xs font-semibold text-gray-700">
-                                Ojo Derecho (OD)
-                              </h5>
-                              <div className="grid grid-cols-4 gap-2">
-                                <div>
-                                  <Label className="text-xs">Esfera</Label>
-                                  <Input
-                                    placeholder="-2.00"
-                                    value={externalPrescriptionData.od_sphere}
-                                    onChange={(e) =>
-                                      setExternalPrescriptionData((prev) => ({
-                                        ...prev,
-                                        od_sphere: e.target.value,
-                                      }))
-                                    }
-                                    className="h-8 text-xs"
-                                  />
-                                </div>
-                                <div>
-                                  <Label className="text-xs">Cilindro</Label>
-                                  <Input
-                                    placeholder="-0.50"
-                                    value={externalPrescriptionData.od_cylinder}
-                                    onChange={(e) =>
-                                      setExternalPrescriptionData((prev) => ({
-                                        ...prev,
-                                        od_cylinder: e.target.value,
-                                      }))
-                                    }
-                                    className="h-8 text-xs"
-                                  />
-                                </div>
-                                <div>
-                                  <Label className="text-xs">Eje</Label>
-                                  <Input
-                                    placeholder="180"
-                                    value={externalPrescriptionData.od_axis}
-                                    onChange={(e) =>
-                                      setExternalPrescriptionData((prev) => ({
-                                        ...prev,
-                                        od_axis: e.target.value,
-                                      }))
-                                    }
-                                    className="h-8 text-xs"
-                                  />
-                                </div>
-                                <div>
-                                  <Label className="text-xs">Adición</Label>
-                                  <Input
-                                    placeholder="+2.00"
-                                    value={externalPrescriptionData.od_add}
-                                    onChange={(e) =>
-                                      setExternalPrescriptionData((prev) => ({
-                                        ...prev,
-                                        od_add: e.target.value,
-                                      }))
-                                    }
-                                    className="h-8 text-xs"
-                                  />
-                                </div>
-                              </div>
-                            </div>
-
-                            <div className="space-y-3">
-                              <h5 className="text-xs font-semibold text-gray-700">
-                                Ojo Izquierdo (OS)
-                              </h5>
-                              <div className="grid grid-cols-4 gap-2">
-                                <div>
-                                  <Label className="text-xs">Esfera</Label>
-                                  <Input
-                                    placeholder="-2.00"
-                                    value={externalPrescriptionData.os_sphere}
-                                    onChange={(e) =>
-                                      setExternalPrescriptionData((prev) => ({
-                                        ...prev,
-                                        os_sphere: e.target.value,
-                                      }))
-                                    }
-                                    className="h-8 text-xs"
-                                  />
-                                </div>
-                                <div>
-                                  <Label className="text-xs">Cilindro</Label>
-                                  <Input
-                                    placeholder="-0.50"
-                                    value={externalPrescriptionData.os_cylinder}
-                                    onChange={(e) =>
-                                      setExternalPrescriptionData((prev) => ({
-                                        ...prev,
-                                        os_cylinder: e.target.value,
-                                      }))
-                                    }
-                                    className="h-8 text-xs"
-                                  />
-                                </div>
-                                <div>
-                                  <Label className="text-xs">Eje</Label>
-                                  <Input
-                                    placeholder="180"
-                                    value={externalPrescriptionData.os_axis}
-                                    onChange={(e) =>
-                                      setExternalPrescriptionData((prev) => ({
-                                        ...prev,
-                                        os_axis: e.target.value,
-                                      }))
-                                    }
-                                    className="h-8 text-xs"
-                                  />
-                                </div>
-                                <div>
-                                  <Label className="text-xs">Adición</Label>
-                                  <Input
-                                    placeholder="+2.00"
-                                    value={externalPrescriptionData.os_add}
-                                    onChange={(e) =>
-                                      setExternalPrescriptionData((prev) => ({
-                                        ...prev,
-                                        os_add: e.target.value,
-                                      }))
-                                    }
-                                    className="h-8 text-xs"
-                                  />
-                                </div>
-                              </div>
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-3">
-                              <div>
-                                <Label className="text-xs">
-                                  DP (Distancia Pupilar)
-                                </Label>
-                                <Input
-                                  placeholder="64"
-                                  value={externalPrescriptionData.pd}
-                                  onChange={(e) =>
-                                    setExternalPrescriptionData((prev) => ({
-                                      ...prev,
-                                      pd: e.target.value,
-                                    }))
-                                  }
-                                  className="h-8 text-xs"
-                                />
-                              </div>
-                              <div>
-                                <Label className="text-xs">DP Cerca</Label>
-                                <Input
-                                  placeholder="62"
-                                  value={externalPrescriptionData.near_pd}
-                                  onChange={(e) =>
-                                    setExternalPrescriptionData((prev) => ({
-                                      ...prev,
-                                      near_pd: e.target.value,
-                                    }))
-                                  }
-                                  className="h-8 text-xs"
-                                />
-                              </div>
-                            </div>
-
-                            <Button
-                              type="button"
-                              onClick={
-                                handleCreateExternalCustomerWithPrescription
-                              }
-                              disabled={creatingExternalCustomer}
-                              className="w-full"
-                              size="sm"
-                            >
-                              {creatingExternalCustomer ? (
-                                <>
-                                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                                  Creando...
-                                </>
-                              ) : (
-                                <>
-                                  <Plus className="h-4 w-4 mr-2" />
-                                  Crear Cliente y Receta
-                                </>
                               )}
-                            </Button>
-                          </div>
-                        </div>
-                      </TabsContent>
-                    </Tabs>
-                  </TabsContent>
+                            </div>
+                          </TabsContent>
 
-                  {/* Frame Tab */}
-                  <TabsContent value="frame" className="space-y-4 mt-4">
-                    <div>
-                      <Label>Marco</Label>
-                      <div className="flex items-center gap-2 mb-2">
-                        <input
-                          type="checkbox"
-                          id="customer_own_frame_pos"
-                          checked={customerOwnFrame}
-                          onChange={(e) => {
-                            setCustomerOwnFrame(e.target.checked);
-                            if (e.target.checked) {
-                              setSelectedFrame(null);
-                              setOrderFormData((prev) => ({
-                                ...prev,
-                                frame_price: 0,
-                                frame_cost: 0,
-                              }));
-                            }
-                          }}
-                          className="h-4 w-4 rounded border-gray-300"
-                        />
-                        <Label
-                          htmlFor="customer_own_frame_pos"
-                          className="cursor-pointer text-sm"
-                        >
-                          Cliente trae marco (recambio de cristales)
-                        </Label>
-                      </div>
-                      {!customerOwnFrame ? (
-                        <>
-                          {selectedFrame ? (
-                            <div className="flex items-center justify-between p-2 border rounded mt-1">
-                              <div>
-                                <div className="font-medium text-sm">
-                                  {selectedFrame.name}
+                          <TabsContent
+                            value="prescription"
+                            className="space-y-4 mt-4"
+                          >
+                            <Alert>
+                              <AlertCircle className="h-4 w-4" />
+                              <AlertDescription>
+                                Cliente nuevo con receta externa. Completa los
+                                datos del cliente y su receta.
+                              </AlertDescription>
+                            </Alert>
+
+                            <div className="space-y-3">
+                              <div className="grid grid-cols-2 gap-3">
+                                <div>
+                                  <Label>Nombre *</Label>
+                                  <Input
+                                    placeholder="Juan"
+                                    value={externalCustomerData.first_name}
+                                    onChange={(e) =>
+                                      setExternalCustomerData((prev) => ({
+                                        ...prev,
+                                        first_name: e.target.value,
+                                      }))
+                                    }
+                                    className="h-9 text-sm"
+                                  />
                                 </div>
-                                <div className="text-xs text-gray-600">
-                                  {formatCurrency(orderFormData.frame_price)}
+                                <div>
+                                  <Label>Apellido *</Label>
+                                  <Input
+                                    placeholder="Pérez"
+                                    value={externalCustomerData.last_name}
+                                    onChange={(e) =>
+                                      setExternalCustomerData((prev) => ({
+                                        ...prev,
+                                        last_name: e.target.value,
+                                      }))
+                                    }
+                                    className="h-9 text-sm"
+                                  />
                                 </div>
                               </div>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => {
+
+                              <div className="grid grid-cols-2 gap-3">
+                                <div>
+                                  <Label>RUT *</Label>
+                                  <Input
+                                    placeholder="12345678-9"
+                                    value={externalCustomerData.rut}
+                                    onChange={(e) => {
+                                      const formatted = formatRUT(
+                                        e.target.value,
+                                      );
+                                      setExternalCustomerData((prev) => ({
+                                        ...prev,
+                                        rut: formatted,
+                                      }));
+                                    }}
+                                    className="h-9 text-sm"
+                                    maxLength={12}
+                                  />
+                                </div>
+                                <div>
+                                  <Label>Teléfono</Label>
+                                  <Input
+                                    placeholder="+56 9 1234 5678"
+                                    value={externalCustomerData.phone}
+                                    onChange={(e) =>
+                                      setExternalCustomerData((prev) => ({
+                                        ...prev,
+                                        phone: e.target.value,
+                                      }))
+                                    }
+                                    className="h-9 text-sm"
+                                  />
+                                </div>
+                              </div>
+
+                              <div>
+                                <Label>Email</Label>
+                                <Input
+                                  type="email"
+                                  placeholder="cliente@ejemplo.com"
+                                  value={externalCustomerData.email}
+                                  onChange={(e) =>
+                                    setExternalCustomerData((prev) => ({
+                                      ...prev,
+                                      email: e.target.value,
+                                    }))
+                                  }
+                                  className="h-9 text-sm"
+                                />
+                              </div>
+
+                              <Separator className="my-4" />
+
+                              <div className="space-y-3">
+                                <h4 className="text-sm font-semibold">
+                                  Datos de la Receta Externa
+                                </h4>
+
+                                <div className="grid grid-cols-2 gap-3">
+                                  <div>
+                                    <Label>Fecha de Receta</Label>
+                                    <Input
+                                      type="date"
+                                      value={
+                                        externalPrescriptionData.prescription_date
+                                      }
+                                      onChange={(e) =>
+                                        setExternalPrescriptionData((prev) => ({
+                                          ...prev,
+                                          prescription_date: e.target.value,
+                                        }))
+                                      }
+                                      className="h-9 text-sm"
+                                    />
+                                  </div>
+                                  <div>
+                                    <Label>Fecha de Vencimiento</Label>
+                                    <Input
+                                      type="date"
+                                      value={
+                                        externalPrescriptionData.expiration_date
+                                      }
+                                      onChange={(e) =>
+                                        setExternalPrescriptionData((prev) => ({
+                                          ...prev,
+                                          expiration_date: e.target.value,
+                                        }))
+                                      }
+                                      className="h-9 text-sm"
+                                    />
+                                  </div>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-3">
+                                  <div>
+                                    <Label>Número de Receta</Label>
+                                    <Input
+                                      placeholder="12345"
+                                      value={
+                                        externalPrescriptionData.prescription_number
+                                      }
+                                      onChange={(e) =>
+                                        setExternalPrescriptionData((prev) => ({
+                                          ...prev,
+                                          prescription_number: e.target.value,
+                                        }))
+                                      }
+                                      className="h-9 text-sm"
+                                    />
+                                  </div>
+                                  <div>
+                                    <Label>Emitida por</Label>
+                                    <Input
+                                      placeholder="Dr. Juan Pérez"
+                                      value={externalPrescriptionData.issued_by}
+                                      onChange={(e) =>
+                                        setExternalPrescriptionData((prev) => ({
+                                          ...prev,
+                                          issued_by: e.target.value,
+                                        }))
+                                      }
+                                      className="h-9 text-sm"
+                                    />
+                                  </div>
+                                </div>
+
+                                <Separator className="my-4" />
+
+                                <div className="space-y-3">
+                                  <h5 className="text-xs font-semibold text-gray-700">
+                                    Ojo Derecho (OD)
+                                  </h5>
+                                  <div className="grid grid-cols-4 gap-2">
+                                    <div>
+                                      <Label className="text-xs">Esfera</Label>
+                                      <Input
+                                        placeholder="-2.00"
+                                        value={
+                                          externalPrescriptionData.od_sphere
+                                        }
+                                        onChange={(e) =>
+                                          setExternalPrescriptionData(
+                                            (prev) => ({
+                                              ...prev,
+                                              od_sphere: e.target.value,
+                                            }),
+                                          )
+                                        }
+                                        className="h-8 text-xs"
+                                      />
+                                    </div>
+                                    <div>
+                                      <Label className="text-xs">
+                                        Cilindro
+                                      </Label>
+                                      <Input
+                                        placeholder="-0.50"
+                                        value={
+                                          externalPrescriptionData.od_cylinder
+                                        }
+                                        onChange={(e) =>
+                                          setExternalPrescriptionData(
+                                            (prev) => ({
+                                              ...prev,
+                                              od_cylinder: e.target.value,
+                                            }),
+                                          )
+                                        }
+                                        className="h-8 text-xs"
+                                      />
+                                    </div>
+                                    <div>
+                                      <Label className="text-xs">Eje</Label>
+                                      <Input
+                                        placeholder="180"
+                                        value={externalPrescriptionData.od_axis}
+                                        onChange={(e) =>
+                                          setExternalPrescriptionData(
+                                            (prev) => ({
+                                              ...prev,
+                                              od_axis: e.target.value,
+                                            }),
+                                          )
+                                        }
+                                        className="h-8 text-xs"
+                                      />
+                                    </div>
+                                    <div>
+                                      <Label className="text-xs">Adición</Label>
+                                      <Input
+                                        placeholder="+2.00"
+                                        value={externalPrescriptionData.od_add}
+                                        onChange={(e) =>
+                                          setExternalPrescriptionData(
+                                            (prev) => ({
+                                              ...prev,
+                                              od_add: e.target.value,
+                                            }),
+                                          )
+                                        }
+                                        className="h-8 text-xs"
+                                      />
+                                    </div>
+                                  </div>
+                                </div>
+
+                                <div className="space-y-3">
+                                  <h5 className="text-xs font-semibold text-gray-700">
+                                    Ojo Izquierdo (OS)
+                                  </h5>
+                                  <div className="grid grid-cols-4 gap-2">
+                                    <div>
+                                      <Label className="text-xs">Esfera</Label>
+                                      <Input
+                                        placeholder="-2.00"
+                                        value={
+                                          externalPrescriptionData.os_sphere
+                                        }
+                                        onChange={(e) =>
+                                          setExternalPrescriptionData(
+                                            (prev) => ({
+                                              ...prev,
+                                              os_sphere: e.target.value,
+                                            }),
+                                          )
+                                        }
+                                        className="h-8 text-xs"
+                                      />
+                                    </div>
+                                    <div>
+                                      <Label className="text-xs">
+                                        Cilindro
+                                      </Label>
+                                      <Input
+                                        placeholder="-0.50"
+                                        value={
+                                          externalPrescriptionData.os_cylinder
+                                        }
+                                        onChange={(e) =>
+                                          setExternalPrescriptionData(
+                                            (prev) => ({
+                                              ...prev,
+                                              os_cylinder: e.target.value,
+                                            }),
+                                          )
+                                        }
+                                        className="h-8 text-xs"
+                                      />
+                                    </div>
+                                    <div>
+                                      <Label className="text-xs">Eje</Label>
+                                      <Input
+                                        placeholder="180"
+                                        value={externalPrescriptionData.os_axis}
+                                        onChange={(e) =>
+                                          setExternalPrescriptionData(
+                                            (prev) => ({
+                                              ...prev,
+                                              os_axis: e.target.value,
+                                            }),
+                                          )
+                                        }
+                                        className="h-8 text-xs"
+                                      />
+                                    </div>
+                                    <div>
+                                      <Label className="text-xs">Adición</Label>
+                                      <Input
+                                        placeholder="+2.00"
+                                        value={externalPrescriptionData.os_add}
+                                        onChange={(e) =>
+                                          setExternalPrescriptionData(
+                                            (prev) => ({
+                                              ...prev,
+                                              os_add: e.target.value,
+                                            }),
+                                          )
+                                        }
+                                        className="h-8 text-xs"
+                                      />
+                                    </div>
+                                  </div>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-3">
+                                  <div>
+                                    <Label className="text-xs">
+                                      DP (Distancia Pupilar)
+                                    </Label>
+                                    <Input
+                                      placeholder="64"
+                                      value={externalPrescriptionData.pd}
+                                      onChange={(e) =>
+                                        setExternalPrescriptionData((prev) => ({
+                                          ...prev,
+                                          pd: e.target.value,
+                                        }))
+                                      }
+                                      className="h-8 text-xs"
+                                    />
+                                  </div>
+                                  <div>
+                                    <Label className="text-xs">DP Cerca</Label>
+                                    <Input
+                                      placeholder="62"
+                                      value={externalPrescriptionData.near_pd}
+                                      onChange={(e) =>
+                                        setExternalPrescriptionData((prev) => ({
+                                          ...prev,
+                                          near_pd: e.target.value,
+                                        }))
+                                      }
+                                      className="h-8 text-xs"
+                                    />
+                                  </div>
+                                </div>
+
+                                <Button
+                                  type="button"
+                                  onClick={
+                                    handleCreateExternalCustomerWithPrescription
+                                  }
+                                  disabled={creatingExternalCustomer}
+                                  className="w-full"
+                                  size="sm"
+                                >
+                                  {creatingExternalCustomer ? (
+                                    <>
+                                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                      Creando...
+                                    </>
+                                  ) : (
+                                    <>
+                                      <Plus className="h-4 w-4 mr-2" />
+                                      Crear Cliente y Receta
+                                    </>
+                                  )}
+                                </Button>
+                              </div>
+                            </div>
+                          </TabsContent>
+                        </Tabs>
+                      </TabsContent>
+
+                      {/* Frame Tab */}
+                      <TabsContent value="frame" className="space-y-4 mt-4">
+                        <div>
+                          <Label>Marco</Label>
+                          <div className="flex items-center gap-2 mb-2">
+                            <input
+                              type="checkbox"
+                              id="customer_own_frame_pos"
+                              checked={customerOwnFrame}
+                              onChange={(e) => {
+                                setCustomerOwnFrame(e.target.checked);
+                                if (e.target.checked) {
                                   setSelectedFrame(null);
                                   setOrderFormData((prev) => ({
                                     ...prev,
                                     frame_price: 0,
                                     frame_cost: 0,
                                   }));
-                                }}
-                              >
-                                <X className="h-3 w-3" />
-                              </Button>
-                            </div>
-                          ) : (
-                            <div className="relative mt-1">
-                              <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                              <Input
-                                placeholder="Buscar marco..."
-                                value={frameSearch}
-                                onChange={(e) => setFrameSearch(e.target.value)}
-                                className="pl-8 h-9 text-sm"
-                              />
-                              {frameSearch.length >= 2 &&
-                                frameResults.length > 0 && (
-                                  <div className="absolute z-10 w-full mt-1 bg-white border rounded-lg shadow-lg max-h-40 overflow-y-auto">
-                                    {frameResults.map((frame) => (
-                                      <div
-                                        key={frame.id}
-                                        className="p-2 hover:bg-gray-100 cursor-pointer border-b text-sm"
-                                        onClick={() =>
-                                          handleFrameSelectForOrder(frame)
-                                        }
-                                      >
-                                        <div className="font-medium">
-                                          {frame.name}
-                                        </div>
-                                        <div className="text-xs text-gray-600">
-                                          {formatCurrency(frame.price)}
-                                        </div>
-                                      </div>
-                                    ))}
+                                }
+                              }}
+                              className="h-4 w-4 rounded border-gray-300"
+                            />
+                            <Label
+                              htmlFor="customer_own_frame_pos"
+                              className="cursor-pointer text-sm"
+                            >
+                              Cliente trae marco (recambio de cristales)
+                            </Label>
+                          </div>
+                          {!customerOwnFrame ? (
+                            <>
+                              {selectedFrame ? (
+                                <div className="flex items-center justify-between p-2 border rounded mt-1">
+                                  <div>
+                                    <div className="font-medium text-sm">
+                                      {selectedFrame.name}
+                                    </div>
+                                    <div className="text-xs text-gray-600">
+                                      {formatCurrency(
+                                        orderFormData.frame_price,
+                                      )}
+                                    </div>
                                   </div>
-                                )}
-                            </div>
-                          )}
-                          {!selectedFrame && (
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => {
+                                      setSelectedFrame(null);
+                                      setOrderFormData((prev) => ({
+                                        ...prev,
+                                        frame_price: 0,
+                                        frame_cost: 0,
+                                      }));
+                                    }}
+                                  >
+                                    <X className="h-3 w-3" />
+                                  </Button>
+                                </div>
+                              ) : (
+                                <div className="relative mt-1">
+                                  <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                                  <Input
+                                    placeholder="Buscar marco..."
+                                    value={frameSearch}
+                                    onChange={(e) =>
+                                      setFrameSearch(e.target.value)
+                                    }
+                                    className="pl-8 h-9 text-sm"
+                                  />
+                                  {frameSearch.length >= 2 &&
+                                    frameResults.length > 0 && (
+                                      <div className="absolute z-10 w-full mt-1 bg-white border rounded-lg shadow-lg max-h-40 overflow-y-auto">
+                                        {frameResults.map((frame) => (
+                                          <div
+                                            key={frame.id}
+                                            className="p-2 hover:bg-gray-100 cursor-pointer border-b text-sm"
+                                            onClick={() =>
+                                              handleFrameSelectForOrder(frame)
+                                            }
+                                          >
+                                            <div className="font-medium">
+                                              {frame.name}
+                                            </div>
+                                            <div className="text-xs text-gray-600">
+                                              {formatCurrency(frame.price)}
+                                            </div>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    )}
+                                </div>
+                              )}
+                              {!selectedFrame && (
+                                <div className="mt-2 grid grid-cols-2 gap-2">
+                                  <Input
+                                    placeholder="Nombre marco"
+                                    value={orderFormData.frame_name}
+                                    onChange={(e) =>
+                                      setOrderFormData((prev) => ({
+                                        ...prev,
+                                        frame_name: e.target.value,
+                                      }))
+                                    }
+                                    className="h-9 text-sm"
+                                  />
+                                  <Input
+                                    type="number"
+                                    placeholder="Precio"
+                                    value={orderFormData.frame_price || ""}
+                                    onChange={(e) => {
+                                      const price =
+                                        parseFloat(e.target.value) || 0;
+                                      setOrderFormData((prev) => ({
+                                        ...prev,
+                                        frame_price: price,
+                                        frame_cost: price,
+                                      }));
+                                    }}
+                                    className="h-9 text-sm"
+                                  />
+                                </div>
+                              )}
+                            </>
+                          ) : (
                             <div className="mt-2 grid grid-cols-2 gap-2">
                               <Input
-                                placeholder="Nombre marco"
+                                placeholder="Nombre marco del cliente"
                                 value={orderFormData.frame_name}
                                 onChange={(e) =>
                                   setOrderFormData((prev) => ({
@@ -4265,344 +4442,363 @@ export default function POSPage() {
                                 }
                                 className="h-9 text-sm"
                               />
-                              <Input
-                                type="number"
-                                placeholder="Precio"
-                                value={orderFormData.frame_price || ""}
-                                onChange={(e) => {
-                                  const price = parseFloat(e.target.value) || 0;
-                                  setOrderFormData((prev) => ({
-                                    ...prev,
-                                    frame_price: price,
-                                    frame_cost: price,
-                                  }));
-                                }}
-                                className="h-9 text-sm"
-                              />
+                              <div className="text-xs text-gray-500 flex items-center">
+                                Precio: $0 (cliente trae marco)
+                              </div>
                             </div>
                           )}
-                        </>
-                      ) : (
-                        <div className="mt-2 grid grid-cols-2 gap-2">
-                          <Input
-                            placeholder="Nombre marco del cliente"
-                            value={orderFormData.frame_name}
-                            onChange={(e) =>
-                              setOrderFormData((prev) => ({
-                                ...prev,
-                                frame_name: e.target.value,
-                              }))
-                            }
-                            className="h-9 text-sm"
-                          />
-                          <div className="text-xs text-gray-500 flex items-center">
-                            Precio: $0 (cliente trae marco)
-                          </div>
                         </div>
-                      )}
-                    </div>
-                  </TabsContent>
+                      </TabsContent>
 
-                  {/* Lenses Tab */}
-                  <TabsContent value="lenses" className="space-y-4 mt-4">
-                    {/* Presbyopia Solution Selector */}
-                    {selectedPrescription &&
-                      hasAddition(selectedPrescription) && (
-                        <div className="space-y-3 p-3 border rounded-lg bg-orange-50">
-                          <div className="flex items-center gap-2">
-                            <AlertCircle className="h-4 w-4 text-orange-600" />
-                            <Label className="text-sm font-medium">
-                              Presbicia detectada (+
-                              {getMaxAddition(selectedPrescription)} D)
-                            </Label>
-                          </div>
-                          <RadioGroup
-                            value={presbyopiaSolution}
-                            onValueChange={(value) => {
-                              const solution = value as PresbyopiaSolution;
-                              setPresbyopiaSolution(solution);
-                              setOrderFormData((prev) => ({
-                                ...prev,
-                                presbyopia_solution: solution,
-                              }));
-                              if (
-                                solution === "progressive" ||
-                                solution === "bifocal" ||
-                                solution === "trifocal"
-                              ) {
-                                setOrderFormData((prev) => ({
-                                  ...prev,
-                                  lens_type: solution,
-                                }));
-                              }
-                              // Reset lens families when changing solution
-                              if (solution !== "two_separate") {
-                                setFarLensFamilyId("");
-                                setNearLensFamilyId("");
-                                setSelectedNearFrame(null);
-                                setCustomerOwnNearFrame(false);
-                                setNearFrameSearch("");
-                                setNearFrameResults([]);
-                                setOrderFormData((prev) => ({
-                                  ...prev,
-                                  far_lens_family_id: "",
-                                  near_lens_family_id: "",
-                                  far_lens_cost: 0,
-                                  near_lens_cost: 0,
-                                  near_frame_product_id: "",
-                                  near_frame_name: "",
-                                  near_frame_brand: "",
-                                  near_frame_model: "",
-                                  near_frame_color: "",
-                                  near_frame_size: "",
-                                  near_frame_sku: "",
-                                  near_frame_price: 0,
-                                  near_frame_price_includes_tax: false,
-                                  near_frame_cost: 0,
-                                }));
-                              }
-                            }}
-                            className="space-y-2"
-                          >
-                            <div className="flex items-center space-x-2">
-                              <RadioGroupItem
-                                value="progressive"
-                                id="pos-progressive"
-                              />
-                              <Label
-                                htmlFor="pos-progressive"
-                                className="cursor-pointer text-sm"
-                              >
-                                Progresivo
-                              </Label>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                              <RadioGroupItem
-                                value="bifocal"
-                                id="pos-bifocal"
-                              />
-                              <Label
-                                htmlFor="pos-bifocal"
-                                className="cursor-pointer text-sm"
-                              >
-                                Bifocal
-                              </Label>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                              <RadioGroupItem
-                                value="two_separate"
-                                id="pos-two-separate"
-                              />
-                              <Label
-                                htmlFor="pos-two-separate"
-                                className="cursor-pointer text-sm"
-                              >
-                                Dos lentes separados
-                              </Label>
-                            </div>
-                          </RadioGroup>
-                        </div>
-                      )}
-
-                    {/* Two Separate Lenses Layout - Improved with clear sections */}
-                    {presbyopiaSolution === "two_separate" ? (
-                      <div className="space-y-6">
-                        {/* Section 1: Far Vision (Lejos) */}
-                        <Card className="border-2 border-blue-200 bg-blue-50/30">
-                          <CardHeader className="pb-3">
-                            <CardTitle className="text-base flex items-center text-blue-900">
-                              <Eye className="h-4 w-4 mr-2" />
-                              Marco y Lente de Lejos (Visión Lejana)
-                            </CardTitle>
-                          </CardHeader>
-                          <CardContent className="space-y-4">
-                            {/* Far Frame - Already selected above, show summary */}
-                            <div className="p-2 bg-white rounded border">
-                              <div className="text-xs font-medium text-gray-700 mb-1">
-                                Marco de Lejos:
-                              </div>
-                              {selectedFrame ? (
-                                <div className="text-sm">
-                                  {selectedFrame.name} -{" "}
-                                  {formatCurrency(orderFormData.frame_price)}
-                                </div>
-                              ) : customerOwnFrame ? (
-                                <div className="text-sm text-gray-600">
-                                  {orderFormData.frame_name ||
-                                    "Cliente trae marco"}{" "}
-                                  - $0
-                                </div>
-                              ) : (
-                                <div className="text-sm text-gray-500">
-                                  {orderFormData.frame_name ||
-                                    "Sin marco seleccionado"}{" "}
-                                  - {formatCurrency(orderFormData.frame_price)}
-                                </div>
-                              )}
-                            </div>
-
-                            {/* Far Lens Family */}
-                            <div>
-                              <Label className="text-sm font-medium">
-                                Familia de Lente de Lejos
-                              </Label>
-                              <LensFamilyCombobox
-                                value={farLensFamilyId || ""}
-                                onChange={(familyId) => {
-                                  setFarLensFamilyId(familyId);
-                                  setOrderFormData((prev) => ({
-                                    ...prev,
-                                    far_lens_family_id: familyId,
-                                  }));
-                                }}
-                                presbyopiaSolution="two_separate"
-                                families={lensFamilies}
-                                loading={loadingFamilies}
-                                placeholder="Selecciona familia de lente"
-                                className="h-9 text-sm"
-                              />
-                              {farLensCost > 0 && (
-                                <div className="mt-1 p-2 bg-green-50 border border-green-200 rounded">
-                                  <p className="text-xs font-medium text-green-800">
-                                    Precio Lente de Lejos:{" "}
-                                    {formatCurrency(farLensCost)}
-                                  </p>
-                                </div>
-                              )}
-                              {!farLensFamilyId && (
-                                <div className="mt-2">
-                                  <Label className="text-sm">
-                                    Costo del Lente de Lejos (Manual)
-                                  </Label>
-                                  <Input
-                                    type="number"
-                                    placeholder="Ej: 30000"
-                                    value={orderFormData.far_lens_cost || ""}
-                                    onChange={(e) => {
-                                      const newValue =
-                                        parseFloat(e.target.value) || 0;
-                                      setOrderFormData((prev) => ({
-                                        ...prev,
-                                        far_lens_cost: newValue,
-                                      }));
-                                      setFarLensCost(newValue);
-                                    }}
-                                    className="h-9 text-sm mt-1"
-                                  />
-                                </div>
-                              )}
-                            </div>
-                          </CardContent>
-                        </Card>
-
-                        {/* Section 2: Near Vision (Cerca) */}
-                        <Card className="border-2 border-purple-200 bg-purple-50/30">
-                          <CardHeader className="pb-3">
-                            <CardTitle className="text-base flex items-center text-purple-900">
-                              <Eye className="h-4 w-4 mr-2" />
-                              Marco y Lente de Cerca (Visión Cercana)
-                            </CardTitle>
-                          </CardHeader>
-                          <CardContent className="space-y-4">
-                            {/* Near Frame Selection */}
-                            <div>
-                              <Label className="text-sm font-medium">
-                                Marco de Cerca
-                              </Label>
-                              <div className="flex items-center gap-2 mb-2 mt-1">
-                                <input
-                                  type="checkbox"
-                                  id="customer_own_near_frame_pos"
-                                  checked={customerOwnNearFrame}
-                                  onChange={(e) => {
-                                    setCustomerOwnNearFrame(e.target.checked);
-                                    if (e.target.checked) {
-                                      setSelectedNearFrame(null);
-                                      setOrderFormData((prev) => ({
-                                        ...prev,
-                                        near_frame_price: 0,
-                                        near_frame_cost: 0,
-                                      }));
-                                    }
-                                  }}
-                                  className="h-4 w-4 rounded border-gray-300"
-                                />
-                                <Label
-                                  htmlFor="customer_own_near_frame_pos"
-                                  className="cursor-pointer text-sm"
-                                >
-                                  Cliente trae marco (recambio de cristales)
+                      {/* Lenses Tab */}
+                      <TabsContent value="lenses" className="space-y-4 mt-4">
+                        {/* Presbyopia Solution Selector */}
+                        {selectedPrescription &&
+                          hasAddition(selectedPrescription) && (
+                            <div className="space-y-3 p-3 border rounded-lg bg-orange-50">
+                              <div className="flex items-center gap-2">
+                                <AlertCircle className="h-4 w-4 text-orange-600" />
+                                <Label className="text-sm font-medium">
+                                  Presbicia detectada (+
+                                  {getMaxAddition(selectedPrescription)} D)
                                 </Label>
                               </div>
-                              {!customerOwnNearFrame ? (
-                                <>
-                                  {selectedNearFrame ? (
-                                    <div className="flex items-center justify-between p-2 border rounded bg-white">
-                                      <div>
-                                        <div className="font-medium text-sm">
-                                          {selectedNearFrame.name}
-                                        </div>
-                                        <div className="text-xs text-gray-600">
-                                          {formatCurrency(
-                                            orderFormData.near_frame_price,
-                                          )}
-                                        </div>
-                                      </div>
-                                      <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        onClick={() => {
+                              <RadioGroup
+                                value={presbyopiaSolution}
+                                onValueChange={(value) => {
+                                  const solution = value as PresbyopiaSolution;
+                                  setPresbyopiaSolution(solution);
+                                  setOrderFormData((prev) => ({
+                                    ...prev,
+                                    presbyopia_solution: solution,
+                                  }));
+                                  if (
+                                    solution === "progressive" ||
+                                    solution === "bifocal" ||
+                                    solution === "trifocal"
+                                  ) {
+                                    setOrderFormData((prev) => ({
+                                      ...prev,
+                                      lens_type: solution,
+                                    }));
+                                  }
+                                  // Reset lens families when changing solution
+                                  if (solution !== "two_separate") {
+                                    setFarLensFamilyId("");
+                                    setNearLensFamilyId("");
+                                    setSelectedNearFrame(null);
+                                    setCustomerOwnNearFrame(false);
+                                    setNearFrameSearch("");
+                                    setNearFrameResults([]);
+                                    setOrderFormData((prev) => ({
+                                      ...prev,
+                                      far_lens_family_id: "",
+                                      near_lens_family_id: "",
+                                      far_lens_cost: 0,
+                                      near_lens_cost: 0,
+                                      near_frame_product_id: "",
+                                      near_frame_name: "",
+                                      near_frame_brand: "",
+                                      near_frame_model: "",
+                                      near_frame_color: "",
+                                      near_frame_size: "",
+                                      near_frame_sku: "",
+                                      near_frame_price: 0,
+                                      near_frame_price_includes_tax: false,
+                                      near_frame_cost: 0,
+                                    }));
+                                  }
+                                }}
+                                className="space-y-2"
+                              >
+                                <div className="flex items-center space-x-2">
+                                  <RadioGroupItem
+                                    value="progressive"
+                                    id="pos-progressive"
+                                  />
+                                  <Label
+                                    htmlFor="pos-progressive"
+                                    className="cursor-pointer text-sm"
+                                  >
+                                    Progresivo
+                                  </Label>
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                  <RadioGroupItem
+                                    value="bifocal"
+                                    id="pos-bifocal"
+                                  />
+                                  <Label
+                                    htmlFor="pos-bifocal"
+                                    className="cursor-pointer text-sm"
+                                  >
+                                    Bifocal
+                                  </Label>
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                  <RadioGroupItem
+                                    value="two_separate"
+                                    id="pos-two-separate"
+                                  />
+                                  <Label
+                                    htmlFor="pos-two-separate"
+                                    className="cursor-pointer text-sm"
+                                  >
+                                    Dos lentes separados
+                                  </Label>
+                                </div>
+                              </RadioGroup>
+                            </div>
+                          )}
+
+                        {/* Two Separate Lenses Layout - Improved with clear sections */}
+                        {presbyopiaSolution === "two_separate" ? (
+                          <div className="space-y-6">
+                            {/* Section 1: Far Vision (Lejos) */}
+                            <Card className="border-2 border-blue-200 bg-blue-50/30">
+                              <CardHeader className="pb-3">
+                                <CardTitle className="text-base flex items-center text-blue-900">
+                                  <Eye className="h-4 w-4 mr-2" />
+                                  Marco y Lente de Lejos (Visión Lejana)
+                                </CardTitle>
+                              </CardHeader>
+                              <CardContent className="space-y-4">
+                                {/* Far Frame - Already selected above, show summary */}
+                                <div className="p-2 bg-white rounded border">
+                                  <div className="text-xs font-medium text-gray-700 mb-1">
+                                    Marco de Lejos:
+                                  </div>
+                                  {selectedFrame ? (
+                                    <div className="text-sm">
+                                      {selectedFrame.name} -{" "}
+                                      {formatCurrency(
+                                        orderFormData.frame_price,
+                                      )}
+                                    </div>
+                                  ) : customerOwnFrame ? (
+                                    <div className="text-sm text-gray-600">
+                                      {orderFormData.frame_name ||
+                                        "Cliente trae marco"}{" "}
+                                      - $0
+                                    </div>
+                                  ) : (
+                                    <div className="text-sm text-gray-500">
+                                      {orderFormData.frame_name ||
+                                        "Sin marco seleccionado"}{" "}
+                                      -{" "}
+                                      {formatCurrency(
+                                        orderFormData.frame_price,
+                                      )}
+                                    </div>
+                                  )}
+                                </div>
+
+                                {/* Far Lens Family */}
+                                <div>
+                                  <Label className="text-sm font-medium">
+                                    Familia de Lente de Lejos
+                                  </Label>
+                                  <LensFamilyCombobox
+                                    value={farLensFamilyId || ""}
+                                    onChange={(familyId) => {
+                                      setFarLensFamilyId(familyId);
+                                      setOrderFormData((prev) => ({
+                                        ...prev,
+                                        far_lens_family_id: familyId,
+                                      }));
+                                    }}
+                                    presbyopiaSolution="two_separate"
+                                    families={lensFamilies}
+                                    loading={loadingFamilies}
+                                    placeholder="Selecciona familia de lente"
+                                    className="h-9 text-sm"
+                                  />
+                                  {farLensCost > 0 && (
+                                    <div className="mt-1 p-2 bg-green-50 border border-green-200 rounded">
+                                      <p className="text-xs font-medium text-green-800">
+                                        Precio Lente de Lejos:{" "}
+                                        {formatCurrency(farLensCost)}
+                                      </p>
+                                    </div>
+                                  )}
+                                  {!farLensFamilyId && (
+                                    <div className="mt-2">
+                                      <Label className="text-sm">
+                                        Costo del Lente de Lejos (Manual)
+                                      </Label>
+                                      <Input
+                                        type="number"
+                                        placeholder="Ej: 30000"
+                                        value={
+                                          orderFormData.far_lens_cost || ""
+                                        }
+                                        onChange={(e) => {
+                                          const newValue =
+                                            parseFloat(e.target.value) || 0;
+                                          setOrderFormData((prev) => ({
+                                            ...prev,
+                                            far_lens_cost: newValue,
+                                          }));
+                                          setFarLensCost(newValue);
+                                        }}
+                                        className="h-9 text-sm mt-1"
+                                      />
+                                    </div>
+                                  )}
+                                </div>
+                              </CardContent>
+                            </Card>
+
+                            {/* Section 2: Near Vision (Cerca) */}
+                            <Card className="border-2 border-purple-200 bg-purple-50/30">
+                              <CardHeader className="pb-3">
+                                <CardTitle className="text-base flex items-center text-purple-900">
+                                  <Eye className="h-4 w-4 mr-2" />
+                                  Marco y Lente de Cerca (Visión Cercana)
+                                </CardTitle>
+                              </CardHeader>
+                              <CardContent className="space-y-4">
+                                {/* Near Frame Selection */}
+                                <div>
+                                  <Label className="text-sm font-medium">
+                                    Marco de Cerca
+                                  </Label>
+                                  <div className="flex items-center gap-2 mb-2 mt-1">
+                                    <input
+                                      type="checkbox"
+                                      id="customer_own_near_frame_pos"
+                                      checked={customerOwnNearFrame}
+                                      onChange={(e) => {
+                                        setCustomerOwnNearFrame(
+                                          e.target.checked,
+                                        );
+                                        if (e.target.checked) {
                                           setSelectedNearFrame(null);
                                           setOrderFormData((prev) => ({
                                             ...prev,
                                             near_frame_price: 0,
                                             near_frame_cost: 0,
                                           }));
-                                        }}
-                                      >
-                                        <X className="h-3 w-3" />
-                                      </Button>
-                                    </div>
-                                  ) : (
-                                    <div className="relative">
-                                      <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                                      <Input
-                                        placeholder="Buscar marco de cerca..."
-                                        value={nearFrameSearch}
-                                        onChange={(e) =>
-                                          setNearFrameSearch(e.target.value)
                                         }
-                                        className="pl-8 h-9 text-sm"
-                                      />
-                                      {nearFrameSearch.length >= 2 &&
-                                        nearFrameResults.length > 0 && (
-                                          <div className="absolute z-10 w-full mt-1 bg-white border rounded-lg shadow-lg max-h-40 overflow-y-auto">
-                                            {nearFrameResults.map((frame) => (
-                                              <div
-                                                key={frame.id}
-                                                className="p-2 hover:bg-gray-100 cursor-pointer border-b text-sm"
-                                                onClick={() =>
-                                                  handleNearFrameSelectForOrder(
-                                                    frame,
-                                                  )
-                                                }
-                                              >
-                                                <div className="font-medium">
-                                                  {frame.name}
-                                                </div>
-                                                <div className="text-xs text-gray-600">
-                                                  {formatCurrency(frame.price)}
-                                                </div>
-                                              </div>
-                                            ))}
+                                      }}
+                                      className="h-4 w-4 rounded border-gray-300"
+                                    />
+                                    <Label
+                                      htmlFor="customer_own_near_frame_pos"
+                                      className="cursor-pointer text-sm"
+                                    >
+                                      Cliente trae marco (recambio de cristales)
+                                    </Label>
+                                  </div>
+                                  {!customerOwnNearFrame ? (
+                                    <>
+                                      {selectedNearFrame ? (
+                                        <div className="flex items-center justify-between p-2 border rounded bg-white">
+                                          <div>
+                                            <div className="font-medium text-sm">
+                                              {selectedNearFrame.name}
+                                            </div>
+                                            <div className="text-xs text-gray-600">
+                                              {formatCurrency(
+                                                orderFormData.near_frame_price,
+                                              )}
+                                            </div>
                                           </div>
-                                        )}
-                                    </div>
-                                  )}
-                                  {!selectedNearFrame && (
+                                          <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={() => {
+                                              setSelectedNearFrame(null);
+                                              setOrderFormData((prev) => ({
+                                                ...prev,
+                                                near_frame_price: 0,
+                                                near_frame_cost: 0,
+                                              }));
+                                            }}
+                                          >
+                                            <X className="h-3 w-3" />
+                                          </Button>
+                                        </div>
+                                      ) : (
+                                        <div className="relative">
+                                          <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                                          <Input
+                                            placeholder="Buscar marco de cerca..."
+                                            value={nearFrameSearch}
+                                            onChange={(e) =>
+                                              setNearFrameSearch(e.target.value)
+                                            }
+                                            className="pl-8 h-9 text-sm"
+                                          />
+                                          {nearFrameSearch.length >= 2 &&
+                                            nearFrameResults.length > 0 && (
+                                              <div className="absolute z-10 w-full mt-1 bg-white border rounded-lg shadow-lg max-h-40 overflow-y-auto">
+                                                {nearFrameResults.map(
+                                                  (frame) => (
+                                                    <div
+                                                      key={frame.id}
+                                                      className="p-2 hover:bg-gray-100 cursor-pointer border-b text-sm"
+                                                      onClick={() =>
+                                                        handleNearFrameSelectForOrder(
+                                                          frame,
+                                                        )
+                                                      }
+                                                    >
+                                                      <div className="font-medium">
+                                                        {frame.name}
+                                                      </div>
+                                                      <div className="text-xs text-gray-600">
+                                                        {formatCurrency(
+                                                          frame.price,
+                                                        )}
+                                                      </div>
+                                                    </div>
+                                                  ),
+                                                )}
+                                              </div>
+                                            )}
+                                        </div>
+                                      )}
+                                      {!selectedNearFrame && (
+                                        <div className="mt-2 grid grid-cols-2 gap-2">
+                                          <Input
+                                            placeholder="Nombre marco de cerca"
+                                            value={
+                                              orderFormData.near_frame_name
+                                            }
+                                            onChange={(e) =>
+                                              setOrderFormData((prev) => ({
+                                                ...prev,
+                                                near_frame_name: e.target.value,
+                                              }))
+                                            }
+                                            className="h-9 text-sm"
+                                          />
+                                          <Input
+                                            type="number"
+                                            placeholder="Precio"
+                                            value={
+                                              orderFormData.near_frame_price ||
+                                              ""
+                                            }
+                                            onChange={(e) => {
+                                              const price =
+                                                parseFloat(e.target.value) || 0;
+                                              setOrderFormData((prev) => ({
+                                                ...prev,
+                                                near_frame_price: price,
+                                                near_frame_cost: price,
+                                              }));
+                                            }}
+                                            className="h-9 text-sm"
+                                          />
+                                        </div>
+                                      )}
+                                    </>
+                                  ) : (
                                     <div className="mt-2 grid grid-cols-2 gap-2">
                                       <Input
-                                        placeholder="Nombre marco de cerca"
+                                        placeholder="Nombre marco del cliente"
                                         value={orderFormData.near_frame_name}
                                         onChange={(e) =>
                                           setOrderFormData((prev) => ({
@@ -4612,860 +4808,854 @@ export default function POSPage() {
                                         }
                                         className="h-9 text-sm"
                                       />
+                                      <div className="text-xs text-gray-500 flex items-center">
+                                        Precio: $0 (cliente trae marco)
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+
+                                {/* Near Lens Family */}
+                                <div>
+                                  <Label className="text-sm font-medium">
+                                    Familia de Lente de Cerca
+                                  </Label>
+                                  <LensFamilyCombobox
+                                    value={nearLensFamilyId || ""}
+                                    onChange={(familyId) => {
+                                      setNearLensFamilyId(familyId);
+                                      setOrderFormData((prev) => ({
+                                        ...prev,
+                                        near_lens_family_id: familyId,
+                                      }));
+                                    }}
+                                    presbyopiaSolution="two_separate"
+                                    families={lensFamilies}
+                                    loading={loadingFamilies}
+                                    placeholder="Selecciona familia de lente"
+                                    className="h-9 text-sm"
+                                  />
+                                  {nearLensCost > 0 && (
+                                    <div className="mt-1 p-2 bg-green-50 border border-green-200 rounded">
+                                      <p className="text-xs font-medium text-green-800">
+                                        Precio Lente de Cerca:{" "}
+                                        {formatCurrency(nearLensCost)}
+                                      </p>
+                                    </div>
+                                  )}
+                                  {!nearLensFamilyId && (
+                                    <div className="mt-2">
+                                      <Label className="text-sm">
+                                        Costo del Lente de Cerca (Manual)
+                                      </Label>
                                       <Input
                                         type="number"
-                                        placeholder="Precio"
+                                        placeholder="Ej: 30000"
                                         value={
-                                          orderFormData.near_frame_price || ""
+                                          orderFormData.near_lens_cost || ""
                                         }
                                         onChange={(e) => {
-                                          const price =
+                                          const newValue =
                                             parseFloat(e.target.value) || 0;
                                           setOrderFormData((prev) => ({
                                             ...prev,
-                                            near_frame_price: price,
-                                            near_frame_cost: price,
+                                            near_lens_cost: newValue,
                                           }));
+                                          setNearLensCost(newValue);
                                         }}
-                                        className="h-9 text-sm"
+                                        className="h-9 text-sm mt-1"
                                       />
                                     </div>
                                   )}
-                                </>
-                              ) : (
-                                <div className="mt-2 grid grid-cols-2 gap-2">
-                                  <Input
-                                    placeholder="Nombre marco del cliente"
-                                    value={orderFormData.near_frame_name}
-                                    onChange={(e) =>
-                                      setOrderFormData((prev) => ({
-                                        ...prev,
-                                        near_frame_name: e.target.value,
-                                      }))
-                                    }
-                                    className="h-9 text-sm"
-                                  />
-                                  <div className="text-xs text-gray-500 flex items-center">
-                                    Precio: $0 (cliente trae marco)
-                                  </div>
                                 </div>
-                              )}
-                            </div>
+                              </CardContent>
+                            </Card>
+                          </div>
+                        ) : null}
 
-                            {/* Near Lens Family */}
-                            <div>
-                              <Label className="text-sm font-medium">
-                                Familia de Lente de Cerca
-                              </Label>
-                              <LensFamilyCombobox
-                                value={nearLensFamilyId || ""}
-                                onChange={(familyId) => {
-                                  setNearLensFamilyId(familyId);
+                        {/* Lens Type Toggle: Optical vs Contact */}
+                        {presbyopiaSolution !== "two_separate" && (
+                          <div className="flex items-center gap-4 p-3 border rounded-lg bg-gray-50">
+                            <Label className="font-medium text-sm">
+                              Tipo de Lente:
+                            </Label>
+                            <div className="flex gap-2">
+                              <Button
+                                type="button"
+                                variant={
+                                  lensType === "optical" ? "default" : "outline"
+                                }
+                                size="sm"
+                                onClick={() => {
+                                  setLensType("optical");
+                                  // Reset contact lens fields when switching to optical
                                   setOrderFormData((prev) => ({
                                     ...prev,
-                                    near_lens_family_id: familyId,
+                                    contact_lens_family_id: "",
+                                    contact_lens_quantity: 1,
+                                    contact_lens_cost: 0,
+                                    contact_lens_price: 0,
                                   }));
                                 }}
-                                presbyopiaSolution="two_separate"
-                                families={lensFamilies}
-                                loading={loadingFamilies}
-                                placeholder="Selecciona familia de lente"
-                                className="h-9 text-sm"
-                              />
-                              {nearLensCost > 0 && (
-                                <div className="mt-1 p-2 bg-green-50 border border-green-200 rounded">
-                                  <p className="text-xs font-medium text-green-800">
-                                    Precio Lente de Cerca:{" "}
-                                    {formatCurrency(nearLensCost)}
-                                  </p>
-                                </div>
-                              )}
-                              {!nearLensFamilyId && (
-                                <div className="mt-2">
-                                  <Label className="text-sm">
-                                    Costo del Lente de Cerca (Manual)
-                                  </Label>
-                                  <Input
-                                    type="number"
-                                    placeholder="Ej: 30000"
-                                    value={orderFormData.near_lens_cost || ""}
-                                    onChange={(e) => {
-                                      const newValue =
-                                        parseFloat(e.target.value) || 0;
-                                      setOrderFormData((prev) => ({
-                                        ...prev,
-                                        near_lens_cost: newValue,
-                                      }));
-                                      setNearLensCost(newValue);
-                                    }}
-                                    className="h-9 text-sm mt-1"
-                                  />
-                                </div>
-                              )}
+                              >
+                                Lentes Ópticos
+                              </Button>
+                              <Button
+                                type="button"
+                                variant={
+                                  lensType === "contact" ? "default" : "outline"
+                                }
+                                size="sm"
+                                onClick={() => {
+                                  setLensType("contact");
+                                  // Reset optical lens fields when switching to contact
+                                  setOrderFormData((prev) => ({
+                                    ...prev,
+                                    lens_family_id: "",
+                                    lens_cost: 0,
+                                  }));
+                                }}
+                              >
+                                Lentes de Contacto
+                              </Button>
                             </div>
-                          </CardContent>
-                        </Card>
-                      </div>
-                    ) : null}
-
-                    {/* Lens Type Toggle: Optical vs Contact */}
-                    {presbyopiaSolution !== "two_separate" && (
-                      <div className="flex items-center gap-4 p-3 border rounded-lg bg-gray-50">
-                        <Label className="font-medium text-sm">
-                          Tipo de Lente:
-                        </Label>
-                        <div className="flex gap-2">
-                          <Button
-                            type="button"
-                            variant={
-                              lensType === "optical" ? "default" : "outline"
-                            }
-                            size="sm"
-                            onClick={() => {
-                              setLensType("optical");
-                              // Reset contact lens fields when switching to optical
-                              setOrderFormData((prev) => ({
-                                ...prev,
-                                contact_lens_family_id: "",
-                                contact_lens_quantity: 1,
-                                contact_lens_cost: 0,
-                                contact_lens_price: 0,
-                              }));
-                            }}
-                          >
-                            Lentes Ópticos
-                          </Button>
-                          <Button
-                            type="button"
-                            variant={
-                              lensType === "contact" ? "default" : "outline"
-                            }
-                            size="sm"
-                            onClick={() => {
-                              setLensType("contact");
-                              // Reset optical lens fields when switching to contact
-                              setOrderFormData((prev) => ({
-                                ...prev,
-                                lens_family_id: "",
-                                lens_cost: 0,
-                              }));
-                            }}
-                          >
-                            Lentes de Contacto
-                          </Button>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Contact Lens Configuration */}
-                    {presbyopiaSolution !== "two_separate" &&
-                    lensType === "contact" ? (
-                      <div className="space-y-4">
-                        <div>
-                          <Label>Familia de Lentes de Contacto</Label>
-                          <ContactLensFamilyCombobox
-                            value={orderFormData.contact_lens_family_id || ""}
-                            onChange={(value) => {
-                              setOrderFormData((prev) => ({
-                                ...prev,
-                                contact_lens_family_id: value,
-                                contact_lens_cost: 0,
-                                contact_lens_price: 0,
-                              }));
-                            }}
-                            families={contactLensFamilies}
-                            loading={loadingContactLensFamilies}
-                            categorySlug="lentes-contacto"
-                            className="h-9 text-sm"
-                          />
-                        </div>
-
-                        {orderFormData.contact_lens_family_id && (
-                          <>
-                            <div className="grid grid-cols-2 gap-4">
-                              <div>
-                                <Label className="text-sm">
-                                  Cantidad de Cajas
-                                </Label>
-                                <Input
-                                  type="number"
-                                  min="1"
-                                  value={
-                                    orderFormData.contact_lens_quantity || 1
-                                  }
-                                  onChange={(e) => {
-                                    const quantity =
-                                      parseInt(e.target.value) || 1;
-                                    setOrderFormData((prev) => ({
-                                      ...prev,
-                                      contact_lens_quantity: quantity,
-                                    }));
-                                  }}
-                                  className="h-9 text-sm"
-                                />
-                              </div>
-                              <div>
-                                <Label className="text-sm">Precio Total</Label>
-                                <Input
-                                  type="number"
-                                  value={orderFormData.contact_lens_price || ""}
-                                  onChange={(e) => {
-                                    const price =
-                                      parseFloat(e.target.value) || 0;
-                                    setOrderFormData((prev) => ({
-                                      ...prev,
-                                      contact_lens_price: price,
-                                    }));
-                                  }}
-                                  placeholder="Se calcula automáticamente"
-                                  className="h-9 text-sm"
-                                />
-                              </div>
-                            </div>
-                            {calculatingContactLensPrice && (
-                              <div className="flex items-center gap-2 text-xs text-gray-600">
-                                <Loader2 className="h-3 w-3 animate-spin" />
-                                <span>
-                                  Calculando precio del lente de contacto...
-                                </span>
-                              </div>
-                            )}
-                            {orderFormData.contact_lens_price > 0 && (
-                              <div className="p-2 bg-green-50 border border-green-200 rounded">
-                                <p className="text-xs font-medium text-green-800">
-                                  Precio Total:{" "}
-                                  {formatCurrency(
-                                    orderFormData.contact_lens_price,
-                                  )}
-                                </p>
-                              </div>
-                            )}
-                          </>
-                        )}
-
-                        {!orderFormData.contact_lens_family_id && (
-                          <div>
-                            <Label className="text-sm">
-                              Costo del Lente de Contacto (Manual)
-                            </Label>
-                            <Input
-                              type="number"
-                              placeholder="Ej: 30000"
-                              value={orderFormData.contact_lens_cost || ""}
-                              onChange={(e) => {
-                                const newValue =
-                                  parseFloat(e.target.value) || 0;
-                                setOrderFormData((prev) => ({
-                                  ...prev,
-                                  contact_lens_cost: newValue,
-                                  contact_lens_price: newValue,
-                                }));
-                              }}
-                              className="h-9 text-sm mt-1"
-                            />
                           </div>
                         )}
 
-                        {/* Las mediciones de receta para lentes de contacto se toman de la receta seleccionada del cliente (Resumen de Receta arriba). */}
-                      </div>
-                    ) : presbyopiaSolution !== "two_separate" &&
-                      lensType === "optical" ? (
-                      /* Optical Lens Configuration (existing code) */
-                      <>
-                        {/* Single Lens Family Selection */}
-                        <div>
-                          <Label>Familia de Lentes</Label>
-                          <LensFamilyCombobox
-                            value={orderFormData.lens_family_id || ""}
-                            onChange={(value) => {
-                              setOrderFormData((prev) => ({
-                                ...prev,
-                                lens_family_id: value,
-                              }));
-                              setManualLensPrice(false);
-                            }}
-                            presbyopiaSolution={presbyopiaSolution}
-                            families={lensFamilies}
-                            loading={loadingFamilies}
-                            placeholder="Selecciona una familia (opcional)"
-                            className="h-9 text-sm"
-                          />
-                        </div>
-
-                        {/* Lens Configuration */}
-                        <div>
-                          <Label>Tipo de Lente *</Label>
-                          {orderFormData.lens_family_id ? (
-                            <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg mt-1">
-                              <p className="text-sm text-blue-800">
-                                Tipo: {orderFormData.lens_type || "—"} ·
-                                Material: {orderFormData.lens_material || "—"}{" "}
-                                (heredados de la familia)
-                              </p>
+                        {/* Contact Lens Configuration */}
+                        {presbyopiaSolution !== "two_separate" &&
+                        lensType === "contact" ? (
+                          <div className="space-y-4">
+                            <div>
+                              <Label>Familia de Lentes de Contacto</Label>
+                              <ContactLensFamilyCombobox
+                                value={
+                                  orderFormData.contact_lens_family_id || ""
+                                }
+                                onChange={(value) => {
+                                  setOrderFormData((prev) => ({
+                                    ...prev,
+                                    contact_lens_family_id: value,
+                                    contact_lens_cost: 0,
+                                    contact_lens_price: 0,
+                                  }));
+                                }}
+                                families={contactLensFamilies}
+                                loading={loadingContactLensFamilies}
+                                categorySlug="lentes-contacto"
+                                className="h-9 text-sm"
+                              />
                             </div>
-                          ) : (
-                            <div className="space-y-2 mt-1">
-                              <div className="p-2 bg-yellow-50 border border-yellow-200 rounded-lg">
-                                <p className="text-xs text-yellow-800">
-                                  No hay familia seleccionada. Ingresa el precio
-                                  del lente manualmente.
-                                </p>
-                              </div>
+
+                            {orderFormData.contact_lens_family_id && (
+                              <>
+                                <div className="grid grid-cols-2 gap-4">
+                                  <div>
+                                    <Label className="text-sm">
+                                      Cantidad de Cajas
+                                    </Label>
+                                    <Input
+                                      type="number"
+                                      min="1"
+                                      value={
+                                        orderFormData.contact_lens_quantity || 1
+                                      }
+                                      onChange={(e) => {
+                                        const quantity =
+                                          parseInt(e.target.value) || 1;
+                                        setOrderFormData((prev) => ({
+                                          ...prev,
+                                          contact_lens_quantity: quantity,
+                                        }));
+                                      }}
+                                      className="h-9 text-sm"
+                                    />
+                                  </div>
+                                  <div>
+                                    <Label className="text-sm">
+                                      Precio Total
+                                    </Label>
+                                    <Input
+                                      type="number"
+                                      value={
+                                        orderFormData.contact_lens_price || ""
+                                      }
+                                      onChange={(e) => {
+                                        const price =
+                                          parseFloat(e.target.value) || 0;
+                                        setOrderFormData((prev) => ({
+                                          ...prev,
+                                          contact_lens_price: price,
+                                        }));
+                                      }}
+                                      placeholder="Se calcula automáticamente"
+                                      className="h-9 text-sm"
+                                    />
+                                  </div>
+                                </div>
+                                {calculatingContactLensPrice && (
+                                  <div className="flex items-center gap-2 text-xs text-gray-600">
+                                    <Loader2 className="h-3 w-3 animate-spin" />
+                                    <span>
+                                      Calculando precio del lente de contacto...
+                                    </span>
+                                  </div>
+                                )}
+                                {orderFormData.contact_lens_price > 0 && (
+                                  <div className="p-2 bg-green-50 border border-green-200 rounded">
+                                    <p className="text-xs font-medium text-green-800">
+                                      Precio Total:{" "}
+                                      {formatCurrency(
+                                        orderFormData.contact_lens_price,
+                                      )}
+                                    </p>
+                                  </div>
+                                )}
+                              </>
+                            )}
+
+                            {!orderFormData.contact_lens_family_id && (
                               <div>
                                 <Label className="text-sm">
-                                  Costo del Lente
+                                  Costo del Lente de Contacto (Manual)
                                 </Label>
                                 <Input
                                   type="number"
                                   placeholder="Ej: 30000"
-                                  value={orderFormData.lens_cost || ""}
+                                  value={orderFormData.contact_lens_cost || ""}
                                   onChange={(e) => {
                                     const newValue =
                                       parseFloat(e.target.value) || 0;
                                     setOrderFormData((prev) => ({
                                       ...prev,
-                                      lens_cost: newValue,
+                                      contact_lens_cost: newValue,
+                                      contact_lens_price: newValue,
                                     }));
                                   }}
                                   className="h-9 text-sm mt-1"
                                 />
                               </div>
-                            </div>
-                          )}
-                          {orderFormData.lens_index && (
-                            <div className="text-xs text-gray-500 mt-1">
-                              Índice: {orderFormData.lens_index}
-                            </div>
-                          )}
-                          {orderFormData.lens_family_id &&
-                            orderFormData.lens_cost > 0 && (
-                              <div className="flex items-center justify-between mt-1">
-                                <div className="text-xs text-gray-600">
-                                  Costo lente:{" "}
-                                  {formatCurrency(orderFormData.lens_cost)}
-                                </div>
-                                <Button
-                                  type="button"
-                                  variant="ghost"
-                                  size="sm"
-                                  className="h-6 text-xs"
-                                  onClick={() =>
-                                    setManualLensPrice(!manualLensPrice)
-                                  }
-                                >
-                                  {manualLensPrice ? "Auto" : "Manual"}
-                                </Button>
-                              </div>
                             )}
-                          {orderFormData.lens_family_id && manualLensPrice && (
-                            <div className="mt-2">
-                              <Label className="text-sm">
-                                Costo del Lente (Manual)
-                              </Label>
-                              <Input
-                                type="number"
-                                placeholder="Ej: 30000"
-                                value={orderFormData.lens_cost || ""}
-                                onChange={(e) => {
-                                  const newValue =
-                                    parseFloat(e.target.value) || 0;
+
+                            {/* Las mediciones de receta para lentes de contacto se toman de la receta seleccionada del cliente (Resumen de Receta arriba). */}
+                          </div>
+                        ) : presbyopiaSolution !== "two_separate" &&
+                          lensType === "optical" ? (
+                          /* Optical Lens Configuration (existing code) */
+                          <>
+                            {/* Single Lens Family Selection */}
+                            <div>
+                              <Label>Familia de Lentes</Label>
+                              <LensFamilyCombobox
+                                value={orderFormData.lens_family_id || ""}
+                                onChange={(value) => {
                                   setOrderFormData((prev) => ({
                                     ...prev,
-                                    lens_cost: newValue,
+                                    lens_family_id: value,
                                   }));
+                                  setManualLensPrice(false);
                                 }}
-                                className="h-9 text-sm mt-1"
+                                presbyopiaSolution={presbyopiaSolution}
+                                families={lensFamilies}
+                                loading={loadingFamilies}
+                                placeholder="Selecciona una familia (opcional)"
+                                className="h-9 text-sm"
                               />
                             </div>
-                          )}
-                          {calculatingPrice && (
-                            <div className="text-xs text-gray-500 mt-1 flex items-center gap-1">
-                              <Loader2 className="h-3 w-3 animate-spin" />
-                              Calculando precio...
-                            </div>
-                          )}
-                        </div>
-                      </>
-                    ) : null}
 
-                    {/* Treatments */}
-                    {/* Hide treatments when two_separate solution or contact lenses */}
-                    {presbyopiaSolution !== "two_separate" &&
-                      lensType === "optical" && (
-                        <>
-                          {/* Show all treatments when no family is selected */}
-                          {!orderFormData.lens_family_id && (
+                            {/* Lens Configuration */}
                             <div>
-                              <Label>Tratamientos</Label>
-                              <div className="grid grid-cols-2 gap-2 mt-1">
-                                {availableTreatments
-                                  .slice(0, 6)
-                                  .map((treatment) => (
-                                    <Button
-                                      key={treatment.value}
-                                      type="button"
-                                      variant={
-                                        orderFormData.lens_treatments.includes(
-                                          treatment.value,
-                                        )
-                                          ? "default"
-                                          : "outline"
-                                      }
-                                      size="sm"
-                                      className="h-8 text-xs"
-                                      onClick={() =>
-                                        handleTreatmentToggle(treatment)
-                                      }
-                                    >
-                                      {treatment.label}
-                                    </Button>
-                                  ))}
-                              </div>
-                              {orderFormData.treatments_cost > 0 && (
-                                <div className="text-xs text-gray-600 mt-1">
-                                  Costo tratamientos:{" "}
-                                  {formatCurrency(
-                                    orderFormData.treatments_cost,
-                                  )}
+                              <Label>Tipo de Lente *</Label>
+                              {orderFormData.lens_family_id ? (
+                                <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg mt-1">
+                                  <p className="text-sm text-blue-800">
+                                    Tipo: {orderFormData.lens_type || "—"} ·
+                                    Material:{" "}
+                                    {orderFormData.lens_material || "—"}{" "}
+                                    (heredados de la familia)
+                                  </p>
                                 </div>
-                              )}
-                            </div>
-                          )}
-                          {/* Show only extras when family is selected */}
-                          {orderFormData.lens_family_id && (
-                            <div>
-                              <Label>Extras</Label>
-                              <div className="text-xs text-gray-500 mb-2">
-                                Los tratamientos estándar están incluidos en la
-                                familia. Solo extras:
-                              </div>
-                              <div className="grid grid-cols-2 gap-2 mt-1">
-                                {availableTreatments
-                                  .filter(
-                                    (t) =>
-                                      t.value === "tint" ||
-                                      t.value === "prism_extra",
-                                  )
-                                  .map((treatment) => (
-                                    <Button
-                                      key={treatment.value}
-                                      type="button"
-                                      variant={
-                                        orderFormData.lens_treatments.includes(
-                                          treatment.value,
-                                        )
-                                          ? "default"
-                                          : "outline"
-                                      }
-                                      size="sm"
-                                      className="h-8 text-xs"
-                                      onClick={() =>
-                                        handleTreatmentToggle(treatment)
-                                      }
-                                    >
-                                      {treatment.label}
-                                    </Button>
-                                  ))}
-                              </div>
-                              {orderFormData.treatments_cost > 0 && (
-                                <div className="text-xs text-gray-600 mt-1">
-                                  Costo extras:{" "}
-                                  {formatCurrency(
-                                    orderFormData.treatments_cost,
-                                  )}
-                                </div>
-                              )}
-                            </div>
-                          )}
-                        </>
-                      )}
-                  </TabsContent>
-
-                  {/* Pricing Tab */}
-                  <TabsContent value="pricing" className="space-y-4 mt-4">
-                    {/* Labor Cost */}
-                    <div>
-                      <Label>Mano de Obra</Label>
-                      <Input
-                        type="number"
-                        placeholder="15000"
-                        value={orderFormData.labor_cost || ""}
-                        onChange={(e) =>
-                          setOrderFormData((prev) => ({
-                            ...prev,
-                            labor_cost: parseFloat(e.target.value) || 0,
-                          }))
-                        }
-                        className="h-9 text-sm"
-                      />
-                    </div>
-
-                    {/* Discount */}
-                    <div className="space-y-2">
-                      <Label>Tipo de Descuento</Label>
-                      <Select
-                        value={discountType}
-                        onValueChange={(value: "percentage" | "amount") => {
-                          setDiscountType(value);
-                          // Clear the other discount field when switching types
-                          if (value === "percentage") {
-                            setOrderFormData((prev) => ({
-                              ...prev,
-                              discount_amount: 0,
-                            }));
-                          } else {
-                            setOrderFormData((prev) => ({
-                              ...prev,
-                              discount_percentage: 0,
-                            }));
-                          }
-                        }}
-                      >
-                        <SelectTrigger className="h-9 text-sm">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="percentage">
-                            Por Porcentaje (%)
-                          </SelectItem>
-                          <SelectItem value="amount">Por Valor ($)</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <div>
-                        <Label>
-                          {discountType === "percentage"
-                            ? "Descuento (%)"
-                            : "Descuento ($)"}
-                        </Label>
-                        <Input
-                          type="number"
-                          placeholder="0"
-                          min="0"
-                          max={
-                            discountType === "percentage" ? "100" : undefined
-                          }
-                          step={discountType === "percentage" ? "0.01" : "1"}
-                          value={
-                            discountType === "percentage"
-                              ? orderFormData.discount_percentage || ""
-                              : orderFormData.discount_amount || ""
-                          }
-                          onChange={(e) => {
-                            const value = parseFloat(e.target.value) || 0;
-                            setOrderFormData((prev) => ({
-                              ...prev,
-                              [discountType === "percentage"
-                                ? "discount_percentage"
-                                : "discount_amount"]: value,
-                            }));
-                          }}
-                          className="h-9 text-sm"
-                        />
-                      </div>
-                    </div>
-
-                    {/* Order Total Preview - Detailed Breakdown */}
-                    {(orderFormData.frame_cost > 0 ||
-                      orderFormData.frame_price > 0 ||
-                      orderFormData.lens_cost > 0 ||
-                      orderFormData.treatments_cost > 0 ||
-                      orderFormData.labor_cost > 0 ||
-                      farLensCost > 0 ||
-                      nearLensCost > 0) && (
-                      <Card className="bg-gray-50 border-2">
-                        <CardHeader className="pb-3">
-                          <CardTitle className="text-base flex items-center">
-                            <Calculator className="h-4 w-4 mr-2" />
-                            Desglose de Precios
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-3">
-                          {presbyopiaSolution === "two_separate" ? (
-                            <>
-                              {/* Two separate lenses pricing breakdown */}
-                              <div className="space-y-2 pb-3 border-b">
-                                <p className="text-sm font-semibold text-gray-700 mb-2">
-                                  Marco y Lente de Lejos:
-                                </p>
-                                <div className="flex justify-between pl-4">
-                                  <span className="text-xs text-gray-600">
-                                    Marco de Lejos:
-                                  </span>
-                                  <span className="text-xs font-medium">
-                                    {formatCurrency(
-                                      orderFormData.frame_cost > 0
-                                        ? orderFormData.frame_cost
-                                        : orderFormData.frame_price || 0,
-                                    )}
-                                  </span>
-                                </div>
-                                <div className="flex justify-between pl-4">
-                                  <span className="text-xs text-gray-600">
-                                    Lente de Lejos:
-                                  </span>
-                                  <span className="text-xs font-medium">
-                                    {formatCurrency(farLensCost || 0)}
-                                  </span>
-                                </div>
-                              </div>
-                              <div className="space-y-2 pb-3 border-b">
-                                <p className="text-sm font-semibold text-gray-700 mb-2">
-                                  Marco y Lente de Cerca:
-                                </p>
-                                {customerOwnNearFrame ? (
-                                  <div className="flex justify-between pl-4">
-                                    <span className="text-xs text-gray-600">
-                                      Marco de Cerca:
-                                    </span>
-                                    <span className="text-xs font-medium">
-                                      $0 (Cliente trae marco)
-                                    </span>
+                              ) : (
+                                <div className="space-y-2 mt-1">
+                                  <div className="p-2 bg-yellow-50 border border-yellow-200 rounded-lg">
+                                    <p className="text-xs text-yellow-800">
+                                      No hay familia seleccionada. Ingresa el
+                                      precio del lente manualmente.
+                                    </p>
                                   </div>
-                                ) : (
-                                  <div className="flex justify-between pl-4">
-                                    <span className="text-xs text-gray-600">
-                                      Marco de Cerca:
-                                    </span>
-                                    <span className="text-xs font-medium">
-                                      {formatCurrency(
-                                        orderFormData.near_frame_cost > 0
-                                          ? orderFormData.near_frame_cost
-                                          : orderFormData.near_frame_price || 0,
-                                      )}
-                                    </span>
+                                  <div>
+                                    <Label className="text-sm">
+                                      Costo del Lente
+                                    </Label>
+                                    <Input
+                                      type="number"
+                                      placeholder="Ej: 30000"
+                                      value={orderFormData.lens_cost || ""}
+                                      onChange={(e) => {
+                                        const newValue =
+                                          parseFloat(e.target.value) || 0;
+                                        setOrderFormData((prev) => ({
+                                          ...prev,
+                                          lens_cost: newValue,
+                                        }));
+                                      }}
+                                      className="h-9 text-sm mt-1"
+                                    />
                                   </div>
-                                )}
-                                <div className="flex justify-between pl-4">
-                                  <span className="text-xs text-gray-600">
-                                    Lente de Cerca:
-                                  </span>
-                                  <span className="text-xs font-medium">
-                                    {formatCurrency(nearLensCost || 0)}
-                                  </span>
-                                </div>
-                              </div>
-                              {orderFormData.treatments_cost > 0 && (
-                                <div className="flex justify-between">
-                                  <span className="text-xs text-gray-600">
-                                    Tratamientos:
-                                  </span>
-                                  <span className="text-xs font-medium">
-                                    {formatCurrency(
-                                      orderFormData.treatments_cost,
-                                    )}
-                                  </span>
                                 </div>
                               )}
-                              {orderFormData.labor_cost > 0 && (
-                                <div className="flex justify-between">
-                                  <span className="text-xs text-gray-600">
-                                    Mano de Obra:
-                                  </span>
-                                  <span className="text-xs font-medium">
-                                    {formatCurrency(orderFormData.labor_cost)}
-                                  </span>
+                              {orderFormData.lens_index && (
+                                <div className="text-xs text-gray-500 mt-1">
+                                  Índice: {orderFormData.lens_index}
                                 </div>
                               )}
-                            </>
-                          ) : (
-                            <>
-                              {/* Single lens pricing breakdown */}
-                              {(orderFormData.frame_cost > 0 ||
-                                orderFormData.frame_price > 0) && (
-                                <div className="flex justify-between">
-                                  <span className="text-xs text-gray-600">
-                                    Marco:
-                                  </span>
-                                  <span className="text-xs font-medium">
-                                    {formatCurrency(
-                                      orderFormData.frame_cost > 0
-                                        ? orderFormData.frame_cost
-                                        : orderFormData.frame_price || 0,
-                                    )}
-                                  </span>
-                                </div>
-                              )}
-                              {lensType === "contact" &&
-                                (orderFormData.contact_lens_price > 0 ||
-                                  orderFormData.contact_lens_cost > 0) && (
-                                  <div className="flex justify-between">
-                                    <span className="text-xs text-gray-600">
-                                      Lentes de Contacto:
-                                    </span>
-                                    <span className="text-xs font-medium">
-                                      {formatCurrency(
-                                        orderFormData.contact_lens_price ||
-                                          orderFormData.contact_lens_cost ||
-                                          0,
-                                      )}
-                                    </span>
-                                  </div>
-                                )}
-                              {orderFormData.lens_cost > 0 &&
-                                lensType !== "contact" && (
-                                  <div className="flex justify-between">
-                                    <span className="text-xs text-gray-600">
-                                      Lente:
-                                    </span>
-                                    <span className="text-xs font-medium">
+                              {orderFormData.lens_family_id &&
+                                orderFormData.lens_cost > 0 && (
+                                  <div className="flex items-center justify-between mt-1">
+                                    <div className="text-xs text-gray-600">
+                                      Costo lente:{" "}
                                       {formatCurrency(orderFormData.lens_cost)}
-                                    </span>
+                                    </div>
+                                    <Button
+                                      type="button"
+                                      variant="ghost"
+                                      size="sm"
+                                      className="h-6 text-xs"
+                                      onClick={() =>
+                                        setManualLensPrice(!manualLensPrice)
+                                      }
+                                    >
+                                      {manualLensPrice ? "Auto" : "Manual"}
+                                    </Button>
                                   </div>
                                 )}
-                              {orderFormData.treatments_cost > 0 && (
-                                <div className="flex justify-between">
-                                  <span className="text-xs text-gray-600">
-                                    Tratamientos:
-                                  </span>
-                                  <span className="text-xs font-medium">
-                                    {formatCurrency(
-                                      orderFormData.treatments_cost,
-                                    )}
-                                  </span>
+                              {orderFormData.lens_family_id &&
+                                manualLensPrice && (
+                                  <div className="mt-2">
+                                    <Label className="text-sm">
+                                      Costo del Lente (Manual)
+                                    </Label>
+                                    <Input
+                                      type="number"
+                                      placeholder="Ej: 30000"
+                                      value={orderFormData.lens_cost || ""}
+                                      onChange={(e) => {
+                                        const newValue =
+                                          parseFloat(e.target.value) || 0;
+                                        setOrderFormData((prev) => ({
+                                          ...prev,
+                                          lens_cost: newValue,
+                                        }));
+                                      }}
+                                      className="h-9 text-sm mt-1"
+                                    />
+                                  </div>
+                                )}
+                              {calculatingPrice && (
+                                <div className="text-xs text-gray-500 mt-1 flex items-center gap-1">
+                                  <Loader2 className="h-3 w-3 animate-spin" />
+                                  Calculando precio...
                                 </div>
                               )}
-                              {orderFormData.labor_cost > 0 && (
-                                <div className="flex justify-between">
-                                  <span className="text-xs text-gray-600">
-                                    Mano de Obra:
-                                  </span>
-                                  <span className="text-xs font-medium">
-                                    {formatCurrency(orderFormData.labor_cost)}
-                                  </span>
+                            </div>
+                          </>
+                        ) : null}
+
+                        {/* Treatments */}
+                        {/* Hide treatments when two_separate solution or contact lenses */}
+                        {presbyopiaSolution !== "two_separate" &&
+                          lensType === "optical" && (
+                            <>
+                              {/* Show all treatments when no family is selected */}
+                              {!orderFormData.lens_family_id && (
+                                <div>
+                                  <Label>Tratamientos</Label>
+                                  <div className="grid grid-cols-2 gap-2 mt-1">
+                                    {availableTreatments
+                                      .slice(0, 6)
+                                      .map((treatment) => (
+                                        <Button
+                                          key={treatment.value}
+                                          type="button"
+                                          variant={
+                                            orderFormData.lens_treatments.includes(
+                                              treatment.value,
+                                            )
+                                              ? "default"
+                                              : "outline"
+                                          }
+                                          size="sm"
+                                          className="h-8 text-xs"
+                                          onClick={() =>
+                                            handleTreatmentToggle(treatment)
+                                          }
+                                        >
+                                          {treatment.label}
+                                        </Button>
+                                      ))}
+                                  </div>
+                                  {orderFormData.treatments_cost > 0 && (
+                                    <div className="text-xs text-gray-600 mt-1">
+                                      Costo tratamientos:{" "}
+                                      {formatCurrency(
+                                        orderFormData.treatments_cost,
+                                      )}
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+                              {/* Show only extras when family is selected */}
+                              {orderFormData.lens_family_id && (
+                                <div>
+                                  <Label>Extras</Label>
+                                  <div className="text-xs text-gray-500 mb-2">
+                                    Los tratamientos estándar están incluidos en
+                                    la familia. Solo extras:
+                                  </div>
+                                  <div className="grid grid-cols-2 gap-2 mt-1">
+                                    {availableTreatments
+                                      .filter(
+                                        (t) =>
+                                          t.value === "tint" ||
+                                          t.value === "prism_extra",
+                                      )
+                                      .map((treatment) => (
+                                        <Button
+                                          key={treatment.value}
+                                          type="button"
+                                          variant={
+                                            orderFormData.lens_treatments.includes(
+                                              treatment.value,
+                                            )
+                                              ? "default"
+                                              : "outline"
+                                          }
+                                          size="sm"
+                                          className="h-8 text-xs"
+                                          onClick={() =>
+                                            handleTreatmentToggle(treatment)
+                                          }
+                                        >
+                                          {treatment.label}
+                                        </Button>
+                                      ))}
+                                  </div>
+                                  {orderFormData.treatments_cost > 0 && (
+                                    <div className="text-xs text-gray-600 mt-1">
+                                      Costo extras:{" "}
+                                      {formatCurrency(
+                                        orderFormData.treatments_cost,
+                                      )}
+                                    </div>
+                                  )}
                                 </div>
                               )}
                             </>
                           )}
+                      </TabsContent>
 
-                          {(() => {
-                            const framePrice =
-                              orderFormData.frame_cost > 0
-                                ? orderFormData.frame_cost
-                                : orderFormData.frame_price || 0;
-
-                            // Include second frame price if two separate lenses
-                            const nearFramePrice =
-                              presbyopiaSolution === "two_separate" &&
-                              !customerOwnNearFrame
-                                ? orderFormData.near_frame_cost > 0
-                                  ? orderFormData.near_frame_cost
-                                  : orderFormData.near_frame_price || 0
-                                : 0;
-
-                            // Calculate lens cost - for two_separate, use sum of far and near lens costs
-                            const effectiveLensCost =
-                              presbyopiaSolution === "two_separate"
-                                ? (farLensCost || 0) + (nearLensCost || 0)
-                                : orderFormData.lens_cost || 0;
-
-                            const subtotal =
-                              framePrice +
-                              nearFramePrice +
-                              effectiveLensCost +
-                              orderFormData.treatments_cost +
-                              orderFormData.labor_cost;
-
-                            // Calculate discount based on type
-                            let discountAmount = 0;
-                            let discountLabel = "";
-                            if (discountType === "percentage") {
-                              discountAmount =
-                                subtotal *
-                                (orderFormData.discount_percentage / 100);
-                              discountLabel = `Descuento (${orderFormData.discount_percentage}%)`;
-                            } else {
-                              discountAmount =
-                                orderFormData.discount_amount || 0;
-                              discountLabel = `Descuento ($${formatPrice(discountAmount)})`;
+                      {/* Pricing Tab */}
+                      <TabsContent value="pricing" className="space-y-4 mt-4">
+                        {/* Labor Cost */}
+                        <div>
+                          <Label>Mano de Obra</Label>
+                          <Input
+                            type="number"
+                            placeholder="15000"
+                            value={orderFormData.labor_cost || ""}
+                            onChange={(e) =>
+                              setOrderFormData((prev) => ({
+                                ...prev,
+                                labor_cost: parseFloat(e.target.value) || 0,
+                              }))
                             }
+                            className="h-9 text-sm"
+                          />
+                        </div>
 
-                            // Ensure discount doesn't exceed subtotal
-                            if (discountAmount > subtotal) {
-                              discountAmount = subtotal;
-                            }
+                        {/* Discount */}
+                        <div className="space-y-2">
+                          <Label>Tipo de Descuento</Label>
+                          <Select
+                            value={discountType}
+                            onValueChange={(value: "percentage" | "amount") => {
+                              setDiscountType(value);
+                              // Clear the other discount field when switching types
+                              if (value === "percentage") {
+                                setOrderFormData((prev) => ({
+                                  ...prev,
+                                  discount_amount: 0,
+                                }));
+                              } else {
+                                setOrderFormData((prev) => ({
+                                  ...prev,
+                                  discount_percentage: 0,
+                                }));
+                              }
+                            }}
+                          >
+                            <SelectTrigger className="h-9 text-sm">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="percentage">
+                                Por Porcentaje (%)
+                              </SelectItem>
+                              <SelectItem value="amount">
+                                Por Valor ($)
+                              </SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <div>
+                            <Label>
+                              {discountType === "percentage"
+                                ? "Descuento (%)"
+                                : "Descuento ($)"}
+                            </Label>
+                            <Input
+                              type="number"
+                              placeholder="0"
+                              min="0"
+                              max={
+                                discountType === "percentage"
+                                  ? "100"
+                                  : undefined
+                              }
+                              step={
+                                discountType === "percentage" ? "0.01" : "1"
+                              }
+                              value={
+                                discountType === "percentage"
+                                  ? orderFormData.discount_percentage || ""
+                                  : orderFormData.discount_amount || ""
+                              }
+                              onChange={(e) => {
+                                const value = parseFloat(e.target.value) || 0;
+                                setOrderFormData((prev) => ({
+                                  ...prev,
+                                  [discountType === "percentage"
+                                    ? "discount_percentage"
+                                    : "discount_amount"]: value,
+                                }));
+                              }}
+                              className="h-9 text-sm"
+                            />
+                          </div>
+                        </div>
 
-                            const subtotalAfterDiscount =
-                              subtotal - discountAmount;
-
-                            return (
-                              <>
-                                <div className="border-t pt-2 flex justify-between">
-                                  <span className="text-sm font-semibold">
-                                    Subtotal:
-                                  </span>
-                                  <span className="text-sm font-semibold">
-                                    {formatCurrency(subtotal)}
-                                  </span>
-                                </div>
-                                {discountAmount > 0 && (
-                                  <>
-                                    <div className="flex justify-between text-red-600">
-                                      <span className="text-xs">
-                                        {discountType === "percentage"
-                                          ? `Descuento (${orderFormData.discount_percentage}%)`
-                                          : `Descuento ($${formatPrice(orderFormData.discount_amount)})`}
-                                        :
+                        {/* Order Total Preview - Detailed Breakdown */}
+                        {(orderFormData.frame_cost > 0 ||
+                          orderFormData.frame_price > 0 ||
+                          orderFormData.lens_cost > 0 ||
+                          orderFormData.treatments_cost > 0 ||
+                          orderFormData.labor_cost > 0 ||
+                          farLensCost > 0 ||
+                          nearLensCost > 0) && (
+                          <Card className="bg-gray-50 border-2">
+                            <CardHeader className="pb-3">
+                              <CardTitle className="text-base flex items-center">
+                                <Calculator className="h-4 w-4 mr-2" />
+                                Desglose de Precios
+                              </CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-3">
+                              {presbyopiaSolution === "two_separate" ? (
+                                <>
+                                  {/* Two separate lenses pricing breakdown */}
+                                  <div className="space-y-2 pb-3 border-b">
+                                    <p className="text-sm font-semibold text-gray-700 mb-2">
+                                      Marco y Lente de Lejos:
+                                    </p>
+                                    <div className="flex justify-between pl-4">
+                                      <span className="text-xs text-gray-600">
+                                        Marco de Lejos:
                                       </span>
                                       <span className="text-xs font-medium">
-                                        -{formatCurrency(discountAmount)}
+                                        {formatCurrency(
+                                          orderFormData.frame_cost > 0
+                                            ? orderFormData.frame_cost
+                                            : orderFormData.frame_price || 0,
+                                        )}
                                       </span>
                                     </div>
-                                    <div className="border-t pt-2 flex justify-between">
-                                      <span className="text-sm font-bold">
-                                        Total:
+                                    <div className="flex justify-between pl-4">
+                                      <span className="text-xs text-gray-600">
+                                        Lente de Lejos:
                                       </span>
-                                      <span className="text-sm font-bold text-green-600">
-                                        {formatCurrency(subtotalAfterDiscount)}
+                                      <span className="text-xs font-medium">
+                                        {formatCurrency(farLensCost || 0)}
                                       </span>
                                     </div>
-                                  </>
-                                )}
-                                {discountAmount === 0 && (
-                                  <div className="border-t pt-2 flex justify-between">
-                                    <span className="text-sm font-bold">
-                                      Total:
-                                    </span>
-                                    <span className="text-sm font-bold text-green-600">
-                                      {formatCurrency(subtotal)}
-                                    </span>
                                   </div>
-                                )}
-                              </>
-                            );
-                          })()}
-                        </CardContent>
-                      </Card>
-                    )}
+                                  <div className="space-y-2 pb-3 border-b">
+                                    <p className="text-sm font-semibold text-gray-700 mb-2">
+                                      Marco y Lente de Cerca:
+                                    </p>
+                                    {customerOwnNearFrame ? (
+                                      <div className="flex justify-between pl-4">
+                                        <span className="text-xs text-gray-600">
+                                          Marco de Cerca:
+                                        </span>
+                                        <span className="text-xs font-medium">
+                                          $0 (Cliente trae marco)
+                                        </span>
+                                      </div>
+                                    ) : (
+                                      <div className="flex justify-between pl-4">
+                                        <span className="text-xs text-gray-600">
+                                          Marco de Cerca:
+                                        </span>
+                                        <span className="text-xs font-medium">
+                                          {formatCurrency(
+                                            orderFormData.near_frame_cost > 0
+                                              ? orderFormData.near_frame_cost
+                                              : orderFormData.near_frame_price ||
+                                                  0,
+                                          )}
+                                        </span>
+                                      </div>
+                                    )}
+                                    <div className="flex justify-between pl-4">
+                                      <span className="text-xs text-gray-600">
+                                        Lente de Cerca:
+                                      </span>
+                                      <span className="text-xs font-medium">
+                                        {formatCurrency(nearLensCost || 0)}
+                                      </span>
+                                    </div>
+                                  </div>
+                                  {orderFormData.treatments_cost > 0 && (
+                                    <div className="flex justify-between">
+                                      <span className="text-xs text-gray-600">
+                                        Tratamientos:
+                                      </span>
+                                      <span className="text-xs font-medium">
+                                        {formatCurrency(
+                                          orderFormData.treatments_cost,
+                                        )}
+                                      </span>
+                                    </div>
+                                  )}
+                                  {orderFormData.labor_cost > 0 && (
+                                    <div className="flex justify-between">
+                                      <span className="text-xs text-gray-600">
+                                        Mano de Obra:
+                                      </span>
+                                      <span className="text-xs font-medium">
+                                        {formatCurrency(
+                                          orderFormData.labor_cost,
+                                        )}
+                                      </span>
+                                    </div>
+                                  )}
+                                </>
+                              ) : (
+                                <>
+                                  {/* Single lens pricing breakdown */}
+                                  {(orderFormData.frame_cost > 0 ||
+                                    orderFormData.frame_price > 0) && (
+                                    <div className="flex justify-between">
+                                      <span className="text-xs text-gray-600">
+                                        Marco:
+                                      </span>
+                                      <span className="text-xs font-medium">
+                                        {formatCurrency(
+                                          orderFormData.frame_cost > 0
+                                            ? orderFormData.frame_cost
+                                            : orderFormData.frame_price || 0,
+                                        )}
+                                      </span>
+                                    </div>
+                                  )}
+                                  {lensType === "contact" &&
+                                    (orderFormData.contact_lens_price > 0 ||
+                                      orderFormData.contact_lens_cost > 0) && (
+                                      <div className="flex justify-between">
+                                        <span className="text-xs text-gray-600">
+                                          Lentes de Contacto:
+                                        </span>
+                                        <span className="text-xs font-medium">
+                                          {formatCurrency(
+                                            orderFormData.contact_lens_price ||
+                                              orderFormData.contact_lens_cost ||
+                                              0,
+                                          )}
+                                        </span>
+                                      </div>
+                                    )}
+                                  {orderFormData.lens_cost > 0 &&
+                                    lensType !== "contact" && (
+                                      <div className="flex justify-between">
+                                        <span className="text-xs text-gray-600">
+                                          Lente:
+                                        </span>
+                                        <span className="text-xs font-medium">
+                                          {formatCurrency(
+                                            orderFormData.lens_cost,
+                                          )}
+                                        </span>
+                                      </div>
+                                    )}
+                                  {orderFormData.treatments_cost > 0 && (
+                                    <div className="flex justify-between">
+                                      <span className="text-xs text-gray-600">
+                                        Tratamientos:
+                                      </span>
+                                      <span className="text-xs font-medium">
+                                        {formatCurrency(
+                                          orderFormData.treatments_cost,
+                                        )}
+                                      </span>
+                                    </div>
+                                  )}
+                                  {orderFormData.labor_cost > 0 && (
+                                    <div className="flex justify-between">
+                                      <span className="text-xs text-gray-600">
+                                        Mano de Obra:
+                                      </span>
+                                      <span className="text-xs font-medium">
+                                        {formatCurrency(
+                                          orderFormData.labor_cost,
+                                        )}
+                                      </span>
+                                    </div>
+                                  )}
+                                </>
+                              )}
 
-                    {/* Add to Cart Button */}
-                    <Button
-                      type="button"
-                      onClick={handleAddCompleteOrderToCart}
-                      disabled={
-                        lensType === "contact"
-                          ? !orderFormData.contact_lens_family_id &&
-                            orderFormData.contact_lens_cost === 0 &&
-                            orderFormData.contact_lens_price === 0
-                          : !orderFormData.lens_family_id &&
-                            orderFormData.lens_cost === 0 &&
-                            farLensCost === 0 &&
-                            nearLensCost === 0
-                      }
-                      className="w-full"
-                      size="sm"
-                    >
-                      <Plus className="h-4 w-4 mr-2" />
-                      Agregar Orden al Carrito
-                    </Button>
-                  </TabsContent>
-                </Tabs>
-              </CardContent>
-            </Card>
+                              {(() => {
+                                const framePrice =
+                                  orderFormData.frame_cost > 0
+                                    ? orderFormData.frame_cost
+                                    : orderFormData.frame_price || 0;
+
+                                // Include second frame price if two separate lenses
+                                const nearFramePrice =
+                                  presbyopiaSolution === "two_separate" &&
+                                  !customerOwnNearFrame
+                                    ? orderFormData.near_frame_cost > 0
+                                      ? orderFormData.near_frame_cost
+                                      : orderFormData.near_frame_price || 0
+                                    : 0;
+
+                                // Calculate lens cost - for two_separate, use sum of far and near lens costs
+                                const effectiveLensCost =
+                                  presbyopiaSolution === "two_separate"
+                                    ? (farLensCost || 0) + (nearLensCost || 0)
+                                    : orderFormData.lens_cost || 0;
+
+                                const subtotal =
+                                  framePrice +
+                                  nearFramePrice +
+                                  effectiveLensCost +
+                                  orderFormData.treatments_cost +
+                                  orderFormData.labor_cost;
+
+                                // Calculate discount based on type
+                                let discountAmount = 0;
+                                let discountLabel = "";
+                                if (discountType === "percentage") {
+                                  discountAmount =
+                                    subtotal *
+                                    (orderFormData.discount_percentage / 100);
+                                  discountLabel = `Descuento (${orderFormData.discount_percentage}%)`;
+                                } else {
+                                  discountAmount =
+                                    orderFormData.discount_amount || 0;
+                                  discountLabel = `Descuento ($${formatPrice(discountAmount)})`;
+                                }
+
+                                // Ensure discount doesn't exceed subtotal
+                                if (discountAmount > subtotal) {
+                                  discountAmount = subtotal;
+                                }
+
+                                const subtotalAfterDiscount =
+                                  subtotal - discountAmount;
+
+                                return (
+                                  <>
+                                    <div className="border-t pt-2 flex justify-between">
+                                      <span className="text-sm font-semibold">
+                                        Subtotal:
+                                      </span>
+                                      <span className="text-sm font-semibold">
+                                        {formatCurrency(subtotal)}
+                                      </span>
+                                    </div>
+                                    {discountAmount > 0 && (
+                                      <>
+                                        <div className="flex justify-between text-red-600">
+                                          <span className="text-xs">
+                                            {discountType === "percentage"
+                                              ? `Descuento (${orderFormData.discount_percentage}%)`
+                                              : `Descuento ($${formatPrice(orderFormData.discount_amount)})`}
+                                            :
+                                          </span>
+                                          <span className="text-xs font-medium">
+                                            -{formatCurrency(discountAmount)}
+                                          </span>
+                                        </div>
+                                        <div className="border-t pt-2 flex justify-between">
+                                          <span className="text-sm font-bold">
+                                            Total:
+                                          </span>
+                                          <span className="text-sm font-bold text-green-600">
+                                            {formatCurrency(
+                                              subtotalAfterDiscount,
+                                            )}
+                                          </span>
+                                        </div>
+                                      </>
+                                    )}
+                                    {discountAmount === 0 && (
+                                      <div className="border-t pt-2 flex justify-between">
+                                        <span className="text-sm font-bold">
+                                          Total:
+                                        </span>
+                                        <span className="text-sm font-bold text-green-600">
+                                          {formatCurrency(subtotal)}
+                                        </span>
+                                      </div>
+                                    )}
+                                  </>
+                                );
+                              })()}
+                            </CardContent>
+                          </Card>
+                        )}
+
+                        {/* Add to Cart Button */}
+                        <Button
+                          type="button"
+                          onClick={handleAddCompleteOrderToCart}
+                          disabled={
+                            lensType === "contact"
+                              ? !orderFormData.contact_lens_family_id &&
+                                orderFormData.contact_lens_cost === 0 &&
+                                orderFormData.contact_lens_price === 0
+                              : !orderFormData.lens_family_id &&
+                                orderFormData.lens_cost === 0 &&
+                                farLensCost === 0 &&
+                                nearLensCost === 0
+                          }
+                          className="w-full"
+                          size="sm"
+                        >
+                          <Plus className="h-4 w-4 mr-2" />
+                          Agregar Orden al Carrito
+                        </Button>
+                      </TabsContent>
+                    </Tabs>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Right Panel - Cart, Payment Summary & Payment Method */}
-        <div className="w-full lg:w-1/3 flex flex-col bg-white border-l-0 lg:border-l overflow-hidden min-h-0">
+        {/* Right Panel - Cart, Payment (desktop only; mobile uses bottom drawer) */}
+        <div className="hidden lg:flex w-full lg:w-1/3 flex-col bg-white border-l-0 lg:border-l overflow-hidden min-h-0 order-1 lg:order-2">
           {/* Scrollable Content - Cart, Summary & Payment */}
           <div className="flex-1 overflow-y-auto bg-[var(--admin-bg-primary)]">
             {/* Cart - extracted component */}
@@ -5490,7 +5680,7 @@ export default function POSPage() {
                   <Button
                     variant={paymentMethod === "cash" ? "default" : "outline"}
                     onClick={() => setPaymentMethod("cash")}
-                    className="h-16"
+                    className="min-h-[48px] sm:h-16"
                   >
                     <Banknote className="h-5 w-5 mr-2" />
                     Efectivo
@@ -5500,7 +5690,7 @@ export default function POSPage() {
                       paymentMethod === "debit_card" ? "default" : "outline"
                     }
                     onClick={() => setPaymentMethod("debit_card")}
-                    className="h-16"
+                    className="min-h-[48px] sm:h-16"
                   >
                     <CreditCard className="h-5 w-5 mr-2" />
                     Débito
@@ -5510,7 +5700,7 @@ export default function POSPage() {
                       paymentMethod === "credit_card" ? "default" : "outline"
                     }
                     onClick={() => setPaymentMethod("credit_card")}
-                    className="h-16"
+                    className="min-h-[48px] sm:h-16"
                   >
                     <CreditCard className="h-5 w-5 mr-2" />
                     Crédito
@@ -5520,7 +5710,7 @@ export default function POSPage() {
                       paymentMethod === "transfer" ? "default" : "outline"
                     }
                     onClick={() => setPaymentMethod("transfer")}
-                    className="h-16"
+                    className="min-h-[48px] sm:h-16"
                   >
                     <Send className="h-5 w-5 mr-2" />
                     Transferencia
@@ -5727,6 +5917,273 @@ export default function POSPage() {
           </div>
         </div>
       </div>
+
+      {/* Mobile: Caja cerrada alert - blocks Cobrar when shown */}
+      {!isSuperAdmin && currentBranchId && isCashOpen === false && (
+        <div className="lg:hidden fixed bottom-28 left-0 right-0 z-50 px-4">
+          <div className="bg-red-50 border border-red-200 rounded-lg p-3 flex items-start gap-2 shadow-lg">
+            <AlertCircle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
+            <div className="flex-1">
+              <p className="text-sm font-semibold text-red-800">Caja cerrada</p>
+              <p className="text-xs text-red-700">
+                Debe abrir la caja antes de realizar ventas.
+              </p>
+              <Link href="/admin/cash-register" className="mt-2 inline-block">
+                <Button size="sm" variant="default">
+                  Abrir Caja
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Mobile: Sticky bottom cart bar - tap to open payment drawer */}
+      <button
+        type="button"
+        onClick={() => {
+          if (processingPayment) return;
+          if (!isSuperAdmin && !currentBranchId) return;
+          if (isCashOpen === false) {
+            toast.error(
+              "La caja está cerrada. Debe abrir la caja antes de realizar ventas.",
+            );
+            return;
+          }
+          if (cart.length === 0) {
+            toast.info("Agrega productos al carrito para cobrar");
+            return;
+          }
+          setMobilePaymentDrawerOpen(true);
+        }}
+        className={`lg:hidden fixed bottom-16 left-0 right-0 z-50 bg-[var(--admin-bg-tertiary)] border-t shadow-[0_-4px_12px_rgba(0,0,0,0.08)] p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] w-full text-left ${
+          cart.length === 0 ||
+          processingPayment ||
+          isCashOpen === false ||
+          (!isSuperAdmin && !currentBranchId)
+            ? "opacity-70 cursor-not-allowed"
+            : ""
+        }`}
+      >
+        <div className="flex items-center justify-between gap-3 max-w-2xl mx-auto">
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2">
+              <ShoppingCart className="h-5 w-5 text-admin-text-tertiary shrink-0" />
+              <span className="text-sm font-medium text-admin-text-primary">
+                {cart.length} {cart.length === 1 ? "item" : "items"}
+              </span>
+            </div>
+            <div className="text-lg font-bold text-epoch-primary truncate">
+              {formatCurrency(total)}
+            </div>
+          </div>
+          <div className="shrink-0 min-h-[44px] px-6 flex items-center justify-center rounded-lg bg-green-600 text-white font-semibold">
+            {processingPayment ? (
+              <Loader2 className="h-5 w-5 animate-spin" />
+            ) : (
+              <>
+                <CheckCircle2 className="h-5 w-5 mr-2" />
+                Cobrar
+              </>
+            )}
+          </div>
+        </div>
+      </button>
+
+      {/* Mobile: Payment drawer - opens upward with cart, payment methods, partial input */}
+      <Sheet
+        open={mobilePaymentDrawerOpen}
+        onOpenChange={setMobilePaymentDrawerOpen}
+      >
+        <SheetContent
+          side="bottom"
+          hideDefaultClose
+          className="h-[85vh] max-h-[85vh] rounded-t-2xl p-0 flex flex-col overflow-hidden"
+        >
+          <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold">Cobrar</h3>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setMobilePaymentDrawerOpen(false)}
+              >
+                <X className="h-5 w-5" />
+              </Button>
+            </div>
+            <div className="border rounded-lg p-3">
+              <POSCart
+                items={cart}
+                subtotal={subtotal}
+                taxAmount={taxAmount}
+                total={total}
+                onUpdateQuantity={updateCartQuantity}
+                onRemove={removeFromCart}
+              />
+            </div>
+            <Card className="bg-[var(--admin-bg-tertiary)]">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base">Método de Pago</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="grid grid-cols-2 gap-2">
+                  <Button
+                    variant={paymentMethod === "cash" ? "default" : "outline"}
+                    onClick={() => setPaymentMethod("cash")}
+                    className="min-h-[44px]"
+                  >
+                    <Banknote className="h-5 w-5 mr-2" />
+                    Efectivo
+                  </Button>
+                  <Button
+                    variant={
+                      paymentMethod === "debit_card" ? "default" : "outline"
+                    }
+                    onClick={() => setPaymentMethod("debit_card")}
+                    className="min-h-[44px]"
+                  >
+                    <CreditCard className="h-5 w-5 mr-2" />
+                    Débito
+                  </Button>
+                  <Button
+                    variant={
+                      paymentMethod === "credit_card" ? "default" : "outline"
+                    }
+                    onClick={() => setPaymentMethod("credit_card")}
+                    className="min-h-[44px]"
+                  >
+                    <CreditCard className="h-5 w-5 mr-2" />
+                    Crédito
+                  </Button>
+                  <Button
+                    variant={
+                      paymentMethod === "transfer" ? "default" : "outline"
+                    }
+                    onClick={() => setPaymentMethod("transfer")}
+                    className="min-h-[44px]"
+                  >
+                    <Send className="h-5 w-5 mr-2" />
+                    Transferencia
+                  </Button>
+                </div>
+                {paymentMethod === "cash" && (
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        id="mobile-cash-partial"
+                        checked={isCashPartial}
+                        onChange={(e) => {
+                          setIsCashPartial(e.target.checked);
+                          if (!e.target.checked) setCashPartialAmount(0);
+                        }}
+                        className="rounded"
+                      />
+                      <Label
+                        htmlFor="mobile-cash-partial"
+                        className="cursor-pointer text-sm"
+                      >
+                        Pago parcial (abono)
+                      </Label>
+                    </div>
+                    {isCashPartial ? (
+                      <>
+                        <Input
+                          type="number"
+                          placeholder="Monto o vacío para total"
+                          value={cashPartialAmount > 0 ? cashPartialAmount : ""}
+                          onChange={(e) => {
+                            const v = parseFloat(e.target.value) || 0;
+                            setCashPartialAmount(v);
+                          }}
+                          className="text-base"
+                          min={0}
+                          max={total}
+                        />
+                        {cashPartialAmount > 0 && (
+                          <p className="text-xs text-gray-600">
+                            Saldo: {formatCurrency(total - cashPartialAmount)}
+                          </p>
+                        )}
+                      </>
+                    ) : (
+                      <>
+                        <Label className="text-sm">Monto Recibido</Label>
+                        <Input
+                          type="number"
+                          placeholder="0"
+                          value={cashReceived || ""}
+                          onChange={(e) =>
+                            setCashReceived(parseFloat(e.target.value) || 0)
+                          }
+                          className="text-base"
+                        />
+                        {cashReceived > 0 && change >= 0 && (
+                          <p className="text-sm text-gray-600">
+                            Vuelto: {formatCurrency(change)}
+                          </p>
+                        )}
+                      </>
+                    )}
+                  </div>
+                )}
+                {(paymentMethod === "transfer" ||
+                  paymentMethod === "debit_card" ||
+                  paymentMethod === "credit_card") && (
+                  <div>
+                    <Label className="text-sm">
+                      {paymentMethod === "transfer"
+                        ? "Monto Transferencia"
+                        : "Abono (opcional)"}
+                    </Label>
+                    <Input
+                      type="number"
+                      placeholder={
+                        paymentMethod === "transfer" ? "Monto" : "Vacío = total"
+                      }
+                      value={depositAmount > 0 ? depositAmount : ""}
+                      onChange={(e) => {
+                        const v = parseFloat(e.target.value) || 0;
+                        setDepositAmount(v);
+                      }}
+                      className="text-base mt-1"
+                      min={0}
+                      max={total}
+                    />
+                    {depositAmount > 0 && (
+                      <p className="text-xs text-gray-600 mt-1">
+                        Saldo: {formatCurrency(total - depositAmount)}
+                      </p>
+                    )}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+          <div className="p-4 border-t flex-shrink-0">
+            <Button
+              onClick={() => {
+                setShowPaymentDialog(true);
+                setMobilePaymentDrawerOpen(false);
+              }}
+              disabled={
+                cart.length === 0 || processingPayment || isCashOpen === false
+              }
+              className="w-full h-14 text-lg font-semibold bg-green-600 hover:bg-green-700"
+              size="lg"
+            >
+              {processingPayment ? (
+                <Loader2 className="h-5 w-5 animate-spin" />
+              ) : (
+                <>
+                  <CheckCircle2 className="h-5 w-5 mr-2" />
+                  Cobrar {formatCurrency(total)}
+                </>
+              )}
+            </Button>
+          </div>
+        </SheetContent>
+      </Sheet>
 
       {/* Payment Confirmation Dialog */}
       <Dialog

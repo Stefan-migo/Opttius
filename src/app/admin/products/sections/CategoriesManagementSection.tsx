@@ -138,27 +138,27 @@ export default function CategoriesManagementSection() {
   return (
     <>
       {/* Categories Management */}
-      <Card className="border border-admin-border-primary/20 bg-admin-bg-tertiary rounded-xl shadow-none overflow-hidden mb-8">
-        <CardHeader className="bg-admin-bg-tertiary/50 border-b border-admin-border-primary/10 py-6">
-          <div className="flex justify-between items-center">
+      <Card className="border border-admin-border-primary/20 bg-admin-bg-tertiary rounded-xl shadow-none overflow-hidden mb-6 sm:mb-8">
+        <CardHeader className="bg-admin-bg-tertiary/50 border-b border-admin-border-primary/10 py-4 sm:py-6 px-4 sm:px-6">
+          <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4">
             <div className="flex flex-col gap-1">
-              <h3 className="text-sm font-display font-bold text-admin-text-primary uppercase tracking-[0.2em] flex items-center">
+              <h3 className="text-xs sm:text-sm font-display font-bold text-admin-text-primary uppercase tracking-[0.15em] sm:tracking-[0.2em]">
                 Gestión de Clasificaciones
               </h3>
-              <p className="text-[10px] font-serif italic text-admin-text-tertiary uppercase tracking-widest">
+              <p className="text-[9px] sm:text-[10px] font-serif italic text-admin-text-tertiary uppercase tracking-widest">
                 Catálogo de Categorías y Estructura Comercial
               </p>
             </div>
             <Button
               onClick={openCreateCategoryDialog}
-              className="bg-epoch-primary hover:bg-epoch-primary/90 text-white rounded-xl text-[10px] font-display font-bold tracking-widest uppercase px-6 py-4 h-auto border-none shadow-premium-sm"
+              className="bg-epoch-primary hover:bg-epoch-primary/90 text-white rounded-xl text-[9px] sm:text-[10px] font-display font-bold tracking-widest uppercase px-4 sm:px-6 py-3 sm:py-4 h-auto border-none shadow-premium-sm shrink-0"
             >
-              <Plus className="h-4 w-4 mr-2" />
-              NUEVO REGISTRO
+              <Plus className="h-4 w-4 sm:mr-2" />
+              <span className="hidden sm:inline">NUEVO REGISTRO</span>
             </Button>
           </div>
         </CardHeader>
-        <CardContent className="p-8">
+        <CardContent className="p-4 sm:p-6 md:p-8">
           {categoriesLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-in fade-in duration-500">
               {[...Array(6)].map((_, i) => (
@@ -203,16 +203,16 @@ export default function CategoriesManagementSection() {
               </Button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
               {categories.map((category) => (
                 <Card
                   key={category.id}
                   className="bg-admin-bg-tertiary border border-admin-border-primary/10 rounded-xl shadow-none group hover:shadow-lg transition-shadow duration-300"
                 >
-                  <CardHeader className="p-6 pb-2">
+                  <CardHeader className="p-4 sm:p-6 pb-2">
                     <div className="flex items-start justify-between">
-                      <div className="flex-1 space-y-1">
-                        <h4 className="text-base font-display font-bold text-admin-text-primary uppercase tracking-tight">
+                      <div className="flex-1 space-y-1 min-w-0">
+                        <h4 className="text-sm sm:text-base font-display font-bold text-admin-text-primary uppercase tracking-tight truncate">
                           {category.name}
                         </h4>
                         <p className="text-[9px] font-display font-bold text-admin-text-tertiary uppercase tracking-[0.2em] bg-admin-border-primary/5 px-2 py-0.5 inline-block border border-admin-border-primary/10">

@@ -384,10 +384,11 @@
 
 @media (max-width: 768px) {
   .admin-header-content .admin-header-title {
-    max-width: 120px;
+    max-width: 160px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    font-size: 0.6875rem;
   }
   .admin-header-actions {
     flex-wrap: wrap;
@@ -411,19 +412,17 @@ html.dark .admin-header {
   gap: 0.75rem;
 }
 
-/* Sidebar Restructuring */
+/* Sidebar Restructuring - fills its container; parent handles positioning */
 .admin-sidebar {
   background: var(--admin-bg-secondary);
   border-right: 1px solid var(--admin-border-primary);
   color: var(--admin-text-primary);
-  width: 18rem;
+  width: 100%;
+  min-width: 0;
   display: flex;
   flex-direction: column;
-  height: 100vh;
-  position: fixed;
-  left: 0;
-  top: 0;
-  z-index: 50;
+  height: 100%;
+  min-height: 0;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
 }
@@ -532,6 +531,14 @@ html.dark .admin-header {
   /* Ensure content text is visible */
   min-height: calc(100vh - 4rem);
   transition: background-color 0.4s ease;
+}
+
+/* Mobile: reserve space for bottom nav so last card is not cut off.
+   Nav height: 4rem (h-16) + safe-area. Use 6rem base to ensure clearance. */
+@media (max-width: 1023px) {
+  .admin-content {
+    padding-bottom: calc(6rem + env(safe-area-inset-bottom, 0px)) !important;
+  }
 }
 
 /* Sidebar Footer Buttons Contrast */
@@ -663,6 +670,31 @@ html.dark .admin-header {
   border: 1px solid var(--border) !important;
   background: var(--card) !important;
   backdrop-filter: blur(8px) !important;
+}
+
+/* Mobile: swipe hint (shown after ~2.5s if toast not dismissed) */
+.toast-swipe-hint {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--border);
+  font-size: 0.7rem;
+  color: var(--muted-foreground);
+  opacity: 0.9;
+}
+
+.toast-swipe-hint-arrow {
+  font-weight: 600;
+  color: var(--foreground);
+}
+
+@media (min-width: 768px) {
+  .toast-swipe-hint {
+    display: none;
+  }
 }
 
 /* Animations */

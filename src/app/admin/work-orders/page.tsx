@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -54,7 +55,6 @@ import Link from "next/link";
 // dynamic import eliminado: CreateWorkOrderForm ya no se usa
 import { useBranch } from "@/hooks/useBranch";
 import { getBranchHeader } from "@/lib/utils/branch";
-import { BranchSelector } from "@/components/admin/BranchSelector";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import {
   extractDataFromResponse,
@@ -354,54 +354,49 @@ export default function WorkOrdersPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-20 lg:pb-0">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1
-            className="text-3xl font-bold text-epoch-primary"
+            className="text-2xl sm:text-3xl font-bold text-epoch-primary"
             data-tour="work-orders-header"
           >
             Trabajos
           </h1>
-          <p className="text-admin-text-tertiary">
+          <p className="text-sm text-admin-text-tertiary">
             {isGlobalView
               ? "Gestión de trabajos de laboratorio - Todas las sucursales"
               : "Gestión de trabajos de laboratorio"}
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          {isSuperAdmin && <BranchSelector />}
-          {/* Botón "Nuevo Trabajo" eliminado: Los trabajos solo se crean desde POS (process-sale) */}
-          {/* Esto previene trabajos "fantasma" sin vínculo financiero ni control de inventario */}
-        </div>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      {/* Stats Cards - 2 per row on mobile, compact on smallest screens */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Card className="bg-admin-bg-tertiary">
-          <CardContent className="p-4">
+          <CardContent className="p-2 sm:p-3 md:p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-admin-text-tertiary">
+                <p className="text-[10px] sm:text-xs md:text-sm text-admin-text-tertiary">
                   Total Trabajos
                 </p>
-                <p className="text-2xl font-bold text-epoch-primary">
+                <p className="text-lg sm:text-xl md:text-2xl font-bold text-epoch-primary">
                   {totalWorkOrders}
                 </p>
               </div>
-              <Package className="h-8 w-8 text-epoch-primary" />
+              <Package className="h-5 w-5 sm:h-6 sm:w-6 md:h-8 md:w-8 text-epoch-primary shrink-0" />
             </div>
           </CardContent>
         </Card>
         <Card className="bg-admin-bg-tertiary">
-          <CardContent className="p-4">
+          <CardContent className="p-2 sm:p-3 md:p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-admin-text-tertiary">
+                <p className="text-[10px] sm:text-xs md:text-sm text-admin-text-tertiary">
                   En Laboratorio
                 </p>
-                <p className="text-2xl font-bold text-orange-600">
+                <p className="text-lg sm:text-xl md:text-2xl font-bold text-orange-600">
                   {
                     workOrders.filter((w) =>
                       [
@@ -413,79 +408,87 @@ export default function WorkOrdersPage() {
                   }
                 </p>
               </div>
-              <Factory className="h-8 w-8 text-orange-600" />
+              <Factory className="h-5 w-5 sm:h-6 sm:w-6 md:h-8 md:w-8 text-orange-600 shrink-0" />
             </div>
           </CardContent>
         </Card>
         <Card className="bg-admin-bg-tertiary">
-          <CardContent className="p-4">
+          <CardContent className="p-2 sm:p-3 md:p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-admin-text-tertiary">
+                <p className="text-[10px] sm:text-xs md:text-sm text-admin-text-tertiary">
                   Listos para Retiro
                 </p>
-                <p className="text-2xl font-bold text-green-600">
+                <p className="text-lg sm:text-xl md:text-2xl font-bold text-green-600">
                   {
                     workOrders.filter((w) => w.status === "ready_for_pickup")
                       .length
                   }
                 </p>
               </div>
-              <CheckCircle className="h-8 w-8 text-green-600" />
+              <CheckCircle className="h-5 w-5 sm:h-6 sm:w-6 md:h-8 md:w-8 text-green-600 shrink-0" />
             </div>
           </CardContent>
         </Card>
         <Card className="bg-admin-bg-tertiary">
-          <CardContent className="p-4">
+          <CardContent className="p-2 sm:p-3 md:p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-admin-text-tertiary">Entregados</p>
-                <p className="text-2xl font-bold text-admin-success">
+                <p className="text-[10px] sm:text-xs md:text-sm text-admin-text-tertiary">
+                  Entregados
+                </p>
+                <p className="text-lg sm:text-xl md:text-2xl font-bold text-admin-success">
                   {workOrders.filter((w) => w.status === "delivered").length}
                 </p>
               </div>
-              <Truck className="h-8 w-8 text-admin-success" />
+              <Truck className="h-5 w-5 sm:h-6 sm:w-6 md:h-8 md:w-8 text-admin-success shrink-0" />
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Filters */}
+      {/* Filters - responsive: search full width, filter below on mobile */}
       <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)]">
-        <CardContent className="p-6">
-          <div className="flex items-center gap-4">
-            <div className="flex-1">
+        <CardContent className="p-4 sm:p-6">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-end">
+            <div className="flex-1 min-w-0">
+              <Label className="text-xs mb-1 block">Buscar</Label>
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-admin-text-tertiary" />
                 <Input
                   placeholder="Buscar por número, cliente, marco, laboratorio..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
+                  className="pl-10 h-12 text-base"
                 />
               </div>
             </div>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-[200px]">
-                <SelectValue placeholder="Estado" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todos los estados</SelectItem>
-                <SelectItem value="quote">Presupuesto</SelectItem>
-                <SelectItem value="ordered">Ordenado</SelectItem>
-                <SelectItem value="sent_to_lab">Enviado al Lab</SelectItem>
-                <SelectItem value="in_progress_lab">En Laboratorio</SelectItem>
-                <SelectItem value="ready_at_lab">Listo en Lab</SelectItem>
-                <SelectItem value="received_from_lab">Recibido</SelectItem>
-                <SelectItem value="mounted">Montado</SelectItem>
-                <SelectItem value="quality_check">Control Calidad</SelectItem>
-                <SelectItem value="ready_for_pickup">
-                  Listo para Retiro
-                </SelectItem>
-                <SelectItem value="delivered">Entregado</SelectItem>
-                <SelectItem value="cancelled">Cancelado</SelectItem>
-              </SelectContent>
-            </Select>
+            <div className="w-full sm:w-48">
+              <Label className="text-xs mb-1 block">Estado</Label>
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-full sm:w-[200px] h-12">
+                  <SelectValue placeholder="Estado" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos los estados</SelectItem>
+                  <SelectItem value="quote">Presupuesto</SelectItem>
+                  <SelectItem value="ordered">Ordenado</SelectItem>
+                  <SelectItem value="sent_to_lab">Enviado al Lab</SelectItem>
+                  <SelectItem value="in_progress_lab">
+                    En Laboratorio
+                  </SelectItem>
+                  <SelectItem value="ready_at_lab">Listo en Lab</SelectItem>
+                  <SelectItem value="received_from_lab">Recibido</SelectItem>
+                  <SelectItem value="mounted">Montado</SelectItem>
+                  <SelectItem value="quality_check">Control Calidad</SelectItem>
+                  <SelectItem value="ready_for_pickup">
+                    Listo para Retiro
+                  </SelectItem>
+                  <SelectItem value="delivered">Entregado</SelectItem>
+                  <SelectItem value="cancelled">Cancelado</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         </CardContent>
       </Card>

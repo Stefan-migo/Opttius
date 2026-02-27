@@ -337,14 +337,14 @@ export default function EmailTemplatesManager({
   const filteredTemplates = displayRows;
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex justify-between items-center">
+    <div className="space-y-4 sm:space-y-6">
+      {/* Header - reorganizado en filas para móvil */}
+      <div className="flex flex-col gap-4 sm:gap-6">
         <div>
-          <h2 className="text-2xl font-bold text-azul-profundo">
+          <h2 className="text-xl sm:text-2xl font-bold text-epoch-primary font-display">
             Plantillas de Email
           </h2>
-          <p className="text-tierra-media">
+          <p className="text-xs sm:text-sm text-epoch-primary/80 mt-1">
             Gestiona las plantillas de email del sistema
           </p>
         </div>
@@ -353,22 +353,20 @@ export default function EmailTemplatesManager({
             setCreateInitialType(undefined);
             setShowCreateDialog(true);
           }}
+          className="rounded-xl min-h-[44px] w-full sm:w-auto"
         >
-          <Plus className="h-4 w-4 mr-2" />
+          <Plus className="h-4 w-4 mr-2 shrink-0" />
           Nueva Plantilla
         </Button>
       </div>
 
       {/* Filters */}
-      <Card
-        className="bg-admin-bg-secondary shadow-[0_1px_3px_rgba(0,0,0,0.3)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.4)]"
-        style={{ backgroundColor: "var(--admin-border-primary)" }}
-      >
-        <CardContent className="p-4">
-          <div className="flex gap-4 items-center">
-            <Label>Filtrar por tipo:</Label>
+      <Card className="rounded-xl border border-border">
+        <CardContent className="p-4 sm:p-6">
+          <div className="flex flex-col sm:flex-row gap-4 sm:gap-4 sm:items-center">
+            <Label className="text-xs sm:text-sm">Filtrar por tipo:</Label>
             <Select value={typeFilter} onValueChange={setTypeFilter}>
-              <SelectTrigger className="w-[250px]">
+              <SelectTrigger className="w-full sm:w-[250px] rounded-xl min-h-[44px]">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -411,29 +409,42 @@ export default function EmailTemplatesManager({
       </Card>
 
       {/* Templates Table */}
-      <Card
-        className="bg-admin-bg-secondary shadow-[0_1px_3px_rgba(0,0,0,0.3)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.4)]"
-        style={{ backgroundColor: "var(--admin-border-primary)" }}
-      >
+      <Card className="rounded-xl border border-border overflow-hidden">
         <CardContent className="p-0">
           {loading ? (
-            <div className="p-8 text-center text-tierra-media">Cargando...</div>
+            <div className="p-6 sm:p-8 text-center text-epoch-primary/80 text-sm">
+              Cargando...
+            </div>
           ) : filteredTemplates.length === 0 ? (
-            <div className="p-8 text-center text-tierra-media">
+            <div className="p-6 sm:p-8 text-center text-epoch-primary/80 text-sm">
               No se encontraron plantillas
             </div>
           ) : (
-            <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0">
+            <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Nombre</TableHead>
-                    <TableHead>Tipo</TableHead>
-                    <TableHead>Envío</TableHead>
-                    <TableHead>Asunto</TableHead>
-                    <TableHead>Estado</TableHead>
-                    <TableHead>Uso</TableHead>
-                    <TableHead>Acciones</TableHead>
+                    <TableHead className="text-epoch-primary/80 text-xs sm:text-sm">
+                      Nombre
+                    </TableHead>
+                    <TableHead className="text-epoch-primary/80 text-xs sm:text-sm">
+                      Tipo
+                    </TableHead>
+                    <TableHead className="text-epoch-primary/80 text-xs sm:text-sm hidden md:table-cell">
+                      Envío
+                    </TableHead>
+                    <TableHead className="text-epoch-primary/80 text-xs sm:text-sm">
+                      Asunto
+                    </TableHead>
+                    <TableHead className="text-epoch-primary/80 text-xs sm:text-sm">
+                      Estado
+                    </TableHead>
+                    <TableHead className="text-epoch-primary/80 text-xs sm:text-sm hidden sm:table-cell">
+                      Uso
+                    </TableHead>
+                    <TableHead className="text-epoch-primary/80 text-xs sm:text-sm">
+                      Acciones
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -446,38 +457,48 @@ export default function EmailTemplatesManager({
                           : undefined
                       }
                     >
-                      <TableCell className="font-medium">
-                        <span className="flex items-center gap-2">
-                          {template?.name ?? (
-                            <span className="text-admin-text-tertiary italic">
-                              Sin plantilla
-                            </span>
-                          )}
+                      <TableCell className="font-medium text-xs sm:text-sm">
+                        <span className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 min-w-0">
+                          <span className="truncate">
+                            {template?.name ?? (
+                              <span className="text-epoch-primary/70 italic">
+                                Sin plantilla
+                              </span>
+                            )}
+                          </span>
                           {template && !template.is_active && (
-                            <Badge variant="secondary" className="text-xs">
+                            <Badge
+                              variant="secondary"
+                              className="text-[10px] sm:text-xs w-fit shrink-0"
+                            >
                               Inactiva
                             </Badge>
                           )}
                         </span>
                       </TableCell>
                       <TableCell>
-                        <Badge variant="outline">{getTypeLabel(type)}</Badge>
+                        <Badge
+                          variant="outline"
+                          className="text-[10px] sm:text-xs"
+                        >
+                          {getTypeLabel(type)}
+                        </Badge>
                       </TableCell>
-                      <TableCell className="max-w-[200px]">
+                      <TableCell className="max-w-[200px] hidden md:table-cell">
                         {mode === "organization" && TYPE_DESCRIPTIONS[type] ? (
                           <span
-                            className="text-xs text-admin-text-tertiary"
+                            className="text-xs text-epoch-primary/70"
                             title={TYPE_DESCRIPTIONS[type]}
                           >
                             {TYPE_DESCRIPTIONS[type]}
                           </span>
                         ) : (
-                          <span className="text-xs text-admin-text-tertiary">
+                          <span className="text-xs text-epoch-primary/70">
                             —
                           </span>
                         )}
                       </TableCell>
-                      <TableCell className="max-w-xs truncate">
+                      <TableCell className="max-w-[120px] sm:max-w-xs truncate text-xs sm:text-sm">
                         {template?.subject ?? "—"}
                       </TableCell>
                       <TableCell>
@@ -487,12 +508,14 @@ export default function EmailTemplatesManager({
                             onCheckedChange={() => handleToggleActive(template)}
                           />
                         ) : (
-                          <span className="text-admin-text-tertiary">—</span>
+                          <span className="text-epoch-primary/70">—</span>
                         )}
                       </TableCell>
-                      <TableCell>{template?.usage_count ?? 0}</TableCell>
+                      <TableCell className="hidden sm:table-cell text-xs sm:text-sm">
+                        {template?.usage_count ?? 0}
+                      </TableCell>
                       <TableCell>
-                        <div className="flex gap-2">
+                        <div className="flex flex-wrap gap-1 sm:gap-2">
                           {template ? (
                             <>
                               <Button
@@ -503,6 +526,7 @@ export default function EmailTemplatesManager({
                                   setShowPreviewDialog(true);
                                 }}
                                 title="Ver plantilla"
+                                className="h-9 w-9 sm:h-9 sm:w-9 p-0 rounded-xl"
                               >
                                 <Eye className="h-4 w-4" />
                               </Button>
@@ -514,6 +538,7 @@ export default function EmailTemplatesManager({
                                   setShowEditDialog(true);
                                 }}
                                 title="Editar plantilla"
+                                className="h-9 w-9 sm:h-9 sm:w-9 p-0 rounded-xl"
                               >
                                 <Edit className="h-4 w-4" />
                               </Button>
@@ -523,6 +548,7 @@ export default function EmailTemplatesManager({
                                 onClick={() => handleTestEmail(template)}
                                 disabled={testing === template.id}
                                 title="Enviar email de prueba"
+                                className="h-9 w-9 sm:h-9 sm:w-9 p-0 rounded-xl"
                               >
                                 <Send
                                   className={`h-4 w-4 ${testing === template.id ? "animate-spin" : ""}`}
@@ -533,7 +559,7 @@ export default function EmailTemplatesManager({
                                   variant="ghost"
                                   size="sm"
                                   onClick={() => handleDeleteClick(template)}
-                                  className="text-red-600"
+                                  className="text-red-600 h-9 w-9 sm:h-9 sm:w-9 p-0 rounded-xl"
                                 >
                                   <Trash2 className="h-4 w-4" />
                                 </Button>
@@ -546,9 +572,10 @@ export default function EmailTemplatesManager({
                                 setCreateInitialType(type);
                                 setShowCreateDialog(true);
                               }}
+                              className="rounded-xl min-h-[44px] text-xs sm:text-sm"
                             >
-                              <Plus className="h-4 w-4 mr-1" />
-                              Crear plantilla
+                              <Plus className="h-4 w-4 mr-1 shrink-0" />
+                              <span className="truncate">Crear plantilla</span>
                             </Button>
                           )}
                         </div>

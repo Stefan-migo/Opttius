@@ -358,9 +358,9 @@ export default function OpticalInternalSupportTicketDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-epoch-background py-12 px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen bg-epoch-background py-8 sm:py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
-          <div className="flex items-center justify-center py-12">
+          <div className="flex items-center justify-center py-8 sm:py-12">
             <Loader2 className="h-8 w-8 animate-spin text-epoch-primary" />
           </div>
         </div>
@@ -370,18 +370,18 @@ export default function OpticalInternalSupportTicketDetailPage() {
 
   if (!ticket) {
     return (
-      <div className="min-h-screen bg-epoch-background py-12 px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen bg-epoch-background py-8 sm:py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <Card className="border-red-200 rounded-xl border">
-            <CardContent className="pt-6">
-              <div className="text-center py-8">
-                <XCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-                <h2 className="text-xl font-display font-semibold text-epoch-primary mb-2">
+            <CardContent className="p-4 sm:pt-6 sm:p-6">
+              <div className="text-center py-6 sm:py-8">
+                <XCircle className="h-10 w-10 sm:h-12 sm:w-12 text-red-500 mx-auto mb-3 sm:mb-4" />
+                <h2 className="text-lg sm:text-xl font-display font-semibold text-epoch-primary mb-2">
                   Ticket no encontrado
                 </h2>
                 <Button
                   onClick={() => router.push("/admin/support")}
-                  className="rounded-xl bg-epoch-primary hover:bg-epoch-surface text-white font-display font-bold text-[10px] tracking-[0.2em] uppercase"
+                  className="rounded-xl bg-epoch-primary hover:bg-epoch-surface text-white font-display font-bold text-[10px] tracking-[0.2em] uppercase min-h-[44px] px-6"
                 >
                   Volver a Tickets
                 </Button>
@@ -394,80 +394,90 @@ export default function OpticalInternalSupportTicketDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-epoch-background py-6 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
+    <div className="min-h-screen bg-epoch-background py-4 sm:py-6 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
+        {/* Header - reorganizado en filas para mejor legibilidad */}
+        <div className="flex flex-col gap-4 sm:gap-6">
+          <div className="flex items-center gap-3">
             <Button
               variant="ghost"
               size="icon"
               onClick={() => router.push("/admin/support")}
-              className="rounded-xl text-epoch-primary hover:bg-epoch-primary/10"
+              className="rounded-xl text-epoch-primary hover:bg-epoch-primary/10 min-h-[44px] min-w-[44px] shrink-0"
+              aria-label="Volver a tickets"
             >
               <ArrowLeft className="h-5 w-5" />
             </Button>
-            <div>
-              <h1 className="text-3xl font-display font-bold text-epoch-primary tracking-tight">
-                Ticket #{ticket.ticket_number}
-              </h1>
-              <p className="text-epoch-primary/80 mt-1">{ticket.subject}</p>
-            </div>
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-display font-bold text-epoch-primary tracking-tight truncate">
+              Ticket #{ticket.ticket_number}
+            </h1>
           </div>
-          <div className="flex gap-2">
+          <p className="text-sm sm:text-base text-epoch-primary/80 line-clamp-2">
+            {ticket.subject}
+          </p>
+          <div className="flex flex-wrap items-center gap-2">
             <Button
               variant="outline"
               onClick={() => setShowUpdateDialog(true)}
-              className="rounded-xl border-admin-border-primary/20"
+              className="rounded-xl border-admin-border-primary/20 min-h-[44px] shrink-0"
             >
-              <Edit className="h-4 w-4 mr-2" />
+              <Edit className="h-4 w-4 mr-2 shrink-0" />
               Editar
             </Button>
-            <Badge className={statusColors[ticket.status]}>
+            <Badge
+              className={`${statusColors[ticket.status]} text-[10px] sm:text-xs px-1.5 py-0`}
+            >
               {statusLabels[ticket.status]}
             </Badge>
-            <Badge className={priorityColors[ticket.priority]}>
+            <Badge
+              className={`${priorityColors[ticket.priority]} text-[10px] sm:text-xs px-1.5 py-0`}
+            >
               {priorityLabels[ticket.priority]}
             </Badge>
-            <Badge variant="outline">{categoryLabels[ticket.category]}</Badge>
+            <Badge
+              variant="outline"
+              className="text-[10px] sm:text-xs px-1.5 py-0"
+            >
+              {categoryLabels[ticket.category]}
+            </Badge>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
           {/* Main Content */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Ticket Details - sin admin-card para evitar hover conflictivo */}
+          <div className="lg:col-span-2 space-y-4 sm:space-y-6">
+            {/* Ticket Details - optimizado para móvil */}
             <Card className="rounded-xl border border-border">
-              <CardHeader>
-                <CardTitle className="font-display text-epoch-primary">
+              <CardHeader className="p-4 sm:p-6 pb-0">
+                <CardTitle className="font-display text-epoch-primary text-base sm:text-lg">
                   Detalles del Ticket
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="p-4 sm:p-6 pt-4 space-y-4">
                 <div>
-                  <Label className="text-sm font-medium text-epoch-primary/80">
+                  <Label className="text-xs sm:text-sm font-medium text-epoch-primary/80">
                     Descripción
                   </Label>
-                  <p className="mt-1 text-epoch-primary whitespace-pre-wrap">
+                  <p className="mt-1 text-epoch-primary whitespace-pre-wrap text-sm sm:text-base">
                     {ticket.description}
                   </p>
                 </div>
                 {ticket.resolution && (
                   <div>
-                    <Label className="text-sm font-medium text-epoch-primary/80">
+                    <Label className="text-xs sm:text-sm font-medium text-epoch-primary/80">
                       Resolución
                     </Label>
-                    <p className="mt-1 text-epoch-primary whitespace-pre-wrap">
+                    <p className="mt-1 text-epoch-primary whitespace-pre-wrap text-sm sm:text-base">
                       {ticket.resolution}
                     </p>
                   </div>
                 )}
                 {ticket.resolution_notes && (
                   <div>
-                    <Label className="text-sm font-medium text-epoch-primary/80">
+                    <Label className="text-xs sm:text-sm font-medium text-epoch-primary/80">
                       Notas de Resolución
                     </Label>
-                    <p className="mt-1 text-epoch-primary whitespace-pre-wrap">
+                    <p className="mt-1 text-epoch-primary whitespace-pre-wrap text-sm sm:text-base">
                       {ticket.resolution_notes}
                     </p>
                   </div>
@@ -475,54 +485,63 @@ export default function OpticalInternalSupportTicketDetailPage() {
               </CardContent>
             </Card>
 
-            {/* Messages - sin admin-card para evitar contraste en burbujas de mensaje */}
+            {/* Messages - optimizado para móvil */}
             <Card className="rounded-xl border border-border">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 font-display text-epoch-primary">
-                  <MessageSquare className="h-5 w-5 text-epoch-accent" />
+              <CardHeader className="p-4 sm:p-6 pb-0">
+                <CardTitle className="flex items-center gap-2 font-display text-epoch-primary text-base sm:text-lg">
+                  <MessageSquare className="h-4 w-4 sm:h-5 sm:w-5 text-epoch-accent shrink-0" />
                   Conversación ({messages.length})
                 </CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="p-4 sm:p-6 pt-4">
                 {messages.length === 0 ? (
-                  <div className="text-center py-8 text-epoch-primary/70">
-                    <MessageSquare className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-                    <p>No hay mensajes aún</p>
+                  <div className="text-center py-6 sm:py-8 text-epoch-primary/70">
+                    <MessageSquare className="h-10 w-10 sm:h-12 sm:w-12 mx-auto mb-3 sm:mb-4 text-gray-400" />
+                    <p className="text-sm sm:text-base">No hay mensajes aún</p>
                   </div>
                 ) : (
-                  <div className="space-y-4">
+                  <div className="space-y-3 sm:space-y-4">
                     {messages.map((msg) => (
                       <div
                         key={msg.id}
-                        className="p-4 rounded-xl border bg-white border-epoch-primary/20 text-epoch-primary"
+                        className="p-3 sm:p-4 rounded-xl border bg-white border-epoch-primary/20 text-epoch-primary"
                       >
-                        <div className="flex items-start justify-between mb-2">
-                          <div className="flex items-center gap-2">
-                            <User className="h-4 w-4 text-epoch-primary/70" />
-                            <span className="font-medium text-sm text-epoch-primary">
+                        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-1 sm:gap-2 mb-2">
+                          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                            <User className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-epoch-primary/70 shrink-0" />
+                            <span className="font-medium text-xs sm:text-sm text-epoch-primary">
                               {msg.sender_name}
                             </span>
                             {msg.message_type === "status_change" && (
-                              <Badge variant="outline" className="text-xs">
+                              <Badge
+                                variant="outline"
+                                className="text-[10px] sm:text-xs px-1.5 py-0"
+                              >
                                 Cambio de Estado
                               </Badge>
                             )}
                             {msg.message_type === "assignment" && (
-                              <Badge variant="outline" className="text-xs">
+                              <Badge
+                                variant="outline"
+                                className="text-[10px] sm:text-xs px-1.5 py-0"
+                              >
                                 Asignación
                               </Badge>
                             )}
                             {msg.message_type === "resolution" && (
-                              <Badge variant="outline" className="text-xs">
+                              <Badge
+                                variant="outline"
+                                className="text-[10px] sm:text-xs px-1.5 py-0"
+                              >
                                 Resolución
                               </Badge>
                             )}
                           </div>
-                          <span className="text-xs text-epoch-primary/70">
+                          <span className="text-[10px] sm:text-xs text-epoch-primary/70 shrink-0">
                             {new Date(msg.created_at).toLocaleString("es-CL")}
                           </span>
                         </div>
-                        <p className="text-epoch-primary whitespace-pre-wrap">
+                        <p className="text-epoch-primary whitespace-pre-wrap text-xs sm:text-sm">
                           {msg.message}
                         </p>
                       </div>
@@ -532,36 +551,36 @@ export default function OpticalInternalSupportTicketDetailPage() {
               </CardContent>
             </Card>
 
-            {/* Add Message Form - sin admin-card para evitar contraste en textarea */}
+            {/* Add Message Form - optimizado para móvil */}
             {ticket.status !== "resolved" && ticket.status !== "closed" && (
               <Card className="rounded-xl border border-border">
-                <CardHeader>
-                  <CardTitle className="font-display text-epoch-primary">
+                <CardHeader className="p-4 sm:p-6 pb-0">
+                  <CardTitle className="font-display text-epoch-primary text-base sm:text-lg">
                     Agregar Mensaje
                   </CardTitle>
-                  <CardDescription>
+                  <CardDescription className="text-xs sm:text-sm">
                     Agrega información adicional o notas sobre la resolución del
                     problema
                   </CardDescription>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="p-4 sm:p-6 pt-4">
                   <form
                     onSubmit={handleSubmitMessage(onSubmitMessage)}
                     className="space-y-4"
                   >
                     <div className="space-y-2">
-                      <Label htmlFor="message">
+                      <Label htmlFor="message" className="text-xs sm:text-sm">
                         Mensaje <span className="text-red-500">*</span>
                       </Label>
                       <Textarea
                         id="message"
                         {...registerMessage("message")}
                         placeholder="Escribe tu mensaje aquí..."
-                        rows={6}
-                        className={`rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20 bg-white text-epoch-primary placeholder:text-epoch-primary/50 ${messageErrors.message ? "border-red-500" : ""}`}
+                        rows={5}
+                        className={`rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20 bg-white text-epoch-primary placeholder:text-epoch-primary/50 text-sm sm:text-base min-h-[120px] ${messageErrors.message ? "border-red-500" : ""}`}
                       />
                       {messageErrors.message && (
-                        <p className="text-sm text-red-500">
+                        <p className="text-xs sm:text-sm text-red-500">
                           {String(messageErrors.message.message)}
                         </p>
                       )}
@@ -570,7 +589,7 @@ export default function OpticalInternalSupportTicketDetailPage() {
                     <Button
                       type="submit"
                       disabled={sendingMessage}
-                      className="w-full rounded-xl bg-epoch-primary hover:bg-epoch-surface text-white font-display font-bold text-[10px] tracking-[0.2em] uppercase"
+                      className="w-full rounded-xl bg-epoch-primary hover:bg-epoch-surface text-white font-display font-bold text-[10px] tracking-[0.2em] uppercase min-h-[44px]"
                     >
                       {sendingMessage ? (
                         <>
@@ -590,9 +609,9 @@ export default function OpticalInternalSupportTicketDetailPage() {
             )}
 
             {ticket.status === "resolved" || ticket.status === "closed" ? (
-              <Alert>
-                <CheckCircle2 className="h-4 w-4" />
-                <AlertDescription>
+              <Alert className="py-3 sm:py-4">
+                <CheckCircle2 className="h-4 w-4 shrink-0" />
+                <AlertDescription className="text-xs sm:text-sm">
                   Este ticket está{" "}
                   {ticket.status === "resolved" ? "resuelto" : "cerrado"}. Si
                   necesitas agregar más información, puedes crear un nuevo
@@ -602,37 +621,37 @@ export default function OpticalInternalSupportTicketDetailPage() {
             ) : null}
           </div>
 
-          {/* Sidebar */}
-          <div className="space-y-6">
+          {/* Sidebar - optimizado para móvil */}
+          <div className="space-y-4 sm:space-y-6">
             {/* Ticket Info */}
             <Card className="rounded-xl border border-border">
-              <CardHeader>
-                <CardTitle className="text-lg font-display text-epoch-primary">
+              <CardHeader className="p-4 sm:p-6 pb-0">
+                <CardTitle className="text-base sm:text-lg font-display text-epoch-primary">
                   Información
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="p-4 sm:p-6 pt-4 space-y-4">
                 {ticket.customer && (
                   <div className="flex items-start gap-3">
-                    <User className="h-5 w-5 text-gray-400 mt-0.5" />
-                    <div>
-                      <Label className="text-xs text-epoch-primary/70">
+                    <User className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400 mt-0.5 shrink-0" />
+                    <div className="min-w-0">
+                      <Label className="text-[10px] sm:text-xs text-epoch-primary/70">
                         Cliente
                       </Label>
-                      <p className="text-sm font-medium">
+                      <p className="text-xs sm:text-sm font-medium">
                         {ticket.customer.first_name} {ticket.customer.last_name}
                       </p>
-                      <p className="text-xs text-gray-500">
+                      <p className="text-[10px] sm:text-xs text-gray-500 truncate">
                         {ticket.customer.email}
                       </p>
                       {ticket.customer.phone && (
-                        <p className="text-xs text-gray-500">
+                        <p className="text-[10px] sm:text-xs text-gray-500">
                           {ticket.customer.phone}
                         </p>
                       )}
                       <Link
                         href={`/admin/customers/${ticket.customer.id}`}
-                        className="text-xs text-epoch-accent hover:text-epoch-primary hover:underline mt-1 inline-block"
+                        className="text-[10px] sm:text-xs text-epoch-accent hover:text-epoch-primary hover:underline mt-1 inline-block"
                       >
                         Ver cliente →
                       </Link>
@@ -642,15 +661,15 @@ export default function OpticalInternalSupportTicketDetailPage() {
 
                 {ticket.branch && (
                   <div className="flex items-start gap-3">
-                    <Building2 className="h-5 w-5 text-gray-400 mt-0.5" />
-                    <div>
-                      <Label className="text-xs text-epoch-primary/70">
+                    <Building2 className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400 mt-0.5 shrink-0" />
+                    <div className="min-w-0">
+                      <Label className="text-[10px] sm:text-xs text-epoch-primary/70">
                         Sucursal
                       </Label>
-                      <p className="text-sm font-medium">
+                      <p className="text-xs sm:text-sm font-medium">
                         {ticket.branch.name}
                       </p>
-                      <p className="text-xs text-gray-500">
+                      <p className="text-[10px] sm:text-xs text-gray-500">
                         {ticket.branch.code}
                       </p>
                     </div>
@@ -659,14 +678,14 @@ export default function OpticalInternalSupportTicketDetailPage() {
 
                 {ticket.related_order && (
                   <div className="flex items-start gap-3">
-                    <Receipt className="h-5 w-5 text-gray-400 mt-0.5" />
-                    <div>
-                      <Label className="text-xs text-epoch-primary/70">
+                    <Receipt className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400 mt-0.5 shrink-0" />
+                    <div className="min-w-0">
+                      <Label className="text-[10px] sm:text-xs text-epoch-primary/70">
                         Pedido Relacionado
                       </Label>
                       <Link
                         href={`/admin/orders/${ticket.related_order.id}`}
-                        className="text-sm font-medium text-epoch-accent hover:text-epoch-primary hover:underline"
+                        className="text-xs sm:text-sm font-medium text-epoch-accent hover:text-epoch-primary hover:underline block truncate"
                       >
                         {ticket.related_order.order_number} →
                       </Link>
@@ -676,14 +695,14 @@ export default function OpticalInternalSupportTicketDetailPage() {
 
                 {ticket.related_work_order && (
                   <div className="flex items-start gap-3">
-                    <Package className="h-5 w-5 text-gray-400 mt-0.5" />
-                    <div>
-                      <Label className="text-xs text-epoch-primary/70">
+                    <Package className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400 mt-0.5 shrink-0" />
+                    <div className="min-w-0">
+                      <Label className="text-[10px] sm:text-xs text-epoch-primary/70">
                         Trabajo Relacionado
                       </Label>
                       <Link
                         href={`/admin/work-orders/${ticket.related_work_order.id}`}
-                        className="text-sm font-medium text-epoch-accent hover:text-epoch-primary hover:underline"
+                        className="text-xs sm:text-sm font-medium text-epoch-accent hover:text-epoch-primary hover:underline block truncate"
                       >
                         {ticket.related_work_order.work_order_number} →
                       </Link>
@@ -693,14 +712,14 @@ export default function OpticalInternalSupportTicketDetailPage() {
 
                 {ticket.related_quote && (
                   <div className="flex items-start gap-3">
-                    <FileText className="h-5 w-5 text-gray-400 mt-0.5" />
-                    <div>
-                      <Label className="text-xs text-epoch-primary/70">
+                    <FileText className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400 mt-0.5 shrink-0" />
+                    <div className="min-w-0">
+                      <Label className="text-[10px] sm:text-xs text-epoch-primary/70">
                         Presupuesto Relacionado
                       </Label>
                       <Link
                         href={`/admin/quotes/${ticket.related_quote.id}`}
-                        className="text-sm font-medium text-epoch-accent hover:text-epoch-primary hover:underline"
+                        className="text-xs sm:text-sm font-medium text-epoch-accent hover:text-epoch-primary hover:underline block truncate"
                       >
                         {ticket.related_quote.quote_number} →
                       </Link>
@@ -710,12 +729,12 @@ export default function OpticalInternalSupportTicketDetailPage() {
 
                 {ticket.related_appointment && (
                   <div className="flex items-start gap-3">
-                    <Calendar className="h-5 w-5 text-gray-400 mt-0.5" />
-                    <div>
-                      <Label className="text-xs text-epoch-primary/70">
+                    <Calendar className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400 mt-0.5 shrink-0" />
+                    <div className="min-w-0">
+                      <Label className="text-[10px] sm:text-xs text-epoch-primary/70">
                         Cita Relacionada
                       </Label>
-                      <p className="text-sm font-medium">
+                      <p className="text-xs sm:text-sm font-medium">
                         {new Date(
                           ticket.related_appointment.appointment_date,
                         ).toLocaleDateString("es-CL")}{" "}
@@ -726,16 +745,16 @@ export default function OpticalInternalSupportTicketDetailPage() {
                 )}
 
                 <div className="flex items-start gap-3">
-                  <Calendar className="h-5 w-5 text-epoch-accent mt-0.5" />
-                  <div>
-                    <Label className="text-xs text-epoch-primary/70">
+                  <Calendar className="h-4 w-4 sm:h-5 sm:w-5 text-epoch-accent mt-0.5 shrink-0" />
+                  <div className="min-w-0">
+                    <Label className="text-[10px] sm:text-xs text-epoch-primary/70">
                       Creado
                     </Label>
-                    <p className="text-sm font-medium">
+                    <p className="text-xs sm:text-sm font-medium">
                       {new Date(ticket.created_at).toLocaleString("es-CL")}
                     </p>
                     {ticket.created_by_user && (
-                      <p className="text-xs text-gray-500">
+                      <p className="text-[10px] sm:text-xs text-gray-500 truncate">
                         Por: {ticket.created_by_user.email}
                       </p>
                     )}
@@ -744,12 +763,12 @@ export default function OpticalInternalSupportTicketDetailPage() {
 
                 {ticket.first_response_at && (
                   <div className="flex items-start gap-3">
-                    <Clock className="h-5 w-5 text-gray-400 mt-0.5" />
-                    <div>
-                      <Label className="text-xs text-epoch-primary/70">
+                    <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400 mt-0.5 shrink-0" />
+                    <div className="min-w-0">
+                      <Label className="text-[10px] sm:text-xs text-epoch-primary/70">
                         Primera Respuesta
                       </Label>
-                      <p className="text-sm font-medium">
+                      <p className="text-xs sm:text-sm font-medium">
                         {new Date(ticket.first_response_at).toLocaleString(
                           "es-CL",
                         )}
@@ -760,16 +779,16 @@ export default function OpticalInternalSupportTicketDetailPage() {
 
                 {ticket.assigned_to_user && (
                   <div className="flex items-start gap-3">
-                    <UserPlus className="h-5 w-5 text-gray-400 mt-0.5" />
-                    <div>
-                      <Label className="text-xs text-epoch-primary/70">
+                    <UserPlus className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400 mt-0.5 shrink-0" />
+                    <div className="min-w-0">
+                      <Label className="text-[10px] sm:text-xs text-epoch-primary/70">
                         Asignado a
                       </Label>
-                      <p className="text-sm font-medium">
+                      <p className="text-xs sm:text-sm font-medium truncate">
                         {ticket.assigned_to_user.email}
                       </p>
                       {ticket.assigned_at && (
-                        <p className="text-xs text-gray-500">
+                        <p className="text-[10px] sm:text-xs text-gray-500">
                           {new Date(ticket.assigned_at).toLocaleDateString(
                             "es-CL",
                           )}
@@ -781,15 +800,15 @@ export default function OpticalInternalSupportTicketDetailPage() {
 
                 {ticket.resolved_at && ticket.resolved_by_user && (
                   <div className="flex items-start gap-3">
-                    <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5" />
-                    <div>
-                      <Label className="text-xs text-epoch-primary/70">
+                    <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 text-green-500 mt-0.5 shrink-0" />
+                    <div className="min-w-0">
+                      <Label className="text-[10px] sm:text-xs text-epoch-primary/70">
                         Resuelto
                       </Label>
-                      <p className="text-sm font-medium">
+                      <p className="text-xs sm:text-sm font-medium">
                         {new Date(ticket.resolved_at).toLocaleString("es-CL")}
                       </p>
-                      <p className="text-xs text-gray-500">
+                      <p className="text-[10px] sm:text-xs text-gray-500 truncate">
                         Por: {ticket.resolved_by_user.email}
                       </p>
                     </div>
@@ -800,9 +819,9 @@ export default function OpticalInternalSupportTicketDetailPage() {
           </div>
         </div>
 
-        {/* Update Ticket Dialog */}
+        {/* Update Ticket Dialog - optimizado para móvil */}
         <Dialog open={showUpdateDialog} onOpenChange={setShowUpdateDialog}>
-          <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-2xl rounded-xl">
+          <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-2xl max-h-[90vh] overflow-y-auto rounded-xl">
             <DialogHeader>
               <DialogTitle>Actualizar Ticket</DialogTitle>
               <DialogDescription>
@@ -813,7 +832,7 @@ export default function OpticalInternalSupportTicketDetailPage() {
               onSubmit={handleSubmitUpdate(onSubmitUpdate)}
               className="space-y-4"
             >
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="status">Estado</Label>
                   <Select
@@ -913,11 +932,11 @@ export default function OpticalInternalSupportTicketDetailPage() {
                 />
               </div>
 
-              <DialogFooter>
+              <DialogFooter className="flex-col sm:flex-row gap-2">
                 <Button
                   type="button"
                   variant="outline"
-                  className="rounded-xl border-admin-border-primary/20"
+                  className="rounded-xl border-admin-border-primary/20 w-full sm:w-auto min-h-[44px]"
                   onClick={() => setShowUpdateDialog(false)}
                 >
                   Cancelar
@@ -925,7 +944,7 @@ export default function OpticalInternalSupportTicketDetailPage() {
                 <Button
                   type="submit"
                   disabled={updatingTicket}
-                  className="rounded-xl bg-epoch-primary hover:bg-epoch-surface text-white font-display font-bold text-[10px] tracking-[0.2em] uppercase"
+                  className="rounded-xl bg-epoch-primary hover:bg-epoch-surface text-white font-display font-bold text-[10px] tracking-[0.2em] uppercase w-full sm:w-auto min-h-[44px]"
                 >
                   {updatingTicket ? (
                     <>

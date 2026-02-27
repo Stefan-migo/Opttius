@@ -73,32 +73,31 @@ export function DemoModeBanner() {
         <Sparkles size={80} />
       </div>
 
-      <div className="flex items-center gap-6 py-2">
-        <div className="h-12 w-12 bg-admin-accent-secondary/10 border border-admin-accent-secondary/20 flex items-center justify-center relative">
-          <Sparkles className="h-6 w-6 text-admin-accent-secondary animate-pulse" />
-          <div className="absolute inset-x-0 bottom-0 h-[2px] bg-admin-accent-secondary shadow-[0_0_8px_rgba(197,160,89,0.5)]" />
-        </div>
-
-        <div className="flex-1">
-          <div className="flex flex-col">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-4 py-4 px-4 sm:py-2 sm:px-0">
+        <div className="flex items-start sm:items-center gap-4 flex-1 min-w-0">
+          <div className="h-10 w-10 sm:h-12 sm:w-12 bg-admin-accent-secondary/10 border border-admin-accent-secondary/20 flex items-center justify-center relative shrink-0">
+            <Sparkles className="h-5 w-5 sm:h-6 sm:w-6 text-admin-accent-secondary animate-pulse" />
+            <div className="absolute inset-x-0 bottom-0 h-[2px] bg-admin-accent-secondary shadow-[0_0_8px_rgba(197,160,89,0.5)]" />
+          </div>
+          <div className="flex flex-col min-w-0">
             <h4 className="text-[10px] font-display font-bold text-admin-accent-secondary uppercase tracking-[0.2em] mb-1">
               Modo Exploración Activo
             </h4>
             <AlertDescription className="text-admin-text-primary text-sm font-medium tracking-tight">
               Estás visualizando el potencial de Opttius con datos de muestra.
-              <span className="hidden md:inline text-admin-text-tertiary ml-2 font-serif italic normal-case">
+              <span className="hidden sm:inline text-admin-text-tertiary ml-2 font-serif italic normal-case">
                 ¿Preparado para trascender al control total de tu propia óptica?
               </span>
             </AlertDescription>
           </div>
         </div>
 
-        <div className="flex items-center gap-4">
-          <div className="flex gap-2">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 shrink-0">
+          <div className="flex flex-col sm:flex-row gap-2">
             <Button
               onClick={handleActivate}
               size="sm"
-              className="bg-admin-accent-secondary hover:bg-admin-accent-secondary/90 text-[#1A2B23] font-display font-bold rounded-xl uppercase tracking-widest text-[9px] h-9 px-4 shadow-lg shadow-admin-accent-secondary/10"
+              className="w-full sm:w-auto bg-admin-accent-secondary hover:bg-admin-accent-secondary/90 text-[#1A2B23] font-display font-bold rounded-xl uppercase tracking-widest text-[9px] h-10 sm:h-9 px-4 shadow-lg shadow-admin-accent-secondary/10"
             >
               Activar mi Óptica
               <ArrowRight className="ml-2 h-3.5 w-3.5" />
@@ -107,7 +106,7 @@ export function DemoModeBanner() {
               onClick={handleDismiss}
               variant="ghost"
               size="sm"
-              className="text-admin-text-tertiary hover:text-admin-text-primary hover:bg-admin-bg-secondary/10 font-display font-bold rounded-xl uppercase tracking-widest text-[9px] h-9"
+              className="w-full sm:w-auto text-admin-text-tertiary hover:text-admin-text-primary hover:bg-admin-bg-secondary/10 font-display font-bold rounded-xl uppercase tracking-widest text-[9px] h-10 sm:h-9"
             >
               Más tarde
             </Button>
@@ -117,7 +116,7 @@ export function DemoModeBanner() {
             onClick={handleDismiss}
             variant="ghost"
             size="icon"
-            className="h-8 w-8 text-admin-text-tertiary/40 hover:text-admin-error hover:bg-admin-error/5 rounded-xl transition-colors"
+            className="h-10 w-10 sm:h-8 sm:w-8 text-admin-text-tertiary/40 hover:text-admin-error hover:bg-admin-error/5 rounded-xl transition-colors self-end sm:self-center"
           >
             <X className="h-4 w-4" />
           </Button>

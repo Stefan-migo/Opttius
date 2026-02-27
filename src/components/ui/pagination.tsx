@@ -78,19 +78,23 @@ export function Pagination({
   };
 
   return (
-    <div className={`flex items-center justify-between ${className}`}>
-      <div className="flex items-center gap-2">
+    <div
+      className={`flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 ${className}`}
+    >
+      <div className="flex flex-wrap items-center gap-2 order-2 sm:order-1">
         {showItemsPerPage && onItemsPerPageChange && (
           <>
-            <span className="text-sm text-muted-foreground">Mostrar:</span>
+            <span className="text-xs sm:text-sm text-muted-foreground">
+              Mostrar:
+            </span>
             <Select
               value={itemsPerPage.toString()}
               onValueChange={(value) => {
                 onItemsPerPageChange(parseInt(value));
-                onPageChange(1); // Reset to first page when changing items per page
+                onPageChange(1);
               }}
             >
-              <SelectTrigger className="h-8 w-[70px]">
+              <SelectTrigger className="h-8 w-[60px] sm:w-[70px] text-xs">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -101,28 +105,31 @@ export function Pagination({
                 ))}
               </SelectContent>
             </Select>
-            <span className="text-sm text-muted-foreground">por página</span>
+            <span className="text-xs sm:text-sm text-muted-foreground hidden sm:inline">
+              por página
+            </span>
           </>
         )}
-        <span className="text-sm text-muted-foreground ml-2">
+        <span className="text-xs sm:text-sm text-muted-foreground">
           {totalItems === 0
             ? "Sin resultados"
-            : `Mostrando ${startItem}-${endItem} de ${totalItems}`}
+            : `${startItem}-${endItem} de ${totalItems}`}
         </span>
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center justify-center sm:justify-end gap-1.5 sm:gap-2 order-1 sm:order-2">
         <Button
           variant="outline"
           size="sm"
           onClick={() => onPageChange(currentPage - 1)}
           disabled={currentPage === 1}
+          className="h-8 w-8 sm:h-9 sm:w-9 p-0"
         >
           <ChevronLeft className="h-4 w-4" />
           <span className="sr-only">Página anterior</span>
         </Button>
 
-        <div className="flex items-center gap-1">
+        <div className="flex flex-wrap items-center justify-center gap-0.5 sm:gap-1">
           {getPageNumbers().map((page, index) => {
             if (page === "...") {
               return (
@@ -144,7 +151,7 @@ export function Pagination({
                 variant={isCurrentPage ? "default" : "outline"}
                 size="sm"
                 onClick={() => onPageChange(pageNumber)}
-                className={isCurrentPage ? "" : "min-w-[40px]"}
+                className={`h-8 w-8 sm:h-9 sm:w-9 p-0 min-w-0 ${isCurrentPage ? "" : ""}`}
               >
                 {pageNumber}
               </Button>
@@ -157,6 +164,7 @@ export function Pagination({
           size="sm"
           onClick={() => onPageChange(currentPage + 1)}
           disabled={currentPage === totalPages || totalPages === 0}
+          className="h-8 w-8 sm:h-9 sm:w-9 p-0"
         >
           <ChevronRight className="h-4 w-4" />
           <span className="sr-only">Página siguiente</span>

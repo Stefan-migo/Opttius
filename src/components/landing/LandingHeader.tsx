@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -207,65 +208,99 @@ export function LandingHeader() {
         </div>
       </nav>
 
-      {/* Mobile menu */}
-      {mobileMenuOpen && (
-        <div className="lg:hidden py-12 px-6 space-y-8 bg-epoch-surface text-white animate-in slide-in-from-top duration-500 fixed inset-0 z-[100] flex flex-col items-center justify-center">
-          <button
-            onClick={() => setMobileMenuOpen(false)}
-            className="absolute top-8 right-8 text-white"
+      {/* Mobile menu - full-screen overlay (portal), same behavior as MinimalLandingHeader on accessory pages */}
+      {mobileMenuOpen &&
+        typeof document !== "undefined" &&
+        createPortal(
+          <div
+            className="fixed inset-0 top-0 left-0 right-0 bottom-0 w-full min-h-screen z-[100] bg-epoch-surface text-white animate-in slide-in-from-top duration-500 flex flex-col items-center justify-center py-12 px-6 overflow-y-auto"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Menú de navegación"
           >
-            <X className="h-8 w-8" />
-          </button>
-          <div className="flex flex-col items-center space-y-8 font-serif italic text-xl">
-            {navigation.map((item) => (
-              <button
-                key={item.name}
-                onClick={() => handleNavClick(item.href)}
-                className="hover:text-epoch-accent transition-colors py-2"
-              >
-                {item.name}
-              </button>
-            ))}
-          </div>
-          <div className="pt-12 w-full max-w-xs space-y-6 border-t border-white/10 flex flex-col items-center">
-            {isLoading ? (
-              <div className="h-12 w-full bg-white/10 animate-pulse rounded-xl" />
-            ) : isAuthenticated ? (
-              <Button
-                onClick={() => {
-                  router.push("/admin");
-                  setMobileMenuOpen(false);
-                }}
-                className="w-full bg-epoch-accent text-epoch-surface rounded-xl h-14 font-display tracking-widest uppercase"
-              >
-                <LayoutDashboard className="mr-2 h-5 w-5" />
-                Dashboard
-              </Button>
-            ) : (
-              <div className="w-full space-y-4">
+            <button
+              onClick={() => setMobileMenuOpen(false)}
+              className="absolute top-8 right-8 text-white hover:text-epoch-accent transition-colors p-2 z-10"
+              aria-label="Cerrar menú"
+            >
+              <X className="h-8 w-8" />
+            </button>
+            <div className="flex flex-col items-center space-y-8 font-serif italic text-xl">
+              {navigation.map((item) => (
                 <button
-                  onClick={() => {
-                    router.push("/login");
-                    setMobileMenuOpen(false);
-                  }}
-                  className="w-full py-4 text-white font-serif italic text-lg text-center"
+                  key={item.name}
+                  onClick={() => handleNavClick(item.href)}
+                  className="hover:text-epoch-accent transition-colors py-2"
                 >
-                  Iniciar Sesión
+                  {item.name}
                 </button>
-                <Button
-                  onClick={() => {
-                    router.push("/signup");
-                    setMobileMenuOpen(false);
-                  }}
-                  className="w-full bg-transparent border border-white/30 text-white rounded-xl h-14 font-display tracking-widest uppercase transition-colors hover:bg-white hover:text-epoch-surface"
-                >
-                  Registrarse
-                </Button>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
+              ))}
+            </div>
+            <div className="pt-12 w-full max-w-xs space-y-4 border-t border-white/20 flex flex-col items-center">
+              {isLoading ? (
+                <div className="h-12 w-full bg-white/10 animate-pulse rounded-xl" />
+              ) : isAuthenticated ? (
+                orgStatus?.hasOrganization && !orgStatus?.isDemoMode ? (
+                  <Button
+                    onClick={() => {
+                      router.push("/admin");
+                      setMobileMenuOpen(false);
+                    }}
+                    className="w-full bg-epoch-accent text-epoch-surface rounded-xl h-14 font-display tracking-widest uppercase hover:bg-white hover:text-epoch-surface"
+                  >
+                    <LayoutDashboard className="mr-2 h-5 w-5" />
+                    Dashboard
+                  </Button>
+                ) : (
+                  <div className="w-full space-y-3">
+                    <Button
+                      onClick={() => {
+                        router.push("/onboarding/create");
+                        setMobileMenuOpen(false);
+                      }}
+                      className="w-full bg-epoch-accent text-epoch-surface rounded-xl h-14 font-display tracking-widest uppercase hover:bg-white hover:text-epoch-surface"
+                    >
+                      Activar mi Óptica
+                    </Button>
+                    <Button
+                      onClick={() => {
+                        router.push("/onboarding/choice");
+                        setMobileMenuOpen(false);
+                      }}
+                      variant="outline"
+                      className="w-full border-white/30 bg-white/10 text-white rounded-xl h-14 font-display tracking-widest uppercase hover:bg-white/20"
+                    >
+                      Ver Demo
+                    </Button>
+                  </div>
+                )
+              ) : (
+                <div className="w-full space-y-3">
+                  <Button
+                    onClick={() => {
+                      router.push("/login");
+                      setMobileMenuOpen(false);
+                    }}
+                    variant="outline"
+                    className="w-full border-white/30 bg-white/10 text-white rounded-xl h-14 font-display tracking-widest uppercase hover:bg-white/20"
+                  >
+                    Iniciar Sesión
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      router.push("/signup");
+                      setMobileMenuOpen(false);
+                    }}
+                    className="w-full bg-epoch-accent text-epoch-surface rounded-xl h-14 font-display tracking-widest uppercase hover:bg-white hover:text-epoch-surface"
+                  >
+                    Registrarse
+                  </Button>
+                </div>
+              )}
+            </div>
+          </div>,
+          document.body,
+        )}
     </header>
   );
 }

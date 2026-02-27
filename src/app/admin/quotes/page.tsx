@@ -68,7 +68,6 @@ const CreateQuoteForm = dynamic(
     ssr: false,
   },
 );
-import { BranchSelector } from "@/components/admin/BranchSelector";
 import { formatDate, formatCurrency } from "@/lib/utils";
 import { quoteService, Quote } from "@/lib/api/services";
 import type { UpdateQuoteData } from "@/lib/api/services/quoteService";
@@ -203,65 +202,75 @@ export default function QuotesPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
+      {/* Header - multi-row */}
+      <div className="flex flex-col gap-2 sm:gap-3">
         <div>
           <h1
-            className="text-3xl font-bold text-epoch-primary"
+            className="text-xl sm:text-2xl lg:text-3xl font-bold text-epoch-primary"
             data-tour="quotes-header"
           >
             Presupuestos
           </h1>
-          <p className="text-admin-text-tertiary">
+          <p className="text-xs sm:text-sm text-admin-text-tertiary">
             {isGlobalView
               ? "Gestiona presupuestos de todas las sucursales"
               : "Gestiona presupuestos para trabajos de lentes"}
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          {isSuperAdmin && <BranchSelector />}
+        <div className="flex flex-wrap items-center gap-2">
           <Link href="/admin/quotes/settings">
-            <Button variant="outline">
-              <Settings className="h-4 w-4 mr-2" />
-              Configuración
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-9 w-9 sm:w-auto sm:px-3"
+              aria-label="Configuración"
+            >
+              <Settings className="h-4 w-4 sm:mr-2 shrink-0" />
+              <span className="hidden sm:inline">Configuración</span>
             </Button>
           </Link>
-          <Button onClick={() => setShowCreateQuote(true)}>
-            <Plus className="h-4 w-4 mr-2" />
-            Nuevo Presupuesto
+          <Button
+            onClick={() => setShowCreateQuote(true)}
+            size="sm"
+            className="h-9 gap-1.5"
+          >
+            <Plus className="h-4 w-4 shrink-0" />
+            <span className="text-xs sm:text-sm">Nuevo Presupuesto</span>
           </Button>
         </div>
       </div>
 
-      {/* Filters */}
+      {/* Filters - search wider, filter smaller on mobile */}
       <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)]">
-        <CardContent className="p-6">
-          <div className="flex items-center gap-4">
-            <div className="flex-1">
+        <CardContent className="p-4 sm:p-6">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4">
+            <div className="flex-1 min-w-0">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-admin-text-tertiary" />
                 <Input
                   placeholder="Buscar por número, cliente, email..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
+                  className="pl-10 w-full"
                 />
               </div>
             </div>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Estado" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todos los estados</SelectItem>
-                <SelectItem value="draft">Borrador</SelectItem>
-                <SelectItem value="sent">Enviado</SelectItem>
-                <SelectItem value="accepted">Aceptado</SelectItem>
-                <SelectItem value="rejected">Rechazado</SelectItem>
-                <SelectItem value="expired">Expirado</SelectItem>
-                <SelectItem value="converted_to_work">Convertido</SelectItem>
-              </SelectContent>
-            </Select>
+            <div className="w-[140px] sm:w-[160px] md:w-[180px] shrink-0">
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Estado" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos los estados</SelectItem>
+                  <SelectItem value="draft">Borrador</SelectItem>
+                  <SelectItem value="sent">Enviado</SelectItem>
+                  <SelectItem value="accepted">Aceptado</SelectItem>
+                  <SelectItem value="rejected">Rechazado</SelectItem>
+                  <SelectItem value="expired">Expirado</SelectItem>
+                  <SelectItem value="converted_to_work">Convertido</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         </CardContent>
       </Card>

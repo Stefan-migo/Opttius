@@ -6,7 +6,6 @@ import {
   Cell,
   ResponsiveContainer,
   Tooltip,
-  Legend,
 } from "recharts";
 import { useMemo } from "react";
 
@@ -111,70 +110,73 @@ export function EnhancedPieChart({
     return null;
   };
 
-  const CustomLegend = (props: any) => {
-    const { payload } = props;
-    return (
-      <div className="flex flex-wrap justify-center gap-4 mt-4">
-        {payload.map((entry: any, index: number) => (
-          <div
-            key={`legend-${index}`}
-            className="flex items-center gap-2 text-sm"
-          >
-            <div
-              className="w-4 h-4 rounded-full"
-              style={{ backgroundColor: entry.color }}
-            />
-            <span className="text-gray-700 dark:text-gray-300">
-              {entry.value}
-            </span>
-            {showPercentage && (
-              <span className="text-gray-500 dark:text-gray-400 font-semibold">
-                ({entry.payload.percentage.toFixed(1)}%)
-              </span>
-            )}
-          </div>
-        ))}
-      </div>
-    );
-  };
+  const pieHeight = Math.min(height * 0.6, 220);
+  const outerRadius = Math.min(90, pieHeight / 2 - 10);
 
   return (
-    <div className="space-y-4 w-full">
+    <div className="flex flex-col w-full min-h-0">
       {title && (
-        <h4 className="font-semibold text-lg text-epoch-primary dark:text-admin-text-primary text-center">
+        <h4 className="font-semibold text-sm sm:text-base text-epoch-primary dark:text-admin-text-primary text-center mb-2 shrink-0">
           {title}
         </h4>
       )}
 
-      <ResponsiveContainer width="100%" height={height}>
-        <RechartsPieChart id="enhanced-pie-chart">
-          <Pie
-            data={chartData}
-            cx="50%"
-            cy="50%"
-            labelLine={false}
-            label={showPercentage ? renderCustomizedLabel : false}
-            outerRadius={100}
-            fill="#8884d8"
-            dataKey="value"
-            animationDuration={1000}
-            animationEasing="ease-out"
+      <div className="shrink-0" style={{ height: pieHeight }}>
+        <ResponsiveContainer width="100%" height="100%">
+          <RechartsPieChart
+            id="enhanced-pie-chart"
+            margin={{ top: 4, right: 4, bottom: 4, left: 4 }}
           >
-            {chartData.map((entry, index) => (
-              <Cell key={`cell-${index}`} fill={entry.color} />
-            ))}
-          </Pie>
-          <Tooltip content={<CustomTooltip />} />
-          {showLegend && <Legend content={<CustomLegend />} />}
-        </RechartsPieChart>
-      </ResponsiveContainer>
+            <Pie
+              data={chartData}
+              cx="50%"
+              cy="50%"
+              labelLine={false}
+              label={showPercentage ? renderCustomizedLabel : false}
+              outerRadius={outerRadius}
+              fill="#8884d8"
+              dataKey="value"
+              animationDuration={1000}
+              animationEasing="ease-out"
+            >
+              {chartData.map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={entry.color} />
+              ))}
+            </Pie>
+            <Tooltip content={<CustomTooltip />} />
+          </RechartsPieChart>
+        </ResponsiveContainer>
+      </div>
 
-      {/* Summary */}
-      <div className="text-center pt-2 border-t border-gray-200 dark:border-gray-700">
-        <p className="text-xs text-admin-text-tertiary dark:text-gray-400 mb-1">
+      {showLegend && (
+        <div className="flex flex-wrap justify-center gap-x-4 gap-y-2 mt-3 shrink-0">
+          {chartData.map((entry, index) => (
+            <div
+              key={`legend-${index}`}
+              className="flex items-center gap-2 text-xs sm:text-sm"
+            >
+              <div
+                className="w-3 h-3 sm:w-4 sm:h-4 rounded-full shrink-0"
+                style={{ backgroundColor: entry.color }}
+              />
+              <span className="text-gray-700 dark:text-gray-300 truncate max-w-[120px] sm:max-w-none">
+                {entry.label}
+              </span>
+              {showPercentage && (
+                <span className="text-gray-500 dark:text-gray-400 font-semibold shrink-0">
+                  ({entry.percentage.toFixed(1)}%)
+                </span>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
+      <div className="text-center pt-3 mt-3 border-t border-gray-200 dark:border-gray-700 shrink-0">
+        <p className="text-xs text-admin-text-tertiary dark:text-gray-400 mb-0.5">
           Total
         </p>
-        <p className="font-bold text-lg text-epoch-primary dark:text-admin-text-primary">
+        <p className="font-bold text-base sm:text-lg text-epoch-primary dark:text-admin-text-primary">
           {formatValue(chartData.reduce((sum, item) => sum + item.value, 0))}
         </p>
       </div>

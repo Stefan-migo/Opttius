@@ -103,7 +103,7 @@ function EyeSection({
       <h3 className="font-semibold text-admin-text-primary border-b border-admin-border-primary/30 pb-2">
         {label}
       </h3>
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         {fields.map(
           (f) =>
             f.value !== null &&
@@ -141,7 +141,7 @@ export function PrescriptionFullDisplay({
         </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
         <EyeSection label="Ojo Derecho (OD)" prefix="od" data={prescription} />
         <EyeSection
           label="Ojo Izquierdo (OS)"

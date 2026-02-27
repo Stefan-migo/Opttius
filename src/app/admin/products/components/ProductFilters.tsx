@@ -42,8 +42,8 @@ export default function ProductFilters({
 }: ProductFiltersProps) {
   return (
     <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)]">
-      <CardContent className="p-6">
-        <div className="flex flex-col lg:flex-row gap-6">
+      <CardContent className="p-3 sm:p-4 md:p-6">
+        <div className="flex flex-col gap-4 sm:gap-6">
           {/* Search Input */}
           <div className="flex-1">
             <label className="text-[10px] font-display font-bold text-admin-text-primary uppercase tracking-widest mb-2 block">
@@ -61,14 +61,14 @@ export default function ProductFilters({
                     e.preventDefault();
                   }
                 }}
-                className="pl-12 h-11 bg-admin-bg-tertiary border-admin-border-primary/10 rounded-xl focus:border-epoch-primary focus:ring-1 focus:ring-epoch-primary/20 font-serif italic text-sm transition-all"
+                className="pl-10 sm:pl-12 h-10 sm:h-11 bg-admin-bg-tertiary border-admin-border-primary/10 rounded-xl focus:border-epoch-primary focus:ring-1 focus:ring-epoch-primary/20 font-serif italic text-sm transition-all"
               />
             </div>
           </div>
 
-          <div className="flex flex-wrap items-end gap-6">
+          <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-end gap-3 sm:gap-4 md:gap-6">
             {/* Category Filter */}
-            <div className="w-full sm:w-48">
+            <div className="w-full sm:w-40 md:w-48 min-w-0">
               <label className="text-[10px] font-display font-bold text-admin-text-primary uppercase tracking-widest mb-2 block">
                 Filtrado por Categoría
               </label>
@@ -97,7 +97,7 @@ export default function ProductFilters({
             </div>
 
             {/* Status Filter */}
-            <div className="w-full sm:w-40">
+            <div className="w-full sm:w-36 md:w-40 min-w-0">
               <label className="text-[10px] font-display font-bold text-admin-text-primary uppercase tracking-widest mb-2 block">
                 Estado de Ficha
               </label>
@@ -140,7 +140,7 @@ export default function ProductFilters({
               <Button
                 variant="outline"
                 onClick={onLowStockToggle}
-                className={`h-11 px-6 rounded-xl border-admin-border-primary/10 font-display font-bold text-[10px] tracking-[0.2em] uppercase transition-all ${
+                className={`h-10 sm:h-11 px-4 sm:px-6 rounded-xl border-admin-border-primary/10 font-display font-bold text-[9px] sm:text-[10px] tracking-[0.15em] sm:tracking-[0.2em] uppercase transition-all ${
                   showLowStockOnly
                     ? "bg-admin-error text-white border-admin-error"
                     : "bg-white text-admin-text-primary hover:bg-admin-bg-tertiary"
@@ -149,16 +149,26 @@ export default function ProductFilters({
                 <AlertTriangle
                   className={`h-4 w-4 mr-2 ${showLowStockOnly ? "text-white" : "text-admin-error"}`}
                 />
-                {showLowStockOnly ? "TODOS" : "STOCK BAJO"}
+                {showLowStockOnly ? (
+                  <>
+                    <span className="hidden sm:inline">TODOS</span>
+                    <span className="sm:hidden">Todos</span>
+                  </>
+                ) : (
+                  <>
+                    <span className="hidden sm:inline">STOCK BAJO</span>
+                    <span className="sm:hidden">Bajo</span>
+                  </>
+                )}
               </Button>
             </div>
 
             {/* View Mode Toggle */}
-            <div className="flex flex-col gap-2">
-              <label className="text-[10px] font-display font-bold text-admin-text-primary uppercase tracking-widest mb-2 block">
-                Visualización
+            <div className="flex flex-col gap-1 sm:gap-2">
+              <label className="text-[9px] sm:text-[10px] font-display font-bold text-admin-text-primary uppercase tracking-widest block">
+                Vista
               </label>
-              <div className="flex items-center h-11 border border-admin-border-primary/10 bg-admin-bg-tertiary p-1 w-24">
+              <div className="flex items-center h-10 sm:h-11 border border-admin-border-primary/10 bg-admin-bg-tertiary p-1 w-20 sm:w-24">
                 <button
                   onClick={() => onViewModeChange("grid")}
                   className={`flex-1 flex items-center justify-center h-full transition-all ${

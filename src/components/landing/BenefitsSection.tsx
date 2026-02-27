@@ -104,8 +104,8 @@ export function BenefitsSection() {
               <div className="absolute inset-0 bg-epoch-primary/20 group-hover:bg-transparent transition-colors duration-1000"></div>
             </div>
 
-            {/* Aesthetic Arch Background */}
-            <div className="absolute -bottom-10 -right-10 w-40 h-40 border border-epoch-accent/10 rounded-full blur-2xl pointer-events-none"></div>
+            {/* Aesthetic Arch Background - hidden on mobile */}
+            <div className="absolute -bottom-10 -right-10 w-40 h-40 border border-epoch-accent/10 rounded-full blur-2xl pointer-events-none hidden md:block"></div>
           </div>
         </div>
       </div>

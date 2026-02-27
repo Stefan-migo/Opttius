@@ -107,26 +107,26 @@ export default function EmailConfigCard({
   const suggestedReplyTo = suggestedContactEmail || "contacto@tuoptica.cl";
 
   return (
-    <Card className="border-admin-border-primary/50 bg-admin-bg-tertiary">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-admin-text-primary">
-          <Mail className="h-5 w-5 text-admin-accent-primary" />
+    <Card className="rounded-xl border border-border overflow-hidden">
+      <CardHeader className="p-4 sm:p-6">
+        <CardTitle className="flex items-center gap-2 font-display text-epoch-primary text-base sm:text-lg">
+          <Mail className="h-4 w-4 sm:h-5 sm:w-5 shrink-0" />
           Correo Electrónico
         </CardTitle>
-        <p className="text-sm text-admin-text-tertiary">
+        <p className="text-xs sm:text-sm text-epoch-primary/80 mt-1">
           Los emails se envían desde <strong>noreply@opttius.cl</strong>. Por
           defecto se usa el nombre de la óptica y el email de contacto. Puedes
           personalizarlos aquí.
         </p>
       </CardHeader>
-      <CardContent>
+      <CardContent className="p-4 sm:p-6 pt-0">
         {loading ? (
-          <div className="flex justify-center py-8">
-            <Loader2 className="h-6 w-6 animate-spin text-admin-accent-primary" />
+          <div className="flex justify-center py-6 sm:py-8">
+            <Loader2 className="h-6 w-6 animate-spin text-epoch-primary" />
           </div>
         ) : (
-          <div className="space-y-6">
-            <div className="rounded-lg border border-admin-border-primary/20 bg-admin-bg-primary/30 p-3 text-xs text-admin-text-tertiary">
+          <div className="space-y-4 sm:space-y-6">
+            <div className="rounded-xl border border-border bg-epoch-background/30 p-3 text-[10px] sm:text-xs text-epoch-primary/80">
               <Info className="inline h-4 w-4 mr-2 align-middle" />
               Valores sugeridos desde <strong>Configuración</strong>: Nombre de
               la Óptica y Email de Contacto.
@@ -136,7 +136,7 @@ export default function EmailConfigCard({
               <Label htmlFor="email_display_name">
                 Nombre de visualización (Display Name)
               </Label>
-              <p className="text-xs text-admin-text-tertiary">
+              <p className="text-[10px] sm:text-xs text-epoch-primary/80">
                 Sugerido:{" "}
                 <span className="font-medium text-admin-text-secondary">
                   {suggestedDisplayName}
@@ -156,7 +156,7 @@ export default function EmailConfigCard({
               <Label htmlFor="support_email">
                 Reply-To (Correo de respuestas)
               </Label>
-              <p className="text-xs text-admin-text-tertiary">
+              <p className="text-[10px] sm:text-xs text-epoch-primary/80">
                 Sugerido:{" "}
                 <span className="font-medium text-admin-text-secondary">
                   {suggestedReplyTo}
@@ -172,11 +172,11 @@ export default function EmailConfigCard({
               />
             </div>
 
-            <div className="flex justify-end pt-4 border-t border-admin-border-primary/10">
+            <div className="flex justify-end pt-4 border-t border-border">
               <Button
                 onClick={handleSave}
                 disabled={saving}
-                className="min-w-[120px]"
+                className="min-w-[120px] rounded-xl min-h-[44px] w-full sm:w-auto"
               >
                 {saving ? (
                   <>

@@ -63,6 +63,7 @@ add_source "docs/user-guide/README.md" "User_Guide_README"
 add_source "docs/user-guide/dashboard.md" "User_Guide_Dashboard"
 
 # Guías técnicas y planes
+add_source "docs/VERCEL_DEPLOYMENT_2026-02.md" "VERCEL_DEPLOYMENT_2026-02"
 add_source "docs/SUPABASE_FIX_INSTRUCTIONS.md" "SUPABASE_FIX_INSTRUCTIONS"
 add_source "docs/COPY_IMPROVEMENT_PLAN.md" "COPY_IMPROVEMENT_PLAN"
 add_source "docs/CHANGELOG_TYPOGRAPHY.md" "CHANGELOG_TYPOGRAPHY"
@@ -78,6 +79,8 @@ add_source "docs/WHATSAPP_IMPLEMENTATION_PROMPT.md" "Prompt Implementación What
 # Testing - guía y skill
 add_source "docs/TESTING_GUIDE.md" "Guía de Testing Opttius"
 add_source "docs/PLAN_TESTING_IMPLEMENTATION.md" "Plan Implementación Testing"
+add_source "docs/MANUAL_TESTING_GUIDE_COMPLETE.md" "Guía de Testing Manual Completa"
+add_source "docs/VIDEOTUTORIALES_MAP.md" "Mapa de Videotutoriales"
 add_source ".cursor/skills/testing-optical-supabase/SKILL.md" "Skill Testing Optical Supabase"
 
 # Índice consolidado de skills (23 guías de dominio)

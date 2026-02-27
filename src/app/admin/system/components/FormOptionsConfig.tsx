@@ -296,24 +296,24 @@ export default function FormOptionsConfig() {
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-display font-bold text-admin-text-primary tracking-tight uppercase mb-1">
+    <div className="space-y-4 sm:space-y-6">
+      <div className="flex flex-col gap-2 sm:gap-4">
+        <h2 className="text-xl sm:text-2xl font-display font-bold text-epoch-primary tracking-tight uppercase">
           Configuración de Formularios
         </h2>
-        <p className="text-[11px] font-serif italic text-admin-text-tertiary uppercase tracking-wider">
+        <p className="text-[10px] sm:text-xs text-epoch-primary/80 uppercase tracking-wider">
           Personaliza las opciones de los menús desplegables en cada formulario
           del sistema.
         </p>
       </div>
 
-      <div className="flex gap-4">
-        <div className="w-56 flex-shrink-0 space-y-2">
-          <Label className="text-[10px] font-display font-bold text-admin-text-primary uppercase tracking-widest">
+      <div className="flex flex-col sm:flex-row gap-4">
+        <div className="w-full sm:w-56 flex-shrink-0 space-y-2">
+          <Label className="text-[10px] font-display font-bold text-epoch-primary uppercase tracking-widest">
             Formulario
           </Label>
           <Select value={selectedFormType} onValueChange={setSelectedFormType}>
-            <SelectTrigger className="h-11 bg-admin-bg-tertiary border-admin-border-primary/10 rounded-xl font-display text-[10px] tracking-widest uppercase">
+            <SelectTrigger className="h-11 min-h-[44px] w-full sm:w-56 bg-epoch-background/50 border-border rounded-xl font-display text-[10px] tracking-widest uppercase">
               <SelectValue />
             </SelectTrigger>
             <SelectContent className="rounded-xl border-admin-border-primary/20">
@@ -331,41 +331,43 @@ export default function FormOptionsConfig() {
         </div>
       </div>
 
-      <Card className="bg-admin-bg-tertiary border border-admin-border-primary/20 rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.08)]">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-lg font-display font-bold text-admin-text-primary uppercase tracking-tight">
-            <FileText className="h-5 w-5 text-admin-accent-primary" />
-            {formTypeInfo?.label}
+      <Card className="rounded-xl border border-border overflow-hidden">
+        <CardHeader className="p-4 sm:p-6">
+          <CardTitle className="flex flex-col sm:flex-row sm:items-center gap-2 text-base sm:text-lg font-display font-bold text-epoch-primary uppercase tracking-tight">
+            <span className="flex items-center gap-2">
+              <FileText className="h-4 w-4 sm:h-5 sm:w-5 shrink-0" />
+              {formTypeInfo?.label}
+            </span>
           </CardTitle>
-          <p className="text-[11px] font-serif italic text-admin-text-tertiary uppercase tracking-wider">
+          <p className="text-[10px] sm:text-xs text-epoch-primary/80 uppercase tracking-wider mt-1">
             {formTypeInfo?.description}
           </p>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="p-4 sm:p-6 pt-0 space-y-4">
           {currentFields.length === 0 ? (
-            <p className="text-admin-text-tertiary text-[11px] font-serif italic py-4">
+            <p className="text-epoch-primary/70 text-[10px] sm:text-xs py-3 sm:py-4">
               No hay campos configurados para este formulario.
             </p>
           ) : (
             currentFields.map((field) => (
               <div
                 key={field.id}
-                className="border border-admin-border-primary/20 rounded-xl p-4 bg-admin-bg-primary/50"
+                className="border border-border rounded-lg p-2 sm:p-3 bg-epoch-background/30 overflow-hidden"
               >
-                <div className="flex justify-between items-start mb-3">
-                  <div>
-                    <h3 className="font-display font-bold text-admin-text-primary text-base uppercase tracking-tight">
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 sm:gap-3 mb-2 sm:mb-3">
+                  <div className="min-w-0 flex-1">
+                    <h3 className="font-display font-bold text-epoch-primary text-xs sm:text-sm uppercase tracking-tight break-words">
                       {field.field_label}
                     </h3>
-                    <p className="text-[11px] font-serif italic text-admin-text-tertiary mt-1">
+                    <p className="text-[9px] sm:text-[10px] text-epoch-primary/70 mt-0.5">
                       Campo:{" "}
-                      <code className="bg-admin-bg-tertiary border border-admin-border-primary/10 px-1.5 py-0.5 rounded-xl text-admin-text-secondary font-display text-[10px]">
+                      <code className="bg-epoch-background/50 border border-border px-1 py-0.5 rounded text-epoch-primary/80 font-display text-[9px]">
                         {field.field_key}
                       </code>
                       {field.is_array && (
                         <Badge
                           variant="secondary"
-                          className="ml-2 rounded-xl text-[9px] font-display font-bold uppercase tracking-wider border-admin-border-primary/20"
+                          className="ml-1.5 rounded text-[8px] font-display font-bold uppercase tracking-wider"
                         >
                           Múltiples valores
                         </Badge>
@@ -375,81 +377,83 @@ export default function FormOptionsConfig() {
                   <Button
                     size="sm"
                     onClick={() => openAddDialog(field)}
-                    className="flex items-center gap-2 h-9 rounded-xl border-admin-border-primary/20 font-display font-bold text-[10px] tracking-widest uppercase bg-admin-accent-primary hover:bg-admin-accent-secondary text-[#1A2B23]"
+                    className="flex items-center gap-1.5 h-8 px-2 sm:px-3 rounded-lg border-border font-display font-bold text-[9px] sm:text-[10px] tracking-widest uppercase w-full sm:w-auto shrink-0"
                   >
-                    <Plus className="h-4 w-4" />
+                    <Plus className="h-3.5 w-3.5" />
                     Agregar Opción
                   </Button>
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-1.5">
                   {field.values && field.values.length > 0 ? (
                     field.values.map((value) => (
                       <div
                         key={value.id}
-                        className={`flex items-center justify-between p-3 rounded-xl border border-admin-border-primary/20 ${
+                        className={`flex items-center justify-between gap-2 p-2 sm:p-2.5 rounded-lg border border-border overflow-hidden min-w-0 ${
                           !value.is_active
-                            ? "bg-admin-bg-tertiary/50 opacity-60"
-                            : "bg-admin-bg-tertiary"
+                            ? "bg-epoch-background/20 opacity-60"
+                            : "bg-epoch-background/40"
                         }`}
                       >
-                        <div className="flex items-center gap-3 flex-1">
-                          <GripVertical className="h-4 w-4 text-admin-text-tertiary" />
-                          <span className="font-display font-bold text-admin-text-primary text-sm uppercase tracking-tight">
+                        <div className="flex items-center gap-1.5 sm:gap-2 flex-1 min-w-0 overflow-hidden">
+                          <GripVertical className="h-3.5 w-3.5 text-epoch-primary/50 shrink-0" />
+                          <span className="font-display font-bold text-epoch-primary text-[10px] sm:text-xs uppercase tracking-tight truncate">
                             {value.label}
                           </span>
-                          <code className="text-[10px] bg-admin-bg-primary/50 border border-admin-border-primary/10 px-1.5 py-0.5 rounded-xl text-admin-text-secondary font-display">
+                          <code className="text-[8px] sm:text-[9px] bg-epoch-background/60 border border-border px-1 py-0.5 rounded text-epoch-primary/80 font-display shrink-0 max-w-[80px] sm:max-w-none truncate">
                             {value.value}
                           </code>
                           {value.is_default && (
-                            <Badge className="text-[9px] font-display font-bold uppercase tracking-wider rounded-xl bg-admin-accent-primary/20 text-admin-accent-primary border border-admin-accent-primary/30">
+                            <Badge className="text-[7px] sm:text-[8px] font-display font-bold uppercase tracking-wider rounded shrink-0">
                               Por defecto
                             </Badge>
                           )}
                           {!value.is_active && (
                             <Badge
                               variant="secondary"
-                              className="text-[9px] font-display font-bold uppercase rounded-xl border-admin-border-primary/20 text-admin-text-tertiary"
+                              className="text-[7px] sm:text-[8px] font-display font-bold uppercase rounded shrink-0"
                             >
                               Inactivo
                             </Badge>
                           )}
                         </div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-0.5 sm:gap-1 shrink-0">
                           <Button
                             size="sm"
                             variant="ghost"
                             onClick={() => handleToggleValueActive(value)}
                             title={value.is_active ? "Desactivar" : "Activar"}
-                            className="text-admin-text-tertiary hover:text-admin-text-primary hover:bg-admin-accent-primary/10 rounded-xl h-8 w-8 p-0"
+                            className="text-epoch-primary/70 hover:text-epoch-primary hover:bg-epoch-primary/10 rounded h-7 w-7 p-0 min-w-7"
                           >
                             {value.is_active ? (
-                              <Eye className="h-4 w-4" />
+                              <Eye className="h-3.5 w-3.5" />
                             ) : (
-                              <EyeOff className="h-4 w-4" />
+                              <EyeOff className="h-3.5 w-3.5" />
                             )}
                           </Button>
                           <Button
                             size="sm"
                             variant="ghost"
                             onClick={() => openEditDialog(value)}
-                            className="text-admin-text-tertiary hover:text-admin-text-primary hover:bg-admin-accent-primary/10 rounded-xl h-8 w-8 p-0"
+                            title="Editar"
+                            className="text-epoch-primary/70 hover:text-epoch-primary hover:bg-epoch-primary/10 rounded h-7 w-7 p-0 min-w-7"
                           >
-                            <Edit2 className="h-4 w-4" />
+                            <Edit2 className="h-3.5 w-3.5" />
                           </Button>
                           <Button
                             size="sm"
                             variant="ghost"
                             onClick={() => handleDeleteValue(value)}
-                            className="text-admin-error hover:text-admin-error hover:bg-admin-error/10 rounded-xl h-8 w-8 p-0"
+                            title="Eliminar"
+                            className="text-red-600 hover:text-red-700 hover:bg-red-500/10 rounded h-7 w-7 p-0 min-w-7"
                           >
-                            <Trash2 className="h-4 w-4" />
+                            <Trash2 className="h-3.5 w-3.5" />
                           </Button>
                         </div>
                       </div>
                     ))
                   ) : (
-                    <p className="text-admin-text-tertiary text-[11px] font-serif italic py-2">
+                    <p className="text-epoch-primary/70 text-[9px] sm:text-[10px] py-2">
                       No hay opciones configuradas
                     </p>
                   )}

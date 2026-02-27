@@ -568,12 +568,14 @@ export default function AddProductPage() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl">
-      <div className="flex justify-between items-center gap-4 mb-6">
-        <div className="flex items-center gap-3">
-          <h1 className="text-3xl font-bold">Agregar Producto</h1>
+    <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8 max-w-4xl">
+      <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4 mb-4 sm:mb-6">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-admin-text-primary">
+            Agregar Producto
+          </h1>
           {hasChanges && (
-            <span className="px-2 py-1 text-xs bg-amber-100 text-amber-800 rounded-full border border-amber-200">
+            <span className="px-2 py-1 text-[10px] sm:text-xs bg-amber-100 text-amber-800 rounded-full border border-amber-200">
               Cambios sin guardar
             </span>
           )}
@@ -581,21 +583,23 @@ export default function AddProductPage() {
         <Button
           variant="outline"
           onClick={() => router.back()}
-          className="flex items-center gap-2"
+          className="h-10 w-10 sm:h-auto sm:w-auto sm:px-4 shrink-0"
         >
-          <ArrowLeft className="h-4 w-4" />
-          Volver
+          <ArrowLeft className="h-4 w-4 sm:mr-2" />
+          <span className="hidden sm:inline">Volver</span>
         </Button>
       </div>
 
       {/* Product Form */}
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
         {/* Product Type & Category - MOVED TO FIRST POSITION */}
         <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.4)]">
-          <CardHeader>
-            <CardTitle>Tipo de Producto</CardTitle>
+          <CardHeader className="px-4 sm:px-6 py-4 sm:py-6">
+            <CardTitle className="text-sm sm:text-base">
+              Tipo de Producto
+            </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-4 px-4 sm:px-6 pb-4 sm:pb-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="product_type">Tipo de Producto *</Label>
@@ -642,10 +646,12 @@ export default function AddProductPage() {
         </Card>
 
         <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.4)]">
-          <CardHeader>
-            <CardTitle>Información Básica</CardTitle>
+          <CardHeader className="px-4 sm:px-6 py-4 sm:py-6">
+            <CardTitle className="text-sm sm:text-base">
+              Información Básica
+            </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-4 px-4 sm:px-6 pb-4 sm:pb-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="name">Nombre del Producto *</Label>
@@ -1424,8 +1430,13 @@ export default function AddProductPage() {
           </CardContent>
         </Card>
 
-        <div className="flex justify-end gap-4">
-          <Button type="button" variant="outline" onClick={() => router.back()}>
+        <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-4">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => router.back()}
+            className="w-full sm:w-auto"
+          >
             Cancelar
           </Button>
           <Button
@@ -1433,16 +1444,16 @@ export default function AddProductPage() {
             variant="secondary"
             disabled={loading}
             onClick={() => handleSubmit(undefined, "draft")}
-            className="flex items-center gap-2"
+            className="flex items-center justify-center gap-2 w-full sm:w-auto"
           >
             <Save className="h-4 w-4" />
-            {loading ? "Guardando..." : "Guardar como Borrador"}
+            {loading ? "Guardando..." : "Borrador"}
           </Button>
           <Button
             type="button"
             disabled={loading}
             onClick={() => setShowPublishAlert(true)}
-            className="flex items-center gap-2"
+            className="flex items-center justify-center gap-2 w-full sm:w-auto"
           >
             <Save className="h-4 w-4" />
             {loading ? "Guardando..." : "Guardar Producto"}

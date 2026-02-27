@@ -267,7 +267,7 @@ export default function CreatePrescriptionForm({
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             <div>
               <Label>Fecha de Receta *</Label>
               <Input
@@ -367,7 +367,7 @@ export default function CreatePrescriptionForm({
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             <div>
               <Label>Esfera (SPH)</Label>
               <Input
@@ -424,7 +424,7 @@ export default function CreatePrescriptionForm({
               />
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <Label>Prisma OD</Label>
               <Input
@@ -458,7 +458,7 @@ export default function CreatePrescriptionForm({
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             <div>
               <Label>Esfera (SPH)</Label>
               <Input
@@ -515,7 +515,7 @@ export default function CreatePrescriptionForm({
               />
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <Label>Prisma OS</Label>
               <Input
@@ -549,7 +549,7 @@ export default function CreatePrescriptionForm({
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
             <div>
               <Label>PD Lejos (Distancia)</Label>
               <Input
@@ -611,7 +611,7 @@ export default function CreatePrescriptionForm({
           <CardTitle>Recomendaciones de Lente</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
             <div>
               <Label>Tipo de Lente</Label>
               <Select
@@ -655,7 +655,7 @@ export default function CreatePrescriptionForm({
           </div>
           <div>
             <Label>Recubrimientos Recomendados</Label>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 mt-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 mt-2">
               {availableCoatings.map((coating) => {
                 const isSelected = formData.coatings?.includes(coating.value);
                 return (

@@ -88,25 +88,29 @@ export default function AdminOrderDetailPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+      <div className="flex items-center justify-center min-h-[50vh] p-4">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
       </div>
     );
   }
 
   if (!order) {
     return (
-      <div className="space-y-4 p-6">
+      <div className="space-y-4 p-4 sm:p-6 pb-28 sm:pb-6">
         <div className="flex gap-2">
           <Link href="/admin/cash-register">
-            <Button variant="outline">
+            <Button
+              variant="outline"
+              size="sm"
+              className="min-h-[44px] sm:min-h-0"
+            >
               <ArrowLeft className="h-4 w-4 mr-2" />
               Caja
             </Button>
           </Link>
         </div>
         <Card>
-          <CardContent className="pt-6 text-center text-gray-500">
+          <CardContent className="pt-6 text-center text-sm sm:text-base text-muted-foreground">
             No se encontró la orden
           </CardContent>
         </Card>
@@ -115,27 +119,33 @@ export default function AdminOrderDetailPage() {
   }
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-4 sm:space-y-6 p-4 sm:p-6 pb-28 sm:pb-6 lg:pb-6">
       <div className="flex gap-2">
         <Link href="/admin/cash-register">
-          <Button variant="outline">
+          <Button
+            variant="outline"
+            size="sm"
+            className="min-h-[44px] sm:min-h-0"
+          >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Caja
           </Button>
         </Link>
       </div>
 
-      {/* Order Header */}
+      {/* Card 1: Orden #ORD-xxx */}
       <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle>Orden #{order.order_number}</CardTitle>
-              <p className="text-sm text-gray-600 mt-1">
+        <CardHeader className="pb-3">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div className="min-w-0">
+              <CardTitle className="text-base sm:text-lg truncate">
+                Orden #{order.order_number}
+              </CardTitle>
+              <p className="text-xs sm:text-sm text-muted-foreground mt-1">
                 {formatDateTime(order.created_at)}
               </p>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap gap-2 shrink-0">
               <Badge
                 variant={
                   order.status === "completed"
@@ -170,135 +180,148 @@ export default function AdminOrderDetailPage() {
 
       {/* Cancellation Reason */}
       {order.status === "cancelled" && order.cancellation_reason && (
-        <Card className="border-red-200 bg-red-50">
-          <CardContent className="pt-6 space-y-2">
-            <div className="flex items-start gap-2">
+        <Card className="border-red-200 bg-red-50 dark:border-red-900/50 dark:bg-red-950/30">
+          <CardContent className="pt-4 sm:pt-6 space-y-2">
+            <div className="flex items-start gap-3">
               <AlertCircle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
-              <div>
-                <p className="font-semibold text-red-900">
+              <div className="min-w-0 flex-1">
+                <p className="text-sm sm:text-base font-semibold text-red-900 dark:text-red-200">
                   Motivo de Anulación
                 </p>
-                <p className="text-red-800 mt-1">{order.cancellation_reason}</p>
+                <p className="text-xs sm:text-sm text-red-800 dark:text-red-300 mt-1 break-words">
+                  {order.cancellation_reason}
+                </p>
               </div>
             </div>
           </CardContent>
         </Card>
       )}
 
-      {/* Order Details */}
-      <div className="grid grid-cols-2 gap-4">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Información</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <div>
-              <p className="text-sm text-gray-600">Cliente</p>
-              <p className="font-medium">
-                {order.customer_name || order.email || "N/A"}
-              </p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-600">Email</p>
-              <p className="font-medium">{order.email || "N/A"}</p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-600">Método de Pago</p>
-              <p className="font-medium">{paymentMethodLabel}</p>
-            </div>
-          </CardContent>
-        </Card>
+      {/* Card 2: Información */}
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base sm:text-lg">Información</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div>
+            <p className="text-xs sm:text-sm text-muted-foreground">Cliente</p>
+            <p className="text-sm sm:text-base font-medium break-words">
+              {order.customer_name || order.email || "N/A"}
+            </p>
+          </div>
+          <div>
+            <p className="text-xs sm:text-sm text-muted-foreground">Email</p>
+            <p className="text-sm sm:text-base font-medium break-all">
+              {order.email || "N/A"}
+            </p>
+          </div>
+          <div>
+            <p className="text-xs sm:text-sm text-muted-foreground">
+              Método de Pago
+            </p>
+            <p className="text-sm sm:text-base font-medium">
+              {paymentMethodLabel}
+            </p>
+          </div>
+        </CardContent>
+      </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Montos</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <div>
-              <p className="text-sm text-gray-600">Subtotal</p>
-              <p className="font-medium">
-                {formatCurrency(order.subtotal ?? order.total_amount)}
-              </p>
+      {/* Card 3: Montos */}
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base sm:text-lg">Montos</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div>
+            <p className="text-xs sm:text-sm text-muted-foreground">Subtotal</p>
+            <p className="text-sm sm:text-base font-medium">
+              {formatCurrency(order.subtotal ?? order.total_amount)}
+            </p>
+          </div>
+          <div>
+            <p className="text-xs sm:text-sm text-muted-foreground">Total</p>
+            <p className="text-base sm:text-lg font-semibold">
+              {formatCurrency(order.total_amount)}
+            </p>
+          </div>
+          <div className="pt-3 border-t space-y-2">
+            <div className="flex justify-between text-sm sm:text-base">
+              <span className="text-muted-foreground">Monto Pagado</span>
+              <span className="font-medium text-green-600">
+                {formatCurrency(paidAmount)}
+              </span>
             </div>
-            <div>
-              <p className="text-sm text-gray-600">Total</p>
-              <p className="font-semibold text-lg">
-                {formatCurrency(order.total_amount)}
-              </p>
+            <div className="flex justify-between text-sm sm:text-base">
+              <span className="text-muted-foreground">Saldo Pendiente</span>
+              <span
+                className={`font-bold ${pendingAmount > 0 ? "text-red-600" : "text-muted-foreground"}`}
+              >
+                {formatCurrency(pendingAmount)}
+              </span>
             </div>
-            <div className="pt-2 border-t">
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-600">Monto Pagado</span>
-                <span className="font-medium text-green-600">
-                  {formatCurrency(paidAmount)}
-                </span>
-              </div>
-              <div className="flex justify-between text-sm mt-1">
-                <span className="text-gray-600">Saldo Pendiente</span>
-                <span
-                  className={`font-bold ${pendingAmount > 0 ? "text-red-600" : "text-gray-600"}`}
-                >
-                  {formatCurrency(pendingAmount)}
-                </span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+          </div>
+        </CardContent>
+      </Card>
 
-      {/* Historial de Pagos */}
+      {/* Card 4: Historial de Pagos */}
       {order.order_payments && order.order_payments.length > 0 && (
         <Card>
-          <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2">
-              <CreditCard className="h-5 w-5" />
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base sm:text-lg flex items-center gap-2">
+              <CreditCard className="h-4 w-4 sm:h-5 sm:w-5 shrink-0" />
               Historial de Pagos
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Fecha</TableHead>
-                  <TableHead>Monto</TableHead>
-                  <TableHead>Método</TableHead>
-                  <TableHead>Descripción</TableHead>
-                  <TableHead className="text-right">Ref. Fiscal</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {[...(order.order_payments || [])]
-                  .sort(
-                    (a: any, b: any) =>
-                      new Date(a.paid_at).getTime() -
-                      new Date(b.paid_at).getTime(),
-                  )
-                  .map((payment: any, idx: number) => (
-                    <TableRow key={payment.id || idx}>
-                      <TableCell className="whitespace-nowrap">
-                        {formatDateTime(payment.paid_at)}
-                      </TableCell>
-                      <TableCell className="font-semibold">
-                        {formatCurrency(Number(payment.amount))}
-                      </TableCell>
-                      <TableCell>
-                        {paymentMethodMap[payment.payment_method] ||
-                          payment.payment_method ||
-                          "N/A"}
-                      </TableCell>
-                      <TableCell>
-                        {payment.notes ||
-                          (idx === 0
-                            ? "Abono inicial"
-                            : "Pago de saldo pendiente")}
-                      </TableCell>
-                      <TableCell className="text-right text-sm text-gray-600">
-                        {payment.payment_reference || "-"}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-              </TableBody>
-            </Table>
+          <CardContent className="px-2 sm:px-6">
+            <div className="overflow-x-auto">
+              <Table className="min-w-[520px]">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="text-xs sm:text-sm">Fecha</TableHead>
+                    <TableHead className="text-xs sm:text-sm">Monto</TableHead>
+                    <TableHead className="text-xs sm:text-sm">Método</TableHead>
+                    <TableHead className="text-xs sm:text-sm">
+                      Descripción
+                    </TableHead>
+                    <TableHead className="text-xs sm:text-sm text-right">
+                      Ref. Fiscal
+                    </TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {[...(order.order_payments || [])]
+                    .sort(
+                      (a: any, b: any) =>
+                        new Date(a.paid_at).getTime() -
+                        new Date(b.paid_at).getTime(),
+                    )
+                    .map((payment: any, idx: number) => (
+                      <TableRow key={payment.id || idx}>
+                        <TableCell className="text-xs sm:text-sm whitespace-nowrap py-3">
+                          {formatDateTime(payment.paid_at)}
+                        </TableCell>
+                        <TableCell className="text-xs sm:text-sm font-semibold py-3">
+                          {formatCurrency(Number(payment.amount))}
+                        </TableCell>
+                        <TableCell className="text-xs sm:text-sm py-3">
+                          {paymentMethodMap[payment.payment_method] ||
+                            payment.payment_method ||
+                            "N/A"}
+                        </TableCell>
+                        <TableCell className="text-xs sm:text-sm py-3 max-w-[120px] sm:max-w-none truncate sm:whitespace-normal">
+                          {payment.notes ||
+                            (idx === 0
+                              ? "Abono inicial"
+                              : "Pago de saldo pendiente")}
+                        </TableCell>
+                        <TableCell className="text-xs sm:text-sm text-right text-muted-foreground py-3">
+                          {payment.payment_reference || "-"}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                </TableBody>
+              </Table>
+            </div>
           </CardContent>
         </Card>
       )}
@@ -306,23 +329,25 @@ export default function AdminOrderDetailPage() {
       {/* Order Items */}
       {order.order_items && order.order_items.length > 0 && (
         <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Artículos</CardTitle>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base sm:text-lg">Artículos</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
               {order.order_items.map((item: any, idx: number) => (
                 <div
                   key={item.id || idx}
-                  className="flex justify-between items-center py-2 border-b last:border-b-0"
+                  className="flex justify-between items-start sm:items-center gap-3 py-3 border-b last:border-b-0"
                 >
-                  <div className="flex-1">
-                    <p className="font-medium">{item.product_name}</p>
-                    <p className="text-sm text-gray-600">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm sm:text-base font-medium break-words">
+                      {item.product_name}
+                    </p>
+                    <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
                       {item.quantity} x {formatCurrency(item.unit_price)}
                     </p>
                   </div>
-                  <p className="font-semibold">
+                  <p className="text-sm sm:text-base font-semibold shrink-0">
                     {formatCurrency(item.total_price)}
                   </p>
                 </div>

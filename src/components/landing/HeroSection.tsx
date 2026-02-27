@@ -17,7 +17,7 @@ export function HeroSection() {
   };
 
   return (
-    <section className="relative min-h-[110vh] flex items-center justify-center overflow-hidden bg-epoch-surface">
+    <section className="relative min-h-screen md:min-h-[110vh] flex items-center justify-center overflow-hidden bg-epoch-surface">
       {/* Background Image with Overlay */}
       <div className="absolute inset-0 z-0 scale-105 animate-pulse-slow">
         <Image
@@ -31,7 +31,7 @@ export function HeroSection() {
         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10"></div>
       </div>
 
-      <div className="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 sm:pt-32 pb-48 sm:pb-72 text-center">
+      <div className="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 sm:pt-32 pb-28 sm:pb-48 md:pb-72 text-center">
         <div className="space-y-12 sm:space-y-20 max-w-4xl mx-auto">
           {/* Badge */}
           <div className="inline-flex items-center gap-2 sm:gap-3 px-4 sm:px-5 py-2 bg-epoch-accent/20 border border-epoch-accent/80 rounded-full text-epoch-accent text-[10px] sm:text-[11px] font-sans font-semibold tracking-[0.35em] uppercase animate-in fade-in slide-in-from-bottom-4 duration-1000 shadow-lg shadow-black/20">
@@ -69,9 +69,6 @@ export function HeroSection() {
           </div>
         </div>
       </div>
-
-      {/* Aesthetic Arches */}
-      <div className="absolute bottom-0 left-0 right-0 h-40 bg-epoch-background rounded-b-2xl z-10"></div>
     </section>
   );
 }

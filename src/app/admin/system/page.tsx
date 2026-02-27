@@ -324,23 +324,24 @@ export default function SystemAdministrationPage() {
 
   if (loading) {
     return (
-      <div className="space-y-6">
-        <div className="flex justify-between items-start">
-          <div>
-            <h1 className="text-3xl font-bold text-epoch-primary">
-              Administración del Sistema
-            </h1>
-            <p className="text-admin-text-tertiary">
-              Cargando configuración del sistema...
-            </p>
-          </div>
+      <div className="space-y-4 sm:space-y-6 p-4 sm:p-6 bg-epoch-background min-h-screen">
+        <div className="flex flex-col gap-4">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-display font-bold text-epoch-primary">
+            Administración del Sistema
+          </h1>
+          <p className="text-sm text-epoch-primary/80">
+            Cargando configuración del sistema...
+          </p>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
           {[...Array(4)].map((_, i) => (
-            <Card key={i} className="animate-pulse">
-              <CardContent className="p-6">
-                <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-                <div className="h-8 bg-gray-200 rounded w-1/2"></div>
+            <Card
+              key={i}
+              className="rounded-xl border border-border animate-pulse"
+            >
+              <CardContent className="p-4 sm:p-6">
+                <div className="h-3 bg-epoch-primary/10 rounded w-3/4 mb-2"></div>
+                <div className="h-6 bg-epoch-primary/10 rounded w-1/2"></div>
               </CardContent>
             </Card>
           ))}
@@ -351,25 +352,28 @@ export default function SystemAdministrationPage() {
 
   if (error) {
     return (
-      <div className="space-y-6">
-        <div className="flex justify-between items-start">
-          <div>
-            <h1 className="text-3xl font-bold text-epoch-primary">
-              Administración del Sistema
-            </h1>
-            <p className="text-admin-text-tertiary">
-              Error al cargar los datos
-            </p>
-          </div>
+      <div className="space-y-4 sm:space-y-6 p-4 sm:p-6 bg-epoch-background min-h-screen">
+        <div className="flex flex-col gap-4">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-display font-bold text-epoch-primary">
+            Administración del Sistema
+          </h1>
+          <p className="text-sm text-epoch-primary/80">
+            Error al cargar los datos
+          </p>
         </div>
-        <Card>
-          <CardContent className="text-center py-16">
-            <AlertTriangle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-red-700 mb-2">
+        <Card className="rounded-xl border border-border">
+          <CardContent className="text-center py-8 sm:py-16">
+            <AlertTriangle className="h-10 w-10 sm:h-12 sm:w-12 text-red-500 mx-auto mb-3 sm:mb-4" />
+            <h3 className="text-base sm:text-lg font-semibold text-red-700 mb-2">
               Error al cargar sistema
             </h3>
-            <p className="text-admin-text-tertiary mb-4">{error}</p>
-            <Button onClick={() => window.location.reload()}>Reintentar</Button>
+            <p className="text-sm text-epoch-primary/80 mb-4">{error}</p>
+            <Button
+              onClick={() => window.location.reload()}
+              className="rounded-xl bg-epoch-primary hover:bg-epoch-surface text-white min-h-[44px]"
+            >
+              Reintentar
+            </Button>
           </CardContent>
         </Card>
       </div>
@@ -377,150 +381,187 @@ export default function SystemAdministrationPage() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex justify-between items-start">
-        <div>
-          <h1
-            className="text-3xl font-bold text-epoch-primary"
-            data-tour="system-header"
-          >
-            Administración del Sistema
-          </h1>
-          <p className="text-admin-text-tertiary">
-            Configuración, monitoreo y mantenimiento del sistema de gestión
-            óptica
-          </p>
-        </div>
-
-        <div className="flex space-x-2">
+    <div className="space-y-4 sm:space-y-6 p-4 sm:p-6 bg-epoch-background min-h-screen">
+      {/* Header - reorganizado en filas */}
+      <div className="flex flex-col gap-4 sm:gap-6">
+        <h1
+          className="text-xl sm:text-2xl md:text-3xl font-display font-bold text-epoch-primary tracking-tight"
+          data-tour="system-header"
+        >
+          Administración del Sistema
+        </h1>
+        <p className="text-sm sm:text-base text-epoch-primary/80 max-w-2xl">
+          Configuración, monitoreo y mantenimiento del sistema de gestión óptica
+        </p>
+        <div className="flex justify-start sm:justify-end">
           <Button
             variant="outline"
             onClick={() => refreshHealth()}
             disabled={refreshing}
+            className="rounded-xl border-epoch-primary/20 min-h-[44px] w-full sm:w-auto"
           >
             <RefreshCw
-              className={`h-4 w-4 mr-2 ${refreshing ? "animate-spin" : ""}`}
+              className={`h-4 w-4 mr-2 shrink-0 ${refreshing ? "animate-spin" : ""}`}
             />
             Actualizar Estado
           </Button>
         </div>
       </div>
 
-      {/* System Health Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.4)]">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-admin-text-tertiary">
-                  Estado del Sistema
+      {/* System Health Overview - optimizado para móvil: stack vertical en móvil */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <Card className="rounded-xl border border-border overflow-hidden">
+          <CardContent className="p-4 sm:p-6">
+            <div className="flex items-center justify-between gap-3">
+              <div className="min-w-0 flex-1">
+                <p className="text-[10px] sm:text-xs font-medium text-epoch-primary/70 uppercase tracking-wider mb-1">
+                  Estado
                 </p>
-                {healthStatus && getHealthStatusBadge(healthStatus.status)}
+                <div className="flex items-center gap-2 min-w-0">
+                  {healthStatus && getHealthStatusBadge(healthStatus.status)}
+                </div>
               </div>
-              <Monitor className="h-8 w-8 text-epoch-primary" />
+              <Monitor className="h-8 w-8 sm:h-10 sm:w-10 text-epoch-primary/40 shrink-0" />
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.4)]">
-          <CardContent className="p-6">
-            <div className="flex items-center">
-              <AlertTriangle className="h-8 w-8 text-yellow-500" />
-              <div className="ml-4">
-                <p className="text-sm text-admin-text-tertiary">Advertencias</p>
-                <p className="text-2xl font-bold text-yellow-600">
-                  {healthStatus?.warnings || 0}
+        <Card className="rounded-xl border border-border overflow-hidden">
+          <CardContent className="p-4 sm:p-6">
+            <div className="flex items-center justify-between gap-3">
+              <div className="min-w-0 flex-1">
+                <p className="text-[10px] sm:text-xs font-medium text-epoch-primary/70 uppercase tracking-wider mb-1">
+                  Advertencias
+                </p>
+                <p className="text-xl sm:text-2xl font-bold text-yellow-600 tabular-nums">
+                  {healthStatus?.warnings ?? 0}
                 </p>
               </div>
+              <AlertTriangle className="h-8 w-8 sm:h-10 sm:w-10 text-yellow-500/80 shrink-0" />
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.4)]">
-          <CardContent className="p-6">
-            <div className="flex items-center">
-              <XCircle className="h-8 w-8 text-red-500" />
-              <div className="ml-4">
-                <p className="text-sm text-admin-text-tertiary">Críticos</p>
-                <p className="text-2xl font-bold text-red-600">
-                  {healthStatus?.criticals || 0}
+        <Card className="rounded-xl border border-border overflow-hidden">
+          <CardContent className="p-4 sm:p-6">
+            <div className="flex items-center justify-between gap-3">
+              <div className="min-w-0 flex-1">
+                <p className="text-[10px] sm:text-xs font-medium text-epoch-primary/70 uppercase tracking-wider mb-1">
+                  Críticos
+                </p>
+                <p className="text-xl sm:text-2xl font-bold text-red-600 tabular-nums">
+                  {healthStatus?.criticals ?? 0}
                 </p>
               </div>
+              <XCircle className="h-8 w-8 sm:h-10 sm:w-10 text-red-500/80 shrink-0" />
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.4)]">
-          <CardContent className="p-6">
-            <div className="flex items-center">
-              <Clock className="h-8 w-8 text-admin-success" />
-              <div className="ml-4">
-                <p className="text-sm text-admin-text-tertiary">
+        <Card className="rounded-xl border border-border overflow-hidden">
+          <CardContent className="p-4 sm:p-6">
+            <div className="flex items-center justify-between gap-3">
+              <div className="min-w-0 flex-1">
+                <p className="text-[10px] sm:text-xs font-medium text-epoch-primary/70 uppercase tracking-wider mb-1">
                   Última Verificación
                 </p>
-                <p className="text-sm font-medium text-admin-success">
+                <p className="text-sm sm:text-base font-medium text-epoch-primary break-words">
                   {healthStatus?.last_check
                     ? new Date(healthStatus.last_check).toLocaleTimeString(
                         "es-AR",
+                        { hour: "2-digit", minute: "2-digit" },
                       )
                     : "N/A"}
                 </p>
               </div>
+              <Clock className="h-8 w-8 sm:h-10 sm:w-10 text-epoch-primary/40 shrink-0" />
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Main Content Tabs */}
+      {/* Main Content Tabs - scroll horizontal para móvil */}
       <Tabs
         value={activeTab}
         onValueChange={setActiveTab}
-        className="space-y-6"
+        className="space-y-4 sm:space-y-6"
       >
-        <TabsList className="flex w-full justify-between gap-1 h-auto">
-          <TabsTrigger value="overview" className="flex-1">
+        <TabsList className="flex w-full justify-start gap-1 sm:gap-2 h-auto p-1 overflow-x-auto overflow-y-hidden min-w-0 [scrollbar-width:thin] [&::-webkit-scrollbar]:h-1 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-epoch-primary/30 rounded-xl border border-epoch-primary/10 bg-epoch-background/50">
+          <TabsTrigger
+            value="overview"
+            className="flex-shrink-0 text-xs sm:text-sm px-3 py-2 min-h-[44px]"
+          >
             Resumen
           </TabsTrigger>
-          <TabsTrigger value="config" className="flex-1">
+          <TabsTrigger
+            value="config"
+            className="flex-shrink-0 text-xs sm:text-sm px-3 py-2 min-h-[44px]"
+          >
             Configuración
           </TabsTrigger>
-          <TabsTrigger value="email" className="flex-1">
-            <Mail className="h-4 w-4 mr-1" />
+          <TabsTrigger
+            value="email"
+            className="flex-shrink-0 text-xs sm:text-sm px-3 py-2 min-h-[44px]"
+          >
+            <Mail className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1 shrink-0" />
             Email
           </TabsTrigger>
-          <TabsTrigger value="notifications" className="flex-1">
-            <Bell className="h-4 w-4 mr-1" />
+          <TabsTrigger
+            value="notifications"
+            className="flex-shrink-0 text-xs sm:text-sm px-3 py-2 min-h-[44px]"
+          >
+            <Bell className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1 shrink-0" />
             Notificaciones
           </TabsTrigger>
-          <TabsTrigger value="billing" className="flex-1">
-            <Receipt className="h-4 w-4 mr-1" />
-            Boletas y Facturas
+          <TabsTrigger
+            value="billing"
+            className="flex-shrink-0 text-xs sm:text-sm px-3 py-2 min-h-[44px]"
+          >
+            <Receipt className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1 shrink-0" />
+            Boletas
           </TabsTrigger>
-          <TabsTrigger value="formularios" className="flex-1">
-            <FileText className="h-4 w-4 mr-1" />
+          <TabsTrigger
+            value="formularios"
+            className="flex-shrink-0 text-xs sm:text-sm px-3 py-2 min-h-[44px]"
+          >
+            <FileText className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1 shrink-0" />
             Formularios
           </TabsTrigger>
-          <TabsTrigger value="whatsapp" className="flex-1">
-            <MessageCircle className="h-4 w-4 mr-1" />
+          <TabsTrigger
+            value="whatsapp"
+            className="flex-shrink-0 text-xs sm:text-sm px-3 py-2 min-h-[44px]"
+          >
+            <MessageCircle className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1 shrink-0" />
             WhatsApp
           </TabsTrigger>
-          <TabsTrigger value="health" className="flex-1">
+          <TabsTrigger
+            value="health"
+            className="flex-shrink-0 text-xs sm:text-sm px-3 py-2 min-h-[44px]"
+          >
             Salud
           </TabsTrigger>
-          <TabsTrigger value="maintenance" className="flex-1">
+          <TabsTrigger
+            value="maintenance"
+            className="flex-shrink-0 text-xs sm:text-sm px-3 py-2 min-h-[44px]"
+          >
             Mantenimiento
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="overview" className="space-y-6">
+        <TabsContent
+          value="overview"
+          className="space-y-4 sm:space-y-6 mt-4 sm:mt-6"
+        >
           <SystemOverview
             healthStatus={healthStatus}
             onTabChange={setActiveTab}
           />
         </TabsContent>
 
-        <TabsContent value="config" className="space-y-6">
+        <TabsContent
+          value="config"
+          className="space-y-4 sm:space-y-6 mt-4 sm:mt-6"
+        >
           <SystemConfig
             configs={configs}
             onUpdateConfig={updateConfig}
@@ -532,19 +573,25 @@ export default function SystemAdministrationPage() {
           />
         </TabsContent>
 
-        <TabsContent value="email" className="space-y-6">
+        <TabsContent
+          value="email"
+          className="space-y-4 sm:space-y-6 mt-4 sm:mt-6"
+        >
           <EmailTemplatesManager organizationId={organizationId ?? undefined} />
           <EmailConfigCard configs={configs} />
         </TabsContent>
 
-        <TabsContent value="notifications" className="space-y-6">
-          <p className="text-sm text-admin-text-tertiary">
+        <TabsContent
+          value="notifications"
+          className="space-y-4 sm:space-y-6 mt-4 sm:mt-6"
+        >
+          <p className="text-xs sm:text-sm text-epoch-primary/80">
             Para ver qué emails se envían automáticamente a los clientes,
             consulta la pestaña{" "}
             <button
               type="button"
               onClick={() => setActiveTab("email")}
-              className="text-admin-accent-primary font-medium hover:underline"
+              className="text-epoch-accent font-medium hover:underline"
             >
               Email
             </button>
@@ -562,19 +609,31 @@ export default function SystemAdministrationPage() {
           />
         </TabsContent>
 
-        <TabsContent value="billing" className="space-y-6">
+        <TabsContent
+          value="billing"
+          className="space-y-4 sm:space-y-6 mt-4 sm:mt-6"
+        >
           <POSBillingSettings />
         </TabsContent>
 
-        <TabsContent value="formularios" className="space-y-6">
+        <TabsContent
+          value="formularios"
+          className="space-y-4 sm:space-y-6 mt-4 sm:mt-6"
+        >
           <FormOptionsConfig />
         </TabsContent>
 
-        <TabsContent value="whatsapp" className="space-y-6">
+        <TabsContent
+          value="whatsapp"
+          className="space-y-4 sm:space-y-6 mt-4 sm:mt-6"
+        >
           <WhatsAppSettingsCard />
         </TabsContent>
 
-        <TabsContent value="health" className="space-y-6">
+        <TabsContent
+          value="health"
+          className="space-y-4 sm:space-y-6 mt-4 sm:mt-6"
+        >
           <SystemHealth
             healthMetrics={healthMetrics}
             healthStatus={healthStatus}
@@ -585,7 +644,10 @@ export default function SystemAdministrationPage() {
           />
         </TabsContent>
 
-        <TabsContent value="maintenance" className="space-y-6">
+        <TabsContent
+          value="maintenance"
+          className="space-y-4 sm:space-y-6 mt-4 sm:mt-6"
+        >
           <SystemMaintenance
             onMaintenanceAction={handleMaintenanceAction}
             maintenanceLoading={false}
@@ -850,16 +912,18 @@ export default function SystemAdministrationPage() {
 
       {/* Backup Results Dialog */}
       <Dialog open={showBackupDialog} onOpenChange={setShowBackupDialog}>
-        <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-2xl">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Database className="h-5 w-5" />
-              {backupResult?.duration_seconds &&
-              backupResult.duration_seconds !== "N/A"
-                ? "Backup de Base de Datos Completado"
-                : "Detalles del Backup"}
+        <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-2xl max-h-[90vh] overflow-y-auto p-4 sm:p-6">
+          <DialogHeader className="space-y-2">
+            <DialogTitle className="flex flex-col sm:flex-row sm:items-center gap-2 text-base sm:text-lg">
+              <span className="flex items-center gap-2">
+                <Database className="h-5 w-5 shrink-0" />
+                {backupResult?.duration_seconds &&
+                backupResult.duration_seconds !== "N/A"
+                  ? "Backup de Base de Datos Completado"
+                  : "Detalles del Backup"}
+              </span>
             </DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="text-xs sm:text-sm">
               {backupResult?.duration_seconds &&
               backupResult.duration_seconds !== "N/A"
                 ? "El backup se ha guardado exitosamente en el almacenamiento"
@@ -883,47 +947,47 @@ export default function SystemAdministrationPage() {
                 )}
 
               {/* Backup Information */}
-              <Card className="bg-admin-bg-tertiary">
-                <CardContent className="p-4">
-                  <div className="space-y-3 text-sm">
-                    <div className="flex justify-between">
-                      <span className="text-admin-text-tertiary">
+              <Card className="rounded-xl border border-border">
+                <CardContent className="p-4 sm:p-6">
+                  <div className="space-y-3 text-xs sm:text-sm">
+                    <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-2">
+                      <span className="text-epoch-primary/80">
                         ID del Backup:
                       </span>
-                      <span className="font-mono text-xs">
+                      <span className="font-mono text-[10px] sm:text-xs break-all">
                         {backupResult.backup_id}
                       </span>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-admin-text-tertiary">Archivo:</span>
-                      <span className="font-medium">
+                    <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-2">
+                      <span className="text-epoch-primary/80">Archivo:</span>
+                      <span className="font-medium break-all">
                         {backupResult.backup_file}
                       </span>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-admin-text-tertiary">
+                    <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-2">
+                      <span className="text-epoch-primary/80">
                         Tablas respaldadas:
                       </span>
                       <span className="font-medium">
                         {backupResult.tables_count}
                       </span>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-admin-text-tertiary">
+                    <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-2">
+                      <span className="text-epoch-primary/80">
                         Total de registros:
                       </span>
                       <span className="font-medium">
                         {backupResult.total_records.toLocaleString()}
                       </span>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-admin-text-tertiary">Tamaño:</span>
+                    <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-2">
+                      <span className="text-epoch-primary/80">Tamaño:</span>
                       <span className="font-medium">
                         {backupResult.backup_size_mb} MB
                       </span>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-admin-text-tertiary">
+                    <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-2">
+                      <span className="text-epoch-primary/80">
                         Tiempo de ejecución:
                       </span>
                       <span className="font-medium">
@@ -931,8 +995,8 @@ export default function SystemAdministrationPage() {
                       </span>
                     </div>
                     {backupResult.download_url_expires_at && (
-                      <div className="flex justify-between">
-                        <span className="text-admin-text-tertiary">
+                      <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-2">
+                        <span className="text-epoch-primary/80">
                           URL expira:
                         </span>
                         <span className="font-medium text-xs">
@@ -966,7 +1030,7 @@ export default function SystemAdministrationPage() {
                         backupResult.backup_file,
                       )
                     }
-                    className="w-full"
+                    className="w-full rounded-xl min-h-[44px]"
                   >
                     <Database className="h-4 w-4 mr-2" />
                     Descargar Backup Ahora
@@ -998,10 +1062,11 @@ export default function SystemAdministrationPage() {
             </div>
           )}
 
-          <DialogFooter>
+          <DialogFooter className="flex-col sm:flex-row gap-2">
             <Button
               variant="outline"
               onClick={() => setShowBackupDialog(false)}
+              className="w-full sm:w-auto rounded-xl min-h-[44px]"
             >
               Cerrar
             </Button>
@@ -1013,6 +1078,7 @@ export default function SystemAdministrationPage() {
                     backupResult.backup_file,
                   )
                 }
+                className="w-full sm:w-auto rounded-xl min-h-[44px]"
               >
                 <Database className="h-4 w-4 mr-2" />
                 Descargar

@@ -258,7 +258,8 @@ export default function CreateOrganizationPage() {
                   </div>
                   {errors.name && (
                     <p className="text-xs font-medium text-red-500 flex items-center gap-1">
-                      <XCircle className="h-3 w-3" /> {String(errors.name.message)}
+                      <XCircle className="h-3 w-3" />{" "}
+                      {String(errors.name.message)}
                     </p>
                   )}
                 </div>
@@ -290,9 +291,9 @@ export default function CreateOrganizationPage() {
                       className={cn(
                         "h-12 bg-[var(--admin-bg-primary)] border-[var(--admin-border-secondary)] transition-all focus:ring-4 focus:ring-primary/10 pr-12",
                         (errors.slug || isSlugInvalid) &&
-                        "border-red-500 focus:ring-red-500/10",
+                          "border-red-500 focus:ring-red-500/10",
                         isSlugValid &&
-                        "border-green-500/50 focus:ring-green-500/5",
+                          "border-green-500/50 focus:ring-green-500/5",
                       )}
                       disabled={isSubmitting}
                     />
@@ -349,13 +350,13 @@ export default function CreateOrganizationPage() {
               </div>
 
               {/* Botones */}
-              <div className="flex gap-4 pt-6">
+              <div className="flex flex-col sm:flex-row gap-4 pt-6">
                 <Button
                   type="button"
                   variant="outline"
                   onClick={() => router.back()}
                   disabled={isSubmitting}
-                  className="flex-1 h-12 border-2 bg-[var(--admin-bg-tertiary)] border-[var(--admin-accent-primary)]"
+                  className="flex-1 min-w-0 h-12 border-2 bg-[var(--admin-bg-tertiary)] border-[var(--admin-accent-primary)]"
                 >
                   Regresar
                 </Button>
@@ -366,18 +367,22 @@ export default function CreateOrganizationPage() {
                     slugValidation.isValidating ||
                     slugValidation.isAvailable === false
                   }
-                  className="flex-1 h-12 shadow-xl shadow-primary/20"
+                  className="flex-1 min-w-0 h-12 shadow-xl shadow-primary/20 overflow-hidden"
                   shimmer
                 >
                   {isSubmitting ? (
                     <>
-                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                      <Loader2 className="mr-2 h-5 w-5 shrink-0 animate-spin" />
                       Procesando...
                     </>
                   ) : (
                     <>
-                      {hasOrganization ? "Activar Ahora" : "Crear Organización"}
-                      <ArrowRight className="ml-2 h-5 w-5" />
+                      <span className="min-w-0 truncate">
+                        {hasOrganization
+                          ? "Activar Ahora"
+                          : "Crear Organización"}
+                      </span>
+                      <ArrowRight className="ml-2 h-5 w-5 shrink-0" />
                     </>
                   )}
                 </Button>

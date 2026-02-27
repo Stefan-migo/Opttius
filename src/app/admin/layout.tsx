@@ -6,7 +6,12 @@ import { useAuthContext } from "@/contexts/AuthContext";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import {
+  Sheet,
+  SheetContent,
+  SheetTrigger,
+  SheetClose,
+} from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
 import Image from "next/image";
 import { OpttiusLogoCompact } from "@/components/ui/brand/OpttiusLogo";
@@ -35,6 +40,7 @@ import {
   Sparkles,
   HelpCircle,
   Loader2,
+  X,
 } from "lucide-react";
 import AdminNotificationDropdown from "@/components/admin/AdminNotificationDropdown";
 import Chatbot from "@/components/admin/Chatbot";
@@ -43,6 +49,7 @@ import { BranchSelector } from "@/components/admin/BranchSelector";
 import { ThemeSelector } from "@/components/theme-selector";
 import { useTheme } from "@/components/theme-provider";
 import { DemoModeBanner } from "@/components/onboarding/DemoModeBanner";
+import { AdminMobileNav } from "@/components/admin/AdminMobileNav";
 import { TourProvider } from "@/components/onboarding/TourProvider";
 import { TourButton } from "@/components/onboarding/TourButton";
 import { SubscriptionGuard } from "@/components/admin/SubscriptionGuard";
@@ -174,6 +181,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [chatbotOpen, setChatbotOpen] = useState(false);
+  const [insightsOpen, setInsightsOpen] = useState(false);
 
   // Admin state management - using combined state to prevent race conditions
   const [adminState, setAdminState] = useState<{
@@ -870,57 +878,51 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     <TourProvider>
       <SubscriptionGuard>
         <div className="admin-layout">
-          {/* Mobile Header */}
+          {/* Mobile Header - app browser style: logo + name left, menu right */}
           <div className="lg:hidden admin-header">
             <div className="admin-header-content">
-              <div className="flex items-center space-x-3">
-                <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
-                  <SheetTrigger asChild>
-                    <Button variant="ghost" size="icon">
-                      <Menu className="h-5 w-5 text-admin-text-primary" />
-                    </Button>
-                  </SheetTrigger>
-                  <SheetContent
-                    side="left"
-                    className="w-80 p-0 bg-admin-bg-secondary [&>button]:text-[#F9F7F2] [&>button:hover]:text-white"
-                  >
-                    <AdminSidebar
-                      pathname={pathname}
-                      onNavigate={() => setSidebarOpen(false)}
-                      stats={stats}
-                      organizationState={organizationState}
-                      adminRole={adminRole}
-                    />
-                  </SheetContent>
-                </Sheet>
-
-                <div className="flex items-center gap-2">
-                  {organizationState.organizationLogo && (
-                    <Image
-                      src={organizationState.organizationLogo}
-                      alt="Logo"
-                      width={28}
-                      height={28}
-                      className="rounded-lg shadow-sm"
-                    />
-                  )}
-                  <h1 className="admin-header-title font-display uppercase tracking-widest text-[14px]">
-                    {organizationState.organizationName || businessConfig.name}
-                  </h1>
-                </div>
+              <div className="flex items-center gap-2 min-w-0 flex-1">
+                {organizationState.organizationLogo && (
+                  <Image
+                    src={organizationState.organizationLogo}
+                    alt="Logo"
+                    width={28}
+                    height={28}
+                    className="rounded-lg shadow-sm shrink-0"
+                  />
+                )}
+                <h1 className="admin-header-title font-display uppercase tracking-widest text-[11px] sm:text-xs truncate">
+                  {organizationState.organizationName || businessConfig.name}
+                </h1>
               </div>
 
-              <div className="admin-header-actions">
-                <BranchSelector />
-                <ThemeSelector />
-                <AdminNotificationDropdown />
-              </div>
+              <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
+                <SheetTrigger asChild>
+                  <Button variant="ghost" size="icon" className="shrink-0">
+                    <Menu className="h-5 w-5 text-[#F9F7F2]" />
+                  </Button>
+                </SheetTrigger>
+                <SheetContent
+                  side="left"
+                  hideDefaultClose
+                  elevateZIndex
+                  className="!w-[75vw] max-w-[75vw] !p-0 !h-[100dvh] bg-admin-bg-secondary overflow-hidden flex flex-col"
+                >
+                  <AdminSidebar
+                    pathname={pathname}
+                    onNavigate={() => setSidebarOpen(false)}
+                    stats={stats}
+                    organizationState={organizationState}
+                    adminRole={adminRole}
+                  />
+                </SheetContent>
+              </Sheet>
             </div>
           </div>
 
-          <div className="lg:flex">
-            {/* Desktop Sidebar */}
-            <div className="hidden lg:flex lg:w-72 lg:flex-col lg:fixed lg:inset-y-0">
+          <div className="lg:flex lg:min-h-0 lg:flex-1">
+            {/* Desktop Sidebar - fixed left, 320px width */}
+            <aside className="hidden lg:flex lg:w-80 lg:flex-shrink-0 lg:flex-col lg:fixed lg:left-0 lg:top-0 lg:bottom-0 lg:h-screen lg:overflow-hidden lg:z-40">
               <AdminSidebar
                 pathname={pathname}
                 stats={stats}
@@ -928,10 +930,10 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                 organizationState={organizationState}
                 adminRole={adminRole}
               />
-            </div>
+            </aside>
 
             {/* Main Content */}
-            <div className="lg:pl-72 flex-1 min-w-0 w-full">
+            <div className="lg:pl-80 flex-1 min-w-0 w-full">
               {/* Desktop Header */}
               <div className="hidden lg:block admin-header">
                 <div className="admin-header-content">
@@ -988,8 +990,8 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                 </div>
               </div>
 
-              {/* Page Content */}
-              <main className="admin-content">
+              {/* Page Content - pb for mobile bottom nav */}
+              <main className="admin-content pb-[calc(4rem+env(safe-area-inset-bottom,0px))] lg:pb-0">
                 {/* Demo Mode Banner */}
                 {organizationState.isDemoMode && <DemoModeBanner />}
                 <TooltipProvider delayDuration={300}>
@@ -999,14 +1001,23 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             </div>
           </div>
 
-          {/* Insights + Chatbot - Floating (Insights sobre Chat IA, ambos círculos) */}
-          <div className="fixed bottom-6 right-6 z-[100] flex flex-col items-end gap-3">
-            <InsightsFloatingButton />
-            <Chatbot />
+          {/* Insights + Chatbot - Floating (desktop only; mobile uses bottom nav) */}
+          <div className="hidden lg:flex fixed bottom-6 right-6 z-[100] flex-col items-end gap-3">
+            <InsightsFloatingButton
+              open={insightsOpen}
+              onOpenChange={setInsightsOpen}
+            />
+            <Chatbot open={chatbotOpen} onOpenChange={setChatbotOpen} />
           </div>
 
           {/* Tour Help Button - Floating */}
           <TourButton />
+
+          {/* Mobile Bottom Nav */}
+          <AdminMobileNav
+            onChatbotClick={() => setChatbotOpen(true)}
+            onInsightsClick={() => setInsightsOpen(true)}
+          />
         </div>
       </SubscriptionGuard>
     </TourProvider>
@@ -1059,35 +1070,49 @@ function AdminSidebar({
   };
 
   return (
-    <div className="admin-sidebar flex grow flex-col h-full overflow-hidden relative">
+    <div className="admin-sidebar flex flex-col h-full w-full overflow-y-auto overflow-x-hidden relative min-h-0">
       {/* Texture Overlay */}
       <div className="absolute inset-0 opacity-[0.03] pointer-events-none" />
 
-      {/* Logo Section */}
-      <div className="admin-sidebar-header relative z-10 border-b border-admin-border-primary/10">
-        <Link
-          href="/"
-          className="admin-sidebar-logo group py-4 px-6 flex items-center justify-center gap-3"
-        >
-          <Image
-            src="/logo-opttius.svg"
-            alt="Opttius"
-            width={44}
-            height={44}
-            className="h-10 w-10 flex-shrink-0 object-contain"
-          />
-          <Image
-            src="/logo-text-default.svg"
-            alt="Opttius"
-            width={176}
-            height={40}
-            className="h-9 w-36 object-contain object-left"
-          />
-        </Link>
+      {/* Logo Section - with close button when in Sheet (mobile) */}
+      <div className="admin-sidebar-header relative z-10 border-b border-admin-border-primary/10 flex-shrink-0">
+        <div className="flex items-center justify-between py-4 px-4">
+          <Link
+            href="/"
+            className="admin-sidebar-logo group flex items-center justify-center gap-3"
+            onClick={onNavigate}
+          >
+            <Image
+              src="/logo-opttius.svg"
+              alt="Opttius"
+              width={44}
+              height={44}
+              className="h-10 w-10 flex-shrink-0 object-contain"
+            />
+            <Image
+              src="/logo-text-default.svg"
+              alt="Opttius"
+              width={176}
+              height={40}
+              className="h-9 w-36 object-contain object-left"
+            />
+          </Link>
+          {onNavigate && (
+            <SheetClose asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="rounded-xl text-[#F9F7F2] hover:bg-white/10 hover:text-white shrink-0"
+              >
+                <X className="h-5 w-5" />
+              </Button>
+            </SheetClose>
+          )}
+        </div>
       </div>
 
       {/* Navigation */}
-      <nav className="admin-sidebar-nav flex-1">
+      <nav className="admin-sidebar-nav flex-1 min-h-0 overflow-y-auto">
         <ul role="list" className="space-y-1">
           {createNavigationItems(stats.newWorkOrders, stats.openTickets, isRoot)
             .filter((item: any) => {
@@ -1168,21 +1193,21 @@ function AdminSidebar({
       </nav>
 
       {/* User & Footer Section */}
-      <div className="mt-auto p-4 space-y-4 border-t border-white/10 bg-black/5">
+      <div className="flex-shrink-0 mt-auto p-3 space-y-3 border-t border-white/10 bg-black/5">
         {/* User Profile Hookup */}
-        <div className="flex items-center gap-3 p-4 bg-white/5 border border-white/10 rounded-xl relative overflow-hidden group">
+        <div className="flex items-center gap-2 p-3 bg-white/5 border border-white/10 rounded-xl relative overflow-hidden group">
           <div className="absolute inset-0 bg-gradient-to-br from-admin-accent-secondary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
-          <div className="h-10 w-10 rounded-xl bg-admin-accent-primary/10 border border-admin-accent-secondary/20 flex items-center justify-center text-admin-accent-secondary font-display font-bold relative z-10">
+          <div className="h-9 w-9 rounded-lg bg-admin-accent-primary/10 border border-admin-accent-secondary/20 flex items-center justify-center text-admin-accent-secondary font-display font-bold text-sm relative z-10">
             {profile?.first_name?.[0] || user?.email?.[0]?.toUpperCase() || "U"}
           </div>
           <div className="flex-1 min-w-0 relative z-10">
-            <p className="text-[11px] font-display font-bold uppercase tracking-wider truncate text-[#F9F7F2]">
+            <p className="text-[10px] font-display font-bold uppercase tracking-wider truncate text-[#F9F7F2]">
               {profile?.first_name
                 ? `${profile.first_name} ${profile.last_name || ""}`.trim()
                 : user?.email?.split("@")[0]}
             </p>
-            <p className="text-[8px] font-serif italic text-[#F9F7F2]/60 tracking-widest uppercase">
+            <p className="text-[7px] font-serif italic text-[#F9F7F2]/60 tracking-widest uppercase">
               {isRoot
                 ? "Archivista Root"
                 : isSuperAdmin
@@ -1194,9 +1219,9 @@ function AdminSidebar({
             <Button
               variant="ghost"
               size="icon-sm"
-              className="rounded-xl hover:bg-white/10 text-[#F9F7F2]"
+              className="rounded-lg hover:bg-white/10 text-[#F9F7F2] h-8 w-8"
             >
-              <User className="h-4 w-4" />
+              <User className="h-3.5 w-3.5" />
             </Button>
           </Link>
         </div>
@@ -1207,9 +1232,9 @@ function AdminSidebar({
             <Button
               variant="outline"
               size="sm"
-              className="w-full text-[9px] font-display uppercase tracking-widest gap-1.5 h-9 bg-transparent border-white/20 text-[#F9F7F2] rounded-xl"
+              className="w-full text-[8px] font-display uppercase tracking-widest gap-1 h-8 bg-transparent border-white/20 text-[#F9F7F2] rounded-lg"
             >
-              <HelpCircle className="h-3.5 w-3.5 text-admin-accent-secondary transition-colors" />
+              <HelpCircle className="h-3 w-3 text-admin-accent-secondary transition-colors" />
               Auxilio
             </Button>
           </Link>
@@ -1217,20 +1242,17 @@ function AdminSidebar({
             variant="outline"
             size="sm"
             onClick={handleSignOut}
-            className="admin-logout-button w-full text-[9px] font-display uppercase tracking-widest gap-1.5 h-9 bg-transparent border-red-300/30 text-red-200 rounded-xl"
+            className="admin-logout-button w-full text-[8px] font-display uppercase tracking-widest gap-1 h-8 bg-transparent border-red-300/30 text-red-200 rounded-lg"
           >
-            <LogOut className="h-3.5 w-3.5 transition-colors" />
+            <LogOut className="h-3 w-3 transition-colors" />
             Retiro
           </Button>
         </div>
 
-        {/* Opttius Branding - cream text for contrast on dark sidebar (Epoch) */}
-        <div className="text-center pt-2">
-          <p className="text-[10px] text-[#F9F7F2] font-medium">
-            &copy; {new Date().getFullYear()} Opttius
-          </p>
-          <p className="text-[9px] text-[#F9F7F2]/75">Derechos Reservados</p>
-        </div>
+        {/* Opttius Branding */}
+        <p className="text-center text-[8px] text-[#F9F7F2]/75 pt-1">
+          &copy; {new Date().getFullYear()} Opttius
+        </p>
       </div>
     </div>
   );

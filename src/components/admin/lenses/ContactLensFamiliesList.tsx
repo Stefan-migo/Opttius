@@ -144,8 +144,8 @@ export default function ContactLensFamiliesList() {
       </div>
 
       <Card className="border border-admin-border-primary/20 bg-admin-bg-tertiary rounded-xl shadow-none overflow-hidden">
-        <CardHeader className="bg-admin-bg-tertiary/50 border-b border-admin-border-primary/10 py-6">
-          <div className="flex justify-between items-center">
+        <CardHeader className="bg-admin-bg-tertiary/50 border-b border-admin-border-primary/10 py-4 sm:py-6 px-4 sm:px-6">
+          <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3">
             <div className="flex items-center gap-2">
               <RefreshCw className="h-4 w-4 text-epoch-primary opacity-50" />
               <h3 className="text-[11px] font-display font-bold text-admin-text-primary uppercase tracking-[0.2em]">
@@ -153,7 +153,7 @@ export default function ContactLensFamiliesList() {
                 {filteredFamilies.length})
               </h3>
             </div>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               <Button
                 variant="ghost"
                 size="sm"
@@ -190,14 +190,14 @@ export default function ContactLensFamiliesList() {
           </div>
         </CardHeader>
         <CardContent className="p-0">
-          <div className="p-6 border-b border-admin-border-primary/10 bg-admin-bg-tertiary/20">
+          <div className="p-3 sm:p-6 border-b border-admin-border-primary/10 bg-admin-bg-tertiary/20">
             <div className="relative">
-              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-4 w-4 text-admin-text-tertiary opacity-40" />
+              <Search className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 h-4 w-4 text-admin-text-tertiary opacity-40" />
               <Input
-                placeholder="BUSCAR EN MATRIZ DE CONTACTOLOGÍA POR NOMBRE, TIPO O MODALIDAD... "
+                placeholder="Buscar por nombre, tipo o modalidad..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-12 rounded-xl border-admin-border-primary/10 focus:border-epoch-primary focus:ring-0 bg-white p-6 text-[10px] font-display font-bold tracking-widest uppercase"
+                className="pl-10 sm:pl-12 rounded-xl border-admin-border-primary/10 focus:border-epoch-primary focus:ring-0 bg-white p-3 sm:p-6 text-[9px] sm:text-[10px] font-display font-bold tracking-widest uppercase"
               />
             </div>
           </div>
@@ -220,23 +220,23 @@ export default function ContactLensFamiliesList() {
               </p>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <Table>
+            <div className="overflow-x-auto min-w-0 -mx-2 sm:mx-0 px-2 sm:px-0">
+              <Table className="min-w-[600px]">
                 <TableHeader className="bg-admin-bg-tertiary/30">
                   <TableRow className="hover:bg-transparent border-admin-border-primary/10">
-                    <TableHead className="text-[10px] font-display font-bold text-admin-text-primary uppercase tracking-[0.2em] p-6">
+                    <TableHead className="text-[9px] sm:text-[10px] font-display font-bold text-admin-text-primary uppercase tracking-[0.2em] p-3 sm:p-6 whitespace-nowrap">
                       FAMILIA / FABRICANTE
                     </TableHead>
-                    <TableHead className="text-[10px] font-display font-bold text-admin-text-primary uppercase tracking-[0.2em] p-6">
+                    <TableHead className="text-[9px] sm:text-[10px] font-display font-bold text-admin-text-primary uppercase tracking-[0.2em] p-3 sm:p-6 whitespace-nowrap">
                       FRECUENCIA
                     </TableHead>
-                    <TableHead className="text-[10px] font-display font-bold text-admin-text-primary uppercase tracking-[0.2em] p-6">
+                    <TableHead className="text-[9px] sm:text-[10px] font-display font-bold text-admin-text-primary uppercase tracking-[0.2em] p-3 sm:p-6 whitespace-nowrap">
                       MODALIDAD
                     </TableHead>
-                    <TableHead className="text-[10px] font-display font-bold text-admin-text-primary uppercase tracking-[0.2em] p-6">
+                    <TableHead className="text-[9px] sm:text-[10px] font-display font-bold text-admin-text-primary uppercase tracking-[0.2em] p-3 sm:p-6 whitespace-nowrap">
                       MATERIAL
                     </TableHead>
-                    <TableHead className="text-[10px] font-display font-bold text-admin-text-primary uppercase tracking-[0.2em] p-6">
+                    <TableHead className="text-[9px] sm:text-[10px] font-display font-bold text-admin-text-primary uppercase tracking-[0.2em] p-3 sm:p-6 whitespace-nowrap">
                       ESTADO
                     </TableHead>
                     <TableHead className="text-[10px] font-display font-bold text-admin-text-primary uppercase tracking-[0.2em] p-6 text-right">
@@ -250,7 +250,7 @@ export default function ContactLensFamiliesList() {
                       key={family.id}
                       className="border-admin-border-primary/10 hover:bg-admin-bg-tertiary/50 transition-colors"
                     >
-                      <TableCell className="p-6">
+                      <TableCell className="p-3 sm:p-6">
                         <div className="space-y-1">
                           <p className="text-sm font-display font-bold text-admin-text-primary uppercase tracking-tight">
                             {family.name}
@@ -260,24 +260,24 @@ export default function ContactLensFamiliesList() {
                           </span>
                         </div>
                       </TableCell>
-                      <TableCell className="p-6">
+                      <TableCell className="p-3 sm:p-6">
                         <span className="text-[10px] font-serif italic text-admin-text-primary uppercase tracking-wider">
                           {USE_TYPES.find((t) => t.value === family.use_type)
                             ?.label || family.use_type}
                         </span>
                       </TableCell>
-                      <TableCell className="p-6">
+                      <TableCell className="p-3 sm:p-6">
                         <span className="text-[10px] font-display font-bold text-admin-text-tertiary uppercase tracking-widest">
                           {MODALITIES.find((m) => m.value === family.modality)
                             ?.label || family.modality}
                         </span>
                       </TableCell>
-                      <TableCell className="p-6">
+                      <TableCell className="p-3 sm:p-6">
                         <span className="text-[10px] font-serif italic text-admin-text-tertiary">
                           {family.material || "Material Estándar"}
                         </span>
                       </TableCell>
-                      <TableCell className="p-6">
+                      <TableCell className="p-3 sm:p-6">
                         <div
                           className={`px-2 py-1 text-[8px] font-display font-bold tracking-widest uppercase inline-block border ${
                             family.is_active
@@ -288,7 +288,7 @@ export default function ContactLensFamiliesList() {
                           {family.is_active ? "ACTIVA" : "INACTIVA"}
                         </div>
                       </TableCell>
-                      <TableCell className="p-6 text-right">
+                      <TableCell className="p-3 sm:p-6 text-right">
                         <div className="flex justify-end gap-1">
                           <Button
                             variant="ghost"
@@ -321,7 +321,7 @@ export default function ContactLensFamiliesList() {
 
           {/* Pagination */}
           {!loading && filteredFamilies.length > 0 && (
-            <div className="mt-4">
+            <div className="mt-4 px-4 sm:px-6 pb-4 sm:pb-6 overflow-x-auto min-w-0">
               <Pagination
                 currentPage={currentPage}
                 totalPages={totalPages}

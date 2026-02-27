@@ -43,7 +43,6 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useBranch } from "@/hooks/useBranch";
-import { BranchSelector } from "@/components/admin/BranchSelector";
 import { customerService, Customer } from "@/lib/api/services/customerService";
 import { handleApiError } from "@/lib/services/errorService";
 import { success } from "@/lib/services/notificationService";
@@ -144,17 +143,15 @@ export default function CustomersPage() {
   if (loading && customers.length === 0) {
     return (
       <div className="space-y-6">
-        <div className="flex justify-between items-start">
-          <div>
-            <h1 className="text-3xl font-bold text-admin-text-primary">
-              Gestión de Clientes
-            </h1>
-            <p className="text-admin-text-tertiary">
-              Cargando información de clientes...
-            </p>
-          </div>
+        <div className="space-y-4">
+          <h1 className="text-2xl sm:text-3xl font-bold text-admin-text-primary">
+            Gestión de Clientes
+          </h1>
+          <p className="text-sm text-admin-text-tertiary">
+            Cargando información de clientes...
+          </p>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 sm:gap-6">
           {[...Array(4)].map((_, i) => (
             <Card key={i} className="animate-pulse">
               <CardContent className="p-6">
@@ -171,15 +168,13 @@ export default function CustomersPage() {
   if (error) {
     return (
       <div className="space-y-6">
-        <div className="flex justify-between items-start">
-          <div>
-            <h1 className="text-3xl font-bold text-admin-text-primary">
-              Gestión de Clientes
-            </h1>
-            <p className="text-admin-text-tertiary">
-              Error al cargar los datos
-            </p>
-          </div>
+        <div className="space-y-4">
+          <h1 className="text-2xl sm:text-3xl font-bold text-admin-text-primary">
+            Gestión de Clientes
+          </h1>
+          <p className="text-sm text-admin-text-tertiary">
+            Error al cargar los datos
+          </p>
         </div>
         <Card>
           <CardContent className="text-center py-16">
@@ -198,19 +193,18 @@ export default function CustomersPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-admin-text-primary">
-            Gestión de Clientes
-          </h1>
-          <p className="text-admin-text-tertiary">
-            Administra los clientes de tu sucursal
-          </p>
-        </div>
-
-        <div className="flex gap-2">
-          <BranchSelector />
-          <Button onClick={() => router.push("/admin/customers/new")}>
+      <div className="space-y-4">
+        <h1 className="text-2xl sm:text-3xl font-bold text-admin-text-primary">
+          Gestión de Clientes
+        </h1>
+        <p className="text-sm text-admin-text-tertiary">
+          Administra los clientes de tu sucursal
+        </p>
+        <div className="flex justify-end">
+          <Button
+            onClick={() => router.push("/admin/customers/new")}
+            className="min-h-[44px]"
+          >
             <UserPlus className="h-4 w-4 mr-2" />
             Nuevo Cliente
           </Button>
@@ -228,19 +222,19 @@ export default function CustomersPage() {
               : "Sucursal seleccionada";
 
           return (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 sm:gap-6">
               <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.4)]">
-                <CardContent className="p-6">
+                <CardContent className="p-4 sm:p-6">
                   <div className="flex items-center">
-                    <Users className="h-8 w-8 text-admin-text-primary" />
-                    <div className="ml-4">
-                      <p className="text-sm text-admin-text-tertiary">
+                    <Users className="h-6 w-6 sm:h-8 sm:w-8 text-admin-text-primary shrink-0" />
+                    <div className="ml-3 sm:ml-4 min-w-0">
+                      <p className="text-xs sm:text-sm text-admin-text-tertiary">
                         Total Clientes
                       </p>
-                      <p className="text-2xl font-bold text-admin-text-primary">
+                      <p className="text-lg sm:text-2xl font-bold text-admin-text-primary">
                         {stats.totalCustomers}
                       </p>
-                      <p className="text-xs text-admin-text-tertiary mt-1">
+                      <p className="text-[10px] sm:text-xs text-admin-text-tertiary mt-1 truncate">
                         {statsLabel}
                       </p>
                     </div>
@@ -249,17 +243,17 @@ export default function CustomersPage() {
               </Card>
 
               <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.4)]">
-                <CardContent className="p-6">
+                <CardContent className="p-4 sm:p-6">
                   <div className="flex items-center">
-                    <CheckCircle className="h-8 w-8 text-admin-success" />
-                    <div className="ml-4">
-                      <p className="text-sm text-admin-text-tertiary">
+                    <CheckCircle className="h-6 w-6 sm:h-8 sm:w-8 text-admin-success shrink-0" />
+                    <div className="ml-3 sm:ml-4 min-w-0">
+                      <p className="text-xs sm:text-sm text-admin-text-tertiary">
                         Clientes Activos
                       </p>
-                      <p className="text-2xl font-bold text-admin-success">
+                      <p className="text-lg sm:text-2xl font-bold text-admin-success">
                         {stats.activeCustomers || stats.totalCustomers}
                       </p>
-                      <p className="text-xs text-admin-text-tertiary mt-1">
+                      <p className="text-[10px] sm:text-xs text-admin-text-tertiary mt-1 truncate">
                         {statsLabel}
                       </p>
                     </div>
@@ -267,18 +261,18 @@ export default function CustomersPage() {
                 </CardContent>
               </Card>
 
-              <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.4)]">
-                <CardContent className="p-6">
+              <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.4)] col-span-2 sm:col-span-1">
+                <CardContent className="p-4 sm:p-6">
                   <div className="flex items-center">
-                    <ArrowUpRight className="h-8 w-8 text-admin-text-primary" />
-                    <div className="ml-4">
-                      <p className="text-sm text-admin-text-tertiary">
+                    <ArrowUpRight className="h-6 w-6 sm:h-8 sm:w-8 text-admin-text-primary shrink-0" />
+                    <div className="ml-3 sm:ml-4 min-w-0">
+                      <p className="text-xs sm:text-sm text-admin-text-tertiary">
                         Nuevos Este Mes
                       </p>
-                      <p className="text-2xl font-bold text-admin-text-primary">
+                      <p className="text-lg sm:text-2xl font-bold text-admin-text-primary">
                         {stats.newCustomersThisMonth}
                       </p>
-                      <p className="text-xs text-admin-text-tertiary mt-1">
+                      <p className="text-[10px] sm:text-xs text-admin-text-tertiary mt-1 truncate">
                         {statsLabel}
                       </p>
                     </div>

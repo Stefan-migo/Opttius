@@ -540,635 +540,649 @@ export default function CreateAppointmentForm({
     <form
       id="create-appointment-form"
       onSubmit={handleSubmit}
-      className="space-y-8 pb-4"
+      className="flex flex-col min-h-0 flex-1"
     >
-      {/* Customer Selection */}
-      <Card className="border-none bg-admin-bg-tertiary/20 shadow-premium-sm rounded-2xl overflow-hidden border border-admin-border-primary/30">
-        <CardHeader className="pb-4 border-b border-admin-border-primary/10">
-          <CardTitle className="flex items-center text-lg font-bold text-admin-text-primary tracking-tight">
-            <div className="h-8 w-8 bg-admin-accent-primary/10 rounded-lg flex items-center justify-center mr-3">
-              <User className="h-4 w-4 text-admin-accent-primary" />
-            </div>
-            Identificación del Cliente
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-6 space-y-6">
-          {/* Toggle between registered and guest customer */}
-          <div className="flex items-center justify-between p-4 bg-white/40 rounded-xl border border-admin-border-primary/20">
-            <div className="space-y-0.5">
-              <Label className="text-sm font-bold text-admin-text-primary">
-                Cliente Registrado
-              </Label>
-              <p className="text-[10px] font-medium text-admin-text-tertiary uppercase">
-                Búsqueda en base de datos oficial
-              </p>
-            </div>
-            <Switch
-              checked={!isGuestCustomer}
-              onCheckedChange={(checked) => {
-                setIsGuestCustomer(!checked);
-                if (!checked) {
-                  setSelectedCustomer(null);
-                  setCustomerSearch("");
-                  setCustomerResults([]);
-                } else {
-                  setGuestCustomerData({
-                    first_name: "",
-                    last_name: "",
-                    rut: "",
-                    email: "",
-                    phone: "",
-                  });
-                }
-              }}
-              className="data-[state=checked]:bg-admin-accent-primary"
-            />
-          </div>
-
-          {isGuestCustomer ? (
-            <div className="space-y-5 animate-in fade-in slide-in-from-top-2 duration-500">
-              <div className="p-4 bg-admin-info/5 border border-admin-info/10 rounded-xl">
-                <p className="text-[11px] font-bold text-admin-info uppercase tracking-tight flex items-center gap-2">
-                  <AlertCircle className="h-3 w-3" />
-                  Registro Temporal
-                </p>
-                <p className="text-[10px] text-admin-text-secondary mt-1">
-                  Ingrese los datos para esta reserva única. El cliente será
-                  formalizado íntegramente al momento de la atención.
+      <div className="flex-1 min-h-0 overflow-y-auto space-y-4 sm:space-y-6 md:space-y-8 pb-4">
+        {/* Customer Selection */}
+        <Card className="border-none bg-admin-bg-tertiary/20 shadow-premium-sm rounded-2xl overflow-hidden border border-admin-border-primary/30">
+          <CardHeader className="pb-3 sm:pb-4 border-b border-admin-border-primary/10 px-4 sm:px-6 pt-4 sm:pt-6">
+            <CardTitle className="flex items-center text-base sm:text-lg font-bold text-admin-text-primary tracking-tight">
+              <div className="h-7 w-7 sm:h-8 sm:w-8 bg-admin-accent-primary/10 rounded-lg flex items-center justify-center mr-2 sm:mr-3 shrink-0">
+                <User className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-admin-accent-primary" />
+              </div>
+              Identificación del Cliente
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-4 sm:p-6 space-y-4 sm:space-y-6">
+            {/* Toggle between registered and guest customer */}
+            <div className="flex items-center justify-between p-3 sm:p-4 bg-white/40 rounded-xl border border-admin-border-primary/20">
+              <div className="space-y-0.5">
+                <Label className="text-sm font-bold text-admin-text-primary">
+                  Cliente Registrado
+                </Label>
+                <p className="text-[10px] font-medium text-admin-text-tertiary uppercase">
+                  Búsqueda en base de datos oficial
                 </p>
               </div>
+              <Switch
+                checked={!isGuestCustomer}
+                onCheckedChange={(checked) => {
+                  setIsGuestCustomer(!checked);
+                  if (!checked) {
+                    setSelectedCustomer(null);
+                    setCustomerSearch("");
+                    setCustomerResults([]);
+                  } else {
+                    setGuestCustomerData({
+                      first_name: "",
+                      last_name: "",
+                      rut: "",
+                      email: "",
+                      phone: "",
+                    });
+                  }
+                }}
+                className="data-[state=checked]:bg-admin-accent-primary"
+              />
+            </div>
 
-              <div className="grid grid-cols-2 gap-4">
+            {isGuestCustomer ? (
+              <div className="space-y-5 animate-in fade-in slide-in-from-top-2 duration-500">
+                <div className="p-4 bg-admin-info/5 border border-admin-info/10 rounded-xl">
+                  <p className="text-[11px] font-bold text-admin-info uppercase tracking-tight flex items-center gap-2">
+                    <AlertCircle className="h-3 w-3" />
+                    Registro Temporal
+                  </p>
+                  <p className="text-[10px] text-admin-text-secondary mt-1">
+                    Ingrese los datos para esta reserva única. El cliente será
+                    formalizado íntegramente al momento de la atención.
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                  <div className="space-y-2">
+                    <Label className="text-[10px] font-bold text-admin-text-tertiary uppercase tracking-wider ml-1">
+                      Nombre *
+                    </Label>
+                    <Input
+                      placeholder="Nombre"
+                      value={guestCustomerData.first_name}
+                      onChange={(e) =>
+                        setGuestCustomerData((prev) => ({
+                          ...prev,
+                          first_name: e.target.value,
+                        }))
+                      }
+                      className="h-11 rounded-xl border-admin-border-primary/50 bg-white/50 focus:bg-white transition-all"
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-[10px] font-bold text-admin-text-tertiary uppercase tracking-wider ml-1">
+                      Apellido *
+                    </Label>
+                    <Input
+                      placeholder="Apellido"
+                      value={guestCustomerData.last_name}
+                      onChange={(e) =>
+                        setGuestCustomerData((prev) => ({
+                          ...prev,
+                          last_name: e.target.value,
+                        }))
+                      }
+                      className="h-11 rounded-xl border-admin-border-primary/50 bg-white/50 focus:bg-white transition-all"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                  <div className="space-y-2">
+                    <Label className="text-[10px] font-bold text-admin-text-tertiary uppercase tracking-wider ml-1">
+                      RUT *
+                    </Label>
+                    <Input
+                      placeholder="12.345.678-9"
+                      value={guestCustomerData.rut}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        const formatted = formatRUT(value);
+                        setGuestCustomerData((prev) => ({
+                          ...prev,
+                          rut: formatted,
+                        }));
+                      }}
+                      className="h-11 rounded-xl border-admin-border-primary/50 bg-white/50 focus:bg-white transition-all"
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-[10px] font-bold text-admin-text-tertiary uppercase tracking-wider ml-1">
+                      Teléfono
+                    </Label>
+                    <Input
+                      type="tel"
+                      placeholder="+56 9..."
+                      value={guestCustomerData.phone}
+                      onChange={(e) =>
+                        setGuestCustomerData((prev) => ({
+                          ...prev,
+                          phone: e.target.value,
+                        }))
+                      }
+                      className="h-11 rounded-xl border-admin-border-primary/50 bg-white/50 focus:bg-white transition-all"
+                    />
+                  </div>
+                </div>
+
                 <div className="space-y-2">
                   <Label className="text-[10px] font-bold text-admin-text-tertiary uppercase tracking-wider ml-1">
-                    Nombre *
+                    Email
                   </Label>
                   <Input
-                    placeholder="Nombre"
-                    value={guestCustomerData.first_name}
+                    type="email"
+                    placeholder="cliente@ejemplo.com"
+                    value={guestCustomerData.email}
                     onChange={(e) =>
                       setGuestCustomerData((prev) => ({
                         ...prev,
-                        first_name: e.target.value,
+                        email: e.target.value,
                       }))
                     }
                     className="h-11 rounded-xl border-admin-border-primary/50 bg-white/50 focus:bg-white transition-all"
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-[10px] font-bold text-admin-text-tertiary uppercase tracking-wider ml-1">
-                    Apellido *
-                  </Label>
-                  <Input
-                    placeholder="Apellido"
-                    value={guestCustomerData.last_name}
-                    onChange={(e) =>
-                      setGuestCustomerData((prev) => ({
-                        ...prev,
-                        last_name: e.target.value,
-                      }))
-                    }
-                    className="h-11 rounded-xl border-admin-border-primary/50 bg-white/50 focus:bg-white transition-all"
-                    required
                   />
                 </div>
               </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label className="text-[10px] font-bold text-admin-text-tertiary uppercase tracking-wider ml-1">
-                    RUT *
-                  </Label>
-                  <Input
-                    placeholder="12.345.678-9"
-                    value={guestCustomerData.rut}
-                    onChange={(e) => {
-                      const value = e.target.value;
-                      const formatted = formatRUT(value);
-                      setGuestCustomerData((prev) => ({
+            ) : selectedCustomer ? (
+              <div className="relative p-3 sm:p-5 rounded-2xl bg-admin-accent-primary/[0.03] border border-admin-accent-primary/20 animate-in zoom-in-95 duration-300">
+                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                  <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
+                    <div className="h-10 w-10 sm:h-12 sm:w-12 bg-admin-accent-primary/10 rounded-full flex items-center justify-center font-black text-admin-accent-primary shrink-0 text-sm sm:text-base">
+                      {selectedCustomer.first_name?.[0]}
+                      {selectedCustomer.last_name?.[0]}
+                    </div>
+                    <div className="space-y-0.5 sm:space-y-1 min-w-0 flex-1">
+                      <p className="text-base sm:text-lg font-bold text-admin-text-primary tracking-tight truncate">
+                        {selectedCustomer.first_name}{" "}
+                        {selectedCustomer.last_name}
+                      </p>
+                      <div className="flex flex-col gap-0.5 min-w-0">
+                        {selectedCustomer.email && (
+                          <p
+                            className="text-[10px] sm:text-[11px] font-medium text-admin-text-secondary truncate"
+                            title={selectedCustomer.email}
+                          >
+                            <span className="opacity-50">✉️</span>{" "}
+                            {selectedCustomer.email}
+                          </p>
+                        )}
+                        {selectedCustomer.phone && (
+                          <p
+                            className="text-[10px] sm:text-[11px] font-medium text-admin-text-secondary truncate"
+                            title={selectedCustomer.phone}
+                          >
+                            <span className="opacity-50">📞</span>{" "}
+                            {selectedCustomer.phone}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="h-9 sm:h-8 w-full sm:w-auto rounded-lg text-admin-accent-primary hover:bg-admin-accent-primary/10 font-bold text-[10px] uppercase tracking-widest shrink-0"
+                    onClick={() => {
+                      setSelectedCustomer(null);
+                      setFormData((prev) => ({
                         ...prev,
-                        rut: formatted,
+                        prescription_id: null,
                       }));
                     }}
-                    className="h-11 rounded-xl border-admin-border-primary/50 bg-white/50 focus:bg-white transition-all"
+                  >
+                    Cambiar
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div className="relative">
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 z-10">
+                  {searchingCustomers ? (
+                    <Loader2 className="h-4 w-4 animate-spin text-admin-accent-primary" />
+                  ) : (
+                    <Search className="h-4 w-4 text-admin-text-tertiary" />
+                  )}
+                </div>
+                <Input
+                  placeholder="Buscar por Nombre, RUT o Email..."
+                  value={customerSearch}
+                  onChange={(e) => setCustomerSearch(e.target.value)}
+                  className="h-12 pl-12 rounded-2xl border-admin-border-primary/50 bg-white/60 focus:bg-white focus:ring-2 focus:ring-admin-accent-primary/20 transition-all font-medium text-sm"
+                />
+
+                {customerSearch.length >= 1 && (
+                  <div className="z-[100] w-full mt-2 bg-white/95 backdrop-blur-md border border-admin-border-primary shadow-premium-lg rounded-2xl animate-in fade-in slide-in-from-top-2 duration-300">
+                    <div className="max-h-60 overflow-y-auto p-2 custom-scrollbar">
+                      {customerResults.length > 0
+                        ? customerResults.map((customer) => (
+                            <div
+                              key={customer.id}
+                              className="flex items-center gap-3 p-3 hover:bg-admin-accent-primary/5 cursor-pointer rounded-xl transition-colors group"
+                              onClick={() => {
+                                setSelectedCustomer(customer);
+                                setCustomerSearch("");
+                                setCustomerResults([]);
+                              }}
+                            >
+                              <div className="h-9 w-9 bg-admin-bg-tertiary rounded-lg flex items-center justify-center font-bold text-admin-text-secondary group-hover:bg-admin-accent-primary/10 group-hover:text-admin-accent-primary transition-colors text-xs">
+                                {customer.first_name?.[0]}
+                                {customer.last_name?.[0]}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-bold text-admin-text-primary truncate">
+                                  {customer.first_name} {customer.last_name}
+                                </p>
+                                <p className="text-[10px] text-admin-text-tertiary truncate">
+                                  {customer.rut || customer.email}
+                                </p>
+                              </div>
+                            </div>
+                          ))
+                        : !searchingCustomers && (
+                            <div className="p-8 text-center text-admin-text-tertiary">
+                              <User className="h-8 w-8 mx-auto mb-2 opacity-20" />
+                              <p className="text-xs font-bold uppercase tracking-widest">
+                                Sin coincidencias
+                              </p>
+                            </div>
+                          )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Date and Time Selection */}
+        <Card className="border-none bg-admin-bg-tertiary/20 shadow-premium-sm rounded-2xl overflow-hidden border border-admin-border-primary/30">
+          <CardHeader className="pb-3 sm:pb-4 border-b border-admin-border-primary/10 px-4 sm:px-6 pt-4 sm:pt-6">
+            <CardTitle className="flex items-center text-base sm:text-lg font-bold text-admin-text-primary tracking-tight">
+              <div className="h-7 w-7 sm:h-8 sm:w-8 bg-admin-info/10 rounded-lg flex items-center justify-center mr-2 sm:mr-3 shrink-0">
+                <Calendar className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-admin-info" />
+              </div>
+              Agenda de la Sesión
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-4 sm:p-6 space-y-4 sm:space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+              <div className="space-y-2">
+                <Label className="text-[10px] font-bold text-admin-text-tertiary uppercase tracking-widest ml-1">
+                  Fecha de Atención *
+                </Label>
+                <div className="relative">
+                  <Input
+                    type="date"
+                    value={formData.appointment_date}
+                    onChange={(e) => {
+                      if (lockDateTime) return;
+                      const selectedDate = e.target.value;
+                      const today = new Date().toISOString().split("T")[0];
+                      if (selectedDate < today) {
+                        toast.error(
+                          "No se pueden agendar citas en fechas pasadas",
+                        );
+                        return;
+                      }
+                      setFormData((prev) => ({
+                        ...prev,
+                        appointment_date: selectedDate,
+                        appointment_time: "",
+                      }));
+                      setAvailableSlots([]);
+                    }}
+                    min={getMinDate()}
+                    max={getMaxDate()}
+                    className={cn(
+                      "h-11 rounded-xl border-admin-border-primary/50 bg-white/50 focus:bg-white transition-all font-bold px-4",
+                      lockDateTime &&
+                        "opacity-60 grayscale cursor-not-allowed bg-admin-bg-tertiary",
+                    )}
+                    disabled={lockDateTime}
                     required
                   />
+                  {lockDateTime && (
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 bg-white rounded-full flex items-center justify-center shadow-sm">
+                      <span className="text-[10px]">🔒</span>
+                    </div>
+                  )}
                 </div>
-                <div className="space-y-2">
-                  <Label className="text-[10px] font-bold text-admin-text-tertiary uppercase tracking-wider ml-1">
-                    Teléfono
-                  </Label>
-                  <Input
-                    type="tel"
-                    placeholder="+56 9..."
-                    value={guestCustomerData.phone}
-                    onChange={(e) =>
-                      setGuestCustomerData((prev) => ({
-                        ...prev,
-                        phone: e.target.value,
-                      }))
-                    }
-                    className="h-11 rounded-xl border-admin-border-primary/50 bg-white/50 focus:bg-white transition-all"
-                  />
-                </div>
+                {lockDateTime && (
+                  <p className="text-[9px] font-bold text-admin-info uppercase tracking-tight ml-1">
+                    Fijada desde el Calendario Maestro
+                  </p>
+                )}
               </div>
 
               <div className="space-y-2">
-                <Label className="text-[10px] font-bold text-admin-text-tertiary uppercase tracking-wider ml-1">
-                  Email
+                <Label className="text-[10px] font-bold text-admin-text-tertiary uppercase tracking-widest ml-1">
+                  Duración Estimada *
                 </Label>
-                <Input
-                  type="email"
-                  placeholder="cliente@ejemplo.com"
-                  value={guestCustomerData.email}
-                  onChange={(e) =>
-                    setGuestCustomerData((prev) => ({
-                      ...prev,
-                      email: e.target.value,
-                    }))
-                  }
-                  className="h-11 rounded-xl border-admin-border-primary/50 bg-white/50 focus:bg-white transition-all"
-                />
-              </div>
-            </div>
-          ) : selectedCustomer ? (
-            <div className="relative p-5 rounded-2xl bg-admin-accent-primary/[0.03] border border-admin-accent-primary/20 animate-in zoom-in-95 duration-300">
-              <div className="flex items-start justify-between">
-                <div className="flex items-center gap-4">
-                  <div className="h-12 w-12 bg-admin-accent-primary/10 rounded-full flex items-center justify-center font-black text-admin-accent-primary">
-                    {selectedCustomer.first_name?.[0]}
-                    {selectedCustomer.last_name?.[0]}
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-lg font-bold text-admin-text-primary tracking-tight">
-                      {selectedCustomer.first_name} {selectedCustomer.last_name}
-                    </p>
-                    <div className="flex flex-col gap-0.5">
-                      <p className="text-[11px] font-medium text-admin-text-secondary flex items-center gap-2">
-                        <span className="opacity-50">✉️</span>{" "}
-                        {selectedCustomer.email}
-                      </p>
-                      {selectedCustomer.phone && (
-                        <p className="text-[11px] font-medium text-admin-text-secondary flex items-center gap-2">
-                          <span className="opacity-50">📞</span>{" "}
-                          {selectedCustomer.phone}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                </div>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="h-8 rounded-lg text-admin-accent-primary hover:bg-admin-accent-primary/10 font-bold text-[10px] uppercase tracking-widest"
-                  onClick={() => {
-                    setSelectedCustomer(null);
-                    setFormData((prev) => ({ ...prev, prescription_id: null }));
-                  }}
-                >
-                  Cambiar
-                </Button>
-              </div>
-            </div>
-          ) : (
-            <div className="relative">
-              <div className="absolute left-4 top-1/2 -translate-y-1/2 z-10">
-                {searchingCustomers ? (
-                  <Loader2 className="h-4 w-4 animate-spin text-admin-accent-primary" />
-                ) : (
-                  <Search className="h-4 w-4 text-admin-text-tertiary" />
-                )}
-              </div>
-              <Input
-                placeholder="Buscar por Nombre, RUT o Email..."
-                value={customerSearch}
-                onChange={(e) => setCustomerSearch(e.target.value)}
-                className="h-12 pl-12 rounded-2xl border-admin-border-primary/50 bg-white/60 focus:bg-white focus:ring-2 focus:ring-admin-accent-primary/20 transition-all font-medium text-sm"
-              />
-
-              {customerSearch.length >= 1 && (
-                <div className="z-[100] w-full mt-2 bg-white/95 backdrop-blur-md border border-admin-border-primary shadow-premium-lg rounded-2xl animate-in fade-in slide-in-from-top-2 duration-300">
-                  <div className="max-h-60 overflow-y-auto p-2 custom-scrollbar">
-                    {customerResults.length > 0
-                      ? customerResults.map((customer) => (
-                          <div
-                            key={customer.id}
-                            className="flex items-center gap-3 p-3 hover:bg-admin-accent-primary/5 cursor-pointer rounded-xl transition-colors group"
-                            onClick={() => {
-                              setSelectedCustomer(customer);
-                              setCustomerSearch("");
-                              setCustomerResults([]);
-                            }}
-                          >
-                            <div className="h-9 w-9 bg-admin-bg-tertiary rounded-lg flex items-center justify-center font-bold text-admin-text-secondary group-hover:bg-admin-accent-primary/10 group-hover:text-admin-accent-primary transition-colors text-xs">
-                              {customer.first_name?.[0]}
-                              {customer.last_name?.[0]}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <p className="text-sm font-bold text-admin-text-primary truncate">
-                                {customer.first_name} {customer.last_name}
-                              </p>
-                              <p className="text-[10px] text-admin-text-tertiary truncate">
-                                {customer.rut || customer.email}
-                              </p>
-                            </div>
-                          </div>
-                        ))
-                      : !searchingCustomers && (
-                          <div className="p-8 text-center text-admin-text-tertiary">
-                            <User className="h-8 w-8 mx-auto mb-2 opacity-20" />
-                            <p className="text-xs font-bold uppercase tracking-widest">
-                              Sin coincidencias
-                            </p>
-                          </div>
-                        )}
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Date and Time Selection */}
-      <Card className="border-none bg-admin-bg-tertiary/20 shadow-premium-sm rounded-2xl overflow-hidden border border-admin-border-primary/30">
-        <CardHeader className="pb-4 border-b border-admin-border-primary/10">
-          <CardTitle className="flex items-center text-lg font-bold text-admin-text-primary tracking-tight">
-            <div className="h-8 w-8 bg-admin-info/10 rounded-lg flex items-center justify-center mr-3">
-              <Calendar className="h-4 w-4 text-admin-info" />
-            </div>
-            Agenda de la Sesión
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-6 space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <Label className="text-[10px] font-bold text-admin-text-tertiary uppercase tracking-widest ml-1">
-                Fecha de Atención *
-              </Label>
-              <div className="relative">
-                <Input
-                  type="date"
-                  value={formData.appointment_date}
-                  onChange={(e) => {
-                    if (lockDateTime) return;
-                    const selectedDate = e.target.value;
-                    const today = new Date().toISOString().split("T")[0];
-                    if (selectedDate < today) {
-                      toast.error(
-                        "No se pueden agendar citas en fechas pasadas",
-                      );
-                      return;
-                    }
+                <Select
+                  value={formData.duration_minutes.toString()}
+                  onValueChange={(value) => {
                     setFormData((prev) => ({
                       ...prev,
-                      appointment_date: selectedDate,
+                      duration_minutes: parseInt(value),
                       appointment_time: "",
                     }));
                     setAvailableSlots([]);
                   }}
-                  min={getMinDate()}
-                  max={getMaxDate()}
-                  className={cn(
-                    "h-11 rounded-xl border-admin-border-primary/50 bg-white/50 focus:bg-white transition-all font-bold px-4",
-                    lockDateTime &&
-                      "opacity-60 grayscale cursor-not-allowed bg-admin-bg-tertiary",
+                >
+                  <SelectTrigger className="h-11 rounded-xl border-admin-border-primary/50 bg-white/50 focus:bg-white transition-all font-bold">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="rounded-xl border-admin-border-primary shadow-premium-lg">
+                    <SelectItem value="15" className="font-bold">
+                      15 MINUTOS
+                    </SelectItem>
+                    <SelectItem value="30" className="font-bold">
+                      30 MINUTOS
+                    </SelectItem>
+                    <SelectItem value="45" className="font-bold">
+                      45 MINUTOS
+                    </SelectItem>
+                    <SelectItem value="60" className="font-bold">
+                      1 HORA
+                    </SelectItem>
+                    <SelectItem value="90" className="font-bold">
+                      1.5 HORAS
+                    </SelectItem>
+                    <SelectItem value="120" className="font-bold">
+                      2 HORAS
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            {/* Available Time Slots Handling */}
+            {formData.appointment_date && (
+              <div className="space-y-4 pt-4 border-t border-admin-border-primary/10">
+                <div className="flex items-center justify-between px-1">
+                  <Label className="text-[10px] font-bold text-admin-text-tertiary uppercase tracking-widest">
+                    Bloques Disponibles
+                  </Label>
+                  {loadingAvailability && (
+                    <Loader2 className="h-3 w-3 animate-spin text-admin-accent-primary" />
                   )}
-                  disabled={lockDateTime}
-                  required
-                />
-                {lockDateTime && (
-                  <div className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 bg-white rounded-full flex items-center justify-center shadow-sm">
-                    <span className="text-[10px]">🔒</span>
+                </div>
+
+                {loadingAvailability ? (
+                  <div className="grid grid-cols-4 gap-2">
+                    {[1, 2, 3, 4].map((i) => (
+                      <div
+                        key={i}
+                        className="h-10 bg-admin-bg-tertiary/30 rounded-lg animate-pulse"
+                      />
+                    ))}
+                  </div>
+                ) : availableSlots.filter((s) => s.available).length === 0 ? (
+                  <div className="p-8 text-center rounded-2xl bg-admin-bg-tertiary/10 border border-dashed border-admin-border-primary/30">
+                    <Clock className="h-8 w-8 mx-auto mb-2 opacity-10" />
+                    <p className="text-[10px] font-bold text-admin-text-tertiary uppercase tracking-widest">
+                      Sin disponibilidad inmediata
+                    </p>
+                    <p className="text-[9px] text-admin-text-tertiary mt-1">
+                      Intente con otra fecha o verifique la configuración
+                    </p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 gap-2 max-h-48 overflow-y-auto p-1 custom-scrollbar">
+                    {availableSlots
+                      .filter(
+                        (slot) =>
+                          slot && slot.time_slot && slot.available !== false,
+                      )
+                      .map((slot) => {
+                        const isSelected =
+                          formData.appointment_time === slot.time_slot;
+                        const isLocked = lockDateTime && isSelected;
+
+                        return (
+                          <Button
+                            key={slot.time_slot}
+                            type="button"
+                            variant="ghost"
+                            onClick={(e) => {
+                              if (lockDateTime && !isSelected) return;
+                              e.preventDefault();
+                              setFormData((prev) => ({
+                                ...prev,
+                                appointment_time: slot.time_slot,
+                              }));
+                            }}
+                            className={cn(
+                              "h-10 rounded-xl font-black text-[10px] tracking-tighter transition-all duration-300 border flex flex-col items-center justify-center p-0",
+                              isSelected
+                                ? "bg-admin-accent-primary text-white border-admin-accent-primary shadow-premium-sm scale-[1.05] z-10"
+                                : "bg-white border-admin-border-primary/30 text-admin-text-secondary hover:border-admin-accent-primary/40 hover:bg-admin-accent-primary/[0.02]",
+                              lockDateTime &&
+                                !isSelected &&
+                                "opacity-30 grayscale cursor-not-allowed",
+                            )}
+                            disabled={lockDateTime && !isSelected}
+                          >
+                            <span className="leading-none">
+                              {formatTime(slot.time_slot)}
+                            </span>
+                            {isLocked && (
+                              <span className="text-[8px] mt-0.5">🔒</span>
+                            )}
+                          </Button>
+                        );
+                      })}
                   </div>
                 )}
               </div>
-              {lockDateTime && (
-                <p className="text-[9px] font-bold text-admin-info uppercase tracking-tight ml-1">
-                  Fijada desde el Calendario Maestro
-                </p>
-              )}
-            </div>
+            )}
+          </CardContent>
+        </Card>
 
-            <div className="space-y-2">
-              <Label className="text-[10px] font-bold text-admin-text-tertiary uppercase tracking-widest ml-1">
-                Duración Estimada *
-              </Label>
+        {/* Appointment Type & Status */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <Card className="border-none bg-admin-bg-tertiary/20 shadow-premium-sm rounded-2xl overflow-hidden border border-admin-border-primary/30">
+            <CardHeader className="pb-4 border-b border-admin-border-primary/10">
+              <CardTitle className="text-sm font-bold text-admin-text-primary flex items-center gap-2">
+                <Package className="h-4 w-4 text-admin-accent-primary" />
+                Tipo de Servicio
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-5">
               <Select
-                value={formData.duration_minutes.toString()}
-                onValueChange={(value) => {
-                  setFormData((prev) => ({
-                    ...prev,
-                    duration_minutes: parseInt(value),
-                    appointment_time: "",
-                  }));
-                  setAvailableSlots([]);
-                }}
+                value={formData.appointment_type}
+                onValueChange={(value) =>
+                  setFormData((prev) => ({ ...prev, appointment_type: value }))
+                }
               >
                 <SelectTrigger className="h-11 rounded-xl border-admin-border-primary/50 bg-white/50 focus:bg-white transition-all font-bold">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent className="rounded-xl border-admin-border-primary shadow-premium-lg">
-                  <SelectItem value="15" className="font-bold">
-                    15 MINUTOS
+                  {appointmentTypes.map((type) => {
+                    const Icon = type.icon;
+                    return (
+                      <SelectItem
+                        key={type.value}
+                        value={type.value}
+                        className="font-bold"
+                      >
+                        <div className="flex items-center gap-2">
+                          <Icon className="h-3.5 w-3.5 opacity-60" />
+                          <span className="uppercase text-[11px] tracking-tight">
+                            {type.label}
+                          </span>
+                        </div>
+                      </SelectItem>
+                    );
+                  })}
+                </SelectContent>
+              </Select>
+            </CardContent>
+          </Card>
+
+          <Card className="border-none bg-admin-bg-tertiary/20 shadow-premium-sm rounded-2xl overflow-hidden border border-admin-border-primary/30">
+            <CardHeader className="pb-4 border-b border-admin-border-primary/10">
+              <CardTitle className="text-sm font-bold text-admin-text-primary flex items-center gap-2">
+                <RefreshCw className="h-4 w-4 text-admin-info" />
+                Estado Inicial
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-5">
+              <Select
+                value={formData.status}
+                onValueChange={(value) =>
+                  setFormData((prev) => ({ ...prev, status: value }))
+                }
+              >
+                <SelectTrigger className="h-11 rounded-xl border-admin-border-primary/50 bg-white/50 focus:bg-white transition-all font-bold">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="rounded-xl border-admin-border-primary shadow-premium-lg">
+                  <SelectItem
+                    value="scheduled"
+                    className="font-bold text-[11px] uppercase tracking-tight"
+                  >
+                    Programada
                   </SelectItem>
-                  <SelectItem value="30" className="font-bold">
-                    30 MINUTOS
+                  <SelectItem
+                    value="confirmed"
+                    className="font-bold text-[11px] uppercase tracking-tight"
+                  >
+                    Confirmada
                   </SelectItem>
-                  <SelectItem value="45" className="font-bold">
-                    45 MINUTOS
+                  <SelectItem
+                    value="completed"
+                    className="font-bold text-[11px] uppercase tracking-tight"
+                  >
+                    Completada
                   </SelectItem>
-                  <SelectItem value="60" className="font-bold">
-                    1 HORA
-                  </SelectItem>
-                  <SelectItem value="90" className="font-bold">
-                    1.5 HORAS
-                  </SelectItem>
-                  <SelectItem value="120" className="font-bold">
-                    2 HORAS
+                  <SelectItem
+                    value="cancelled"
+                    className="font-bold text-[11px] uppercase tracking-tight text-red-600"
+                  >
+                    Cancelada
                   </SelectItem>
                 </SelectContent>
               </Select>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
+        </div>
 
-          {/* Available Time Slots Handling */}
-          {formData.appointment_date && (
-            <div className="space-y-4 pt-4 border-t border-admin-border-primary/10">
-              <div className="flex items-center justify-between px-1">
-                <Label className="text-[10px] font-bold text-admin-text-tertiary uppercase tracking-widest">
-                  Bloques Disponibles
+        {/* Notes & Reasoning */}
+        <Card className="border-none bg-admin-bg-tertiary/20 shadow-premium-sm rounded-2xl overflow-hidden border border-admin-border-primary/30">
+          <CardHeader className="pb-4 border-b border-admin-border-primary/10">
+            <CardTitle className="text-sm font-bold text-admin-text-primary flex items-center gap-2">
+              <AlertCircle className="h-4 w-4 text-admin-accent-primary" />
+              Detalles Clínicos & Notas
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-6 space-y-6">
+            <div className="space-y-2">
+              <Label className="text-[10px] font-bold text-admin-text-tertiary uppercase tracking-widest ml-1">
+                Motivo de la Cita
+              </Label>
+              <Input
+                value={formData.reason}
+                onChange={(e) =>
+                  setFormData((prev) => ({ ...prev, reason: e.target.value }))
+                }
+                placeholder="Describa brevemente el motivo..."
+                className="h-11 rounded-xl border-admin-border-primary/50 bg-white/50 focus:bg-white transition-all"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-[10px] font-bold text-admin-text-tertiary uppercase tracking-widest ml-1">
+                Observaciones Internas
+              </Label>
+              <Textarea
+                value={formData.notes}
+                onChange={(e) =>
+                  setFormData((prev) => ({ ...prev, notes: e.target.value }))
+                }
+                placeholder="Información relevante para el profesional..."
+                rows={3}
+                className="rounded-xl border-admin-border-primary/50 bg-white/50 focus:bg-white transition-all resize-none p-4"
+              />
+            </div>
+
+            <div className="flex items-center justify-between p-3 sm:p-4 bg-white/40 rounded-xl border border-admin-border-primary/20">
+              <div className="space-y-0.5">
+                <Label className="text-sm font-bold text-admin-text-primary">
+                  Requiere Seguimiento
                 </Label>
-                {loadingAvailability && (
-                  <Loader2 className="h-3 w-3 animate-spin text-admin-accent-primary" />
-                )}
+                <p className="text-[10px] font-medium text-admin-text-tertiary uppercase">
+                  Recordatorio automático de control
+                </p>
               </div>
-
-              {loadingAvailability ? (
-                <div className="grid grid-cols-4 gap-2">
-                  {[1, 2, 3, 4].map((i) => (
-                    <div
-                      key={i}
-                      className="h-10 bg-admin-bg-tertiary/30 rounded-lg animate-pulse"
-                    />
-                  ))}
-                </div>
-              ) : availableSlots.filter((s) => s.available).length === 0 ? (
-                <div className="p-8 text-center rounded-2xl bg-admin-bg-tertiary/10 border border-dashed border-admin-border-primary/30">
-                  <Clock className="h-8 w-8 mx-auto mb-2 opacity-10" />
-                  <p className="text-[10px] font-bold text-admin-text-tertiary uppercase tracking-widest">
-                    Sin disponibilidad inmediata
-                  </p>
-                  <p className="text-[9px] text-admin-text-tertiary mt-1">
-                    Intente con otra fecha o verifique la configuración
-                  </p>
-                </div>
-              ) : (
-                <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 gap-2 max-h-48 overflow-y-auto p-1 custom-scrollbar">
-                  {availableSlots
-                    .filter(
-                      (slot) =>
-                        slot && slot.time_slot && slot.available !== false,
-                    )
-                    .map((slot) => {
-                      const isSelected =
-                        formData.appointment_time === slot.time_slot;
-                      const isLocked = lockDateTime && isSelected;
-
-                      return (
-                        <Button
-                          key={slot.time_slot}
-                          type="button"
-                          variant="ghost"
-                          onClick={(e) => {
-                            if (lockDateTime && !isSelected) return;
-                            e.preventDefault();
-                            setFormData((prev) => ({
-                              ...prev,
-                              appointment_time: slot.time_slot,
-                            }));
-                          }}
-                          className={cn(
-                            "h-10 rounded-xl font-black text-[10px] tracking-tighter transition-all duration-300 border flex flex-col items-center justify-center p-0",
-                            isSelected
-                              ? "bg-admin-accent-primary text-white border-admin-accent-primary shadow-premium-sm scale-[1.05] z-10"
-                              : "bg-white border-admin-border-primary/30 text-admin-text-secondary hover:border-admin-accent-primary/40 hover:bg-admin-accent-primary/[0.02]",
-                            lockDateTime &&
-                              !isSelected &&
-                              "opacity-30 grayscale cursor-not-allowed",
-                          )}
-                          disabled={lockDateTime && !isSelected}
-                        >
-                          <span className="leading-none">
-                            {formatTime(slot.time_slot)}
-                          </span>
-                          {isLocked && (
-                            <span className="text-[8px] mt-0.5">🔒</span>
-                          )}
-                        </Button>
-                      );
-                    })}
-                </div>
-              )}
+              <Switch
+                checked={formData.follow_up_required}
+                onCheckedChange={(checked) => {
+                  const baseDate = formData.appointment_date
+                    ? new Date(formData.appointment_date)
+                    : new Date();
+                  const followUpDate = new Date(baseDate);
+                  followUpDate.setFullYear(followUpDate.getFullYear() + 1);
+                  setFormData((prev) => ({
+                    ...prev,
+                    follow_up_required: checked,
+                    follow_up_date: checked
+                      ? followUpDate.toISOString().split("T")[0]
+                      : "",
+                  }));
+                }}
+                className="data-[state=checked]:bg-admin-accent-primary"
+              />
             </div>
-          )}
-        </CardContent>
-      </Card>
 
-      {/* Appointment Type & Status */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <Card className="border-none bg-admin-bg-tertiary/20 shadow-premium-sm rounded-2xl overflow-hidden border border-admin-border-primary/30">
-          <CardHeader className="pb-4 border-b border-admin-border-primary/10">
-            <CardTitle className="text-sm font-bold text-admin-text-primary flex items-center gap-2">
-              <Package className="h-4 w-4 text-admin-accent-primary" />
-              Tipo de Servicio
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-5">
-            <Select
-              value={formData.appointment_type}
-              onValueChange={(value) =>
-                setFormData((prev) => ({ ...prev, appointment_type: value }))
-              }
-            >
-              <SelectTrigger className="h-11 rounded-xl border-admin-border-primary/50 bg-white/50 focus:bg-white transition-all font-bold">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className="rounded-xl border-admin-border-primary shadow-premium-lg">
-                {appointmentTypes.map((type) => {
-                  const Icon = type.icon;
-                  return (
-                    <SelectItem
-                      key={type.value}
-                      value={type.value}
-                      className="font-bold"
-                    >
-                      <div className="flex items-center gap-2">
-                        <Icon className="h-3.5 w-3.5 opacity-60" />
-                        <span className="uppercase text-[11px] tracking-tight">
-                          {type.label}
-                        </span>
-                      </div>
-                    </SelectItem>
-                  );
-                })}
-              </SelectContent>
-            </Select>
-          </CardContent>
-        </Card>
-
-        <Card className="border-none bg-admin-bg-tertiary/20 shadow-premium-sm rounded-2xl overflow-hidden border border-admin-border-primary/30">
-          <CardHeader className="pb-4 border-b border-admin-border-primary/10">
-            <CardTitle className="text-sm font-bold text-admin-text-primary flex items-center gap-2">
-              <RefreshCw className="h-4 w-4 text-admin-info" />
-              Estado Inicial
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-5">
-            <Select
-              value={formData.status}
-              onValueChange={(value) =>
-                setFormData((prev) => ({ ...prev, status: value }))
-              }
-            >
-              <SelectTrigger className="h-11 rounded-xl border-admin-border-primary/50 bg-white/50 focus:bg-white transition-all font-bold">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className="rounded-xl border-admin-border-primary shadow-premium-lg">
-                <SelectItem
-                  value="scheduled"
-                  className="font-bold text-[11px] uppercase tracking-tight"
-                >
-                  Programada
-                </SelectItem>
-                <SelectItem
-                  value="confirmed"
-                  className="font-bold text-[11px] uppercase tracking-tight"
-                >
-                  Confirmada
-                </SelectItem>
-                <SelectItem
-                  value="completed"
-                  className="font-bold text-[11px] uppercase tracking-tight"
-                >
-                  Completada
-                </SelectItem>
-                <SelectItem
-                  value="cancelled"
-                  className="font-bold text-[11px] uppercase tracking-tight text-red-600"
-                >
-                  Cancelada
-                </SelectItem>
-              </SelectContent>
-            </Select>
+            {formData.follow_up_required && (
+              <div className="space-y-2 animate-in slide-in-from-top-2 duration-300">
+                <Label className="text-[10px] font-bold text-admin-text-tertiary uppercase tracking-widest ml-1">
+                  Cita Proyectada
+                </Label>
+                <Input
+                  type="date"
+                  value={formData.follow_up_date}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      follow_up_date: e.target.value,
+                    }))
+                  }
+                  className="h-11 rounded-xl border-admin-border-primary/50 bg-white/50 focus:bg-white transition-all"
+                />
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
 
-      {/* Notes & Reasoning */}
-      <Card className="border-none bg-admin-bg-tertiary/20 shadow-premium-sm rounded-2xl overflow-hidden border border-admin-border-primary/30">
-        <CardHeader className="pb-4 border-b border-admin-border-primary/10">
-          <CardTitle className="text-sm font-bold text-admin-text-primary flex items-center gap-2">
-            <AlertCircle className="h-4 w-4 text-admin-accent-primary" />
-            Detalles Clínicos & Notas
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-6 space-y-6">
-          <div className="space-y-2">
-            <Label className="text-[10px] font-bold text-admin-text-tertiary uppercase tracking-widest ml-1">
-              Motivo de la Cita
-            </Label>
-            <Input
-              value={formData.reason}
-              onChange={(e) =>
-                setFormData((prev) => ({ ...prev, reason: e.target.value }))
-              }
-              placeholder="Describa brevemente el motivo..."
-              className="h-11 rounded-xl border-admin-border-primary/50 bg-white/50 focus:bg-white transition-all"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label className="text-[10px] font-bold text-admin-text-tertiary uppercase tracking-widest ml-1">
-              Observaciones Internas
-            </Label>
-            <Textarea
-              value={formData.notes}
-              onChange={(e) =>
-                setFormData((prev) => ({ ...prev, notes: e.target.value }))
-              }
-              placeholder="Información relevante para el profesional..."
-              rows={3}
-              className="rounded-xl border-admin-border-primary/50 bg-white/50 focus:bg-white transition-all resize-none p-4"
-            />
-          </div>
-
-          <div className="flex items-center justify-between p-4 bg-white/40 rounded-xl border border-admin-border-primary/20">
-            <div className="space-y-0.5">
-              <Label className="text-sm font-bold text-admin-text-primary">
-                Requiere Seguimiento
-              </Label>
-              <p className="text-[10px] font-medium text-admin-text-tertiary uppercase">
-                Recordatorio automático de control
-              </p>
-            </div>
-            <Switch
-              checked={formData.follow_up_required}
-              onCheckedChange={(checked) => {
-                const baseDate = formData.appointment_date
-                  ? new Date(formData.appointment_date)
-                  : new Date();
-                const followUpDate = new Date(baseDate);
-                followUpDate.setFullYear(followUpDate.getFullYear() + 1);
-                setFormData((prev) => ({
-                  ...prev,
-                  follow_up_required: checked,
-                  follow_up_date: checked
-                    ? followUpDate.toISOString().split("T")[0]
-                    : "",
-                }));
-              }}
-              className="data-[state=checked]:bg-admin-accent-primary"
-            />
-          </div>
-
-          {formData.follow_up_required && (
-            <div className="space-y-2 animate-in slide-in-from-top-2 duration-300">
-              <Label className="text-[10px] font-bold text-admin-text-tertiary uppercase tracking-widest ml-1">
-                Cita Proyectada
-              </Label>
-              <Input
-                type="date"
-                value={formData.follow_up_date}
-                onChange={(e) =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    follow_up_date: e.target.value,
-                  }))
-                }
-                className="h-11 rounded-xl border-admin-border-primary/50 bg-white/50 focus:bg-white transition-all"
-              />
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Actions */}
-      <div className="flex items-center justify-end gap-4 pt-4">
+      {/* Actions - sticky footer, always visible */}
+      <div className="shrink-0 flex flex-row justify-end gap-3 sm:gap-4 p-4 sm:p-6 md:p-8 pt-4 border-t border-admin-border-primary/10 bg-white">
         <Button
           type="button"
           variant="ghost"
           onClick={onCancel}
-          className="h-12 px-8 rounded-xl font-bold text-admin-text-tertiary hover:bg-admin-bg-tertiary/20 uppercase text-[11px] tracking-widest transition-all"
+          className="h-10 sm:h-12 px-4 sm:px-8 rounded-xl font-bold text-admin-text-tertiary hover:bg-admin-bg-tertiary/20 uppercase text-[10px] sm:text-[11px] tracking-widest transition-all"
         >
           Descartar
         </Button>
         <Button
           type="submit"
           disabled={saving || !formData.appointment_time}
-          className="h-12 px-10 rounded-xl bg-admin-accent-primary hover:bg-admin-accent-primary/90 text-white shadow-premium-md font-bold uppercase text-[11px] tracking-widest transition-all active:scale-[0.98] disabled:opacity-50"
+          className="h-10 sm:h-12 px-6 sm:px-10 rounded-xl bg-admin-accent-primary hover:bg-admin-accent-primary/90 text-white shadow-premium-md font-bold uppercase text-[10px] sm:text-[11px] tracking-widest transition-all active:scale-[0.98] disabled:opacity-50"
         >
           {saving ? (
             <>

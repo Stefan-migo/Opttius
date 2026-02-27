@@ -239,13 +239,15 @@ export default function BranchesPage() {
   // Check if user is super admin
   if (!isSuperAdmin) {
     return (
-      <div className="container mx-auto py-8">
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-center py-8">
-              <XCircle className="h-12 w-12 text-destructive mx-auto mb-4" />
-              <h2 className="text-2xl font-bold mb-2">Acceso Restringido</h2>
-              <p className="text-muted-foreground">
+      <div className="p-4 sm:p-6 bg-epoch-background min-h-screen">
+        <Card className="rounded-xl border border-border">
+          <CardContent className="p-4 sm:p-6">
+            <div className="text-center py-6 sm:py-8">
+              <XCircle className="h-10 w-10 sm:h-12 sm:w-12 text-destructive mx-auto mb-3 sm:mb-4" />
+              <h2 className="text-lg sm:text-xl font-bold text-epoch-primary mb-2">
+                Acceso Restringido
+              </h2>
+              <p className="text-sm text-epoch-primary/80">
                 Solo los super administradores pueden gestionar sucursales.
               </p>
             </div>
@@ -256,247 +258,326 @@ export default function BranchesPage() {
   }
 
   return (
-    <div className="container mx-auto py-8">
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          <h1 className="text-3xl font-bold mb-2">Gestión de Sucursales</h1>
-          <p className="text-[var(--admin-accent-primary)]">
-            Administra las sucursales de tu negocio
-          </p>
-        </div>
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button onClick={() => handleOpenDialog()}>
-              <Plus className="h-4 w-4 mr-2" />
-              Nueva Sucursal
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-2xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>
-                {selectedBranch ? "Editar Sucursal" : "Nueva Sucursal"}
-              </DialogTitle>
-              <DialogDescription>
-                {selectedBranch
-                  ? "Modifica la información de la sucursal"
-                  : "Completa los datos para crear una nueva sucursal"}
-              </DialogDescription>
-            </DialogHeader>
-            <form onSubmit={handleSubmit}>
-              <div className="grid gap-4 py-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="name">
-                      Nombre <span className="text-destructive">*</span>
-                    </Label>
-                    <Input
-                      id="name"
-                      value={formData.name}
-                      onChange={(e) =>
-                        setFormData({ ...formData, name: e.target.value })
-                      }
-                      placeholder="Ej: Sucursal Centro"
-                      required
-                    />
+    <div className="p-4 sm:p-6 bg-epoch-background min-h-screen space-y-4 sm:space-y-6">
+      {/* Header - reorganizado en filas */}
+      <div className="flex flex-col gap-4 sm:gap-6">
+        <h1 className="text-xl sm:text-2xl md:text-3xl font-display font-bold text-epoch-primary tracking-tight">
+          Gestión de Sucursales
+        </h1>
+        <p className="text-sm sm:text-base text-epoch-primary/80 max-w-2xl">
+          Administra las sucursales de tu negocio
+        </p>
+        <div className="flex justify-start sm:justify-end">
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button
+                onClick={() => handleOpenDialog()}
+                className="rounded-xl bg-epoch-primary hover:bg-epoch-surface text-white font-display font-bold text-[10px] tracking-[0.2em] uppercase min-h-[44px] px-6 w-full sm:w-auto"
+              >
+                <Plus className="h-4 w-4 mr-2 shrink-0" />
+                Nueva Sucursal
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>
+                  {selectedBranch ? "Editar Sucursal" : "Nueva Sucursal"}
+                </DialogTitle>
+                <DialogDescription>
+                  {selectedBranch
+                    ? "Modifica la información de la sucursal"
+                    : "Completa los datos para crear una nueva sucursal"}
+                </DialogDescription>
+              </DialogHeader>
+              <form onSubmit={handleSubmit}>
+                <div className="grid gap-4 py-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label
+                        htmlFor="name"
+                        className="text-xs sm:text-sm text-epoch-primary/80"
+                      >
+                        Nombre <span className="text-destructive">*</span>
+                      </Label>
+                      <Input
+                        id="name"
+                        value={formData.name}
+                        onChange={(e) =>
+                          setFormData({ ...formData, name: e.target.value })
+                        }
+                        placeholder="Ej: Sucursal Centro"
+                        required
+                        className="rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20 min-h-[44px]"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label
+                        htmlFor="code"
+                        className="text-xs sm:text-sm text-epoch-primary/80"
+                      >
+                        Código <span className="text-destructive">*</span>
+                      </Label>
+                      <Input
+                        id="code"
+                        value={formData.code}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            code: e.target.value.toUpperCase(),
+                          })
+                        }
+                        placeholder="Ej: SUC-001"
+                        required
+                        disabled={!!selectedBranch}
+                        className="rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20 min-h-[44px]"
+                      />
+                      {selectedBranch && (
+                        <p className="text-xs text-epoch-primary/70">
+                          El código no se puede modificar
+                        </p>
+                      )}
+                    </div>
                   </div>
+
                   <div className="space-y-2">
-                    <Label htmlFor="code">
-                      Código <span className="text-destructive">*</span>
+                    <Label
+                      htmlFor="address_line_1"
+                      className="text-xs sm:text-sm text-epoch-primary/80"
+                    >
+                      Dirección Línea 1
                     </Label>
                     <Input
-                      id="code"
-                      value={formData.code}
+                      id="address_line_1"
+                      value={formData.address_line_1}
                       onChange={(e) =>
                         setFormData({
                           ...formData,
-                          code: e.target.value.toUpperCase(),
+                          address_line_1: e.target.value,
                         })
                       }
-                      placeholder="Ej: SUC-001"
-                      required
-                      disabled={!!selectedBranch}
-                    />
-                    {selectedBranch && (
-                      <p className="text-xs text-muted-foreground">
-                        El código no se puede modificar
-                      </p>
-                    )}
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="address_line_1">Dirección Línea 1</Label>
-                  <Input
-                    id="address_line_1"
-                    value={formData.address_line_1}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        address_line_1: e.target.value,
-                      })
-                    }
-                    placeholder="Calle y número"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="address_line_2">Dirección Línea 2</Label>
-                  <Input
-                    id="address_line_2"
-                    value={formData.address_line_2}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        address_line_2: e.target.value,
-                      })
-                    }
-                    placeholder="Depto, oficina, etc."
-                  />
-                </div>
-
-                <div className="grid grid-cols-3 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="city">Ciudad</Label>
-                    <Input
-                      id="city"
-                      value={formData.city}
-                      onChange={(e) =>
-                        setFormData({ ...formData, city: e.target.value })
-                      }
-                      placeholder="Ciudad"
+                      placeholder="Calle y número"
+                      className="rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20 min-h-[44px]"
                     />
                   </div>
+
                   <div className="space-y-2">
-                    <Label htmlFor="state">Región/Estado</Label>
+                    <Label
+                      htmlFor="address_line_2"
+                      className="text-xs sm:text-sm text-epoch-primary/80"
+                    >
+                      Dirección Línea 2
+                    </Label>
                     <Input
-                      id="state"
-                      value={formData.state}
-                      onChange={(e) =>
-                        setFormData({ ...formData, state: e.target.value })
-                      }
-                      placeholder="Región"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="postal_code">Código Postal</Label>
-                    <Input
-                      id="postal_code"
-                      value={formData.postal_code}
+                      id="address_line_2"
+                      value={formData.address_line_2}
                       onChange={(e) =>
                         setFormData({
                           ...formData,
-                          postal_code: e.target.value,
+                          address_line_2: e.target.value,
                         })
                       }
-                      placeholder="Código postal"
+                      placeholder="Depto, oficina, etc."
+                      className="rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20 min-h-[44px]"
                     />
                   </div>
-                </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="country">País</Label>
-                  <Input
-                    id="country"
-                    value={formData.country}
-                    onChange={(e) =>
-                      setFormData({ ...formData, country: e.target.value })
-                    }
-                    placeholder="País"
-                  />
-                </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div className="space-y-2">
+                      <Label
+                        htmlFor="city"
+                        className="text-xs sm:text-sm text-epoch-primary/80"
+                      >
+                        Ciudad
+                      </Label>
+                      <Input
+                        id="city"
+                        value={formData.city}
+                        onChange={(e) =>
+                          setFormData({ ...formData, city: e.target.value })
+                        }
+                        placeholder="Ciudad"
+                        className="rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20 min-h-[44px]"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label
+                        htmlFor="state"
+                        className="text-xs sm:text-sm text-epoch-primary/80"
+                      >
+                        Región/Estado
+                      </Label>
+                      <Input
+                        id="state"
+                        value={formData.state}
+                        onChange={(e) =>
+                          setFormData({ ...formData, state: e.target.value })
+                        }
+                        placeholder="Región"
+                        className="rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20 min-h-[44px]"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label
+                        htmlFor="postal_code"
+                        className="text-xs sm:text-sm text-epoch-primary/80"
+                      >
+                        Código Postal
+                      </Label>
+                      <Input
+                        id="postal_code"
+                        value={formData.postal_code}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            postal_code: e.target.value,
+                          })
+                        }
+                        placeholder="Código postal"
+                        className="rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20 min-h-[44px]"
+                      />
+                    </div>
+                  </div>
 
-                <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="phone">Teléfono</Label>
+                    <Label
+                      htmlFor="country"
+                      className="text-xs sm:text-sm text-epoch-primary/80"
+                    >
+                      País
+                    </Label>
                     <Input
-                      id="phone"
-                      value={formData.phone}
+                      id="country"
+                      value={formData.country}
                       onChange={(e) =>
-                        setFormData({ ...formData, phone: e.target.value })
+                        setFormData({ ...formData, country: e.target.value })
                       }
-                      placeholder="+56 9 1234 5678"
+                      placeholder="País"
+                      className="rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20 min-h-[44px]"
                     />
                   </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label
+                        htmlFor="phone"
+                        className="text-xs sm:text-sm text-epoch-primary/80"
+                      >
+                        Teléfono
+                      </Label>
+                      <Input
+                        id="phone"
+                        value={formData.phone}
+                        onChange={(e) =>
+                          setFormData({ ...formData, phone: e.target.value })
+                        }
+                        placeholder="+56 9 1234 5678"
+                        className="rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20 min-h-[44px]"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label
+                        htmlFor="email"
+                        className="text-xs sm:text-sm text-epoch-primary/80"
+                      >
+                        Email
+                      </Label>
+                      <Input
+                        id="email"
+                        type="email"
+                        value={formData.email}
+                        onChange={(e) =>
+                          setFormData({ ...formData, email: e.target.value })
+                        }
+                        placeholder="sucursal@ejemplo.com"
+                        className="rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20 min-h-[44px]"
+                      />
+                    </div>
+                  </div>
+
                   <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      value={formData.email}
-                      onChange={(e) =>
-                        setFormData({ ...formData, email: e.target.value })
+                    <Label
+                      htmlFor="is_active"
+                      className="text-xs sm:text-sm text-epoch-primary/80"
+                    >
+                      Estado
+                    </Label>
+                    <Select
+                      value={formData.is_active ? "active" : "inactive"}
+                      onValueChange={(value) =>
+                        setFormData({
+                          ...formData,
+                          is_active: value === "active",
+                        })
                       }
-                      placeholder="sucursal@ejemplo.com"
-                    />
+                    >
+                      <SelectTrigger className="rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20 min-h-[44px]">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="active">Activa</SelectItem>
+                        <SelectItem value="inactive">Inactiva</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="is_active">Estado</Label>
-                  <Select
-                    value={formData.is_active ? "active" : "inactive"}
-                    onValueChange={(value) =>
-                      setFormData({
-                        ...formData,
-                        is_active: value === "active",
-                      })
-                    }
+                <DialogFooter className="flex-col sm:flex-row gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleCloseDialog}
+                    disabled={isSubmitting}
+                    className="rounded-xl border-epoch-primary/20 w-full sm:w-auto min-h-[44px]"
                   >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="active">Activa</SelectItem>
-                      <SelectItem value="inactive">Inactiva</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-              <DialogFooter>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={handleCloseDialog}
-                  disabled={isSubmitting}
-                >
-                  Cancelar
-                </Button>
-                <Button type="submit" disabled={isSubmitting}>
-                  {isSubmitting ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Guardando...
-                    </>
-                  ) : (
-                    "Guardar"
-                  )}
-                </Button>
-              </DialogFooter>
-            </form>
-          </DialogContent>
-        </Dialog>
+                    Cancelar
+                  </Button>
+                  <Button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="rounded-xl bg-epoch-primary hover:bg-epoch-surface text-white w-full sm:w-auto min-h-[44px]"
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Guardando...
+                      </>
+                    ) : (
+                      "Guardar"
+                    )}
+                  </Button>
+                </DialogFooter>
+              </form>
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Sucursales</CardTitle>
-          <CardDescription className="text-[var(--admin-accent-primary)]">
+      <Card className="rounded-xl border border-border">
+        <CardHeader className="p-4 sm:p-6 pb-0">
+          <CardTitle className="font-display text-epoch-primary text-base sm:text-lg">
+            Sucursales
+          </CardTitle>
+          <CardDescription className="text-xs sm:text-sm text-epoch-primary/80">
             Lista de todas las sucursales del negocio
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-4 sm:p-6 pt-4">
           {isLoading ? (
-            <div className="flex justify-center items-center py-12">
-              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+            <div className="flex justify-center items-center py-8 sm:py-12">
+              <Loader2 className="h-8 w-8 animate-spin text-epoch-primary" />
             </div>
           ) : branches.length === 0 ? (
-            <div className="text-center py-12">
-              <Building2 className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-semibold mb-2">No hay sucursales</h3>
-              <p className="text-muted-foreground mb-4">
+            <div className="text-center py-8 sm:py-12">
+              <Building2 className="h-10 w-10 sm:h-12 sm:w-12 text-epoch-primary/40 mx-auto mb-3 sm:mb-4" />
+              <h3 className="text-base sm:text-lg font-semibold text-epoch-primary mb-2">
+                No hay sucursales
+              </h3>
+              <p className="text-sm text-epoch-primary/80 mb-4">
                 Crea tu primera sucursal para comenzar
               </p>
-              <Button onClick={() => handleOpenDialog()}>
+              <Button
+                onClick={() => handleOpenDialog()}
+                className="rounded-xl bg-epoch-primary hover:bg-epoch-surface text-white font-display font-bold text-[10px] tracking-[0.2em] uppercase min-h-[44px] px-6"
+              >
                 <Plus className="h-4 w-4 mr-2" />
                 Crear Sucursal
               </Button>
@@ -506,36 +587,44 @@ export default function BranchesPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="text-[var(--admin-accent-primary)]">
+                    <TableHead className="text-epoch-primary/80 text-xs sm:text-sm">
                       Nombre
                     </TableHead>
-                    <TableHead className="text-[var(--admin-accent-primary)]">
+                    <TableHead className="text-epoch-primary/80 text-xs sm:text-sm">
                       Código
                     </TableHead>
-                    <TableHead>Ubicación</TableHead>
-                    <TableHead>Contacto</TableHead>
-                    <TableHead>Estado</TableHead>
-                    <TableHead className="text-right">Acciones</TableHead>
+                    <TableHead className="text-epoch-primary/80 text-xs sm:text-sm">
+                      Ubicación
+                    </TableHead>
+                    <TableHead className="text-epoch-primary/80 text-xs sm:text-sm">
+                      Contacto
+                    </TableHead>
+                    <TableHead className="text-epoch-primary/80 text-xs sm:text-sm">
+                      Estado
+                    </TableHead>
+                    <TableHead className="text-right text-epoch-primary/80 text-xs sm:text-sm">
+                      Acciones
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {branches.map((branch) => (
                     <TableRow key={branch.id}>
-                      <TableCell className="font-medium">
+                      <TableCell className="font-medium text-epoch-primary text-xs sm:text-sm">
                         {branch.name}
                       </TableCell>
                       <TableCell>
                         <Badge
                           variant="outline"
-                          className="border-[var(--admin-border-secondary)] bg-[var(--admin-bg-tertiary)]/60 text-[var(--admin-text-primary)] font-medium"
+                          className="border-epoch-primary/20 text-epoch-primary font-medium text-[10px] sm:text-xs"
                         >
                           {branch.code}
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        <div className="flex items-center gap-2 text-sm text-foreground">
-                          <MapPin className="h-4 w-4 text-[var(--accent-foreground)]" />
-                          <span>
+                        <div className="flex items-center gap-2 text-xs sm:text-sm text-epoch-primary/80 min-w-0">
+                          <MapPin className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-epoch-accent shrink-0" />
+                          <span className="truncate">
                             {branch.city || branch.state
                               ? `${branch.city || ""}${branch.city && branch.state ? ", " : ""}${branch.state || ""}`
                               : "Sin ubicación"}
@@ -543,21 +632,21 @@ export default function BranchesPage() {
                         </div>
                       </TableCell>
                       <TableCell>
-                        <div className="space-y-1">
+                        <div className="space-y-1 min-w-0">
                           {branch.phone && (
-                            <div className="flex items-center gap-2 text-sm">
-                              <Phone className="h-3 w-3" />
-                              <span>{branch.phone}</span>
+                            <div className="flex items-center gap-2 text-xs sm:text-sm text-epoch-primary/80">
+                              <Phone className="h-3 w-3 shrink-0" />
+                              <span className="truncate">{branch.phone}</span>
                             </div>
                           )}
                           {branch.email && (
-                            <div className="flex items-center gap-2 text-sm">
-                              <Mail className="h-3 w-3" />
-                              <span>{branch.email}</span>
+                            <div className="flex items-center gap-2 text-xs sm:text-sm text-epoch-primary/80">
+                              <Mail className="h-3 w-3 shrink-0" />
+                              <span className="truncate">{branch.email}</span>
                             </div>
                           )}
                           {!branch.phone && !branch.email && (
-                            <span className="text-sm text-foreground">
+                            <span className="text-xs sm:text-sm text-epoch-primary/70">
                               Sin contacto
                             </span>
                           )}
@@ -565,23 +654,27 @@ export default function BranchesPage() {
                       </TableCell>
                       <TableCell>
                         {branch.is_active ? (
-                          <Badge className="bg-[var(--admin-success)] text-[var(--admin-text-on-dark)] border border-[var(--admin-success)]/40 rounded-lg font-medium">
-                            <CheckCircle className="h-3 w-3 mr-1" />
+                          <Badge className="bg-epoch-primary text-white text-[10px] sm:text-xs">
+                            <CheckCircle className="h-3 w-3 mr-1 shrink-0" />
                             Activa
                           </Badge>
                         ) : (
-                          <Badge className="bg-[var(--admin-bg-tertiary)] border border-[var(--admin-border-secondary)] text-[var(--admin-text-secondary)] rounded-lg font-medium">
-                            <XCircle className="h-3 w-3 mr-1" />
+                          <Badge
+                            variant="outline"
+                            className="border-epoch-primary/20 text-epoch-primary/70 text-[10px] sm:text-xs"
+                          >
+                            <XCircle className="h-3 w-3 mr-1 shrink-0" />
                             Inactiva
                           </Badge>
                         )}
                       </TableCell>
                       <TableCell className="text-right">
-                        <div className="flex justify-end gap-2">
+                        <div className="flex justify-end gap-1 sm:gap-2">
                           <Button
                             variant="ghost"
                             size="sm"
                             onClick={() => handleOpenDialog(branch)}
+                            className="min-h-[44px] min-w-[44px] sm:min-h-8 sm:min-w-8 rounded-xl"
                           >
                             <Edit className="h-4 w-4" />
                           </Button>
@@ -593,6 +686,7 @@ export default function BranchesPage() {
                               setIsDeleteDialogOpen(true);
                             }}
                             disabled={branch.code === "MAIN"}
+                            className="min-h-[44px] min-w-[44px] sm:min-h-8 sm:min-w-8 rounded-xl"
                           >
                             <Trash2 className="h-4 w-4 text-destructive" />
                           </Button>
@@ -608,10 +702,12 @@ export default function BranchesPage() {
       </Card>
 
       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <DialogContent>
+        <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>¿Eliminar sucursal?</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-epoch-primary">
+              ¿Eliminar sucursal?
+            </DialogTitle>
+            <DialogDescription className="text-epoch-primary/80">
               Esta acción no se puede deshacer. Se eliminará la sucursal{" "}
               <strong>{selectedBranch?.name}</strong> y todos sus datos
               asociados.
@@ -623,7 +719,7 @@ export default function BranchesPage() {
               )}
             </DialogDescription>
           </DialogHeader>
-          <DialogFooter>
+          <DialogFooter className="flex-col sm:flex-row gap-2">
             <Button
               variant="outline"
               onClick={() => {
@@ -631,6 +727,7 @@ export default function BranchesPage() {
                 setSelectedBranch(null);
               }}
               disabled={isSubmitting}
+              className="rounded-xl border-epoch-primary/20 w-full sm:w-auto min-h-[44px]"
             >
               Cancelar
             </Button>
@@ -638,6 +735,7 @@ export default function BranchesPage() {
               variant="destructive"
               onClick={handleDelete}
               disabled={isSubmitting || selectedBranch?.code === "MAIN"}
+              className="rounded-xl w-full sm:w-auto min-h-[44px]"
             >
               {isSubmitting ? (
                 <>

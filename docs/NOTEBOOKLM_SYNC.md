@@ -32,6 +32,9 @@
 | `docs/WHATSAPP_AGENT_TRAINING.md`                         | Entrenamiento Agente WhatsApp             | Tras cambios en guía de entrenamiento                 |
 | `.cursor/skills/whatsapp-agent-training-optical/SKILL.md` | Skill Entrenamiento Agente WhatsApp       | Tras cambios en skill de entrenamiento                |
 | `docs/WHATSAPP_IMPLEMENTATION_PROMPT.md`                  | Prompt Implementación WhatsApp            | Prompt para agente que crea plan de implementación    |
+| `docs/VERCEL_DEPLOYMENT_2026-02.md`                       | VERCEL_DEPLOYMENT_2026-02                 | Tras cambios en crons, deploy o plan Vercel           |
+| `docs/MANUAL_TESTING_GUIDE_COMPLETE.md`                   | Guía de Testing Manual Completa           | Tras cambios en flujos de testing o checklists        |
+| `docs/VIDEOTUTORIALES_MAP.md`                             | Mapa de Videotutoriales                   | Tras cambios en prioridades o videos sugeridos        |
 
 **Evitar duplicados en NotebookLM:** Si ya existen fuentes con estos títulos, elimínalas antes de volver a sincronizar (`nlm source delete <source-id> --confirm`). El script `add_source` siempre añade; no actualiza fuentes existentes.
 

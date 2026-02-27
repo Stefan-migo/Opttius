@@ -10,7 +10,6 @@ import {
   Twitter,
   Linkedin,
   Instagram,
-  Sparkles,
 } from "lucide-react";
 import businessConfig from "@/config/business";
 import { useTheme } from "@/components/theme-provider";
@@ -149,16 +148,11 @@ export function LandingFooter() {
             © {currentYear} {businessConfig.displayName}. DISEÑADO PARA ÓPTICAS
             EXIGENTES.
           </p>
-          <div className="flex gap-4">
-            <div className="w-12 h-12 border border-white/5 flex items-center justify-center rounded-full opacity-50">
-              <Sparkles className="h-4 w-4 text-epoch-accent" />
-            </div>
-          </div>
         </div>
       </div>
 
-      {/* Aesthetic Arch Base */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[120%] h-40 bg-epoch-background rounded-b-[100%] z-0"></div>
+      {/* Aesthetic Arch Base - subtler curve on mobile */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[120%] h-40 bg-epoch-background rounded-b-[30%] sm:rounded-b-[50%] md:rounded-b-[70%] lg:rounded-b-[100%] z-0"></div>
     </footer>
   );
 }

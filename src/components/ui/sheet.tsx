@@ -38,7 +38,7 @@ const sheetVariants = cva(
         top: "inset-x-0 top-0 border-b data-[state=closed]:slide-out-to-top data-[state=open]:slide-in-from-top",
         bottom:
           "inset-x-0 bottom-0 border-t data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom",
-        left: "inset-y-0 left-0 h-full w-3/4 border-r data-[state=closed]:slide-out-to-left data-[state=open]:slide-in-from-left sm:max-w-sm",
+        left: "inset-y-0 left-0 h-full w-80 border-r data-[state=closed]:slide-out-to-left data-[state=open]:slide-in-from-left",
         right:
           "inset-y-0 right-0 h-full w-3/4 border-l data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right sm:max-w-sm",
       },
@@ -54,32 +54,55 @@ interface SheetContentProps
     VariantProps<typeof sheetVariants> {
   /** When true, elevates z-index above floating buttons (z-[110]) so sidebar appears on top */
   elevateZIndex?: boolean;
+  /** When true, hides the default close button (use when close is rendered inside children) */
+  hideDefaultClose?: boolean;
+  /** When true, overlay no cubre el bottom nav (deja espacio para cerrar tocando el icono) */
+  overlayExcludeBottomNav?: boolean;
 }
 
 const SheetContent = React.forwardRef<
   React.ElementRef<typeof SheetPrimitive.Content>,
   SheetContentProps
->(({ side = "right", className, children, elevateZIndex, ...props }, ref) => {
-  const overlayClassName = elevateZIndex ? "z-[110]" : undefined;
-  const contentClassName = elevateZIndex ? "z-[110]" : undefined;
+>(
+  (
+    {
+      side = "right",
+      className,
+      children,
+      elevateZIndex,
+      hideDefaultClose,
+      overlayExcludeBottomNav,
+      ...props
+    },
+    ref,
+  ) => {
+    const overlayClassName = cn(
+      elevateZIndex && "z-[110]",
+      overlayExcludeBottomNav &&
+        "!top-0 !left-0 !right-0 !bottom-[calc(4rem+env(safe-area-inset-bottom))]",
+    );
+    const contentClassName = elevateZIndex ? "z-[110]" : undefined;
 
-  return (
-    <SheetPortal>
-      <SheetOverlay className={overlayClassName} />
-      <SheetPrimitive.Content
-        ref={ref}
-        className={cn(sheetVariants({ side }), contentClassName, className)}
-        {...props}
-      >
-        <SheetPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-secondary">
-          <X className="h-4 w-4" />
-          <span className="sr-only">Close</span>
-        </SheetPrimitive.Close>
-        {children}
-      </SheetPrimitive.Content>
-    </SheetPortal>
-  );
-});
+    return (
+      <SheetPortal>
+        <SheetOverlay className={overlayClassName || undefined} />
+        <SheetPrimitive.Content
+          ref={ref}
+          className={cn(sheetVariants({ side }), contentClassName, className)}
+          {...props}
+        >
+          {!hideDefaultClose && (
+            <SheetPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-secondary">
+              <X className="h-4 w-4" />
+              <span className="sr-only">Close</span>
+            </SheetPrimitive.Close>
+          )}
+          {children}
+        </SheetPrimitive.Content>
+      </SheetPortal>
+    );
+  },
+);
 SheetContent.displayName = SheetPrimitive.Content.displayName;
 
 const SheetHeader = ({

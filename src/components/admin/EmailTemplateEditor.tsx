@@ -488,12 +488,12 @@ export default function EmailTemplateEditor({
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-7xl max-h-[95vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>
+        <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-7xl max-h-[90vh] sm:max-h-[95vh] overflow-y-auto p-4 sm:p-6">
+          <DialogHeader className="space-y-2">
+            <DialogTitle className="text-base sm:text-lg">
               {template ? "Editar Plantilla" : "Nueva Plantilla"}
             </DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="text-xs sm:text-sm">
               {template
                 ? "Modifica la plantilla de email. Los cambios se aplicarán automáticamente en los próximos emails."
                 : "Crea una nueva plantilla de email para el sistema"}
@@ -502,7 +502,7 @@ export default function EmailTemplateEditor({
 
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Basic Info */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="name">Nombre de la Plantilla *</Label>
                 <Input

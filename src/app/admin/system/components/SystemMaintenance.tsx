@@ -93,17 +93,17 @@ export default function SystemMaintenance({
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Maintenance Actions */}
-      <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.4)]">
-        <CardHeader>
-          <CardTitle className="flex items-center">
-            <Server className="h-5 w-5 mr-2" />
+      <Card className="rounded-xl border border-border overflow-hidden">
+        <CardHeader className="p-4 sm:p-6 pb-0">
+          <CardTitle className="flex flex-col sm:flex-row sm:items-center gap-2 font-display text-epoch-primary text-base sm:text-lg break-words">
+            <Server className="h-4 w-4 sm:h-5 sm:w-5 mr-2 shrink-0" />
             Herramientas de Mantenimiento
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <CardContent className="p-4 sm:p-6 pt-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
             {maintenanceActions.map((action) => {
               const Icon = action.icon;
               const isActive =
@@ -113,19 +113,21 @@ export default function SystemMaintenance({
                 <Button
                   key={action.id}
                   variant="outline"
-                  className="justify-start h-auto p-4 flex-col items-start"
+                  className="justify-start h-auto p-3 sm:p-4 flex-col items-start rounded-xl border-epoch-primary/20 min-h-[44px] min-w-0 w-full overflow-hidden"
                   onClick={() => onMaintenanceAction(action.id)}
                   disabled={maintenanceLoading}
                 >
-                  <div className="flex items-center space-x-2 mb-2">
-                    <Icon className="h-5 w-5" />
-                    <span className="font-medium">{action.label}</span>
+                  <div className="flex items-center space-x-2 mb-1 sm:mb-2 w-full min-w-0">
+                    <Icon className="h-4 w-4 sm:h-5 sm:w-5 shrink-0" />
+                    <span className="font-medium text-xs sm:text-sm truncate">
+                      {action.label}
+                    </span>
                   </div>
-                  <p className="text-sm text-admin-text-tertiary">
+                  <p className="text-[10px] sm:text-xs text-epoch-primary/70 text-left break-words w-full overflow-hidden line-clamp-2">
                     {action.description}
                   </p>
                   {isActive && (
-                    <RefreshCw className="h-3 w-3 animate-spin mt-2" />
+                    <RefreshCw className="h-3 w-3 animate-spin mt-2 shrink-0" />
                   )}
                 </Button>
               );

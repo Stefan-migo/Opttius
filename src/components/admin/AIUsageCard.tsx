@@ -81,13 +81,13 @@ export function AIUsageCard() {
   if (loading && !data) {
     return (
       <Card className="rounded-xl border-epoch-primary/20">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-epoch-primary">
-            <Cpu className="h-5 w-5" />
+        <CardHeader className="p-4 sm:p-6">
+          <CardTitle className="flex items-center gap-2 text-epoch-primary text-base sm:text-lg">
+            <Cpu className="h-4 w-4 sm:h-5 sm:w-5" />
             Uso de IA
           </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-4 sm:p-6">
           <div className="flex items-center justify-center py-8 text-muted-foreground">
             <RefreshCw className="h-6 w-6 animate-spin mr-2" />
             Cargando...
@@ -99,17 +99,17 @@ export function AIUsageCard() {
 
   return (
     <Card className="rounded-xl border-epoch-primary/20">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="flex items-center gap-2 text-epoch-primary">
-          <Cpu className="h-5 w-5" />
+      <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-4 sm:p-6 pb-2">
+        <CardTitle className="flex items-center gap-2 text-epoch-primary text-base sm:text-lg">
+          <Cpu className="h-4 w-4 sm:h-5 sm:w-5 shrink-0" />
           Uso de IA
         </CardTitle>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 shrink-0">
           <Select
             value={String(days)}
             onValueChange={(v) => setDays(Number(v))}
           >
-            <SelectTrigger className="w-[100px]">
+            <SelectTrigger className="w-full sm:w-[100px] min-h-[44px]">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -124,69 +124,77 @@ export function AIUsageCard() {
           />
         </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className="p-4 sm:p-6">
         {error && <div className="text-destructive text-sm py-4">{error}</div>}
         {data && !error && (
           <>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-              <div className="rounded-xl border border-epoch-primary/20 p-3">
-                <div className="flex items-center gap-2 text-muted-foreground text-xs">
-                  <Zap className="h-4 w-4" />
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-4 sm:mb-6">
+              <div className="rounded-xl border border-epoch-primary/20 p-3 sm:p-4">
+                <div className="flex items-center gap-2 text-muted-foreground text-[10px] sm:text-xs">
+                  <Zap className="h-3 w-3 sm:h-4 sm:w-4 shrink-0" />
                   Total tokens
                 </div>
-                <div className="text-lg font-semibold text-epoch-primary mt-1">
+                <div className="text-base sm:text-lg font-semibold text-epoch-primary mt-1">
                   {data.summary.totalTokens.toLocaleString()}
                 </div>
               </div>
-              <div className="rounded-xl border border-epoch-primary/20 p-3">
-                <div className="flex items-center gap-2 text-muted-foreground text-xs">
-                  <DollarSign className="h-4 w-4" />
+              <div className="rounded-xl border border-epoch-primary/20 p-3 sm:p-4">
+                <div className="flex items-center gap-2 text-muted-foreground text-[10px] sm:text-xs">
+                  <DollarSign className="h-3 w-3 sm:h-4 sm:w-4 shrink-0" />
                   Coste estimado
                 </div>
-                <div className="text-lg font-semibold text-epoch-primary mt-1">
+                <div className="text-base sm:text-lg font-semibold text-epoch-primary mt-1 truncate">
                   ${data.summary.estimatedCostUsd.toFixed(4)}
                 </div>
               </div>
-              <div className="rounded-xl border border-epoch-primary/20 p-3">
-                <div className="text-muted-foreground text-xs">Llamadas</div>
-                <div className="text-lg font-semibold text-epoch-primary mt-1">
+              <div className="rounded-xl border border-epoch-primary/20 p-3 sm:p-4">
+                <div className="text-muted-foreground text-[10px] sm:text-xs">
+                  Llamadas
+                </div>
+                <div className="text-base sm:text-lg font-semibold text-epoch-primary mt-1">
                   {data.summary.requestCount}
                 </div>
               </div>
-              <div className="rounded-xl border border-epoch-primary/20 p-3">
-                <div className="text-muted-foreground text-xs">
+              <div className="rounded-xl border border-epoch-primary/20 p-3 sm:p-4">
+                <div className="text-muted-foreground text-[10px] sm:text-xs">
                   Input tokens
                 </div>
-                <div className="text-lg font-semibold text-epoch-primary mt-1">
+                <div className="text-base sm:text-lg font-semibold text-epoch-primary mt-1">
                   {data.summary.totalPromptTokens.toLocaleString()}
                 </div>
               </div>
             </div>
             {data.byModel.length > 0 && (
               <div>
-                <h4 className="text-sm font-medium mb-2">Por modelo</h4>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Modelo</TableHead>
-                      <TableHead className="text-right">Llamadas</TableHead>
-                      <TableHead className="text-right">Tokens</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {data.byModel.map((m) => (
-                      <TableRow key={m.model}>
-                        <TableCell className="font-mono text-xs">
-                          {m.model}
-                        </TableCell>
-                        <TableCell className="text-right">{m.count}</TableCell>
-                        <TableCell className="text-right">
-                          {m.totalTokens.toLocaleString()}
-                        </TableCell>
+                <h4 className="text-xs sm:text-sm font-medium mb-2">
+                  Por modelo
+                </h4>
+                <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0 min-w-0 [scrollbar-width:thin]">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Modelo</TableHead>
+                        <TableHead className="text-right">Llamadas</TableHead>
+                        <TableHead className="text-right">Tokens</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                    </TableHeader>
+                    <TableBody>
+                      {data.byModel.map((m) => (
+                        <TableRow key={m.model}>
+                          <TableCell className="font-mono text-xs">
+                            {m.model}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            {m.count}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            {m.totalTokens.toLocaleString()}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
               </div>
             )}
           </>

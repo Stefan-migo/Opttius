@@ -137,11 +137,11 @@ export default function OnboardingChoicePage() {
         <div className="text-center mb-16 animate-in fade-in slide-in-from-bottom-4 duration-1000">
           <div className="inline-flex items-center justify-center mb-10 relative group">
             <Image
-              src="/OpttiusTextCentered.svg"
+              src="/OpttiusTextCentered-on-light.svg"
               alt="Opttius"
-              width={144}
-              height={112}
-              className="h-28 w-36 relative z-10 transition-transform duration-500 group-hover:scale-105 object-contain"
+              width={240}
+              height={53}
+              className="h-14 sm:h-16 md:h-20 w-auto max-w-[240px] relative z-10 transition-transform duration-500 group-hover:scale-105 object-contain"
             />
           </div>
           <h1 className="text-5xl md:text-6xl font-display font-bold text-epoch-primary mb-4 tracking-tight uppercase">

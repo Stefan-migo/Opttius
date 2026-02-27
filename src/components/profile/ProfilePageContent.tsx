@@ -333,7 +333,7 @@ export function ProfilePageContent({
   }
 
   return (
-    <div className="min-h-screen bg-[var(--admin-bg-primary)] px-4 py-12 relative overflow-hidden">
+    <div className="min-h-screen bg-[var(--admin-bg-primary)] px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12 relative overflow-hidden">
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
         <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/10 rounded-full blur-[120px] animate-premium-float" />
         <div
@@ -344,11 +344,11 @@ export function ProfilePageContent({
       </div>
 
       <div className="max-w-6xl mx-auto relative z-10">
-        <div className="mb-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
-          <h1 className="text-4xl font-bold font-display text-slate-900 dark:text-white mb-2 tracking-tight">
+        <div className="mb-6 sm:mb-8 md:mb-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold font-display text-slate-900 dark:text-white mb-1 sm:mb-2 tracking-tight">
             {title}
           </h1>
-          <p className="text-slate-600 dark:text-slate-400 font-medium font-body">
+          <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400 font-medium font-body">
             {subtitle}
           </p>
         </div>
@@ -356,13 +356,13 @@ export function ProfilePageContent({
         <Card
           variant="glass"
           rounded="lg"
-          className="mb-10 overflow-hidden border-white/20 dark:border-slate-800/50 shadow-2xl animate-in zoom-in-95 duration-500 bg-[var(--admin-bg-tertiary)] backdrop-blur-xl"
+          className="mb-6 sm:mb-8 md:mb-10 overflow-hidden border-white/20 dark:border-slate-800/50 shadow-2xl animate-in zoom-in-95 duration-500 bg-[var(--admin-bg-tertiary)] backdrop-blur-xl"
         >
-          <CardContent className="p-8 md:p-10">
-            <div className="flex flex-col md:flex-row items-center md:items-start gap-10">
-              <div className="relative group">
-                <div className="absolute inset-0 bg-primary/20 rounded-full blur-2xl group-hover:bg-primary/30 transition-all duration-500 scale-75" />
-                <div className="relative z-10 rounded-full shadow-xl overflow-hidden">
+          <CardContent className="p-4 sm:p-6 md:p-8 lg:p-10">
+            <div className="flex flex-col md:flex-row items-center md:items-start gap-6 sm:gap-8 md:gap-10">
+              <div className="relative group shrink-0 flex flex-col items-center">
+                <div className="absolute inset-0 bg-primary/20 rounded-full blur-2xl group-hover:bg-primary/30 transition-all duration-500 scale-75 pointer-events-none" />
+                <div className="relative z-10">
                   <AvatarUpload
                     currentAvatarUrl={profile?.avatar_url || undefined}
                     onUploadSuccess={handleAvatarUpload}
@@ -372,10 +372,10 @@ export function ProfilePageContent({
                 </div>
               </div>
 
-              <div className="flex-1 text-center md:text-left space-y-4">
+              <div className="flex-1 min-w-0 text-center md:text-left space-y-3 sm:space-y-4">
                 <div>
-                  <div className="flex flex-col md:flex-row md:items-center gap-3 mb-1">
-                    <h2 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight">
+                  <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center justify-center md:justify-start gap-2 sm:gap-3 mb-1">
+                    <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-slate-900 dark:text-white tracking-tight break-words">
                       {profile?.first_name && profile?.last_name
                         ? `${profile.first_name} ${profile.last_name}`
                         : user.email?.split("@")[0]}
@@ -383,32 +383,32 @@ export function ProfilePageContent({
                     {showRoleBadge && (
                       <Badge
                         variant="healty"
-                        className="w-fit mx-auto md:mx-0 bg-green-500/10 text-green-600 border-none px-3 py-1 font-bold text-[10px] uppercase"
+                        className="w-fit mx-auto md:mx-0 bg-green-500/10 text-green-600 border-none px-2 sm:px-3 py-1 font-bold text-[9px] sm:text-[10px] uppercase"
                       >
                         {adminData?.adminCheck?.role || "ADMINISTRADOR"}
                       </Badge>
                     )}
                   </div>
-                  <p className="text-lg text-slate-500 dark:text-slate-400 font-medium">
+                  <p className="text-sm sm:text-base md:text-lg text-slate-500 dark:text-slate-400 font-medium truncate max-w-full">
                     {user.email}
                   </p>
                 </div>
 
-                <div className="flex flex-wrap gap-3 justify-center md:justify-start">
+                <div className="flex flex-wrap gap-2 sm:gap-3 justify-center md:justify-start">
                   {profile?.is_member && (
-                    <Badge className="gap-2 bg-primary/10 text-primary border-primary/20 hover:bg-primary/20 px-4 py-1.5 rounded-full transition-all">
-                      <Sparkles className="h-4 w-4" />
-                      <span className="font-bold tracking-wide text-[10px] uppercase">
+                    <Badge className="gap-1.5 sm:gap-2 bg-primary/10 text-primary border-primary/20 hover:bg-primary/20 px-3 sm:px-4 py-1.5 rounded-full transition-all">
+                      <Sparkles className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
+                      <span className="font-bold tracking-wide text-[9px] sm:text-[10px] uppercase">
                         MIEMBRO GOLD
                       </span>
                     </Badge>
                   )}
                   <Badge
                     variant="outline"
-                    className="gap-2 border-slate-200 dark:border-slate-700 bg-white/50 dark:bg-slate-800/50 px-4 py-1.5 rounded-full transition-all"
+                    className="gap-1.5 sm:gap-2 border-slate-200 dark:border-slate-700 bg-white/50 dark:bg-slate-800/50 px-3 sm:px-4 py-1.5 rounded-full transition-all"
                   >
-                    <Award className="h-4 w-4 text-amber-500" />
-                    <span className="text-slate-600 dark:text-slate-400 text-[10px] font-bold uppercase">
+                    <Award className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0 text-amber-500" />
+                    <span className="text-slate-600 dark:text-slate-400 text-[9px] sm:text-[10px] font-bold uppercase">
                       Desde {memberSince}
                     </span>
                   </Badge>
@@ -421,62 +421,64 @@ export function ProfilePageContent({
         <Tabs
           value={activeTab}
           onValueChange={setActiveTab}
-          className="space-y-8"
+          className="space-y-6 sm:space-y-8"
         >
-          <TabsList className="p-1.5 bg-slate-200/50 dark:bg-slate-800/50 backdrop-blur-md rounded-2xl grid w-full grid-cols-2 md:grid-cols-5 gap-2">
-            {[
-              { id: "overview", label: "Resumen", icon: User },
-              { id: "personal", label: "Personal", icon: Edit3 },
-              { id: "address", label: "Dirección", icon: MapPin },
-              { id: "subscription", label: "Suscripción", icon: CreditCard },
-              { id: "settings", label: "Ajustes", icon: Settings },
-            ]
-              .filter((tab) => {
-                if (tab.id === "subscription") {
-                  return adminData?.adminCheck?.isOwner;
-                }
-                return true;
-              })
-              .map((tab) => (
-                <TabsTrigger
-                  key={tab.id}
-                  value={tab.id}
-                  className="rounded-xl py-3 data-[state=active]:bg-[var(--admin-bg-secondary)] data-[state=active]:shadow-lg data-[state=active]:text-[var(--admin-accent-secondary)] transition-all duration-300"
-                >
-                  <tab.icon
-                    className={`h-4 w-4 mr-2 ${variant === "admin" ? "text-[var(--admin-accent-secondary)]" : ""}`}
-                  />
-                  <span
-                    className={`font-bold tracking-tight ${variant === "admin" ? "text-[var(--admin-accent-secondary)]" : ""}`}
+          <div className="overflow-x-auto overflow-y-hidden -mx-4 px-4 sm:mx-0 sm:px-0 [scrollbar-width:thin]">
+            <TabsList className="p-1.5 bg-slate-200/50 dark:bg-slate-800/50 backdrop-blur-md rounded-xl sm:rounded-2xl inline-flex flex-nowrap gap-1.5 sm:gap-2 shrink-0">
+              {[
+                { id: "overview", label: "Resumen", icon: User },
+                { id: "personal", label: "Personal", icon: Edit3 },
+                { id: "address", label: "Dirección", icon: MapPin },
+                { id: "subscription", label: "Suscripción", icon: CreditCard },
+                { id: "settings", label: "Ajustes", icon: Settings },
+              ]
+                .filter((tab) => {
+                  if (tab.id === "subscription") {
+                    return adminData?.adminCheck?.isOwner;
+                  }
+                  return true;
+                })
+                .map((tab) => (
+                  <TabsTrigger
+                    key={tab.id}
+                    value={tab.id}
+                    className="rounded-lg sm:rounded-xl py-2.5 sm:py-3 px-2 sm:px-3 text-xs sm:text-sm data-[state=active]:bg-[var(--admin-bg-secondary)] data-[state=active]:shadow-lg data-[state=active]:text-[var(--admin-accent-secondary)] transition-all duration-300 min-h-[44px] sm:min-h-0 shrink-0 whitespace-nowrap"
                   >
-                    {tab.label}
-                  </span>
-                </TabsTrigger>
-              ))}
-          </TabsList>
+                    <tab.icon
+                      className={`h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2 shrink-0 ${variant === "admin" ? "text-[var(--admin-accent-secondary)]" : ""}`}
+                    />
+                    <span
+                      className={`font-bold tracking-tight truncate ${variant === "admin" ? "text-[var(--admin-accent-secondary)]" : ""}`}
+                    >
+                      {tab.label}
+                    </span>
+                  </TabsTrigger>
+                ))}
+            </TabsList>
+          </div>
 
           <TabsContent
             value="overview"
-            className="space-y-8 animate-in fade-in slide-in-from-top-2 duration-500"
+            className="space-y-6 sm:space-y-8 animate-in fade-in slide-in-from-top-2 duration-500"
           >
             {variant === "public" && !dataLoading && needsOnboarding && (
               <Card
                 variant="glass"
                 className="border-primary/20 bg-primary/5 shadow-xl shadow-primary/5 overflow-hidden"
               >
-                <CardContent className="p-8">
-                  <div className="flex flex-col md:flex-row items-center gap-8">
+                <CardContent className="p-4 sm:p-6 md:p-8">
+                  <div className="flex flex-col md:flex-row items-center gap-4 sm:gap-6 md:gap-8">
                     <div className="flex-shrink-0 relative">
                       <div className="absolute inset-0 bg-primary/20 blur-xl animate-pulse rounded-full" />
-                      <div className="relative z-10 w-16 h-16 bg-white dark:bg-slate-900 rounded-2xl flex items-center justify-center shadow-2xl">
-                        <Building2 className="h-8 w-8 text-primary" />
+                      <div className="relative z-10 w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 bg-white dark:bg-slate-900 rounded-xl sm:rounded-2xl flex items-center justify-center shadow-2xl">
+                        <Building2 className="h-6 w-6 sm:h-7 sm:w-7 md:h-8 md:w-8 text-primary" />
                       </div>
                     </div>
-                    <div className="flex-1 text-center md:text-left">
-                      <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2 tracking-tight">
+                    <div className="flex-1 min-w-0 text-center md:text-left">
+                      <h3 className="text-base sm:text-lg md:text-xl font-bold text-slate-900 dark:text-white mb-1 sm:mb-2 tracking-tight">
                         Configura tu Óptica Profesional
                       </h3>
-                      <p className="text-slate-600 dark:text-slate-400 mb-0 font-medium font-body leading-relaxed">
+                      <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400 mb-0 font-medium font-body leading-relaxed">
                         Desbloquea todas las herramientas especializadas
                         configurando tu organización real. Toma menos de 2
                         minutos.
@@ -486,10 +488,10 @@ export function ProfilePageContent({
                       onClick={() => router.push("/onboarding/choice")}
                       size="lg"
                       shimmer
-                      className="whitespace-nowrap shadow-xl shadow-primary/20 font-bold"
+                      className="w-full md:w-auto min-h-[44px] shadow-xl shadow-primary/20 font-bold"
                     >
                       Comenzar Ahora
-                      <ArrowRight className="ml-2 h-5 w-5" />
+                      <ArrowRight className="ml-2 h-5 w-5 shrink-0" />
                     </Button>
                   </div>
                 </CardContent>
@@ -501,53 +503,53 @@ export function ProfilePageContent({
                 variant="elevated"
                 className="overflow-hidden border-2 border-primary/5 shadow-2xl shadow-primary/5"
               >
-                <CardHeader className="bg-slate-50/50 dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-800">
-                  <CardTitle className="flex items-center gap-3 text-2xl font-bold font-cormorant tracking-tight">
-                    <div className="p-2 bg-primary/10 rounded-xl">
-                      <Building2 className="h-6 w-6 text-primary" />
+                <CardHeader className="bg-slate-50/50 dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-800 p-4 sm:p-6">
+                  <CardTitle className="flex items-center gap-2 sm:gap-3 text-lg sm:text-xl md:text-2xl font-bold font-cormorant tracking-tight">
+                    <div className="p-1.5 sm:p-2 bg-primary/10 rounded-lg sm:rounded-xl">
+                      <Building2 className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
                     </div>
                     Mi Organización
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="p-8">
-                  <div className="flex flex-col md:flex-row items-center justify-between gap-8">
-                    <div className="flex gap-10">
+                <CardContent className="p-4 sm:p-6 md:p-8">
+                  <div className="flex flex-col md:flex-row items-center justify-between gap-4 sm:gap-6 md:gap-8">
+                    <div className="flex flex-wrap gap-6 sm:gap-10 justify-center md:justify-start">
                       <div>
-                        <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">
+                        <p className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-widest mb-1 sm:mb-2">
                           Estado Cuenta
                         </p>
                         <Badge
                           variant="healty"
-                          className="px-4 py-1 text-[10px] font-bold"
+                          className="px-3 sm:px-4 py-1 text-[9px] sm:text-[10px] font-bold"
                         >
                           ACTIVA
                         </Badge>
                       </div>
                       <div>
-                        <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">
+                        <p className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-widest mb-1 sm:mb-2">
                           Plan Actual
                         </p>
-                        <p className="text-lg font-bold text-slate-900 dark:text-white uppercase">
+                        <p className="text-base sm:text-lg font-bold text-slate-900 dark:text-white uppercase">
                           {subscriptionData?.currentTier || "Basic"}
                         </p>
                       </div>
                     </div>
-                    <div className="flex gap-4 w-full md:w-auto">
+                    <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full md:w-auto">
                       <Button
                         variant="outline"
                         onClick={() => router.push("/admin/settings")}
-                        className="flex-1 md:flex-none border-2 h-12"
+                        className="flex-1 md:flex-none border-2 h-12 min-h-[44px]"
                       >
-                        <Settings className="h-5 w-5 mr-2" />
+                        <Settings className="h-5 w-5 mr-2 shrink-0" />
                         Ajustes
                       </Button>
                       <Button
                         onClick={() => router.push("/admin")}
-                        className="flex-1 md:flex-none h-12 shadow-xl shadow-primary/10"
+                        className="flex-1 md:flex-none h-12 min-h-[44px] shadow-xl shadow-primary/10"
                         shimmer
                       >
                         Panel Administrativo
-                        <ArrowRight className="ml-2 h-5 w-5" />
+                        <ArrowRight className="ml-2 h-5 w-5 shrink-0" />
                       </Button>
                     </div>
                   </div>
@@ -555,50 +557,50 @@ export function ProfilePageContent({
               </Card>
             )}
 
-            <div className="grid gap-8 md:grid-cols-2">
+            <div className="grid gap-4 sm:gap-6 md:gap-8 grid-cols-1 md:grid-cols-2">
               <Card variant="interactive" className="group">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-3 text-xl font-bold font-cormorant tracking-tight text-slate-800 dark:text-white group-hover:text-primary transition-colors">
-                    <div className="p-2 bg-[var(--admin-bg-tertiary)] rounded-xl group-hover:bg-primary/10 transition-colors">
-                      <User className="h-5 w-5 text-slate-600 dark:text-slate-400 group-hover:text-primary" />
+                <CardHeader className="p-4 sm:p-6 pb-4">
+                  <CardTitle className="flex items-center gap-2 sm:gap-3 text-base sm:text-lg md:text-xl font-bold font-cormorant tracking-tight text-slate-800 dark:text-white group-hover:text-primary transition-colors">
+                    <div className="p-1.5 sm:p-2 bg-[var(--admin-bg-tertiary)] rounded-lg sm:rounded-xl group-hover:bg-primary/10 transition-colors">
+                      <User className="h-4 w-4 sm:h-5 sm:w-5 text-slate-600 dark:text-slate-400 group-hover:text-primary" />
                     </div>
                     Información Base
                   </CardTitle>
                 </CardHeader>
-                <CardContent spacing="relaxed" className="p-6 pt-0">
-                  <div className="space-y-4">
-                    <div className="bg-slate-100/50 dark:bg-slate-900/50 p-5 rounded-3xl border border-[var(--admin-border-secondary)] group-hover:border-primary/30 transition-all">
-                      <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                <CardContent spacing="relaxed" className="p-4 sm:p-6 pt-0">
+                  <div className="space-y-3 sm:space-y-4">
+                    <div className="bg-slate-100/50 dark:bg-slate-900/50 p-4 sm:p-5 rounded-2xl sm:rounded-3xl border border-[var(--admin-border-secondary)] group-hover:border-primary/30 transition-all">
+                      <Label className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest">
                         Nombre Completo
                       </Label>
-                      <p className="text-base font-bold mt-1 text-slate-800 dark:text-slate-100">
+                      <p className="text-sm sm:text-base font-bold mt-1 text-slate-800 dark:text-slate-100 break-words">
                         {profile?.first_name && profile?.last_name
                           ? `${profile.first_name} ${profile.last_name}`
                           : "Pendiente de completar"}
                       </p>
                     </div>
-                    <div className="bg-slate-100/50 dark:bg-slate-900/50 p-5 rounded-3xl border border-[var(--admin-border-secondary)] group-hover:border-primary/30 transition-all">
-                      <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                    <div className="bg-slate-100/50 dark:bg-slate-900/50 p-4 sm:p-5 rounded-2xl sm:rounded-3xl border border-[var(--admin-border-secondary)] group-hover:border-primary/30 transition-all">
+                      <Label className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest">
                         Canal de Acceso
                       </Label>
-                      <p className="text-base font-bold mt-1 text-slate-800 dark:text-slate-100">
+                      <p className="text-sm sm:text-base font-bold mt-1 text-slate-800 dark:text-slate-100 truncate">
                         {user.email}
                       </p>
                     </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="bg-slate-100/50 dark:bg-slate-900/50 p-5 rounded-3xl border border-[var(--admin-border-secondary)] group-hover:border-primary/30 transition-all">
-                        <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                      <div className="bg-slate-100/50 dark:bg-slate-900/50 p-4 sm:p-5 rounded-2xl sm:rounded-3xl border border-[var(--admin-border-secondary)] group-hover:border-primary/30 transition-all">
+                        <Label className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest">
                           Teléfono
                         </Label>
-                        <p className="text-sm font-bold mt-1 text-slate-800 dark:text-slate-100">
+                        <p className="text-xs sm:text-sm font-bold mt-1 text-slate-800 dark:text-slate-100">
                           {profile?.phone || "Sin registro"}
                         </p>
                       </div>
-                      <div className="bg-[var(--admin-bg-tertiary)] p-5 rounded-3xl border border-[var(--admin-border-secondary)] group-hover:border-primary/30 transition-all">
-                        <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                      <div className="bg-[var(--admin-bg-tertiary)] p-4 sm:p-5 rounded-2xl sm:rounded-3xl border border-[var(--admin-border-secondary)] group-hover:border-primary/30 transition-all">
+                        <Label className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest">
                           Cumpleaños
                         </Label>
-                        <p className="text-sm font-bold mt-1 text-slate-800 dark:text-slate-100">
+                        <p className="text-xs sm:text-sm font-bold mt-1 text-slate-800 dark:text-slate-100">
                           {profile?.date_of_birth
                             ? formatDate(profile.date_of_birth)
                             : "Sin registro"}
@@ -608,7 +610,7 @@ export function ProfilePageContent({
                   </div>
                   <Button
                     variant="outline"
-                    className="w-full mt-6 border-2 border-[var(--accent-foreground)] text-[var(--accent-foreground)] rounded-2xl font-bold h-12 hover:bg-primary hover:text-white hover:border-primary transition-all duration-300"
+                    className="w-full mt-4 sm:mt-6 border-2 border-[var(--accent-foreground)] text-[var(--accent-foreground)] rounded-xl sm:rounded-2xl font-bold h-12 min-h-[44px] hover:bg-primary hover:text-white hover:border-primary transition-all duration-300"
                     onClick={() => {
                       setActiveTab("personal");
                       setIsEditingPersonal(true);
@@ -621,45 +623,45 @@ export function ProfilePageContent({
               </Card>
 
               <Card variant="interactive" className="group">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-3 text-xl font-bold font-cormorant tracking-tight text-[var(--accent-foreground)] transition-colors">
-                    <div className="p-2 bg-[var(--admin-bg-tertiary)] rounded-xl transition-colors">
-                      <MapPin className="h-5 w-5 text-[var(--accent-foreground)]" />
+                <CardHeader className="p-4 sm:p-6 pb-4">
+                  <CardTitle className="flex items-center gap-2 sm:gap-3 text-base sm:text-lg md:text-xl font-bold font-cormorant tracking-tight text-[var(--accent-foreground)] transition-colors">
+                    <div className="p-1.5 sm:p-2 bg-[var(--admin-bg-tertiary)] rounded-lg sm:rounded-xl transition-colors">
+                      <MapPin className="h-4 w-4 sm:h-5 sm:w-5 text-[var(--accent-foreground)]" />
                     </div>
                     Ubicación Principal
                   </CardTitle>
                 </CardHeader>
-                <CardContent spacing="relaxed" className="p-6 pt-0">
-                  <div className="space-y-4">
-                    <div className="bg-[var(--admin-bg-tertiary)] p-5 rounded-3xl border border-[var(--admin-border-secondary)] group-hover:border-primary/30 transition-all min-h-[84px]">
-                      <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                <CardContent spacing="relaxed" className="p-4 sm:p-6 pt-0">
+                  <div className="space-y-3 sm:space-y-4">
+                    <div className="bg-[var(--admin-bg-tertiary)] p-4 sm:p-5 rounded-2xl sm:rounded-3xl border border-[var(--admin-border-secondary)] group-hover:border-primary/30 transition-all min-h-[72px] sm:min-h-[84px]">
+                      <Label className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest">
                         Dirección Lineal
                       </Label>
                       <div className="mt-1">
-                        <p className="text-base font-bold text-slate-800 dark:text-slate-100">
+                        <p className="text-sm sm:text-base font-bold text-slate-800 dark:text-slate-100 break-words">
                           {profile?.address_line_1 || "Pendiente de completar"}
                         </p>
                         {profile?.address_line_2 && (
-                          <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
+                          <p className="text-xs sm:text-sm font-medium text-slate-500 dark:text-slate-400 break-words">
                             {profile.address_line_2}
                           </p>
                         )}
                       </div>
                     </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="bg-[var(--admin-bg-tertiary)] p-5 rounded-3xl border border-[var(--admin-border-secondary)] group-hover:border-primary/30 transition-all">
-                        <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                      <div className="bg-[var(--admin-bg-tertiary)] p-4 sm:p-5 rounded-2xl sm:rounded-3xl border border-[var(--admin-border-secondary)] group-hover:border-primary/30 transition-all">
+                        <Label className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest">
                           Ciudad
                         </Label>
-                        <p className="text-sm font-bold mt-1 text-slate-800 dark:text-slate-100">
+                        <p className="text-xs sm:text-sm font-bold mt-1 text-slate-800 dark:text-slate-100">
                           {profile?.city || "—"}
                         </p>
                       </div>
-                      <div className="bg-[var(--admin-bg-tertiary)] p-5 rounded-3xl border border-[var(--admin-border-secondary)] group-hover:border-primary/30 transition-all">
-                        <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                      <div className="bg-[var(--admin-bg-tertiary)] p-4 sm:p-5 rounded-2xl sm:rounded-3xl border border-[var(--admin-border-secondary)] group-hover:border-primary/30 transition-all">
+                        <Label className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest">
                           País
                         </Label>
-                        <p className="text-sm font-bold mt-1 text-slate-800 dark:text-slate-100">
+                        <p className="text-xs sm:text-sm font-bold mt-1 text-slate-800 dark:text-slate-100">
                           {profile?.country || "—"}
                         </p>
                       </div>
@@ -667,7 +669,7 @@ export function ProfilePageContent({
                   </div>
                   <Button
                     variant="outline"
-                    className="w-full mt-6 bg-[var(--accent-foreground)] border-2 border-[var(--admin-border-secondary)] text-[var(--admin-bg-primary)] rounded-2xl font-bold h-12 hover:bg-[var(--accent-foreground)] hover:text-white hover:border-[var(--accent-foreground)] transition-all duration-300"
+                    className="w-full mt-4 sm:mt-6 bg-[var(--accent-foreground)] border-2 border-[var(--admin-border-secondary)] text-[var(--admin-bg-primary)] rounded-xl sm:rounded-2xl font-bold h-12 min-h-[44px] hover:bg-[var(--accent-foreground)] hover:text-white hover:border-[var(--accent-foreground)] transition-all duration-300"
                     onClick={() => {
                       setActiveTab("address");
                       setIsEditingAddress(true);
@@ -680,39 +682,39 @@ export function ProfilePageContent({
               </Card>
 
               <Card variant="interactive" className="group md:col-span-2">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-3 text-xl font-bold font-cormorant tracking-tight text-slate-800 dark:text-white group-hover:text-primary transition-colors">
-                    <div className="p-2 bg-[var(--admin-bg-tertiary)] rounded-xl group-hover:bg-primary/10 transition-colors">
-                      <CreditCard className="h-5 w-5 text-slate-600 dark:text-slate-400 group-hover:text-primary" />
+                <CardHeader className="p-4 sm:p-6 pb-4">
+                  <CardTitle className="flex items-center gap-2 sm:gap-3 text-base sm:text-lg md:text-xl font-bold font-cormorant tracking-tight text-slate-800 dark:text-white group-hover:text-primary transition-colors">
+                    <div className="p-1.5 sm:p-2 bg-[var(--admin-bg-tertiary)] rounded-lg sm:rounded-xl group-hover:bg-primary/10 transition-colors">
+                      <CreditCard className="h-4 w-4 sm:h-5 sm:w-5 text-slate-600 dark:text-slate-400 group-hover:text-primary" />
                     </div>
                     Estado de Suscripción
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="p-6 pt-0">
-                  <div className="bg-primary/5 dark:bg-primary/10 rounded-[2rem] p-8 border border-[var(--admin-border-secondary)] flex flex-col md:flex-row items-center justify-between gap-8">
-                    <div className="flex items-center gap-6">
-                      <div className="w-16 h-16 rounded-3xl bg-primary flex items-center justify-center text-white shadow-xl shadow-primary/30">
-                        <Zap className="h-8 w-8" />
+                <CardContent className="p-4 sm:p-6 pt-0">
+                  <div className="bg-primary/5 dark:bg-primary/10 rounded-2xl sm:rounded-[2rem] p-4 sm:p-6 md:p-8 border border-[var(--admin-border-secondary)] flex flex-col md:flex-row items-center justify-between gap-4 sm:gap-6 md:gap-8">
+                    <div className="flex items-center gap-4 sm:gap-6">
+                      <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-2xl sm:rounded-3xl bg-primary flex items-center justify-center text-white shadow-xl shadow-primary/30 shrink-0">
+                        <Zap className="h-6 w-6 sm:h-7 sm:w-7 md:h-8 md:w-8" />
                       </div>
-                      <div>
-                        <p className="text-[10px] font-black text-primary/60 uppercase tracking-[0.2em] mb-1">
+                      <div className="min-w-0">
+                        <p className="text-[9px] sm:text-[10px] font-black text-primary/60 uppercase tracking-[0.2em] mb-1">
                           Tu Nivel Actual
                         </p>
-                        <h3 className="text-3xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">
+                        <h3 className="text-xl sm:text-2xl md:text-3xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">
                           Plan {subscriptionData?.currentTier || "Básico"}
                         </h3>
                       </div>
                     </div>
-                    <div className="flex gap-4 w-full md:w-auto">
+                    <div className="w-full md:w-auto">
                       <Button
                         size="lg"
-                        className="flex-1 md:flex-none h-14 rounded-2xl font-bold px-8 shadow-xl shadow-primary/20"
+                        className="w-full md:w-auto min-h-[44px] h-12 sm:h-14 rounded-xl sm:rounded-2xl font-bold px-6 sm:px-8 shadow-xl shadow-primary/20"
                         onClick={() => setActiveTab("subscription")}
                         disabled={!adminData?.adminCheck?.isOwner}
                         shimmer
                       >
                         Gestionar Suscripción
-                        <ArrowRight className="h-5 w-5 ml-2" />
+                        <ArrowRight className="h-5 w-5 ml-2 shrink-0" />
                       </Button>
                     </div>
                   </div>
@@ -728,13 +730,13 @@ export function ProfilePageContent({
             <Card variant="elevated" className="border-0 shadow-2xl">
               <CardHeader
                 padding="lg"
-                className="border-b border-slate-100 dark:border-slate-800"
+                className="border-b border-slate-100 dark:border-slate-800 p-4 sm:p-6"
               >
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                   <CardTitle
                     size="lg"
                     theme="modern"
-                    className="font-cormorant"
+                    className="font-cormorant text-lg sm:text-xl"
                   >
                     Datos Personales
                   </CardTitle>
@@ -742,20 +744,20 @@ export function ProfilePageContent({
                     <Button
                       onClick={() => setIsEditingPersonal(true)}
                       variant="outline"
-                      className="border-2 font-bold px-6 text-[var(--accent-foreground)] bg-[var(--admin-border-primary)] border-[var(--admin-border-secondary)]"
+                      className="border-2 font-bold px-4 sm:px-6 text-[var(--accent-foreground)] bg-[var(--admin-border-primary)] border-[var(--admin-border-secondary)] min-h-[44px] w-full sm:w-auto"
                     >
-                      <Edit3 className="h-4 w-4 mr-2" />
+                      <Edit3 className="h-4 w-4 mr-2 shrink-0" />
                       Editar Información
                     </Button>
                   )}
                 </div>
               </CardHeader>
-              <CardContent padding="lg">
+              <CardContent padding="lg" className="p-4 sm:p-6">
                 <form
                   onSubmit={personalForm.handleSubmit(handlePersonalInfoSubmit)}
-                  className="space-y-8"
+                  className="space-y-6 sm:space-y-8"
                 >
-                  <div className="grid gap-6 md:grid-cols-2">
+                  <div className="grid gap-4 sm:gap-6 grid-cols-1 md:grid-cols-2">
                     <div className="space-y-3">
                       <Label
                         htmlFor="firstName"
@@ -797,7 +799,7 @@ export function ProfilePageContent({
                       )}
                     </div>
                   </div>
-                  <div className="grid gap-6 md:grid-cols-2">
+                  <div className="grid gap-4 sm:gap-6 grid-cols-1 md:grid-cols-2">
                     <div className="space-y-3">
                       <Label
                         htmlFor="phone"
@@ -851,24 +853,24 @@ export function ProfilePageContent({
                     )}
                   </div>
                   {isEditingPersonal && (
-                    <div className="flex gap-4 pt-4">
+                    <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4">
                       <Button
                         type="submit"
                         disabled={isLoading}
-                        className="flex-1 h-12 shadow-xl shadow-primary/20"
+                        className="flex-1 h-12 min-h-[44px] shadow-xl shadow-primary/20"
                         shimmer
                       >
                         {isLoading ? (
-                          <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                          <Loader2 className="h-5 w-5 mr-2 animate-spin shrink-0" />
                         ) : (
-                          <Save className="h-5 w-5 mr-2" />
+                          <Save className="h-5 w-5 mr-2 shrink-0" />
                         )}
                         Guardar Cambios
                       </Button>
                       <Button
                         type="button"
                         variant="outline"
-                        className="flex-1 h-12 border-2"
+                        className="flex-1 h-12 min-h-[44px] border-2"
                         onClick={() => {
                           setIsEditingPersonal(false);
                           personalForm.reset({
@@ -898,13 +900,13 @@ export function ProfilePageContent({
             <Card variant="elevated" className="border-0 shadow-2xl">
               <CardHeader
                 padding="lg"
-                className="border-b border-slate-100 dark:border-slate-800"
+                className="border-b border-slate-100 dark:border-slate-800 p-4 sm:p-6"
               >
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                   <CardTitle
                     size="lg"
                     theme="modern"
-                    className="font-cormorant"
+                    className="font-cormorant text-lg sm:text-xl"
                   >
                     Dirección de Envío / Oficina
                   </CardTitle>
@@ -912,21 +914,21 @@ export function ProfilePageContent({
                     <Button
                       onClick={() => setIsEditingAddress(true)}
                       variant="outline"
-                      className="border-2 font-bold px-6"
+                      className="border-2 font-bold px-4 sm:px-6 min-h-[44px] w-full sm:w-auto"
                     >
-                      <Edit3 className="h-4 w-4 mr-2" />
+                      <Edit3 className="h-4 w-4 mr-2 shrink-0" />
                       Editar Dirección
                     </Button>
                   )}
                 </div>
               </CardHeader>
-              <CardContent padding="lg">
+              <CardContent padding="lg" className="p-4 sm:p-6">
                 <form
                   onSubmit={addressForm.handleSubmit(handleAddressSubmit)}
-                  className="space-y-8"
+                  className="space-y-6 sm:space-y-8"
                 >
-                  <div className="grid gap-8">
-                    <div className="grid gap-6 md:grid-cols-2">
+                  <div className="grid gap-6 sm:gap-8">
+                    <div className="grid gap-4 sm:gap-6 grid-cols-1 md:grid-cols-2">
                       <div className="space-y-3">
                         <Label
                           htmlFor="addressLine1"
@@ -956,7 +958,7 @@ export function ProfilePageContent({
                         />
                       </div>
                     </div>
-                    <div className="grid gap-6 md:grid-cols-2">
+                    <div className="grid gap-4 sm:gap-6 grid-cols-1 md:grid-cols-2">
                       <div className="space-y-3">
                         <Label
                           htmlFor="city"
@@ -986,7 +988,7 @@ export function ProfilePageContent({
                         />
                       </div>
                     </div>
-                    <div className="grid gap-6 md:grid-cols-2">
+                    <div className="grid gap-4 sm:gap-6 grid-cols-1 md:grid-cols-2">
                       <div className="space-y-3">
                         <Label
                           htmlFor="postalCode"
@@ -1018,24 +1020,24 @@ export function ProfilePageContent({
                     </div>
                   </div>
                   {isEditingAddress && (
-                    <div className="flex gap-4 pt-4">
+                    <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4">
                       <Button
                         type="submit"
                         disabled={isLoading}
-                        className="flex-1 h-12 shadow-xl shadow-primary/20"
+                        className="flex-1 h-12 min-h-[44px] shadow-xl shadow-primary/20"
                         shimmer
                       >
                         {isLoading ? (
-                          <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                          <Loader2 className="h-5 w-5 mr-2 animate-spin shrink-0" />
                         ) : (
-                          <Save className="h-5 w-5 mr-2" />
+                          <Save className="h-5 w-5 mr-2 shrink-0" />
                         )}
                         Guardar Dirección
                       </Button>
                       <Button
                         type="button"
                         variant="outline"
-                        className="flex-1 h-12 border-2"
+                        className="flex-1 h-12 min-h-[44px] border-2"
                         onClick={() => {
                           setIsEditingAddress(false);
                           addressForm.reset({
@@ -1076,22 +1078,22 @@ export function ProfilePageContent({
             >
               <CardHeader
                 padding="lg"
-                className="bg-[var(--admin-bg-tertiary)]"
+                className="bg-[var(--admin-bg-tertiary)] p-4 sm:p-6"
               >
-                <CardTitle className="flex items-center gap-3 text-xl font-bold font-cormorant tracking-tight">
-                  <div className="p-2 bg-primary/10 rounded-xl">
-                    <Lock className="h-5 w-5 text-primary" />
+                <CardTitle className="flex items-center gap-2 sm:gap-3 text-base sm:text-lg md:text-xl font-bold font-cormorant tracking-tight">
+                  <div className="p-1.5 sm:p-2 bg-primary/10 rounded-lg sm:rounded-xl">
+                    <Lock className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                   </div>
                   Seguridad de la Cuenta
                 </CardTitle>
-                <CardDescription className="text-[var(--accent-foreground)]">
+                <CardDescription className="text-[var(--accent-foreground)] text-sm">
                   Administra tu contraseña y métodos de acceso. Se requiere tu
                   contraseña actual para realizar el cambio.
                 </CardDescription>
               </CardHeader>
-              <CardContent padding="lg">
+              <CardContent padding="lg" className="p-4 sm:p-6">
                 {!isChangingPassword ? (
-                  <div className="flex items-center justify-between p-6 bg-[var(--admin-bg-primary)] rounded-2xl border border-dashed border-[var(--admin-border-secondary)]">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-4 sm:p-6 bg-[var(--admin-bg-primary)] rounded-xl sm:rounded-2xl border border-dashed border-[var(--admin-border-secondary)]">
                     <div>
                       <h4 className="font-bold text-slate-900 dark:text-white">
                         Contraseña
@@ -1103,7 +1105,7 @@ export function ProfilePageContent({
                     <Button
                       variant="outline"
                       onClick={() => setIsChangingPassword(true)}
-                      className="border-2 font-bold"
+                      className="border-2 font-bold min-h-[44px] w-full sm:w-auto"
                     >
                       Cambiar Contraseña
                     </Button>
@@ -1145,7 +1147,7 @@ export function ProfilePageContent({
                         </Button>
                       </div>
                     </div>
-                    <div className="grid gap-6 md:grid-cols-2">
+                    <div className="grid gap-4 sm:gap-6 grid-cols-1 md:grid-cols-2">
                       <div className="space-y-3">
                         <Label
                           htmlFor="newPassword"
@@ -1214,24 +1216,24 @@ export function ProfilePageContent({
                         </div>
                       </div>
                     </div>
-                    <div className="flex gap-4 pt-4">
+                    <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4">
                       <Button
                         type="submit"
                         disabled={isLoading}
-                        className="flex-1 h-12 shadow-xl shadow-primary/20"
+                        className="flex-1 h-12 min-h-[44px] shadow-xl shadow-primary/20"
                         shimmer
                       >
                         {isLoading ? (
-                          <Loader2 className="h-5 w-5 animate-spin" />
+                          <Loader2 className="h-5 w-5 animate-spin shrink-0" />
                         ) : (
-                          <Save className="h-5 w-5 mr-2" />
+                          <Save className="h-5 w-5 mr-2 shrink-0" />
                         )}
                         Actualizar Ahora
                       </Button>
                       <Button
                         type="button"
                         variant="outline"
-                        className="flex-1 h-12 border-2"
+                        className="flex-1 h-12 min-h-[44px] border-2"
                         onClick={() => {
                           setIsChangingPassword(false);
                           passwordForm.reset();
@@ -1252,20 +1254,24 @@ export function ProfilePageContent({
             >
               <CardHeader
                 padding="lg"
-                className="bg-[var(--admin-bg-tertiary)]"
+                className="bg-[var(--admin-bg-tertiary)] p-4 sm:p-6"
               >
-                <CardTitle className="flex items-center gap-3 text-xl font-bold font-cormorant tracking-tight">
-                  <div className="p-2 bg-amber-500/10 rounded-xl">
-                    <Bell className="h-5 w-5 text-amber-500" />
+                <CardTitle className="flex items-center gap-2 sm:gap-3 text-base sm:text-lg md:text-xl font-bold font-cormorant tracking-tight">
+                  <div className="p-1.5 sm:p-2 bg-amber-500/10 rounded-lg sm:rounded-xl">
+                    <Bell className="h-4 w-4 sm:h-5 sm:w-5 text-amber-500" />
                   </div>
                   Personalización
                 </CardTitle>
-                <CardDescription>
+                <CardDescription className="text-sm">
                   Ajusta el sistema a tus necesidades regionales.
                 </CardDescription>
               </CardHeader>
-              <CardContent padding="lg" spacing="relaxed">
-                <div className="space-y-6 max-w-md">
+              <CardContent
+                padding="lg"
+                spacing="relaxed"
+                className="p-4 sm:p-6"
+              >
+                <div className="space-y-4 sm:space-y-6 max-w-md">
                   <div className="space-y-3">
                     <Label htmlFor="timezone" className="text-sm font-bold">
                       Zona Horaria Regional
@@ -1360,7 +1366,7 @@ export function ProfilePageContent({
                     </div>
                   )}
 
-                  <div className="flex items-center justify-between rounded-2xl border border-slate-200 dark:border-slate-800 p-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-xl sm:rounded-2xl border border-slate-200 dark:border-slate-800 p-4">
                     <div className="space-y-0.5">
                       <Label htmlFor="newsletter" className="text-sm font-bold">
                         Recibir novedades y ofertas por email
@@ -1383,7 +1389,7 @@ export function ProfilePageContent({
 
                   <Button
                     onClick={handlePreferencesUpdate}
-                    className="w-full h-12 shadow-xl shadow-amber-500/20"
+                    className="w-full h-12 min-h-[44px] shadow-xl shadow-amber-500/20"
                     shimmer
                   >
                     {isLoading ? (

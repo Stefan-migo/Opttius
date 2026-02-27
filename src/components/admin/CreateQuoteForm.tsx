@@ -1567,7 +1567,7 @@ export default function CreateQuoteForm({
         <>
           <div className="p-4 border rounded-lg bg-blue-50 text-blue-900">
             <p className="font-medium mb-2">Resumen de Receta</p>
-            <div className="grid grid-cols-2 gap-2 text-sm">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
               <div>
                 <span className="font-semibold">OD:</span> Esf{" "}
                 {selectedPrescription.od_sphere ?? "—"} / Cil{" "}
@@ -1728,7 +1728,7 @@ export default function CreateQuoteForm({
           </div>
 
           {customerOwnFrame ? (
-            <div className="grid grid-cols-2 gap-4 mt-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
               <div>
                 <Label>Nombre del Marco *</Label>
                 <Input
@@ -1848,7 +1848,7 @@ export default function CreateQuoteForm({
 
           {/* Manual frame entry */}
           {!selectedFrame && !customerOwnFrame && (
-            <div className="grid grid-cols-2 gap-4 mt-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
               <div>
                 <Label>Nombre del Marco</Label>
                 <Input
@@ -1920,7 +1920,7 @@ export default function CreateQuoteForm({
                 </Label>
               </div>
               {customerOwnNearFrame ? (
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <Label>Nombre del Marco (Cerca) *</Label>
                     <Input
@@ -2036,7 +2036,7 @@ export default function CreateQuoteForm({
 
               {/* Manual near frame entry */}
               {!selectedNearFrame && !customerOwnNearFrame && (
-                <div className="grid grid-cols-2 gap-4 mt-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
                   <div>
                     <Label>Nombre del Marco (Cerca)</Label>
                     <Input
@@ -2149,7 +2149,7 @@ export default function CreateQuoteForm({
 
                 {formData.contact_lens_family_id && (
                   <>
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
                         <Label>Cantidad de Cajas</Label>
                         <Input
@@ -2196,7 +2196,7 @@ export default function CreateQuoteForm({
               /* Optical Lens Configuration (existing code) */
               <>
                 {presbyopiaSolution === "two_separate" ? (
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {/* Far Lens */}
                     <div className="space-y-2">
                       <Label>Lente de Lejos</Label>
@@ -2390,7 +2390,7 @@ export default function CreateQuoteForm({
                     Con familia: ocultamos estándar (AR, Blue, UV, Anti-rayas,
                     Foto, Polarizado). Extras permitidos: Tinte, Prisma.
                   </p>
-                  <div className="grid grid-cols-2 gap-2 mt-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2">
                     {availableTreatments
                       .filter((t) => {
                         if (!formData.lens_family_id) return true;
@@ -2451,7 +2451,7 @@ export default function CreateQuoteForm({
 
                   {/* Tint options */}
                   {formData.lens_treatments.includes("tint") && (
-                    <div className="grid grid-cols-2 gap-4 mt-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
                       <div>
                         <Label>Color del Tinte</Label>
                         <Input
@@ -2534,7 +2534,7 @@ export default function CreateQuoteForm({
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <Label>Tipo de Descuento</Label>
               <Select
@@ -2602,7 +2602,7 @@ export default function CreateQuoteForm({
               <summary className="px-4 py-2 cursor-pointer text-sm font-medium">
                 Datos internos (no mostrar al cliente)
               </summary>
-              <div className="p-4 grid grid-cols-2 gap-4">
+              <div className="p-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <Label>Costo interno de Marco</Label>
                   <Input

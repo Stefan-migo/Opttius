@@ -84,6 +84,32 @@ export function Toaster() {
         // Mark as processed
         toastElement.dataset.progressSetup = "true";
 
+        // Mobile: show swipe hint after 2.5s if toast still visible (helps discoverability)
+        const SWIPE_HINT_DELAY_MS = 2500;
+        const swipeHintTimeout = setTimeout(() => {
+          if (
+            !document.body.contains(toastElement) ||
+            toastElement.getAttribute("data-removed") === "true" ||
+            toastElement.dataset.swipeHintShown === "true"
+          ) {
+            return;
+          }
+          const isMobile =
+            typeof window !== "undefined" && window.innerWidth < 768;
+          if (!isMobile) return;
+
+          toastElement.dataset.swipeHintShown = "true";
+          const hint = document.createElement("div");
+          hint.className = "toast-swipe-hint";
+          hint.setAttribute("aria-hidden", "true");
+          hint.innerHTML = `
+            <span class="toast-swipe-hint-text">Desliza</span>
+            <span class="toast-swipe-hint-arrow">→</span>
+            <span class="toast-swipe-hint-text">para cerrar</span>
+          `;
+          toastElement.appendChild(hint);
+        }, SWIPE_HINT_DELAY_MS);
+
         // Reset progress bar when toast is removed
         const removeObserver = new MutationObserver((mutations) => {
           mutations.forEach((mutation) => {

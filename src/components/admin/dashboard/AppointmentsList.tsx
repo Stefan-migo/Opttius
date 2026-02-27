@@ -66,9 +66,10 @@ export function AppointmentsList({
         <div className="divide-y divide-admin-border-primary/5">
           {appointments.length > 0 ? (
             appointments.map((appointment) => (
-              <div
+              <Link
                 key={appointment.id}
-                className="group flex items-center p-6 hover:bg-admin-bg-tertiary/60 transition-all duration-300 relative overflow-hidden border-l-2 border-l-transparent hover:border-l-epoch-accent/50"
+                href="/admin/appointments"
+                className="group flex items-center p-6 hover:bg-admin-bg-tertiary/60 active:bg-admin-bg-tertiary/70 transition-all duration-300 relative overflow-hidden border-l-2 border-l-transparent hover:border-l-epoch-accent/50 block"
               >
                 <div className="flex-shrink-0 mr-6 text-center min-w-[70px] pr-6">
                   <p className="text-sm font-display font-bold text-admin-text-primary leading-none tracking-wider">
@@ -94,28 +95,26 @@ export function AppointmentsList({
                   </div>
                 </div>
 
-                <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 text-admin-text-tertiary hover:text-epoch-primary hover:bg-admin-bg-secondary border border-transparent hover:border-admin-border-primary/10 rounded-xl shadow-sm"
-                  >
+                <div className="opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
+                  <span className="inline-flex h-8 w-8 items-center justify-center text-admin-text-tertiary group-hover:text-admin-text-primary rounded-xl">
                     <ChevronRight className="h-4 w-4" />
-                  </Button>
+                  </span>
                 </div>
-              </div>
+              </Link>
             ))
           ) : (
-            <div className="flex flex-col items-center justify-center h-[300px] text-center p-8">
-              <div className="h-12 w-12 rounded-xl bg-admin-bg-tertiary border border-admin-border-primary/10 flex items-center justify-center mb-4">
-                <Clock className="h-6 w-6 text-admin-text-tertiary/20" />
+            <div className="flex items-center justify-center gap-3 h-[72px] sm:h-[300px] text-center p-4 sm:p-8 sm:flex-col">
+              <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-xl bg-admin-bg-tertiary border border-admin-border-primary/10 flex items-center justify-center flex-shrink-0">
+                <Clock className="h-5 w-5 sm:h-6 sm:w-6 text-admin-text-tertiary/20" />
               </div>
-              <p className="text-[10px] font-display font-bold text-admin-text-tertiary uppercase tracking-widest">
-                Tranquilidad absoluta para este ciclo
-              </p>
-              <p className="text-[11px] font-serif italic text-admin-text-tertiary/60 mt-2">
-                No hay registros de citas programadas para el día de hoy.
-              </p>
+              <div className="text-left sm:text-center">
+                <p className="text-[10px] font-display font-bold text-admin-text-tertiary uppercase tracking-widest">
+                  Tranquilidad absoluta para este ciclo
+                </p>
+                <p className="text-[11px] font-serif italic text-admin-text-tertiary/60 mt-0.5 sm:mt-2">
+                  No hay registros de citas programadas para el día de hoy.
+                </p>
+              </div>
             </div>
           )}
         </div>

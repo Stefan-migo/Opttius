@@ -12,6 +12,9 @@
  */
 export type Locale = "es-CL" | "es-AR" | "es-ES";
 
+/** Zona horaria por defecto para ópticas en Chile */
+const DEFAULT_TIMEZONE = "America/Santiago";
+
 /**
  * Opciones para formateo de fechas
  */
@@ -20,6 +23,8 @@ export interface DateFormatOptions {
   includeTime?: boolean;
   includeYear?: boolean;
   format?: "short" | "medium" | "long" | "full";
+  /** Zona horaria para mostrar la fecha (default: America/Santiago) */
+  timeZone?: string;
 }
 
 /**
@@ -67,6 +72,7 @@ export function formatDate(
       includeTime = false,
       includeYear = true,
       format = "short",
+      timeZone = DEFAULT_TIMEZONE,
     } = options;
 
     const formatOptions: Intl.DateTimeFormatOptions = {};
@@ -107,6 +113,7 @@ export function formatDate(
       formatOptions.hour = "2-digit";
       formatOptions.minute = "2-digit";
     }
+    formatOptions.timeZone = timeZone;
 
     return dateObj.toLocaleDateString(locale, formatOptions);
   } catch (error) {
@@ -258,6 +265,7 @@ export function formatNumber(
 export function formatDateTime(
   dateTime: string | Date | number | null | undefined,
   locale: Locale = "es-CL",
+  timeZone: string = DEFAULT_TIMEZONE,
 ): string {
   if (!dateTime) {
     return "Sin fecha";
@@ -279,6 +287,7 @@ export function formatDateTime(
       year: "numeric",
       hour: "2-digit",
       minute: "2-digit",
+      timeZone,
     });
   } catch (error) {
     return "Sin fecha";

@@ -129,10 +129,12 @@ export default function EditAdminUserPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex items-center justify-center min-h-screen bg-epoch-background py-8">
         <div className="text-center">
-          <div className="animate-spin h-8 w-8 border-4 border-admin-accent-tertiary border-t-transparent rounded-full mx-auto mb-4" />
-          <p className="text-muted-foreground">Cargando administrador...</p>
+          <div className="animate-spin h-8 w-8 border-4 border-epoch-accent border-t-transparent rounded-full mx-auto mb-4" />
+          <p className="text-sm text-epoch-primary/80">
+            Cargando administrador...
+          </p>
         </div>
       </div>
     );
@@ -140,18 +142,21 @@ export default function EditAdminUserPage() {
 
   if (error || !adminUser) {
     return (
-      <div className="container mx-auto py-8">
-        <Card className="admin-card bg-admin-bg-tertiary">
-          <CardContent className="p-6">
-            <div className="text-center">
-              <h2 className="text-2xl font-bold text-epoch-primary mb-4">
+      <div className="p-4 sm:p-6 bg-epoch-background min-h-screen">
+        <Card className="rounded-xl border border-border">
+          <CardContent className="p-4 sm:p-6">
+            <div className="text-center py-6 sm:py-8">
+              <h2 className="text-lg sm:text-xl font-bold text-epoch-primary mb-2">
                 Error
               </h2>
-              <p className="text-muted-foreground mb-6">
+              <p className="text-sm text-epoch-primary/80 mb-6">
                 {error || "Administrador no encontrado"}
               </p>
               <Link href="/admin/admin-users">
-                <Button variant="outline">
+                <Button
+                  variant="outline"
+                  className="rounded-xl border-epoch-primary/20 min-h-[44px] px-6"
+                >
                   <ArrowLeft className="mr-2 h-4 w-4" />
                   Volver a Administradores
                 </Button>
@@ -164,59 +169,70 @@ export default function EditAdminUserPage() {
   }
 
   return (
-    <div className="container mx-auto py-8 space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-epoch-primary">
-            Editar Usuario
-          </h1>
-          <p className="text-muted-foreground">
-            Modificar información del administrador
-          </p>
+    <div className="p-4 sm:p-6 bg-epoch-background min-h-screen space-y-4 sm:space-y-6">
+      {/* Header - reorganizado en filas */}
+      <div className="flex flex-col gap-4 sm:gap-6">
+        <div className="flex items-center gap-3">
+          <Link href={`/admin/admin-users/${adminId}`}>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="rounded-xl text-epoch-primary hover:bg-epoch-primary/10 min-h-[44px] shrink-0"
+            >
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Volver
+            </Button>
+          </Link>
         </div>
-        <Link href={`/admin/admin-users/${adminId}`}>
-          <Button variant="default" size="sm">
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Volver
-          </Button>
-        </Link>
+        <h1 className="text-xl sm:text-2xl md:text-3xl font-display font-bold text-epoch-primary tracking-tight">
+          Editar Usuario
+        </h1>
+        <p className="text-sm sm:text-base text-epoch-primary/80 max-w-2xl">
+          Modificar información del administrador
+        </p>
       </div>
 
       {/* Form Card */}
-      <Card className="admin-card bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)]">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Crown className="h-5 w-5" />
-            {adminUser.email}
+      <Card className="rounded-xl border border-border">
+        <CardHeader className="p-4 sm:p-6 pb-0">
+          <CardTitle className="flex items-center gap-2 font-display text-epoch-primary text-base sm:text-lg">
+            <Crown className="h-4 w-4 sm:h-5 sm:w-5 shrink-0" />
+            <span className="truncate">{adminUser.email}</span>
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-6">
+        <CardContent className="p-4 sm:p-6 pt-4 space-y-4 sm:space-y-6">
           {/* Email (read-only) */}
-          <div>
-            <Label htmlFor="email">Email</Label>
+          <div className="space-y-2">
+            <Label
+              htmlFor="email"
+              className="text-xs sm:text-sm text-epoch-primary/80"
+            >
+              Email
+            </Label>
             <Input
               id="email"
               type="email"
               value={adminUser.email}
               disabled
-              className="bg-admin-bg-tertiary"
+              className="rounded-xl bg-epoch-background/50 border-epoch-primary/10 min-h-[44px]"
             />
-            <p className="text-sm text-muted-foreground mt-1">
+            <p className="text-xs sm:text-sm text-epoch-primary/70 mt-1">
               El email no puede ser modificado
             </p>
           </div>
 
           {/* Role (editable) */}
-          <div>
-            <Label>Rol</Label>
+          <div className="space-y-2">
+            <Label className="text-xs sm:text-sm text-epoch-primary/80">
+              Rol
+            </Label>
             <Select
               value={formData.role}
               onValueChange={(value) =>
                 setFormData({ ...formData, role: value })
               }
             >
-              <SelectTrigger>
+              <SelectTrigger className="rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20 min-h-[44px]">
                 <SelectValue placeholder="Seleccionar rol" />
               </SelectTrigger>
               <SelectContent>
@@ -248,46 +264,48 @@ export default function EditAdminUserPage() {
                 </SelectItem>
               </SelectContent>
             </Select>
-            <p className="text-sm text-muted-foreground mt-1">
+            <p className="text-xs sm:text-sm text-epoch-primary/70 mt-1">
               El rol define el nivel de acceso del usuario en la organización
             </p>
           </div>
 
           {/* Status */}
-          <div>
-            <Label>Estado</Label>
-            <div className="mt-2 flex items-center gap-4">
-              <label className="flex items-center gap-2 cursor-pointer">
+          <div className="space-y-2">
+            <Label className="text-xs sm:text-sm text-epoch-primary/80">
+              Estado
+            </Label>
+            <div className="flex flex-wrap items-center gap-4">
+              <label className="flex items-center gap-2 cursor-pointer min-h-[44px]">
                 <input
                   type="checkbox"
                   checked={formData.is_active}
                   onChange={(e) =>
                     setFormData({ ...formData, is_active: e.target.checked })
                   }
-                  className="h-4 w-4 rounded border-gray-300"
+                  className="h-4 w-4 rounded border-epoch-primary/30"
                 />
-                <span className="text-sm">
+                <span className="text-sm text-epoch-primary">
                   {formData.is_active ? "Activo" : "Inactivo"}
                 </span>
               </label>
               {formData.is_active ? (
-                <Badge className="bg-admin-success text-admin-text-on-dark">
-                  Activo
-                </Badge>
+                <Badge className="bg-epoch-primary text-white">Activo</Badge>
               ) : (
                 <Badge variant="destructive">Inactivo</Badge>
               )}
             </div>
-            <p className="text-sm text-muted-foreground mt-1">
+            <p className="text-xs sm:text-sm text-epoch-primary/70 mt-1">
               Los administradores inactivos no pueden acceder al panel
             </p>
           </div>
 
           {/* Permissions Info */}
-          <div>
-            <Label>Permisos</Label>
-            <div className="mt-2 p-4 bg-admin-bg-tertiary rounded-md">
-              <p className="text-sm text-muted-foreground">
+          <div className="space-y-2">
+            <Label className="text-xs sm:text-sm text-epoch-primary/80">
+              Permisos
+            </Label>
+            <div className="p-4 rounded-xl border border-epoch-primary/10 bg-epoch-background/50">
+              <p className="text-xs sm:text-sm text-epoch-primary/70">
                 Los permisos granulares se pueden editar desde el menú de
                 acciones del usuario en el listado de administradores (Editar
                 Permisos).
@@ -295,15 +313,26 @@ export default function EditAdminUserPage() {
             </div>
           </div>
 
-          {/* Actions */}
-          <div className="flex justify-end gap-4 pt-4 border-t">
-            <Link href={`/admin/admin-users/${adminId}`}>
-              <Button variant="outline">
+          {/* Actions - optimizado para móvil */}
+          <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-4 border-t border-epoch-primary/10">
+            <Link
+              href={`/admin/admin-users/${adminId}`}
+              className="w-full sm:w-auto"
+            >
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full rounded-xl border-epoch-primary/20 min-h-[44px]"
+              >
                 <X className="mr-2 h-4 w-4" />
                 Cancelar
               </Button>
             </Link>
-            <Button onClick={handleSave} disabled={saving}>
+            <Button
+              onClick={handleSave}
+              disabled={saving}
+              className="w-full sm:w-auto rounded-xl bg-epoch-primary hover:bg-epoch-surface text-white font-display font-bold text-[10px] tracking-[0.2em] uppercase min-h-[44px]"
+            >
               <Save className="mr-2 h-4 w-4" />
               {saving ? "Guardando..." : "Guardar Cambios"}
             </Button>

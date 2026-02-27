@@ -541,34 +541,43 @@ export default function QuoteDetailPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <Button variant="outline" size="sm" onClick={() => router.back()}>
+      {/* Header - multi-row */}
+      <div className="flex flex-col gap-2 sm:gap-3">
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => router.back()}
+            className="h-9 w-9 shrink-0"
+            aria-label="Volver"
+          >
             <ArrowLeft className="h-4 w-4" />
           </Button>
-          <div>
-            <h1 className="text-3xl font-bold text-epoch-primary">
-              {quote.quote_number}
-            </h1>
-            <p className="text-admin-text-tertiary">
-              Presupuesto para {customerName}
-            </p>
-          </div>
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-epoch-primary truncate min-w-0">
+            {quote.quote_number}
+          </h1>
         </div>
-        <div className="flex items-center gap-2">
+        <p className="text-xs sm:text-sm text-admin-text-tertiary">
+          Presupuesto para {customerName}
+        </p>
+        <div className="flex flex-wrap items-center gap-2">
           {getStatusBadge(quote.status)}
           {!quote.converted_to_work_order_id && (
-            <Button onClick={handleLoadToPOS} disabled={loadingToPos}>
+            <Button
+              onClick={handleLoadToPOS}
+              disabled={loadingToPos}
+              size="sm"
+              className="h-9 gap-1.5"
+            >
               {loadingToPos ? (
                 <>
-                  <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                  Cargando...
+                  <RefreshCw className="h-4 w-4 animate-spin shrink-0" />
+                  <span className="text-xs sm:text-sm">Cargando...</span>
                 </>
               ) : (
                 <>
-                  <Calculator className="h-4 w-4 mr-2" />
-                  Cargar al POS
+                  <Calculator className="h-4 w-4 shrink-0" />
+                  <span className="text-xs sm:text-sm">Cargar al POS</span>
                 </>
               )}
             </Button>
@@ -577,16 +586,31 @@ export default function QuoteDetailPage() {
             <Link
               href={`/admin/work-orders/${quote.converted_to_work_order_id}`}
             >
-              <Button variant="outline">Ver Trabajo</Button>
+              <Button variant="outline" size="sm" className="h-9">
+                <Eye className="h-4 w-4 sm:mr-2 shrink-0" />
+                <span className="hidden sm:inline">Ver Trabajo</span>
+              </Button>
             </Link>
           )}
-          <Button variant="outline" onClick={() => setShowSendDialog(true)}>
-            <Send className="h-4 w-4 mr-2" />
-            Enviar Presupuesto
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowSendDialog(true)}
+            className="h-9 w-9 sm:w-auto sm:px-3"
+            aria-label="Enviar presupuesto"
+          >
+            <Send className="h-4 w-4 sm:mr-2 shrink-0" />
+            <span className="hidden sm:inline">Enviar Presupuesto</span>
           </Button>
-          <Button variant="outline" onClick={handlePrint}>
-            <Printer className="h-4 w-4 mr-2" />
-            Imprimir
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handlePrint}
+            className="h-9 w-9 sm:w-auto sm:px-3"
+            aria-label="Imprimir"
+          >
+            <Printer className="h-4 w-4 sm:mr-2 shrink-0" />
+            <span className="hidden sm:inline">Imprimir</span>
           </Button>
         </div>
       </div>
@@ -1574,7 +1598,7 @@ export default function QuoteDetailPage() {
                   <p className="text-sm text-admin-text-tertiary mb-1">
                     Notas Internas
                   </p>
-                  <p className="font-medium whitespace-pre-wrap text-sm bg-admin-bg-secondary p-3 rounded">
+                  <p className="font-medium whitespace-pre-wrap text-sm text-admin-text-primary bg-admin-bg-tertiary border border-admin-border-secondary/50 p-3 rounded-lg">
                     {quote.notes}
                   </p>
                 </div>
@@ -1584,7 +1608,7 @@ export default function QuoteDetailPage() {
                   <p className="text-sm text-admin-text-tertiary mb-1">
                     Notas para el Cliente
                   </p>
-                  <p className="font-medium whitespace-pre-wrap text-sm bg-admin-bg-secondary p-3 rounded">
+                  <p className="font-medium whitespace-pre-wrap text-sm text-admin-text-primary bg-admin-bg-tertiary border border-admin-border-secondary/50 p-3 rounded-lg">
                     {quote.customer_notes}
                   </p>
                 </div>
@@ -1594,7 +1618,7 @@ export default function QuoteDetailPage() {
                   <p className="text-sm text-admin-text-tertiary mb-1">
                     Términos y Condiciones
                   </p>
-                  <p className="font-medium whitespace-pre-wrap text-sm bg-admin-bg-secondary p-3 rounded">
+                  <p className="font-medium whitespace-pre-wrap text-sm text-admin-text-primary bg-admin-bg-tertiary border border-admin-border-secondary/50 p-3 rounded-lg">
                     {quote.terms_and_conditions}
                   </p>
                 </div>

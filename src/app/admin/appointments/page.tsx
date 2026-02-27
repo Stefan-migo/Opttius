@@ -113,7 +113,14 @@ interface Appointment {
 
 export default function AppointmentsPage() {
   const { user, loading: authLoading } = useAuthContext();
-  const [view, setView] = useState<"week" | "month">("week");
+  const [view, setView] = useState<"day" | "week" | "month">("week");
+
+  // Default to day view on mobile for better usability (only on initial mount)
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.innerWidth < 768) {
+      setView("day");
+    }
+  }, []);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
@@ -174,7 +181,10 @@ export default function AppointmentsPage() {
       setLoading(true);
       let startDate: Date;
       let endDate: Date;
-      if (view === "week") {
+      if (view === "day") {
+        startDate = new Date(currentDate);
+        endDate = new Date(currentDate);
+      } else if (view === "week") {
         const monday = getMondayOfWeek(currentDate);
         startDate = new Date(monday);
         endDate = new Date(monday);
@@ -217,7 +227,10 @@ export default function AppointmentsPage() {
 
   const navigateDate = (direction: "prev" | "next") => {
     const newDate = new Date(currentDate);
-    if (view === "week") {
+    if (view === "day") {
+      newDate.setDate(newDate.getDate() + (direction === "next" ? 1 : -1));
+      setCurrentDate(newDate);
+    } else if (view === "week") {
       const monday = getMondayOfWeek(currentDate);
       monday.setDate(monday.getDate() + (direction === "next" ? 7 : -7));
       setCurrentDate(monday);
@@ -482,24 +495,26 @@ export default function AppointmentsPage() {
 
   return (
     <div className="space-y-8 animate-in fade-in duration-700">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 pb-6 border-b border-admin-border-primary/20">
-        <div className="space-y-1">
-          <h1 className="text-4xl font-display font-bold text-admin-text-primary tracking-tight uppercase">
+      {/* Header - multi-row */}
+      <div className="flex flex-col gap-2 sm:gap-3">
+        <div>
+          <h1 className="text-xl sm:text-2xl lg:text-4xl font-display font-bold text-admin-text-primary tracking-tight uppercase">
             Agenda
           </h1>
-          <p className="text-[10px] font-serif italic text-admin-text-tertiary uppercase tracking-[0.3em]">
+          <p className="text-[10px] sm:text-xs font-serif italic text-admin-text-tertiary uppercase tracking-[0.2em] sm:tracking-[0.3em]">
             Gestión Técnica de Consultas y Procedimientos Ópticos
           </p>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex flex-wrap items-center gap-2">
           <Link href="/admin/appointments/settings">
             <Button
               variant="outline"
-              className="h-11 px-6 bg-white border-admin-border-primary/20 hover:border-epoch-accent/40 text-admin-text-primary font-display font-bold text-[10px] tracking-widest uppercase rounded-xl transition-all flex items-center gap-2"
+              size="sm"
+              className="h-9 w-9 sm:w-auto sm:px-4 bg-white border-admin-border-primary/20 hover:border-epoch-accent/40 text-admin-text-primary font-display font-bold text-[10px] tracking-widest uppercase rounded-xl transition-all"
+              aria-label="Configuración"
             >
-              <Settings className="h-4 w-4" />
-              <span>CONFIGURACIÓN</span>
+              <Settings className="h-4 w-4 sm:mr-2 shrink-0" />
+              <span className="hidden sm:inline">Configuración</span>
             </Button>
           </Link>
           <Button
@@ -508,59 +523,66 @@ export default function AppointmentsPage() {
               setPrefilledAppointmentData(null);
               setShowCreateAppointment(true);
             }}
-            className="h-11 px-8 bg-epoch-primary hover:bg-epoch-surface text-white font-display font-bold text-[10px] tracking-[0.2em] uppercase rounded-xl transition-all shadow-premium-sm flex items-center gap-2"
+            size="sm"
+            className="h-9 gap-1.5 px-4 sm:px-6 bg-epoch-primary hover:bg-epoch-surface text-white font-display font-bold text-[10px] tracking-widest uppercase rounded-xl transition-all shadow-premium-sm"
           >
-            <Plus className="h-4 w-4" />
-            <span>NUEVA CITA MÉDICA</span>
+            <Plus className="h-4 w-4 shrink-0" />
+            <span className="text-xs sm:text-sm">Nueva Cita</span>
           </Button>
         </div>
       </div>
 
-      {/* View Controls */}
+      {/* View Controls - responsive layout and fonts */}
       <Card className="border border-admin-border-primary/20 bg-admin-border-primary/5 rounded-xl shadow-none overflow-hidden">
-        <CardContent className="p-4 md:p-6">
-          <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-6">
-            <div className="flex flex-wrap items-center gap-4">
-              <div className="flex items-center bg-white p-1 rounded-xl border border-admin-border-primary/20">
+        <CardContent className="p-3 sm:p-4 md:p-6">
+          <div className="flex flex-col gap-4 md:gap-6 xl:flex-row xl:items-center xl:justify-between">
+            <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-3 sm:gap-4">
+              <div className="flex items-center bg-white p-1 rounded-xl border border-admin-border-primary/20 w-fit">
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => navigateDate("prev")}
-                  className="h-9 w-9 p-0 hover:bg-admin-bg-tertiary text-admin-text-primary rounded-xl transition-all"
+                  className="h-8 w-8 sm:h-9 sm:w-9 p-0 hover:bg-admin-bg-tertiary text-admin-text-primary rounded-lg sm:rounded-xl transition-all"
                 >
-                  <ChevronLeft className="h-5 w-5" />
+                  <ChevronLeft className="h-4 w-4 sm:h-5 sm:w-5" />
                 </Button>
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={goToToday}
-                  className="px-6 h-9 font-display font-bold text-[10px] uppercase tracking-widest text-admin-text-secondary hover:bg-admin-bg-tertiary rounded-xl transition-all"
+                  className="px-3 sm:px-6 h-8 sm:h-9 font-display font-bold text-[9px] sm:text-[10px] uppercase tracking-widest text-admin-text-secondary hover:bg-admin-bg-tertiary rounded-lg sm:rounded-xl transition-all"
                 >
-                  HOY
+                  Hoy
                 </Button>
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => navigateDate("next")}
-                  className="h-9 w-9 p-0 hover:bg-admin-bg-tertiary text-admin-text-primary rounded-xl transition-all"
+                  className="h-8 w-8 sm:h-9 sm:w-9 p-0 hover:bg-admin-bg-tertiary text-admin-text-primary rounded-lg sm:rounded-xl transition-all"
                 >
-                  <ChevronRight className="h-5 w-5" />
+                  <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5" />
                 </Button>
               </div>
-              <div className="flex items-center gap-3 px-6 py-2 bg-white rounded-xl border border-admin-border-primary/20">
-                <CalendarDays className="h-5 w-5 text-epoch-primary" />
-                <span className="text-lg font-display font-bold text-admin-text-primary uppercase tracking-tight">
-                  {view === "week"
-                    ? `Semana del ${weekLabelDate.toLocaleDateString("es-CL", { day: "numeric", month: "long" })}`
-                    : currentDate.toLocaleDateString("es-CL", {
+              <div className="flex items-center gap-2 sm:gap-3 px-3 sm:px-6 py-2 bg-white rounded-xl border border-admin-border-primary/20 min-w-0">
+                <CalendarDays className="h-4 w-4 sm:h-5 sm:w-5 text-epoch-primary shrink-0" />
+                <span className="text-sm sm:text-base md:text-lg font-display font-bold text-admin-text-primary uppercase tracking-tight truncate">
+                  {view === "day"
+                    ? currentDate.toLocaleDateString("es-CL", {
+                        weekday: "long",
+                        day: "numeric",
                         month: "long",
-                        year: "numeric",
-                      })}
+                      })
+                    : view === "week"
+                      ? `Semana del ${weekLabelDate.toLocaleDateString("es-CL", { day: "numeric", month: "long" })}`
+                      : currentDate.toLocaleDateString("es-CL", {
+                          month: "long",
+                          year: "numeric",
+                        })}
                 </span>
               </div>
             </div>
 
-            <div className="flex flex-wrap items-center gap-3">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
               {/* Branch selector for global view */}
               {isGlobalView && isSuperAdmin && (
                 <div className="flex items-center gap-2">
@@ -568,7 +590,7 @@ export default function AppointmentsPage() {
                     value={selectedBranchForView || ""}
                     onValueChange={(value) => setSelectedBranchForView(value)}
                   >
-                    <SelectTrigger className="w-[180px] h-10 bg-white border-admin-border-primary/20 font-display font-bold text-[10px] tracking-widest uppercase rounded-xl focus:ring-epoch-primary/20 transition-all">
+                    <SelectTrigger className="w-[140px] sm:w-[160px] md:w-[180px] h-9 sm:h-10 bg-white border-admin-border-primary/20 font-display font-bold text-[9px] sm:text-[10px] tracking-widest uppercase rounded-xl focus:ring-epoch-primary/20 transition-all">
                       <div className="flex items-center gap-2">
                         <Building2 className="h-3.5 w-3.5 text-epoch-primary" />
                         <SelectValue placeholder="SUCURSAL" />
@@ -593,29 +615,37 @@ export default function AppointmentsPage() {
 
               <Select
                 value={view}
-                onValueChange={(value: "week" | "month") => setView(value)}
+                onValueChange={(value: "day" | "week" | "month") =>
+                  setView(value)
+                }
               >
-                <SelectTrigger className="w-[120px] h-10 bg-white border-admin-border-primary/20 font-display font-bold text-[10px] tracking-widest uppercase rounded-xl transition-all">
+                <SelectTrigger className="w-[90px] sm:w-[110px] md:w-[120px] h-9 sm:h-10 bg-white border-admin-border-primary/20 font-display font-bold text-[9px] sm:text-[10px] tracking-widest uppercase rounded-xl transition-all">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent className="rounded-xl border-admin-border-primary/20 shadow-premium-lg">
                   <SelectItem
-                    value="week"
-                    className="font-display font-medium text-[10px] tracking-widest uppercase"
+                    value="day"
+                    className="font-display font-medium text-[9px] sm:text-[10px] tracking-widest uppercase"
                   >
-                    SEMANA
+                    Día
+                  </SelectItem>
+                  <SelectItem
+                    value="week"
+                    className="font-display font-medium text-[9px] sm:text-[10px] tracking-widest uppercase"
+                  >
+                    Semana
                   </SelectItem>
                   <SelectItem
                     value="month"
-                    className="font-display font-medium text-[10px] tracking-widest uppercase"
+                    className="font-display font-medium text-[9px] sm:text-[10px] tracking-widest uppercase"
                   >
-                    MENSUAL
+                    Mes
                   </SelectItem>
                 </SelectContent>
               </Select>
 
               <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-[180px] h-10 bg-white border-admin-border-primary/20 font-display font-bold text-[10px] tracking-widest uppercase rounded-xl transition-all">
+                <SelectTrigger className="w-[140px] sm:w-[160px] md:w-[180px] h-9 sm:h-10 bg-white border-admin-border-primary/20 font-display font-bold text-[9px] sm:text-[10px] tracking-widest uppercase rounded-xl transition-all">
                   <div className="flex items-center gap-2">
                     <Filter className="h-3.5 w-3.5 text-epoch-accent" />
                     <SelectValue placeholder="ESTADO" />
@@ -624,9 +654,10 @@ export default function AppointmentsPage() {
                 <SelectContent className="rounded-xl border-admin-border-primary/20 shadow-premium-lg">
                   <SelectItem
                     value="all"
-                    className="font-display font-medium text-[10px] tracking-widest uppercase"
+                    className="font-display font-medium text-[9px] sm:text-[10px] tracking-widest uppercase"
                   >
-                    TODOS LOS ESTADOS
+                    <span className="hidden sm:inline">TODOS LOS ESTADOS</span>
+                    <span className="sm:hidden">Todos</span>
                   </SelectItem>
                   <SelectItem
                     value="scheduled"
@@ -835,17 +866,15 @@ export default function AppointmentsPage() {
         open={showCreateAppointment}
         onOpenChange={setShowCreateAppointment}
       >
-        <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-2xl max-h-[90vh] overflow-y-auto border-2 border-admin-border-primary/20 bg-white shadow-premium-xl rounded-xl p-0">
-          <div className="p-0">
-            <DialogHeader className="p-8 bg-admin-bg-tertiary border-b border-admin-border-primary/10">
+        <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-2xl max-h-[90vh] overflow-hidden border-2 border-admin-border-primary/20 bg-white shadow-premium-xl rounded-xl p-0 flex flex-col">
+          <div className="p-0 flex flex-col min-h-0 flex-1 overflow-hidden">
+            <DialogHeader className="p-4 sm:p-6 md:p-8 bg-admin-bg-tertiary border-b border-admin-border-primary/10 shrink-0">
               <div className="flex items-center gap-3 mb-2">
                 <div className="h-10 w-10 bg-epoch-primary flex items-center justify-center">
                   <CalendarDays className="h-5 w-5 text-white" />
                 </div>
-                <DialogTitle className="text-2xl font-display font-bold text-admin-text-primary tracking-tight uppercase">
-                  {selectedAppointment
-                    ? "EXPEDIENTE DE CITA"
-                    : "CONSULTA DE RESERVA"}
+                <DialogTitle className="text-xl sm:text-2xl font-display font-bold text-admin-text-primary tracking-tight uppercase">
+                  {selectedAppointment ? "Expediente de cita" : "Reservar cita"}
                 </DialogTitle>
               </div>
               <DialogDescription className="text-[11px] font-serif italic text-admin-text-tertiary tracking-wide pl-13">
@@ -854,7 +883,7 @@ export default function AppointmentsPage() {
                   : "Ingrese las especificaciones para agendar una nueva consulta en el ciclo óptico."}
               </DialogDescription>
             </DialogHeader>
-            <div className="p-8">
+            <div className="p-4 sm:p-6 md:p-8 flex-1 min-h-0 flex flex-col overflow-hidden">
               <CreateAppointmentForm
                 initialData={
                   selectedAppointment || prefilledAppointmentData || undefined

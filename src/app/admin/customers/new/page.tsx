@@ -39,19 +39,20 @@ export default function NewCustomerPage() {
       notes: "",
     },
     onSubmit: async (data) => {
-      // Create the request body with name field
+      // API expects first_name, last_name, address_line_* (CreateCustomerData)
       const requestBody = {
-        name: `${data.first_name} ${data.last_name}`.trim(),
-        email: data.email,
-        phone: data.phone || undefined,
-        rut: data.rut || undefined,
-        shipping_info: {
-          address_1: data.address_line_1 || undefined,
-          city: data.city || undefined,
-          state: data.state || undefined,
-          postal_code: data.postal_code || undefined,
-          phone: data.phone || undefined,
-        },
+        first_name: data.first_name?.trim() || null,
+        last_name: data.last_name?.trim() || null,
+        email: data.email?.trim() || null,
+        phone: data.phone?.trim() || null,
+        rut: data.rut?.trim() || null,
+        address_line_1: data.address_line_1?.trim() || null,
+        address_line_2: data.address_line_2?.trim() || null,
+        city: data.city?.trim() || null,
+        state: data.state?.trim() || null,
+        postal_code: data.postal_code?.trim() || null,
+        country: data.country?.trim() || "Chile",
+        notes: data.notes?.trim() || null,
         branch_id: currentBranchId || undefined,
       };
 
@@ -90,21 +91,23 @@ export default function NewCustomerPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <Button variant="outline" size="sm" onClick={() => router.back()}>
+      <div className="space-y-4">
+        <div className="flex items-center gap-3">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => router.back()}
+            className="min-h-[44px] shrink-0"
+          >
             <ArrowLeft className="h-4 w-4" />
           </Button>
-          <div>
-            <h1 className="text-4xl font-display font-bold text-admin-text-primary tracking-tight uppercase">
-              Nuevo Cliente
-            </h1>
-            <p className="text-[10px] font-serif italic text-admin-text-tertiary uppercase tracking-[0.3em]">
-              Registro de Archivo en la Base de Datos
-            </p>
-          </div>
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-display font-bold text-admin-text-primary tracking-tight uppercase">
+            Nuevo Cliente
+          </h1>
         </div>
-
+        <p className="text-[9px] sm:text-[10px] font-serif italic text-admin-text-tertiary uppercase tracking-[0.3em]">
+          Registro de Archivo en la Base de Datos
+        </p>
         <FormFieldActionsExtended
           onCancel={() => router.back()}
           onSubmit={form.handleSubmit}
@@ -117,7 +120,7 @@ export default function NewCustomerPage() {
 
       {/* Form Error */}
       {form.formError && (
-        <Card className="border-red-200 bg-admin-bg-tertiary">
+        <Card className="border border-red-300 bg-admin-bg-tertiary">
           <CardContent className="p-4">
             <p className="text-red-700">{form.formError}</p>
           </CardContent>
@@ -126,21 +129,22 @@ export default function NewCustomerPage() {
 
       {/* Form */}
       <form onSubmit={form.handleSubmit} className="space-y-6">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
           {/* Personal Information */}
-          <Card className="border-none bg-admin-bg-secondary shadow-premium-sm rounded-xl overflow-hidden border border-admin-border-primary/30">
+          <Card className="border border-admin-border-primary/30 bg-admin-bg-tertiary shadow-premium-sm rounded-xl overflow-hidden">
             <CardHeader className="border-b border-admin-border-primary/10">
-              <CardTitle className="flex items-center">
+              <CardTitle className="flex items-center text-admin-text-primary">
                 <User className="h-5 w-5 mr-2" />
                 Información Personal
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <FormField
                   label="Nombre"
                   required
                   error={form.errors.first_name?.message}
+                  labelClassName="text-xs sm:text-sm"
                 >
                   <Input
                     id="first_name"
@@ -150,6 +154,7 @@ export default function NewCustomerPage() {
                     }
                     placeholder="Nombre"
                     aria-invalid={!!form.errors.first_name}
+                    className="h-12 sm:h-14"
                   />
                 </FormField>
 
@@ -157,6 +162,7 @@ export default function NewCustomerPage() {
                   label="Apellido"
                   required
                   error={form.errors.last_name?.message}
+                  labelClassName="text-xs sm:text-sm"
                 >
                   <Input
                     id="last_name"
@@ -164,6 +170,7 @@ export default function NewCustomerPage() {
                     onChange={(e) => form.setValue("last_name", e.target.value)}
                     placeholder="Apellido"
                     aria-invalid={!!form.errors.last_name}
+                    className="h-12 sm:h-14"
                   />
                 </FormField>
               </div>
@@ -172,6 +179,7 @@ export default function NewCustomerPage() {
                 label="Email"
                 error={form.errors.email?.message}
                 description="Opcional"
+                labelClassName="text-xs sm:text-sm"
               >
                 <Input
                   id="email"
@@ -180,6 +188,7 @@ export default function NewCustomerPage() {
                   onChange={(e) => form.setValue("email", e.target.value)}
                   placeholder="email@ejemplo.com"
                   aria-invalid={!!form.errors.email}
+                  className="h-12 sm:h-14"
                 />
               </FormField>
 
@@ -187,6 +196,7 @@ export default function NewCustomerPage() {
                 label="Teléfono"
                 error={form.errors.phone?.message}
                 description="Opcional"
+                labelClassName="text-xs sm:text-sm"
               >
                 <Input
                   id="phone"
@@ -194,6 +204,7 @@ export default function NewCustomerPage() {
                   onChange={(e) => form.setValue("phone", e.target.value)}
                   placeholder="+54 9 11 1234-5678"
                   aria-invalid={!!form.errors.phone}
+                  className="h-12 sm:h-14"
                 />
               </FormField>
 
@@ -201,6 +212,7 @@ export default function NewCustomerPage() {
                 label="RUT"
                 error={form.errors.rut?.message}
                 description="Rol Único Tributario (opcional)"
+                labelClassName="text-xs sm:text-sm"
               >
                 <Input
                   id="rut"
@@ -209,15 +221,16 @@ export default function NewCustomerPage() {
                   onBlur={(e) => handleRUTBlur(e.target.value)}
                   placeholder="12.345.678-9 o 123456789"
                   aria-invalid={!!form.errors.rut}
+                  className="h-12 sm:h-14"
                 />
               </FormField>
             </CardContent>
           </Card>
 
           {/* Address Information */}
-          <Card className="border-none bg-admin-bg-secondary shadow-premium-sm rounded-xl overflow-hidden border border-admin-border-primary/30">
+          <Card className="border border-admin-border-primary/30 bg-admin-bg-tertiary shadow-premium-sm rounded-xl overflow-hidden">
             <CardHeader className="border-b border-admin-border-primary/10">
-              <CardTitle className="flex items-center">
+              <CardTitle className="flex items-center text-admin-text-primary">
                 <MapPin className="h-5 w-5 mr-2" />
                 Dirección
               </CardTitle>
@@ -226,6 +239,7 @@ export default function NewCustomerPage() {
               <FormField
                 label="Dirección"
                 error={form.errors.address_line_1?.message}
+                labelClassName="text-xs sm:text-sm"
               >
                 <Input
                   id="address_line_1"
@@ -235,6 +249,7 @@ export default function NewCustomerPage() {
                   }
                   placeholder="Calle y número"
                   aria-invalid={!!form.errors.address_line_1}
+                  className="h-12 sm:h-14"
                 />
               </FormField>
 
@@ -242,6 +257,7 @@ export default function NewCustomerPage() {
                 label="Dirección 2"
                 error={form.errors.address_line_2?.message}
                 description="Opcional - Departamento, piso, etc."
+                labelClassName="text-xs sm:text-sm"
               >
                 <Input
                   id="address_line_2"
@@ -251,35 +267,47 @@ export default function NewCustomerPage() {
                   }
                   placeholder="Departamento, piso, etc."
                   aria-invalid={!!form.errors.address_line_2}
+                  className="h-12 sm:h-14"
                 />
               </FormField>
 
-              <div className="grid grid-cols-2 gap-4">
-                <FormField label="Ciudad" error={form.errors.city?.message}>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <FormField
+                  label="Ciudad"
+                  error={form.errors.city?.message}
+                  labelClassName="text-xs sm:text-sm"
+                >
                   <Input
                     id="city"
                     value={form.values.city}
                     onChange={(e) => form.setValue("city", e.target.value)}
                     placeholder="Ciudad"
                     aria-invalid={!!form.errors.city}
+                    className="h-12 sm:h-14"
                   />
                 </FormField>
 
-                <FormField label="Provincia" error={form.errors.state?.message}>
+                <FormField
+                  label="Provincia"
+                  error={form.errors.state?.message}
+                  labelClassName="text-xs sm:text-sm"
+                >
                   <Input
                     id="state"
                     value={form.values.state}
                     onChange={(e) => form.setValue("state", e.target.value)}
                     placeholder="Provincia"
                     aria-invalid={!!form.errors.state}
+                    className="h-12 sm:h-14"
                   />
                 </FormField>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <FormField
                   label="Código Postal"
                   error={form.errors.postal_code?.message}
+                  labelClassName="text-xs sm:text-sm"
                 >
                   <Input
                     id="postal_code"
@@ -289,16 +317,22 @@ export default function NewCustomerPage() {
                     }
                     placeholder="1234"
                     aria-invalid={!!form.errors.postal_code}
+                    className="h-12 sm:h-14"
                   />
                 </FormField>
 
-                <FormField label="País" error={form.errors.country?.message}>
+                <FormField
+                  label="País"
+                  error={form.errors.country?.message}
+                  labelClassName="text-xs sm:text-sm"
+                >
                   <Input
                     id="country"
                     value={form.values.country}
                     onChange={(e) => form.setValue("country", e.target.value)}
                     placeholder="País"
                     aria-invalid={!!form.errors.country}
+                    className="h-12 sm:h-14"
                   />
                 </FormField>
               </div>
@@ -306,15 +340,18 @@ export default function NewCustomerPage() {
           </Card>
 
           {/* Additional Notes */}
-          <Card className="border-none bg-admin-bg-secondary shadow-premium-sm rounded-xl overflow-hidden border border-admin-border-primary/30 lg:col-span-2">
+          <Card className="border border-admin-border-primary/30 bg-admin-bg-tertiary shadow-premium-sm rounded-xl overflow-hidden lg:col-span-2">
             <CardHeader className="border-b border-admin-border-primary/10">
-              <CardTitle>Notas Adicionales</CardTitle>
+              <CardTitle className="text-admin-text-primary">
+                Notas Adicionales
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <FormField
                 label="Notas"
                 error={form.errors.notes?.message}
                 description="Notas sobre el cliente"
+                labelClassName="text-xs sm:text-sm"
               >
                 <Textarea
                   id="notes"

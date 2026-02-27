@@ -85,6 +85,25 @@ export async function GET(request: NextRequest) {
       .order("created_at", { ascending: false });
 
     if (error) {
+      // Table may not exist yet (migration not applied) - return empty data
+      if (error.code === "42P01" || error.message?.includes("does not exist")) {
+        logger.warn("ai_usage_log table not found, returning empty data", {
+          hint: "Run migration 20260302000001_create_ai_usage_log",
+        });
+        return NextResponse.json({
+          organizationId: orgId,
+          period: { days, startDate: startDate.toISOString() },
+          summary: {
+            totalPromptTokens: 0,
+            totalCompletionTokens: 0,
+            totalTokens: 0,
+            estimatedCostUsd: 0,
+            requestCount: 0,
+          },
+          byModel: [],
+          recentLogs: [],
+        });
+      }
       logger.error("Failed to fetch AI usage", { error });
       return NextResponse.json(
         { error: "Failed to fetch usage" },
