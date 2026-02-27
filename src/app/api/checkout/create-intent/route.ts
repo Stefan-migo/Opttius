@@ -172,7 +172,7 @@ export async function POST(request: NextRequest) {
       let intentResponse;
       try {
         intentResponse = await gatewayInstance.createPaymentIntent(
-          null,
+          paymentRecord.id,
           amountNum,
           currency,
           user.id,

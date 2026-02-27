@@ -240,8 +240,8 @@ export function CheckoutPageContent() {
 
       setPaymentId(data.paymentId);
 
-      // Handle Redirect-based gateways (NOWPayments, PayPal)
-      if (data.approvalUrl) {
+      // Solo redirigir para gateways que usan flujo externo (NO Mercado Pago - usa CardPayment embebido)
+      if (data.approvalUrl && selectedGateway !== "mercadopago") {
         const gatewayNames = {
           nowpayments: "la pasarela de criptomonedas",
           paypal: "PayPal",
@@ -783,61 +783,61 @@ export function CheckoutPageContent() {
                   ) : (
                     <Card
                       variant="glass"
-                      className="border-0 shadow-2xl bg-admin-bg-secondary rounded-xl overflow-hidden animate-in fade-in zoom-in-95 duration-500 min-w-0"
+                      className="border-2 border-admin-border-secondary dark:border-admin-border-primary shadow-2xl bg-admin-bg-tertiary rounded-xl sm:rounded-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-500 min-w-0"
                     >
-                      <CardHeader className="p-4 sm:p-6 md:p-8 border-b border-admin-border-primary bg-admin-bg-secondary">
+                      <CardHeader className="p-4 sm:p-5 md:p-6 border-b border-admin-border-secondary dark:border-admin-border-primary bg-admin-bg-tertiary">
                         <div className="flex items-center gap-3 min-w-0">
-                          <div className="p-2 bg-admin-accent-primary rounded-xl text-[#1A2B23] shrink-0">
+                          <div className="p-2 sm:p-2.5 bg-admin-accent-primary rounded-xl text-[#1A2B23] shrink-0">
                             <CreditCard className="h-4 w-4 sm:h-5 sm:w-5" />
                           </div>
                           <div className="min-w-0">
-                            <CardTitle className="text-base sm:text-lg font-bold">
+                            <CardTitle className="text-sm sm:text-base md:text-lg font-bold text-admin-text-primary">
                               Datos de la Tarjeta
                             </CardTitle>
-                            <CardDescription className="text-[11px] sm:text-xs">
+                            <CardDescription className="text-[11px] sm:text-xs text-admin-text-tertiary mt-0.5">
                               Pago procesado por Mercado Pago
                             </CardDescription>
                           </div>
                         </div>
                       </CardHeader>
-                      <CardContent className="p-4 sm:p-6 md:p-8">
+                      <CardContent className="p-4 sm:p-5 md:p-6 bg-admin-bg-tertiary">
                         {error && (
                           <Alert
                             variant="destructive"
-                            className="mb-4 sm:mb-6 rounded-xl border-none bg-admin-error/10 text-admin-error"
+                            className="mb-4 sm:mb-5 rounded-xl border border-admin-error/30 bg-admin-error/10 dark:bg-admin-error/20"
                           >
-                            <AlertCircle className="h-4 w-4 shrink-0" />
-                            <AlertDescription className="font-bold text-sm break-words">
+                            <AlertCircle className="h-4 w-4 shrink-0 text-admin-error" />
+                            <AlertDescription className="font-bold text-sm break-words text-admin-error dark:text-red-400">
                               {error}
                             </AlertDescription>
                           </Alert>
                         )}
 
-                        <div className="p-3 sm:p-4 bg-admin-info/10 rounded-xl mb-4 sm:mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border border-admin-info/20 min-w-0">
+                        <div className="p-3 sm:p-4 rounded-xl mb-4 sm:mb-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 min-w-0 bg-white/80 dark:bg-admin-bg-secondary/40 border border-admin-border-secondary dark:border-admin-border-primary/50">
                           <div className="flex items-center gap-2">
-                            <div className="w-2 h-2 rounded-xl bg-admin-info animate-pulse shrink-0" />
-                            <span className="text-[10px] sm:text-xs font-bold text-admin-info uppercase tracking-widest">
+                            <div className="w-2 h-2 rounded-full bg-admin-info animate-pulse shrink-0" />
+                            <span className="text-[10px] sm:text-xs font-bold text-admin-text-secondary uppercase tracking-widest">
                               Sesión de pago activa
                             </span>
                           </div>
-                          <span className="text-lg sm:text-xl font-black text-admin-text-primary">
+                          <span className="text-base sm:text-lg font-black text-admin-text-primary">
                             ${amount.toLocaleString()} CLP
                           </span>
                         </div>
 
-                        <label className="flex items-center gap-3 mb-4 sm:mb-6 p-3 rounded-xl border border-admin-border-primary bg-admin-bg-secondary cursor-pointer min-w-0">
+                        <label className="flex items-start sm:items-center gap-3 mb-4 sm:mb-5 p-3 sm:p-4 rounded-xl border border-admin-border-secondary dark:border-admin-border-primary bg-white/60 dark:bg-admin-bg-secondary/30 cursor-pointer min-w-0">
                           <input
                             type="checkbox"
                             checked={saveCard}
                             onChange={(e) => setSaveCard(e.target.checked)}
-                            className="rounded-xl border-admin-border-primary text-admin-accent-primary focus:ring-admin-accent-primary shrink-0"
+                            className="rounded border-admin-border-primary text-admin-accent-primary focus:ring-admin-accent-primary shrink-0 mt-0.5 sm:mt-0"
                           />
                           <span className="text-xs sm:text-sm font-medium text-admin-text-primary break-words">
                             Guardar tarjeta para próximos pagos y renovaciones
                           </span>
                         </label>
 
-                        <div className="mercadopago-brick-container min-h-[260px] sm:min-h-[300px]">
+                        <div className="mercadopago-brick-container min-h-[260px] sm:min-h-[300px] rounded-xl overflow-hidden">
                           <CardPayment
                             initialization={{
                               amount: Math.round(amount),
