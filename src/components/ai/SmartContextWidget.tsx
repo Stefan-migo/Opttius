@@ -11,6 +11,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { InsightCard } from "./InsightCard";
+import { InsightDetailDialog } from "./InsightDetailDialog";
 import { Button } from "@/components/ui/button";
 import {
   Popover,
@@ -39,7 +40,15 @@ export function SmartContextWidget({
 }: SmartContextWidgetProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isRegenerating, setIsRegenerating] = useState(false);
+  const [selectedInsight, setSelectedInsight] =
+    useState<DatabaseInsight | null>(null);
+  const [detailDialogOpen, setDetailDialogOpen] = useState(false);
   const queryClient = useQueryClient();
+
+  const openInsightDetail = (insight: DatabaseInsight) => {
+    setSelectedInsight(insight);
+    setDetailDialogOpen(true);
+  };
 
   // Fetch insights for the section
   const {
@@ -215,8 +224,8 @@ export function SmartContextWidget({
         </div>
       </div>
 
-      {/* Content */}
-      <div className="max-h-[600px] overflow-y-auto">
+      {/* Content - responsive height for mobile/tablet/desktop */}
+      <div className="max-h-[min(70vh,600px)] sm:max-h-[min(75vh,600px)] overflow-y-auto">
         {isLoading ? (
           <div className="p-6 flex flex-col items-center justify-center gap-2">
             <Loader2 className="w-6 h-6 text-epoch-primary animate-spin" />
@@ -268,6 +277,7 @@ export function SmartContextWidget({
                     sendFeedback.mutate({ insightId: insight.id, score })
                   }
                   compact={true}
+                  onExpand={() => openInsightDetail(insight)}
                 />
               </div>
             ))}
@@ -281,6 +291,11 @@ export function SmartContextWidget({
     return (
       <div className="w-full p-0 rounded-xl overflow-hidden">
         {panelContent}
+        <InsightDetailDialog
+          insight={selectedInsight}
+          open={detailDialogOpen}
+          onOpenChange={setDetailDialogOpen}
+        />
       </div>
     );
   }
@@ -329,7 +344,7 @@ export function SmartContextWidget({
           </Button>
         </PopoverTrigger>
         <PopoverContent
-          className="w-96 max-w-[calc(100vw-2rem)] p-0 shadow-2xl border-epoch-primary/20 rounded-xl overflow-hidden"
+          className="w-96 max-w-[calc(100vw-2rem)] sm:w-[400px] md:w-[420px] p-0 shadow-2xl border-epoch-primary/20 rounded-xl overflow-hidden"
           align="start"
           side="top"
           sideOffset={10}
@@ -337,6 +352,11 @@ export function SmartContextWidget({
           {panelContent}
         </PopoverContent>
       </Popover>
+      <InsightDetailDialog
+        insight={selectedInsight}
+        open={detailDialogOpen}
+        onOpenChange={setDetailDialogOpen}
+      />
     </div>
   );
 }

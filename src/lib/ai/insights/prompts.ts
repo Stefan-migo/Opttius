@@ -3,11 +3,17 @@
  *
  * Contains prompts tailored for each section of the application.
  * These prompts guide the LLM to generate contextual, actionable insights.
+ * Usa rutas de routes-reference.ts - NUNCA inventar rutas.
  *
  * @module lib/ai/insights/prompts
  */
 
 import type { InsightSection } from "./schemas";
+import {
+  INSIGHT_ROUTES,
+  ROUTES_BY_SECTION,
+  INVALID_ROUTES,
+} from "./routes-reference";
 
 /**
  * Base prompt instructions for all insights
@@ -97,7 +103,7 @@ Genera 1-3 insights que formen un resumen ejecutivo coherente:
 
 Prioridad: 6-8
 Tipos: 'info', 'opportunity' o 'warning' según corresponda
-Rutas: /admin/work-orders, /admin/quotes, /admin/analytics
+Rutas válidas: ${ROUTES_BY_SECTION.dashboard.slice(0, 6).join(", ")}
 `;
 }
 
@@ -191,14 +197,10 @@ Analiza las siguientes métricas:
 - Total de productos: ${totalProducts}
 - Total de órdenes: ${totalOrders}
 
-RUTAS DISPONIBLES EN EL SISTEMA (usa SOLO estas rutas):
-- Trabajos de laboratorio: /admin/work-orders (con filtros: ?status=ordered, ?status=sent_to_lab, etc.)
-- Presupuestos: /admin/quotes (con filtros: ?status=draft, ?status=sent)
-- Analíticas/Ventas: /admin/analytics
-- Productos: /admin/products
-- Clientes: /admin/customers
-- POS: /admin/pos
-- Configuración: /admin/settings
+RUTAS VÁLIDAS (usa SOLO estas, NUNCA otras):
+${ROUTES_BY_SECTION.dashboard.map((r) => `- ${r}`).join("\n")}
+
+RUTAS PROHIBIDAS (NO usar): ${INVALID_ROUTES.join(", ")}
 
 Tareas según fase:
 ${
@@ -218,35 +220,35 @@ ${
 `
       : `
 1. Compara las ventas de ayer con el promedio mensual
-2. Si hay trabajos pendientes, sugiere revisar /admin/work-orders?status=ordered
-3. Si hay presupuestos pendientes, sugiere revisar /admin/quotes?status=draft
+2. Si hay trabajos pendientes, sugiere revisar ${INSIGHT_ROUTES.workOrdersOrdered}
+3. Si hay presupuestos pendientes, sugiere revisar ${INSIGHT_ROUTES.quotesDraft}
 4. Analiza tendencias y genera insights específicos basados en datos reales
 5. Si no hay problemas, genera un insight de tipo 'neutral' indicando que todo está en orden
 6. Asigna prioridad del 1 al 10 según la importancia real (10 = crítico, 1 = informativo)
 `
 }
 
-IMPORTANTE: Usa SOLO las rutas listadas arriba. NO inventes rutas que no existen.
+IMPORTANTE: Usa SOLO las rutas listadas arriba. NO inventes rutas.
 Ejemplos de action_url válidos:
-- "/admin/work-orders?status=ordered"
-- "/admin/quotes?status=draft"
-- "/admin/analytics"
-- "/admin/products"
-- "/admin/customers"
-- "/admin/settings"
+- "${INSIGHT_ROUTES.workOrdersOrdered}"
+- "${INSIGHT_ROUTES.quotesDraft}"
+- "${INSIGHT_ROUTES.analytics}"
+- "${INSIGHT_ROUTES.products}"
+- "${INSIGHT_ROUTES.customers}"
+- "${INSIGHT_ROUTES.system}"
 
 Ejemplos de insights según fase:
 ${
   organizationPhase === "new"
     ? `
-- Bienvenida: tipo 'info', prioridad 5, action_url: "/admin/products"
-- Configuración inicial: tipo 'opportunity', prioridad 6, action_url: "/admin/settings"
-- Primeros pasos: tipo 'info', prioridad 5, action_url: "/admin/customers"
+- Bienvenida: tipo 'info', prioridad 5, action_url: "${INSIGHT_ROUTES.products}"
+- Configuración inicial: tipo 'opportunity', prioridad 6, action_url: "${INSIGHT_ROUTES.system}"
+- Primeros pasos: tipo 'info', prioridad 5, action_url: "${INSIGHT_ROUTES.customers}"
 `
     : `
-- Si ventas < promedio: tipo 'warning', prioridad 7-8, action_url: "/admin/analytics"
-- Si trabajos pendientes > 0: tipo 'warning', prioridad 9-10, action_url: "/admin/work-orders?status=ordered"
-- Si presupuestos pendientes > 0: tipo 'opportunity', prioridad 6-7, action_url: "/admin/quotes?status=draft"
+- Si ventas < promedio: tipo 'warning', prioridad 7-8, action_url: "${INSIGHT_ROUTES.analytics}"
+- Si trabajos pendientes > 0: tipo 'warning', prioridad 9-10, action_url: "${INSIGHT_ROUTES.workOrdersOrdered}"
+- Si presupuestos pendientes > 0: tipo 'opportunity', prioridad 6-7, action_url: "${INSIGHT_ROUTES.quotesDraft}"
 - Si todo está bien: tipo 'neutral', prioridad 1-2
 `
 }
@@ -279,10 +281,8 @@ Eres un auditor de inventario de la óptica "${organizationName}".
 Analiza esta lista de productos sin movimiento (Stock Zombie):
 ${JSON.stringify(data.zombieProducts || [], null, 2)}
 
-RUTAS DISPONIBLES EN EL SISTEMA (usa SOLO estas rutas):
-- Gestión de productos: /admin/products
-- Productos con stock bajo: /admin/products (filtrar por stock)
-- Categorías: /admin/categories
+RUTAS VÁLIDAS (usa SOLO estas):
+${ROUTES_BY_SECTION.inventory.map((r) => `- ${r}`).join("\n")}
 
 Tareas:
 1. Calcula el valor monetario total retenido en stock zombie
@@ -290,15 +290,15 @@ Tareas:
 3. Sugiere una estrategia de liquidación o bundling específica
 4. Asigna prioridad del 1 al 10 (mayor valor inmovilizado = mayor prioridad)
 
-IMPORTANTE: Usa SOLO las rutas listadas arriba. NO inventes rutas que no existen.
+IMPORTANTE: Usa SOLO las rutas listadas arriba. NO inventes rutas.
 Ejemplos de action_url válidos:
-- "/admin/products"
-- "/admin/products?lowStock=true"
+- "${INSIGHT_ROUTES.products}"
+- "${INSIGHT_ROUTES.productsLowStock}"
 
 Ejemplos de insights:
-- Stock zombie > $500,000: tipo 'warning', prioridad 8-9, action_url: "/admin/products"
-- Stock zombie < $100,000: tipo 'info', prioridad 4-5, action_url: "/admin/products"
-- Stock bajo detectado: tipo 'warning', prioridad 7-8, action_url: "/admin/products"
+- Stock zombie > $500,000: tipo 'warning', prioridad 8-9, action_url: "${INSIGHT_ROUTES.products}"
+- Stock zombie < $100,000: tipo 'info', prioridad 4-5, action_url: "${INSIGHT_ROUTES.products}"
+- Stock bajo detectado: tipo 'warning', prioridad 7-8, action_url: "${INSIGHT_ROUTES.productsLowStock}"
 `;
 }
 
@@ -326,11 +326,10 @@ Eres un especialista en marketing y fidelización de la óptica "${organizationN
 De esta lista de clientes inactivos:
 ${JSON.stringify(data.inactiveClients || [], null, 2)}
 
-RUTAS DISPONIBLES EN EL SISTEMA (usa SOLO estas rutas):
-- Gestión de clientes: /admin/customers
-- Detalle de cliente: /admin/customers/[id]
-- Citas y agenda: /admin/appointments
-- Nuevo cliente: /admin/customers/new
+RUTAS VÁLIDAS (usa SOLO estas):
+${ROUTES_BY_SECTION.clients.map((r) => `- ${r}`).join("\n")}
+
+NOTA: Para detalle de cliente usa /admin/customers (lista). NO usar /admin/customers/[id] en action_url.
 
 Tareas:
 1. Identifica clientes que requieren renovación de receta (> 12 meses sin visita)
@@ -339,15 +338,16 @@ Tareas:
 4. Menciona el beneficio (ej. salud visual, comodidad)
 5. Asigna prioridad del 1 al 10 (mayor tiempo inactivo = mayor prioridad)
 
-IMPORTANTE: Usa SOLO las rutas listadas arriba. NO inventes rutas que no existen.
+IMPORTANTE: Usa SOLO las rutas listadas arriba. NO inventes rutas.
 Ejemplos de action_url válidos:
-- "/admin/customers"
-- "/admin/appointments"
+- "${INSIGHT_ROUTES.customers}"
+- "${INSIGHT_ROUTES.customersNew}"
+- "${INSIGHT_ROUTES.appointments}"
 
 Ejemplos de insights:
-- Clientes inactivos > 12 meses: tipo 'opportunity', prioridad 7-8, action_url: "/admin/customers"
-- Clientes inactivos 6-12 meses: tipo 'opportunity', prioridad 5-6, action_url: "/admin/customers"
-- Recetas vencidas: tipo 'warning', prioridad 8-9, action_url: "/admin/customers"
+- Clientes inactivos > 12 meses: tipo 'opportunity', prioridad 7-8, action_url: "${INSIGHT_ROUTES.customers}"
+- Clientes inactivos 6-12 meses: tipo 'opportunity', prioridad 5-6, action_url: "${INSIGHT_ROUTES.customers}"
+- Recetas vencidas: tipo 'warning', prioridad 8-9, action_url: "${INSIGHT_ROUTES.customers}"
 `;
 }
 
@@ -384,6 +384,9 @@ Eres un experto óptico de la óptica "${organizationName}" especializado en ven
 Basado en:
 - Dioptría: ${JSON.stringify(data.prescription || {}, null, 2)}
 - Historial de compras del cliente: ${JSON.stringify(data.customerHistory || {}, null, 2)}
+
+RUTAS VÁLIDAS si usas action_url (usa SOLO estas):
+${ROUTES_BY_SECTION.pos.map((r) => `- ${r}`).join("\n")}
 
 Tareas:
 1. Sugiere el material de cristal ideal según la dioptría
@@ -432,11 +435,8 @@ ${JSON.stringify(data.salesData || {}, null, 2)}
 Tendencias:
 ${JSON.stringify(data.trends || {}, null, 2)}
 
-RUTAS DISPONIBLES EN EL SISTEMA (usa SOLO estas rutas):
-- Analíticas y reportes: /admin/analytics
-- Ventas/Órdenes (Caja): /admin/cash-register
-- Productos: /admin/products
-- Trabajos: /admin/work-orders
+RUTAS VÁLIDAS (usa SOLO estas):
+${ROUTES_BY_SECTION.analytics.map((r) => `- ${r}`).join("\n")}
 
 Tareas:
 1. Explica en lenguaje natural (máximo 2 líneas) por qué las ventas cambiaron este período
@@ -444,16 +444,16 @@ Tareas:
 3. Sugiere una acción concreta
 4. Asigna prioridad del 1 al 10 (mayor desviación = mayor prioridad)
 
-IMPORTANTE: Usa SOLO las rutas listadas arriba. NO inventes rutas que no existen.
+IMPORTANTE: Usa SOLO las rutas listadas arriba. NO inventes rutas.
 Ejemplos de action_url válidos:
-- "/admin/analytics"
-- "/admin/cash-register"
-- "/admin/products"
+- "${INSIGHT_ROUTES.analytics}"
+- "${INSIGHT_ROUTES.cashRegister}"
+- "${INSIGHT_ROUTES.products}"
 
 Ejemplos de insights:
-- Caída > 10%: tipo 'warning', prioridad 8-9, action_url: "/admin/analytics"
-- Caída 5-10%: tipo 'warning', prioridad 6-7, action_url: "/admin/analytics"
-- Subida > 10%: tipo 'info', prioridad 3-4, action_url: "/admin/analytics"
+- Caída > 10%: tipo 'warning', prioridad 8-9, action_url: "${INSIGHT_ROUTES.analytics}"
+- Caída 5-10%: tipo 'warning', prioridad 6-7, action_url: "${INSIGHT_ROUTES.analytics}"
+- Subida > 10%: tipo 'info', prioridad 3-4, action_url: "${INSIGHT_ROUTES.analytics}"
 - Estable: tipo 'neutral', prioridad 1-2
 `;
 }

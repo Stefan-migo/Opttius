@@ -9,6 +9,7 @@ import {
   X,
   Star,
   ExternalLink,
+  ChevronRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -19,6 +20,8 @@ interface InsightCardProps {
   onDismiss: () => void;
   onFeedback: (score: number) => void;
   compact?: boolean;
+  /** When set, card becomes clickable to expand and show full insight */
+  onExpand?: () => void;
 }
 
 const typeConfig = {
@@ -61,6 +64,7 @@ export function InsightCard({
   onDismiss,
   onFeedback,
   compact = false,
+  onExpand,
 }: InsightCardProps) {
   const [showFeedback, setShowFeedback] = useState(false);
   const [hoveredStar, setHoveredStar] = useState<number | null>(null);
@@ -96,12 +100,18 @@ export function InsightCard({
   };
 
   if (compact) {
+    const isClickable = !!onExpand;
+    const CardWrapper = isClickable ? "button" : "div";
     return (
-      <div
+      <CardWrapper
+        type={isClickable ? "button" : undefined}
+        onClick={isClickable ? onExpand : undefined}
         className={cn(
-          "relative rounded-xl border-l-2 p-2.5 transition-all",
+          "relative rounded-xl border-l-2 p-2.5 transition-all w-full text-left",
           config.bgColor,
           config.borderColor,
+          isClickable &&
+            "cursor-pointer hover:shadow-md focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-epoch-primary/50 active:scale-[0.99]",
         )}
       >
         <div className="flex items-start gap-2">
@@ -139,6 +149,12 @@ export function InsightCard({
             <p className="text-xs text-gray-700 leading-relaxed mb-2 line-clamp-2">
               {insight.message}
             </p>
+            {isClickable && (
+              <span className="inline-flex items-center gap-0.5 text-xs text-epoch-primary/80 font-medium mb-2">
+                Ver más
+                <ChevronRight className="w-3 h-3" />
+              </span>
+            )}
 
             {/* Footer */}
             <div className="flex items-center justify-between gap-2">
@@ -217,7 +233,10 @@ export function InsightCard({
                     config.borderColor,
                     "hover:bg-white",
                   )}
-                  onClick={handleActionClick}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleActionClick(e);
+                  }}
                 >
                   {insight.action_label}
                   <ExternalLink className="w-3 h-3 ml-1" />
@@ -226,7 +245,7 @@ export function InsightCard({
             </div>
           </div>
         </div>
-      </div>
+      </CardWrapper>
     );
   }
 
