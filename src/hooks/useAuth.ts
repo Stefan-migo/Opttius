@@ -211,6 +211,11 @@ export function useAuth(initialUser?: User | null) {
     try {
       // Create auth user - handle_new_user trigger creates profile with SECURITY DEFINER
       // (bypasses RLS). We pass phone in metadata so the trigger can include it.
+      const redirectUrl =
+        typeof window !== "undefined"
+          ? `${window.location.origin}/login`
+          : `${process.env.NEXT_PUBLIC_APP_URL || process.env.NEXT_PUBLIC_BASE_URL || "https://www.opttius.cl"}/login`;
+
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
         password,
@@ -220,6 +225,7 @@ export function useAuth(initialUser?: User | null) {
             last_name: userData?.lastName,
             phone: userData?.phone,
           },
+          emailRedirectTo: redirectUrl,
         },
       });
 

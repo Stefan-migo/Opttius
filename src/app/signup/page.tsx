@@ -129,7 +129,7 @@ export default function SignupPage() {
         <div className="w-full max-w-md relative z-10 animate-in zoom-in-95 duration-700 rounded-3xl overflow-hidden">
           <Card className="overflow-hidden rounded-3xl shadow-2xl border-0 bg-epoch-primary">
             {/* Header: mismo tamaño visual que el contenido */}
-            <div className="bg-epoch-primary p-10 text-center">
+            <div className="bg-epoch-primary p-6 sm:p-10 text-center">
               <div className="relative mx-auto mb-6 flex justify-center">
                 <Image
                   src="/logoYopttius.png"
@@ -151,33 +151,35 @@ export default function SignupPage() {
             </div>
 
             {/* Contenido: verde oscuro con texto y botón en contraste */}
-            <CardContent className="p-10 text-center bg-epoch-primary border-t border-white/10">
+            <CardContent className="p-6 sm:p-10 text-center bg-epoch-primary border-t border-white/10">
               {requiresEmailConfirmation ? (
-                <div className="space-y-8">
+                <div className="space-y-6 sm:space-y-8">
                   <p className="text-[15px] font-serif italic text-white/90 leading-relaxed">
                     Su óptica está a un paso de la automatización. Revise su
                     bandeja de entrada y active su cuenta para comenzar.
                   </p>
                   <Button
                     onClick={() => router.push("/login")}
-                    className="w-full h-16 bg-epoch-accent hover:bg-epoch-accent/90 text-epoch-primary rounded-xl font-display font-bold uppercase text-[11px] tracking-[0.3em] transition-all shadow-xl group"
+                    className="w-full min-h-14 sm:h-16 px-4 overflow-hidden bg-epoch-accent hover:bg-epoch-accent/90 text-epoch-primary rounded-xl font-display font-bold uppercase text-[10px] sm:text-[11px] tracking-[0.12em] sm:tracking-[0.3em] transition-all shadow-xl group flex items-center justify-center gap-2 py-3 sm:py-4 whitespace-normal"
                   >
-                    REGRESAR AL ACCESO
-                    <ArrowRight className="ml-3 h-4 w-4 transition-transform group-hover:translate-x-2" />
+                    <span className="break-words text-center">
+                      REGRESAR AL ACCESO
+                    </span>
+                    <ArrowRight className="h-4 w-4 shrink-0 transition-transform group-hover:translate-x-2" />
                   </Button>
                 </div>
               ) : (
-                <div className="space-y-8">
+                <div className="space-y-6 sm:space-y-8">
                   <p className="text-[15px] font-serif italic text-white/90 leading-relaxed">
                     Su cuenta ha sido creada. Redirigiéndole a la configuración
                     inicial...
                   </p>
                   <Button
                     onClick={() => router.push("/onboarding/choice")}
-                    className="w-full h-16 bg-epoch-accent hover:bg-epoch-accent/90 text-epoch-primary rounded-xl font-display font-bold uppercase text-[11px] tracking-[0.3em] transition-all shadow-xl group"
+                    className="w-full min-h-14 sm:h-16 px-4 overflow-hidden bg-epoch-accent hover:bg-epoch-accent/90 text-epoch-primary rounded-xl font-display font-bold uppercase text-[10px] sm:text-[11px] tracking-[0.12em] sm:tracking-[0.3em] transition-all shadow-xl group flex items-center justify-center gap-2 py-3 sm:py-4 whitespace-normal"
                   >
-                    CONTINUAR
-                    <ArrowRight className="ml-3 h-4 w-4 transition-transform group-hover:translate-x-2" />
+                    <span className="break-words text-center">CONTINUAR</span>
+                    <ArrowRight className="h-4 w-4 shrink-0 transition-transform group-hover:translate-x-2" />
                   </Button>
                 </div>
               )}
