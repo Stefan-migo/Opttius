@@ -23,7 +23,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { createSaasSupportMessageSchema } from "@/lib/api/validation/zod-schemas";
 import type { z } from "zod";
 
-type MessageForm = z.infer<typeof createSaasSupportMessageSchema>;
+type MessageForm = z.input<typeof createSaasSupportMessageSchema>;
 
 interface TicketMessage {
   id: string;
@@ -106,8 +106,10 @@ export default function HelpTicketDetailPage() {
   } = useForm<MessageForm>({
     resolver: zodResolver(createSaasSupportMessageSchema),
     defaultValues: {
+      message: "",
       is_internal: false,
       message_type: "message",
+      attachments: [],
     },
   });
 
