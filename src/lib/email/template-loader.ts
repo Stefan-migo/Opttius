@@ -20,6 +20,7 @@ export async function loadEmailTemplate(
   type: string,
   useServiceRole: boolean = false,
   organizationId?: string,
+  category?: "saas" | "organization",
 ): Promise<EmailTemplate | null> {
   try {
     const supabase = useServiceRole
@@ -45,6 +46,10 @@ export async function loadEmailTemplate(
       .select("*")
       .eq("type", type)
       .eq("is_active", true);
+
+    if (category) {
+      query = query.eq("category", category);
+    }
 
     if (organizationId) {
       query = query.or(

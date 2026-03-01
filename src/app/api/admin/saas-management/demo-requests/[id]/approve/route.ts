@@ -60,7 +60,7 @@ export async function POST(
     if (!targetUserId) {
       const { data: inviteData, error: inviteError } =
         await supabase.auth.admin.inviteUserByEmail(email, {
-          redirectTo: `${process.env.NEXT_PUBLIC_APP_URL || "https://www.opttius.cl"}/login`,
+          redirectTo: `${process.env.NEXT_PUBLIC_APP_URL || "https://www.opttius.cl"}/reset-password`,
         });
       if (inviteError) {
         logger.error("Error inviting user for demo", {

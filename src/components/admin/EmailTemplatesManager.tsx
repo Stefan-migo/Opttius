@@ -61,6 +61,7 @@ interface EmailTemplate {
   usage_count: number;
   created_at: string;
   updated_at: string;
+  template_group?: string | null;
 }
 
 interface EmailTemplatesManagerProps {
@@ -115,6 +116,7 @@ export default function EmailTemplatesManager({
   const [templates, setTemplates] = useState<EmailTemplate[]>([]);
   const [loading, setLoading] = useState(true);
   const [typeFilter, setTypeFilter] = useState("all");
+  const [groupFilter, setGroupFilter] = useState<string>("all");
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showPreviewDialog, setShowPreviewDialog] = useState(false);
@@ -133,7 +135,7 @@ export default function EmailTemplatesManager({
 
   useEffect(() => {
     fetchTemplates();
-  }, [typeFilter]);
+  }, [typeFilter, groupFilter]);
 
   const fetchTemplates = async () => {
     try {
@@ -144,6 +146,9 @@ export default function EmailTemplatesManager({
       }
       if (mode === "saas") {
         params.set("category", "saas");
+        if (groupFilter !== "all") {
+          params.set("template_group", groupFilter);
+        }
       }
 
       const apiUrl =
@@ -308,6 +313,10 @@ export default function EmailTemplatesManager({
       saas_support_new_response: "Nueva Respuesta",
       saas_support_ticket_assigned: "Ticket Asignado",
       saas_support_ticket_resolved: "Ticket Resuelto",
+      demo_approved: "Demo Aprobada",
+      demo_expiring: "Demo por Vencer",
+      demo_expired: "Demo Expirada",
+      demo_post_meeting_followup: "Post-Reunión Followup",
     };
     return labels[type] || type;
   };
@@ -363,7 +372,22 @@ export default function EmailTemplatesManager({
       {/* Filters */}
       <Card className="rounded-xl border border-border">
         <CardContent className="p-4 sm:p-6">
-          <div className="flex flex-col sm:flex-row gap-4 sm:gap-4 sm:items-center">
+          <div className="flex flex-col sm:flex-row gap-4 sm:gap-4 sm:items-center flex-wrap">
+            {mode === "saas" && (
+              <>
+                <Label className="text-xs sm:text-sm">Grupo:</Label>
+                <Select value={groupFilter} onValueChange={setGroupFilter}>
+                  <SelectTrigger className="w-full sm:w-[200px] rounded-xl min-h-[44px]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todos</SelectItem>
+                    <SelectItem value="funnel">Funnel</SelectItem>
+                    <SelectItem value="support">Soporte</SelectItem>
+                  </SelectContent>
+                </Select>
+              </>
+            )}
             <Label className="text-xs sm:text-sm">Filtrar por tipo:</Label>
             <Select value={typeFilter} onValueChange={setTypeFilter}>
               <SelectTrigger className="w-full sm:w-[250px] rounded-xl min-h-[44px]">
@@ -399,6 +423,14 @@ export default function EmailTemplatesManager({
                     </SelectItem>
                     <SelectItem value="saas_support_ticket_resolved">
                       Ticket Resuelto
+                    </SelectItem>
+                    <SelectItem value="demo_approved">Demo Aprobada</SelectItem>
+                    <SelectItem value="demo_expiring">
+                      Demo por Vencer
+                    </SelectItem>
+                    <SelectItem value="demo_expired">Demo Expirada</SelectItem>
+                    <SelectItem value="demo_post_meeting_followup">
+                      Post-Reunión Followup
                     </SelectItem>
                   </>
                 )}

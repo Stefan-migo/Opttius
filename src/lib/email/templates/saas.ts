@@ -813,38 +813,46 @@ export async function sendDemoApprovedEmail(
   data: DemoApprovedData,
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const name = data.fullName || "Usuario";
+    const template = await loadEmailTemplate(
+      "demo_approved",
+      true,
+      undefined,
+      "saas",
+    );
+    if (!template) {
+      console.warn("⚠️ No demo_approved template found");
+      return { success: false, error: "Template not found" };
+    }
+
     const loginUrl =
       data.loginUrl ||
       `${process.env.NEXT_PUBLIC_APP_URL || "https://www.opttius.cl"}/login`;
-
-    const content = `
-      <p>Hola ${name},</p>
-      <p>Tu solicitud de demo de Opttius ha sido <strong>aprobada</strong>.</p>
-      <p>Ya puedes acceder a tu entorno de demostración con tu email y contraseña actual.</p>
-      <p><a href="${loginUrl}" style="display:inline-block;background:#1e40af;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600;">Acceder a mi demo</a></p>
-      <p>La demo tiene una duración de 7 días. Si tienes dudas, contáctanos a soporte@opttius.cl.</p>
-    `;
-
+    const variables = {
+      full_name: data.fullName || "Usuario",
+      login_url: loginUrl,
+    };
+    const subject = replaceTemplateVariables(template.subject, variables);
+    const content = replaceTemplateVariables(template.content, variables);
     const html = wrapInModernLayout(content, {
       title: "Demo aprobada - Opttius",
       previewText: "Tu solicitud de demo ha sido aprobada.",
       organizationName: "Opttius",
     });
-
     const text = html
       .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")
       .replace(/<[^>]+>/g, "")
       .replace(/\n\s*\n/g, "\n")
       .trim();
 
-    return await sendEmail({
+    const result = await sendEmail({
       to: data.email,
-      subject: "Tu demo de Opttius está lista",
+      subject,
       html,
       text,
       replyTo: "soporte@opttius.cl",
     });
+    if (result.success) await incrementTemplateUsage(template.id);
+    return result;
   } catch (error) {
     console.error("Error sending demo approved email:", error);
     return {
@@ -862,37 +870,47 @@ export async function sendDemoExpiringEmail(
   data: DemoExpiringData,
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const name = data.fullName || "Usuario";
+    const template = await loadEmailTemplate(
+      "demo_expiring",
+      true,
+      undefined,
+      "saas",
+    );
+    if (!template) {
+      console.warn("⚠️ No demo_expiring template found");
+      return { success: false, error: "Template not found" };
+    }
+
     const days = data.daysRemaining;
     const meetingUrl = data.meetingUrl || "https://www.opttius.cl/contacto";
-
-    const content = `
-      <p>Hola ${name},</p>
-      <p>Tu demo de Opttius vence en <strong>${days} ${days === 1 ? "día" : "días"}</strong>.</p>
-      <p>¿Te gustaría agendar una reunión para conocer cómo Opttius puede ayudarte a gestionar tu óptica? Conversamos sobre tus necesidades y te mostramos las opciones de planes.</p>
-      <p><a href="${meetingUrl}" style="display:inline-block;background:#1e40af;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600;">Agendar reunión</a></p>
-      <p>Si tienes dudas, escríbenos a soporte@opttius.cl.</p>
-    `;
-
+    const variables = {
+      full_name: data.fullName || "Usuario",
+      days_remaining: days.toString(),
+      days_label: days === 1 ? "día" : "días",
+      meeting_url: meetingUrl,
+    };
+    const subject = replaceTemplateVariables(template.subject, variables);
+    const content = replaceTemplateVariables(template.content, variables);
     const html = wrapInModernLayout(content, {
       title: "Tu demo de Opttius vence pronto",
       previewText: `Tu demo vence en ${days} ${days === 1 ? "día" : "días"}. Agenda una reunión.`,
       organizationName: "Opttius",
     });
-
     const text = html
       .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")
       .replace(/<[^>]+>/g, "")
       .replace(/\n\s*\n/g, "\n")
       .trim();
 
-    return await sendEmail({
+    const result = await sendEmail({
       to: data.email,
-      subject: `Tu demo de Opttius vence en ${days} ${days === 1 ? "día" : "días"}`,
+      subject,
       html,
       text,
       replyTo: "soporte@opttius.cl",
     });
+    if (result.success) await incrementTemplateUsage(template.id);
+    return result;
   } catch (error) {
     console.error("Error sending demo expiring email:", error);
     return {
@@ -910,36 +928,44 @@ export async function sendDemoExpiredEmail(
   data: DemoExpiredData,
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const name = data.fullName || "Usuario";
+    const template = await loadEmailTemplate(
+      "demo_expired",
+      true,
+      undefined,
+      "saas",
+    );
+    if (!template) {
+      console.warn("⚠️ No demo_expired template found");
+      return { success: false, error: "Template not found" };
+    }
+
     const meetingUrl = data.meetingUrl || "https://www.opttius.cl/contacto";
-
-    const content = `
-      <p>Hola ${name},</p>
-      <p>Tu prueba de Opttius ha finalizado. Esperamos que hayas podido explorar el sistema: gestión de inventario, citas, presupuestos, POS y más.</p>
-      <p>Si te gustaría continuar con Opttius o tienes preguntas, agenda una reunión y conversamos sobre tu óptica.</p>
-      <p><a href="${meetingUrl}" style="display:inline-block;background:#1e40af;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600;">Agendar reunión</a></p>
-      <p>También puedes escribirnos a soporte@opttius.cl.</p>
-    `;
-
+    const variables = {
+      full_name: data.fullName || "Usuario",
+      meeting_url: meetingUrl,
+    };
+    const subject = replaceTemplateVariables(template.subject, variables);
+    const content = replaceTemplateVariables(template.content, variables);
     const html = wrapInModernLayout(content, {
       title: "Tu prueba de Opttius ha finalizado",
       previewText: "Tu demo ha expirado. Agenda una reunión para continuar.",
       organizationName: "Opttius",
     });
-
     const text = html
       .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")
       .replace(/<[^>]+>/g, "")
       .replace(/\n\s*\n/g, "\n")
       .trim();
 
-    return await sendEmail({
+    const result = await sendEmail({
       to: data.email,
-      subject: "Tu prueba de Opttius ha finalizado",
+      subject,
       html,
       text,
       replyTo: "soporte@opttius.cl",
     });
+    if (result.success) await incrementTemplateUsage(template.id);
+    return result;
   } catch (error) {
     console.error("Error sending demo expired email:", error);
     return {
@@ -957,35 +983,44 @@ export async function sendDemoPostMeetingFollowupEmail(
   data: DemoPostMeetingFollowupData,
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const name = data.fullName || "Usuario";
+    const template = await loadEmailTemplate(
+      "demo_post_meeting_followup",
+      true,
+      undefined,
+      "saas",
+    );
+    if (!template) {
+      console.warn("⚠️ No demo_post_meeting_followup template found");
+      return { success: false, error: "Template not found" };
+    }
+
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://www.opttius.cl";
-
-    const content = `
-      <p>Hola ${name},</p>
-      <p>Gracias por reunirte con nosotros. Esperamos que la conversación haya sido útil.</p>
-      <p>Si tienes más preguntas sobre Opttius, planes o la migración de datos, estamos aquí para ayudarte. Escríbenos a soporte@opttius.cl.</p>
-      <p><a href="${appUrl}" style="display:inline-block;background:#1e40af;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600;">Ver Opttius</a></p>
-    `;
-
+    const variables = {
+      full_name: data.fullName || "Usuario",
+      app_url: appUrl,
+    };
+    const subject = replaceTemplateVariables(template.subject, variables);
+    const content = replaceTemplateVariables(template.content, variables);
     const html = wrapInModernLayout(content, {
       title: "Gracias por reunirte con Opttius",
       previewText: "¿Tienes preguntas? Estamos aquí para ayudarte.",
       organizationName: "Opttius",
     });
-
     const text = html
       .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")
       .replace(/<[^>]+>/g, "")
       .replace(/\n\s*\n/g, "\n")
       .trim();
 
-    return await sendEmail({
+    const result = await sendEmail({
       to: data.email,
-      subject: "Gracias por reunirte con Opttius",
+      subject,
       html,
       text,
       replyTo: "soporte@opttius.cl",
     });
+    if (result.success) await incrementTemplateUsage(template.id);
+    return result;
   } catch (error) {
     console.error("Error sending demo post-meeting followup email:", error);
     return {

@@ -21,15 +21,20 @@ export async function GET(request: NextRequest) {
     const supabase = createServiceRoleClient();
     const { searchParams } = new URL(request.url);
     const type = searchParams.get("type") || "";
+    const templateGroup = searchParams.get("template_group") || "";
 
     let query = supabase
       .from("system_email_templates")
       .select("*")
       .eq("category", "saas")
+      .order("template_group", { ascending: true, nullsFirst: true })
       .order("type", { ascending: true });
 
     if (type && type !== "all") {
       query = query.eq("type", type);
+    }
+    if (templateGroup && templateGroup !== "all") {
+      query = query.eq("template_group", templateGroup);
     }
 
     const { data: templates, error } = await query;

@@ -26,6 +26,7 @@ import {
   Video,
   FileText,
   Target,
+  Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -129,6 +130,10 @@ export default function NewUsersFlowPage() {
     offer_type: "",
     lost_reason: "",
   });
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [requestToDelete, setRequestToDelete] = useState<DemoRequest | null>(
+    null,
+  );
 
   const fetchData = async () => {
     setLoading(true);
@@ -184,6 +189,37 @@ export default function NewUsersFlowPage() {
       }
     } catch {
       toast.error("Error al aprobar");
+    } finally {
+      setActioning(null);
+    }
+  };
+
+  const handleDeleteClick = (r: DemoRequest) => {
+    setRequestToDelete(r);
+    setDeleteConfirmOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!requestToDelete) return;
+    setActioning(requestToDelete.id);
+    try {
+      const res = await fetch(
+        `/api/admin/saas-management/demo-requests/${requestToDelete.id}/delete`,
+        { method: "DELETE" },
+      );
+      const data = await res.json();
+      if (res.ok) {
+        toast.success(data.message ?? "Solicitud eliminada");
+        setDeleteConfirmOpen(false);
+        setRequestToDelete(null);
+        setFunnelModalOpen(false);
+        setSelectedRequest(null);
+        fetchData();
+      } else {
+        toast.error(data.error ?? data.details ?? "Error al eliminar");
+      }
+    } catch {
+      toast.error("Error al eliminar");
     } finally {
       setActioning(null);
     }
@@ -554,6 +590,19 @@ export default function NewUsersFlowPage() {
                                 Ver
                               </Button>
                             )}
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDeleteClick(r);
+                              }}
+                              disabled={actioning === r.id}
+                              title="Eliminar solicitud"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
                           </div>
                         </td>
                       </tr>
@@ -725,6 +774,63 @@ export default function NewUsersFlowPage() {
                     Marcar perdido
                   </Button>
                 )}
+                <Button
+                  size="sm"
+                  variant="destructive"
+                  className="ml-auto"
+                  onClick={() => {
+                    setFunnelModalOpen(false);
+                    handleDeleteClick(selectedRequest);
+                  }}
+                  disabled={actioning === selectedRequest.id}
+                >
+                  <Trash2 className="h-4 w-4 mr-1" />
+                  Eliminar solicitud
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Eliminar solicitud</DialogTitle>
+          </DialogHeader>
+          {requestToDelete && (
+            <div className="space-y-4">
+              <p className="text-sm text-muted-foreground">
+                ¿Estás seguro de eliminar la solicitud de{" "}
+                <strong>
+                  {requestToDelete.full_name || requestToDelete.email}
+                </strong>
+                ? Se eliminará toda la información asociada
+                {requestToDelete.organization_id &&
+                  ", incluyendo la organización demo y sus datos"}
+                .
+              </p>
+              <div className="flex gap-2 justify-end">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setDeleteConfirmOpen(false);
+                    setRequestToDelete(null);
+                  }}
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  variant="destructive"
+                  onClick={handleDeleteConfirm}
+                  disabled={actioning === requestToDelete.id}
+                >
+                  {actioning === requestToDelete.id ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    "Eliminar"
+                  )}
+                </Button>
               </div>
             </div>
           )}

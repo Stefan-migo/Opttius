@@ -51,33 +51,43 @@ export default function ResetPasswordPage() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<boolean>(false);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [isInviteFlow, setIsInviteFlow] = useState(false);
 
-  // Check if we are in recovery mode
+  // Check if we are in recovery or invite mode (set password flow)
   useEffect(() => {
-    const checkRecovery = async () => {
+    const checkRecoveryOrInvite = async () => {
       const supabase = createClient();
       const {
         data: { session },
       } = await supabase.auth.getSession();
 
       const hash = window.location.hash;
-      if (
-        hash.includes("type=recovery") ||
-        (session && !session.user.is_anonymous)
-      ) {
-        if (hash.includes("type=recovery")) {
+      const isRecovery = hash.includes("type=recovery");
+      const isInvite = hash.includes("type=invite");
+      if (isRecovery || isInvite || (session && !session.user.is_anonymous)) {
+        if (isRecovery || isInvite) {
+          setIsInviteFlow(isInvite);
           setStep("update");
         }
       }
     };
 
-    checkRecovery();
+    checkRecoveryOrInvite();
 
     const supabase = createClient();
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event) => {
       if (event === "PASSWORD_RECOVERY") {
+        setIsInviteFlow(false);
+        setStep("update");
+      }
+      // Invite flow: user lands with tokens in hash, session is established
+      if (
+        event === "SIGNED_IN" &&
+        window.location.hash.includes("type=invite")
+      ) {
+        setIsInviteFlow(true);
         setStep("update");
       }
     });
@@ -118,7 +128,7 @@ export default function ResetPasswordPage() {
 
       setSuccess(true);
       setTimeout(() => {
-        router.push("/login");
+        router.push(isInviteFlow ? "/admin" : "/login");
       }, 3000);
     } catch (err: any) {
       setError(err.message || "Error al actualizar la contraseña");
@@ -199,21 +209,27 @@ export default function ResetPasswordPage() {
           <div className="text-center mb-8 sm:mb-10 lg:text-left space-y-3">
             <div className="inline-flex items-center gap-4 px-4 sm:px-6 py-2 border border-epoch-primary/10 rounded-full text-epoch-primary/60 text-[10px] font-display tracking-[0.3em] sm:tracking-[0.4em] uppercase">
               {step === "update"
-                ? "Actualizar contraseña"
+                ? isInviteFlow
+                  ? "Tu demo está lista"
+                  : "Actualizar contraseña"
                 : "Recuperación de cuenta"}
             </div>
             <h1 className="text-3xl sm:text-4xl md:text-5xl font-display font-bold text-epoch-primary tracking-tight">
               {step === "sent"
                 ? "Correo enviado"
                 : step === "update"
-                  ? "Nueva contraseña"
+                  ? isInviteFlow
+                    ? "Crea tu contraseña"
+                    : "Nueva contraseña"
                   : "¿Olvidaste tu contraseña?"}
             </h1>
             <p className="text-epoch-primary/60 font-display font-bold uppercase text-[10px] tracking-[0.2em] sm:tracking-widest leading-relaxed">
               {step === "sent"
                 ? "Revisa tu bandeja de entrada para continuar."
                 : step === "update"
-                  ? "Ingresa tu nueva contraseña para restablecer el acceso."
+                  ? isInviteFlow
+                    ? "Tu demo de Opttius está lista. Crea una contraseña para acceder."
+                    : "Ingresa tu nueva contraseña para restablecer el acceso."
                   : "Ingresa tu email para recibir un enlace de recuperación."}
             </p>
           </div>
@@ -339,7 +355,7 @@ export default function ResetPasswordPage() {
                       htmlFor="password"
                       className="text-[10px] font-display font-bold text-epoch-primary/40 uppercase tracking-[0.3em] ml-1"
                     >
-                      Nueva contraseña
+                      {isInviteFlow ? "Contraseña" : "Nueva contraseña"}
                     </Label>
                     <div className="relative group">
                       <Input
@@ -400,6 +416,8 @@ export default function ResetPasswordPage() {
                   >
                     {isUpdating ? (
                       <Loader2 className="h-5 w-5 animate-spin" />
+                    ) : isInviteFlow ? (
+                      "Crear contraseña y acceder"
                     ) : (
                       "Restablecer contraseña"
                     )}
