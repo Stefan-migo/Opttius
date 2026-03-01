@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { BreadcrumbStructuredData } from "@/components/seo/BreadcrumbStructuredData";
 
 export const metadata: Metadata = {
   title: "Política de Rastreo y Sesiones",
@@ -9,6 +10,12 @@ export const metadata: Metadata = {
 export default function CookiesPage() {
   return (
     <article className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
+      <BreadcrumbStructuredData
+        items={[
+          { name: "Inicio", path: "/" },
+          { name: "Cookies", path: "/legal/cookies" },
+        ]}
+      />
       <h1 className="text-4xl md:text-5xl font-display font-bold text-epoch-primary tracking-tight mb-4">
         Política de Rastreo y Sesiones
       </h1>

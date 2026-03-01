@@ -18,7 +18,7 @@ import type { DatabaseInsight } from "@/lib/ai/insights/schemas";
 interface InsightCardProps {
   insight: DatabaseInsight;
   onDismiss: () => void;
-  onFeedback: (score: number) => void;
+  onFeedback: (score: number, comment?: string) => void;
   compact?: boolean;
   /** When set, card becomes clickable to expand and show full insight */
   onExpand?: () => void;
@@ -68,6 +68,7 @@ export function InsightCard({
 }: InsightCardProps) {
   const [showFeedback, setShowFeedback] = useState(false);
   const [hoveredStar, setHoveredStar] = useState<number | null>(null);
+  const [feedbackComment, setFeedbackComment] = useState("");
   const config = typeConfig[insight.type];
   const Icon = config.icon;
 
@@ -95,8 +96,9 @@ export function InsightCard({
   };
 
   const handleStarClick = (score: number) => {
-    onFeedback(score);
+    onFeedback(score, feedbackComment.trim() || undefined);
     setShowFeedback(false);
+    setFeedbackComment("");
   };
 
   if (compact) {
@@ -187,30 +189,41 @@ export function InsightCard({
                 )}
 
                 {showFeedback && (
-                  <div className="flex items-center gap-0.5">
-                    {[1, 2, 3, 4, 5].map((score) => (
-                      <button
-                        key={score}
-                        type="button"
-                        className="focus:outline-none"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleStarClick(score);
-                        }}
-                        onMouseEnter={() => setHoveredStar(score)}
-                        onMouseLeave={() => setHoveredStar(null)}
-                      >
-                        <Star
-                          className={cn(
-                            "h-3 w-3 transition-colors",
-                            (hoveredStar !== null && score <= hoveredStar) ||
-                              insight.feedback_score === score
-                              ? "fill-yellow-400 text-yellow-400"
-                              : "text-gray-300 hover:text-yellow-400",
-                          )}
-                        />
-                      </button>
-                    ))}
+                  <div className="flex flex-col gap-1">
+                    <div className="flex items-center gap-0.5">
+                      {[1, 2, 3, 4, 5].map((score) => (
+                        <button
+                          key={score}
+                          type="button"
+                          className="focus:outline-none"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleStarClick(score);
+                          }}
+                          onMouseEnter={() => setHoveredStar(score)}
+                          onMouseLeave={() => setHoveredStar(null)}
+                        >
+                          <Star
+                            className={cn(
+                              "h-3 w-3 transition-colors",
+                              (hoveredStar !== null && score <= hoveredStar) ||
+                                insight.feedback_score === score
+                                ? "fill-yellow-400 text-yellow-400"
+                                : "text-gray-300 hover:text-yellow-400",
+                            )}
+                          />
+                        </button>
+                      ))}
+                    </div>
+                    <textarea
+                      placeholder="Comentario (opcional)"
+                      className="w-full text-xs border rounded px-2 py-1 min-h-[2rem] max-h-20 resize-y"
+                      value={feedbackComment}
+                      onChange={(e) => setFeedbackComment(e.target.value)}
+                      onClick={(e) => e.stopPropagation()}
+                      maxLength={500}
+                      rows={2}
+                    />
                   </div>
                 )}
 
@@ -311,28 +324,38 @@ export function InsightCard({
           )}
 
           {showFeedback && (
-            <div className="flex items-center gap-1">
-              {[1, 2, 3, 4, 5].map((score) => (
-                <button
-                  key={score}
-                  type="button"
-                  className="focus:outline-none"
-                  onClick={() => handleStarClick(score)}
-                  onMouseEnter={() => setHoveredStar(score)}
-                  onMouseLeave={() => setHoveredStar(null)}
-                  aria-label={`${score} estrellas`}
-                >
-                  <Star
-                    className={cn(
-                      "h-4 w-4 transition-colors",
-                      (hoveredStar !== null && score <= hoveredStar) ||
-                        insight.feedback_score === score
-                        ? "fill-yellow-400 text-yellow-400"
-                        : "text-gray-300 hover:text-yellow-400",
-                    )}
-                  />
-                </button>
-              ))}
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center gap-1">
+                {[1, 2, 3, 4, 5].map((score) => (
+                  <button
+                    key={score}
+                    type="button"
+                    className="focus:outline-none"
+                    onClick={() => handleStarClick(score)}
+                    onMouseEnter={() => setHoveredStar(score)}
+                    onMouseLeave={() => setHoveredStar(null)}
+                    aria-label={`${score} estrellas`}
+                  >
+                    <Star
+                      className={cn(
+                        "h-4 w-4 transition-colors",
+                        (hoveredStar !== null && score <= hoveredStar) ||
+                          insight.feedback_score === score
+                          ? "fill-yellow-400 text-yellow-400"
+                          : "text-gray-300 hover:text-yellow-400",
+                      )}
+                    />
+                  </button>
+                ))}
+              </div>
+              <textarea
+                placeholder="Comentario (opcional)"
+                className="w-full text-sm border rounded px-2 py-1.5 min-h-[2.5rem] max-h-24 resize-y"
+                value={feedbackComment}
+                onChange={(e) => setFeedbackComment(e.target.value)}
+                maxLength={500}
+                rows={2}
+              />
             </div>
           )}
 

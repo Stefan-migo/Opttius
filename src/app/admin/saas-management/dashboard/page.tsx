@@ -667,6 +667,33 @@ export default function SaaSDashboard() {
               </CardContent>
             </Card>
 
+            {/* Flujos de Nuevos Usuarios */}
+            <Card
+              className="admin-card cursor-pointer hover:shadow-lg transition-shadow border-l-4 border-l-epoch-primary"
+              onClick={() =>
+                router.push("/admin/saas-management/new-users-flow")
+              }
+            >
+              <CardContent className="pt-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-epoch-primary/10 rounded-lg">
+                      <Users className="h-6 w-6 text-epoch-primary" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-lg">
+                        Flujos de Nuevos Usuarios
+                      </h3>
+                      <p className="text-sm text-muted-foreground">
+                        Solicitudes demo, ópticas conocidas y aprobaciones
+                      </p>
+                    </div>
+                  </div>
+                  <ArrowRight className="h-5 w-5 text-muted-foreground" />
+                </div>
+              </CardContent>
+            </Card>
+
             {/* Soporte */}
             <Card
               className="admin-card cursor-pointer hover:shadow-lg transition-shadow border-l-4 border-l-epoch-accent"

@@ -5,9 +5,14 @@
 
 set -e
 NB_EXT_ID="17302d9d-7d70-4c8d-a774-49fbfca3c09d"
+NB_ANEXO="19de09c1-37ae-4832-a17b-dd326c613ce3"
+NB_ANEXO2="2084f3bf-70df-4dd4-a0b3-3cfe0d6c9cff"
+NB_ANEXO3="d2a862dc-a6de-46f2-bacc-c483d1f31b32"
+NB_ANEXO4="2c8b8292-bc96-4697-84a3-801306784619"
+NB_ANEXO5="f7d4d9c4-de38-4020-a069-e485aa64d792"
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 
-echo "Sincronizando fuentes extendidas con NotebookLM (notebook $NB_EXT_ID)..."
+echo "Sincronizando fuentes extendidas (Extendido → Anexo → Anexo 2 → Anexo 3 → Anexo 4 → Anexo 5)..."
 echo "Asegúrate de haber ejecutado: nlm login --check"
 echo ""
 
@@ -17,8 +22,22 @@ add_source() {
   local file="$1"
   local title="$2"
   if [ -f "$ROOT/$file" ]; then
-    echo "  + $title"
-    nlm source add "$NB_EXT_ID" --file "$ROOT/$file" --title "$title" 2>/dev/null || echo "    (omitido o error)"
+    echo -n "  + $title ... "
+    if nlm source add "$NB_EXT_ID" --file "$ROOT/$file" --title "$title" 2>/dev/null; then
+      echo "OK (Extendido)"
+    elif nlm source add "$NB_ANEXO" --file "$ROOT/$file" --title "$title" 2>/dev/null; then
+      echo "OK (Anexo)"
+    elif nlm source add "$NB_ANEXO2" --file "$ROOT/$file" --title "$title" 2>/dev/null; then
+      echo "OK (Anexo 2)"
+    elif nlm source add "$NB_ANEXO3" --file "$ROOT/$file" --title "$title" 2>/dev/null; then
+      echo "OK (Anexo 3)"
+    elif nlm source add "$NB_ANEXO4" --file "$ROOT/$file" --title "$title" 2>/dev/null; then
+      echo "OK (Anexo 4)"
+    elif nlm source add "$NB_ANEXO5" --file "$ROOT/$file" --title "$title" 2>/dev/null; then
+      echo "OK (Anexo 5)"
+    else
+      echo "omitido (ya existe o límite)"
+    fi
     sleep 2
   fi
 }
@@ -68,13 +87,12 @@ add_source "docs/SUPABASE_FIX_INSTRUCTIONS.md" "SUPABASE_FIX_INSTRUCTIONS"
 add_source "docs/COPY_IMPROVEMENT_PLAN.md" "COPY_IMPROVEMENT_PLAN"
 add_source "docs/CHANGELOG_TYPOGRAPHY.md" "CHANGELOG_TYPOGRAPHY"
 add_source "docs/IDENTITY_AUDIT.md" "IDENTITY_AUDIT"
+add_source "docs/marketing/MARKETING_IDENTITY_STRATEGY.md" "MARKETING_IDENTITY_STRATEGY"
 
-# WhatsApp + Agente IA
-add_source "docs/WHATSAPP_AI_AGENT.md" "Módulo WhatsApp + Agente IA"
-add_source ".cursor/skills/whatsapp-ai-agent-optical/SKILL.md" "Skill WhatsApp AI Agent Óptico"
-add_source "docs/WHATSAPP_AGENT_TRAINING.md" "Entrenamiento Agente WhatsApp"
-add_source ".cursor/skills/whatsapp-agent-training-optical/SKILL.md" "Skill Entrenamiento Agente WhatsApp"
+# WhatsApp + Agente IA (docs principales en sync-sources; aquí solo complementos)
 add_source "docs/WHATSAPP_IMPLEMENTATION_PROMPT.md" "Prompt Implementación WhatsApp"
+add_source ".cursor/skills/whatsapp-ai-agent-optical/SKILL.md" "Skill WhatsApp AI Agent Óptico"
+add_source ".cursor/skills/whatsapp-agent-training-optical/SKILL.md" "Skill Entrenamiento Agente WhatsApp"
 
 # Testing - guía y skill
 add_source "docs/TESTING_GUIDE.md" "Guía de Testing Opttius"

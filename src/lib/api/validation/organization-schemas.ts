@@ -51,7 +51,7 @@ export const branchNameSchema = z
 export const createOrganizationSchema = z.object({
   name: organizationNameSchema,
   slug: organizationSlugSchema,
-  subscription_tier: subscriptionTierSchema.default("pro"),
+  subscription_tier: subscriptionTierSchema,
   branchName: branchNameSchema,
 });
 

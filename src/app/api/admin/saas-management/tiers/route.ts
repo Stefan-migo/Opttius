@@ -2,7 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireRoot } from "@/lib/api/root-middleware";
 import { createServiceRoleClient } from "@/utils/supabase/service-role";
 import { appLogger as logger } from "@/lib/logger";
-import { AuthorizationError } from "@/lib/api/errors";
+import { AuthorizationError, ValidationError } from "@/lib/api/errors";
+import { tierUpdateSchema } from "@/lib/api/validation/zod-schemas";
+import {
+  parseAndValidateBody,
+  validationErrorResponse,
+} from "@/lib/api/validation/zod-helpers";
 
 /**
  * GET /api/admin/saas-management/tiers
@@ -81,7 +86,16 @@ export async function PATCH(request: NextRequest) {
     await requireRoot(request);
     const supabaseServiceRole = createServiceRoleClient();
 
-    const body = await request.json();
+    let body;
+    try {
+      body = await parseAndValidateBody(request, tierUpdateSchema);
+    } catch (error) {
+      if (error instanceof ValidationError) {
+        return validationErrorResponse(error);
+      }
+      throw error;
+    }
+
     const {
       name,
       price_monthly,
@@ -91,10 +105,6 @@ export async function PATCH(request: NextRequest) {
       max_products,
       features,
     } = body;
-
-    if (!name) {
-      return NextResponse.json({ error: "name es requerido" }, { status: 400 });
-    }
 
     // Validar que el tier existe
     const { data: existingTier } = await supabaseServiceRole
@@ -120,20 +130,24 @@ export async function PATCH(request: NextRequest) {
       updates.price_monthly = price_monthly;
     }
 
+    // NULL = unlimited; 0, null, undefined from client -> store NULL in DB
+    const toLimitValue = (v: number | null | undefined) =>
+      v == null || v === 0 ? null : v;
+
     if (max_branches !== undefined) {
-      updates.max_branches = max_branches;
+      updates.max_branches = toLimitValue(max_branches);
     }
 
     if (max_users !== undefined) {
-      updates.max_users = max_users;
+      updates.max_users = toLimitValue(max_users);
     }
 
     if (max_customers !== undefined) {
-      updates.max_customers = max_customers;
+      updates.max_customers = toLimitValue(max_customers);
     }
 
     if (max_products !== undefined) {
-      updates.max_products = max_products;
+      updates.max_products = toLimitValue(max_products);
     }
 
     if (features !== undefined) {

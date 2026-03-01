@@ -11,6 +11,7 @@ import { appLogger as logger } from "@/lib/logger";
 import { getSubscriptionStatus } from "@/lib/saas/subscription-status";
 import { canUpgrade } from "@/lib/saas/tier-config";
 import type { SubscriptionTier } from "@/lib/saas/tier-config";
+import { recordTierChange } from "@/lib/saas/tier-change-audit";
 
 export const dynamic = "force-dynamic";
 export async function POST(request: NextRequest) {
@@ -98,6 +99,14 @@ export async function POST(request: NextRequest) {
         );
       }
 
+      await recordTierChange({
+        organizationId,
+        fromTier: currentTier,
+        toTier: targetTier,
+        changedByUserId: user.id,
+        source: "org_user",
+      });
+
       logger.info("Plan changed immediately", {
         organizationId,
         fromTier: currentTier,
@@ -116,21 +125,25 @@ export async function POST(request: NextRequest) {
         effectiveDate: new Date().toISOString(),
       });
     } else {
-      // Scheduled change: store pending tier change
-      // For now, we'll update immediately but could add a scheduled_tier field
-      // For simplicity, we'll update at end of period by setting cancel_at logic
+      // Scheduled downgrade: store in scheduled_tier, apply at end of period
+      const effectiveAt =
+        subscriptionStatus.currentPeriodEnd ||
+        subscriptionStatus.trialEndsAt ||
+        new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // fallback: 30 days
+
       const { error: updateError } = await supabase
         .from("organizations")
         .update({
-          subscription_tier: targetTier,
+          scheduled_tier: targetTier,
+          scheduled_tier_effective_at: effectiveAt.toISOString(),
           updated_at: new Date().toISOString(),
         })
         .eq("id", organizationId);
 
       if (updateError) {
-        logger.error("Error updating organization tier", updateError);
+        logger.error("Error scheduling tier change", updateError);
         return NextResponse.json(
-          { error: "Error al actualizar el plan" },
+          { error: "Error al programar el cambio de plan" },
           { status: 500 },
         );
       }
@@ -139,14 +152,15 @@ export async function POST(request: NextRequest) {
         organizationId,
         fromTier: currentTier,
         toTier: targetTier,
-        effectiveDate: subscriptionStatus.currentPeriodEnd,
+        effectiveDate: effectiveAt,
       });
 
       return NextResponse.json({
         success: true,
-        message: `Plan programado para cambiar a ${targetTier} al final del período actual (${subscriptionStatus.currentPeriodEnd ? new Date(subscriptionStatus.currentPeriodEnd).toLocaleDateString("es-CL") : "N/A"}).`,
+        message: `Plan programado para cambiar a ${targetTier} al final del período actual (${effectiveAt.toLocaleDateString("es-CL")}).`,
         newTier: targetTier,
-        effectiveDate: subscriptionStatus.currentPeriodEnd,
+        effectiveDate: effectiveAt.toISOString(),
+        scheduled: true,
       });
     }
   } catch (error) {

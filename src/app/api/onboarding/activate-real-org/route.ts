@@ -58,20 +58,42 @@ export async function POST(request: NextRequest) {
 
     const { name, slug, branchName } = validatedBody;
 
-    // Verificar que el usuario actualmente tiene la organización demo asignada
     const { data: currentAdminUser } = await supabaseServiceRole
       .from("admin_users")
       .select("organization_id")
       .eq("id", user.id)
       .single();
 
-    if (!currentAdminUser || currentAdminUser.organization_id !== DEMO_ORG_ID) {
+    const currentOrgId = currentAdminUser?.organization_id;
+    if (!currentOrgId) {
       return NextResponse.json(
-        {
-          error: "Solo puedes activar tu organización real desde modo demo",
-        },
+        { error: "Solo puedes activar tu organización real desde modo demo" },
         { status: 400 },
       );
+    }
+
+    if (currentOrgId !== DEMO_ORG_ID) {
+      const { data: org } = await supabaseServiceRole
+        .from("organizations")
+        .select("metadata")
+        .eq("id", currentOrgId)
+        .single();
+      const meta = org?.metadata as Record<string, unknown> | null;
+      if (meta?.demo_type === "organic") {
+        return NextResponse.json(
+          {
+            error:
+              "La activación de tu óptica debe gestionarse a través de soporte.",
+          },
+          { status: 403 },
+        );
+      }
+      if (meta?.is_demo !== true) {
+        return NextResponse.json(
+          { error: "Solo puedes activar tu organización real desde modo demo" },
+          { status: 400 },
+        );
+      }
     }
 
     // Verificar que el slug no exista
@@ -185,7 +207,7 @@ export async function POST(request: NextRequest) {
     const { data: demoBranches } = await supabaseServiceRole
       .from("branches")
       .select("id")
-      .eq("organization_id", DEMO_ORG_ID);
+      .eq("organization_id", currentOrgId);
 
     const demoBranchIds = demoBranches?.map((b) => b.id) || [];
 
@@ -197,7 +219,7 @@ export async function POST(request: NextRequest) {
       await supabaseServiceRole
         .from("customers")
         .delete()
-        .eq("organization_id", DEMO_ORG_ID)
+        .eq("organization_id", currentOrgId)
         .in("branch_id", demoBranchIds)
         .eq("created_by", user.id);
     }
@@ -216,7 +238,7 @@ export async function POST(request: NextRequest) {
         await supabaseServiceRole
           .from("orders")
           .delete()
-          .eq("organization_id", DEMO_ORG_ID)
+          .eq("organization_id", currentOrgId)
           .in("id", userOrderIds);
       }
     }
@@ -226,7 +248,7 @@ export async function POST(request: NextRequest) {
       await supabaseServiceRole
         .from("quotes")
         .delete()
-        .eq("organization_id", DEMO_ORG_ID)
+        .eq("organization_id", currentOrgId)
         .in("branch_id", demoBranchIds);
       // Nota: quotes puede no tener created_by, así que eliminamos todos los de la demo del usuario
       // Esto es seguro porque cuando el usuario cambia de organización, ya no los verá de todas formas
@@ -237,7 +259,7 @@ export async function POST(request: NextRequest) {
       await supabaseServiceRole
         .from("lab_work_orders")
         .delete()
-        .eq("organization_id", DEMO_ORG_ID)
+        .eq("organization_id", currentOrgId)
         .in("branch_id", demoBranchIds)
         .eq("created_by", user.id);
     }
@@ -247,7 +269,7 @@ export async function POST(request: NextRequest) {
       await supabaseServiceRole
         .from("appointments")
         .delete()
-        .eq("organization_id", DEMO_ORG_ID)
+        .eq("organization_id", currentOrgId)
         .in("branch_id", demoBranchIds);
     }
 
@@ -255,7 +277,7 @@ export async function POST(request: NextRequest) {
     await supabaseServiceRole
       .from("payments")
       .delete()
-      .eq("organization_id", DEMO_ORG_ID)
+      .eq("organization_id", currentOrgId)
       .eq("user_id", user.id);
 
     // 7. Pagos de órdenes creados por el usuario en la demo
@@ -327,7 +349,7 @@ export async function POST(request: NextRequest) {
       .from("user_tour_progress")
       .delete()
       .eq("user_id", user.id)
-      .eq("organization_id", DEMO_ORG_ID);
+      .eq("organization_id", currentOrgId);
 
     // 16. Historial de chat del usuario en la demo
     await supabaseServiceRole

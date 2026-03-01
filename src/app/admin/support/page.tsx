@@ -140,7 +140,7 @@ const categoryLabels: Record<string, string> = {
 
 export default function OpticalInternalSupportPage() {
   const router = useRouter();
-  const { currentBranchId } = useBranch();
+  const { currentBranchId, isGlobalView, isSuperAdmin, branches } = useBranch();
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [loadingTickets, setLoadingTickets] = useState(true);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
@@ -203,7 +203,7 @@ export default function OpticalInternalSupportPage() {
     loadCustomers();
   }, []);
 
-  // Reset customer search when dialog closes
+  // Reset customer search when dialog closes; al abrir, sincronizar sucursal
   useEffect(() => {
     if (!showCreateDialog) {
       setCustomerSearch("");
@@ -212,8 +212,10 @@ export default function OpticalInternalSupportPage() {
       setTicketValue("customer_id", undefined);
       setTicketValue("customer_name", undefined);
       setTicketValue("customer_email", undefined);
+    } else if (currentBranchId && !isGlobalView) {
+      setTicketValue("branch_id", currentBranchId);
     }
-  }, [showCreateDialog, setTicketValue]);
+  }, [showCreateDialog, currentBranchId, isGlobalView, setTicketValue]);
 
   // Debounced customer search for Create Ticket form
   const searchCustomersForTicket = useCallback(
@@ -255,13 +257,6 @@ export default function OpticalInternalSupportPage() {
     return () => clearTimeout(t);
   }, [customerSearch, searchCustomersForTicket]);
 
-  // Actualizar branch_id cuando cambia currentBranchId
-  useEffect(() => {
-    if (currentBranchId && !watchTicket("branch_id")) {
-      setTicketValue("branch_id", currentBranchId);
-    }
-  }, [currentBranchId, setTicketValue, watchTicket]);
-
   useEffect(() => {
     loadTickets();
   }, [filters, pagination.page, currentBranchId]);
@@ -295,14 +290,31 @@ export default function OpticalInternalSupportPage() {
         params.append("priority", filters.priority);
       if (filters.category && filters.category !== "all")
         params.append("category", filters.category);
-      if (filters.branch_id && filters.branch_id !== "all")
-        params.append("branch_id", filters.branch_id);
       if (filters.customer_id && filters.customer_id !== "all")
         params.append("customer_id", filters.customer_id);
       if (filters.search) params.append("search", filters.search);
 
+      // Filtro por sucursal: usuarios normales solo ven su sucursal; Super Admin en vista global ve todas
+      if (!isSuperAdmin && currentBranchId) {
+        params.append("branch_id", currentBranchId);
+      } else if (isSuperAdmin && !isGlobalView && currentBranchId) {
+        params.append("branch_id", currentBranchId);
+      } else if (
+        isSuperAdmin &&
+        isGlobalView &&
+        filters.branch_id &&
+        filters.branch_id !== "all"
+      ) {
+        params.append("branch_id", filters.branch_id);
+      }
+      // Si Super Admin en vista global y filters.branch_id === "all": no enviamos branch_id → API devuelve todas
+
+      const headers = getBranchHeader(
+        isSuperAdmin && isGlobalView ? null : currentBranchId,
+      );
       const response = await fetch(
         `/api/admin/optical-support/tickets?${params.toString()}`,
+        { headers },
       );
 
       if (!response.ok) {
@@ -328,10 +340,23 @@ export default function OpticalInternalSupportPage() {
   const onSubmitTicket: SubmitHandler<any> = async (data) => {
     setCreatingTicket(true);
     try {
+      // Usar siempre la sucursal seleccionada; el form puede tener valor desactualizado
+      const branchId =
+        isSuperAdmin && isGlobalView
+          ? data.branch_id
+          : currentBranchId || data.branch_id;
+      const payload = { ...data, branch_id: branchId || undefined };
+
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+        ...getBranchHeader(
+          isSuperAdmin && isGlobalView ? null : currentBranchId,
+        ),
+      };
       const response = await fetch("/api/admin/optical-support/tickets", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
+        headers,
+        body: JSON.stringify(payload),
       });
 
       if (!response.ok) {
@@ -528,6 +553,36 @@ export default function OpticalInternalSupportPage() {
                 </SelectContent>
               </Select>
             </div>
+
+            {isSuperAdmin && isGlobalView && branches.length > 1 && (
+              <div className="space-y-1.5 sm:space-y-2">
+                <label className="text-xs sm:text-sm font-medium">
+                  Sucursal
+                </label>
+                <Select
+                  value={filters.branch_id}
+                  onValueChange={(value) =>
+                    setFilters((prev) => ({
+                      ...prev,
+                      branch_id: value,
+                      page: 1,
+                    }))
+                  }
+                >
+                  <SelectTrigger className="rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20">
+                    <SelectValue placeholder="Todas las sucursales" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todas las sucursales</SelectItem>
+                    {branches.map((b) => (
+                      <SelectItem key={b.id} value={b.id}>
+                        {b.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
 
             <div className="space-y-1.5 sm:space-y-2">
               <label className="text-xs sm:text-sm font-medium">Cliente</label>

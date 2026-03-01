@@ -1967,3 +1967,16 @@ export const updateSaasUserSchema = z.object({
   organization_id: uuidOptionalSchema,
   permissions: z.record(z.array(z.string())).optional(),
 });
+
+/** Schema for PATCH /api/admin/saas-management/tiers */
+export const tierUpdateSchema = z.object({
+  name: z.enum(["basic", "pro", "premium"], {
+    errorMap: () => ({ message: "name debe ser basic, pro o premium" }),
+  }),
+  price_monthly: z.number().min(0, "price_monthly debe ser >= 0").optional(),
+  max_branches: z.number().int().min(0).nullable().optional(),
+  max_users: z.number().int().min(0).nullable().optional(),
+  max_customers: z.number().int().min(0).nullable().optional(),
+  max_products: z.number().int().min(0).nullable().optional(),
+  features: z.record(z.string(), z.boolean()).optional(),
+});

@@ -11,6 +11,10 @@ import { inventoryTools } from "./optimizeInventory";
 import { recommendationTools } from "./generateRecommendations";
 import { importBulkTools } from "./importBulk";
 import { customerWhatsAppTools } from "./customerWhatsApp";
+import { appointmentTools } from "./appointments";
+import { workOrderTools } from "./workOrders";
+import { quoteTools } from "./quotes";
+import { prescriptionTools } from "./prescriptions";
 import type { ToolDefinition } from "./types";
 import type { LLMTool } from "../types";
 
@@ -18,8 +22,12 @@ export const allTools: ToolDefinition[] = [
   ...productTools,
   ...categoryTools,
   ...orderTools,
+  ...workOrderTools,
   ...customerTools,
   ...customerWhatsAppTools,
+  ...appointmentTools,
+  ...quoteTools,
+  ...prescriptionTools,
   ...analyticsTools,
   ...supportTools,
   ...businessFlowTools,

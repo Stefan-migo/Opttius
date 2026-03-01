@@ -12,13 +12,26 @@ import { createServerClient } from "@supabase/ssr";
  * 2. Para /admin: redirige a login si no hay sesión
  */
 export async function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl;
+  const { pathname, searchParams } = request.nextUrl;
+
+  // /acceso-opticas: validar key si DEMO_OPTICAS_ACCESS_KEY está configurado
+  if (pathname === "/acceso-opticas") {
+    const secretKey = process.env.DEMO_OPTICAS_ACCESS_KEY;
+    if (secretKey && secretKey.length > 0) {
+      const providedKey = searchParams.get("key");
+      if (providedKey !== secretKey) {
+        return NextResponse.redirect(new URL("/", request.url));
+      }
+    }
+  }
 
   // Rutas excluidas (no requieren verificación de admin)
   const excludedPaths = [
     "/onboarding",
     "/login",
     "/signup",
+    "/solicitar-demo",
+    "/acceso-opticas",
     "/reset-password",
     "/support",
     "/api",

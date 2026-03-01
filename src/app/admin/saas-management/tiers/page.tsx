@@ -26,6 +26,10 @@ import {
   ArrowLeft,
 } from "lucide-react";
 import { toast } from "sonner";
+import {
+  TIER_FEATURE_LABELS,
+  TIER_DISPLAY_NAMES,
+} from "@/lib/saas/tier-constants";
 
 interface Tier {
   id: string;
@@ -102,13 +106,22 @@ export default function TiersPage() {
 
     setEditing(true);
     try {
+      // 0 or empty = unlimited -> send null (DB stores NULL for unlimited)
+      const toLimitPayload = (v: number) => (v === 0 ? null : v);
+      const payload = {
+        name: selectedTier.name,
+        price_monthly: editData.price_monthly,
+        max_branches: toLimitPayload(editData.max_branches),
+        max_users: toLimitPayload(editData.max_users),
+        max_customers: toLimitPayload(editData.max_customers),
+        max_products: toLimitPayload(editData.max_products),
+        features: editData.features,
+      };
+
       const response = await fetch("/api/admin/saas-management/tiers", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: selectedTier.name,
-          ...editData,
-        }),
+        body: JSON.stringify(payload),
       });
 
       const data = await response.json();
@@ -142,17 +155,6 @@ export default function TiersPage() {
       premium: "bg-purple-100 text-purple-800 border-purple-300",
     };
     return colors[name] || colors.basic;
-  };
-
-  const featureLabels: Record<string, string> = {
-    pos: "Punto de Venta",
-    appointments: "Citas y Agenda",
-    quotes: "Presupuestos",
-    work_orders: "Trabajos de Laboratorio",
-    chat_ia: "Chat IA",
-    advanced_analytics: "Analíticas Avanzadas",
-    api_access: "Acceso API",
-    custom_branding: "Branding Personalizado",
   };
 
   return (
@@ -193,11 +195,9 @@ export default function TiersPage() {
                 <div className="flex items-center justify-between">
                   <CardTitle className="flex items-center gap-2">
                     <Crown className="h-5 w-5" />
-                    {tier.name === "basic"
-                      ? "Básico"
-                      : tier.name === "pro"
-                        ? "Pro"
-                        : "Premium"}
+                    {TIER_DISPLAY_NAMES[
+                      tier.name as keyof typeof TIER_DISPLAY_NAMES
+                    ] ?? tier.name}
                   </CardTitle>
                   <Button
                     variant="outline"
@@ -257,7 +257,11 @@ export default function TiersPage() {
                           ) : (
                             <div className="h-4 w-4 rounded-full border-2 border-gray-300" />
                           )}
-                          <span>{featureLabels[key] || key}</span>
+                          <span>
+                            {TIER_FEATURE_LABELS[
+                              key as keyof typeof TIER_FEATURE_LABELS
+                            ] || key}
+                          </span>
                         </div>
                       ),
                     )}
@@ -300,11 +304,11 @@ export default function TiersPage() {
           <DialogHeader>
             <DialogTitle>
               Editar Tier:{" "}
-              {selectedTier?.name === "basic"
-                ? "Básico"
-                : selectedTier?.name === "pro"
-                  ? "Pro"
-                  : "Premium"}
+              {selectedTier
+                ? (TIER_DISPLAY_NAMES[
+                    selectedTier.name as keyof typeof TIER_DISPLAY_NAMES
+                  ] ?? selectedTier.name)
+                : ""}
             </DialogTitle>
             <DialogDescription>
               Modifica los límites y características del tier
@@ -326,7 +330,7 @@ export default function TiersPage() {
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label>Máx. Sucursales (0 = ilimitado)</Label>
+                <Label>Máx. Sucursales (0 o vacío = ilimitado)</Label>
                 <Input
                   type="number"
                   value={editData.max_branches}
@@ -339,7 +343,7 @@ export default function TiersPage() {
                 />
               </div>
               <div>
-                <Label>Máx. Usuarios (0 = ilimitado)</Label>
+                <Label>Máx. Usuarios (0 o vacío = ilimitado)</Label>
                 <Input
                   type="number"
                   value={editData.max_users}
@@ -352,7 +356,7 @@ export default function TiersPage() {
                 />
               </div>
               <div>
-                <Label>Máx. Clientes (0 = ilimitado)</Label>
+                <Label>Máx. Clientes (0 o vacío = ilimitado)</Label>
                 <Input
                   type="number"
                   value={editData.max_customers}
@@ -365,7 +369,7 @@ export default function TiersPage() {
                 />
               </div>
               <div>
-                <Label>Máx. Productos (0 = ilimitado)</Label>
+                <Label>Máx. Productos (0 o vacío = ilimitado)</Label>
                 <Input
                   type="number"
                   value={editData.max_products}
@@ -381,7 +385,7 @@ export default function TiersPage() {
             <div>
               <Label>Features</Label>
               <div className="grid grid-cols-2 gap-2 mt-2">
-                {Object.keys(featureLabels).map((key) => (
+                {Object.keys(TIER_FEATURE_LABELS).map((key) => (
                   <label
                     key={key}
                     className="flex items-center gap-2 cursor-pointer"
@@ -399,7 +403,13 @@ export default function TiersPage() {
                         })
                       }
                     />
-                    <span className="text-sm">{featureLabels[key]}</span>
+                    <span className="text-sm">
+                      {
+                        TIER_FEATURE_LABELS[
+                          key as keyof typeof TIER_FEATURE_LABELS
+                        ]
+                      }
+                    </span>
                   </label>
                 ))}
               </div>

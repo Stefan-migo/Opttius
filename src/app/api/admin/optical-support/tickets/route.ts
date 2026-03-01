@@ -12,7 +12,8 @@ import { getBranchContext } from "@/lib/api/branch-middleware";
 /**
  * GET /api/admin/optical-support/tickets
  * Listar tickets de soporte interno de la óptica con filtros
- * Solo usuarios de la misma organización pueden ver sus tickets
+ * - Usuarios normales: solo tickets de su sucursal
+ * - Super Admin: todos los tickets de la org (vista global) o de la sucursal seleccionada
  */
 export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
@@ -57,11 +58,44 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    // Obtener contexto de sucursal: Super Admin puede ver todas; usuarios normales solo su sucursal
+    const branchContext = await getBranchContext(request, user.id);
+    const { branchId, isSuperAdmin, isGlobalView } = branchContext;
+
     const { searchParams } = new URL(request.url);
+    const queryBranchId = searchParams.get("branch_id");
+
+    // Determinar branch_id efectivo para el filtro
+    let effectiveBranchId: string | null = null;
+    if (isSuperAdmin) {
+      // Super Admin: si hay branch en query/header y no es "global", filtrar por esa sucursal
+      if (queryBranchId && queryBranchId !== "global") {
+        effectiveBranchId = queryBranchId;
+      } else if (!isGlobalView && branchId) {
+        effectiveBranchId = branchId;
+      }
+      // Si isGlobalView o branch_id=global: effectiveBranchId queda null → mostrar todas las sucursales
+    } else {
+      // Usuario normal: SIEMPRE filtrar por sucursal (solo ve la suya)
+      effectiveBranchId = branchId || queryBranchId || null;
+      if (!effectiveBranchId) {
+        const primaryBranch = branchContext.accessibleBranches.find(
+          (b: { isPrimary?: boolean }) => b.isPrimary,
+        );
+        effectiveBranchId =
+          primaryBranch?.id || branchContext.accessibleBranches[0]?.id || null;
+      }
+      if (!effectiveBranchId) {
+        return NextResponse.json(
+          { error: "Debe seleccionar una sucursal para ver los tickets" },
+          { status: 400 },
+        );
+      }
+    }
 
     // Validar y parsear filtros
     const filters = opticalInternalSupportTicketFiltersSchema.parse({
-      branch_id: searchParams.get("branch_id") || undefined,
+      branch_id: queryBranchId || undefined,
       customer_id: searchParams.get("customer_id") || undefined,
       status: searchParams.get("status") || undefined,
       priority: searchParams.get("priority") || undefined,
@@ -98,9 +132,9 @@ export async function GET(request: NextRequest) {
         ascending: filters.sort_order === "asc",
       });
 
-    // Aplicar filtros
-    if (filters.branch_id) {
-      query = query.eq("branch_id", filters.branch_id);
+    // Filtro por sucursal (obligatorio para usuarios normales; opcional para Super Admin)
+    if (effectiveBranchId) {
+      query = query.eq("branch_id", effectiveBranchId);
     }
 
     if (filters.customer_id) {

@@ -345,6 +345,11 @@ ORGANIZATIONAL CONTEXT:
 - Ubicación: ${context.organization.location}
 - Moneda: ${context.organization.currency}
 
+IMPORTANTE - MONEDA Y UBICACIÓN:
+- La óptica opera en ${context.organization.location} con moneda ${context.organization.currency}
+- SIEMPRE expresa precios, montos e ingresos en ${context.organization.currency} (ej: $150.000 CLP, no USD)
+- No asumas otra moneda ni país; usa exclusivamente la indicada arriba
+
 TOP 10 PRODUCTOS:
 ${context.organization.topProducts.map((p) => `- ${p.name}: $${p.price} (Stock: ${p.inventory})`).join("\n")}
 
@@ -624,6 +629,7 @@ INSTRUCCIONES:
 
       let stepCount = 0;
       let fullResponse = "";
+      let userReceivedContent = false;
 
       while (stepCount < config.maxSteps) {
         try {
@@ -637,11 +643,13 @@ INSTRUCCIONES:
           const collectedToolCallsMap = new Map<string, ToolCall>();
           let lastChunk: LLMStreamChunk | null = null;
 
+          // Buffer content - only emit to user when there are NO tool calls (final response).
+          // When there are tool calls, the buffered content is reasoning and should be hidden.
           for await (const chunk of stream) {
             lastChunk = chunk;
             if (chunk.content) {
               assistantMessage += chunk.content;
-              yield chunk;
+              // Do NOT yield here - we'll decide after the loop based on tool calls
             }
             if (chunk.toolCalls && chunk.toolCalls.length > 0) {
               console.log(
@@ -735,6 +743,13 @@ INSTRUCCIONES:
             this.messages.push(assistantMsg);
           }
 
+          // Only emit content to user when there are NO tool calls (final response).
+          // When there are tool calls, the content is reasoning - hide it.
+          if (collectedToolCalls.length === 0 && assistantMessage) {
+            userReceivedContent = true;
+            yield { content: assistantMessage, done: false };
+          }
+
           if (collectedToolCalls.length === 0 || !config.enableToolCalling) {
             break;
           }
@@ -744,19 +759,20 @@ INSTRUCCIONES:
               // Validate tool call name
               if (!toolCall.name || !toolCall.name.trim()) {
                 const errorMsg = `Error: Nombre de herramienta inválido o vacío`;
-                yield {
-                  content: `\n\n❌ ${errorMsg}`,
-                  done: false,
-                };
+                console.error("Tool validation:", errorMsg);
+                this.messages.push({
+                  role: "tool",
+                  content: errorMsg,
+                  toolCallId: toolCall.id,
+                  name: "unknown",
+                });
                 continue;
               }
 
               const toolName = toolCall.name.trim();
 
-              yield {
-                content: `\n\n[Ejecutando ${toolName}...]`,
-                done: false,
-              };
+              // Tool execution messages are hidden from user - only log for debugging
+              console.log(`[Agent] Executing tool: ${toolName}`);
 
               // Log tool call details for debugging
               console.log("=== TOOL EXECUTION DEBUG ===");
@@ -793,10 +809,6 @@ INSTRUCCIONES:
                   toolCallId: toolCall.id,
                   name: toolName,
                 });
-                yield {
-                  content: `\n\n❌ ${errorMsg}`,
-                  done: false,
-                };
                 continue;
               }
 
@@ -804,10 +816,9 @@ INSTRUCCIONES:
                 executor.requiresConfirmation(toolName) &&
                 config.requireConfirmationForDestructiveActions
               ) {
-                yield {
-                  content: `\n\n⚠️ Esta acción requiere confirmación. Ejecutando de todas formas...`,
-                  done: false,
-                };
+                console.log(
+                  `[Agent] Tool ${toolName} requires confirmation, executing anyway`,
+                );
               }
 
               const result = await executor.executeTool(
@@ -827,51 +838,23 @@ INSTRUCCIONES:
               });
 
               if (result.success) {
-                // Show success message with details if available
-                const successMsg =
-                  result.message || `${toolName} completado exitosamente`;
-                yield {
-                  content: `\n\n✅ ${successMsg}`,
-                  done: false,
-                };
-                // If there's data, show a summary
-                if (result.data) {
-                  try {
-                    const dataStr =
-                      typeof result.data === "string"
-                        ? result.data
-                        : JSON.stringify(result.data);
-                    if (dataStr.length < 200) {
-                      yield {
-                        content: `\n\n📋 Resultado: ${dataStr}`,
-                        done: false,
-                      };
-                    }
-                  } catch (e) {
-                    // Ignore JSON stringify errors
-                  }
-                }
+                // Tool success - LLM receives result via messages, no user-facing yield
+                console.log(`[Agent] Tool ${toolName} completed successfully`);
               } else {
-                // Show error message
-                yield {
-                  content: `\n\n❌ Error en ${toolName}: ${result.error || "Error desconocido"}`,
-                  done: false,
-                };
+                // Tool error - LLM receives it via messages, can include in final response
+                console.error(`[Agent] Tool ${toolName} failed:`, result.error);
               }
             } catch (toolError: any) {
               const toolName =
                 toolCall.name?.trim() || "herramienta desconocida";
               const errorMsg = `Error ejecutando ${toolName}: ${toolError.message}`;
+              console.error("[Agent] Tool execution error:", errorMsg);
               this.messages.push({
                 role: "tool",
                 content: errorMsg,
                 toolCallId: toolCall.id,
                 name: toolName,
               });
-              yield {
-                content: `\n\n❌ ${errorMsg}`,
-                done: false,
-              };
             }
           }
 
@@ -887,6 +870,16 @@ INSTRUCCIONES:
           // Don't break immediately, let the error propagate so fallback can catch it
           throw streamError;
         }
+      }
+
+      // If the user never received any content (LLM stuck in tool calls or empty response),
+      // yield a fallback so the chat is not silent
+      if (!userReceivedContent) {
+        const fallbackMsg =
+          stepCount >= config.maxSteps
+            ? "Llegué al límite de pasos sin poder completar tu solicitud. Por favor, sé más específico: indica los nombres o IDs de los productos, o la sucursal si aplica."
+            : "No pude generar una respuesta. ¿Puedes reformular tu pregunta de forma más específica?";
+        yield { content: fallbackMsg, done: false };
       }
 
       yield { content: "", done: true };

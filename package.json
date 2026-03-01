@@ -55,6 +55,7 @@
     "rate-limiting:test": "node scripts/test-rate-limiting.js",
     "notebooklm:sync": "bash scripts/sync-notebooklm-sources.sh",
     "notebooklm:sync-extended": "bash scripts/sync-notebooklm-extended.sh",
+    "notebooklm:sync-anexo": "bash scripts/sync-notebooklm-anexo.sh",
     "prepare": "husky"
   },
   "dependencies": {

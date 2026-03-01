@@ -37,7 +37,7 @@ interface AuthContextType extends AuthState {
   signOut: () => Promise<{ error: any }>;
   updateProfile: (updates: Partial<Profile>) => Promise<Profile>;
   resetPassword: (email: string) => Promise<{ error: any }>;
-  refetchProfile: () => Promise<Profile | null> | null;
+  refetchProfile: () => Promise<Profile | null>;
   /** Refresca isAdmin, isSuperAdmin, adminRole desde la DB. Usar tras onboarding (assign-demo, activate-real-org). */
   refetchAdminStatus: () => Promise<void>;
   isAdmin: boolean;

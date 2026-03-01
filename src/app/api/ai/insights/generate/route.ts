@@ -22,6 +22,7 @@ const generateBodySchema = z.object({
   section: InsightSectionSchema,
   data: z.any(), // Data to analyze
   additionalContext: z.record(z.any()).optional(),
+  forceRegenerate: z.boolean().optional().default(false),
 });
 
 /**
@@ -35,7 +36,7 @@ export async function POST(request: NextRequest) {
     try {
       // Validate body
       const body = await parseAndValidateBody(request, generateBodySchema);
-      const { section, data, additionalContext } = body;
+      const { section, data, additionalContext, forceRegenerate } = body;
 
       const { client: supabase, getUser } =
         await createClientFromRequest(request);
@@ -131,6 +132,39 @@ export async function POST(request: NextRequest) {
         totalProducts: totalProducts || 0,
         totalOrders: totalOrders || 0,
       };
+
+      // Cache check: return existing insights if recent (< 24h) and not forceRegenerate
+      if (!forceRegenerate) {
+        const twentyFourHoursAgo = new Date();
+        twentyFourHoursAgo.setHours(twentyFourHoursAgo.getHours() - 24);
+
+        const { data: recentInsights } = await supabase
+          .from("ai_insights")
+          .select(
+            "id, section, type, title, message, priority, action_label, action_url, metadata, is_dismissed, feedback_score, created_at, updated_at",
+          )
+          .eq("organization_id", adminUser.organization_id)
+          .eq("section", section)
+          .eq("is_dismissed", false)
+          .gte("created_at", twentyFourHoursAgo.toISOString())
+          .order("priority", { ascending: false })
+          .order("created_at", { ascending: false })
+          .limit(20);
+
+        if (recentInsights && recentInsights.length > 0) {
+          logger.info("Returning cached insights", {
+            section,
+            count: recentInsights.length,
+            organizationId: adminUser.organization_id,
+          });
+          return NextResponse.json({
+            success: true,
+            insights: recentInsights,
+            count: recentInsights.length,
+            fromCache: true,
+          });
+        }
+      }
 
       // Generate insights using LLM with maturity adaptation
       logger.info("Generating insights with maturity adaptation", {

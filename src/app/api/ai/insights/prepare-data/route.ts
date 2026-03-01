@@ -7,6 +7,95 @@ import { prepareInsightData } from "@/lib/ai/insights/prepare-data";
 import type { InsightSection } from "@/lib/ai/insights/schemas";
 
 /**
+ * POST /api/ai/insights/prepare-data
+ * Prepare data with optional POS context (prescription, customerHistory from form)
+ * Used by POS OnBlur to get data enriched with current prescription/customer
+ */
+export async function POST(request: NextRequest) {
+  return withRateLimit(rateLimitConfigs.general)(request, async () => {
+    try {
+      const { client: supabase, getUser } =
+        await createClientFromRequest(request);
+
+      const { data: userData, error: userError } = await getUser();
+      const user = userData?.user;
+      if (userError || !user) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      }
+
+      const { data: adminUser, error: adminError } = await supabase
+        .from("admin_users")
+        .select("organization_id")
+        .eq("id", user.id)
+        .eq("is_active", true)
+        .single();
+
+      if (adminError || !adminUser?.organization_id) {
+        return NextResponse.json(
+          { error: "Organization not found" },
+          { status: 404 },
+        );
+      }
+
+      const branchContext = await getBranchContext(request, user.id);
+
+      const { data: organization, error: orgError } = await supabase
+        .from("organizations")
+        .select("name")
+        .eq("id", adminUser.organization_id)
+        .single();
+
+      if (orgError || !organization) {
+        return NextResponse.json(
+          { error: "Failed to fetch organization" },
+          { status: 500 },
+        );
+      }
+
+      const body = await request.json().catch(() => ({}));
+      const section = (body.section as InsightSection) || null;
+      const posContext = body.posContext as
+        | {
+            prescription?: Record<string, unknown>;
+            customerHistory?: Record<string, unknown>;
+          }
+        | undefined;
+
+      const result = await prepareInsightData(
+        supabase,
+        adminUser.organization_id,
+        organization.name,
+        section,
+        branchContext,
+      );
+
+      if (
+        posContext &&
+        (posContext.prescription || posContext.customerHistory)
+      ) {
+        result.data.pos = {
+          prescription: posContext.prescription || {},
+          customerHistory: posContext.customerHistory || {},
+        };
+      }
+
+      return NextResponse.json({
+        success: true,
+        organizationName: result.organizationName,
+        section: result.section,
+        data: result.data,
+      });
+    } catch (error: any) {
+      logger.error("Prepare data POST error", { error: error.message });
+      return NextResponse.json(
+        { error: "Internal server error" },
+        { status: 500 },
+      );
+    }
+  });
+}
+
+/**
  * GET /api/ai/insights/prepare-data
  * Prepare real system data for insight generation
  * This endpoint aggregates data from various sources to prepare it for AI analysis

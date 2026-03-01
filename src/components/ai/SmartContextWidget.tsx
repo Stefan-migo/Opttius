@@ -92,14 +92,16 @@ export function SmartContextWidget({
     mutationFn: async ({
       insightId,
       score,
+      comment,
     }: {
       insightId: string;
       score: number;
+      comment?: string;
     }) => {
       const res = await fetch(`/api/ai/insights/${insightId}/feedback`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ score }),
+        body: JSON.stringify({ score, ...(comment && { comment }) }),
       });
       if (!res.ok) throw new Error("Failed to send feedback");
       return res.json();
@@ -268,8 +270,12 @@ export function SmartContextWidget({
                 <InsightCard
                   insight={insight}
                   onDismiss={() => dismissInsight.mutate(insight.id)}
-                  onFeedback={(score) =>
-                    sendFeedback.mutate({ insightId: insight.id, score })
+                  onFeedback={(score, comment) =>
+                    sendFeedback.mutate({
+                      insightId: insight.id,
+                      score,
+                      comment,
+                    })
                   }
                   compact={true}
                   onExpand={() => openInsightDetail(insight)}

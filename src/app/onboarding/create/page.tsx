@@ -46,8 +46,9 @@ export default function CreateOrganizationPage() {
     handleSubmit,
     watch,
     setValue,
+    getValues,
     formState: { errors },
-  } = useForm<any>({
+  } = useForm<CreateOrganizationInput>({
     resolver: zodResolver(createOrganizationSchema),
     defaultValues: {
       subscription_tier: "pro",
@@ -55,26 +56,21 @@ export default function CreateOrganizationPage() {
     },
   });
 
-  const organizationName = watch("name");
   const slug = watch("slug");
 
   // Validación en vivo del slug
   const slugValidation = useSlugValidation(slug || "");
 
-  // Auto-generar slug desde el nombre
-  // Generate slug automatically when name changes, but only if slug is empty or very short (like "o")
-  useEffect(() => {
-    if (organizationName && organizationName.trim().length > 0) {
-      // Only auto-generate if slug is empty or very short (1-2 characters, likely accidental input)
-      if (!slug || slug.trim().length <= 2) {
-        const autoSlug = generateSlug(organizationName);
-        // Only set if the generated slug is different and meaningful
-        if (autoSlug && autoSlug.length > 0 && autoSlug !== slug) {
-          setValue("slug", autoSlug);
-        }
+  // Generar slug solo cuando el usuario termina de escribir en "Nombre comercial" (onBlur)
+  const handleNameBlur = () => {
+    const name = getValues("name");
+    if (name && name.trim().length > 0) {
+      const autoSlug = generateSlug(name);
+      if (autoSlug && autoSlug.length > 0) {
+        setValue("slug", autoSlug);
       }
     }
-  }, [organizationName, slug, setValue]);
+  };
 
   // Verificar si el usuario ya tiene organización
   useEffect(() => {
@@ -247,7 +243,9 @@ export default function CreateOrganizationPage() {
                   <div className="relative group">
                     <Input
                       id="name"
-                      {...register("name")}
+                      {...register("name", {
+                        onBlur: handleNameBlur,
+                      })}
                       placeholder="Ej. Óptica Visión Premium"
                       className={cn(
                         "h-12 bg-[var(--admin-bg-primary)] border-[var(--admin-border-secondary)] transition-all focus:ring-4 focus:ring-primary/10",

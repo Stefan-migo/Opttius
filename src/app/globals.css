@@ -526,6 +526,8 @@ html.dark .admin-header {
 .admin-content {
   padding: 1.5rem;
   max-width: 100%;
+  min-width: 0;
+  overflow-x: hidden;
   background: var(--admin-bg-primary);
   color: var(--admin-text-primary);
   /* Ensure content text is visible */

@@ -2,6 +2,7 @@ import { z } from "zod";
 import type { ToolDefinition, ToolResult } from "./types";
 import { parseImportFile } from "../utils/file-parser";
 import { createServiceRoleClient } from "@/utils/supabase/server";
+import { resolveBranchByName } from "./resolvers";
 
 const analyzeImportFileSchema = z.object({
   fileId: z
@@ -27,6 +28,10 @@ const executeBulkImportSchema = z.object({
     .describe(
       "Branch ID where to import. Required for customers. If omitted, uses context.currentBranchId when available.",
     ),
+  branchName: z
+    .string()
+    .optional()
+    .describe("Branch name (alternative to branchId, e.g. 'Sucursal Centro')"),
 });
 
 async function downloadFile(
@@ -204,6 +209,10 @@ export const importBulkTools: ToolDefinition[] = [
           description:
             "Branch UUID (required for customers). Use context.currentBranchId if user has a branch selected.",
         },
+        branchName: {
+          type: "string",
+          description: "Branch name (alternative to branchId)",
+        },
       },
       required: ["fileId", "entityType", "columnMapping"],
     },
@@ -211,7 +220,13 @@ export const importBulkTools: ToolDefinition[] = [
     execute: async (params, context): Promise<ToolResult> => {
       try {
         const validated = executeBulkImportSchema.parse(params);
-        const { organizationId, currentBranchId, userData, currency } = context;
+        const {
+          supabase,
+          organizationId,
+          currentBranchId,
+          userData,
+          currency,
+        } = context;
         const serviceSupabase = createServiceRoleClient();
 
         if (!organizationId) {
@@ -221,8 +236,16 @@ export const importBulkTools: ToolDefinition[] = [
           };
         }
 
-        // Resolve branchId: params > context.currentBranchId
+        // Resolve branchId: params > branchName > context.currentBranchId
         let resolvedBranchId = validated.branchId;
+        if (!resolvedBranchId && validated.branchName) {
+          resolvedBranchId =
+            (await resolveBranchByName(
+              supabase,
+              organizationId,
+              validated.branchName,
+            )) ?? undefined;
+        }
         if (!resolvedBranchId || resolvedBranchId === "global") {
           if (currentBranchId && currentBranchId !== "global") {
             resolvedBranchId = currentBranchId;

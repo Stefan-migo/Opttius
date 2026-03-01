@@ -24,6 +24,7 @@ export function LandingHeader() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const [orgStatus, setOrgStatus] = useState<OrgStatus>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [signupEnabled, setSignupEnabled] = useState(false);
 
   const navigation = [
     { name: "Inicio", href: "#inicio" },
@@ -83,6 +84,13 @@ export function LandingHeader() {
     checkAuthAndOrg();
   }, []);
 
+  useEffect(() => {
+    fetch("/api/landing/onboarding-config", { cache: "no-store" })
+      .then((res) => res.json())
+      .then((data) => setSignupEnabled(data.signupEnabled ?? false))
+      .catch(() => setSignupEnabled(false));
+  }, []);
+
   const handleNavClick = (href: string) => {
     setMobileMenuOpen(false);
     if (href.startsWith("#")) {
@@ -113,18 +121,18 @@ export function LandingHeader() {
             <Image
               src="/logo-opttius.svg"
               alt="Opttius"
-              width={44}
-              height={44}
-              className="h-8 w-8 sm:h-10 sm:w-10 md:h-11 md:w-11 transition-all duration-700"
+              width={36}
+              height={36}
+              className="h-6 w-6 sm:h-7 sm:w-7 md:h-8 md:w-8 transition-all duration-700"
             />
           </div>
           <div className="flex flex-col items-start justify-center">
             <Image
-              src="/logo-text-default.svg"
+              src="/OpttiusTextAlone.svg"
               alt="Opttius"
-              width={176}
-              height={40}
-              className="h-8 w-32 sm:h-10 sm:w-40 md:w-44 transition-all duration-700 object-contain object-left"
+              width={140}
+              height={36}
+              className="h-5 w-24 sm:h-6 sm:w-28 md:h-7 md:w-32 transition-all duration-700 object-contain object-left"
             />
           </div>
         </Link>
@@ -182,11 +190,20 @@ export function LandingHeader() {
                 Acceso
               </button>
               <Button
-                onClick={() => router.push("/signup")}
+                onClick={() => router.push("/solicitar-demo")}
                 className="bg-transparent border border-white/30 hover:bg-white hover:text-epoch-surface text-white rounded-xl px-10 py-5 font-display text-xs tracking-widest uppercase transition-all duration-502 animate-in fade-in zoom-in"
               >
-                Empezar Ahora
+                Solicitar Demo
               </Button>
+              {signupEnabled && (
+                <Button
+                  onClick={() => router.push("/signup")}
+                  variant="outline"
+                  className="border-white/30 hover:bg-white/10 text-white rounded-xl px-6 py-5 font-display text-xs tracking-widest uppercase"
+                >
+                  Registrarse
+                </Button>
+              )}
             </div>
           )}
         </div>
@@ -288,13 +305,25 @@ export function LandingHeader() {
                   </Button>
                   <Button
                     onClick={() => {
-                      router.push("/signup");
+                      router.push("/solicitar-demo");
                       setMobileMenuOpen(false);
                     }}
                     className="w-full bg-epoch-accent text-epoch-surface rounded-xl h-14 font-display tracking-widest uppercase hover:bg-white hover:text-epoch-surface"
                   >
-                    Registrarse
+                    Solicitar Demo
                   </Button>
+                  {signupEnabled && (
+                    <Button
+                      onClick={() => {
+                        router.push("/signup");
+                        setMobileMenuOpen(false);
+                      }}
+                      variant="outline"
+                      className="w-full border-white/30 bg-white/10 text-white rounded-xl h-14 font-display tracking-widest uppercase hover:bg-white/20"
+                    >
+                      Registrarse
+                    </Button>
+                  )}
                 </div>
               )}
             </div>

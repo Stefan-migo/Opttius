@@ -368,6 +368,13 @@ export function useAuth(initialUser?: User | null) {
     }
   };
 
+  const refetchProfile = async (): Promise<Profile | null> => {
+    if (!authState.user) return null;
+    const profile = await fetchProfile(authState.user.id);
+    setAuthState((prev) => ({ ...prev, profile }));
+    return profile;
+  };
+
   return {
     ...authState,
     signUp,
@@ -375,7 +382,6 @@ export function useAuth(initialUser?: User | null) {
     signOut,
     updateProfile,
     resetPassword,
-    refetchProfile: () =>
-      authState.user ? fetchProfile(authState.user.id) : null,
+    refetchProfile,
   };
 }

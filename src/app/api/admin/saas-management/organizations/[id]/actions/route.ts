@@ -3,6 +3,7 @@ import { requireRoot } from "@/lib/api/root-middleware";
 import { createServiceRoleClient } from "@/utils/supabase/service-role";
 import { appLogger as logger } from "@/lib/logger";
 import { AuthorizationError } from "@/lib/api/errors";
+import { recordTierChange } from "@/lib/saas/tier-change-audit";
 
 /**
  * POST /api/admin/saas-management/organizations/[id]/actions
@@ -14,7 +15,7 @@ export async function POST(
   { params }: { params: { id: string } },
 ) {
   try {
-    await requireRoot(request);
+    const { userId } = await requireRoot(request);
     const supabaseServiceRole = createServiceRoleClient();
 
     const { id } = params;
@@ -80,6 +81,16 @@ export async function POST(
         { error: "Failed to perform action", details: updateError.message },
         { status: 500 },
       );
+    }
+
+    if (action === "change_tier") {
+      await recordTierChange({
+        organizationId: id,
+        fromTier: organization.subscription_tier || "basic",
+        toTier: value,
+        changedByUserId: userId,
+        source: "root",
+      });
     }
 
     logger.info(`Organization action performed: ${action} on ${id}`);

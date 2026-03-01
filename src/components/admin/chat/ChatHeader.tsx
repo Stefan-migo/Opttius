@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -62,6 +62,10 @@ export function ChatHeader({
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState(title);
 
+  useEffect(() => {
+    setEditTitle(title);
+  }, [title]);
+
   const handleTitleSubmit = () => {
     if (editTitle.trim()) {
       onTitleChange(editTitle.trim());
@@ -79,32 +83,32 @@ export function ChatHeader({
   };
 
   return (
-    <div className="bg-primary px-5 py-2 flex items-center justify-between text-white shadow-md relative group">
-      <div className="flex items-center gap-4">
+    <div className="bg-primary px-3 sm:px-5 py-2 flex items-center justify-between gap-2 text-white shadow-md relative group min-h-0 shrink-0">
+      <div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-1 overflow-hidden">
         {/* Avatar Area */}
-        <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/20 shadow-inner">
-          <Bot className="w-6 h-6 text-white" />
+        <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/20 shadow-inner shrink-0">
+          <Bot className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
         </div>
 
         {/* Title & Status */}
-        <div className="flex flex-col min-w-0">
-          <div className="flex items-center gap-2 group/title">
+        <div className="flex flex-col min-w-0 flex-1 overflow-hidden">
+          <div className="flex items-center gap-1.5 sm:gap-2 group/title min-w-0">
             {isEditing ? (
               <Input
                 value={editTitle}
                 onChange={(e) => setEditTitle(e.target.value)}
                 onBlur={handleTitleSubmit}
                 onKeyDown={handleTitleKeyDown}
-                className="h-7 text-sm font-bold bg-white/10 border-white/20 text-white placeholder:text-white/50 focus-visible:ring-white/30"
+                className="h-6 sm:h-7 text-xs sm:text-sm font-bold bg-white/10 border-white/20 text-white placeholder:text-white/50 focus-visible:ring-white/30 min-w-0"
                 autoFocus
               />
             ) : (
               <h2
-                className="text-lg font-bold truncate cursor-pointer hover:text-white/80 transition-colors flex items-center gap-1.5"
+                className="text-sm sm:text-base font-bold truncate cursor-pointer hover:text-white/80 transition-colors flex items-center gap-1 min-w-0"
                 onClick={() => setIsEditing(true)}
               >
-                {title || "Opttius IA"}
-                <Edit2 className="w-3 h-3 opacity-0 group-hover/title:opacity-50 transition-opacity" />
+                <span className="truncate block">{title || "Opttius IA"}</span>
+                <Edit2 className="w-3 h-3 shrink-0 opacity-0 group-hover/title:opacity-50 transition-opacity" />
               </h2>
             )}
           </div>
@@ -120,7 +124,7 @@ export function ChatHeader({
         </div>
       </div>
 
-      <div className="flex items-center gap-1">
+      <div className="flex items-center gap-0.5 sm:gap-1 shrink-0">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button

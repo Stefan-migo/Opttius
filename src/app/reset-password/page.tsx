@@ -14,7 +14,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
 import {
   Loader2,
   Lock,
@@ -56,20 +55,16 @@ export default function ResetPasswordPage() {
   // Check if we are in recovery mode
   useEffect(() => {
     const checkRecovery = async () => {
-      // Supabase sets a session if returning from recovery email
       const supabase = createClient();
       const {
         data: { session },
       } = await supabase.auth.getSession();
 
-      // Also check URL for recovery type
       const hash = window.location.hash;
       if (
         hash.includes("type=recovery") ||
         (session && !session.user.is_anonymous)
       ) {
-        // If we have a session, we can show the update password form
-        // But only if we are specifically here for recovery
         if (hash.includes("type=recovery")) {
           setStep("update");
         }
@@ -78,7 +73,6 @@ export default function ResetPasswordPage() {
 
     checkRecovery();
 
-    // Listen for the recovery event
     const supabase = createClient();
     const {
       data: { subscription },
@@ -134,117 +128,114 @@ export default function ResetPasswordPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row bg-slate-50 dark:bg-slate-950 overflow-hidden relative">
-      <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/10 rounded-full blur-[120px] animate-premium-float" />
-        <div
-          className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-indigo-500/10 rounded-full blur-[120px] animate-premium-float"
-          style={{ animationDelay: "-4s" }}
-        />
-      </div>
+    <div className="min-h-screen min-h-[100dvh] flex flex-col md:flex-row bg-epoch-background overflow-hidden relative">
+      {/* Visual Side (Desktop) - matches login */}
+      <div className="relative hidden lg:flex lg:w-1/2 xl:w-7/12 overflow-hidden items-center justify-center bg-epoch-surface">
+        <div className="absolute inset-0 z-0">
+          <Image
+            src="/images/landing/Hero.webp"
+            alt="Vintage Optics"
+            fill
+            className="object-cover opacity-30 grayscale"
+            priority
+          />
+          <div className="absolute inset-0 bg-gradient-to-tr from-epoch-primary via-epoch-primary/40 to-transparent" />
+        </div>
 
-      {/* Left Side: Branding */}
-      <div className="relative hidden lg:flex lg:w-1/2 xl:w-7/12 overflow-hidden z-10">
-        <div
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-all duration-1000 scale-105"
-          style={{
-            backgroundImage: `url('/luxury_optics_auth_bg_1769965128142.png')`,
-          }}
-        />
-        <div className="absolute inset-0 bg-gradient-to-tr from-slate-900 via-slate-900/40 to-transparent" />
-
-        <div className="relative z-10 flex flex-col justify-between p-16 w-full">
-          <div
-            className="flex items-center gap-5 group cursor-pointer"
-            onClick={() => router.push("/")}
-          >
-            <div className="h-16 w-16 bg-white/10 backdrop-blur-xl border border-white/20 rounded-[2rem] flex items-center justify-center shadow-2xl transition-all duration-500 group-hover:bg-white group-hover:scale-110">
+        <div className="relative z-10 p-12 xl:p-20 w-full h-full flex flex-col justify-between">
+          <Link href="/" className="group flex flex-col items-start w-fit">
+            <div className="relative mb-1 group-hover:scale-110 transition-transform duration-500">
               <Image
-                src="/logo-opttius.svg"
-                alt="Opttius Logo"
-                width={44}
-                height={44}
-                className="object-contain transition-all duration-500 group-hover:brightness-100 invert group-hover:invert-0"
+                src="/logo-text-default.svg"
+                alt="Opttius"
+                width={192}
+                height={56}
+                className="h-14 w-48 opacity-100 object-contain object-left"
               />
             </div>
-            <span className="text-4xl font-black text-white tracking-tighter uppercase font-heading">
-              Opttius
-            </span>
-          </div>
+          </Link>
 
-          <div className="max-w-xl">
-            <h2 className="text-6xl font-black text-white leading-[1.1] tracking-tight mb-8">
-              Tu <span className="text-primary">Visión</span>,<br />
-              Nuestra{" "}
-              <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary to-indigo-400">
-                Prioridad
+          <div className="max-w-xl animate-in fade-in slide-in-from-left-10 duration-1000">
+            <h2 className="text-5xl xl:text-6xl font-display font-bold text-white leading-tight tracking-tight mb-8">
+              Recupera tu
+              <br />
+              <span className="text-epoch-accent italic font-serif lowercase tracking-normal">
+                acceso seguro
               </span>
-              .
             </h2>
-            <p className="text-2xl text-slate-200/90 font-medium leading-relaxed">
-              Recupera el acceso a tu ecosistema administrativo de forma segura
-              y rápida.
+            <div className="w-24 h-[1px] bg-epoch-accent mb-8"></div>
+            <p className="text-lg xl:text-xl text-white/70 font-serif italic tracking-wide leading-relaxed">
+              Restablece tu contraseña de forma segura y vuelve a gestionar tu
+              óptica.
             </p>
           </div>
 
-          <div className="flex items-center gap-8 text-white/40 text-xs font-black uppercase tracking-[0.2em]">
-            <span>Seguridad Avanzada</span>
-            <div className="h-1 w-1 rounded-full bg-white/20" />
-            <span>Encriptación de Grado Militar</span>
+          <div className="flex items-center gap-8 text-white/30 text-[9px] font-display uppercase tracking-[0.4em]">
+            <span className="flex items-center gap-2">
+              <div className="w-1 h-1 rounded-full bg-epoch-accent animate-pulse" />
+              SISTEMA DE ÉLITE
+            </span>
+            <span>V3.0.0</span>
           </div>
         </div>
       </div>
 
-      {/* Right Side: Forms */}
-      <div className="flex-1 flex flex-col justify-center items-center p-6 md:p-12 lg:p-20 relative z-10 overflow-y-auto">
-        <div className="w-full max-w-md animate-in fade-in slide-in-from-bottom-10 duration-700">
-          <div className="text-center mb-10 lg:text-left space-y-3">
-            <Badge
-              variant="healty"
-              className="bg-primary/10 text-primary border-none text-[10px] font-black tracking-widest px-4 py-1.5 rounded-full inline-block uppercase"
-            >
+      {/* Form Side - mobile-first, touch-optimized */}
+      <div className="flex-1 flex flex-col justify-center items-center p-4 sm:p-6 md:p-12 lg:p-20 relative z-10 overflow-y-auto min-h-0">
+        <div className="w-full max-w-md animate-in fade-in slide-in-from-bottom-10 duration-700 py-4 sm:py-0">
+          {/* Mobile logo - visible when left panel hidden */}
+          <div className="lg:hidden mb-8 flex justify-center">
+            <Link href="/" className="group">
+              <Image
+                src="/logo-text-default.svg"
+                alt="Opttius"
+                width={160}
+                height={48}
+                className="h-12 w-40 sm:h-14 sm:w-48 opacity-100 object-contain group-hover:opacity-90 transition-opacity"
+              />
+            </Link>
+          </div>
+
+          <div className="text-center mb-8 sm:mb-10 lg:text-left space-y-3">
+            <div className="inline-flex items-center gap-4 px-4 sm:px-6 py-2 border border-epoch-primary/10 rounded-full text-epoch-primary/60 text-[10px] font-display tracking-[0.3em] sm:tracking-[0.4em] uppercase">
               {step === "update"
-                ? "Actualizar Contraseña"
-                : "Recuperación de Cuenta"}
-            </Badge>
-            <h1 className="text-4xl font-black text-slate-900 dark:text-white tracking-tight">
+                ? "Actualizar contraseña"
+                : "Recuperación de cuenta"}
+            </div>
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-display font-bold text-epoch-primary tracking-tight">
               {step === "sent"
-                ? "Correo Enviado"
+                ? "Correo enviado"
                 : step === "update"
-                  ? "Nueva Contraseña"
-                  : "¿Olvidaste tu llave?"}
+                  ? "Nueva contraseña"
+                  : "¿Olvidaste tu contraseña?"}
             </h1>
-            <p className="text-slate-500 dark:text-slate-400 font-bold uppercase text-[10px] tracking-widest leading-loose">
+            <p className="text-epoch-primary/60 font-display font-bold uppercase text-[10px] tracking-[0.2em] sm:tracking-widest leading-relaxed">
               {step === "sent"
-                ? "Revisa tu bandeja de entrada para continuar con el proceso."
+                ? "Revisa tu bandeja de entrada para continuar."
                 : step === "update"
-                  ? "Ingresa tu nueva llave maestra para restablecer el acceso."
-                  : "Ingresa tu email para recibir un enlace de recuperación seguro."}
+                  ? "Ingresa tu nueva contraseña para restablecer el acceso."
+                  : "Ingresa tu email para recibir un enlace de recuperación."}
             </p>
           </div>
 
-          <Card
-            variant="glass"
-            rounded="lg"
-            className="border-white/40 dark:border-slate-800/50 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.1)] overflow-hidden"
-          >
-            <CardContent className="p-8 sm:p-12">
+          <Card className="border-epoch-primary/5 bg-white shadow-2xl rounded-xl">
+            <CardContent className="p-6 sm:p-8 md:p-12">
               {error && (
                 <Alert
                   variant="destructive"
-                  className="mb-6 bg-red-500/10 border-red-500/20 rounded-2xl"
+                  className="mb-6 bg-red-500/10 border-red-500/20 rounded-xl animate-in shake-in duration-500"
                 >
-                  <AlertDescription className="text-red-500 font-bold text-xs">
+                  <AlertDescription className="text-red-950 font-serif italic text-xs">
                     {error}
                   </AlertDescription>
                 </Alert>
               )}
 
               {success && (
-                <Alert className="mb-6 bg-emerald-500/10 border-emerald-500/20 rounded-2xl">
-                  <CheckCircle2 className="h-4 w-4 text-emerald-500" />
-                  <AlertDescription className="text-emerald-500 font-bold text-xs">
-                    ¡Contraseña actualizada con éxito! Redirigiendo...
+                <Alert className="mb-6 bg-emerald-500/10 border-emerald-500/20 rounded-xl">
+                  <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" />
+                  <AlertDescription className="text-emerald-700 font-serif italic text-xs">
+                    ¡Contraseña actualizada! Redirigiendo...
                   </AlertDescription>
                 </Alert>
               )}
@@ -257,9 +248,9 @@ export default function ResetPasswordPage() {
                   <div className="space-y-3">
                     <Label
                       htmlFor="email"
-                      className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] ml-1"
+                      className="text-[10px] font-display font-bold text-epoch-primary/40 uppercase tracking-[0.3em] ml-1"
                     >
-                      Correo Electrónico
+                      Email
                     </Label>
                     <div className="relative group">
                       <Input
@@ -268,16 +259,16 @@ export default function ResetPasswordPage() {
                         placeholder="admin@opttius.com"
                         {...requestForm.register("email")}
                         className={cn(
-                          "h-14 rounded-2xl border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 pl-14 focus:bg-white dark:focus:bg-slate-900 transition-all font-bold text-slate-700 dark:text-slate-200",
+                          "h-14 min-h-[44px] rounded-xl border-epoch-primary/10 bg-epoch-background/50 pl-14 focus:bg-white transition-all font-body text-epoch-primary shadow-inner",
                           requestForm.formState.errors.email &&
-                            "border-red-500",
+                            "border-red-900 focus-visible:ring-red-900",
                         )}
                         disabled={authLoading}
                       />
-                      <Mail className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 transition-colors group-focus-within:text-accent-foreground" />
+                      <Mail className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-epoch-primary/30 group-focus-within:text-epoch-primary transition-colors stroke-[1px]" />
                     </div>
                     {requestForm.formState.errors.email && (
-                      <p className="text-[10px] text-red-500 font-black uppercase tracking-tight ml-1">
+                      <p className="text-[10px] text-red-900 font-display italic tracking-[0.1em] ml-1 uppercase">
                         {requestForm.formState.errors.email.message}
                       </p>
                     )}
@@ -286,15 +277,14 @@ export default function ResetPasswordPage() {
                   <Button
                     type="submit"
                     size="lg"
-                    className="w-full h-16 rounded-2xl shadow-xl shadow-primary/20 font-black uppercase text-xs tracking-[0.2em] group"
+                    className="w-full h-14 min-h-[44px] sm:h-16 rounded-xl bg-epoch-primary hover:bg-epoch-surface text-white font-display font-bold uppercase text-[10px] sm:text-xs tracking-[0.2em] sm:tracking-[0.4em] group overflow-hidden transition-all duration-500 shadow-xl"
                     disabled={authLoading}
-                    shimmer
                   >
                     {authLoading ? (
                       <Loader2 className="h-5 w-5 animate-spin" />
                     ) : (
                       <>
-                        Enviar Enlace
+                        Enviar enlace
                         <ArrowRight className="ml-3 h-5 w-5 transition-transform group-hover:translate-x-1" />
                       </>
                     )}
@@ -302,9 +292,9 @@ export default function ResetPasswordPage() {
 
                   <Link
                     href="/login"
-                    className="flex items-center justify-center gap-2 text-[10px] font-black text-slate-400 hover:text-primary uppercase tracking-widest transition-colors mt-6"
+                    className="flex items-center justify-center gap-2 py-3 min-h-[44px] text-[10px] font-display font-bold text-epoch-primary/60 hover:text-epoch-primary uppercase tracking-widest transition-colors"
                   >
-                    <ArrowLeft className="h-3 w-3" />
+                    <ArrowLeft className="h-3 w-3 shrink-0" />
                     Volver al login
                   </Link>
                 </form>
@@ -312,28 +302,28 @@ export default function ResetPasswordPage() {
 
               {step === "sent" && (
                 <div className="text-center space-y-6">
-                  <div className="w-20 h-20 bg-emerald-500/10 rounded-3xl flex items-center justify-center mx-auto mb-4">
-                    <Mail className="h-10 w-10 text-emerald-500" />
+                  <div className="w-16 h-16 sm:w-20 sm:h-20 bg-emerald-500/10 rounded-2xl sm:rounded-3xl flex items-center justify-center mx-auto">
+                    <Mail className="h-8 w-8 sm:h-10 sm:w-10 text-emerald-500" />
                   </div>
-                  <p className="text-slate-600 dark:text-slate-400 font-medium">
+                  <p className="text-epoch-primary/80 font-body text-sm sm:text-base">
                     Hemos enviado un enlace de recuperación a:
                     <br />
-                    <span className="font-bold text-slate-900 dark:text-white">
+                    <span className="font-bold text-epoch-primary">
                       {requestForm.getValues("email")}
                     </span>
                   </p>
                   <Button
                     variant="outline"
-                    className="w-full h-14 rounded-2xl border-2 font-bold"
+                    className="w-full h-14 min-h-[44px] rounded-xl border-2 border-epoch-primary/20 font-display font-bold hover:bg-epoch-primary/5 hover:border-epoch-primary/30"
                     onClick={() => setStep("request")}
                   >
                     Intentar con otro correo
                   </Button>
                   <Link
                     href="/login"
-                    className="flex items-center justify-center gap-2 text-[10px] font-black text-primary uppercase tracking-widest transition-colors"
+                    className="flex items-center justify-center gap-2 py-3 min-h-[44px] text-[10px] font-display font-bold text-epoch-accent hover:text-epoch-primary uppercase tracking-widest transition-colors"
                   >
-                    <ArrowLeft className="h-3 w-3" />
+                    <ArrowLeft className="h-3 w-3 shrink-0" />
                     Regresar al login
                   </Link>
                 </div>
@@ -347,9 +337,9 @@ export default function ResetPasswordPage() {
                   <div className="space-y-3">
                     <Label
                       htmlFor="password"
-                      className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] ml-1"
+                      className="text-[10px] font-display font-bold text-epoch-primary/40 uppercase tracking-[0.3em] ml-1"
                     >
-                      Nueva Contraseña
+                      Nueva contraseña
                     </Label>
                     <div className="relative group">
                       <Input
@@ -358,22 +348,27 @@ export default function ResetPasswordPage() {
                         placeholder="••••••••"
                         {...updateForm.register("password")}
                         className={cn(
-                          "h-14 rounded-2xl border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 pl-14 focus:bg-white dark:focus:bg-slate-900 transition-all font-bold text-slate-700 dark:text-slate-200",
+                          "h-14 min-h-[44px] rounded-xl border-epoch-primary/10 bg-epoch-background/50 pl-14 focus:bg-white transition-all font-body text-epoch-primary shadow-inner",
                           updateForm.formState.errors.password &&
-                            "border-red-500",
+                            "border-red-900 focus-visible:ring-red-900",
                         )}
                         disabled={isUpdating}
                       />
-                      <Lock className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
+                      <Lock className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-epoch-primary/30" />
                     </div>
+                    {updateForm.formState.errors.password && (
+                      <p className="text-[10px] text-red-900 font-display italic tracking-[0.1em] ml-1 uppercase">
+                        {updateForm.formState.errors.password.message}
+                      </p>
+                    )}
                   </div>
 
                   <div className="space-y-3">
                     <Label
                       htmlFor="confirmPassword"
-                      className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] ml-1"
+                      className="text-[10px] font-display font-bold text-epoch-primary/40 uppercase tracking-[0.3em] ml-1"
                     >
-                      Confirmar Contraseña
+                      Confirmar contraseña
                     </Label>
                     <div className="relative group">
                       <Input
@@ -382,16 +377,16 @@ export default function ResetPasswordPage() {
                         placeholder="••••••••"
                         {...updateForm.register("confirmPassword")}
                         className={cn(
-                          "h-14 rounded-2xl border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 pl-14 focus:bg-white dark:focus:bg-slate-900 transition-all font-bold text-slate-700 dark:text-slate-200",
+                          "h-14 min-h-[44px] rounded-xl border-epoch-primary/10 bg-epoch-background/50 pl-14 focus:bg-white transition-all font-body text-epoch-primary shadow-inner",
                           updateForm.formState.errors.confirmPassword &&
-                            "border-red-500",
+                            "border-red-900 focus-visible:ring-red-900",
                         )}
                         disabled={isUpdating}
                       />
-                      <ShieldCheck className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
+                      <ShieldCheck className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-epoch-primary/30" />
                     </div>
                     {updateForm.formState.errors.confirmPassword && (
-                      <p className="text-[10px] text-red-500 font-black uppercase tracking-tight ml-1">
+                      <p className="text-[10px] text-red-900 font-display italic tracking-[0.1em] ml-1 uppercase">
                         {updateForm.formState.errors.confirmPassword.message}
                       </p>
                     )}
@@ -400,14 +395,13 @@ export default function ResetPasswordPage() {
                   <Button
                     type="submit"
                     size="lg"
-                    className="w-full h-16 rounded-2xl shadow-xl shadow-primary/20 font-black uppercase text-xs tracking-[0.2em]"
+                    className="w-full h-14 min-h-[44px] sm:h-16 rounded-xl bg-epoch-primary hover:bg-epoch-surface text-white font-display font-bold uppercase text-[10px] sm:text-xs tracking-[0.2em] sm:tracking-[0.4em] overflow-hidden transition-all duration-500 shadow-xl"
                     disabled={isUpdating}
-                    shimmer
                   >
                     {isUpdating ? (
                       <Loader2 className="h-5 w-5 animate-spin" />
                     ) : (
-                      "Restablecer Contraseña"
+                      "Restablecer contraseña"
                     )}
                   </Button>
                 </form>

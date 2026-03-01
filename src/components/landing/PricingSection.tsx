@@ -41,17 +41,17 @@ const TIER_DISPLAY: Record<
   { displayName: string; description: string; popular: boolean }
 > = {
   basic: {
-    displayName: "Standard",
+    displayName: "Clínica Base",
     description: "Para ópticas que inician su transformación digital.",
     popular: false,
   },
   pro: {
-    displayName: "Professional",
+    displayName: "Óptica Avanzada",
     description: "La potencia de la IA para ópticas en expansión.",
     popular: true,
   },
   premium: {
-    displayName: "Enterprise",
+    displayName: "Red Óptica",
     description: "Control total para grandes cadenas y laboratorios.",
     popular: false,
   },
@@ -151,7 +151,7 @@ export function PricingSection() {
   }, []);
 
   const handleGetStarted = () => {
-    router.push("/signup");
+    router.push("/solicitar-demo");
   };
 
   const plans =

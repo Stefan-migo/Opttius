@@ -11,7 +11,7 @@ const BANNER_REAPPEAR_DELAY = 24 * 60 * 60 * 1000; // 24 horas
 
 export function DemoModeBanner() {
   const router = useRouter();
-  const [isDemoMode, setIsDemoMode] = useState(false);
+  const [showBanner, setShowBanner] = useState(false);
   const [isDismissed, setIsDismissed] = useState(false);
 
   useEffect(() => {
@@ -20,8 +20,11 @@ export function DemoModeBanner() {
         const response = await fetch("/api/admin/check-status");
         const data = await response.json();
 
-        if (data.organization?.isDemoMode) {
-          setIsDemoMode(true);
+        if (
+          data.organization?.isDemoMode &&
+          data.organization?.showActivateBanner
+        ) {
+          setShowBanner(true);
           // Verificar si el banner fue descartado previamente
           const dismissedTimestamp = localStorage.getItem(
             "demo-banner-dismissed-timestamp",
@@ -62,7 +65,7 @@ export function DemoModeBanner() {
     );
   };
 
-  if (!isDemoMode || isDismissed) {
+  if (!showBanner || isDismissed) {
     return null;
   }
 

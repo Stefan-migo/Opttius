@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/utils/supabase/server";
+import { createClient, createServiceRoleClient } from "@/utils/supabase/server";
 import { appLogger as logger } from "@/lib/logger";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
 
@@ -107,7 +107,8 @@ export async function POST(request: NextRequest) {
     const arrayBuffer = await file.arrayBuffer();
     const buffer = new Uint8Array(arrayBuffer);
 
-    const { error: uploadError } = await supabase.storage
+    const storageClient = createServiceRoleClient();
+    const { error: uploadError } = await storageClient.storage
       .from("import-temp")
       .upload(storagePath, buffer, {
         contentType: mimeType,
@@ -115,7 +116,11 @@ export async function POST(request: NextRequest) {
       });
 
     if (uploadError) {
-      logger.error("Upload import file failed", { error: uploadError });
+      logger.error("Upload import file failed", {
+        error: uploadError,
+        message: uploadError.message,
+        bucket: "import-temp",
+      });
       return NextResponse.json(
         { error: "Failed to upload file" },
         { status: 500 },

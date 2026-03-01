@@ -8,12 +8,13 @@ import Image from "next/image";
 export function HeroSection() {
   const router = useRouter();
 
-  const handleDemoClick = () => {
-    router.push("/onboarding/choice");
+  const handleExploreClick = () => {
+    const element = document.querySelector("#caracteristicas");
+    if (element) element.scrollIntoView({ behavior: "smooth" });
   };
 
-  const handleSignUpClick = () => {
-    router.push("/signup");
+  const handleSolicitarDemoClick = () => {
+    router.push("/solicitar-demo");
   };
 
   return (
@@ -22,7 +23,7 @@ export function HeroSection() {
       <div className="absolute inset-0 z-0 scale-105 animate-pulse-slow">
         <Image
           src="/images/landing/Hero.webp"
-          alt="Vintage Optics Background"
+          alt="Fondo con equipamiento de examen visual y lentes - Opttius, software de gestión para ópticas"
           fill
           className="object-cover opacity-40 mix-blend-luminosity grayscale"
           priority
@@ -42,29 +43,30 @@ export function HeroSection() {
           {/* Main Title */}
           <div className="space-y-4 sm:space-y-6">
             <h1 className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-sans font-bold text-white leading-tight tracking-tight animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-200">
-              El motor inteligente para las ópticas modernas.
+              Automatiza. Controla. Crece.
             </h1>
             <p className="font-sans text-base sm:text-xl md:text-2xl text-white/70 mt-4 animate-in fade-in slide-in-from-bottom-12 duration-1000 delay-400">
-              Desde el examen visual hasta la entrega del lente. Centraliza tus
-              recetas, inventario, flujos de laboratorio y ventas en una única
+              El motor inteligente para las ópticas modernas. Desde el examen
+              visual hasta la entrega del lente. Centraliza tus recetas,
+              inventario, flujos de laboratorio y ventas en una única
               plataforma.
             </p>
           </div>
 
           <div className="flex flex-col sm:flex-row gap-4 sm:gap-8 justify-center items-center animate-in fade-in slide-in-from-bottom-20 duration-1000 delay-600">
             <Button
-              onClick={handleSignUpClick}
+              onClick={handleSolicitarDemoClick}
               size="lg"
               className="bg-epoch-accent hover:bg-white text-epoch-surface rounded-xl h-16 px-16 text-xs font-sans font-semibold tracking-[0.2em] uppercase transition-all duration-500 shadow-2xl"
             >
-              Probar Gratis
+              Solicitar Demo
               <ArrowRight className="ml-3 h-4 w-4" />
             </Button>
             <button
-              onClick={handleDemoClick}
+              onClick={handleExploreClick}
               className="text-white/60 hover:text-white font-sans text-lg tracking-wide transition-all duration-300 border-b border-white/20 hover:border-white pb-1"
             >
-              Ver demo en vivo
+              Explorar la plataforma
             </button>
           </div>
         </div>

@@ -81,6 +81,7 @@ export function ProfilePageContent({
     profile,
     loading: authLoading,
     updateProfile,
+    refetchProfile,
   } = useAuthContext();
   const [activeTab, setActiveTab] = useState(
     searchParams.get("tab") || "overview",
@@ -205,6 +206,7 @@ export function ProfilePageContent({
   const handleAvatarUpload = async (avatarUrl: string) => {
     try {
       await updateProfile({ avatar_url: avatarUrl });
+      await refetchProfile();
       toast.success("Foto de perfil actualizada exitosamente");
     } catch (error) {
       console.error("Error updating avatar:", error);
@@ -223,6 +225,7 @@ export function ProfilePageContent({
         date_of_birth: data.dateOfBirth || null,
         bio: data.bio || null,
       });
+      await refetchProfile();
       setIsEditingPersonal(false);
       toast.success("Información personal actualizada exitosamente");
     } catch (error) {
@@ -244,6 +247,7 @@ export function ProfilePageContent({
         postal_code: data.postalCode || null,
         country: data.country || null,
       });
+      await refetchProfile();
       setIsEditingAddress(false);
       toast.success("Dirección actualizada exitosamente");
     } catch (error) {
@@ -298,6 +302,7 @@ export function ProfilePageContent({
         newsletter_subscribed: preferences.newsletter_subscribed,
         preferred_branch_id: preferences.preferred_branch_id || null,
       });
+      await refetchProfile();
       toast.success("Preferencias actualizadas exitosamente");
     } catch (error) {
       console.error("Error updating preferences:", error);

@@ -63,6 +63,96 @@ export class OrganizationalMemory {
   }
 
   /**
+   * Resolve location and currency from multiple sources (no hardcoding).
+   * Priority: 1) organization_settings explicit, 2) system_config, 3) quote_settings, 4) heuristics (phone/address/docType).
+   */
+  private resolveLocationAndCurrency(settings: Record<string, unknown>): {
+    location: string;
+    currency: string;
+  } {
+    const phone = String(settings.business_phone || "").trim();
+    const address = String(settings.business_address || "").toLowerCase();
+    const docType = String(settings.default_document_type || "").toLowerCase();
+    const explicitCountry = String(settings.country || "").trim();
+    const explicitCurrency = String(settings.currency || "")
+      .trim()
+      .toUpperCase();
+
+    // 1) Explicit organization_settings (highest priority)
+    if (explicitCurrency && explicitCurrency.length >= 3) {
+      const countryFromCurrency = this.countryFromCurrency(explicitCurrency);
+      return {
+        location: explicitCountry || countryFromCurrency || "No especificado",
+        currency: explicitCurrency,
+      };
+    }
+    if (explicitCountry) {
+      const currencyFromCountry = this.currencyFromCountry(explicitCountry);
+      if (currencyFromCountry) {
+        return { location: explicitCountry, currency: currencyFromCountry };
+      }
+    }
+
+    // 2) Heuristics from phone, address, document type
+    if (
+      phone.startsWith("+56") ||
+      address.includes("chile") ||
+      docType === "boleta"
+    ) {
+      return { location: "Chile", currency: "CLP" };
+    }
+    if (phone.startsWith("+54") || address.includes("argentina")) {
+      return { location: "Argentina", currency: "ARS" };
+    }
+    if (phone.startsWith("+34") || address.includes("españa")) {
+      return { location: "España", currency: "EUR" };
+    }
+    if (
+      address.includes("méxico") ||
+      address.includes("mexico") ||
+      phone.startsWith("+52")
+    ) {
+      return { location: "México", currency: "MXN" };
+    }
+    if (phone.startsWith("+57") || address.includes("colombia")) {
+      return { location: "Colombia", currency: "COP" };
+    }
+    if (
+      phone.startsWith("+51") ||
+      address.includes("perú") ||
+      address.includes("peru")
+    ) {
+      return { location: "Perú", currency: "PEN" };
+    }
+
+    return { location: "No especificado", currency: "USD" };
+  }
+
+  private countryFromCurrency(code: string): string | null {
+    const map: Record<string, string> = {
+      CLP: "Chile",
+      ARS: "Argentina",
+      MXN: "México",
+      EUR: "España",
+      COP: "Colombia",
+      PEN: "Perú",
+      USD: "Estados Unidos",
+    };
+    return map[code] ?? null;
+  }
+
+  private currencyFromCountry(country: string): string | null {
+    const c = country.toLowerCase();
+    if (c.includes("chile")) return "CLP";
+    if (c.includes("argentina")) return "ARS";
+    if (c.includes("méxico") || c.includes("mexico")) return "MXN";
+    if (c.includes("españa") || c.includes("espa")) return "EUR";
+    if (c.includes("colombia")) return "COP";
+    if (c.includes("perú") || c.includes("peru")) return "PEN";
+    return null;
+  }
+
+  /**
    * Get comprehensive organizational context
    */
   async getOrganizationalContext(): Promise<OrganizationalContext> {
@@ -73,49 +163,28 @@ export class OrganizationalMemory {
     }
 
     try {
-      const [orgData, settingsData, productsData, ordersData] =
-        await Promise.all([
-          this.getOrganizationData(),
-          this.getOrganizationSettings(),
-          this.getTopProducts(),
-          this.getRecentOrders(),
-        ]);
+      const [
+        orgData,
+        settingsData,
+        productsData,
+        ordersData,
+        systemCurrency,
+        quoteCurrency,
+      ] = await Promise.all([
+        this.getOrganizationData(),
+        this.getOrganizationSettings(),
+        this.getTopProducts(),
+        this.getRecentOrders(),
+        this.getSystemConfigCurrency(),
+        this.getQuoteSettingsCurrency(),
+      ]);
 
-      const settings = settingsData || {};
-      const phone = settings.business_phone || "";
-      const address = settings.business_address || "";
-      const docType = settings.default_document_type || "";
+      const settings = (settingsData || {}) as Record<string, unknown>;
 
-      // Detect location and currency
-      let location = "No especificado";
-      let currency = "USD"; // Default fallback
-
-      if (
-        phone.startsWith("+56") ||
-        address.toLowerCase().includes("chile") ||
-        docType === "boleta"
-      ) {
-        location = "Chile";
-        currency = "CLP";
-      } else if (
-        phone.startsWith("+54") ||
-        address.toLowerCase().includes("argentina")
-      ) {
-        location = "Argentina";
-        currency = "ARS";
-      } else if (
-        phone.startsWith("+34") ||
-        address.toLowerCase().includes("españa")
-      ) {
-        location = "España";
-        currency = "EUR";
-      } else if (
-        address.toLowerCase().includes("méxico") ||
-        phone.startsWith("+52")
-      ) {
-        location = "México";
-        currency = "MXN";
-      }
+      // Resolve location/currency: explicit settings > system_config > quote_settings > heuristics
+      let { location, currency } = this.resolveLocationAndCurrency(settings);
+      if (currency === "USD" && systemCurrency) currency = systemCurrency;
+      if (currency === "USD" && quoteCurrency) currency = quoteCurrency;
 
       const context: OrganizationalContext = {
         name: orgData.name,
@@ -129,8 +198,14 @@ export class OrganizationalMemory {
         },
         services: [],
         location: location,
-        phone: settings.business_phone || "No especificado",
-        email: settings.business_email || "No especificado",
+        phone:
+          (typeof settings.business_phone === "string"
+            ? settings.business_phone
+            : "") || "No especificado",
+        email:
+          (typeof settings.business_email === "string"
+            ? settings.business_email
+            : "") || "No especificado",
         website: "No especificado",
         currency: currency,
         createdAt: orgData.created_at || new Date().toISOString(),
@@ -288,6 +363,51 @@ export class OrganizationalMemory {
     }
 
     return data;
+  }
+
+  /** Get currency from system_config (org-level first, then global). */
+  private async getSystemConfigCurrency(): Promise<string | null> {
+    // Try org-level first
+    const { data: orgData } = await this.supabase
+      .from("system_config")
+      .select("config_value")
+      .eq("config_key", "currency")
+      .eq("organization_id", this.organizationId)
+      .maybeSingle();
+
+    if (orgData?.config_value) {
+      const val = orgData.config_value;
+      return typeof val === "string" ? val : String(val);
+    }
+
+    // Fallback to global
+    const { data: globalData } = await this.supabase
+      .from("system_config")
+      .select("config_value")
+      .eq("config_key", "currency")
+      .is("organization_id", null)
+      .is("branch_id", null)
+      .maybeSingle();
+
+    if (globalData?.config_value) {
+      const val = globalData.config_value;
+      return typeof val === "string" ? val : String(val);
+    }
+    return null;
+  }
+
+  /** Get currency from quote_settings (first branch of org). */
+  private async getQuoteSettingsCurrency(): Promise<string | null> {
+    const { data, error } = await this.supabase
+      .from("quote_settings")
+      .select("currency")
+      .eq("organization_id", this.organizationId)
+      .not("currency", "is", null)
+      .limit(1)
+      .maybeSingle();
+
+    if (error || !data?.currency) return null;
+    return String(data.currency).trim() || null;
   }
 
   private async getTopProducts(): Promise<

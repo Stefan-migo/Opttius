@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { MessageSquare, X } from "lucide-react";
 import { ChatbotContent } from "./ChatbotContent";
 import { cn } from "@/lib/utils";
@@ -86,13 +86,13 @@ export default function Chatbot(
       className="h-full"
       currentSection={currentSection}
       onClose={() => setIsOpen(false)}
-      onExpandClick={isExpanded ? handleCollapseClick : handleExpandClick}
-      isSidebarMode={isExpanded || isControlled}
+      onExpandClick={!isExpanded ? handleExpandClick : undefined}
+      isSidebarMode={isExpanded}
     />
   );
 
-  // When controlled (mobile nav) or expanded: use Sheet. Full-screen on mobile.
-  const useSheet = isExpanded || (isControlled && isOpen);
+  // Sheet solo cuando el usuario expandió a sidebar; si no, burbuja flotante
+  const useSheet = isExpanded;
 
   return (
     <div className="relative z-[100] flex flex-col items-end justify-end w-fit">
@@ -101,8 +101,13 @@ export default function Chatbot(
           <SheetContent
             side="right"
             elevateZIndex
+            hideDefaultClose
             className="w-full max-w-full sm:w-[420px] p-0 flex flex-col overflow-hidden"
+            aria-describedby={undefined}
           >
+            <SheetTitle className="sr-only">
+              Asistente de Inteligencia Opttius
+            </SheetTitle>
             <div className="flex-1 overflow-hidden min-h-0 flex flex-col">
               {chatContent}
             </div>

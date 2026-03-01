@@ -9,6 +9,7 @@ import {
   replaceTemplateVariables,
   getDefaultVariables,
 } from "../template-utils";
+import { wrapInModernLayout } from "../layout";
 import { createServiceRoleClient } from "@/utils/supabase/server";
 
 // ============================================================================
@@ -98,6 +99,30 @@ export interface SaaSOnboardingData {
   next_step_name?: string;
   next_step_url?: string;
   resources_url?: string;
+}
+
+export interface DemoApprovedData {
+  email: string;
+  fullName?: string | null;
+  loginUrl: string;
+}
+
+export interface DemoExpiringData {
+  email: string;
+  fullName?: string | null;
+  daysRemaining: number;
+  meetingUrl: string;
+}
+
+export interface DemoExpiredData {
+  email: string;
+  fullName?: string | null;
+  meetingUrl: string;
+}
+
+export interface DemoPostMeetingFollowupData {
+  email: string;
+  fullName?: string | null;
 }
 
 // ============================================================================
@@ -781,6 +806,196 @@ export async function sendSaaSFeatureAnnouncement(
 }
 
 // ============================================================================
+// DEMO APROBADA (usuarios existentes - no reciben invite de Supabase)
+// ============================================================================
+
+export async function sendDemoApprovedEmail(
+  data: DemoApprovedData,
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const name = data.fullName || "Usuario";
+    const loginUrl =
+      data.loginUrl ||
+      `${process.env.NEXT_PUBLIC_APP_URL || "https://www.opttius.cl"}/login`;
+
+    const content = `
+      <p>Hola ${name},</p>
+      <p>Tu solicitud de demo de Opttius ha sido <strong>aprobada</strong>.</p>
+      <p>Ya puedes acceder a tu entorno de demostración con tu email y contraseña actual.</p>
+      <p><a href="${loginUrl}" style="display:inline-block;background:#1e40af;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600;">Acceder a mi demo</a></p>
+      <p>La demo tiene una duración de 7 días. Si tienes dudas, contáctanos a soporte@opttius.cl.</p>
+    `;
+
+    const html = wrapInModernLayout(content, {
+      title: "Demo aprobada - Opttius",
+      previewText: "Tu solicitud de demo ha sido aprobada.",
+      organizationName: "Opttius",
+    });
+
+    const text = html
+      .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")
+      .replace(/<[^>]+>/g, "")
+      .replace(/\n\s*\n/g, "\n")
+      .trim();
+
+    return await sendEmail({
+      to: data.email,
+      subject: "Tu demo de Opttius está lista",
+      html,
+      text,
+      replyTo: "soporte@opttius.cl",
+    });
+  } catch (error) {
+    console.error("Error sending demo approved email:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Unknown error",
+    };
+  }
+}
+
+// ============================================================================
+// DEMO POR VENCER (días 5-6 de 7)
+// ============================================================================
+
+export async function sendDemoExpiringEmail(
+  data: DemoExpiringData,
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const name = data.fullName || "Usuario";
+    const days = data.daysRemaining;
+    const meetingUrl = data.meetingUrl || "https://www.opttius.cl/contacto";
+
+    const content = `
+      <p>Hola ${name},</p>
+      <p>Tu demo de Opttius vence en <strong>${days} ${days === 1 ? "día" : "días"}</strong>.</p>
+      <p>¿Te gustaría agendar una reunión para conocer cómo Opttius puede ayudarte a gestionar tu óptica? Conversamos sobre tus necesidades y te mostramos las opciones de planes.</p>
+      <p><a href="${meetingUrl}" style="display:inline-block;background:#1e40af;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600;">Agendar reunión</a></p>
+      <p>Si tienes dudas, escríbenos a soporte@opttius.cl.</p>
+    `;
+
+    const html = wrapInModernLayout(content, {
+      title: "Tu demo de Opttius vence pronto",
+      previewText: `Tu demo vence en ${days} ${days === 1 ? "día" : "días"}. Agenda una reunión.`,
+      organizationName: "Opttius",
+    });
+
+    const text = html
+      .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")
+      .replace(/<[^>]+>/g, "")
+      .replace(/\n\s*\n/g, "\n")
+      .trim();
+
+    return await sendEmail({
+      to: data.email,
+      subject: `Tu demo de Opttius vence en ${days} ${days === 1 ? "día" : "días"}`,
+      html,
+      text,
+      replyTo: "soporte@opttius.cl",
+    });
+  } catch (error) {
+    console.error("Error sending demo expiring email:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Unknown error",
+    };
+  }
+}
+
+// ============================================================================
+// DEMO EXPIRADA (día 8+)
+// ============================================================================
+
+export async function sendDemoExpiredEmail(
+  data: DemoExpiredData,
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const name = data.fullName || "Usuario";
+    const meetingUrl = data.meetingUrl || "https://www.opttius.cl/contacto";
+
+    const content = `
+      <p>Hola ${name},</p>
+      <p>Tu prueba de Opttius ha finalizado. Esperamos que hayas podido explorar el sistema: gestión de inventario, citas, presupuestos, POS y más.</p>
+      <p>Si te gustaría continuar con Opttius o tienes preguntas, agenda una reunión y conversamos sobre tu óptica.</p>
+      <p><a href="${meetingUrl}" style="display:inline-block;background:#1e40af;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600;">Agendar reunión</a></p>
+      <p>También puedes escribirnos a soporte@opttius.cl.</p>
+    `;
+
+    const html = wrapInModernLayout(content, {
+      title: "Tu prueba de Opttius ha finalizado",
+      previewText: "Tu demo ha expirado. Agenda una reunión para continuar.",
+      organizationName: "Opttius",
+    });
+
+    const text = html
+      .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")
+      .replace(/<[^>]+>/g, "")
+      .replace(/\n\s*\n/g, "\n")
+      .trim();
+
+    return await sendEmail({
+      to: data.email,
+      subject: "Tu prueba de Opttius ha finalizado",
+      html,
+      text,
+      replyTo: "soporte@opttius.cl",
+    });
+  } catch (error) {
+    console.error("Error sending demo expired email:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Unknown error",
+    };
+  }
+}
+
+// ============================================================================
+// POST-REUNIÓN FOLLOWUP (3 días después de reunión)
+// ============================================================================
+
+export async function sendDemoPostMeetingFollowupEmail(
+  data: DemoPostMeetingFollowupData,
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const name = data.fullName || "Usuario";
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://www.opttius.cl";
+
+    const content = `
+      <p>Hola ${name},</p>
+      <p>Gracias por reunirte con nosotros. Esperamos que la conversación haya sido útil.</p>
+      <p>Si tienes más preguntas sobre Opttius, planes o la migración de datos, estamos aquí para ayudarte. Escríbenos a soporte@opttius.cl.</p>
+      <p><a href="${appUrl}" style="display:inline-block;background:#1e40af;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600;">Ver Opttius</a></p>
+    `;
+
+    const html = wrapInModernLayout(content, {
+      title: "Gracias por reunirte con Opttius",
+      previewText: "¿Tienes preguntas? Estamos aquí para ayudarte.",
+      organizationName: "Opttius",
+    });
+
+    const text = html
+      .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")
+      .replace(/<[^>]+>/g, "")
+      .replace(/\n\s*\n/g, "\n")
+      .trim();
+
+    return await sendEmail({
+      to: data.email,
+      subject: "Gracias por reunirte con Opttius",
+      html,
+      text,
+      replyTo: "soporte@opttius.cl",
+    });
+  } catch (error) {
+    console.error("Error sending demo post-meeting followup email:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Unknown error",
+    };
+  }
+}
+
+// ============================================================================
 // Exports
 // ============================================================================
 
@@ -796,4 +1011,8 @@ export const saasEmailTemplates = {
   sendSaaSMaintenanceNotice,
   sendSaaSUsageAlert,
   sendSaaSFeatureAnnouncement,
+  sendDemoApprovedEmail,
+  sendDemoExpiringEmail,
+  sendDemoExpiredEmail,
+  sendDemoPostMeetingFollowupEmail,
 };

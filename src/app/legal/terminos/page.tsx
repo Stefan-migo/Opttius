@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { BreadcrumbStructuredData } from "@/components/seo/BreadcrumbStructuredData";
 
 export const metadata: Metadata = {
   title: "Condiciones del Ecosistema Operativo",
@@ -9,6 +10,12 @@ export const metadata: Metadata = {
 export default function TerminosPage() {
   return (
     <article className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
+      <BreadcrumbStructuredData
+        items={[
+          { name: "Inicio", path: "/" },
+          { name: "Términos", path: "/legal/terminos" },
+        ]}
+      />
       <h1 className="text-4xl md:text-5xl font-display font-bold text-epoch-primary tracking-tight mb-4">
         Condiciones del Ecosistema Operativo
       </h1>

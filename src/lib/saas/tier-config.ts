@@ -22,8 +22,8 @@ export type TierFeature =
 export interface TierLimits {
   name: string;
   price: number;
-  max_branches: number;
-  max_users: number;
+  max_branches: number | "unlimited";
+  max_users: number | "unlimited";
   max_customers: number | "unlimited";
   max_products: number | "unlimited";
   features: Record<TierFeature, boolean>;

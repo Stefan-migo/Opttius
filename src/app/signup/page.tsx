@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { useForm } from "react-hook-form";
@@ -59,8 +59,28 @@ type SignupForm = z.infer<typeof signupSchema>;
 
 export default function SignupPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { signUp, loading } = useAuthContext();
   const [showPassword, setShowPassword] = useState(false);
+  const [configChecked, setConfigChecked] = useState(false);
+
+  useEffect(() => {
+    const checkConfig = async () => {
+      try {
+        const res = await fetch("/api/landing/onboarding-config");
+        const data = await res.json();
+        const accessOpticas = searchParams.get("access") === "opticas";
+        if (data.signupEnabled === false && !accessOpticas) {
+          router.replace("/solicitar-demo");
+          return;
+        }
+      } catch {
+        // Si falla la API, permitir signup (fail open para no bloquear)
+      }
+      setConfigChecked(true);
+    };
+    checkConfig();
+  }, [router, searchParams]);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -116,6 +136,14 @@ export default function SignupPage() {
       setError(err.message || "An error occurred during signup");
     }
   };
+
+  if (!configChecked) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-epoch-background">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-epoch-primary" />
+      </div>
+    );
+  }
 
   if (isSuccess) {
     return (

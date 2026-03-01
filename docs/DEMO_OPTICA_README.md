@@ -84,6 +84,17 @@ Ejecutar tras `supabase db reset` o aplicar con `supabase db push`.
 
 ---
 
+## Demos dedicadas por usuario
+
+Además de la demo global (Óptica Mirada Clara), el sistema soporta **demos dedicadas de 7 días** por usuario, creadas vía la función `create_demo_organization_for_user(p_user_id, p_demo_type)`:
+
+- **Ópticas conocidas** (`demo_type: 'known_optica'`): signup vía `/acceso-opticas`, demo con banner "Activar tu Óptica" visible, auto-activación permitida.
+- **Orgánicos** (`demo_type: 'organic'`): aprobados desde el dashboard, demo sin banner, activación solo vía soporte.
+
+La demo global (`DEMO_ORG_ID`) se mantiene para reset/testing y no se elimina por el cron de limpieza. Ver [docs/onboarding/DUAL_ONBOARDING_FLOWS.md](./onboarding/DUAL_ONBOARDING_FLOWS.md) para el flujo completo.
+
+---
+
 ## Relación con reset_demo_organization
 
 La función `reset_demo_organization()` borra y recrea org, branches y customers de la demo anterior ("Óptica Demo Global"). Las migraciones de Mirada Clara insertan datos con `ON CONFLICT` y actualizan el nombre de la org.

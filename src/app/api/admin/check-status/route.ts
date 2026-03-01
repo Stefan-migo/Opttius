@@ -80,7 +80,22 @@ export async function GET(request: NextRequest) {
       error: Error | null;
     };
     const isRootUser = !!isRoot;
-    const isDemoMode = organizationId === DEMO_ORG_ID;
+
+    let isDemoMode = organizationId === DEMO_ORG_ID;
+    let showActivateBanner = isDemoMode;
+
+    if (organizationId && organizationId !== DEMO_ORG_ID) {
+      const { data: orgMeta } = await supabase
+        .from("organizations")
+        .select("metadata")
+        .eq("id", organizationId)
+        .single();
+      const meta = orgMeta?.metadata as Record<string, unknown> | null;
+      if (meta?.is_demo === true) {
+        isDemoMode = true;
+        showActivateBanner = meta?.demo_type !== "organic";
+      }
+    }
 
     // Get organization details if exists
     let organizationName = null;
@@ -139,6 +154,7 @@ export async function GET(request: NextRequest) {
         ownerId,
         hasOrganization: !!organizationId,
         isDemoMode,
+        showActivateBanner,
         isSuperAdmin,
         isRootUser,
         isOwner,

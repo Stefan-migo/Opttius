@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { MinimalLandingHeader } from "@/components/landing/MinimalLandingHeader";
+import { BreadcrumbStructuredData } from "@/components/seo/BreadcrumbStructuredData";
 
 export const metadata: Metadata = {
   title: "Nosotros",
@@ -39,6 +40,12 @@ const pillars = [
 export default function AboutPage() {
   return (
     <div className="min-h-screen bg-epoch-background">
+      <BreadcrumbStructuredData
+        items={[
+          { name: "Inicio", path: "/" },
+          { name: "Nosotros", path: "/about" },
+        ]}
+      />
       <MinimalLandingHeader navItems={aboutNavItems} />
 
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-24 md:py-32 pt-32">
@@ -118,7 +125,7 @@ export default function AboutPage() {
             rentabilidad comercial. Hemos unido ambos mundos.
           </p>
           <Link
-            href="/signup"
+            href="/solicitar-demo"
             className="inline-flex items-center gap-3 px-10 py-4 bg-epoch-primary hover:bg-epoch-surface text-white font-display font-bold uppercase text-xs tracking-[0.3em] transition-all duration-500 group"
           >
             Elevar el Estándar de mi Óptica

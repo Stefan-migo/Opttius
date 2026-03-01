@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -37,6 +37,14 @@ export default function LoginPage() {
   const { signIn, loading } = useAuthContext();
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [signupEnabled, setSignupEnabled] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/landing/onboarding-config")
+      .then((r) => r.json())
+      .then((d) => setSignupEnabled(d.signupEnabled !== false))
+      .catch(() => {});
+  }, []);
 
   const {
     register,
@@ -231,9 +239,7 @@ export default function LoginPage() {
                   ) : (
                     <span className="flex items-center justify-center gap-2 sm:gap-3">
                       <span className="sm:hidden">Acceder</span>
-                      <span className="hidden sm:inline">
-                        Sincronizar Acceso
-                      </span>
+                      <span className="hidden sm:inline">Iniciar sesión</span>
                       <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-2 shrink-0" />
                     </span>
                   )}
@@ -245,10 +251,10 @@ export default function LoginPage() {
                   ¿Primera vez aquí?
                 </p>
                 <Link
-                  href="/signup"
+                  href={signupEnabled ? "/signup" : "/solicitar-demo"}
                   className="inline-flex items-center gap-4 px-10 py-4 border border-epoch-primary/10 text-xs font-display font-bold text-epoch-primary uppercase tracking-[0.3em] hover:bg-epoch-primary hover:text-white transition-all duration-500 hover:-translate-y-1"
                 >
-                  Crear cuenta
+                  {signupEnabled ? "Crear cuenta" : "Solicitar demo"}
                   <ArrowRight className="h-3 w-3" />
                 </Link>
               </div>

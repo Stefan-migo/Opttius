@@ -614,20 +614,25 @@ export default function EditProductPage() {
             }
           : null;
 
+      // In global mode, do NOT send stock fields - stock cannot be configured globally
+      const isGlobalMode = !currentBranchId || currentBranchId === "global";
       const productData = {
         ...formData,
         status: status || formData.status,
         price: parseFloat(formData.price),
         price_includes_tax: formData.price_includes_tax === true,
-        // Stock quantity - same as create: always send number for RPC update_product_stock
-        stock_quantity: formData.stock_quantity
-          ? parseInt(String(formData.stock_quantity))
-          : 0,
-        low_stock_threshold: formData.low_stock_threshold
-          ? parseInt(String(formData.low_stock_threshold))
-          : 5,
-        // branch_id in body - same as create, required for stock update
-        branch_id: currentBranchId || null,
+        // Stock only when branch selected - API rejects stock changes in global mode
+        ...(isGlobalMode
+          ? {}
+          : {
+              stock_quantity: formData.stock_quantity
+                ? parseInt(String(formData.stock_quantity))
+                : 0,
+              low_stock_threshold: formData.low_stock_threshold
+                ? parseInt(String(formData.low_stock_threshold))
+                : 5,
+              branch_id: currentBranchId,
+            }),
         // Optical fields
         frame_measurements: frameMeasurements,
         prescription_range: prescriptionRange,
@@ -730,37 +735,50 @@ export default function EditProductPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl">
-      {/* Header with changes indicator */}
-      <div className="flex justify-between items-center gap-3 mb-6">
-        <div className="flex items-center gap-2">
-          <Package className="h-5 w-5 text-epoch-primary" />
-          <h1 className="text-2xl font-bold text-epoch-primary">
-            Editar Producto
-          </h1>
+    <div className="container mx-auto px-3 sm:px-4 py-6 sm:py-8 max-w-4xl min-w-0">
+      {/* Header: mobile-first, stacked on small screens */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between sm:gap-3 mb-6">
+        <div className="flex flex-col gap-2 min-w-0 sm:flex-row sm:items-center sm:gap-2">
+          <div className="flex items-center gap-2 min-w-0">
+            <Package className="h-5 w-5 shrink-0 text-epoch-primary" />
+            <div className="min-w-0">
+              <h1 className="text-xl font-bold text-epoch-primary truncate sm:text-2xl">
+                Editar Producto
+              </h1>
+              {formData.name && (
+                <p className="text-sm text-muted-foreground truncate mt-0.5">
+                  {formData.name}
+                </p>
+              )}
+            </div>
+          </div>
           {hasChanges && (
-            <span className="px-2 py-1 text-xs bg-amber-100 text-amber-800 rounded-full border border-amber-200">
+            <span className="inline-flex w-fit px-2.5 py-1 text-xs font-medium bg-amber-100 text-amber-800 rounded-full border border-amber-200 dark:bg-amber-900/30 dark:text-amber-200 dark:border-amber-800">
               Cambios sin guardar
             </span>
           )}
         </div>
-        <Link href="/admin/products">
-          <Button className="group btn-enhanced px-6 py-3 lg:px-8 lg:py-4 text-white font-semibold text-sm lg:text-base w-full sm:w-auto">
-            <ArrowLeft className="h-4 w-4 mr-2" />
+        <Link href="/admin/products" className="w-full sm:w-auto">
+          <Button
+            variant="outline"
+            size="default"
+            className="w-full sm:w-auto min-h-[44px] px-4 sm:px-6 font-medium shrink-0"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2 shrink-0" />
             Volver a Productos
           </Button>
         </Link>
       </div>
 
       {/* Product Form */}
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-6 min-w-0">
         {/* Product Type & Category - MOVED TO FIRST POSITION */}
-        <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.4)]">
+        <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.4)] min-w-0 overflow-hidden">
           <CardHeader>
             <CardTitle>Tipo de Producto</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 min-w-0">
               <div>
                 <Label htmlFor="product_type">Tipo de Producto *</Label>
                 <Select
@@ -802,7 +820,7 @@ export default function EditProductPage() {
                 </Select>
               </div>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 min-w-0">
               <div>
                 <Label htmlFor="status">Estado</Label>
                 <Select
@@ -823,12 +841,12 @@ export default function EditProductPage() {
           </CardContent>
         </Card>
 
-        <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.4)]">
+        <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.4)] min-w-0 overflow-hidden">
           <CardHeader>
             <CardTitle>Información Básica</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 min-w-0">
               <div>
                 <Label htmlFor="name">Nombre del Producto *</Label>
                 <Input
@@ -876,14 +894,14 @@ export default function EditProductPage() {
           </CardContent>
         </Card>
 
-        <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.4)]">
+        <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.4)] min-w-0 overflow-hidden">
           <CardHeader>
             <CardTitle>Precios e Inventario</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 min-w-0">
               <div>
-                <Label htmlFor="price">Precio (ARS) *</Label>
+                <Label htmlFor="price">Precio (CLP) *</Label>
                 <Input
                   id="price"
                   type="number"
@@ -907,13 +925,15 @@ export default function EditProductPage() {
                     handleInputChange("stock_quantity", e.target.value)
                   }
                   placeholder="50"
-                  required
+                  required={!!currentBranchId}
                   min="0"
+                  disabled={!currentBranchId || currentBranchId === "global"}
                   className="border-black/20"
                 />
                 <p className="text-xs text-muted-foreground mt-1">
-                  Stock para esta sucursal. Puede gestionar stock por sucursal
-                  desde la página de productos.
+                  {currentBranchId && currentBranchId !== "global"
+                    ? "Stock para esta sucursal. Puede gestionar stock por sucursal desde la página de productos."
+                    : "Selecciona una sucursal para configurar el stock. En vista global el inventario no se modifica."}
                 </p>
               </div>
               <div>
@@ -929,6 +949,7 @@ export default function EditProductPage() {
                   }
                   placeholder="5"
                   min="0"
+                  disabled={!currentBranchId || currentBranchId === "global"}
                   className="border-black/20"
                 />
                 <p className="text-xs text-muted-foreground mt-1">
@@ -959,12 +980,12 @@ export default function EditProductPage() {
 
         {/* Brand & Model Information - Hidden for services */}
         {formData.product_type !== "service" && (
-          <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.4)]">
+          <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.4)] min-w-0 overflow-hidden">
             <CardHeader>
               <CardTitle>Marca y Modelo</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 min-w-0">
                 <div>
                   <Label htmlFor="brand">Marca</Label>
                   <Input
@@ -1005,12 +1026,12 @@ export default function EditProductPage() {
         )}
 
         {/* SKU and Barcode - Available for all product types */}
-        <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.4)]">
+        <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.4)] min-w-0 overflow-hidden">
           <CardHeader>
             <CardTitle>Códigos de Identificación</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 min-w-0">
               <div>
                 <Label htmlFor="sku">SKU</Label>
                 <Input
@@ -1035,7 +1056,7 @@ export default function EditProductPage() {
           </CardContent>
         </Card>
 
-        <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.4)]">
+        <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.4)] min-w-0 overflow-hidden">
           <CardHeader>
             <CardTitle>Imagen del Producto</CardTitle>
           </CardHeader>
@@ -1053,12 +1074,12 @@ export default function EditProductPage() {
 
         {/* Frame Specifications - Only show if product_type is 'frame' */}
         {formData.product_type === "frame" && (
-          <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.4)]">
+          <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.4)] min-w-0 overflow-hidden">
             <CardHeader>
               <CardTitle>Especificaciones del Armazón</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 min-w-0">
                 <div>
                   <Label>Tipo de Armazón</Label>
                   <Select
@@ -1175,7 +1196,7 @@ export default function EditProductPage() {
               {/* Frame Measurements */}
               <div>
                 <Label className="mb-2 block">Medidas del Armazón (mm)</Label>
-                <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 sm:gap-4">
                   <div>
                     <Label className="text-xs">Ancho de Lente</Label>
                     <Input
@@ -1282,12 +1303,12 @@ export default function EditProductPage() {
 
         {/* Lens Specifications - Only show if product_type is 'lens' */}
         {formData.product_type === "lens" && (
-          <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.4)]">
+          <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.4)] min-w-0 overflow-hidden">
             <CardHeader>
               <CardTitle>Especificaciones del Lente</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 min-w-0">
                 <div>
                   <Label>Tipo de Lente</Label>
                   <Select
@@ -1363,7 +1384,7 @@ export default function EditProductPage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 min-w-0">
                 <div className="flex items-center space-x-2">
                   <input
                     type="checkbox"
@@ -1472,7 +1493,7 @@ export default function EditProductPage() {
                   <Label className="mb-2 block">
                     Rango de Receta Soportado
                   </Label>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4 min-w-0">
                     <div>
                       <Label className="text-xs">SPH Mínimo</Label>
                       <Input
@@ -1559,12 +1580,12 @@ export default function EditProductPage() {
         )}
 
         {/* Warranty & Additional Info */}
-        <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.4)]">
+        <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.4)] min-w-0 overflow-hidden">
           <CardHeader>
             <CardTitle>Garantía e Información Adicional</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 min-w-0">
               <div>
                 <Label htmlFor="warranty_months">Garantía (meses)</Label>
                 <Input
@@ -1617,28 +1638,34 @@ export default function EditProductPage() {
           </CardContent>
         </Card>
 
-        {/* Submit Buttons */}
-        <div className="flex gap-4">
-          <Link href="/admin/products">
-            <Button type="button" variant="outline">
+        {/* Submit Buttons - mobile: stacked full-width, desktop: row */}
+        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:gap-4 min-w-0">
+          <Link href="/admin/products" className="w-full sm:w-auto sm:order-1">
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full sm:w-auto min-h-[44px]"
+            >
               Cancelar
             </Button>
           </Link>
-
           <Button
             type="button"
             variant="secondary"
             disabled={saving}
             onClick={() => handleSubmit(undefined, "draft")}
-            className="flex items-center gap-2 text-white"
+            className="w-full sm:w-auto min-h-[44px] flex items-center justify-center gap-2 text-white sm:order-2"
             style={{ backgroundColor: "var(--admin-accent-tertiary)" }}
           >
-            <Save className="h-4 w-4" />
+            <Save className="h-4 w-4 shrink-0" />
             {saving ? "Guardando..." : "Guardar como Borrador"}
           </Button>
-
-          <Button type="submit" disabled={saving} className="flex-1">
-            <Save className="h-4 w-4 mr-2" />
+          <Button
+            type="submit"
+            disabled={saving}
+            className="w-full sm:flex-1 min-h-[44px] flex items-center justify-center gap-2 sm:order-3 sm:min-w-[140px]"
+          >
+            <Save className="h-4 w-4 shrink-0" />
             {saving ? "Guardando..." : "Guardar Cambios"}
           </Button>
         </div>

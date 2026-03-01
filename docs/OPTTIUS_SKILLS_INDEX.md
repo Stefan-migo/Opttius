@@ -1,6 +1,6 @@
 # Índice de Skills Opttius — Guías de Dominio del Proyecto
 
-Este documento consolida las 25 skills del directorio `.cursor/skills` para que NotebookLM tenga acceso al conocimiento experto del proyecto Opttius (ópticas, Supabase, Next.js).
+Este documento consolida las 26 skills del directorio `.cursor/skills` para que NotebookLM tenga acceso al conocimiento experto del proyecto Opttius (ópticas, Supabase, Next.js).
 
 **Fecha de generación:** 2026-02-23  
 **Fuente:** `.cursor/skills/**/SKILL.md`
@@ -9,15 +9,15 @@ Este documento consolida las 25 skills del directorio `.cursor/skills` para que 
 
 ## Resumen por Categoría
 
-| Categoría        | Skills                                                                |
-| ---------------- | --------------------------------------------------------------------- |
-| **Óptica Core**  | admin-users, appointments, crm, inventory, pos, quotes, work-orders   |
-| **Pagos y SaaS** | payment-workflow, saas-management                                     |
-| **Sistema**      | system-configuration, supabase-auth, user-profile                     |
-| **Frontend**     | frontend-design-modern, responsive-frontend-optical, opttius-identity |
-| **Comunicación** | emails, notifications, support, whatsapp-ai-agent                     |
-| **Analítica**    | analytics, dashboard, ai                                              |
-| **Herramientas** | nlm-skill, testing                                                    |
+| Categoría        | Skills                                                                                                                       |
+| ---------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| **Óptica Core**  | admin-users, appointments, crm, inventory, pos, quotes, work-orders                                                          |
+| **Pagos y SaaS** | payment-workflow, saas-management                                                                                            |
+| **Sistema**      | system-configuration, supabase-auth, user-profile                                                                            |
+| **Frontend**     | frontend-design-modern, responsive-frontend-optical, opttius-identity, marketing-identity-optical, seo-aio-optical-discovery |
+| **Comunicación** | emails, notifications, support, whatsapp-ai-agent                                                                            |
+| **Analítica**    | analytics, dashboard, ai                                                                                                     |
+| **Herramientas** | nlm-skill, testing                                                                                                           |
 
 ---
 
@@ -184,6 +184,30 @@ Este documento consolida las 25 skills del directorio `.cursor/skills` para que 
 **Arquetipo:** Software médico de alta gama / Minimalismo SaaS. "De la clínica al código."
 
 **Paleta:** epoch-primary #1A2B23, epoch-accent #C5A059, epoch-surface #1A1A1A, epoch-background #F9F7F2.
+
+---
+
+## 14b. marketing-identity-optical
+
+**Cuándo usar:** estrategia de marketing, narrativa, copy, landing, conversión, posicionamiento óptico.
+
+**Propósito:** Guiar construcción de estrategia de marketing e identidad con código limpio y mejores prácticas.
+
+**Fórmula:** Hero (problema + propuesta + origen + CTA), Problem/Solution, Features, Benefits, CTA. Pilares: tecnólogo médico, exclusivo para ópticas.
+
+**Doc:** docs/marketing/MARKETING_IDENTITY_STRATEGY.md.
+
+---
+
+## 14c. seo-aio-optical-discovery
+
+**Cuándo usar:** metadata, sitemap, robots, JSON-LD, Schema.org, Open Graph, discoverability, SEO, AIO, citación por LLMs.
+
+**Propósito:** Estrategia de descubrimiento orgánico (SEO + AIO) para que ópticas encuentren Opttius y LLMs lo citen como autoridad.
+
+**Principios:** Topic clusters (no keywords aisladas), respuesta directa en 30 palabras (AIO), autoridad temática, vocabulario técnico óptico.
+
+**Docs:** docs/marketing/SEO_AIO_DISCOVERY_STRATEGY.md, SEO_AIO_TECHNICAL_REFERENCE.md, SEO_AIO_CURRENT_STATE_AND_IMPROVEMENTS.md.
 
 ---
 

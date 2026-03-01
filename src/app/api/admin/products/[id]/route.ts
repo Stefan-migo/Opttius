@@ -269,6 +269,25 @@ export async function PUT(
       );
     }
 
+    // Stock changes require a branch. In global mode, stock must not be modified.
+    if (
+      body.stock_quantity !== undefined ||
+      body.low_stock_threshold !== undefined
+    ) {
+      const branchContext = await getBranchContext(request, user.id);
+      const branchId = branchContext.branchId || body.branch_id;
+      if (!branchId) {
+        return NextResponse.json(
+          {
+            error:
+              "No se puede modificar el stock en vista global. Selecciona una sucursal para actualizar el inventario de esa sucursal.",
+            code: "STOCK_REQUIRES_BRANCH",
+          },
+          { status: 400 },
+        );
+      }
+    }
+
     // Generate slug if not provided
     let slug = body.slug?.trim();
     if (!slug) {
@@ -546,16 +565,15 @@ export async function PUT(
       const branchId = branchContext.branchId || body.branch_id;
 
       if (!branchId) {
-        logger.warn("Stock update skipped: no branch_id provided", {
-          productId: id,
-          stockQuantity: body.stock_quantity,
-          branchContext: branchContext.branchId,
-        });
-        return NextResponse.json({
-          product: updatedProduct,
-          warning:
-            "El producto se actualizó, pero el stock no se actualizó porque no se seleccionó una sucursal",
-        });
+        // Should not reach here - early validation returns 400. Safety fallback.
+        return NextResponse.json(
+          {
+            error:
+              "No se puede modificar el stock en vista global. Selecciona una sucursal.",
+            code: "STOCK_REQUIRES_BRANCH",
+          },
+          { status: 400 },
+        );
       }
 
       const serviceSupabase = createServiceRoleClient();

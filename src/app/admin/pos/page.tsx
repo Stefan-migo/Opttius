@@ -83,6 +83,7 @@ import { LensFamilyCombobox } from "@/components/admin/lenses/LensFamilyCombobox
 import { ContactLensFamilyCombobox } from "@/components/admin/lenses/ContactLensFamilyCombobox";
 import type { QuoteSearchParams } from "@/lib/api/services";
 import { useBranch } from "@/hooks/useBranch";
+import { usePosInsightsRefresh } from "@/hooks/usePosInsightsRefresh";
 import { getBranchHeader } from "@/lib/utils/branch";
 import { useLensPriceCalculation } from "@/hooks/useLensPriceCalculation";
 import {
@@ -267,6 +268,12 @@ export default function POSPage() {
     useState<boolean>(false);
 
   const [manualLensPrice, setManualLensPrice] = useState<boolean>(false);
+
+  // POS insights: refresh when prescription or customer changes (for contextual recommendations)
+  usePosInsightsRefresh(selectedPrescription, selectedCustomer, {
+    debounceMs: 2000,
+    enabled: !!(selectedPrescription || selectedCustomer),
+  });
 
   // Lens families and price calculation
   const [lensFamilies, setLensFamilies] = useState<any[]>([]);

@@ -9,8 +9,8 @@ const DEMO_ORG_ID =
 /**
  * POST /api/onboarding/assign-demo
  *
- * Asigna la organización demo al usuario actual.
- * Esto permite que el usuario explore el sistema con datos pre-cargados.
+ * Crea una organización demo dedicada (7 días) para el usuario (flujo ópticas conocidas).
+ * Clona estructura Mirada Clara. Banner y botón activar visibles.
  *
  * Returns:
  * - { success: boolean, organizationId: string }
@@ -21,7 +21,6 @@ export async function POST(request: NextRequest) {
     const supabase = await createClient();
     const supabaseServiceRole = createServiceRoleClient();
 
-    // Verificar autenticación
     const {
       data: { user },
       error: userError,
@@ -31,7 +30,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "No autenticado" }, { status: 401 });
     }
 
-    // Verificar que el usuario no tenga ya una organización asignada
     const { data: existingAdminUser, error: adminUserError } =
       await supabaseServiceRole
         .from("admin_users")
@@ -39,148 +37,78 @@ export async function POST(request: NextRequest) {
         .eq("id", user.id)
         .maybeSingle();
 
-    // Si hay un error que no sea "no encontrado", registrar y continuar
     if (adminUserError && adminUserError.code !== "PGRST116") {
       logger.warn("Error checking existing admin user", adminUserError);
     }
 
     if (existingAdminUser?.organization_id) {
-      // Si ya tiene organización y no es la demo, no permitir cambio
-      if (existingAdminUser.organization_id !== DEMO_ORG_ID) {
+      const orgId = existingAdminUser.organization_id;
+
+      if (orgId !== DEMO_ORG_ID) {
+        const { data: org } = await supabaseServiceRole
+          .from("organizations")
+          .select("metadata")
+          .eq("id", orgId)
+          .single();
+
+        const meta = org?.metadata as Record<string, unknown> | null;
+        const isOwnDemo =
+          meta?.owner_user_id === user.id && meta?.is_demo === true;
+
+        if (isOwnDemo) {
+          return NextResponse.json({
+            success: true,
+            organizationId: orgId,
+            alreadyAssigned: true,
+          });
+        }
+
         return NextResponse.json(
           {
             error: "Ya tienes una organización asignada",
-            organizationId: existingAdminUser.organization_id,
+            organizationId: orgId,
           },
           { status: 400 },
         );
       }
-      // Ya tiene demo asignada. is_super_admin reconoce role=super_admin en admin_users.
-      return NextResponse.json({
-        success: true,
-        organizationId: DEMO_ORG_ID,
-        alreadyAssigned: true,
-      });
     }
 
-    // Verificar que la organización demo existe
-    const { data: demoOrg, error: orgError } = await supabaseServiceRole
+    const { data: newOrgId, error: rpcError } = await supabaseServiceRole.rpc(
+      "create_demo_organization_for_user",
+      { p_user_id: user.id, p_demo_type: "known_optica" },
+    );
+
+    if (rpcError) {
+      logger.error("Error creating demo organization", {
+        error: rpcError,
+        userId: user.id,
+      });
+      return NextResponse.json(
+        {
+          error: "Error al crear organización demo",
+          details: rpcError.message,
+        },
+        { status: 500 },
+      );
+    }
+
+    const { data: demoOrg } = await supabaseServiceRole
       .from("organizations")
       .select("id, name")
-      .eq("id", DEMO_ORG_ID)
-      .maybeSingle();
+      .eq("id", newOrgId)
+      .single();
 
-    if (orgError) {
-      logger.error("Error checking demo organization", orgError);
-      return NextResponse.json(
-        {
-          error: "Error al verificar organización demo",
-          details: orgError.message,
-        },
-        { status: 500 },
-      );
-    }
-
-    if (!demoOrg) {
-      logger.error("Demo organization not found", {
-        demoOrgId: DEMO_ORG_ID,
-        message:
-          "La organización demo no existe en la base de datos. Asegúrate de aplicar las migraciones.",
-      });
-      return NextResponse.json(
-        {
-          error: "La organización demo no está disponible",
-          details:
-            "La organización demo no existe. Por favor, contacta al administrador del sistema.",
-        },
-        { status: 500 },
-      );
-    }
-
-    // Crear/actualizar admin_users con organization_id de demo
-    // El usuario que se registra es el dueño de la óptica, por lo tanto debe ser super_admin
-    const { data: adminUser, error: adminError } = await supabaseServiceRole
-      .from("admin_users")
-      .upsert(
-        {
-          id: user.id,
-          email: user.email,
-          role: "super_admin",
-          organization_id: DEMO_ORG_ID,
-          is_active: true,
-        },
-        {
-          onConflict: "id",
-        },
-      )
-      .select()
-      .maybeSingle();
-
-    if (adminError) {
-      logger.error("Error assigning demo organization", {
-        error: adminError,
-        userId: user.id,
-        email: user.email,
-      });
-      return NextResponse.json(
-        {
-          error: "Error al asignar organización demo",
-          details: adminError.message,
-        },
-        { status: 500 },
-      );
-    }
-
-    if (!adminUser) {
-      logger.error("Admin user not created after upsert", {
-        userId: user.id,
-        email: user.email,
-      });
-      return NextResponse.json(
-        {
-          error: "Error al crear registro de usuario",
-          details: "No se pudo crear el registro de administrador",
-        },
-        { status: 500 },
-      );
-    }
-
-    // Crear acceso de super_admin (branch_id = null) para acceso global a todas las sucursales
-    // Primero eliminar cualquier acceso existente
-    await supabaseServiceRole
-      .from("admin_branch_access")
-      .delete()
-      .eq("admin_user_id", user.id);
-
-    // Crear acceso de super_admin con branch_id = null
-    const { error: accessError } = await supabaseServiceRole
-      .from("admin_branch_access")
-      .insert({
-        admin_user_id: user.id,
-        branch_id: null, // null = acceso global a todas las sucursales (super_admin)
-        role: "manager",
-        is_primary: true,
-      });
-
-    if (accessError) {
-      logger.warn(
-        "Error creating super admin branch access (non-critical)",
-        accessError,
-      );
-      // No crítico, pero el usuario podría no tener acceso global
-    }
-
-    logger.info("Demo organization assigned successfully", {
+    logger.info("Demo organization created and assigned", {
       userId: user.id,
-      organizationId: DEMO_ORG_ID,
+      organizationId: newOrgId,
     });
 
     return NextResponse.json({
       success: true,
-      organizationId: DEMO_ORG_ID,
+      organizationId: newOrgId,
       organization: {
-        id: demoOrg.id,
-        name: demoOrg.name,
+        id: demoOrg?.id ?? newOrgId,
+        name: demoOrg?.name ?? "Óptica Demo",
       },
     });
   } catch (error) {

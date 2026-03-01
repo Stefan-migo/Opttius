@@ -13,7 +13,6 @@ import {
   Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { ToolCallDisplay } from "./ToolCallDisplay";
 
 interface MessageBubbleProps {
   role: "user" | "assistant" | "system" | "tool";
@@ -346,39 +345,24 @@ export function MessageBubble({
             </div>
 
             {(() => {
+              // Tool calls and reasoning are hidden from the user - only show final response.
+              // Log errors to console for debugging.
               const toolCallsArray = Array.isArray(toolCallsData)
                 ? toolCallsData
                 : toolCallsData
                   ? [toolCallsData]
                   : [];
-              const hasError = toolCallsArray.some((tc: any, index: number) => {
+              toolCallsArray.forEach((tc: any, index: number) => {
                 const result =
                   toolResultsData?.[tc.id] || toolResultsData?.[index];
-                return result && result.success === false;
+                if (result && result.success === false) {
+                  console.error(
+                    `Tool Execution Error [${tc.name}]:`,
+                    result.error || "Unknown error",
+                    result,
+                  );
+                }
               });
-
-              if (hasError) {
-                // Log the error to console as requested
-                toolCallsArray.forEach((tc: any, index: number) => {
-                  const result =
-                    toolResultsData?.[tc.id] || toolResultsData?.[index];
-                  if (result && result.success === false) {
-                    console.error(
-                      `Tool Execution Error [${tc.name}]:`,
-                      result.error || "Unknown error",
-                      result,
-                    );
-                  }
-                });
-
-                return (
-                  <ToolCallDisplay
-                    toolCalls={toolCallsArray}
-                    toolResults={toolResultsData}
-                    className="mt-4 border-t border-red-100 dark:border-red-900/30 pt-3"
-                  />
-                );
-              }
               return null;
             })()}
           </div>

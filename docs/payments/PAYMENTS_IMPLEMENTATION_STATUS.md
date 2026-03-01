@@ -47,30 +47,37 @@ El sistema de pagos de Opttius incluye 4 pasarelas de pago con integración comp
 
 **Estado:** 🟢 **COMPLETO - Producción Lista**
 
-| Componente | Archivo | Estado |
-|------------|--------|--------|
-| Gateway | [`src/lib/payments/mercadopago/gateway.ts`](src/lib/payments/mercadopago/gateway.ts) | ✅ |
-| Webhook Validator | [`src/lib/payments/mercadopago/webhook-validator.ts`](src/lib/payments/mercadopago/webhook-validator.ts) | ✅ |
-| API Routes | [`src/app/api/webhooks/mercadopago/`](src/app/api/webhooks/mercadopago/) | ✅ |
-| Testing | [`docs/payments/MERCADOPAGO_TESTING_GUIDE.md`](docs/payments/MERCADOPAGO_TESTING_GUIDE.md) | ✅ |
+| Componente        | Archivo                                                                                                  | Estado |
+| ----------------- | -------------------------------------------------------------------------------------------------------- | ------ |
+| Gateway           | [`src/lib/payments/mercadopago/gateway.ts`](src/lib/payments/mercadopago/gateway.ts)                     | ✅     |
+| Webhook Validator | [`src/lib/payments/mercadopago/webhook-validator.ts`](src/lib/payments/mercadopago/webhook-validator.ts) | ✅     |
+| API Routes        | [`src/app/api/webhooks/mercadopago/`](src/app/api/webhooks/mercadopago/)                                 | ✅     |
+| Testing           | [`docs/payments/MERCADOPAGO_TESTING_GUIDE.md`](docs/payments/MERCADOPAGO_TESTING_GUIDE.md)               | ✅     |
 
 **Features:**
+
 - ✅ Preference API para Checkout Pro
-- ✅ Payment SDK v2 para Checkout Bricks
+- ✅ Payment SDK v2 para Checkout Bricks (CardPayment embebido en /checkout)
 - ✅ Webhooks con topic + id
 - ✅ Sandbox y Producción
+
+**Desarrollo local:**
+
+- El checkout usa **CardPayment Brick** embebido (no redirige a MP). Funciona con `localhost`.
+- Para pruebas con **flujo redirect** o **webhook**: Mercado Pago no puede alcanzar `http://localhost`. Usar ngrok: `npm run tunnel` y configurar `NEXT_PUBLIC_BASE_URL=https://xxx.ngrok-free.app`. Sin HTTPS público, el webhook no se ejecutará y `auto_return` no aplicará.
 
 ### 2. NOWPayments (Criptomonedas)
 
 **Estado:** 🟢 **COMPLETO - Producción Lista**
 
-| Componente | Archivo | Estado |
-|------------|--------|--------|
-| Gateway | [`src/lib/payments/nowpayments/gateway.ts`](src/lib/payments/nowpayments/gateway.ts) | ✅ |
-| IPN Handler | [`src/app/api/webhooks/nowpayments/`](src/app/api/webhooks/nowpayments/) | ✅ |
-| Testing | [`docs/payments/NOWPAYMENTS_TESTING_SANDBOX_PASO_A_PASO.md`](docs/payments/NOWPAYMENTS_TESTING_SANDBOX_PASO_A_PASO.md) | ✅ |
+| Componente  | Archivo                                                                                                                | Estado |
+| ----------- | ---------------------------------------------------------------------------------------------------------------------- | ------ |
+| Gateway     | [`src/lib/payments/nowpayments/gateway.ts`](src/lib/payments/nowpayments/gateway.ts)                                   | ✅     |
+| IPN Handler | [`src/app/api/webhooks/nowpayments/`](src/app/api/webhooks/nowpayments/)                                               | ✅     |
+| Testing     | [`docs/payments/NOWPAYMENTS_TESTING_SANDBOX_PASO_A_PASO.md`](docs/payments/NOWPAYMENTS_TESTING_SANDBOX_PASO_A_PASO.md) | ✅     |
 
 **Criptomonedas Soportadas:**
+
 - Bitcoin (BTC)
 - Ethereum (ETH)
 - USDT (ERC-20, TRC-20)
@@ -80,13 +87,14 @@ El sistema de pagos de Opttius incluye 4 pasarelas de pago con integración comp
 
 **Estado:** 🟡 **PARCIAL - Necesita Testing**
 
-| Componente | Archivo | Estado |
-|------------|--------|--------|
-| Gateway | [`src/lib/payments/flow/gateway.ts`](src/lib/payments/flow/gateway.ts) | ✅ |
-| Webhook | [`src/app/api/webhooks/flow/`](src/app/api/webhooks/flow/) | ✅ |
-| Testing | ⚠️ Pendiente | ⏳ |
+| Componente | Archivo                                                                | Estado |
+| ---------- | ---------------------------------------------------------------------- | ------ |
+| Gateway    | [`src/lib/payments/flow/gateway.ts`](src/lib/payments/flow/gateway.ts) | ✅     |
+| Webhook    | [`src/app/api/webhooks/flow/`](src/app/api/webhooks/flow/)             | ✅     |
+| Testing    | ⚠️ Pendiente                                                           | ⏳     |
 
 **Features:**
+
 - ✅ Payment Create
 - ✅ Status Mapping
 - ⚠️ Testing completo pendiente
@@ -95,13 +103,13 @@ El sistema de pagos de Opttius incluye 4 pasarelas de pago con integración comp
 
 **Estado:** 🟡 **PARCIAL - Necesita Testing**
 
-| Componente | Archivo | Estado |
-|------------|--------|--------|
-| Gateway | [`src/lib/payments/paypal/gateway.ts`](src/lib/payments/paypal/gateway.ts) | ✅ |
-| OAuth | ✅ | ✅ |
-| Orders API v2 | ✅ | ✅ |
-| Webhooks | [`src/app/api/webhooks/paypal/`](src/app/api/webhooks/paypal/) | ✅ |
-| Testing | ⚠️ Pendiente | ⏳ |
+| Componente    | Archivo                                                                    | Estado |
+| ------------- | -------------------------------------------------------------------------- | ------ |
+| Gateway       | [`src/lib/payments/paypal/gateway.ts`](src/lib/payments/paypal/gateway.ts) | ✅     |
+| OAuth         | ✅                                                                         | ✅     |
+| Orders API v2 | ✅                                                                         | ✅     |
+| Webhooks      | [`src/app/api/webhooks/paypal/`](src/app/api/webhooks/paypal/)             | ✅     |
+| Testing       | ⚠️ Pendiente                                                               | ⏳     |
 
 ---
 
@@ -109,31 +117,31 @@ El sistema de pagos de Opttius incluye 4 pasarelas de pago con integración comp
 
 ### Core de Pagos
 
-| Archivo | Descripción |
-|---------|-------------|
-| [`src/lib/payments/index.ts`](src/lib/payments/index.ts) | PaymentGatewayFactory |
-| [`src/lib/payments/interfaces.ts`](src/lib/payments/interfaces.ts) | IPaymentGateway |
-| [`src/lib/payments/services/payment-service.ts`](src/lib/payments/services/payment-service.ts) | Lógica de negocio |
-| [`src/types/payment.ts`](src/types/payment.ts) | Tipos TypeScript |
+| Archivo                                                                                        | Descripción           |
+| ---------------------------------------------------------------------------------------------- | --------------------- |
+| [`src/lib/payments/index.ts`](src/lib/payments/index.ts)                                       | PaymentGatewayFactory |
+| [`src/lib/payments/interfaces.ts`](src/lib/payments/interfaces.ts)                             | IPaymentGateway       |
+| [`src/lib/payments/services/payment-service.ts`](src/lib/payments/services/payment-service.ts) | Lógica de negocio     |
+| [`src/types/payment.ts`](src/types/payment.ts)                                                 | Tipos TypeScript      |
 
 ### Gateways
 
-| Archivo | Descripción |
-|---------|-------------|
+| Archivo                                                                              | Descripción  |
+| ------------------------------------------------------------------------------------ | ------------ |
 | [`src/lib/payments/mercadopago/gateway.ts`](src/lib/payments/mercadopago/gateway.ts) | Mercado Pago |
-| [`src/lib/payments/nowpayments/gateway.ts`](src/lib/payments/nowpayments/gateway.ts) | NOWPayments |
-| [`src/lib/payments/flow/gateway.ts`](src/lib/payments/flow/gateway.ts) | Flow Chile |
-| [`src/lib/payments/paypal/gateway.ts`](src/lib/payments/paypal/gateway.ts) | PayPal |
+| [`src/lib/payments/nowpayments/gateway.ts`](src/lib/payments/nowpayments/gateway.ts) | NOWPayments  |
+| [`src/lib/payments/flow/gateway.ts`](src/lib/payments/flow/gateway.ts)               | Flow Chile   |
+| [`src/lib/payments/paypal/gateway.ts`](src/lib/payments/paypal/gateway.ts)           | PayPal       |
 
 ### API Routes
 
-| Endpoint | Descripción |
-|----------|-------------|
+| Endpoint                            | Descripción           |
+| ----------------------------------- | --------------------- |
 | `/api/admin/payments/create-intent` | Crear intento de pago |
-| `/api/webhooks/mercadopago` | Webhook MP |
-| `/api/webhooks/nowpayments` | Webhook Crypto |
-| `/api/webhooks/flow` | Webhook Flow |
-| `/api/webhooks/paypal` | Webhook PayPal |
+| `/api/webhooks/mercadopago`         | Webhook MP            |
+| `/api/webhooks/nowpayments`         | Webhook Crypto        |
+| `/api/webhooks/flow`                | Webhook Flow          |
+| `/api/webhooks/paypal`              | Webhook PayPal        |
 
 ---
 
@@ -141,36 +149,36 @@ El sistema de pagos de Opttius incluye 4 pasarelas de pago con integración comp
 
 ### Cobertura de Tests
 
-| Componente | Unit Tests | Integration Tests | Estado |
-|------------|------------|-------------------|--------|
-| Mercado Pago | ✅ | ✅ | Completo |
-| NOWPayments | ✅ | ✅ | Completo |
-| Flow | ✅ | ⚠️ | Parcial |
-| PayPal | ✅ | ⚠️ | Parcial |
-| Payment Service | ✅ | ✅ | Completo |
+| Componente      | Unit Tests | Integration Tests | Estado   |
+| --------------- | ---------- | ----------------- | -------- |
+| Mercado Pago    | ✅         | ✅                | Completo |
+| NOWPayments     | ✅         | ✅                | Completo |
+| Flow            | ✅         | ⚠️                | Parcial  |
+| PayPal          | ✅         | ⚠️                | Parcial  |
+| Payment Service | ✅         | ✅                | Completo |
 
 ### Archivos de Test
 
-| Archivo | Tests |
-|---------|-------|
-| `src/__tests__/unit/lib/payments/flow-gateway.test.ts` | Flow unit tests |
-| `src/__tests__/unit/lib/payments/paypal-gateway.test.ts` | PayPal unit tests |
-| `src/__tests__/integration/api/webhooks/flow.test.ts` | Flow webhook tests |
-| `src/__tests__/integration/api/webhooks/paypal.test.ts` | PayPal webhook tests |
-| `src/__tests__/integration/api/payments.test.ts` | Payments API tests |
+| Archivo                                                  | Tests                |
+| -------------------------------------------------------- | -------------------- |
+| `src/__tests__/unit/lib/payments/flow-gateway.test.ts`   | Flow unit tests      |
+| `src/__tests__/unit/lib/payments/paypal-gateway.test.ts` | PayPal unit tests    |
+| `src/__tests__/integration/api/webhooks/flow.test.ts`    | Flow webhook tests   |
+| `src/__tests__/integration/api/webhooks/paypal.test.ts`  | PayPal webhook tests |
+| `src/__tests__/integration/api/payments.test.ts`         | Payments API tests   |
 
 ---
 
 ## 📊 Métricas de Implementación
 
-| Métrica | Valor |
-|---------|-------|
-| **Pasarelas** | 4 (100% implementadas) |
-| **Gateways funcionando** | 2 (50%) |
-| **Gateways pendientes testing** | 2 (50%) |
-| **Unit tests** | 50+ |
-| **Integration tests** | 30+ |
-| **Cobertura** | ~75% |
+| Métrica                         | Valor                  |
+| ------------------------------- | ---------------------- |
+| **Pasarelas**                   | 4 (100% implementadas) |
+| **Gateways funcionando**        | 2 (50%)                |
+| **Gateways pendientes testing** | 2 (50%)                |
+| **Unit tests**                  | 50+                    |
+| **Integration tests**           | 30+                    |
+| **Cobertura**                   | ~75%                   |
 
 ---
 
@@ -178,23 +186,23 @@ El sistema de pagos de Opttius incluye 4 pasarelas de pago con integración comp
 
 ### Características de Seguridad
 
-| Característica | Estado |
-|----------------|--------|
-| Validación de firma HMAC | ✅ |
-| Idempotencia de webhooks | ✅ |
-| Rate limiting | ✅ |
-| Logging completo | ✅ |
-| Validación de webhook signatures | ✅ |
+| Característica                   | Estado |
+| -------------------------------- | ------ |
+| Validación de firma HMAC         | ✅     |
+| Idempotencia de webhooks         | ✅     |
+| Rate limiting                    | ✅     |
+| Logging completo                 | ✅     |
+| Validación de webhook signatures | ✅     |
 
 ### Tipos de Eventos de Seguridad
 
 ```typescript
 // Security events para pagos
-"payment.fraud_suspected"
-"payment.webhook_tampered"
-"payment.signature_invalid"
-"payment.amount_anomaly"
-"payment.frequency_anomaly"
+"payment.fraud_suspected";
+"payment.webhook_tampered";
+"payment.signature_invalid";
+"payment.amount_anomaly";
+"payment.frequency_anomaly";
 ```
 
 ---

@@ -72,16 +72,28 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get user details for context
+    // Get user details for context (admin_users + profiles fallback for display name)
     const { data: userData } = await supabase
       .from("admin_users")
       .select("role, full_name")
       .eq("id", user.id)
       .single();
 
+    let userName =
+      userData?.full_name?.trim() || user.email?.split("@")[0] || "Usuario";
+
+    if (!userData?.full_name?.trim()) {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("full_name")
+        .eq("id", user.id)
+        .single();
+      if (profile?.full_name?.trim()) {
+        userName = profile.full_name.trim();
+      }
+    }
+
     const isSuperAdmin = userData?.role === "super_admin";
-    const userName =
-      userData?.full_name || user.email?.split("@")[0] || "Usuario";
 
     let currentSessionId = sessionId;
     let sessionTitle: string | null = null;
@@ -220,14 +232,34 @@ export async function POST(request: NextRequest) {
                 ? "\n\nIMPORTANTE SUCURSAL: El usuario tiene vista global. Para cualquier acción que afecte una sucursal (importar, modificar inventario, crear clientes, etc.), DEBES preguntar primero en qué sucursal realizarla."
                 : "";
 
-            const enhancedSystemPrompt = `${specializedIdentity}\n\n${section ? `ESTADO ACTUAL: El usuario está navegando en la sección de ${section === "dashboard" ? "Dashboard" : section === "inventory" ? "Inventario" : section === "clients" ? "Clientes" : section === "pos" ? "Punto de Venta" : "Analíticas"}.\n` : ""}\n${branchContext}${branchInstruction}\n${systemPrompt}`;
+            const today = new Date().toISOString().split("T")[0];
+            const dateContext = `FECHA ACTUAL: ${today} (YYYY-MM-DD). Usa SIEMPRE esta fecha para citas, reprogramaciones y cualquier referencia temporal. NO preguntes "para qué año" cuando el usuario pida crear o cambiar citas; asume el año actual (${today.split("-")[0]}).`;
+
+            const enhancedSystemPrompt = `${specializedIdentity}\n\n${dateContext}\n\n${section ? `ESTADO ACTUAL: El usuario está navegando en la sección de ${section === "dashboard" ? "Dashboard" : section === "inventory" ? "Inventario" : section === "clients" ? "Clientes" : section === "pos" ? "Punto de Venta" : "Analíticas"}.\n` : ""}\n${branchContext}${branchInstruction}\n${systemPrompt}`;
+
+            // Resolve organizationId: from admin_users, or from branch when Super Admin has branch selected
+            let resolvedOrgId = adminUser?.organization_id;
+            if (
+              !resolvedOrgId &&
+              currentBranchId &&
+              currentBranchId !== "global"
+            ) {
+              const { data: branchRow } = await serviceSupabase
+                .from("branches")
+                .select("organization_id")
+                .eq("id", currentBranchId)
+                .single();
+              if (branchRow?.organization_id) {
+                resolvedOrgId = branchRow.organization_id;
+              }
+            }
 
             const fallbackAgent = await createAgent({
               userId: user.id,
               provider: providerToTry,
               model: modelToTry,
               sessionId: currentSessionId,
-              organizationId: adminUser?.organization_id,
+              organizationId: resolvedOrgId,
               context: agentContext,
               config: {
                 ...baseConfig,

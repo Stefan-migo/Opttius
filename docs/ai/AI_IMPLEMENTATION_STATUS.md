@@ -130,6 +130,19 @@ Secciones integradas con `SmartContextWidget`:
 - ✅ Componente `AIUsageCard` integrado en `/admin/analytics`
 - ✅ Logging desde Agent y generator de insights
 
+### 7. Integración WhatsApp + Agente IA
+
+- ✅ **Webhook** `POST /api/webhooks/whatsapp` con verificación de firma Meta
+- ✅ **Context resolver** `wa_id` + `phone_number_id` → organization_id, branch_id, role (admin/customer)
+- ✅ **Session manager** sesiones por `(wa_id, organization_id)` en `chat_sessions`
+- ✅ **WhatsApp adapter** `processWhatsAppMessage()` reutiliza el mismo Agent con config por canal
+- ✅ **Prompts** `whatsapp` (admin) y `whatsapp_customer` (cliente) en `agent/config.ts`
+- ✅ **Tools cliente** getAppointmentStatus, getQuoteStatus, getOrderStatus, confirmAppointment
+- ✅ **OAuth Embedded** conexión de número por óptica vía `/api/admin/whatsapp/oauth-callback`
+- ✅ **Notificaciones B2B** recordatorios de cita, envío de presupuestos por WhatsApp
+
+**Archivos:** `src/lib/whatsapp/`, `src/lib/ai/agent/whatsapp-adapter.ts`, `src/app/api/webhooks/whatsapp/`
+
 ---
 
 ## 🗄️ Base de Datos
@@ -196,6 +209,15 @@ Campos principales:
 ---
 
 ## 📝 Documentación de Referencia
+
+**Documentos activos del módulo AI:**
+
+- `docs/ai/AI_MODULE_IMPROVEMENTS_2026-03.md` — Mejoras marzo 2026 (chat, tools, upload)
+- `docs/ai/AGENT_TOOLS_REFERENCE.md` — Referencia detallada de todas las tools
+- `docs/ai/AGENT_TOOLS_TEST_CHECKLIST.md` — Checklist de testing manual
+- `docs/ai/AGENT_TRAINING_ROADMAP.md` — Roadmap de entrenamiento del agente
+- `docs/AI_SYSTEM.md` — Arquitectura general del sistema de IA
+- `docs/WHATSAPP_AI_AGENT.md` — Módulo WhatsApp + Agente IA
 
 Esta consolidación reemplaza a los siguientes documentos que han sido movidos a `docs/archive/`:
 
@@ -289,6 +311,6 @@ El único archivo remainente es este documento (`AI_IMPLEMENTATION_STATUS.md`).
 
 ---
 
-**Última Actualización:** 2026-02-21  
-**Versión:** 2.1  
+**Última Actualización:** 2026-02-28  
+**Versión:** 2.2  
 **Estado del Sistema:** 🟢 OPERACIONAL

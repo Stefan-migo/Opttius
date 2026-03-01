@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { useChatSession } from "@/hooks/useChatSession";
 import { useChatConfig } from "@/hooks/useChatConfig";
 import { useBranch } from "@/hooks/useBranch";
@@ -19,6 +19,7 @@ interface UseChatMessagesReturn {
   currentStreamingContent: string;
   setMessages: React.Dispatch<React.SetStateAction<Message[]>>;
   sendMessage: (content: string, fileId?: string) => Promise<void>;
+  stopStreaming: () => void;
   regenerateMessage: (messageId: string) => Promise<void>;
   clearMessages: () => void;
   loadMessagesFromSession: (sessionId: string) => Promise<void>;
@@ -156,6 +157,7 @@ export function useChatMessages(currentSection: string | null) {
 
       abortControllerRef.current = new AbortController();
 
+      let accumulatedContent = "";
       try {
         const apiConfig = getConfigForAPI();
         const response = await fetch("/api/admin/chat", {
@@ -188,7 +190,6 @@ export function useChatMessages(currentSection: string | null) {
         }
 
         let buffer = "";
-        let accumulatedContent = "";
 
         while (true) {
           const { done, value } = await reader.read();
@@ -279,6 +280,24 @@ export function useChatMessages(currentSection: string | null) {
         }
       } catch (error: any) {
         if (error.name === "AbortError") {
+          // User stopped the response - finalize with partial content and re-enable input
+          setMessages((prev) => {
+            const updated = [...prev];
+            const index = updated.findIndex((m) => m.id === assistantMessageId);
+            if (index !== -1) {
+              const stoppedLabel = "_(Respuesta detenida)_";
+              updated[index] = {
+                ...updated[index],
+                content: accumulatedContent
+                  ? `${accumulatedContent}\n\n${stoppedLabel}`
+                  : stoppedLabel,
+              };
+            }
+            return updated;
+          });
+          setCurrentStreamingContent("");
+          setIsStreaming(false);
+          streamingMessageIdRef.current = null;
           return;
         }
 
@@ -341,10 +360,14 @@ export function useChatMessages(currentSection: string | null) {
     setMessages([]);
   }, []);
 
-  // Sync streaming content to messages
-  const lastStreamingContentRef = useRef("");
-  if (currentStreamingContent !== lastStreamingContentRef.current) {
-    lastStreamingContentRef.current = currentStreamingContent;
+  const stopStreaming = useCallback(() => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+  }, []);
+
+  // Sync streaming content to messages (in useEffect to avoid setState during render)
+  useEffect(() => {
     if (
       isStreaming &&
       currentStreamingContent &&
@@ -364,7 +387,7 @@ export function useChatMessages(currentSection: string | null) {
         return updated;
       });
     }
-  }
+  }, [isStreaming, currentStreamingContent]);
 
   return {
     messages,
@@ -372,6 +395,7 @@ export function useChatMessages(currentSection: string | null) {
     currentStreamingContent,
     setMessages,
     sendMessage,
+    stopStreaming,
     regenerateMessage,
     clearMessages,
     loadMessagesFromSession,

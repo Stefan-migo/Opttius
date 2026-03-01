@@ -1,40 +1,69 @@
 import { z } from "zod";
 import type { ToolDefinition, ToolResult } from "./types";
+import { resolveOpticalTicketByNumber } from "./resolvers";
 
+// Optical internal support uses: open, assigned, in_progress, waiting_customer, resolved, closed
 const getTicketsSchema = z.object({
   status: z
-    .enum(["open", "in_progress", "pending_customer", "resolved", "closed"])
+    .enum([
+      "open",
+      "assigned",
+      "in_progress",
+      "waiting_customer",
+      "resolved",
+      "closed",
+    ])
     .optional(),
   priority: z.enum(["low", "medium", "high", "urgent"]).optional(),
+  branchName: z
+    .string()
+    .optional()
+    .describe("Sucursal por nombre (ej. Casa Matriz)"),
   limit: z.number().default(20),
 });
 
-const getTicketByIdSchema = z.object({
-  ticketId: z.string().uuid(),
-});
+const ticketIdOrNumberSchema = z
+  .object({
+    ticketId: z.string().uuid().optional(),
+    ticketNumber: z.string().optional(),
+  })
+  .refine((d) => d.ticketId || d.ticketNumber, {
+    message: "Provide ticketId or ticketNumber",
+  });
 
-const updateTicketStatusSchema = z.object({
-  ticketId: z.string().uuid(),
-  status: z.enum([
-    "open",
-    "in_progress",
-    "pending_customer",
-    "resolved",
-    "closed",
-  ]),
-});
+const updateTicketStatusSchema = z
+  .object({
+    ticketId: z.string().uuid().optional(),
+    ticketNumber: z.string().optional(),
+    status: z.enum([
+      "open",
+      "assigned",
+      "in_progress",
+      "waiting_customer",
+      "resolved",
+      "closed",
+    ]),
+  })
+  .refine((d) => d.ticketId || d.ticketNumber, {
+    message: "Provide ticketId or ticketNumber",
+  });
 
-const createTicketResponseSchema = z.object({
-  ticketId: z.string().uuid(),
-  message: z.string().min(1),
-  isInternal: z.boolean().default(false),
-});
+const createTicketResponseSchema = z
+  .object({
+    ticketId: z.string().uuid().optional(),
+    ticketNumber: z.string().optional(),
+    message: z.string().min(1),
+    isInternal: z.boolean().default(false),
+  })
+  .refine((d) => d.ticketId || d.ticketNumber, {
+    message: "Provide ticketId or ticketNumber",
+  });
 
 export const supportTools: ToolDefinition[] = [
   {
     name: "getTickets",
     description:
-      "Get list of support tickets with optional filters for status and priority.",
+      "Obtener lista de tickets de incidentes (registro de problemas con clientes). Filtra por sucursal según la sucursal seleccionada del usuario. Super Admin en vista global puede ver todos.",
     category: "support",
     parameters: {
       type: "object",
@@ -43,13 +72,19 @@ export const supportTools: ToolDefinition[] = [
           type: "string",
           enum: [
             "open",
+            "assigned",
             "in_progress",
-            "pending_customer",
+            "waiting_customer",
             "resolved",
             "closed",
           ],
         },
         priority: { type: "string", enum: ["low", "medium", "high", "urgent"] },
+        branchName: {
+          type: "string",
+          description:
+            "Nombre de sucursal (ej. Casa Matriz). Si no se indica, usa la sucursal del contexto.",
+        },
         limit: { type: "number", default: 20 },
       },
     },
@@ -57,7 +92,7 @@ export const supportTools: ToolDefinition[] = [
     execute: async (params, context): Promise<ToolResult> => {
       try {
         const validated = getTicketsSchema.parse(params);
-        const { supabase, organizationId } = context;
+        const { supabase, organizationId, currentBranchId, userData } = context;
 
         if (!organizationId) {
           return {
@@ -66,11 +101,43 @@ export const supportTools: ToolDefinition[] = [
           };
         }
 
+        let branchIdToFilter: string | null = null;
+        if (validated.branchName) {
+          const { resolveBranchByName } = await import("./resolvers");
+          branchIdToFilter = await resolveBranchByName(
+            supabase,
+            organizationId,
+            validated.branchName,
+          );
+          if (!branchIdToFilter) {
+            return {
+              success: false,
+              error: `Sucursal "${validated.branchName}" no encontrada`,
+            };
+          }
+        } else if (currentBranchId && currentBranchId !== "global") {
+          branchIdToFilter = currentBranchId;
+        }
+        // Si branchIdToFilter es null: Super Admin en vista global ve todas las sucursales
+
+        if (!branchIdToFilter && !userData?.isSuperAdmin) {
+          return {
+            success: false,
+            error:
+              "Debe seleccionar una sucursal para consultar tickets de incidentes",
+          };
+        }
+
         let query = supabase
-          .from("support_tickets")
+          .from("optical_internal_support_tickets")
           .select("*")
+          .eq("organization_id", organizationId)
           .order("created_at", { ascending: false })
           .limit(validated.limit);
+
+        if (branchIdToFilter) {
+          query = query.eq("branch_id", branchIdToFilter);
+        }
 
         if (validated.status) {
           query = query.eq("status", validated.status);
@@ -91,7 +158,7 @@ export const supportTools: ToolDefinition[] = [
           data: {
             tickets: data || [],
           },
-          message: `Found ${data?.length || 0} support tickets`,
+          message: `Encontrados ${data?.length || 0} tickets de incidentes`,
         };
       } catch (error: any) {
         return {
@@ -104,20 +171,26 @@ export const supportTools: ToolDefinition[] = [
   {
     name: "getTicketById",
     description:
-      "Get detailed information about a specific support ticket including messages.",
+      "Obtener detalle de un ticket de incidentes. Usar ticketNumber (ej. OPT-20250128-0001) visible en la UI o ticketId. Filtra por sucursal del contexto.",
     category: "support",
     parameters: {
       type: "object",
       properties: {
-        ticketId: { type: "string", description: "Ticket UUID" },
+        ticketId: {
+          type: "string",
+          description: "Ticket UUID (opcional si se proporciona ticketNumber)",
+        },
+        ticketNumber: {
+          type: "string",
+          description: "Número de ticket visible en UI (ej. OPT-20250128-0001)",
+        },
       },
-      required: ["ticketId"],
     },
-    zodSchema: getTicketByIdSchema,
+    zodSchema: ticketIdOrNumberSchema,
     execute: async (params, context): Promise<ToolResult> => {
       try {
-        const validated = getTicketByIdSchema.parse(params);
-        const { supabase, organizationId } = context;
+        const validated = ticketIdOrNumberSchema.parse(params);
+        const { supabase, organizationId, currentBranchId } = context;
 
         if (!organizationId) {
           return {
@@ -126,20 +199,50 @@ export const supportTools: ToolDefinition[] = [
           };
         }
 
+        let ticketId = validated.ticketId;
+        if (!ticketId && validated.ticketNumber) {
+          const branchId =
+            currentBranchId && currentBranchId !== "global"
+              ? currentBranchId
+              : undefined;
+          ticketId =
+            (await resolveOpticalTicketByNumber(
+              supabase,
+              validated.ticketNumber,
+              organizationId,
+              branchId,
+            )) ?? undefined;
+          if (!ticketId) {
+            return {
+              success: false,
+              error: `Ticket con número "${validated.ticketNumber}" no encontrado`,
+            };
+          }
+        } else if (!ticketId) {
+          return {
+            success: false,
+            error: "Proporciona ticketId o ticketNumber",
+          };
+        }
+
         const { data: ticket, error: ticketError } = await supabase
-          .from("support_tickets")
+          .from("optical_internal_support_tickets")
           .select("*")
-          .eq("id", validated.ticketId)
+          .eq("id", ticketId)
+          .eq("organization_id", organizationId)
           .single();
 
-        if (ticketError) {
-          return { success: false, error: ticketError.message };
+        if (ticketError || !ticket) {
+          return {
+            success: false,
+            error: ticketError?.message || "Ticket no encontrado",
+          };
         }
 
         const { data: messages, error: messagesError } = await supabase
-          .from("support_messages")
+          .from("optical_internal_support_messages")
           .select("*")
-          .eq("ticket_id", validated.ticketId)
+          .eq("ticket_id", ticketId)
           .order("created_at", { ascending: true });
 
         if (messagesError) {
@@ -152,7 +255,7 @@ export const supportTools: ToolDefinition[] = [
             ticket,
             messages: messages || [],
           },
-          message: `Retrieved ticket ${ticket.ticket_number}`,
+          message: `Ticket ${ticket.ticket_number} obtenido`,
         };
       } catch (error: any) {
         return {
@@ -164,30 +267,39 @@ export const supportTools: ToolDefinition[] = [
   },
   {
     name: "updateTicketStatus",
-    description: "Update the status of a support ticket.",
+    description:
+      "Actualizar estado de un ticket de incidentes. Usar ticketNumber (visible en UI) o ticketId. Respeta la sucursal del contexto.",
     category: "support",
     parameters: {
       type: "object",
       properties: {
-        ticketId: { type: "string", description: "Ticket UUID" },
+        ticketId: {
+          type: "string",
+          description: "Ticket UUID (opcional si se proporciona ticketNumber)",
+        },
+        ticketNumber: {
+          type: "string",
+          description: "Número de ticket visible en UI",
+        },
         status: {
           type: "string",
           enum: [
             "open",
+            "assigned",
             "in_progress",
-            "pending_customer",
+            "waiting_customer",
             "resolved",
             "closed",
           ],
         },
       },
-      required: ["ticketId", "status"],
+      required: ["status"],
     },
     zodSchema: updateTicketStatusSchema,
     execute: async (params, context): Promise<ToolResult> => {
       try {
         const validated = updateTicketStatusSchema.parse(params);
-        const { supabase, organizationId } = context;
+        const { supabase, organizationId, currentBranchId } = context;
 
         if (!organizationId) {
           return {
@@ -196,20 +308,47 @@ export const supportTools: ToolDefinition[] = [
           };
         }
 
-        const updateData: any = {
+        let ticketId = validated.ticketId;
+        if (!ticketId && validated.ticketNumber) {
+          const branchId =
+            currentBranchId && currentBranchId !== "global"
+              ? currentBranchId
+              : undefined;
+          ticketId =
+            (await resolveOpticalTicketByNumber(
+              supabase,
+              validated.ticketNumber,
+              organizationId,
+              branchId,
+            )) ?? undefined;
+          if (!ticketId) {
+            return {
+              success: false,
+              error: `Ticket con número "${validated.ticketNumber}" no encontrado`,
+            };
+          }
+        } else if (!ticketId) {
+          return {
+            success: false,
+            error: "Proporciona ticketId o ticketNumber",
+          };
+        }
+
+        const updateData: Record<string, unknown> = {
           status: validated.status,
           updated_at: new Date().toISOString(),
         };
 
         if (validated.status === "resolved" || validated.status === "closed") {
-          updateData.resolved_at = new Date().toISOString();
-          updateData.resolved_by = context.userId;
+          (updateData as any).resolved_at = new Date().toISOString();
+          (updateData as any).resolved_by = context.userId;
         }
 
         const { data, error } = await supabase
-          .from("support_tickets")
+          .from("optical_internal_support_tickets")
           .update(updateData)
-          .eq("id", validated.ticketId)
+          .eq("id", ticketId)
+          .eq("organization_id", organizationId)
           .select()
           .single();
 
@@ -220,7 +359,7 @@ export const supportTools: ToolDefinition[] = [
         return {
           success: true,
           data,
-          message: `Ticket status updated to ${validated.status}`,
+          message: `Estado del ticket actualizado a ${validated.status}`,
         };
       } catch (error: any) {
         return {
@@ -232,26 +371,34 @@ export const supportTools: ToolDefinition[] = [
   },
   {
     name: "createTicketResponse",
-    description: "Add a response message to a support ticket.",
+    description:
+      "Agregar respuesta o nota a un ticket de incidentes. Usar ticketNumber (visible en UI) o ticketId. Respeta la sucursal del contexto.",
     category: "support",
     parameters: {
       type: "object",
       properties: {
-        ticketId: { type: "string", description: "Ticket UUID" },
-        message: { type: "string", description: "Response message" },
+        ticketId: {
+          type: "string",
+          description: "Ticket UUID (opcional si se proporciona ticketNumber)",
+        },
+        ticketNumber: {
+          type: "string",
+          description: "Número de ticket visible en UI",
+        },
+        message: { type: "string", description: "Mensaje de respuesta" },
         isInternal: {
           type: "boolean",
           default: false,
-          description: "Mark as internal note",
+          description: "Marcar como nota interna",
         },
       },
-      required: ["ticketId", "message"],
+      required: ["message"],
     },
     zodSchema: createTicketResponseSchema,
     execute: async (params, context): Promise<ToolResult> => {
       try {
         const validated = createTicketResponseSchema.parse(params);
-        const { supabase, organizationId } = context;
+        const { supabase, organizationId, currentBranchId } = context;
 
         if (!organizationId) {
           return {
@@ -260,35 +407,67 @@ export const supportTools: ToolDefinition[] = [
           };
         }
 
-        // Verify ticket ownership first
+        let ticketId = validated.ticketId;
+        if (!ticketId && validated.ticketNumber) {
+          const branchId =
+            currentBranchId && currentBranchId !== "global"
+              ? currentBranchId
+              : undefined;
+          ticketId =
+            (await resolveOpticalTicketByNumber(
+              supabase,
+              validated.ticketNumber,
+              organizationId,
+              branchId,
+            )) ?? undefined;
+          if (!ticketId) {
+            return {
+              success: false,
+              error: `Ticket con número "${validated.ticketNumber}" no encontrado`,
+            };
+          }
+        } else if (!ticketId) {
+          return {
+            success: false,
+            error: "Proporciona ticketId o ticketNumber",
+          };
+        }
+
         const { data: ticket } = await supabase
-          .from("support_tickets")
+          .from("optical_internal_support_tickets")
           .select("id")
-          .eq("id", validated.ticketId)
+          .eq("id", ticketId)
+          .eq("organization_id", organizationId)
           .single();
 
         if (!ticket) {
-          return { success: false, error: "Ticket not found or access denied" };
+          return {
+            success: false,
+            error: "Ticket no encontrado o sin acceso",
+          };
         }
 
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("first_name, last_name, email")
+        const { data: adminUser } = await supabase
+          .from("admin_users")
+          .select("email, role")
           .eq("id", context.userId)
           .single();
 
-        const { data: message, error: messageError } = await supabase
-          .from("support_messages")
+        const senderName = adminUser?.email?.split("@")[0] || "Usuario";
+        const senderEmail = adminUser?.email || "";
+        const senderRole = adminUser?.role || "admin";
+
+        const { data: newMessage, error: messageError } = await supabase
+          .from("optical_internal_support_messages")
           .insert({
-            ticket_id: validated.ticketId,
+            ticket_id: ticketId,
             message: validated.message,
             is_internal: validated.isInternal,
-            is_from_customer: false,
             sender_id: context.userId,
-            sender_name: profile
-              ? `${profile.first_name} ${profile.last_name || ""}`.trim()
-              : "Admin",
-            sender_email: profile?.email || "",
+            sender_name: senderName,
+            sender_email: senderEmail,
+            sender_role: senderRole,
+            message_type: validated.isInternal ? "note" : "message",
           })
           .select()
           .single();
@@ -298,17 +477,17 @@ export const supportTools: ToolDefinition[] = [
         }
 
         await supabase
-          .from("support_tickets")
+          .from("optical_internal_support_tickets")
           .update({
             last_response_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
           })
-          .eq("id", validated.ticketId);
+          .eq("id", ticketId);
 
         return {
           success: true,
-          data: message,
-          message: `Response added to ticket`,
+          data: newMessage,
+          message: "Respuesta agregada al ticket",
         };
       } catch (error: any) {
         return {

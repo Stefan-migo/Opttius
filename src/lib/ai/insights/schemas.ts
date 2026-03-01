@@ -105,6 +105,7 @@ export const InsightFeedbackSchema = z.object({
     .int()
     .min(1)
     .max(5, "Feedback score must be between 1 and 5"),
+  comment: z.string().max(500).optional(),
 });
 
 /**

@@ -8,8 +8,9 @@ import Image from "next/image";
 export function CTASection() {
   const router = useRouter();
 
-  const handleDemoClick = () => {
-    router.push("/onboarding/choice");
+  const handleExploreClick = () => {
+    const element = document.querySelector("#caracteristicas");
+    if (element) element.scrollIntoView({ behavior: "smooth" });
   };
 
   return (
@@ -43,18 +44,18 @@ export function CTASection() {
 
           <div className="flex flex-col sm:flex-row gap-8 w-full justify-center items-center">
             <Button
-              onClick={() => router.push("/signup")}
+              onClick={() => router.push("/solicitar-demo")}
               size="lg"
               className="bg-epoch-accent hover:bg-white text-epoch-surface rounded-xl h-16 px-16 text-xs font-sans font-semibold tracking-[0.2em] uppercase transition-all duration-500 w-full sm:w-auto shadow-2xl"
             >
-              Comenzar prueba gratis
+              Solicitar Demo
               <ArrowRight className="ml-3 h-4 w-4" />
             </Button>
             <button
-              onClick={handleDemoClick}
+              onClick={handleExploreClick}
               className="text-white/60 hover:text-white font-sans text-lg tracking-wide transition-all duration-300 border-b border-white/20 hover:border-white pb-1"
             >
-              Ver demo en vivo
+              Explorar la plataforma
             </button>
           </div>
 

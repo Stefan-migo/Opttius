@@ -925,8 +925,10 @@ export async function sendQuoteSent(
       customer_first_name: quote.customer_first_name || "Cliente",
       quote_number: quote.quote_number,
       quote_date: quote.date,
+      quote_expiry: quote.expiry_date,
       quote_expiry_date: quote.expiry_date,
       valid_days: quote.valid_days?.toString() || "30",
+      quote_items: itemsTable,
       items_table: itemsTable,
       subtotal: quote.subtotal || "",
       discount: quote.discount || "",
@@ -1081,6 +1083,9 @@ export async function sendAccountWelcomeEmail(
       }),
       customer_name: customer.name || "Cliente",
       customer_first_name: customer.first_name || "Cliente",
+      account_url:
+        customer.dashboard_url ||
+        `${process.env.NEXT_PUBLIC_APP_URL || "https://opttius.cl"}/mi-cuenta`,
       dashboard_url:
         customer.dashboard_url ||
         `${process.env.NEXT_PUBLIC_APP_URL || "https://opttius.cl"}/mi-cuenta`,

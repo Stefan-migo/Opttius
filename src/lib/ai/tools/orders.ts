@@ -1,5 +1,6 @@
 import { z } from "zod";
 import type { ToolDefinition, ToolResult } from "./types";
+import { resolveOrderByNumber } from "./resolvers";
 
 const getOrdersSchema = z.object({
   status: z
@@ -19,32 +20,14 @@ const getOrdersSchema = z.object({
   offset: z.number().default(0),
 });
 
-const getOrderByIdSchema = z.object({
-  orderId: z.string().uuid(),
-});
-
-const updateOrderStatusSchema = z.object({
-  orderId: z.string().uuid(),
-  status: z.enum([
-    "pending",
-    "processing",
-    "shipped",
-    "delivered",
-    "cancelled",
-    "refunded",
-  ]),
-});
-
-const updatePaymentStatusSchema = z.object({
-  orderId: z.string().uuid(),
-  paymentStatus: z.enum([
-    "pending",
-    "paid",
-    "failed",
-    "refunded",
-    "partially_refunded",
-  ]),
-});
+const getOrderByIdSchema = z
+  .object({
+    orderId: z.string().uuid().optional(),
+    orderNumber: z.string().optional(),
+  })
+  .refine((d) => d.orderId || d.orderNumber, {
+    message: "Provide orderId or orderNumber",
+  });
 
 const getPendingOrdersSchema = z.object({
   limit: z.number().default(20),
@@ -155,14 +138,21 @@ export const orderTools: ToolDefinition[] = [
   },
   {
     name: "getOrderById",
-    description: "Get detailed information about a specific order by ID.",
+    description:
+      "Get detailed information about a specific order by ID or order_number (visible in UI).",
     category: "orders",
     parameters: {
       type: "object",
       properties: {
-        orderId: { type: "string", description: "Order UUID" },
+        orderId: {
+          type: "string",
+          description: "Order UUID (optional if orderNumber provided)",
+        },
+        orderNumber: {
+          type: "string",
+          description: "Order number visible in UI (e.g. ORD-2025-001)",
+        },
       },
-      required: ["orderId"],
     },
     zodSchema: getOrderByIdSchema,
     execute: async (params, context): Promise<ToolResult> => {
@@ -174,6 +164,27 @@ export const orderTools: ToolDefinition[] = [
           return {
             success: false,
             error: "Organization ID is missing in context",
+          };
+        }
+
+        let orderId = validated.orderId;
+        if (!orderId && validated.orderNumber) {
+          orderId =
+            (await resolveOrderByNumber(
+              supabase,
+              organizationId,
+              validated.orderNumber,
+            )) ?? undefined;
+          if (!orderId) {
+            return {
+              success: false,
+              error: `Orden con número "${validated.orderNumber}" no encontrada`,
+            };
+          }
+        } else if (!orderId) {
+          return {
+            success: false,
+            error: "Proporciona orderId o orderNumber",
           };
         }
 
@@ -194,7 +205,7 @@ export const orderTools: ToolDefinition[] = [
 
           `,
           )
-          .eq("id", validated.orderId)
+          .eq("id", orderId)
           .eq("organization_id", organizationId)
           .single();
 
@@ -215,134 +226,6 @@ export const orderTools: ToolDefinition[] = [
         return {
           success: false,
           error: error.message || "Failed to get order",
-        };
-      }
-    },
-  },
-  {
-    name: "updateOrderStatus",
-    description:
-      "Update the status of an order (pending, processing, shipped, delivered, cancelled, refunded).",
-    category: "orders",
-    parameters: {
-      type: "object",
-      properties: {
-        orderId: { type: "string", description: "Order UUID" },
-        status: {
-          type: "string",
-          enum: [
-            "pending",
-            "processing",
-            "shipped",
-            "delivered",
-            "cancelled",
-            "refunded",
-          ],
-        },
-      },
-      required: ["orderId", "status"],
-    },
-    zodSchema: updateOrderStatusSchema,
-    execute: async (params, context): Promise<ToolResult> => {
-      try {
-        const validated = updateOrderStatusSchema.parse(params);
-        const { supabase, organizationId } = context;
-
-        if (!organizationId) {
-          return {
-            success: false,
-            error: "Organization ID is missing in context",
-          };
-        }
-
-        const updateData: any = {
-          status: validated.status,
-          updated_at: new Date().toISOString(),
-        };
-
-        if (validated.status === "shipped") {
-          updateData.shipped_at = new Date().toISOString();
-        } else if (validated.status === "delivered") {
-          updateData.delivered_at = new Date().toISOString();
-        }
-
-        const { data, error } = await supabase
-          .from("orders")
-          .update(updateData)
-          .eq("id", validated.orderId)
-          .eq("organization_id", organizationId)
-          .select()
-          .single();
-
-        if (error) {
-          return { success: false, error: error.message };
-        }
-
-        return {
-          success: true,
-          data,
-          message: `Order status updated to ${validated.status}`,
-        };
-      } catch (error: any) {
-        return {
-          success: false,
-          error: error.message || "Failed to update order status",
-        };
-      }
-    },
-  },
-  {
-    name: "updatePaymentStatus",
-    description: "Update the payment status of an order.",
-    category: "orders",
-    parameters: {
-      type: "object",
-      properties: {
-        orderId: { type: "string", description: "Order UUID" },
-        paymentStatus: {
-          type: "string",
-          enum: ["pending", "paid", "failed", "refunded", "partially_refunded"],
-        },
-      },
-      required: ["orderId", "paymentStatus"],
-    },
-    zodSchema: updatePaymentStatusSchema,
-    execute: async (params, context): Promise<ToolResult> => {
-      try {
-        const validated = updatePaymentStatusSchema.parse(params);
-        const { supabase, organizationId } = context;
-
-        if (!organizationId) {
-          return {
-            success: false,
-            error: "Organization ID is missing in context",
-          };
-        }
-
-        const { data, error } = await supabase
-          .from("orders")
-          .update({
-            payment_status: validated.paymentStatus,
-            updated_at: new Date().toISOString(),
-          })
-          .eq("id", validated.orderId)
-          .eq("organization_id", organizationId)
-          .select()
-          .single();
-
-        if (error) {
-          return { success: false, error: error.message };
-        }
-
-        return {
-          success: true,
-          data,
-          message: `Payment status updated to ${validated.paymentStatus}`,
-        };
-      } catch (error: any) {
-        return {
-          success: false,
-          error: error.message || "Failed to update payment status",
         };
       }
     },

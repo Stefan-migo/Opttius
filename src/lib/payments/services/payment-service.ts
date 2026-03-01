@@ -15,6 +15,7 @@ import type {
 import { appLogger as logger } from "@/lib/logger";
 import { EmailNotificationService } from "@/lib/email/notifications";
 import { createServiceRoleClient } from "@/utils/supabase/server";
+import { recordTierChange } from "@/lib/saas/tier-change-audit";
 
 export class PaymentService {
   private supabase: SupabaseClient;
@@ -322,6 +323,14 @@ export class PaymentService {
       }
     }
 
+    const { data: orgBefore } = await this.supabase
+      .from("organizations")
+      .select("subscription_tier")
+      .eq("id", organizationId)
+      .single();
+
+    const fromTier = (orgBefore?.subscription_tier as TierName) || "basic";
+
     const { error: orgError } = await this.supabase
       .from("organizations")
       .update({
@@ -337,6 +346,15 @@ export class PaymentService {
       });
       throw new Error(`Error updating organization tier: ${orgError.message}`);
     }
+
+    await recordTierChange({
+      organizationId,
+      fromTier,
+      toTier: tier,
+      changedByUserId: null,
+      source: "checkout",
+    });
+
     logger.info("Organization subscription_tier updated", {
       organizationId,
       tier,

@@ -613,7 +613,12 @@ export async function PUT(request: NextRequest) {
 
         let valueTypeToUse = existingConfig?.value_type ?? "string";
         if (!existingConfig) {
-          if (config_key.startsWith("mercadopago_")) {
+          if (
+            config_key === "signup_enabled" ||
+            config_key === "onboarding_stage_mode"
+          ) {
+            valueTypeToUse = "boolean";
+          } else if (config_key.startsWith("mercadopago_")) {
             if (
               config_key.includes("test_mode") ||
               config_key.includes("auto_return") ||
@@ -654,7 +659,13 @@ export async function PUT(request: NextRequest) {
             config_key.includes("secret") ||
             config_key.includes("key");
 
-          if (config_key.startsWith("mercadopago_")) {
+          if (
+            config_key === "signup_enabled" ||
+            config_key === "onboarding_stage_mode"
+          ) {
+            category = "onboarding";
+            valueType = "boolean";
+          } else if (config_key.startsWith("mercadopago_")) {
             category = "payments";
             if (
               config_key.includes("test_mode") ||

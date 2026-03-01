@@ -8,6 +8,8 @@ export interface Category {
   name: string;
   slug: string;
   description?: string;
+  sort_order?: number | null;
+  parent_id?: string | null;
 }
 
 const fetchCategories = async (): Promise<Category[]> => {

@@ -13,6 +13,7 @@ import { useChatSession } from "@/hooks/useChatSession";
 import { useChatConfig } from "@/hooks/useChatConfig";
 import { useBranch } from "@/hooks/useBranch";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 import { Sparkles } from "lucide-react";
 import { useChatMessages } from "./hooks/useChatMessages";
 import { useKeyboardShortcuts } from "./hooks/useKeyboardShortcuts";
@@ -86,6 +87,7 @@ export function ChatbotContent({
     currentStreamingContent,
     setMessages,
     sendMessage,
+    stopStreaming,
     regenerateMessage,
     clearMessages,
     loadMessagesFromSession,
@@ -188,9 +190,17 @@ export function ChatbotContent({
   });
 
   const handleExport = () => {
-    if (currentSession && messages.length > 0) {
-      setShowExport(true);
+    if (!currentSession) {
+      toast.info("Crea o selecciona una conversación para exportar");
+      return;
     }
+    if (messages.length === 0) {
+      toast.info("No hay mensajes para exportar en esta conversación");
+      return;
+    }
+    // Defer to next tick: Radix DropdownMenu closing interferes with Dialog opening
+    // (pointer-events stuck on body). See radix-ui/primitives#3317
+    setTimeout(() => setShowExport(true), 0);
   };
 
   const handleClear = () => {
@@ -319,6 +329,7 @@ export function ChatbotContent({
           )}
           <ChatInput
             onSend={(msg, fileId) => sendMessage(msg, fileId)}
+            onStop={stopStreaming}
             disabled={isStreaming}
             placeholder={
               currentSection

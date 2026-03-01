@@ -19,7 +19,7 @@ export async function POST(
       const { id } = await params;
 
       // Validate body
-      const { score } = await parseAndValidateBody(
+      const { score, comment } = await parseAndValidateBody(
         request,
         InsightFeedbackSchema,
       );
@@ -54,7 +54,11 @@ export async function POST(
       // Update insight with feedback
       const { data: insight, error: updateError } = await supabase
         .from("ai_insights")
-        .update({ feedback_score: score })
+        .update({
+          feedback_score: score,
+          feedback_comment: comment ?? null,
+          updated_at: new Date().toISOString(),
+        })
         .eq("id", id)
         .eq("organization_id", adminUser.organization_id)
         .select()

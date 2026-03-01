@@ -1,5 +1,6 @@
 import { z } from "zod";
 import type { ToolDefinition, ToolExecutionContext, ToolResult } from "./types";
+import { resolveBranchByName } from "./resolvers";
 
 const getProductsSchema = z.object({
   search: z.string().optional(),
@@ -64,7 +65,9 @@ const deleteProductSchema = z.object({
 const updateInventorySchema = z.object({
   productId: z.string().uuid(),
   quantity: z.number().min(0),
-  adjustmentType: z.enum(["set", "add", "subtract"]).default("set"),
+  adjustmentType: z.enum(["set", "add", "subtract"]).default("add"),
+  branchId: z.string().uuid().optional(),
+  branchName: z.string().optional(),
 });
 
 const getLowStockProductsSchema = z.object({
@@ -237,6 +240,12 @@ export const productTools: ToolDefinition[] = [
               option1,
               option2,
               option3
+            ),
+            product_branch_stock (
+              branch_id,
+              quantity,
+              low_stock_threshold,
+              branch:branches(id, name)
             )
           `,
           )
@@ -376,7 +385,7 @@ export const productTools: ToolDefinition[] = [
           compare_at_price: validated.compare_at_price || null,
           cost_price: validated.cost_price || null,
           category_id: validated.category_id || null,
-          inventory_quantity: validated.inventory_quantity || 0,
+          inventory_quantity: 0, // Legacy; stock lives in product_branch_stock only
           status: validated.status || "draft",
           featured_image: validated.featured_image || null,
           gallery: validated.gallery || [],
@@ -399,28 +408,51 @@ export const productTools: ToolDefinition[] = [
           return { success: false, error: error.message };
         }
 
-        // Initialize inventory in the default branch if quantity provided
-        if (validated.inventory_quantity > 0) {
+        const currentBranchId = context.currentBranchId;
+        const isGlobalMode = !currentBranchId || currentBranchId === "global";
+
+        if (isGlobalMode) {
+          // Global mode: add product to ALL branches with stock 0. Never set stock in global.
           try {
-            // Get default branch
-            const { data: branch } = await supabase
+            const { data: orgBranches } = await supabase
               .from("branches")
               .select("id")
-              .eq("organization_id", organizationId)
-              .limit(1)
-              .single();
+              .eq("organization_id", organizationId);
 
-            if (branch) {
-              await supabase.from("product_branch_stock").insert({
-                product_id: data.id,
-                branch_id: branch.id,
-                quantity: validated.inventory_quantity,
-                low_stock_threshold: 5,
-              });
+            if (orgBranches && orgBranches.length > 0) {
+              for (const branch of orgBranches) {
+                await supabase.from("product_branch_stock").upsert(
+                  {
+                    product_id: data.id,
+                    branch_id: branch.id,
+                    quantity: 0,
+                    reserved_quantity: 0,
+                    low_stock_threshold: 5,
+                  },
+                  { onConflict: "product_id,branch_id" },
+                );
+              }
             }
           } catch (e) {
+            console.error("Failed to initialize branch stock (global):", e);
+          }
+        } else {
+          // Branch mode: add stock only for the current branch
+          const qty =
+            validated.inventory_quantity > 0 ? validated.inventory_quantity : 0;
+          try {
+            await supabase.from("product_branch_stock").upsert(
+              {
+                product_id: data.id,
+                branch_id: currentBranchId,
+                quantity: qty,
+                reserved_quantity: 0,
+                low_stock_threshold: 5,
+              },
+              { onConflict: "product_id,branch_id" },
+            );
+          } catch (e) {
             console.error("Failed to initialize branch stock:", e);
-            // Don't fail the whole operation, just log
           }
         }
 
@@ -473,10 +505,14 @@ export const productTools: ToolDefinition[] = [
           };
         }
 
+        // Strip inventory_quantity - stock lives in product_branch_stock. Use updateInventory tool.
+        const { inventory_quantity: _inv, ...productUpdates } =
+          validated.updates as Record<string, unknown>;
+
         const { data, error } = await supabase
           .from("products")
           .update({
-            ...validated.updates,
+            ...productUpdates,
             updated_at: new Date().toISOString(),
           })
           .eq("id", validated.productId)
@@ -561,7 +597,7 @@ export const productTools: ToolDefinition[] = [
   {
     name: "updateInventory",
     description:
-      "Update product inventory quantity. Can set, add, or subtract from current stock.",
+      "Update product inventory quantity in a specific branch. Can set, add, or subtract from current stock. IMPORTANT: Before calling, use getProductById to check product_branch_stock. If product is in multiple branches and user is in global view, you MUST ask which branch or use branchName. Never assume a branch when in global mode.",
     category: "products",
     parameters: {
       type: "object",
@@ -571,8 +607,19 @@ export const productTools: ToolDefinition[] = [
         adjustmentType: {
           type: "string",
           enum: ["set", "add", "subtract"],
-          default: "set",
-          description: "How to adjust inventory",
+          default: "add",
+          description:
+            "How to adjust inventory (add = add to current, set = replace, subtract = remove)",
+        },
+        branchId: {
+          type: "string",
+          description:
+            "Branch UUID where to update stock (required when user is in global view)",
+        },
+        branchName: {
+          type: "string",
+          description:
+            "Branch name (alternative to branchId, e.g. 'Sucursal Centro')",
         },
       },
       required: ["productId", "quantity"],
@@ -605,26 +652,22 @@ export const productTools: ToolDefinition[] = [
           };
         }
 
-        let branchId = context.currentBranchId;
+        let branchId = validated.branchId ?? context.currentBranchId ?? null;
+
+        if (validated.branchName && !branchId) {
+          branchId = await resolveBranchByName(
+            supabase,
+            organizationId,
+            validated.branchName,
+          );
+        }
 
         if (!branchId || branchId === "global") {
-          // Get default branch for the organization if no specific branch is selected
-          const { data: branch, error: branchError } = await supabase
-            .from("branches")
-            .select("id")
-            .eq("organization_id", organizationId)
-            .limit(1)
-            .single();
-
-          if (branchError || !branch) {
-            // If no branch found, fallback to just updating products table (legacy)
-            // But warn
-            console.warn(
-              "No branch found for inventory update, falling back to legacy column",
-            );
-          } else {
-            branchId = branch.id;
-          }
+          return {
+            success: false,
+            error:
+              "Vista global activa: debes indicar en qué sucursal agregar las unidades. Usa branchName (ej. 'Sucursal Centro') o branchId. Primero consulta getProductById para ver en qué sucursales está el producto.",
+          };
         }
         let newQuantity = 0;
 
@@ -668,44 +711,18 @@ export const productTools: ToolDefinition[] = [
               error: "Failed to update branch stock: " + stockError.message,
             };
           }
-        } else {
-          // Fallback logic for legacy column if no branch
-          const { data: currentProduct } = await supabase
-            .from("products")
-            .select("inventory_quantity")
-            .eq("id", validated.productId)
-            .single();
-
-          const currentQty = currentProduct?.inventory_quantity || 0;
-          if (validated.adjustmentType === "set") {
-            newQuantity = validated.quantity;
-          } else if (validated.adjustmentType === "add") {
-            newQuantity = currentQty + validated.quantity;
-          } else if (validated.adjustmentType === "subtract") {
-            newQuantity = Math.max(0, currentQty - validated.quantity);
-          }
         }
 
-        // Also update legacy column for compatibility
-        const { data, error } = await supabase
-          .from("products")
-          .update({
-            inventory_quantity: newQuantity,
-            updated_at: new Date().toISOString(),
-          })
-          .eq("id", validated.productId)
-          .eq("organization_id", organizationId)
-          .select()
-          .single();
-
-        if (error) {
-          return { success: false, error: error.message };
-        }
-
+        // Stock lives ONLY in product_branch_stock. Do NOT update products.inventory_quantity
+        // (legacy column) - it would leak one branch's stock to global view and other branches.
         return {
           success: true,
-          data,
-          message: `Inventory updated to ${newQuantity} units`,
+          data: {
+            product_id: validated.productId,
+            branch_id: branchId,
+            quantity: newQuantity,
+          },
+          message: `Inventario actualizado a ${newQuantity} unidades en la sucursal indicada`,
         };
       } catch (error: any) {
         return {

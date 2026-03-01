@@ -3,17 +3,26 @@
 import { useState, KeyboardEvent, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { SendHorizonal, Sparkles, Command, Paperclip, X } from "lucide-react";
+import {
+  SendHorizonal,
+  Sparkles,
+  Command,
+  Paperclip,
+  X,
+  Square,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface ChatInputProps {
   onSend: (message: string, fileId?: string) => void;
+  onStop?: () => void;
   disabled?: boolean;
   placeholder?: string;
 }
 
 export function ChatInput({
   onSend,
+  onStop,
   disabled,
   placeholder = "Pregunta sobre Opttius...",
 }: ChatInputProps) {
@@ -145,19 +154,31 @@ export function ChatInput({
             rows={1}
             className="resize-none min-h-[44px] max-h-48 bg-transparent border-0 focus-visible:ring-0 focus-visible:ring-offset-0 px-4 py-3 text-[14.5px] leading-relaxed placeholder:text-slate-400 dark:placeholder:text-slate-500"
           />
-          <Button
-            onClick={handleSend}
-            disabled={disabled || (!message.trim() && !attachedFile)}
-            size="icon"
-            className={cn(
-              "shrink-0 rounded-xl w-10 h-10 transition-all duration-300",
-              message.trim()
-                ? "bg-primary text-white shadow-md shadow-primary/20 scale-100 opacity-100"
-                : "bg-slate-100 dark:bg-slate-800 text-slate-400 scale-90 opacity-50",
-            )}
-          >
-            <SendHorizonal className="w-5 h-5" />
-          </Button>
+          {disabled && onStop ? (
+            <Button
+              onClick={onStop}
+              variant="destructive"
+              size="icon"
+              className="shrink-0 rounded-xl w-10 h-10"
+              title="Detener respuesta"
+            >
+              <Square className="w-5 h-5 fill-current" />
+            </Button>
+          ) : (
+            <Button
+              onClick={handleSend}
+              disabled={disabled || (!message.trim() && !attachedFile)}
+              size="icon"
+              className={cn(
+                "shrink-0 rounded-xl w-10 h-10 transition-all duration-300",
+                message.trim()
+                  ? "bg-primary text-white shadow-md shadow-primary/20 scale-100 opacity-100"
+                  : "bg-slate-100 dark:bg-slate-800 text-slate-400 scale-90 opacity-50",
+              )}
+            >
+              <SendHorizonal className="w-5 h-5" />
+            </Button>
+          )}
         </div>
 
         <div className="flex items-center justify-between px-4 mt-2.5">

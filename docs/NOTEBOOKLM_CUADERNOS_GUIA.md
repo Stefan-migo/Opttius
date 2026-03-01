@@ -6,10 +6,15 @@ Esta guía explica cuándo usar cada cuaderno de NotebookLM según el tipo de co
 
 ## Resumen de cuadernos
 
-| Cuaderno                              | ID                                     | Fuentes | Propósito                                                    |
-| ------------------------------------- | -------------------------------------- | ------- | ------------------------------------------------------------ |
-| **Opttius - Cerebro**                 | `e071bebc-ce79-4b32-a040-61a6a9c331a3` | 50/50   | Documentación principal: sistemas, arquitectura, flujos core |
-| **Opttius - Documentación Extendida** | `17302d9d-7d70-4c8d-a774-49fbfca3c09d` | ~28/50  | Análisis, implementación, changelogs, guías técnicas         |
+| Cuaderno                              | ID                                     | Fuentes | Propósito                                                            |
+| ------------------------------------- | -------------------------------------- | ------- | -------------------------------------------------------------------- |
+| **Opttius - Cerebro**                 | `e071bebc-ce79-4b32-a040-61a6a9c331a3` | 50/50   | Documentación principal: sistemas, arquitectura, flujos core (lleno) |
+| **Opttius - Documentación Extendida** | `17302d9d-7d70-4c8d-a774-49fbfca3c09d` | ~44/50  | Análisis, implementación, changelogs, guías técnicas, docs nuevas    |
+| **Opttius - Docs Anexo**              | `19de09c1-37ae-4832-a17b-dd326c613ce3` | 50/50   | Overflow: docs que no caben en Extendido, referencias AI             |
+| **Opttius - Docs Anexo 2**            | `2084f3bf-70df-4dd4-a0b3-3cfe0d6c9cff` | 0/50    | Overflow adicional (SEO, marketing, etc.)                            |
+| **Opttius - Docs Anexo 3**            | `d2a862dc-a6de-46f2-bacc-c483d1f31b32` | 0/50    | Overflow adicional                                                   |
+| **Opttius - Docs Anexo 4**            | `2c8b8292-bc96-4697-84a3-801306784619` | 0/50    | Overflow adicional                                                   |
+| **Opttius - Docs Anexo 5**            | `f7d4d9c4-de38-4020-a069-e485aa64d792` | 0/50    | Overflow adicional                                                   |
 
 ---
 
@@ -54,6 +59,19 @@ Esta guía explica cuándo usar cada cuaderno de NotebookLM según el tipo de co
 
 ---
 
+### Usa el **Cuaderno Anexo** (o **Anexo 2**) cuando:
+
+| Situación                          | Ejemplo de consulta                             |
+| ---------------------------------- | ----------------------------------------------- |
+| **Docs que no caben en Extendido** | Referencias de tools del agente, checklists     |
+| **Overflow de sincronización**     | El sync añade aquí cuando Extendido está lleno  |
+| **Documentación AI detallada**     | AGENT_TOOLS_REFERENCE, AGENT_TRAINING_ROADMAP   |
+| **SEO, marketing, identidad**      | Estrategia SEO AIO, MARKETING_IDENTITY_STRATEGY |
+
+**Contenido:** Docs de overflow, referencias técnicas del agente IA, SEO, marketing. **Anexo 2** se usa cuando Anexo está lleno (50/50).
+
+---
+
 ## Flujo de decisión rápida
 
 ```
@@ -62,6 +80,9 @@ Esta guía explica cuándo usar cada cuaderno de NotebookLM según el tipo de co
 
 ¿Necesitas contexto histórico, implementación o guías técnicas?
     → Cuaderno Extendido
+
+¿Buscas referencias de tools del agente, SEO, marketing o docs de overflow?
+    → Cuaderno Anexo (o Anexo 2 si Anexo está lleno)
 
 ¿No estás seguro?
     → Empieza por el Cuaderno principal
@@ -75,15 +96,23 @@ Esta guía explica cuándo usar cada cuaderno de NotebookLM según el tipo de co
 # Verificar sesión
 nlm login --check
 
-# Listar fuentes del cuaderno principal
-nlm source list e071bebc-ce79-4b32-a040-61a6a9c331a3
+# Listar fuentes
+nlm source list e071bebc-ce79-4b32-a040-61a6a9c331a3   # Cerebro
+nlm source list 17302d9d-7d70-4c8d-a774-49fbfca3c09d   # Extendido
+nlm source list 19de09c1-37ae-4832-a17b-dd326c613ce3   # Anexo
+nlm source list 2084f3bf-70df-4dd4-a0b3-3cfe0d6c9cff   # Anexo 2
+nlm source list d2a862dc-a6de-46f2-bacc-c483d1f31b32   # Anexo 3
+nlm source list 2c8b8292-bc96-4697-84a3-801306784619   # Anexo 4
+nlm source list f7d4d9c4-de38-4020-a069-e485aa64d792   # Anexo 5
 
-# Listar fuentes del cuaderno extendido
-nlm source list 17302d9d-7d70-4c8d-a774-49fbfca3c09d
+# Sincronizar (fallback: Extendido → Anexo → Anexo 2-5)
+npm run notebooklm:sync
+npm run notebooklm:sync-extended
+npm run notebooklm:sync-anexo
 
-# Añadir fuente al cuaderno extendido
+# Añadir fuente manualmente a cualquier anexo
 export PYTHONIOENCODING=utf-8
-nlm source add 17302d9d-7d70-4c8d-a774-49fbfca3c09d --file docs/<archivo>.md --title "Título"
+nlm source add 2084f3bf-70df-4dd4-a0b3-3cfe0d6c9cff --file docs/<archivo>.md --title "Título"
 ```
 
 ---
@@ -95,26 +124,36 @@ Para simplificar los comandos:
 ```bash
 nlm alias set opttius-brain e071bebc-ce79-4b32-a040-61a6a9c331a3
 nlm alias set opttius-ext 17302d9d-7d70-4c8d-a774-49fbfca3c09d
+nlm alias set opttius-anexo 19de09c1-37ae-4832-a17b-dd326c613ce3
+nlm alias set opttius-anexo2 2084f3bf-70df-4dd4-a0b3-3cfe0d6c9cff
+nlm alias set opttius-anexo3 d2a862dc-a6de-46f2-bacc-c483d1f31b32
+nlm alias set opttius-anexo4 2c8b8292-bc96-4697-84a3-801306784619
+nlm alias set opttius-anexo5 f7d4d9c4-de38-4020-a069-e485aa64d792
 
 # Uso
 nlm source list opttius-brain
-nlm source add opttius-ext --file docs/archivo.md --title "Título"
+nlm source add opttius-anexo2 --file docs/archivo.md --title "Título"
 ```
 
 ---
 
-## Poblar el cuaderno extendido
+## Poblar los cuadernos
 
 Ejecuta tras `nlm login`:
 
 ```bash
+# Sync principal (Extendido + Anexo, Cerebro está lleno)
+npm run notebooklm:sync
+
+# Sync extendido (archive, implementación, análisis)
 npm run notebooklm:sync-extended
+
+# Sync anexo (referencias AI, overflow)
+npm run notebooklm:sync-anexo
 ```
 
-O directamente:
+- **notebooklm:sync** → Docs clave (Extendido → Anexo → Anexo 2-5)
+- **notebooklm:sync-extended** → ~38 fuentes: archive, implementación, análisis (mismo fallback)
+- **notebooklm:sync-anexo** → Referencias del agente IA, tools, roadmap (Anexo → Anexo 2-5)
 
-```bash
-bash scripts/sync-notebooklm-extended.sh
-```
-
-El script añade ~28 fuentes: archive, implementación, análisis, guías técnicas.
+**Capacidad total:** Cerebro (50) + Extendido (50) + Anexo (50) + Anexo 2-5 (50×4=200) = **400 fuentes**
