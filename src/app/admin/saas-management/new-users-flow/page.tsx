@@ -216,7 +216,10 @@ export default function NewUsersFlowPage() {
         setSelectedRequest(null);
         fetchData();
       } else {
-        toast.error(data.error ?? data.details ?? "Error al eliminar");
+        const msg = data.details
+          ? `${data.error ?? "Error"}: ${data.details}`
+          : (data.error ?? "Error al eliminar");
+        toast.error(msg);
       }
     } catch {
       toast.error("Error al eliminar");
