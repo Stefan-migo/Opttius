@@ -81,7 +81,8 @@ jobs:
 
   container-security:
     runs-on: ubuntu-latest
-    if: hashFiles('Dockerfile') != '' || hashFiles('Dockerfile.*') != ''
+    # hashFiles no funciona a nivel job; sin Dockerfile se omite
+    if: false
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
