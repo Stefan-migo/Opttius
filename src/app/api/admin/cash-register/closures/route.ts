@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient, createServiceRoleClient } from "@/utils/supabase/server";
-import { getBranchContext, addBranchFilter } from "@/lib/api/branch-middleware";
+import {
+  getBranchContext,
+  getFieldOperationFromRequest,
+  validateBranchAccess,
+} from "@/lib/api/branch-middleware";
 import { appLogger as logger } from "@/lib/logger";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
 
@@ -33,8 +37,34 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Get branch context
+    // Get branch context and optional operativo context
     const branchContext = await getBranchContext(request, user.id);
+    const fieldOperationId =
+      getFieldOperationFromRequest(request) ||
+      new URL(request.url).searchParams.get("field_operation_id");
+
+    let effectiveBranchId = branchContext.branchId;
+    if (fieldOperationId) {
+      const { data: fieldOp } = await supabaseServiceRole
+        .from("field_operations")
+        .select("id, branch_id")
+        .eq("id", fieldOperationId)
+        .single();
+      if (!fieldOp) {
+        return NextResponse.json({
+          closures: [],
+          pagination: { page: 1, limit: 50, total: 0, totalPages: 0 },
+        });
+      }
+      const hasAccess = await validateBranchAccess(user.id, fieldOp.branch_id);
+      if (!hasAccess) {
+        return NextResponse.json({
+          closures: [],
+          pagination: { page: 1, limit: 50, total: 0, totalPages: 0 },
+        });
+      }
+      effectiveBranchId = fieldOp.branch_id;
+    }
 
     // Get query params
     const { searchParams } = new URL(request.url);
@@ -57,8 +87,13 @@ export async function GET(request: NextRequest) {
       .order("closed_at", { ascending: false });
 
     // Apply branch filter
-    if (branchContext.branchId) {
-      query = query.eq("branch_id", branchContext.branchId);
+    if (effectiveBranchId) {
+      query = query.eq("branch_id", effectiveBranchId);
+      if (fieldOperationId) {
+        query = query.eq("field_operation_id", fieldOperationId);
+      } else {
+        query = query.is("field_operation_id", null);
+      }
     } else if (!branchContext.isSuperAdmin) {
       // Regular admin without branch - return empty
       return NextResponse.json({

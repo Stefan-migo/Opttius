@@ -16,6 +16,7 @@ import {
   MapPin,
 } from "lucide-react";
 import Image from "next/image";
+import { FeatureSlideDialog } from "./FeatureSlideDialog";
 
 /* Grid uniforme: 5 cols x 2 rows = 10 items. Orden por importancia percibida por el usuario. */
 const features = [
@@ -27,6 +28,7 @@ const features = [
       "Facturación ágil integrada al historial del paciente. Descuentos de laboratorio, pagos mixtos y sincronización de stock en tiempo real.",
     className: "bg-epoch-primary text-white",
     image: "/images/landing/pos.webp",
+    slidesFolder: "POS",
   },
   {
     icon: Users,
@@ -35,6 +37,7 @@ const features = [
       "Centraliza la salud visual y el historial comercial. Recetas, citas, presupuestos y órdenes de laboratorio sincronizados en una línea de tiempo perfecta.",
     className: "bg-white",
     image: "/images/landing/LamparaW.webp",
+    slidesFolder: "CRM",
   },
   {
     icon: Package,
@@ -44,6 +47,7 @@ const features = [
       "Control de armazones, lentes y accesorios con alertas de stock bajo. Movimientos, ajustes y valoración de inventario al día.",
     className: "bg-epoch-accent/10",
     image: "/images/landing/mesaW.webp",
+    slidesFolder: "Inventario",
   },
   {
     icon: FileText,
@@ -53,6 +57,7 @@ const features = [
       "Adiós a las llamadas al laboratorio. Monitoree el estado de cada trabajo (tallado, biselado, entrega) paso a paso en el sistema.",
     className: "bg-white",
     image: "/images/landing/laboratorio.webp",
+    slidesFolder: "WorkOrders",
   },
   {
     icon: Calendar,
@@ -62,6 +67,7 @@ const features = [
       "Reduzca el ausentismo con recordatorios automáticos por WhatsApp. Confirmaciones directas y reprogramación sin fricción.",
     className: "bg-white",
     image: "/images/landing/agenda.webp",
+    slidesFolder: "Citas",
   },
   {
     icon: MessageSquare,
@@ -71,6 +77,7 @@ const features = [
       "Un asistente que conoce tu negocio. Consulta stock, clientes, órdenes de trabajo y obtén recomendaciones ópticas. Disponible en el panel y por WhatsApp.",
     className: "bg-epoch-surface text-white",
     image: "/images/landing/asistente.webp",
+    slidesFolder: "AI",
   },
   {
     icon: BarChart3,
@@ -80,6 +87,7 @@ const features = [
       "Tome decisiones con datos reales. Visualice márgenes de ganancia, productos estrella y rendimiento por vendedor al instante.",
     className: "bg-white",
     image: "/images/landing/analytics.webp",
+    slidesFolder: "Analiticas",
   },
   {
     icon: Building2,
@@ -89,6 +97,7 @@ const features = [
       "Gestione una o diez sucursales desde un solo panel. Inventarios compartidos, reportes consolidados y permisos por ubicación.",
     className: "bg-epoch-accent/10",
     image: "/images/landing/multisucursal.webp",
+    slidesFolder: "Admin",
   },
   {
     icon: Briefcase,
@@ -98,6 +107,7 @@ const features = [
       "Convenios con empresas e instituciones. Copago, órdenes de compra, descuento por planilla y cobranza institucional.",
     className: "bg-white",
     comingSoon: true,
+    slidesFolder: "Convenios",
   },
   {
     icon: MapPin,
@@ -107,24 +117,45 @@ const features = [
       "Bodega móvil, registro masivo en empresa, receta digital en sitio y sincronización offline.",
     className: "bg-epoch-accent/10",
     comingSoon: true,
+    slidesFolder: "Operativos",
   },
 ];
 
 function FeatureCard({
   feature,
   index,
+  onOpenSlides,
 }: {
   feature: (typeof features)[number];
   index: number;
+  onOpenSlides?: () => void;
 }) {
   const [imageError, setImageError] = useState(false);
   const showImage = feature.image && !imageError;
 
   const isComingSoon = "comingSoon" in feature && feature.comingSoon;
+  const hasSlides = "slidesFolder" in feature && feature.slidesFolder;
+
+  const handleClick = () => {
+    if (hasSlides && onOpenSlides) onOpenSlides();
+  };
 
   return (
     <div
-      className={`group relative overflow-hidden rounded-xl p-6 sm:p-8 border border-epoch-primary/5 transition-all duration-700 flex flex-col justify-between hover:shadow-2xl hover:-translate-y-1 ${feature.className} ${isComingSoon ? "opacity-90" : ""}`}
+      role={hasSlides ? "button" : undefined}
+      tabIndex={hasSlides ? 0 : undefined}
+      onClick={hasSlides ? handleClick : undefined}
+      onKeyDown={
+        hasSlides
+          ? (e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                handleClick();
+              }
+            }
+          : undefined
+      }
+      className={`group relative overflow-hidden rounded-xl p-6 sm:p-8 border border-epoch-primary/5 transition-all duration-700 flex flex-col justify-between hover:shadow-2xl hover:-translate-y-1 ${feature.className} ${isComingSoon ? "opacity-90" : ""} ${hasSlides ? "cursor-pointer focus:outline-none focus:ring-2 focus:ring-epoch-accent focus:ring-offset-2" : ""}`}
     >
       {isComingSoon && (
         <div className="absolute top-4 right-4 z-20">
@@ -207,13 +238,25 @@ function FeatureCard({
         >
           {(index + 1).toString().padStart(2, "0")}
         </span>
-        <ArrowUpRight
-          className={`h-4 w-4 opacity-0 group-hover:opacity-100 transition-all duration-500 translate-y-2 group-hover:translate-y-0 ${
-            feature.className.includes("text-white")
-              ? "text-epoch-accent"
-              : "text-epoch-primary"
-          }`}
-        />
+        {hasSlides ? (
+          <span
+            className={`text-[9px] font-sans font-medium uppercase tracking-wider opacity-60 group-hover:opacity-100 transition-opacity ${
+              feature.className.includes("text-white")
+                ? "text-white"
+                : "text-epoch-primary"
+            }`}
+          >
+            Ver presentación
+          </span>
+        ) : (
+          <ArrowUpRight
+            className={`h-4 w-4 opacity-0 group-hover:opacity-100 transition-all duration-500 translate-y-2 group-hover:translate-y-0 ${
+              feature.className.includes("text-white")
+                ? "text-epoch-accent"
+                : "text-epoch-primary"
+            }`}
+          />
+        )}
       </div>
 
       <div className="absolute top-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-700">
@@ -224,6 +267,12 @@ function FeatureCard({
 }
 
 export function FeaturesSection() {
+  const [selectedFeatureIndex, setSelectedFeatureIndex] = useState<
+    number | null
+  >(null);
+  const selectedFeature =
+    selectedFeatureIndex !== null ? features[selectedFeatureIndex] : null;
+
   return (
     <section
       className="py-20 sm:py-32 bg-epoch-background relative"
@@ -254,10 +303,31 @@ export function FeaturesSection() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 lg:grid-rows-2 gap-4 auto-rows-[minmax(180px,auto)]">
           {features.map((feature, index) => (
-            <FeatureCard key={index} feature={feature} index={index} />
+            <FeatureCard
+              key={index}
+              feature={feature}
+              index={index}
+              onOpenSlides={
+                "slidesFolder" in feature
+                  ? () => setSelectedFeatureIndex(index)
+                  : undefined
+              }
+            />
           ))}
         </div>
       </div>
+
+      {selectedFeature && "slidesFolder" in selectedFeature && (
+        <FeatureSlideDialog
+          open={selectedFeatureIndex !== null}
+          onOpenChange={(open) => !open && setSelectedFeatureIndex(null)}
+          title={selectedFeature.title}
+          subtitle={
+            "subtitle" in selectedFeature ? selectedFeature.subtitle : undefined
+          }
+          slidesFolder={selectedFeature.slidesFolder}
+        />
+      )}
     </section>
   );
 }

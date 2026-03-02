@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
 import { createServiceRoleClient } from "@/utils/supabase/server";
-import { getBranchContext } from "@/lib/api/branch-middleware";
+import {
+  getBranchContext,
+  getFieldOperationFromRequest,
+  validateBranchAccess,
+} from "@/lib/api/branch-middleware";
 import { appLogger as logger } from "@/lib/logger";
 import {
   createApiSuccessResponse,
@@ -13,6 +17,7 @@ import { z } from "zod";
 
 const openCashRegisterSchema = z.object({
   opening_cash_amount: z.number().min(0).default(0),
+  field_operation_id: z.string().uuid().optional().nullable(),
 });
 
 export const dynamic = "force-dynamic";
@@ -46,33 +51,85 @@ export async function POST(request: NextRequest) {
           );
         }
 
-        // Get branch context
+        // Get branch context and optional operativo context
         const branchContext = await getBranchContext(request, user.id);
+        let body: Record<string, unknown> = {};
+        try {
+          body = await request.json();
+        } catch {
+          // Empty body ok
+        }
+        const fieldOperationId =
+          getFieldOperationFromRequest(request) ||
+          (body?.field_operation_id as string | undefined) ||
+          null;
 
-        // Validate branch access for non-super admins
-        if (!branchContext.isSuperAdmin && !branchContext.branchId) {
+        let effectiveBranchId = branchContext.branchId;
+
+        // Operativo mode: resolve branch from field_operations
+        if (fieldOperationId) {
+          const { data: fieldOp, error: fieldOpError } =
+            await supabaseServiceRole
+              .from("field_operations")
+              .select("id, branch_id")
+              .eq("id", fieldOperationId)
+              .single();
+
+          if (fieldOpError || !fieldOp) {
+            return NextResponse.json(
+              { error: "Operativo no encontrado" },
+              { status: 404 },
+            );
+          }
+
+          const hasAccess = await validateBranchAccess(
+            user.id,
+            fieldOp.branch_id,
+          );
+          if (!hasAccess) {
+            return NextResponse.json(
+              { error: "No tiene acceso a este operativo" },
+              { status: 403 },
+            );
+          }
+          effectiveBranchId = fieldOp.branch_id;
+        }
+
+        // Validate branch for non-super admins
+        if (!branchContext.isSuperAdmin && !effectiveBranchId) {
           return NextResponse.json(
             {
-              error: "Debe seleccionar una sucursal para abrir la caja",
+              error: fieldOperationId
+                ? "Operativo inválido"
+                : "Debe seleccionar una sucursal para abrir la caja",
             },
             { status: 400 },
           );
         }
 
         // Parse and validate request body
-        const body = await request.json();
         const validatedData = openCashRegisterSchema.parse(body);
 
-        // Check if there's already an open session for this branch
-        const { data: existingSession, error: checkError } =
-          await supabaseServiceRole
-            .from("pos_sessions")
-            .select("id, status, opening_time")
-            .eq("branch_id", branchContext.branchId!)
-            .eq("status", "open")
-            .order("opening_time", { ascending: false })
-            .limit(1)
-            .maybeSingle();
+        // Build session query: branch + optional field_operation_id
+        let sessionQuery = supabaseServiceRole
+          .from("pos_sessions")
+          .select("id, status, opening_time")
+          .eq("branch_id", effectiveBranchId!)
+          .eq("status", "open");
+
+        if (fieldOperationId) {
+          sessionQuery = sessionQuery.eq(
+            "field_operation_id",
+            fieldOperationId,
+          );
+        } else {
+          sessionQuery = sessionQuery.is("field_operation_id", null);
+        }
+
+        const { data: existingSession, error: checkError } = await sessionQuery
+          .order("opening_time", { ascending: false })
+          .limit(1)
+          .maybeSingle();
 
         if (checkError && checkError.code !== "PGRST116") {
           logger.error("Error checking existing session", checkError);
@@ -85,7 +142,9 @@ export async function POST(request: NextRequest) {
         if (existingSession) {
           return NextResponse.json(
             {
-              error: "Ya existe una caja abierta para esta sucursal",
+              error: fieldOperationId
+                ? "Ya existe una caja abierta para este operativo"
+                : "Ya existe una caja abierta para esta sucursal",
               session: existingSession,
             },
             { status: 400 },
@@ -93,13 +152,23 @@ export async function POST(request: NextRequest) {
         }
 
         const todayStr = new Date().toISOString().split("T")[0];
+        let closureQuery = supabaseServiceRole
+          .from("cash_register_closures")
+          .select("id, status")
+          .eq("branch_id", effectiveBranchId!)
+          .eq("closure_date", todayStr);
+
+        if (fieldOperationId) {
+          closureQuery = closureQuery.eq(
+            "field_operation_id",
+            fieldOperationId,
+          );
+        } else {
+          closureQuery = closureQuery.is("field_operation_id", null);
+        }
+
         const { data: existingClosure, error: closureError } =
-          await supabaseServiceRole
-            .from("cash_register_closures")
-            .select("id, status")
-            .eq("branch_id", branchContext.branchId!)
-            .eq("closure_date", todayStr)
-            .maybeSingle();
+          await closureQuery.maybeSingle();
 
         if (closureError && closureError.code !== "PGRST116") {
           logger.error("Error checking existing closure", closureError);
@@ -120,16 +189,21 @@ export async function POST(request: NextRequest) {
         }
 
         // Create new POS session
+        const insertData: Record<string, unknown> = {
+          cashier_id: user.id,
+          branch_id: effectiveBranchId!,
+          opening_cash_amount: validatedData.opening_cash_amount,
+          status: "open",
+          opening_time: new Date().toISOString(),
+        };
+        if (fieldOperationId) {
+          insertData.field_operation_id = fieldOperationId;
+        }
+
         const { data: newSession, error: sessionError } =
           await supabaseServiceRole
             .from("pos_sessions")
-            .insert({
-              cashier_id: user.id,
-              branch_id: branchContext.branchId!,
-              opening_cash_amount: validatedData.opening_cash_amount,
-              status: "open",
-              opening_time: new Date().toISOString(),
-            })
+            .insert(insertData)
             .select()
             .single();
 
@@ -143,7 +217,8 @@ export async function POST(request: NextRequest) {
 
         logger.info("Cash register opened successfully", {
           sessionId: newSession.id,
-          branchId: branchContext.branchId,
+          branchId: effectiveBranchId,
+          fieldOperationId: fieldOperationId || undefined,
           openingCash: validatedData.opening_cash_amount,
         });
 
@@ -202,27 +277,71 @@ export async function GET(request: NextRequest) {
           );
         }
 
-        // Get branch context
+        // Get branch context and optional operativo context
         const branchContext = await getBranchContext(request, user.id);
+        const fieldOperationId = getFieldOperationFromRequest(request);
 
-        // No branch selected (global view or no branches): return closed state so POS can load
-        if (!branchContext.branchId) {
+        let effectiveBranchId = branchContext.branchId;
+
+        // Operativo mode: resolve branch from field_operations
+        if (fieldOperationId) {
+          const { data: fieldOp, error: fieldOpError } =
+            await supabaseServiceRole
+              .from("field_operations")
+              .select("id, branch_id")
+              .eq("id", fieldOperationId)
+              .single();
+
+          if (fieldOpError || !fieldOp) {
+            return createApiSuccessResponse({
+              isOpen: false,
+              session: null,
+            });
+          }
+
+          const hasAccess = await validateBranchAccess(
+            user.id,
+            fieldOp.branch_id,
+          );
+          if (!hasAccess) {
+            return createApiSuccessResponse({
+              isOpen: false,
+              session: null,
+            });
+          }
+          effectiveBranchId = fieldOp.branch_id;
+        }
+
+        // No branch: return closed state so POS can load
+        if (!effectiveBranchId) {
           return createApiSuccessResponse({
             isOpen: false,
             session: null,
           });
         }
 
-        // Check if there's an open session for this branch
-        const { data: openSession, error: sessionError } =
-          await supabaseServiceRole
-            .from("pos_sessions")
-            .select("id, status, opening_time, opening_cash_amount, branch_id")
-            .eq("branch_id", branchContext.branchId)
-            .eq("status", "open")
-            .order("opening_time", { ascending: false })
-            .limit(1)
-            .maybeSingle();
+        // Check if there's an open session (branch or operativo)
+        let sessionQuery = supabaseServiceRole
+          .from("pos_sessions")
+          .select(
+            "id, status, opening_time, opening_cash_amount, branch_id, field_operation_id",
+          )
+          .eq("branch_id", effectiveBranchId)
+          .eq("status", "open");
+
+        if (fieldOperationId) {
+          sessionQuery = sessionQuery.eq(
+            "field_operation_id",
+            fieldOperationId,
+          );
+        } else {
+          sessionQuery = sessionQuery.is("field_operation_id", null);
+        }
+
+        const { data: openSession, error: sessionError } = await sessionQuery
+          .order("opening_time", { ascending: false })
+          .limit(1)
+          .maybeSingle();
 
         if (sessionError) {
           logger.error("Error checking open session", sessionError);

@@ -35,7 +35,7 @@ import {
 } from "@/components/ui/dialog";
 import CreatePrescriptionForm from "@/components/admin/CreatePrescriptionForm";
 import { useBranch } from "@/hooks/useBranch";
-import { getBranchHeader } from "@/lib/utils/branch";
+import { getBranchAndOperativoHeaders } from "@/lib/utils/branch";
 import {
   calculatePriceWithTax,
   calculateTotal as calculateTotalTax,
@@ -74,6 +74,7 @@ interface CreateQuoteFormProps {
   onCancel: () => void;
   initialCustomerId?: string;
   initialFieldOperationId?: string;
+  initialBranchId?: string;
   initialPrescriptionId?: string;
 }
 
@@ -83,9 +84,14 @@ export default function CreateQuoteForm({
   initialCustomerId,
   initialPrescriptionId,
   initialFieldOperationId,
+  initialBranchId,
 }: CreateQuoteFormProps) {
-  // Branch context
+  // Branch context: use operativo branch when in operativo context
   const { currentBranchId } = useBranch();
+  const effectiveBranchId =
+    initialFieldOperationId && initialBranchId
+      ? initialBranchId
+      : (currentBranchId ?? undefined);
 
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -868,7 +874,7 @@ export default function CreateQuoteForm({
       try {
         const customers = await customerService.searchCustomers(
           customerSearch,
-          currentBranchId ?? undefined,
+          effectiveBranchId ?? undefined,
           initialFieldOperationId ?? undefined,
         );
         setCustomerResults(customers || []);
@@ -881,7 +887,7 @@ export default function CreateQuoteForm({
 
     const debounce = setTimeout(searchCustomers, 300);
     return () => clearTimeout(debounce);
-  }, [customerSearch, currentBranchId, initialFieldOperationId]);
+  }, [customerSearch, effectiveBranchId, initialFieldOperationId]);
 
   // Search frames
   useEffect(() => {
@@ -895,8 +901,9 @@ export default function CreateQuoteForm({
       try {
         const frames = await productService.searchProducts(
           frameSearch,
-          currentBranchId ?? undefined,
+          effectiveBranchId,
           "frame",
+          initialFieldOperationId ?? undefined,
         );
         setFrameResults(frames || []);
       } catch (error) {
@@ -908,7 +915,7 @@ export default function CreateQuoteForm({
 
     const debounce = setTimeout(searchFrames, 300);
     return () => clearTimeout(debounce);
-  }, [frameSearch, currentBranchId]);
+  }, [frameSearch, effectiveBranchId, initialFieldOperationId]);
 
   // Search near frames (for two separate lenses)
   useEffect(() => {
@@ -922,8 +929,9 @@ export default function CreateQuoteForm({
       try {
         const results = await productService.searchProducts(
           nearFrameSearch,
-          currentBranchId ?? undefined,
+          effectiveBranchId,
           "frame",
+          initialFieldOperationId ?? undefined,
         );
         setNearFrameResults(results || []);
       } catch (error) {
@@ -935,7 +943,7 @@ export default function CreateQuoteForm({
 
     const debounce = setTimeout(searchNearFrames, 300);
     return () => clearTimeout(debounce);
-  }, [nearFrameSearch, currentBranchId]);
+  }, [nearFrameSearch, effectiveBranchId, initialFieldOperationId]);
 
   const calculateTotal = () => {
     // Use tax percentage from settings or system config, default to 19% (IVA Chile)
@@ -1227,7 +1235,10 @@ export default function CreateQuoteForm({
 
       const headers: HeadersInit = {
         "Content-Type": "application/json",
-        ...getBranchHeader(currentBranchId),
+        ...getBranchAndOperativoHeaders(
+          effectiveBranchId ?? null,
+          initialFieldOperationId ?? undefined,
+        ),
       };
 
       // Prepare near frame data
@@ -1305,7 +1316,7 @@ export default function CreateQuoteForm({
         total_amount: formData.total_amount,
         valid_until: expirationDate.toISOString().split("T")[0],
         notes: formData.notes,
-        branch_id: currentBranchId || undefined,
+        branch_id: effectiveBranchId || undefined,
         field_operation_id: initialFieldOperationId || undefined,
         // Move fields from items to top level
         prescription_id: selectedPrescription.id,

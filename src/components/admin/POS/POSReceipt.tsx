@@ -30,7 +30,12 @@ export const POSReceipt = forwardRef<HTMLDivElement, POSReceiptProps>(
         className="bg-white text-black p-4 font-mono text-[12px] leading-tight"
         style={{ width: isThermal ? width : "100%", maxWidth: "100%" }}
       >
-        {/* Header Section */}
+        {/* Header Section - Config from /admin/system Boletas y Facturas */}
+        {settings?.header_text && (
+          <div className="text-center mb-4 text-xs border-b border-black pb-2">
+            {settings.header_text}
+          </div>
+        )}
         <div className="text-center mb-6">
           {settings?.logo_url && (
             <div className="flex justify-center mb-4">
@@ -156,7 +161,7 @@ export const POSReceipt = forwardRef<HTMLDivElement, POSReceiptProps>(
         </div>
 
         {/* Payments Section */}
-        <div className="mt-4 pt-2 border-t border-dashed border-black space-y-1 text-[11px]">
+        <div className="mt-4 pt-2 border-t border-black space-y-1 text-[11px]">
           <p className="font-bold mb-1">PAGOS:</p>
           {order.order_payments && order.order_payments.length > 0 ? (
             order.order_payments.map((payment: any, idx: number) => (

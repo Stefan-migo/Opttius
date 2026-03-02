@@ -19,6 +19,7 @@ export interface Quote {
     name?: string;
     email?: string;
     phone?: string;
+    rut?: string | null;
   };
   customer_name?: string;
   customer_email?: string;

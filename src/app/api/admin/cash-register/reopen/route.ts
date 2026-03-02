@@ -72,10 +72,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get the session to check its branch
+    // Get the session to check its branch and operativo
     const { data: session, error: sessionError } = await supabaseServiceRole
       .from("pos_sessions")
-      .select("id, branch_id, status, reopen_count, opening_time")
+      .select(
+        "id, branch_id, field_operation_id, status, reopen_count, opening_time",
+      )
       .eq("id", session_id)
       .single();
 
@@ -105,13 +107,22 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Check if there's already an open session for this branch
+    // Check if there's already an open session for this branch (and operativo if applicable)
+    let openSessionsQuery = supabaseServiceRole
+      .from("pos_sessions")
+      .select("id, opening_time")
+      .eq("branch_id", session.branch_id)
+      .eq("status", "open");
+    if (session.field_operation_id) {
+      openSessionsQuery = openSessionsQuery.eq(
+        "field_operation_id",
+        session.field_operation_id,
+      );
+    } else {
+      openSessionsQuery = openSessionsQuery.is("field_operation_id", null);
+    }
     const { data: openSessions, error: openSessionsError } =
-      await supabaseServiceRole
-        .from("pos_sessions")
-        .select("id, opening_time")
-        .eq("branch_id", session.branch_id)
-        .eq("status", "open");
+      await openSessionsQuery;
 
     if (openSessionsError) {
       logger.error("Error checking open sessions", openSessionsError);
@@ -152,12 +163,20 @@ export async function POST(request: NextRequest) {
       closure = closureBySession;
     } else if (session.opening_time) {
       const sessionDateStr = session.opening_time.split("T")[0];
-      const { data: closureByDate } = await supabaseServiceRole
+      let closureByDateQuery = supabaseServiceRole
         .from("cash_register_closures")
         .select("id, status, reopen_count, pos_session_id")
         .eq("branch_id", session.branch_id)
-        .eq("closure_date", sessionDateStr)
-        .maybeSingle();
+        .eq("closure_date", sessionDateStr);
+      if (session.field_operation_id) {
+        closureByDateQuery = closureByDateQuery.eq(
+          "field_operation_id",
+          session.field_operation_id,
+        );
+      } else {
+        closureByDateQuery = closureByDateQuery.is("field_operation_id", null);
+      }
+      const { data: closureByDate } = await closureByDateQuery.maybeSingle();
       closure = closureByDate || null;
     }
 

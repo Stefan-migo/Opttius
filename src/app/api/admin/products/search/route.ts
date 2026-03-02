@@ -1,6 +1,9 @@
 import { NextRequest } from "next/server";
 import { createClient } from "@/utils/supabase/server";
-import { getBranchContext, addBranchFilter } from "@/lib/api/branch-middleware";
+import {
+  getBranchContext,
+  getFieldOperationFromRequest,
+} from "@/lib/api/branch-middleware";
 import { appLogger as logger } from "@/lib/logger";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
 import { withRateLimit, rateLimitConfigs } from "@/lib/api/middleware";
@@ -62,7 +65,18 @@ export async function GET(request: NextRequest) {
           searchConditions += `,sku.ilike.%${trimmedQuery}%,barcode.ilike.%${trimmedQuery}%`;
         }
 
-        const currentBranchId = branchContext.branchId;
+        const fieldOperationId = getFieldOperationFromRequest(request);
+        let operativoBranchId: string | null = null;
+        if (fieldOperationId) {
+          const { data: fo } = await supabase
+            .from("field_operations")
+            .select("branch_id")
+            .eq("id", fieldOperationId)
+            .single();
+          operativoBranchId = fo?.branch_id ?? null;
+        }
+
+        const currentBranchId = operativoBranchId ?? branchContext.branchId;
         const selectFields = currentBranchId
           ? `id, name, price, price_includes_tax, status, featured_image, sku, barcode, product_type, category_id, inventory_quantity, frame_brand, frame_model, frame_color, frame_size,
            product_branch_stock (
@@ -125,6 +139,33 @@ export async function GET(request: NextRequest) {
           );
         }
 
+        // When in operativo context: only products with stock in bodega móvil
+        let mobileStockMap: Map<
+          string,
+          { quantity: number; reserved: number }
+        > = new Map();
+        if (fieldOperationId) {
+          const { data: mobileStock } = await supabase
+            .from("operativo_mobile_stock")
+            .select("product_id, quantity, reserved_quantity")
+            .eq("field_operation_id", fieldOperationId)
+            .gt("quantity", 0);
+
+          if (mobileStock && mobileStock.length > 0) {
+            mobileStock.forEach((row: any) => {
+              mobileStockMap.set(row.product_id, {
+                quantity: row.quantity ?? 0,
+                reserved: row.reserved_quantity ?? 0,
+              });
+            });
+            filteredProducts = filteredProducts.filter((p: any) =>
+              mobileStockMap.has(p.id),
+            );
+          } else {
+            filteredProducts = [];
+          }
+        }
+
         if (currentBranchId) {
           logger.info("Product search branch context", {
             currentBranchId,
@@ -136,7 +177,18 @@ export async function GET(request: NextRequest) {
         const processedProducts = filteredProducts.map((product: any) => {
           let processedProduct = { ...product };
 
-          if (currentBranchId && product.product_branch_stock) {
+          if (fieldOperationId && mobileStockMap.has(product.id)) {
+            const ms = mobileStockMap.get(product.id)!;
+            const available = Math.max(0, ms.quantity - ms.reserved);
+            processedProduct = {
+              ...product,
+              available_quantity: available,
+              quantity: ms.quantity,
+              reserved_quantity: ms.reserved,
+              inventory_quantity: ms.quantity,
+            };
+            delete processedProduct.product_branch_stock;
+          } else if (currentBranchId && product.product_branch_stock) {
             const branchStock = Array.isArray(product.product_branch_stock)
               ? product.product_branch_stock.find(
                   (stock: any) => stock.branch_id === currentBranchId,

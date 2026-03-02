@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
 import { createServiceRoleClient } from "@/utils/supabase/server";
-import { validateBranchAccess } from "@/lib/api/branch-middleware";
+import {
+  validateBranchAccess,
+  getBranchContext,
+} from "@/lib/api/branch-middleware";
 import { appLogger as logger } from "@/lib/logger";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
 import { AuthenticationError, AuthorizationError } from "@/lib/api/errors";
@@ -127,7 +130,7 @@ export async function PUT(
 
     const { data: existing } = await supabaseServiceRole
       .from("field_operations")
-      .select("id, branch_id")
+      .select("id, branch_id, organization_id")
       .eq("id", id)
       .single();
 
@@ -138,7 +141,17 @@ export async function PUT(
       );
     }
 
-    const hasAccess = await validateBranchAccess(user.id, existing.branch_id);
+    let hasAccess = await validateBranchAccess(user.id, existing.branch_id);
+    if (!hasAccess) {
+      const branchContext = await getBranchContext(request, user.id);
+      if (
+        branchContext.isSuperAdmin &&
+        branchContext.organizationId &&
+        existing.organization_id === branchContext.organizationId
+      ) {
+        hasAccess = true;
+      }
+    }
     if (!hasAccess) {
       return NextResponse.json(
         { error: "No tiene acceso a este operativo" },
@@ -157,6 +170,47 @@ export async function PUT(
         return validationErrorResponse(error);
       }
       throw error;
+    }
+
+    // Auto-return remaining mobile stock when status changes to completed
+    if (validatedBody.status === "completed") {
+      const { data: mobileStockRows } = await supabaseServiceRole
+        .from("operativo_mobile_stock")
+        .select("id, product_id, quantity")
+        .eq("field_operation_id", id);
+
+      if (mobileStockRows && mobileStockRows.length > 0) {
+        const branchId = existing.branch_id;
+        for (const row of mobileStockRows) {
+          const qty = row.quantity ?? 0;
+          if (qty <= 0) continue;
+          const { error: stockError } = await supabaseServiceRole.rpc(
+            "update_product_stock",
+            {
+              p_product_id: row.product_id,
+              p_branch_id: branchId,
+              p_quantity_change: qty,
+              p_reserve: false,
+              p_movement_type: "receipt",
+              p_reference_type: "field_operation_return",
+              p_reference_id: id,
+              p_created_by: user.id,
+            },
+          );
+          if (stockError) {
+            logger.warn("Auto-return stock failed for product", {
+              product_id: row.product_id,
+              error: stockError.message,
+              requestId,
+            });
+          } else {
+            await supabaseServiceRole
+              .from("operativo_mobile_stock")
+              .delete()
+              .eq("id", row.id);
+          }
+        }
+      }
     }
 
     const updateData: Record<string, unknown> = {

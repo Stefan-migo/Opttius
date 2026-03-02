@@ -214,14 +214,22 @@ export async function POST(request: NextRequest) {
             today.setHours(0, 0, 0, 0);
             const todayStart = today.toISOString();
 
+            let sessionQuery = supabaseServiceRole
+              .from("pos_sessions")
+              .select("id")
+              .eq("branch_id", effectiveBranchId)
+              .eq("status", "open")
+              .gte("opening_time", todayStart);
+            if (fieldOperationId) {
+              sessionQuery = sessionQuery.eq(
+                "field_operation_id",
+                fieldOperationId,
+              );
+            } else {
+              sessionQuery = sessionQuery.is("field_operation_id", null);
+            }
             const { data: openSession, error: sessionCheckError } =
-              await supabaseServiceRole
-                .from("pos_sessions")
-                .select("id")
-                .eq("branch_id", effectiveBranchId)
-                .eq("status", "open")
-                .gte("opening_time", todayStart)
-                .maybeSingle();
+              await sessionQuery.maybeSingle();
 
             if (sessionCheckError && sessionCheckError.code !== "PGRST116") {
               logger.error(
@@ -237,8 +245,9 @@ export async function POST(request: NextRequest) {
             if (!openSession) {
               return NextResponse.json(
                 {
-                  error:
-                    "Debe abrir la caja antes de realizar ventas. Por favor, abra la caja desde la sección Caja.",
+                  error: fieldOperationId
+                    ? "Debe abrir la caja del operativo antes de realizar ventas. Abra la caja desde la página del operativo."
+                    : "Debe abrir la caja antes de realizar ventas. Por favor, abra la caja desde la sección Caja.",
                 },
                 { status: 400 },
               );
@@ -255,6 +264,11 @@ export async function POST(request: NextRequest) {
 
             if (effectiveBranchId) {
               query = query.eq("branch_id", effectiveBranchId);
+              if (fieldOperationId) {
+                query = query.eq("field_operation_id", fieldOperationId);
+              } else {
+                query = query.is("field_operation_id", null);
+              }
             } else {
               query = query.is("branch_id", null);
             }

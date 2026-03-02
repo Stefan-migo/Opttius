@@ -14,6 +14,7 @@ import {
   ValidationError,
   AuthenticationError,
   AuthorizationError,
+  NotFoundError,
 } from "@/lib/api/errors";
 import {
   createPaginatedResponse,
@@ -533,11 +534,43 @@ export async function POST(request: NextRequest) {
             });
 
             // Determine customer branch_id
-            // Priority: 1) branchContext.branchId (from header - selected branch), 2) validatedBody.branch_id (explicit), 3) error
+            // Priority: 1) field_operation_id in body → use body.branch_id (operativo context)
+            //           2) branchContext.branchId (from header - selected branch)
+            //           3) validatedBody.branch_id (explicit, e.g. super admin)
             let customerBranchId: string | null = null;
 
-            // First, try to use branch from context (header) - this is the selected branch
-            if (branchContext.branchId) {
+            // Operativo context: when field_operation_id is in body, MUST use operativo's branch
+            if (validatedBody.field_operation_id && validatedBody.branch_id) {
+              const { data: fieldOp } = await serviceSupabase
+                .from("field_operations")
+                .select("id, branch_id, organization_id")
+                .eq("id", validatedBody.field_operation_id)
+                .single();
+              if (!fieldOp) {
+                return createApiErrorResponse(new NotFoundError("Operativo"));
+              }
+              if (
+                fieldOp.organization_id !== userOrganizationId &&
+                !branchContext.isSuperAdmin
+              ) {
+                return createApiErrorResponse(
+                  new AuthorizationError("No tienes acceso a este operativo"),
+                );
+              }
+              if (fieldOp.branch_id !== validatedBody.branch_id) {
+                return createApiErrorResponse(
+                  new ValidationError(
+                    "La sucursal no coincide con el operativo",
+                  ),
+                );
+              }
+              customerBranchId = validatedBody.branch_id;
+              logger.debug("Using branch_id from operativo context", {
+                branchId: customerBranchId,
+                fieldOperationId: validatedBody.field_operation_id,
+              });
+            } else if (branchContext.branchId) {
+              // Use branch from context (header) - the selected branch
               customerBranchId = branchContext.branchId;
               logger.debug("Using branch_id from context (selected branch)", {
                 branchId: customerBranchId,
@@ -563,9 +596,8 @@ export async function POST(request: NextRequest) {
                 branch.organization_id !== userOrganizationId &&
                 !branchContext.isSuperAdmin
               ) {
-                return NextResponse.json(
-                  { error: "No tienes acceso a esta sucursal" },
-                  { status: 403 },
+                return createApiErrorResponse(
+                  new AuthorizationError("No tienes acceso a esta sucursal"),
                 );
               }
 
@@ -611,16 +643,18 @@ export async function POST(request: NextRequest) {
               "customers",
             );
             if (!customerLimit.allowed) {
-              return NextResponse.json(
-                {
-                  error:
-                    customerLimit.reason ??
+              return createApiErrorResponse(
+                new AuthorizationError(
+                  customerLimit.reason ??
                     "Límite de clientes alcanzado para tu plan. Considera actualizar tu suscripción.",
-                  code: "TIER_LIMIT",
-                  currentCount: customerLimit.currentCount,
-                  maxAllowed: customerLimit.maxAllowed,
+                ),
+                {
+                  details: {
+                    code: "TIER_LIMIT",
+                    currentCount: customerLimit.currentCount,
+                    maxAllowed: customerLimit.maxAllowed,
+                  },
                 },
-                { status: 403 },
               );
             }
 

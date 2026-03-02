@@ -248,7 +248,7 @@ export async function GET(request: NextRequest) {
         customerIds.length > 0
           ? await supabase
               .from("customers")
-              .select("id, first_name, last_name, email, phone")
+              .select("id, first_name, last_name, email, phone, rut")
               .in("id", customerIds)
           : { data: [] };
 

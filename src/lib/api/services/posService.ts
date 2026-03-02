@@ -25,6 +25,14 @@ export interface CashRegisterStatus {
   opened_at?: string;
   closing_balance?: number;
   current_balance?: number;
+  /** Session details from GET /api/admin/cash-register/open */
+  session?: {
+    id?: string;
+    opening_cash_amount?: number;
+    opening_time?: string;
+    status?: string;
+    [key: string]: unknown;
+  };
 }
 
 export interface PendingBalanceOrder {
@@ -137,13 +145,21 @@ class POSService {
 
   /**
    * Check if cash register is open
+   * @param fieldOperationId - When in operativo mode, checks operativo's independent cash register
    */
-  async getCashStatus(branchId?: string): Promise<CashRegisterStatus | null> {
+  async getCashStatus(
+    branchId?: string,
+    fieldOperationId?: string | null,
+  ): Promise<CashRegisterStatus | null> {
     try {
+      const headers = getBranchAndOperativoHeaders(
+        branchId ?? null,
+        fieldOperationId ?? undefined,
+      );
       const response = await this.client.get<CashRegisterStatus>(
         `/api/admin/cash-register/open`,
         {
-          headers: branchId ? { "x-branch-id": branchId } : undefined,
+          headers: Object.keys(headers).length > 0 ? headers : undefined,
         },
       );
 

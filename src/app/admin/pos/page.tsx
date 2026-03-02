@@ -29,6 +29,7 @@ import {
   Package,
   ChevronDown,
   ChevronUp,
+  ArrowLeft,
   DollarSign,
   Wallet,
   Send,
@@ -524,54 +525,119 @@ export default function POSPage() {
   });
 
   const printRef = useRef<HTMLDivElement>(null);
-  const printReceipt = (retryCount = 0) => {
+  const printReceipt = (orderForPrint: any, retryCount = 0) => {
+    if (!orderForPrint) return;
+
     const el = printRef.current;
-    if (!lastProcessedOrder) {
-      window.print();
-      return;
-    }
     if (!el || !el.innerHTML?.trim()) {
-      if (retryCount < 1) {
-        setTimeout(() => printReceipt(retryCount + 1), 200);
+      if (retryCount < 3) {
+        setTimeout(() => printReceipt(orderForPrint, retryCount + 1), 250);
         return;
       }
-      window.print();
       return;
     }
+
     const html = el.innerHTML;
-    const w = window.open("", "_blank");
-    if (!w) {
-      window.print();
+    const RECEIPT_STYLES = `
+      * { box-sizing: border-box; }
+      body { margin: 0; padding: 16px; font-family: ui-monospace, monospace; font-size: 12px; color: #000; background: #fff; }
+      #pos-receipt-print, [id="pos-receipt-print"] { background: #fff; color: #000; padding: 16px; font-family: ui-monospace, monospace; font-size: 12px; line-height: 1.25; width: 100%; max-width: 100%; }
+      .text-center { text-align: center; }
+      .text-right { text-align: right; }
+      .font-bold { font-weight: 700; }
+      .uppercase { text-transform: uppercase; }
+      .capitalize { text-transform: capitalize; }
+      .italic { font-style: italic; }
+      .not-italic { font-style: normal; }
+      .mb-1 { margin-bottom: 4px; }
+      .mb-2 { margin-bottom: 8px; }
+      .mb-4 { margin-bottom: 16px; }
+      .mb-6 { margin-bottom: 24px; }
+      .mt-1 { margin-top: 4px; }
+      .mt-4 { margin-top: 16px; }
+      .mt-8 { margin-top: 32px; }
+      .mt-10 { margin-top: 40px; }
+      .pt-1 { padding-top: 4px; }
+      .pt-2 { padding-top: 8px; }
+      .py-1 { padding-top: 4px; padding-bottom: 4px; }
+      .py-2 { padding-top: 8px; padding-bottom: 8px; }
+      .space-y-1 > * + * { margin-top: 4px; }
+      .space-y-2 > * + * { margin-top: 8px; }
+      .border-t { border-top: 1px solid #000; }
+      .border-b { border-bottom: 1px solid #000; }
+      .border-black { border-color: #000; }
+      .border-gray-100 { border-color: #f3f4f6; }
+      .border-gray-200 { border-color: #e5e7eb; }
+      .border-gray-300 { border-color: #d1d5db; }
+      .border-dashed { border-style: dashed; }
+      .text-\\[10px\\] { font-size: 10px; }
+      .text-\\[11px\\] { font-size: 11px; }
+      .text-\\[12px\\] { font-size: 12px; }
+      .text-sm { font-size: 14px; }
+      .text-base { font-size: 16px; }
+      .text-lg { font-size: 18px; }
+      .text-red-600 { color: #dc2626; }
+      .opacity-30 { opacity: 0.3; }
+      .flex { display: flex; }
+      .justify-between { justify-content: space-between; }
+      .justify-center { justify-content: center; }
+      .object-contain { object-fit: contain; }
+      .h-16 { height: 64px; }
+      .w-auto { width: auto; }
+      .w-full { width: 100%; }
+      .align-top { vertical-align: top; }
+      table { width: 100%; border-collapse: collapse; }
+      th, td { padding: 4px 0; text-align: left; }
+      thead th { border-bottom: 1px solid #000; }
+      tbody tr { border-bottom: 1px solid #f3f4f6; }
+      tbody tr:last-child { border-bottom: none; }
+      img { max-width: 100%; height: auto; }
+      @media print {
+        html, body { height: auto !important; min-height: 0 !important; overflow: visible !important; background: #fff !important; }
+        body { page-break-after: avoid; }
+        @page { size: auto; margin: 10mm; }
+      }
+    `;
+
+    const iframe = document.createElement("iframe");
+    iframe.style.cssText =
+      "position:absolute;width:0;height:0;border:0;visibility:hidden;";
+    document.body.appendChild(iframe);
+
+    const doc = iframe.contentDocument || iframe.contentWindow?.document;
+    if (!doc) {
+      document.body.removeChild(iframe);
       return;
     }
-    w.document.write(`<!DOCTYPE html>
+
+    doc.open();
+    doc.write(`<!DOCTYPE html>
       <html>
         <head>
           <meta charset="utf-8">
           <title>Boleta</title>
-          <style>
-            body { margin: 0; padding: 16px; font-family: monospace; font-size: 12px; color: #000; }
-            table { width: 100%; border-collapse: collapse; }
-            th, td { padding: 4px 0; text-align: left; }
-            .text-right { text-align: right; }
-            .font-bold { font-weight: 700; }
-            .border-top { border-top: 1px solid #000; }
-            .border-bottom { border-bottom: 1px solid #000; }
-            @media print {
-              html, body { height: auto !important; min-height: 0 !important; overflow: visible !important; }
-              body { page-break-after: avoid; }
-              @page { size: auto; margin: 10mm; }
-            }
-          </style>
+          <style>${RECEIPT_STYLES}</style>
         </head>
         <body>${html}</body>
       </html>`);
-    w.document.close();
-    w.onload = () => {
-      w.focus();
-      w.print();
-      w.close();
+    doc.close();
+
+    const printWhenReady = () => {
+      try {
+        iframe.contentWindow?.focus();
+        iframe.contentWindow?.print();
+      } finally {
+        setTimeout(() => {
+          if (iframe.parentNode) document.body.removeChild(iframe);
+        }, 500);
+      }
     };
+
+    if (doc.readyState === "complete") {
+      printWhenReady();
+    } else {
+      iframe.contentWindow?.addEventListener("load", printWhenReady);
+    }
   };
 
   // Tab activo del formulario "Crear orden completa" (para abrir Lentes al cargar presupuesto de lentes de contacto)
@@ -662,7 +728,7 @@ export default function POSPage() {
     checkCashStatus();
     const interval = setInterval(checkCashStatus, 30000); // Check every 30 seconds
     return () => clearInterval(interval);
-  }, [effectiveBranchId, isSuperAdmin]);
+  }, [effectiveBranchId, isSuperAdmin, fieldOperationIdFromUrl]);
 
   const checkCashStatus = async () => {
     if (!effectiveBranchId && !isSuperAdmin) {
@@ -673,9 +739,10 @@ export default function POSPage() {
 
     setCheckingCashStatus(true);
     try {
-      // Use posService for cash status
+      // Use posService for cash status (operativo uses independent caja when fieldOperationId present)
       const cashStatus = await posService.getCashStatus(
         effectiveBranchId || undefined,
+        fieldOperationIdFromUrl || undefined,
       );
       if (cashStatus) {
         setIsCashOpen(cashStatus.isOpen);
@@ -3158,7 +3225,7 @@ export default function POSPage() {
 
       // Trigger automatic print after React re-renders with new order (state update is async)
       if (billingSettings?.auto_print_receipt !== false) {
-        setTimeout(printReceipt, 400);
+        setTimeout(() => printReceipt(orderToPrint), 400);
       }
     } catch (error: any) {
       console.error("Error processing payment:", error);
@@ -3278,7 +3345,7 @@ export default function POSPage() {
               setLastProcessedOrder(fullOrder);
               if (billingSettings?.auto_print_receipt !== false) {
                 toast.info("Imprimiendo comprobante...");
-                setTimeout(printReceipt, 400);
+                setTimeout(() => printReceipt(fullOrder), 400);
               }
             }
           }
@@ -3299,17 +3366,26 @@ export default function POSPage() {
   return (
     <div className="h-screen flex flex-col bg-[var(--admin-bg-primary)] pb-40 lg:pb-0">
       {/* Operativo mode banner */}
-      {operativo && (
-        <div className="flex-shrink-0 px-4 sm:px-6 py-2 bg-admin-accent-primary/20 border-b border-admin-accent-primary/30 flex items-center justify-between gap-2">
+      {operativo && fieldOperationIdFromUrl && (
+        <div className="flex-shrink-0 px-4 sm:px-6 py-2 bg-admin-accent-primary/20 border-b border-admin-accent-primary/30 flex items-center justify-between gap-2 flex-wrap">
           <span className="text-sm font-medium text-admin-text-primary">
             Modo operativo: {operativo.name}
           </span>
-          <Link
-            href="/admin/pos"
-            className="text-sm text-admin-accent-primary hover:underline font-medium underline-offset-2"
-          >
-            Salir del modo operativo
-          </Link>
+          <div className="flex items-center gap-3">
+            <Link
+              href={`/admin/field-operations/${fieldOperationIdFromUrl}`}
+              className="inline-flex items-center gap-1.5 text-sm text-admin-accent-primary hover:underline font-medium underline-offset-2"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Volver al operativo
+            </Link>
+            <Link
+              href="/admin/pos"
+              className="text-sm text-admin-accent-primary hover:underline font-medium underline-offset-2"
+            >
+              Salir del modo operativo
+            </Link>
+          </div>
         </div>
       )}
 
@@ -3391,14 +3467,27 @@ export default function POSPage() {
               <div className="flex items-center gap-2 text-sm text-red-800">
                 <AlertCircle className="h-4 w-4 flex-shrink-0" />
                 <span>
-                  <span className="font-semibold">La caja está cerrada</span>
+                  <span className="font-semibold">
+                    {fieldOperationIdFromUrl
+                      ? "La caja del operativo está cerrada"
+                      : "La caja está cerrada"}
+                  </span>
                   <span className="hidden sm:inline">
                     {" "}
-                    - Debe abrir la caja antes de realizar ventas
+                    -{" "}
+                    {fieldOperationIdFromUrl
+                      ? "Debe abrir la caja del operativo antes de realizar ventas"
+                      : "Debe abrir la caja antes de realizar ventas"}
                   </span>
                 </span>
               </div>
-              <Link href="/admin/cash-register">
+              <Link
+                href={
+                  fieldOperationIdFromUrl
+                    ? `/admin/cash-register?field_operation_id=${fieldOperationIdFromUrl}`
+                    : "/admin/cash-register"
+                }
+              >
                 <Button size="sm" variant="default">
                   Abrir Caja
                 </Button>
@@ -6084,11 +6173,22 @@ export default function POSPage() {
                 <AlertCircle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
                 <div className="flex-1">
                   <p className="text-sm font-semibold text-red-800">
-                    Caja cerrada
+                    {fieldOperationIdFromUrl
+                      ? "Caja del operativo cerrada"
+                      : "Caja cerrada"}
                   </p>
                   <p className="text-xs text-red-700">
-                    No se pueden realizar ventas sin abrir la caja. Ve a Caja
-                    para abrirla.
+                    No se pueden realizar ventas sin abrir la caja.{" "}
+                    <Link
+                      href={
+                        fieldOperationIdFromUrl
+                          ? `/admin/cash-register?field_operation_id=${fieldOperationIdFromUrl}`
+                          : "/admin/cash-register"
+                      }
+                      className="underline font-medium"
+                    >
+                      Ir a Caja
+                    </Link>
                   </p>
                 </div>
               </div>
@@ -6123,11 +6223,24 @@ export default function POSPage() {
           <div className="bg-red-50 border border-red-200 rounded-lg p-3 flex items-start gap-2 shadow-lg">
             <AlertCircle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
             <div className="flex-1">
-              <p className="text-sm font-semibold text-red-800">Caja cerrada</p>
-              <p className="text-xs text-red-700">
-                Debe abrir la caja antes de realizar ventas.
+              <p className="text-sm font-semibold text-red-800">
+                {fieldOperationIdFromUrl
+                  ? "Caja del operativo cerrada"
+                  : "Caja cerrada"}
               </p>
-              <Link href="/admin/cash-register" className="mt-2 inline-block">
+              <p className="text-xs text-red-700">
+                {fieldOperationIdFromUrl
+                  ? "Debe abrir la caja del operativo antes de realizar ventas."
+                  : "Debe abrir la caja antes de realizar ventas."}
+              </p>
+              <Link
+                href={
+                  fieldOperationIdFromUrl
+                    ? `/admin/cash-register?field_operation_id=${fieldOperationIdFromUrl}`
+                    : "/admin/cash-register"
+                }
+                className="mt-2 inline-block"
+              >
                 <Button size="sm" variant="default">
                   Abrir Caja
                 </Button>
@@ -6145,7 +6258,9 @@ export default function POSPage() {
           if (!isSuperAdmin && !effectiveBranchId) return;
           if (isCashOpen === false) {
             toast.error(
-              "La caja está cerrada. Debe abrir la caja antes de realizar ventas.",
+              fieldOperationIdFromUrl
+                ? "La caja del operativo está cerrada. Debe abrir la caja del operativo antes de realizar ventas."
+                : "La caja está cerrada. Debe abrir la caja antes de realizar ventas.",
             );
             return;
           }

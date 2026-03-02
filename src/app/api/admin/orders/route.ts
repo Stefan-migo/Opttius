@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClientFromRequest } from "@/utils/supabase/server";
-import { getBranchContext } from "@/lib/api/branch-middleware";
+import {
+  getBranchContext,
+  getFieldOperationFromRequest,
+} from "@/lib/api/branch-middleware";
 import { appLogger as logger } from "@/lib/logger";
 import { EmailNotificationService } from "@/lib/email/notifications";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
@@ -52,8 +55,9 @@ export async function GET(request: NextRequest) {
     }
     logger.debug("Admin access confirmed", { email: user.email, requestId });
 
-    // Get branch context for multi-tenancy
+    // Get branch context and optional operativo context for multi-tenancy
     const branchContext = await getBranchContext(request, user.id, supabase);
+    const fieldOperationId = getFieldOperationFromRequest(request);
 
     // Get user's organization_id for filtering
     const { data: adminUser } = await supabase
@@ -128,17 +132,28 @@ export async function GET(request: NextRequest) {
       query = query.eq("organization_id", userOrganizationId);
       logger.debug("Filtering by organization_id", { userOrganizationId });
 
-      // If a specific branch is selected, also filter by branch_id
+      // If a specific branch is selected, also filter by branch_id and field_operation_id
       if (branchContext.branchId) {
         query = query.eq("branch_id", branchContext.branchId);
+        if (fieldOperationId) {
+          query = query.eq("field_operation_id", fieldOperationId);
+        } else {
+          query = query.is("field_operation_id", null);
+        }
         logger.debug("Filtering by branch_id", {
           branchId: branchContext.branchId,
+          fieldOperationId: fieldOperationId || null,
         });
       }
     } else if (branchContext.isSuperAdmin) {
       // Super admin: branch selected = filter by branch; Vision Global = only user's organization
       if (branchContext.branchId) {
         query = query.eq("branch_id", branchContext.branchId);
+        if (fieldOperationId) {
+          query = query.eq("field_operation_id", fieldOperationId);
+        } else {
+          query = query.is("field_operation_id", null);
+        }
       } else if (branchContext.organizationId) {
         query = query.eq("organization_id", branchContext.organizationId);
       }

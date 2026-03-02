@@ -7,6 +7,7 @@
 
 import { ApiClient, isSuccess, unwrapData } from "../client-helpers";
 import { handleApiError } from "@/lib/services/errorService";
+import { getBranchAndOperativoHeaders } from "@/lib/utils/branch";
 
 // Types
 export interface Product {
@@ -323,11 +324,13 @@ export async function deleteProduct(id: string): Promise<void> {
 
 /**
  * Search products by query
+ * @param fieldOperationId - When in operativo context, filters to products in bodega móvil
  */
 export async function searchProducts(
   query: string,
   branchId?: string,
   type?: string,
+  fieldOperationId?: string | null,
 ): Promise<Product[]> {
   try {
     const params = new URLSearchParams({
@@ -336,8 +339,14 @@ export async function searchProducts(
       ...(type && { type }),
     });
 
+    const headers = getBranchAndOperativoHeaders(
+      branchId ?? null,
+      fieldOperationId ?? undefined,
+    );
+
     const response = await client.get<Product[]>(
       `/api/admin/products/search?${params.toString()}`,
+      { headers: { "Content-Type": "application/json", ...headers } },
     );
     const data = unwrapData(response);
     return Array.isArray(data) ? data : [];

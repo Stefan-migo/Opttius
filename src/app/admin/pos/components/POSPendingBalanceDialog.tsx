@@ -149,8 +149,8 @@ export function POSPendingBalanceDialog({
                         key={order.id}
                         className={
                           selectedOrder?.id === order.id
-                            ? "bg-admin-info/5"
-                            : "cursor-pointer hover:bg-admin-bg-secondary"
+                            ? "bg-admin-accent/10"
+                            : "cursor-pointer hover:bg-muted"
                         }
                         onClick={() => {
                           onSelectOrder(order);

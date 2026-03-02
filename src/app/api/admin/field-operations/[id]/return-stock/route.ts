@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
 import { createServiceRoleClient } from "@/utils/supabase/server";
-import { validateBranchAccess } from "@/lib/api/branch-middleware";
+import {
+  validateBranchAccess,
+  getBranchContext,
+} from "@/lib/api/branch-middleware";
 import { appLogger as logger } from "@/lib/logger";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
 import { AuthenticationError, AuthorizationError } from "@/lib/api/errors";
@@ -50,7 +53,7 @@ export async function POST(
 
     const { data: operation, error: opError } = await supabaseServiceRole
       .from("field_operations")
-      .select("id, branch_id, status")
+      .select("id, branch_id, organization_id, status")
       .eq("id", fieldOperationId)
       .single();
 
@@ -61,7 +64,17 @@ export async function POST(
       );
     }
 
-    const hasAccess = await validateBranchAccess(user.id, operation.branch_id);
+    let hasAccess = await validateBranchAccess(user.id, operation.branch_id);
+    if (!hasAccess) {
+      const branchContext = await getBranchContext(request, user.id);
+      if (
+        branchContext.isSuperAdmin &&
+        branchContext.organizationId &&
+        operation.organization_id === branchContext.organizationId
+      ) {
+        hasAccess = true;
+      }
+    }
     if (!hasAccess) {
       return NextResponse.json(
         { error: "No tiene acceso a este operativo" },

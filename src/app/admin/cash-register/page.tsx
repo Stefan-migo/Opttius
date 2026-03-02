@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import {
   extractDataFromResponse,
   extractTotalFromResponse,
@@ -57,7 +58,10 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useBranch } from "@/hooks/useBranch";
-import { getBranchHeader } from "@/lib/utils/branch";
+import {
+  getBranchHeader,
+  getBranchAndOperativoHeaders,
+} from "@/lib/utils/branch";
 import { Pagination } from "@/components/ui/pagination";
 import Link from "next/link";
 import { formatCurrency, formatDate, formatDateTime } from "@/lib/utils";
@@ -149,7 +153,15 @@ interface Movement {
 }
 
 export default function CashRegisterPage() {
+  const searchParams = useSearchParams();
+  const fieldOperationIdFromUrl = searchParams.get("field_operation_id");
   const { currentBranchId, isSuperAdmin } = useBranch();
+  const [fieldOperation, setFieldOperation] = useState<{
+    id: string;
+    name: string;
+    branch_id: string;
+  } | null>(null);
+  const [loadingFieldOperation, setLoadingFieldOperation] = useState(false);
   const [closures, setClosures] = useState<CashClosure[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCloseDialog, setShowCloseDialog] = useState(false);
@@ -226,7 +238,40 @@ export default function CashRegisterPage() {
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
   const [orderFiltersExpanded, setOrderFiltersExpanded] = useState(false);
 
-  const isGlobalView = !currentBranchId && isSuperAdmin;
+  const effectiveBranchId =
+    fieldOperation?.branch_id ?? currentBranchId ?? null;
+  const isOperativoMode = !!fieldOperationIdFromUrl && !!fieldOperation;
+  const effectiveHeaders = getBranchAndOperativoHeaders(
+    effectiveBranchId,
+    fieldOperationIdFromUrl,
+  );
+  const isGlobalView =
+    !effectiveBranchId && isSuperAdmin && !fieldOperationIdFromUrl;
+
+  useEffect(() => {
+    if (!fieldOperationIdFromUrl) {
+      setFieldOperation(null);
+      return;
+    }
+    setLoadingFieldOperation(true);
+    fetch(`/api/admin/field-operations/${fieldOperationIdFromUrl}`)
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        const payload = data?.data ?? data;
+        const op = payload?.fieldOperation ?? payload;
+        if (op?.id && op?.branch_id) {
+          setFieldOperation({
+            id: op.id,
+            name: op.name || "Operativo",
+            branch_id: op.branch_id,
+          });
+        } else {
+          setFieldOperation(null);
+        }
+      })
+      .catch(() => setFieldOperation(null))
+      .finally(() => setLoadingFieldOperation(false));
+  }, [fieldOperationIdFromUrl]);
 
   // Reset filtros de fecha al día actual (Chile) al cambiar sucursal
   useEffect(() => {
@@ -236,26 +281,47 @@ export default function CashRegisterPage() {
       date_from: today,
       date_to: today,
     }));
-  }, [currentBranchId]);
+  }, [effectiveBranchId]);
 
   useEffect(() => {
+    if (fieldOperationIdFromUrl && !fieldOperation) return;
     fetchClosures();
     checkCashStatus();
     // Load orders by default (incl. super admin Vista Global - API filters by org)
     fetchOrders();
-  }, [currentBranchId, isGlobalView]);
+  }, [
+    effectiveBranchId,
+    isGlobalView,
+    fieldOperationIdFromUrl,
+    fieldOperation,
+  ]);
 
   // Refetch closures when pagination changes
   useEffect(() => {
+    if (fieldOperationIdFromUrl && !fieldOperation) return;
     fetchClosures();
-  }, [closuresCurrentPage, closuresItemsPerPage, currentBranchId]);
+  }, [
+    closuresCurrentPage,
+    closuresItemsPerPage,
+    effectiveBranchId,
+    fieldOperationIdFromUrl,
+    fieldOperation,
+  ]);
 
   // Refetch orders when pagination changes
   useEffect(() => {
-    if (!isGlobalView) {
+    if (!isGlobalView && (!fieldOperationIdFromUrl || fieldOperation)) {
       fetchOrders();
     }
-  }, [ordersCurrentPage, ordersItemsPerPage, orderFilters, currentBranchId]);
+  }, [
+    ordersCurrentPage,
+    ordersItemsPerPage,
+    orderFilters,
+    effectiveBranchId,
+    isGlobalView,
+    fieldOperationIdFromUrl,
+    fieldOperation,
+  ]);
 
   const checkCashStatus = async () => {
     if (isGlobalView) {
@@ -265,9 +331,7 @@ export default function CashRegisterPage() {
 
     setCheckingCashStatus(true);
     try {
-      const headers: HeadersInit = {
-        ...getBranchHeader(currentBranchId),
-      };
+      const headers: HeadersInit = { ...effectiveHeaders };
 
       const response = await fetch("/api/admin/cash-register/open", {
         headers,
@@ -304,15 +368,19 @@ export default function CashRegisterPage() {
     try {
       const headers: HeadersInit = {
         "Content-Type": "application/json",
-        ...getBranchHeader(currentBranchId),
+        ...effectiveHeaders,
       };
+
+      const body: Record<string, unknown> = {
+        opening_cash_amount: parseFloat(openingCashInput),
+      };
+      if (fieldOperationIdFromUrl)
+        body.field_operation_id = fieldOperationIdFromUrl;
 
       const response = await fetch("/api/admin/cash-register/open", {
         method: "POST",
         headers,
-        body: JSON.stringify({
-          opening_cash_amount: parseFloat(openingCashInput),
-        }),
+        body: JSON.stringify(body),
       });
 
       if (response.ok) {
@@ -338,9 +406,7 @@ export default function CashRegisterPage() {
   const fetchOrders = async () => {
     setLoadingOrders(true);
     try {
-      const headers: HeadersInit = {
-        ...getBranchHeader(currentBranchId),
-      };
+      const headers: HeadersInit = { ...effectiveHeaders };
 
       const offset = (ordersCurrentPage - 1) * ordersItemsPerPage;
       const params = new URLSearchParams({
@@ -443,7 +509,7 @@ export default function CashRegisterPage() {
         fetchMovements(currentSessionId);
       }
     }
-  }, [showCloseDialog, currentSessionId, currentBranchId]);
+  }, [showCloseDialog, currentSessionId, effectiveBranchId]);
 
   // Fetch orders when filters change
   useEffect(() => {
@@ -453,15 +519,16 @@ export default function CashRegisterPage() {
   const fetchClosures = async () => {
     setLoading(true);
     try {
-      const headers: HeadersInit = {
-        ...getBranchHeader(currentBranchId),
-      };
+      const headers: HeadersInit = { ...effectiveHeaders };
 
       const offset = (closuresCurrentPage - 1) * closuresItemsPerPage;
       const params = new URLSearchParams({
         limit: closuresItemsPerPage.toString(),
         offset: offset.toString(),
       });
+      if (fieldOperationIdFromUrl) {
+        params.append("field_operation_id", fieldOperationIdFromUrl);
+      }
 
       const response = await fetch(
         `/api/admin/cash-register/closures?${params}`,
@@ -488,9 +555,7 @@ export default function CashRegisterPage() {
   const fetchDailySummary = async () => {
     setLoadingSummary(true);
     try {
-      const headers: HeadersInit = {
-        ...getBranchHeader(currentBranchId),
-      };
+      const headers: HeadersInit = { ...effectiveHeaders };
 
       const today = getTodayInTimezone("America/Santiago");
       const response = await fetch(
@@ -544,9 +609,7 @@ export default function CashRegisterPage() {
 
   const fetchCurrentSessionId = async () => {
     try {
-      const headers: HeadersInit = {
-        ...getBranchHeader(currentBranchId),
-      };
+      const headers: HeadersInit = { ...effectiveHeaders };
 
       const response = await fetch("/api/admin/cash-register/open", {
         headers,
@@ -569,9 +632,7 @@ export default function CashRegisterPage() {
 
     setLoadingMovements(true);
     try {
-      const headers: HeadersInit = {
-        ...getBranchHeader(currentBranchId),
-      };
+      const headers: HeadersInit = { ...effectiveHeaders };
 
       const response = await fetch(
         `/api/admin/cash-register/session-movements?session_id=${sessionId}`,
@@ -602,7 +663,7 @@ export default function CashRegisterPage() {
     try {
       const headers: HeadersInit = {
         "Content-Type": "application/json",
-        ...getBranchHeader(currentBranchId),
+        ...effectiveHeaders,
       };
 
       // Validar que se haya ingresado el efectivo físico contado
@@ -632,18 +693,22 @@ export default function CashRegisterPage() {
           actualCashValue - (dailySummary?.expected_cash || 0),
       });
 
+      const closeBody: Record<string, unknown> = {
+        closure_date: `${today}T00:00:00`,
+        opening_cash_amount: openingCash,
+        actual_cash: actualCashValue,
+        card_machine_debit_total: cardMachineDebit,
+        card_machine_credit_total: cardMachineCredit,
+        notes: notes || null,
+        discrepancies: discrepancies || null,
+      };
+      if (fieldOperationIdFromUrl)
+        closeBody.field_operation_id = fieldOperationIdFromUrl;
+
       const response = await fetch("/api/admin/cash-register/close", {
         method: "POST",
         headers,
-        body: JSON.stringify({
-          closure_date: `${today}T00:00:00`,
-          opening_cash_amount: openingCash,
-          actual_cash: actualCashValue,
-          card_machine_debit_total: cardMachineDebit,
-          card_machine_credit_total: cardMachineCredit,
-          notes: notes || null,
-          discrepancies: discrepancies || null,
-        }),
+        body: JSON.stringify(closeBody),
       });
 
       if (!response.ok) {
@@ -696,7 +761,7 @@ export default function CashRegisterPage() {
     try {
       const headers: HeadersInit = {
         "Content-Type": "application/json",
-        ...getBranchHeader(currentBranchId),
+        ...effectiveHeaders,
       };
 
       const response = await fetch("/api/admin/cash-register/reopen", {
@@ -728,7 +793,7 @@ export default function CashRegisterPage() {
   const fetchCreditNotes = async () => {
     setLoadingCreditNotes(true);
     try {
-      const headers = getBranchHeader(currentBranchId);
+      const headers = effectiveHeaders;
       const { date_from, date_to } = getCreditNotesDateRange();
       const params = new URLSearchParams({
         date_from,
@@ -759,7 +824,7 @@ export default function CashRegisterPage() {
     try {
       const headers: HeadersInit = {
         "Content-Type": "application/json",
-        ...getBranchHeader(currentBranchId),
+        ...effectiveHeaders,
       };
 
       const body: Record<string, unknown> = {
@@ -807,9 +872,7 @@ export default function CashRegisterPage() {
   const handleDeleteOrder = async (orderId: string) => {
     setProcessingOrderAction(true);
     try {
-      const headers: HeadersInit = {
-        ...getBranchHeader(currentBranchId),
-      };
+      const headers: HeadersInit = { ...effectiveHeaders };
 
       const response = await fetch(`/api/admin/orders/${orderId}/delete`, {
         method: "DELETE",
@@ -882,22 +945,58 @@ export default function CashRegisterPage() {
       ? actualCash - (dailySummary.expected_cash || 0)
       : null;
 
+  if (fieldOperationIdFromUrl && loadingFieldOperation) {
+    return (
+      <div className="flex items-center justify-center py-24">
+        <RefreshCw className="h-8 w-8 animate-spin text-epoch-primary" />
+      </div>
+    );
+  }
+
+  if (fieldOperationIdFromUrl && !fieldOperation) {
+    return (
+      <div className="space-y-6">
+        <p className="text-admin-text-secondary">Operativo no encontrado.</p>
+        <Link href="/admin/cash-register">
+          <Button variant="outline">Volver a Caja</Button>
+        </Link>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6 pb-20 lg:pb-0 min-w-0">
+      {/* Operativo mode banner */}
+      {isOperativoMode && fieldOperation && (
+        <div className="rounded-lg border border-admin-accent-primary/30 bg-admin-accent-primary/10 px-4 py-2 text-sm text-admin-text-primary">
+          Modo operativo: <strong>{fieldOperation.name}</strong>
+        </div>
+      )}
+
       {/* Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="space-y-4">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold text-epoch-primary">
-            Caja
+            {isOperativoMode && fieldOperation
+              ? `Caja - ${fieldOperation.name}`
+              : "Caja"}
           </h1>
-          <p className="text-sm text-admin-text-tertiary">
+          <p className="text-sm text-admin-text-tertiary mt-1">
             {isGlobalView
               ? "Gestión de caja - Todas las sucursales"
-              : "Gestión de caja diaria"}
+              : isOperativoMode
+                ? "Caja independiente del operativo en terreno"
+                : "Gestión de caja diaria"}
           </p>
         </div>
-        <div className="flex items-center justify-between gap-2 w-full sm:min-w-[280px]">
-          <Link href="/admin/pos">
+        <div className="flex flex-wrap items-center gap-2">
+          <Link
+            href={
+              isOperativoMode && fieldOperationIdFromUrl
+                ? `/admin/pos?field_operation_id=${fieldOperationIdFromUrl}`
+                : "/admin/pos"
+            }
+          >
             <Button variant="outline" size="sm" className="shrink-0">
               <ArrowLeft className="h-4 w-4 mr-2" />
               Volver al POS
@@ -905,7 +1004,7 @@ export default function CashRegisterPage() {
           </Link>
           <Button
             onClick={() => setShowCloseDialog(true)}
-            disabled={!currentBranchId && !isSuperAdmin}
+            disabled={!effectiveBranchId && !isSuperAdmin}
             className="shrink-0"
           >
             <DollarSign className="h-4 w-4 mr-2" />
@@ -1008,7 +1107,7 @@ export default function CashRegisterPage() {
       )}
 
       {/* Daily Summary Card (if branch selected) */}
-      {currentBranchId && dailySummary && (
+      {effectiveBranchId && dailySummary && (
         <Card className="bg-admin-bg-tertiary">
           <CardHeader className="pb-2 pt-4 sm:pt-6">
             <CardTitle className="text-sm sm:text-base flex items-center gap-2">
@@ -1100,8 +1199,10 @@ export default function CashRegisterPage() {
                     No hay cierres de caja
                   </h3>
                   <p className="text-admin-text-tertiary">
-                    {currentBranchId
-                      ? "Aún no se ha cerrado la caja para esta sucursal"
+                    {effectiveBranchId
+                      ? isOperativoMode
+                        ? "Aún no se ha cerrado la caja para este operativo"
+                        : "Aún no se ha cerrado la caja para esta sucursal"
                       : "Seleccione una sucursal para ver sus cierres de caja"}
                   </p>
                 </div>
@@ -2335,13 +2436,29 @@ export default function CashRegisterPage() {
           )}
 
           <DialogFooter className="flex-col-reverse sm:flex-row gap-2 sm:gap-0 pt-2">
-            <Button
-              variant="outline"
-              onClick={() => setShowCloseDialog(false)}
-              className="w-full sm:w-auto min-h-[44px] sm:min-h-0 order-2 sm:order-1"
-            >
-              Cancelar
-            </Button>
+            <div className="flex flex-wrap gap-2 w-full sm:w-auto order-2 sm:order-1">
+              {isOperativoMode && fieldOperationIdFromUrl && (
+                <Link
+                  href={`/admin/field-operations/${fieldOperationIdFromUrl}`}
+                  className="inline-flex"
+                >
+                  <Button
+                    variant="outline"
+                    className="w-full sm:w-auto min-h-[44px] sm:min-h-0"
+                  >
+                    <ArrowLeft className="h-4 w-4 mr-2" />
+                    Volver al operativo
+                  </Button>
+                </Link>
+              )}
+              <Button
+                variant="outline"
+                onClick={() => setShowCloseDialog(false)}
+                className="w-full sm:w-auto min-h-[44px] sm:min-h-0"
+              >
+                Cancelar
+              </Button>
+            </div>
             <Button
               onClick={handleCloseCashRegister}
               disabled={closing || !dailySummary}

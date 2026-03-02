@@ -83,16 +83,27 @@ export default function QuotesPage() {
   const { currentBranchId, isSuperAdmin, branches } = useBranch();
   const isGlobalView = !currentBranchId && isSuperAdmin;
   const [operativoName, setOperativoName] = useState<string | null>(null);
+  const [operativoBranchId, setOperativoBranchId] = useState<string | null>(
+    null,
+  );
 
   useEffect(() => {
     if (!fieldOperationIdFromUrl) {
       setOperativoName(null);
+      setOperativoBranchId(null);
       return;
     }
     fetch(`/api/admin/field-operations/${fieldOperationIdFromUrl}`)
       .then((r) => r.json())
-      .then((j) => setOperativoName(j?.data?.fieldOperation?.name ?? null))
-      .catch(() => setOperativoName(null));
+      .then((j) => {
+        const fo = j?.data?.fieldOperation;
+        setOperativoName(fo?.name ?? null);
+        setOperativoBranchId(fo?.branch_id ?? null);
+      })
+      .catch(() => {
+        setOperativoName(null);
+        setOperativoBranchId(null);
+      });
   }, [fieldOperationIdFromUrl]);
 
   const [quotes, setQuotes] = useState<Quote[]>([]);
@@ -538,7 +549,13 @@ export default function QuotesPage() {
                             </Link>
                             {quote.status !== "accepted" &&
                               !quote.converted_to_work_order_id && (
-                                <Link href={`/admin/pos?quoteId=${quote.id}`}>
+                                <Link
+                                  href={
+                                    fieldOperationIdFromUrl
+                                      ? `/admin/pos?quoteId=${quote.id}&field_operation_id=${fieldOperationIdFromUrl}`
+                                      : `/admin/pos?quoteId=${quote.id}`
+                                  }
+                                >
                                   <Button
                                     variant="outline"
                                     size="sm"
@@ -615,6 +632,7 @@ export default function QuotesPage() {
             onSuccess={handleQuoteCreated}
             onCancel={() => setShowCreateQuote(false)}
             initialFieldOperationId={fieldOperationIdFromUrl || undefined}
+            initialBranchId={operativoBranchId ?? undefined}
           />
         </DialogContent>
       </Dialog>

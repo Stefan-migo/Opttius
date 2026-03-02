@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient, createServiceRoleClient } from "@/utils/supabase/server";
 import {
   getBranchContext,
+  getFieldOperationFromRequest,
   validateBranchAccess,
 } from "@/lib/api/branch-middleware";
 import { appLogger as logger } from "@/lib/logger";
@@ -36,11 +37,35 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Get branch context
+    // Get branch context and optional operativo context
     const branchContext = await getBranchContext(request, user.id);
+    const fieldOperationId = getFieldOperationFromRequest(request);
+
+    let effectiveBranchId = branchContext.branchId;
+    if (fieldOperationId) {
+      const { data: fieldOp } = await supabaseServiceRole
+        .from("field_operations")
+        .select("id, branch_id")
+        .eq("id", fieldOperationId)
+        .single();
+      if (!fieldOp) {
+        return NextResponse.json(
+          { error: "Operativo no encontrado" },
+          { status: 404 },
+        );
+      }
+      const hasAccess = await validateBranchAccess(user.id, fieldOp.branch_id);
+      if (!hasAccess) {
+        return NextResponse.json(
+          { error: "No tiene acceso a este operativo" },
+          { status: 403 },
+        );
+      }
+      effectiveBranchId = fieldOp.branch_id;
+    }
 
     // Validate branch access for non-super admins
-    if (!branchContext.isSuperAdmin && !branchContext.branchId) {
+    if (!branchContext.isSuperAdmin && !effectiveBranchId) {
       return NextResponse.json(
         {
           error: "Debe seleccionar una sucursal",
@@ -56,12 +81,18 @@ export async function GET(request: NextRequest) {
     let dateStr = closureDate.toISOString().split("T")[0]; // YYYY-MM-DD
 
     // Align summary date with the currently open session if it differs
-    if (branchContext.branchId) {
-      const { data: openSession } = await supabaseServiceRole
+    if (effectiveBranchId) {
+      let sessionQuery = supabaseServiceRole
         .from("pos_sessions")
         .select("id, opening_time")
-        .eq("branch_id", branchContext.branchId)
-        .eq("status", "open")
+        .eq("branch_id", effectiveBranchId)
+        .eq("status", "open");
+      if (fieldOperationId) {
+        sessionQuery = sessionQuery.eq("field_operation_id", fieldOperationId);
+      } else {
+        sessionQuery = sessionQuery.is("field_operation_id", null);
+      }
+      const { data: openSession } = await sessionQuery
         .order("opening_time", { ascending: false })
         .limit(1)
         .maybeSingle();
@@ -73,7 +104,7 @@ export async function GET(request: NextRequest) {
             requestedDate: dateStr,
             sessionDate: sessionDateStr,
             sessionId: openSession.id,
-            branchId: branchContext.branchId,
+            branchId: effectiveBranchId,
           });
           dateStr = sessionDateStr;
         }
@@ -88,9 +119,14 @@ export async function GET(request: NextRequest) {
       .gte("created_at", `${dateStr}T00:00:00`)
       .lt("created_at", `${dateStr}T23:59:59`);
 
-    // Filter by branch
-    if (branchContext.branchId) {
-      ordersQuery = ordersQuery.eq("branch_id", branchContext.branchId);
+    // Filter by branch and optional operativo
+    if (effectiveBranchId) {
+      ordersQuery = ordersQuery.eq("branch_id", effectiveBranchId);
+      if (fieldOperationId) {
+        ordersQuery = ordersQuery.eq("field_operation_id", fieldOperationId);
+      } else {
+        ordersQuery = ordersQuery.is("field_operation_id", null);
+      }
     } else if (!branchContext.isSuperAdmin) {
       // Regular admin without branch selected - return empty
       return NextResponse.json({
@@ -118,7 +154,7 @@ export async function GET(request: NextRequest) {
       logger.error("Error fetching orders:", {
         error: ordersError,
         date: dateStr,
-        branchId: branchContext.branchId,
+        branchId: effectiveBranchId,
       });
       return NextResponse.json(
         {
@@ -136,15 +172,20 @@ export async function GET(request: NextRequest) {
     let sessionPayments: any[] = [];
     let sessionId: string | null = null;
 
-    if (branchContext.branchId) {
-      // Primero intentar encontrar sesión "open"
-      const { data: openSession } = await supabaseServiceRole
+    if (effectiveBranchId) {
+      let sessionQuery = supabaseServiceRole
         .from("pos_sessions")
         .select("id, opening_cash_amount, status, reopen_count")
-        .eq("branch_id", branchContext.branchId)
+        .eq("branch_id", effectiveBranchId)
         .eq("status", "open")
         .gte("opening_time", `${dateStr}T00:00:00`)
-        .lt("opening_time", `${dateStr}T23:59:59`)
+        .lt("opening_time", `${dateStr}T23:59:59`);
+      if (fieldOperationId) {
+        sessionQuery = sessionQuery.eq("field_operation_id", fieldOperationId);
+      } else {
+        sessionQuery = sessionQuery.is("field_operation_id", null);
+      }
+      const { data: openSession } = await sessionQuery
         .order("opening_time", { ascending: false })
         .limit(1)
         .maybeSingle();
@@ -152,13 +193,21 @@ export async function GET(request: NextRequest) {
       let posSession = openSession;
 
       if (!posSession) {
-        // Si no hay sesión "open", buscar la última sesión del día (puede estar "closed" si fue reabierta)
-        const { data: lastSession } = await supabaseServiceRole
+        let lastSessionQuery = supabaseServiceRole
           .from("pos_sessions")
           .select("id, opening_cash_amount, status, reopen_count")
-          .eq("branch_id", branchContext.branchId)
+          .eq("branch_id", effectiveBranchId)
           .gte("opening_time", `${dateStr}T00:00:00`)
-          .lt("opening_time", `${dateStr}T23:59:59`)
+          .lt("opening_time", `${dateStr}T23:59:59`);
+        if (fieldOperationId) {
+          lastSessionQuery = lastSessionQuery.eq(
+            "field_operation_id",
+            fieldOperationId,
+          );
+        } else {
+          lastSessionQuery = lastSessionQuery.is("field_operation_id", null);
+        }
+        const { data: lastSession } = await lastSessionQuery
           .order("opening_time", { ascending: false })
           .limit(1)
           .maybeSingle();
@@ -207,7 +256,8 @@ export async function GET(request: NextRequest) {
     // Calculate summary
     const summary = {
       date: dateStr,
-      branch_id: branchContext.branchId,
+      branch_id: effectiveBranchId,
+      field_operation_id: fieldOperationId || null,
       total_sales: 0,
       total_transactions:
         sessionPayments.length > 0
@@ -334,13 +384,18 @@ export async function GET(request: NextRequest) {
 
     // ✅ NUEVO: Obtener cierre anterior si existe (para reaperturas)
     let previousClosure = null;
-    if (branchContext.branchId) {
-      const { data: existingClosure } = await supabaseServiceRole
+    if (effectiveBranchId) {
+      let closureQuery = supabaseServiceRole
         .from("cash_register_closures")
         .select("*")
-        .eq("branch_id", branchContext.branchId)
-        .eq("closure_date", dateStr)
-        .maybeSingle();
+        .eq("branch_id", effectiveBranchId)
+        .eq("closure_date", dateStr);
+      if (fieldOperationId) {
+        closureQuery = closureQuery.eq("field_operation_id", fieldOperationId);
+      } else {
+        closureQuery = closureQuery.is("field_operation_id", null);
+      }
+      const { data: existingClosure } = await closureQuery.maybeSingle();
 
       if (
         existingClosure &&
@@ -401,11 +456,35 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get branch context
+    // Get branch context and optional operativo context
     const branchContext = await getBranchContext(request, user.id);
+    const fieldOperationId = getFieldOperationFromRequest(request);
+
+    let effectiveBranchId = branchContext.branchId;
+    if (fieldOperationId) {
+      const { data: fieldOp } = await supabaseServiceRole
+        .from("field_operations")
+        .select("id, branch_id")
+        .eq("id", fieldOperationId)
+        .single();
+      if (!fieldOp) {
+        return NextResponse.json(
+          { error: "Operativo no encontrado" },
+          { status: 404 },
+        );
+      }
+      const hasAccess = await validateBranchAccess(user.id, fieldOp.branch_id);
+      if (!hasAccess) {
+        return NextResponse.json(
+          { error: "No tiene acceso a este operativo" },
+          { status: 403 },
+        );
+      }
+      effectiveBranchId = fieldOp.branch_id;
+    }
 
     // Validate branch access for non-super admins
-    if (!branchContext.isSuperAdmin && !branchContext.branchId) {
+    if (!branchContext.isSuperAdmin && !effectiveBranchId) {
       return NextResponse.json(
         {
           error: "Debe seleccionar una sucursal para cerrar la caja",
@@ -451,14 +530,22 @@ export async function POST(request: NextRequest) {
     // Get date string early for use in queries
     let dateStr = closure_date.split("T")[0];
 
-    // Check if there's an open session for this branch and close it
-    // (Do not filter by date to avoid mismatches)
+    // Check if there's an open session for this branch/operativo and close it
+    let openSessionQuery = supabaseServiceRole
+      .from("pos_sessions")
+      .select("id, status, reopen_count, opening_time")
+      .eq("branch_id", effectiveBranchId!)
+      .eq("status", "open");
+    if (fieldOperationId) {
+      openSessionQuery = openSessionQuery.eq(
+        "field_operation_id",
+        fieldOperationId,
+      );
+    } else {
+      openSessionQuery = openSessionQuery.is("field_operation_id", null);
+    }
     const { data: openSession, error: openSessionError } =
-      await supabaseServiceRole
-        .from("pos_sessions")
-        .select("id, status, reopen_count, opening_time")
-        .eq("branch_id", branchContext.branchId!)
-        .eq("status", "open")
+      await openSessionQuery
         .order("opening_time", { ascending: false })
         .limit(1)
         .maybeSingle();
@@ -476,7 +563,7 @@ export async function POST(request: NextRequest) {
           requestedDate: dateStr,
           sessionDate: sessionDateStr,
           sessionId: openSession.id,
-          branchId: branchContext.branchId,
+          branchId: effectiveBranchId,
         });
         dateStr = sessionDateStr;
       }
@@ -487,12 +574,24 @@ export async function POST(request: NextRequest) {
 
     // If no open session, check if there's a closure with a session_id (reopened case)
     if (!sessionIdForClosure) {
-      const { data: existingClosure } = await supabaseServiceRole
+      let existingClosureQuery = supabaseServiceRole
         .from("cash_register_closures")
         .select("pos_session_id")
-        .eq("branch_id", branchContext.branchId!)
-        .eq("closure_date", dateStr)
-        .maybeSingle();
+        .eq("branch_id", effectiveBranchId!)
+        .eq("closure_date", dateStr);
+      if (fieldOperationId) {
+        existingClosureQuery = existingClosureQuery.eq(
+          "field_operation_id",
+          fieldOperationId,
+        );
+      } else {
+        existingClosureQuery = existingClosureQuery.is(
+          "field_operation_id",
+          null,
+        );
+      }
+      const { data: existingClosure } =
+        await existingClosureQuery.maybeSingle();
 
       if (existingClosure?.pos_session_id) {
         sessionIdForClosure = existingClosure.pos_session_id;
@@ -533,8 +632,13 @@ export async function POST(request: NextRequest) {
       .gte("created_at", `${dateStr}T00:00:00`)
       .lt("created_at", `${dateStr}T23:59:59`);
 
-    if (branchContext.branchId) {
-      ordersQuery = ordersQuery.eq("branch_id", branchContext.branchId);
+    if (effectiveBranchId) {
+      ordersQuery = ordersQuery.eq("branch_id", effectiveBranchId);
+      if (fieldOperationId) {
+        ordersQuery = ordersQuery.eq("field_operation_id", fieldOperationId);
+      } else {
+        ordersQuery = ordersQuery.is("field_operation_id", null);
+      }
     }
 
     const { data: orders, error: ordersError } = await ordersQuery;
@@ -543,7 +647,7 @@ export async function POST(request: NextRequest) {
       logger.error("Error fetching orders for closure:", {
         error: ordersError,
         closureDate: closure_date,
-        branchId: branchContext.branchId,
+        branchId: effectiveBranchId,
       });
       return NextResponse.json(
         {
@@ -768,21 +872,32 @@ export async function POST(request: NextRequest) {
       ? new Date(openSession.opening_time)
       : new Date(`${dateStr}T00:00:00`);
 
-    // Check if closure already exists for this branch and date
+    // Check if closure already exists for this branch/operativo and date
+    let existingClosureQuery = supabaseServiceRole
+      .from("cash_register_closures")
+      .select("id, status, pos_session_id")
+      .eq("branch_id", effectiveBranchId!)
+      .eq("closure_date", dateStr);
+    if (fieldOperationId) {
+      existingClosureQuery = existingClosureQuery.eq(
+        "field_operation_id",
+        fieldOperationId,
+      );
+    } else {
+      existingClosureQuery = existingClosureQuery.is(
+        "field_operation_id",
+        null,
+      );
+    }
     const { data: existingClosure, error: existingClosureError } =
-      await supabaseServiceRole
-        .from("cash_register_closures")
-        .select("id, status, pos_session_id")
-        .eq("branch_id", branchContext.branchId)
-        .eq("closure_date", dateStr)
-        .maybeSingle();
+      await existingClosureQuery.maybeSingle();
 
     if (existingClosureError) {
       logger.error("Error checking existing closure:", {
         error: existingClosureError.message || existingClosureError,
         code: existingClosureError.code,
         details: existingClosureError.details,
-        branchId: branchContext.branchId,
+        branchId: effectiveBranchId,
         dateStr,
       });
       return NextResponse.json(
@@ -815,16 +930,16 @@ export async function POST(request: NextRequest) {
       logger.warn("Updating a closed closure due to open session", {
         closureId: existingClosure.id,
         sessionId: openSession?.id,
-        branchId: branchContext.branchId,
+        branchId: effectiveBranchId,
         dateStr,
       });
     }
 
     // Validate branch_id is not null before inserting
-    if (!branchContext.branchId) {
+    if (!effectiveBranchId) {
       logger.error("branch_id is null when trying to create closure", {
         isSuperAdmin: branchContext.isSuperAdmin,
-        branchId: branchContext.branchId,
+        branchId: effectiveBranchId,
       });
       return NextResponse.json(
         {
@@ -846,11 +961,12 @@ export async function POST(request: NextRequest) {
     }
 
     // Log closure data before insert/update
-    const closureData = {
-      branch_id: branchContext.branchId,
+    const closureData: Record<string, unknown> = {
+      branch_id: effectiveBranchId,
       closure_date: dateStr,
       closed_by: user.id,
       pos_session_id: sessionIdForClosure || null,
+      ...(fieldOperationId && { field_operation_id: fieldOperationId }),
       opening_cash_amount: Number(opening_cash_amount),
       total_sales: totalSales,
       total_transactions:
@@ -930,7 +1046,8 @@ export async function POST(request: NextRequest) {
     } else {
       // Insert new closure (normal case - no existing closure)
       logger.info("Inserting new closure", {
-        branchId: branchContext.branchId,
+        branchId: effectiveBranchId,
+        fieldOperationId: fieldOperationId || undefined,
         closureDate: dateStr,
       });
       closureResponse = await supabaseServiceRole
@@ -949,7 +1066,7 @@ export async function POST(request: NextRequest) {
         details: closureError.details,
         hint: closureError.hint,
         closureDate: closure_date,
-        branchId: branchContext.branchId,
+        branchId: effectiveBranchId,
         existingClosure: existingClosure
           ? { id: existingClosure.id, status: existingClosure.status }
           : null,

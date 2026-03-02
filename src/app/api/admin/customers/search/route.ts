@@ -368,13 +368,9 @@ export async function GET(request: NextRequest) {
             throw error;
           }
 
-          // When in operativo mode, filter to only customers linked to this operativo (RPC doesn't support field_operation_id)
-          let finalCustomers = customers || [];
-          if (fieldOperationId) {
-            finalCustomers = finalCustomers.filter(
-              (c: any) => c.field_operation_id === fieldOperationId,
-            );
-          }
+          // When field_operation_id is present, buildFilteredCustomersQuery already
+          // filters by it at DB level - no extra filter needed (select doesn't include field_operation_id)
+          const finalCustomers = customers || [];
 
           logger.debug("Found customers", { count: finalCustomers.length });
 

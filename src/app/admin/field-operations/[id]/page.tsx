@@ -49,6 +49,13 @@ import {
   Trash2,
   Stethoscope,
   FilePlus,
+  Eye,
+  Banknote,
+  Factory,
+  CheckCircle,
+  XCircle,
+  AlertCircle,
+  RotateCcw,
 } from "lucide-react";
 import Link from "next/link";
 import { useBranch } from "@/hooks/useBranch";
@@ -60,8 +67,10 @@ import {
   customerService,
   type Customer,
 } from "@/lib/api/services/customerService";
-import { quoteService, type Quote } from "@/lib/api/services";
+import { quoteService, posService, type Quote } from "@/lib/api/services";
 import AddCustomerForm from "@/components/admin/AddCustomerForm";
+import { getBranchAndOperativoHeaders } from "@/lib/utils/branch";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const CreateQuoteForm = dynamic(
   () => import("@/components/admin/CreateQuoteForm"),
@@ -124,6 +133,11 @@ interface WorkOrderItem {
   work_order_number: string;
   status: string;
   total_amount: number;
+  payment_status?: string;
+  frame_name?: string;
+  lens_type?: string;
+  lens_material?: string;
+  lab_name?: string;
   customer?: { first_name?: string; last_name?: string; email?: string };
 }
 
@@ -137,9 +151,9 @@ export default function FieldOperationDetailPage() {
     "resumen",
     "clientes",
     "presupuestos",
-    "stock",
     "trabajos",
     "entrega",
+    "stock",
   ].includes(tabFromUrl || "")
     ? tabFromUrl!
     : "resumen";
@@ -171,6 +185,17 @@ export default function FieldOperationDetailPage() {
   >(null);
   const [deleteCustomerId, setDeleteCustomerId] = useState<string | null>(null);
   const [deletingCustomer, setDeletingCustomer] = useState(false);
+  const [deleteQuoteId, setDeleteQuoteId] = useState<string | null>(null);
+  const [deletingQuote, setDeletingQuote] = useState(false);
+  const [cashStatus, setCashStatus] = useState<{
+    isOpen: boolean;
+    session?: { opening_cash_amount?: number };
+  } | null>(null);
+  const [loadingCashStatus, setLoadingCashStatus] = useState(false);
+  const [showOpenCashDialog, setShowOpenCashDialog] = useState(false);
+  const [openingCashAmount, setOpeningCashAmount] = useState("");
+  const [openingCash, setOpeningCash] = useState(false);
+  const [returningStock, setReturningStock] = useState(false);
 
   useEffect(() => {
     if (id) fetchDetail();
@@ -236,6 +261,59 @@ export default function FieldOperationDetailPage() {
     }
   };
 
+  const fetchCashStatus = async () => {
+    if (!operation?.branch_id || !id) return;
+    setLoadingCashStatus(true);
+    try {
+      const status = await posService.getCashStatus(operation.branch_id, id);
+      setCashStatus({
+        isOpen: status?.isOpen ?? false,
+        session: status?.session,
+      });
+    } catch {
+      setCashStatus(null);
+    } finally {
+      setLoadingCashStatus(false);
+    }
+  };
+
+  useEffect(() => {
+    if (operation) fetchCashStatus();
+  }, [operation?.id, operation?.branch_id]);
+
+  const handleOpenCash = async () => {
+    const amount = parseFloat(openingCashAmount);
+    if (isNaN(amount) || amount < 0) {
+      toast.error("Ingrese un monto válido");
+      return;
+    }
+    if (!operation?.branch_id || !id) return;
+    setOpeningCash(true);
+    try {
+      const headers = getBranchAndOperativoHeaders(operation.branch_id, id);
+      const res = await fetch("/api/admin/cash-register/open", {
+        method: "POST",
+        headers: { ...headers, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          opening_cash_amount: amount,
+          field_operation_id: id,
+        }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err?.error || "Error al abrir caja");
+      }
+      toast.success("Caja abierta");
+      setShowOpenCashDialog(false);
+      setOpeningCashAmount("");
+      fetchCashStatus();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Error al abrir caja");
+    } finally {
+      setOpeningCash(false);
+    }
+  };
+
   useEffect(() => {
     if (operation) {
       fetchCustomers();
@@ -281,7 +359,9 @@ export default function FieldOperationDetailPage() {
     try {
       const headers: HeadersInit = {
         "Content-Type": "application/json",
-        ...getBranchHeader(currentBranchId),
+        ...(operation?.branch_id
+          ? getBranchAndOperativoHeaders(operation.branch_id, id)
+          : getBranchHeader(currentBranchId)),
       };
       const response = await fetch(`/api/admin/field-operations/${id}`, {
         method: "PUT",
@@ -291,10 +371,45 @@ export default function FieldOperationDetailPage() {
       if (!response.ok) throw new Error("Error al actualizar estado");
       setOperation((prev) => (prev ? { ...prev, status: newStatus } : null));
       toast.success("Estado actualizado");
+      if (newStatus === "completed") fetchDetail();
     } catch {
       toast.error("Error al actualizar estado");
     } finally {
       setUpdatingStatus(false);
+    }
+  };
+
+  const handleReturnStock = async () => {
+    if (!operation?.branch_id || !id || mobileStock.length === 0) return;
+    setReturningStock(true);
+    try {
+      const headers: HeadersInit = {
+        "Content-Type": "application/json",
+        ...getBranchAndOperativoHeaders(operation.branch_id, id),
+      };
+      const res = await fetch(
+        `/api/admin/field-operations/${id}/return-stock`,
+        {
+          method: "POST",
+          headers,
+          body: JSON.stringify({
+            items: mobileStock.map((m) => ({
+              product_id: m.product_id,
+              quantity: m.quantity,
+            })),
+          }),
+        },
+      );
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err?.error || "Error al devolver stock");
+      }
+      toast.success("Stock sobrante devuelto a la sucursal");
+      fetchDetail();
+    } catch (e: unknown) {
+      toast.error(e instanceof Error ? e.message : "Error al devolver stock");
+    } finally {
+      setReturningStock(false);
     }
   };
 
@@ -354,7 +469,107 @@ export default function FieldOperationDetailPage() {
     }
   };
 
+  const handleDeleteQuoteClick = (quoteId: string) => {
+    setDeleteQuoteId(quoteId);
+  };
+
+  const handleDeleteQuoteConfirm = async () => {
+    if (!deleteQuoteId) return;
+    setDeletingQuote(true);
+    try {
+      await quoteService.deleteQuote(deleteQuoteId);
+      toast.success("Presupuesto eliminado");
+      setDeleteQuoteId(null);
+      fetchQuotes();
+    } catch (err: any) {
+      toast.error(err?.message || "Error al eliminar presupuesto");
+    } finally {
+      setDeletingQuote(false);
+    }
+  };
+
   const operativoReturnUrl = `/admin/field-operations/${id}?tab=clientes`;
+
+  const getWorkOrderStatusBadge = (status: string) => {
+    const config: Record<
+      string,
+      {
+        variant: "default" | "secondary" | "outline" | "destructive";
+        label: string;
+        icon: typeof Package;
+      }
+    > = {
+      quote: { variant: "outline", label: "Presupuesto", icon: FileText },
+      ordered: { variant: "secondary", label: "Ordenado", icon: Package },
+      sent_to_lab: {
+        variant: "secondary",
+        label: "Enviado al Lab",
+        icon: Package,
+      },
+      in_progress_lab: {
+        variant: "default",
+        label: "En Laboratorio",
+        icon: Factory,
+      },
+      ready_at_lab: {
+        variant: "secondary",
+        label: "Listo en Lab",
+        icon: CheckCircle,
+      },
+      received_from_lab: {
+        variant: "secondary",
+        label: "Recibido",
+        icon: Package,
+      },
+      mounted: { variant: "secondary", label: "Montado", icon: Package },
+      quality_check: {
+        variant: "secondary",
+        label: "Control Calidad",
+        icon: Package,
+      },
+      ready_for_pickup: {
+        variant: "default",
+        label: "Listo para Retiro",
+        icon: CheckCircle,
+      },
+      delivered: { variant: "default", label: "Entregado", icon: CheckCircle },
+      cancelled: { variant: "destructive", label: "Cancelado", icon: XCircle },
+      returned: {
+        variant: "destructive",
+        label: "Devuelto",
+        icon: AlertCircle,
+      },
+    };
+    const c = config[status] || {
+      variant: "outline" as const,
+      label: status,
+      icon: Package,
+    };
+    const Icon = c.icon;
+    return (
+      <Badge variant={c.variant} className="flex items-center gap-1 w-fit">
+        <Icon className="h-3 w-3" />
+        {c.label}
+      </Badge>
+    );
+  };
+
+  const getPaymentStatusBadge = (status: string) => {
+    const config: Record<
+      string,
+      {
+        variant: "default" | "secondary" | "outline" | "destructive";
+        label: string;
+      }
+    > = {
+      pending: { variant: "outline", label: "Pendiente" },
+      partial: { variant: "secondary", label: "Parcial" },
+      paid: { variant: "default", label: "Pagado" },
+      refunded: { variant: "destructive", label: "Reembolsado" },
+    };
+    const c = config[status] || { variant: "outline" as const, label: status };
+    return <Badge variant={c.variant}>{c.label}</Badge>;
+  };
 
   return (
     <div className="space-y-6">
@@ -406,8 +621,60 @@ export default function FieldOperationDetailPage() {
         </Select>
       </div>
 
+      {mobileStock.length > 0 && operation.status !== "completed" && (
+        <Alert className="border-admin-accent-secondary/30 bg-admin-bg-secondary/5">
+          <AlertCircle className="h-4 w-4 text-admin-accent-primary" />
+          <AlertDescription className="text-admin-text-secondary text-sm">
+            Al marcar este operativo como <strong>Completado</strong>, todo el
+            stock sobrante en la bodega móvil se devolverá automáticamente al
+            inventario de la sucursal.
+          </AlertDescription>
+        </Alert>
+      )}
+
       {/* Acciones rápidas */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+        <div className="rounded-xl border border-admin-border-primary/30 bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)] p-4 min-h-[44px] flex flex-col gap-2">
+          <div className="flex items-center gap-3">
+            <Banknote className="h-5 w-5 shrink-0 text-admin-accent-primary" />
+            <span className="font-medium text-admin-text-primary">
+              Caja del operativo
+            </span>
+          </div>
+          {loadingCashStatus ? (
+            <div className="h-5 w-20 rounded bg-admin-bg-primary/50 animate-pulse" />
+          ) : cashStatus?.isOpen ? (
+            <>
+              <p className="text-sm text-admin-text-secondary">
+                Caja abierta
+                {typeof cashStatus.session?.opening_cash_amount ===
+                  "number" && (
+                  <span className="ml-1">
+                    · Inicial:{" "}
+                    {formatPrice(cashStatus.session.opening_cash_amount)}
+                  </span>
+                )}
+              </p>
+              <Link
+                href={`/admin/cash-register?field_operation_id=${id}`}
+                className="text-sm font-medium text-admin-accent-primary hover:underline"
+              >
+                Cerrar caja →
+              </Link>
+            </>
+          ) : (
+            <>
+              <p className="text-sm text-admin-text-secondary">Caja cerrada</p>
+              <button
+                type="button"
+                onClick={() => setShowOpenCashDialog(true)}
+                className="text-sm font-medium text-admin-accent-primary hover:underline text-left"
+              >
+                Abrir caja
+              </button>
+            </>
+          )}
+        </div>
         <Link
           href={`/admin/pos?field_operation_id=${id}`}
           className="block rounded-xl border border-admin-border-primary/30 bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.4)] p-4 min-h-[44px] flex items-center gap-3"
@@ -459,12 +726,6 @@ export default function FieldOperationDetailPage() {
             Presupuestos
           </TabsTrigger>
           <TabsTrigger
-            value="stock"
-            className="flex-shrink-0 text-xs sm:text-sm px-3 py-2 min-h-[44px]"
-          >
-            Stock Móvil
-          </TabsTrigger>
-          <TabsTrigger
             value="trabajos"
             className="flex-shrink-0 text-xs sm:text-sm px-3 py-2 min-h-[44px]"
           >
@@ -475,6 +736,12 @@ export default function FieldOperationDetailPage() {
             className="flex-shrink-0 text-xs sm:text-sm px-3 py-2 min-h-[44px]"
           >
             Entrega
+          </TabsTrigger>
+          <TabsTrigger
+            value="stock"
+            className="flex-shrink-0 text-xs sm:text-sm px-3 py-2 min-h-[44px]"
+          >
+            Stock Móvil
           </TabsTrigger>
         </TabsList>
 
@@ -656,6 +923,15 @@ export default function FieldOperationDetailPage() {
                         Nº
                       </TableHead>
                       <TableHead className="text-admin-text-tertiary font-semibold">
+                        Cliente
+                      </TableHead>
+                      <TableHead className="text-admin-text-tertiary font-semibold">
+                        RUT
+                      </TableHead>
+                      <TableHead className="text-admin-text-tertiary font-semibold">
+                        Teléfono / Email
+                      </TableHead>
+                      <TableHead className="text-admin-text-tertiary font-semibold">
                         Estado
                       </TableHead>
                       <TableHead className="text-admin-text-tertiary font-semibold text-right">
@@ -672,6 +948,19 @@ export default function FieldOperationDetailPage() {
                         <TableCell className="font-medium text-admin-text-primary font-mono text-sm">
                           {q.quote_number || "—"}
                         </TableCell>
+                        <TableCell className="text-admin-text-primary">
+                          {q.customer
+                            ? [q.customer.first_name, q.customer.last_name]
+                                .filter(Boolean)
+                                .join(" ") || "—"
+                            : "—"}
+                        </TableCell>
+                        <TableCell className="text-admin-text-tertiary font-mono text-sm">
+                          {q.customer?.rut ? formatRUT(q.customer.rut) : "—"}
+                        </TableCell>
+                        <TableCell className="text-admin-text-tertiary text-sm">
+                          {q.customer?.phone || q.customer?.email || "—"}
+                        </TableCell>
                         <TableCell>
                           <Badge variant="outline" className="text-xs">
                             {q.status}
@@ -681,12 +970,38 @@ export default function FieldOperationDetailPage() {
                           {formatPrice(q.total_amount ?? 0)}
                         </TableCell>
                         <TableCell>
-                          <Link
-                            href={`/admin/quotes/${q.id}`}
-                            className="text-admin-accent-primary hover:underline text-sm font-medium"
-                          >
-                            Ver
-                          </Link>
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <Link
+                              href={`/admin/quotes/${q.id}`}
+                              className="inline-flex items-center gap-1 text-admin-accent-primary hover:underline text-sm font-medium"
+                            >
+                              <Eye className="h-4 w-4" />
+                              Ver
+                            </Link>
+                            {q.status !== "accepted" &&
+                              !q.converted_to_work_order_id && (
+                                <Link
+                                  href={`/admin/pos?quoteId=${q.id}&field_operation_id=${id}`}
+                                  className="inline-flex items-center gap-1 text-green-600 hover:text-green-700 text-sm font-medium"
+                                  title="Cargar al POS del operativo"
+                                >
+                                  <ShoppingCart className="h-4 w-4" />
+                                  Cargar al POS
+                                </Link>
+                              )}
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteQuoteClick(q.id)}
+                              disabled={
+                                q.status === "accepted" ||
+                                !!q.converted_to_work_order_id
+                              }
+                              className="inline-flex items-center gap-1 text-admin-text-tertiary hover:text-red-500 text-sm disabled:opacity-50"
+                              title="Eliminar"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </button>
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -699,11 +1014,37 @@ export default function FieldOperationDetailPage() {
 
         <TabsContent value="stock" className="space-y-4 mt-4 sm:mt-6">
           <div className="rounded-xl border border-admin-border-primary/30 bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.4)] overflow-hidden">
-            <div className="p-4 sm:p-6 border-b border-admin-border-primary/20">
+            <div className="p-4 sm:p-6 border-b border-admin-border-primary/20 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
               <h3 className="flex items-center gap-2 text-admin-text-primary font-semibold">
                 <Package className="h-5 w-5 shrink-0" />
                 Stock en bodega móvil
               </h3>
+              <div className="flex items-center gap-2 flex-wrap">
+                {mobileStock.length > 0 && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={handleReturnStock}
+                    disabled={returningStock}
+                    className="min-h-[44px] border-admin-border-primary/30"
+                  >
+                    {returningStock ? (
+                      <RefreshCw className="h-4 w-4 animate-spin mr-2" />
+                    ) : (
+                      <RotateCcw className="h-4 w-4 mr-2" />
+                    )}
+                    Devolver stock sobrante
+                  </Button>
+                )}
+                <Link
+                  href={`/admin/field-operations/${id}/prepare`}
+                  className="inline-flex items-center gap-2 text-sm font-medium text-admin-accent-primary hover:text-admin-accent-secondary"
+                >
+                  <Plus className="h-4 w-4" />
+                  Agregar stock
+                </Link>
+              </div>
             </div>
             <div className="p-4 sm:p-6 pt-0">
               {mobileStock.length === 0 ? (
@@ -775,59 +1116,111 @@ export default function FieldOperationDetailPage() {
                   No hay trabajos vinculados a este operativo.
                 </p>
               ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="text-admin-text-tertiary font-semibold">
-                        Cliente
-                      </TableHead>
-                      <TableHead className="text-admin-text-tertiary font-semibold">
-                        Nº OT
-                      </TableHead>
-                      <TableHead className="text-admin-text-tertiary font-semibold">
-                        Estado
-                      </TableHead>
-                      <TableHead className="text-admin-text-tertiary font-semibold text-right">
-                        Monto
-                      </TableHead>
-                      <TableHead className="text-admin-text-tertiary font-semibold">
-                        Acciones
-                      </TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {workOrders.map((wo) => (
-                      <TableRow key={wo.id} className="hover:bg-[#AE000025]">
-                        <TableCell className="text-admin-text-primary">
-                          {wo.customer
-                            ? `${wo.customer.first_name || ""} ${wo.customer.last_name || ""}`.trim() ||
-                              wo.customer.email ||
-                              "—"
-                            : "—"}
-                        </TableCell>
-                        <TableCell className="text-admin-text-primary font-mono text-sm">
-                          {wo.work_order_number}
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="outline" className="text-xs">
-                            {wo.status}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-right text-admin-text-primary">
-                          {formatPrice(wo.total_amount)}
-                        </TableCell>
-                        <TableCell>
-                          <Link
-                            href={`/admin/work-orders/${wo.id}`}
-                            className="text-admin-accent-primary hover:underline text-sm font-medium"
-                          >
-                            Ver
-                          </Link>
-                        </TableCell>
+                <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="text-admin-text-tertiary font-semibold">
+                          Número
+                        </TableHead>
+                        <TableHead className="text-admin-text-tertiary font-semibold">
+                          Cliente
+                        </TableHead>
+                        <TableHead className="text-admin-text-tertiary font-semibold">
+                          Marco
+                        </TableHead>
+                        <TableHead className="text-admin-text-tertiary font-semibold">
+                          Lente
+                        </TableHead>
+                        <TableHead className="text-admin-text-tertiary font-semibold">
+                          Laboratorio
+                        </TableHead>
+                        <TableHead className="text-admin-text-tertiary font-semibold">
+                          Estado
+                        </TableHead>
+                        <TableHead className="text-admin-text-tertiary font-semibold">
+                          Pago
+                        </TableHead>
+                        <TableHead className="text-admin-text-tertiary font-semibold text-right">
+                          Total
+                        </TableHead>
+                        <TableHead className="text-admin-text-tertiary font-semibold">
+                          Acciones
+                        </TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                    </TableHeader>
+                    <TableBody>
+                      {workOrders.map((wo) => (
+                        <TableRow key={wo.id} className="hover:bg-[#AE000025]">
+                          <TableCell className="font-medium text-admin-text-primary">
+                            {wo.work_order_number}
+                          </TableCell>
+                          <TableCell>
+                            <div>
+                              <div className="font-medium text-admin-text-primary">
+                                {wo.customer
+                                  ? `${wo.customer.first_name || ""} ${wo.customer.last_name || ""}`.trim() ||
+                                    "—"
+                                  : "—"}
+                              </div>
+                              {wo.customer?.email && (
+                                <div className="text-sm text-admin-text-tertiary">
+                                  {wo.customer.email}
+                                </div>
+                              )}
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-admin-text-primary">
+                            {wo.frame_name || "-"}
+                          </TableCell>
+                          <TableCell>
+                            <div>
+                              <div className="font-medium text-admin-text-primary">
+                                {wo.lens_type || "-"}
+                              </div>
+                              {wo.lens_material && (
+                                <div className="text-sm text-admin-text-tertiary">
+                                  {wo.lens_material}
+                                </div>
+                              )}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            {wo.lab_name ? (
+                              <div className="flex items-center gap-1">
+                                <Factory className="h-3 w-3" />
+                                <span className="text-sm text-admin-text-primary">
+                                  {wo.lab_name}
+                                </span>
+                              </div>
+                            ) : (
+                              "-"
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            {getWorkOrderStatusBadge(wo.status)}
+                          </TableCell>
+                          <TableCell>
+                            {getPaymentStatusBadge(
+                              wo.payment_status || "pending",
+                            )}
+                          </TableCell>
+                          <TableCell className="text-right font-semibold text-admin-success">
+                            {formatPrice(wo.total_amount)}
+                          </TableCell>
+                          <TableCell>
+                            <Link href={`/admin/work-orders/${wo.id}`}>
+                              <Button variant="outline" size="sm">
+                                <Eye className="h-4 w-4 mr-1" />
+                                Ver
+                              </Button>
+                            </Link>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
               )}
             </div>
           </div>
@@ -965,6 +1358,48 @@ export default function FieldOperationDetailPage() {
         </DialogContent>
       </Dialog>
 
+      {/* Delete Quote Confirmation Dialog */}
+      <Dialog
+        open={deleteQuoteId !== null}
+        onOpenChange={(open) => !open && setDeleteQuoteId(null)}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>¿Eliminar presupuesto?</DialogTitle>
+            <DialogDescription>
+              Esta acción no se puede deshacer. El presupuesto será eliminado
+              permanentemente.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setDeleteQuoteId(null)}
+              disabled={deletingQuote}
+            >
+              Cancelar
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleDeleteQuoteConfirm}
+              disabled={deletingQuote}
+            >
+              {deletingQuote ? (
+                <>
+                  <RefreshCw className="h-4 w-4 animate-spin mr-2" />
+                  Eliminando...
+                </>
+              ) : (
+                <>
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Eliminar
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {/* Add Customer Dialog */}
       <Dialog open={showAddCustomer} onOpenChange={setShowAddCustomer}>
         <DialogContent className="max-w-md">
@@ -1016,7 +1451,61 @@ export default function FieldOperationDetailPage() {
             }}
             initialCustomerId={quoteInitialCustomerId}
             initialFieldOperationId={id}
+            initialBranchId={operation?.branch_id}
           />
+        </DialogContent>
+      </Dialog>
+
+      {/* Open Cash Dialog */}
+      <Dialog
+        open={showOpenCashDialog}
+        onOpenChange={(open) => {
+          setShowOpenCashDialog(open);
+          if (!open) setOpeningCashAmount("");
+        }}
+      >
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Abrir caja del operativo</DialogTitle>
+            <DialogDescription>
+              Ingrese el monto inicial de efectivo para abrir la caja.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div>
+              <label
+                htmlFor="opening-cash"
+                className="text-sm font-medium text-admin-text-primary"
+              >
+                Monto inicial
+              </label>
+              <Input
+                id="opening-cash"
+                type="number"
+                min={0}
+                step={0.01}
+                placeholder="0"
+                value={openingCashAmount}
+                onChange={(e) => setOpeningCashAmount(e.target.value)}
+                className="mt-1"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowOpenCashDialog(false);
+                setOpeningCashAmount("");
+              }}
+              disabled={openingCash}
+            >
+              Cancelar
+            </Button>
+            <Button onClick={handleOpenCash} disabled={openingCash}>
+              {openingCash ? "Abriendo…" : "Abrir caja"}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
 
