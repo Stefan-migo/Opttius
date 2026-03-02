@@ -20,6 +20,7 @@ import {
 } from "@/lib/api/validation/zod-helpers";
 import { ValidationError } from "@/lib/api/errors";
 import { normalizeRUT } from "@/lib/utils/rut";
+import { validateFeature } from "@/lib/saas/tier-validator";
 
 export const dynamic = "force-dynamic";
 
@@ -60,6 +61,19 @@ export async function GET(request: NextRequest) {
             { error: "Organization context required" },
             { status: 400 },
           );
+        }
+
+        if (orgId) {
+          const hasAgreements = await validateFeature(orgId, "agreements");
+          if (!hasAgreements) {
+            return NextResponse.json(
+              {
+                error:
+                  "Gestión de Convenios requiere el plan Óptica Avanzada. Upgrade para habilitar.",
+              },
+              { status: 403 },
+            );
+          }
         }
 
         let queryParams;
@@ -161,6 +175,17 @@ export async function POST(request: NextRequest) {
           return NextResponse.json(
             { error: "Organization context required" },
             { status: 400 },
+          );
+        }
+
+        const hasAgreements = await validateFeature(orgId, "agreements");
+        if (!hasAgreements) {
+          return NextResponse.json(
+            {
+              error:
+                "Gestión de Convenios requiere el plan Óptica Avanzada. Upgrade para habilitar.",
+            },
+            { status: 403 },
           );
         }
 

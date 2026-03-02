@@ -12,10 +12,14 @@ export const TIER_FEATURE_LABELS: Record<TierFeature, string> = {
   appointments: "Citas y Agenda",
   quotes: "Presupuestos",
   work_orders: "Trabajos de Laboratorio",
+  prescriptions: "Libro Digital de Recetas",
+  custom_branding: "Branding Personalizado",
   chat_ia: "Chat IA",
   advanced_analytics: "Analíticas Avanzadas",
-  api_access: "Acceso API",
-  custom_branding: "Branding Personalizado",
+  field_operations: "Operativos en Terreno",
+  agreements: "Gestión de Convenios",
+  whatsapp: "WhatsApp Business",
+  api_access: "Acceso API (futuro)",
 };
 
 /** Display names for tiers (Spanish) */

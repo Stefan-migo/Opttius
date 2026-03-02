@@ -16,6 +16,7 @@ import {
   validationErrorResponse,
 } from "@/lib/api/validation/zod-helpers";
 import { ValidationError } from "@/lib/api/errors";
+import { validateFeature } from "@/lib/saas/tier-validator";
 
 export const dynamic = "force-dynamic";
 
@@ -41,6 +42,24 @@ export async function GET(request: NextRequest) {
     }
 
     const branchContext = await getBranchContext(request, user.id);
+    const { data: adminUser } = await supabase
+      .from("admin_users")
+      .select("organization_id")
+      .eq("id", user.id)
+      .single();
+    const orgId = branchContext.organizationId ?? adminUser?.organization_id;
+    if (orgId) {
+      const hasFieldOps = await validateFeature(orgId, "field_operations");
+      if (!hasFieldOps) {
+        return NextResponse.json(
+          {
+            error:
+              "Operativos en Terreno requiere el plan Óptica Avanzada. Upgrade para habilitar.",
+          },
+          { status: 403 },
+        );
+      }
+    }
 
     const searchParams = request.nextUrl.searchParams;
     const status = searchParams.get("status") || "all";
@@ -149,6 +168,20 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: "Sucursal no encontrada o sin organización" },
         { status: 400 },
+      );
+    }
+
+    const hasFieldOps = await validateFeature(
+      branch.organization_id,
+      "field_operations",
+    );
+    if (!hasFieldOps) {
+      return NextResponse.json(
+        {
+          error:
+            "Operativos en Terreno requiere el plan Óptica Avanzada. Upgrade para habilitar.",
+        },
+        { status: 403 },
       );
     }
 

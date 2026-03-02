@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Check, Sparkles, Loader2 } from "lucide-react";
 
@@ -29,10 +30,13 @@ const FEATURE_LABELS: Record<string, string> = {
   appointments: "Citas y Agenda",
   quotes: "Presupuestos",
   work_orders: "Trabajos de Laboratorio",
+  prescriptions: "Libro Digital de Recetas",
+  custom_branding: "Personalización de marca",
   chat_ia: "Asistente IA 24/7",
   advanced_analytics: "Reportes ejecutivos",
-  api_access: "API de integración",
-  custom_branding: "Personalización de marca",
+  field_operations: "Operativos en Terreno",
+  agreements: "Gestión de Convenios",
+  whatsapp: "WhatsApp Business",
 };
 
 /** Fallback para displayName y description cuando no vienen de la API */
@@ -47,7 +51,7 @@ const TIER_DISPLAY: Record<
   },
   pro: {
     displayName: "Óptica Avanzada",
-    description: "La potencia de la IA para ópticas en expansión.",
+    description: "Todo lo que necesitas: IA, operativos, convenios y WhatsApp.",
     popular: true,
   },
   premium: {
@@ -176,32 +180,39 @@ export function PricingSection() {
             basic: {
               max_branches: 1,
               max_users: 2,
-              max_customers: 500,
+              max_customers: 200,
               max_products: 100,
               features: {
                 pos: true,
                 appointments: true,
                 quotes: true,
                 work_orders: true,
+                prescriptions: true,
+                custom_branding: true,
               },
             },
             pro: {
-              max_branches: 3,
-              max_users: 10,
-              max_customers: 5000,
+              max_branches: 4,
+              max_users: 8,
+              max_customers: 2000,
               max_products: 500,
               features: {
                 pos: true,
                 appointments: true,
                 quotes: true,
                 work_orders: true,
+                prescriptions: true,
+                custom_branding: true,
                 chat_ia: true,
                 advanced_analytics: true,
+                field_operations: true,
+                agreements: true,
+                whatsapp: true,
               },
             },
             premium: {
-              max_branches: 0,
-              max_users: 0,
+              max_branches: 20,
+              max_users: 50,
               max_customers: 0,
               max_products: 0,
               features: {
@@ -209,10 +220,13 @@ export function PricingSection() {
                 appointments: true,
                 quotes: true,
                 work_orders: true,
+                prescriptions: true,
+                custom_branding: true,
                 chat_ia: true,
                 advanced_analytics: true,
-                api_access: true,
-                custom_branding: true,
+                field_operations: true,
+                agreements: true,
+                whatsapp: true,
               },
             },
           };
@@ -324,10 +338,21 @@ export function PricingSection() {
           </div>
         )}
 
-        <div className="mt-20 text-center max-w-2xl mx-auto">
-          <p className="text-epoch-primary/70 text-sm font-body leading-relaxed mb-8">
+        <div className="mt-20 text-center max-w-2xl mx-auto space-y-6">
+          <p className="text-epoch-primary/70 text-sm font-body leading-relaxed">
             Todos los planes incluyen una prueba gratuita de {trialDays} días
             con acceso total. No se requiere tarjeta de crédito para comenzar.
+          </p>
+          <p className="text-epoch-primary/60 text-sm font-body leading-relaxed">
+            La integración con SII y la conexión con Fonasa e Isapres están
+            disponibles bajo solicitud. Contacta directamente a{" "}
+            <Link
+              href="/support"
+              className="text-epoch-primary font-medium underline underline-offset-2 hover:text-epoch-accent transition-colors"
+            >
+              soporte
+            </Link>{" "}
+            para solicitar estas características.
           </p>
           <div className="h-px w-20 bg-epoch-primary/20 mx-auto"></div>
         </div>

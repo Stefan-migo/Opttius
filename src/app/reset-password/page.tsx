@@ -52,23 +52,60 @@ export default function ResetPasswordPage() {
   const [success, setSuccess] = useState<boolean>(false);
   const [isUpdating, setIsUpdating] = useState(false);
   const [isInviteFlow, setIsInviteFlow] = useState(false);
+  const [isEstablishingSession, setIsEstablishingSession] = useState(false);
 
   // Check if we are in recovery or invite mode (set password flow)
   useEffect(() => {
     const checkRecoveryOrInvite = async () => {
       const supabase = createClient();
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-
       const hash = window.location.hash;
       const isRecovery = hash.includes("type=recovery");
       const isInvite = hash.includes("type=invite");
-      if (isRecovery || isInvite || (session && !session.user.is_anonymous)) {
-        if (isRecovery || isInvite) {
-          setIsInviteFlow(isInvite);
-          setStep("update");
+
+      // Hash with tokens: establish session explicitly before showing form
+      if (isRecovery || isInvite) {
+        const params = new URLSearchParams(hash.substring(1));
+        const accessToken = params.get("access_token");
+        const refreshToken = params.get("refresh_token");
+
+        if (!accessToken || !refreshToken) {
+          setError(
+            "Enlace inválido o expirado. Solicita uno nuevo desde la página de recuperación.",
+          );
+          return;
         }
+
+        setIsEstablishingSession(true);
+        setError(null);
+
+        const { error: setSessionError } = await supabase.auth.setSession({
+          access_token: accessToken,
+          refresh_token: refreshToken,
+        });
+
+        setIsEstablishingSession(false);
+
+        if (setSessionError) {
+          setError(
+            "Enlace inválido o expirado. Solicita uno nuevo desde la página de recuperación.",
+          );
+          return;
+        }
+
+        setIsInviteFlow(isInvite);
+        setStep("update");
+        // Clear hash from URL to avoid token exposure in history
+        window.history.replaceState(null, "", window.location.pathname);
+        return;
+      }
+
+      // No hash: check if session already exists (e.g. PASSWORD_RECOVERY already processed)
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (session && !session.user.is_anonymous) {
+        setIsInviteFlow(false);
+        setStep("update");
       }
     };
 
@@ -82,7 +119,6 @@ export default function ResetPasswordPage() {
         setIsInviteFlow(false);
         setStep("update");
       }
-      // Invite flow: user lands with tokens in hash, session is established
       if (
         event === "SIGNED_IN" &&
         window.location.hash.includes("type=invite")
@@ -120,6 +156,15 @@ export default function ResetPasswordPage() {
       setError(null);
       setIsUpdating(true);
       const supabase = createClient();
+
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (!session) {
+        setError("La sesión ha expirado. Por favor, solicita un nuevo enlace.");
+        return;
+      }
+
       const { error } = await supabase.auth.updateUser({
         password: data.password,
       });
@@ -256,7 +301,16 @@ export default function ResetPasswordPage() {
                 </Alert>
               )}
 
-              {step === "request" && (
+              {isEstablishingSession && (
+                <div className="flex flex-col items-center justify-center py-12 space-y-6">
+                  <Loader2 className="h-12 w-12 text-epoch-primary animate-spin" />
+                  <p className="text-epoch-primary/80 font-body text-sm text-center">
+                    Verificando enlace...
+                  </p>
+                </div>
+              )}
+
+              {!isEstablishingSession && step === "request" && (
                 <form
                   onSubmit={requestForm.handleSubmit(onRequestSubmit)}
                   className="space-y-6"
@@ -316,7 +370,7 @@ export default function ResetPasswordPage() {
                 </form>
               )}
 
-              {step === "sent" && (
+              {!isEstablishingSession && step === "sent" && (
                 <div className="text-center space-y-6">
                   <div className="w-16 h-16 sm:w-20 sm:h-20 bg-emerald-500/10 rounded-2xl sm:rounded-3xl flex items-center justify-center mx-auto">
                     <Mail className="h-8 w-8 sm:h-10 sm:w-10 text-emerald-500" />
@@ -345,7 +399,7 @@ export default function ResetPasswordPage() {
                 </div>
               )}
 
-              {step === "update" && (
+              {!isEstablishingSession && step === "update" && (
                 <form
                   onSubmit={updateForm.handleSubmit(onUpdateSubmit)}
                   className="space-y-6"

@@ -11,6 +11,7 @@ import type {
   IsRootUserParams,
   IsRootUserResult,
 } from "@/types/supabase-rpc";
+import { getOrganizationFeatures } from "@/lib/saas/tier-validator";
 
 const DEMO_ORG_ID =
   process.env.NEXT_PUBLIC_DEMO_ORG_ID || "00000000-0000-0000-0000-000000000001";
@@ -121,6 +122,27 @@ export async function GET(request: NextRequest) {
     const onboardingRequired =
       isAdmin && !organizationId && !isSuperAdmin && !isRootUser;
 
+    // Get tier features for sidebar filtering (root users get all features)
+    let tierFeatures: Record<string, boolean> = {};
+    if (organizationId && !isRootUser) {
+      tierFeatures = await getOrganizationFeatures(organizationId);
+    } else if (isRootUser) {
+      // Root users see all features
+      tierFeatures = {
+        field_operations: true,
+        agreements: true,
+        whatsapp: true,
+        chat_ia: true,
+        advanced_analytics: true,
+        prescriptions: true,
+        custom_branding: true,
+        pos: true,
+        appointments: true,
+        quotes: true,
+        work_orders: true,
+      };
+    }
+
     // Test products query
     const {
       data: products,
@@ -159,6 +181,7 @@ export async function GET(request: NextRequest) {
         isRootUser,
         isOwner,
         onboardingRequired,
+        tierFeatures,
       },
       productsTest: {
         count: count,

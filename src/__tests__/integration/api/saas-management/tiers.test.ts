@@ -130,7 +130,7 @@ describe("SaaS Tiers API - Integration Tests", () => {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             name: "basic",
-            max_customers: originalMaxCustomers ?? 500,
+            max_customers: originalMaxCustomers ?? 200,
           }),
         },
         rootUser.authToken,

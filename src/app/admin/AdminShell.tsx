@@ -77,133 +77,145 @@ const createNavigationItems = (
   newWorkOrdersCount?: number,
   openTicketsCount?: number,
   isRoot?: boolean,
-) => [
-  // --- Operación diaria (más usados arriba) ---
-  {
-    href: "/admin",
-    label: "Dashboard",
-    icon: LayoutDashboard,
-    description: "Visión general y KPIs",
-  },
-  {
-    href: "/admin/pos",
-    label: "Punto de Venta",
-    icon: ShoppingCart,
-    description: "Sistema POS",
-  },
-  {
-    href: "/admin/work-orders",
-    label: "Trabajos",
-    icon: Glasses,
-    description: "Gestión de trabajos de laboratorio",
-    badge:
-      newWorkOrdersCount !== undefined && newWorkOrdersCount > 0
-        ? newWorkOrdersCount.toString()
-        : undefined,
-  },
-  {
-    href: "/admin/appointments",
-    label: "Citas y Agenda",
-    icon: Calendar,
-    description: "Gestión de citas y agenda",
-  },
-  {
-    href: "/admin/quotes",
-    label: "Presupuestos",
-    icon: Receipt,
-    description: "Crear y gestionar presupuestos",
-  },
-  // --- CRM y catálogo ---
-  {
-    href: "/admin/customers",
-    label: "Clientes",
-    icon: Users,
-    description: "Gestión de clientes",
-  },
-  {
-    href: "/admin/products",
-    label: "Productos",
-    icon: Package,
-    description: "Catálogo e inventario",
-  },
-  {
-    href: "/admin/prescriptions",
-    label: "Libro de Recetas",
-    icon: ClipboardList,
-    description: "Registro de recetas despachadas (Código Sanitario)",
-  },
-  // --- Módulos especiales ---
-  {
-    href: "/admin/agreements",
-    label: "Convenios",
-    icon: FileText,
-    description: "Gestión de convenios con empresas e instituciones",
-  },
-  {
-    href: "/admin/field-operations",
-    label: "Operativos en Terreno",
-    icon: MapPin,
-    description: "Operativos móviles y bodega temporal",
-  },
-  // --- Reportes ---
-  {
-    href: "/admin/analytics",
-    label: "Analíticas",
-    icon: BarChart3,
-    description: "Reportes y estadísticas",
-  },
-  // --- Onboarding ---
-  {
-    href: "/checkout",
-    label: "Checkout",
-    icon: DollarSign,
-    description: "Pagos con Flow / pasarelas",
-    onboardingOnly: true,
-  },
-  // --- Soporte ---
-  {
-    href: "/admin/support",
-    label: "Registro de Incidentes",
-    icon: MessageSquare,
-    description: "Registro de incidentes y problemas para análisis y mejora",
-    badge:
-      openTicketsCount !== undefined && openTicketsCount > 0
-        ? openTicketsCount.toString()
-        : undefined,
-  },
-  // --- Configuración (al final) ---
-  {
-    href: "/admin/admin-users",
-    label: "Administradores",
-    icon: Users,
-    description: "Gestión de usuarios admin",
-    adminOrSuperAdminOnly: true,
-  },
-  {
-    href: "/admin/branches",
-    label: "Sucursales",
-    icon: Building2,
-    description: "Gestión de sucursales",
-    superAdminOnly: true,
-  },
-  {
-    href: "/admin/system",
-    label: "Sistema",
-    icon: Server,
-    description: "Administración del sistema",
-  },
-  ...(isRoot
-    ? [
-        {
-          href: "/admin/saas-management",
-          label: "Gestión SaaS Opttius",
-          icon: Settings,
-          description: "Administración completa del SaaS",
-          rootOnly: true,
-        },
-      ]
-    : []),
-];
+  tierFeatures?: Record<string, boolean>,
+) => {
+  const hasFeature = (key: string) =>
+    isRoot || !tierFeatures || tierFeatures[key] === true;
+  const items = [
+    // --- Operación diaria (más usados arriba) ---
+    {
+      href: "/admin",
+      label: "Dashboard",
+      icon: LayoutDashboard,
+      description: "Visión general y KPIs",
+    },
+    {
+      href: "/admin/pos",
+      label: "Punto de Venta",
+      icon: ShoppingCart,
+      description: "Sistema POS",
+    },
+    {
+      href: "/admin/work-orders",
+      label: "Trabajos",
+      icon: Glasses,
+      description: "Gestión de trabajos de laboratorio",
+      badge:
+        newWorkOrdersCount !== undefined && newWorkOrdersCount > 0
+          ? newWorkOrdersCount.toString()
+          : undefined,
+    },
+    {
+      href: "/admin/appointments",
+      label: "Citas y Agenda",
+      icon: Calendar,
+      description: "Gestión de citas y agenda",
+    },
+    {
+      href: "/admin/quotes",
+      label: "Presupuestos",
+      icon: Receipt,
+      description: "Crear y gestionar presupuestos",
+    },
+    // --- CRM y catálogo ---
+    {
+      href: "/admin/customers",
+      label: "Clientes",
+      icon: Users,
+      description: "Gestión de clientes",
+    },
+    {
+      href: "/admin/products",
+      label: "Productos",
+      icon: Package,
+      description: "Catálogo e inventario",
+    },
+    {
+      href: "/admin/prescriptions",
+      label: "Libro de Recetas",
+      icon: ClipboardList,
+      description: "Registro de recetas despachadas (Código Sanitario)",
+    },
+    // --- Módulos especiales (tier-gated) ---
+    {
+      href: "/admin/agreements",
+      label: "Convenios",
+      icon: FileText,
+      description: "Gestión de convenios con empresas e instituciones",
+      requiresFeature: "agreements",
+    },
+    {
+      href: "/admin/field-operations",
+      label: "Operativos en Terreno",
+      icon: MapPin,
+      description: "Operativos móviles y bodega temporal",
+      requiresFeature: "field_operations",
+    },
+    // --- Reportes ---
+    {
+      href: "/admin/analytics",
+      label: "Analíticas",
+      icon: BarChart3,
+      description: "Reportes y estadísticas",
+    },
+    // --- Onboarding ---
+    {
+      href: "/checkout",
+      label: "Checkout",
+      icon: DollarSign,
+      description: "Pagos con Flow / pasarelas",
+      onboardingOnly: true,
+    },
+    // --- Soporte ---
+    {
+      href: "/admin/support",
+      label: "Registro de Incidentes",
+      icon: MessageSquare,
+      description: "Registro de incidentes y problemas para análisis y mejora",
+      badge:
+        openTicketsCount !== undefined && openTicketsCount > 0
+          ? openTicketsCount.toString()
+          : undefined,
+    },
+    // --- Configuración (al final) ---
+    {
+      href: "/admin/admin-users",
+      label: "Administradores",
+      icon: Users,
+      description: "Gestión de usuarios admin",
+      adminOrSuperAdminOnly: true,
+    },
+    {
+      href: "/admin/branches",
+      label: "Sucursales",
+      icon: Building2,
+      description: "Gestión de sucursales",
+      superAdminOnly: true,
+    },
+    {
+      href: "/admin/system",
+      label: "Sistema",
+      icon: Server,
+      description: "Administración del sistema",
+    },
+    ...(isRoot
+      ? [
+          {
+            href: "/admin/saas-management",
+            label: "Gestión SaaS Opttius",
+            icon: Settings,
+            description: "Administración completa del SaaS",
+            rootOnly: true,
+          },
+        ]
+      : []),
+  ];
+  return items.filter(
+    (item) =>
+      !("requiresFeature" in item) ||
+      hasFeature(item.requiresFeature as string),
+  );
+};
 
 export function AdminShell({ children }: AdminLayoutProps) {
   const { user, profile, loading, signOut } = useAuthContext();
@@ -242,6 +254,7 @@ export function AdminShell({ children }: AdminLayoutProps) {
     showActivateBanner: boolean;
     onboardingRequired: boolean;
     isChecking: boolean;
+    tierFeatures?: Record<string, boolean>;
   }>({
     hasOrganization: null,
     organizationName: null,
@@ -370,6 +383,7 @@ export function AdminShell({ children }: AdminLayoutProps) {
             onboardingRequired:
               data.organization.onboardingRequired && !isRootUser, // Root users nunca necesitan onboarding
             isChecking: false,
+            tierFeatures: data.organization.tierFeatures ?? {},
           };
 
           setOrganizationState(orgState);
@@ -1102,6 +1116,7 @@ function AdminSidebar({
     isDemoMode: boolean;
     onboardingRequired: boolean;
     isChecking: boolean;
+    tierFeatures?: Record<string, boolean>;
   };
   adminRole?: string | null;
 }) {
@@ -1161,7 +1176,12 @@ function AdminSidebar({
       {/* Navigation */}
       <nav className="admin-sidebar-nav flex-1 min-h-0 overflow-y-auto">
         <ul role="list" className="space-y-1">
-          {createNavigationItems(stats.newWorkOrders, stats.openTickets, isRoot)
+          {createNavigationItems(
+            stats.newWorkOrders,
+            stats.openTickets,
+            isRoot,
+            organizationState?.tierFeatures,
+          )
             .filter((item: any) => {
               if (item.superAdminOnly && !isSuperAdmin) return false;
               if (item.rootOnly && !isRoot) return false;

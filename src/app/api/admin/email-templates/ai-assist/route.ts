@@ -74,7 +74,9 @@ Tipo de plantilla: ${templateType}
 Variables disponibles (OBLIGATORIO usar solo estas, con sintaxis {{variable_name}}):
 ${variablesPrompt}
 
-IMPORTANTE: Usa organization_name para el nombre de la óptica, NUNCA company_name.
+REGLAS CRÍTICAS:
+- NUNCA uses customer_first_name; usa customer_name para el saludo.
+- Usa organization_name para el nombre de la óptica (company_name es alias, mismo valor).
 ${orgInfo?.name ? `Nombre de la óptica en este contexto: ${orgInfo.name}` : ""}
 ${orgInfo?.primary_color ? `Color primario sugerido: ${orgInfo.primary_color}` : ""}
 

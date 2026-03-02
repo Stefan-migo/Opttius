@@ -5,6 +5,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
+import { validateFeature } from "@/lib/saas/tier-validator";
 
 export const dynamic = "force-dynamic";
 
@@ -29,6 +30,20 @@ export async function GET(request: NextRequest) {
     if (!adminUser?.organization_id) {
       return NextResponse.json(
         { error: "Admin sin organización" },
+        { status: 403 },
+      );
+    }
+
+    const hasWhatsApp = await validateFeature(
+      adminUser.organization_id,
+      "whatsapp",
+    );
+    if (!hasWhatsApp) {
+      return NextResponse.json(
+        {
+          error:
+            "WhatsApp Business requiere el plan Óptica Avanzada. Upgrade para habilitar.",
+        },
         { status: 403 },
       );
     }

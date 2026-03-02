@@ -14,10 +14,14 @@ export type TierFeature =
   | "appointments"
   | "quotes"
   | "work_orders"
+  | "prescriptions"
+  | "custom_branding"
   | "chat_ia"
   | "advanced_analytics"
-  | "api_access"
-  | "custom_branding";
+  | "field_operations"
+  | "agreements"
+  | "whatsapp"
+  | "api_access";
 
 export interface TierLimits {
   name: string;
@@ -38,24 +42,28 @@ export const TIER_LIMITS: Record<SubscriptionTier, TierLimits> = {
     price: 49,
     max_branches: 1,
     max_users: 2,
-    max_customers: 500,
+    max_customers: 200,
     max_products: 100,
     features: {
       pos: true,
       appointments: true,
       quotes: true,
       work_orders: true,
+      prescriptions: true,
+      custom_branding: true,
       chat_ia: false,
       advanced_analytics: false,
+      field_operations: false,
+      agreements: false,
+      whatsapp: false,
       api_access: false,
-      custom_branding: false,
     },
   },
   pro: {
     name: "Pro",
     price: 99,
-    max_branches: 3,
-    max_users: 5,
+    max_branches: 4,
+    max_users: 8,
     max_customers: 2000,
     max_products: 500,
     features: {
@@ -63,10 +71,14 @@ export const TIER_LIMITS: Record<SubscriptionTier, TierLimits> = {
       appointments: true,
       quotes: true,
       work_orders: true,
+      prescriptions: true,
+      custom_branding: true,
       chat_ia: true,
       advanced_analytics: true,
+      field_operations: true,
+      agreements: true,
+      whatsapp: true,
       api_access: false,
-      custom_branding: false,
     },
   },
   premium: {
@@ -81,10 +93,14 @@ export const TIER_LIMITS: Record<SubscriptionTier, TierLimits> = {
       appointments: true,
       quotes: true,
       work_orders: true,
+      prescriptions: true,
+      custom_branding: true,
       chat_ia: true,
       advanced_analytics: true,
-      api_access: true,
-      custom_branding: true,
+      field_operations: true,
+      agreements: true,
+      whatsapp: true,
+      api_access: false,
     },
   },
 };

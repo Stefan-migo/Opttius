@@ -28,6 +28,7 @@ import {
   replaceTemplateVariables,
   getDefaultVariables,
 } from "@/lib/email/template-utils";
+import { getVariablesForEditor } from "@/lib/email/ai-template-variables";
 
 interface EmailTemplate {
   id: string;
@@ -289,130 +290,6 @@ export default function EmailTemplateEditor({
       setAiLoading(false);
     }
   };
-
-  const availableVariables = [
-    {
-      key: "customer_name",
-      label: "Nombre del Cliente",
-      description: "Nombre completo del cliente",
-    },
-    {
-      key: "order_number",
-      label: "Número de Pedido",
-      description: "Número único del pedido",
-    },
-    {
-      key: "order_total",
-      label: "Total del Pedido",
-      description: "Monto total formateado",
-    },
-    {
-      key: "order_date",
-      label: "Fecha del Pedido",
-      description: "Fecha formateada del pedido",
-    },
-    {
-      key: "order_items",
-      label: "Items del Pedido",
-      description: "Lista HTML de productos",
-    },
-    {
-      key: "company_name",
-      label: "Nombre de la Empresa",
-      description: "OPTTIUS CONSCIENTE",
-    },
-    {
-      key: "support_email",
-      label: "Email de Soporte",
-      description: "soporte@opttius.cl",
-    },
-    {
-      key: "contact_email",
-      label: "Email de Contacto",
-      description: "contacto@opttius.com",
-    },
-    {
-      key: "website_url",
-      label: "URL del Sitio",
-      description: "URL del sitio web",
-    },
-    {
-      key: "tracking_number",
-      label: "Número de Seguimiento",
-      description: "Número de tracking del envío",
-    },
-    {
-      key: "carrier",
-      label: "Transportista",
-      description: "Nombre de la empresa de envío",
-    },
-    {
-      key: "estimated_delivery",
-      label: "Entrega Estimada",
-      description: "Fecha estimada de entrega",
-    },
-    {
-      key: "delivery_date",
-      label: "Fecha de Entrega",
-      description: "Fecha de entrega",
-    },
-    {
-      key: "payment_method",
-      label: "Método de Pago",
-      description: "Método de pago utilizado",
-    },
-    {
-      key: "transaction_id",
-      label: "ID de Transacción",
-      description: "ID de la transacción",
-    },
-    { key: "amount", label: "Monto", description: "Monto del pago" },
-    {
-      key: "membership_tier",
-      label: "Tipo de Membresía",
-      description: "Tipo de membresía",
-    },
-    {
-      key: "membership_start_date",
-      label: "Fecha de Inicio",
-      description: "Fecha de inicio de membresía",
-    },
-    {
-      key: "access_url",
-      label: "URL de Acceso",
-      description: "URL para acceder a la membresía",
-    },
-    {
-      key: "reset_link",
-      label: "Enlace de Restablecimiento",
-      description: "URL para resetear contraseña",
-    },
-    {
-      key: "reset_url",
-      label: "URL de Restablecimiento",
-      description: "URL para resetear contraseña",
-    },
-    {
-      key: "account_url",
-      label: "URL de Cuenta",
-      description: "URL de la cuenta del usuario",
-    },
-    {
-      key: "renewal_url",
-      label: "URL de Renovación",
-      description: "URL para renovar membresía",
-    },
-    {
-      key: "days_remaining",
-      label: "Días Restantes",
-      description: "Días restantes de membresía",
-    },
-    {
-      key: "low_stock_products",
-      label: "Productos con Stock Bajo",
-      description: "Lista de productos con stock bajo",
-    },
-  ];
 
   const insertVariable = (variable: string) => {
     const textarea = textareaRef.current;
@@ -742,98 +619,17 @@ export default function EmailTemplateEditor({
                       Variables Disponibles
                     </Label>
                     <div className="flex flex-wrap gap-2 max-h-32 overflow-y-auto">
-                      {availableVariables
-                        .filter((v) => {
-                          // Filter variables based on template type
-                          if (
-                            formData.type === "order_confirmation" ||
-                            formData.type === "order_shipped" ||
-                            formData.type === "order_delivered"
-                          ) {
-                            return [
-                              "customer_name",
-                              "order_number",
-                              "order_total",
-                              "order_date",
-                              "order_items",
-                              "company_name",
-                              "support_email",
-                              "website_url",
-                              "tracking_number",
-                              "carrier",
-                              "estimated_delivery",
-                              "delivery_date",
-                              "payment_method",
-                            ].includes(v.key);
-                          }
-                          if (formData.type === "password_reset") {
-                            return [
-                              "customer_name",
-                              "reset_link",
-                              "reset_url",
-                              "company_name",
-                              "support_email",
-                            ].includes(v.key);
-                          }
-                          if (formData.type === "account_welcome") {
-                            return [
-                              "customer_name",
-                              "account_url",
-                              "company_name",
-                              "support_email",
-                              "website_url",
-                            ].includes(v.key);
-                          }
-                          if (
-                            formData.type === "membership_welcome" ||
-                            formData.type === "membership_reminder"
-                          ) {
-                            return [
-                              "customer_name",
-                              "membership_tier",
-                              "membership_start_date",
-                              "access_url",
-                              "renewal_url",
-                              "days_remaining",
-                              "company_name",
-                              "support_email",
-                            ].includes(v.key);
-                          }
-                          if (
-                            formData.type === "payment_success" ||
-                            formData.type === "payment_failed"
-                          ) {
-                            return [
-                              "customer_name",
-                              "order_number",
-                              "amount",
-                              "payment_method",
-                              "transaction_id",
-                              "company_name",
-                              "support_email",
-                            ].includes(v.key);
-                          }
-                          if (formData.type === "low_stock_alert") {
-                            return [
-                              "low_stock_products",
-                              "product_count",
-                              "company_name",
-                              "support_email",
-                            ].includes(v.key);
-                          }
-                          return true; // Show all for custom type
-                        })
-                        .map((varItem) => (
-                          <Badge
-                            key={varItem.key}
-                            variant="outline"
-                            className="cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors"
-                            onClick={() => insertVariable(varItem.key)}
-                            title={varItem.description}
-                          >
-                            {varItem.label}
-                          </Badge>
-                        ))}
+                      {getVariablesForEditor(formData.type).map((varItem) => (
+                        <Badge
+                          key={varItem.key}
+                          variant="outline"
+                          className="cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors"
+                          onClick={() => insertVariable(varItem.key)}
+                          title={varItem.description}
+                        >
+                          {varItem.label}
+                        </Badge>
+                      ))}
                     </div>
                     <p className="text-xs text-muted-foreground mt-2">
                       Haz clic en una variable para insertarla en el contenido

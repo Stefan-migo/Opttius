@@ -33,10 +33,14 @@ const DEFAULT_FEATURES: Record<TierFeature, boolean> = {
   appointments: true,
   quotes: true,
   work_orders: true,
+  prescriptions: true,
+  custom_branding: true,
   chat_ia: false,
   advanced_analytics: false,
+  field_operations: false,
+  agreements: false,
+  whatsapp: false,
   api_access: false,
-  custom_branding: false,
 };
 
 /**
@@ -250,6 +254,20 @@ export async function validateTierLimit(
     maxAllowed,
     tier,
   };
+}
+
+/**
+ * Get all tier features for an organization (for UI filtering)
+ */
+export async function getOrganizationFeatures(
+  organizationId: string,
+): Promise<Record<string, boolean>> {
+  const tier = await getOrganizationTier(organizationId);
+  if (!tier) {
+    return { ...DEFAULT_FEATURES };
+  }
+  const tierConfig = await getTierConfigForValidation(tier);
+  return { ...tierConfig.features };
 }
 
 /**

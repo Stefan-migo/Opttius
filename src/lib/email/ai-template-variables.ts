@@ -1,11 +1,41 @@
 /**
  * Variables disponibles por tipo de plantilla de email B2C
  * Fuente de verdad para el agente de IA en la creación de plantillas.
- * Alineado con: notifications.ts, optica.ts, migraciones 20260230*
+ * Alineado con: notifications.ts, optica.ts, migraciones 20260316*
  *
- * IMPORTANTE: Usar organization_name (no company_name). Las variables deben
- * coincidir exactamente con lo que envían las funciones send*.
+ * IMPORTANTE: Usar customer_name (NUNCA customer_first_name). Usar organization_name
+ * para el nombre de la óptica. Las variables deben coincidir exactamente con lo que
+ * envían las funciones send*.
  */
+
+/** Lista canónica de parámetros B2C correctos (fuente de verdad para documentación y editor) */
+export const B2C_CANONICAL_VARIABLES = [
+  "customer_name",
+  "order_number",
+  "order_total",
+  "order_date",
+  "order_items",
+  "company_name",
+  "support_email",
+  "contact_email",
+  "website_url",
+  "tracking_number",
+  "carrier",
+  "estimated_delivery",
+  "delivery_date",
+  "payment_method",
+  "transaction_id",
+  "amount",
+  "membership_tier",
+  "membership_start_date",
+  "access_url",
+  "reset_link",
+  "reset_url",
+  "account_url",
+  "renewal_url",
+  "days_remaining",
+  "low_stock_products",
+] as const;
 
 export const VARIABLES_BY_TYPE: Record<string, string[]> = {
   order_confirmation: [
@@ -52,7 +82,6 @@ export const VARIABLES_BY_TYPE: Record<string, string[]> = {
   ],
   appointment_confirmation: [
     "customer_name",
-    "customer_first_name",
     "appointment_date",
     "appointment_time",
     "professional_name",
@@ -69,7 +98,6 @@ export const VARIABLES_BY_TYPE: Record<string, string[]> = {
   ],
   appointment_reminder_2h: [
     "customer_name",
-    "customer_first_name",
     "appointment_time",
     "professional_name",
     "branch_name",
@@ -79,7 +107,6 @@ export const VARIABLES_BY_TYPE: Record<string, string[]> = {
   ],
   appointment_cancelation: [
     "customer_name",
-    "customer_first_name",
     "appointment_date",
     "appointment_time",
     "branch_name",
@@ -90,7 +117,6 @@ export const VARIABLES_BY_TYPE: Record<string, string[]> = {
   ],
   appointment_rescheduled: [
     "customer_name",
-    "customer_first_name",
     "appointment_date",
     "appointment_time",
     "old_appointment_date",
@@ -101,7 +127,6 @@ export const VARIABLES_BY_TYPE: Record<string, string[]> = {
   ],
   appointment_follow_up_reminder: [
     "customer_name",
-    "customer_first_name",
     "follow_up_date",
     "branch_name",
     "branch_phone",
@@ -110,7 +135,6 @@ export const VARIABLES_BY_TYPE: Record<string, string[]> = {
   ],
   prescription_ready: [
     "customer_name",
-    "customer_first_name",
     "prescription_date",
     "prescription_expiry_date",
     "prescription_number",
@@ -122,7 +146,6 @@ export const VARIABLES_BY_TYPE: Record<string, string[]> = {
   ],
   prescription_expiring: [
     "customer_name",
-    "customer_first_name",
     "prescription_expiry_date",
     "prescription_number",
     "branch_name",
@@ -143,7 +166,6 @@ export const VARIABLES_BY_TYPE: Record<string, string[]> = {
   ],
   quote_expiring: [
     "customer_name",
-    "customer_first_name",
     "quote_number",
     "quote_expiry_date",
     "total",
@@ -153,12 +175,7 @@ export const VARIABLES_BY_TYPE: Record<string, string[]> = {
     "branch_email",
     "organization_name",
   ],
-  work_order_ready: [
-    "customer_name",
-    "customer_first_name",
-    "work_order_number",
-    "organization_name",
-  ],
+  work_order_ready: ["customer_name", "work_order_number", "organization_name"],
   low_stock_alert: [
     "low_stock_products",
     "low_stock_products_text",
@@ -172,9 +189,26 @@ export const VARIABLES_BY_TYPE: Record<string, string[]> = {
     "reset_url",
     "organization_name",
   ],
+  membership_welcome: [
+    "customer_name",
+    "membership_tier",
+    "membership_start_date",
+    "access_url",
+    "organization_name",
+    "support_email",
+  ],
+  membership_reminder: [
+    "customer_name",
+    "membership_tier",
+    "days_remaining",
+    "renewal_url",
+    "organization_name",
+    "support_email",
+  ],
   custom: [
     "customer_name",
     "organization_name",
+    "company_name",
     "support_email",
     "contact_email",
     "website_url",
@@ -184,7 +218,7 @@ export const VARIABLES_BY_TYPE: Record<string, string[]> = {
 /** Descripciones para el agente de IA - qué contiene cada variable */
 export const VARIABLE_DESCRIPTIONS: Record<string, string> = {
   customer_name: "Nombre completo del cliente",
-  customer_first_name: "Primer nombre del cliente",
+  company_name: "Nombre de la óptica (alias de organization_name, mismo valor)",
   order_number: "Número único de la orden",
   order_date: "Fecha formateada de la orden (ej: 15 de enero de 2025)",
   order_total: "Total formateado en moneda (ej: $50.000)",
@@ -234,6 +268,11 @@ export const VARIABLE_DESCRIPTIONS: Record<string, string> = {
   account_url: "URL del panel de cuenta del usuario",
   reset_link: "URL para restablecer contraseña",
   reset_url: "URL para restablecer contraseña",
+  membership_tier: "Tipo de membresía del cliente",
+  membership_start_date: "Fecha de inicio de membresía",
+  access_url: "URL para acceder al servicio/membresía",
+  renewal_url: "URL para renovar membresía",
+  days_remaining: "Días restantes (trial, membresía, etc.)",
 };
 
 /**
@@ -242,6 +281,81 @@ export const VARIABLE_DESCRIPTIONS: Record<string, string> = {
  */
 export function getVariablesForType(type: string): string[] {
   return VARIABLES_BY_TYPE[type] || VARIABLES_BY_TYPE.custom;
+}
+
+/** Etiquetas en español para el editor de plantillas */
+const VAR_LABELS: Record<string, string> = {
+  customer_name: "Nombre del Cliente",
+  order_number: "Número de Pedido",
+  order_total: "Total del Pedido",
+  order_date: "Fecha del Pedido",
+  order_items: "Items del Pedido",
+  company_name: "Nombre de la Empresa",
+  organization_name: "Nombre de la Óptica",
+  support_email: "Email de Soporte",
+  contact_email: "Email de Contacto",
+  website_url: "URL del Sitio",
+  tracking_number: "Número de Seguimiento",
+  carrier: "Transportista",
+  estimated_delivery: "Entrega Estimada",
+  delivery_date: "Fecha de Entrega",
+  payment_method: "Método de Pago",
+  transaction_id: "ID de Transacción",
+  amount: "Monto",
+  reset_link: "Enlace de Restablecimiento",
+  reset_url: "URL de Restablecimiento",
+  account_url: "URL de Cuenta",
+  membership_tier: "Tipo de Membresía",
+  membership_start_date: "Fecha de Inicio",
+  access_url: "URL de Acceso",
+  renewal_url: "URL de Renovación",
+  days_remaining: "Días Restantes",
+  low_stock_products: "Productos con Stock Bajo",
+  appointment_date: "Fecha de la Cita",
+  appointment_time: "Hora de la Cita",
+  professional_name: "Nombre del Profesional",
+  appointment_type: "Tipo de Cita",
+  branch_name: "Nombre de la Sucursal",
+  branch_address: "Dirección de la Sucursal",
+  branch_phone: "Teléfono de la Sucursal",
+  branch_email: "Email de la Sucursal",
+  booking_url: "URL para Agendar",
+  old_appointment_date: "Fecha Anterior",
+  old_appointment_time: "Hora Anterior",
+  follow_up_date: "Fecha de Control",
+  prescription_date: "Fecha de Receta",
+  prescription_expiry_date: "Vencimiento Receta",
+  prescription_number: "Número de Receta",
+  doctor_name: "Nombre del Doctor",
+  prescription_url: "URL de Receta",
+  quote_number: "Número de Presupuesto",
+  quote_date: "Fecha de Presupuesto",
+  quote_total: "Total del Presupuesto",
+  quote_expiry: "Vencimiento Presupuesto",
+  quote_items: "Items del Presupuesto",
+  quote_expiry_date: "Vencimiento Presupuesto",
+  total: "Total",
+  accept_url: "URL Aceptar",
+  quote_url: "URL Ver Presupuesto",
+  work_order_number: "Número de Trabajo",
+  order_items_text: "Items (texto)",
+  low_stock_products_text: "Productos Stock Bajo (texto)",
+  product_count: "Cantidad de Productos",
+};
+
+/**
+ * Variables para el editor de plantillas, filtradas por tipo.
+ * Usado por EmailTemplateEditor para el dropdown dinámico.
+ */
+export function getVariablesForEditor(
+  type: string,
+): Array<{ key: string; label: string; description: string }> {
+  const keys = getVariablesForType(type);
+  return keys.map((key) => ({
+    key,
+    label: VAR_LABELS[key] || key.replace(/_/g, " "),
+    description: VARIABLE_DESCRIPTIONS[key] || "",
+  }));
 }
 
 /**

@@ -226,7 +226,16 @@ export async function sendAppointmentConfirmation(
     };
 
     const subject = replaceTemplateVariables(template.subject, variables);
-    const html = replaceTemplateVariables(template.content, variables);
+    let html = replaceTemplateVariables(template.content, variables);
+
+    const { wrapInModernLayout } = await import("../layout");
+    html = wrapInModernLayout(html, {
+      organizationName: orgInfo?.name || "Nuestra Óptica",
+      organizationColor:
+        (orgInfo?.metadata as { primary_color?: string })?.primary_color ||
+        "#1e40af",
+      previewText: `Confirmación de tu cita para el ${appointment.date}`,
+    });
 
     const text = htmlToText(html);
 
@@ -300,7 +309,16 @@ export async function sendAppointmentReminder(
     };
 
     const subject = replaceTemplateVariables(template.subject, variables);
-    const html = replaceTemplateVariables(template.content, variables);
+    let html = replaceTemplateVariables(template.content, variables);
+
+    const { wrapInModernLayout } = await import("../layout");
+    html = wrapInModernLayout(html, {
+      organizationName: orgInfo?.name || "Nuestra Óptica",
+      organizationColor:
+        (orgInfo?.metadata as { primary_color?: string })?.primary_color ||
+        "#1e40af",
+      previewText: `Recordatorio: Tienes una cita el ${appointment.date} a las ${appointment.time}`,
+    });
 
     const text = htmlToText(html);
 
@@ -370,7 +388,16 @@ export async function sendAppointmentReminder2h(
     };
 
     const subject = replaceTemplateVariables(template.subject, variables);
-    const html = replaceTemplateVariables(template.content, variables);
+    let html = replaceTemplateVariables(template.content, variables);
+
+    const { wrapInModernLayout } = await import("../layout");
+    html = wrapInModernLayout(html, {
+      organizationName: orgInfo?.name || "Nuestra Óptica",
+      organizationColor:
+        (orgInfo?.metadata as { primary_color?: string })?.primary_color ||
+        "#1e40af",
+      previewText: `Tu cita es en 2 horas a las ${appointment.time}`,
+    });
 
     const text = htmlToText(html);
 
@@ -441,7 +468,16 @@ export async function sendAppointmentCancellation(
     };
 
     const subject = replaceTemplateVariables(template.subject, variables);
-    const html = replaceTemplateVariables(template.content, variables);
+    let html = replaceTemplateVariables(template.content, variables);
+
+    const { wrapInModernLayout } = await import("../layout");
+    html = wrapInModernLayout(html, {
+      organizationName: orgInfo?.name || "Nuestra Óptica",
+      organizationColor:
+        (orgInfo?.metadata as { primary_color?: string })?.primary_color ||
+        "#1e40af",
+      previewText: `Tu cita del ${appointment.date} fue cancelada`,
+    });
 
     const text = htmlToText(html);
 
@@ -519,7 +555,16 @@ export async function sendAppointmentRescheduled(
     };
 
     const subject = replaceTemplateVariables(template.subject, variables);
-    const html = replaceTemplateVariables(template.content, variables);
+    let html = replaceTemplateVariables(template.content, variables);
+
+    const { wrapInModernLayout } = await import("../layout");
+    html = wrapInModernLayout(html, {
+      organizationName: orgInfo?.name || "Nuestra Óptica",
+      organizationColor:
+        (orgInfo?.metadata as { primary_color?: string })?.primary_color ||
+        "#1e40af",
+      previewText: `Tu cita fue reprogramada para el ${appointment.date}`,
+    });
 
     const text = htmlToText(html);
 
@@ -609,7 +654,16 @@ export async function sendAppointmentFollowUpReminder(
     };
 
     const subject = replaceTemplateVariables(template.subject, variables);
-    const html = replaceTemplateVariables(template.content, variables);
+    let html = replaceTemplateVariables(template.content, variables);
+
+    const { wrapInModernLayout } = await import("../layout");
+    html = wrapInModernLayout(html, {
+      organizationName: orgInfo?.name || "Nuestra Óptica",
+      organizationColor:
+        (orgInfo?.metadata as { primary_color?: string })?.primary_color ||
+        "#1e40af",
+      previewText: `Recuerda tu control programado para el ${appointment.follow_up_date}`,
+    });
 
     const text = htmlToText(html);
 
@@ -697,7 +751,16 @@ export async function sendPrescriptionReady(
     };
 
     const subject = replaceTemplateVariables(template.subject, variables);
-    const html = replaceTemplateVariables(template.content, variables);
+    let html = replaceTemplateVariables(template.content, variables);
+
+    const { wrapInModernLayout } = await import("../layout");
+    html = wrapInModernLayout(html, {
+      organizationName: orgInfo?.name || "Nuestra Óptica",
+      organizationColor:
+        (orgInfo?.metadata as { primary_color?: string })?.primary_color ||
+        "#1e40af",
+      previewText: `Tu receta de fecha ${prescription.date} está disponible`,
+    });
 
     const text = htmlToText(html);
 
@@ -770,7 +833,16 @@ export async function sendPrescriptionExpiring(
     };
 
     const subject = replaceTemplateVariables(template.subject, variables);
-    const html = replaceTemplateVariables(template.content, variables);
+    let html = replaceTemplateVariables(template.content, variables);
+
+    const { wrapInModernLayout } = await import("../layout");
+    html = wrapInModernLayout(html, {
+      organizationName: orgInfo?.name || "Nuestra Óptica",
+      organizationColor:
+        (orgInfo?.metadata as { primary_color?: string })?.primary_color ||
+        "#1e40af",
+      previewText: `Tu receta ${prescription.prescription_number} vence pronto`,
+    });
 
     const text = htmlToText(html);
 
@@ -850,7 +922,16 @@ export async function sendWorkOrderReady(
     };
 
     const subject = replaceTemplateVariables(template.subject, variables);
-    const html = replaceTemplateVariables(template.content, variables);
+    let html = replaceTemplateVariables(template.content, variables);
+
+    const { wrapInModernLayout } = await import("../layout");
+    html = wrapInModernLayout(html, {
+      organizationName: orgInfo?.name || "Nuestra Óptica",
+      organizationColor:
+        (orgInfo?.metadata as { primary_color?: string })?.primary_color ||
+        "#1e40af",
+      previewText: `Tu trabajo ${workOrder.work_order_number} está listo para retiro`,
+    });
 
     const text = htmlToText(html);
 
@@ -950,7 +1031,16 @@ export async function sendQuoteSent(
     };
 
     const subject = replaceTemplateVariables(template.subject, variables);
-    const html = replaceTemplateVariables(template.content, variables);
+    let html = replaceTemplateVariables(template.content, variables);
+
+    const { wrapInModernLayout } = await import("../layout");
+    html = wrapInModernLayout(html, {
+      organizationName: orgInfo?.name || "Nuestra Óptica",
+      organizationColor:
+        (orgInfo?.metadata as { primary_color?: string })?.primary_color ||
+        "#1e40af",
+      previewText: `Presupuesto #${quote.quote_number} disponible`,
+    });
 
     const text = htmlToText(html);
 
@@ -1022,7 +1112,16 @@ export async function sendQuoteExpiring(
     };
 
     const subject = replaceTemplateVariables(template.subject, variables);
-    const html = replaceTemplateVariables(template.content, variables);
+    let html = replaceTemplateVariables(template.content, variables);
+
+    const { wrapInModernLayout } = await import("../layout");
+    html = wrapInModernLayout(html, {
+      organizationName: orgInfo?.name || "Nuestra Óptica",
+      organizationColor:
+        (orgInfo?.metadata as { primary_color?: string })?.primary_color ||
+        "#1e40af",
+      previewText: `Tu presupuesto #${quote.quote_number} vence pronto`,
+    });
 
     const text = htmlToText(html);
 
@@ -1095,7 +1194,16 @@ export async function sendAccountWelcomeEmail(
     };
 
     const subject = replaceTemplateVariables(template.subject, variables);
-    const html = replaceTemplateVariables(template.content, variables);
+    let html = replaceTemplateVariables(template.content, variables);
+
+    const { wrapInModernLayout } = await import("../layout");
+    html = wrapInModernLayout(html, {
+      organizationName: orgInfo?.name || "Nuestra Óptica",
+      organizationColor:
+        (orgInfo?.metadata as { primary_color?: string })?.primary_color ||
+        "#1e40af",
+      previewText: `Bienvenido a ${orgInfo?.name || "nuestra óptica"}`,
+    });
 
     const text = htmlToText(html);
 
@@ -1253,7 +1361,16 @@ export async function sendBirthdayPromo(
     };
 
     const subject = replaceTemplateVariables(template.subject, variables);
-    const html = replaceTemplateVariables(template.content, variables);
+    let html = replaceTemplateVariables(template.content, variables);
+
+    const { wrapInModernLayout } = await import("../layout");
+    html = wrapInModernLayout(html, {
+      organizationName: orgInfo?.name || "Nuestra Óptica",
+      organizationColor:
+        (orgInfo?.metadata as { primary_color?: string })?.primary_color ||
+        "#1e40af",
+      previewText: `¡Feliz cumpleaños ${data.customer_name || "!"}`,
+    });
 
     const text = htmlToText(html);
 

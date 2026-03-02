@@ -1,8 +1,10 @@
 # Sistema de Gestión de Tiers de Suscripción - Opttius
 
-**Versión:** 1.1  
-**Última actualización:** 2026-03-01  
+**Versión:** 1.2  
+**Última actualización:** 2026-03-25  
 **Base documental:** Este documento es la fuente de verdad para el sistema de tiers. Toda la documentación del programa se irá desarrollando a partir de esta estructura.
+
+**Changelog 1.2 (2026-03-25):** Reestructuración de tiers: nuevos features (field_operations, agreements, whatsapp, prescriptions), custom_branding para todos, límites actualizados (basic 200 clientes, pro 4 sucursales/8 usuarios), api_access removido de tiers activos, validaciones en APIs y filtrado de sidebar.
 
 **Changelog 1.1 (2026-03-01):** Implementadas mejoras 7.1-7.4, 7.6, 7.7, 7.10: fuente DB en tier-validator, mapeo NULL/0, downgrade programado, Zod PATCH, labels centralizados, auditoría, tests.
 
@@ -10,11 +12,11 @@
 
 ## 1. Resumen Ejecutivo
 
-El sistema de tiers de Opttius define los planes de suscripción (Basic, Pro, Premium) que determinan los límites operativos y las funcionalidades disponibles para cada organización (óptica) en la plataforma. Es un componente crítico del modelo SaaS multi-tenant.
+El sistema de tiers de Opttius define los planes de suscripción (Clínica Base, Óptica Avanzada, Red Óptica) que determinan los límites operativos y las funcionalidades disponibles para cada organización (óptica) en la plataforma. Es un componente crítico del modelo SaaS multi-tenant.
 
 ### Alcance
 
-- **Qué gestiona:** Planes (basic, pro, premium), precios, límites (branches, users, customers, products), features (chat_ia, analytics, api_access, branding)
+- **Qué gestiona:** Planes (basic, pro, premium), precios, límites (branches, users, customers, products), features (chat_ia, advanced_analytics, field_operations, agreements, whatsapp, prescriptions, custom_branding)
 - **Dónde vive:** Tabla `subscription_tiers`, módulo `/admin/saas-management/tiers`, APIs de validación
 - **Quién modifica:** Usuarios root/dev (gestión), super_admin de org (cambio de plan)
 
@@ -43,28 +45,30 @@ El sistema de tiers de Opttius define los planes de suscripción (Basic, Pro, Pr
 - CHECK constraint: `subscription_tier IN ('basic','pro','premium')`
 - No hay FK a subscription_tiers; es referencia por nombre
 
-### 2.3 Valores por defecto (seed)
+### 2.3 Valores por defecto (post-restructuración v1.2)
 
 | Tier    | Precio  | Branches | Users | Customers | Products |
 | ------- | ------- | -------- | ----- | --------- | -------- |
-| basic   | 49.000  | 1        | 2     | 500       | 100      |
-| pro     | 99.000  | 3        | 5     | 2.000     | 500      |
+| basic   | 49.000  | 1        | 2     | 200       | 100      |
+| pro     | 99.000  | 4        | 8     | 2.000     | 500      |
 | premium | 299.000 | 20       | 50    | ∞         | ∞        |
 
 ### 2.4 Features (JSONB)
 
-```json
-{
-  "pos": true,
-  "appointments": true,
-  "quotes": true,
-  "work_orders": true,
-  "chat_ia": false,
-  "advanced_analytics": false,
-  "api_access": false,
-  "custom_branding": false
-}
-```
+| Feature            | Basic | Pro | Premium  |
+| ------------------ | :---: | :-: | :------: |
+| pos                |   ✓   |  ✓  |    ✓     |
+| appointments       |   ✓   |  ✓  |    ✓     |
+| quotes             |   ✓   |  ✓  |    ✓     |
+| work_orders        |   ✓   |  ✓  |    ✓     |
+| prescriptions      |   ✓   |  ✓  |    ✓     |
+| custom_branding    |   ✓   |  ✓  |    ✓     |
+| chat_ia            |   ✗   |  ✓  |    ✓     |
+| advanced_analytics |   ✗   |  ✓  |    ✓     |
+| field_operations   |   ✗   |  ✓  |    ✓     |
+| agreements         |   ✗   |  ✓  |    ✓     |
+| whatsapp           |   ✗   |  ✓  |    ✓     |
+| api_access         |   —   |  —  | (futuro) |
 
 ---
 
@@ -106,6 +110,12 @@ Se invoca `validateFeature(organizationId, feature)` en:
 
 - `chat/route.ts` — feature "chat_ia"
 - `analytics/dashboard/route.ts` — feature "advanced_analytics"
+- `field-operations/route.ts` — feature "field_operations"
+- `agreements/route.ts` — feature "agreements"
+- `whatsapp/connect/route.ts` — feature "whatsapp"
+- `whatsapp/status/route.ts` — feature "whatsapp"
+
+El sidebar (AdminShell) filtra ítems de navegación según `tierFeatures` retornados por `/api/admin/check-status`.
 
 ---
 
@@ -146,7 +156,7 @@ Se invoca `validateFeature(organizationId, feature)` en:
 
 1. **Escalabilidad progresiva:** Basic → Pro → Premium con incrementos claros de valor
 2. **Límites ópticos:** max_branches refleja realidad de ópticas (1-3 sucursales típico, 20 para cadenas)
-3. **Features diferenciadores:** Chat IA y analytics en Pro; API y branding en Premium
+3. **Features diferenciadores:** Chat IA, analytics, operativos, convenios y WhatsApp en Óptica Avanzada; branding en todos los tiers
 4. **Precios en CLP:** Mantener coherencia con mercado chileno
 
 ### 5.2 Código Limpio
@@ -244,3 +254,4 @@ Ver sección 7 para el detalle de mejoras propuestas.
 - Migración gateway: `supabase/migrations/20260207000001_add_gateway_plan_id_to_subscription_tiers.sql`
 - Migración scheduled_tier: `supabase/migrations/20260308000000_add_scheduled_tier_to_organizations.sql`
 - Migración auditoría: `supabase/migrations/20260308000001_create_tier_change_audit.sql`
+- Migración restructuración: `supabase/migrations/20260325000000_tier_restructure.sql`

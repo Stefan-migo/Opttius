@@ -57,7 +57,7 @@ describe("tier-config", () => {
       const basic = getTierConfig("basic");
       expect(basic.name).toBe("Basic");
       expect(basic.max_branches).toBe(1);
-      expect(basic.max_customers).toBe(500);
+      expect(basic.max_customers).toBe(200);
 
       const premium = getTierConfig("premium");
       expect(premium.max_customers).toBe("unlimited");
@@ -86,10 +86,14 @@ describe("tier-constants", () => {
       "appointments",
       "quotes",
       "work_orders",
+      "prescriptions",
+      "custom_branding",
       "chat_ia",
       "advanced_analytics",
+      "field_operations",
+      "agreements",
+      "whatsapp",
       "api_access",
-      "custom_branding",
     ];
     expected.forEach((key) => {
       expect(TIER_FEATURE_LABELS).toHaveProperty(key);
