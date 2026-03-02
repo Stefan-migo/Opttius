@@ -47,6 +47,7 @@ export async function getOrCreateWhatsAppSession(
       provider: DEFAULT_PROVIDER,
       model: DEFAULT_MODEL,
       title: `WhatsApp ${waId}`,
+      organization_id: organizationId,
       metadata,
     })
     .select("id")

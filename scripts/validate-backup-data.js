@@ -34,6 +34,9 @@ const TABLES = [
   { name: 'appointments', filter: 'organization_id', col: 'organization_id' },
   { name: 'products', filter: 'organization_id', col: 'organization_id' },
   { name: 'admin_users', filter: 'organization_id', col: 'organization_id' },
+  { name: 'agreements', filter: 'organization_id', col: 'organization_id' },
+  { name: 'field_operations', filter: 'organization_id', col: 'organization_id' },
+  { name: 'chat_sessions', filter: 'organization_id', col: 'organization_id' },
 ];
 
 async function validate() {

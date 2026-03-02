@@ -113,6 +113,46 @@ const TABLES_CONFIG: TableConfig[] = [
   { name: "optical_internal_support_tickets", filter: "organization_id" },
   { name: "user_tour_progress", filter: "organization_id" },
   { name: "subscriptions", filter: "organization_id" },
+
+  // --- Nivel 5: Agreements (Convenios) ---
+  { name: "agreements", filter: "organization_id" },
+  {
+    name: "agreement_purchase_orders",
+    filter: "agreement_id",
+    anchor: "agreements",
+  },
+  {
+    name: "agreement_institutional_balances",
+    filter: "agreement_id",
+    anchor: "agreements",
+  },
+  { name: "agreement_customers", filter: "agreement_id", anchor: "agreements" },
+  {
+    name: "agreement_institutional_invoices",
+    filter: "organization_id",
+  },
+  {
+    name: "agreement_institutional_invoice_balances",
+    filter: "invoice_id",
+    anchor: "agreement_institutional_invoices",
+  },
+
+  // --- Nivel 6: Field Operations ---
+  { name: "field_operations", filter: "organization_id" },
+  {
+    name: "operativo_mobile_stock",
+    filter: "field_operation_id",
+    anchor: "field_operations",
+  },
+  {
+    name: "operativo_sync_queue",
+    filter: "field_operation_id",
+    anchor: "field_operations",
+  },
+
+  // --- Nivel 7: AI Chat ---
+  { name: "chat_sessions", filter: "organization_id" },
+  { name: "chat_messages", filter: "session_id", anchor: "chat_sessions" },
 ];
 
 export class BackupService {
@@ -131,7 +171,7 @@ export class BackupService {
       created_by: userIdOrEmail || "system",
       organization_id: organizationId,
       tables: {},
-      version: "1.4",
+      version: "1.5",
     };
 
     const idsCache: Record<string, string[]> = {};

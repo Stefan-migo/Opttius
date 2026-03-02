@@ -29,6 +29,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const { data: adminUser } = await supabase
+      .from("admin_users")
+      .select("organization_id")
+      .eq("id", user.id)
+      .single();
+
     const body = await request.json();
     const { provider, model, title, config } = body;
 
@@ -60,12 +66,14 @@ export async function POST(request: NextRequest) {
       provider: string;
       model: string;
       title: string | null;
+      organization_id?: string | null;
       config?: string | null;
     } = {
       user_id: user.id,
       provider: String(provider).trim(),
       model: modelString,
       title: title ? String(title).trim() : null,
+      organization_id: adminUser?.organization_id ?? null,
     };
 
     // Only include config if it's a valid object
