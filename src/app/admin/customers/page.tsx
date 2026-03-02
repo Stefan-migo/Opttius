@@ -41,9 +41,10 @@ import {
   ArrowUpRight,
 } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useBranch } from "@/hooks/useBranch";
 import { customerService, Customer } from "@/lib/api/services/customerService";
+import { agreementService } from "@/lib/api/services/agreementService";
 import { handleApiError } from "@/lib/services/errorService";
 import { success } from "@/lib/services/notificationService";
 
@@ -55,8 +56,11 @@ interface CustomerStats {
 
 export default function CustomersPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const fieldOperationIdFromUrl = searchParams.get("field_operation_id");
   const { currentBranchId, isSuperAdmin, branches } = useBranch();
   const isGlobalView = !currentBranchId && isSuperAdmin;
+  const [operativoName, setOperativoName] = useState<string | null>(null);
 
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [stats, setStats] = useState<CustomerStats | null>(null);
@@ -67,6 +71,10 @@ export default function CustomersPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [agreementFilter, setAgreementFilter] = useState<string>("all");
+  const [agreements, setAgreements] = useState<{ id: string; name: string }[]>(
+    [],
+  );
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
@@ -80,6 +88,31 @@ export default function CustomersPage() {
     return () => clearTimeout(timer);
   }, [searchTerm]);
 
+  // Fetch operativo name when in operativo mode
+  useEffect(() => {
+    if (!fieldOperationIdFromUrl) {
+      setOperativoName(null);
+      return;
+    }
+    fetch(`/api/admin/field-operations/${fieldOperationIdFromUrl}`)
+      .then((r) => r.json())
+      .then((j) => setOperativoName(j?.data?.fieldOperation?.name ?? null))
+      .catch(() => setOperativoName(null));
+  }, [fieldOperationIdFromUrl]);
+
+  // Fetch active agreements for filter
+  useEffect(() => {
+    agreementService
+      .getAgreements({
+        status: "active",
+        branchId: currentBranchId || undefined,
+      })
+      .then((r) =>
+        setAgreements(r.data.map((a) => ({ id: a.id, name: a.name }))),
+      )
+      .catch(() => setAgreements([]));
+  }, [currentBranchId]);
+
   // Fetch customers data
   useEffect(() => {
     fetchCustomers();
@@ -87,9 +120,11 @@ export default function CustomersPage() {
   }, [
     currentPage,
     statusFilter,
+    agreementFilter,
     currentBranchId,
     isGlobalView,
     debouncedSearchTerm,
+    fieldOperationIdFromUrl,
   ]);
 
   const fetchCustomers = async () => {
@@ -101,9 +136,11 @@ export default function CustomersPage() {
         limit: 20,
         search: debouncedSearchTerm ? debouncedSearchTerm : undefined,
         status: statusFilter !== "all" ? statusFilter : undefined,
+        agreementId: agreementFilter !== "all" ? agreementFilter : undefined,
         branchId: currentBranchId || undefined,
         isGlobalView,
         isSuperAdmin,
+        fieldOperationId: fieldOperationIdFromUrl || undefined,
       });
 
       setCustomers(data);
@@ -192,17 +229,40 @@ export default function CustomersPage() {
 
   return (
     <div className="space-y-6">
+      {/* Operativo mode banner */}
+      {fieldOperationIdFromUrl && (
+        <div className="flex items-center justify-between gap-2 px-4 py-2 rounded-xl bg-admin-accent-primary/20 border border-admin-accent-primary/30">
+          <span className="text-sm font-medium text-admin-text-primary">
+            Clientes del operativo: {operativoName || "..."}
+          </span>
+          <Link
+            href={`/admin/field-operations/${fieldOperationIdFromUrl}`}
+            className="text-sm text-admin-accent-primary hover:underline font-medium"
+          >
+            Volver al operativo
+          </Link>
+        </div>
+      )}
+
       {/* Header */}
       <div className="space-y-4">
         <h1 className="text-2xl sm:text-3xl font-bold text-admin-text-primary">
           Gestión de Clientes
         </h1>
         <p className="text-sm text-admin-text-tertiary">
-          Administra los clientes de tu sucursal
+          {fieldOperationIdFromUrl
+            ? "Clientes vinculados a este operativo"
+            : "Administra los clientes de tu sucursal"}
         </p>
         <div className="flex justify-end">
           <Button
-            onClick={() => router.push("/admin/customers/new")}
+            onClick={() =>
+              router.push(
+                fieldOperationIdFromUrl
+                  ? `/admin/customers/new?field_operation_id=${fieldOperationIdFromUrl}`
+                  : "/admin/customers/new",
+              )
+            }
             className="min-h-[44px]"
           >
             <UserPlus className="h-4 w-4 mr-2" />
@@ -308,6 +368,25 @@ export default function CustomersPage() {
               </div>
             </div>
 
+            <Select
+              value={agreementFilter}
+              onValueChange={(v) => {
+                setAgreementFilter(v);
+                setCurrentPage(1);
+              }}
+            >
+              <SelectTrigger className="w-[200px]">
+                <SelectValue placeholder="Convenio" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos los convenios</SelectItem>
+                {agreements.map((a) => (
+                  <SelectItem key={a.id} value={a.id}>
+                    {a.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Estado" />
@@ -416,21 +495,31 @@ export default function CustomersPage() {
                       </TableCell>
 
                       <TableCell>
-                        {customer.is_active !== false ? (
-                          <Badge
-                            variant="default"
-                            className="bg-admin-success text-white"
-                            style={{ color: "var(--admin-accent-secondary)" }}
-                          >
-                            <CheckCircle className="h-3 w-3 mr-1" />
-                            Activo
-                          </Badge>
-                        ) : (
-                          <Badge variant="secondary">
-                            <AlertTriangle className="h-3 w-3 mr-1" />
-                            Inactivo
-                          </Badge>
-                        )}
+                        <div className="flex flex-wrap gap-1">
+                          {customer.is_active !== false ? (
+                            <Badge
+                              variant="default"
+                              className="bg-admin-success text-white"
+                              style={{ color: "var(--admin-accent-secondary)" }}
+                            >
+                              <CheckCircle className="h-3 w-3 mr-1" />
+                              Activo
+                            </Badge>
+                          ) : (
+                            <Badge variant="secondary">
+                              <AlertTriangle className="h-3 w-3 mr-1" />
+                              Inactivo
+                            </Badge>
+                          )}
+                          {customer.is_convenio_client && (
+                            <Badge
+                              variant="outline"
+                              className="border-admin-accent-primary/50 text-admin-accent-primary"
+                            >
+                              Convenio
+                            </Badge>
+                          )}
+                        </div>
                       </TableCell>
 
                       <TableCell className="text-sm text-admin-text-tertiary">

@@ -69,6 +69,12 @@ export const rateLimitConfigs = {
     windowMs: 5 * 60 * 1000, // 5 minutes
     maxRequests: 20,
   },
+
+  // Agreements (convenios)
+  agreements: {
+    windowMs: 60 * 1000, // 1 minute
+    maxRequests: 30,
+  },
 };
 
 // Rate limiting middleware

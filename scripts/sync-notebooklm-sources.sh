@@ -61,6 +61,12 @@ add_source "docs/marketing/SEO_AIO_DISCOVERY_STRATEGY.md" "Estrategia SEO AIO De
 add_source "docs/marketing/SEO_AIO_TECHNICAL_REFERENCE.md" "Referencia Técnica SEO AIO"
 add_source "docs/marketing/SEO_AIO_CURRENT_STATE_AND_IMPROVEMENTS.md" "Estado SEO AIO y Mejoras"
 add_source "docs/marketing/MARKETING_IDENTITY_STRATEGY.md" "MARKETING_IDENTITY_STRATEGY"
+add_source "docs/AGREEMENTS_SYSTEM.md" "AGREEMENTS_SYSTEM - Gestión de Convenios"
+add_source ".cursor/skills/agreements-optical-supabase/SKILL.md" "Skill agreements-optical-supabase"
+add_source "docs/FIELD_OPERATIONS_SYSTEM.md" "FIELD_OPERATIONS_SYSTEM - Operativos en Terreno"
+add_source ".cursor/skills/field-operations-optical-supabase/SKILL.md" "Skill field-operations-optical-supabase"
+add_source "docs/LIBRO_RECETAS_DIGITAL.md" "LIBRO_RECETAS_DIGITAL - Libro Digital de Recetas"
+add_source ".cursor/skills/libro-recetas-digital-optical/SKILL.md" "Skill libro-recetas-digital-optical"
 
 echo ""
 echo "Listo. Ver docs/NOTEBOOKLM_SYNC.md y docs/NOTEBOOKLM_CUADERNOS_GUIA.md"

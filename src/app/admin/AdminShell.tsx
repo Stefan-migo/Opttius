@@ -19,6 +19,7 @@ import {
   LayoutDashboard,
   ShoppingCart,
   Package,
+  Glasses,
   Users,
   BarChart3,
   Menu,
@@ -32,6 +33,7 @@ import {
   Tag,
   Receipt,
   FileText,
+  ClipboardList,
   Calendar,
   Building2,
   DollarSign,
@@ -41,6 +43,7 @@ import {
   HelpCircle,
   Loader2,
   X,
+  MapPin,
 } from "lucide-react";
 import AdminNotificationDropdown from "@/components/admin/AdminNotificationDropdown";
 import Chatbot from "@/components/admin/Chatbot";
@@ -63,12 +66,19 @@ interface AdminLayoutProps {
   children: React.ReactNode;
 }
 
-// Admin navigation items - will be populated dynamically
+// Admin navigation items - orden por flujo natural del usuario:
+// 1. Operación diaria (Dashboard, POS, Trabajos, Citas, Presupuestos)
+// 2. CRM y catálogo (Clientes, Productos, Libro de Recetas)
+// 3. Módulos especiales (Convenios, Operativos)
+// 4. Reportes (Analíticas)
+// 5. Soporte (Registro de Incidentes)
+// 6. Configuración (Administradores, Sucursales, Sistema, SaaS)
 const createNavigationItems = (
   newWorkOrdersCount?: number,
   openTicketsCount?: number,
   isRoot?: boolean,
 ) => [
+  // --- Operación diaria (más usados arriba) ---
   {
     href: "/admin",
     label: "Dashboard",
@@ -84,18 +94,12 @@ const createNavigationItems = (
   {
     href: "/admin/work-orders",
     label: "Trabajos",
-    icon: Package,
+    icon: Glasses,
     description: "Gestión de trabajos de laboratorio",
     badge:
       newWorkOrdersCount !== undefined && newWorkOrdersCount > 0
         ? newWorkOrdersCount.toString()
         : undefined,
-  },
-  {
-    href: "/admin/quotes",
-    label: "Presupuestos",
-    icon: Receipt,
-    description: "Crear y gestionar presupuestos",
   },
   {
     href: "/admin/appointments",
@@ -104,11 +108,12 @@ const createNavigationItems = (
     description: "Gestión de citas y agenda",
   },
   {
-    href: "/admin/products",
-    label: "Productos",
-    icon: Package,
-    description: "Catálogo e inventario",
+    href: "/admin/quotes",
+    label: "Presupuestos",
+    icon: Receipt,
+    description: "Crear y gestionar presupuestos",
   },
+  // --- CRM y catálogo ---
   {
     href: "/admin/customers",
     label: "Clientes",
@@ -116,18 +121,46 @@ const createNavigationItems = (
     description: "Gestión de clientes",
   },
   {
+    href: "/admin/products",
+    label: "Productos",
+    icon: Package,
+    description: "Catálogo e inventario",
+  },
+  {
+    href: "/admin/prescriptions",
+    label: "Libro de Recetas",
+    icon: ClipboardList,
+    description: "Registro de recetas despachadas (Código Sanitario)",
+  },
+  // --- Módulos especiales ---
+  {
+    href: "/admin/agreements",
+    label: "Convenios",
+    icon: FileText,
+    description: "Gestión de convenios con empresas e instituciones",
+  },
+  {
+    href: "/admin/field-operations",
+    label: "Operativos en Terreno",
+    icon: MapPin,
+    description: "Operativos móviles y bodega temporal",
+  },
+  // --- Reportes ---
+  {
     href: "/admin/analytics",
     label: "Analíticas",
     icon: BarChart3,
     description: "Reportes y estadísticas",
   },
+  // --- Onboarding ---
   {
     href: "/checkout",
     label: "Checkout",
     icon: DollarSign,
     description: "Pagos con Flow / pasarelas",
-    onboardingOnly: true, // Solo visible durante onboarding/suscripción
+    onboardingOnly: true,
   },
+  // --- Soporte ---
   {
     href: "/admin/support",
     label: "Registro de Incidentes",
@@ -138,12 +171,13 @@ const createNavigationItems = (
         ? openTicketsCount.toString()
         : undefined,
   },
+  // --- Configuración (al final) ---
   {
     href: "/admin/admin-users",
     label: "Administradores",
     icon: Users,
     description: "Gestión de usuarios admin",
-    adminOrSuperAdminOnly: true, // Solo visible para admin y super_admin (y root/dev)
+    adminOrSuperAdminOnly: true,
   },
   {
     href: "/admin/branches",
@@ -158,7 +192,6 @@ const createNavigationItems = (
     icon: Server,
     description: "Administración del sistema",
   },
-  // Gestión SaaS - Solo visible para root/dev
   ...(isRoot
     ? [
         {

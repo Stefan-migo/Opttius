@@ -54,6 +54,10 @@ export interface Order {
   tax_amount: number;
   discount_amount: number;
   items: OrderItem[];
+  /** Número de orden de compra (OC) para ReferenciaDoc en DTE */
+  oc_number?: string | null;
+  purchase_order_id?: string | null;
+  agreement_id?: string | null;
   customer?: {
     id: string;
     first_name?: string;

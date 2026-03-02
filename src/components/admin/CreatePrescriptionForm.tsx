@@ -133,40 +133,6 @@ export default function CreatePrescriptionForm({
     { value: "sports", label: "Deportivo" },
   ];
 
-  const lensMaterials = [
-    { value: "cr39", label: "CR-39" },
-    { value: "polycarbonate", label: "Policarbonato" },
-    { value: "high_index_1_67", label: "Alto Índice 1.67" },
-    { value: "high_index_1_74", label: "Alto Índice 1.74" },
-    { value: "trivex", label: "Trivex" },
-    { value: "glass", label: "Vidrio" },
-  ];
-
-  const availableCoatings = [
-    { value: "anti_reflective", label: "Anti-reflejante" },
-    { value: "blue_light_filter", label: "Filtro Luz Azul" },
-    { value: "uv_protection", label: "Protección UV" },
-    { value: "scratch_resistant", label: "Anti-rayas" },
-    { value: "anti_fog", label: "Anti-empañamiento" },
-    { value: "photochromic", label: "Fotocromático" },
-    { value: "polarized", label: "Polarizado" },
-  ];
-
-  const handleCoatingsToggle = (coating: string) => {
-    const currentCoatings = formData.coatings || [];
-    if (currentCoatings.includes(coating)) {
-      setFormData((prev) => ({
-        ...prev,
-        coatings: currentCoatings.filter((c: string) => c !== coating),
-      }));
-    } else {
-      setFormData((prev) => ({
-        ...prev,
-        coatings: [...currentCoatings, coating],
-      }));
-    }
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -257,21 +223,25 @@ export default function CreatePrescriptionForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 min-w-0">
+    <form
+      onSubmit={handleSubmit}
+      className="space-y-6 min-w-0 w-full overflow-hidden"
+    >
       {/* Prescription Header */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center">
-            <FileText className="h-5 w-5 mr-2" />
-            Información General
+      <Card className="overflow-hidden">
+        <CardHeader className="flex-shrink-0">
+          <CardTitle className="flex items-center gap-2 min-w-0 truncate">
+            <FileText className="h-5 w-5 shrink-0" />
+            <span className="truncate">Información General</span>
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            <div>
-              <Label>Fecha de Receta *</Label>
+        <CardContent className="space-y-4 min-w-0">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 min-w-0">
+            <div className="min-w-0 space-y-2">
+              <Label className="block">Fecha de Receta *</Label>
               <Input
                 type="date"
+                className="w-full"
                 value={formData.prescription_date}
                 onChange={(e) =>
                   setFormData((prev) => ({
@@ -282,9 +252,10 @@ export default function CreatePrescriptionForm({
                 required
               />
             </div>
-            <div>
-              <Label>Fecha de Vencimiento</Label>
+            <div className="min-w-0 space-y-2">
+              <Label className="block">Fecha de Vencimiento</Label>
               <Input
+                className="w-full"
                 type="date"
                 value={formData.expiration_date}
                 onChange={(e) =>
@@ -295,9 +266,10 @@ export default function CreatePrescriptionForm({
                 }
               />
             </div>
-            <div>
-              <Label>Número de Receta</Label>
+            <div className="min-w-0 space-y-2">
+              <Label className="block">Número de Receta</Label>
               <Input
+                className="w-full"
                 value={formData.prescription_number}
                 onChange={(e) =>
                   setFormData((prev) => ({
@@ -308,9 +280,10 @@ export default function CreatePrescriptionForm({
                 placeholder="Número único de receta"
               />
             </div>
-            <div>
-              <Label>Emitida por</Label>
+            <div className="min-w-0 space-y-2">
+              <Label className="block">Emitida por</Label>
               <Input
+                className="w-full"
                 value={formData.issued_by}
                 onChange={(e) =>
                   setFormData((prev) => ({
@@ -321,9 +294,10 @@ export default function CreatePrescriptionForm({
                 placeholder="Nombre del oftalmólogo/optómetra"
               />
             </div>
-            <div>
-              <Label>Licencia Profesional</Label>
+            <div className="min-w-0 space-y-2">
+              <Label className="block">Licencia Profesional</Label>
               <Input
+                className="w-full"
                 value={formData.issued_by_license}
                 onChange={(e) =>
                   setFormData((prev) => ({
@@ -334,15 +308,15 @@ export default function CreatePrescriptionForm({
                 placeholder="Número de licencia"
               />
             </div>
-            <div>
-              <Label>Tipo de Receta</Label>
+            <div className="min-w-0 space-y-2">
+              <Label className="block">Tipo de Receta</Label>
               <Select
                 value={formData.prescription_type}
                 onValueChange={(value) =>
                   setFormData((prev) => ({ ...prev, prescription_type: value }))
                 }
               >
-                <SelectTrigger>
+                <SelectTrigger className="w-full min-w-0">
                   <SelectValue placeholder="Selecciona tipo" />
                 </SelectTrigger>
                 <SelectContent>
@@ -359,15 +333,15 @@ export default function CreatePrescriptionForm({
       </Card>
 
       {/* Right Eye (OD) */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center">
-            <Eye className="h-5 w-5 mr-2" />
-            Ojo Derecho (OD - Oculus Dexter)
+      <Card className="overflow-hidden">
+        <CardHeader className="flex-shrink-0">
+          <CardTitle className="flex items-center gap-2 min-w-0 truncate">
+            <Eye className="h-5 w-5 shrink-0" />
+            <span className="truncate">Ojo Derecho (OD - Oculus Dexter)</span>
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <CardContent className="space-y-4 min-w-0">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 min-w-0">
             <div>
               <Label>Esfera (SPH)</Label>
               <Input
@@ -450,15 +424,17 @@ export default function CreatePrescriptionForm({
       </Card>
 
       {/* Left Eye (OS) */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center">
-            <Eye className="h-5 w-5 mr-2" />
-            Ojo Izquierdo (OS - Oculus Sinister)
+      <Card className="overflow-hidden">
+        <CardHeader className="flex-shrink-0">
+          <CardTitle className="flex items-center gap-2 min-w-0 truncate">
+            <Eye className="h-5 w-5 shrink-0" />
+            <span className="truncate">
+              Ojo Izquierdo (OS - Oculus Sinister)
+            </span>
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <CardContent className="space-y-4 min-w-0">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 min-w-0">
             <div>
               <Label>Esfera (SPH)</Label>
               <Input
@@ -541,15 +517,15 @@ export default function CreatePrescriptionForm({
       </Card>
 
       {/* Pupillary Distance (PD) - Binocular Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center">
-            <Eye className="h-5 w-5 mr-2" />
-            Distancia Pupilar (PD) - Binocular
+      <Card className="overflow-hidden">
+        <CardHeader className="flex-shrink-0">
+          <CardTitle className="flex items-center gap-2 min-w-0 truncate">
+            <Eye className="h-5 w-5 shrink-0" />
+            <span className="truncate">Distancia Pupilar (PD) - Binocular</span>
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+        <CardContent className="space-y-4 min-w-0">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 min-w-0">
             <div>
               <Label>PD Lejos (Distancia)</Label>
               <Input
@@ -605,94 +581,14 @@ export default function CreatePrescriptionForm({
         </CardContent>
       </Card>
 
-      {/* Lens Recommendations */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Recomendaciones de Lente</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-            <div>
-              <Label>Tipo de Lente</Label>
-              <Select
-                value={formData.lens_type}
-                onValueChange={(value) =>
-                  setFormData((prev) => ({ ...prev, lens_type: value }))
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecciona tipo" />
-                </SelectTrigger>
-                <SelectContent>
-                  {prescriptionTypes.map((type) => (
-                    <SelectItem key={type.value} value={type.value}>
-                      {type.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label>Material Recomendado</Label>
-              <Select
-                value={formData.lens_material}
-                onValueChange={(value) =>
-                  setFormData((prev) => ({ ...prev, lens_material: value }))
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecciona material" />
-                </SelectTrigger>
-                <SelectContent>
-                  {lensMaterials.map((material) => (
-                    <SelectItem key={material.value} value={material.value}>
-                      {material.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-          <div>
-            <Label>Recubrimientos Recomendados</Label>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 mt-2">
-              {availableCoatings.map((coating) => {
-                const isSelected = formData.coatings?.includes(coating.value);
-                return (
-                  <div
-                    key={coating.value}
-                    className={`p-3 border rounded-lg cursor-pointer transition-colors ${
-                      isSelected
-                        ? "border-verde-suave bg-verde-suave/10"
-                        : "border-gray-200 hover:border-azul-profundo"
-                    }`}
-                    onClick={() => handleCoatingsToggle(coating.value)}
-                  >
-                    <div className="flex items-center">
-                      <input
-                        type="checkbox"
-                        checked={isSelected}
-                        onChange={() => handleCoatingsToggle(coating.value)}
-                        className="mr-2"
-                      />
-                      <span className={isSelected ? "font-medium" : ""}>
-                        {coating.label}
-                      </span>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
       {/* Notes */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Notas y Observaciones</CardTitle>
+      <Card className="overflow-hidden">
+        <CardHeader className="flex-shrink-0">
+          <CardTitle className="min-w-0 truncate">
+            Notas y Observaciones
+          </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-4 min-w-0">
           <div>
             <Label>Observaciones Clínicas</Label>
             <Textarea
@@ -736,11 +632,11 @@ export default function CreatePrescriptionForm({
       </Card>
 
       {/* Status */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Estado</CardTitle>
+      <Card className="overflow-hidden">
+        <CardHeader className="flex-shrink-0">
+          <CardTitle className="min-w-0 truncate">Estado</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-4 min-w-0">
           <div className="flex items-center justify-between">
             <div>
               <Label>Receta Activa</Label>

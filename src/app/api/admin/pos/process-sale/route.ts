@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
 import { createServiceRoleClient } from "@/utils/supabase/server";
-import { getBranchContext } from "@/lib/api/branch-middleware";
+import {
+  getBranchContext,
+  getFieldOperationFromRequest,
+} from "@/lib/api/branch-middleware";
 import { appLogger as logger } from "@/lib/logger";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
 import { withRateLimit, rateLimitConfigs } from "@/lib/api/middleware";
@@ -19,6 +22,10 @@ import {
 import { BillingFactory } from "@/lib/billing/BillingFactory";
 import type { Order as BillingOrder } from "@/lib/billing/adapters/BillingAdapter";
 import { getAvailableQuantity } from "@/lib/inventory/stock-helpers";
+import {
+  getOperativoMobileAvailableQuantity,
+  reduceOperativoMobileStock,
+} from "@/lib/inventory/operativo-mobile-stock-helpers";
 import { DEFAULT_LOW_STOCK_THRESHOLD } from "@/lib/inventory/constants";
 
 export const dynamic = "force-dynamic";
@@ -59,8 +66,55 @@ export async function POST(request: NextRequest) {
           // Get branch context
           const branchContext = await getBranchContext(request, user.id);
 
+          // Operativo mode: validate field operation and use its branch
+          let fieldOperationId: string | null =
+            getFieldOperationFromRequest(request);
+          let effectiveBranchId = branchContext.branchId;
+
+          if (fieldOperationId) {
+            const { data: fieldOp, error: fieldOpError } = await supabase
+              .from("field_operations")
+              .select("id, branch_id, organization_id")
+              .eq("id", fieldOperationId)
+              .single();
+
+            if (fieldOpError || !fieldOp) {
+              return NextResponse.json(
+                { error: "Operativo no encontrado" },
+                { status: 404 },
+              );
+            }
+
+            // Validate user has access (same org)
+            if (
+              branchContext.organizationId &&
+              fieldOp.organization_id !== branchContext.organizationId
+            ) {
+              return NextResponse.json(
+                { error: "No tiene acceso a este operativo" },
+                { status: 403 },
+              );
+            }
+
+            // Use operativo branch as effective branch
+            effectiveBranchId = fieldOp.branch_id;
+
+            // Validate branch matches (user must have access to operativo branch)
+            if (
+              !branchContext.isSuperAdmin &&
+              !branchContext.accessibleBranches.some(
+                (b) => b.id === fieldOp.branch_id,
+              )
+            ) {
+              return NextResponse.json(
+                { error: "No tiene acceso a la sucursal del operativo" },
+                { status: 403 },
+              );
+            }
+          }
+
           // Validate branch access for non-super admins
-          if (!branchContext.isSuperAdmin && !branchContext.branchId) {
+          if (!branchContext.isSuperAdmin && !effectiveBranchId) {
             return NextResponse.json(
               {
                 error: "Debe seleccionar una sucursal para realizar ventas POS",
@@ -127,6 +181,8 @@ export async function POST(request: NextRequest) {
             contact_lens_rx_base_curve_os,
             contact_lens_rx_diameter_os,
             contact_lens_quantity,
+            agreement_id,
+            purchase_order_id,
             contact_lens_cost,
             contact_lens_price,
             quote_id,
@@ -153,7 +209,7 @@ export async function POST(request: NextRequest) {
 
           // Validate that cash register is open before processing sale
           let posSessionId = null;
-          if (!branchContext.isSuperAdmin && branchContext.branchId) {
+          if (!branchContext.isSuperAdmin && effectiveBranchId) {
             const today = new Date();
             today.setHours(0, 0, 0, 0);
             const todayStart = today.toISOString();
@@ -162,7 +218,7 @@ export async function POST(request: NextRequest) {
               await supabaseServiceRole
                 .from("pos_sessions")
                 .select("id")
-                .eq("branch_id", branchContext.branchId)
+                .eq("branch_id", effectiveBranchId)
                 .eq("status", "open")
                 .gte("opening_time", todayStart)
                 .maybeSingle();
@@ -197,8 +253,8 @@ export async function POST(request: NextRequest) {
               .eq("cashier_id", user.id)
               .eq("status", "open");
 
-            if (branchContext.branchId) {
-              query = query.eq("branch_id", branchContext.branchId);
+            if (effectiveBranchId) {
+              query = query.eq("branch_id", effectiveBranchId);
             } else {
               query = query.is("branch_id", null);
             }
@@ -216,7 +272,7 @@ export async function POST(request: NextRequest) {
                 .from("pos_sessions")
                 .insert({
                   cashier_id: user.id,
-                  branch_id: branchContext.branchId,
+                  branch_id: effectiveBranchId,
                   opening_cash_amount: 0,
                   status: "open",
                 })
@@ -425,6 +481,108 @@ export async function POST(request: NextRequest) {
               phone: null,
               rut: customer_rut || null,
             };
+          }
+
+          // Validate agreement and purchase order if provided
+          let agreement: any = null;
+          let purchaseOrder: any = null;
+          let copagoAmount: number | null = null;
+          let institutionalAmount: number | null = null;
+
+          if (agreement_id) {
+            const { data: agreementData, error: agreementError } =
+              await supabaseServiceRole
+                .from("agreements")
+                .select("id, status, valid_from, valid_until, billing_rules")
+                .eq("id", agreement_id)
+                .single();
+
+            if (agreementError || !agreementData) {
+              return NextResponse.json(
+                { error: "Convenio no encontrado" },
+                { status: 404 },
+              );
+            }
+            agreement = agreementData;
+
+            if (agreement.status !== "active") {
+              return NextResponse.json(
+                { error: "El convenio no está activo" },
+                { status: 400 },
+              );
+            }
+
+            const today = new Date().toISOString().split("T")[0];
+            if (agreement.valid_from > today) {
+              return NextResponse.json(
+                { error: "El convenio aún no está vigente" },
+                { status: 400 },
+              );
+            }
+            if (agreement.valid_until && agreement.valid_until < today) {
+              return NextResponse.json(
+                { error: "El convenio ha expirado" },
+                { status: 400 },
+              );
+            }
+
+            if (!purchase_order_id) {
+              return NextResponse.json(
+                {
+                  error:
+                    "La orden de compra (OC) es obligatoria para ventas bajo convenio",
+                },
+                { status: 400 },
+              );
+            }
+
+            const { data: poData, error: poError } = await supabaseServiceRole
+              .from("agreement_purchase_orders")
+              .select("id, status, max_amount, used_amount")
+              .eq("id", purchase_order_id)
+              .eq("agreement_id", agreement_id)
+              .single();
+
+            if (poError || !poData) {
+              return NextResponse.json(
+                {
+                  error:
+                    "Orden de compra no encontrada o no pertenece al convenio",
+                },
+                { status: 404 },
+              );
+            }
+            purchaseOrder = poData;
+
+            if (purchaseOrder.status !== "active") {
+              return NextResponse.json(
+                { error: "La orden de compra no está activa" },
+                { status: 400 },
+              );
+            }
+
+            const rules = (agreement.billing_rules || {}) as {
+              copago_percent?: number;
+              institutional_percent?: number;
+            };
+            const copagoPercent = rules.copago_percent ?? 20;
+            const institutionalPercent = rules.institutional_percent ?? 80;
+
+            copagoAmount =
+              Math.round(total_amount * (copagoPercent / 100) * 100) / 100;
+            institutionalAmount =
+              Math.round((total_amount - copagoAmount) * 100) / 100;
+
+            if (purchaseOrder.max_amount != null) {
+              const newUsed =
+                (purchaseOrder.used_amount || 0) + institutionalAmount;
+              if (newUsed > purchaseOrder.max_amount) {
+                return NextResponse.json(
+                  { error: "La OC excede el monto máximo autorizado" },
+                  { status: 400 },
+                );
+              }
+            }
           }
 
           // Validate quote if provided
@@ -660,11 +818,11 @@ export async function POST(request: NextRequest) {
 
           // Resolve organization_id so orders appear in org-scoped lists (Caja, etc.)
           let orderOrganizationId: string | null = null;
-          if (branchContext.branchId) {
+          if (effectiveBranchId) {
             const { data: branchRow } = await supabaseServiceRole
               .from("branches")
               .select("organization_id")
-              .eq("id", branchContext.branchId)
+              .eq("id", effectiveBranchId)
               .single();
             orderOrganizationId =
               (branchRow as { organization_id?: string } | null)
@@ -695,18 +853,22 @@ export async function POST(request: NextRequest) {
                 total_amount: total_amount,
                 currency: currency || "CLP",
                 mp_payment_method: payment_method_type,
-                branch_id: branchContext.branchId,
+                branch_id: effectiveBranchId,
                 organization_id: orderOrganizationId,
+                field_operation_id: fieldOperationId,
                 customer_notes: null,
                 is_pos_sale: true,
                 pos_session_id: posSessionId || null,
-                // ✅ NUEVO: Campos de nombre de cliente
                 customer_name: customerName,
                 billing_first_name: billingFirstName,
                 billing_last_name: billingLastName,
                 sii_rut: customer_rut || sii_rut || customer?.rut || null,
                 sii_business_name: sii_business_name || null,
                 customer_id: customer_id || null,
+                agreement_id: agreement_id || null,
+                purchase_order_id: purchase_order_id || null,
+                copago_amount: copagoAmount ?? null,
+                institutional_amount: institutionalAmount ?? null,
               })
               .select()
               .single();
@@ -742,9 +904,64 @@ export async function POST(request: NextRequest) {
           }
 
           // Register payment(s) in order_payments
+          // When agreement: only register copago (worker pays); institutional is pending
           let paymentAmount: number;
           let dbPaymentMethod: string;
-          if (paymentsArray && paymentsArray.length > 0) {
+          const amountToRegister =
+            agreement_id && copagoAmount != null
+              ? copagoAmount
+              : paymentsArray && paymentsArray.length > 0
+                ? paymentsArray.reduce((s, p) => s + p.amount, 0)
+                : deposit_amount || cash_received || total_amount;
+
+          if (agreement_id && copagoAmount != null) {
+            paymentAmount = copagoAmount;
+            dbPaymentMethod =
+              PAYMENT_METHOD_MAP[payment_method_type] || payment_method_type;
+            const { error: paymentError } = await supabaseServiceRole
+              .from("order_payments")
+              .insert({
+                order_id: newOrder.id,
+                amount: copagoAmount,
+                payment_method: dbPaymentMethod,
+                pos_session_id: posSessionId || null,
+                payment_reference:
+                  fiscal_reference?.trim() || siiInvoiceNumber || null,
+                created_by: user.id,
+                notes: `Copago convenio - ${payment_method_type}`,
+              });
+            if (paymentError) {
+              logger.error("Error creating payment record", paymentError);
+            }
+
+            if (institutionalAmount != null && institutionalAmount > 0) {
+              const { error: balanceErr } = await supabaseServiceRole
+                .from("agreement_institutional_balances")
+                .insert({
+                  agreement_id: agreement_id,
+                  order_id: newOrder.id,
+                  purchase_order_id: purchase_order_id || null,
+                  amount: institutionalAmount,
+                  status: "pending",
+                });
+              if (balanceErr) {
+                logger.error(
+                  "Error creating institutional balance",
+                  balanceErr,
+                );
+              }
+
+              if (purchase_order_id) {
+                await supabaseServiceRole
+                  .from("agreement_purchase_orders")
+                  .update({
+                    used_amount:
+                      (purchaseOrder?.used_amount || 0) + institutionalAmount,
+                  })
+                  .eq("id", purchase_order_id);
+              }
+            }
+          } else if (paymentsArray && paymentsArray.length > 0) {
             paymentAmount = paymentsArray.reduce((s, p) => s + p.amount, 0);
             dbPaymentMethod =
               PAYMENT_METHOD_MAP[paymentsArray[0].method] ||
@@ -844,15 +1061,25 @@ export async function POST(request: NextRequest) {
           let billingResult = null;
           try {
             const billingConfig = await BillingFactory.getBillingConfig(
-              branchContext.branchId || "",
+              effectiveBranchId || "",
             );
             const billingAdapter = BillingFactory.createAdapter(billingConfig);
+
+            let ocNumber: string | null = null;
+            if (purchase_order_id && purchaseOrder) {
+              const { data: po } = await supabaseServiceRole
+                .from("agreement_purchase_orders")
+                .select("oc_number")
+                .eq("id", purchase_order_id)
+                .single();
+              ocNumber = po?.oc_number ?? null;
+            }
 
             const billingOrder: BillingOrder = {
               id: newOrder.id,
               order_number: newOrder.order_number,
               customer_id: customer_id ?? undefined,
-              branch_id: branchContext.branchId ?? "",
+              branch_id: effectiveBranchId ?? "",
               total_amount: total_amount,
               subtotal: subtotal,
               tax_amount: tax_amount || 0,
@@ -879,6 +1106,9 @@ export async function POST(request: NextRequest) {
                     business_name: sii_business_name ?? undefined,
                   },
               created_at: newOrder.created_at,
+              oc_number: ocNumber ?? undefined,
+              purchase_order_id: purchase_order_id ?? undefined,
+              agreement_id: agreement_id ?? undefined,
             };
 
             billingResult = await billingAdapter.emitDocument(billingOrder);
@@ -921,8 +1151,10 @@ export async function POST(request: NextRequest) {
           }
 
           // Validate stock sufficient before reducing (prevent oversell)
-          const branchIdForStock = branchContext.branchId;
-          if (branchIdForStock) {
+          const branchIdForStock = effectiveBranchId;
+          const useMobileStock = !!fieldOperationId;
+
+          if (branchIdForStock || (useMobileStock && fieldOperationId)) {
             for (const item of items) {
               if (
                 item.product_id &&
@@ -937,19 +1169,25 @@ export async function POST(request: NextRequest) {
                 );
                 if (product?.product_type === "service") continue;
 
-                const availableQty = await getAvailableQuantity(
-                  item.product_id,
-                  branchIdForStock,
-                  supabaseServiceRole,
-                );
+                const availableQty = useMobileStock
+                  ? await getOperativoMobileAvailableQuantity(
+                      item.product_id,
+                      fieldOperationId!,
+                      supabaseServiceRole,
+                    )
+                  : await getAvailableQuantity(
+                      item.product_id,
+                      branchIdForStock!,
+                      supabaseServiceRole,
+                    );
+
                 if (availableQty < item.quantity) {
                   const productName = product?.name || item.product_id;
+                  const msg = useMobileStock
+                    ? `Stock insuficiente en bodega móvil para ${productName}. Disponible: ${availableQty}, solicitado: ${item.quantity}`
+                    : `Stock insuficiente para ${productName}. Disponible: ${availableQty}, solicitado: ${item.quantity}`;
                   return createApiErrorResponse(
-                    new APIError(
-                      `Stock insuficiente para ${productName}. Disponible: ${availableQty}, solicitado: ${item.quantity}`,
-                      400,
-                      "INSUFFICIENT_STOCK",
-                    ),
+                    new APIError(msg, 400, "INSUFFICIENT_STOCK"),
                   );
                 }
               }
@@ -977,94 +1215,116 @@ export async function POST(request: NextRequest) {
                 continue;
               }
 
-              const branchId = branchContext.branchId;
-              if (!branchId) {
-                logger.warn(
-                  `Cannot update inventory: no branch_id for product ${item.product_id}`,
+              if (useMobileStock && fieldOperationId) {
+                // Operativo mode: reduce from operativo_mobile_stock
+                const reduceResult = await reduceOperativoMobileStock(
+                  item.product_id,
+                  fieldOperationId,
+                  item.quantity,
+                  supabaseServiceRole,
                 );
-                continue;
-              }
-
-              // Verificar stock actual antes de reducir
-              const { data: currentStock } = await supabaseServiceRole
-                .from("product_branch_stock")
-                .select("quantity")
-                .eq("product_id", item.product_id)
-                .eq("branch_id", branchId)
-                .maybeSingle();
-
-              const currentQuantity = currentStock?.quantity || 0;
-
-              // Si no hay stock registrado y se intenta reducir, crear registro con 0 y luego reducir
-              // Esto maneja el caso donde un producto se vende por primera vez sin stock inicial
-              if (!currentStock && currentQuantity === 0) {
-                logger.info("Creating initial stock record for product", {
+                if (!reduceResult.success) {
+                  logger.error(
+                    `Error reducing operativo mobile stock for product ${item.product_id}`,
+                    { error: reduceResult.error },
+                  );
+                  return createApiErrorResponse(
+                    new APIError(
+                      reduceResult.error || "Error al actualizar stock móvil",
+                      400,
+                      "INSUFFICIENT_STOCK",
+                    ),
+                  );
+                }
+                logger.info("Operativo mobile stock reduced", {
                   product_id: item.product_id,
-                  branch_id: branchId,
+                  quantity_decreased: item.quantity,
                 });
+              } else {
+                // Branch mode: reduce from product_branch_stock
+                const branchId = effectiveBranchId;
+                if (!branchId) {
+                  logger.warn(
+                    `Cannot update inventory: no branch_id for product ${item.product_id}`,
+                  );
+                  continue;
+                }
 
-                // Crear registro inicial con cantidad 0
-                const { error: createError } = await supabaseServiceRole
+                // Verificar stock actual antes de reducir
+                const { data: currentStock } = await supabaseServiceRole
                   .from("product_branch_stock")
-                  .insert({
+                  .select("quantity")
+                  .eq("product_id", item.product_id)
+                  .eq("branch_id", branchId)
+                  .maybeSingle();
+
+                const currentQuantity = currentStock?.quantity || 0;
+
+                // Si no hay stock registrado y se intenta reducir, crear registro con 0 y luego reducir
+                if (!currentStock && currentQuantity === 0) {
+                  logger.info("Creating initial stock record for product", {
                     product_id: item.product_id,
                     branch_id: branchId,
-                    quantity: 0,
-                    reserved_quantity: 0,
-                    low_stock_threshold: DEFAULT_LOW_STOCK_THRESHOLD,
                   });
 
-                if (createError) {
-                  logger.error(
-                    `Error creating initial stock record for product ${item.product_id}`,
-                    {
-                      error: createError,
+                  const { error: createError } = await supabaseServiceRole
+                    .from("product_branch_stock")
+                    .insert({
                       product_id: item.product_id,
                       branch_id: branchId,
-                    },
-                  );
-                  // Continue anyway - the RPC function will handle it
+                      quantity: 0,
+                      reserved_quantity: 0,
+                      low_stock_threshold: DEFAULT_LOW_STOCK_THRESHOLD,
+                    });
+
+                  if (createError) {
+                    logger.error(
+                      `Error creating initial stock record for product ${item.product_id}`,
+                      {
+                        error: createError,
+                        product_id: item.product_id,
+                        branch_id: branchId,
+                      },
+                    );
+                  }
                 }
-              }
 
-              logger.info("Attempting to update inventory", {
-                product_id: item.product_id,
-                branch_id: branchId,
-                quantity: item.quantity,
-                product_type: product?.product_type,
-                current_quantity: currentQuantity,
-              });
-
-              const { data: stockUpdateResult, error: inventoryError } =
-                await supabaseServiceRole.rpc("update_product_stock", {
-                  p_product_id: item.product_id,
-                  p_branch_id: branchId,
-                  p_quantity_change: -item.quantity, // Negative to decrease
-                  p_reserve: false, // Decrease actual quantity, not reserved
-                  p_movement_type: "sale",
-                  p_reference_type: "order",
-                  p_reference_id: newOrder.id,
-                  p_created_by: user.id,
-                });
-
-              if (inventoryError) {
-                logger.error(
-                  `Error updating inventory for product ${item.product_id}`,
-                  {
-                    error: inventoryError,
-                    product_id: item.product_id,
-                    branch_id: branchId,
-                    quantity: item.quantity,
-                  },
-                );
-                // Don't fail the transaction, but log the error
-              } else {
-                logger.info("Inventory updated successfully", {
+                logger.info("Attempting to update inventory", {
                   product_id: item.product_id,
                   branch_id: branchId,
-                  quantity_decreased: item.quantity,
-                  result: stockUpdateResult,
+                  quantity: item.quantity,
                 });
+
+                const { data: stockUpdateResult, error: inventoryError } =
+                  await supabaseServiceRole.rpc("update_product_stock", {
+                    p_product_id: item.product_id,
+                    p_branch_id: branchId,
+                    p_quantity_change: -item.quantity,
+                    p_reserve: false,
+                    p_movement_type: "sale",
+                    p_reference_type: "order",
+                    p_reference_id: newOrder.id,
+                    p_created_by: user.id,
+                  });
+
+                if (inventoryError) {
+                  logger.error(
+                    `Error updating inventory for product ${item.product_id}`,
+                    {
+                      error: inventoryError,
+                      product_id: item.product_id,
+                      branch_id: branchId,
+                      quantity: item.quantity,
+                    },
+                  );
+                } else {
+                  logger.info("Inventory updated successfully", {
+                    product_id: item.product_id,
+                    branch_id: branchId,
+                    quantity_decreased: item.quantity,
+                    result: stockUpdateResult,
+                  });
+                }
               }
             }
           }
@@ -1207,7 +1467,7 @@ export async function POST(request: NextRequest) {
               newOrder.order_number,
               newOrder.email || "venta@pos.local",
               newOrder.total_amount,
-              newOrder.branch_id ?? branchContext.branchId ?? undefined,
+              newOrder.branch_id ?? effectiveBranchId ?? undefined,
             ).catch((err) =>
               logger.error("Error creating sale notification", err),
             );
@@ -1230,7 +1490,7 @@ export async function POST(request: NextRequest) {
           const { data: minDepositData, error: minDepositError } =
             await supabaseServiceRole.rpc("get_min_deposit", {
               p_order_total: total_amount,
-              p_branch_id: branchContext.branchId,
+              p_branch_id: effectiveBranchId,
             });
 
           const minDeposit = minDepositError
@@ -1283,7 +1543,9 @@ export async function POST(request: NextRequest) {
           // Create work order
           const workOrderData: Record<string, unknown> = {
             work_order_number: workOrderNumber,
-            branch_id: branchContext.branchId,
+            branch_id: effectiveBranchId,
+            field_operation_id: fieldOperationId,
+            operativo_batch_id: fieldOperationId,
             customer_id: customer_id || null, // Can be null for simple product sales
             prescription_id: lensInfo.prescription_id || null, // ✅ Guardar prescription_id
             quote_id: quote_id || null, // Link to quote if sale comes from quote
@@ -1367,6 +1629,7 @@ export async function POST(request: NextRequest) {
             deposit_amount: paymentAmount, // Actual amount paid
             balance_amount: balance, // Calculated balance
             pos_order_id: newOrder.id, // Link work order to the order created above
+            agreement_id: agreement_id || null,
             internal_notes: `Venta POS - Método: ${payment_method_type}${billingResult ? ` - Folio: ${billingResult.folio}` : ""} - Depósito: ${paymentAmount}/${total_amount} - Saldo: ${balance}${presbyopia_solution && presbyopia_solution !== "none" ? ` - Presbicia: ${presbyopia_solution}` : ""}${lensInfo.lens_family_id ? ` - Familia: ${lensFamily?.name || lensInfo.lens_family_id}` : ""}`,
             customer_notes: null,
             assigned_to: user.id,
@@ -1457,7 +1720,7 @@ export async function POST(request: NextRequest) {
             newOrder.order_number,
             newOrder.email || "venta@pos.local",
             newOrder.total_amount,
-            newOrder.branch_id ?? branchContext.branchId ?? undefined,
+            newOrder.branch_id ?? effectiveBranchId ?? undefined,
           ).catch((err) =>
             logger.error("Error creating sale notification", err),
           );
@@ -1475,7 +1738,7 @@ export async function POST(request: NextRequest) {
               newWorkOrder.work_order_number,
               customerName,
               newWorkOrder.total_amount,
-              newWorkOrder.branch_id ?? branchContext.branchId ?? undefined,
+              newWorkOrder.branch_id ?? effectiveBranchId ?? undefined,
             ).catch((err) =>
               logger.error("Error creating work order notification", err),
             );

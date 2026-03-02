@@ -73,9 +73,11 @@ Documento base de la identidad del sistema. Fuente de verdad para copy, diseño 
 
 ### CTAs Principales
 
-- **Primario:** "Probar Gratis", "Comenzar ahora", "Empezar Ahora"
-- **Secundario:** "Ver demo en vivo", "Solicitar demo"
+- **Primario:** "Solicitar Demo" (por ahora; "Probar Gratis" como alternativa futura)
+- **Secundario:** "Ver demo en vivo", "Explorar la plataforma"
 - **Auth:** "Iniciar sesión", "Registrarse", "Crear cuenta", "Email", "Contraseña"
+
+> **Decisión 2026-03:** CTA principal en landing es "Solicitar Demo".
 
 ---
 

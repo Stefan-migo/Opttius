@@ -407,6 +407,32 @@ export const paginationSchema = z.object({
 });
 
 /**
+ * Schema para validar query params del Libro Digital de Recetas (GET /api/admin/prescriptions)
+ */
+export const prescriptionListQuerySchema = z.object({
+  q: z.string().optional(),
+  search: z.string().optional(),
+  rut: z.string().optional(),
+  date_from: z
+    .string()
+    .optional()
+    .transform((v) => (v && /^\d{4}-\d{2}-\d{2}$/.test(v) ? v : undefined)),
+  date_to: z
+    .string()
+    .optional()
+    .transform((v) => (v && /^\d{4}-\d{2}-\d{2}$/.test(v) ? v : undefined)),
+  issued_by: z.string().optional(),
+  branch_id: z
+    .string()
+    .optional()
+    .transform((v) =>
+      v && v.trim() !== "" && /^[0-9a-f-]{36}$/i.test(v) ? v : undefined,
+    ),
+  page: z.coerce.number().min(1).default(1),
+  limit: z.coerce.number().min(1).max(100).default(20),
+});
+
+/**
  * Schema para validar parámetros del dashboard de analíticas
  */
 export const analyticsDashboardParamsSchema = z.object({
@@ -508,6 +534,7 @@ export const customerBaseSchema = z
     tags: z.array(z.string()).optional().nullable(),
     is_active: z.boolean().default(true).optional(),
     branch_id: uuidOptionalSchema,
+    field_operation_id: uuidOptionalSchema,
   })
   .refine(
     (data) => {
@@ -598,6 +625,7 @@ export const updateCustomerSchema = z.object({
 export const searchCustomerSchema = searchSchema.extend({
   branch_id: uuidOptionalSchema,
   is_active: z.boolean().optional(),
+  agreement_id: uuidOptionalSchema,
 });
 
 // ============================================================================
@@ -896,6 +924,9 @@ export const processSaleSchema = z
     contact_lens_cost: priceOptionalSchema,
     contact_lens_price: priceOptionalSchema,
     quote_id: uuidOptionalSchema, // Quote ID if sale comes from a quote
+    agreement_id: uuidOptionalSchema,
+    purchase_order_id: uuidOptionalSchema,
+    field_operation_id: uuidOptionalSchema, // Operativo en terreno - header takes precedence
   })
   .refine(
     (data) => {
@@ -922,7 +953,127 @@ export const processSaleSchema = z
         "La suma de pagos divididos debe ser al menos el total de la venta",
       path: ["payments"],
     },
+  )
+  .refine(
+    (data) => {
+      if (!data.agreement_id) return true;
+      return !!data.purchase_order_id;
+    },
+    {
+      message:
+        "Si se selecciona un convenio, la orden de compra (OC) es obligatoria",
+      path: ["purchase_order_id"],
+    },
   );
+
+// ============================================================================
+// Schemas para Agreements (Gestión de Convenios)
+// ============================================================================
+
+const billingRulesSchema = z
+  .object({
+    copago_percent: z.number().min(0).max(100).optional(),
+    institutional_percent: z.number().min(0).max(100).optional(),
+    copago_per_product: z.record(z.string(), z.number()).optional(),
+    max_monthly_deduction_per_worker: z.number().optional(),
+    require_oc: z.boolean().optional().default(true),
+  })
+  .optional()
+  .nullable();
+
+export const createAgreementSchema = z.object({
+  name: z
+    .string()
+    .min(2, "El nombre debe tener al menos 2 caracteres")
+    .max(200)
+    .trim(),
+  agreement_type: z.enum(["empresa", "sindicato", "mutual"]),
+  institution_name: z
+    .string()
+    .min(2, "La razón social es requerida")
+    .max(200)
+    .trim(),
+  institution_rut: rutSchema,
+  representative_name: z.string().max(200).trim().optional().nullable(),
+  representative_email: z
+    .union([z.string().email("Email inválido").max(200).trim(), z.literal("")])
+    .optional()
+    .nullable()
+    .transform((v) => (!v || v === "" ? null : v)),
+  representative_phone: z.string().max(50).trim().optional().nullable(),
+  valid_from: z.union([
+    z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Formato YYYY-MM-DD"),
+    z.coerce.date(),
+  ]),
+  valid_until: z
+    .union([
+      z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+      z.coerce.date(),
+      z.literal(""),
+    ])
+    .optional()
+    .nullable()
+    .transform((v) => (!v || v === "" ? null : v)),
+  branch_id: uuidOptionalSchema,
+  billing_rules: billingRulesSchema,
+  max_installments_by_product: z
+    .record(z.string(), z.number().int().positive())
+    .optional()
+    .nullable(),
+  discount_percent: z.number().min(0).max(100).optional().nullable(),
+  notes: z.string().max(1000).trim().optional().nullable(),
+});
+
+export const updateAgreementSchema = createAgreementSchema.partial();
+
+export const createPurchaseOrderSchema = z.object({
+  agreement_id: uuidSchema,
+  oc_number: z.string().min(1, "El número de OC es requerido").max(100).trim(),
+  issued_at: z
+    .union([
+      z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+      z.coerce.date(),
+      z.literal(""),
+    ])
+    .optional()
+    .nullable()
+    .transform((v) => (!v || v === "" ? null : v)),
+  valid_until: z
+    .union([
+      z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+      z.coerce.date(),
+      z.literal(""),
+    ])
+    .optional()
+    .nullable()
+    .transform((v) => (!v || v === "" ? null : v)),
+  max_amount: z.number().positive().optional().nullable(),
+  notes: z.string().max(500).trim().optional().nullable(),
+});
+
+export const updatePurchaseOrderSchema = createPurchaseOrderSchema
+  .omit({ agreement_id: true })
+  .extend({
+    status: z.enum(["active", "exhausted", "expired", "cancelled"]).optional(),
+  })
+  .partial();
+
+export const reconcileSchema = z.object({
+  balance_ids: z
+    .array(uuidSchema)
+    .min(1, "Debe seleccionar al menos un balance"),
+  paid_at: z.union([z.string().datetime(), z.coerce.date()]),
+  payment_reference: z.string().max(200).trim().optional().nullable(),
+  emit_invoice: z.boolean().optional().default(true),
+});
+
+export const agreementListQuerySchema = z.object({
+  status: z.enum(["active", "suspended", "expired", "cancelled"]).optional(),
+  branch_id: uuidOptionalSchema,
+  agreement_type: z.enum(["empresa", "sindicato", "mutual"]).optional(),
+  page: z.coerce.number().int().positive().optional().default(1),
+  limit: z.coerce.number().int().positive().max(100).optional().default(20),
+});
 
 // ============================================================================
 // Schemas para Work Orders
@@ -1508,6 +1659,7 @@ export const createQuoteSchema = z.object({
   terms_and_conditions: z.string().max(5000).trim().optional().nullable(),
   expiration_date: dateISOOptionalSchema,
   branch_id: uuidOptionalSchema,
+  field_operation_id: uuidOptionalSchema,
 });
 
 // ============================================================================
@@ -1979,4 +2131,62 @@ export const tierUpdateSchema = z.object({
   max_customers: z.number().int().min(0).nullable().optional(),
   max_products: z.number().int().min(0).nullable().optional(),
   features: z.record(z.string(), z.boolean()).optional(),
+});
+
+// ============================================================================
+// Schemas para Field Operations (Operativos en Terreno)
+// ============================================================================
+
+const fieldOperationDateSchema = z.union([
+  z.string().regex(/^\d{4}-\d{2}-\d{2}/, "Formato fecha: YYYY-MM-DD"),
+  z.coerce.date(),
+]);
+
+export const createFieldOperationSchema = z.object({
+  name: z.string().min(1, "El nombre es requerido").max(255).trim(),
+  scheduled_date: fieldOperationDateSchema,
+  location: z.string().max(500).trim().optional().nullable(),
+  branch_id: uuidSchema,
+});
+
+export const updateFieldOperationSchema = z.object({
+  name: z.string().min(1).max(255).trim().optional(),
+  scheduled_date: fieldOperationDateSchema.optional(),
+  location: z.string().max(500).trim().optional().nullable(),
+  status: z
+    .enum(["draft", "prepared", "in_progress", "completed", "cancelled"])
+    .optional(),
+});
+
+export const transferStockSchema = z.object({
+  product_id: uuidSchema,
+  quantity: z.number().int().positive("La cantidad debe ser mayor a 0"),
+});
+
+export const transferStockBulkSchema = z.object({
+  items: z
+    .array(transferStockSchema)
+    .min(1, "Debe incluir al menos un producto"),
+});
+
+export const returnStockSchema = z.object({
+  product_id: uuidSchema,
+  quantity: z.number().int().positive("La cantidad debe ser mayor a 0"),
+});
+
+export const returnStockBulkSchema = z.object({
+  items: z.array(returnStockSchema).min(1, "Debe incluir al menos un producto"),
+});
+
+export const deliverFieldOperationSchema = z.object({
+  work_order_ids: z
+    .array(uuidSchema)
+    .min(1, "Debe seleccionar al menos un trabajo"),
+  delivered_at: z.coerce.date().optional(),
+  recipient_name: z
+    .string()
+    .min(1, "El nombre del receptor es requerido")
+    .max(255)
+    .trim(),
+  notes: z.string().max(1000).trim().optional().nullable(),
 });

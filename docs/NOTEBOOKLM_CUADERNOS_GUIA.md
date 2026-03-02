@@ -55,7 +55,7 @@ Esta guía explica cuándo usar cada cuaderno de NotebookLM según el tipo de co
 | **Búsqueda de contexto histórico** | "¿Cómo evolucionó el sistema de identidad?"                     |
 | **Testing y QA**                   | "¿Qué flujos críticos debo verificar?" "¿Cómo validar backups?" |
 
-**Contenido:** Archive (salvataje, CTO briefing), estado de implementación (setup, API, AI, payments, integrations, forms, email, analysis), evaluaciones (database, inventory, brain), guías (Supabase, typography, identity audit), testing (TESTING_GUIDE, skill testing), NOTEBOOKLM_CUADERNOS_GUIA, PROJECT_SUMMARY.
+**Contenido:** Archive (salvataje, CTO briefing), estado de implementación (setup, API, AI, payments, integrations, forms, email, analysis), evaluaciones (database, inventory, brain), guías (Supabase, typography, identity audit), testing (TESTING_GUIDE, skill testing), NOTEBOOKLM_CUADERNOS_GUIA, PROJECT_SUMMARY, **AGREEMENTS_SYSTEM** (Gestión de Convenios).
 
 ---
 

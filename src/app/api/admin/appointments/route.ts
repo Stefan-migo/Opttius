@@ -561,6 +561,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // When customer_id is provided, inherit field_operation_id from customer (operativo context)
+    let fieldOperationId: string | null = null;
+    if (customerId) {
+      const { data: cust } = await supabaseServiceRole
+        .from("customers")
+        .select("field_operation_id")
+        .eq("id", customerId)
+        .single();
+      fieldOperationId = cust?.field_operation_id ?? null;
+    }
+
     // Create appointment
     const appointmentData: {
       customer_id: string | null;
@@ -578,6 +589,7 @@ export async function POST(request: NextRequest) {
       follow_up_date: string | null;
       created_by: string;
       branch_id: string;
+      field_operation_id?: string | null;
       [key: string]: unknown;
     } = {
       customer_id: customerId, // NULL for guest customers
@@ -596,6 +608,7 @@ export async function POST(request: NextRequest) {
       created_by: user.id,
       branch_id: finalBranchId, // Always include branch_id (required by database)
       organization_id: branchContext.organizationId, // Set organization_id for multi-tenancy
+      field_operation_id: fieldOperationId,
     };
 
     // Add guest customer data if present

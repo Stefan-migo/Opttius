@@ -55,6 +55,7 @@ export class InternalBilling implements BillingAdapter {
           folio: folio,
           order_id: order.id,
           branch_id: order.branch_id,
+          purchase_order_reference: (order as any).oc_number ?? null,
           customer_id: order.customer_id || null,
           customer_name:
             order.customer?.first_name && order.customer?.last_name

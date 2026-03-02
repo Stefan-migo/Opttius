@@ -120,3 +120,36 @@ export function getBranchQueryParam(branchId: string | null): string {
   }
   return `branch_id=${branchId}`;
 }
+
+/**
+ * Obtiene el header HTTP para incluir field_operation_id en peticiones API
+ *
+ * @param fieldOperationId - ID del operativo en terreno
+ * @returns Objeto con el header 'x-field-operation-id' configurado
+ */
+export function getOperativoHeader(
+  fieldOperationId: string | null | undefined,
+): Record<string, string> {
+  if (fieldOperationId == null || fieldOperationId === "") {
+    return {};
+  }
+  return { "x-field-operation-id": fieldOperationId };
+}
+
+/**
+ * Combina headers de branch y opcionalmente field_operation_id
+ *
+ * @param branchId - ID de la sucursal
+ * @param fieldOperationId - ID del operativo (opcional)
+ * @returns Objeto con x-branch-id y opcionalmente x-field-operation-id
+ */
+export function getBranchAndOperativoHeaders(
+  branchId: string | null | undefined,
+  fieldOperationId?: string | null,
+): Record<string, string> {
+  const headers = { ...getBranchHeader(branchId) };
+  if (fieldOperationId) {
+    Object.assign(headers, getOperativoHeader(fieldOperationId));
+  }
+  return headers;
+}

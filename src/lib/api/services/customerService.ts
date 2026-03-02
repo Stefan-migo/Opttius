@@ -7,7 +7,7 @@
 
 import { ApiClient, isSuccess, unwrapData } from "../client-helpers";
 import { handleApiError } from "@/lib/services/errorService";
-import { getBranchHeader } from "@/lib/utils/branch";
+import { getBranchAndOperativoHeaders } from "@/lib/utils/branch";
 
 // Import shared types from other services to avoid duplication
 import type { Appointment } from "./appointmentService";
@@ -25,6 +25,7 @@ export interface Customer {
   phone?: string | null;
   rut?: string | null;
   branch_id: string;
+  field_operation_id?: string | null;
   is_active?: boolean;
   is_active_customer?: boolean; // Alias for is_active used in UI
   created_at: string;
@@ -62,6 +63,19 @@ export interface Customer {
 
   // Analytics
   analytics?: CustomerAnalytics;
+
+  // Agreement (convenio) usage
+  agreement_usage?: AgreementUsage[];
+  is_convenio_client?: boolean;
+}
+
+export interface AgreementUsage {
+  agreement_id: string;
+  agreement_name: string | null;
+  order_count: number;
+  last_order_at: string;
+  total_copago: number;
+  total_institutional: number;
 }
 
 export interface Prescription {
@@ -174,6 +188,7 @@ export interface CreateCustomerData {
   tags?: string[] | null;
   is_active?: boolean;
   branch_id?: string | null;
+  field_operation_id?: string | null;
 }
 
 export interface UpdateCustomerData extends Partial<CreateCustomerData> {}
@@ -183,10 +198,12 @@ export interface CustomerSearchParams {
   limit?: number;
   search?: string;
   status?: string;
+  agreementId?: string;
   // Support for branch headers
   branchId?: string;
   isGlobalView?: boolean;
   isSuperAdmin?: boolean;
+  fieldOperationId?: string;
 }
 
 export interface CustomerListResponse {
@@ -209,20 +226,17 @@ function getBranchHeaders(
   branchId?: string,
   isGlobalView?: boolean,
   isSuperAdmin?: boolean,
+  fieldOperationId?: string,
 ): HeadersInit {
-  const headers: HeadersInit = {
+  const branchIdForHeader = isGlobalView && isSuperAdmin ? "global" : branchId;
+  const headers = getBranchAndOperativoHeaders(
+    branchIdForHeader,
+    fieldOperationId,
+  );
+  return {
     "Content-Type": "application/json",
+    ...headers,
   };
-
-  if (branchId) {
-    headers["x-branch-id"] = branchId;
-  }
-
-  if (isGlobalView && isSuperAdmin) {
-    headers["x-branch-id"] = "global";
-  }
-
-  return headers;
 }
 
 /**
@@ -238,10 +252,18 @@ export async function getCustomers(
     const queryString = new URLSearchParams(
       Object.entries(queryParams)
         .filter(([_, v]) => v !== undefined)
-        .map(([k, v]) => [k, String(v)]) as [string, string][],
+        .map(([k, v]) => [
+          k === "agreementId" ? "agreement_id" : k,
+          String(v),
+        ]) as [string, string][],
     ).toString();
 
-    const headers = getBranchHeaders(branchId, isGlobalView, isSuperAdmin);
+    const headers = getBranchHeaders(
+      branchId,
+      isGlobalView,
+      isSuperAdmin,
+      params.fieldOperationId,
+    );
 
     const response = await client.get<Customer[]>(
       `/api/admin/customers${queryString ? `?${queryString}` : ""}`,
@@ -335,16 +357,21 @@ export async function deleteCustomer(id: string): Promise<void> {
  * Search customers by query.
  * @param query - Search term (name, email, phone, RUT)
  * @param branchId - Optional branch ID to filter customers. When provided, only customers from this branch are returned. Required for branch-scoped forms (quotes, appointments).
+ * @param fieldOperationId - Optional field operation ID. When provided, only customers linked to this operativo are returned.
  */
 export async function searchCustomers(
   query: string,
   branchId?: string | null,
+  fieldOperationId?: string | null,
 ): Promise<Customer[]> {
   try {
-    const headers = getBranchHeader(branchId ?? null);
+    const headers = getBranchAndOperativoHeaders(
+      branchId ?? null,
+      fieldOperationId ?? undefined,
+    );
     const response = await client.get<Customer[]>(
       `/api/admin/customers/search?q=${encodeURIComponent(query)}`,
-      { headers },
+      { headers: { "Content-Type": "application/json", ...headers } },
     );
     const data = unwrapData(response);
     return Array.isArray(data) ? data : [];

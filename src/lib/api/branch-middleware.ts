@@ -17,6 +17,31 @@ export interface BranchContext {
   }>;
 }
 
+export interface OperativoContext {
+  fieldOperationId: string | null;
+}
+
+/**
+ * Extract field_operation_id from request (header or query param)
+ */
+export function getFieldOperationFromRequest(
+  request: NextRequest,
+): string | null {
+  const headerId = request.headers.get("x-field-operation-id");
+  if (headerId) return headerId;
+  const { searchParams } = new URL(request.url);
+  const queryId = searchParams.get("field_operation_id");
+  return queryId || null;
+}
+
+/**
+ * Get operativo context from request (field_operation_id if present)
+ */
+export function getOperativoContext(request: NextRequest): OperativoContext {
+  const fieldOperationId = getFieldOperationFromRequest(request);
+  return { fieldOperationId };
+}
+
 /**
  * Extract branch_id from request (header, query param, or user context)
  */

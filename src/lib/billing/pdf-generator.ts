@@ -5,6 +5,7 @@
  */
 
 import { Order, OrderItem } from "./adapters/BillingAdapter";
+import type { InstitutionalInvoiceItem } from "./adapters/InstitutionalInvoiceAdapter";
 
 export interface BillingDocumentData {
   // Document info
@@ -184,4 +185,118 @@ function formatCurrency(amount: number, currency: string): string {
     currency: currency || "CLP",
     minimumFractionDigits: 0,
   }).format(amount);
+}
+
+// ============================================================================
+// Institutional Invoice PDF (facturas agrupadas a instituciones)
+// ============================================================================
+
+export interface InstitutionalInvoiceDocumentData {
+  folio: string;
+  emissionDate: Date;
+  businessName: string;
+  businessRUT: string;
+  businessAddress?: string;
+  institutionName: string;
+  institutionRUT: string;
+  periodFrom: string;
+  periodTo: string;
+  paymentReference?: string;
+  items: InstitutionalInvoiceItem[];
+  subtotal: number;
+  taxAmount: number;
+  totalAmount: number;
+  currency: string;
+}
+
+/**
+ * Generates PDF for institutional invoice (agrupada a institución)
+ * Returns placeholder URL; actual PDF generation TBD
+ */
+export async function generateInstitutionalInvoicePDF(
+  data: InstitutionalInvoiceDocumentData,
+): Promise<string> {
+  // Placeholder: same pattern as generateBillingPDF
+  return `/api/admin/agreements/invoices/${data.folio}/pdf`;
+}
+
+/**
+ * Generates HTML for institutional invoice (preview or conversion)
+ */
+export function generateInstitutionalInvoiceHTML(
+  data: InstitutionalInvoiceDocumentData,
+): string {
+  return `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="UTF-8">
+      <title>Factura Institucional ${data.folio}</title>
+      <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .header { display: flex; justify-content: space-between; margin-bottom: 30px; }
+        .document-info { text-align: right; }
+        .customer-info { margin: 20px 0; }
+        .items-table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        .items-table th, .items-table td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        .items-table th { background-color: #f2f2f2; }
+        .totals { text-align: right; margin-top: 20px; }
+        .period { margin: 8px 0; color: #666; }
+      </style>
+    </head>
+    <body>
+      <div class="header">
+        <div>
+          <h2>${data.businessName}</h2>
+          <p>RUT: ${data.businessRUT}</p>
+          ${data.businessAddress ? `<p>${data.businessAddress}</p>` : ""}
+        </div>
+        <div class="document-info">
+          <h1>Factura Institucional</h1>
+          <p><strong>Folio:</strong> ${data.folio}</p>
+          <p><strong>Fecha:</strong> ${data.emissionDate.toLocaleDateString("es-CL")}</p>
+        </div>
+      </div>
+      
+      <div class="customer-info">
+        <h3>Cliente (Institución)</h3>
+        <p><strong>Razón social:</strong> ${data.institutionName}</p>
+        <p><strong>RUT:</strong> ${data.institutionRUT}</p>
+        <p class="period"><strong>Período:</strong> ${data.periodFrom} - ${data.periodTo}</p>
+        ${data.paymentReference ? `<p><strong>Ref. pago:</strong> ${data.paymentReference}</p>` : ""}
+      </div>
+      
+      <table class="items-table">
+        <thead>
+          <tr>
+            <th>Orden</th>
+            <th>OC</th>
+            <th>Descripción</th>
+            <th>Monto</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${data.items
+            .map(
+              (item) => `
+            <tr>
+              <td>${item.order_number}</td>
+              <td>${item.oc_number || "-"}</td>
+              <td>${item.description}</td>
+              <td>${formatCurrency(item.amount, data.currency)}</td>
+            </tr>
+          `,
+            )
+            .join("")}
+        </tbody>
+      </table>
+      
+      <div class="totals">
+        <p>Subtotal: ${formatCurrency(data.subtotal, data.currency)}</p>
+        <p>IVA: ${formatCurrency(data.taxAmount, data.currency)}</p>
+        <p><strong>Total: ${formatCurrency(data.totalAmount, data.currency)}</strong></p>
+      </div>
+    </body>
+    </html>
+  `;
 }

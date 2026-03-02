@@ -5,14 +5,14 @@ import { Eye } from "lucide-react";
 
 export interface PrescriptionDisplayData {
   id?: string;
-  prescription_number?: string;
-  prescription_type?: string;
+  prescription_number?: string | null;
+  prescription_type?: string | null;
   prescription_date?: string;
-  expiration_date?: string;
+  expiration_date?: string | null;
   is_current?: boolean;
   is_active?: boolean;
-  issued_by?: string;
-  issued_by_license?: string;
+  issued_by?: string | null;
+  issued_by_license?: string | null;
   od_sphere?: number | null;
   od_cylinder?: number | null;
   od_axis?: number | null;
@@ -33,7 +33,7 @@ export interface PrescriptionDisplayData {
   height_segmentation?: number | null;
   pd_distance?: number | null;
   pd_near?: number | null;
-  notes?: string;
+  notes?: string | null;
   // Legacy aliases (work-orders may use prism_od/prism_os)
   prism_od?: number | null;
   prism_os?: number | null;

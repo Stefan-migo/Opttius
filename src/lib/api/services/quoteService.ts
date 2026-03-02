@@ -78,6 +78,7 @@ export interface CreateQuoteData {
   valid_until?: string;
   notes?: string;
   branch_id?: string;
+  field_operation_id?: string;
   // Frame fields
   prescription_id?: string | null;
   frame_product_id?: string | null;
@@ -154,6 +155,7 @@ export interface QuoteSearchParams {
   branch_id?: string;
   date_from?: string;
   date_to?: string;
+  field_operation_id?: string;
 }
 
 export interface QuoteListResponse {

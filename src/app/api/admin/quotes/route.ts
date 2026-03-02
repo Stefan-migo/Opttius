@@ -2,7 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
 import { createServiceRoleClient } from "@/utils/supabase/server";
 import { NotificationService } from "@/lib/notifications/notification-service";
-import { getBranchContext, addBranchFilter } from "@/lib/api/branch-middleware";
+import {
+  getBranchContext,
+  addBranchFilter,
+  getFieldOperationFromRequest,
+} from "@/lib/api/branch-middleware";
 import { normalizeRUT } from "@/lib/utils/rut";
 import { appLogger as logger } from "@/lib/logger";
 import { EmailNotificationService } from "@/lib/email/notifications";
@@ -61,9 +65,21 @@ export async function GET(request: NextRequest) {
     const customerEmail = searchParams.get("customer_email")?.trim() || null;
     const page = parseInt(searchParams.get("page") || "1");
     const limit = parseInt(searchParams.get("limit") || "20");
+    const fieldOperationId = getFieldOperationFromRequest(request);
 
     // Get branch context
     const branchContext = await getBranchContext(request, user.id);
+
+    const supabaseServiceRoleForOp = createServiceRoleClient();
+    let effectiveBranchId = branchContext.branchId;
+    if (fieldOperationId) {
+      const { data: fieldOp } = await supabaseServiceRoleForOp
+        .from("field_operations")
+        .select("id, branch_id")
+        .eq("id", fieldOperationId)
+        .single();
+      if (fieldOp) effectiveBranchId = fieldOp.branch_id;
+    }
 
     // Get user's organization_id for multi-tenancy filtering
     const { data: adminUser } = await supabase
@@ -99,12 +115,24 @@ export async function GET(request: NextRequest) {
           );
         }
         // For POS customer quotes: do NOT filter by branch so all org quotes for customer are visible
-        if (!forCustomerQuotesOnly && branchContext.branchId) {
-          filteredQuery = filteredQuery.eq("branch_id", branchContext.branchId);
+        if (!forCustomerQuotesOnly && effectiveBranchId) {
+          filteredQuery = filteredQuery.eq("branch_id", effectiveBranchId);
+        }
+        if (fieldOperationId) {
+          filteredQuery = filteredQuery.eq(
+            "field_operation_id",
+            fieldOperationId,
+          );
         }
       } else if (branchContext.isSuperAdmin) {
-        if (!forCustomerQuotesOnly && branchContext.branchId) {
-          filteredQuery = filteredQuery.eq("branch_id", branchContext.branchId);
+        if (!forCustomerQuotesOnly && effectiveBranchId) {
+          filteredQuery = filteredQuery.eq("branch_id", effectiveBranchId);
+        }
+        if (fieldOperationId) {
+          filteredQuery = filteredQuery.eq(
+            "field_operation_id",
+            fieldOperationId,
+          );
         } else if (branchContext.organizationId) {
           if (forCustomerQuotesOnly) {
             filteredQuery = filteredQuery.or(
@@ -120,10 +148,16 @@ export async function GET(request: NextRequest) {
       } else {
         filteredQuery = addBranchFilter(
           filteredQuery,
-          forCustomerQuotesOnly ? null : branchContext.branchId,
+          forCustomerQuotesOnly ? null : effectiveBranchId,
           branchContext.isSuperAdmin,
           branchContext.organizationId,
         );
+        if (fieldOperationId) {
+          filteredQuery = filteredQuery.eq(
+            "field_operation_id",
+            fieldOperationId,
+          );
+        }
       }
 
       return filteredQuery;
@@ -458,6 +492,17 @@ export async function POST(request: NextRequest) {
         null;
     }
 
+    // Inherit field_operation_id from customer when not explicitly provided (operativo context)
+    let quoteFieldOperationId = validatedBody.field_operation_id || null;
+    if (!quoteFieldOperationId && validatedBody.customer_id) {
+      const { data: cust } = await supabaseServiceRole
+        .from("customers")
+        .select("field_operation_id")
+        .eq("id", validatedBody.customer_id)
+        .single();
+      quoteFieldOperationId = cust?.field_operation_id ?? null;
+    }
+
     // Create quote
     // Usar validatedBody para campos validados por Zod
     const { data: newQuote, error: quoteError } = await supabaseServiceRole
@@ -467,6 +512,7 @@ export async function POST(request: NextRequest) {
         customer_id: validatedBody.customer_id,
         branch_id: quoteBranchId,
         organization_id: quoteOrganizationId,
+        field_operation_id: quoteFieldOperationId,
         prescription_id: validatedBody.prescription_id || null,
         frame_product_id: validatedBody.frame_product_id || null,
         frame_name: validatedBody.frame_name || null,

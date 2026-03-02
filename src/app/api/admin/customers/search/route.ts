@@ -4,7 +4,10 @@ import {
   createServiceRoleClient,
 } from "@/utils/supabase/server";
 import { normalizeRUT, formatRUT } from "@/lib/utils/rut";
-import { getBranchContext } from "@/lib/api/branch-middleware";
+import {
+  getBranchContext,
+  getFieldOperationFromRequest,
+} from "@/lib/api/branch-middleware";
 import { appLogger as logger } from "@/lib/logger";
 import { withRateLimit, rateLimitConfigs } from "@/lib/api/middleware";
 import { RateLimitError } from "@/lib/api/errors";
@@ -68,6 +71,18 @@ export async function GET(request: NextRequest) {
             orgBranchIds = branches?.map((b: { id: string }) => b.id) || [];
           }
 
+          // When field_operation_id is present, resolve branch from operativo and filter by field_operation_id
+          const fieldOperationId = getFieldOperationFromRequest(request);
+          let operativoBranchId: string | null = null;
+          if (fieldOperationId) {
+            const { data: fo } = await supabaseServiceRole
+              .from("field_operations")
+              .select("branch_id")
+              .eq("id", fieldOperationId)
+              .single();
+            operativoBranchId = fo?.branch_id ?? null;
+          }
+
           // Build a customers query with branch filter (sync, no async return)
           const buildFilteredCustomersQuery = () => {
             const q = supabaseServiceRole
@@ -79,6 +94,11 @@ export async function GET(request: NextRequest) {
               organizationId,
               accessibleBranches,
             } = branchContext;
+            if (fieldOperationId && operativoBranchId) {
+              return q
+                .eq("branch_id", operativoBranchId)
+                .eq("field_operation_id", fieldOperationId);
+            }
             if (branchId) return q.eq("branch_id", branchId);
             if (isSuperAdmin && orgBranchIds && orgBranchIds.length > 0) {
               return q.in("branch_id", orgBranchIds);
@@ -99,7 +119,9 @@ export async function GET(request: NextRequest) {
           // Get branch params for RPC (p_branch_id or p_branch_ids)
           let rpcBranchId: string | null = null;
           let rpcBranchIds: string[] | null = null;
-          if (branchContext.branchId) {
+          if (fieldOperationId && operativoBranchId) {
+            rpcBranchId = operativoBranchId;
+          } else if (branchContext.branchId) {
             rpcBranchId = branchContext.branchId;
           } else if (
             branchContext.isSuperAdmin &&
@@ -145,7 +167,8 @@ export async function GET(request: NextRequest) {
           let error: any = null;
 
           // If this looks like a RUT search, try the SQL function first (handles partial matches better)
-          if (isRutSearch) {
+          // Skip RPC when filtering by operativo - RPC doesn't support field_operation_id and we'd lose the filter
+          if (isRutSearch && !fieldOperationId) {
             try {
               logger.debug("Using RUT search function", {
                 searchTerm,
@@ -345,9 +368,17 @@ export async function GET(request: NextRequest) {
             throw error;
           }
 
-          logger.debug("Found customers", { count: customers.length });
+          // When in operativo mode, filter to only customers linked to this operativo (RPC doesn't support field_operation_id)
+          let finalCustomers = customers || [];
+          if (fieldOperationId) {
+            finalCustomers = finalCustomers.filter(
+              (c: any) => c.field_operation_id === fieldOperationId,
+            );
+          }
 
-          return createApiSuccessResponse(customers || [], { requestId });
+          logger.debug("Found customers", { count: finalCustomers.length });
+
+          return createApiSuccessResponse(finalCustomers, { requestId });
         } catch (error) {
           if (error instanceof RateLimitError) {
             logger.warn("Rate limit exceeded for customer search", {

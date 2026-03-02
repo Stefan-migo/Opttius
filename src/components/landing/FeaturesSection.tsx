@@ -12,45 +12,64 @@ import {
   Package,
   Sparkles,
   ArrowUpRight,
+  Briefcase,
+  MapPin,
 } from "lucide-react";
 import Image from "next/image";
 
-/* Bento grid: 4 cols. Row 1: [1: col-2 row-2][2: col-1][3: col-1]. Row 2: [1 cont.][4: col-1][5: col-1]. Row 3: [6: col-1][7: col-1][8: col-2] */
-/* Cada tarjeta puede tener una imagen. Estilo: grayscale, opacity-10, hover: grayscale-0 opacity-20 */
+/* Grid uniforme: 5 cols x 2 rows = 10 items. Orden por importancia percibida por el usuario. */
 const features = [
-  {
-    icon: Users,
-    title: "Expediente Clínico Unificado",
-    description:
-      "Centraliza la salud visual y el historial comercial. Recetas, citas, presupuestos y órdenes de laboratorio sincronizados en una línea de tiempo perfecta.",
-    className: "lg:col-span-2 lg:row-span-2 bg-epoch-primary text-white",
-    image: "/images/landing/LamparaW.webp",
-  },
   {
     icon: ShoppingCart,
     title: "POS (Punto de Venta)",
     subtitle: "Punto de Venta Clínico",
     description:
       "Facturación ágil integrada al historial del paciente. Descuentos de laboratorio, pagos mixtos y sincronización de stock en tiempo real.",
-    className: "lg:col-span-1 bg-white",
+    className: "bg-epoch-primary text-white",
     image: "/images/landing/pos.webp",
   },
   {
-    icon: Building2,
-    title: "Multi-Sucursal",
-    subtitle: "Control Multi-Sede",
+    icon: Users,
+    title: "Expediente Clínico Unificado",
     description:
-      "Gestione una o diez sucursales desde un solo panel. Inventarios compartidos, reportes consolidados y permisos por ubicación.",
-    className: "lg:col-span-1 bg-epoch-accent/10",
-    image: "/images/landing/multisucursal.webp",
+      "Centraliza la salud visual y el historial comercial. Recetas, citas, presupuestos y órdenes de laboratorio sincronizados en una línea de tiempo perfecta.",
+    className: "bg-white",
+    image: "/images/landing/LamparaW.webp",
+  },
+  {
+    icon: Package,
+    title: "Inventario",
+    subtitle: "Inventario Inteligente",
+    description:
+      "Control de armazones, lentes y accesorios con alertas de stock bajo. Movimientos, ajustes y valoración de inventario al día.",
+    className: "bg-epoch-accent/10",
+    image: "/images/landing/mesaW.webp",
+  },
+  {
+    icon: FileText,
+    title: "Laboratorio",
+    subtitle: "Trazabilidad de Órdenes",
+    description:
+      "Adiós a las llamadas al laboratorio. Monitoree el estado de cada trabajo (tallado, biselado, entrega) paso a paso en el sistema.",
+    className: "bg-white",
+    image: "/images/landing/laboratorio.webp",
+  },
+  {
+    icon: Calendar,
+    title: "Agenda (Comunicación)",
+    subtitle: "Agenda Inteligente",
+    description:
+      "Reduzca el ausentismo con recordatorios automáticos por WhatsApp. Confirmaciones directas y reprogramación sin fricción.",
+    className: "bg-white",
+    image: "/images/landing/agenda.webp",
   },
   {
     icon: MessageSquare,
-    title: "Asistente AI (Agenda)",
-    subtitle: "Recepción Automatizada",
+    title: "Agente IA",
+    subtitle: "Chatbot con Conocimiento de tu Óptica",
     description:
-      "Su asistente virtual trabaja 24/7. Responde consultas básicas, agenda citas y confirma asistencias automáticamente.",
-    className: "lg:col-span-1 bg-white",
+      "Un asistente que conoce tu negocio. Consulta stock, clientes, órdenes de trabajo y obtén recomendaciones ópticas. Disponible en el panel y por WhatsApp.",
+    className: "bg-epoch-surface text-white",
     image: "/images/landing/asistente.webp",
   },
   {
@@ -59,35 +78,35 @@ const features = [
     subtitle: "Analítica Comercial",
     description:
       "Tome decisiones con datos reales. Visualice márgenes de ganancia, productos estrella y rendimiento por vendedor al instante.",
-    className: "lg:col-span-1 bg-epoch-surface text-white",
+    className: "bg-white",
     image: "/images/landing/analytics.webp",
   },
   {
-    icon: Calendar,
-    title: "Agenda (Comunicación)",
-    subtitle: "Agenda Inteligente",
+    icon: Building2,
+    title: "Multi-Sucursal",
+    subtitle: "Control Multi-Sede",
     description:
-      "Reduzca el ausentismo con recordatorios automáticos por WhatsApp. Confirmaciones directas y reprogramación sin fricción.",
-    className: "lg:col-span-1 bg-white",
-    image: "/images/landing/agenda.webp",
+      "Gestione una o diez sucursales desde un solo panel. Inventarios compartidos, reportes consolidados y permisos por ubicación.",
+    className: "bg-epoch-accent/10",
+    image: "/images/landing/multisucursal.webp",
   },
   {
-    icon: FileText,
-    title: "Laboratorio",
-    subtitle: "Trazabilidad de Órdenes",
+    icon: Briefcase,
+    title: "Gestión de Convenios",
+    subtitle: "Próximamente",
     description:
-      "Adiós a las llamadas al laboratorio. Monitoree el estado de cada trabajo (tallado, biselado, entrega) paso a paso en el sistema.",
-    className: "lg:col-span-1 bg-epoch-accent/10",
-    image: "/images/landing/laboratorio.webp",
+      "Convenios con empresas e instituciones. Copago, órdenes de compra, descuento por planilla y cobranza institucional.",
+    className: "bg-white",
+    comingSoon: true,
   },
   {
-    icon: Package,
-    title: "Inventario",
-    subtitle: "Inventario Inteligente",
+    icon: MapPin,
+    title: "Operativos en Terreno",
+    subtitle: "Próximamente",
     description:
-      "Control de armazones, lentes y accesorios con alertas de stock bajo. Movimientos, ajustes y valoración de inventario al día.",
-    className: "lg:col-span-2 bg-white",
-    image: "/images/landing/mesaW.webp",
+      "Bodega móvil, registro masivo en empresa, receta digital en sitio y sincronización offline.",
+    className: "bg-epoch-accent/10",
+    comingSoon: true,
   },
 ];
 
@@ -101,10 +120,19 @@ function FeatureCard({
   const [imageError, setImageError] = useState(false);
   const showImage = feature.image && !imageError;
 
+  const isComingSoon = "comingSoon" in feature && feature.comingSoon;
+
   return (
     <div
-      className={`group relative overflow-hidden rounded-xl p-6 sm:p-8 border border-epoch-primary/5 transition-all duration-700 flex flex-col justify-between hover:shadow-2xl hover:-translate-y-1 ${feature.className}`}
+      className={`group relative overflow-hidden rounded-xl p-6 sm:p-8 border border-epoch-primary/5 transition-all duration-700 flex flex-col justify-between hover:shadow-2xl hover:-translate-y-1 ${feature.className} ${isComingSoon ? "opacity-90" : ""}`}
     >
+      {isComingSoon && (
+        <div className="absolute top-4 right-4 z-20">
+          <span className="inline-flex px-3 py-1 rounded-full text-[9px] font-sans font-semibold tracking-wider uppercase bg-epoch-accent/20 text-epoch-accent border border-epoch-accent/40">
+            En construcción
+          </span>
+        </div>
+      )}
       {showImage && (
         <div className="absolute inset-0 z-0">
           <Image
@@ -224,7 +252,7 @@ export function FeaturesSection() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 auto-rows-[minmax(160px,auto)]">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 lg:grid-rows-2 gap-4 auto-rows-[minmax(180px,auto)]">
           {features.map((feature, index) => (
             <FeatureCard key={index} feature={feature} index={index} />
           ))}

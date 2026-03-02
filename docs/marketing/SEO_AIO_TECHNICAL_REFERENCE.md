@@ -381,7 +381,15 @@ Usar en `metadataBase`, sitemap, robots, JSON-LD.
 
 ---
 
-## 8. Referencias Externas
+## 8. Cloudflare y Verificación en Producción
+
+Si usas Cloudflare, su "Managed robots.txt" bloquea GPTBot y ClaudeBot por defecto. Ver [SEO_AIO_CLOUDFLARE_VERIFICATION.md](./SEO_AIO_CLOUDFLARE_VERIFICATION.md) para desactivarlo y permitir crawlers de IA.
+
+Para verificar el sitemap sin artefactos de extensiones del navegador: `curl -s https://www.opttius.cl/sitemap.xml`
+
+---
+
+## 9. Referencias Externas
 
 - [Next.js Metadata API](https://nextjs.org/docs/app/building-your-application/optimizing/metadata)
 - [Next.js JSON-LD Guide](https://nextjs.org/docs/app/guides/json-ld)

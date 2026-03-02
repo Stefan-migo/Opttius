@@ -296,6 +296,7 @@ export type Database = {
           action_label: string | null;
           action_url: string | null;
           created_at: string;
+          feedback_comment: string | null;
           feedback_score: number | null;
           id: string;
           is_dismissed: boolean;
@@ -312,6 +313,7 @@ export type Database = {
           action_label?: string | null;
           action_url?: string | null;
           created_at?: string;
+          feedback_comment?: string | null;
           feedback_score?: number | null;
           id?: string;
           is_dismissed?: boolean;
@@ -328,6 +330,7 @@ export type Database = {
           action_label?: string | null;
           action_url?: string | null;
           created_at?: string;
+          feedback_comment?: string | null;
           feedback_score?: number | null;
           id?: string;
           is_dismissed?: boolean;
@@ -343,6 +346,47 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "ai_insights_organization_id_fkey";
+            columns: ["organization_id"];
+            isOneToOne: false;
+            referencedRelation: "organizations";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      ai_usage_log: {
+        Row: {
+          completion_tokens: number;
+          created_at: string;
+          endpoint: string | null;
+          id: string;
+          model: string;
+          organization_id: string;
+          prompt_tokens: number;
+          provider: string;
+        };
+        Insert: {
+          completion_tokens?: number;
+          created_at?: string;
+          endpoint?: string | null;
+          id?: string;
+          model: string;
+          organization_id: string;
+          prompt_tokens?: number;
+          provider: string;
+        };
+        Update: {
+          completion_tokens?: number;
+          created_at?: string;
+          endpoint?: string | null;
+          id?: string;
+          model?: string;
+          organization_id?: string;
+          prompt_tokens?: number;
+          provider?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "ai_usage_log_organization_id_fkey";
             columns: ["organization_id"];
             isOneToOne: false;
             referencedRelation: "organizations";
@@ -823,11 +867,12 @@ export type Database = {
           id: string;
           last_message_preview: string | null;
           message_count: number | null;
+          metadata: Json | null;
           model: string;
           provider: string;
           title: string | null;
           updated_at: string;
-          user_id: string;
+          user_id: string | null;
         };
         Insert: {
           config?: Json | null;
@@ -835,11 +880,12 @@ export type Database = {
           id?: string;
           last_message_preview?: string | null;
           message_count?: number | null;
+          metadata?: Json | null;
           model: string;
           provider: string;
           title?: string | null;
           updated_at?: string;
-          user_id: string;
+          user_id?: string | null;
         };
         Update: {
           config?: Json | null;
@@ -847,11 +893,12 @@ export type Database = {
           id?: string;
           last_message_preview?: string | null;
           message_count?: number | null;
+          metadata?: Json | null;
           model?: string;
           provider?: string;
           title?: string | null;
           updated_at?: string;
-          user_id?: string;
+          user_id?: string | null;
         };
         Relationships: [];
       };
@@ -859,6 +906,7 @@ export type Database = {
         Row: {
           base_curve: number | null;
           brand: string | null;
+          category_id: string | null;
           created_at: string;
           description: string | null;
           diameter: number | null;
@@ -875,6 +923,7 @@ export type Database = {
         Insert: {
           base_curve?: number | null;
           brand?: string | null;
+          category_id?: string | null;
           created_at?: string;
           description?: string | null;
           diameter?: number | null;
@@ -891,6 +940,7 @@ export type Database = {
         Update: {
           base_curve?: number | null;
           brand?: string | null;
+          category_id?: string | null;
           created_at?: string;
           description?: string | null;
           diameter?: number | null;
@@ -905,6 +955,13 @@ export type Database = {
           use_type?: string;
         };
         Relationships: [
+          {
+            foreignKeyName: "contact_lens_families_category_id_fkey";
+            columns: ["category_id"];
+            isOneToOne: false;
+            referencedRelation: "categories";
+            referencedColumns: ["id"];
+          },
           {
             foreignKeyName: "contact_lens_families_organization_id_fkey";
             columns: ["organization_id"];
@@ -1244,6 +1301,187 @@ export type Database = {
           },
         ];
       };
+      demo_requests: {
+        Row: {
+          conversion_date: string | null;
+          created_at: string | null;
+          demo_expires_at: string | null;
+          demo_started_at: string | null;
+          email: string;
+          full_name: string | null;
+          funnel_stage: string | null;
+          id: string;
+          last_contact_at: string | null;
+          last_email_sent: string | null;
+          last_email_sent_at: string | null;
+          last_login_at: string | null;
+          login_count: number | null;
+          lost_reason: string | null;
+          meeting_completed_at: string | null;
+          meeting_scheduled_at: string | null;
+          meeting_url: string | null;
+          metadata: Json | null;
+          notes: string | null;
+          offer_details: Json | null;
+          offer_sent_at: string | null;
+          offer_type: string | null;
+          optica_name: string | null;
+          organization_id: string | null;
+          phone: string | null;
+          reviewed_at: string | null;
+          reviewed_by: string | null;
+          source: string | null;
+          status: string | null;
+        };
+        Insert: {
+          conversion_date?: string | null;
+          created_at?: string | null;
+          demo_expires_at?: string | null;
+          demo_started_at?: string | null;
+          email: string;
+          full_name?: string | null;
+          funnel_stage?: string | null;
+          id?: string;
+          last_contact_at?: string | null;
+          last_email_sent?: string | null;
+          last_email_sent_at?: string | null;
+          last_login_at?: string | null;
+          login_count?: number | null;
+          lost_reason?: string | null;
+          meeting_completed_at?: string | null;
+          meeting_scheduled_at?: string | null;
+          meeting_url?: string | null;
+          metadata?: Json | null;
+          notes?: string | null;
+          offer_details?: Json | null;
+          offer_sent_at?: string | null;
+          offer_type?: string | null;
+          optica_name?: string | null;
+          organization_id?: string | null;
+          phone?: string | null;
+          reviewed_at?: string | null;
+          reviewed_by?: string | null;
+          source?: string | null;
+          status?: string | null;
+        };
+        Update: {
+          conversion_date?: string | null;
+          created_at?: string | null;
+          demo_expires_at?: string | null;
+          demo_started_at?: string | null;
+          email?: string;
+          full_name?: string | null;
+          funnel_stage?: string | null;
+          id?: string;
+          last_contact_at?: string | null;
+          last_email_sent?: string | null;
+          last_email_sent_at?: string | null;
+          last_login_at?: string | null;
+          login_count?: number | null;
+          lost_reason?: string | null;
+          meeting_completed_at?: string | null;
+          meeting_scheduled_at?: string | null;
+          meeting_url?: string | null;
+          metadata?: Json | null;
+          notes?: string | null;
+          offer_details?: Json | null;
+          offer_sent_at?: string | null;
+          offer_type?: string | null;
+          optica_name?: string | null;
+          organization_id?: string | null;
+          phone?: string | null;
+          reviewed_at?: string | null;
+          reviewed_by?: string | null;
+          source?: string | null;
+          status?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "demo_requests_organization_id_fkey";
+            columns: ["organization_id"];
+            isOneToOne: false;
+            referencedRelation: "organizations";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      drivers: {
+        Row: {
+          created_at: string;
+          email: string | null;
+          id: string;
+          is_active: boolean | null;
+          license_number: string;
+          name: string;
+          organization_id: string;
+          phone: string | null;
+          updated_at: string;
+        };
+        Insert: {
+          created_at?: string;
+          email?: string | null;
+          id?: string;
+          is_active?: boolean | null;
+          license_number: string;
+          name: string;
+          organization_id: string;
+          phone?: string | null;
+          updated_at?: string;
+        };
+        Update: {
+          created_at?: string;
+          email?: string | null;
+          id?: string;
+          is_active?: boolean | null;
+          license_number?: string;
+          name?: string;
+          organization_id?: string;
+          phone?: string | null;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "drivers_organization_id_fkey";
+            columns: ["organization_id"];
+            isOneToOne: false;
+            referencedRelation: "organizations";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      email_send_events: {
+        Row: {
+          created_at: string;
+          email_id: string;
+          event_type: string;
+          id: string;
+          metadata: Json | null;
+          recipient: string | null;
+          subject: string | null;
+          template_id: string | null;
+        };
+        Insert: {
+          created_at?: string;
+          email_id: string;
+          event_type: string;
+          id?: string;
+          metadata?: Json | null;
+          recipient?: string | null;
+          subject?: string | null;
+          template_id?: string | null;
+        };
+        Update: {
+          created_at?: string;
+          email_id?: string;
+          event_type?: string;
+          id?: string;
+          metadata?: Json | null;
+          recipient?: string | null;
+          subject?: string | null;
+          template_id?: string | null;
+        };
+        Relationships: [];
+      };
       embeddings: {
         Row: {
           content: string;
@@ -1285,6 +1523,320 @@ export type Database = {
           user_id?: string | null;
         };
         Relationships: [];
+      };
+      field_operations: {
+        Row: {
+          branch_id: string;
+          created_at: string | null;
+          created_by: string | null;
+          id: string;
+          location: string | null;
+          name: string;
+          organization_id: string;
+          scheduled_date: string;
+          status: string;
+          updated_at: string | null;
+        };
+        Insert: {
+          branch_id: string;
+          created_at?: string | null;
+          created_by?: string | null;
+          id?: string;
+          location?: string | null;
+          name: string;
+          organization_id: string;
+          scheduled_date: string;
+          status?: string;
+          updated_at?: string | null;
+        };
+        Update: {
+          branch_id?: string;
+          created_at?: string | null;
+          created_by?: string | null;
+          id?: string;
+          location?: string | null;
+          name?: string;
+          organization_id?: string;
+          scheduled_date?: string;
+          status?: string;
+          updated_at?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "field_operations_branch_id_fkey";
+            columns: ["branch_id"];
+            isOneToOne: false;
+            referencedRelation: "branches";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "field_operations_organization_id_fkey";
+            columns: ["organization_id"];
+            isOneToOne: false;
+            referencedRelation: "organizations";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      internal_order_items: {
+        Row: {
+          created_at: string;
+          id: string;
+          internal_order_id: string;
+          notes: string | null;
+          product_id: string;
+          quantity: number;
+        };
+        Insert: {
+          created_at?: string;
+          id?: string;
+          internal_order_id: string;
+          notes?: string | null;
+          product_id: string;
+          quantity: number;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          internal_order_id?: string;
+          notes?: string | null;
+          product_id?: string;
+          quantity?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "internal_order_items_internal_order_id_fkey";
+            columns: ["internal_order_id"];
+            isOneToOne: false;
+            referencedRelation: "internal_orders";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "internal_order_items_product_id_fkey";
+            columns: ["product_id"];
+            isOneToOne: false;
+            referencedRelation: "products";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "internal_order_items_product_id_fkey";
+            columns: ["product_id"];
+            isOneToOne: false;
+            referencedRelation: "products_with_stock";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      internal_order_status_history: {
+        Row: {
+          changed_by: string;
+          created_at: string;
+          id: string;
+          internal_order_id: string;
+          notes: string | null;
+          status: string;
+        };
+        Insert: {
+          changed_by: string;
+          created_at?: string;
+          id?: string;
+          internal_order_id: string;
+          notes?: string | null;
+          status: string;
+        };
+        Update: {
+          changed_by?: string;
+          created_at?: string;
+          id?: string;
+          internal_order_id?: string;
+          notes?: string | null;
+          status?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "internal_order_status_history_changed_by_fkey";
+            columns: ["changed_by"];
+            isOneToOne: false;
+            referencedRelation: "admin_users";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "internal_order_status_history_changed_by_fkey";
+            columns: ["changed_by"];
+            isOneToOne: false;
+            referencedRelation: "admin_users_view";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "internal_order_status_history_internal_order_id_fkey";
+            columns: ["internal_order_id"];
+            isOneToOne: false;
+            referencedRelation: "internal_orders";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      internal_orders: {
+        Row: {
+          actual_delivery_date: string | null;
+          assigned_driver_id: string | null;
+          assigned_vehicle_id: string | null;
+          created_at: string;
+          created_by: string;
+          destination_branch_id: string;
+          id: string;
+          notes: string | null;
+          order_number: string;
+          organization_id: string;
+          origin_branch_id: string;
+          priority: string | null;
+          scheduled_date: string | null;
+          status: string | null;
+          updated_at: string;
+        };
+        Insert: {
+          actual_delivery_date?: string | null;
+          assigned_driver_id?: string | null;
+          assigned_vehicle_id?: string | null;
+          created_at?: string;
+          created_by: string;
+          destination_branch_id: string;
+          id?: string;
+          notes?: string | null;
+          order_number: string;
+          organization_id: string;
+          origin_branch_id: string;
+          priority?: string | null;
+          scheduled_date?: string | null;
+          status?: string | null;
+          updated_at?: string;
+        };
+        Update: {
+          actual_delivery_date?: string | null;
+          assigned_driver_id?: string | null;
+          assigned_vehicle_id?: string | null;
+          created_at?: string;
+          created_by?: string;
+          destination_branch_id?: string;
+          id?: string;
+          notes?: string | null;
+          order_number?: string;
+          organization_id?: string;
+          origin_branch_id?: string;
+          priority?: string | null;
+          scheduled_date?: string | null;
+          status?: string | null;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "internal_orders_assigned_driver_id_fkey";
+            columns: ["assigned_driver_id"];
+            isOneToOne: false;
+            referencedRelation: "drivers";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "internal_orders_assigned_vehicle_id_fkey";
+            columns: ["assigned_vehicle_id"];
+            isOneToOne: false;
+            referencedRelation: "vehicles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "internal_orders_created_by_fkey";
+            columns: ["created_by"];
+            isOneToOne: false;
+            referencedRelation: "admin_users";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "internal_orders_created_by_fkey";
+            columns: ["created_by"];
+            isOneToOne: false;
+            referencedRelation: "admin_users_view";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "internal_orders_destination_branch_id_fkey";
+            columns: ["destination_branch_id"];
+            isOneToOne: false;
+            referencedRelation: "branches";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "internal_orders_organization_id_fkey";
+            columns: ["organization_id"];
+            isOneToOne: false;
+            referencedRelation: "organizations";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "internal_orders_origin_branch_id_fkey";
+            columns: ["origin_branch_id"];
+            isOneToOne: false;
+            referencedRelation: "branches";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      inventory_movements: {
+        Row: {
+          branch_id: string;
+          created_at: string | null;
+          created_by: string | null;
+          id: string;
+          movement_type: string;
+          product_id: string;
+          quantity_change: number;
+          reference_id: string | null;
+          reference_type: string | null;
+        };
+        Insert: {
+          branch_id: string;
+          created_at?: string | null;
+          created_by?: string | null;
+          id?: string;
+          movement_type: string;
+          product_id: string;
+          quantity_change: number;
+          reference_id?: string | null;
+          reference_type?: string | null;
+        };
+        Update: {
+          branch_id?: string;
+          created_at?: string | null;
+          created_by?: string | null;
+          id?: string;
+          movement_type?: string;
+          product_id?: string;
+          quantity_change?: number;
+          reference_id?: string | null;
+          reference_type?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "inventory_movements_branch_id_fkey";
+            columns: ["branch_id"];
+            isOneToOne: false;
+            referencedRelation: "branches";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "inventory_movements_product_id_fkey";
+            columns: ["product_id"];
+            isOneToOne: false;
+            referencedRelation: "products";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "inventory_movements_product_id_fkey";
+            columns: ["product_id"];
+            isOneToOne: false;
+            referencedRelation: "products_with_stock";
+            referencedColumns: ["id"];
+          },
+        ];
       };
       lab_work_order_status_history: {
         Row: {
@@ -1355,11 +1907,13 @@ export type Database = {
           customer_id: string;
           customer_notes: string | null;
           customer_own_frame: boolean;
+          customer_own_near_frame: boolean | null;
           delivered_at: string | null;
           deposit_amount: number | null;
           discount_amount: number | null;
           far_lens_cost: number | null;
           far_lens_family_id: string | null;
+          field_operation_id: string | null;
           frame_brand: string | null;
           frame_color: string | null;
           frame_cost: number | null;
@@ -1390,8 +1944,21 @@ export type Database = {
           lens_treatments: string[];
           lens_type: string;
           mounted_at: string | null;
+          near_frame_brand: string | null;
+          near_frame_color: string | null;
+          near_frame_cost: number | null;
+          near_frame_model: string | null;
+          near_frame_name: string | null;
+          near_frame_price: number | null;
+          near_frame_price_includes_tax: boolean | null;
+          near_frame_product_id: string | null;
+          near_frame_size: string | null;
+          near_frame_sku: string | null;
           near_lens_cost: number | null;
           near_lens_family_id: string | null;
+          operativo_batch_id: string | null;
+          operativo_delivered_at: string | null;
+          operativo_recipient_name: string | null;
           ordered_at: string | null;
           organization_id: string | null;
           payment_method: string | null;
@@ -1445,11 +2012,13 @@ export type Database = {
           customer_id: string;
           customer_notes?: string | null;
           customer_own_frame?: boolean;
+          customer_own_near_frame?: boolean | null;
           delivered_at?: string | null;
           deposit_amount?: number | null;
           discount_amount?: number | null;
           far_lens_cost?: number | null;
           far_lens_family_id?: string | null;
+          field_operation_id?: string | null;
           frame_brand?: string | null;
           frame_color?: string | null;
           frame_cost?: number | null;
@@ -1480,8 +2049,21 @@ export type Database = {
           lens_treatments?: string[];
           lens_type: string;
           mounted_at?: string | null;
+          near_frame_brand?: string | null;
+          near_frame_color?: string | null;
+          near_frame_cost?: number | null;
+          near_frame_model?: string | null;
+          near_frame_name?: string | null;
+          near_frame_price?: number | null;
+          near_frame_price_includes_tax?: boolean | null;
+          near_frame_product_id?: string | null;
+          near_frame_size?: string | null;
+          near_frame_sku?: string | null;
           near_lens_cost?: number | null;
           near_lens_family_id?: string | null;
+          operativo_batch_id?: string | null;
+          operativo_delivered_at?: string | null;
+          operativo_recipient_name?: string | null;
           ordered_at?: string | null;
           organization_id?: string | null;
           payment_method?: string | null;
@@ -1535,11 +2117,13 @@ export type Database = {
           customer_id?: string;
           customer_notes?: string | null;
           customer_own_frame?: boolean;
+          customer_own_near_frame?: boolean | null;
           delivered_at?: string | null;
           deposit_amount?: number | null;
           discount_amount?: number | null;
           far_lens_cost?: number | null;
           far_lens_family_id?: string | null;
+          field_operation_id?: string | null;
           frame_brand?: string | null;
           frame_color?: string | null;
           frame_cost?: number | null;
@@ -1570,8 +2154,21 @@ export type Database = {
           lens_treatments?: string[];
           lens_type?: string;
           mounted_at?: string | null;
+          near_frame_brand?: string | null;
+          near_frame_color?: string | null;
+          near_frame_cost?: number | null;
+          near_frame_model?: string | null;
+          near_frame_name?: string | null;
+          near_frame_price?: number | null;
+          near_frame_price_includes_tax?: boolean | null;
+          near_frame_product_id?: string | null;
+          near_frame_size?: string | null;
+          near_frame_sku?: string | null;
           near_lens_cost?: number | null;
           near_lens_family_id?: string | null;
+          operativo_batch_id?: string | null;
+          operativo_delivered_at?: string | null;
+          operativo_recipient_name?: string | null;
           ordered_at?: string | null;
           organization_id?: string | null;
           payment_method?: string | null;
@@ -1628,6 +2225,13 @@ export type Database = {
             referencedColumns: ["id"];
           },
           {
+            foreignKeyName: "lab_work_orders_field_operation_id_fkey";
+            columns: ["field_operation_id"];
+            isOneToOne: false;
+            referencedRelation: "field_operations";
+            referencedColumns: ["id"];
+          },
+          {
             foreignKeyName: "lab_work_orders_frame_product_id_fkey";
             columns: ["frame_product_id"];
             isOneToOne: false;
@@ -1646,6 +2250,20 @@ export type Database = {
             columns: ["lens_family_id"];
             isOneToOne: false;
             referencedRelation: "lens_families";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "lab_work_orders_near_frame_product_id_fkey";
+            columns: ["near_frame_product_id"];
+            isOneToOne: false;
+            referencedRelation: "products";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "lab_work_orders_near_frame_product_id_fkey";
+            columns: ["near_frame_product_id"];
+            isOneToOne: false;
+            referencedRelation: "products_with_stock";
             referencedColumns: ["id"];
           },
           {
@@ -1688,6 +2306,7 @@ export type Database = {
       lens_families: {
         Row: {
           brand: string | null;
+          category_id: string | null;
           created_at: string | null;
           description: string | null;
           id: string;
@@ -1700,6 +2319,7 @@ export type Database = {
         };
         Insert: {
           brand?: string | null;
+          category_id?: string | null;
           created_at?: string | null;
           description?: string | null;
           id?: string;
@@ -1712,6 +2332,7 @@ export type Database = {
         };
         Update: {
           brand?: string | null;
+          category_id?: string | null;
           created_at?: string | null;
           description?: string | null;
           id?: string;
@@ -1723,6 +2344,13 @@ export type Database = {
           updated_at?: string | null;
         };
         Relationships: [
+          {
+            foreignKeyName: "lens_families_category_id_fkey";
+            columns: ["category_id"];
+            isOneToOne: false;
+            referencedRelation: "categories";
+            referencedColumns: ["id"];
+          },
           {
             foreignKeyName: "lens_families_organization_id_fkey";
             columns: ["organization_id"];
@@ -1865,6 +2493,7 @@ export type Database = {
       };
       notification_settings: {
         Row: {
+          branch_id: string | null;
           created_at: string;
           enabled: boolean | null;
           id: string;
@@ -1872,12 +2501,14 @@ export type Database = {
           notification_type: Database["public"]["Enums"]["admin_notification_type"];
           notify_all_admins: boolean | null;
           notify_specific_roles: string[] | null;
+          organization_id: string | null;
           priority:
             | Database["public"]["Enums"]["admin_notification_priority"]
             | null;
           updated_at: string;
         };
         Insert: {
+          branch_id?: string | null;
           created_at?: string;
           enabled?: boolean | null;
           id?: string;
@@ -1885,12 +2516,14 @@ export type Database = {
           notification_type: Database["public"]["Enums"]["admin_notification_type"];
           notify_all_admins?: boolean | null;
           notify_specific_roles?: string[] | null;
+          organization_id?: string | null;
           priority?:
             | Database["public"]["Enums"]["admin_notification_priority"]
             | null;
           updated_at?: string;
         };
         Update: {
+          branch_id?: string | null;
           created_at?: string;
           enabled?: boolean | null;
           id?: string;
@@ -1898,12 +2531,124 @@ export type Database = {
           notification_type?: Database["public"]["Enums"]["admin_notification_type"];
           notify_all_admins?: boolean | null;
           notify_specific_roles?: string[] | null;
+          organization_id?: string | null;
           priority?:
             | Database["public"]["Enums"]["admin_notification_priority"]
             | null;
           updated_at?: string;
         };
-        Relationships: [];
+        Relationships: [
+          {
+            foreignKeyName: "notification_settings_branch_id_fkey";
+            columns: ["branch_id"];
+            isOneToOne: false;
+            referencedRelation: "branches";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "notification_settings_organization_id_fkey";
+            columns: ["organization_id"];
+            isOneToOne: false;
+            referencedRelation: "organizations";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      operativo_mobile_stock: {
+        Row: {
+          created_at: string | null;
+          field_operation_id: string;
+          id: string;
+          product_id: string;
+          quantity: number;
+          reserved_quantity: number;
+          updated_at: string | null;
+        };
+        Insert: {
+          created_at?: string | null;
+          field_operation_id: string;
+          id?: string;
+          product_id: string;
+          quantity?: number;
+          reserved_quantity?: number;
+          updated_at?: string | null;
+        };
+        Update: {
+          created_at?: string | null;
+          field_operation_id?: string;
+          id?: string;
+          product_id?: string;
+          quantity?: number;
+          reserved_quantity?: number;
+          updated_at?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "operativo_mobile_stock_field_operation_id_fkey";
+            columns: ["field_operation_id"];
+            isOneToOne: false;
+            referencedRelation: "field_operations";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "operativo_mobile_stock_product_id_fkey";
+            columns: ["product_id"];
+            isOneToOne: false;
+            referencedRelation: "products";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "operativo_mobile_stock_product_id_fkey";
+            columns: ["product_id"];
+            isOneToOne: false;
+            referencedRelation: "products_with_stock";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      operativo_sync_queue: {
+        Row: {
+          created_at: string;
+          device_id: string;
+          entity_type: string;
+          error_message: string | null;
+          field_operation_id: string;
+          id: string;
+          payload: Json;
+          status: string;
+          synced_at: string | null;
+        };
+        Insert: {
+          created_at?: string;
+          device_id: string;
+          entity_type: string;
+          error_message?: string | null;
+          field_operation_id: string;
+          id?: string;
+          payload: Json;
+          status?: string;
+          synced_at?: string | null;
+        };
+        Update: {
+          created_at?: string;
+          device_id?: string;
+          entity_type?: string;
+          error_message?: string | null;
+          field_operation_id?: string;
+          id?: string;
+          payload?: Json;
+          status?: string;
+          synced_at?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "operativo_sync_queue_field_operation_id_fkey";
+            columns: ["field_operation_id"];
+            isOneToOne: false;
+            referencedRelation: "field_operations";
+            referencedColumns: ["id"];
+          },
+        ];
       };
       optical_internal_support_messages: {
         Row: {
@@ -2321,6 +3066,7 @@ export type Database = {
           carrier: string | null;
           created_at: string;
           currency: string;
+          customer_id: string | null;
           customer_name: string | null;
           customer_notes: string | null;
           delivered_at: string | null;
@@ -2407,6 +3153,7 @@ export type Database = {
           carrier?: string | null;
           created_at?: string;
           currency?: string;
+          customer_id?: string | null;
           customer_name?: string | null;
           customer_notes?: string | null;
           delivered_at?: string | null;
@@ -2493,6 +3240,7 @@ export type Database = {
           carrier?: string | null;
           created_at?: string;
           currency?: string;
+          customer_id?: string | null;
           customer_name?: string | null;
           customer_notes?: string | null;
           delivered_at?: string | null;
@@ -2565,6 +3313,13 @@ export type Database = {
             columns: ["branch_id"];
             isOneToOne: false;
             referencedRelation: "branches";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "orders_customer_id_fkey";
+            columns: ["customer_id"];
+            isOneToOne: false;
+            referencedRelation: "customers";
             referencedColumns: ["id"];
           },
           {
@@ -2666,6 +3421,8 @@ export type Database = {
           metadata: Json | null;
           name: string;
           owner_id: string | null;
+          scheduled_tier: string | null;
+          scheduled_tier_effective_at: string | null;
           slogan: string | null;
           slug: string;
           status: string | null;
@@ -2680,6 +3437,8 @@ export type Database = {
           metadata?: Json | null;
           name: string;
           owner_id?: string | null;
+          scheduled_tier?: string | null;
+          scheduled_tier_effective_at?: string | null;
           slogan?: string | null;
           slug: string;
           status?: string | null;
@@ -2694,6 +3453,8 @@ export type Database = {
           metadata?: Json | null;
           name?: string;
           owner_id?: string | null;
+          scheduled_tier?: string | null;
+          scheduled_tier_effective_at?: string | null;
           slogan?: string | null;
           slug?: string;
           status?: string | null;
@@ -3316,6 +4077,7 @@ export type Database = {
           field_category: string;
           field_key: string;
           field_label: string;
+          form_type: string;
           id: string;
           is_active: boolean | null;
           is_array: boolean | null;
@@ -3327,6 +4089,7 @@ export type Database = {
           field_category: string;
           field_key: string;
           field_label: string;
+          form_type?: string;
           id?: string;
           is_active?: boolean | null;
           is_array?: boolean | null;
@@ -3338,6 +4101,7 @@ export type Database = {
           field_category?: string;
           field_key?: string;
           field_label?: string;
+          form_type?: string;
           id?: string;
           is_active?: boolean | null;
           is_array?: boolean | null;
@@ -4269,6 +5033,42 @@ export type Database = {
           },
         ];
       };
+      saas_backups: {
+        Row: {
+          backup_type: string;
+          created_at: string;
+          created_by: string | null;
+          filename: string;
+          id: string;
+          size_bytes: number;
+          source: string | null;
+          status: string;
+          storage_path: string;
+        };
+        Insert: {
+          backup_type?: string;
+          created_at?: string;
+          created_by?: string | null;
+          filename: string;
+          id?: string;
+          size_bytes?: number;
+          source?: string | null;
+          status?: string;
+          storage_path: string;
+        };
+        Update: {
+          backup_type?: string;
+          created_at?: string;
+          created_by?: string | null;
+          filename?: string;
+          id?: string;
+          size_bytes?: number;
+          source?: string | null;
+          status?: string;
+          storage_path?: string;
+        };
+        Relationships: [];
+      };
       saas_support_messages: {
         Row: {
           attachments: Json | null;
@@ -4979,6 +5779,7 @@ export type Database = {
       };
       system_config: {
         Row: {
+          branch_id: string | null;
           category: string;
           config_key: string;
           config_value: Json;
@@ -4988,11 +5789,13 @@ export type Database = {
           is_public: boolean | null;
           is_sensitive: boolean | null;
           last_modified_by: string | null;
+          organization_id: string | null;
           updated_at: string;
           validation_rules: Json | null;
           value_type: string | null;
         };
         Insert: {
+          branch_id?: string | null;
           category?: string;
           config_key: string;
           config_value: Json;
@@ -5002,11 +5805,13 @@ export type Database = {
           is_public?: boolean | null;
           is_sensitive?: boolean | null;
           last_modified_by?: string | null;
+          organization_id?: string | null;
           updated_at?: string;
           validation_rules?: Json | null;
           value_type?: string | null;
         };
         Update: {
+          branch_id?: string | null;
           category?: string;
           config_key?: string;
           config_value?: Json;
@@ -5016,11 +5821,19 @@ export type Database = {
           is_public?: boolean | null;
           is_sensitive?: boolean | null;
           last_modified_by?: string | null;
+          organization_id?: string | null;
           updated_at?: string;
           validation_rules?: Json | null;
           value_type?: string | null;
         };
         Relationships: [
+          {
+            foreignKeyName: "system_config_branch_id_fkey";
+            columns: ["branch_id"];
+            isOneToOne: false;
+            referencedRelation: "branches";
+            referencedColumns: ["id"];
+          },
           {
             foreignKeyName: "system_config_last_modified_by_fkey";
             columns: ["last_modified_by"];
@@ -5033,6 +5846,13 @@ export type Database = {
             columns: ["last_modified_by"];
             isOneToOne: false;
             referencedRelation: "admin_users_view";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "system_config_organization_id_fkey";
+            columns: ["organization_id"];
+            isOneToOne: false;
+            referencedRelation: "organizations";
             referencedColumns: ["id"];
           },
         ];
@@ -5051,6 +5871,7 @@ export type Database = {
           name: string;
           organization_id: string | null;
           subject: string;
+          template_group: string | null;
           type: string;
           updated_at: string;
           usage_count: number | null;
@@ -5069,6 +5890,7 @@ export type Database = {
           name: string;
           organization_id?: string | null;
           subject: string;
+          template_group?: string | null;
           type: string;
           updated_at?: string;
           usage_count?: number | null;
@@ -5087,6 +5909,7 @@ export type Database = {
           name?: string;
           organization_id?: string | null;
           subject?: string;
+          template_group?: string | null;
           type?: string;
           updated_at?: string;
           usage_count?: number | null;
@@ -5230,6 +6053,250 @@ export type Database = {
           },
         ];
       };
+      telemetry_aggregates: {
+        Row: {
+          avg_response_time: number | null;
+          created_at: string;
+          date: string;
+          error_rate: number | null;
+          feature_usage: Json | null;
+          id: string;
+          organization_id: string | null;
+          page_views: Json | null;
+          period: string;
+          total_events: number | null;
+          unique_sessions: number | null;
+          unique_users: number | null;
+          updated_at: string;
+        };
+        Insert: {
+          avg_response_time?: number | null;
+          created_at?: string;
+          date: string;
+          error_rate?: number | null;
+          feature_usage?: Json | null;
+          id?: string;
+          organization_id?: string | null;
+          page_views?: Json | null;
+          period: string;
+          total_events?: number | null;
+          unique_sessions?: number | null;
+          unique_users?: number | null;
+          updated_at?: string;
+        };
+        Update: {
+          avg_response_time?: number | null;
+          created_at?: string;
+          date?: string;
+          error_rate?: number | null;
+          feature_usage?: Json | null;
+          id?: string;
+          organization_id?: string | null;
+          page_views?: Json | null;
+          period?: string;
+          total_events?: number | null;
+          unique_sessions?: number | null;
+          unique_users?: number | null;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "telemetry_aggregates_organization_id_fkey";
+            columns: ["organization_id"];
+            isOneToOne: false;
+            referencedRelation: "organizations";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      telemetry_config: {
+        Row: {
+          anonymize_ip: boolean | null;
+          created_at: string;
+          enabled: boolean | null;
+          exclude_sensitive_paths: string[] | null;
+          id: string;
+          organization_id: string | null;
+          retention_days: number | null;
+          sampling_rate: number | null;
+          track_errors: boolean | null;
+          track_feature_usage: boolean | null;
+          track_page_views: boolean | null;
+          track_performance: boolean | null;
+          updated_at: string;
+        };
+        Insert: {
+          anonymize_ip?: boolean | null;
+          created_at?: string;
+          enabled?: boolean | null;
+          exclude_sensitive_paths?: string[] | null;
+          id?: string;
+          organization_id?: string | null;
+          retention_days?: number | null;
+          sampling_rate?: number | null;
+          track_errors?: boolean | null;
+          track_feature_usage?: boolean | null;
+          track_page_views?: boolean | null;
+          track_performance?: boolean | null;
+          updated_at?: string;
+        };
+        Update: {
+          anonymize_ip?: boolean | null;
+          created_at?: string;
+          enabled?: boolean | null;
+          exclude_sensitive_paths?: string[] | null;
+          id?: string;
+          organization_id?: string | null;
+          retention_days?: number | null;
+          sampling_rate?: number | null;
+          track_errors?: boolean | null;
+          track_feature_usage?: boolean | null;
+          track_page_views?: boolean | null;
+          track_performance?: boolean | null;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "telemetry_config_organization_id_fkey";
+            columns: ["organization_id"];
+            isOneToOne: true;
+            referencedRelation: "organizations";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      telemetry_events: {
+        Row: {
+          browser: string | null;
+          created_at: string;
+          device_type: string | null;
+          duration: number | null;
+          event_name: string;
+          event_type: string;
+          id: string;
+          ip_address: unknown;
+          organization_id: string | null;
+          os: string | null;
+          page_url: string | null;
+          payload: Json | null;
+          performance_data: Json | null;
+          processed: boolean | null;
+          processed_at: string | null;
+          referrer: string | null;
+          screen_size: string | null;
+          session_id: string | null;
+          timestamp: string;
+          user_agent: string | null;
+          user_id: string | null;
+        };
+        Insert: {
+          browser?: string | null;
+          created_at?: string;
+          device_type?: string | null;
+          duration?: number | null;
+          event_name: string;
+          event_type: string;
+          id?: string;
+          ip_address?: unknown;
+          organization_id?: string | null;
+          os?: string | null;
+          page_url?: string | null;
+          payload?: Json | null;
+          performance_data?: Json | null;
+          processed?: boolean | null;
+          processed_at?: string | null;
+          referrer?: string | null;
+          screen_size?: string | null;
+          session_id?: string | null;
+          timestamp?: string;
+          user_agent?: string | null;
+          user_id?: string | null;
+        };
+        Update: {
+          browser?: string | null;
+          created_at?: string;
+          device_type?: string | null;
+          duration?: number | null;
+          event_name?: string;
+          event_type?: string;
+          id?: string;
+          ip_address?: unknown;
+          organization_id?: string | null;
+          os?: string | null;
+          page_url?: string | null;
+          payload?: Json | null;
+          performance_data?: Json | null;
+          processed?: boolean | null;
+          processed_at?: string | null;
+          referrer?: string | null;
+          screen_size?: string | null;
+          session_id?: string | null;
+          timestamp?: string;
+          user_agent?: string | null;
+          user_id?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "telemetry_events_organization_id_fkey";
+            columns: ["organization_id"];
+            isOneToOne: false;
+            referencedRelation: "organizations";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      tier_change_audit: {
+        Row: {
+          changed_by_user_id: string | null;
+          created_at: string;
+          from_tier: string;
+          id: string;
+          organization_id: string;
+          source: string;
+          to_tier: string;
+        };
+        Insert: {
+          changed_by_user_id?: string | null;
+          created_at?: string;
+          from_tier: string;
+          id?: string;
+          organization_id: string;
+          source: string;
+          to_tier: string;
+        };
+        Update: {
+          changed_by_user_id?: string | null;
+          created_at?: string;
+          from_tier?: string;
+          id?: string;
+          organization_id?: string;
+          source?: string;
+          to_tier?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "tier_change_audit_changed_by_user_id_fkey";
+            columns: ["changed_by_user_id"];
+            isOneToOne: false;
+            referencedRelation: "admin_users";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "tier_change_audit_changed_by_user_id_fkey";
+            columns: ["changed_by_user_id"];
+            isOneToOne: false;
+            referencedRelation: "admin_users_view";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "tier_change_audit_organization_id_fkey";
+            columns: ["organization_id"];
+            isOneToOne: false;
+            referencedRelation: "organizations";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       user_tour_progress: {
         Row: {
           completed_at: string | null;
@@ -5283,6 +6350,47 @@ export type Database = {
           },
         ];
       };
+      vehicles: {
+        Row: {
+          capacity: number | null;
+          created_at: string;
+          id: string;
+          is_active: boolean | null;
+          model: string | null;
+          organization_id: string;
+          plate_number: string;
+          updated_at: string;
+        };
+        Insert: {
+          capacity?: number | null;
+          created_at?: string;
+          id?: string;
+          is_active?: boolean | null;
+          model?: string | null;
+          organization_id: string;
+          plate_number: string;
+          updated_at?: string;
+        };
+        Update: {
+          capacity?: number | null;
+          created_at?: string;
+          id?: string;
+          is_active?: boolean | null;
+          model?: string | null;
+          organization_id?: string;
+          plate_number?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "vehicles_organization_id_fkey";
+            columns: ["organization_id"];
+            isOneToOne: false;
+            referencedRelation: "organizations";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       webhook_events: {
         Row: {
           created_at: string;
@@ -5323,6 +6431,47 @@ export type Database = {
             columns: ["payment_id"];
             isOneToOne: false;
             referencedRelation: "payments";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      whatsapp_phone_numbers: {
+        Row: {
+          access_token_encrypted: string | null;
+          created_at: string;
+          display_phone_number: string | null;
+          id: string;
+          organization_id: string;
+          phone_number_id: string;
+          updated_at: string;
+          waba_id: string;
+        };
+        Insert: {
+          access_token_encrypted?: string | null;
+          created_at?: string;
+          display_phone_number?: string | null;
+          id?: string;
+          organization_id: string;
+          phone_number_id: string;
+          updated_at?: string;
+          waba_id: string;
+        };
+        Update: {
+          access_token_encrypted?: string | null;
+          created_at?: string;
+          display_phone_number?: string | null;
+          id?: string;
+          organization_id?: string;
+          phone_number_id?: string;
+          updated_at?: string;
+          waba_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "whatsapp_phone_numbers_organization_id_fkey";
+            columns: ["organization_id"];
+            isOneToOne: false;
+            referencedRelation: "organizations";
             referencedColumns: ["id"];
           },
         ];
@@ -5626,6 +6775,13 @@ export type Database = {
       };
     };
     Functions: {
+      archive_old_telemetry_data: {
+        Args: { archive_before_date?: string };
+        Returns: {
+          archive_date: string;
+          archived_count: number;
+        }[];
+      };
       calculate_contact_lens_price: {
         Args: {
           p_addition?: number;
@@ -5649,6 +6805,7 @@ export type Database = {
       calculate_lens_price:
         | {
             Args: {
+              p_addition?: number;
               p_cylinder?: number;
               p_lens_family_id: string;
               p_sourcing_type?: string;
@@ -5662,7 +6819,6 @@ export type Database = {
           }
         | {
             Args: {
-              p_addition?: number;
               p_cylinder?: number;
               p_lens_family_id: string;
               p_sourcing_type?: string;
@@ -5694,8 +6850,20 @@ export type Database = {
         };
         Returns: boolean;
       };
+      cleanup_expired_demo_organizations: {
+        Args: never;
+        Returns: {
+          deleted_org_id: string;
+          deleted_org_slug: string;
+        }[];
+      };
       cleanup_old_notifications: { Args: never; Returns: undefined };
+      cleanup_old_telemetry_data: { Args: never; Returns: undefined };
       collect_system_health_metrics: { Args: never; Returns: undefined };
+      create_demo_organization_for_user: {
+        Args: { p_demo_type?: string; p_user_id: string };
+        Returns: string;
+      };
       create_lens_family_full: {
         Args: { p_family_data: Json; p_matrices_data: Json };
         Returns: Json;
@@ -5704,9 +6872,20 @@ export type Database = {
         Args: { product_id: string; quantity: number };
         Returns: boolean;
       };
+      delete_demo_request_and_org: {
+        Args: { p_request_id: string };
+        Returns: {
+          deleted_org_id: string;
+          deleted_request_id: string;
+        }[];
+      };
       expire_quotes: { Args: never; Returns: number };
       generate_billing_folio: {
         Args: { p_branch_id: string; p_document_type: string };
+        Returns: string;
+      };
+      generate_internal_order_number: {
+        Args: { org_id: string };
         Returns: string;
       };
       generate_optical_internal_ticket_number: { Args: never; Returns: string };
@@ -5719,6 +6898,7 @@ export type Database = {
       generate_ticket_number: { Args: never; Returns: string };
       generate_work_order_number: { Args: never; Returns: string };
       get_admin_role: { Args: { user_id?: string }; Returns: string };
+      get_auth_user_id_by_email: { Args: { p_email: string }; Returns: string };
       get_available_time_slots: {
         Args: {
           p_branch_id?: string;
@@ -5750,12 +6930,33 @@ export type Database = {
         Args: { p_branch_id?: string; p_order_total: number };
         Returns: number;
       };
-      get_notification_priority: {
+      get_notification_priority:
+        | {
+            Args: {
+              p_default_priority?: Database["public"]["Enums"]["admin_notification_priority"];
+              p_notification_type: Database["public"]["Enums"]["admin_notification_type"];
+            };
+            Returns: Database["public"]["Enums"]["admin_notification_priority"];
+          }
+        | {
+            Args: {
+              p_branch_id?: string;
+              p_default_priority?: Database["public"]["Enums"]["admin_notification_priority"];
+              p_notification_type: Database["public"]["Enums"]["admin_notification_type"];
+              p_organization_id?: string;
+            };
+            Returns: Database["public"]["Enums"]["admin_notification_priority"];
+          };
+      get_notification_setting_effective: {
         Args: {
-          p_default_priority?: Database["public"]["Enums"]["admin_notification_priority"];
+          p_branch_id?: string;
           p_notification_type: Database["public"]["Enums"]["admin_notification_type"];
+          p_organization_id?: string;
         };
-        Returns: Database["public"]["Enums"]["admin_notification_priority"];
+        Returns: {
+          enabled: boolean;
+          priority: Database["public"]["Enums"]["admin_notification_priority"];
+        }[];
       };
       get_product_stock: {
         Args: { p_branch_id: string; p_product_id: string };
@@ -5766,6 +6967,16 @@ export type Database = {
           quantity: number;
           reorder_point: number;
           reserved_quantity: number;
+        }[];
+      };
+      get_telemetry_stats: {
+        Args: { org_id?: string };
+        Returns: {
+          date_range: string;
+          organization_id: string;
+          storage_size_mb: number;
+          total_events: number;
+          unique_users: number;
         }[];
       };
       get_unread_notification_count: {
@@ -5796,12 +7007,21 @@ export type Database = {
       get_user_organization_id: { Args: { user_id?: string }; Returns: string };
       is_admin: { Args: { user_id?: string }; Returns: boolean };
       is_employee: { Args: { user_id?: string }; Returns: boolean };
-      is_notification_enabled: {
-        Args: {
-          p_notification_type: Database["public"]["Enums"]["admin_notification_type"];
-        };
-        Returns: boolean;
-      };
+      is_notification_enabled:
+        | {
+            Args: {
+              p_notification_type: Database["public"]["Enums"]["admin_notification_type"];
+            };
+            Returns: boolean;
+          }
+        | {
+            Args: {
+              p_branch_id?: string;
+              p_notification_type: Database["public"]["Enums"]["admin_notification_type"];
+              p_organization_id?: string;
+            };
+            Returns: boolean;
+          };
       is_root_user: { Args: { user_id?: string }; Returns: boolean };
       is_super_admin: { Args: { user_id?: string }; Returns: boolean };
       log_admin_activity: {
@@ -5813,6 +7033,7 @@ export type Database = {
         };
         Returns: string;
       };
+      log_debug: { Args: { message: string }; Returns: undefined };
       mark_all_notifications_read: { Args: never; Returns: undefined };
       mark_notification_read: {
         Args: { notification_id: string };
@@ -5820,8 +7041,14 @@ export type Database = {
       };
       normalize_rut_for_search: { Args: { rut_text: string }; Returns: string };
       optimize_database: { Args: never; Returns: Json };
+      reset_demo_organization: { Args: never; Returns: undefined };
+      schedule_telemetry_cleanup: { Args: never; Returns: undefined };
       search_customers_by_rut: {
-        Args: { rut_search_term: string };
+        Args: {
+          p_branch_id?: string;
+          p_branch_ids?: string[];
+          rut_search_term: string;
+        };
         Returns: {
           email: string;
           first_name: string;
@@ -5900,6 +7127,8 @@ export type Database = {
           similarity: number;
         }[];
       };
+      seed_demo_mirada_clara: { Args: never; Returns: undefined };
+      seed_demo_organization_data: { Args: never; Returns: undefined };
       update_pos_session_cash: {
         Args: { cash_amount: number; session_id: string };
         Returns: boolean;
@@ -5907,8 +7136,12 @@ export type Database = {
       update_product_stock: {
         Args: {
           p_branch_id: string;
+          p_created_by?: string;
+          p_movement_type?: string;
           p_product_id: string;
           p_quantity_change: number;
+          p_reference_id?: string;
+          p_reference_type?: string;
           p_reserve?: boolean;
         };
         Returns: boolean;
@@ -5922,6 +7155,7 @@ export type Database = {
         };
         Returns: undefined;
       };
+      uuid_generate_v4: { Args: never; Returns: string };
     };
     Enums: {
       admin_notification_priority: "low" | "medium" | "high" | "urgent";

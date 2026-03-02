@@ -332,6 +332,15 @@ export default function CustomerDetailPage() {
         <div className="flex flex-wrap items-center gap-2">
           {customer.analytics?.segment &&
             getSegmentBadge(customer.analytics.segment)}
+          {customer.is_convenio_client && (
+            <Badge
+              variant="outline"
+              className="border-admin-accent-primary/50 text-admin-accent-primary"
+            >
+              <FileText className="h-3 w-3 mr-1" />
+              Cliente convenio
+            </Badge>
+          )}
           <Link href={`/admin/customers/${customer.id}/edit`}>
             <Button className="min-h-[44px]">
               <Edit className="h-4 w-4 mr-2" />
@@ -408,48 +417,59 @@ export default function CustomerDetailPage() {
         </Card>
       </div>
 
-      {/* Main Content */}
-      <Tabs defaultValue="overview" className="space-y-6">
-        <TabsList className="flex items-center w-full justify-start overflow-x-auto overflow-y-hidden gap-2 sm:gap-4 p-0 h-auto rounded-xl border-b border-admin-border-primary/20 bg-transparent min-w-0 [scrollbar-width:thin] [&::-webkit-scrollbar]:h-1 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-admin-border-primary/40">
+      {/* Main Content - Tabs styled like /admin/system */}
+      <Tabs defaultValue="overview" className="space-y-4 sm:space-y-6">
+        <TabsList className="flex w-full justify-start md:justify-center gap-1 sm:gap-2 h-auto p-1 overflow-x-auto overflow-y-hidden min-w-0 [scrollbar-width:thin] [&::-webkit-scrollbar]:h-1 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-epoch-primary/30 rounded-xl border border-epoch-primary/10 bg-epoch-background/50">
           <TabsTrigger
             value="overview"
-            className="shrink-0 rounded-xl border-b-2 border-transparent data-[state=active]:border-admin-accent-primary data-[state=active]:bg-transparent bg-transparent text-admin-text-tertiary data-[state=active]:text-admin-text-primary px-2 sm:px-3 pb-3 sm:pb-4 text-[10px] sm:text-sm font-medium transition-all"
+            className="flex-shrink-0 text-xs sm:text-sm px-3 py-2 min-h-[44px]"
           >
             Resumen
           </TabsTrigger>
           <TabsTrigger
             value="prescriptions"
-            className="shrink-0 rounded-xl border-b-2 border-transparent data-[state=active]:border-admin-accent-primary data-[state=active]:bg-transparent bg-transparent text-admin-text-tertiary data-[state=active]:text-admin-text-primary px-2 sm:px-3 pb-3 sm:pb-4 text-[10px] sm:text-sm font-medium transition-all"
+            className="flex-shrink-0 text-xs sm:text-sm px-3 py-2 min-h-[44px]"
           >
             Recetas
           </TabsTrigger>
           <TabsTrigger
             value="appointments"
-            className="shrink-0 rounded-xl border-b-2 border-transparent data-[state=active]:border-admin-accent-primary data-[state=active]:bg-transparent bg-transparent text-admin-text-tertiary data-[state=active]:text-admin-text-primary px-2 sm:px-3 pb-3 sm:pb-4 text-[10px] sm:text-sm font-medium transition-all"
+            className="flex-shrink-0 text-xs sm:text-sm px-3 py-2 min-h-[44px]"
           >
             Citas
           </TabsTrigger>
           <TabsTrigger
             value="quotes"
-            className="shrink-0 rounded-xl border-b-2 border-transparent data-[state=active]:border-admin-accent-primary data-[state=active]:bg-transparent bg-transparent text-admin-text-tertiary data-[state=active]:text-admin-text-primary px-2 sm:px-3 pb-3 sm:pb-4 text-[10px] sm:text-sm font-medium transition-all"
+            className="flex-shrink-0 text-xs sm:text-sm px-3 py-2 min-h-[44px]"
           >
             Presupuestos
           </TabsTrigger>
           <TabsTrigger
             value="purchases"
-            className="shrink-0 rounded-xl border-b-2 border-transparent data-[state=active]:border-admin-accent-primary data-[state=active]:bg-transparent bg-transparent text-admin-text-tertiary data-[state=active]:text-admin-text-primary px-2 sm:px-3 pb-3 sm:pb-4 text-[10px] sm:text-sm font-medium transition-all"
+            className="flex-shrink-0 text-xs sm:text-sm px-3 py-2 min-h-[44px]"
           >
             Compras
           </TabsTrigger>
           <TabsTrigger
             value="analytics"
-            className="shrink-0 rounded-xl border-b-2 border-transparent data-[state=active]:border-admin-accent-primary data-[state=active]:bg-transparent bg-transparent text-admin-text-tertiary data-[state=active]:text-admin-text-primary px-2 sm:px-3 pb-3 sm:pb-4 text-[10px] sm:text-sm font-medium transition-all"
+            className="flex-shrink-0 text-xs sm:text-sm px-3 py-2 min-h-[44px]"
           >
             Analíticas
           </TabsTrigger>
+          {customer.agreement_usage && customer.agreement_usage.length > 0 && (
+            <TabsTrigger
+              value="convenios"
+              className="flex-shrink-0 text-xs sm:text-sm px-3 py-2 min-h-[44px]"
+            >
+              Convenios
+            </TabsTrigger>
+          )}
         </TabsList>
 
-        <TabsContent value="overview" className="space-y-6">
+        <TabsContent
+          value="overview"
+          className="space-y-4 sm:space-y-6 mt-4 sm:mt-6"
+        >
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
             {/* Customer Information */}
             <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)]">
@@ -734,7 +754,10 @@ export default function CustomerDetailPage() {
           )}
         </TabsContent>
 
-        <TabsContent value="prescriptions" className="space-y-6">
+        <TabsContent
+          value="prescriptions"
+          className="space-y-4 sm:space-y-6 mt-4 sm:mt-6"
+        >
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
             <CardTitle className="flex items-center text-admin-text-primary">
               <Eye className="h-5 w-5 mr-2" />
@@ -840,7 +863,10 @@ export default function CustomerDetailPage() {
           )}
         </TabsContent>
 
-        <TabsContent value="appointments" className="space-y-6">
+        <TabsContent
+          value="appointments"
+          className="space-y-4 sm:space-y-6 mt-4 sm:mt-6"
+        >
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
             <CardTitle className="flex items-center text-admin-text-primary">
               <CalendarIcon className="h-5 w-5 mr-2" />
@@ -1023,7 +1049,10 @@ export default function CustomerDetailPage() {
           )}
         </TabsContent>
 
-        <TabsContent value="quotes" className="space-y-6">
+        <TabsContent
+          value="quotes"
+          className="space-y-4 sm:space-y-6 mt-4 sm:mt-6"
+        >
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
             <CardTitle className="flex items-center text-admin-text-primary">
               <FileText className="h-5 w-5 mr-2" />
@@ -1235,7 +1264,10 @@ export default function CustomerDetailPage() {
           )}
         </TabsContent>
 
-        <TabsContent value="purchases" className="space-y-6">
+        <TabsContent
+          value="purchases"
+          className="space-y-4 sm:space-y-6 mt-4 sm:mt-6"
+        >
           {/* Lens Purchases Section */}
           <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)]">
             <CardHeader className="p-4 sm:p-6">
@@ -1567,7 +1599,10 @@ export default function CustomerDetailPage() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="analytics" className="space-y-6">
+        <TabsContent
+          value="analytics"
+          className="space-y-4 sm:space-y-6 mt-4 sm:mt-6"
+        >
           {/* Empty State for No Orders */}
           {customer.analytics?.orderCount === 0 && (
             <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)]">
@@ -1766,6 +1801,60 @@ export default function CustomerDetailPage() {
             </>
           )}
         </TabsContent>
+
+        {customer.agreement_usage && customer.agreement_usage.length > 0 && (
+          <TabsContent
+            value="convenios"
+            className="space-y-4 sm:space-y-6 mt-4 sm:mt-6"
+          >
+            <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)]">
+              <CardHeader className="p-4 sm:p-6">
+                <CardTitle className="flex items-center text-admin-text-primary">
+                  <FileText className="h-5 w-5 mr-2" />
+                  Convenios utilizados
+                </CardTitle>
+                <p className="text-sm text-admin-text-tertiary mt-1">
+                  Historial de compras bajo convenio
+                </p>
+              </CardHeader>
+              <CardContent className="p-4 sm:p-6 pt-0">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Convenio</TableHead>
+                      <TableHead>Órdenes</TableHead>
+                      <TableHead>Última compra</TableHead>
+                      <TableHead>Total copago</TableHead>
+                      <TableHead>Total institucional</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {customer.agreement_usage.map((u) => (
+                      <TableRow key={u.agreement_id}>
+                        <TableCell>
+                          <Link
+                            href={`/admin/agreements/${u.agreement_id}`}
+                            className="font-medium text-admin-accent-primary hover:underline"
+                          >
+                            {u.agreement_name || "Sin nombre"}
+                          </Link>
+                        </TableCell>
+                        <TableCell>{u.order_count}</TableCell>
+                        <TableCell className="text-admin-text-tertiary">
+                          {formatDate(u.last_order_at)}
+                        </TableCell>
+                        <TableCell>{formatCurrency(u.total_copago)}</TableCell>
+                        <TableCell>
+                          {formatCurrency(u.total_institutional)}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        )}
       </Tabs>
 
       {/* Create/Edit Prescription Dialog */}
@@ -1848,6 +1937,7 @@ export default function CustomerDetailPage() {
             }}
             onCancel={() => setShowCreateQuote(false)}
             initialCustomerId={customerId}
+            initialFieldOperationId={customer?.field_operation_id ?? undefined}
           />
         </DialogContent>
       </Dialog>

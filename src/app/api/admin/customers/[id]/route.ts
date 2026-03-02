@@ -213,6 +213,24 @@ export async function GET(
 
     logger.debug("Quotes fetched", { count: quotes?.length || 0 });
 
+    // Get agreement_usage from agreement_customers (join agreements for name)
+    const { data: acRows } = await supabase
+      .from("agreement_customers")
+      .select(
+        "agreement_id, order_count, last_order_at, total_copago, total_institutional, agreements:agreement_id(name)",
+      )
+      .eq("customer_id", params.id);
+
+    const agreement_usage = (acRows || []).map((r: any) => ({
+      agreement_id: r.agreement_id,
+      agreement_name: (r as any).agreements?.name ?? null,
+      order_count: r.order_count,
+      last_order_at: r.last_order_at,
+      total_copago: Number(r.total_copago ?? 0),
+      total_institutional: Number(r.total_institutional ?? 0),
+    }));
+    const is_convenio_client = agreement_usage.length > 0;
+
     // Calculate analytics
     const totalSpent =
       orders?.reduce(
@@ -334,6 +352,8 @@ export async function GET(
 
     return createApiSuccessResponse({
       ...customer,
+      agreement_usage,
+      is_convenio_client,
       orders: orders || [],
       prescriptions: prescriptions || [],
       appointments: appointments || [],

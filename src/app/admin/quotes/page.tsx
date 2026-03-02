@@ -51,6 +51,7 @@ import {
 import { toast } from "sonner";
 import Link from "next/link";
 import dynamic from "next/dynamic";
+import { useSearchParams } from "next/navigation";
 import { useBranch } from "@/hooks/useBranch";
 
 // Lazy load CreateQuoteForm to reduce initial bundle size
@@ -77,9 +78,22 @@ import {
 } from "@/lib/api/response-helpers";
 
 export default function QuotesPage() {
-  // Branch context
+  const searchParams = useSearchParams();
+  const fieldOperationIdFromUrl = searchParams.get("field_operation_id");
   const { currentBranchId, isSuperAdmin, branches } = useBranch();
   const isGlobalView = !currentBranchId && isSuperAdmin;
+  const [operativoName, setOperativoName] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!fieldOperationIdFromUrl) {
+      setOperativoName(null);
+      return;
+    }
+    fetch(`/api/admin/field-operations/${fieldOperationIdFromUrl}`)
+      .then((r) => r.json())
+      .then((j) => setOperativoName(j?.data?.fieldOperation?.name ?? null))
+      .catch(() => setOperativoName(null));
+  }, [fieldOperationIdFromUrl]);
 
   const [quotes, setQuotes] = useState<Quote[]>([]);
   const [loading, setLoading] = useState(true);
@@ -96,7 +110,13 @@ export default function QuotesPage() {
 
   useEffect(() => {
     fetchQuotes();
-  }, [currentPage, statusFilter, currentBranchId, isGlobalView]);
+  }, [
+    currentPage,
+    statusFilter,
+    currentBranchId,
+    isGlobalView,
+    fieldOperationIdFromUrl,
+  ]);
 
   const fetchQuotes = async () => {
     try {
@@ -111,6 +131,7 @@ export default function QuotesPage() {
             ? "global"
             : currentBranchId || undefined,
         search: searchTerm || undefined,
+        field_operation_id: fieldOperationIdFromUrl || undefined,
       });
 
       setQuotes(result.data);
@@ -202,6 +223,21 @@ export default function QuotesPage() {
 
   return (
     <div className="space-y-6">
+      {/* Operativo mode banner */}
+      {fieldOperationIdFromUrl && (
+        <div className="flex items-center justify-between gap-2 px-4 py-2 rounded-xl bg-admin-accent-primary/20 border border-admin-accent-primary/30">
+          <span className="text-sm font-medium text-admin-text-primary">
+            Presupuestos del operativo: {operativoName || "..."}
+          </span>
+          <Link
+            href={`/admin/field-operations/${fieldOperationIdFromUrl}`}
+            className="text-sm text-admin-accent-primary hover:underline font-medium"
+          >
+            Volver al operativo
+          </Link>
+        </div>
+      )}
+
       {/* Header - multi-row */}
       <div className="flex flex-col gap-2 sm:gap-3">
         <div>
@@ -578,6 +614,7 @@ export default function QuotesPage() {
           <CreateQuoteForm
             onSuccess={handleQuoteCreated}
             onCancel={() => setShowCreateQuote(false)}
+            initialFieldOperationId={fieldOperationIdFromUrl || undefined}
           />
         </DialogContent>
       </Dialog>

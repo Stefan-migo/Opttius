@@ -12,6 +12,7 @@ import { ApiClient } from "../client-helpers";
 import { isSuccess, unwrapData } from "../client-helpers";
 import { handleApiError } from "@/lib/services/errorService";
 import { success } from "@/lib/services/notificationService";
+import { getBranchAndOperativoHeaders } from "@/lib/utils/branch";
 
 // ============================================
 // Types
@@ -81,6 +82,10 @@ export interface ProcessSaleRequest {
 
   // Branch
   branch_id: string;
+
+  // Agreement (convenio)
+  agreement_id?: string;
+  purchase_order_id?: string;
 
   // Notes
   notes?: string;
@@ -231,13 +236,15 @@ class POSService {
   async processSale(
     orderData: ProcessSaleRequest,
     branchId?: string,
+    fieldOperationId?: string,
   ): Promise<ProcessSaleResponse | null> {
     try {
+      const headers = getBranchAndOperativoHeaders(branchId, fieldOperationId);
       const response = await this.client.post<ProcessSaleResponse>(
         `${this.basePath}/process-sale`,
         orderData,
         {
-          headers: branchId ? { "x-branch-id": branchId } : undefined,
+          headers: Object.keys(headers).length > 0 ? headers : undefined,
         },
       );
 

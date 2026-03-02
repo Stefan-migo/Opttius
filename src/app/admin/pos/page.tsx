@@ -78,6 +78,9 @@ import {
   lensFamilyService,
   contactLensFamilyService,
   contactLensMatrixService,
+  agreementService,
+  type Agreement,
+  type AgreementPurchaseOrder,
 } from "@/lib/api/services";
 import { LensFamilyCombobox } from "@/components/admin/lenses/LensFamilyCombobox";
 import { ContactLensFamilyCombobox } from "@/components/admin/lenses/ContactLensFamilyCombobox";
@@ -151,6 +154,7 @@ interface Customer {
   business_name?: string;
   address?: string;
   phone?: string | null;
+  is_convenio_client?: boolean;
 }
 
 interface Quote {
@@ -175,12 +179,19 @@ type PaymentMethod = "cash" | "debit_card" | "credit_card" | "transfer";
 
 export default function POSPage() {
   const searchParams = useSearchParams();
+  const fieldOperationIdFromUrl = searchParams.get("field_operation_id");
   const {
     currentBranchId,
     isSuperAdmin,
     branches,
     isLoading: branchLoading,
   } = useBranch();
+  const [operativo, setOperativo] = useState<{
+    id: string;
+    name: string;
+    branch_id: string;
+  } | null>(null);
+  const [operativoLoading, setOperativoLoading] = useState(false);
   const [products, setProducts] = useState<Product[]>([]);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -226,10 +237,67 @@ export default function POSPage() {
   const [fiscalReference, setFiscalReference] = useState<string>("");
   const [pendingFiscalReference, setPendingFiscalReference] =
     useState<string>("");
+  // Agreement (convenio) selection for POS
+  const [agreementsForBranch, setAgreementsForBranch] = useState<Agreement[]>(
+    [],
+  );
+  const [purchaseOrdersForAgreement, setPurchaseOrdersForAgreement] = useState<
+    AgreementPurchaseOrder[]
+  >([]);
+  const [selectedAgreementId, setSelectedAgreementId] = useState<string | null>(
+    null,
+  );
+  const [selectedPurchaseOrderId, setSelectedPurchaseOrderId] = useState<
+    string | null
+  >(null);
+  const [selectedAgreement, setSelectedAgreement] = useState<Agreement | null>(
+    null,
+  );
+  const [loadingAgreements, setLoadingAgreements] = useState(false);
+  const [loadingPurchaseOrders, setLoadingPurchaseOrders] = useState(false);
   const [receiptType, setReceiptType] = useState<"sale" | "payment">("sale");
   const [selectedProductIndex, setSelectedProductIndex] = useState<number>(-1);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const suggestionsRef = useRef<HTMLDivElement>(null);
+
+  // Effective branch: in operativo mode use operativo.branch_id, otherwise currentBranchId
+  const effectiveBranchId = operativo?.branch_id ?? currentBranchId;
+
+  // Fetch operativo when field_operation_id in URL
+  useEffect(() => {
+    if (!fieldOperationIdFromUrl) {
+      setOperativo(null);
+      return;
+    }
+    setOperativoLoading(true);
+    const fetchOperativo = async () => {
+      try {
+        const headers = getBranchHeader(currentBranchId);
+        const res = await fetch(
+          `/api/admin/field-operations/${fieldOperationIdFromUrl}`,
+          { headers },
+        );
+        if (!res.ok) {
+          toast.error("Operativo no encontrado");
+          setOperativo(null);
+          return;
+        }
+        const json = await res.json();
+        const fo = json?.data?.fieldOperation;
+        if (fo) {
+          setOperativo({ id: fo.id, name: fo.name, branch_id: fo.branch_id });
+        } else {
+          setOperativo(null);
+        }
+      } catch {
+        toast.error("Error al cargar operativo");
+        setOperativo(null);
+      } finally {
+        setOperativoLoading(false);
+      }
+    };
+    fetchOperativo();
+  }, [fieldOperationIdFromUrl, currentBranchId]);
 
   // Customer search states
   const [customerSearchTerm, setCustomerSearchTerm] = useState("");
@@ -274,6 +342,68 @@ export default function POSPage() {
     debounceMs: 2000,
     enabled: !!(selectedPrescription || selectedCustomer),
   });
+
+  // Fetch active agreements when payment dialog opens (for convenio selector)
+  useEffect(() => {
+    if (!showPaymentDialog || !effectiveBranchId) {
+      setAgreementsForBranch([]);
+      setSelectedAgreementId(null);
+      setSelectedPurchaseOrderId(null);
+      setSelectedAgreement(null);
+      setPurchaseOrdersForAgreement([]);
+      return;
+    }
+    let cancelled = false;
+    setLoadingAgreements(true);
+    agreementService
+      .getAgreements({ status: "active", branchId: effectiveBranchId })
+      .then((res) => {
+        if (!cancelled) setAgreementsForBranch(res.data);
+      })
+      .catch(() => {
+        if (!cancelled) setAgreementsForBranch([]);
+      })
+      .finally(() => {
+        if (!cancelled) setLoadingAgreements(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [showPaymentDialog, effectiveBranchId]);
+
+  // Fetch purchase orders when agreement is selected
+  useEffect(() => {
+    if (!selectedAgreementId) {
+      setPurchaseOrdersForAgreement([]);
+      setSelectedPurchaseOrderId(null);
+      setSelectedAgreement(null);
+      return;
+    }
+    const agreement = agreementsForBranch.find(
+      (a) => a.id === selectedAgreementId,
+    );
+    setSelectedAgreement(agreement || null);
+    let cancelled = false;
+    setLoadingPurchaseOrders(true);
+    agreementService
+      .getPurchaseOrders(selectedAgreementId)
+      .then((orders) => {
+        if (!cancelled) {
+          const active = orders.filter((o) => o.status === "active");
+          setPurchaseOrdersForAgreement(active);
+          setSelectedPurchaseOrderId(null);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setPurchaseOrdersForAgreement([]);
+      })
+      .finally(() => {
+        if (!cancelled) setLoadingPurchaseOrders(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedAgreementId, agreementsForBranch]);
 
   // Lens families and price calculation
   const [lensFamilies, setLensFamilies] = useState<any[]>([]);
@@ -497,7 +627,7 @@ export default function POSPage() {
       loadQuoteFromUrl();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParams, currentBranchId]);
+  }, [searchParams, effectiveBranchId]);
 
   // Calculate totals with tax consideration
   const itemsForTaxCalculation = cart.map((item) => ({
@@ -508,18 +638,34 @@ export default function POSPage() {
   const subtotal = calculateSubtotal(itemsForTaxCalculation, taxPercentage);
   const taxAmount = calculateTotalTax(itemsForTaxCalculation, taxPercentage);
   const total = calculateTotal(itemsForTaxCalculation, taxPercentage);
-  const change = isCashPartial ? 0 : cashReceived - total; // No change for partial payments
+
+  // When convenio is selected, worker pays only copago; otherwise full total
+  const amountToPay = (() => {
+    if (selectedAgreement && selectedPurchaseOrderId) {
+      const rules = selectedAgreement.billing_rules as
+        | {
+            copago_percent?: number;
+          }
+        | undefined;
+      const pct =
+        rules?.copago_percent ?? selectedAgreement.discount_percent ?? 20;
+      return Math.round(total * (pct / 100));
+    }
+    return total;
+  })();
+
+  const change = isCashPartial ? 0 : cashReceived - amountToPay; // No change for partial payments
 
   // Check cash register status
   useEffect(() => {
-    if (!currentBranchId && !isSuperAdmin) return;
+    if (!effectiveBranchId && !isSuperAdmin) return;
     checkCashStatus();
     const interval = setInterval(checkCashStatus, 30000); // Check every 30 seconds
     return () => clearInterval(interval);
-  }, [currentBranchId, isSuperAdmin]);
+  }, [effectiveBranchId, isSuperAdmin]);
 
   const checkCashStatus = async () => {
-    if (!currentBranchId && !isSuperAdmin) {
+    if (!effectiveBranchId && !isSuperAdmin) {
       setIsCashOpen(null);
       setCheckingCashStatus(false);
       return;
@@ -529,7 +675,7 @@ export default function POSPage() {
     try {
       // Use posService for cash status
       const cashStatus = await posService.getCashStatus(
-        currentBranchId || undefined,
+        effectiveBranchId || undefined,
       );
       if (cashStatus) {
         setIsCashOpen(cashStatus.isOpen);
@@ -544,18 +690,18 @@ export default function POSPage() {
   // Fetch billing settings and organization info
   useEffect(() => {
     const fetchData = async () => {
-      if (!currentBranchId && !isSuperAdmin) return;
+      if (!effectiveBranchId && !isSuperAdmin) return;
 
       try {
         // Fetch Billing settings using posService
         const billingSettings = await posService.getBillingSettings(
-          currentBranchId || undefined,
+          effectiveBranchId || undefined,
         );
         if (billingSettings) setBillingSettings(billingSettings);
 
         // Fetch Organization info using posService
         const organization = await posService.getCurrentOrganization(
-          currentBranchId || undefined,
+          effectiveBranchId || undefined,
         );
         if (organization) setOrganization(organization);
       } catch (error) {
@@ -564,7 +710,7 @@ export default function POSPage() {
     };
 
     fetchData();
-  }, [currentBranchId, isSuperAdmin]);
+  }, [effectiveBranchId, isSuperAdmin]);
 
   // Focus search on mount
   useEffect(() => {
@@ -589,7 +735,7 @@ export default function POSPage() {
         const result = await customerService.getCustomers({
           search: customerSearchTerm,
           limit: 10,
-          branchId: currentBranchId || undefined,
+          branchId: effectiveBranchId || undefined,
         });
 
         console.log("📦 POS: Search response:", {
@@ -623,7 +769,7 @@ export default function POSPage() {
 
     const debounce = setTimeout(searchCustomers, 200);
     return () => clearTimeout(debounce);
-  }, [customerSearchTerm, currentBranchId]);
+  }, [customerSearchTerm, effectiveBranchId]);
 
   // Fetch customer quotes when customer is selected.
   // Pass customerRut so the API returns quotes for ALL customer rows with that RUT in the org
@@ -926,7 +1072,7 @@ export default function POSPage() {
 
     const debounce = setTimeout(searchProducts, 200); // Reduced debounce for faster response
     return () => clearTimeout(debounce);
-  }, [searchTerm, currentBranchId]);
+  }, [searchTerm, effectiveBranchId]);
 
   // Handle keyboard navigation in search
   const handleSearchKeyPress = (e: React.KeyboardEvent) => {
@@ -1311,6 +1457,27 @@ export default function POSPage() {
       ),
       fetchCustomerPrescriptions(customer.id),
     ]);
+
+    // Suggest last-used agreement for convenio clients (pre-select in POS)
+    if (customer.is_convenio_client) {
+      try {
+        const fullCustomer = await customerService.getCustomer(customer.id);
+        const usage = fullCustomer.agreement_usage;
+        if (usage && usage.length > 0) {
+          const sorted = [...usage].sort(
+            (a, b) =>
+              new Date(b.last_order_at).getTime() -
+              new Date(a.last_order_at).getTime(),
+          );
+          const lastAgreementId = sorted[0].agreement_id;
+          if (lastAgreementId) {
+            setSelectedAgreementId(lastAgreementId);
+          }
+        }
+      } catch {
+        // Ignore - suggestion is optional
+      }
+    }
   };
 
   // Fetch customer prescriptions and auto-select current or first
@@ -1364,7 +1531,7 @@ export default function POSPage() {
           `${externalCustomerData.first_name.toLowerCase()}.${externalCustomerData.last_name.toLowerCase()}@placeholder.com`,
         phone: externalCustomerData.phone || undefined,
         rut: externalCustomerData.rut || undefined,
-        branch_id: currentBranchId || undefined,
+        branch_id: effectiveBranchId || undefined,
       });
 
       // Step 2: Create prescription for the new customer
@@ -1821,7 +1988,7 @@ export default function POSPage() {
       setSearchingFrames(true);
       try {
         const headers: HeadersInit = {
-          ...getBranchHeader(currentBranchId),
+          ...getBranchHeader(effectiveBranchId),
         };
         const response = await fetch(
           `/api/admin/products/search?q=${encodeURIComponent(frameSearch)}&type=frame&limit=10`,
@@ -1839,7 +2006,7 @@ export default function POSPage() {
     };
     const debounce = setTimeout(searchFrames, 300);
     return () => clearTimeout(debounce);
-  }, [frameSearch, currentBranchId]);
+  }, [frameSearch, effectiveBranchId]);
 
   // Search near frames for two separate lenses
   useEffect(() => {
@@ -1851,7 +2018,7 @@ export default function POSPage() {
       setSearchingNearFrames(true);
       try {
         const headers: HeadersInit = {
-          ...getBranchHeader(currentBranchId),
+          ...getBranchHeader(effectiveBranchId),
         };
         const response = await fetch(
           `/api/admin/products/search?q=${encodeURIComponent(nearFrameSearch)}&type=frame&limit=10`,
@@ -1870,7 +2037,7 @@ export default function POSPage() {
 
     const debounce = setTimeout(searchNearFrames, 300);
     return () => clearTimeout(debounce);
-  }, [nearFrameSearch, currentBranchId]);
+  }, [nearFrameSearch, effectiveBranchId]);
 
   // Lens types and materials
   const lensTypes = [
@@ -2572,7 +2739,7 @@ export default function POSPage() {
       return;
     }
 
-    // Validar monto según método de pago
+    // Validar monto según método de pago (amountToPay = copago si convenio, sino total)
     if (paymentMethod === "cash") {
       if (isCashPartial) {
         // Efectivo parcial: validar monto parcial
@@ -2580,14 +2747,14 @@ export default function POSPage() {
           toast.error("Debe ingresar un monto a pagar");
           return;
         }
-        if (cashPartialAmount > total) {
-          toast.error("El monto a pagar no puede ser mayor al total");
+        if (cashPartialAmount > amountToPay) {
+          toast.error("El monto a pagar no puede ser mayor al total a pagar");
           return;
         }
       } else {
         // Efectivo completo: validar monto recibido
-        if (cashReceived < total) {
-          toast.error("El monto recibido es menor al total");
+        if (cashReceived < amountToPay) {
+          toast.error("El monto recibido es menor al total a pagar");
           return;
         }
       }
@@ -2598,8 +2765,10 @@ export default function POSPage() {
         toast.error("Debe ingresar un monto de transferencia");
         return;
       }
-      if (depositAmount > total) {
-        toast.error("El monto de transferencia no puede ser mayor al total");
+      if (depositAmount > amountToPay) {
+        toast.error(
+          "El monto de transferencia no puede ser mayor al total a pagar",
+        );
         return;
       }
     }
@@ -2608,9 +2777,9 @@ export default function POSPage() {
     if (
       (paymentMethod === "debit_card" || paymentMethod === "credit_card") &&
       depositAmount > 0 &&
-      depositAmount > total
+      depositAmount > amountToPay
     ) {
-      toast.error("El abono no puede ser mayor al total");
+      toast.error("El abono no puede ser mayor al total a pagar");
       return;
     }
 
@@ -2728,30 +2897,31 @@ export default function POSPage() {
         return;
       }
 
-      // Calcular monto de pago según método
-      let paymentAmount = total;
+      // Calcular monto de pago según método (amountToPay = copago si convenio)
+      let paymentAmount = amountToPay;
       let finalPaymentStatus: "paid" | "pending" | "partial" = "paid";
 
       if (paymentMethod === "cash") {
         if (isCashPartial) {
           // Efectivo parcial: usar monto parcial
           paymentAmount = cashPartialAmount;
-          finalPaymentStatus = cashPartialAmount >= total ? "paid" : "partial";
+          finalPaymentStatus =
+            cashPartialAmount >= amountToPay ? "paid" : "partial";
         } else {
           // Efectivo completo: usar monto recibido
           paymentAmount = cashReceived;
-          finalPaymentStatus = cashReceived >= total ? "paid" : "partial";
+          finalPaymentStatus = cashReceived >= amountToPay ? "paid" : "partial";
         }
       } else if (paymentMethod === "transfer") {
         paymentAmount = depositAmount;
-        finalPaymentStatus = depositAmount >= total ? "paid" : "partial";
+        finalPaymentStatus = depositAmount >= amountToPay ? "paid" : "partial";
       } else if (
         paymentMethod === "debit_card" ||
         paymentMethod === "credit_card"
       ) {
-        // Para tarjetas, si hay abono se usa ese monto, sino se paga el total
-        paymentAmount = depositAmount > 0 ? depositAmount : total;
-        finalPaymentStatus = paymentAmount >= total ? "paid" : "partial";
+        // Para tarjetas, si hay abono se usa ese monto, sino se paga el total a pagar
+        paymentAmount = depositAmount > 0 ? depositAmount : amountToPay;
+        finalPaymentStatus = paymentAmount >= amountToPay ? "paid" : "partial";
       }
 
       const orderData = {
@@ -2939,13 +3109,17 @@ export default function POSPage() {
             : null,
         // Quote ID if sale comes from a quote
         quote_id: selectedQuote?.id || null,
+        // Agreement (convenio) - optional
+        agreement_id: selectedAgreementId || null,
+        purchase_order_id: selectedPurchaseOrderId || null,
       };
 
       // Use posService.processSale() instead of direct fetch
       // Cast orderData to ProcessSaleRequest to satisfy type requirements
       const result = await posService.processSale(
         orderData as unknown as import("@/lib/api/services").ProcessSaleRequest,
-        currentBranchId || undefined,
+        effectiveBranchId || undefined,
+        fieldOperationIdFromUrl || undefined,
       );
 
       // API returns null on error (e.g. stock insuficiente) - handleApiError already showed toast
@@ -2999,7 +3173,7 @@ export default function POSPage() {
     try {
       // Use currentBranchId, or first branch when in global view (ensures API gets branch filter)
       const branchForFetch =
-        currentBranchId || (branches?.length ? branches[0]?.id : undefined);
+        effectiveBranchId || (branches?.length ? branches[0]?.id : undefined);
       const orders = await posService.getPendingBalanceOrders(
         undefined,
         branchForFetch,
@@ -3070,7 +3244,7 @@ export default function POSPage() {
           notes: `Pago de saldo pendiente en POS`,
           fiscal_reference: pendingFiscalReference?.trim() || undefined,
         },
-        currentBranchId || undefined,
+        effectiveBranchId || undefined,
       );
 
       // Result is the data object from the response (unwrapped), so it doesn't have a .success property
@@ -3086,7 +3260,7 @@ export default function POSPage() {
         // Fetch full order for receipt and trigger print (mismo formato que venta POS)
         try {
           const orderRes = await fetch(`/api/admin/orders/${orderId}`, {
-            headers: getBranchHeader(orderBranchId || currentBranchId),
+            headers: getBranchHeader(orderBranchId || effectiveBranchId),
           });
           if (orderRes.ok) {
             const orderData = await orderRes.json();
@@ -3094,7 +3268,7 @@ export default function POSPage() {
             if (fullOrder) {
               // Cargar billing settings de la sucursal de la orden para usar el formato guardado
               const receiptBranchId = fullOrder.branch_id || orderBranchId;
-              if (receiptBranchId && receiptBranchId !== currentBranchId) {
+              if (receiptBranchId && receiptBranchId !== effectiveBranchId) {
                 const orderBranchSettings =
                   await posService.getBillingSettings(receiptBranchId);
                 if (orderBranchSettings)
@@ -3124,6 +3298,21 @@ export default function POSPage() {
 
   return (
     <div className="h-screen flex flex-col bg-[var(--admin-bg-primary)] pb-40 lg:pb-0">
+      {/* Operativo mode banner */}
+      {operativo && (
+        <div className="flex-shrink-0 px-4 sm:px-6 py-2 bg-admin-accent-primary/20 border-b border-admin-accent-primary/30 flex items-center justify-between gap-2">
+          <span className="text-sm font-medium text-admin-text-primary">
+            Modo operativo: {operativo.name}
+          </span>
+          <Link
+            href="/admin/pos"
+            className="text-sm text-admin-accent-primary hover:underline font-medium underline-offset-2"
+          >
+            Salir del modo operativo
+          </Link>
+        </div>
+      )}
+
       {/* Header - title, subtitle, Caja | Saldos (no card) */}
       <div className="border-b px-4 sm:px-6 py-3 sm:py-4 bg-[var(--admin-bg-primary)] flex-shrink-0">
         <div className="flex flex-col gap-3">
@@ -3135,9 +3324,11 @@ export default function POSPage() {
               Punto de Venta (POS)
             </h1>
             <p className="text-sm text-gray-600">
-              {!currentBranchId && isSuperAdmin
-                ? "Sistema de ventas - Todas las sucursales"
-                : "Sistema de ventas"}
+              {operativo
+                ? `Sistema de ventas - ${operativo.name}`
+                : !currentBranchId && isSuperAdmin
+                  ? "Sistema de ventas - Todas las sucursales"
+                  : "Sistema de ventas"}
             </p>
           </div>
           <div className="flex items-center justify-between gap-2">
@@ -3186,7 +3377,7 @@ export default function POSPage() {
       </div>
 
       {/* Cash Status Alert - desktop only; mobile uses fixed alert above Cobrar bar */}
-      {!isSuperAdmin && currentBranchId && (
+      {!isSuperAdmin && effectiveBranchId && (
         <div
           className={`hidden lg:block px-4 sm:px-6 py-3 ${isCashOpen === false ? "bg-red-50 border-b border-red-200" : isCashOpen === true ? "bg-green-50 border-b border-green-200" : ""}`}
         >
@@ -5787,7 +5978,7 @@ export default function POSPage() {
                         {cashPartialAmount === 0 && (
                           <div className="mt-2 text-sm text-gray-500">
                             Se procesará el pago completo:{" "}
-                            {formatCurrency(total)}
+                            {formatCurrency(amountToPay)}
                           </div>
                         )}
                       </>
@@ -5845,7 +6036,7 @@ export default function POSPage() {
                       }}
                       className="text-lg"
                       min={0}
-                      max={total}
+                      max={amountToPay}
                     />
                     {depositAmount > 0 && (
                       <div className="mt-2 space-y-1">
@@ -5861,21 +6052,22 @@ export default function POSPage() {
                         <div className="text-sm text-gray-600">
                           Saldo pendiente:{" "}
                           <span className="font-semibold text-orange-600">
-                            {formatCurrency(total - depositAmount)}
+                            {formatCurrency(amountToPay - depositAmount)}
                           </span>
                         </div>
-                        {depositAmount < total * 0.5 && (
+                        {depositAmount < amountToPay * 0.5 && (
                           <div className="text-xs text-amber-600 flex items-center gap-1">
                             <AlertCircle className="h-3 w-3" />
                             El abono mínimo recomendado es{" "}
-                            {formatCurrency(total * 0.5)} (50%)
+                            {formatCurrency(amountToPay * 0.5)} (50%)
                           </div>
                         )}
                       </div>
                     )}
                     {depositAmount === 0 && paymentMethod !== "transfer" && (
                       <div className="mt-2 text-sm text-gray-500">
-                        Se procesará el pago completo: {formatCurrency(total)}
+                        Se procesará el pago completo:{" "}
+                        {formatCurrency(amountToPay)}
                       </div>
                     )}
                   </div>
@@ -5926,7 +6118,7 @@ export default function POSPage() {
       </div>
 
       {/* Mobile: Caja cerrada alert - blocks Cobrar when shown */}
-      {!isSuperAdmin && currentBranchId && isCashOpen === false && (
+      {!isSuperAdmin && effectiveBranchId && isCashOpen === false && (
         <div className="lg:hidden fixed bottom-28 left-0 right-0 z-50 px-4">
           <div className="bg-red-50 border border-red-200 rounded-lg p-3 flex items-start gap-2 shadow-lg">
             <AlertCircle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
@@ -5950,7 +6142,7 @@ export default function POSPage() {
         type="button"
         onClick={() => {
           if (processingPayment) return;
-          if (!isSuperAdmin && !currentBranchId) return;
+          if (!isSuperAdmin && !effectiveBranchId) return;
           if (isCashOpen === false) {
             toast.error(
               "La caja está cerrada. Debe abrir la caja antes de realizar ventas.",
@@ -5967,7 +6159,7 @@ export default function POSPage() {
           cart.length === 0 ||
           processingPayment ||
           isCashOpen === false ||
-          (!isSuperAdmin && !currentBranchId)
+          (!isSuperAdmin && !effectiveBranchId)
             ? "opacity-70 cursor-not-allowed"
             : ""
         }`}
@@ -6105,11 +6297,12 @@ export default function POSPage() {
                           }}
                           className="text-base"
                           min={0}
-                          max={total}
+                          max={amountToPay}
                         />
                         {cashPartialAmount > 0 && (
                           <p className="text-xs text-gray-600">
-                            Saldo: {formatCurrency(total - cashPartialAmount)}
+                            Saldo:{" "}
+                            {formatCurrency(amountToPay - cashPartialAmount)}
                           </p>
                         )}
                       </>
@@ -6155,11 +6348,11 @@ export default function POSPage() {
                       }}
                       className="text-base mt-1"
                       min={0}
-                      max={total}
+                      max={amountToPay}
                     />
                     {depositAmount > 0 && (
                       <p className="text-xs text-gray-600 mt-1">
-                        Saldo: {formatCurrency(total - depositAmount)}
+                        Saldo: {formatCurrency(amountToPay - depositAmount)}
                       </p>
                     )}
                   </div>
@@ -6197,7 +6390,12 @@ export default function POSPage() {
         open={showPaymentDialog}
         onOpenChange={(open) => {
           setShowPaymentDialog(open);
-          if (!open) setFiscalReference("");
+          if (!open) {
+            setFiscalReference("");
+            setSelectedAgreementId(null);
+            setSelectedPurchaseOrderId(null);
+            setSelectedAgreement(null);
+          }
         }}
       >
         <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-md rounded-xl border-admin-border-primary">
@@ -6210,11 +6408,122 @@ export default function POSPage() {
           <div className="space-y-4">
             <div>
               <div className="text-sm text-admin-text-secondary mb-2">
-                Total a pagar:
+                {selectedAgreement && selectedPurchaseOrderId
+                  ? "Total a pagar (copago):"
+                  : "Total a pagar:"}
               </div>
               <div className="text-2xl font-bold text-admin-success">
-                {formatCurrency(total)}
+                {formatCurrency(amountToPay)}
               </div>
+              {selectedAgreement && selectedPurchaseOrderId && (
+                <p className="text-xs text-admin-text-tertiary mt-1">
+                  Total venta: {formatCurrency(total)} (institución paga{" "}
+                  {formatCurrency(total - amountToPay)})
+                </p>
+              )}
+            </div>
+            {/* Convenio selector */}
+            <div className="space-y-2">
+              <Label className="text-sm text-admin-text-secondary flex items-center gap-1.5">
+                <FileText className="h-4 w-4" />
+                Venta bajo convenio (opcional)
+              </Label>
+              <Select
+                value={selectedAgreementId ?? "none"}
+                onValueChange={(v) =>
+                  setSelectedAgreementId(v === "none" ? null : v)
+                }
+              >
+                <SelectTrigger className="rounded-xl">
+                  <SelectValue placeholder="Sin convenio" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">Sin convenio</SelectItem>
+                  {!loadingAgreements &&
+                    agreementsForBranch.map((a) => (
+                      <SelectItem key={a.id} value={a.id}>
+                        {a.name} ({a.institution_name})
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+              {loadingAgreements && (
+                <p className="text-xs text-admin-text-tertiary">
+                  Cargando convenios...
+                </p>
+              )}
+              {selectedAgreementId && (
+                <>
+                  <Select
+                    value={selectedPurchaseOrderId ?? ""}
+                    onValueChange={(v) =>
+                      setSelectedPurchaseOrderId(v === "" ? null : v)
+                    }
+                  >
+                    <SelectTrigger className="rounded-xl">
+                      <SelectValue placeholder="Selecciona orden de compra (OC)" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {!loadingPurchaseOrders &&
+                        purchaseOrdersForAgreement.map((po) => (
+                          <SelectItem key={po.id} value={po.id}>
+                            OC {po.oc_number}
+                            {po.max_amount != null
+                              ? ` (máx ${formatCurrency(po.max_amount)}, usado ${formatCurrency(po.used_amount)})`
+                              : ""}
+                          </SelectItem>
+                        ))}
+                    </SelectContent>
+                  </Select>
+                  {loadingPurchaseOrders && (
+                    <p className="text-xs text-admin-text-tertiary">
+                      Cargando OC...
+                    </p>
+                  )}
+                  {!selectedPurchaseOrderId &&
+                    purchaseOrdersForAgreement.length === 0 &&
+                    !loadingPurchaseOrders && (
+                      <p className="text-xs text-admin-warning">
+                        No hay OC activas. Crea una en Convenios.
+                      </p>
+                    )}
+                </>
+              )}
+              {selectedAgreement &&
+                selectedPurchaseOrderId &&
+                (() => {
+                  const rules = selectedAgreement.billing_rules as
+                    | {
+                        copago_percent?: number;
+                      }
+                    | undefined;
+                  const copagoPct =
+                    rules?.copago_percent ??
+                    selectedAgreement.discount_percent ??
+                    20;
+                  const copago = Math.round(total * (copagoPct / 100));
+                  const institutional = total - copago;
+                  return (
+                    <div className="rounded-lg bg-admin-bg-tertiary p-3 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-admin-text-secondary">
+                          Copago (trabajador):
+                        </span>
+                        <span className="font-medium">
+                          {formatCurrency(copago)}
+                        </span>
+                      </div>
+                      <div className="flex justify-between mt-1">
+                        <span className="text-admin-text-secondary">
+                          Saldo institucional:
+                        </span>
+                        <span className="font-medium">
+                          {formatCurrency(institutional)}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })()}
             </div>
             <div>
               <div className="text-sm text-admin-text-secondary mb-1">
@@ -6238,9 +6547,10 @@ export default function POSPage() {
                   <div className="font-medium text-admin-info">
                     {formatCurrency(depositAmount)}
                   </div>
-                  {depositAmount < total && (
+                  {depositAmount < amountToPay && (
                     <div className="text-xs text-admin-text-tertiary mt-1">
-                      Saldo pendiente: {formatCurrency(total - depositAmount)}
+                      Saldo pendiente:{" "}
+                      {formatCurrency(amountToPay - depositAmount)}
                     </div>
                   )}
                 </div>
@@ -6289,7 +6599,10 @@ export default function POSPage() {
               </Button>
               <Button
                 onClick={processPayment}
-                disabled={processingPayment}
+                disabled={
+                  processingPayment ||
+                  (!!selectedAgreementId && !selectedPurchaseOrderId)
+                }
                 className="flex-1 rounded-xl"
               >
                 {processingPayment ? (
@@ -6437,7 +6750,7 @@ export default function POSPage() {
         }}
         orderId={refundOrderId || ""}
         orderNumber={refundOrderNumber}
-        branchId={currentBranchId}
+        branchId={effectiveBranchId}
         onSuccess={fetchPendingBalanceOrders}
       />
 
@@ -6457,7 +6770,8 @@ export default function POSPage() {
               branch={
                 branches.find(
                   (b) =>
-                    b.id === (currentBranchId || lastProcessedOrder?.branch_id),
+                    b.id ===
+                    (effectiveBranchId || lastProcessedOrder?.branch_id),
                 ) ?? null
               }
               organization={organization}

@@ -42,6 +42,7 @@ export function extractDataFromResponse<T>(response: any): T[] {
     "quotes",
     "workOrders",
     "work_orders",
+    "prescriptions",
     "appointments",
     "users",
     "tickets",

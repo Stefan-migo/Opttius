@@ -214,7 +214,7 @@ export default function ResetPasswordPage() {
                   : "Actualizar contraseña"
                 : "Recuperación de cuenta"}
             </div>
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-display font-bold text-epoch-primary tracking-tight">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-display font-bold text-epoch-primary tracking-tight">
               {step === "sent"
                 ? "Correo enviado"
                 : step === "update"
@@ -235,7 +235,7 @@ export default function ResetPasswordPage() {
           </div>
 
           <Card className="border-epoch-primary/5 bg-white shadow-2xl rounded-xl">
-            <CardContent className="p-6 sm:p-8 md:p-12">
+            <CardContent className="p-4 sm:p-6 md:p-8 lg:p-12">
               {error && (
                 <Alert
                   variant="destructive"
@@ -411,13 +411,16 @@ export default function ResetPasswordPage() {
                   <Button
                     type="submit"
                     size="lg"
-                    className="w-full h-14 min-h-[44px] sm:h-16 rounded-xl bg-epoch-primary hover:bg-epoch-surface text-white font-display font-bold uppercase text-[10px] sm:text-xs tracking-[0.2em] sm:tracking-[0.4em] overflow-hidden transition-all duration-500 shadow-xl"
+                    className="w-full h-14 min-h-[44px] sm:h-16 rounded-xl bg-epoch-primary hover:bg-epoch-surface text-white font-display font-bold uppercase text-xs sm:text-sm tracking-normal sm:tracking-[0.2em] px-6 overflow-hidden transition-all duration-500 shadow-xl"
                     disabled={isUpdating}
                   >
                     {isUpdating ? (
                       <Loader2 className="h-5 w-5 animate-spin" />
                     ) : isInviteFlow ? (
-                      "Crear contraseña y acceder"
+                      <>
+                        Crear contraseña
+                        <span className="hidden sm:inline"> y acceder</span>
+                      </>
                     ) : (
                       "Restablecer contraseña"
                     )}

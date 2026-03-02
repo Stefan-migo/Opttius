@@ -73,6 +73,7 @@ interface CreateQuoteFormProps {
   onSuccess: () => void;
   onCancel: () => void;
   initialCustomerId?: string;
+  initialFieldOperationId?: string;
   initialPrescriptionId?: string;
 }
 
@@ -81,6 +82,7 @@ export default function CreateQuoteForm({
   onCancel,
   initialCustomerId,
   initialPrescriptionId,
+  initialFieldOperationId,
 }: CreateQuoteFormProps) {
   // Branch context
   const { currentBranchId } = useBranch();
@@ -867,6 +869,7 @@ export default function CreateQuoteForm({
         const customers = await customerService.searchCustomers(
           customerSearch,
           currentBranchId ?? undefined,
+          initialFieldOperationId ?? undefined,
         );
         setCustomerResults(customers || []);
       } catch (error) {
@@ -878,7 +881,7 @@ export default function CreateQuoteForm({
 
     const debounce = setTimeout(searchCustomers, 300);
     return () => clearTimeout(debounce);
-  }, [customerSearch, currentBranchId]);
+  }, [customerSearch, currentBranchId, initialFieldOperationId]);
 
   // Search frames
   useEffect(() => {
@@ -1303,6 +1306,7 @@ export default function CreateQuoteForm({
         valid_until: expirationDate.toISOString().split("T")[0],
         notes: formData.notes,
         branch_id: currentBranchId || undefined,
+        field_operation_id: initialFieldOperationId || undefined,
         // Move fields from items to top level
         prescription_id: selectedPrescription.id,
         frame_product_id: selectedFrame?.id,

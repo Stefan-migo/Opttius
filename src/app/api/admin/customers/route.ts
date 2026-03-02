@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClientFromRequest } from "@/utils/supabase/server";
 import { NotificationService } from "@/lib/notifications/notification-service";
-import { getBranchContext, addBranchFilter } from "@/lib/api/branch-middleware";
+import {
+  getBranchContext,
+  addBranchFilter,
+  getFieldOperationFromRequest,
+} from "@/lib/api/branch-middleware";
 import { appLogger as logger } from "@/lib/logger";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
 import { withRateLimit, rateLimitConfigs } from "@/lib/api/middleware";
@@ -57,10 +61,18 @@ export async function GET(request: NextRequest) {
           ? "active"
           : "inactive"
         : "";
+    const agreementId = queryParams.agreement_id ?? null;
     const { page, limit } = extractPaginationParams(request.url);
     const offset = (page - 1) * limit;
 
-    logger.debug("Query params", { search, status, page, limit, requestId });
+    logger.debug("Query params", {
+      search,
+      status,
+      agreementId,
+      page,
+      limit,
+      requestId,
+    });
 
     const { client: supabase, getUser } =
       await createClientFromRequest(request);
@@ -94,6 +106,24 @@ export async function GET(request: NextRequest) {
     // Get branch context (pass supabase client to use same auth context)
     const branchContext = await getBranchContext(request, user.id, supabase);
 
+    // Operativo mode: when field_operation_id in header/query, filter by it
+    const fieldOperationId = getFieldOperationFromRequest(request);
+    let effectiveBranchId = branchContext.branchId;
+    if (fieldOperationId) {
+      const { createServiceRoleClient } = await import(
+        "@/utils/supabase/server"
+      );
+      const serviceSupabase = createServiceRoleClient();
+      const { data: fieldOp } = await serviceSupabase
+        .from("field_operations")
+        .select("id, branch_id, organization_id")
+        .eq("id", fieldOperationId)
+        .single();
+      if (fieldOp) {
+        effectiveBranchId = fieldOp.branch_id;
+      }
+    }
+
     // Get user's organization_id for filtering
     const { data: adminUser } = await supabase
       .from("admin_users")
@@ -114,26 +144,53 @@ export async function GET(request: NextRequest) {
 
         // If a specific branch is selected, also filter by branch_id
         // Otherwise, show all customers from the organization
-        if (branchContext.branchId) {
-          query = query.eq("branch_id", branchContext.branchId);
+        if (effectiveBranchId) {
+          query = query.eq("branch_id", effectiveBranchId);
+        }
+        if (fieldOperationId) {
+          query = query.eq("field_operation_id", fieldOperationId);
         }
       } else if (branchContext.isSuperAdmin) {
         // Platform Super admin (no organization_id): sees only what branch filter says
-        if (branchContext.branchId) {
-          query = query.eq("branch_id", branchContext.branchId);
+        if (effectiveBranchId) {
+          query = query.eq("branch_id", effectiveBranchId);
+        }
+        if (fieldOperationId) {
+          query = query.eq("field_operation_id", fieldOperationId);
         }
       } else {
         // Fallback: use generic branch filter
         query = addBranchFilter(
           query,
-          branchContext.branchId,
+          effectiveBranchId ?? branchContext.branchId,
           branchContext.isSuperAdmin,
           branchContext.organizationId,
         );
+        if (fieldOperationId) {
+          query = query.eq("field_operation_id", fieldOperationId);
+        }
       }
 
       return query;
     };
+
+    // If agreement_id filter: get customer IDs from agreement_customers first
+    let agreementCustomerIds: string[] = [];
+    if (agreementId) {
+      const { data: acRows } = await supabase
+        .from("agreement_customers")
+        .select("customer_id")
+        .eq("agreement_id", agreementId);
+      agreementCustomerIds = (acRows || []).map((r: any) => r.customer_id);
+      if (agreementCustomerIds.length === 0) {
+        // No customers for this agreement - return empty result
+        return createPaginatedResponse(
+          [],
+          { page, limit, total: 0 },
+          { requestId },
+        );
+      }
+    }
 
     // Build the query to get customers from customers table (not profiles)
     let query = applyBranchFilter(supabase.from("customers").select("*"));
@@ -151,21 +208,29 @@ export async function GET(request: NextRequest) {
       query = query.eq("is_active", false);
     }
 
+    if (agreementId && agreementCustomerIds.length > 0) {
+      query = query.in("id", agreementCustomerIds);
+    }
+
     // Get total count for pagination
-    const countQuery = applyBranchFilter(
+    let countQuery = applyBranchFilter(
       supabase.from("customers").select("*", { count: "exact", head: true }),
     );
 
     if (search) {
-      countQuery.or(
+      countQuery = countQuery.or(
         `first_name.ilike.%${search}%,last_name.ilike.%${search}%,email.ilike.%${search}%,phone.ilike.%${search}%,rut.ilike.%${search}%`,
       );
     }
 
     if (status === "active") {
-      countQuery.eq("is_active", true);
+      countQuery = countQuery.eq("is_active", true);
     } else if (status === "inactive") {
-      countQuery.eq("is_active", false);
+      countQuery = countQuery.eq("is_active", false);
+    }
+
+    if (agreementId && agreementCustomerIds.length > 0) {
+      countQuery = countQuery.in("id", agreementCustomerIds);
     }
 
     const { count, error: countError } = await countQuery;
@@ -257,6 +322,18 @@ export async function GET(request: NextRequest) {
       }
     }
 
+    // Fetch is_convenio_client: customers who have any agreement_customers record
+    const convenioCustomerIds = new Set<string>();
+    if (customerIds.length > 0) {
+      const { data: acRows } = await supabase
+        .from("agreement_customers")
+        .select("customer_id")
+        .in("customer_id", customerIds);
+      (acRows || []).forEach((r: any) =>
+        convenioCustomerIds.add(r.customer_id),
+      );
+    }
+
     // Calculate customer analytics
     const customerStats = (customers || []).map((customer: any) => {
       const stats = orderStatsMap[customer.id] || {
@@ -274,6 +351,7 @@ export async function GET(request: NextRequest) {
 
       return {
         ...customer,
+        is_convenio_client: convenioCustomerIds.has(customer.id),
         analytics: {
           totalSpent,
           orderCount,
@@ -589,6 +667,7 @@ export async function POST(request: NextRequest) {
             const customerData = {
               organization_id: userOrganizationId,
               branch_id: customerBranchId,
+              field_operation_id: validatedBody.field_operation_id || null,
               first_name: validatedBody.first_name || null,
               last_name: validatedBody.last_name || null,
               email: validatedBody.email || null,

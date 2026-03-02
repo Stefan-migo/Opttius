@@ -11,7 +11,7 @@ Este documento consolida las 26 skills del directorio `.cursor/skills` para que 
 
 | Categoría        | Skills                                                                                                                       |
 | ---------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| **Óptica Core**  | admin-users, appointments, crm, inventory, pos, quotes, work-orders                                                          |
+| **Óptica Core**  | admin-users, appointments, crm, field-operations, inventory, libro-recetas-digital, pos, quotes, work-orders                 |
 | **Pagos y SaaS** | payment-workflow, saas-management                                                                                            |
 | **Sistema**      | system-configuration, supabase-auth, user-profile                                                                            |
 | **Frontend**     | frontend-design-modern, responsive-frontend-optical, opttius-identity, marketing-identity-optical, seo-aio-optical-discovery |
@@ -288,6 +288,30 @@ Este documento consolida las 26 skills del directorio `.cursor/skills` para que 
 **Estados:** quote → ordered → sent_to_lab → received_from_lab → mounted → quality_check → ready_for_pickup → delivered. on_hold_payment (no visible en taller).
 
 **Orígenes:** process-sale (POS), quotes convert, API directa.
+
+---
+
+## 22a. libro-recetas-digital-optical
+
+**Cuándo usar:** libro de recetas, registro recetas despachadas, Código Sanitario Chile, fiscalización Seremi, recetas centralizadas, exportación auditoría, vinculación receta-OT.
+
+**Modelo:** Reutiliza tabla prescriptions. Vista centralizada = fetch con join customers. CRUD existente en customers/[id]/prescriptions.
+
+**Requisitos:** Filtros RUT, fecha, profesional. Export CSV/XLS. Vinculación con lab_work_orders. Presbicia (od_add, os_add).
+
+**Doc:** docs/LIBRO_RECETAS_DIGITAL.md.
+
+---
+
+## 22b. field-operations-optical-supabase
+
+**Cuándo usar:** operativos en terreno, bodega móvil, sync offline, registro masivo, OT express, entrega en empresa.
+
+**Flujo:** Preparación (transfer stock) → En terreno (offline-first) → Consolidación (lote único) → Entrega (empresa cliente).
+
+**Tablas:** field_operations, operativo_mobile_stock, operativo_sync_queue. Extender lab_work_orders con field_operation_id, operativo_batch_id.
+
+**Doc:** docs/FIELD_OPERATIONS_SYSTEM.md.
 
 ---
 

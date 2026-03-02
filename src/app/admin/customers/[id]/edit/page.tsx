@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter, useParams } from "next/navigation";
+import { useRouter, useParams, useSearchParams } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -37,7 +37,9 @@ interface FormCustomerData {
 export default function CustomerEditPage() {
   const router = useRouter();
   const params = useParams();
+  const searchParams = useSearchParams();
   const customerId = params.id as string;
+  const returnTo = searchParams.get("return_to");
 
   const [customer, setCustomer] = useState<FormCustomerData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -65,7 +67,7 @@ export default function CustomerEditPage() {
     },
     onSuccess: () => {
       success("Cliente actualizado exitosamente");
-      router.push("/admin/customers");
+      router.push(returnTo || "/admin/customers");
     },
     onError: (err) => {
       const standardError = handleApiError(err, "CustomerEditPage");

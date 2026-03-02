@@ -15,35 +15,37 @@
 
 ## Fuentes que deben mantenerse actualizadas
 
-| Documento                                                  | Título en NotebookLM                      | Cuándo actualizar                                     |
-| ---------------------------------------------------------- | ----------------------------------------- | ----------------------------------------------------- |
-| `docs/SYSTEM_CONFIGURATION.md`                             | SYSTEM_CONFIGURATION                      | Tras cambios en módulo Sistema, API config, scope     |
-| `docs/SYSTEM_CONFIGURATION_CHANGELOG_2026-02.md`           | SYSTEM_CONFIGURATION_CHANGELOG            | Tras mejoras o correcciones del módulo Sistema        |
-| `docs/FRONTEND_IDENTITY.md`                                | Frontend Identity Documentation - Opttius | Tras cambios en paleta Epoch, componentes, tokens     |
-| `docs/FRONTEND_RESPONSIVITY.md`                            | FRONTEND_RESPONSIVITY                     | Tras cambios en responsividad, breakpoints, patrones  |
-| `docs/FRONTEND_RESPONSIVE_UPDATE_2026-02.md`               | FRONTEND_RESPONSIVE_UPDATE_2026-02        | Changelog de implementación mobile-first 2026-02      |
-| `docs/SAAS_MANAGEMENT_SYSTEM.md`                           | SAAS_MANAGEMENT_SYSTEM                    | Tras cambios en arquitectura o flujos del módulo SaaS |
-| `docs/SAAS_MANAGEMENT_IMPROVEMENTS_2026-02.md`             | SAAS_MANAGEMENT_IMPROVEMENTS_2026-02      | Tras nuevas mejoras o correcciones en SaaS Management |
-| `docs/USER_PROFILE_SYSTEM.md`                              | USER_PROFILE_SYSTEM                       | Tras cambios en perfil, RLS, preferencias             |
-| `docs/USER_PROFILE_IMPROVEMENTS_2026-02.md`                | USER_PROFILE_IMPROVEMENTS_2026-02         | Tras nuevas mejoras o correcciones en User Profile    |
-| `docs/PAYMENT_WORKFLOW_SYSTEM.md`                          | PAYMENT_WORKFLOW_SYSTEM                   | Tras cambios en checkout, POS, cron, pasarelas        |
-| `docs/PAYMENT_WORKFLOW_TEST_CHECKLIST.md`                  | PAYMENT_WORKFLOW_TEST_CHECKLIST           | Checklist de pruebas manuales del payment workflow    |
-| `docs/OPTTIUS_SKILLS_INDEX.md`                             | OPTTIUS_SKILLS_INDEX                      | Índice consolidado de 25 skills (.cursor/skills)      |
-| `docs/WHATSAPP_AI_AGENT.md`                                | Módulo WhatsApp + Agente IA               | Tras cambios en módulo WhatsApp, webhook, Agent       |
-| `.cursor/skills/whatsapp-ai-agent-optical/SKILL.md`        | Skill WhatsApp AI Agent Óptico            | Tras cambios en guía del skill WhatsApp               |
-| `docs/WHATSAPP_AGENT_TRAINING.md`                          | Entrenamiento Agente WhatsApp             | Tras cambios en guía de entrenamiento                 |
-| `docs/ai/AI_IMPLEMENTATION_STATUS.md`                      | AI_IMPLEMENTATION_STATUS                  | Estado consolidado del módulo IA (sync-extended)      |
-| `docs/ai/AI_MODULE_IMPROVEMENTS_2026-03.md`                | AI_MODULE_IMPROVEMENTS_2026-03            | Tras mejoras en chat, tools, upload, UX               |
-| `docs/ai/AGENT_TOOLS_REFERENCE.md`                         | AGENT_TOOLS_REFERENCE                     | Referencia de tools del agente (sync-anexo)           |
-| `.cursor/skills/whatsapp-agent-training-optical/SKILL.md`  | Skill Entrenamiento Agente WhatsApp       | Tras cambios en skill de entrenamiento                |
-| `docs/WHATSAPP_IMPLEMENTATION_PROMPT.md`                   | Prompt Implementación WhatsApp            | Prompt para agente que crea plan de implementación    |
-| `docs/VERCEL_DEPLOYMENT_2026-02.md`                        | VERCEL_DEPLOYMENT_2026-02                 | Tras cambios en crons, deploy o plan Vercel           |
-| `docs/MANUAL_TESTING_GUIDE_COMPLETE.md`                    | Guía de Testing Manual Completa           | Tras cambios en flujos de testing o checklists        |
-| `docs/VIDEOTUTORIALES_MAP.md`                              | Mapa de Videotutoriales                   | Tras cambios en prioridades o videos sugeridos        |
-| `docs/marketing/MARKETING_IDENTITY_STRATEGY.md`            | MARKETING_IDENTITY_STRATEGY               | Tras cambios en estrategia, narrativa o identidad     |
-| `docs/marketing/SEO_AIO_DISCOVERY_STRATEGY.md`             | Estrategia SEO AIO Descubrimiento         | Tras cambios en estrategia SEO + AIO                  |
-| `docs/marketing/SEO_AIO_TECHNICAL_REFERENCE.md`            | Referencia Técnica SEO AIO                | Tras cambios en implementación técnica SEO            |
-| `docs/marketing/SEO_AIO_CURRENT_STATE_AND_IMPROVEMENTS.md` | Estado SEO AIO y Mejoras                  | Tras auditorías o mejoras de SEO                      |
+| Documento                                                   | Título en NotebookLM                            | Cuándo actualizar                                     |
+| ----------------------------------------------------------- | ----------------------------------------------- | ----------------------------------------------------- |
+| `docs/SYSTEM_CONFIGURATION.md`                              | SYSTEM_CONFIGURATION                            | Tras cambios en módulo Sistema, API config, scope     |
+| `docs/SYSTEM_CONFIGURATION_CHANGELOG_2026-02.md`            | SYSTEM_CONFIGURATION_CHANGELOG                  | Tras mejoras o correcciones del módulo Sistema        |
+| `docs/FRONTEND_IDENTITY.md`                                 | Frontend Identity Documentation - Opttius       | Tras cambios en paleta Epoch, componentes, tokens     |
+| `docs/FRONTEND_RESPONSIVITY.md`                             | FRONTEND_RESPONSIVITY                           | Tras cambios en responsividad, breakpoints, patrones  |
+| `docs/FRONTEND_RESPONSIVE_UPDATE_2026-02.md`                | FRONTEND_RESPONSIVE_UPDATE_2026-02              | Changelog de implementación mobile-first 2026-02      |
+| `docs/SAAS_MANAGEMENT_SYSTEM.md`                            | SAAS_MANAGEMENT_SYSTEM                          | Tras cambios en arquitectura o flujos del módulo SaaS |
+| `docs/SAAS_MANAGEMENT_IMPROVEMENTS_2026-02.md`              | SAAS_MANAGEMENT_IMPROVEMENTS_2026-02            | Tras nuevas mejoras o correcciones en SaaS Management |
+| `docs/USER_PROFILE_SYSTEM.md`                               | USER_PROFILE_SYSTEM                             | Tras cambios en perfil, RLS, preferencias             |
+| `docs/USER_PROFILE_IMPROVEMENTS_2026-02.md`                 | USER_PROFILE_IMPROVEMENTS_2026-02               | Tras nuevas mejoras o correcciones en User Profile    |
+| `docs/PAYMENT_WORKFLOW_SYSTEM.md`                           | PAYMENT_WORKFLOW_SYSTEM                         | Tras cambios en checkout, POS, cron, pasarelas        |
+| `docs/PAYMENT_WORKFLOW_TEST_CHECKLIST.md`                   | PAYMENT_WORKFLOW_TEST_CHECKLIST                 | Checklist de pruebas manuales del payment workflow    |
+| `docs/OPTTIUS_SKILLS_INDEX.md`                              | OPTTIUS_SKILLS_INDEX                            | Índice consolidado de 25 skills (.cursor/skills)      |
+| `docs/WHATSAPP_AI_AGENT.md`                                 | Módulo WhatsApp + Agente IA                     | Tras cambios en módulo WhatsApp, webhook, Agent       |
+| `.cursor/skills/whatsapp-ai-agent-optical/SKILL.md`         | Skill WhatsApp AI Agent Óptico                  | Tras cambios en guía del skill WhatsApp               |
+| `docs/WHATSAPP_AGENT_TRAINING.md`                           | Entrenamiento Agente WhatsApp                   | Tras cambios en guía de entrenamiento                 |
+| `docs/ai/AI_IMPLEMENTATION_STATUS.md`                       | AI_IMPLEMENTATION_STATUS                        | Estado consolidado del módulo IA (sync-extended)      |
+| `docs/ai/AI_MODULE_IMPROVEMENTS_2026-03.md`                 | AI_MODULE_IMPROVEMENTS_2026-03                  | Tras mejoras en chat, tools, upload, UX               |
+| `docs/ai/AGENT_TOOLS_REFERENCE.md`                          | AGENT_TOOLS_REFERENCE                           | Referencia de tools del agente (sync-anexo)           |
+| `.cursor/skills/whatsapp-agent-training-optical/SKILL.md`   | Skill Entrenamiento Agente WhatsApp             | Tras cambios en skill de entrenamiento                |
+| `docs/WHATSAPP_IMPLEMENTATION_PROMPT.md`                    | Prompt Implementación WhatsApp                  | Prompt para agente que crea plan de implementación    |
+| `docs/VERCEL_DEPLOYMENT_2026-02.md`                         | VERCEL_DEPLOYMENT_2026-02                       | Tras cambios en crons, deploy o plan Vercel           |
+| `docs/MANUAL_TESTING_GUIDE_COMPLETE.md`                     | Guía de Testing Manual Completa                 | Tras cambios en flujos de testing o checklists        |
+| `docs/VIDEOTUTORIALES_MAP.md`                               | Mapa de Videotutoriales                         | Tras cambios en prioridades o videos sugeridos        |
+| `docs/marketing/MARKETING_IDENTITY_STRATEGY.md`             | MARKETING_IDENTITY_STRATEGY                     | Tras cambios en estrategia, narrativa o identidad     |
+| `docs/marketing/SEO_AIO_DISCOVERY_STRATEGY.md`              | Estrategia SEO AIO Descubrimiento               | Tras cambios en estrategia SEO + AIO                  |
+| `docs/marketing/SEO_AIO_TECHNICAL_REFERENCE.md`             | Referencia Técnica SEO AIO                      | Tras cambios en implementación técnica SEO            |
+| `docs/marketing/SEO_AIO_CURRENT_STATE_AND_IMPROVEMENTS.md`  | Estado SEO AIO y Mejoras                        | Tras auditorías o mejoras de SEO                      |
+| `docs/FIELD_OPERATIONS_SYSTEM.md`                           | FIELD_OPERATIONS_SYSTEM - Operativos en Terreno | Tras cambios en módulo Operativos en Terreno          |
+| `.cursor/skills/field-operations-optical-supabase/SKILL.md` | Skill field-operations-optical-supabase         | Tras cambios en guía del skill Operativos en Terreno  |
 
 **Nota:** Los docs de marketing y SEO se añaden a Extendido, Anexo o Anexo 2 según disponibilidad.
 

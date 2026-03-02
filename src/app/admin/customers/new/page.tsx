@@ -1,6 +1,7 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,7 +21,26 @@ import { formatRUT } from "@/lib/utils/rut";
 
 export default function NewCustomerPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const fieldOperationIdFromUrl = searchParams.get("field_operation_id");
   const { currentBranchId, isSuperAdmin } = useBranch();
+  const [operativoBranchId, setOperativoBranchId] = useState<string | null>(
+    null,
+  );
+
+  useEffect(() => {
+    if (!fieldOperationIdFromUrl) {
+      setOperativoBranchId(null);
+      return;
+    }
+    fetch(`/api/admin/field-operations/${fieldOperationIdFromUrl}`)
+      .then((r) => r.json())
+      .then((j) => {
+        const fo = j?.data?.fieldOperation;
+        setOperativoBranchId(fo?.branch_id ?? null);
+      })
+      .catch(() => setOperativoBranchId(null));
+  }, [fieldOperationIdFromUrl]);
 
   const form = useForm({
     validationSchema: customerSchema,
@@ -53,7 +73,8 @@ export default function NewCustomerPage() {
         postal_code: data.postal_code?.trim() || null,
         country: data.country?.trim() || "Chile",
         notes: data.notes?.trim() || null,
-        branch_id: currentBranchId || undefined,
+        branch_id: operativoBranchId || currentBranchId || undefined,
+        field_operation_id: fieldOperationIdFromUrl || undefined,
       };
 
       const customer = await customerService.createCustomer(requestBody);
@@ -68,7 +89,11 @@ export default function NewCustomerPage() {
     },
     onSuccess: () => {
       success("Cliente creado exitosamente");
-      router.push("/admin/customers");
+      router.push(
+        fieldOperationIdFromUrl
+          ? `/admin/customers?field_operation_id=${fieldOperationIdFromUrl}`
+          : "/admin/customers",
+      );
     },
     onError: (err) => {
       const standardError = handleApiError(err, "NewCustomerPage");

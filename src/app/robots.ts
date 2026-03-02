@@ -48,6 +48,17 @@ export default function robots(): MetadataRoute.Robots {
           "/profile/",
         ],
       },
+      {
+        userAgent: "ClaudeBot",
+        allow: "/",
+        disallow: [
+          "/admin/",
+          "/api/",
+          "/onboarding/",
+          "/checkout/",
+          "/profile/",
+        ],
+      },
     ],
     sitemap: `${baseUrl}/sitemap.xml`,
   };

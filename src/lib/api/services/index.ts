@@ -1,6 +1,6 @@
 /**
  * API Services Index
- * 
+ *
  * Centralized export of all API services.
  * Provides a single import point for all service layers.
  */
@@ -17,7 +17,7 @@ export {
   getCustomerStats,
   getPrescriptions,
   createPrescription,
-} from './customerService';
+} from "./customerService";
 export type {
   Customer,
   CreateCustomerData,
@@ -28,7 +28,7 @@ export type {
   CreatePrescriptionData,
   LensPurchase,
   CustomerAnalytics,
-} from './customerService';
+} from "./customerService";
 
 // Product Service
 export {
@@ -41,7 +41,7 @@ export {
   searchProducts,
   updateProductStock,
   bulkProductOperations,
-} from './productService';
+} from "./productService";
 export type {
   Product,
   CreateProductData,
@@ -49,7 +49,7 @@ export type {
   ProductSearchParams,
   ProductListResponse,
   BulkProductOperationData,
-} from './productService';
+} from "./productService";
 
 // Appointment Service
 export {
@@ -64,7 +64,7 @@ export {
   updateScheduleSettings,
   confirmAppointment,
   cancelAppointment,
-} from './appointmentService';
+} from "./appointmentService";
 export type {
   Appointment,
   CreateAppointmentData,
@@ -73,7 +73,7 @@ export type {
   AppointmentListResponse,
   AvailabilitySlot,
   ScheduleSettings,
-} from './appointmentService';
+} from "./appointmentService";
 
 // Quote Service
 export {
@@ -90,7 +90,7 @@ export {
   addQuoteItem,
   updateQuoteItem,
   removeQuoteItem,
-} from './quoteService';
+} from "./quoteService";
 export type {
   Quote,
   QuoteItem,
@@ -99,7 +99,7 @@ export type {
   QuoteSearchParams,
   QuoteListResponse,
   QuoteWithItems,
-} from './quoteService';
+} from "./quoteService";
 
 // Order Service
 export {
@@ -116,7 +116,7 @@ export {
   updateOrderItem,
   removeOrderItem,
   processRefund,
-} from './orderService';
+} from "./orderService";
 export type {
   Order,
   OrderItem,
@@ -126,10 +126,10 @@ export type {
   OrderSearchParams,
   OrderListResponse,
   OrderWithItems,
-} from './orderService';
+} from "./orderService";
 
 // POS Service
-export { posService } from './posService';
+export { posService } from "./posService";
 export type {
   CashRegisterStatus,
   PendingBalanceOrder,
@@ -137,33 +137,56 @@ export type {
   ProcessSaleResponse,
   PendingPaymentRequest,
   PendingPaymentResponse,
-} from './posService';
+} from "./posService";
 
 // Quote Settings Service
-export { quoteSettingsService } from './quoteSettingsService';
+export { quoteSettingsService } from "./quoteSettingsService";
 export type {
   QuoteSettings,
   UpdateQuoteSettingsData,
-} from './quoteSettingsService';
+} from "./quoteSettingsService";
 
 // Lens Family Service
-export { lensFamilyService } from './lensFamilyService';
-export type {
-  LensFamily,
-  LensFamilyListResponse,
-} from './lensFamilyService';
+export { lensFamilyService } from "./lensFamilyService";
+export type { LensFamily, LensFamilyListResponse } from "./lensFamilyService";
 
 // Contact Lens Family Service
-export { contactLensFamilyService } from './contactLensFamilyService';
+export { contactLensFamilyService } from "./contactLensFamilyService";
 export type {
   ContactLensFamily,
   ContactLensFamilyListResponse,
-} from './contactLensFamilyService';
+} from "./contactLensFamilyService";
 
 // Contact Lens Matrix Service
-export { contactLensMatrixService } from './contactLensMatrixService';
+export { contactLensMatrixService } from "./contactLensMatrixService";
 export type {
   ContactLensMatrixCalculationRequest,
   ContactLensMatrixCalculationResult,
   ContactLensMatrixCalculationResponse,
-} from './contactLensMatrixService';
+} from "./contactLensMatrixService";
+
+// Agreement Service
+export {
+  agreementService,
+  getAgreements,
+  getAgreement,
+  createAgreement,
+  updateAgreement,
+  updateAgreementStatus,
+  getPurchaseOrders,
+  createPurchaseOrder,
+  updatePurchaseOrder,
+  getInstitutionalBalances,
+  reconcileBalances,
+  getAgreementAnalytics,
+} from "./agreementService";
+export type {
+  Agreement,
+  AgreementPurchaseOrder,
+  AgreementInstitutionalBalance,
+  CreateAgreementData,
+  CreatePurchaseOrderData,
+  ReconcileData,
+  AgreementListParams,
+  AgreementListResponse,
+} from "./agreementService";
