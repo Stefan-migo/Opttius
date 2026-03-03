@@ -11,7 +11,15 @@ export const businessConfig = {
   displayName: "Opttius",
   tagline: "Sistema de Gestión Óptica",
   contactEmail: "contacto@opttius.cl",
-  contactPhone: "+5492979242298",
+  contactPhone: "+56926928279",
+
+  // Social links (null = en construcción / no disponible)
+  social: {
+    instagram: "https://www.instagram.com/opttius/",
+    facebook: "https://www.facebook.com/profile.php?id=61585058060650",
+    linkedin: null as string | null, // En construcción
+    twitter: null as string | null, // Opcional: crear cuando esté listo
+  },
 
   // Branding
   colors: {

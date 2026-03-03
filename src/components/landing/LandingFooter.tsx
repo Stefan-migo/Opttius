@@ -2,17 +2,33 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import {
-  Building2,
-  Mail,
-  Phone,
-  Facebook,
-  Twitter,
-  Linkedin,
-  Instagram,
-} from "lucide-react";
+import { Facebook, Linkedin, Instagram } from "lucide-react";
 import businessConfig from "@/config/business";
-import { useTheme } from "@/components/theme-provider";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+
+const SOCIAL_ITEMS = [
+  {
+    Icon: Instagram,
+    href: businessConfig.social?.instagram ?? null,
+    label: "Instagram",
+  },
+  {
+    Icon: Facebook,
+    href: businessConfig.social?.facebook ?? null,
+    label: "Facebook",
+  },
+  {
+    Icon: Linkedin,
+    href: businessConfig.social?.linkedin ?? null,
+    label: "LinkedIn",
+    comingSoon: !businessConfig.social?.linkedin,
+  },
+] as const;
 
 export function LandingFooter() {
   const currentYear = new Date().getFullYear();
@@ -42,17 +58,41 @@ export function LandingFooter() {
               De la clínica al código. 100% nativo para ópticas.
             </p>
 
-            <div className="flex gap-8">
-              {[Facebook, Twitter, Linkedin, Instagram].map((Icon, i) => (
-                <a
-                  key={i}
-                  href="#"
-                  className="text-white/30 hover:text-epoch-accent transition-all duration-500"
-                >
-                  <Icon className="h-5 w-5 stroke-1" />
-                </a>
-              ))}
-            </div>
+            <TooltipProvider delayDuration={200}>
+              <div className="flex gap-8">
+                {SOCIAL_ITEMS.map(({ Icon, href, label, comingSoon }) =>
+                  href && !comingSoon ? (
+                    <a
+                      key={label}
+                      href={href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-white/30 hover:text-epoch-accent transition-all duration-500"
+                      aria-label={label}
+                    >
+                      <Icon className="h-5 w-5 stroke-1" />
+                    </a>
+                  ) : (
+                    <Tooltip key={label}>
+                      <TooltipTrigger asChild>
+                        <span
+                          className="text-white/20 cursor-not-allowed inline-flex"
+                          aria-label={`${label} (próximamente)`}
+                        >
+                          <Icon className="h-5 w-5 stroke-1" />
+                        </span>
+                      </TooltipTrigger>
+                      <TooltipContent
+                        side="top"
+                        className="bg-epoch-surface border border-white/10"
+                      >
+                        <p className="text-xs">Próximamente</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  ),
+                )}
+              </div>
+            </TooltipProvider>
           </div>
 
           {/* Product Column */}

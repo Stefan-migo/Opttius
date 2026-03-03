@@ -113,10 +113,14 @@ export function PricingSection() {
 
   useEffect(() => {
     let cancelled = false;
-    fetch("/api/landing/tiers", { cache: "no-store" })
+    fetch(`/api/landing/tiers?_=${Date.now()}`, {
+      cache: "no-store",
+      headers: { Pragma: "no-cache" },
+    })
       .then((res) => res.json())
       .then((data) => {
         if (cancelled) return;
+        if (data.error) return; // API error, use fallback
         if (data.trial_days != null) {
           const parsed = parseInt(String(data.trial_days), 10);
           if (!isNaN(parsed) && parsed > 0) setTrialDays(parsed);
