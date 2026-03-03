@@ -18,10 +18,16 @@ interface UseAvailabilityReturn {
 
 interface UseAvailabilityProps {
   scheduleSettings: any;
+  effectiveBranchId?: string | null;
 }
 
-export function useAvailability({ scheduleSettings }: UseAvailabilityProps): UseAvailabilityReturn {
+export function useAvailability({
+  scheduleSettings,
+  effectiveBranchId,
+}: UseAvailabilityProps): UseAvailabilityReturn {
   const { currentBranchId } = useBranch();
+  const branchIdForRequest =
+    effectiveBranchId !== undefined ? effectiveBranchId : currentBranchId;
   const [availableSlots, setAvailableSlots] = useState<TimeSlot[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -33,7 +39,9 @@ export function useAvailability({ scheduleSettings }: UseAvailabilityProps): Use
     }
 
     if (!scheduleSettings) {
-      console.log("Schedule settings not loaded yet, skipping availability fetch");
+      console.log(
+        "Schedule settings not loaded yet, skipping availability fetch",
+      );
       return;
     }
 
@@ -59,12 +67,12 @@ export function useAvailability({ scheduleSettings }: UseAvailabilityProps): Use
 
       const headers = {
         "Content-Type": "application/json",
-        ...getBranchHeader(currentBranchId),
+        ...getBranchHeader(branchIdForRequest),
       };
 
       const response = await fetch(
         `/api/admin/appointments/availability?${params}`,
-        { headers }
+        { headers },
       );
 
       if (response.ok) {
@@ -82,7 +90,7 @@ export function useAvailability({ scheduleSettings }: UseAvailabilityProps): Use
             data.slots.length,
             "total,",
             availableCount,
-            "available"
+            "available",
           );
           setAvailableSlots(data.slots);
         } else {

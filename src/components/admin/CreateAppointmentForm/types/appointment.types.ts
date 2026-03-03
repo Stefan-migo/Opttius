@@ -62,6 +62,10 @@ export interface CreateAppointmentFormProps {
   initialData?: any;
   initialCustomerId?: string;
   lockDateTime?: boolean;
-  /** Override branch for customer search. Use when parent has a specific branch selected (e.g. super admin dropdown). Ensures only customers from this branch are shown. */
+  /**
+   * Override branch for customer search and API calls.
+   * Use when parent has a specific branch selected (e.g. super admin dropdown).
+   * When super_admin: form shows branch selector; this prefills it when available.
+   */
   effectiveBranchId?: string | null;
 }

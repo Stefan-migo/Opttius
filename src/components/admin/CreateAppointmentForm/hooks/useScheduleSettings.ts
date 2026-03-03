@@ -26,9 +26,18 @@ interface UseScheduleSettingsReturn {
   getMaxDate: () => string;
 }
 
-export function useScheduleSettings(): UseScheduleSettingsReturn {
+interface UseScheduleSettingsProps {
+  effectiveBranchId?: string | null;
+}
+
+export function useScheduleSettings(
+  props?: UseScheduleSettingsProps,
+): UseScheduleSettingsReturn {
   const { user, loading: authLoading } = useAuthContext();
   const { currentBranchId } = useBranch();
+  const effectiveBranchId = props?.effectiveBranchId;
+  const branchIdForRequest =
+    effectiveBranchId !== undefined ? effectiveBranchId : currentBranchId;
   const [settings, setSettings] = useState<ScheduleSettings | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -39,7 +48,7 @@ export function useScheduleSettings(): UseScheduleSettingsReturn {
     try {
       const headers: HeadersInit = {
         "Content-Type": "application/json",
-        ...getBranchHeader(currentBranchId),
+        ...getBranchHeader(branchIdForRequest),
       };
 
       const response = await fetch("/api/admin/schedule-settings", { headers });
@@ -59,7 +68,7 @@ export function useScheduleSettings(): UseScheduleSettingsReturn {
     if (!authLoading && user) {
       loadSettings();
     }
-  }, [currentBranchId, authLoading, user]);
+  }, [branchIdForRequest, authLoading, user]);
 
   const getMinDate = (): string => {
     if (!settings) return new Date().toISOString().split("T")[0];

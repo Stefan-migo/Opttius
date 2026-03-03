@@ -55,7 +55,6 @@ import { EnhancedLineChart } from "@/components/admin/charts/EnhancedLineChart";
 import { useBranch } from "@/hooks/useBranch";
 import { getBranchHeader } from "@/lib/utils/branch";
 import { MetricTooltip } from "@/components/admin/MetricTooltip";
-import { AIUsageCard } from "@/components/admin/AIUsageCard";
 
 interface AnalyticsData {
   kpis: {
@@ -694,12 +693,6 @@ export default function AnalyticsPage() {
               className="shrink-0 text-[10px] sm:text-sm px-2 sm:px-4 py-2 min-h-[44px]"
             >
               Productos
-            </TabsTrigger>
-            <TabsTrigger
-              value="ai"
-              className="shrink-0 text-[10px] sm:text-sm px-2 sm:px-4 py-2 min-h-[44px]"
-            >
-              IA
             </TabsTrigger>
             {analytics.support && (
               <TabsTrigger
@@ -1522,10 +1515,6 @@ export default function AnalyticsPage() {
             </div>
           </TabsContent>
         )}
-
-        <TabsContent value="ai" className="space-y-4 sm:space-y-6">
-          <AIUsageCard />
-        </TabsContent>
       </Tabs>
     </div>
   );

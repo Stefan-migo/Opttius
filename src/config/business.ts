@@ -17,7 +17,7 @@ export const businessConfig = {
   social: {
     instagram: "https://www.instagram.com/opttius/",
     facebook: "https://www.facebook.com/profile.php?id=61585058060650",
-    linkedin: null as string | null, // En construcción
+    linkedin: "https://www.linkedin.com/company/opttius/",
     twitter: null as string | null, // Opcional: crear cuando esté listo
   },
 

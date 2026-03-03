@@ -21,11 +21,18 @@ interface AppointmentFormData {
 interface UseAppointmentFormProps {
   initialData?: any;
   scheduleSettings: any;
+  effectiveBranchId?: string | null;
 }
 
-export function useAppointmentForm({ initialData, scheduleSettings }: UseAppointmentFormProps) {
+export function useAppointmentForm({
+  initialData,
+  scheduleSettings,
+  effectiveBranchId,
+}: UseAppointmentFormProps) {
   const { user, loading: authLoading } = useAuthContext();
   const { currentBranchId } = useBranch();
+  const branchIdForRequest =
+    effectiveBranchId !== undefined ? effectiveBranchId : currentBranchId;
   const [saving, setSaving] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -68,7 +75,8 @@ export function useAppointmentForm({ initialData, scheduleSettings }: UseAppoint
   // Update duration when schedule settings load
   useEffect(() => {
     if (scheduleSettings && !initialData?.duration_minutes) {
-      const defaultDuration = scheduleSettings.default_appointment_duration || 30;
+      const defaultDuration =
+        scheduleSettings.default_appointment_duration || 30;
       setFormData((prev) => ({
         ...prev,
         duration_minutes: defaultDuration,
@@ -136,7 +144,7 @@ export function useAppointmentForm({ initialData, scheduleSettings }: UseAppoint
     isGuestCustomer: boolean,
     guestCustomerData: any,
     onSuccess: () => void,
-    lockDateTime: boolean = false
+    lockDateTime: boolean = false,
   ) => {
     e.preventDefault();
 
@@ -149,11 +157,17 @@ export function useAppointmentForm({ initialData, scheduleSettings }: UseAppoint
     if (isGuestCustomer) {
       // Validate guest customer data
       if (!guestCustomerData.first_name?.trim()) {
-        setErrors((prev) => ({ ...prev, guest_first_name: "El nombre es obligatorio" }));
+        setErrors((prev) => ({
+          ...prev,
+          guest_first_name: "El nombre es obligatorio",
+        }));
         return false;
       }
       if (!guestCustomerData.last_name?.trim()) {
-        setErrors((prev) => ({ ...prev, guest_last_name: "El apellido es obligatorio" }));
+        setErrors((prev) => ({
+          ...prev,
+          guest_last_name: "El apellido es obligatorio",
+        }));
         return false;
       }
       if (!guestCustomerData.rut?.trim()) {
@@ -163,7 +177,10 @@ export function useAppointmentForm({ initialData, scheduleSettings }: UseAppoint
     } else {
       // Validate registered customer
       if (!selectedCustomer) {
-        setErrors((prev) => ({ ...prev, customer: "Selecciona un cliente registrado" }));
+        setErrors((prev) => ({
+          ...prev,
+          customer: "Selecciona un cliente registrado",
+        }));
         return false;
       }
     }
@@ -222,8 +239,13 @@ export function useAppointmentForm({ initialData, scheduleSettings }: UseAppoint
 
       const headers = {
         "Content-Type": "application/json",
-        ...getBranchHeader(currentBranchId),
+        ...getBranchHeader(branchIdForRequest),
       };
+
+      // Super admin in global view: send branch_id in body so API can create appointment
+      if (branchIdForRequest) {
+        requestBody.branch_id = branchIdForRequest;
+      }
 
       const response = await fetch(url, {
         method,
