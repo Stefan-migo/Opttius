@@ -2,14 +2,35 @@
  * GET /api/landing/tiers
  * Public endpoint: returns subscription tiers (name, price, limits) for the landing pricing section.
  * Values are the same as in Gestión SaaS Opttius so the landing always reflects current pricing.
+ * Uses service role when available; falls back to anon (RLS allows public read via policy).
  */
 import { NextResponse } from "next/server";
-import { createServiceRoleClient } from "@/utils/supabase/service-role";
+import { createClient } from "@supabase/supabase-js";
 
 export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
+function getSupabaseClient() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!url) return null;
+  const key = serviceKey || anonKey;
+  if (!key) return null;
+  return createClient(url, key, {
+    auth: { autoRefreshToken: false, persistSession: false },
+  });
+}
+
 export async function GET() {
   try {
-    const supabase = createServiceRoleClient();
+    const supabase = getSupabaseClient();
+    if (!supabase) {
+      return NextResponse.json(
+        { error: "Database not configured", tiers: [] },
+        { status: 503, headers: { "Cache-Control": "no-store" } },
+      );
+    }
 
     const { data: tiers, error } = await supabase
       .from("subscription_tiers")

@@ -162,12 +162,20 @@ export function PricingSection() {
     router.push("/solicitar-demo");
   };
 
+  const formatPrice = (value: number) =>
+    new Intl.NumberFormat("es-CL", {
+      style: "currency",
+      currency: "CLP",
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(value);
+
   const plans =
     tiers.length > 0
       ? tiers.map((t) => ({
           ...TIER_DISPLAY[t.name as TierName],
           features: buildFeaturesFromTier(t),
-          price: `$${Math.round(Number(t.price_monthly)).toLocaleString()}`,
+          price: formatPrice(Math.round(Number(t.price_monthly))),
           period: "mes",
         }))
       : TIER_ORDER.map((name) => {
@@ -242,7 +250,7 @@ export function PricingSection() {
               price_monthly: DEFAULT_PRICES[name],
               ...fb,
             }),
-            price: `$${DEFAULT_PRICES[name].toLocaleString()}`,
+            price: formatPrice(DEFAULT_PRICES[name]),
             period: "mes",
           };
         });

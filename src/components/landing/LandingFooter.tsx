@@ -11,24 +11,32 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
-const SOCIAL_ITEMS = [
+const social = businessConfig.social ?? {};
+const SOCIAL_ITEMS: Array<{
+  Icon: typeof Instagram;
+  href: string | null;
+  label: string;
+  comingSoon: boolean;
+}> = [
   {
     Icon: Instagram,
-    href: businessConfig.social?.instagram ?? null,
+    href: social.instagram ?? null,
     label: "Instagram",
+    comingSoon: false,
   },
   {
     Icon: Facebook,
-    href: businessConfig.social?.facebook ?? null,
+    href: social.facebook ?? null,
     label: "Facebook",
+    comingSoon: false,
   },
   {
     Icon: Linkedin,
-    href: businessConfig.social?.linkedin ?? null,
+    href: social.linkedin ?? null,
     label: "LinkedIn",
-    comingSoon: !businessConfig.social?.linkedin,
+    comingSoon: !social.linkedin,
   },
-] as const;
+];
 
 export function LandingFooter() {
   const currentYear = new Date().getFullYear();

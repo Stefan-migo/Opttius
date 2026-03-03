@@ -71,6 +71,7 @@ describe("useScheduleSettings", () => {
       updateProfile: vi.fn(),
       resetPassword: vi.fn(),
       refetchProfile: vi.fn(),
+      refetchAdminStatus: vi.fn(),
       isAdmin: false,
       isSuperAdmin: false,
       adminRole: null,
