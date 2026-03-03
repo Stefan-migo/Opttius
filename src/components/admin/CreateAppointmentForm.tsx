@@ -575,44 +575,6 @@ export default function CreateAppointmentForm({
       className="flex flex-col min-h-0 flex-1"
     >
       <div className="flex-1 min-h-0 overflow-y-auto space-y-4 sm:space-y-6 md:space-y-8 pb-4">
-        {/* Branch selector for super_admin - required to create appointment */}
-        {isSuperAdmin && (
-          <Card className="border-none bg-admin-bg-tertiary/20 shadow-premium-sm rounded-2xl overflow-hidden border border-admin-border-primary/30">
-            <CardContent className="p-4 sm:p-6 space-y-2">
-              <Label className="text-[10px] font-bold text-admin-text-tertiary uppercase tracking-widest">
-                Sucursal *
-              </Label>
-              <Select
-                value={formBranchId ?? ""}
-                onValueChange={(v) => setFormBranchId(v || null)}
-              >
-                <SelectTrigger className="h-11 rounded-xl border-admin-border-primary/50 bg-white/50 focus:bg-white transition-all font-bold">
-                  <div className="flex items-center gap-2">
-                    <Building2 className="h-4 w-4 text-epoch-primary" />
-                    <SelectValue placeholder="Seleccione sucursal" />
-                  </div>
-                </SelectTrigger>
-                <SelectContent className="rounded-xl border-admin-border-primary shadow-premium-lg">
-                  {branches.map((b) => (
-                    <SelectItem
-                      key={b.id}
-                      value={b.id}
-                      className="font-bold text-[11px] uppercase tracking-tight"
-                    >
-                      {b.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {!effectiveBranchForForm && (
-                <p className="text-[10px] text-admin-error font-medium">
-                  Debe seleccionar una sucursal para crear la cita
-                </p>
-              )}
-            </CardContent>
-          </Card>
-        )}
-
         {/* Customer Selection */}
         <Card className="border-none bg-admin-bg-tertiary/20 shadow-premium-sm rounded-2xl overflow-hidden border border-admin-border-primary/30">
           <CardHeader className="pb-3 sm:pb-4 border-b border-admin-border-primary/10 px-4 sm:px-6 pt-4 sm:pt-6">
@@ -1237,6 +1199,44 @@ export default function CreateAppointmentForm({
             )}
           </CardContent>
         </Card>
+
+        {/* Branch selector for super_admin - required to create appointment */}
+        {isSuperAdmin && (
+          <Card className="border-none bg-admin-bg-tertiary/20 shadow-premium-sm rounded-2xl overflow-hidden border border-admin-border-primary/30">
+            <CardContent className="p-4 sm:p-6 space-y-2">
+              <Label className="text-[10px] font-bold text-admin-text-tertiary uppercase tracking-widest">
+                Sucursal *
+              </Label>
+              <Select
+                value={formBranchId ?? ""}
+                onValueChange={(v) => setFormBranchId(v || null)}
+              >
+                <SelectTrigger className="h-11 rounded-xl border-admin-border-primary/50 bg-white/50 focus:bg-white transition-all font-bold">
+                  <div className="flex items-center gap-2">
+                    <Building2 className="h-4 w-4 text-epoch-primary" />
+                    <SelectValue placeholder="Seleccione sucursal" />
+                  </div>
+                </SelectTrigger>
+                <SelectContent className="rounded-xl border-admin-border-primary shadow-premium-lg">
+                  {branches.map((b) => (
+                    <SelectItem
+                      key={b.id}
+                      value={b.id}
+                      className="font-bold text-[11px] uppercase tracking-tight"
+                    >
+                      {b.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {!effectiveBranchForForm && (
+                <p className="text-[10px] text-admin-error font-medium">
+                  Debe seleccionar una sucursal para crear la cita
+                </p>
+              )}
+            </CardContent>
+          </Card>
+        )}
       </div>
 
       {/* Actions - sticky footer, always visible */}
