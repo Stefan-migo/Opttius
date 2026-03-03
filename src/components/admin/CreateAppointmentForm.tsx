@@ -28,6 +28,7 @@ import {
   AlertCircle,
   RefreshCw,
   CheckCircle,
+  Building2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -57,8 +58,28 @@ export default function CreateAppointmentForm({
   effectiveBranchId,
 }: CreateAppointmentFormProps) {
   const { user, loading: authLoading } = useAuthContext();
-  const { currentBranchId } = useBranch();
-  const branchIdForSearch = effectiveBranchId ?? currentBranchId ?? undefined;
+  const { currentBranchId, isSuperAdmin, branches } = useBranch();
+
+  // For super_admin: show branch selector. Use form selection or parent's effectiveBranchId.
+  const [formBranchId, setFormBranchId] = useState<string | null>(
+    effectiveBranchId ?? null,
+  );
+  useEffect(() => {
+    if (effectiveBranchId) setFormBranchId(effectiveBranchId);
+  }, [effectiveBranchId]);
+  useEffect(() => {
+    if (isSuperAdmin && branches.length > 0 && !formBranchId) {
+      setFormBranchId(effectiveBranchId ?? branches[0]?.id ?? null);
+    }
+  }, [isSuperAdmin, branches, effectiveBranchId, formBranchId]);
+
+  const effectiveBranchForForm =
+    effectiveBranchId ??
+    formBranchId ??
+    (isSuperAdmin ? null : currentBranchId);
+
+  const branchIdForSearch =
+    effectiveBranchForForm ?? currentBranchId ?? undefined;
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [loadingAvailability, setLoadingAvailability] = useState(false);
@@ -150,7 +171,7 @@ export default function CreateAppointmentForm({
     if (!authLoading && user) {
       fetchScheduleSettings();
     }
-  }, [currentBranchId, authLoading, user]);
+  }, [effectiveBranchForForm, authLoading, user]);
 
   useEffect(() => {
     if (
@@ -214,7 +235,7 @@ export default function CreateAppointmentForm({
     try {
       const headers: HeadersInit = {
         "Content-Type": "application/json",
-        ...getBranchHeader(currentBranchId),
+        ...getBranchHeader(effectiveBranchForForm ?? currentBranchId),
       };
 
       const response = await fetch("/api/admin/schedule-settings", {
@@ -269,6 +290,12 @@ export default function CreateAppointmentForm({
       return;
     }
 
+    // Super admin must select branch before we can fetch availability
+    if (isSuperAdmin && !effectiveBranchForForm) {
+      setAvailableSlots([]);
+      return;
+    }
+
     const selectedDate = new Date(formData.appointment_date + "T00:00:00");
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -291,7 +318,7 @@ export default function CreateAppointmentForm({
 
       const headers = {
         "Content-Type": "application/json",
-        ...getBranchHeader(currentBranchId),
+        ...getBranchHeader(effectiveBranchForForm ?? currentBranchId),
       };
 
       const response = await fetch(
@@ -452,7 +479,7 @@ export default function CreateAppointmentForm({
         prescription_id: formData.prescription_id || null,
         order_id: formData.order_id || null,
         cancellation_reason: null,
-        branch_id: currentBranchId, // Ensure branch_id is sent for availability check
+        branch_id: effectiveBranchForForm ?? currentBranchId ?? undefined,
       };
 
       // If guest customer, send guest data to store in appointment (not create customer)
@@ -472,7 +499,7 @@ export default function CreateAppointmentForm({
 
       const headers = {
         "Content-Type": "application/json",
-        ...getBranchHeader(currentBranchId),
+        ...getBranchHeader(effectiveBranchForForm ?? currentBranchId),
       };
 
       const response = await fetch(url, {
@@ -536,6 +563,11 @@ export default function CreateAppointmentForm({
     return maxDate.toISOString().split("T")[0];
   };
 
+  const canSubmit =
+    !saving &&
+    !!formData.appointment_time &&
+    (!isSuperAdmin || !!effectiveBranchForForm);
+
   return (
     <form
       id="create-appointment-form"
@@ -543,6 +575,44 @@ export default function CreateAppointmentForm({
       className="flex flex-col min-h-0 flex-1"
     >
       <div className="flex-1 min-h-0 overflow-y-auto space-y-4 sm:space-y-6 md:space-y-8 pb-4">
+        {/* Branch selector for super_admin - required to create appointment */}
+        {isSuperAdmin && (
+          <Card className="border-none bg-admin-bg-tertiary/20 shadow-premium-sm rounded-2xl overflow-hidden border border-admin-border-primary/30">
+            <CardContent className="p-4 sm:p-6 space-y-2">
+              <Label className="text-[10px] font-bold text-admin-text-tertiary uppercase tracking-widest">
+                Sucursal *
+              </Label>
+              <Select
+                value={formBranchId ?? ""}
+                onValueChange={(v) => setFormBranchId(v || null)}
+              >
+                <SelectTrigger className="h-11 rounded-xl border-admin-border-primary/50 bg-white/50 focus:bg-white transition-all font-bold">
+                  <div className="flex items-center gap-2">
+                    <Building2 className="h-4 w-4 text-epoch-primary" />
+                    <SelectValue placeholder="Seleccione sucursal" />
+                  </div>
+                </SelectTrigger>
+                <SelectContent className="rounded-xl border-admin-border-primary shadow-premium-lg">
+                  {branches.map((b) => (
+                    <SelectItem
+                      key={b.id}
+                      value={b.id}
+                      className="font-bold text-[11px] uppercase tracking-tight"
+                    >
+                      {b.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {!effectiveBranchForForm && (
+                <p className="text-[10px] text-admin-error font-medium">
+                  Debe seleccionar una sucursal para crear la cita
+                </p>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
         {/* Customer Selection */}
         <Card className="border-none bg-admin-bg-tertiary/20 shadow-premium-sm rounded-2xl overflow-hidden border border-admin-border-primary/30">
           <CardHeader className="pb-3 sm:pb-4 border-b border-admin-border-primary/10 px-4 sm:px-6 pt-4 sm:pt-6">
@@ -1181,7 +1251,7 @@ export default function CreateAppointmentForm({
         </Button>
         <Button
           type="submit"
-          disabled={saving || !formData.appointment_time}
+          disabled={!canSubmit}
           className="h-10 sm:h-12 px-6 sm:px-10 rounded-xl bg-admin-accent-primary hover:bg-admin-accent-primary/90 text-white shadow-premium-md font-bold uppercase text-[10px] sm:text-[11px] tracking-widest transition-all active:scale-[0.98] disabled:opacity-50"
         >
           {saving ? (
