@@ -1,10 +1,10 @@
 /**
  * Error Service
- * 
+ *
  * Servicio centralizado para manejo consistente de errores en toda la aplicación.
  * Proporciona funciones para extraer mensajes de error, manejar errores de API,
  * y mostrar notificaciones de error al usuario.
- * 
+ *
  * @module lib/services/errorService
  */
 
@@ -13,7 +13,7 @@ import { toast } from "sonner";
 /**
  * Tipos de error conocidos
  */
-export type ErrorType = 
+export type ErrorType =
   | "network"
   | "authentication"
   | "authorization"
@@ -36,10 +36,10 @@ export interface StandardError {
 
 /**
  * Extrae el mensaje de error de un error desconocido
- * 
+ *
  * @param error - Error a procesar
  * @returns Mensaje de error extraído
- * 
+ *
  * @example
  * extractErrorMessage(new Error("Something went wrong")) // "Something went wrong"
  * extractErrorMessage("Custom error message") // "Custom error message"
@@ -67,9 +67,17 @@ export function extractErrorMessage(error: unknown): string {
       return error.message;
     }
     if ("error" in error && typeof error.error === "string") {
-      return error.error;
+      const details =
+        "details" in error && typeof error.details === "string"
+          ? `: ${error.details}`
+          : "";
+      return error.error + details;
     }
-    if ("error" in error && typeof error.error === "object" && error.error !== null) {
+    if (
+      "error" in error &&
+      typeof error.error === "object" &&
+      error.error !== null
+    ) {
       if ("message" in error.error && typeof error.error.message === "string") {
         return error.error.message;
       }
@@ -82,7 +90,7 @@ export function extractErrorMessage(error: unknown): string {
 
 /**
  * Determina el tipo de error basado en el error
- * 
+ *
  * @param error - Error a clasificar
  * @returns Tipo de error
  */
@@ -94,22 +102,38 @@ export function classifyError(error: unknown): ErrorType {
   const message = extractErrorMessage(error).toLowerCase();
 
   // Network errors
-  if (message.includes("network") || message.includes("fetch") || message.includes("connection")) {
+  if (
+    message.includes("network") ||
+    message.includes("fetch") ||
+    message.includes("connection")
+  ) {
     return "network";
   }
 
   // Authentication errors
-  if (message.includes("unauthorized") || message.includes("authentication") || message.includes("not authenticated")) {
+  if (
+    message.includes("unauthorized") ||
+    message.includes("authentication") ||
+    message.includes("not authenticated")
+  ) {
     return "authentication";
   }
 
   // Authorization errors
-  if (message.includes("forbidden") || message.includes("permission") || message.includes("not authorized")) {
+  if (
+    message.includes("forbidden") ||
+    message.includes("permission") ||
+    message.includes("not authorized")
+  ) {
     return "authorization";
   }
 
   // Validation errors
-  if (message.includes("validation") || message.includes("invalid") || message.includes("required")) {
+  if (
+    message.includes("validation") ||
+    message.includes("invalid") ||
+    message.includes("required")
+  ) {
     return "validation";
   }
 
@@ -119,7 +143,11 @@ export function classifyError(error: unknown): ErrorType {
   }
 
   // Server errors
-  if (message.includes("server") || message.includes("500") || message.includes("internal")) {
+  if (
+    message.includes("server") ||
+    message.includes("500") ||
+    message.includes("internal")
+  ) {
     return "server";
   }
 
@@ -128,15 +156,23 @@ export function classifyError(error: unknown): ErrorType {
 
 /**
  * Crea un error estandarizado
- * 
+ *
  * @param error - Error original
  * @param context - Contexto adicional del error
  * @returns Error estandarizado
  */
-export function createStandardError(error: unknown, context?: string): StandardError {
+export function createStandardError(
+  error: unknown,
+  context?: string,
+): StandardError {
   const message = extractErrorMessage(error);
   const type = classifyError(error);
-  const userMessage = getUserFriendlyMessage({ type, message, userMessage: "", timestamp: new Date().toISOString() });
+  const userMessage = getUserFriendlyMessage({
+    type,
+    message,
+    userMessage: "",
+    timestamp: new Date().toISOString(),
+  });
 
   return {
     type,
@@ -148,12 +184,12 @@ export function createStandardError(error: unknown, context?: string): StandardE
 
 /**
  * Maneja un error de API de manera consistente
- * 
+ *
  * @param error - Error a manejar
  * @param context - Contexto del error (ej: "Customer API", "Order API")
  * @param showToast - Si debe mostrar notificación toast (default: true)
  * @returns Error estandarizado
- * 
+ *
  * @example
  * try {
  *   await fetchCustomers();
@@ -161,7 +197,11 @@ export function createStandardError(error: unknown, context?: string): StandardE
  *   handleApiError(error, "Customer API");
  * }
  */
-export function handleApiError(error: unknown, context: string = "API", showToast: boolean = true): StandardError {
+export function handleApiError(
+  error: unknown,
+  context: string = "API",
+  showToast: boolean = true,
+): StandardError {
   const standardError = createStandardError(error, context);
 
   // Log del error para debugging
@@ -181,7 +221,7 @@ export function handleApiError(error: unknown, context: string = "API", showToas
 
 /**
  * Obtiene un mensaje amigable para el usuario basado en el tipo de error
- * 
+ *
  * @param error - Error estandarizado
  * @returns Mensaje amigable para el usuario
  */
@@ -206,85 +246,103 @@ export function getUserFriendlyMessage(error: StandardError): string {
 
 /**
  * Maneja un error de validación
- * 
+ *
  * @param error - Error de validación
  * @param context - Contexto del error
  * @returns Error estandarizado
  */
-export function handleValidationError(error: unknown, context: string = "Validation"): StandardError {
+export function handleValidationError(
+  error: unknown,
+  context: string = "Validation",
+): StandardError {
   return handleApiError(error, context, true);
 }
 
 /**
  * Maneja un error de red
- * 
+ *
  * @param error - Error de red
  * @param context - Contexto del error
  * @returns Error estandarizado
  */
-export function handleNetworkError(error: unknown, context: string = "Network"): StandardError {
+export function handleNetworkError(
+  error: unknown,
+  context: string = "Network",
+): StandardError {
   return handleApiError(error, context, true);
 }
 
 /**
  * Maneja un error de autenticación
- * 
+ *
  * @param error - Error de autenticación
  * @param context - Contexto del error
  * @returns Error estandarizado
  */
-export function handleAuthenticationError(error: unknown, context: string = "Authentication"): StandardError {
+export function handleAuthenticationError(
+  error: unknown,
+  context: string = "Authentication",
+): StandardError {
   const standardError = handleApiError(error, context, true);
-  
+
   // Redirigir a login si es un error de autenticación
   if (typeof window !== "undefined") {
     // Opcional: redirigir a login
     // window.location.href = "/login";
   }
-  
+
   return standardError;
 }
 
 /**
  * Maneja un error de autorización
- * 
+ *
  * @param error - Error de autorización
  * @param context - Contexto del error
  * @returns Error estandarizado
  */
-export function handleAuthorizationError(error: unknown, context: string = "Authorization"): StandardError {
+export function handleAuthorizationError(
+  error: unknown,
+  context: string = "Authorization",
+): StandardError {
   return handleApiError(error, context, true);
 }
 
 /**
  * Maneja un error de servidor
- * 
+ *
  * @param error - Error de servidor
  * @param context - Contexto del error
  * @returns Error estandarizado
  */
-export function handleServerError(error: unknown, context: string = "Server"): StandardError {
+export function handleServerError(
+  error: unknown,
+  context: string = "Server",
+): StandardError {
   return handleApiError(error, context, true);
 }
 
 /**
  * Maneja un error genérico
- * 
+ *
  * @param error - Error a manejar
  * @param context - Contexto del error
  * @returns Error estandarizado
  */
-export function handleGenericError(error: unknown, context: string = "Error"): StandardError {
+export function handleGenericError(
+  error: unknown,
+  context: string = "Error",
+): StandardError {
   return handleApiError(error, context, true);
 }
 
 /**
  * Wrapper para funciones asíncronas que maneja errores automáticamente
- * 
+ *
  * @param fn - Función asíncrona a ejecutar
  * @param context - Contexto del error
  * @returns Resultado de la función o null si hay error
- * 
+ *
  * @example
  * const result = await withErrorHandling(async () => {
  *   return await fetchCustomers();
@@ -292,7 +350,7 @@ export function handleGenericError(error: unknown, context: string = "Error"): S
  */
 export async function withErrorHandling<T>(
   fn: () => Promise<T>,
-  context: string = "Operation"
+  context: string = "Operation",
 ): Promise<T | null> {
   try {
     return await fn();

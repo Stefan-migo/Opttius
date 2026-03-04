@@ -1322,12 +1322,12 @@ export async function POST(request: NextRequest) {
 
             if (rpcError) {
               logger.error("process_pos_sale RPC error", rpcError);
-              return NextResponse.json(
-                {
-                  error: "Error al procesar la venta",
-                  details: rpcError.message,
-                },
-                { status: 500 },
+              return createApiErrorResponse(
+                new APIError(
+                  `Error al procesar la venta: ${rpcError.message}`,
+                  500,
+                  "RPC_ERROR",
+                ),
               );
             }
 
@@ -1335,9 +1335,12 @@ export async function POST(request: NextRequest) {
             const workOrderId = rpcResult?.work_order_id;
             if (!orderId) {
               logger.error("RPC returned no order_id", rpcResult);
-              return NextResponse.json(
-                { error: "Error al procesar la venta" },
-                { status: 500 },
+              return createApiErrorResponse(
+                new APIError(
+                  "Error al procesar la venta: la operación no devolvió un ID de orden",
+                  500,
+                  "RPC_ERROR",
+                ),
               );
             }
 
@@ -2323,13 +2326,18 @@ export async function POST(request: NextRequest) {
             });
             return NextResponse.json({ error: error.message }, { status: 429 });
           }
-          logger.error("POS process sale error", { error });
-          return NextResponse.json(
-            {
-              error: "Internal server error",
-              details: error instanceof Error ? error.message : "Unknown error",
-            },
-            { status: 500 },
+          const errMsg = error instanceof Error ? error.message : String(error);
+          const errStack = error instanceof Error ? error.stack : undefined;
+          logger.error("POS process sale error", {
+            error: errMsg,
+            stack: errStack,
+          });
+          return createApiErrorResponse(
+            new APIError(
+              `Error al procesar la venta: ${errMsg}`,
+              500,
+              "INTERNAL_ERROR",
+            ),
           );
         }
       },

@@ -7,10 +7,11 @@
 /** Map from process-sale/UI payment method types to order_payments DB values */
 export const PAYMENT_METHOD_MAP: Record<string, string> = {
   cash: "cash",
-  card: "card",
+  card: "debit", // order_payments only allows cash, debit, credit, transfer, check
   debit_card: "debit",
   credit_card: "credit",
   transfer: "transfer",
+  deposit: "transfer",
 };
 
 /** Valid payment methods for order_payments table */
