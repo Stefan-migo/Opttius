@@ -417,41 +417,41 @@ export default function PrescriptionsPage() {
             </div>
           ) : (
             <>
-              {/* Mobile: cards */}
+              {/* Mobile: cards - estilo admin (bg-admin-bg-tertiary, shadow, tokens Epoch) */}
               <div className="md:hidden space-y-3">
                 {prescriptions.map((p) => (
                   <div
                     key={p.id}
-                    className="rounded-xl border border-admin-border bg-admin-bg-secondary p-4 shadow-sm"
+                    className="rounded-xl border border-admin-border bg-admin-bg-tertiary p-4 shadow-[0_1px_3px_rgba(0,0,0,0.3)]"
                   >
                     <div className="flex items-start justify-between gap-2 mb-3">
                       <div className="min-w-0 flex-1">
-                        <p className="font-semibold text-sm text-epoch-primary truncate">
+                        <p className="font-semibold text-sm text-admin-text-primary truncate">
                           {p.customer?.first_name || ""}{" "}
                           {p.customer?.last_name || ""}
                         </p>
-                        <p className="text-xs text-admin-text-tertiary truncate">
+                        <p className="text-xs text-admin-text-secondary truncate">
                           {p.customer?.rut
                             ? formatRUT(p.customer.rut)
                             : p.customer?.email || "-"}
                         </p>
                       </div>
-                      <span className="text-xs text-admin-text-tertiary shrink-0">
+                      <span className="text-xs text-admin-text-secondary shrink-0">
                         {formatDate(p.prescription_date)}
                       </span>
                     </div>
                     <div className="flex flex-wrap gap-2 text-xs mb-3">
-                      <span className="text-admin-text-tertiary">
+                      <span className="text-admin-text-secondary">
                         {p.issued_by || "-"}
                       </span>
-                      <span>·</span>
-                      <span>
+                      <span className="text-admin-text-secondary">·</span>
+                      <span className="text-admin-text-primary">
                         {translatePrescriptionType(p.prescription_type)}
                       </span>
                       {hasPresbyopia(p) && (
                         <Badge
                           variant="secondary"
-                          className="text-[10px] px-1.5 py-0"
+                          className="text-[10px] px-1.5 py-0 border-admin-border text-admin-text-primary"
                         >
                           Presbicia
                         </Badge>
@@ -459,7 +459,7 @@ export default function PrescriptionsPage() {
                       {(p.work_orders_count ?? 0) > 0 && (
                         <Link
                           href="/admin/work-orders"
-                          className="text-epoch-primary hover:underline flex items-center gap-0.5"
+                          className="text-admin-accent-primary hover:underline flex items-center gap-0.5"
                         >
                           <Link2 className="h-3 w-3" />
                           {p.work_orders_count} OT

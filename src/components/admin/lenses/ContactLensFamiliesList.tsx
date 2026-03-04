@@ -1,6 +1,4 @@
 "use client";
-
-import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,6 +11,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import React, { useState, useEffect } from "react";
 import { Edit, Trash2, Search, RefreshCw, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
@@ -53,6 +59,7 @@ export default function ContactLensFamiliesList() {
   const [families, setFamilies] = useState<ContactLensFamily[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [modalityFilter, setModalityFilter] = useState<string>("all");
   const [includeInactive, setIncludeInactive] = useState(false);
 
   // Pagination state
@@ -61,7 +68,7 @@ export default function ContactLensFamiliesList() {
 
   useEffect(() => {
     fetchFamilies();
-  }, [includeInactive]);
+  }, [includeInactive, modalityFilter]);
 
   const fetchFamilies = async () => {
     try {
@@ -69,6 +76,9 @@ export default function ContactLensFamiliesList() {
       const params = new URLSearchParams();
       if (includeInactive) {
         params.append("include_inactive", "true");
+      }
+      if (modalityFilter && modalityFilter !== "all") {
+        params.append("modality", modalityFilter);
       }
       const response = await fetch(
         `/api/admin/contact-lens-families?${params.toString()}`,
@@ -128,7 +138,7 @@ export default function ContactLensFamiliesList() {
   // Reset to page 1 when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, includeInactive]);
+  }, [searchTerm, includeInactive, modalityFilter]);
 
   return (
     <div className="py-6 space-y-8">
@@ -191,14 +201,34 @@ export default function ContactLensFamiliesList() {
         </CardHeader>
         <CardContent className="p-0">
           <div className="p-3 sm:p-6 border-b border-admin-border-primary/10 bg-admin-bg-tertiary/20">
-            <div className="relative">
-              <Search className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 h-4 w-4 text-admin-text-tertiary opacity-40" />
-              <Input
-                placeholder="Buscar por nombre, tipo o modalidad..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 sm:pl-12 rounded-xl border-admin-border-primary/10 focus:border-epoch-primary focus:ring-0 bg-white p-3 sm:p-6 text-[9px] sm:text-[10px] font-display font-bold tracking-widest uppercase"
-              />
+            <div className="flex flex-col sm:flex-row gap-3">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 h-4 w-4 text-admin-text-tertiary opacity-40" />
+                <Input
+                  placeholder="Buscar por nombre, tipo o modalidad..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10 sm:pl-12 rounded-xl border-admin-border-primary/10 focus:border-epoch-primary focus:ring-0 bg-white p-3 sm:p-6 text-[9px] sm:text-[10px] font-display font-bold tracking-widest uppercase"
+                />
+              </div>
+              <div className="w-full sm:w-48">
+                <Select
+                  value={modalityFilter}
+                  onValueChange={setModalityFilter}
+                >
+                  <SelectTrigger className="rounded-xl border-admin-border-primary/10 h-auto p-3 sm:p-6 text-[9px] sm:text-[10px] font-display font-bold tracking-widest uppercase">
+                    <SelectValue placeholder="Modalidad" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todas las modalidades</SelectItem>
+                    {MODALITIES.map((m) => (
+                      <SelectItem key={m.value} value={m.value}>
+                        {m.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </div>
 
@@ -245,75 +275,110 @@ export default function ContactLensFamiliesList() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {paginatedFamilies.map((family) => (
-                    <TableRow
-                      key={family.id}
-                      className="border-admin-border-primary/10 hover:bg-admin-bg-tertiary/50 transition-colors"
-                    >
-                      <TableCell className="p-3 sm:p-6">
-                        <div className="space-y-1">
-                          <p className="text-sm font-display font-bold text-admin-text-primary uppercase tracking-tight">
-                            {family.name}
-                          </p>
-                          <span className="text-[9px] font-display font-bold text-admin-text-tertiary tracking-widest uppercase bg-admin-bg-tertiary px-2 py-0.5 border border-admin-border-primary/5">
-                            {family.brand || "FABRICANTE NO ASIGNADO"}
-                          </span>
-                        </div>
-                      </TableCell>
-                      <TableCell className="p-3 sm:p-6">
-                        <span className="text-[10px] font-serif italic text-admin-text-primary uppercase tracking-wider">
-                          {USE_TYPES.find((t) => t.value === family.use_type)
-                            ?.label || family.use_type}
-                        </span>
-                      </TableCell>
-                      <TableCell className="p-3 sm:p-6">
-                        <span className="text-[10px] font-display font-bold text-admin-text-tertiary uppercase tracking-widest">
-                          {MODALITIES.find((m) => m.value === family.modality)
-                            ?.label || family.modality}
-                        </span>
-                      </TableCell>
-                      <TableCell className="p-3 sm:p-6">
-                        <span className="text-[10px] font-serif italic text-admin-text-tertiary">
-                          {family.material || "Material Estándar"}
-                        </span>
-                      </TableCell>
-                      <TableCell className="p-3 sm:p-6">
-                        <div
-                          className={`px-2 py-1 text-[8px] font-display font-bold tracking-widest uppercase inline-block border ${
-                            family.is_active
-                              ? "bg-epoch-primary/5 text-epoch-primary border-epoch-primary/20"
-                              : "bg-admin-error/5 text-admin-error border-admin-error/20"
-                          }`}
-                        >
-                          {family.is_active ? "ACTIVA" : "INACTIVA"}
-                        </div>
-                      </TableCell>
-                      <TableCell className="p-3 sm:p-6 text-right">
-                        <div className="flex justify-end gap-1">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-8 w-8 p-0 rounded-xl hover:bg-admin-bg-tertiary text-epoch-primary"
-                            onClick={() =>
-                              router.push(
-                                `/admin/contact-lens-families/${family.id}`,
-                              )
-                            }
+                  {paginatedFamilies.map((family, idx) => {
+                    const prevModality =
+                      idx > 0 ? paginatedFamilies[idx - 1].modality : null;
+                    const showGroupHeader = prevModality !== family.modality;
+                    return (
+                      <React.Fragment key={family.id}>
+                        {showGroupHeader && (
+                          <TableRow
+                            key={`group-${family.modality}-${idx}`}
+                            className="bg-admin-bg-tertiary/40 hover:bg-transparent"
                           >
-                            <Edit className="h-3.5 w-3.5" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-8 w-8 p-0 rounded-xl hover:bg-admin-error/5 text-admin-error"
-                            onClick={() => handleDelete(family.id)}
-                          >
-                            <Trash2 className="h-3.5 w-3.5" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                            <TableCell
+                              colSpan={6}
+                              className="p-2 sm:p-3 text-[9px] font-display font-bold text-admin-text-tertiary uppercase tracking-[0.2em]"
+                            >
+                              {MODALITIES.find(
+                                (m) => m.value === family.modality,
+                              )?.label || family.modality}
+                            </TableCell>
+                          </TableRow>
+                        )}
+                        <TableRow className="border-admin-border-primary/10 hover:bg-admin-bg-tertiary/50 transition-colors">
+                          <TableCell className="p-3 sm:p-6">
+                            <div className="space-y-1">
+                              <div className="flex flex-wrap items-center gap-2">
+                                <p className="text-sm font-display font-bold text-admin-text-primary uppercase tracking-tight">
+                                  {family.name}
+                                </p>
+                                <Badge
+                                  variant="outline"
+                                  className="text-[8px] font-display font-bold tracking-widest uppercase border-admin-border-primary/20"
+                                >
+                                  {MODALITIES.find(
+                                    (m) => m.value === family.modality,
+                                  )?.label || family.modality}{" "}
+                                  ·{" "}
+                                  {USE_TYPES.find(
+                                    (t) => t.value === family.use_type,
+                                  )?.label || family.use_type}
+                                </Badge>
+                              </div>
+                              <span className="text-[9px] font-display font-bold text-admin-text-tertiary tracking-widest uppercase bg-admin-bg-tertiary px-2 py-0.5 border border-admin-border-primary/5">
+                                {family.brand || "FABRICANTE NO ASIGNADO"}
+                              </span>
+                            </div>
+                          </TableCell>
+                          <TableCell className="p-3 sm:p-6">
+                            <span className="text-[10px] font-serif italic text-admin-text-primary uppercase tracking-wider">
+                              {USE_TYPES.find(
+                                (t) => t.value === family.use_type,
+                              )?.label || family.use_type}
+                            </span>
+                          </TableCell>
+                          <TableCell className="p-3 sm:p-6">
+                            <span className="text-[10px] font-display font-bold text-admin-text-tertiary uppercase tracking-widest">
+                              {MODALITIES.find(
+                                (m) => m.value === family.modality,
+                              )?.label || family.modality}
+                            </span>
+                          </TableCell>
+                          <TableCell className="p-3 sm:p-6">
+                            <span className="text-[10px] font-serif italic text-admin-text-tertiary">
+                              {family.material || "Material Estándar"}
+                            </span>
+                          </TableCell>
+                          <TableCell className="p-3 sm:p-6">
+                            <div
+                              className={`px-2 py-1 text-[8px] font-display font-bold tracking-widest uppercase inline-block border ${
+                                family.is_active
+                                  ? "bg-epoch-primary/5 text-epoch-primary border-epoch-primary/20"
+                                  : "bg-admin-error/5 text-admin-error border-admin-error/20"
+                              }`}
+                            >
+                              {family.is_active ? "ACTIVA" : "INACTIVA"}
+                            </div>
+                          </TableCell>
+                          <TableCell className="p-3 sm:p-6 text-right">
+                            <div className="flex justify-end gap-1">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-8 w-8 p-0 rounded-xl hover:bg-admin-bg-tertiary text-epoch-primary"
+                                onClick={() =>
+                                  router.push(
+                                    `/admin/contact-lens-families/${family.id}`,
+                                  )
+                                }
+                              >
+                                <Edit className="h-3.5 w-3.5" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-8 w-8 p-0 rounded-xl hover:bg-admin-error/5 text-admin-error"
+                                onClick={() => handleDelete(family.id)}
+                              >
+                                <Trash2 className="h-3.5 w-3.5" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      </React.Fragment>
+                    );
+                  })}
                 </TableBody>
               </Table>
             </div>

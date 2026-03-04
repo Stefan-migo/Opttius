@@ -27,12 +27,22 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus, Edit, Trash2 } from "lucide-react";
+import { Plus, Edit, Trash2, ChevronDown, ChevronRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { formatCurrency } from "@/lib/utils";
+import {
+  OPTICAL_MATRIX_TEMPLATE,
+  getOpticalDefaultMatrices,
+} from "@/lib/lens-matrices/constants";
+import {
+  OPTICAL_MATRIX_SUGGESTION_TITLE,
+  OPTICAL_MATRIX_SUGGESTION_DESCRIPTION,
+  OPTICAL_MATRIX_SUGGESTION_ROWS,
+} from "@/lib/lens-matrices/suggestion-text";
 
 export interface LensMatrixFormData {
   id: string; // Temporary ID or DB ID
+  name?: string | null;
   sphere_min: number;
   sphere_max: number;
   cylinder_min: number;
@@ -49,6 +59,7 @@ interface LensMatrixManagerProps {
   matrices: LensMatrixFormData[];
   onChange?: (matrices: LensMatrixFormData[]) => void;
   readOnly?: boolean;
+  lensType?: string;
   onMatrixCreate?: (matrix: LensMatrixFormData) => Promise<void>;
   onMatrixUpdate?: (matrix: LensMatrixFormData) => Promise<void>;
   onMatrixDelete?: (id: string) => Promise<void>;
@@ -58,14 +69,19 @@ export function LensMatrixManager({
   matrices,
   onChange,
   readOnly = false,
+  lensType = "single_vision",
   onMatrixCreate,
   onMatrixUpdate,
   onMatrixDelete,
 }: LensMatrixManagerProps) {
   const [showDialog, setShowDialog] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [suggestionOpen, setSuggestionOpen] = useState(matrices.length === 0);
+
+  const isMonofocal = lensType === "single_vision";
 
   const [formData, setFormData] = useState({
+    name: "",
     sphere_min: "-6.00",
     sphere_max: "6.00",
     cylinder_min: "-2.00",
@@ -82,6 +98,7 @@ export function LensMatrixManager({
     if (matrix) {
       setEditingId(matrix.id);
       setFormData({
+        name: matrix.name ?? "",
         sphere_min: matrix.sphere_min.toString(),
         sphere_max: matrix.sphere_max.toString(),
         cylinder_min: matrix.cylinder_min.toString(),
@@ -96,12 +113,13 @@ export function LensMatrixManager({
     } else {
       setEditingId(null);
       setFormData({
+        name: "",
         sphere_min: "-6.00",
         sphere_max: "6.00",
         cylinder_min: "-2.00",
         cylinder_max: "2.00",
-        addition_min: "0.00",
-        addition_max: "4.00",
+        addition_min: isMonofocal ? "0.00" : "0.00",
+        addition_max: isMonofocal ? "0.00" : "4.00",
         base_price: "0",
         cost: "0",
         sourcing_type: "surfaced",
@@ -111,17 +129,40 @@ export function LensMatrixManager({
     setShowDialog(true);
   };
 
+  const handleApplyTemplate = (template: "defaults" | "full") => {
+    const rows =
+      template === "defaults"
+        ? getOpticalDefaultMatrices(lensType)
+        : OPTICAL_MATRIX_TEMPLATE;
+    const newMatrices: LensMatrixFormData[] = rows.map((r, i) => ({
+      id: `temp-${Date.now()}-${i}`,
+      name: r.name,
+      sphere_min: r.sphere_min,
+      sphere_max: r.sphere_max,
+      cylinder_min: r.cylinder_min,
+      cylinder_max: r.cylinder_max,
+      addition_min: r.addition_min,
+      addition_max: r.addition_max,
+      base_price: r.base_price,
+      cost: r.cost,
+      sourcing_type: r.sourcing_type,
+      is_active: true,
+    }));
+    if (onChange) onChange([...matrices, ...newMatrices]);
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
     const newMatrix: LensMatrixFormData = {
       id: editingId || `temp-${Date.now()}`,
+      name: formData.name?.trim() || undefined,
       sphere_min: parseFloat(formData.sphere_min),
       sphere_max: parseFloat(formData.sphere_max),
       cylinder_min: parseFloat(formData.cylinder_min),
       cylinder_max: parseFloat(formData.cylinder_max),
-      addition_min: parseFloat(formData.addition_min),
-      addition_max: parseFloat(formData.addition_max),
+      addition_min: isMonofocal ? 0 : parseFloat(formData.addition_min),
+      addition_max: isMonofocal ? 0 : parseFloat(formData.addition_max),
       base_price: parseFloat(formData.base_price),
       cost: parseFloat(formData.cost),
       sourcing_type: formData.sourcing_type,
@@ -157,6 +198,73 @@ export function LensMatrixManager({
 
   return (
     <div className="space-y-4">
+      {/* Suggestion panel (collapsible) */}
+      {!readOnly && (
+        <div className="border rounded-lg overflow-hidden">
+          <button
+            type="button"
+            onClick={() => setSuggestionOpen(!suggestionOpen)}
+            className="w-full flex items-center justify-between p-4 text-left bg-gray-50 hover:bg-gray-100 transition-colors"
+          >
+            <span className="font-medium text-sm text-gray-700">
+              {OPTICAL_MATRIX_SUGGESTION_TITLE}
+            </span>
+            {suggestionOpen ? (
+              <ChevronDown className="h-4 w-4 text-gray-500" />
+            ) : (
+              <ChevronRight className="h-4 w-4 text-gray-500" />
+            )}
+          </button>
+          {suggestionOpen && (
+            <div className="p-4 pt-0 space-y-4 border-t">
+              <p className="text-sm text-gray-600">
+                {OPTICAL_MATRIX_SUGGESTION_DESCRIPTION}
+              </p>
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Nombre</TableHead>
+                      <TableHead>Rango</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {OPTICAL_MATRIX_SUGGESTION_ROWS.map((row) => (
+                      <TableRow key={row.name}>
+                        <TableCell className="font-medium">
+                          {row.name}
+                        </TableCell>
+                        <TableCell className="text-gray-600">
+                          {row.range}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleApplyTemplate("defaults")}
+                >
+                  Crear Rango base + Fallback
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleApplyTemplate("full")}
+                >
+                  Crear plantilla completa
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-medium">Matrices de Precios</h3>
         {!readOnly && (
@@ -180,6 +288,7 @@ export function LensMatrixManager({
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead>Nombre</TableHead>
                 <TableHead>Esfera</TableHead>
                 <TableHead>Cilindro</TableHead>
                 <TableHead>Adición</TableHead>
@@ -194,6 +303,10 @@ export function LensMatrixManager({
             <TableBody>
               {matrices.map((matrix) => (
                 <TableRow key={matrix.id}>
+                  <TableCell>
+                    {matrix.name ||
+                      `${matrix.sphere_min} a ${matrix.sphere_max}`}
+                  </TableCell>
                   <TableCell>
                     {matrix.sphere_min} a {matrix.sphere_max}
                   </TableCell>
@@ -249,6 +362,19 @@ export function LensMatrixManager({
           </DialogHeader>
           <form onSubmit={handleSubmit}>
             <div className="grid grid-cols-2 gap-4 py-4">
+              <div className="space-y-4 col-span-2">
+                <div>
+                  <Label htmlFor="matrix_name">Nombre (opcional)</Label>
+                  <Input
+                    id="matrix_name"
+                    placeholder="Ej: Rango base, Fallback..."
+                    value={formData.name}
+                    onChange={(e) =>
+                      setFormData({ ...formData, name: e.target.value })
+                    }
+                  />
+                </div>
+              </div>
               <div className="space-y-4">
                 <h4 className="font-medium text-sm text-gray-500 uppercase">
                   Rangos de Graduación
@@ -315,53 +441,61 @@ export function LensMatrixManager({
                     />
                   </div>
                 </div>
-                {/* Addition Ranges */}
-                <div className="p-3 bg-purple-50 border border-purple-100 rounded-md">
-                  <div className="grid grid-cols-2 gap-2">
-                    <div>
-                      <Label htmlFor="addition_min" className="text-purple-900">
-                        Adición Min
-                      </Label>
-                      <Input
-                        id="addition_min"
-                        type="number"
-                        step="0.25"
-                        min="0"
-                        max="4"
-                        value={formData.addition_min}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            addition_min: e.target.value,
-                          })
-                        }
-                        required
-                        className="bg-white"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="addition_max" className="text-purple-900">
-                        Adición Max
-                      </Label>
-                      <Input
-                        id="addition_max"
-                        type="number"
-                        step="0.25"
-                        min="0"
-                        max="4"
-                        value={formData.addition_max}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            addition_max: e.target.value,
-                          })
-                        }
-                        required
-                        className="bg-white"
-                      />
+                {/* Addition Ranges - hidden for single_vision (monofocal) */}
+                {!isMonofocal && (
+                  <div className="p-3 bg-purple-50 border border-purple-100 rounded-md">
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <Label
+                          htmlFor="addition_min"
+                          className="text-purple-900"
+                        >
+                          Adición Min
+                        </Label>
+                        <Input
+                          id="addition_min"
+                          type="number"
+                          step="0.25"
+                          min="0"
+                          max="4"
+                          value={formData.addition_min}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              addition_min: e.target.value,
+                            })
+                          }
+                          required
+                          className="bg-white"
+                        />
+                      </div>
+                      <div>
+                        <Label
+                          htmlFor="addition_max"
+                          className="text-purple-900"
+                        >
+                          Adición Max
+                        </Label>
+                        <Input
+                          id="addition_max"
+                          type="number"
+                          step="0.25"
+                          min="0"
+                          max="4"
+                          value={formData.addition_max}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              addition_max: e.target.value,
+                            })
+                          }
+                          required
+                          className="bg-white"
+                        />
+                      </div>
                     </div>
                   </div>
-                </div>
+                )}
               </div>
 
               <div className="space-y-4">

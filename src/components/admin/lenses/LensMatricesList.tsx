@@ -41,6 +41,7 @@ import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Pagination } from "@/components/ui/pagination";
 import { formatCurrency } from "@/lib/utils";
+import { isOpticalFallbackMatrix } from "@/lib/lens-matrices/constants";
 
 interface LensFamily {
   id: string;
@@ -53,6 +54,7 @@ interface LensFamily {
 interface LensPriceMatrix {
   id: string;
   lens_family_id: string;
+  name?: string | null;
   sphere_min: number;
   sphere_max: number;
   cylinder_min: number;
@@ -103,6 +105,7 @@ export default function LensMatricesList() {
 
   const [formData, setFormData] = useState({
     lens_family_id: "",
+    name: "",
     sphere_min: "",
     sphere_max: "",
     cylinder_min: "0",
@@ -215,6 +218,7 @@ export default function LensMatricesList() {
   const resetForm = () => {
     setFormData({
       lens_family_id: "",
+      name: "",
       sphere_min: "",
       sphere_max: "",
       cylinder_min: "0",
@@ -230,6 +234,7 @@ export default function LensMatricesList() {
     setEditingMatrix(matrix);
     setFormData({
       lens_family_id: matrix.lens_family_id,
+      name: matrix.name ?? "",
       sphere_min: matrix.sphere_min.toString(),
       sphere_max: matrix.sphere_max.toString(),
       cylinder_min: matrix.cylinder_min.toString(),
@@ -346,6 +351,7 @@ export default function LensMatricesList() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Familia</TableHead>
+                  <TableHead>Nombre</TableHead>
                   <TableHead>Marca</TableHead>
                   <TableHead>Tipo de Lente</TableHead>
                   <TableHead>Material</TableHead>
@@ -360,10 +366,27 @@ export default function LensMatricesList() {
               <TableBody>
                 {paginatedMatrices.map((matrix) => {
                   const family = matrix.lens_families;
+                  const isFallback = isOpticalFallbackMatrix(
+                    matrix.sphere_min,
+                    matrix.sphere_max,
+                    matrix.cylinder_min,
+                    matrix.cylinder_max,
+                  );
                   return (
                     <TableRow key={matrix.id}>
                       <TableCell className="font-medium">
                         {family.name}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          {matrix.name ||
+                            `${matrix.sphere_min} a ${matrix.sphere_max}`}
+                          {isFallback && (
+                            <Badge variant="secondary" className="text-xs">
+                              Fallback
+                            </Badge>
+                          )}
+                        </div>
                       </TableCell>
                       <TableCell>{family.brand || "-"}</TableCell>
                       <TableCell>
@@ -468,6 +491,18 @@ export default function LensMatricesList() {
                       ))}
                     </SelectContent>
                   </Select>
+                </div>
+
+                <div className="md:col-span-2">
+                  <Label htmlFor="name">Nombre (opcional)</Label>
+                  <Input
+                    id="name"
+                    placeholder="Ej: Rango base, Fallback..."
+                    value={formData.name}
+                    onChange={(e) =>
+                      setFormData({ ...formData, name: e.target.value })
+                    }
+                  />
                 </div>
 
                 <div>

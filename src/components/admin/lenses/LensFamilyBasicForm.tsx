@@ -50,12 +50,10 @@ export const LENS_MATERIALS = [
 const CATEGORY_NONE_VALUE = "__none__";
 
 const LENS_CATEGORY_SLUGS = [
-  "monofocales",
-  "progresivos",
-  "bifocales",
   "lectura",
   "ocupacional",
   "deportivo",
+  "lentes-contacto",
 ];
 
 export function LensFamilyBasicForm({
@@ -112,13 +110,9 @@ export function LensFamilyBasicForm({
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="space-y-2">
+        {/* Categoría deprecada: oculta por defecto, priorizar lens_type como selector de tipo */}
+        <div className="space-y-2 hidden">
           <Label htmlFor="category_id">Categoría</Label>
-          <p className="text-xs text-muted-foreground">
-            Para que el sistema sugiera esta familia al crear presupuestos según
-            el tipo de receta del cliente (ej: si elige progresivos, verá las
-            familias con categoría Progresivos).
-          </p>
           <Select
             value={data.category_id ?? CATEGORY_NONE_VALUE}
             onValueChange={(value) =>
@@ -141,11 +135,12 @@ export function LensFamilyBasicForm({
             </SelectContent>
           </Select>
         </div>
-        <div className="space-y-2">
+        <div className="space-y-2 md:col-span-2">
           <Label htmlFor="lens_type">Tipo de Lente *</Label>
           <p className="text-xs text-muted-foreground">
             Clasificación técnica del diseño óptico: monofocal, bifocal,
-            progresivo, lectura, etc.
+            progresivo, lectura, etc. Usado para sugerir familias en
+            presupuestos.
           </p>
           <Select
             value={data.lens_type}

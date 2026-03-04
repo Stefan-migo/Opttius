@@ -62,6 +62,10 @@ add_source "docs/email/EMAIL_SYSTEM_UPDATE_2026-02.md" "EMAIL_SYSTEM_UPDATE_2026
 add_source ".cursor/skills/emails-optical-supabase/SKILL.md" "Skill_Emails_Optical_Supabase"
 add_source "docs/analysis/ANALYSIS_IMPLEMENTATION_STATUS.md" "ANALYSIS_IMPLEMENTATION_STATUS"
 
+# Base de datos Supabase (documentación central)
+add_source "docs/database/SUPABASE_DATABASE_DOCUMENTATION.md" "SUPABASE_DATABASE_DOCUMENTATION"
+add_source ".cursor/skills/database-optical-supabase/SKILL.md" "Skill_Database_Optical_Supabase"
+
 # Análisis y evaluaciones
 add_source "docs/DATABASE_EVALUATION_AND_RECOMMENDATIONS.md" "DATABASE_EVALUATION_AND_RECOMMENDATIONS"
 add_source "docs/INVENTORY_ANALYSIS_AND_IMPROVEMENTS.md" "INVENTORY_ANALYSIS_AND_IMPROVEMENTS"

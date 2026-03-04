@@ -131,15 +131,9 @@ export default function ContactLensFamiliesPage() {
         const cats = json.categories || json.data || [];
         setCategories(
           cats.filter((c: { slug?: string }) =>
-            [
-              "lentes-contacto",
-              "monofocales",
-              "progresivos",
-              "bifocales",
-              "lectura",
-              "ocupacional",
-              "deportivo",
-            ].includes(c.slug ?? ""),
+            ["lentes-contacto", "lectura", "ocupacional", "deportivo"].includes(
+              c.slug ?? "",
+            ),
           ),
         );
       })

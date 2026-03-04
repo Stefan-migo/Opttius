@@ -236,9 +236,15 @@ export async function POST(request: NextRequest) {
     // Create credit_note and credit_note_movement for caja integration
     let creditNoteId: string | null = null;
     if (posSessionId && refundAmount > 0) {
-      const { data: cnNumber, error: cnNumError } =
+      const { data: cnNumberRaw, error: cnNumError } =
         await supabaseServiceRole.rpc("generate_credit_note_number");
-      if (!cnNumError && cnNumber) {
+      const cnNumber =
+        typeof cnNumberRaw === "string"
+          ? cnNumberRaw
+          : Array.isArray(cnNumberRaw) && cnNumberRaw[0]
+            ? cnNumberRaw[0]
+            : cnNumberRaw;
+      if (!cnNumError && cnNumber && typeof cnNumber === "string") {
         const { data: branchRow } = await supabaseServiceRole
           .from("branches")
           .select("organization_id")

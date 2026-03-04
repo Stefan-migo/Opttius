@@ -293,6 +293,16 @@ export async function GET(
       relations.near_lens_family = nearLensFamily || null;
     }
 
+    // Fetch lens family for single lens case
+    if (quoteData.lens_family_id) {
+      const { data: lensFamily } = await supabaseServiceRole
+        .from("lens_families")
+        .select("id, name")
+        .eq("id", quoteData.lens_family_id)
+        .single();
+      relations.lens_family = lensFamily || null;
+    }
+
     // Combine quote data with relations
     // Ensure customer is always present (even if null) to avoid undefined errors
     const quote = {
@@ -302,6 +312,7 @@ export async function GET(
       frame_product: relations.frame_product || null,
       far_lens_family: relations.far_lens_family || null,
       near_lens_family: relations.near_lens_family || null,
+      lens_family: relations.lens_family || null,
     };
 
     logger.info("Quote fetched successfully:", {

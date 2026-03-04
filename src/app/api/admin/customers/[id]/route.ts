@@ -145,13 +145,15 @@ export async function GET(
     logger.debug("Orders fetched", { count: orders?.length || 0 });
 
     // Get customer prescriptions (recetas) - filtered by branch
+    // Order: is_current first (current prescription at top), then most recent by created_at
     const { data: prescriptions, error: prescriptionsError } =
       await applyBranchFilter(
         supabase
           .from("prescriptions")
           .select("*")
           .eq("customer_id", params.id)
-          .order("prescription_date", { ascending: false }),
+          .order("is_current", { ascending: false, nullsFirst: false })
+          .order("created_at", { ascending: false }),
       );
 
     if (prescriptionsError) {

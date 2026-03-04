@@ -1,14 +1,46 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { ArrowLeft, Loader2, Save, Calendar, Users, Key } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  ArrowLeft,
+  Loader2,
+  Save,
+  Calendar,
+  Users,
+  Key,
+  Link2,
+  Copy,
+  Trash2,
+} from "lucide-react";
 import { toast } from "sonner";
+
+type OpticasToken = {
+  id: string;
+  token_preview: string;
+  expires_at: string;
+  label: string | null;
+  created_at: string;
+};
 
 export default function SaasConfigPage() {
   const router = useRouter();
@@ -18,6 +50,14 @@ export default function SaasConfigPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [savingOnboarding, setSavingOnboarding] = useState(false);
+
+  const [opticasTokens, setOpticasTokens] = useState<OpticasToken[]>([]);
+  const [tokensLoading, setTokensLoading] = useState(false);
+  const [generatingToken, setGeneratingToken] = useState(false);
+  const [newTokenModal, setNewTokenModal] = useState<{
+    open: boolean;
+    url: string;
+  }>({ open: false, url: "" });
 
   useEffect(() => {
     fetch("/api/admin/system/config")
@@ -56,6 +96,80 @@ export default function SaasConfigPage() {
       .catch(() => toast.error("Error al cargar configuración"))
       .finally(() => setLoading(false));
   }, []);
+
+  const fetchOpticasTokens = useCallback(async () => {
+    setTokensLoading(true);
+    try {
+      const res = await fetch("/api/admin/opticas-access-tokens");
+      const data = await res.json();
+      if (res.ok) {
+        setOpticasTokens(data.tokens ?? []);
+      }
+    } catch {
+      toast.error("Error al cargar tokens");
+    } finally {
+      setTokensLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchOpticasTokens();
+  }, [fetchOpticasTokens]);
+
+  const handleGenerateOpticasToken = async (label?: string) => {
+    setGeneratingToken(true);
+    try {
+      const res = await fetch("/api/admin/opticas-access-tokens", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ label: label || null, expires_in_days: 90 }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        toast.error(data.error || "Error al generar enlace");
+        return;
+      }
+      setNewTokenModal({ open: true, url: data.url });
+      fetchOpticasTokens();
+      toast.success("Enlace generado. Cópialo ahora; no se mostrará de nuevo.");
+    } catch {
+      toast.error("Error de conexión");
+    } finally {
+      setGeneratingToken(false);
+    }
+  };
+
+  const handleCopyOpticasUrl = async (id: string) => {
+    try {
+      const res = await fetch(`/api/admin/opticas-access-tokens/${id}`);
+      const data = await res.json();
+      if (!res.ok) {
+        toast.error(data.error || "Error al obtener URL");
+        return;
+      }
+      await navigator.clipboard.writeText(data.url);
+      toast.success("URL copiada al portapapeles");
+    } catch {
+      toast.error("Error al copiar");
+    }
+  };
+
+  const handleRevokeOpticasToken = async (id: string) => {
+    try {
+      const res = await fetch(`/api/admin/opticas-access-tokens/${id}`, {
+        method: "DELETE",
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        toast.error(data.error || "Error al revocar");
+        return;
+      }
+      toast.success("Token revocado");
+      fetchOpticasTokens();
+    } catch {
+      toast.error("Error de conexión");
+    }
+  };
 
   const handleSave = async () => {
     const num = parseInt(trialDays, 10);
@@ -259,20 +373,106 @@ export default function SaasConfigPage() {
             Acceso ópticas conocidas
           </CardTitle>
           <p className="text-sm text-muted-foreground">
-            Si configuras DEMO_OPTICAS_ACCESS_KEY en las variables de entorno,
-            el link /acceso-opticas solo funcionará con ?key=TU_VALOR. Comparte
-            la URL completa con las ópticas de confianza.
+            Genera enlaces únicos para ópticas de confianza. Cada enlace es
+            revocable y tiene expiración. Compatibilidad: si tienes
+            DEMO_OPTICAS_ACCESS_KEY en .env, ?key= también funciona.
           </p>
         </CardHeader>
-        <CardContent>
-          <p className="text-sm text-muted-foreground">
-            Ejemplo:{" "}
-            <code className="bg-muted px-2 py-1 rounded text-xs">
-              https://opttius.cl/acceso-opticas?key=tu_clave_secreta
-            </code>
-          </p>
+        <CardContent className="space-y-4">
+          <Button
+            onClick={() => handleGenerateOpticasToken()}
+            disabled={generatingToken}
+          >
+            {generatingToken ? (
+              <Loader2 className="h-4 w-4 animate-spin mr-2" />
+            ) : (
+              <Link2 className="h-4 w-4 mr-2" />
+            )}
+            Generar enlace único
+          </Button>
+
+          {tokensLoading ? (
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Cargando tokens…
+            </div>
+          ) : opticasTokens.length > 0 ? (
+            <div className="border rounded-lg overflow-hidden">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Label</TableHead>
+                    <TableHead>Vista previa</TableHead>
+                    <TableHead>Expira</TableHead>
+                    <TableHead className="text-right">Acciones</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {opticasTokens.map((t) => (
+                    <TableRow key={t.id}>
+                      <TableCell>{t.label || "—"}</TableCell>
+                      <TableCell>
+                        <code className="text-xs">{t.token_preview}</code>
+                      </TableCell>
+                      <TableCell>
+                        {new Date(t.expires_at).toLocaleDateString()}
+                      </TableCell>
+                      <TableCell className="text-right space-x-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleCopyOpticasUrl(t.id)}
+                        >
+                          <Copy className="h-3 w-3 mr-1" />
+                          Copiar URL
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleRevokeOpticasToken(t.id)}
+                        >
+                          <Trash2 className="h-3 w-3 mr-1" />
+                          Revocar
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          ) : null}
         </CardContent>
       </Card>
+
+      <Dialog
+        open={newTokenModal.open}
+        onOpenChange={(open) => setNewTokenModal((prev) => ({ ...prev, open }))}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Enlace generado</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-muted-foreground">
+            Copia este enlace ahora. No se mostrará de nuevo.
+          </p>
+          <div className="flex gap-2">
+            <Input
+              readOnly
+              value={newTokenModal.url}
+              className="font-mono text-sm"
+            />
+            <Button
+              variant="outline"
+              onClick={() => {
+                navigator.clipboard.writeText(newTokenModal.url);
+                toast.success("URL copiada");
+              }}
+            >
+              <Copy className="h-4 w-4" />
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -15,7 +15,7 @@ import {
   createApiSuccessResponse,
   createApiErrorResponse,
 } from "@/lib/api/response";
-import { z } from "zod";
+import { CONTACT_LENS_DEFAULT_MATRICES } from "@/lib/lens-matrices/constants";
 
 export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
@@ -63,6 +63,7 @@ export async function GET(request: NextRequest) {
     const includeInactive = searchParams.get("include_inactive") === "true";
     const categorySlug = searchParams.get("category_slug");
     const categoryId = searchParams.get("category_id");
+    const modality = searchParams.get("modality");
     const search = searchParams.get("search")?.trim();
 
     // Build query - include category for display
@@ -104,6 +105,17 @@ export async function GET(request: NextRequest) {
         if (ids.length > 0) {
           query = query.in("category_id", ids);
         }
+      }
+    }
+
+    // Filter by modality (comma-separated: spherical,toric,multifocal)
+    if (modality) {
+      const modalities = modality
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean);
+      if (modalities.length > 0) {
+        query = query.in("modality", modalities);
       }
     }
 
@@ -199,35 +211,52 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create price matrices if provided
-    if (matricesInput && matricesInput.length > 0 && family) {
-      const matrixRows = matricesInput.map((m) => ({
-        contact_lens_family_id: family.id,
-        organization_id: userOrganizationId,
-        sphere_min: m.sphere_min,
-        sphere_max: m.sphere_max,
-        cylinder_min: m.cylinder_min,
-        cylinder_max: m.cylinder_max,
-        axis_min: m.axis_min,
-        axis_max: m.axis_max,
-        addition_min: m.addition_min,
-        addition_max: m.addition_max,
-        base_price: m.base_price,
-        cost: m.cost,
-        is_active: m.is_active,
-      }));
+    // Create price matrices: use provided or defaults (Rango base + Fallback)
+    if (family) {
+      const matricesToInsert =
+        matricesInput && matricesInput.length > 0
+          ? matricesInput.map((m) => ({
+              contact_lens_family_id: family.id,
+              organization_id: userOrganizationId,
+              name: m.name ?? null,
+              sphere_min: m.sphere_min,
+              sphere_max: m.sphere_max,
+              cylinder_min: m.cylinder_min,
+              cylinder_max: m.cylinder_max,
+              axis_min: m.axis_min ?? 0,
+              axis_max: m.axis_max ?? 180,
+              addition_min: m.addition_min ?? 0,
+              addition_max: m.addition_max ?? 4,
+              base_price: m.base_price,
+              cost: m.cost,
+              is_active: m.is_active ?? true,
+            }))
+          : CONTACT_LENS_DEFAULT_MATRICES.map((m) => ({
+              contact_lens_family_id: family.id,
+              organization_id: userOrganizationId,
+              name: m.name,
+              sphere_min: m.sphere_min,
+              sphere_max: m.sphere_max,
+              cylinder_min: m.cylinder_min,
+              cylinder_max: m.cylinder_max,
+              axis_min: m.axis_min,
+              axis_max: m.axis_max,
+              addition_min: m.addition_min,
+              addition_max: m.addition_max,
+              base_price: m.base_price,
+              cost: m.cost,
+              is_active: true,
+            }));
 
       const { error: matricesError } = await supabase
         .from("contact_lens_price_matrices")
-        .insert(matrixRows);
+        .insert(matricesToInsert);
 
       if (matricesError) {
         logger.error(
           "Error creating contact lens price matrices",
           matricesError,
         );
-        // Family was created; we could rollback or leave it. For simplicity, return success
-        // and log. The family exists but matrices failed.
         return createApiErrorResponse(
           new Error(
             "Familia creada pero error al crear matrices de precios. Edite la familia para agregar matrices.",

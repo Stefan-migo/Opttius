@@ -39,6 +39,7 @@ import { toast } from "sonner";
 import Link from "next/link";
 import { useBranch } from "@/hooks/useBranch";
 import { formatCurrency, formatDate } from "@/lib/utils";
+import { getLensTypeLabel } from "@/lib/lens-type-labels";
 import { quoteService } from "@/lib/api/services";
 
 interface Quote {
@@ -79,6 +80,7 @@ interface Quote {
   near_lens_family_id?: string;
   far_lens_cost?: number;
   near_lens_cost?: number;
+  lens_family?: { id: string; name: string } | null;
   far_lens_family?: { id: string; name: string } | null;
   near_lens_family?: { id: string; name: string } | null;
   // Near frame fields (for two_separate solution)
@@ -818,164 +820,97 @@ export default function QuoteDetailPage() {
             </Card>
           </div>
 
-          {/* Frame and Lens Info */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {quote.presbyopia_solution === "two_separate" ? (
-              <>
-                {/* Two separate frames */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center">
-                      <Package className="h-5 w-5 mr-2" />
-                      Marcos (Dos lentes separados)
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="border-b pb-3">
-                      <p className="text-xs text-admin-text-tertiary mb-2 font-semibold">
-                        Marco de Lejos:
-                      </p>
-                      <div className="space-y-1">
-                        <p className="text-sm font-medium">
-                          {quote.frame_name || "-"}
-                        </p>
-                        {quote.frame_brand && (
-                          <p className="text-xs text-admin-text-tertiary">
-                            Marca: {quote.frame_brand}
-                          </p>
-                        )}
-                        <p className="text-sm font-semibold text-admin-success">
-                          Precio: {formatCurrency(quote.frame_price)}
-                        </p>
-                      </div>
-                    </div>
-                    <div>
-                      <p className="text-xs text-admin-text-tertiary mb-2 font-semibold">
-                        Marco de Cerca:
-                      </p>
-                      <div className="space-y-1">
-                        {quote.customer_own_near_frame ? (
-                          <p className="text-sm text-blue-600">
-                            Cliente trae marco
-                          </p>
-                        ) : (
-                          <>
-                            <p className="text-sm font-medium">
-                              {quote.near_frame_name || "-"}
-                            </p>
-                            {quote.near_frame_brand && (
-                              <p className="text-xs text-admin-text-tertiary">
-                                Marca: {quote.near_frame_brand}
-                              </p>
-                            )}
-                            <p className="text-sm font-semibold text-admin-success">
-                              Precio:{" "}
-                              {formatCurrency(quote.near_frame_price || 0)}
-                            </p>
-                          </>
-                        )}
-                      </div>
-                    </div>
-                    <div className="pt-2 border-t">
-                      <p className="text-xs text-admin-text-tertiary">
-                        Total Marcos
-                      </p>
-                      <p className="text-lg font-bold text-admin-success">
-                        {formatCurrency(
-                          (quote.frame_price || 0) +
-                            (quote.customer_own_near_frame
-                              ? 0
-                              : quote.near_frame_price || 0),
-                        )}
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
-              </>
-            ) : (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <Package className="h-5 w-5 mr-2" />
-                    Marco
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  <div>
-                    <p className="text-sm text-admin-text-tertiary">Nombre</p>
-                    <p className="font-medium">{quote.frame_name || "-"}</p>
-                  </div>
-                  {quote.frame_brand && (
-                    <div>
-                      <p className="text-sm text-admin-text-tertiary">Marca</p>
-                      <p className="font-medium">{quote.frame_brand}</p>
-                    </div>
-                  )}
-                  {quote.frame_model && (
-                    <div>
-                      <p className="text-sm text-admin-text-tertiary">Modelo</p>
-                      <p className="font-medium">{quote.frame_model}</p>
-                    </div>
-                  )}
-                  {quote.frame_color && (
-                    <div>
-                      <p className="text-sm text-admin-text-tertiary">Color</p>
-                      <p className="font-medium">{quote.frame_color}</p>
-                    </div>
-                  )}
-                  <div>
-                    <p className="text-sm text-admin-text-tertiary">Precio</p>
-                    <p className="font-semibold text-admin-success">
-                      {formatCurrency(quote.frame_price)}
+          {/* Marco y Lente - Single merged card */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <Package className="h-5 w-5 mr-2" />
+                <Eye className="h-5 w-5 mr-2" />
+                Marco y Lente
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {quote.presbyopia_solution === "two_separate" ? (
+                <>
+                  <div className="space-y-2 pb-4 border-b border-admin-border-primary/20">
+                    <p className="text-xs font-display font-bold text-admin-text-tertiary uppercase tracking-widest">
+                      Par Lejos
+                    </p>
+                    <p className="font-medium">
+                      Marco: {quote.frame_name || "—"}
+                      {quote.frame_brand && ` (${quote.frame_brand})`}
+                    </p>
+                    <p className="font-medium">
+                      Lente:{" "}
+                      {quote.far_lens_family?.name ||
+                        getLensTypeLabel(quote.lens_type) ||
+                        "—"}
+                    </p>
+                    <p className="text-sm font-semibold text-admin-success">
+                      Precio: {formatCurrency(quote.frame_price)}
                     </p>
                   </div>
-                </CardContent>
-              </Card>
-            )}
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Eye className="h-5 w-5 mr-2" />
-                  Lente
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                {quote.lens_type && (
-                  <div>
-                    <p className="text-sm text-admin-text-tertiary">Tipo</p>
-                    <p className="font-medium">{quote.lens_type}</p>
+                  <div className="space-y-2">
+                    <p className="text-xs font-display font-bold text-admin-text-tertiary uppercase tracking-widest">
+                      Par Cerca
+                    </p>
+                    <p className="font-medium">
+                      Marco:{" "}
+                      {quote.customer_own_near_frame
+                        ? "Cliente trae marco"
+                        : `${quote.near_frame_name || "—"}${quote.near_frame_brand ? ` (${quote.near_frame_brand})` : ""}`}
+                    </p>
+                    <p className="font-medium">
+                      Lente: {quote.near_lens_family?.name || "—"}
+                    </p>
+                    {!quote.customer_own_near_frame && (
+                      <p className="text-sm font-semibold text-admin-success">
+                        Precio: {formatCurrency(quote.near_frame_price || 0)}
+                      </p>
+                    )}
                   </div>
-                )}
-                {quote.lens_material && (
+                </>
+              ) : (
+                <div className="space-y-2">
                   <div>
-                    <p className="text-sm text-admin-text-tertiary">Material</p>
-                    <p className="font-medium">{quote.lens_material}</p>
+                    <p className="text-sm text-admin-text-tertiary">Marco</p>
+                    <p className="font-medium">{quote.frame_name || "—"}</p>
+                    {quote.frame_brand && (
+                      <p className="text-sm text-admin-text-tertiary">
+                        {quote.frame_brand}
+                        {quote.frame_model && ` · ${quote.frame_model}`}
+                      </p>
+                    )}
+                    <p className="text-sm font-semibold text-admin-success">
+                      Precio: {formatCurrency(quote.frame_price)}
+                    </p>
                   </div>
-                )}
-                {quote.lens_index && (
                   <div>
-                    <p className="text-sm text-admin-text-tertiary">Índice</p>
-                    <p className="font-medium">{quote.lens_index}</p>
-                  </div>
-                )}
-                {quote.lens_treatments && quote.lens_treatments.length > 0 && (
-                  <div>
+                    <p className="text-sm text-admin-text-tertiary">Lente</p>
+                    <p className="font-medium">
+                      {quote.lens_family?.name ||
+                        getLensTypeLabel(quote.lens_type) ||
+                        "—"}
+                    </p>
                     <p className="text-sm text-admin-text-tertiary">
-                      Tratamientos
+                      {quote.lens_material}
+                      {quote.lens_index && ` · Índice ${quote.lens_index}`}
                     </p>
-                    <div className="flex flex-wrap gap-1 mt-1">
-                      {quote.lens_treatments.map((treatment, idx) => (
-                        <Badge key={idx} variant="outline">
-                          {treatment}
-                        </Badge>
-                      ))}
-                    </div>
+                    {quote.lens_treatments &&
+                      quote.lens_treatments.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mt-1">
+                          {quote.lens_treatments.map((treatment, idx) => (
+                            <Badge key={idx} variant="outline">
+                              {treatment}
+                            </Badge>
+                          ))}
+                        </div>
+                      )}
                   </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </TabsContent>
 
         {/* Details Tab */}
@@ -1430,10 +1365,20 @@ export default function QuoteDetailPage() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
+                    {quote.lens_type && (
+                      <div>
+                        <p className="text-xs text-admin-text-tertiary">
+                          Tipo de Lente
+                        </p>
+                        <p className="font-medium">
+                          {getLensTypeLabel(quote.lens_type)}
+                        </p>
+                      </div>
+                    )}
                     {quote.far_lens_family && (
                       <div className="p-2 bg-blue-50 border border-blue-200 rounded">
                         <p className="text-xs text-blue-800 font-semibold mb-1">
-                          Familia de lentes:
+                          Familia de lente
                         </p>
                         <p className="text-sm text-blue-900">
                           {quote.far_lens_family.name}
@@ -1468,10 +1413,20 @@ export default function QuoteDetailPage() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
+                    {quote.lens_type && (
+                      <div>
+                        <p className="text-xs text-admin-text-tertiary">
+                          Tipo de Lente
+                        </p>
+                        <p className="font-medium">
+                          {getLensTypeLabel(quote.lens_type)}
+                        </p>
+                      </div>
+                    )}
                     {quote.near_lens_family && (
                       <div className="p-2 bg-blue-50 border border-blue-200 rounded">
                         <p className="text-xs text-blue-800 font-semibold mb-1">
-                          Familia de lentes:
+                          Familia de lente
                         </p>
                         <p className="text-sm text-blue-900">
                           {quote.near_lens_family.name}
@@ -1511,9 +1466,19 @@ export default function QuoteDetailPage() {
                       <p className="text-xs text-admin-text-tertiary">
                         Tipo de Lente
                       </p>
-                      <p className="font-medium">{quote.lens_type}</p>
+                      <p className="font-medium">
+                        {getLensTypeLabel(quote.lens_type)}
+                      </p>
                     </div>
                   )}
+                  <div>
+                    <p className="text-xs text-admin-text-tertiary">
+                      Familia de lente
+                    </p>
+                    <p className="font-medium">
+                      {quote.lens_family?.name || "—"}
+                    </p>
+                  </div>
                   {quote.lens_material && (
                     <div>
                       <p className="text-xs text-admin-text-tertiary">

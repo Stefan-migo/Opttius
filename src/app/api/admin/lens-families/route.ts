@@ -60,6 +60,7 @@ export async function GET(request: NextRequest) {
     const includeInactive = searchParams.get("include_inactive") === "true";
     const categorySlug = searchParams.get("category_slug");
     const categoryId = searchParams.get("category_id");
+    const lensType = searchParams.get("lens_type");
     const search = searchParams.get("search")?.trim();
 
     // Build query - include category for display (FK category_id -> categories)
@@ -105,6 +106,17 @@ export async function GET(request: NextRequest) {
         if (ids.length > 0) {
           query = query.in("category_id", ids);
         }
+      }
+    }
+
+    // Filter by lens_type (comma-separated: single_vision,progressive,reading)
+    if (lensType) {
+      const types = lensType
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean);
+      if (types.length > 0) {
+        query = query.in("lens_type", types);
       }
     }
 
@@ -176,12 +188,9 @@ export async function POST(request: NextRequest) {
     const bodyRaw = await request.json();
     let body: any;
 
-    // Check if we are doing a full creation (with matrices)
-    if (
-      bodyRaw.matrices &&
-      Array.isArray(bodyRaw.matrices) &&
-      bodyRaw.matrices.length > 0
-    ) {
+    // Full creation: with matrices or with defaults (empty matrices)
+    const hasMatrices = bodyRaw.matrices && Array.isArray(bodyRaw.matrices);
+    if (hasMatrices || bodyRaw.create_with_defaults === true) {
       // Validate with proper schema
       const validation = createLensFamilyFullSchema.safeParse(bodyRaw);
       if (!validation.success) {
@@ -189,10 +198,12 @@ export async function POST(request: NextRequest) {
       }
       body = validation.data;
 
-      // Extract matrices and family data
-      const { matrices, ...familyData } = body;
+      // Extract matrices and family data (matrices can be empty for defaults)
+      const { matrices = [], create_with_defaults, ...familyData } = body;
+      const matricesToSend =
+        Array.isArray(matrices) && matrices.length > 0 ? matrices : [];
 
-      // Use RPC for atomic insertion
+      // Use RPC for atomic insertion (empty matrices triggers default Rango base + Fallback)
       const { data: familyId, error } = await supabase.rpc(
         "create_lens_family_full",
         {
@@ -200,18 +211,15 @@ export async function POST(request: NextRequest) {
             ...familyData,
             organization_id: userOrganizationId, // Enforce organization_id
           },
-          p_matrices_data: matrices,
+          p_matrices_data: matricesToSend,
         },
       );
 
       if (error) {
         logger.error("Error creating lens family full (RPC)", error);
-        if (error) {
-          logger.error("Error creating lens family full (RPC)", error);
-          return createApiErrorResponse(
-            new Error("Error al crear familia de lentes completa"),
-          );
-        }
+        return createApiErrorResponse(
+          new Error("Error al crear familia de lentes completa"),
+        );
       }
 
       // Fetch the created family to return it (optional, but good practice)

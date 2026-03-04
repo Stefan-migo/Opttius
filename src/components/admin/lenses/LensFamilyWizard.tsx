@@ -68,17 +68,20 @@ export function LensFamilyWizard() {
   };
 
   const handleSubmit = async () => {
-    if (data.matrices.length === 0) {
-      toast.error("Debe agregar al menos una matriz de precios");
-      return;
-    }
-
     try {
       setLoading(true);
+      const matricesPayload =
+        data.matrices.length > 0
+          ? data.matrices.map(({ id: _id, ...m }) => m)
+          : [];
+      const payload =
+        matricesPayload.length > 0
+          ? { ...data, matrices: matricesPayload }
+          : { ...data, matrices: [], create_with_defaults: true };
       const response = await fetch("/api/admin/lens-families", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
+        body: JSON.stringify(payload),
       });
 
       if (!response.ok) {
@@ -162,6 +165,7 @@ export function LensFamilyWizard() {
               <LensMatrixManager
                 matrices={data.matrices}
                 onChange={handleMatricesChange}
+                lensType={data.lens_type}
               />
             </div>
           )}

@@ -356,7 +356,7 @@ export default function CategoriesManagementSection() {
           />
           <CategorySection
             title="Categorías especializadas de lentes"
-            subtitle="Tipos específicos de lentes ópticos: monofocales, progresivos, bifocales, etc."
+            subtitle="Tipos de productos ópticos: lectura, ocupacional, deportivo, lentes de contacto"
             icon={Glasses}
             categories={especializadas}
             onEdit={openEditCategoryDialog}

@@ -2282,6 +2282,9 @@ export default function CreateQuoteForm({
                         }));
                       }}
                       presbyopiaSolution={presbyopiaSolution}
+                      prescriptionType={
+                        selectedPrescription?.prescription_type ?? undefined
+                      }
                       families={lensFamilies}
                       loading={loadingFamilies}
                       placeholder="Selecciona familia (opcional)"

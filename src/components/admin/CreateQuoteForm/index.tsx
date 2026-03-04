@@ -214,6 +214,10 @@ export default function CreateQuoteForm({
       {selectedCustomer && (
         <PrescriptionSelection
           customerId={selectedCustomer.id}
+          customerName={
+            `${selectedCustomer.first_name || ""} ${selectedCustomer.last_name || ""}`.trim() ||
+            undefined
+          }
           selectedPrescription={selectedPrescription}
           onPrescriptionSelect={handlePrescriptionSelect}
           onPrescriptionClear={handlePrescriptionClear}

@@ -927,6 +927,7 @@ export const processSaleSchema = z
     agreement_id: uuidOptionalSchema,
     purchase_order_id: uuidOptionalSchema,
     field_operation_id: uuidOptionalSchema, // Operativo en terreno - header takes precedence
+    idempotency_key: z.string().uuid().optional().nullable(), // Prevents duplicate sales on retry
   })
   .refine(
     (data) => {
@@ -1249,6 +1250,7 @@ export const updateLensFamilySchema = lensFamilyBaseSchema.partial();
 
 const lensPriceMatrixBaseObject = z.object({
   lens_family_id: uuidSchema,
+  name: z.string().max(50).optional().nullable(),
   sphere_min: z.number().min(-30).max(30).multipleOf(0.25),
   sphere_max: z.number().min(-30).max(30).multipleOf(0.25),
   cylinder_min: z.number().min(-30).max(30).multipleOf(0.25),
@@ -1285,7 +1287,9 @@ export const createLensFamilyFullSchema = lensFamilyBaseSchema.extend({
           path: ["sphere_max"],
         }),
     )
-    .min(1, "Debe agregar al menos una matriz de precios"),
+    .optional()
+    .default([]),
+  create_with_defaults: z.boolean().optional(),
 });
 
 export const lensPriceMatrixV2RangeRefine = lensPriceMatrixBaseSchema.refine(
@@ -1367,6 +1371,7 @@ export const updateContactLensFamilySchema =
 /** Matrix input for create (no contact_lens_family_id) */
 const contactLensPriceMatrixInputSchema = z
   .object({
+    name: z.string().max(50).optional().nullable(),
     sphere_min: z.number().min(-30).max(30).multipleOf(0.25),
     sphere_max: z.number().min(-30).max(30).multipleOf(0.25),
     cylinder_min: z.number().min(-6).max(6).multipleOf(0.25).default(0),
@@ -1412,6 +1417,7 @@ export const updateContactLensFamilyWithMatricesSchema =
 
 const contactLensPriceMatrixBaseObject = z.object({
   contact_lens_family_id: uuidSchema,
+  name: z.string().max(50).optional().nullable(),
   sphere_min: z.number().min(-30).max(30).multipleOf(0.25),
   sphere_max: z.number().min(-30).max(30).multipleOf(0.25),
   cylinder_min: z.number().min(-6).max(6).multipleOf(0.25).default(0),

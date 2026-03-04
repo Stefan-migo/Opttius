@@ -20,12 +20,19 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Plus, Edit, Trash2 } from "lucide-react";
+import { Plus, Edit, Trash2, ChevronDown, ChevronRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { formatCurrency } from "@/lib/utils";
+import { CONTACT_LENS_DEFAULT_MATRICES } from "@/lib/lens-matrices/constants";
+import {
+  CONTACT_LENS_MATRIX_SUGGESTION_TITLE,
+  CONTACT_LENS_MATRIX_SUGGESTION_DESCRIPTION,
+  CONTACT_LENS_MATRIX_SUGGESTION_ROWS,
+} from "@/lib/lens-matrices/suggestion-text";
 
 export interface ContactLensMatrixFormData {
   id: string;
+  name?: string | null;
   sphere_min: number;
   sphere_max: number;
   cylinder_min: number;
@@ -52,7 +59,9 @@ export function ContactLensMatrixManager({
 }: ContactLensMatrixManagerProps) {
   const [showDialog, setShowDialog] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [suggestionOpen, setSuggestionOpen] = useState(matrices.length === 0);
   const [formData, setFormData] = useState({
+    name: "",
     sphere_min: "-6.00",
     sphere_max: "6.00",
     cylinder_min: "-2.00",
@@ -66,10 +75,31 @@ export function ContactLensMatrixManager({
     is_active: true,
   });
 
+  const handleApplyTemplate = () => {
+    const newMatrices: ContactLensMatrixFormData[] =
+      CONTACT_LENS_DEFAULT_MATRICES.map((r, i) => ({
+        id: `temp-${Date.now()}-${i}`,
+        name: r.name,
+        sphere_min: r.sphere_min,
+        sphere_max: r.sphere_max,
+        cylinder_min: r.cylinder_min,
+        cylinder_max: r.cylinder_max,
+        axis_min: r.axis_min,
+        axis_max: r.axis_max,
+        addition_min: r.addition_min,
+        addition_max: r.addition_max,
+        base_price: r.base_price,
+        cost: r.cost,
+        is_active: true,
+      }));
+    onChange([...matrices, ...newMatrices]);
+  };
+
   const handleOpenDialog = (matrix?: ContactLensMatrixFormData) => {
     if (matrix) {
       setEditingId(matrix.id);
       setFormData({
+        name: matrix.name ?? "",
         sphere_min: matrix.sphere_min.toString(),
         sphere_max: matrix.sphere_max.toString(),
         cylinder_min: matrix.cylinder_min.toString(),
@@ -85,6 +115,7 @@ export function ContactLensMatrixManager({
     } else {
       setEditingId(null);
       setFormData({
+        name: "",
         sphere_min: "-6.00",
         sphere_max: "6.00",
         cylinder_min: "-2.00",
@@ -106,6 +137,7 @@ export function ContactLensMatrixManager({
 
     const newMatrix: ContactLensMatrixFormData = {
       id: editingId || `temp-${Date.now()}`,
+      name: formData.name?.trim() || undefined,
       sphere_min: parseFloat(formData.sphere_min),
       sphere_max: parseFloat(formData.sphere_max),
       cylinder_min: parseFloat(formData.cylinder_min),
@@ -135,6 +167,62 @@ export function ContactLensMatrixManager({
 
   return (
     <div className="space-y-4">
+      {!readOnly && (
+        <div className="border rounded-lg overflow-hidden">
+          <button
+            type="button"
+            onClick={() => setSuggestionOpen(!suggestionOpen)}
+            className="w-full flex items-center justify-between p-4 text-left bg-gray-50 hover:bg-gray-100 transition-colors"
+          >
+            <span className="font-medium text-sm text-gray-700">
+              {CONTACT_LENS_MATRIX_SUGGESTION_TITLE}
+            </span>
+            {suggestionOpen ? (
+              <ChevronDown className="h-4 w-4 text-gray-500" />
+            ) : (
+              <ChevronRight className="h-4 w-4 text-gray-500" />
+            )}
+          </button>
+          {suggestionOpen && (
+            <div className="p-4 pt-0 space-y-4 border-t">
+              <p className="text-sm text-gray-600">
+                {CONTACT_LENS_MATRIX_SUGGESTION_DESCRIPTION}
+              </p>
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Nombre</TableHead>
+                      <TableHead>Rango</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {CONTACT_LENS_MATRIX_SUGGESTION_ROWS.map((row) => (
+                      <TableRow key={row.name}>
+                        <TableCell className="font-medium">
+                          {row.name}
+                        </TableCell>
+                        <TableCell className="text-gray-600">
+                          {row.range}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={handleApplyTemplate}
+              >
+                Crear Rango base + Fallback
+              </Button>
+            </div>
+          )}
+        </div>
+      )}
+
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-medium">Matrices de Precios</h3>
         {!readOnly && (
@@ -158,6 +246,7 @@ export function ContactLensMatrixManager({
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead>Nombre</TableHead>
                 <TableHead>Esfera</TableHead>
                 <TableHead>Cilindro</TableHead>
                 <TableHead>Eje</TableHead>
@@ -172,6 +261,10 @@ export function ContactLensMatrixManager({
             <TableBody>
               {matrices.map((matrix) => (
                 <TableRow key={matrix.id}>
+                  <TableCell>
+                    {matrix.name ||
+                      `${matrix.sphere_min} a ${matrix.sphere_max}`}
+                  </TableCell>
                   <TableCell>
                     {matrix.sphere_min} a {matrix.sphere_max}
                   </TableCell>
@@ -225,6 +318,19 @@ export function ContactLensMatrixManager({
           </DialogHeader>
           <form onSubmit={handleSubmit}>
             <div className="grid grid-cols-2 gap-4 py-4">
+              <div className="space-y-4 col-span-2">
+                <div>
+                  <Label htmlFor="matrix_name">Nombre (opcional)</Label>
+                  <Input
+                    id="matrix_name"
+                    placeholder="Ej: Rango base, Fallback..."
+                    value={formData.name}
+                    onChange={(e) =>
+                      setFormData({ ...formData, name: e.target.value })
+                    }
+                  />
+                </div>
+              </div>
               <div className="space-y-4">
                 <h4 className="font-medium text-sm text-gray-500 uppercase">
                   Rangos de Graduación

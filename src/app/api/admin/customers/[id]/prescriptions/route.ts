@@ -69,11 +69,13 @@ export async function GET(
     }
 
     // Use service role to bypass RLS - demo/legacy prescriptions may have organization_id=null
+    // Order: is_current first (current prescription at top), then most recent by created_at
     const { data: prescriptions, error } = await supabaseServiceRole
       .from("prescriptions")
       .select("*")
       .eq("customer_id", id)
-      .order("prescription_date", { ascending: false });
+      .order("is_current", { ascending: false, nullsFirst: false })
+      .order("created_at", { ascending: false });
 
     if (error) {
       logger.error("Error fetching prescriptions", error);

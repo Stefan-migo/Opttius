@@ -278,10 +278,39 @@ class POSService {
         return data;
       }
 
+      // For 5xx/network errors: show specific message (sale may have gone through)
+      const errMsg = (response as any)?.error?.message ?? "";
+      const errCode = (response as any)?.error?.code ?? "";
+      const isServerOrNetwork =
+        errCode === "NETWORK_ERROR" ||
+        /internal server error|500|timeout|network error|failed to fetch/i.test(
+          errMsg,
+        );
+      if (isServerOrNetwork) {
+        const { error: showError } = await import(
+          "@/lib/services/notificationService"
+        );
+        showError(
+          "La venta puede haberse procesado. Revise en Caja u Órdenes antes de reintentar.",
+        );
+        return null;
+      }
+
       handleApiError(response);
       return null;
     } catch (error) {
       console.error("Error processing sale:", error);
+      const errMsg = error instanceof Error ? error.message : String(error);
+      const isServerOrNetwork = /network|timeout|failed to fetch/i.test(errMsg);
+      if (isServerOrNetwork) {
+        const { error: showError } = await import(
+          "@/lib/services/notificationService"
+        );
+        showError(
+          "La venta puede haberse procesado. Revise en Caja u Órdenes antes de reintentar.",
+        );
+        return null;
+      }
       handleApiError(error);
       return null;
     }

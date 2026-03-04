@@ -15,7 +15,9 @@ export default function AccesoOpticasPage() {
   useEffect(() => {
     const params = new URLSearchParams();
     params.set("access", "opticas");
+    const token = searchParams.get("token");
     const key = searchParams.get("key");
+    if (token) params.set("token", token);
     if (key) params.set("key", key);
     router.replace(`/signup?${params.toString()}`);
   }, [router, searchParams]);

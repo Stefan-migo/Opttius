@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useBranch } from "@/hooks/useBranch";
 import { getBranchHeader } from "@/lib/utils/branch";
+import { extractDataFromResponse } from "@/lib/api/response-helpers";
 import { Customer, Prescription, Frame } from "../types/quote.types";
 
 export function useCustomerSearch(initialCustomerId?: string) {
@@ -113,7 +114,8 @@ export function usePrescriptionSearch(customerId: string | null) {
 
       if (response.ok) {
         const data = await response.json();
-        setPrescriptions(data.prescriptions || []);
+        const list = extractDataFromResponse<Prescription>(data);
+        setPrescriptions(Array.isArray(list) ? list : []);
       }
     } catch (error) {
       console.error("Error fetching prescriptions:", error);

@@ -50,6 +50,7 @@ import {
 import { toast } from "sonner";
 import Link from "next/link";
 import { formatCurrency, formatDate, formatDateTime } from "@/lib/utils";
+import { getLensTypeLabel } from "@/lib/lens-type-labels";
 import { PrescriptionFullDisplay } from "@/components/admin/PrescriptionFullDisplay";
 
 interface WorkOrder {
@@ -1558,7 +1559,13 @@ export default function WorkOrderDetailPage() {
                       {workOrder.frame_model && ` · ${workOrder.frame_model}`}
                     </p>
                     <p className="text-xs text-admin-text-tertiary mt-2">
-                      Familia de Lente
+                      Tipo de Lente
+                    </p>
+                    <p className="font-medium">
+                      {getLensTypeLabel(workOrder.lens_type)}
+                    </p>
+                    <p className="text-xs text-admin-text-tertiary mt-2">
+                      Familia de lente
                     </p>
                     <p className="font-medium">
                       {workOrder.far_lens_family?.name || "—"}
@@ -1575,7 +1582,13 @@ export default function WorkOrderDetailPage() {
                       {workOrder.frame_model && ` · ${workOrder.frame_model}`}
                     </p>
                     <p className="text-xs text-admin-text-tertiary mt-2">
-                      Familia de Lente
+                      Tipo de Lente
+                    </p>
+                    <p className="font-medium">
+                      {getLensTypeLabel(workOrder.lens_type)}
+                    </p>
+                    <p className="text-xs text-admin-text-tertiary mt-2">
+                      Familia de lente
                     </p>
                     <p className="font-medium">
                       {workOrder.near_lens_family?.name || "—"}
@@ -1589,7 +1602,15 @@ export default function WorkOrderDetailPage() {
                       Tipo de Lente
                     </p>
                     <p className="font-medium">
-                      {workOrder.lens_family?.name || workOrder.lens_type}
+                      {getLensTypeLabel(workOrder.lens_type)}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-admin-text-tertiary">
+                      Familia de lente
+                    </p>
+                    <p className="font-medium">
+                      {workOrder.lens_family?.name || "—"}
                     </p>
                   </div>
                   <div>

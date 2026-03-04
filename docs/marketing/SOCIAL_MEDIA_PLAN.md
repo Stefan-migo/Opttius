@@ -71,18 +71,21 @@ Cuando tengas tiempo: serie de tutoriales de 2 minutos ("Demostración del POS O
 | 1.4   | LinkedIn  | Biografía/About: "El motor inteligente para ópticas modernas. Creado por un tecnólogo médico." + link opttius.cl | [ ]    |
 | 1.5   | Facebook  | Crear Fan Page con logo, banner, descripción                                                                     | [ ]    |
 
-### Semana 2: Contenido Inicial en Instagram
+### Semana 2: Contenido Inicial (LinkedIn + Instagram)
 
-| Tarea | Tipo | Idea                                                                       | Estado |
-| ----- | ---- | -------------------------------------------------------------------------- | ------ |
-| 2.1   | Post | Gráfico con métrica (ej: "10h/sem recuperadas")                            | [ ]    |
-| 2.2   | Post | Frase "Show, Don't Tell" (ej: "Reduce errores de transcripción en un 95%") | [ ]    |
-| 2.3   | Post | Foto estética de la interfaz (POS o presupuestos)                          | [ ]    |
-| 2.4   | Post | Hook de dolor: "¿Tu inventario nunca cuadra con tu caja?"                  | [ ]    |
-| 2.5   | Post | Badge: "De la clínica al código. 100% nativo para ópticas."                | [ ]    |
-| 2.6   | Post | CTA: "Solicitar Demo" + link                                               | [ ]    |
+**Documentación detallada:** [CONTENIDO_SEMANA_2_INDEX.md](./CONTENIDO_SEMANA_2_INDEX.md) | [LinkedIn](./CONTENIDO_SEMANA_2_LINKEDIN.md) | [Instagram](./CONTENIDO_SEMANA_2_INSTAGRAM.md)
 
-**Objetivo:** Perfil ya no vacío si alguien entra desde la web.
+| Tarea | Canal     | Idea                                                                       | Estado |
+| ----- | --------- | -------------------------------------------------------------------------- | ------ |
+| 2.1   | Instagram | Gráfico con métrica (ej: "10h/sem recuperadas")                            | [ ]    |
+| 2.2   | Instagram | Frase "Show, Don't Tell" (ej: "Reduce errores de transcripción en un 95%") | [ ]    |
+| 2.3   | Instagram | Foto estética de la interfaz (POS o presupuestos)                          | [ ]    |
+| 2.4   | Instagram | Hook de dolor: "¿Tu inventario nunca cuadra con tu caja?"                  | [ ]    |
+| 2.5   | Instagram | Badge: "De la clínica al código. 100% nativo para ópticas."                | [ ]    |
+| 2.6   | Instagram | CTA: "Solicitar Demo" + link                                               | [ ]    |
+| 2.7   | LinkedIn  | 5 posts (Inventario, Laboratorio, Presbicia, Multi-sucursal, CTA)          | [ ]    |
+
+**Objetivo:** Perfiles con contenido coherente. LinkedIn: autoridad clínica. Instagram: escaparate visual.
 
 ### Semana 3: Contacto 1 a 1 en LinkedIn
 

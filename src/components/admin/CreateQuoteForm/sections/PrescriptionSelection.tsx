@@ -13,6 +13,7 @@ import { Plus, Eye, Loader2 } from "lucide-react";
 import { usePrescriptionSearch } from "../hooks";
 import { PrescriptionFullDisplay } from "@/components/admin/PrescriptionFullDisplay";
 import { Prescription } from "../types/quote.types";
+import { formatDate } from "@/lib/utils";
 import { translatePrescriptionType } from "@/lib/prescription-helpers";
 import {
   hasAddition,
@@ -24,6 +25,7 @@ import { Label } from "@/components/ui/label";
 
 interface PrescriptionSelectionProps {
   customerId: string | null;
+  customerName?: string;
   selectedPrescription: Prescription | null;
   onPrescriptionSelect: (prescription: Prescription) => void;
   onPrescriptionClear: () => void;
@@ -35,6 +37,7 @@ interface PrescriptionSelectionProps {
 
 export function PrescriptionSelection({
   customerId,
+  customerName,
   selectedPrescription,
   onPrescriptionSelect,
   onPrescriptionClear,
@@ -200,7 +203,11 @@ export function PrescriptionSelection({
             <SelectContent>
               {prescriptions.map((prescription) => (
                 <SelectItem key={prescription.id} value={prescription.id}>
-                  {prescription.prescription_date} -{" "}
+                  {customerName ? `${customerName} · ` : ""}
+                  {prescription.prescription_date
+                    ? formatDate(prescription.prescription_date)
+                    : "Sin fecha"}
+                  {" · "}
                   {translatePrescriptionType(prescription.prescription_type)}
                   {prescription.is_current && " (Actual)"}
                 </SelectItem>

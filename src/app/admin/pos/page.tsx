@@ -68,6 +68,7 @@ import {
 } from "@/lib/utils/tax";
 import { getTaxPercentage } from "@/lib/utils/tax-config";
 import { formatCurrency, formatDate, formatPrice } from "@/lib/utils";
+import { translatePrescriptionType } from "@/lib/prescription-helpers";
 import { getTodayInTimezone } from "@/lib/utils/date-timezone";
 import { extractDataFromResponse } from "@/lib/api/response-helpers";
 import {
@@ -260,6 +261,7 @@ export default function POSPage() {
   const [selectedProductIndex, setSelectedProductIndex] = useState<number>(-1);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const suggestionsRef = useRef<HTMLDivElement>(null);
+  const idempotencyKeyRef = useRef<string | null>(null);
 
   // Effective branch: in operativo mode use operativo.branch_id, otherwise currentBranchId
   const effectiveBranchId = operativo?.branch_id ?? currentBranchId;
@@ -2860,6 +2862,12 @@ export default function POSPage() {
     setProcessingPayment(true);
 
     try {
+      // Idempotency: same key for retries (prevents duplicate sales on timeout/retry)
+      if (!idempotencyKeyRef.current) {
+        idempotencyKeyRef.current = crypto.randomUUID();
+      }
+      const idempotencyKey = idempotencyKeyRef.current;
+
       // Lógica para verificar si realmente se requiere trabajo de laboratorio
       // Solo los marcos (frames) con datos de lentes requieren trabajo de laboratorio
 
@@ -3027,15 +3035,23 @@ export default function POSPage() {
           selectedCustomer?.business_name || customerBusinessName || null,
         items: cart.map((item) => {
           const product = item.product as any;
+          // Temp IDs (lens, labor, etc.) -> null. IDs with timestamp suffix -> extract UUID (first 36 chars)
+          let productId: string | null = null;
+          if (
+            item.product.id.startsWith("lens-") ||
+            item.product.id.startsWith("treatments-") ||
+            item.product.id.startsWith("labor-") ||
+            item.product.id.startsWith("frame-manual-")
+          ) {
+            productId = null;
+          } else if (item.product.id.length > 36) {
+            // Frame/near-frame from catalog: "uuid-timestamp" or "uuid-near-timestamp" -> extract UUID for stock
+            productId = item.product.id.substring(0, 36);
+          } else {
+            productId = item.product.id;
+          }
           return {
-            product_id:
-              item.product.id.startsWith("lens-") ||
-              item.product.id.startsWith("treatments-") ||
-              item.product.id.startsWith("labor-") ||
-              item.product.id.startsWith("frame-manual-") ||
-              item.product.id.length > 36 // Filter IDs with timestamp suffix (e.g., "uuid-1234567890")
-                ? null
-                : item.product.id,
+            product_id: productId,
             product_name: item.product.name,
             quantity: item.quantity,
             unit_price: item.unitPrice,
@@ -3179,6 +3195,8 @@ export default function POSPage() {
         // Agreement (convenio) - optional
         agreement_id: selectedAgreementId || null,
         purchase_order_id: selectedPurchaseOrderId || null,
+        // Idempotency: prevents duplicate sales on retry
+        idempotency_key: idempotencyKey,
       };
 
       // Use posService.processSale() instead of direct fetch
@@ -3220,6 +3238,7 @@ export default function POSPage() {
       setLastProcessedOrder(orderToPrint);
 
       // Clear cart and reset
+      idempotencyKeyRef.current = null;
       clearCart();
       setShowPaymentDialog(false);
 
@@ -4078,13 +4097,18 @@ export default function POSPage() {
                                               key={prescription.id}
                                               value={prescription.id}
                                             >
+                                              {selectedCustomer
+                                                ? `${selectedCustomer.first_name || ""} ${selectedCustomer.last_name || ""}`.trim()
+                                                : ""}
+                                              {selectedCustomer ? " · " : ""}
                                               {prescription.prescription_date
                                                 ? formatDate(
                                                     prescription.prescription_date,
                                                   )
                                                 : "Sin fecha"}
-                                              {prescription.issued_by &&
-                                                ` - ${prescription.issued_by}`}
+                                              {prescription.prescription_type
+                                                ? ` · ${translatePrescriptionType(prescription.prescription_type)}`
+                                                : ""}
                                               {prescription.is_current &&
                                                 " (Actual)"}
                                             </SelectItem>
@@ -5343,6 +5367,10 @@ export default function POSPage() {
                                   setManualLensPrice(false);
                                 }}
                                 presbyopiaSolution={presbyopiaSolution}
+                                prescriptionType={
+                                  selectedPrescription?.prescription_type ??
+                                  undefined
+                                }
                                 families={lensFamilies}
                                 loading={loadingFamilies}
                                 placeholder="Selecciona una familia (opcional)"

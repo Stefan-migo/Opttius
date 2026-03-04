@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/command";
 import {
   getCategorySlugsForPresbyopia,
+  getLensTypesForPresbyopia,
   getRecommendedLensTypes,
   type PresbyopiaSolution,
 } from "@/lib/presbyopia-helpers";
@@ -32,10 +33,19 @@ export interface LensFamilyOption {
   lens_material?: string;
 }
 
+/** prescription_type values that map 1:1 to lens_type for filtering when presbyopiaSolution is "none" */
+const PRESCRIPTION_TYPE_TO_LENS_FILTER = [
+  "reading",
+  "computer",
+  "sports",
+] as const;
+
 interface LensFamilyComboboxProps {
   value: string;
   onChange: (value: string) => void;
   presbyopiaSolution?: PresbyopiaSolution | null;
+  /** When presbyopiaSolution is "none", use prescription_type to filter (reading/computer/sports → only that type) */
+  prescriptionType?: string | null;
   /** Optional: use pre-fetched families (filtered client-side). When not provided, fetches from API. */
   families?: LensFamilyOption[];
   loading?: boolean;
@@ -50,6 +60,7 @@ export function LensFamilyCombobox({
   value,
   onChange,
   presbyopiaSolution = null,
+  prescriptionType = null,
   families: familiesProp,
   loading: loadingProp,
   placeholder = "Selecciona familia (opcional)",
@@ -63,16 +74,53 @@ export function LensFamilyCombobox({
   const [fetchLoading, setFetchLoading] = useState(false);
   const [search, setSearch] = useState("");
 
+  // When presbyopiaSolution is "none" and prescriptionType is reading/computer/sports, filter by that type only
+  const effectiveLensTypes = (() => {
+    const fromPresbyopia = getLensTypesForPresbyopia(
+      presbyopiaSolution ?? undefined,
+    );
+    if (presbyopiaSolution && presbyopiaSolution !== "none") {
+      return fromPresbyopia;
+    }
+    const pt = prescriptionType?.toLowerCase().trim();
+    if (
+      pt &&
+      (PRESCRIPTION_TYPE_TO_LENS_FILTER as readonly string[]).includes(pt)
+    ) {
+      return [pt];
+    }
+    return fromPresbyopia;
+  })();
+
   const fetchFamilies = useCallback(
     async (searchTerm?: string) => {
       if (familiesProp != null) return;
       setFetchLoading(true);
       try {
-        const slugs = getCategorySlugsForPresbyopia(
-          presbyopiaSolution ?? undefined,
-        );
+        const lensTypes = (() => {
+          const fromPresbyopia = getLensTypesForPresbyopia(
+            presbyopiaSolution ?? undefined,
+          );
+          if (presbyopiaSolution && presbyopiaSolution !== "none") {
+            return fromPresbyopia;
+          }
+          const pt = prescriptionType?.toLowerCase().trim();
+          if (
+            pt &&
+            (PRESCRIPTION_TYPE_TO_LENS_FILTER as readonly string[]).includes(pt)
+          ) {
+            return [pt];
+          }
+          return fromPresbyopia;
+        })();
+        const slugs =
+          lensTypes.length === 0
+            ? getCategorySlugsForPresbyopia(presbyopiaSolution ?? undefined)
+            : [];
         const params = new URLSearchParams();
-        if (slugs.length > 0) {
+        if (lensTypes.length > 0) {
+          params.set("lens_type", lensTypes.join(","));
+        } else if (slugs.length > 0) {
           params.set("category_slug", slugs.join(","));
         }
         if (searchTerm?.trim()) {
@@ -95,22 +143,28 @@ export function LensFamilyCombobox({
         setFetchLoading(false);
       }
     },
-    [presbyopiaSolution, familiesProp],
+    [presbyopiaSolution, prescriptionType, familiesProp],
   );
 
   useEffect(() => {
     fetchFamilies(search);
   }, [fetchFamilies, search]);
 
-  const slugs = getCategorySlugsForPresbyopia(presbyopiaSolution ?? undefined);
-  const recommendedTypes = getRecommendedLensTypes(
-    presbyopiaSolution ?? "none",
-  );
+  const lensTypes = effectiveLensTypes;
+  const slugs =
+    lensTypes.length === 0
+      ? getCategorySlugsForPresbyopia(presbyopiaSolution ?? undefined)
+      : [];
+  const recommendedTypes =
+    lensTypes.length > 0
+      ? lensTypes
+      : getRecommendedLensTypes(presbyopiaSolution ?? "none");
   const baseList = familiesProp ?? fetchedFamilies;
   const filteredList =
-    baseList.length > 0 && (slugs.length > 0 || recommendedTypes.length > 0)
+    baseList.length > 0 &&
+    (lensTypes.length > 0 || slugs.length > 0 || recommendedTypes.length > 0)
       ? baseList.filter((f) => {
-          // Extraer slug de categoría (soporta categories, category, o category_id como objeto)
+          const familyType = (f as any).lens_type || "";
           const cat =
             (f as any).categories ??
             (f as any).category ??
@@ -120,18 +174,19 @@ export function LensFamilyCombobox({
           const catSlug =
             typeof cat === "object" && cat?.slug ? cat.slug : null;
 
-          // 1. If category exists and matches one of the expected slugs, it's a perfect match
+          // Prefer lens_type when available
+          if (lensTypes.length > 0) {
+            return familyType ? lensTypes.includes(familyType) : false;
+          }
+
+          // Fallback to category-based filtering
           if (catSlug && slugs.length > 0 && slugs.includes(catSlug)) {
             return true;
           }
-
-          // 2. If it matches recommended lens types, it's also a good match (handles legacy without category)
-          if (recommendedTypes.length > 0) {
-            const familyType = (f as any).lens_type || "";
+          if (recommendedTypes.length > 0 && familyType) {
             const normalizedType = familyType
               .toLowerCase()
               .replace(/[^a-z]/g, "");
-
             const hasMatch = recommendedTypes.some((rt) => {
               const normalizedRT = rt.toLowerCase().replace(/[^a-z]/g, "");
               return (
@@ -141,23 +196,12 @@ export function LensFamilyCombobox({
                     normalizedType === "visionsencilla"))
               );
             });
-
             if (hasMatch) return true;
           }
-
-          // 3. Fallback: If it has NO category but we are looking for specific categories,
-          // allow it (legacy data that hasn't been categorized yet)
-          if (!catSlug && slugs.length > 0) {
-            return true;
-          }
-
-          // 4. If it HAS a category but it's NOT in the expected slugs, then we should probably filter it
-          // as it belongs to a different group (e.g. contact lenses instead of optical)
+          if (!catSlug && slugs.length > 0) return true;
           if (catSlug && slugs.length > 0 && !slugs.includes(catSlug)) {
             return false;
           }
-
-          // 5. Default to showing it if no strict mismatch found
           return true;
         })
       : baseList;

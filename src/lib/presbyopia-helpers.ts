@@ -176,12 +176,35 @@ export const PRESBYOPIA_TO_CATEGORY_SLUGS: Record<
   PresbyopiaSolution,
   string[]
 > = {
-  none: ["monofocales", "lectura", "ocupacional", "deportivo"],
-  progressive: ["progresivos"],
-  bifocal: ["bifocales"],
+  none: ["lectura", "ocupacional", "deportivo"],
+  progressive: [], // lens_type is source of truth; category eliminated
+  bifocal: [], // lens_type is source of truth; category eliminated
   trifocal: [], // Deprecated - no category
-  two_separate: ["monofocales", "lectura"],
+  two_separate: ["lectura"],
 };
+
+/**
+ * Mapping from presbyopia solution to lens_type values for filtering lens families.
+ * Preferred over category_slug for API filtering.
+ */
+export const PRESBYOPIA_TO_LENS_TYPES: Record<PresbyopiaSolution, string[]> = {
+  none: ["single_vision", "reading", "computer", "sports"],
+  progressive: ["progressive"],
+  bifocal: ["bifocal"],
+  trifocal: ["trifocal"],
+  two_separate: ["single_vision", "reading"],
+};
+
+/**
+ * Get lens_type values for filtering lens families by presbyopia solution.
+ * Returns empty array for null/undefined.
+ */
+export function getLensTypesForPresbyopia(
+  solution: PresbyopiaSolution | null | undefined,
+): string[] {
+  if (solution == null) return [];
+  return PRESBYOPIA_TO_LENS_TYPES[solution] ?? [];
+}
 
 /**
  * Get category slugs for filtering lens families by presbyopia solution.

@@ -13,11 +13,25 @@ Este documento consolida las 26 skills del directorio `.cursor/skills` para que 
 | ---------------- | ---------------------------------------------------------------------------------------------------------------------------- |
 | **Óptica Core**  | admin-users, appointments, crm, field-operations, inventory, libro-recetas-digital, pos, quotes, work-orders                 |
 | **Pagos y SaaS** | payment-workflow, saas-management                                                                                            |
-| **Sistema**      | system-configuration, supabase-auth, user-profile                                                                            |
+| **Sistema**      | system-configuration, supabase-auth, user-profile, database-optical-supabase                                                 |
 | **Frontend**     | frontend-design-modern, responsive-frontend-optical, opttius-identity, marketing-identity-optical, seo-aio-optical-discovery |
 | **Comunicación** | emails, notifications, support, whatsapp-ai-agent                                                                            |
 | **Analítica**    | analytics, dashboard, ai                                                                                                     |
 | **Herramientas** | nlm-skill, testing                                                                                                           |
+
+---
+
+## 0. database-optical-supabase
+
+**Cuándo usar:** schema, migraciones, RLS, índices, funciones, multi-tenant, patrones ópticos.
+
+**Principios:** organization_id + branch_id para scope; profiles ≠ customers; product_branch_stock para inventario.
+
+**RLS:** is_super_admin, can_access_branch, get_user_organization_id. Políticas por SELECT/INSERT/UPDATE/DELETE.
+
+**Índices:** B-tree en FKs y filtros; GIST para rangos (matrices de precios); parciales para NULL/boolean.
+
+**Docs:** docs/database/SUPABASE_DATABASE_DOCUMENTATION.md
 
 ---
 

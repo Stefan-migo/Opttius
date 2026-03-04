@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
+import { createClient } from "@supabase/supabase-js";
 
 /**
  * Middleware: Refresca la sesión de Supabase y protege rutas /admin
@@ -14,14 +15,43 @@ import { createServerClient } from "@supabase/ssr";
 export async function middleware(request: NextRequest) {
   const { pathname, searchParams } = request.nextUrl;
 
-  // /acceso-opticas: validar key si DEMO_OPTICAS_ACCESS_KEY está configurado
+  // /acceso-opticas: validar ?token= (DB) o ?key= (DEMO_OPTICAS_ACCESS_KEY fallback)
   if (pathname === "/acceso-opticas") {
-    const secretKey = process.env.DEMO_OPTICAS_ACCESS_KEY;
-    if (secretKey && secretKey.length > 0) {
-      const providedKey = searchParams.get("key");
-      if (providedKey !== secretKey) {
-        return NextResponse.redirect(new URL("/", request.url));
+    const providedToken = searchParams.get("token");
+    const providedKey = searchParams.get("key");
+
+    let valid = false;
+
+    if (providedToken) {
+      try {
+        const supabase = createClient(
+          process.env.NEXT_PUBLIC_SUPABASE_URL!,
+          process.env.SUPABASE_SERVICE_ROLE_KEY!,
+          { auth: { autoRefreshToken: false, persistSession: false } },
+        );
+        const { data, error } = await supabase
+          .from("opticas_access_tokens")
+          .select("id")
+          .eq("token", providedToken)
+          .gt("expires_at", new Date().toISOString())
+          .maybeSingle();
+        valid = !error && !!data;
+      } catch {
+        valid = false;
       }
+    }
+
+    if (!valid && providedKey) {
+      const secretKey = process.env.DEMO_OPTICAS_ACCESS_KEY;
+      valid = !!(
+        secretKey &&
+        secretKey.length > 0 &&
+        providedKey === secretKey
+      );
+    }
+
+    if (!valid) {
+      return NextResponse.redirect(new URL("/", request.url));
     }
   }
 

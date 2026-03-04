@@ -45,10 +45,10 @@ flowchart TB
 
 ### Variables de entorno
 
-| Variable                  | Descripción                                                                                                                              |
-| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| `DEMO_OPTICAS_ACCESS_KEY` | (Opcional) Si está definida, `/acceso-opticas` requiere `?key=<valor>` para acceder. Sin ella, el link es público para quien lo conozca. |
-| `CRON_SECRET`             | Requerido para el cron de limpieza de demos expiradas.                                                                                   |
+| Variable                  | Descripción                                                                                                                                   |
+| ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| `DEMO_OPTICAS_ACCESS_KEY` | (Opcional) Fallback para `/acceso-opticas?key=<valor>`. Con tokens dinámicos (Config SaaS) no es obligatorio. Ver sección "Tokens dinámicos". |
+| `CRON_SECRET`             | Requerido para el cron de limpieza de demos expiradas.                                                                                        |
 
 ### system_config (global)
 
@@ -59,12 +59,20 @@ flowchart TB
 
 ---
 
-## Cómo compartir el link de ópticas conocidas
+## Tokens dinámicos para acceso ópticas
 
-1. **Sin key**: Compartir `https://tu-dominio.com/acceso-opticas`. Cualquiera con el link puede registrarse.
-2. **Con key**: Configurar `DEMO_OPTICAS_ACCESS_KEY` en Vercel/env y compartir `https://tu-dominio.com/acceso-opticas?key=<valor>`. Solo quienes tengan el key podrán acceder.
+El acceso a `/acceso-opticas` puede validarse de dos formas:
 
-El link está disponible en el dashboard **Flujos de Nuevos Usuarios** (`/admin/saas-management/new-users-flow`) con botón para copiar.
+1. **Tokens dinámicos** (recomendado): Root genera enlaces únicos desde **Config** (`/admin/saas-management/config`) en la sección "Acceso ópticas conocidas". Cada enlace usa `?token=<valor>` y es revocable, con expiración por defecto de 90 días.
+2. **Key estática** (fallback): Si `DEMO_OPTICAS_ACCESS_KEY` está definida en .env, `?key=<valor>` también funciona. Útil para compatibilidad con enlaces ya compartidos.
+
+### Cómo compartir el link de ópticas conocidas
+
+1. Ir a **SaaS Management** → **Configuración**.
+2. En "Acceso ópticas conocidas", clic en **Generar enlace único**.
+3. Copiar la URL mostrada en el modal (solo se muestra una vez al generarla).
+4. Compartir con la óptica. El enlace redirige a `/signup?access=opticas` y permite crear cuenta con demo dedicada.
+5. Para revocar: en la misma sección, clic en **Revocar** junto al token.
 
 ---
 
@@ -96,11 +104,15 @@ El link está disponible en el dashboard **Flujos de Nuevos Usuarios** (`/admin/
 | Migración | `supabase/migrations/20260305000001_create_demo_requests.sql`               |
 | Migración | `supabase/migrations/20260305000002_create_demo_org_for_user.sql`           |
 | Migración | `supabase/migrations/20260305000004_cleanup_expired_demo_organizations.sql` |
+| Migración | `supabase/migrations/20260411000001_create_opticas_access_tokens.sql`       |
 | API       | `src/app/api/landing/onboarding-config/route.ts`                            |
 | API       | `src/app/api/demo-requests/route.ts`                                        |
+| API       | `src/app/api/admin/opticas-access-tokens/route.ts`                          |
+| API       | `src/app/api/admin/opticas-access-tokens/[id]/route.ts`                     |
 | API       | `src/app/api/cron/cleanup-expired-demos/route.ts`                           |
 | Página    | `src/app/solicitar-demo/page.tsx`                                           |
 | Página    | `src/app/acceso-opticas/page.tsx`                                           |
+| Página    | `src/app/admin/saas-management/config/page.tsx`                             |
 | Página    | `src/app/admin/saas-management/new-users-flow/page.tsx`                     |
 
 ---

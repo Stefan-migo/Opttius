@@ -108,15 +108,9 @@ export function ContactLensFamilyWizard({
         const cats = json.categories || json.data || [];
         setCategories(
           cats.filter((c: { slug?: string }) =>
-            [
-              "lentes-contacto",
-              "monofocales",
-              "progresivos",
-              "bifocales",
-              "lectura",
-              "ocupacional",
-              "deportivo",
-            ].includes(c.slug ?? ""),
+            ["lentes-contacto", "lectura", "ocupacional", "deportivo"].includes(
+              c.slug ?? "",
+            ),
           ),
         );
       })
@@ -204,11 +198,6 @@ export function ContactLensFamilyWizard({
   };
 
   const handleSubmit = async () => {
-    if (!familyId && data.matrices.length === 0) {
-      toast.error("Debe agregar al menos una matriz de precios");
-      return;
-    }
-
     try {
       setLoading(true);
 
@@ -225,6 +214,7 @@ export function ContactLensFamilyWizard({
         description: data.description || null,
         is_active: data.is_active,
         matrices: data.matrices.map((m) => ({
+          name: m.name ?? null,
           sphere_min: m.sphere_min,
           sphere_max: m.sphere_max,
           cylinder_min: m.cylinder_min,

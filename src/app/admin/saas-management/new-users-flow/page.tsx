@@ -16,8 +16,6 @@ import {
   ArrowLeft,
   CheckCircle2,
   XCircle,
-  Copy,
-  Link2,
   Users,
   Clock,
   Mail,
@@ -294,12 +292,6 @@ export default function NewUsersFlowPage() {
     setFunnelModalOpen(true);
   };
 
-  const copyLink = (path: string) => {
-    const url = `${typeof window !== "undefined" ? window.location.origin : ""}${path}`;
-    navigator.clipboard.writeText(url);
-    toast.success("Enlace copiado al portapapeles");
-  };
-
   const formatDate = (s: string | null) => {
     if (!s) return "—";
     const d = new Date(s);
@@ -417,37 +409,6 @@ export default function NewUsersFlowPage() {
           </Card>
         </div>
       )}
-
-      <Card className="admin-card">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Link2 className="h-5 w-5" />
-            Dar acceso a óptica conocida
-          </CardTitle>
-          <p className="text-sm text-muted-foreground">
-            Comparte este enlace con ópticas que conoces. Les permite crear
-            cuenta y acceder a una demo dedicada de 7 días con banner de
-            activación.
-          </p>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-wrap gap-2 items-center">
-            <code className="px-3 py-2 bg-muted rounded-lg text-sm">
-              {typeof window !== "undefined"
-                ? `${window.location.origin}/acceso-opticas`
-                : "/acceso-opticas"}
-            </code>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => copyLink("/acceso-opticas")}
-            >
-              <Copy className="h-4 w-4 mr-2" />
-              Copiar enlace
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
 
       <Card className="admin-card">
         <CardHeader>
