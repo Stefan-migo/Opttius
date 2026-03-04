@@ -10,6 +10,7 @@ import { validateBranchAccess } from "@/lib/api/branch-middleware";
 import { appLogger as logger } from "@/lib/logger";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
 import { NotificationService } from "@/lib/notifications/notification-service";
+import { sendDeliveryCompletionEmail } from "@/lib/email/send-delivery-completion-email";
 
 export const dynamic = "force-dynamic";
 export async function POST(
@@ -165,7 +166,7 @@ export async function POST(
       });
     }
 
-    // 9. Create notification (non-blocking)
+    // 9. Create notification and send delivery completion email (non-blocking)
     if (updatedWorkOrder) {
       const customerName = updatedWorkOrder.customer
         ? `${updatedWorkOrder.customer.first_name || ""} ${updatedWorkOrder.customer.last_name || ""}`.trim() ||
@@ -179,6 +180,24 @@ export async function POST(
         customerName,
         updatedWorkOrder.branch_id ?? undefined,
       ).catch((err) => logger.warn("Error creating notification", err));
+
+      // Send delivery completion email with survey link
+      const orgId = (updatedWorkOrder as { organization_id?: string })
+        .organization_id;
+      const customerEmail = (updatedWorkOrder.customer as { email?: string })
+        ?.email;
+      if (orgId && customerEmail) {
+        sendDeliveryCompletionEmail({
+          workOrderId: id,
+          organizationId: orgId,
+          customerId: updatedWorkOrder.customer_id ?? null,
+          customerEmail,
+          customerName,
+          workOrderNumber: updatedWorkOrder.work_order_number || "",
+        }).catch((err) =>
+          logger.warn("Error sending delivery completion email", err),
+        );
+      }
     }
 
     logger.info("Work order delivered", {

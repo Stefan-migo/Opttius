@@ -176,6 +176,12 @@ export const VARIABLES_BY_TYPE: Record<string, string[]> = {
     "organization_name",
   ],
   work_order_ready: ["customer_name", "work_order_number", "organization_name"],
+  work_order_delivered: [
+    "customer_name",
+    "work_order_number",
+    "organization_name",
+    "survey_url",
+  ],
   low_stock_alert: [
     "low_stock_products",
     "low_stock_products_text",

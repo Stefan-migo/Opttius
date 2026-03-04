@@ -43,7 +43,8 @@ export async function GET(request: NextRequest) {
         customer_id,
         branch_id,
         organization_id,
-        customer:customers(id, first_name, last_name, email)
+        customer:customers(id, first_name, last_name, email),
+        branch:branches(phone, email)
       `,
       )
       .eq("status", "sent")
@@ -82,6 +83,8 @@ export async function GET(request: NextRequest) {
           ? q.quote_date
           : q.quote_date?.toISOString?.()?.split("T")[0] || expiryDateStr;
 
+      const branch = q.branch as { phone?: string; email?: string } | null;
+
       const quoteData = {
         id: q.id,
         quote_number: q.quote_number || `COT-${String(q.id).slice(0, 8)}`,
@@ -93,8 +96,8 @@ export async function GET(request: NextRequest) {
         total: q.total_amount ? String(q.total_amount) : "",
         accept_url: "",
         quote_url: "",
-        branch_phone: "",
-        branch_email: "",
+        branch_phone: branch?.phone || "",
+        branch_email: branch?.email || "",
       };
 
       const result = await sendQuoteExpiring(

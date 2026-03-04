@@ -81,6 +81,7 @@ const ESSENTIAL_TYPES = [
   "order_confirmation",
   "quote_sent",
   "work_order_ready",
+  "work_order_delivered",
   "order_delivered",
   "quote_expiring",
   "account_welcome",
@@ -103,6 +104,8 @@ const TYPE_DESCRIPTIONS: Record<string, string> = {
   quote_sent: "Se envía automáticamente al enviar el presupuesto",
   work_order_ready:
     "Se envía automáticamente cuando los lentes están listos para retiro",
+  work_order_delivered:
+    "Se envía automáticamente al marcar entregado, incluye link a encuesta",
   order_delivered:
     "Se envía automáticamente al confirmar entrega (requiere flujo de entrega)",
   quote_expiring: "Se envía automáticamente 48h antes de expirar (cron diario)",

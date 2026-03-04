@@ -5,6 +5,7 @@ import { NotificationService } from "@/lib/notifications/notification-service";
 import { validateBranchAccess } from "@/lib/api/branch-middleware";
 import { appLogger as logger } from "@/lib/logger";
 import { EmailNotificationService } from "@/lib/email/notifications";
+import { sendDeliveryCompletionEmail } from "@/lib/email/send-delivery-completion-email";
 import { sendWorkOrderReadyWhatsApp } from "@/lib/whatsapp/notifications-b2b";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
 
@@ -174,7 +175,7 @@ export async function PUT(
         updatedWorkOrder.branch_id ?? undefined,
       ).catch((err) => logger.warn("Error creating notification", err));
 
-      // If status is delivered, also create completion notification
+      // If status is delivered, also create completion notification and send survey email
       if (status === "delivered") {
         const customerName = updatedWorkOrder.customer
           ? `${updatedWorkOrder.customer.first_name || ""} ${updatedWorkOrder.customer.last_name || ""}`.trim() ||
@@ -188,6 +189,24 @@ export async function PUT(
           customerName,
           updatedWorkOrder.branch_id ?? undefined,
         ).catch((err) => logger.warn("Error creating notification", err));
+
+        // Send delivery completion email with survey link (non-blocking)
+        const orgId = (updatedWorkOrder as { organization_id?: string })
+          .organization_id;
+        const customerEmail = (updatedWorkOrder.customer as { email?: string })
+          ?.email;
+        if (orgId && customerEmail) {
+          sendDeliveryCompletionEmail({
+            workOrderId: id,
+            organizationId: orgId,
+            customerId: updatedWorkOrder.customer_id ?? null,
+            customerEmail,
+            customerName,
+            workOrderNumber: updatedWorkOrder.work_order_number || "",
+          }).catch((err) =>
+            logger.warn("Error sending delivery completion email", err),
+          );
+        }
       }
 
       // If status is ready_for_pickup, send email and optionally WhatsApp to customer

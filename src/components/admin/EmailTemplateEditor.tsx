@@ -499,6 +499,9 @@ export default function EmailTemplateEditor({
                         <SelectItem value="work_order_ready">
                           Lentes Listo para Retiro
                         </SelectItem>
+                        <SelectItem value="work_order_delivered">
+                          Entrega Completada + Encuesta
+                        </SelectItem>
                         <SelectItem value="payment_success">
                           Pago Exitoso
                         </SelectItem>

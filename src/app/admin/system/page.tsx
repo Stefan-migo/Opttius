@@ -32,6 +32,7 @@ import {
   Users,
   FileText,
   MessageCircle,
+  Star,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useBranch } from "@/hooks/useBranch";
@@ -48,6 +49,7 @@ import SystemHealth from "./components/SystemHealth";
 import SystemMaintenance from "./components/SystemMaintenance";
 import FormOptionsConfig from "./components/FormOptionsConfig";
 import WhatsAppSettingsCard from "@/components/admin/WhatsAppSettingsCard";
+import SurveysConfig from "@/components/admin/SurveysConfig";
 import dynamic from "next/dynamic";
 
 const POSBillingSettings = dynamic(
@@ -71,38 +73,24 @@ export default function SystemAdministrationPage() {
   const [configScope, setConfigScope] = useState<"global" | "branch">("global");
   const configBranchId =
     configScope === "branch" && currentBranchId ? currentBranchId : null;
+  const validTabs = [
+    "overview",
+    "config",
+    "email",
+    "notifications",
+    "billing",
+    "formularios",
+    "whatsapp",
+    "encuestas",
+    "health",
+    "maintenance",
+  ];
   const [activeTab, setActiveTab] = useState(
-    tabFromUrl &&
-      [
-        "overview",
-        "config",
-        "email",
-        "notifications",
-        "billing",
-        "formularios",
-        "whatsapp",
-        "health",
-        "maintenance",
-      ].includes(tabFromUrl)
-      ? tabFromUrl
-      : "overview",
+    tabFromUrl && validTabs.includes(tabFromUrl) ? tabFromUrl : "overview",
   );
 
   useEffect(() => {
-    if (
-      tabFromUrl &&
-      [
-        "overview",
-        "config",
-        "email",
-        "notifications",
-        "billing",
-        "formularios",
-        "whatsapp",
-        "health",
-        "maintenance",
-      ].includes(tabFromUrl)
-    ) {
+    if (tabFromUrl && validTabs.includes(tabFromUrl)) {
       setActiveTab(tabFromUrl);
     }
   }, [tabFromUrl]);
@@ -535,6 +523,13 @@ export default function SystemAdministrationPage() {
             WhatsApp
           </TabsTrigger>
           <TabsTrigger
+            value="encuestas"
+            className="flex-shrink-0 text-xs sm:text-sm px-3 py-2 min-h-[44px]"
+          >
+            <Star className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1 shrink-0" />
+            Encuestas
+          </TabsTrigger>
+          <TabsTrigger
             value="health"
             className="flex-shrink-0 text-xs sm:text-sm px-3 py-2 min-h-[44px]"
           >
@@ -628,6 +623,13 @@ export default function SystemAdministrationPage() {
           className="space-y-4 sm:space-y-6 mt-4 sm:mt-6"
         >
           <WhatsAppSettingsCard />
+        </TabsContent>
+
+        <TabsContent
+          value="encuestas"
+          className="space-y-4 sm:space-y-6 mt-4 sm:mt-6"
+        >
+          <SurveysConfig />
         </TabsContent>
 
         <TabsContent

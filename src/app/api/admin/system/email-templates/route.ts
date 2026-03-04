@@ -189,6 +189,7 @@ export async function POST(request: NextRequest) {
       "prescription_expiring",
       "quote_sent",
       "work_order_ready",
+      "work_order_delivered",
       "low_stock_alert",
       "payment_success",
       "payment_failed",
