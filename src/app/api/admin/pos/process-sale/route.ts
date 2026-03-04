@@ -187,8 +187,10 @@ export async function POST(request: NextRequest) {
             contact_lens_price,
             quote_id,
             payments: paymentsArray,
-            idempotency_key,
           } = validatedBody;
+          const idempotency_key =
+            (validatedBody as { idempotency_key?: string | null })
+              .idempotency_key ?? undefined;
 
           const supabaseServiceRole = createServiceRoleClient();
 
