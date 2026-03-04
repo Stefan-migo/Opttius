@@ -1316,7 +1316,7 @@ export async function POST(request: NextRequest) {
 
             const { data: rpcResult, error: rpcError } =
               await supabaseServiceRole.rpc("process_pos_sale", {
-                p_payload: rpcPayload,
+                p_payload: JSON.stringify(rpcPayload),
                 p_user_id: user.id,
               });
 
