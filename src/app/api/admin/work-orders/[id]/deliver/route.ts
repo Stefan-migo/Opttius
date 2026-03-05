@@ -182,8 +182,16 @@ export async function POST(
       ).catch((err) => logger.warn("Error creating notification", err));
 
       // Send delivery completion email with survey link
-      const orgId = (updatedWorkOrder as { organization_id?: string })
+      let orgId = (updatedWorkOrder as { organization_id?: string })
         .organization_id;
+      if (!orgId && updatedWorkOrder.branch_id) {
+        const { data: branch } = await supabaseServiceRole
+          .from("branches")
+          .select("organization_id")
+          .eq("id", updatedWorkOrder.branch_id)
+          .single();
+        orgId = branch?.organization_id ?? undefined;
+      }
       const customerEmail = (updatedWorkOrder.customer as { email?: string })
         ?.email;
       if (orgId && customerEmail) {

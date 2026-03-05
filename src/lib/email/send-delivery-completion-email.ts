@@ -53,6 +53,10 @@ export async function sendDeliveryCompletionEmail(
     } = params;
 
     if (!customerEmail?.trim()) {
+      logger.warn("Delivery completion email skipped: no customer email", {
+        workOrderId,
+        organizationId,
+      });
       return { success: false, error: "No customer email" };
     }
 
@@ -81,6 +85,13 @@ export async function sendDeliveryCompletionEmail(
     }
 
     if (!surveyEnabled) {
+      logger.warn(
+        "Delivery completion email skipped: survey disabled for org",
+        {
+          workOrderId,
+          organizationId,
+        },
+      );
       return { success: false, error: "Survey disabled for org" };
     }
 
@@ -100,7 +111,14 @@ export async function sendDeliveryCompletionEmail(
       });
 
     if (invError) {
-      logger.error("Error creating survey invitation", invError);
+      logger.error(
+        "Delivery completion email skipped: failed to create survey invitation",
+        {
+          workOrderId,
+          organizationId,
+          error: invError,
+        },
+      );
       return { success: false, error: "Failed to create survey invitation" };
     }
 
@@ -159,7 +177,11 @@ export async function sendDeliveryCompletionEmail(
 
     return result;
   } catch (error) {
-    logger.error("Error sending delivery completion email", error);
+    logger.error("Error sending delivery completion email", {
+      workOrderId: params.workOrderId,
+      organizationId: params.organizationId,
+      error,
+    });
     return {
       success: false,
       error: error instanceof Error ? error.message : "Unknown error",

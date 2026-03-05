@@ -15,6 +15,7 @@ import {
   validationErrorResponse,
 } from "@/lib/api/validation/zod-helpers";
 import { ValidationError } from "@/lib/api/errors";
+import { sendDeliveryCompletionEmail } from "@/lib/email/send-delivery-completion-email";
 
 export const dynamic = "force-dynamic";
 
@@ -148,6 +149,70 @@ export async function POST(
         .eq("id", workOrderId);
 
       updated.push(workOrderId);
+    }
+
+    // Send delivery completion email with survey link for each delivered work order (non-blocking)
+    for (const workOrderId of updated) {
+      (async () => {
+        try {
+          const { data: wo } = await supabaseServiceRole
+            .from("lab_work_orders")
+            .select(
+              `
+              id,
+              organization_id,
+              branch_id,
+              work_order_number,
+              customer_id,
+              customer:customers!lab_work_orders_customer_id_fkey(id, first_name, last_name, email)
+            `,
+            )
+            .eq("id", workOrderId)
+            .single();
+
+          if (!wo || !wo.customer) return;
+
+          let orgId = (wo as { organization_id?: string }).organization_id;
+          if (!orgId && wo.branch_id) {
+            const { data: branch } = await supabaseServiceRole
+              .from("branches")
+              .select("organization_id")
+              .eq("id", wo.branch_id)
+              .single();
+            orgId = branch?.organization_id ?? undefined;
+          }
+
+          const customer = wo.customer as {
+            first_name?: string;
+            last_name?: string;
+            email?: string;
+          };
+          const customerEmail = customer?.email;
+          if (!orgId || !customerEmail) return;
+
+          const customerName =
+            `${customer?.first_name || ""} ${customer?.last_name || ""}`.trim() ||
+            customer?.email ||
+            "Cliente";
+
+          await sendDeliveryCompletionEmail({
+            workOrderId,
+            organizationId: orgId,
+            customerId: wo.customer_id ?? null,
+            customerEmail,
+            customerName,
+            workOrderNumber: wo.work_order_number || "",
+          });
+        } catch (err) {
+          logger.warn(
+            "Error sending delivery completion email for field operation",
+            {
+              workOrderId,
+              error: err,
+            },
+          );
+        }
+      })();
     }
 
     return createApiSuccessResponse(
