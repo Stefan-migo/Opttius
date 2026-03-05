@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
-import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -13,7 +12,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Star, CheckCircle2, ArrowLeft, Loader2 } from "lucide-react";
+import { Star, CheckCircle2, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 export default function EncuestaPage() {
@@ -95,16 +94,9 @@ export default function EncuestaPage() {
               </CardTitle>
               <CardDescription>
                 Este enlace de encuesta ya no está disponible o ha expirado.
+                Puedes cerrar esta página.
               </CardDescription>
             </CardHeader>
-            <CardContent>
-              <Link href="/">
-                <Button variant="outline" className="w-full">
-                  <ArrowLeft className="h-4 w-4 mr-2" />
-                  Volver al inicio
-                </Button>
-              </Link>
-            </CardContent>
           </Card>
         </div>
       </div>
@@ -124,17 +116,10 @@ export default function EncuestaPage() {
                 ¡Gracias por tu opinión!
               </CardTitle>
               <CardDescription className="text-epoch-primary/80">
-                Tu respuesta nos ayuda a mejorar nuestro servicio.
+                Tu respuesta nos ayuda a mejorar nuestro servicio. Puedes cerrar
+                esta página.
               </CardDescription>
             </CardHeader>
-            <CardContent>
-              <Link href="/">
-                <Button variant="outline" className="w-full">
-                  <ArrowLeft className="h-4 w-4 mr-2" />
-                  Volver al inicio
-                </Button>
-              </Link>
-            </CardContent>
           </Card>
         </div>
       </div>
@@ -145,13 +130,6 @@ export default function EncuestaPage() {
     <div className="min-h-screen bg-epoch-background py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-lg mx-auto">
         <div className="mb-8">
-          <Link
-            href="/"
-            className="inline-flex items-center gap-2 text-sm text-epoch-primary/70 hover:text-epoch-primary mb-4"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Volver al inicio
-          </Link>
           <h1 className="text-2xl font-display font-bold text-epoch-primary">
             Encuesta de satisfacción
           </h1>
