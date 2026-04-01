@@ -8,9 +8,9 @@
  */
 
 import { appLogger as logger } from "@/lib/logger";
-import { getRedisClient } from "@/lib/redis/client";
-import { SecurityEvent, SecuritySeverity } from "./events";
-import { behavioralAnalytics, UserAction } from "./behavioral-analytics";
+
+import { UserAction } from "./behavioral-analytics";
+import { SecurityEvent, SecurityEventType, SecuritySeverity } from "./events";
 
 // Types for threat detection
 export interface ThreatIndicator {
@@ -121,16 +121,13 @@ export class ThreatDetector {
     const threats: SecurityEvent[] = [];
 
     try {
-      // Get behavioral analysis
-      const baseline = await behavioralAnalytics.getUserBaseline(userId);
-
       // Check against threat intelligence
       for (const action of actions) {
         const intelMatches = await this.checkThreatIntel(action);
         if (intelMatches.length > 0) {
           threats.push(
             this.createThreatEvent(
-              "THREAT_INTEL_MATCH",
+              "system.suspicious_activity" as SecurityEventType,
               "high",
               userId,
               action.ipAddress,
@@ -156,7 +153,7 @@ export class ThreatDetector {
       if (zeroTrustEval.accessDecision === "deny") {
         threats.push(
           this.createThreatEvent(
-            "ZERO_TRUST_VIOLATION",
+            "authz.access_denied" as SecurityEventType,
             "critical",
             userId,
             undefined,
@@ -169,7 +166,7 @@ export class ThreatDetector {
       }
 
       // Apply ML-based anomaly detection
-      const mlThreats = await this.applyMLDetection(userId, actions, baseline);
+      const mlThreats = await this.applyMLDetection(userId, actions);
       threats.push(...mlThreats);
 
       // Log detected threats
@@ -240,7 +237,7 @@ export class ThreatDetector {
       for (const action of actions) {
         if (this.interactsWithDeceptionAsset(action, asset)) {
           const threatEvent = this.createThreatEvent(
-            "DECEPTION_ASSET_TRIGGERED",
+            "system.suspicious_activity" as SecurityEventType,
             "high",
             userId,
             action.ipAddress,
@@ -316,7 +313,6 @@ export class ThreatDetector {
   private async applyMLDetection(
     userId: string,
     actions: UserAction[],
-    baseline: any,
   ): Promise<SecurityEvent[]> {
     const threats: SecurityEvent[] = [];
 
@@ -327,7 +323,6 @@ export class ThreatDetector {
             model,
             userId,
             actions,
-            baseline,
           );
           threats.push(...anomalies);
           break;
@@ -449,7 +444,13 @@ export class ThreatDetector {
   private async collectTrustEvidence(
     userId: string,
     actions: UserAction[],
-  ): Promise<any> {
+  ): Promise<{
+    userId: string;
+    recentActions: number;
+    unusualPatterns: number;
+    verificationHistory: string[];
+    deviceConsistency: number;
+  }> {
     // Collect various evidence points for trust evaluation
     return {
       userId,
@@ -460,13 +461,13 @@ export class ThreatDetector {
     };
   }
 
-  private calculateTrustScore(evidence: any): number {
+  private calculateTrustScore(evidence: { unusualPatterns: number }): number {
     // Calculate trust score based on collected evidence
     return Math.max(0.1, Math.min(0.9, 1.0 - evidence.unusualPatterns * 0.2));
   }
 
   private determineVerificationRequirements(
-    evidence: any,
+    evidence: { deviceConsistency: number },
     trustScore: number,
   ): string[] {
     const requirements: string[] = [];
@@ -508,7 +509,6 @@ export class ThreatDetector {
     model: MLModel,
     userId: string,
     actions: UserAction[],
-    baseline: any,
   ): Promise<SecurityEvent[]> {
     // Run anomaly detection algorithm
     return [];
@@ -528,12 +528,12 @@ export class ThreatDetector {
     severity: SecuritySeverity,
     userId?: string,
     ipAddress?: string,
-    details?: Record<string, any>,
+    details?: Record<string, unknown>,
   ): SecurityEvent {
     return {
       id: `threat_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       timestamp: new Date().toISOString(),
-      eventType: eventType as any,
+      eventType: eventType as SecurityEventType,
       severity,
       source: "threat-detection",
       userId,
