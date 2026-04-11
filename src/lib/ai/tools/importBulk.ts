@@ -1,8 +1,10 @@
 import { z } from "zod";
-import type { ToolDefinition, ToolResult } from "./types";
-import { parseImportFile } from "../utils/file-parser";
+
 import { createServiceRoleClient } from "@/utils/supabase/server";
+
+import { parseImportFile } from "../utils/file-parser";
 import { resolveBranchByName } from "./resolvers";
+import type { ToolDefinition, ToolResult } from "./types";
 
 const analyzeImportFileSchema = z.object({
   fileId: z
@@ -36,7 +38,7 @@ const executeBulkImportSchema = z.object({
 
 async function downloadFile(
   fileId: string,
-  supabase: any,
+  supabase: unknown,
 ): Promise<ArrayBuffer> {
   const { data, error } = await supabase.storage
     .from("import-temp")
@@ -178,7 +180,7 @@ export const importBulkTools: ToolDefinition[] = [
           },
           message: `Analyzed ${rows.length} rows. Suggested mapping for ${validated.entityType}.`,
         };
-      } catch (error: any) {
+      } catch (error: unknown) {
         return {
           success: false,
           error: error.message || "Failed to analyze file",
@@ -334,7 +336,7 @@ export const importBulkTools: ToolDefinition[] = [
           for (let i = 0; i < rows.length; i++) {
             try {
               const row = rows[i];
-              const mapped: Record<string, any> = {};
+              const mapped: Record<string, unknown> = {};
               for (const [fileCol, opttiusField] of Object.entries(
                 validated.columnMapping,
               )) {
@@ -370,7 +372,7 @@ export const importBulkTools: ToolDefinition[] = [
               } else {
                 imported++;
               }
-            } catch (e: any) {
+            } catch (e: unknown) {
               failed.push({
                 row: i + 2,
                 error: e?.message || "Validation error",
@@ -381,7 +383,7 @@ export const importBulkTools: ToolDefinition[] = [
           for (let i = 0; i < rows.length; i++) {
             try {
               const row = rows[i];
-              const mapped: Record<string, any> = {};
+              const mapped: Record<string, unknown> = {};
               for (const [fileCol, opttiusField] of Object.entries(
                 validated.columnMapping,
               )) {
@@ -442,7 +444,7 @@ export const importBulkTools: ToolDefinition[] = [
                   );
                 }
               }
-            } catch (e: any) {
+            } catch (e: unknown) {
               failed.push({
                 row: i + 2,
                 error: e?.message || "Validation error",
@@ -460,7 +462,7 @@ export const importBulkTools: ToolDefinition[] = [
           },
           message: `Imported ${imported} ${validated.entityType}. ${failed.length} failed.`,
         };
-      } catch (error: any) {
+      } catch (error: unknown) {
         return {
           success: false,
           error: error.message || "Failed to execute import",

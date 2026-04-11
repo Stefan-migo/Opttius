@@ -1,7 +1,7 @@
 "use client";
 
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Select,
   SelectContent,
@@ -45,11 +45,11 @@ export default function ProductPagination({
 
           <div className="flex flex-wrap items-center justify-center sm:justify-end gap-2 order-1 sm:order-2">
             <Button
-              variant="outline"
-              size="sm"
-              onClick={() => onPageChange(Math.max(1, currentPage - 1))}
-              disabled={currentPage === 1}
               className="h-8 sm:h-9 text-xs px-2 sm:px-3"
+              disabled={currentPage === 1}
+              size="sm"
+              variant="outline"
+              onClick={() => onPageChange(Math.max(1, currentPage - 1))}
             >
               Ant
             </Button>
@@ -59,8 +59,8 @@ export default function ProductPagination({
               {currentPage > 3 && (
                 <>
                   <Button
-                    variant={currentPage === 1 ? "default" : "outline"}
                     size="sm"
+                    variant={currentPage === 1 ? "default" : "outline"}
                     onClick={() => onPageChange(1)}
                   >
                     1
@@ -82,11 +82,11 @@ export default function ProductPagination({
                 })
                 .map((page) => (
                   <Button
-                    key={page}
-                    variant={currentPage === page ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => onPageChange(page)}
                     className="h-8 w-8 sm:h-9 sm:w-9 p-0 min-w-0"
+                    key={page}
+                    size="sm"
+                    variant={currentPage === page ? "default" : "outline"}
+                    onClick={() => onPageChange(page)}
                   >
                     {page}
                   </Button>
@@ -99,8 +99,8 @@ export default function ProductPagination({
                     <span className="px-2">...</span>
                   )}
                   <Button
-                    variant={currentPage === totalPages ? "default" : "outline"}
                     size="sm"
+                    variant={currentPage === totalPages ? "default" : "outline"}
                     onClick={() => onPageChange(totalPages)}
                   >
                     {totalPages}
@@ -110,13 +110,13 @@ export default function ProductPagination({
             </div>
 
             <Button
-              variant="outline"
+              className="h-8 sm:h-9 text-xs px-2 sm:px-3"
+              disabled={currentPage === totalPages}
               size="sm"
+              variant="outline"
               onClick={() =>
                 onPageChange(Math.min(totalPages, currentPage + 1))
               }
-              disabled={currentPage === totalPages}
-              className="h-8 sm:h-9 text-xs px-2 sm:px-3"
             >
               Sig
             </Button>

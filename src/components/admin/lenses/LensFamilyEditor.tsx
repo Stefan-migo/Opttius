@@ -1,14 +1,16 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { ArrowLeft, Loader2, Save } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Save, ArrowLeft, Loader2 } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
 import { LensFamilyBasicForm, LensFamilyFormData } from "./LensFamilyBasicForm";
-import { LensMatrixManager, LensMatrixFormData } from "./LensMatrixManager";
+import { LensMatrixFormData, LensMatrixManager } from "./LensMatrixManager";
 
 interface LensFamilyEditorProps {
   familyId: string;
@@ -101,7 +103,7 @@ export function LensFamilyEditor({ familyId }: LensFamilyEditorProps) {
 
       toast.success("Matriz creada");
       fetchData(); // Reload to get ID and sort
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast.error(error.message);
     }
   };
@@ -125,7 +127,7 @@ export function LensFamilyEditor({ familyId }: LensFamilyEditorProps) {
 
       toast.success("Matriz actualizada");
       fetchData();
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast.error(error.message);
     }
   };
@@ -140,7 +142,7 @@ export function LensFamilyEditor({ familyId }: LensFamilyEditorProps) {
 
       toast.success("Matriz eliminada");
       fetchData();
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast.error(error.message);
     }
   };
@@ -160,8 +162,8 @@ export function LensFamilyEditor({ familyId }: LensFamilyEditorProps) {
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
           <Button
-            variant="outline"
             size="sm"
+            variant="outline"
             onClick={() => router.push("/admin/products?tab=lens-families")}
           >
             <ArrowLeft className="h-4 w-4" />
@@ -188,7 +190,7 @@ export function LensFamilyEditor({ familyId }: LensFamilyEditorProps) {
             <CardContent className="pt-6">
               <LensFamilyBasicForm data={familyData} onChange={setFamilyData} />
               <div className="mt-6 flex justify-end">
-                <Button onClick={handleInfoSave} disabled={saving}>
+                <Button disabled={saving} onClick={handleInfoSave}>
                   <Save className="h-4 w-4 mr-2" />
                   {saving ? "Guardando..." : "Guardar Cambios"}
                 </Button>
@@ -203,8 +205,8 @@ export function LensFamilyEditor({ familyId }: LensFamilyEditorProps) {
               <LensMatrixManager
                 matrices={matrices}
                 onMatrixCreate={handleMatrixCreate}
-                onMatrixUpdate={handleMatrixUpdate}
                 onMatrixDelete={handleMatrixDelete}
+                onMatrixUpdate={handleMatrixUpdate}
               />
             </CardContent>
           </Card>

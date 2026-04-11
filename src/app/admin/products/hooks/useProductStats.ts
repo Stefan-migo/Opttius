@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { getBranchHeader } from "@/lib/utils/branch";
+
 import { extractDataFromResponse } from "@/lib/api/response-helpers";
 
 interface Product {

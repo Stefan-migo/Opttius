@@ -1,25 +1,26 @@
-'use client';
+"use client";
 
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Button } from '@/components/ui/button';
-import { AlertCircle, Home } from 'lucide-react';
+import { AlertCircle, Home } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 
 export default function UnauthorizedPage() {
   const router = useRouter();
 
   useEffect(() => {
     // Optional: Add analytics tracking for unauthorized access attempts
-    console.log('Unauthorized access attempt recorded');
+    console.log("Unauthorized access attempt recorded");
   }, []);
 
   const handleGoHome = () => {
-    router.push('/');
+    router.push("/");
   };
 
   const handleLogin = () => {
-    router.push('/login');
+    router.push("/login");
   };
 
   return (
@@ -39,16 +40,17 @@ export default function UnauthorizedPage() {
           <AlertCircle className="h-4 w-4" />
           <AlertTitle>Unauthorized Access</AlertTitle>
           <AlertDescription>
-            This page requires administrator privileges. Please contact your system administrator if you believe this is an error.
+            This page requires administrator privileges. Please contact your
+            system administrator if you believe this is an error.
           </AlertDescription>
         </Alert>
 
         <div className="flex flex-col sm:flex-row gap-3">
-          <Button onClick={handleGoHome} className="flex-1">
+          <Button className="flex-1" onClick={handleGoHome}>
             <Home className="mr-2 h-4 w-4" />
             Go Home
           </Button>
-          <Button variant="outline" onClick={handleLogin} className="flex-1">
+          <Button className="flex-1" variant="outline" onClick={handleLogin}>
             Login
           </Button>
         </div>

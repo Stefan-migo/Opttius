@@ -1,4 +1,4 @@
-import type { LLMProvider, LLMConfig } from "./types";
+import type { LLMConfig, LLMProvider } from "./types";
 
 export interface AIConfig {
   defaultProvider: LLMProvider;
@@ -23,7 +23,7 @@ export function getAIConfig(): AIConfig {
     defaultModel: process.env.AI_DEFAULT_MODEL || "deepseek-chat",
     fallbackProviders: (process.env.AI_FALLBACK_PROVIDERS?.split(
       ",",
-    ) as LLMProvider[]) || ["google", "openai"],
+    ) as LLMProvider[]) || ["openrouter"],
     providers: {
       openai: {
         apiKey: process.env.OPENAI_API_KEY,
@@ -55,7 +55,7 @@ export function getAIConfig(): AIConfig {
         baseURL:
           process.env.OPENROUTER_BASE_URL || "https://openrouter.ai/api/v1",
         defaultModel:
-          process.env.OPENROUTER_DEFAULT_MODEL || "anthropic/claude-3.5-sonnet",
+          process.env.OPENROUTER_DEFAULT_MODEL || "google/gemini-2.0-flash-exp",
         enabled: !!process.env.OPENROUTER_API_KEY,
       },
       kilocode: {

@@ -1,14 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/utils/supabase/server";
-import { getBranchContext } from "@/lib/api/branch-middleware";
-import { appLogger as logger } from "@/lib/logger";
-import {
-  createApiSuccessResponse,
-  createApiErrorResponse,
-} from "@/lib/api/response";
-import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
-import { withRateLimit, rateLimitConfigs } from "@/lib/api/middleware";
 import { z } from "zod";
+
+import { getBranchContext } from "@/lib/api/branch-middleware";
+import { rateLimitConfigs, withRateLimit } from "@/lib/api/middleware";
+import { createApiSuccessResponse } from "@/lib/api/response";
+import { appLogger as logger } from "@/lib/logger";
+import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
+import { createClient } from "@/utils/supabase/server";
 
 const posSettingsSchema = z.object({
   min_deposit_percent: z.number().min(0).max(100).optional(),
@@ -33,7 +31,7 @@ const posSettingsSchema = z.object({
 export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
   try {
-    return await (withRateLimit(rateLimitConfigs.general) as any)(
+    return await (withRateLimit(rateLimitConfigs.general) as unknown)(
       request,
       async () => {
         const supabase = await createClient();
@@ -98,7 +96,10 @@ export async function GET(request: NextRequest) {
           .eq("organization_id", branchContext.organizationId!)
           .maybeSingle();
 
-        const getMergedValue = (field: string, defaultValue: any = null) => {
+        const getMergedValue = (
+          field: string,
+          defaultValue: unknown = null,
+        ) => {
           if (
             settings &&
             settings[field] !== null &&
@@ -150,7 +151,7 @@ export async function GET(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   try {
-    return await (withRateLimit(rateLimitConfigs.modification) as any)(
+    return await (withRateLimit(rateLimitConfigs.modification) as unknown)(
       request,
       async () => {
         const supabase = await createClient();

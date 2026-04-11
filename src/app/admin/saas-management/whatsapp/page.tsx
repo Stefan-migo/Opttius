@@ -1,12 +1,24 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import {
+  AlertCircle,
+  ArrowLeft,
+  CheckCircle,
+  ChevronRight,
+  Loader2,
+  MessageCircle,
+  Send,
+  X,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
@@ -14,17 +26,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  MessageCircle,
-  Loader2,
-  CheckCircle,
-  AlertCircle,
-  ArrowLeft,
-  Send,
-  ChevronRight,
-  X,
-} from "lucide-react";
-import { toast } from "sonner";
 
 interface Organization {
   id: string;
@@ -219,11 +220,11 @@ export default function SaasWhatsAppPage() {
     <div className="space-y-6 p-6">
       <div className="flex items-center gap-4">
         <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => router.push("/admin/saas-management/dashboard")}
-          title="Volver al dashboard"
           className="rounded-xl text-epoch-primary hover:bg-epoch-primary/10"
+          size="icon"
+          title="Volver al dashboard"
+          variant="ghost"
+          onClick={() => router.push("/admin/saas-management/dashboard")}
         >
           <ArrowLeft className="h-5 w-5" />
         </Button>
@@ -251,7 +252,7 @@ export default function SaasWhatsAppPage() {
           </p>
         </CardHeader>
         <CardContent className="space-y-6">
-          <form onSubmit={handleConnect} className="space-y-4">
+          <form className="space-y-4" onSubmit={handleConnect}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="org">Organización</Label>
@@ -272,22 +273,22 @@ export default function SaasWhatsAppPage() {
                 <Label htmlFor="waba_id">WABA ID (Business Account ID)</Label>
                 <Input
                   id="waba_id"
+                  placeholder="Ej: 123456789012345"
                   value={form.waba_id}
                   onChange={(e) =>
                     setForm((f) => ({ ...f, waba_id: e.target.value }))
                   }
-                  placeholder="Ej: 123456789012345"
                 />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="phone_number_id">Phone Number ID</Label>
                 <Input
                   id="phone_number_id"
+                  placeholder="Ej: 987654321098765"
                   value={form.phone_number_id}
                   onChange={(e) =>
                     setForm((f) => ({ ...f, phone_number_id: e.target.value }))
                   }
-                  placeholder="Ej: 987654321098765"
                 />
               </div>
               <div className="space-y-2">
@@ -296,6 +297,7 @@ export default function SaasWhatsAppPage() {
                 </Label>
                 <Input
                   id="display_phone_number"
+                  placeholder="+56912345678"
                   value={form.display_phone_number}
                   onChange={(e) =>
                     setForm((f) => ({
@@ -303,11 +305,10 @@ export default function SaasWhatsAppPage() {
                       display_phone_number: e.target.value,
                     }))
                   }
-                  placeholder="+56912345678"
                 />
               </div>
             </div>
-            <Button type="submit" disabled={saving}>
+            <Button disabled={saving} type="submit">
               {saving ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
@@ -330,8 +331,8 @@ export default function SaasWhatsAppPage() {
               <div className="rounded-lg border divide-y">
                 {numbers.map((n) => (
                   <div
-                    key={n.id}
                     className="flex items-center justify-between p-4"
+                    key={n.id}
                   >
                     <div>
                       <p className="font-medium">
@@ -341,7 +342,7 @@ export default function SaasWhatsAppPage() {
                         {n.organization?.name ?? "—"} | WABA: {n.waba_id}
                       </p>
                     </div>
-                    <Badge variant="default" className="gap-1">
+                    <Badge className="gap-1" variant="default">
                       <CheckCircle className="h-3 w-3" />
                       Conectado
                     </Badge>
@@ -383,10 +384,10 @@ export default function SaasWhatsAppPage() {
               </SelectContent>
             </Select>
             <Button
-              variant="outline"
-              size="sm"
-              onClick={fetchConversations}
               disabled={conversationsLoading}
+              size="sm"
+              variant="outline"
+              onClick={fetchConversations}
             >
               {conversationsLoading ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -409,12 +410,12 @@ export default function SaasWhatsAppPage() {
               ) : (
                 conversations.map((c) => (
                   <div
-                    key={c.id}
                     className={`p-4 rounded-lg border cursor-pointer transition-colors ${
                       selectedSessionId === c.id
                         ? "bg-epoch-primary/10 border-epoch-primary"
                         : "hover:bg-muted/50"
                     }`}
+                    key={c.id}
                     onClick={() => setSelectedSessionId(c.id)}
                   >
                     <div className="flex items-center justify-between">
@@ -445,8 +446,8 @@ export default function SaasWhatsAppPage() {
                 <div className="p-2 border-b flex items-center justify-between">
                   <span className="font-medium">Mensajes</span>
                   <Button
-                    variant="ghost"
                     size="icon"
+                    variant="ghost"
                     onClick={() => setSelectedSessionId(null)}
                   >
                     <X className="h-4 w-4" />
@@ -460,10 +461,10 @@ export default function SaasWhatsAppPage() {
                   ) : (
                     messages.map((m) => (
                       <div
-                        key={m.id}
                         className={`flex ${
                           m.role === "user" ? "justify-end" : "justify-start"
                         }`}
+                        key={m.id}
                       >
                         <div
                           className={`max-w-[85%] rounded-lg px-3 py-2 ${

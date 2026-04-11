@@ -1,32 +1,28 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import {
+  ArrowLeft,
+  Coins,
+  CreditCard,
+  Globe,
+  Info,
+  Loader2,
+  ShieldCheck,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
+  CardDescription,
   CardHeader,
   CardTitle,
-  CardDescription,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import {
-  Globe,
-  CreditCard,
-  Coins,
-  ArrowLeft,
-  Settings,
-  Loader2,
-  ChevronUp,
-  ChevronDown,
-  Info,
-  ShieldCheck,
-  AlertTriangle,
-  Zap,
-} from "lucide-react";
-import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
 interface Gateway {
@@ -37,7 +33,7 @@ interface Gateway {
   is_enabled: boolean;
   display_order: number;
   icon_name: string;
-  config: Record<string, any>;
+  config: Record<string, unknown>;
   updated_at: string;
 }
 
@@ -124,10 +120,10 @@ export default function PaymentGatewaysPage() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => router.push("/admin/saas-management")}
             className="rounded-full hover:bg-slate-100 dark:hover:bg-slate-800"
+            size="icon"
+            variant="ghost"
+            onClick={() => router.push("/admin/saas-management")}
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
@@ -177,13 +173,13 @@ export default function PaymentGatewaysPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {gateways.map((gateway) => (
             <Card
-              key={gateway.id}
               className={cn(
                 "admin-card border-2 border-border relative overflow-hidden transition-all duration-300",
                 gateway.is_enabled
                   ? gatewayColors[gateway.gateway_id]
                   : "border-slate-100 bg-slate-50/50 opacity-80",
               )}
+              key={gateway.id}
             >
               <CardHeader className="pb-2">
                 <div className="flex justify-between items-start">
@@ -218,8 +214,8 @@ export default function PaymentGatewaysPage() {
                     </span>
                     <Switch
                       checked={gateway.is_enabled}
-                      onCheckedChange={() => toggleGateway(gateway)}
                       disabled={updatingId === gateway.id}
+                      onCheckedChange={() => toggleGateway(gateway)}
                     />
                   </div>
                 </div>
@@ -240,24 +236,24 @@ export default function PaymentGatewaysPage() {
                   <div className="flex gap-2">
                     {gateway.gateway_id === "nowpayments" && (
                       <Badge
-                        variant="healty"
                         className="bg-orange-500/10 text-orange-600 border-none"
+                        variant="healty"
                       >
                         300+ Cryptos
                       </Badge>
                     )}
                     {gateway.gateway_id === "mercadopago" && (
                       <Badge
-                        variant="healty"
                         className="bg-blue-500/10 text-blue-600 border-none"
+                        variant="healty"
                       >
                         Tarjetas Chile
                       </Badge>
                     )}
                     {gateway.gateway_id === "paypal" && (
                       <Badge
-                        variant="healty"
                         className="bg-indigo-500/10 text-indigo-600 border-none"
+                        variant="healty"
                       >
                         USD Global
                       </Badge>

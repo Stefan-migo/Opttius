@@ -1,6 +1,8 @@
-import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Eye, RefreshCw } from "lucide-react";
+import { useEffect, useState } from "react";
+
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -10,12 +12,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Eye, Loader2, RefreshCw } from "lucide-react";
 import { useBranch } from "@/hooks/useBranch";
+
 import {
-  QuoteFormData,
-  LensFamily,
   ContactLensFamily,
+  LensFamily,
+  QuoteFormData,
 } from "../types/quote.types";
 
 interface LensConfigurationProps {
@@ -23,7 +25,7 @@ interface LensConfigurationProps {
   presbyopiaSolution: string;
   lensType: "optical" | "contact";
   manualLensPrice: boolean;
-  onUpdateField: (field: keyof QuoteFormData, value: any) => void;
+  onUpdateField: (field: keyof QuoteFormData, value: unknown) => void;
   onManualLensPriceToggle: () => void;
   onCalculateLensPrice: () => void;
   disabled?: boolean;
@@ -139,16 +141,16 @@ export function LensConfiguration({
         {/* Lens Type Toggle */}
         <div className="flex gap-2">
           <Button
+            disabled={disabled}
             variant={lensType === "optical" ? "default" : "outline"}
             onClick={() => onUpdateField("lens_type", "optical")}
-            disabled={disabled}
           >
             Ópticos
           </Button>
           <Button
+            disabled={disabled}
             variant={lensType === "contact" ? "default" : "outline"}
             onClick={() => onUpdateField("lens_type", "contact")}
-            disabled={disabled}
           >
             Contacto
           </Button>
@@ -159,6 +161,7 @@ export function LensConfiguration({
           <div>
             <Label>Familia de Lentes de Contacto</Label>
             <Select
+              disabled={loadingContactLensFamilies || disabled}
               value={formData.contact_lens_family_id || "none"}
               onValueChange={(value) =>
                 onUpdateField(
@@ -166,7 +169,6 @@ export function LensConfiguration({
                   value === "none" ? "" : value,
                 )
               }
-              disabled={loadingContactLensFamilies || disabled}
             >
               <SelectTrigger>
                 <SelectValue
@@ -197,12 +199,12 @@ export function LensConfiguration({
           <div>
             <Label>Familia de Lentes</Label>
             <Select
+              disabled={loadingFamilies || disabled}
               value={formData.lens_family_id || "none"}
               onValueChange={(value) => {
                 onUpdateField("lens_family_id", value === "none" ? "" : value);
                 onUpdateField("lens_cost", 0); // Reset cost to trigger recalculation
               }}
-              disabled={loadingFamilies || disabled}
             >
               <SelectTrigger>
                 <SelectValue
@@ -243,25 +245,25 @@ export function LensConfiguration({
               <div>
                 <Label>Tipo de Lente</Label>
                 <Input
-                  value={formData.lens_type}
-                  onChange={(e) => onUpdateField("lens_type", e.target.value)}
-                  placeholder="Ej: Progresivo"
-                  readOnly={!!formData.lens_family_id}
                   className={formData.lens_family_id ? "bg-gray-50" : ""}
                   disabled={disabled}
+                  placeholder="Ej: Progresivo"
+                  readOnly={!!formData.lens_family_id}
+                  value={formData.lens_type}
+                  onChange={(e) => onUpdateField("lens_type", e.target.value)}
                 />
               </div>
               <div>
                 <Label>Material</Label>
                 <Input
+                  className={formData.lens_family_id ? "bg-gray-50" : ""}
+                  disabled={disabled}
+                  placeholder="Ej: Policarbonato"
+                  readOnly={!!formData.lens_family_id}
                   value={formData.lens_material}
                   onChange={(e) =>
                     onUpdateField("lens_material", e.target.value)
                   }
-                  placeholder="Ej: Policarbonato"
-                  readOnly={!!formData.lens_family_id}
-                  className={formData.lens_family_id ? "bg-gray-50" : ""}
-                  disabled={disabled}
                 />
               </div>
             </div>
@@ -270,15 +272,8 @@ export function LensConfiguration({
             <div className="mt-4">
               <Label>Índice de Refracción</Label>
               <Input
-                type="number"
-                step="0.01"
-                value={formData.lens_index || ""}
-                onChange={(e) =>
-                  onUpdateField(
-                    "lens_index",
-                    parseFloat(e.target.value) || null,
-                  )
-                }
+                className={formData.lens_family_id ? "bg-gray-50" : ""}
+                disabled={disabled}
                 placeholder={
                   formData.lens_family_id
                     ? formData.lens_index
@@ -287,8 +282,15 @@ export function LensConfiguration({
                     : "Ej: 1.67"
                 }
                 readOnly={!!formData.lens_family_id}
-                className={formData.lens_family_id ? "bg-gray-50" : ""}
-                disabled={disabled}
+                step="0.01"
+                type="number"
+                value={formData.lens_index || ""}
+                onChange={(e) =>
+                  onUpdateField(
+                    "lens_index",
+                    parseFloat(e.target.value) || null,
+                  )
+                }
               />
               {formData.lens_family_id && formData.lens_material && (
                 <p className="text-xs text-gray-500 mt-1">
@@ -329,22 +331,22 @@ export function LensConfiguration({
 
                       return (
                         <div
-                          key={treatment.value}
                           className="flex items-center"
+                          key={treatment.value}
                         >
                           <input
-                            type="checkbox"
-                            id={`treatment-${treatment.value}`}
                             checked={isSelected}
+                            className="h-4 w-4 rounded border-gray-300"
+                            disabled={isDisabled || disabled}
+                            id={`treatment-${treatment.value}`}
+                            type="checkbox"
                             onChange={() =>
                               handleTreatmentToggle(treatment.value)
                             }
-                            disabled={isDisabled || disabled}
-                            className="h-4 w-4 rounded border-gray-300"
                           />
                           <Label
-                            htmlFor={`treatment-${treatment.value}`}
                             className="ml-2 text-sm cursor-pointer"
+                            htmlFor={`treatment-${treatment.value}`}
                           >
                             {treatment.label}
                           </Label>
@@ -364,21 +366,21 @@ export function LensConfiguration({
             {/* Manual Price Toggle */}
             <div className="flex items-center gap-2 mt-4">
               <Button
+                disabled={presbyopiaSolution === "two_separate" || disabled}
+                size="sm"
                 type="button"
                 variant="outline"
-                size="sm"
                 onClick={onManualLensPriceToggle}
-                disabled={presbyopiaSolution === "two_separate" || disabled}
               >
                 {manualLensPrice ? "Auto" : "Manual"}
               </Button>
               {!manualLensPrice && (
                 <Button
+                  disabled={disabled}
+                  size="sm"
                   type="button"
                   variant="outline"
-                  size="sm"
                   onClick={onCalculateLensPrice}
-                  disabled={disabled}
                 >
                   <RefreshCw className="h-4 w-4 mr-2" />
                   Calcular
@@ -390,22 +392,22 @@ export function LensConfiguration({
             <div className="mt-4">
               <Label>Costo del Lente</Label>
               <Input
-                type="number"
-                value={formData.lens_cost || ""}
-                onChange={(e) =>
-                  onUpdateField("lens_cost", parseFloat(e.target.value) || 0)
-                }
-                placeholder="0"
                 className={
                   formData.lens_family_id && !manualLensPrice
                     ? "bg-gray-50"
                     : ""
                 }
+                disabled={disabled}
+                placeholder="0"
                 readOnly={
                   presbyopiaSolution === "two_separate" ||
                   (!!formData.lens_family_id && !manualLensPrice)
                 }
-                disabled={disabled}
+                type="number"
+                value={formData.lens_cost || ""}
+                onChange={(e) =>
+                  onUpdateField("lens_cost", parseFloat(e.target.value) || 0)
+                }
               />
               {presbyopiaSolution === "two_separate" && (
                 <p className="text-xs text-gray-500 mt-1">

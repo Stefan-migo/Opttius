@@ -1,13 +1,14 @@
 import { createServiceRoleClient } from "@/utils/supabase/server";
+
 import { sendEmail } from "./client";
-import { loadEmailTemplate, incrementTemplateUsage } from "./template-loader";
+import { getOrganizationInfoWithFallbacks } from "./org-utils";
+import { incrementTemplateUsage, loadEmailTemplate } from "./template-loader";
 import {
-  replaceTemplateVariables,
   formatOrderItemsHTML,
   formatOrderItemsText,
   getDefaultVariables,
+  replaceTemplateVariables,
 } from "./template-utils";
-import { getOrganizationInfoWithFallbacks } from "./org-utils";
 
 /** Etiquetas legibles para métodos de pago (POS y e-commerce) */
 const PAYMENT_METHOD_LABELS: Record<string, string> = {
@@ -180,7 +181,7 @@ export class EmailNotificationService {
 
   // Send appointment confirmation
   static async sendAppointmentConfirmation(
-    appointment: any, // Use proper type if available
+    appointment: unknown, // Use proper type if available
     organizationId?: string,
   ): Promise<{ success: boolean; error?: string }> {
     try {
@@ -235,7 +236,7 @@ export class EmailNotificationService {
 
   // Send appointment reminder
   static async sendAppointmentReminder(
-    appointment: any,
+    appointment: unknown,
     organizationId?: string,
   ): Promise<{ success: boolean; error?: string }> {
     try {
@@ -288,7 +289,7 @@ export class EmailNotificationService {
 
   // Send quote sent
   static async sendQuoteSent(
-    quote: any,
+    quote: unknown,
     organizationId?: string,
   ): Promise<{ success: boolean; error?: string }> {
     try {
@@ -343,7 +344,7 @@ export class EmailNotificationService {
 
   // Send work order ready
   static async sendWorkOrderReady(
-    workOrder: any,
+    workOrder: unknown,
     organizationId?: string,
   ): Promise<{ success: boolean; error?: string }> {
     try {
@@ -394,7 +395,7 @@ export class EmailNotificationService {
 
   // Send prescription ready
   static async sendPrescriptionReady(
-    prescription: any,
+    prescription: unknown,
     organizationId?: string,
   ): Promise<{ success: boolean; error?: string }> {
     try {

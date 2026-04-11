@@ -1,6 +1,6 @@
-import { InsightSection } from "./schemas";
 import { MaturityLevel } from "../memory/organizational";
 import { getSectionPrompt } from "./prompts";
+import { InsightSection } from "./schemas";
 
 export class OrganizationalMaturitySystem {
   private organizationId: string;
@@ -15,9 +15,9 @@ export class OrganizationalMaturitySystem {
   async getAdaptivePrompts(
     section: InsightSection,
     maturity: MaturityLevel,
-    data: any,
+    data: unknown,
     organizationName: string,
-    additionalContext?: Record<string, any>,
+    additionalContext?: Record<string, unknown>,
   ): Promise<string> {
     // Get the base prompt from the existing system
     // We pass maturity info in additionalContext so the base prompt can use it if it wants

@@ -1,16 +1,27 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import {
+  AlertTriangle,
+  Bell,
+  CheckCircle,
+  Copy,
+  ExternalLink,
+  RefreshCw,
+  Save,
+  XCircle,
+} from "lucide-react";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
+  CardDescription,
   CardHeader,
   CardTitle,
-  CardDescription,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
 import {
   Select,
   SelectContent,
@@ -18,23 +29,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
-import {
-  Bell,
-  Save,
-  RefreshCw,
-  CheckCircle,
-  XCircle,
-  AlertTriangle,
-  Copy,
-  ExternalLink,
-} from "lucide-react";
-import { toast } from "sonner";
-import {
-  NOTIFICATION_TYPE_LABELS,
-  PRIORITY_LABELS,
-  PRIORITY_BADGE_COLORS,
-} from "@/lib/notifications/constants";
+import { Switch } from "@/components/ui/switch";
+import { NOTIFICATION_TYPE_LABELS } from "@/lib/notifications/constants";
 
 interface NotificationSetting {
   id: string;
@@ -43,7 +39,7 @@ interface NotificationSetting {
   priority: "low" | "medium" | "high" | "urgent" | null;
   notify_all_admins: boolean;
   notify_specific_roles: string[] | null;
-  metadata: any;
+  metadata: unknown;
   created_at: string;
   updated_at: string;
 }
@@ -125,7 +121,7 @@ export default function NotificationSettings({
     }
   };
 
-  const updateSetting = (type: string, field: string, value: any) => {
+  const updateSetting = (type: string, field: string, value: unknown) => {
     setSettings((prev) => {
       const updated = prev.map((setting) => {
         if (setting.notification_type === type) {
@@ -305,25 +301,25 @@ export default function NotificationSettings({
                 </div>
               )}
               <Button
-                variant="outline"
-                size="sm"
-                onClick={() => toggleAll(true)}
                 className="rounded-xl min-h-[44px] w-full sm:w-auto"
+                size="sm"
+                variant="outline"
+                onClick={() => toggleAll(true)}
               >
                 Activar Todas
               </Button>
               <Button
-                variant="outline"
-                size="sm"
-                onClick={() => toggleAll(false)}
                 className="rounded-xl min-h-[44px] w-full sm:w-auto"
+                size="sm"
+                variant="outline"
+                onClick={() => toggleAll(false)}
               >
                 Desactivar Todas
               </Button>
               <Button
-                onClick={saveSettings}
-                disabled={!hasChanges || saving}
                 className="rounded-xl min-h-[44px] w-full sm:w-auto"
+                disabled={!hasChanges || saving}
+                onClick={saveSettings}
               >
                 {saving ? (
                   <>
@@ -362,10 +358,10 @@ export default function NotificationSettings({
                   </p>
                   <div className="flex flex-wrap gap-2">
                     <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={copySQLToClipboard}
                       disabled={loadingSQL}
+                      size="sm"
+                      variant="outline"
+                      onClick={copySQLToClipboard}
                     >
                       {loadingSQL ? (
                         <>
@@ -380,8 +376,9 @@ export default function NotificationSettings({
                       )}
                     </Button>
                     <Button
-                      variant="outline"
+                      disabled={loadingSQL}
                       size="sm"
+                      variant="outline"
                       onClick={() => {
                         if (!migrationSQL) {
                           fetchMigrationSQL().then(() => {
@@ -403,7 +400,6 @@ export default function NotificationSettings({
                           }
                         }
                       }}
-                      disabled={loadingSQL}
                     >
                       <ExternalLink className="h-4 w-4 mr-2" />
                       Ver SQL
@@ -415,10 +411,10 @@ export default function NotificationSettings({
                         SQL de la migración:
                       </Label>
                       <textarea
-                        id="migration-sql"
                         readOnly
-                        value={migrationSQL}
                         className="w-full h-64 p-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-md font-mono text-xs overflow-auto"
+                        id="migration-sql"
+                        value={migrationSQL}
                         onClick={(e) => {
                           (e.target as HTMLTextAreaElement).select();
                           copySQLToClipboard();
@@ -451,8 +447,8 @@ export default function NotificationSettings({
                 <div className="space-y-2">
                   {opticalSettings.map((setting) => (
                     <div
-                      key={setting.id}
                       className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 p-2.5 sm:p-3 border border-border rounded-lg overflow-hidden"
+                      key={setting.id}
                     >
                       <div className="flex items-center gap-2 min-w-0 flex-1">
                         <Label className="font-medium text-xs sm:text-sm truncate">
@@ -469,6 +465,7 @@ export default function NotificationSettings({
                       <div className="flex items-center gap-2 sm:gap-3 shrink-0">
                         <Switch
                           checked={setting.enabled}
+                          className="scale-90 sm:scale-100"
                           onCheckedChange={(checked) =>
                             updateSetting(
                               setting.notification_type,
@@ -476,7 +473,6 @@ export default function NotificationSettings({
                               checked,
                             )
                           }
-                          className="scale-90 sm:scale-100"
                         />
                         <Select
                           value={setting.priority || "medium"}
@@ -512,8 +508,8 @@ export default function NotificationSettings({
                 <div className="space-y-2">
                   {generalSettings.map((setting) => (
                     <div
-                      key={setting.id}
                       className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 p-2.5 sm:p-3 border border-border rounded-lg overflow-hidden"
+                      key={setting.id}
                     >
                       <div className="flex items-center gap-2 min-w-0 flex-1">
                         <Label className="font-medium text-xs sm:text-sm truncate">
@@ -530,6 +526,7 @@ export default function NotificationSettings({
                       <div className="flex items-center gap-2 sm:gap-3 shrink-0">
                         <Switch
                           checked={setting.enabled}
+                          className="scale-90 sm:scale-100"
                           onCheckedChange={(checked) =>
                             updateSetting(
                               setting.notification_type,
@@ -537,7 +534,6 @@ export default function NotificationSettings({
                               checked,
                             )
                           }
-                          className="scale-90 sm:scale-100"
                         />
                         <Select
                           value={setting.priority || "medium"}
@@ -573,8 +569,8 @@ export default function NotificationSettings({
                 <div className="space-y-2">
                   {systemSettings.map((setting) => (
                     <div
-                      key={setting.id}
                       className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 p-2.5 sm:p-3 border border-border rounded-lg overflow-hidden"
+                      key={setting.id}
                     >
                       <div className="flex items-center gap-2 min-w-0 flex-1">
                         <Label className="font-medium text-xs sm:text-sm truncate">
@@ -591,6 +587,7 @@ export default function NotificationSettings({
                       <div className="flex items-center gap-2 sm:gap-3 shrink-0">
                         <Switch
                           checked={setting.enabled}
+                          className="scale-90 sm:scale-100"
                           onCheckedChange={(checked) =>
                             updateSetting(
                               setting.notification_type,
@@ -598,7 +595,6 @@ export default function NotificationSettings({
                               checked,
                             )
                           }
-                          className="scale-90 sm:scale-100"
                         />
                         <Select
                           value={setting.priority || "medium"}

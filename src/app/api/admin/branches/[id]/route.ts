@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/utils/supabase/server";
+
 import { validateBranchAccess } from "@/lib/api/branch-middleware";
 import { appLogger as logger } from "@/lib/logger";
+import { createClient } from "@/utils/supabase/server";
 
 export const dynamic = "force-dynamic";
 export async function GET(
@@ -55,7 +56,7 @@ export async function GET(
     }
 
     return NextResponse.json({ branch });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error("Error in GET /api/admin/branches/[id]", error);
     return NextResponse.json(
       { error: error.message || "Internal server error" },
@@ -133,7 +134,7 @@ export async function PUT(
     }
 
     // Update branch
-    const updateData: any = {};
+    const updateData: unknown = {};
     if (name !== undefined) updateData.name = name;
     if (code !== undefined) updateData.code = code;
     if (address_line_1 !== undefined)
@@ -165,7 +166,7 @@ export async function PUT(
     }
 
     return NextResponse.json({ branch: updatedBranch });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error("Error in PUT /api/admin/branches/[id]", error);
     return NextResponse.json(
       { error: error.message || "Internal server error" },
@@ -240,7 +241,7 @@ export async function DELETE(
     }
 
     return NextResponse.json({ success: true });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error("Error in DELETE /api/admin/branches/[id]", error);
     return NextResponse.json(
       { error: error.message || "Internal server error" },

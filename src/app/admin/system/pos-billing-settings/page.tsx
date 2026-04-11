@@ -1,19 +1,32 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import {
+  ArrowLeft,
+  Building2,
+  Eye,
+  FileText,
+  Printer,
+  Save,
+  Settings,
+  Thermometer,
+} from "lucide-react";
+import { Copy, Loader2, Sparkles } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+
+import { BranchSelector } from "@/components/admin/BranchSelector";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
+  CardDescription,
   CardHeader,
   CardTitle,
-  CardDescription,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import ImageUpload from "@/components/ui/ImageUpload";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Select,
   SelectContent,
@@ -22,25 +35,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import {
-  Settings,
-  Upload,
-  Save,
-  Building2,
-  FileText,
-  ArrowLeft,
-  Printer,
-  Eye,
-  Thermometer,
-} from "lucide-react";
-import { toast } from "sonner";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
 import { useBranch } from "@/hooks/useBranch";
 import { getBranchHeader } from "@/lib/utils/branch";
 import { formatRUT, formatRUTAsYouType } from "@/lib/utils/rut";
-import { BranchSelector } from "@/components/admin/BranchSelector";
-import { Loader2, Copy, Sparkles } from "lucide-react";
-import ImageUpload from "@/components/ui/ImageUpload";
-import Image from "next/image";
 
 interface POSSettings {
   min_deposit_percent: number;
@@ -154,7 +153,7 @@ export default function POSBillingSettingsPage() {
         const error = await billingResponse.json();
         toast.error(error.error || "Error al cargar configuración de boletas");
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error fetching settings:", error);
       toast.error("Error al cargar configuraciones");
     } finally {
@@ -211,7 +210,7 @@ export default function POSBillingSettingsPage() {
         const error = await response.json();
         toast.error(error.error || "Error al guardar configuración POS");
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error saving POS settings:", error);
       toast.error("Error al guardar configuración POS");
     } finally {
@@ -258,7 +257,7 @@ export default function POSBillingSettingsPage() {
         const error = await response.json();
         toast.error(error.error || "Error al guardar configuración de boletas");
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error saving billing settings:", error);
       toast.error("Error al guardar configuración de boletas");
     } finally {
@@ -297,7 +296,7 @@ export default function POSBillingSettingsPage() {
     const config = printerConfigs[type] || { width: 80, height: 297 };
     setBillingSettings({
       ...billingSettings,
-      printer_type: type as any,
+      printer_type: type as unknown,
       printer_width_mm: config.width,
       printer_height_mm: config.height,
     });
@@ -331,9 +330,9 @@ export default function POSBillingSettingsPage() {
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
           {isSuperAdmin && <BranchSelector />}
           <Button
+            className="rounded-xl min-h-[44px] w-full sm:w-auto"
             variant="outline"
             onClick={() => router.back()}
-            className="rounded-xl min-h-[44px] w-full sm:w-auto"
           >
             <ArrowLeft className="h-4 w-4 mr-2 shrink-0" />
             Volver
@@ -343,28 +342,28 @@ export default function POSBillingSettingsPage() {
 
       {/* Tabs - scroll horizontal en móvil */}
       <Tabs
-        value={activeTab}
-        onValueChange={(v) => setActiveTab(v as any)}
         className="space-y-4 sm:space-y-6"
+        value={activeTab}
+        onValueChange={(v) => setActiveTab(v as unknown)}
       >
         <TabsList className="flex w-full justify-start gap-1 overflow-x-auto overflow-y-hidden min-w-0 p-1 rounded-xl border border-border [scrollbar-width:thin] flex-shrink-0">
           <TabsTrigger
-            value="pos"
             className="flex-shrink-0 min-h-[44px] text-xs sm:text-sm px-3 py-2"
+            value="pos"
           >
             <Settings className="h-4 w-4 mr-2 shrink-0" />
             Configuración POS
           </TabsTrigger>
           <TabsTrigger
-            value="billing"
             className="flex-shrink-0 min-h-[44px] text-xs sm:text-sm px-3 py-2"
+            value="billing"
           >
             <FileText className="h-4 w-4 mr-2 shrink-0" />
             Configuración de Boletas
           </TabsTrigger>
           <TabsTrigger
-            value="preview"
             className="flex-shrink-0 min-h-[44px] text-xs sm:text-sm px-3 py-2"
+            value="preview"
           >
             <Eye className="h-4 w-4 mr-2 shrink-0" />
             Previsualización
@@ -372,7 +371,7 @@ export default function POSBillingSettingsPage() {
         </TabsList>
 
         {/* POS Settings Tab */}
-        <TabsContent value="pos" className="space-y-4 sm:space-y-6">
+        <TabsContent className="space-y-4 sm:space-y-6" value="pos">
           <Card className="rounded-xl border border-border overflow-hidden">
             <CardHeader className="p-4 sm:p-6">
               <CardTitle className="flex items-center gap-2 font-display text-epoch-primary text-base sm:text-lg">
@@ -392,10 +391,11 @@ export default function POSBillingSettingsPage() {
                 </Label>
                 <Input
                   id="min_deposit_percent"
-                  type="number"
-                  min="0"
                   max="100"
+                  min="0"
+                  placeholder="50.00"
                   step="0.01"
+                  type="number"
                   value={posSettings.min_deposit_percent}
                   onChange={(e) =>
                     setPosSettings({
@@ -403,7 +403,6 @@ export default function POSBillingSettingsPage() {
                       min_deposit_percent: parseFloat(e.target.value) || 0,
                     })
                   }
-                  placeholder="50.00"
                 />
                 <p className="text-xs sm:text-sm text-epoch-primary/80">
                   Porcentaje del total de la orden que se requiere como depósito
@@ -417,9 +416,10 @@ export default function POSBillingSettingsPage() {
                 </Label>
                 <Input
                   id="min_deposit_amount"
-                  type="number"
                   min="0"
+                  placeholder="Dejar vacío para usar solo porcentaje"
                   step="0.01"
+                  type="number"
                   value={posSettings.min_deposit_amount || ""}
                   onChange={(e) =>
                     setPosSettings({
@@ -429,7 +429,6 @@ export default function POSBillingSettingsPage() {
                         : null,
                     })
                   }
-                  placeholder="Dejar vacío para usar solo porcentaje"
                 />
                 <p className="text-xs sm:text-sm text-epoch-primary/80">
                   Monto fijo mínimo de depósito. Si se establece, el sistema
@@ -439,7 +438,7 @@ export default function POSBillingSettingsPage() {
               </div>
 
               <div className="pt-4 border-t">
-                <Button onClick={handleSavePOS} disabled={saving}>
+                <Button disabled={saving} onClick={handleSavePOS}>
                   {saving ? (
                     <>
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -458,7 +457,7 @@ export default function POSBillingSettingsPage() {
         </TabsContent>
 
         {/* Billing Settings Tab */}
-        <TabsContent value="billing" className="space-y-6">
+        <TabsContent className="space-y-6" value="billing">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Business Information */}
             <Card>
@@ -472,6 +471,7 @@ export default function POSBillingSettingsPage() {
                 <div>
                   <Label>Nombre de la Empresa *</Label>
                   <Input
+                    placeholder="Ej: Óptica Central"
                     value={billingSettings.business_name}
                     onChange={(e) =>
                       setBillingSettings({
@@ -479,21 +479,14 @@ export default function POSBillingSettingsPage() {
                         business_name: e.target.value,
                       })
                     }
-                    placeholder="Ej: Óptica Central"
                   />
                 </div>
                 <div>
                   <Label>RUT de la Empresa *</Label>
                   <Input
+                    className="font-mono"
+                    placeholder="Ej: 76.123.456-7 o 761234567"
                     value={billingSettings.business_rut}
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      const formatted = formatRUTAsYouType(val);
-                      setBillingSettings({
-                        ...billingSettings,
-                        business_rut: formatted,
-                      });
-                    }}
                     onBlur={(e) => {
                       const val = e.target.value.trim();
                       if (val) {
@@ -506,13 +499,20 @@ export default function POSBillingSettingsPage() {
                         }
                       }
                     }}
-                    placeholder="Ej: 76.123.456-7 o 761234567"
-                    className="font-mono"
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      const formatted = formatRUTAsYouType(val);
+                      setBillingSettings({
+                        ...billingSettings,
+                        business_rut: formatted,
+                      });
+                    }}
                   />
                 </div>
                 <div>
                   <Label>Dirección</Label>
                   <Input
+                    placeholder="Dirección completa"
                     value={billingSettings.business_address || ""}
                     onChange={(e) =>
                       setBillingSettings({
@@ -520,12 +520,12 @@ export default function POSBillingSettingsPage() {
                         business_address: e.target.value,
                       })
                     }
-                    placeholder="Dirección completa"
                   />
                 </div>
                 <div>
                   <Label>Teléfono</Label>
                   <Input
+                    placeholder="+56 9 1234 5678"
                     value={billingSettings.business_phone || ""}
                     onChange={(e) =>
                       setBillingSettings({
@@ -533,12 +533,12 @@ export default function POSBillingSettingsPage() {
                         business_phone: e.target.value,
                       })
                     }
-                    placeholder="+56 9 1234 5678"
                   />
                 </div>
                 <div>
                   <Label>Email</Label>
                   <Input
+                    placeholder="contacto@empresa.cl"
                     type="email"
                     value={billingSettings.business_email || ""}
                     onChange={(e) =>
@@ -547,7 +547,6 @@ export default function POSBillingSettingsPage() {
                         business_email: e.target.value,
                       })
                     }
-                    placeholder="contacto@empresa.cl"
                   />
                 </div>
               </CardContent>
@@ -589,6 +588,7 @@ export default function POSBillingSettingsPage() {
 
                   <div className="space-y-4">
                     <ImageUpload
+                      folder="billing"
                       value={billingSettings.logo_url || ""}
                       onChange={(url) =>
                         setBillingSettings({
@@ -596,14 +596,13 @@ export default function POSBillingSettingsPage() {
                           logo_url: url,
                         })
                       }
-                      folder="billing"
                     />
 
                     <Button
+                      className="w-full text-xs shadow-sm"
+                      size="sm"
                       type="button"
                       variant="outline"
-                      size="sm"
-                      className="w-full text-xs shadow-sm"
                       onClick={handleReuseMainLogo}
                     >
                       <Copy className="h-3 w-3 mr-2" />
@@ -615,7 +614,7 @@ export default function POSBillingSettingsPage() {
                   <Label>Tipo de Documento por Defecto</Label>
                   <Select
                     value={billingSettings.default_document_type}
-                    onValueChange={(v: any) =>
+                    onValueChange={(v: unknown) =>
                       setBillingSettings({
                         ...billingSettings,
                         default_document_type: v,
@@ -653,6 +652,8 @@ export default function POSBillingSettingsPage() {
                 <div>
                   <Label>Texto de Encabezado (opcional)</Label>
                   <Textarea
+                    placeholder="Texto que aparecerá en el encabezado de las boletas"
+                    rows={3}
                     value={billingSettings.header_text || ""}
                     onChange={(e) =>
                       setBillingSettings({
@@ -660,13 +661,13 @@ export default function POSBillingSettingsPage() {
                         header_text: e.target.value,
                       })
                     }
-                    placeholder="Texto que aparecerá en el encabezado de las boletas"
-                    rows={3}
                   />
                 </div>
                 <div>
                   <Label>Texto de Pie de Página (opcional)</Label>
                   <Textarea
+                    placeholder="Texto que aparecerá en el pie de página"
+                    rows={3}
                     value={billingSettings.footer_text || ""}
                     onChange={(e) =>
                       setBillingSettings({
@@ -674,13 +675,13 @@ export default function POSBillingSettingsPage() {
                         footer_text: e.target.value,
                       })
                     }
-                    placeholder="Texto que aparecerá en el pie de página"
-                    rows={3}
                   />
                 </div>
                 <div>
                   <Label>Términos y Condiciones (opcional)</Label>
                   <Textarea
+                    placeholder="Términos y condiciones que aparecerán en las boletas"
+                    rows={4}
                     value={billingSettings.terms_and_conditions || ""}
                     onChange={(e) =>
                       setBillingSettings({
@@ -688,8 +689,6 @@ export default function POSBillingSettingsPage() {
                         terms_and_conditions: e.target.value,
                       })
                     }
-                    placeholder="Términos y condiciones que aparecerán en las boletas"
-                    rows={4}
                   />
                 </div>
               </CardContent>
@@ -738,9 +737,9 @@ export default function POSBillingSettingsPage() {
                     <div>
                       <Label>Ancho (mm)</Label>
                       <Input
-                        type="number"
-                        min="50"
                         max="500"
+                        min="50"
+                        type="number"
                         value={billingSettings.printer_width_mm || 80}
                         onChange={(e) =>
                           setBillingSettings({
@@ -753,9 +752,9 @@ export default function POSBillingSettingsPage() {
                     <div>
                       <Label>Alto (mm)</Label>
                       <Input
-                        type="number"
-                        min="50"
                         max="1000"
+                        min="50"
+                        type="number"
                         value={billingSettings.printer_height_mm || 297}
                         onChange={(e) =>
                           setBillingSettings({
@@ -779,7 +778,7 @@ export default function POSBillingSettingsPage() {
           </Card>
 
           <div className="flex justify-end">
-            <Button onClick={handleSaveBilling} disabled={saving}>
+            <Button disabled={saving} onClick={handleSaveBilling}>
               {saving ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -796,7 +795,7 @@ export default function POSBillingSettingsPage() {
         </TabsContent>
 
         {/* Preview Tab */}
-        <TabsContent value="preview" className="space-y-4 sm:space-y-6">
+        <TabsContent className="space-y-4 sm:space-y-6" value="preview">
           <Card className="rounded-xl border border-border overflow-hidden">
             <CardHeader className="p-4 sm:p-6">
               <CardTitle className="flex flex-col sm:flex-row sm:items-center gap-2 font-display text-epoch-primary text-base sm:text-lg">
@@ -817,7 +816,7 @@ export default function POSBillingSettingsPage() {
                   </Label>
                   <Select
                     value={billingSettings.default_document_type}
-                    onValueChange={(v: any) =>
+                    onValueChange={(v: unknown) =>
                       setBillingSettings({
                         ...billingSettings,
                         default_document_type: v,
@@ -835,7 +834,7 @@ export default function POSBillingSettingsPage() {
                   <Label className="text-xs sm:text-sm">Formato:</Label>
                   <Select
                     value={billingSettings.printer_type || "thermal"}
-                    onValueChange={(v: any) => handlePrinterTypeChange(v)}
+                    onValueChange={(v: unknown) => handlePrinterTypeChange(v)}
                   >
                     <SelectTrigger className="w-full sm:w-48 rounded-xl min-h-[44px]">
                       <SelectValue />
@@ -872,9 +871,9 @@ export default function POSBillingSettingsPage() {
                       <div className="text-center mb-4">
                         {billingSettings.logo_url && (
                           <img
-                            src={billingSettings.logo_url}
                             alt="Logo"
                             className="h-16 mx-auto mb-2 object-contain"
+                            src={billingSettings.logo_url}
                           />
                         )}
                         <h2 className="font-bold text-lg">

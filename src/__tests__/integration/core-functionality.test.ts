@@ -3,14 +3,15 @@
  * Tests core application functionality and integrations
  */
 
-import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import { setupIntegrationTest, teardownIntegrationTest } from "../setup";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
 import {
-  mockUsers,
+  createMockSupabaseClient,
   mockOrganizations,
   mockProducts,
-  createMockSupabaseClient,
+  mockUsers,
 } from "../mocks/data";
+import { setupIntegrationTest, teardownIntegrationTest } from "../setup";
 
 describe("Core Application Integration Tests", () => {
   beforeEach(() => {

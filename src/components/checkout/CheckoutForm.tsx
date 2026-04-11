@@ -1,13 +1,15 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { MercadoPagoButton } from "./MercadoPagoButton";
 import { cn } from "@/lib/utils";
+
+import { MercadoPagoButton } from "./MercadoPagoButton";
 
 type Gateway = "flow" | "mercadopago" | "paypal";
 
@@ -112,23 +114,23 @@ export function CheckoutForm() {
       </CardHeader>
       <CardContent>
         {!preferenceId ? (
-          <form onSubmit={handleCreateIntent} className="space-y-4">
+          <form className="space-y-4" onSubmit={handleCreateIntent}>
             {tiers.length > 0 && (
               <div>
                 <Label>Plan / Tier</Label>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mt-1">
                   {tiers.map((tier) => (
                     <Button
-                      key={tier.name}
-                      type="button"
-                      variant={
-                        selectedTier === tier.name ? "default" : "outline"
-                      }
                       className={cn(
                         "h-auto py-3 flex flex-col items-center",
                         selectedTier === tier.name &&
                           "ring-2 ring-primary ring-offset-2",
                       )}
+                      key={tier.name}
+                      type="button"
+                      variant={
+                        selectedTier === tier.name ? "default" : "outline"
+                      }
                       onClick={() => handleSelectTier(tier)}
                     >
                       <span className="font-medium">
@@ -145,35 +147,35 @@ export function CheckoutForm() {
             <div>
               <Label htmlFor="amount">Monto</Label>
               <Input
+                required
                 id="amount"
-                type="number"
                 min="1"
-                step="0.01"
                 placeholder="1000"
+                step="0.01"
+                type="number"
                 value={amount}
                 onChange={(e) => {
                   setAmount(e.target.value);
                   setSelectedTier(null);
                 }}
-                required
               />
             </div>
             <div>
               <Label htmlFor="currency">Moneda</Label>
               <Input
                 id="currency"
+                placeholder="CLP"
                 value={currency}
                 onChange={(e) => setCurrency(e.target.value)}
-                placeholder="CLP"
               />
             </div>
             <div>
               <Label htmlFor="order_id">ID de orden (opcional)</Label>
               <Input
                 id="order_id"
+                placeholder="UUID de la orden"
                 value={orderId}
                 onChange={(e) => setOrderId(e.target.value)}
-                placeholder="UUID de la orden"
               />
             </div>
             <div>
@@ -182,9 +184,9 @@ export function CheckoutForm() {
                 {(["flow", "mercadopago", "paypal"] as const).map((g) => (
                   <Button
                     key={g}
+                    size="sm"
                     type="button"
                     variant={gateway === g ? "default" : "outline"}
-                    size="sm"
                     onClick={() => setGateway(g)}
                   >
                     {g === "flow"
@@ -201,7 +203,7 @@ export function CheckoutForm() {
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
-            <Button type="submit" disabled={loading} className="w-full">
+            <Button className="w-full" disabled={loading} type="submit">
               {loading
                 ? "Creando intento…"
                 : gateway === "mercadopago"
@@ -225,8 +227,8 @@ export function CheckoutForm() {
               }}
             />
             <Button
-              variant="outline"
               className="w-full"
+              variant="outline"
               onClick={() => {
                 setPreferenceId(null);
                 setError(null);

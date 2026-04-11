@@ -4,9 +4,10 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/utils/supabase/server";
+
 import { appLogger as logger } from "@/lib/logger";
 import { validateFeature } from "@/lib/saas/tier-validator";
+import { createClient } from "@/utils/supabase/server";
 
 export const dynamic = "force-dynamic";
 

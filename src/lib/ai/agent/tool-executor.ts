@@ -1,10 +1,7 @@
-import type {
-  ToolDefinition,
-  ToolExecutionContext,
-  ToolResult,
-} from "../tools/types";
-import { getToolByName } from "../tools";
 import { logAdminActivity } from "@/lib/api/middleware";
+
+import { getToolByName } from "../tools";
+import type { ToolExecutionContext, ToolResult } from "../tools/types";
 
 export class ToolExecutor {
   private context: ToolExecutionContext;
@@ -13,7 +10,7 @@ export class ToolExecutor {
     this.context = context;
   }
 
-  async executeTool(toolName: string, params: any): Promise<ToolResult> {
+  async executeTool(toolName: string, params: unknown): Promise<ToolResult> {
     const tool = getToolByName(toolName);
 
     if (!tool) {
@@ -54,7 +51,7 @@ export class ToolExecutor {
       }
 
       return result;
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (!this.context.skipAdminActivityLog) {
         await logAdminActivity(
           this.context.userId,
@@ -74,7 +71,7 @@ export class ToolExecutor {
 
   validateToolCall(
     toolName: string,
-    params: any,
+    params: unknown,
   ): { valid: boolean; error?: string } {
     const tool = getToolByName(toolName);
     if (!tool) {

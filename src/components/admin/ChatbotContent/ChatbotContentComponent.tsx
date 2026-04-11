@@ -1,23 +1,23 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback, useMemo } from "react";
-import { ResizablePanel } from "@/components/ui/resizable";
-import { MessageList } from "../chat/MessageList";
-import { ChatInput } from "../chat/ChatInput";
-import { ChatHistorySidebar } from "../chat/ChatHistorySidebar";
-import { SettingsPanel } from "../chat/SettingsPanel";
-import { ToolBrowser } from "../chat/ToolBrowser";
-import { ChatHeader } from "../chat/ChatHeader";
-import { ExportDialog } from "../chat/ExportDialog";
-import { useChatSession } from "@/hooks/useChatSession";
-import { useChatConfig } from "@/hooks/useChatConfig";
-import { useBranch } from "@/hooks/useBranch";
-import { cn } from "@/lib/utils";
-import { toast } from "sonner";
 import { Sparkles } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { toast } from "sonner";
+
+import { useBranch } from "@/hooks/useBranch";
+import { useChatConfig } from "@/hooks/useChatConfig";
+import { useChatSession } from "@/hooks/useChatSession";
+import type { InsightSection } from "@/lib/ai/insights/schemas";
+import { cn } from "@/lib/utils";
+
+import { ChatHeader } from "../chat/ChatHeader";
+import { ChatHistorySidebar } from "../chat/ChatHistorySidebar";
+import { ChatInput } from "../chat/ChatInput";
+import { ExportDialog } from "../chat/ExportDialog";
+import { MessageList } from "../chat/MessageList";
+import { SettingsPanel } from "../chat/SettingsPanel";
 import { useChatMessages } from "./hooks/useChatMessages";
 import { useKeyboardShortcuts } from "./hooks/useKeyboardShortcuts";
-import type { InsightSection } from "@/lib/ai/insights/schemas";
 
 interface ChatbotContentProps {
   className?: string;
@@ -236,9 +236,9 @@ export function ChatbotContent({
         <div className="absolute inset-0 z-[60] bg-white dark:bg-slate-950 overflow-y-auto animate-in slide-in-from-left duration-300">
           <ChatHistorySidebar
             currentSessionId={currentSession?.id}
-            onSessionSelect={handleSessionSelect}
-            onNewSession={handleNewSession}
             onClose={() => setShowHistory(false)}
+            onNewSession={handleNewSession}
+            onSessionSelect={handleSessionSelect}
           />
         </div>
       )}
@@ -248,29 +248,29 @@ export function ChatbotContent({
           <div className="absolute inset-0 z-[60] bg-white dark:bg-slate-950 overflow-y-auto animate-in slide-in-from-right duration-300">
             <SettingsPanel
               config={config}
-              onConfigChange={updateChatConfig}
               onClose={() => setShowSettings(false)}
+              onConfigChange={updateChatConfig}
             />
           </div>
         )}
         {/* Fixed Header */}
         <div className="flex-shrink-0 z-20 bg-admin-bg-primary border-b border-admin-border-primary">
           <ChatHeader
+            isSidebarMode={isSidebarMode}
             title={sessionTitle}
+            onClear={handleClear}
+            onClose={onClose}
+            onDelete={handleDelete}
+            onExpandClick={onExpandClick}
+            onExport={handleExport}
+            onHistoryClick={() => setShowHistory(!showHistory)}
+            onNewConversation={handleNewSession}
+            onSettingsClick={() => setShowSettings(!showSettings)}
             onTitleChange={(title) => {
               if (currentSession) {
                 updateSessionTitle(currentSession.id, title);
               }
             }}
-            onSettingsClick={() => setShowSettings(!showSettings)}
-            onHistoryClick={() => setShowHistory(!showHistory)}
-            onNewConversation={handleNewSession}
-            onExport={handleExport}
-            onClear={handleClear}
-            onDelete={handleDelete}
-            onClose={onClose}
-            onExpandClick={onExpandClick}
-            isSidebarMode={isSidebarMode}
           />
         </div>
 
@@ -279,8 +279,8 @@ export function ChatbotContent({
           <div className="flex-1 flex flex-col min-h-0 overflow-hidden bg-white dark:bg-slate-950">
             <div className="flex-1 overflow-y-auto min-h-0">
               <MessageList
-                messages={messages}
                 isStreaming={isStreaming && !currentStreamingContent}
+                messages={messages}
                 onMessageAction={(messageId, action) => {
                   if (action === "copy") {
                     const message = messages.find((m) => m.id === messageId);
@@ -311,14 +311,14 @@ export function ChatbotContent({
               <div className="flex flex-wrap gap-2">
                 {quickSuggestions[currentSection].map((suggestion, index) => (
                   <button
+                    className="text-xs px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 hover:bg-primary hover:text-white border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm active:scale-95 group flex items-center gap-2"
+                    disabled={isStreaming}
                     key={index}
                     onClick={() => {
                       if (!isStreaming) {
                         sendMessage(suggestion);
                       }
                     }}
-                    disabled={isStreaming}
-                    className="text-xs px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 hover:bg-primary hover:text-white border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm active:scale-95 group flex items-center gap-2"
                   >
                     <Sparkles className="w-3 h-3 text-primary group-hover:text-white transition-colors" />
                     {suggestion}
@@ -328,24 +328,24 @@ export function ChatbotContent({
             </div>
           )}
           <ChatInput
-            onSend={(msg, fileId) => sendMessage(msg, fileId)}
-            onStop={stopStreaming}
             disabled={isStreaming}
             placeholder={
               currentSection
                 ? `Pregunta sobre ${currentSection === "dashboard" ? "el dashboard" : currentSection === "inventory" ? "inventario" : currentSection === "clients" ? "clientes" : currentSection === "pos" ? "ventas" : "analíticas"}...`
                 : "Escribe tu mensaje..."
             }
+            onSend={(msg, fileId) => sendMessage(msg, fileId)}
+            onStop={stopStreaming}
           />
         </div>
       </div>
 
       {currentSession && (
         <ExportDialog
-          open={showExport}
-          onOpenChange={setShowExport}
-          session={currentSession}
           messages={messages}
+          open={showExport}
+          session={currentSession}
+          onOpenChange={setShowExport}
         />
       )}
     </div>

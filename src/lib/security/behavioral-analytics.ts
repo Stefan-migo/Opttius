@@ -9,6 +9,7 @@
 
 import { appLogger as logger } from "@/lib/logger";
 import { getRedisClient } from "@/lib/redis/client";
+
 import { SecurityEvent, SecuritySeverity } from "./events";
 
 // Types for behavioral analytics
@@ -19,7 +20,7 @@ export interface UserAction {
   ipAddress?: string;
   userAgent?: string;
   resourceId?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface BehaviorBaseline {
@@ -50,7 +51,7 @@ export interface AnomalyRecord {
   anomalyType: string;
   severity: SecuritySeverity;
   confidence: number;
-  details: Record<string, any>;
+  details: Record<string, unknown>;
 }
 
 export interface ThreatAssessment {

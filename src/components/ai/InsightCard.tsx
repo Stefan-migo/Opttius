@@ -1,19 +1,20 @@
 "use client";
 
-import { useState } from "react";
 import {
   AlertTriangle,
-  TrendingUp,
-  Info,
   CheckCircle,
-  X,
-  Star,
-  ExternalLink,
   ChevronRight,
+  ExternalLink,
+  Info,
+  Star,
+  TrendingUp,
+  X,
 } from "lucide-react";
+import { useState } from "react";
+
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 import type { DatabaseInsight } from "@/lib/ai/insights/schemas";
+import { cn } from "@/lib/utils";
 
 interface InsightCardProps {
   insight: DatabaseInsight;
@@ -106,8 +107,6 @@ export function InsightCard({
     const CardWrapper = isClickable ? "button" : "div";
     return (
       <CardWrapper
-        type={isClickable ? "button" : undefined}
-        onClick={isClickable ? onExpand : undefined}
         className={cn(
           "relative rounded-xl border-l-2 p-2.5 transition-all w-full text-left",
           config.bgColor,
@@ -115,6 +114,8 @@ export function InsightCard({
           isClickable &&
             "cursor-pointer hover:shadow-md focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-epoch-primary/50 active:scale-[0.99]",
         )}
+        type={isClickable ? "button" : undefined}
+        onClick={isClickable ? onExpand : undefined}
       >
         <div className="flex items-start gap-2">
           {/* Icon */}
@@ -136,14 +137,14 @@ export function InsightCard({
                 {insight.title}
               </h4>
               <Button
-                variant="ghost"
-                size="sm"
+                aria-label="Descartar"
                 className="h-5 w-5 p-0 text-gray-400 hover:text-gray-600 flex-shrink-0"
+                size="sm"
+                variant="ghost"
                 onClick={(e) => {
                   e.stopPropagation();
                   onDismiss();
                 }}
-                aria-label="Descartar"
               >
                 <X className="h-3 w-3" />
               </Button>
@@ -166,8 +167,8 @@ export function InsightCard({
                   {Array.from({ length: Math.min(insight.priority, 5) }).map(
                     (_, i) => (
                       <div
-                        key={i}
                         className={cn("w-1 h-1 rounded-full", config.dotColor)}
+                        key={i}
                       />
                     ),
                   )}
@@ -176,9 +177,9 @@ export function InsightCard({
                 {/* Feedback */}
                 {!showFeedback && !insight.feedback_score && (
                   <Button
-                    variant="ghost"
-                    size="sm"
                     className="h-5 px-1.5 text-xs text-gray-500 hover:text-gray-700"
+                    size="sm"
+                    variant="ghost"
                     onClick={(e) => {
                       e.stopPropagation();
                       setShowFeedback(true);
@@ -193,9 +194,9 @@ export function InsightCard({
                     <div className="flex items-center gap-0.5">
                       {[1, 2, 3, 4, 5].map((score) => (
                         <button
+                          className="focus:outline-none"
                           key={score}
                           type="button"
-                          className="focus:outline-none"
                           onClick={(e) => {
                             e.stopPropagation();
                             handleStarClick(score);
@@ -216,13 +217,13 @@ export function InsightCard({
                       ))}
                     </div>
                     <textarea
-                      placeholder="Comentario (opcional)"
                       className="w-full text-xs border rounded px-2 py-1 min-h-[2rem] max-h-20 resize-y"
+                      maxLength={500}
+                      placeholder="Comentario (opcional)"
+                      rows={2}
                       value={feedbackComment}
                       onChange={(e) => setFeedbackComment(e.target.value)}
                       onClick={(e) => e.stopPropagation()}
-                      maxLength={500}
-                      rows={2}
                     />
                   </div>
                 )}
@@ -238,14 +239,14 @@ export function InsightCard({
               {/* Action button */}
               {insight.action_label && insight.action_url && (
                 <Button
-                  variant="outline"
-                  size="sm"
                   className={cn(
                     "h-6 px-2 text-xs font-medium",
                     config.color,
                     config.borderColor,
                     "hover:bg-white",
                   )}
+                  size="sm"
+                  variant="outline"
                   onClick={(e) => {
                     e.stopPropagation();
                     handleActionClick(e);
@@ -284,11 +285,11 @@ export function InsightCard({
           </div>
         </div>
         <Button
-          variant="ghost"
-          size="sm"
-          className="h-8 w-8 p-0 text-gray-400 hover:text-gray-600"
-          onClick={onDismiss}
           aria-label="Descartar insight"
+          className="h-8 w-8 p-0 text-gray-400 hover:text-gray-600"
+          size="sm"
+          variant="ghost"
+          onClick={onDismiss}
         >
           <X className="h-4 w-4" />
         </Button>
@@ -301,11 +302,11 @@ export function InsightCard({
             <div className="flex gap-0.5">
               {Array.from({ length: 10 }).map((_, i) => (
                 <div
-                  key={i}
                   className={cn(
                     "w-1.5 h-1.5 rounded-full",
                     i < insight.priority ? config.dotColor : "bg-gray-200",
                   )}
+                  key={i}
                 />
               ))}
             </div>
@@ -313,9 +314,9 @@ export function InsightCard({
 
           {!showFeedback && !insight.feedback_score && (
             <Button
-              variant="ghost"
-              size="sm"
               className="h-7 text-xs text-gray-500 hover:text-gray-700"
+              size="sm"
+              variant="ghost"
               onClick={() => setShowFeedback(true)}
             >
               <Star className="h-3 w-3 mr-1" />
@@ -328,13 +329,13 @@ export function InsightCard({
               <div className="flex items-center gap-1">
                 {[1, 2, 3, 4, 5].map((score) => (
                   <button
+                    aria-label={`${score} estrellas`}
+                    className="focus:outline-none"
                     key={score}
                     type="button"
-                    className="focus:outline-none"
                     onClick={() => handleStarClick(score)}
                     onMouseEnter={() => setHoveredStar(score)}
                     onMouseLeave={() => setHoveredStar(null)}
-                    aria-label={`${score} estrellas`}
                   >
                     <Star
                       className={cn(
@@ -349,12 +350,12 @@ export function InsightCard({
                 ))}
               </div>
               <textarea
-                placeholder="Comentario (opcional)"
                 className="w-full text-sm border rounded px-2 py-1.5 min-h-[2.5rem] max-h-24 resize-y"
+                maxLength={500}
+                placeholder="Comentario (opcional)"
+                rows={2}
                 value={feedbackComment}
                 onChange={(e) => setFeedbackComment(e.target.value)}
-                maxLength={500}
-                rows={2}
               />
             </div>
           )}
@@ -369,9 +370,9 @@ export function InsightCard({
 
         {insight.action_label && insight.action_url && (
           <Button
-            variant="outline"
-            size="sm"
             className={cn("text-xs", config.color, config.borderColor)}
+            size="sm"
+            variant="outline"
             onClick={handleActionClick}
           >
             {insight.action_label}

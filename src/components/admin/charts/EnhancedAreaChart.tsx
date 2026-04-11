@@ -1,16 +1,15 @@
 "use client";
 
+import { useMemo } from "react";
 import {
-  AreaChart as RechartsAreaChart,
   Area,
+  AreaChart as RechartsAreaChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
   XAxis,
   YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  Legend,
 } from "recharts";
-import { useMemo } from "react";
 
 interface EnhancedAreaChartProps {
   data: Array<{ date: string; value: number; count?: number }>;
@@ -57,7 +56,7 @@ export function EnhancedAreaChart({
     );
   }
 
-  const CustomTooltip = ({ active, payload }: any) => {
+  const CustomTooltip = ({ active, payload }: unknown) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       return (
@@ -88,18 +87,18 @@ export function EnhancedAreaChart({
         </h4>
       )}
 
-      <ResponsiveContainer width="100%" height={height}>
+      <ResponsiveContainer height={height} width="100%">
         <RechartsAreaChart
-          id="enhanced-area-chart"
           data={chartData}
+          id="enhanced-area-chart"
           margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
         >
           <defs>
             <linearGradient
               id={`colorGradient-${color}`}
               x1="0"
-              y1="0"
               x2="0"
+              y1="0"
               y2="1"
             >
               <stop offset="5%" stopColor={color} stopOpacity={0.8} />
@@ -108,45 +107,45 @@ export function EnhancedAreaChart({
           </defs>
           {showGrid && (
             <CartesianGrid
-              strokeDasharray="3 3"
-              stroke="#E5E7EB"
-              opacity={0.3}
               className="dark:opacity-20"
+              opacity={0.3}
+              stroke="#E5E7EB"
+              strokeDasharray="3 3"
             />
           )}
           <XAxis
-            dataKey="formattedDate"
-            stroke="#6B7280"
-            fontSize={12}
-            tickLine={false}
             axisLine={false}
-            interval="preserveStartEnd"
             className="dark:text-gray-400"
+            dataKey="formattedDate"
+            fontSize={12}
+            interval="preserveStartEnd"
+            stroke="#6B7280"
+            tickLine={false}
           />
           <YAxis
-            stroke="#6B7280"
-            fontSize={12}
-            tickLine={false}
             axisLine={false}
+            className="dark:text-gray-400"
+            fontSize={12}
+            stroke="#6B7280"
             tickFormatter={(value) => {
               // Format large numbers
               if (value >= 1000000) return `${(value / 1000000).toFixed(1)}M`;
               if (value >= 1000) return `${(value / 1000).toFixed(1)}K`;
               return formatValue(value);
             }}
-            className="dark:text-gray-400"
+            tickLine={false}
           />
           <Tooltip content={<CustomTooltip />} />
           <Area
-            type="monotone"
-            dataKey="displayValue"
-            stroke={color}
-            strokeWidth={2}
-            fill={`url(#colorGradient-${color})`}
-            dot={{ fill: color, r: 4 }}
             activeDot={{ r: 6, fill: color }}
             animationDuration={1000}
             animationEasing="ease-out"
+            dataKey="displayValue"
+            dot={{ fill: color, r: 4 }}
+            fill={`url(#colorGradient-${color})`}
+            stroke={color}
+            strokeWidth={2}
+            type="monotone"
           />
         </RechartsAreaChart>
       </ResponsiveContainer>

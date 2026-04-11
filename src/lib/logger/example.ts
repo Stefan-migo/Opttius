@@ -14,7 +14,7 @@ export function logUserLogin(userId: string) {
 }
 
 // Example 2: Debug log (only in development)
-export function logDebugInfo(data: any) {
+export function logDebugInfo(data: unknown) {
   logger.debug("Debug information", data);
 }
 
@@ -24,11 +24,11 @@ export function logLowStock(productId: string, currentStock: number) {
 }
 
 // Example 4: Error log with Error object
-export function logError(message: string, error: Error, context?: any) {
-  logger.error(message, error as any, context);
+export function logError(message: string, error: Error, context?: unknown) {
+  logger.error(message, error as unknown, context);
 }
 
 // Example 5: Error log with plain object
-export function logApiError(message: string, errorData: any) {
+export function logApiError(message: string, errorData: unknown) {
   logger.error(message, errorData, undefined);
 }

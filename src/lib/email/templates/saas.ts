@@ -3,14 +3,15 @@
  * Estas funciones implementan las plantillas para comunicación con administradores de ópticas
  */
 
-import { sendEmail } from "../client";
-import { loadEmailTemplate, incrementTemplateUsage } from "../template-loader";
-import {
-  replaceTemplateVariables,
-  getDefaultVariables,
-} from "../template-utils";
-import { wrapInModernLayout } from "../layout";
 import { createServiceRoleClient } from "@/utils/supabase/server";
+
+import { sendEmail } from "../client";
+import { wrapInModernLayout } from "../layout";
+import { incrementTemplateUsage, loadEmailTemplate } from "../template-loader";
+import {
+  getDefaultVariables,
+  replaceTemplateVariables,
+} from "../template-utils";
 
 // ============================================================================
 // Interfaces para tipos de datos SaaS

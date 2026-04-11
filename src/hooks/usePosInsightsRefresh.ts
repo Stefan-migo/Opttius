@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
+import { useEffect, useRef } from "react";
 
 /** Minimal shape for prescription/customer used by POS insights refresh */
 type PrescriptionLike = { id?: unknown };

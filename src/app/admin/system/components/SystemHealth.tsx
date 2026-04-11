@@ -1,8 +1,10 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Activity, AlertTriangle, RefreshCw, XCircle } from "lucide-react";
+
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -11,7 +13,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Activity, AlertTriangle, XCircle, RefreshCw } from "lucide-react";
+
 import { HealthMetric, HealthStatus } from "../hooks/useSystemHealth";
 
 interface SystemHealthProps {
@@ -99,11 +101,11 @@ export default function SystemHealth({
               <span className="truncate break-words">Métricas de Salud</span>
             </div>
             <Button
-              variant="outline"
-              size="sm"
-              onClick={onRefresh}
-              disabled={refreshing}
               className="rounded-xl border-epoch-primary/20 min-h-[44px] min-w-[44px] shrink-0"
+              disabled={refreshing}
+              size="sm"
+              variant="outline"
+              onClick={onRefresh}
             >
               <RefreshCw
                 className={`h-3 w-3 sm:h-4 sm:w-4 ${refreshing ? "animate-spin" : ""}`}
@@ -119,11 +121,11 @@ export default function SystemHealth({
                 No hay métricas de salud disponibles
               </p>
               <Button
-                variant="outline"
-                size="sm"
-                onClick={onRefresh}
-                disabled={refreshing}
                 className="rounded-xl border-epoch-primary/20 min-h-[44px]"
+                disabled={refreshing}
+                size="sm"
+                variant="outline"
+                onClick={onRefresh}
               >
                 <RefreshCw
                   className={`h-3 w-3 mr-2 ${refreshing ? "animate-spin" : ""}`}
@@ -161,10 +163,10 @@ export default function SystemHealth({
                       </TableCell>
                       <TableCell>
                         <Badge
+                          className="text-[10px] sm:text-xs"
                           variant={
                             metric.is_healthy ? "default" : "destructive"
                           }
-                          className="text-[10px] sm:text-xs"
                         >
                           {metric.is_healthy ? "Saludable" : "Problema"}
                         </Badge>
@@ -193,11 +195,11 @@ export default function SystemHealth({
                   (m) => m.metric_name === "memory_usage",
                 ) && (
                   <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={onClearMemory}
-                    disabled={clearingMemory}
                     className="rounded-xl border-epoch-primary/20 min-h-[44px] w-full sm:w-auto"
+                    disabled={clearingMemory}
+                    size="sm"
+                    variant="outline"
+                    onClick={onClearMemory}
                   >
                     <RefreshCw
                       className={`h-4 w-4 mr-2 ${clearingMemory ? "animate-spin" : ""}`}
@@ -211,8 +213,8 @@ export default function SystemHealth({
               <div className="space-y-3 sm:space-y-4">
                 {healthStatus.critical_metrics.map((metric) => (
                   <div
-                    key={metric.id}
                     className="p-3 sm:p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl"
+                    key={metric.id}
                   >
                     <div className="flex items-start space-x-3">
                       <XCircle className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
@@ -221,7 +223,7 @@ export default function SystemHealth({
                           <span className="font-semibold text-red-700 dark:text-red-400">
                             Crítico
                           </span>
-                          <Badge variant="destructive" className="text-xs">
+                          <Badge className="text-xs" variant="destructive">
                             Requiere Acción
                           </Badge>
                         </div>
@@ -258,8 +260,8 @@ export default function SystemHealth({
 
                 {healthStatus.warning_metrics.map((metric) => (
                   <div
-                    key={metric.id}
                     className="p-3 sm:p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-xl"
+                    key={metric.id}
                   >
                     <div className="flex items-start space-x-3">
                       <AlertTriangle className="h-5 w-5 text-yellow-500 flex-shrink-0 mt-0.5" />
@@ -272,11 +274,11 @@ export default function SystemHealth({
                           </div>
                           {metric.metric_name === "memory_usage" && (
                             <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={onClearMemory}
-                              disabled={clearingMemory}
                               className="h-7 text-xs rounded-xl min-h-[44px] sm:min-h-7"
+                              disabled={clearingMemory}
+                              size="sm"
+                              variant="outline"
+                              onClick={onClearMemory}
                             >
                               <RefreshCw
                                 className={`h-3 w-3 mr-1 ${clearingMemory ? "animate-spin" : ""}`}

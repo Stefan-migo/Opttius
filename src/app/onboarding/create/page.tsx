@@ -1,13 +1,22 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useAuthContext } from "@/contexts/AuthContext";
+import {
+  AlertCircle,
+  ArrowRight,
+  Building2,
+  CheckCircle2,
+  Loader2,
+  XCircle,
+} from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Card,
   CardContent,
@@ -15,24 +24,16 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import {
-  Loader2,
-  Building2,
-  CheckCircle2,
-  XCircle,
-  AlertCircle,
-  ArrowRight,
-} from "lucide-react";
-import { generateSlug } from "@/lib/utils/slug-generator";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useAuthContext } from "@/contexts/AuthContext";
 import { useSlugValidation } from "@/hooks/useSlugValidation";
 import {
-  createOrganizationSchema,
   type CreateOrganizationInput,
+  createOrganizationSchema,
 } from "@/lib/api/validation/organization-schemas";
-import { Badge } from "@/components/ui/badge";
-import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { generateSlug } from "@/lib/utils/slug-generator";
 
 export default function CreateOrganizationPage() {
   const router = useRouter();
@@ -150,7 +151,7 @@ export default function CreateOrganizationPage() {
 
       // Redirigir a página de completado
       router.push("/onboarding/complete");
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(err.message || "Error al crear la organización");
       setIsSubmitting(false);
     }
@@ -207,24 +208,24 @@ export default function CreateOrganizationPage() {
         </div>
 
         <Card
-          variant="elevated"
           className="border-0 shadow-2xl overflow-visible"
+          variant="elevated"
         >
           <CardHeader padding="lg">
             <CardTitle size="lg" theme="modern">
               Identidad de la Organización
             </CardTitle>
-            <CardDescription size="lg" className="text-accent-foreground">
+            <CardDescription className="text-accent-foreground" size="lg">
               Esta información será la base de tu perfil empresarial y aparecerá
               en tus documentos oficiales.
             </CardDescription>
           </CardHeader>
           <CardContent padding="lg" spacing="relaxed">
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+            <form className="space-y-8" onSubmit={handleSubmit(onSubmit)}>
               {error && (
                 <Alert
-                  variant="destructive"
                   className="animate-in zoom-in-95 duration-300"
+                  variant="destructive"
                 >
                   <AlertCircle className="h-4 w-4" />
                   <AlertDescription>{error}</AlertDescription>
@@ -235,8 +236,8 @@ export default function CreateOrganizationPage() {
                 {/* Nombre de la organización */}
                 <div className="space-y-3">
                   <Label
-                    htmlFor="name"
                     className="text-sm font-bold text-slate-700 dark:text-slate-300"
+                    htmlFor="name"
                   >
                     Nombre comercial <span className="text-red-500">*</span>
                   </Label>
@@ -246,12 +247,12 @@ export default function CreateOrganizationPage() {
                       {...register("name", {
                         onBlur: handleNameBlur,
                       })}
-                      placeholder="Ej. Óptica Visión Premium"
                       className={cn(
                         "h-12 bg-[var(--admin-bg-primary)] border-[var(--admin-border-secondary)] transition-all focus:ring-4 focus:ring-primary/10",
                         errors.name && "border-red-500 focus:ring-red-500/10",
                       )}
                       disabled={isSubmitting}
+                      placeholder="Ej. Óptica Visión Premium"
                     />
                   </div>
                   {errors.name && (
@@ -266,16 +267,16 @@ export default function CreateOrganizationPage() {
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <Label
-                      htmlFor="slug"
                       className="text-sm font-bold text-slate-700 dark:text-slate-300"
+                      htmlFor="slug"
                     >
                       Identificador de URL (slug){" "}
                       <span className="text-red-500">*</span>
                     </Label>
                     {isSlugValid && (
                       <Badge
-                        variant="healty"
                         className="bg-green-500/10 text-green-600 border-none px-2 text-[10px]"
+                        variant="healty"
                       >
                         ✓ Disponible
                       </Badge>
@@ -285,7 +286,6 @@ export default function CreateOrganizationPage() {
                     <Input
                       id="slug"
                       {...register("slug")}
-                      placeholder="vision-premium"
                       className={cn(
                         "h-12 bg-[var(--admin-bg-primary)] border-[var(--admin-border-secondary)] transition-all focus:ring-4 focus:ring-primary/10 pr-12",
                         (errors.slug || isSlugInvalid) &&
@@ -294,6 +294,7 @@ export default function CreateOrganizationPage() {
                           "border-green-500/50 focus:ring-green-500/5",
                       )}
                       disabled={isSubmitting}
+                      placeholder="vision-premium"
                     />
                     {showSlugValidation && (
                       <div className="absolute right-4 top-1/2 -translate-y-1/2 transition-all">
@@ -329,17 +330,17 @@ export default function CreateOrganizationPage() {
                 {/* Nombre de primera sucursal */}
                 <div className="space-y-3">
                   <Label
-                    htmlFor="branchName"
                     className="text-sm font-bold text-slate-700 dark:text-slate-300"
+                    htmlFor="branchName"
                   >
                     Nombre de tu primera sucursal
                   </Label>
                   <Input
                     id="branchName"
                     {...register("branchName")}
-                    placeholder="Ej. Sucursal Central o Casa Matriz"
                     className="h-12 bg-[var(--admin-bg-primary)] border-[var(--admin-border-secondary)] transition-all focus:ring-4 focus:ring-primary/10"
                     disabled={isSubmitting}
+                    placeholder="Ej. Sucursal Central o Casa Matriz"
                   />
                   <p className="text-[11px] text-slate-500 font-medium italic">
                     Puedes crear más sucursales después en la configuración.
@@ -350,23 +351,23 @@ export default function CreateOrganizationPage() {
               {/* Botones */}
               <div className="flex flex-col sm:flex-row gap-4 pt-6">
                 <Button
+                  className="flex-1 min-w-0 h-12 border-2 bg-[var(--admin-bg-tertiary)] border-[var(--admin-accent-primary)]"
+                  disabled={isSubmitting}
                   type="button"
                   variant="outline"
                   onClick={() => router.back()}
-                  disabled={isSubmitting}
-                  className="flex-1 min-w-0 h-12 border-2 bg-[var(--admin-bg-tertiary)] border-[var(--admin-accent-primary)]"
                 >
                   Regresar
                 </Button>
                 <Button
-                  type="submit"
+                  shimmer
+                  className="flex-1 min-w-0 h-12 shadow-xl shadow-primary/20 overflow-hidden"
                   disabled={
                     isSubmitting ||
                     slugValidation.isValidating ||
                     slugValidation.isAvailable === false
                   }
-                  className="flex-1 min-w-0 h-12 shadow-xl shadow-primary/20 overflow-hidden"
-                  shimmer
+                  type="submit"
                 >
                   {isSubmitting ? (
                     <>
@@ -394,8 +395,8 @@ export default function CreateOrganizationPage() {
           <p className="text-sm text-slate-500 dark:text-slate-500 font-medium">
             ¿Solo quieres dar un vistazo?{" "}
             <Link
-              href="/onboarding/choice"
               className="text-primary hover:text-primary/80 font-bold hover:underline transition-all"
+              href="/onboarding/choice"
             >
               Explorar demo primero
             </Link>

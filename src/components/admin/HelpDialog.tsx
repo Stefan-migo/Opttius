@@ -1,6 +1,9 @@
 "use client";
 
+import { HelpCircle } from "lucide-react";
 import { useState } from "react";
+
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -9,8 +12,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { HelpCircle } from "lucide-react";
 
 interface HelpDialogProps {
   title: string;
@@ -33,10 +34,10 @@ export function HelpDialog({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button
-          variant="ghost"
-          size="sm"
           className="h-6 w-6 p-0 hover:bg-azul-profundo/10"
+          size="sm"
           title={`Ayuda: ${title}`}
+          variant="ghost"
         >
           <HelpCircle className="h-4 w-4 text-tierra-media hover:text-azul-profundo transition-colors" />
         </Button>

@@ -5,9 +5,10 @@
  * Requires CRON_SECRET for authorization.
  */
 import { NextRequest, NextResponse } from "next/server";
-import { createServiceRoleClient } from "@/utils/supabase/server";
-import { appLogger as logger } from "@/lib/logger";
+
 import { sendSaaSPaymentFailed } from "@/lib/email/templates/saas";
+import { appLogger as logger } from "@/lib/logger";
+import { createServiceRoleClient } from "@/utils/supabase/server";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;

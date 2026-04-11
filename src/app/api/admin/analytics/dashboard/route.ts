@@ -1,19 +1,20 @@
-import { NextRequest, NextResponse } from "next/server";
 import { unstable_cache } from "next/cache";
-import { createServiceRoleClient } from "@/lib/supabase";
-import { createClient } from "@/utils/supabase/server";
-import { getBranchContext, addBranchFilter } from "@/lib/api/branch-middleware";
-import { appLogger as logger } from "@/lib/logger";
-import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
+import { NextRequest } from "next/server";
+
+import {
+  computeInventoryMetrics,
+  parseAnalyticsPeriod,
+} from "@/lib/analytics/analytics-service";
+import { getBranchContext } from "@/lib/api/branch-middleware";
 import { AuthenticationError, AuthorizationError } from "@/lib/api/errors";
 import {
-  createApiSuccessResponse,
   createApiErrorResponse,
+  createApiSuccessResponse,
 } from "@/lib/api/response";
-import {
-  parseAnalyticsPeriod,
-  computeInventoryMetrics,
-} from "@/lib/analytics/analytics-service";
+import { appLogger as logger } from "@/lib/logger";
+import { createServiceRoleClient } from "@/lib/supabase";
+import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
+import { createClient } from "@/utils/supabase/server";
 
 export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
@@ -314,8 +315,8 @@ export async function GET(request: NextRequest) {
         const orderItems = orderItemsResult.data || [];
 
         // Filter order items to only include items from orders in the filtered set
-        const orderIds = new Set(ordersInPeriod.map((o: any) => o.id));
-        const filteredOrderItems = orderItems.filter((item: any) =>
+        const orderIds = new Set(ordersInPeriod.map((o: unknown) => o.id));
+        const filteredOrderItems = orderItems.filter((item: unknown) =>
           orderIds.has(item.order_id),
         );
 
@@ -422,18 +423,20 @@ export async function GET(request: NextRequest) {
           );
         } else {
           prevPosRevenue = prevOrders
-            .filter((o: any) => o.is_pos_sale && o.payment_status === "paid")
+            .filter(
+              (o: unknown) => o.is_pos_sale && o.payment_status === "paid",
+            )
             .reduce(
-              (sum: number, order: any) =>
+              (sum: number, order: unknown) =>
                 sum + Number(order.total_amount || 0),
               0,
             );
         }
 
         const prevWorkOrdersRevenue = prevWorkOrders
-          .filter((wo: any) => wo.payment_status === "paid")
+          .filter((wo: unknown) => wo.payment_status === "paid")
           .reduce(
-            (sum: number, wo: any) => sum + Number(wo.total_amount || 0),
+            (sum: number, wo: unknown) => sum + Number(wo.total_amount || 0),
             0,
           );
 
@@ -447,12 +450,12 @@ export async function GET(request: NextRequest) {
         // WORK ORDERS METRICS
         // ====================================
         const workOrdersByStatus: Record<string, number> = {};
-        workOrders.forEach((wo: any) => {
+        workOrders.forEach((wo: unknown) => {
           const status = wo.status || "quote";
           workOrdersByStatus[status] = (workOrdersByStatus[status] || 0) + 1;
         });
 
-        const pendingWorkOrders = workOrders.filter((wo: any) =>
+        const pendingWorkOrders = workOrders.filter((wo: unknown) =>
           [
             "quote",
             "ordered",
@@ -464,22 +467,22 @@ export async function GET(request: NextRequest) {
         ).length;
 
         const completedWorkOrders = workOrders.filter(
-          (wo: any) => wo.status === "delivered",
+          (wo: unknown) => wo.status === "delivered",
         ).length;
         const cancelledWorkOrders = workOrders.filter(
-          (wo: any) => wo.status === "cancelled",
+          (wo: unknown) => wo.status === "cancelled",
         ).length;
 
         // Calculate average delivery time (from ordered to delivered)
         const deliveredWorkOrders = workOrders.filter(
-          (wo: any) =>
+          (wo: unknown) =>
             wo.status === "delivered" && wo.ordered_at && wo.delivered_at,
         );
 
         let avgDeliveryDays = 0;
         if (deliveredWorkOrders.length > 0) {
           const totalDays = deliveredWorkOrders.reduce(
-            (sum: number, wo: any) => {
+            (sum: number, wo: unknown) => {
               const ordered = new Date(wo.ordered_at);
               const delivered = new Date(wo.delivered_at);
               const days = Math.ceil(
@@ -497,23 +500,23 @@ export async function GET(request: NextRequest) {
         // QUOTES METRICS
         // ====================================
         const quotesByStatus: Record<string, number> = {};
-        quotes.forEach((q: any) => {
+        quotes.forEach((q: unknown) => {
           const status = q.status || "draft";
           quotesByStatus[status] = (quotesByStatus[status] || 0) + 1;
         });
 
         const totalQuotes = quotes.length;
         const acceptedQuotes = quotes.filter(
-          (q: any) => q.status === "accepted",
+          (q: unknown) => q.status === "accepted",
         ).length;
         const rejectedQuotes = quotes.filter(
-          (q: any) => q.status === "rejected",
+          (q: unknown) => q.status === "rejected",
         ).length;
         const expiredQuotes = quotes.filter(
-          (q: any) => q.status === "expired",
+          (q: unknown) => q.status === "expired",
         ).length;
         const convertedQuotes = quotes.filter(
-          (q: any) => q.status === "converted_to_work",
+          (q: unknown) => q.status === "converted_to_work",
         ).length;
 
         const quoteConversionRate =
@@ -524,7 +527,7 @@ export async function GET(request: NextRequest) {
         const avgQuoteValue =
           totalQuotes > 0
             ? quotes.reduce(
-                (sum: number, q: any) => sum + Number(q.total_amount || 0),
+                (sum: number, q: unknown) => sum + Number(q.total_amount || 0),
                 0,
               ) / totalQuotes
             : 0;
@@ -533,7 +536,7 @@ export async function GET(request: NextRequest) {
         // APPOINTMENTS METRICS
         // ====================================
         const appointmentsByStatus: Record<string, number> = {};
-        appointments.forEach((apt: any) => {
+        appointments.forEach((apt: unknown) => {
           const status = apt.status || "scheduled";
           appointmentsByStatus[status] =
             (appointmentsByStatus[status] || 0) + 1;
@@ -541,13 +544,13 @@ export async function GET(request: NextRequest) {
 
         const totalAppointments = appointments.length;
         const completedAppointments = appointments.filter(
-          (apt: any) => apt.status === "completed",
+          (apt: unknown) => apt.status === "completed",
         ).length;
         const cancelledAppointments = appointments.filter(
-          (apt: any) => apt.status === "cancelled",
+          (apt: unknown) => apt.status === "cancelled",
         ).length;
         const noShowAppointments = appointments.filter(
-          (apt: any) => apt.status === "no_show",
+          (apt: unknown) => apt.status === "no_show",
         ).length;
 
         const appointmentCompletionRate =
@@ -568,13 +571,13 @@ export async function GET(request: NextRequest) {
 
         // Customers with multiple orders/work orders (recurring)
         const customerOrderCounts: Record<string, number> = {};
-        ordersInPeriod.forEach((o: any) => {
+        ordersInPeriod.forEach((o: unknown) => {
           if (o.customer_email) {
             customerOrderCounts[o.customer_email] =
               (customerOrderCounts[o.customer_email] || 0) + 1;
           }
         });
-        workOrders.forEach((wo: any) => {
+        workOrders.forEach((wo: unknown) => {
           // Work orders have customer_id, we'd need to join to get email
           // For now, count unique customer_ids
           if (wo.customer_id) {
@@ -589,7 +592,7 @@ export async function GET(request: NextRequest) {
         // ====================================
         // PRODUCTS METRICS (from product_branch_stock via analytics-service)
         // ====================================
-        const productIdsInCatalog = new Set(products.map((p: any) => p.id));
+        const productIdsInCatalog = new Set(products.map((p: unknown) => p.id));
         const inventoryMetrics = computeInventoryMetrics(
           productBranchStock as Array<{
             product_id: string;
@@ -603,8 +606,8 @@ export async function GET(request: NextRequest) {
         const outOfStockProducts = inventoryMetrics.outOfStock;
 
         // Top products by revenue
-        const productStats: Record<string, any> = {};
-        filteredOrderItems.forEach((item: any) => {
+        const productStats: Record<string, unknown> = {};
+        filteredOrderItems.forEach((item: unknown) => {
           const productId = item.product_id;
           if (!productStats[productId]) {
             productStats[productId] = {
@@ -621,7 +624,7 @@ export async function GET(request: NextRequest) {
         });
 
         const topProducts = Object.values(productStats)
-          .map((stat: any) => ({
+          .map((stat: unknown) => ({
             id: stat.id,
             name: stat.name,
             category: "General",
@@ -634,10 +637,10 @@ export async function GET(request: NextRequest) {
 
         // Map product categories
         topProducts.forEach((product) => {
-          const prod = products.find((p: any) => p.id === product.id);
+          const prod = products.find((p: unknown) => p.id === product.id);
           if (prod) {
             const category = categories.find(
-              (c: any) => c.id === prod.category_id,
+              (c: unknown) => c.id === prod.category_id,
             );
             product.category = category?.name || "Sin Categoría";
           }
@@ -645,11 +648,13 @@ export async function GET(request: NextRequest) {
 
         // Category revenue
         const categoryRevenue: Record<string, number> = {};
-        filteredOrderItems.forEach((item: any) => {
-          const product = products.find((p: any) => p.id === item.product_id);
+        filteredOrderItems.forEach((item: unknown) => {
+          const product = products.find(
+            (p: unknown) => p.id === item.product_id,
+          );
           if (product && product.category_id) {
             const category = categories.find(
-              (c: any) => c.id === product.category_id,
+              (c: unknown) => c.id === product.category_id,
             );
             const categoryName = category?.name || "Sin Categoría";
             categoryRevenue[categoryName] =
@@ -674,14 +679,14 @@ export async function GET(request: NextRequest) {
         if (closuresInPeriod.length > 0) {
           // Use closures payment breakdown when available
           const totalClosureRevenue = closuresInPeriod.reduce(
-            (s: number, c: any) => s + (Number(c.total_sales) || 0),
+            (s: number, c: unknown) => s + (Number(c.total_sales) || 0),
             0,
           );
           const totalClosureTxns = closuresInPeriod.reduce(
-            (s: number, c: any) => s + (Number(c.total_transactions) || 0),
+            (s: number, c: unknown) => s + (Number(c.total_transactions) || 0),
             0,
           );
-          closuresInPeriod.forEach((c: any) => {
+          closuresInPeriod.forEach((c: unknown) => {
             const addPayment = (method: string, amount: number) => {
               if (amount > 0) {
                 if (!paymentMethods[method]) {
@@ -705,7 +710,7 @@ export async function GET(request: NextRequest) {
             });
           }
         } else {
-          ordersInPeriod.forEach((o: any) => {
+          ordersInPeriod.forEach((o: unknown) => {
             if (o.is_pos_sale && o.payment_method_type) {
               const method = o.payment_method_type;
               if (!paymentMethods[method]) {
@@ -736,30 +741,31 @@ export async function GET(request: NextRequest) {
           let daySales: number;
           let dayOrderCount: number;
           if (closuresInPeriod.length > 0) {
-            const dayClosures = closuresInPeriod.filter((c: any) => {
+            const dayClosures = closuresInPeriod.filter((c: unknown) => {
               const d = String(c.closure_date).split("T")[0];
               return d === dateStr;
             });
             daySales = dayClosures.reduce(
-              (s: number, c: any) => s + (Number(c.total_sales) || 0),
+              (s: number, c: unknown) => s + (Number(c.total_sales) || 0),
               0,
             );
             dayOrderCount = dayClosures.reduce(
-              (s: number, c: any) => s + (Number(c.total_transactions) || 0),
+              (s: number, c: unknown) =>
+                s + (Number(c.total_transactions) || 0),
               0,
             );
           } else {
-            const dayOrders = ordersInPeriod.filter((order: any) => {
+            const dayOrders = ordersInPeriod.filter((order: unknown) => {
               const orderDate = new Date(order.created_at);
               return orderDate >= currentDate && orderDate < nextDate;
             });
             daySales = dayOrders
               .filter(
-                (o: any) =>
+                (o: unknown) =>
                   o.payment_status === "paid" || o.status === "delivered",
               )
               .reduce(
-                (sum: number, order: any) =>
+                (sum: number, order: unknown) =>
                   sum + Number(order.total_amount || 0),
                 0,
               );
@@ -767,14 +773,14 @@ export async function GET(request: NextRequest) {
           }
 
           // Work orders revenue for this day
-          const dayWorkOrders = workOrders.filter((wo: any) => {
+          const dayWorkOrders = workOrders.filter((wo: unknown) => {
             const woDate = new Date(wo.created_at);
             return woDate >= currentDate && woDate < nextDate;
           });
           const dayWorkOrdersRevenue = dayWorkOrders
-            .filter((wo: any) => wo.payment_status === "paid")
+            .filter((wo: unknown) => wo.payment_status === "paid")
             .reduce(
-              (sum: number, wo: any) => sum + Number(wo.total_amount || 0),
+              (sum: number, wo: unknown) => sum + Number(wo.total_amount || 0),
               0,
             );
 
@@ -785,7 +791,7 @@ export async function GET(request: NextRequest) {
           });
 
           // New customers for this day
-          const dayCustomers = customers.filter((customer: any) => {
+          const dayCustomers = customers.filter((customer: unknown) => {
             const customerDate = new Date(customer.created_at);
             return customerDate >= currentDate && customerDate < nextDate;
           });
@@ -804,7 +810,7 @@ export async function GET(request: NextRequest) {
           });
 
           // Quotes for this day
-          const dayQuotes = quotes.filter((q: any) => {
+          const dayQuotes = quotes.filter((q: unknown) => {
             const quoteDate = new Date(q.created_at);
             return quoteDate >= currentDate && quoteDate < nextDate;
           });
@@ -821,7 +827,7 @@ export async function GET(request: NextRequest) {
         // ====================================
         const supportByStatus: Record<string, number> = {};
         const supportByCategory: Record<string, number> = {};
-        supportTickets.forEach((t: any) => {
+        supportTickets.forEach((t: unknown) => {
           const status = t.status || "open";
           supportByStatus[status] = (supportByStatus[status] || 0) + 1;
           const category = t.category || "other";
@@ -834,21 +840,21 @@ export async function GET(request: NextRequest) {
           "in_progress",
           "waiting_customer",
         ];
-        const openTickets = supportTickets.filter((t: any) =>
+        const openTickets = supportTickets.filter((t: unknown) =>
           openSupportStatuses.includes(t.status || ""),
         ).length;
         const resolvedTickets = supportTickets.filter(
-          (t: any) => t.status === "resolved" || t.status === "closed",
+          (t: unknown) => t.status === "resolved" || t.status === "closed",
         ).length;
 
         const ticketsWithResolutionTime = supportTickets.filter(
-          (t: any) => t.resolution_time_minutes != null,
+          (t: unknown) => t.resolution_time_minutes != null,
         );
         const avgResolutionMinutes =
           ticketsWithResolutionTime.length > 0
             ? Math.round(
                 ticketsWithResolutionTime.reduce(
-                  (sum: number, t: any) =>
+                  (sum: number, t: unknown) =>
                     sum + (t.resolution_time_minutes || 0),
                   0,
                 ) / ticketsWithResolutionTime.length,
@@ -861,7 +867,7 @@ export async function GET(request: NextRequest) {
           currentDate.setDate(currentDate.getDate() + i);
           const nextDate = new Date(currentDate);
           nextDate.setDate(nextDate.getDate() + 1);
-          const dayTickets = supportTickets.filter((t: any) => {
+          const dayTickets = supportTickets.filter((t: unknown) => {
             const d = new Date(t.created_at);
             return d >= currentDate && d < nextDate;
           });

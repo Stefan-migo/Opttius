@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { Code, Eye, FileText, Save, Sparkles, X } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
+
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
 import {
   Dialog,
   DialogContent,
@@ -14,6 +14,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -21,14 +23,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
-import { Save, X, Eye, Code, FileText, Sparkles } from "lucide-react";
-import { toast } from "sonner";
-import {
-  replaceTemplateVariables,
-  getDefaultVariables,
-} from "@/lib/email/template-utils";
+import { Switch } from "@/components/ui/switch";
+import { Textarea } from "@/components/ui/textarea";
 import { getVariablesForEditor } from "@/lib/email/ai-template-variables";
+import {
+  getDefaultVariables,
+  replaceTemplateVariables,
+} from "@/lib/email/template-utils";
 
 interface EmailTemplate {
   id: string;
@@ -377,19 +378,19 @@ export default function EmailTemplateEditor({
             </DialogDescription>
           </DialogHeader>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form className="space-y-4" onSubmit={handleSubmit}>
             {/* Basic Info */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="name">Nombre de la Plantilla *</Label>
                 <Input
+                  required
                   id="name"
+                  placeholder="Ej: Confirmación de Pedido"
                   value={formData.name}
                   onChange={(e) =>
                     setFormData({ ...formData, name: e.target.value })
                   }
-                  placeholder="Ej: Confirmación de Pedido"
-                  required
                 />
               </div>
 
@@ -401,11 +402,11 @@ export default function EmailTemplateEditor({
                   &quot;Marketing&quot; requieren envío manual.
                 </p>
                 <Select
+                  disabled={!!template?.is_system}
                   value={formData.type}
                   onValueChange={(value) =>
                     setFormData({ ...formData, type: value })
                   }
-                  disabled={!!template?.is_system}
                 >
                   <SelectTrigger id="type">
                     <SelectValue />
@@ -524,13 +525,13 @@ export default function EmailTemplateEditor({
             <div className="space-y-2">
               <Label htmlFor="subject">Asunto *</Label>
               <Input
+                required
                 id="subject"
+                placeholder="Ej: Confirmación de tu pedido {{order_number}}"
                 value={formData.subject}
                 onChange={(e) =>
                   setFormData({ ...formData, subject: e.target.value })
                 }
-                placeholder="Ej: Confirmación de tu pedido {{order_number}}"
-                required
               />
               <p className="text-xs text-muted-foreground">
                 Puedes usar variables como {"{{customer_name}}"},{" "}
@@ -544,9 +545,9 @@ export default function EmailTemplateEditor({
                 <Label>Contenido HTML del Email *</Label>
                 <div className="flex gap-2">
                   <Button
+                    size="sm"
                     type="button"
                     variant="outline"
-                    size="sm"
                     onClick={() => setShowPreview(!showPreview)}
                   >
                     <Eye className="h-4 w-4 mr-2" />
@@ -592,27 +593,27 @@ export default function EmailTemplateEditor({
                         </SelectContent>
                       </Select>
                       <Button
+                        className="gap-2"
+                        size="sm"
                         type="button"
                         variant="outline"
-                        size="sm"
                         onClick={() => setShowAiAssistDialog(true)}
-                        className="gap-2"
                       >
                         <Sparkles className="h-4 w-4" />
                         Asistir con IA
                       </Button>
                     </div>
                     <Textarea
-                      ref={textareaRef}
+                      required
+                      className="font-mono text-sm"
                       id="content"
+                      placeholder="<html><body>...</body></html>"
+                      ref={textareaRef}
+                      rows={20}
                       value={formData.content}
                       onChange={(e) =>
                         setFormData({ ...formData, content: e.target.value })
                       }
-                      placeholder="<html><body>...</body></html>"
-                      rows={20}
-                      className="font-mono text-sm"
-                      required
                     />
                   </div>
 
@@ -624,11 +625,11 @@ export default function EmailTemplateEditor({
                     <div className="flex flex-wrap gap-2 max-h-32 overflow-y-auto">
                       {getVariablesForEditor(formData.type).map((varItem) => (
                         <Badge
-                          key={varItem.key}
-                          variant="outline"
                           className="cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors"
-                          onClick={() => insertVariable(varItem.key)}
+                          key={varItem.key}
                           title={varItem.description}
+                          variant="outline"
+                          onClick={() => insertVariable(varItem.key)}
                         >
                           {varItem.label}
                         </Badge>
@@ -678,8 +679,8 @@ export default function EmailTemplateEditor({
                 </p>
               </div>
               <Switch
-                id="is_active"
                 checked={formData.is_active}
+                id="is_active"
                 onCheckedChange={(checked) =>
                   setFormData({ ...formData, is_active: checked })
                 }
@@ -688,15 +689,15 @@ export default function EmailTemplateEditor({
 
             <DialogFooter>
               <Button
+                disabled={loading}
                 type="button"
                 variant="outline"
                 onClick={() => onOpenChange(false)}
-                disabled={loading}
               >
                 <X className="h-4 w-4 mr-2" />
                 Cancelar
               </Button>
-              <Button type="submit" disabled={loading}>
+              <Button disabled={loading} type="submit">
                 <Save className="h-4 w-4 mr-2" />
                 {loading ? "Guardando..." : "Guardar Plantilla"}
               </Button>
@@ -719,11 +720,11 @@ export default function EmailTemplateEditor({
             </DialogDescription>
           </DialogHeader>
           <Textarea
-            value={aiPrompt}
-            onChange={(e) => setAiPrompt(e.target.value)}
+            className="resize-none"
             placeholder="Ej: Plantilla de bienvenida cálida para clientes nuevos que acaban de registrarse..."
             rows={4}
-            className="resize-none"
+            value={aiPrompt}
+            onChange={(e) => setAiPrompt(e.target.value)}
           />
           <DialogFooter>
             <Button
@@ -736,7 +737,7 @@ export default function EmailTemplateEditor({
             >
               Cancelar
             </Button>
-            <Button type="button" onClick={handleAiAssist} disabled={aiLoading}>
+            <Button disabled={aiLoading} type="button" onClick={handleAiAssist}>
               {aiLoading ? "Generando..." : "Generar"}
             </Button>
           </DialogFooter>

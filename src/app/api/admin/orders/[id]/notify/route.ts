@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/utils/supabase/server";
+
 import { EmailNotificationService } from "@/lib/email/notifications";
 import { appLogger as logger } from "@/lib/logger";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
+import { createClient } from "@/utils/supabase/server";
 
 export const dynamic = "force-dynamic";
 export async function POST(
@@ -77,7 +78,7 @@ export async function POST(
       customer_name: customerName,
       currency: order.currency,
       items:
-        order.order_items?.map((item: any) => ({
+        order.order_items?.map((item: unknown) => ({
           id: item.id,
           name: item.product_name,
           quantity: item.quantity,

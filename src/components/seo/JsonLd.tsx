@@ -11,8 +11,8 @@ export function JsonLd({ data }: JsonLdProps) {
 
   return (
     <script
-      type="application/ld+json"
       dangerouslySetInnerHTML={{ __html: jsonString }}
+      type="application/ld+json"
     />
   );
 }

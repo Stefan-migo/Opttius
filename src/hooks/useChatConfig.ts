@@ -1,6 +1,7 @@
-import { useState, useCallback, useEffect } from "react";
-import type { LLMProvider } from "@/lib/ai/types";
+import { useCallback, useState } from "react";
+
 import { SYSTEM_PROMPTS } from "@/lib/ai/agent/config";
+import type { LLMProvider } from "@/lib/ai/types";
 
 export interface ChatConfig {
   provider: LLMProvider | undefined;

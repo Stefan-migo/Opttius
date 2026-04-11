@@ -1,8 +1,10 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+import { AlertTriangle, Grid3X3, List, Search } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -10,7 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Search, Filter, AlertTriangle, Grid3X3, List } from "lucide-react";
+
 import { Category } from "../hooks/useCategories";
 
 interface ProductFiltersProps {
@@ -20,11 +22,13 @@ interface ProductFiltersProps {
   showLowStockOnly: boolean;
   viewMode: "grid" | "table";
   categories: Category[];
+  productTypeFilter: string;
   onSearchChange: (term: string) => void;
   onCategoryChange: (category: string) => void;
   onStatusChange: (status: string) => void;
   onLowStockToggle: () => void;
   onViewModeChange: (mode: "grid" | "table") => void;
+  onProductTypeChange: (type: string) => void;
 }
 
 export default function ProductFilters({
@@ -39,6 +43,8 @@ export default function ProductFilters({
   onStatusChange,
   onLowStockToggle,
   onViewModeChange,
+  productTypeFilter,
+  onProductTypeChange,
 }: ProductFiltersProps) {
   return (
     <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)]">
@@ -52,8 +58,9 @@ export default function ProductFilters({
             <div className="relative group">
               <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-admin-text-tertiary h-4 w-4 transition-colors group-focus-within:text-epoch-primary" />
               <Input
-                type="text"
+                className="pl-10 sm:pl-12 h-10 sm:h-11 bg-admin-bg-tertiary border-admin-border-primary/10 rounded-xl focus:border-epoch-primary focus:ring-1 focus:ring-epoch-primary/20 font-serif italic text-sm transition-all"
                 placeholder="Nombre, SKU, Marca o Código..."
+                type="text"
                 value={searchTerm}
                 onChange={(e) => onSearchChange(e.target.value)}
                 onKeyDown={(e) => {
@@ -61,7 +68,6 @@ export default function ProductFilters({
                     e.preventDefault();
                   }
                 }}
-                className="pl-10 sm:pl-12 h-10 sm:h-11 bg-admin-bg-tertiary border-admin-border-primary/10 rounded-xl focus:border-epoch-primary focus:ring-1 focus:ring-epoch-primary/20 font-serif italic text-sm transition-all"
               />
             </div>
           </div>
@@ -78,20 +84,73 @@ export default function ProductFilters({
                 </SelectTrigger>
                 <SelectContent className="rounded-xl border-admin-border-primary/20">
                   <SelectItem
-                    value="all"
                     className="font-display text-[10px] tracking-widest uppercase"
+                    value="all"
                   >
                     Todas las categorías
                   </SelectItem>
                   {categories.map((category) => (
                     <SelectItem
+                      className="font-display text-[10px] tracking-widest uppercase"
                       key={category.id}
                       value={category.id}
-                      className="font-display text-[10px] tracking-widest uppercase"
                     >
                       {category.name}
                     </SelectItem>
                   ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Product Type Filter */}
+            <div className="w-full sm:w-40 md:w-44 min-w-0">
+              <label className="text-[10px] font-display font-bold text-admin-text-primary uppercase tracking-widest mb-2 block">
+                Tipo de Producto
+              </label>
+              <Select
+                value={productTypeFilter}
+                onValueChange={onProductTypeChange}
+              >
+                <SelectTrigger className="h-11 bg-admin-bg-tertiary border-admin-border-primary/10 rounded-xl font-display text-[10px] tracking-widest uppercase">
+                  <SelectValue placeholder="Todos los tipos" />
+                </SelectTrigger>
+                <SelectContent className="rounded-xl border-admin-border-primary/20">
+                  <SelectItem
+                    className="font-display text-[10px] tracking-widest uppercase"
+                    value="all"
+                  >
+                    Todos los tipos
+                  </SelectItem>
+                  <SelectItem
+                    className="font-display text-[10px] tracking-widest uppercase"
+                    value="frame"
+                  >
+                    Armazones
+                  </SelectItem>
+                  <SelectItem
+                    className="font-display text-[10px] tracking-widest uppercase"
+                    value="contact_lens"
+                  >
+                    Lentes de Contacto
+                  </SelectItem>
+                  <SelectItem
+                    className="font-display text-[10px] tracking-widest uppercase"
+                    value="accessory"
+                  >
+                    Accesorios
+                  </SelectItem>
+                  <SelectItem
+                    className="font-display text-[10px] tracking-widest uppercase"
+                    value="service"
+                  >
+                    Servicios
+                  </SelectItem>
+                  <SelectItem
+                    className="font-display text-[10px] tracking-widest uppercase"
+                    value="lens"
+                  >
+                    Cristales
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -107,26 +166,26 @@ export default function ProductFilters({
                 </SelectTrigger>
                 <SelectContent className="rounded-xl border-admin-border-primary/20">
                   <SelectItem
-                    value="all"
                     className="font-display text-[10px] tracking-widest uppercase text-admin-text-tertiary"
+                    value="all"
                   >
                     Todos los estados
                   </SelectItem>
                   <SelectItem
-                    value="active"
                     className="font-display text-[10px] tracking-widest uppercase text-admin-success"
+                    value="active"
                   >
                     Activo
                   </SelectItem>
                   <SelectItem
-                    value="draft"
                     className="font-display text-[10px] tracking-widest uppercase text-admin-text-tertiary"
+                    value="draft"
                   >
                     Borrador
                   </SelectItem>
                   <SelectItem
-                    value="archived"
                     className="font-display text-[10px] tracking-widest uppercase text-admin-error"
+                    value="archived"
                   >
                     Archivado
                   </SelectItem>
@@ -138,13 +197,13 @@ export default function ProductFilters({
             <div className="flex flex-col gap-2">
               <div className="h-5" /> {/* Spacer */}
               <Button
-                variant="outline"
-                onClick={onLowStockToggle}
                 className={`h-10 sm:h-11 px-4 sm:px-6 rounded-xl border-admin-border-primary/10 font-display font-bold text-[9px] sm:text-[10px] tracking-[0.15em] sm:tracking-[0.2em] uppercase transition-all ${
                   showLowStockOnly
                     ? "bg-admin-error text-white border-admin-error"
                     : "bg-white text-admin-text-primary hover:bg-admin-bg-tertiary"
                 }`}
+                variant="outline"
+                onClick={onLowStockToggle}
               >
                 <AlertTriangle
                   className={`h-4 w-4 mr-2 ${showLowStockOnly ? "text-white" : "text-admin-error"}`}
@@ -170,24 +229,24 @@ export default function ProductFilters({
               </label>
               <div className="flex items-center h-10 sm:h-11 border border-admin-border-primary/10 bg-admin-bg-tertiary p-1 w-20 sm:w-24">
                 <button
-                  onClick={() => onViewModeChange("grid")}
                   className={`flex-1 flex items-center justify-center h-full transition-all ${
                     viewMode === "grid"
                       ? "bg-white text-epoch-primary shadow-sm"
                       : "text-admin-text-tertiary hover:text-admin-text-primary"
                   }`}
                   title="Vista de cuadrícula"
+                  onClick={() => onViewModeChange("grid")}
                 >
                   <Grid3X3 className="h-4 w-4" />
                 </button>
                 <button
-                  onClick={() => onViewModeChange("table")}
                   className={`flex-1 flex items-center justify-center h-full transition-all ${
                     viewMode === "table"
                       ? "bg-white text-epoch-primary shadow-sm"
                       : "text-admin-text-tertiary hover:text-admin-text-primary"
                   }`}
                   title="Vista de archivo"
+                  onClick={() => onViewModeChange("table")}
                 >
                   <List className="h-4 w-4" />
                 </button>

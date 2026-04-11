@@ -4,13 +4,14 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
+
+import { validateBranchAccess } from "@/lib/api/branch-middleware";
+import { sendDeliveryCompletionEmail } from "@/lib/email/send-delivery-completion-email";
+import { appLogger as logger } from "@/lib/logger";
+import { NotificationService } from "@/lib/notifications/notification-service";
+import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
 import { createClient } from "@/utils/supabase/server";
 import { createServiceRoleClient } from "@/utils/supabase/server";
-import { validateBranchAccess } from "@/lib/api/branch-middleware";
-import { appLogger as logger } from "@/lib/logger";
-import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
-import { NotificationService } from "@/lib/notifications/notification-service";
-import { sendDeliveryCompletionEmail } from "@/lib/email/send-delivery-completion-email";
 
 export const dynamic = "force-dynamic";
 export async function POST(

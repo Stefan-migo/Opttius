@@ -1,9 +1,38 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Download,
+  Eye,
+  FileText,
+  Link2,
+  Pencil,
+  RefreshCw,
+  Search,
+  Trash2,
+  User,
+} from "lucide-react";
+import dynamic from "next/dynamic";
+import Link from "next/link";
+import { useCallback, useEffect, useState } from "react";
+import { toast } from "sonner";
+
+import {
+  type PrescriptionDisplayData,
+  PrescriptionFullDisplay,
+} from "@/components/admin/PrescriptionFullDisplay";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -14,43 +43,15 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import {
-  Search,
-  Eye,
-  FileText,
-  ChevronLeft,
-  ChevronRight,
-  RefreshCw,
-  Download,
-  Link2,
-  User,
-  Pencil,
-  Trash2,
-} from "lucide-react";
-import { toast } from "sonner";
-import Link from "next/link";
-import dynamic from "next/dynamic";
 import { useBranch } from "@/hooks/useBranch";
-import { getBranchHeader } from "@/lib/utils/branch";
-import { formatDate } from "@/lib/utils";
-import { formatRUT } from "@/lib/utils/rut";
-import { translatePrescriptionType } from "@/lib/prescription-helpers";
 import {
   extractDataFromResponse,
   extractPaginationFromResponse,
 } from "@/lib/api/response-helpers";
-import {
-  PrescriptionFullDisplay,
-  type PrescriptionDisplayData,
-} from "@/components/admin/PrescriptionFullDisplay";
+import { translatePrescriptionType } from "@/lib/prescription-helpers";
+import { formatDate } from "@/lib/utils";
+import { getBranchHeader } from "@/lib/utils/branch";
+import { formatRUT } from "@/lib/utils/rut";
 
 const CreatePrescriptionForm = dynamic(
   () => import("@/components/admin/CreatePrescriptionForm"),
@@ -294,19 +295,19 @@ export default function PrescriptionsPage() {
         </div>
         <div className="flex gap-2 shrink-0">
           <Button
-            variant="outline"
-            size="sm"
-            onClick={() => handleExport("csv")}
             className="min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0 gap-1.5 flex-1 sm:flex-initial px-3"
+            size="sm"
+            variant="outline"
+            onClick={() => handleExport("csv")}
           >
             <Download className="h-4 w-4 shrink-0" />
             CSV
           </Button>
           <Button
-            variant="outline"
-            size="sm"
-            onClick={() => handleExport("xlsx")}
             className="min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0 gap-1.5 flex-1 sm:flex-initial px-3"
+            size="sm"
+            variant="outline"
+            onClick={() => handleExport("xlsx")}
           >
             <Download className="h-4 w-4 shrink-0" />
             Excel
@@ -325,20 +326,20 @@ export default function PrescriptionsPage() {
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-admin-text-tertiary" />
                 <Input
+                  className="pl-10 min-h-[44px] sm:min-h-0 h-11 sm:h-10 text-base sm:text-sm"
                   placeholder="Nombre, RUT o email..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 min-h-[44px] sm:min-h-0 h-11 sm:h-10 text-base sm:text-sm"
                 />
               </div>
             </div>
             <div>
               <Label className="text-[10px] sm:text-xs mb-1 block">RUT</Label>
               <Input
+                className="min-h-[44px] sm:min-h-0 h-11 sm:h-10"
                 placeholder="12.345.678-9"
                 value={rutFilter}
                 onChange={(e) => setRutFilter(e.target.value)}
-                className="min-h-[44px] sm:min-h-0 h-11 sm:h-10"
               />
             </div>
             <div>
@@ -346,16 +347,16 @@ export default function PrescriptionsPage() {
                 Profesional
               </Label>
               <Input
+                className="min-h-[44px] sm:min-h-0 h-11 sm:h-10"
                 placeholder="Oftalmólogo..."
                 value={issuedBy}
                 onChange={(e) => setIssuedBy(e.target.value)}
-                className="min-h-[44px] sm:min-h-0 h-11 sm:h-10"
               />
             </div>
             <div className="flex gap-2 items-end">
               <Button
-                onClick={fetchPrescriptions}
                 className="flex-1 min-h-[44px] sm:min-h-0 h-11 sm:h-10"
+                onClick={fetchPrescriptions}
               >
                 <RefreshCw className="h-4 w-4 sm:mr-2 shrink-0" />
                 <span className="hidden sm:inline">Buscar</span>
@@ -368,10 +369,10 @@ export default function PrescriptionsPage() {
                 Fecha desde
               </Label>
               <Input
+                className="min-h-[44px] sm:min-h-0 h-11 sm:h-10"
                 type="date"
                 value={dateFrom}
                 onChange={(e) => setDateFrom(e.target.value)}
-                className="min-h-[44px] sm:min-h-0 h-11 sm:h-10"
               />
             </div>
             <div>
@@ -379,10 +380,10 @@ export default function PrescriptionsPage() {
                 Fecha hasta
               </Label>
               <Input
+                className="min-h-[44px] sm:min-h-0 h-11 sm:h-10"
                 type="date"
                 value={dateTo}
                 onChange={(e) => setDateTo(e.target.value)}
-                className="min-h-[44px] sm:min-h-0 h-11 sm:h-10"
               />
             </div>
           </div>
@@ -421,8 +422,8 @@ export default function PrescriptionsPage() {
               <div className="md:hidden space-y-3">
                 {prescriptions.map((p) => (
                   <div
-                    key={p.id}
                     className="rounded-xl border border-admin-border bg-admin-bg-tertiary p-4 shadow-[0_1px_3px_rgba(0,0,0,0.3)]"
+                    key={p.id}
                   >
                     <div className="flex items-start justify-between gap-2 mb-3">
                       <div className="min-w-0 flex-1">
@@ -450,16 +451,16 @@ export default function PrescriptionsPage() {
                       </span>
                       {hasPresbyopia(p) && (
                         <Badge
-                          variant="secondary"
                           className="text-[10px] px-1.5 py-0 border-admin-border text-admin-text-primary"
+                          variant="secondary"
                         >
                           Presbicia
                         </Badge>
                       )}
                       {(p.work_orders_count ?? 0) > 0 && (
                         <Link
-                          href="/admin/work-orders"
                           className="text-admin-accent-primary hover:underline flex items-center gap-0.5"
+                          href="/admin/work-orders"
                         >
                           <Link2 className="h-3 w-3" />
                           {p.work_orders_count} OT
@@ -468,28 +469,28 @@ export default function PrescriptionsPage() {
                     </div>
                     <div className="flex items-center justify-end gap-1 pt-2 border-t border-admin-border">
                       <Button
-                        variant="ghost"
-                        size="icon"
                         className="min-h-[44px] min-w-[44px] h-11 w-11 shrink-0"
+                        size="icon"
                         title="Ver receta"
+                        variant="ghost"
                         onClick={() => setViewPrescription(p)}
                       >
                         <Eye className="h-4 w-4" />
                       </Button>
                       <Button
-                        variant="ghost"
-                        size="icon"
                         className="min-h-[44px] min-w-[44px] h-11 w-11 shrink-0"
+                        size="icon"
                         title="Modificar"
+                        variant="ghost"
                         onClick={() => setEditPrescription(p)}
                       >
                         <Pencil className="h-4 w-4" />
                       </Button>
                       <Button
-                        variant="ghost"
-                        size="icon"
                         className="min-h-[44px] min-w-[44px] h-11 w-11 shrink-0 text-destructive hover:text-destructive"
+                        size="icon"
                         title="Eliminar"
+                        variant="ghost"
                         onClick={() => setDeletePrescription(p)}
                       >
                         <Trash2 className="h-4 w-4" />
@@ -499,9 +500,9 @@ export default function PrescriptionsPage() {
                         title="Ver cliente"
                       >
                         <Button
-                          variant="ghost"
-                          size="icon"
                           className="min-h-[44px] min-w-[44px] h-11 w-11 shrink-0"
+                          size="icon"
+                          variant="ghost"
                         >
                           <User className="h-4 w-4" />
                         </Button>
@@ -566,7 +567,7 @@ export default function PrescriptionsPage() {
                         </TableCell>
                         <TableCell>
                           {hasPresbyopia(p) ? (
-                            <Badge variant="secondary" className="text-xs">
+                            <Badge className="text-xs" variant="secondary">
                               Sí
                             </Badge>
                           ) : (
@@ -576,8 +577,8 @@ export default function PrescriptionsPage() {
                         <TableCell>
                           {(p.work_orders_count ?? 0) > 0 ? (
                             <Link
-                              href="/admin/work-orders"
                               className="text-epoch-primary hover:underline flex items-center gap-1"
+                              href="/admin/work-orders"
                               title={`${p.work_orders_count} OT vinculada(s)`}
                             >
                               <Link2 className="h-3 w-3" />
@@ -590,28 +591,28 @@ export default function PrescriptionsPage() {
                         <TableCell>
                           <div className="flex flex-wrap gap-1">
                             <Button
-                              variant="ghost"
-                              size="icon"
                               className="h-8 w-8"
+                              size="icon"
                               title="Ver receta"
+                              variant="ghost"
                               onClick={() => setViewPrescription(p)}
                             >
                               <Eye className="h-4 w-4" />
                             </Button>
                             <Button
-                              variant="ghost"
-                              size="icon"
                               className="h-8 w-8"
+                              size="icon"
                               title="Modificar receta"
+                              variant="ghost"
                               onClick={() => setEditPrescription(p)}
                             >
                               <Pencil className="h-4 w-4" />
                             </Button>
                             <Button
-                              variant="ghost"
-                              size="icon"
                               className="h-8 w-8 text-destructive hover:text-destructive"
+                              size="icon"
                               title="Eliminar receta"
+                              variant="ghost"
                               onClick={() => setDeletePrescription(p)}
                             >
                               <Trash2 className="h-4 w-4" />
@@ -621,9 +622,9 @@ export default function PrescriptionsPage() {
                               title="Ver cliente"
                             >
                               <Button
-                                variant="ghost"
-                                size="icon"
                                 className="h-8 w-8"
+                                size="icon"
+                                variant="ghost"
                               >
                                 <User className="h-4 w-4" />
                               </Button>
@@ -643,24 +644,24 @@ export default function PrescriptionsPage() {
                   </p>
                   <div className="flex gap-2 order-1 sm:order-2">
                     <Button
-                      variant="outline"
-                      size="sm"
                       className="min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0"
+                      disabled={currentPage <= 1}
+                      size="sm"
+                      variant="outline"
                       onClick={() =>
                         setCurrentPage((prev) => Math.max(1, prev - 1))
                       }
-                      disabled={currentPage <= 1}
                     >
                       <ChevronLeft className="h-4 w-4" />
                     </Button>
                     <Button
-                      variant="outline"
-                      size="sm"
                       className="min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0"
+                      disabled={currentPage >= totalPages}
+                      size="sm"
+                      variant="outline"
                       onClick={() =>
                         setCurrentPage((prev) => Math.min(totalPages, prev + 1))
                       }
-                      disabled={currentPage >= totalPages}
                     >
                       <ChevronRight className="h-4 w-4" />
                     </Button>
@@ -702,19 +703,19 @@ export default function PrescriptionsPage() {
           )}
           <DialogFooter className="flex-col-reverse sm:flex-row gap-2">
             <Button
+              className="w-full sm:w-auto min-h-[44px] sm:min-h-0"
               variant="outline"
               onClick={() => setViewPrescription(null)}
-              className="w-full sm:w-auto min-h-[44px] sm:min-h-0"
             >
               Cerrar
             </Button>
             {viewPrescription && (
               <Button
+                className="w-full sm:w-auto min-h-[44px] sm:min-h-0"
                 onClick={() => {
                   setViewPrescription(null);
                   setEditPrescription(viewPrescription);
                 }}
-                className="w-full sm:w-auto min-h-[44px] sm:min-h-0"
               >
                 <Pencil className="h-4 w-4 mr-2" />
                 Modificar
@@ -741,11 +742,11 @@ export default function PrescriptionsPage() {
             <CreatePrescriptionForm
               customerId={editPrescription.customer_id}
               initialData={editPrescription}
+              onCancel={() => setEditPrescription(null)}
               onSuccess={() => {
                 setEditPrescription(null);
                 fetchPrescriptions();
               }}
-              onCancel={() => setEditPrescription(null)}
             />
           )}
         </DialogContent>
@@ -777,18 +778,18 @@ export default function PrescriptionsPage() {
           </DialogHeader>
           <DialogFooter className="flex-col-reverse sm:flex-row gap-2">
             <Button
+              className="w-full sm:w-auto min-h-[44px] sm:min-h-0"
+              disabled={deleting}
               variant="outline"
               onClick={() => setDeletePrescription(null)}
-              disabled={deleting}
-              className="w-full sm:w-auto min-h-[44px] sm:min-h-0"
             >
               Cancelar
             </Button>
             <Button
+              className="w-full sm:w-auto min-h-[44px] sm:min-h-0"
+              disabled={deleting}
               variant="destructive"
               onClick={handleDelete}
-              disabled={deleting}
-              className="w-full sm:w-auto min-h-[44px] sm:min-h-0"
             >
               {deleting ? "Eliminando..." : "Eliminar"}
             </Button>

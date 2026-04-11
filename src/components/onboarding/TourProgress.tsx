@@ -1,6 +1,7 @@
 "use client";
 
 import { X } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 
 interface TourProgressProps {
@@ -35,11 +36,11 @@ export function TourProgress({
             </div>
           </div>
           <Button
-            variant="ghost"
-            size="sm"
-            onClick={onSkip}
             className="ml-4 shrink-0"
+            size="sm"
             title="Salir del tour"
+            variant="ghost"
+            onClick={onSkip}
           >
             <X className="h-4 w-4 mr-1" />
             Salir

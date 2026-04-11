@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/utils/supabase/server";
+
 import { getBranchContext } from "@/lib/api/branch-middleware";
 import { appLogger as logger } from "@/lib/logger";
+import { createClient } from "@/utils/supabase/server";
 
 // GET /api/admin/vehicles/available - Get available vehicles (not assigned to active orders)
 export const dynamic = "force-dynamic";
@@ -40,7 +41,7 @@ export async function GET(req: NextRequest) {
     }
 
     const assignedVehicleIds =
-      activeOrderVehicles?.map((o: any) => o.assigned_vehicle_id) || [];
+      activeOrderVehicles?.map((o: unknown) => o.assigned_vehicle_id) || [];
 
     // Get available vehicles
     let query = supabase

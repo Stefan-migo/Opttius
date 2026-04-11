@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+
 import { getBranchHeader } from "@/lib/utils/branch";
 
 interface Customer {
@@ -40,7 +41,7 @@ interface UseCustomerSearchReturn {
 }
 
 interface UseCustomerSearchProps {
-  initialData?: any;
+  initialData?: unknown;
   initialCustomerId?: string;
   /** Sucursal actual para filtrar clientes. Obligatorio para admins no super. */
   currentBranchId?: string | null;

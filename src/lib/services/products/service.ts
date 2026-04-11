@@ -4,17 +4,19 @@
  */
 
 import { SupabaseClient } from "@supabase/supabase-js";
+
+import { NotFoundError, ValidationError } from "@/lib/api/errors";
 import { appLogger as logger } from "@/lib/logger";
 import { Database } from "@/types/supabase";
+
 import {
-  ProductWithRelations,
+  ProductInsert,
   ProductListParams,
   ProductListResponse,
   ProductServiceContext,
-  ProductInsert,
-  ProductUpdate
+  ProductUpdate,
+  ProductWithRelations,
 } from "./types";
-import { ValidationError, NotFoundError } from "@/lib/api/errors";
 
 export class ProductsService {
   private supabase: SupabaseClient<Database>;
@@ -28,7 +30,7 @@ export class ProductsService {
    */
   async listProducts(
     params: ProductListParams,
-    context: ProductServiceContext
+    context: ProductServiceContext,
   ): Promise<ProductListResponse> {
     try {
       const {
@@ -49,7 +51,7 @@ export class ProductsService {
         sortOrder = "desc",
         branchId,
         organizationId,
-        isSuperAdmin
+        isSuperAdmin,
       } = params;
 
       // Build base query with count
@@ -97,7 +99,10 @@ export class ProductsService {
             query = query.or(`branch_id.is.null,branch_id.eq.${branchId}`);
             logger.debug("Filtering by branch_id in query", { branchId });
           } catch (error) {
-            logger.warn("Error using .or() filter, will filter in post-processing", { error });
+            logger.warn(
+              "Error using .or() filter, will filter in post-processing",
+              { error },
+            );
           }
         }
       } else if (isSuperAdmin) {
@@ -105,7 +110,10 @@ export class ProductsService {
           try {
             query = query.or(`branch_id.is.null,branch_id.eq.${branchId}`);
           } catch (error) {
-            logger.warn("Error using .or() filter, will filter in post-processing", { error });
+            logger.warn(
+              "Error using .or() filter, will filter in post-processing",
+              { error },
+            );
           }
         } else if (organizationId) {
           query = query.eq("organization_id", organizationId);
@@ -145,7 +153,7 @@ export class ProductsService {
       if (search) {
         const searchTerm = `%${search}%`;
         query = query.or(
-          `name.ilike.${searchTerm},description.ilike.${searchTerm},sku.ilike.${searchTerm}`
+          `name.ilike.${searchTerm},description.ilike.${searchTerm},sku.ilike.${searchTerm}`,
         );
 
         // Apply branch filter in post-processing when searching
@@ -172,19 +180,31 @@ export class ProductsService {
       let filteredProducts = products || [];
 
       if (search && branchId) {
-        filteredProducts = this.filterProductsByBranch(filteredProducts, branchId);
+        filteredProducts = this.filterProductsByBranch(
+          filteredProducts,
+          branchId,
+        );
       }
 
       // Apply low stock filtering
       if (lowStockOnly) {
-        filteredProducts = this.filterLowStockProducts(filteredProducts, branchId as string | null);
+        filteredProducts = this.filterLowStockProducts(
+          filteredProducts,
+          branchId as string | null,
+        );
       }
 
       // Apply in-stock filtering
       if (inStock === "true") {
-        filteredProducts = this.filterInStockProducts(filteredProducts, branchId as string | null);
+        filteredProducts = this.filterInStockProducts(
+          filteredProducts,
+          branchId as string | null,
+        );
       } else if (inStock === "false") {
-        filteredProducts = this.filterOutOfStockProducts(filteredProducts, branchId as string | null);
+        filteredProducts = this.filterOutOfStockProducts(
+          filteredProducts,
+          branchId as string | null,
+        );
       }
 
       const totalCount = count || 0;
@@ -197,9 +217,8 @@ export class ProductsService {
         currentPage,
         totalPages,
         hasNextPage: currentPage < totalPages,
-        hasPrevPage: currentPage > 1
+        hasPrevPage: currentPage > 1,
       };
-
     } catch (error) {
       logger.error("Error in listProducts service", { error });
       throw error;
@@ -209,11 +228,15 @@ export class ProductsService {
   /**
    * Get product by ID with relations
    */
-  async getProductById(id: string, context: ProductServiceContext): Promise<ProductWithRelations> {
+  async getProductById(
+    id: string,
+    context: ProductServiceContext,
+  ): Promise<ProductWithRelations> {
     try {
       let query = this.supabase
         .from("products")
-        .select(`
+        .select(
+          `
           *,
           categories:category_id (
             id,
@@ -236,7 +259,8 @@ export class ProductsService {
             low_stock_threshold,
             branch_id
           )
-        `)
+        `,
+        )
         .eq("id", id);
 
       // Apply organization filter for non-super admins
@@ -258,7 +282,6 @@ export class ProductsService {
       }
 
       return product as ProductWithRelations;
-
     } catch (error) {
       logger.error("Error in getProductById service", { error, productId: id });
       throw error;
@@ -268,14 +291,21 @@ export class ProductsService {
   /**
    * Create new product
    */
-  async createProduct(productData: ProductInsert, context: ProductServiceContext): Promise<ProductWithRelations> {
+  async createProduct(
+    productData: ProductInsert,
+    context: ProductServiceContext,
+  ): Promise<ProductWithRelations> {
     try {
       // Validate required fields
       if (!productData.name?.trim()) {
         throw new ValidationError("Product name is required");
       }
 
-      if (productData.price === undefined || productData.price === null || isNaN(Number(productData.price))) {
+      if (
+        productData.price === undefined ||
+        productData.price === null ||
+        isNaN(Number(productData.price))
+      ) {
         throw new ValidationError("Valid price is required");
       }
 
@@ -298,7 +328,8 @@ export class ProductsService {
       const { data: product, error } = await this.supabase
         .from("products")
         .insert(productData)
-        .select(`
+        .select(
+          `
           *,
           categories:category_id (
             id,
@@ -315,7 +346,8 @@ export class ProductsService {
             option3,
             is_default
           )
-        `)
+        `,
+        )
         .single();
 
       if (error) {
@@ -324,7 +356,6 @@ export class ProductsService {
       }
 
       return product as ProductWithRelations;
-
     } catch (error) {
       logger.error("Error in createProduct service", { error });
       throw error;
@@ -337,7 +368,7 @@ export class ProductsService {
   async updateProduct(
     id: string,
     productData: ProductUpdate,
-    context: ProductServiceContext
+    context: ProductServiceContext,
   ): Promise<ProductWithRelations> {
     try {
       // Validate product exists and user has access
@@ -345,7 +376,8 @@ export class ProductsService {
 
       // Generate new slug if name changed
       if (productData.name && productData.name !== existingProduct.name) {
-        let slug = productData.slug?.trim() || this.generateSlug(productData.name);
+        const slug =
+          productData.slug?.trim() || this.generateSlug(productData.name);
         const uniqueSlug = await this.ensureUniqueSlug(slug, id);
         productData.slug = uniqueSlug;
       }
@@ -354,7 +386,8 @@ export class ProductsService {
         .from("products")
         .update(productData)
         .eq("id", id)
-        .select(`
+        .select(
+          `
           *,
           categories:category_id (
             id,
@@ -371,16 +404,20 @@ export class ProductsService {
             option3,
             is_default
           )
-        `)
+        `,
+        )
         .single();
 
       if (error) {
-        logger.error("Error updating product", { error, productId: id, productData });
+        logger.error("Error updating product", {
+          error,
+          productId: id,
+          productData,
+        });
         throw new Error(`Failed to update product: ${error.message}`);
       }
 
       return product as ProductWithRelations;
-
     } catch (error) {
       logger.error("Error in updateProduct service", { error, productId: id });
       throw error;
@@ -390,7 +427,10 @@ export class ProductsService {
   /**
    * Delete product
    */
-  async deleteProduct(id: string, context: ProductServiceContext): Promise<void> {
+  async deleteProduct(
+    id: string,
+    context: ProductServiceContext,
+  ): Promise<void> {
     try {
       // Validate product exists and user has access
       await this.getProductById(id, context);
@@ -404,7 +444,6 @@ export class ProductsService {
         logger.error("Error deleting product", { error, productId: id });
         throw new Error(`Failed to delete product: ${error.message}`);
       }
-
     } catch (error) {
       logger.error("Error in deleteProduct service", { error, productId: id });
       throw error;
@@ -415,25 +454,37 @@ export class ProductsService {
 
   private validateSortColumn(sortBy: string): string {
     const validColumns = [
-      "created_at", "updated_at", "name", "price", "sku",
-      "status", "featured", "inventory_quantity"
+      "created_at",
+      "updated_at",
+      "name",
+      "price",
+      "sku",
+      "status",
+      "featured",
+      "inventory_quantity",
     ];
 
     return validColumns.includes(sortBy) ? sortBy : "created_at";
   }
 
-  private filterProductsByBranch(products: any[], branchId: string): any[] {
-    return products.filter(product => {
+  private filterProductsByBranch(
+    products: unknown[],
+    branchId: string,
+  ): unknown[] {
+    return products.filter((product) => {
       // Include products where branch_id is null (global) or matches the branch
       return !product.branch_id || product.branch_id === branchId;
     });
   }
 
-  private filterLowStockProducts(products: any[], branchId: string | null | undefined): any[] {
-    return products.filter(product => {
+  private filterLowStockProducts(
+    products: unknown[],
+    branchId: string | null | undefined,
+  ): unknown[] {
+    return products.filter((product) => {
       if (branchId && product.product_branch_stock) {
         const branchStock = product.product_branch_stock.find(
-          (stock: any) => stock.branch_id === branchId
+          (stock: unknown) => stock.branch_id === branchId,
         );
         if (branchStock) {
           return branchStock.quantity <= branchStock.low_stock_threshold;
@@ -443,11 +494,14 @@ export class ProductsService {
     });
   }
 
-  private filterInStockProducts(products: any[], branchId: string | null | undefined): any[] {
-    return products.filter(product => {
+  private filterInStockProducts(
+    products: unknown[],
+    branchId: string | null | undefined,
+  ): unknown[] {
+    return products.filter((product) => {
       if (branchId && product.product_branch_stock) {
         const branchStock = product.product_branch_stock.find(
-          (stock: any) => stock.branch_id === branchId
+          (stock: unknown) => stock.branch_id === branchId,
         );
         if (branchStock) {
           return branchStock.quantity > 0;
@@ -457,11 +511,14 @@ export class ProductsService {
     });
   }
 
-  private filterOutOfStockProducts(products: any[], branchId: string | null | undefined): any[] {
-    return products.filter(product => {
+  private filterOutOfStockProducts(
+    products: unknown[],
+    branchId: string | null | undefined,
+  ): unknown[] {
+    return products.filter((product) => {
       if (branchId && product.product_branch_stock) {
         const branchStock = product.product_branch_stock.find(
-          (stock: any) => stock.branch_id === branchId
+          (stock: unknown) => stock.branch_id === branchId,
         );
         if (branchStock) {
           return branchStock.quantity <= 0;
@@ -473,15 +530,20 @@ export class ProductsService {
   }
 
   private generateSlug(name: string): string {
-    return name
-      .toLowerCase()
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/(^-|-$)/g, "") || `product-${Date.now()}`;
+    return (
+      name
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/(^-|-$)/g, "") || `product-${Date.now()}`
+    );
   }
 
-  private async ensureUniqueSlug(slug: string, excludeId?: string): Promise<string> {
+  private async ensureUniqueSlug(
+    slug: string,
+    excludeId?: string,
+  ): Promise<string> {
     let uniqueSlug = slug;
     let counter = 1;
 

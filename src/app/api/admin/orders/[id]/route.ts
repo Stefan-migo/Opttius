@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
+
+import { getBranchContext } from "@/lib/api/branch-middleware";
+import { appLogger as logger } from "@/lib/logger";
+import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
 import {
   createClient,
   createClientFromRequest,
   createServiceRoleClient,
 } from "@/utils/supabase/server";
-import { getBranchContext } from "@/lib/api/branch-middleware";
-import { EmailNotificationService } from "@/lib/email/notifications";
-import { appLogger as logger } from "@/lib/logger";
-import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
 
 export const dynamic = "force-dynamic";
 export async function PATCH(
@@ -266,7 +266,7 @@ export async function GET(
       .eq("id", user.id)
       .single();
 
-    const userOrganizationId = (adminUser as any)?.organization_id;
+    const userOrganizationId = (adminUser as unknown)?.organization_id;
 
     // Get order details
     let query = supabase

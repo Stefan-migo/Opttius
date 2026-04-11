@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClientFromRequest } from "@/utils/supabase/server";
+
+import { rateLimitConfigs, withRateLimit } from "@/lib/api/middleware";
 import { appLogger as logger } from "@/lib/logger";
-import { withRateLimit, rateLimitConfigs } from "@/lib/api/middleware";
+import { createClientFromRequest } from "@/utils/supabase/server";
 
 /**
  * POST /api/ai/insights/:id/dismiss
@@ -73,7 +74,7 @@ export async function POST(
       logger.info("Insight dismissed", { insightId: id, userId: user.id });
 
       return NextResponse.json({ success: true, insight });
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error("Dismiss insight API error", { error: error.message });
       return NextResponse.json(
         { error: "Internal server error" },

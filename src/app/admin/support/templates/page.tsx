@@ -1,19 +1,24 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { extractDataFromResponse } from "@/lib/api/response-helpers";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  ArrowLeft,
+  BarChart3,
+  Clock,
+  Copy,
+  Edit,
+  Eye,
+  FileText,
+  Plus,
+  Search,
+  Tag,
+  User,
+} from "lucide-react";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -22,22 +27,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import {
-  FileText,
-  ArrowLeft,
-  Plus,
-  Search,
-  Edit,
-  Eye,
-  Copy,
-  Trash2,
-  Settings,
-  Tag,
-  BarChart3,
-  Clock,
-  User,
-} from "lucide-react";
-import Link from "next/link";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { extractDataFromResponse } from "@/lib/api/response-helpers";
 
 interface SupportTemplate {
   id: string;
@@ -317,10 +316,10 @@ export default function TemplatesPage() {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {[...Array(6)].map((_, i) => (
-            <Card key={i} className="animate-pulse">
+            <Card className="animate-pulse" key={i}>
               <CardContent className="p-6">
-                <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-                <div className="h-8 bg-gray-200 rounded w-1/2"></div>
+                <div className="h-4 bg-gray-200 rounded w-3/4 mb-2" />
+                <div className="h-8 bg-gray-200 rounded w-1/2" />
               </CardContent>
             </Card>
           ))}
@@ -335,7 +334,7 @@ export default function TemplatesPage() {
       <div className="flex justify-between items-start">
         <div className="flex items-center gap-4">
           <Link href="/admin/support">
-            <Button variant="outline" size="sm">
+            <Button size="sm" variant="outline">
               <ArrowLeft className="h-4 w-4 mr-2" />
               Volver
             </Button>
@@ -426,10 +425,10 @@ export default function TemplatesPage() {
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-admin-text-tertiary h-4 w-4" />
                 <Input
+                  className="pl-10"
                   placeholder="Buscar plantillas por nombre o contenido..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
                 />
               </div>
             </div>
@@ -465,7 +464,7 @@ export default function TemplatesPage() {
       {/* Templates Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredTemplates.map((template) => (
-          <Card key={template.id} className="hover:shadow-lg transition-shadow">
+          <Card className="hover:shadow-lg transition-shadow" key={template.id}>
             <CardHeader className="pb-3">
               <div className="flex items-start justify-between">
                 <div className="flex-1">
@@ -479,13 +478,13 @@ export default function TemplatesPage() {
                 <div className="flex items-center gap-2">
                   {template.category && (
                     <Badge
-                      variant="outline"
                       style={{
                         borderColor:
                           template.category.name === "Productos"
                             ? "#10B981"
                             : "#3B82F6",
                       }}
+                      variant="outline"
                     >
                       {template.category.name}
                     </Badge>
@@ -521,26 +520,26 @@ export default function TemplatesPage() {
 
                 <div className="flex gap-2">
                   <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => openPreviewDialog(template)}
                     className="flex-1"
+                    size="sm"
+                    variant="outline"
+                    onClick={() => openPreviewDialog(template)}
                   >
                     <Eye className="h-3 w-3 mr-1" />
                     Vista previa
                   </Button>
 
                   <Button
-                    variant="outline"
                     size="sm"
+                    variant="outline"
                     onClick={() => handleCopyTemplate(template)}
                   >
                     <Copy className="h-3 w-3" />
                   </Button>
 
                   <Button
-                    variant="outline"
                     size="sm"
+                    variant="outline"
                     onClick={() => openEditDialog(template)}
                   >
                     <Edit className="h-3 w-3" />
@@ -643,13 +642,13 @@ export default function TemplatesPage() {
                 <span className="text-red-500">*</span>
               </label>
               <Textarea
+                className="min-h-[200px]"
                 placeholder="Hola {{customer_name}},&#10;&#10;Gracias por contactarnos sobre tu pedido {{order_number}}.&#10;&#10;[Continúa escribiendo tu mensaje...]"
+                rows={10}
                 value={form.content}
                 onChange={(e) =>
                   setForm((prev) => ({ ...prev, content: e.target.value }))
                 }
-                rows={10}
-                className="min-h-[200px]"
               />
               <p className="text-xs text-admin-text-tertiary mt-2">
                 Usa variables con doble llaves, ej:{" "}
@@ -660,13 +659,13 @@ export default function TemplatesPage() {
 
           <DialogFooter>
             <Button
+              disabled={saving}
               variant="outline"
               onClick={() => setEditDialogOpen(false)}
-              disabled={saving}
             >
               Cancelar
             </Button>
-            <Button onClick={handleSaveTemplate} disabled={saving}>
+            <Button disabled={saving} onClick={handleSaveTemplate}>
               {saving
                 ? "Guardando..."
                 : editingTemplate
@@ -725,7 +724,7 @@ export default function TemplatesPage() {
                 </label>
                 <div className="flex flex-wrap gap-2">
                   {Object.entries(previewData.variables).map(([key, value]) => (
-                    <Badge key={key} variant="outline" className="text-xs">
+                    <Badge className="text-xs" key={key} variant="outline">
                       {key}: {value}
                     </Badge>
                   ))}

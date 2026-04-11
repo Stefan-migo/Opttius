@@ -1,6 +1,8 @@
 "use client";
 
+import { Check, Palette } from "lucide-react";
 import * as React from "react";
+
 import { useTheme } from "@/components/theme-provider";
 import { Button } from "@/components/ui/button";
 import {
@@ -9,8 +11,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Palette, Check } from "lucide-react";
-import { ThemeId, themes } from "@/config/themes";
+import { themes } from "@/config/themes";
 import { cn } from "@/lib/utils";
 
 export function ThemeSelector() {
@@ -18,7 +19,7 @@ export function ThemeSelector() {
 
   if (!mounted) {
     return (
-      <Button variant="ghost" size="icon" disabled>
+      <Button disabled size="icon" variant="ghost">
         <Palette className="h-4 w-4" />
       </Button>
     );
@@ -27,7 +28,7 @@ export function ThemeSelector() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="relative">
+        <Button className="relative" size="icon" variant="ghost">
           <Palette className="h-4 w-4 text-admin-text-primary" />
           <span className="sr-only">Select theme</span>
         </Button>
@@ -35,9 +36,9 @@ export function ThemeSelector() {
       <DropdownMenuContent align="end" className="w-48">
         {themes.map((themeOption) => (
           <DropdownMenuItem
+            className="flex items-center justify-between cursor-pointer"
             key={themeOption.id}
             onClick={() => setTheme(themeOption.id)}
-            className="flex items-center justify-between cursor-pointer"
           >
             <div className="flex items-center gap-2">
               <div

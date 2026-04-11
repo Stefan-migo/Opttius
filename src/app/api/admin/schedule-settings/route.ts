@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/utils/supabase/server";
-import { createServiceRoleClient } from "@/utils/supabase/server";
+
 import { getBranchContext } from "@/lib/api/branch-middleware";
+import { createApiSuccessResponse } from "@/lib/api/response";
 import { appLogger as logger } from "@/lib/logger";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
-import { createApiSuccessResponse } from "@/lib/api/response";
+import { createClient } from "@/utils/supabase/server";
+import { createServiceRoleClient } from "@/utils/supabase/server";
 
 export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
@@ -199,10 +200,15 @@ export async function PUT(request: NextRequest) {
       .limit(1)
       .maybeSingle();
 
-    const updateData: any = {
+    const updateData: unknown = {
       updated_at: new Date().toISOString(),
-      updated_by: user.id,
+      // updated_by will be set only if user.id is valid (FK constraint may fail)
     };
+
+    // Only add updated_by if we have a valid user id (FK constraint)
+    if (user.id) {
+      updateData.updated_by = user.id;
+    }
 
     if (body.slot_duration_minutes !== undefined)
       updateData.slot_duration_minutes = body.slot_duration_minutes;
@@ -299,7 +305,7 @@ export async function PUT(request: NextRequest) {
               branch_id: branch.id,
               ...updateData,
             },
-            { onConflict: "branch_id" },
+            { onConflict: "organization_id,branch_id" },
           );
         }
       }

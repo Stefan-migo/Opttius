@@ -4,11 +4,13 @@
  * @module lib/payments/nowpayments/gateway
  */
 
-import type { NextRequest } from "next/server";
-import type { IPaymentGateway, PaymentIntentResponse } from "../interfaces";
-import type { PaymentStatus, WebhookEvent } from "@/types/payment";
-import { appLogger as logger } from "@/lib/logger";
 import crypto from "crypto";
+import type { NextRequest } from "next/server";
+
+import { appLogger as logger } from "@/lib/logger";
+import type { PaymentStatus, WebhookEvent } from "@/types/payment";
+
+import type { IPaymentGateway, PaymentIntentResponse } from "../interfaces";
 
 /**
  * Get the NOWPayments API base URL based on sandbox mode

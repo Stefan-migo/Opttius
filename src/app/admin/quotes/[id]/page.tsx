@@ -1,46 +1,44 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { useRouter, useParams } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import {
+  ArrowLeft,
+  Calculator,
+  CheckCircle,
+  Clock,
+  DollarSign,
+  Eye,
+  FileText,
+  Loader2,
+  Package,
+  Printer,
+  RefreshCw,
+  Send,
+  User,
+  XCircle,
+} from "lucide-react";
+import Link from "next/link";
+import { useParams, useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
+
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
 } from "@/components/ui/dialog";
-import {
-  ArrowLeft,
-  Edit,
-  FileText,
-  User,
-  Eye,
-  Package,
-  Calculator,
-  Calendar,
-  DollarSign,
-  Send,
-  RefreshCw,
-  CheckCircle,
-  XCircle,
-  Clock,
-  AlertTriangle,
-  Printer,
-  Loader2,
-} from "lucide-react";
-import { toast } from "sonner";
-import Link from "next/link";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useBranch } from "@/hooks/useBranch";
-import { formatCurrency, formatDate } from "@/lib/utils";
-import { getLensTypeLabel } from "@/lib/lens-type-labels";
 import { quoteService } from "@/lib/api/services";
+import { getLensTypeLabel } from "@/lib/lens-type-labels";
+import { formatCurrency, formatDate } from "@/lib/utils";
 
 interface Quote {
   id: string;
@@ -54,8 +52,8 @@ interface Quote {
     email?: string;
     phone?: string;
   };
-  prescription?: any;
-  frame_product?: any;
+  prescription?: unknown;
+  frame_product?: unknown;
   frame_name?: string;
   frame_brand?: string;
   frame_model?: string;
@@ -160,7 +158,7 @@ export default function QuoteDetailPage() {
 
       const quoteResult = await quoteService.getQuote(quoteId);
       // Cast to any to handle additional properties from API response
-      const quote = quoteResult as unknown as any;
+      const quote = quoteResult as unknown as unknown;
 
       console.log("Quote loaded:", {
         quoteId: quote?.id,
@@ -195,7 +193,7 @@ export default function QuoteDetailPage() {
     try {
       // Redirigir al POS con el quoteId como parámetro
       router.push(`/admin/pos?quoteId=${quoteId}`);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error loading quote to POS:", error);
       toast.error("Error al cargar presupuesto al POS");
     } finally {
@@ -458,7 +456,7 @@ export default function QuoteDetailPage() {
 
       // Refresh quote to update status
       fetchQuote();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error sending quote:", error);
       toast.error(error.message || "Error al enviar presupuesto");
     } finally {
@@ -474,7 +472,10 @@ export default function QuoteDetailPage() {
   }, [quote]);
 
   const getStatusBadge = (status: string) => {
-    const config: Record<string, { variant: any; label: string; icon: any }> = {
+    const config: Record<
+      string,
+      { variant: unknown; label: string; icon: unknown }
+    > = {
       draft: { variant: "outline", label: "Borrador", icon: FileText },
       sent: { variant: "secondary", label: "Enviado", icon: Send },
       accepted: { variant: "default", label: "Aceptado", icon: CheckCircle },
@@ -495,7 +496,7 @@ export default function QuoteDetailPage() {
     const Icon = statusConfig.icon;
 
     return (
-      <Badge variant={statusConfig.variant} className="flex items-center gap-1">
+      <Badge className="flex items-center gap-1" variant={statusConfig.variant}>
         <Icon className="h-3 w-3" />
         {statusConfig.label}
       </Badge>
@@ -506,7 +507,7 @@ export default function QuoteDetailPage() {
     return (
       <div className="space-y-6">
         <div className="flex items-center space-x-4">
-          <Button variant="outline" size="sm">
+          <Button size="sm" variant="outline">
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div>
@@ -523,7 +524,7 @@ export default function QuoteDetailPage() {
     return (
       <div className="space-y-6">
         <div className="flex items-center space-x-4">
-          <Button variant="outline" size="sm" onClick={() => router.back()}>
+          <Button size="sm" variant="outline" onClick={() => router.back()}>
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div>
@@ -547,11 +548,11 @@ export default function QuoteDetailPage() {
       <div className="flex flex-col gap-2 sm:gap-3">
         <div className="flex items-center gap-2">
           <Button
-            variant="outline"
-            size="icon"
-            onClick={() => router.back()}
-            className="h-9 w-9 shrink-0"
             aria-label="Volver"
+            className="h-9 w-9 shrink-0"
+            size="icon"
+            variant="outline"
+            onClick={() => router.back()}
           >
             <ArrowLeft className="h-4 w-4" />
           </Button>
@@ -566,10 +567,10 @@ export default function QuoteDetailPage() {
           {getStatusBadge(quote.status)}
           {!quote.converted_to_work_order_id && (
             <Button
-              onClick={handleLoadToPOS}
+              className="h-9 gap-1.5"
               disabled={loadingToPos}
               size="sm"
-              className="h-9 gap-1.5"
+              onClick={handleLoadToPOS}
             >
               {loadingToPos ? (
                 <>
@@ -588,28 +589,28 @@ export default function QuoteDetailPage() {
             <Link
               href={`/admin/work-orders/${quote.converted_to_work_order_id}`}
             >
-              <Button variant="outline" size="sm" className="h-9">
+              <Button className="h-9" size="sm" variant="outline">
                 <Eye className="h-4 w-4 sm:mr-2 shrink-0" />
                 <span className="hidden sm:inline">Ver Trabajo</span>
               </Button>
             </Link>
           )}
           <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setShowSendDialog(true)}
-            className="h-9 w-9 sm:w-auto sm:px-3"
             aria-label="Enviar presupuesto"
+            className="h-9 w-9 sm:w-auto sm:px-3"
+            size="sm"
+            variant="outline"
+            onClick={() => setShowSendDialog(true)}
           >
             <Send className="h-4 w-4 sm:mr-2 shrink-0" />
             <span className="hidden sm:inline">Enviar Presupuesto</span>
           </Button>
           <Button
-            variant="outline"
-            size="sm"
-            onClick={handlePrint}
-            className="h-9 w-9 sm:w-auto sm:px-3"
             aria-label="Imprimir"
+            className="h-9 w-9 sm:w-auto sm:px-3"
+            size="sm"
+            variant="outline"
+            onClick={handlePrint}
           >
             <Printer className="h-4 w-4 sm:mr-2 shrink-0" />
             <span className="hidden sm:inline">Imprimir</span>
@@ -653,12 +654,12 @@ export default function QuoteDetailPage() {
             <div>
               <Label htmlFor="email">Email de Destino</Label>
               <Input
+                className="mt-1"
                 id="email"
+                placeholder="cliente@ejemplo.com"
                 type="email"
                 value={sendEmail}
                 onChange={(e) => setSendEmail(e.target.value)}
-                placeholder="cliente@ejemplo.com"
-                className="mt-1"
               />
             </div>
           </div>
@@ -666,7 +667,7 @@ export default function QuoteDetailPage() {
             <Button variant="outline" onClick={() => setShowSendDialog(false)}>
               Cancelar
             </Button>
-            <Button onClick={handleSendQuote} disabled={sending || !sendEmail}>
+            <Button disabled={sending || !sendEmail} onClick={handleSendQuote}>
               {sending ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -684,7 +685,7 @@ export default function QuoteDetailPage() {
       </Dialog>
 
       {/* Main Content */}
-      <Tabs defaultValue="overview" className="space-y-6">
+      <Tabs className="space-y-6" defaultValue="overview">
         <TabsList>
           <TabsTrigger value="overview">Resumen</TabsTrigger>
           <TabsTrigger value="details">Detalles</TabsTrigger>
@@ -692,7 +693,7 @@ export default function QuoteDetailPage() {
         </TabsList>
 
         {/* Overview Tab */}
-        <TabsContent value="overview" className="space-y-6">
+        <TabsContent className="space-y-6" value="overview">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Customer Info */}
             <Card>
@@ -728,9 +729,9 @@ export default function QuoteDetailPage() {
                     {quote.customer?.id ? (
                       <Link href={`/admin/customers/${quote.customer.id}`}>
                         <Button
-                          variant="outline"
-                          size="sm"
                           className="w-full mt-4"
+                          size="sm"
+                          variant="outline"
                         >
                           Ver Cliente
                         </Button>
@@ -914,7 +915,7 @@ export default function QuoteDetailPage() {
         </TabsContent>
 
         {/* Details Tab */}
-        <TabsContent value="details" className="space-y-6">
+        <TabsContent className="space-y-6" value="details">
           {/* Prescription Details */}
           {quote.prescription && (
             <Card>
@@ -1593,7 +1594,7 @@ export default function QuoteDetailPage() {
         </TabsContent>
 
         {/* Pricing Tab */}
-        <TabsContent value="pricing" className="space-y-6">
+        <TabsContent className="space-y-6" value="pricing">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center">

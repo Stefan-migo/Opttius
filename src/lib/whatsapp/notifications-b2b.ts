@@ -3,9 +3,11 @@
  * Usa número oficial de Opttius (env WHATSAPP_PHONE_NUMBER_ID)
  */
 
-import { WhatsAppClient } from "./client";
 import type { SupabaseClient } from "@supabase/supabase-js";
+
 import { appLogger as logger } from "@/lib/logger";
+
+import { WhatsAppClient } from "./client";
 
 /** Normaliza teléfono para envío (solo dígitos, sin +) */
 function normalizePhone(phone: string): string {

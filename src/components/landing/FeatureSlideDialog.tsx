@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import Image from "next/image";
+import { useCallback, useEffect, useState } from "react";
+
 import { cn } from "@/lib/utils";
 
 const SLIDE_COUNTS: Record<string, number> = {
@@ -101,12 +102,12 @@ export function FeatureSlideDialog({
               )}
             </div>
             <DialogPrimitive.Close
+              aria-label="Cerrar"
               className={cn(
                 "flex h-11 w-11 shrink-0 items-center justify-center rounded-xl",
                 "text-epoch-primary/70 hover:bg-epoch-primary/10 hover:text-epoch-primary",
                 "transition-colors focus:outline-none focus:ring-2 focus:ring-epoch-accent focus:ring-offset-2",
               )}
-              aria-label="Cerrar"
             >
               <X className="h-5 w-5" />
             </DialogPrimitive.Close>
@@ -118,12 +119,12 @@ export function FeatureSlideDialog({
             <div className="relative flex min-h-0 flex-1 items-center justify-center bg-epoch-surface/5 p-2 sm:p-4">
               <div className="relative aspect-[4/3] w-full max-w-3xl overflow-hidden rounded-lg bg-epoch-surface/10">
                 <Image
-                  src={slides[slideIndex]}
-                  alt={`${title} - Slide ${slideIndex + 1} de ${totalSlides}`}
                   fill
+                  alt={`${title} - Slide ${slideIndex + 1} de ${totalSlides}`}
                   className="object-contain"
-                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 80vw, 896px"
                   priority={slideIndex === 0}
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 80vw, 896px"
+                  src={slides[slideIndex]}
                 />
               </div>
             </div>
@@ -131,34 +132,34 @@ export function FeatureSlideDialog({
             {/* Navigation - touch-friendly (min 44px) */}
             <div className="flex shrink-0 items-center justify-between gap-2 border-t border-epoch-primary/10 px-2 py-3 sm:px-4 sm:py-4">
               <button
-                type="button"
-                onClick={goPrev}
+                aria-label="Slide anterior"
                 className={cn(
                   "flex h-12 min-h-[44px] w-12 min-w-[44px] items-center justify-center rounded-xl",
                   "bg-epoch-primary/10 text-epoch-primary hover:bg-epoch-primary/20",
                   "transition-colors focus:outline-none focus:ring-2 focus:ring-epoch-accent focus:ring-offset-2",
                 )}
-                aria-label="Slide anterior"
+                type="button"
+                onClick={goPrev}
               >
                 <ChevronLeft className="h-6 w-6" />
               </button>
 
               <span
-                className="font-sans text-sm font-medium text-epoch-primary/80"
                 aria-live="polite"
+                className="font-sans text-sm font-medium text-epoch-primary/80"
               >
                 {slideIndex + 1} / {totalSlides}
               </span>
 
               <button
-                type="button"
-                onClick={goNext}
+                aria-label="Slide siguiente"
                 className={cn(
                   "flex h-12 min-h-[44px] w-12 min-w-[44px] items-center justify-center rounded-xl",
                   "bg-epoch-primary/10 text-epoch-primary hover:bg-epoch-primary/20",
                   "transition-colors focus:outline-none focus:ring-2 focus:ring-epoch-accent focus:ring-offset-2",
                 )}
-                aria-label="Slide siguiente"
+                type="button"
+                onClick={goNext}
               >
                 <ChevronRight className="h-6 w-6" />
               </button>

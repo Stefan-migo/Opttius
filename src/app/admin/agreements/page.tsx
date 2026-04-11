@@ -1,9 +1,19 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Eye,
+  FileText,
+  Loader2,
+  Plus,
+} from "lucide-react";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Select,
   SelectContent,
@@ -19,22 +29,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  FileText,
-  Plus,
-  Eye,
-  Building2,
-  Calendar,
-  ChevronLeft,
-  ChevronRight,
-  Loader2,
-} from "lucide-react";
-import Link from "next/link";
 import { useBranch } from "@/hooks/useBranch";
 import {
-  agreementService,
   Agreement,
   AgreementListParams,
+  agreementService,
 } from "@/lib/api/services/agreementService";
 import { handleApiError } from "@/lib/services/errorService";
 import { formatDate } from "@/lib/utils";
@@ -137,7 +136,7 @@ export default function AgreementsPage() {
           </p>
         </div>
         <Link href="/admin/agreements/new">
-          <Button variant="default" className="gap-2">
+          <Button className="gap-2" variant="default">
             <Plus className="h-4 w-4" />
             Nuevo convenio
           </Button>
@@ -240,7 +239,7 @@ export default function AgreementsPage() {
                       </TableCell>
                       <TableCell className="text-right">
                         <Link href={`/admin/agreements/${ag.id}`}>
-                          <Button variant="ghost" size="sm">
+                          <Button size="sm" variant="ghost">
                             <Eye className="h-4 w-4 mr-1" />
                             Ver
                           </Button>
@@ -258,10 +257,10 @@ export default function AgreementsPage() {
                   </p>
                   <div className="flex gap-2">
                     <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                       disabled={currentPage <= 1}
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                     >
                       <ChevronLeft className="h-4 w-4" />
                     </Button>
@@ -269,12 +268,12 @@ export default function AgreementsPage() {
                       {currentPage} / {totalPages}
                     </span>
                     <Button
-                      variant="outline"
+                      disabled={currentPage >= totalPages}
                       size="sm"
+                      variant="outline"
                       onClick={() =>
                         setCurrentPage((p) => Math.min(totalPages, p + 1))
                       }
-                      disabled={currentPage >= totalPages}
                     >
                       <ChevronRight className="h-4 w-4" />
                     </Button>

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/utils/supabase/server";
+
 import { appLogger as logger } from "@/lib/logger";
+import { createClient } from "@/utils/supabase/server";
 
 export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
@@ -232,8 +233,8 @@ export async function POST(request: NextRequest) {
 }
 
 // Helper functions
-function getLatestMetrics(metrics: any[]) {
-  const latest: any = {};
+function getLatestMetrics(metrics: unknown[]) {
+  const latest: unknown = {};
 
   metrics.forEach((metric) => {
     const key = metric.metric_name;
@@ -248,10 +249,10 @@ function getLatestMetrics(metrics: any[]) {
   return Object.values(latest);
 }
 
-function calculateHealthStatus(latestMetrics: any[]) {
+function calculateHealthStatus(latestMetrics: unknown[]) {
   let overallStatus = "healthy";
-  const warnings: any[] = [];
-  const criticals: any[] = [];
+  const warnings: unknown[] = [];
+  const criticals: unknown[] = [];
 
   latestMetrics.forEach((metric) => {
     if (
@@ -286,8 +287,8 @@ function calculateHealthStatus(latestMetrics: any[]) {
   };
 }
 
-function groupMetricsByCategory(metrics: any[]) {
-  const grouped = metrics.reduce((acc: any, metric) => {
+function groupMetricsByCategory(metrics: unknown[]) {
+  const grouped = metrics.reduce((acc: unknown, metric) => {
     const category = metric.category || "general";
 
     if (!acc[category]) {
@@ -312,7 +313,7 @@ function groupMetricsByCategory(metrics: any[]) {
   Object.keys(grouped).forEach((category) => {
     Object.keys(grouped[category]).forEach((metricName) => {
       grouped[category][metricName].sort(
-        (a: any, b: any) =>
+        (a: unknown, b: unknown) =>
           new Date(a.collected_at).getTime() -
           new Date(b.collected_at).getTime(),
       );

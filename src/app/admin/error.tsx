@@ -1,8 +1,9 @@
 "use client";
 
+import { AlertCircle, ArrowLeft, Home, RefreshCw } from "lucide-react";
 import { useEffect } from "react";
+
 import { Button } from "@/components/ui/button";
-import { AlertCircle, RefreshCw, Home, ArrowLeft } from "lucide-react";
 import { logger } from "@/lib/logger";
 
 /**
@@ -18,7 +19,7 @@ export default function AdminError({
 }) {
   useEffect(() => {
     // Log error to logger
-    logger.error("Admin error page triggered", error as any, {
+    logger.error("Admin error page triggered", error as unknown, {
       digest: error.digest,
       adminError: true,
       timestamp: new Date().toISOString(),
@@ -56,26 +57,26 @@ export default function AdminError({
         </div>
 
         <div className="flex flex-col gap-2 sm:flex-row">
-          <Button onClick={reset} variant="default" className="flex-1">
+          <Button className="flex-1" variant="default" onClick={reset}>
             <RefreshCw className="mr-2 h-4 w-4" />
             Intentar de nuevo
           </Button>
           <Button
+            className="flex-1"
+            variant="outline"
             onClick={() => {
               window.location.href = "/admin";
             }}
-            variant="outline"
-            className="flex-1"
           >
             <ArrowLeft className="mr-2 h-4 w-4" />
             Volver al panel
           </Button>
           <Button
+            className="flex-1"
+            variant="ghost"
             onClick={() => {
               window.location.href = "/";
             }}
-            variant="ghost"
-            className="flex-1"
           >
             <Home className="mr-2 h-4 w-4" />
             Inicio

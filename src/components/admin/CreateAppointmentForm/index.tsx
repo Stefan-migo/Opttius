@@ -1,8 +1,21 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import {
+  AlertCircle,
+  Building2,
+  CheckCircle,
+  Eye,
+  Loader2,
+  Package,
+  RefreshCw,
+  Truck,
+  User,
+  Wrench,
+} from "lucide-react";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -11,41 +24,22 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { toast } from "sonner";
-import { cn } from "@/lib/utils";
-import { formatRUT } from "@/lib/utils/rut";
-import {
-  Eye,
-  User,
-  Package,
-  Truck,
-  Wrench,
-  AlertCircle,
-  RefreshCw,
-  CheckCircle,
-  Calendar,
-  Clock,
-  Loader2,
-  Building2,
-} from "lucide-react";
-
 // Hooks
 import { useBranch } from "@/hooks/useBranch";
-import { useAppointmentForm } from "./hooks/useAppointmentForm";
-import { useCustomerSearch } from "./hooks/useCustomerSearch";
-import { useAvailability } from "./hooks/useAvailability";
-import { useScheduleSettings } from "./hooks/useScheduleSettings";
 
-// Types
-import type {
-  CreateAppointmentFormProps,
-  AppointmentType,
-} from "./types/appointment.types";
-
+import AppointmentDetails from "./AppointmentDetails";
 // Components (will be created next)
 import CustomerSelection from "./CustomerSelection";
 import DateTimeSelection from "./DateTimeSelection";
-import AppointmentDetails from "./AppointmentDetails";
+import { useAppointmentForm } from "./hooks/useAppointmentForm";
+import { useAvailability } from "./hooks/useAvailability";
+import { useCustomerSearch } from "./hooks/useCustomerSearch";
+import { useScheduleSettings } from "./hooks/useScheduleSettings";
+// Types
+import type {
+  AppointmentType,
+  CreateAppointmentFormProps,
+} from "./types/appointment.types";
 
 const appointmentTypes: AppointmentType[] = [
   { value: "eye_exam", label: "Examen de la Vista", icon: Eye },
@@ -163,7 +157,7 @@ export default function CreateAppointmentForm({
         }
         onSuccess();
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error saving appointment:", error);
       toast.error(error.message || "Error al guardar cita");
     }
@@ -180,7 +174,7 @@ export default function CreateAppointmentForm({
     (!isSuperAdmin || !!effectiveBranchForForm);
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-8 pb-4">
+    <form className="space-y-8 pb-4" onSubmit={handleSubmit}>
       {/* Branch selector for super_admin - required to create appointment */}
       {isSuperAdmin && (
         <div className="space-y-2">
@@ -200,9 +194,9 @@ export default function CreateAppointmentForm({
             <SelectContent className="rounded-xl border-admin-border-primary/20">
               {branches.map((b) => (
                 <SelectItem
+                  className="font-display font-medium text-[10px] tracking-widest uppercase"
                   key={b.id}
                   value={b.id}
-                  className="font-display font-medium text-[10px] tracking-widest uppercase"
                 >
                   {b.name}
                 </SelectItem>
@@ -219,33 +213,35 @@ export default function CreateAppointmentForm({
 
       {/* Customer Selection */}
       <CustomerSelection
-        isGuestCustomer={customerSearchHook.isGuestCustomer}
-        selectedCustomer={customerSearchHook.selectedCustomer}
-        guestCustomerData={customerSearchHook.guestCustomerData}
-        customerSearch={customerSearchHook.customerSearch}
         customerResults={customerSearchHook.customerResults}
+        customerSearch={customerSearchHook.customerSearch}
+        guestCustomerData={customerSearchHook.guestCustomerData}
+        isGuestCustomer={customerSearchHook.isGuestCustomer}
         searchingCustomers={customerSearchHook.searchingCustomers}
-        onGuestModeToggle={customerSearchHook.setIsGuestCustomer}
-        onCustomerSelect={customerSearchHook.setSelectedCustomer}
+        selectedCustomer={customerSearchHook.selectedCustomer}
         onCustomerClear={() => {
           customerSearchHook.setSelectedCustomer(null);
           appointmentFormHook.updateField("prescription_id", null);
         }}
-        onGuestDataChange={customerSearchHook.updateGuestCustomerData}
         onCustomerSearchChange={customerSearchHook.setCustomerSearch}
         onCustomerSearchClear={customerSearchHook.clearCustomerSearch}
+        onCustomerSelect={customerSearchHook.setSelectedCustomer}
+        onGuestDataChange={customerSearchHook.updateGuestCustomerData}
+        onGuestModeToggle={customerSearchHook.setIsGuestCustomer}
       />
 
       {/* Date and Time Selection */}
       <DateTimeSelection
-        date={appointmentFormHook.formData.appointment_date}
-        time={appointmentFormHook.formData.appointment_time}
-        duration={appointmentFormHook.formData.duration_minutes}
-        lockDateTime={lockDateTime}
         availableSlots={availabilityHook.availableSlots}
+        date={appointmentFormHook.formData.appointment_date}
+        duration={appointmentFormHook.formData.duration_minutes}
+        formatTime={formatTime}
+        isSlotAvailable={availabilityHook.isSlotAvailable}
         loadingAvailability={availabilityHook.loading}
-        minDate={scheduleSettingsHook.getMinDate()}
+        lockDateTime={lockDateTime}
         maxDate={scheduleSettingsHook.getMaxDate()}
+        minDate={scheduleSettingsHook.getMinDate()}
+        time={appointmentFormHook.formData.appointment_time}
         onDateChange={(date: string) => {
           if (lockDateTime) return;
           const today = new Date().toISOString().split("T")[0];
@@ -259,9 +255,6 @@ export default function CreateAppointmentForm({
           });
           availabilityHook.clearSlots();
         }}
-        onTimeChange={(time: string) =>
-          appointmentFormHook.updateField("appointment_time", time)
-        }
         onDurationChange={(duration: number) => {
           appointmentFormHook.updateFormData({
             duration_minutes: duration,
@@ -280,53 +273,54 @@ export default function CreateAppointmentForm({
             );
           }
         }}
-        formatTime={formatTime}
-        isSlotAvailable={availabilityHook.isSlotAvailable}
+        onTimeChange={(time: string) =>
+          appointmentFormHook.updateField("appointment_time", time)
+        }
       />
 
       {/* Appointment Details */}
       <AppointmentDetails
         appointmentType={appointmentFormHook.formData.appointment_type}
-        status={appointmentFormHook.formData.status}
-        reason={appointmentFormHook.formData.reason}
-        notes={appointmentFormHook.formData.notes}
-        followUpRequired={appointmentFormHook.formData.follow_up_required}
-        followUpDate={appointmentFormHook.formData.follow_up_date}
         appointmentTypes={appointmentTypes}
-        onTypeChange={(type: string) =>
-          appointmentFormHook.updateField("appointment_type", type)
-        }
-        onStatusChange={(status: string) =>
-          appointmentFormHook.updateField("status", status)
-        }
-        onReasonChange={(reason: string) =>
-          appointmentFormHook.updateField("reason", reason)
-        }
-        onNotesChange={(notes: string) =>
-          appointmentFormHook.updateField("notes", notes)
+        followUpDate={appointmentFormHook.formData.follow_up_date}
+        followUpRequired={appointmentFormHook.formData.follow_up_required}
+        notes={appointmentFormHook.formData.notes}
+        reason={appointmentFormHook.formData.reason}
+        status={appointmentFormHook.formData.status}
+        onFollowUpDateChange={(date: string) =>
+          appointmentFormHook.updateField("follow_up_date", date)
         }
         onFollowUpToggle={(required: boolean) =>
           appointmentFormHook.updateField("follow_up_required", required)
         }
-        onFollowUpDateChange={(date: string) =>
-          appointmentFormHook.updateField("follow_up_date", date)
+        onNotesChange={(notes: string) =>
+          appointmentFormHook.updateField("notes", notes)
+        }
+        onReasonChange={(reason: string) =>
+          appointmentFormHook.updateField("reason", reason)
+        }
+        onStatusChange={(status: string) =>
+          appointmentFormHook.updateField("status", status)
+        }
+        onTypeChange={(type: string) =>
+          appointmentFormHook.updateField("appointment_type", type)
         }
       />
 
       {/* Actions */}
       <div className="flex items-center justify-end gap-4 pt-4">
         <Button
+          className="h-12 px-8 rounded-xl font-bold text-admin-text-tertiary hover:bg-admin-bg-tertiary/20 uppercase text-[11px] tracking-widest transition-all"
           type="button"
           variant="ghost"
           onClick={onCancel}
-          className="h-12 px-8 rounded-xl font-bold text-admin-text-tertiary hover:bg-admin-bg-tertiary/20 uppercase text-[11px] tracking-widest transition-all"
         >
           Descartar
         </Button>
         <Button
-          type="submit"
-          disabled={!canSubmit}
           className="h-12 px-10 rounded-xl bg-admin-accent-primary hover:bg-admin-accent-primary/90 text-white shadow-premium-md font-bold uppercase text-[11px] tracking-widest transition-all active:scale-[0.98] disabled:opacity-50"
+          disabled={!canSubmit}
+          type="submit"
         >
           {appointmentFormHook.saving ? (
             <>

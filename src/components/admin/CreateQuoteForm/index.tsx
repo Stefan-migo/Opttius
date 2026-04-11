@@ -1,11 +1,12 @@
 "use client";
 
+import { CheckCircle, Loader2, Package } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
+
+import CreatePrescriptionForm from "@/components/admin/CreatePrescriptionForm";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Package, Loader2, Calculator, CheckCircle } from "lucide-react";
-import { toast } from "sonner";
 import {
   Dialog,
   DialogContent,
@@ -13,36 +14,21 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import CreatePrescriptionForm from "@/components/admin/CreatePrescriptionForm";
 import { useBranch } from "@/hooks/useBranch";
-import { getBranchHeader } from "@/lib/utils/branch";
 import {
-  calculatePriceWithTax,
-  calculateTotal as calculateTotalTax,
-} from "@/lib/utils/tax";
-import { useLensPriceCalculation } from "@/hooks/useLensPriceCalculation";
-import {
-  hasAddition,
-  getMaxAddition,
-  getFarSphere,
-  getCylinder,
   getDefaultPresbyopiaSolution,
-  getRecommendedLensTypes,
+  hasAddition,
   type PresbyopiaSolution,
 } from "@/lib/presbyopia-helpers";
-import { translatePrescriptionType } from "@/lib/prescription-helpers";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Info } from "lucide-react";
+import { getBranchHeader } from "@/lib/utils/branch";
 
 // Local imports
-import { useQuoteForm, useFrameSearch } from "./hooks";
+import { useFrameSearch, useQuoteForm } from "./hooks";
 import { CustomerSelection, PrescriptionSelection } from "./sections";
 import {
   CreateQuoteFormProps,
   Customer,
   Prescription,
-  Frame,
 } from "./types/quote.types";
 
 export default function CreateQuoteForm({
@@ -201,13 +187,13 @@ export default function CreateQuoteForm({
 
   // Render the form
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form className="space-y-6" onSubmit={handleSubmit}>
       {/* Customer Selection Section */}
       <CustomerSelection
-        selectedCustomer={selectedCustomer}
-        onCustomerSelect={handleCustomerSelect}
-        onCustomerClear={handleCustomerClear}
         initialCustomerId={initialCustomerId}
+        selectedCustomer={selectedCustomer}
+        onCustomerClear={handleCustomerClear}
+        onCustomerSelect={handleCustomerSelect}
       />
 
       {/* Prescription Selection Section */}
@@ -218,12 +204,12 @@ export default function CreateQuoteForm({
             `${selectedCustomer.first_name || ""} ${selectedCustomer.last_name || ""}`.trim() ||
             undefined
           }
-          selectedPrescription={selectedPrescription}
-          onPrescriptionSelect={handlePrescriptionSelect}
-          onPrescriptionClear={handlePrescriptionClear}
           presbyopiaSolution={presbyopiaSolution}
-          onPresbyopiaSolutionChange={handlePresbyopiaSolutionChange}
+          selectedPrescription={selectedPrescription}
           onCreateNewPrescription={() => setShowCreatePrescription(true)}
+          onPresbyopiaSolutionChange={handlePresbyopiaSolutionChange}
+          onPrescriptionClear={handlePrescriptionClear}
+          onPrescriptionSelect={handlePrescriptionSelect}
         />
       )}
 
@@ -248,16 +234,16 @@ export default function CreateQuoteForm({
       {/* Action Buttons */}
       <div className="flex justify-end gap-3 pt-6 border-t">
         <Button
+          disabled={saving}
           type="button"
           variant="outline"
           onClick={onCancel}
-          disabled={saving}
         >
           Cancelar
         </Button>
         <Button
-          type="submit"
           disabled={saving || !selectedCustomer || !selectedPrescription}
+          type="submit"
         >
           {saving ? (
             <>
@@ -287,12 +273,12 @@ export default function CreateQuoteForm({
           </DialogHeader>
           <CreatePrescriptionForm
             customerId={selectedCustomer?.id || ""}
+            onCancel={() => setShowCreatePrescription(false)}
             onSuccess={() => {
               // The prescription will be passed through some other mechanism
               setShowCreatePrescription(false);
               // We'll need to refetch prescriptions or handle this differently
             }}
-            onCancel={() => setShowCreatePrescription(false)}
           />
         </DialogContent>
       </Dialog>

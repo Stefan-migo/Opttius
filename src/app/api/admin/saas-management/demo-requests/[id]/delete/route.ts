@@ -3,9 +3,10 @@
  * Deletes a demo request and all associated data (demo org if approved). Root only.
  */
 import { NextRequest, NextResponse } from "next/server";
+
 import { requireRoot } from "@/lib/api/root-middleware";
-import { createServiceRoleClient } from "@/utils/supabase/service-role";
 import { appLogger as logger } from "@/lib/logger";
+import { createServiceRoleClient } from "@/utils/supabase/service-role";
 
 export const dynamic = "force-dynamic";
 

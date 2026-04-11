@@ -1,4 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
+
 import { OrganizationalMaturitySystem } from "@/lib/ai/insights/maturity";
 import type { MaturityLevel } from "@/lib/ai/memory/organizational";
 
@@ -199,7 +200,7 @@ describe("OrganizationalMaturitySystem", () => {
 
     it("should default to growing if level is unknown", async () => {
       const mockMaturity = {
-        level: "unknown" as any,
+        level: "unknown" as unknown,
         daysSinceCreation: 50,
         totalOrders: 20,
         totalRevenue: 20000,

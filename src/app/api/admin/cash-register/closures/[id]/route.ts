@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient, createServiceRoleClient } from "@/utils/supabase/server";
+
 import {
   getBranchContext,
   validateBranchAccess,
 } from "@/lib/api/branch-middleware";
 import { appLogger as logger } from "@/lib/logger";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
+import { createClient, createServiceRoleClient } from "@/utils/supabase/server";
 
 /**
  * GET /api/admin/cash-register/closures/[id]
@@ -113,7 +114,7 @@ export async function GET(
       closure: closureWithUser,
       orders: orders || [],
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error("Error fetching cash register closure:", {
       error,
       closureId: id,
@@ -193,7 +194,7 @@ export async function PUT(
     }
 
     // Prepare update data
-    const updateData: any = {
+    const updateData: unknown = {
       updated_at: new Date().toISOString(),
     };
 
@@ -224,8 +225,8 @@ export async function PUT(
       body.card_machine_credit_total !== undefined
     ) {
       const expectedCash =
-        Number((existingClosure as any).opening_cash_amount || 0) +
-        Number((existingClosure as any).cash_sales || 0);
+        Number((existingClosure as unknown).opening_cash_amount || 0) +
+        Number((existingClosure as unknown).cash_sales || 0);
       if (updateData.actual_cash !== undefined) {
         updateData.cash_difference =
           Number(updateData.actual_cash) - expectedCash;
@@ -239,16 +240,20 @@ export async function PUT(
         const debitTotal =
           updateData.card_machine_debit_total !== undefined
             ? Number(updateData.card_machine_debit_total)
-            : Number((existingClosure as any).card_machine_debit_total || 0);
+            : Number(
+                (existingClosure as unknown).card_machine_debit_total || 0,
+              );
         const creditTotal =
           updateData.card_machine_credit_total !== undefined
             ? Number(updateData.card_machine_credit_total)
-            : Number((existingClosure as any).card_machine_credit_total || 0);
+            : Number(
+                (existingClosure as unknown).card_machine_credit_total || 0,
+              );
         const expectedDebit = Number(
-          (existingClosure as any).debit_card_sales || 0,
+          (existingClosure as unknown).debit_card_sales || 0,
         );
         const expectedCredit = Number(
-          (existingClosure as any).credit_card_sales || 0,
+          (existingClosure as unknown).credit_card_sales || 0,
         );
         updateData.card_machine_difference =
           debitTotal - expectedDebit + (creditTotal - expectedCredit);
@@ -304,7 +309,7 @@ export async function PUT(
       success: true,
       closure: closureWithUser,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error("Error updating cash register closure:", {
       error,
       closureId: id,

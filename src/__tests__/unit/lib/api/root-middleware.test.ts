@@ -1,9 +1,10 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
 import { NextRequest } from "next/server";
-import { requireRoot, isRootUser } from "@/lib/api/root-middleware";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
 import { AuthorizationError } from "@/lib/api/errors";
-import { createServiceRoleClient } from "@/utils/supabase/service-role";
+import { isRootUser, requireRoot } from "@/lib/api/root-middleware";
 import { createClient } from "@/utils/supabase/server";
+import { createServiceRoleClient } from "@/utils/supabase/service-role";
 
 // Mock dependencies
 vi.mock("@/utils/supabase/server");
@@ -43,7 +44,7 @@ describe("requireRoot", () => {
           error: null,
         }),
       },
-    } as any);
+    } as unknown);
 
     // Mock createServiceRoleClient
     vi.mocked(createServiceRoleClient).mockReturnValue({
@@ -57,7 +58,7 @@ describe("requireRoot", () => {
           }),
         }),
       }),
-    } as any);
+    } as unknown);
 
     const result = await requireRoot(mockRequest);
 
@@ -82,7 +83,7 @@ describe("requireRoot", () => {
           error: null,
         }),
       },
-    } as any);
+    } as unknown);
 
     vi.mocked(createServiceRoleClient).mockReturnValue({
       from: vi.fn().mockReturnValue({
@@ -95,7 +96,7 @@ describe("requireRoot", () => {
           }),
         }),
       }),
-    } as any);
+    } as unknown);
 
     const result = await requireRoot(mockRequest);
 
@@ -119,7 +120,7 @@ describe("requireRoot", () => {
           error: null,
         }),
       },
-    } as any);
+    } as unknown);
 
     vi.mocked(createServiceRoleClient).mockReturnValue({
       from: vi.fn().mockReturnValue({
@@ -132,7 +133,7 @@ describe("requireRoot", () => {
           }),
         }),
       }),
-    } as any);
+    } as unknown);
 
     await expect(requireRoot(mockRequest)).rejects.toThrow(AuthorizationError);
     await expect(requireRoot(mockRequest)).rejects.toThrow(
@@ -148,7 +149,7 @@ describe("requireRoot", () => {
           error: new Error("Not authenticated"),
         }),
       },
-    } as any);
+    } as unknown);
 
     await expect(requireRoot(mockRequest)).rejects.toThrow(AuthorizationError);
     await expect(requireRoot(mockRequest)).rejects.toThrow("Unauthorized");
@@ -167,7 +168,7 @@ describe("requireRoot", () => {
           error: null,
         }),
       },
-    } as any);
+    } as unknown);
 
     vi.mocked(createServiceRoleClient).mockReturnValue({
       from: vi.fn().mockReturnValue({
@@ -180,7 +181,7 @@ describe("requireRoot", () => {
           }),
         }),
       }),
-    } as any);
+    } as unknown);
 
     await expect(requireRoot(mockRequest)).rejects.toThrow(AuthorizationError);
   });
@@ -203,7 +204,7 @@ describe("isRootUser", () => {
           }),
         }),
       }),
-    } as any);
+    } as unknown);
 
     const result = await isRootUser("root-user-id");
     expect(result).toBe(true);
@@ -221,7 +222,7 @@ describe("isRootUser", () => {
           }),
         }),
       }),
-    } as any);
+    } as unknown);
 
     const result = await isRootUser("dev-user-id");
     expect(result).toBe(true);
@@ -239,7 +240,7 @@ describe("isRootUser", () => {
           }),
         }),
       }),
-    } as any);
+    } as unknown);
 
     const result = await isRootUser("admin-user-id");
     expect(result).toBe(false);
@@ -257,7 +258,7 @@ describe("isRootUser", () => {
           }),
         }),
       }),
-    } as any);
+    } as unknown);
 
     const result = await isRootUser("non-existent-id");
     expect(result).toBe(false);
@@ -268,7 +269,7 @@ describe("isRootUser", () => {
       from: vi.fn().mockImplementation(() => {
         throw new Error("Database error");
       }),
-    } as any);
+    } as unknown);
 
     const result = await isRootUser("user-id");
     expect(result).toBe(false);

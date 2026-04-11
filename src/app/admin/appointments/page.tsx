@@ -1,10 +1,37 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import {
+  Activity,
+  AlertCircle,
+  ArrowRight,
+  Building2,
+  Calendar,
+  CalendarDays,
+  CheckCircle,
+  ChevronLeft,
+  ChevronRight,
+  Clock,
+  Eye,
+  FileText,
+  Filter,
+  Package,
+  Plus,
+  RefreshCw,
+  Settings,
+  Trash2,
+  Truck,
+  User,
+  Wrench,
+  XCircle,
+} from "lucide-react";
+import dynamic from "next/dynamic";
+import Link from "next/link";
+import { useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
+
 import { Badge } from "@/components/ui/badge";
-import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Select,
   SelectContent,
@@ -12,35 +39,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Calendar,
-  Plus,
-  Settings,
-  ChevronLeft,
-  ChevronRight,
-  Clock,
-  User,
-  Eye,
-  Package,
-  Wrench,
-  Truck,
-  AlertCircle,
-  CheckCircle,
-  XCircle,
-  RefreshCw,
-  Trash2,
-  CalendarDays,
-  Filter,
-  ArrowRight,
-  Activity,
-  FileText,
-  Building2,
-} from "lucide-react";
-import { toast } from "sonner";
-import Link from "next/link";
-import dynamic from "next/dynamic";
-import { useBranch } from "@/hooks/useBranch";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useBranch } from "@/hooks/useBranch";
 import { cn } from "@/lib/utils";
 
 // Lazy load large components to reduce initial bundle size
@@ -50,7 +50,7 @@ const AppointmentCalendar = dynamic(
     loading: () => (
       <div className="flex items-center justify-center py-12">
         <div className="text-center space-y-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-epoch-primary mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-epoch-primary mx-auto" />
           <p className="text-admin-text-tertiary">Cargando calendario...</p>
         </div>
       </div>
@@ -65,7 +65,7 @@ const CreateAppointmentForm = dynamic(
     loading: () => (
       <div className="flex items-center justify-center py-12">
         <div className="text-center space-y-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-epoch-primary mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-epoch-primary mx-auto" />
           <p className="text-admin-text-tertiary">Cargando formulario...</p>
         </div>
       </div>
@@ -133,6 +133,8 @@ export default function AppointmentsPage() {
     time?: string;
     lockDateTime?: boolean;
   } | null>(null);
+  // Using any for scheduleSettings due to type mismatch between service and component
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [scheduleSettings, setScheduleSettings] = useState<any>(null);
   const [showWeeklyReport, setShowWeeklyReport] = useState(false);
   const [lastRefresh, setLastRefresh] = useState<number>(Date.now());
@@ -256,8 +258,8 @@ export default function AppointmentsPage() {
   const weekLabelDate =
     view === "week" ? getMondayOfWeek(currentDate) : currentDate;
 
-  const getAppointmentTypeIcon = (type: string) => {
-    const icons: Record<string, any> = {
+  const getAppointmentTypeIcon = (type: string): typeof Calendar => {
+    const icons: Record<string, typeof Calendar> = {
       eye_exam: Eye,
       consultation: User,
       fitting: Package,
@@ -289,8 +291,8 @@ export default function AppointmentsPage() {
       case "scheduled":
         return (
           <Badge
-            variant="outline"
             className="bg-admin-bg-tertiary/50 text-admin-info border-admin-info/30 font-bold text-[10px] uppercase tracking-wider"
+            variant="outline"
           >
             <Clock className="h-3 w-3 mr-1" />
             Programada
@@ -299,8 +301,8 @@ export default function AppointmentsPage() {
       case "confirmed":
         return (
           <Badge
-            variant="outline"
             className="bg-admin-bg-tertiary/50 text-admin-success border-admin-success/30 font-bold text-[10px] uppercase tracking-wider"
+            variant="outline"
           >
             <CheckCircle className="h-3 w-3 mr-1" />
             Confirmada
@@ -309,8 +311,8 @@ export default function AppointmentsPage() {
       case "completed":
         return (
           <Badge
-            variant="outline"
             className="bg-admin-bg-tertiary/50 text-admin-accent-secondary border-admin-accent-secondary/30 font-bold text-[10px] uppercase tracking-wider"
+            variant="outline"
           >
             <CheckCircle className="h-3 w-3 mr-1" />
             Completada
@@ -319,8 +321,8 @@ export default function AppointmentsPage() {
       case "cancelled":
         return (
           <Badge
-            variant="outline"
             className="bg-admin-error/10 text-admin-error border-admin-error/30 font-bold text-[10px] uppercase tracking-wider"
+            variant="outline"
           >
             <XCircle className="h-3 w-3 mr-1" />
             Cancelada
@@ -329,8 +331,8 @@ export default function AppointmentsPage() {
       case "no_show":
         return (
           <Badge
-            variant="outline"
             className="bg-admin-bg-tertiary/50 text-admin-text-tertiary border-admin-border-secondary font-bold text-[10px] uppercase tracking-wider"
+            variant="outline"
           >
             <XCircle className="h-3 w-3 mr-1" />
             No asistó
@@ -339,8 +341,8 @@ export default function AppointmentsPage() {
       default:
         return (
           <Badge
-            variant="secondary"
             className="text-[10px] font-bold uppercase tracking-wider"
+            variant="secondary"
           >
             {status}
           </Badge>
@@ -508,23 +510,23 @@ export default function AppointmentsPage() {
         <div className="flex flex-wrap items-center gap-2">
           <Link href="/admin/appointments/settings">
             <Button
-              variant="outline"
-              size="sm"
-              className="h-9 w-9 sm:w-auto sm:px-4 bg-white border-admin-border-primary/20 hover:border-epoch-accent/40 text-admin-text-primary font-display font-bold text-[10px] tracking-widest uppercase rounded-xl transition-all"
               aria-label="Configuración"
+              className="h-9 w-9 sm:w-auto sm:px-4 bg-white border-admin-border-primary/20 hover:border-epoch-accent/40 text-admin-text-primary font-display font-bold text-[10px] tracking-widest uppercase rounded-xl transition-all"
+              size="sm"
+              variant="outline"
             >
               <Settings className="h-4 w-4 sm:mr-2 shrink-0" />
               <span className="hidden sm:inline">Configuración</span>
             </Button>
           </Link>
           <Button
+            className="h-9 gap-1.5 px-4 sm:px-6 bg-epoch-primary hover:bg-epoch-surface text-white font-display font-bold text-[10px] tracking-widest uppercase rounded-xl transition-all shadow-premium-sm"
+            size="sm"
             onClick={() => {
               setSelectedAppointment(null);
               setPrefilledAppointmentData(null);
               setShowCreateAppointment(true);
             }}
-            size="sm"
-            className="h-9 gap-1.5 px-4 sm:px-6 bg-epoch-primary hover:bg-epoch-surface text-white font-display font-bold text-[10px] tracking-widest uppercase rounded-xl transition-all shadow-premium-sm"
           >
             <Plus className="h-4 w-4 shrink-0" />
             <span className="text-xs sm:text-sm">Nueva Cita</span>
@@ -539,26 +541,26 @@ export default function AppointmentsPage() {
             <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-3 sm:gap-4">
               <div className="flex items-center bg-white p-1 rounded-xl border border-admin-border-primary/20 w-fit">
                 <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => navigateDate("prev")}
                   className="h-8 w-8 sm:h-9 sm:w-9 p-0 hover:bg-admin-bg-tertiary text-admin-text-primary rounded-lg sm:rounded-xl transition-all"
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => navigateDate("prev")}
                 >
                   <ChevronLeft className="h-4 w-4 sm:h-5 sm:w-5" />
                 </Button>
                 <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={goToToday}
                   className="px-3 sm:px-6 h-8 sm:h-9 font-display font-bold text-[9px] sm:text-[10px] uppercase tracking-widest text-admin-text-secondary hover:bg-admin-bg-tertiary rounded-lg sm:rounded-xl transition-all"
+                  size="sm"
+                  variant="ghost"
+                  onClick={goToToday}
                 >
                   Hoy
                 </Button>
                 <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => navigateDate("next")}
                   className="h-8 w-8 sm:h-9 sm:w-9 p-0 hover:bg-admin-bg-tertiary text-admin-text-primary rounded-lg sm:rounded-xl transition-all"
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => navigateDate("next")}
                 >
                   <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5" />
                 </Button>
@@ -599,9 +601,9 @@ export default function AppointmentsPage() {
                     <SelectContent className="rounded-xl border-admin-border-primary/20 shadow-premium-lg">
                       {branches.map((branch) => (
                         <SelectItem
+                          className="font-display font-medium text-[10px] tracking-widest uppercase"
                           key={branch.id}
                           value={branch.id}
-                          className="font-display font-medium text-[10px] tracking-widest uppercase"
                         >
                           {branch.name}
                         </SelectItem>
@@ -624,20 +626,20 @@ export default function AppointmentsPage() {
                 </SelectTrigger>
                 <SelectContent className="rounded-xl border-admin-border-primary/20 shadow-premium-lg">
                   <SelectItem
-                    value="day"
                     className="font-display font-medium text-[9px] sm:text-[10px] tracking-widest uppercase"
+                    value="day"
                   >
                     Día
                   </SelectItem>
                   <SelectItem
-                    value="week"
                     className="font-display font-medium text-[9px] sm:text-[10px] tracking-widest uppercase"
+                    value="week"
                   >
                     Semana
                   </SelectItem>
                   <SelectItem
-                    value="month"
                     className="font-display font-medium text-[9px] sm:text-[10px] tracking-widest uppercase"
+                    value="month"
                   >
                     Mes
                   </SelectItem>
@@ -653,33 +655,33 @@ export default function AppointmentsPage() {
                 </SelectTrigger>
                 <SelectContent className="rounded-xl border-admin-border-primary/20 shadow-premium-lg">
                   <SelectItem
-                    value="all"
                     className="font-display font-medium text-[9px] sm:text-[10px] tracking-widest uppercase"
+                    value="all"
                   >
                     <span className="hidden sm:inline">TODOS LOS ESTADOS</span>
                     <span className="sm:hidden">Todos</span>
                   </SelectItem>
                   <SelectItem
-                    value="scheduled"
                     className="font-display font-medium text-[10px] tracking-widest uppercase text-admin-info"
+                    value="scheduled"
                   >
                     PROGRAMADAS
                   </SelectItem>
                   <SelectItem
-                    value="confirmed"
                     className="font-display font-medium text-[10px] tracking-widest uppercase text-admin-success"
+                    value="confirmed"
                   >
                     CONFIRMADAS
                   </SelectItem>
                   <SelectItem
-                    value="completed"
                     className="font-display font-medium text-[10px] tracking-widest uppercase text-epoch-primary"
+                    value="completed"
                   >
                     COMPLETADAS
                   </SelectItem>
                   <SelectItem
-                    value="cancelled"
                     className="font-display font-medium text-[10px] tracking-widest uppercase text-admin-error"
+                    value="cancelled"
                   >
                     CANCELADAS
                   </SelectItem>
@@ -742,8 +744,8 @@ export default function AppointmentsPage() {
                     .slice(0, 3)
                     .map((apt) => (
                       <div
-                        key={apt.id}
                         className="flex items-center gap-3 p-2 rounded-lg bg-admin-bg-tertiary/20 border border-admin-border-primary/30 hover:bg-white transition-all cursor-pointer"
+                        key={apt.id}
                         onClick={() => handleAppointmentClick(apt)}
                       >
                         <div className="h-8 w-8 bg-white rounded-lg flex items-center justify-center text-[10px] font-black shadow-sm text-admin-accent-primary">
@@ -785,8 +787,8 @@ export default function AppointmentsPage() {
             </CardHeader>
             <CardContent className="p-4 space-y-2">
               <Button
-                variant="ghost"
                 className="w-full justify-start text-xs font-bold text-admin-text-secondary hover:text-admin-accent-primary hover:bg-admin-accent-primary/5 rounded-lg h-9"
+                variant="ghost"
                 onClick={() => {
                   setLastRefresh(Date.now());
                   fetchAppointments();
@@ -797,8 +799,8 @@ export default function AppointmentsPage() {
                 Sincronizar Datos
               </Button>
               <Button
-                variant="ghost"
                 className="w-full justify-start text-xs font-bold text-admin-text-secondary hover:text-admin-accent-primary hover:bg-admin-accent-primary/5 rounded-lg h-9"
+                variant="ghost"
                 onClick={() => setShowWeeklyReport(true)}
               >
                 <FileText className="h-3.5 w-3.5 mr-2" />
@@ -818,7 +820,7 @@ export default function AppointmentsPage() {
               <div className="p-1 space-y-1 animate-in fade-in duration-500">
                 <div className="grid grid-cols-7 gap-1 border-b border-admin-border-primary/10 pb-1">
                   {[...Array(7)].map((_, i) => (
-                    <div key={i} className="p-4 space-y-2">
+                    <div className="p-4 space-y-2" key={i}>
                       <Skeleton className="h-4 w-12 mx-auto opacity-40" />
                       <Skeleton className="h-6 w-8 mx-auto" />
                     </div>
@@ -827,16 +829,16 @@ export default function AppointmentsPage() {
                 <div className="grid grid-cols-7 gap-1 h-[500px]">
                   {[...Array(7)].map((_, col) => (
                     <div
-                      key={col}
                       className="border-r border-admin-border-primary/5 last:border-0 p-2 space-y-3"
+                      key={col}
                     >
                       {[...Array(6)].map((_, row) => (
                         <Skeleton
-                          key={row}
                           className={cn(
                             "h-16 w-full opacity-[0.03]",
                             row % 3 === 0 && "opacity-10",
                           )}
+                          key={row}
                         />
                       ))}
                     </div>
@@ -846,14 +848,14 @@ export default function AppointmentsPage() {
             ) : (
               <div className="p-1">
                 <AppointmentCalendar
-                  view={view}
-                  currentDate={currentDate}
                   appointments={appointments}
+                  currentDate={currentDate}
+                  lastRefresh={lastRefresh}
+                  scheduleSettings={scheduleSettings}
+                  view={view}
                   onAppointmentClick={handleAppointmentClick}
                   onDateChange={setCurrentDate}
                   onSlotClick={handleSlotClick}
-                  scheduleSettings={scheduleSettings}
-                  lastRefresh={lastRefresh}
                 />
               </div>
             )}
@@ -885,22 +887,22 @@ export default function AppointmentsPage() {
             </DialogHeader>
             <div className="p-4 sm:p-6 md:p-8 flex-1 min-h-0 flex flex-col overflow-hidden">
               <CreateAppointmentForm
-                initialData={
-                  selectedAppointment || prefilledAppointmentData || undefined
-                }
-                initialCustomerId={undefined}
-                lockDateTime={prefilledAppointmentData?.lockDateTime || false}
                 effectiveBranchId={
                   isGlobalView && selectedBranchForView
                     ? selectedBranchForView
                     : undefined
                 }
-                onSuccess={handleAppointmentCreated}
+                initialCustomerId={undefined}
+                initialData={
+                  selectedAppointment || prefilledAppointmentData || undefined
+                }
+                lockDateTime={prefilledAppointmentData?.lockDateTime || false}
                 onCancel={() => {
                   setShowCreateAppointment(false);
                   setSelectedAppointment(null);
                   setPrefilledAppointmentData(null);
                 }}
+                onSuccess={handleAppointmentCreated}
               />
             </div>
           </div>
@@ -1060,7 +1062,11 @@ export default function AppointmentsPage() {
                         "cancelled",
                         "no_show",
                       ] as const;
-                      if (!validStatuses.includes(newStatus as any)) {
+                      if (
+                        !validStatuses.includes(
+                          newStatus as (typeof validStatuses)[number],
+                        )
+                      ) {
                         toast.error("Estado inválido");
                         return;
                       }
@@ -1097,38 +1103,39 @@ export default function AppointmentsPage() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent className="rounded-xl border-admin-border-primary">
-                      <SelectItem value="scheduled" className="text-admin-info">
+                      <SelectItem className="text-admin-info" value="scheduled">
                         Programada
                       </SelectItem>
                       <SelectItem
-                        value="confirmed"
                         className="text-admin-success"
+                        value="confirmed"
                       >
                         Confirmada
                       </SelectItem>
                       <SelectItem
-                        value="completed"
                         className="text-admin-accent-secondary"
+                        value="completed"
                       >
                         Completada
                       </SelectItem>
                       <SelectItem
-                        value="cancelled"
                         className="text-admin-error"
+                        value="cancelled"
                       >
                         Cancelada
                       </SelectItem>
                       <SelectItem
-                        value="no_show"
                         className="text-admin-text-tertiary"
+                        value="no_show"
                       >
                         No se presentó
                       </SelectItem>
                     </SelectContent>
                   </Select>
                   <Button
-                    variant="ghost"
+                    className="h-11 w-11 rounded-xl text-admin-error hover:bg-admin-error hover:text-white transition-all border border-admin-error/20"
                     size="icon"
+                    variant="ghost"
                     onClick={async (e) => {
                       e.stopPropagation();
                       if (!confirm("¿Eliminar cita permanentemente?")) return;
@@ -1143,7 +1150,6 @@ export default function AppointmentsPage() {
                         toast.error("Error al eliminar");
                       }
                     }}
-                    className="h-11 w-11 rounded-xl text-admin-error hover:bg-admin-error hover:text-white transition-all border border-admin-error/20"
                   >
                     <Trash2 className="h-5 w-5" />
                   </Button>
@@ -1179,17 +1185,17 @@ export default function AppointmentsPage() {
               {/* Action Buttons */}
               <div className="flex gap-3 pt-4 border-t border-admin-border-primary/30">
                 <Button
+                  className="flex-1 h-12 rounded-xl border-admin-border-primary hover:bg-admin-bg-tertiary font-bold transition-all text-sm uppercase tracking-wide"
                   variant="outline"
                   onClick={() => setShowCreateAppointment(true)}
-                  className="flex-1 h-12 rounded-xl border-admin-border-primary hover:bg-admin-bg-tertiary font-bold transition-all text-sm uppercase tracking-wide"
                 >
                   <Settings className="h-4 w-4 mr-2" />
                   Editar Datos
                 </Button>
                 {selectedAppointment.customer?.id && (
                   <Link
-                    href={`/admin/customers/${selectedAppointment.customer.id}`}
                     className="flex-1"
+                    href={`/admin/customers/${selectedAppointment.customer.id}`}
                   >
                     <Button className="w-full h-12 rounded-xl bg-admin-accent-primary hover:bg-admin-accent-secondary font-bold transition-all uppercase tracking-wide text-sm flex items-center justify-center gap-2">
                       Ficha Cliente
@@ -1207,9 +1213,9 @@ export default function AppointmentsPage() {
       <Dialog open={showWeeklyReport} onOpenChange={setShowWeeklyReport}>
         <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-2xl max-h-[90vh] overflow-y-auto border-2 border-admin-border-primary/20 bg-admin-bg-secondary shadow-premium-xl rounded-xl p-0 print:overflow-visible print:max-h-none">
           <div
-            ref={weeklyReportRef}
-            id="weekly-report-print"
             className="p-8 space-y-8 print:p-4 print:max-w-none"
+            id="weekly-report-print"
+            ref={weeklyReportRef}
           >
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 print:flex-row">
               <DialogHeader>
@@ -1237,19 +1243,19 @@ export default function AppointmentsPage() {
                   </div>
                 </div>
               </DialogHeader>
-              <div className="flex gap-2 print:hidden" data-print-hide>
+              <div data-print-hide className="flex gap-2 print:hidden">
                 <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handlePrintWeeklyReport}
                   className="gap-2"
+                  size="sm"
+                  variant="outline"
+                  onClick={handlePrintWeeklyReport}
                 >
                   <FileText className="h-4 w-4" />
                   Imprimir
                 </Button>
                 <Button
-                  variant="outline"
                   size="sm"
+                  variant="outline"
                   onClick={() => setShowWeeklyReport(false)}
                 >
                   Cerrar
@@ -1330,8 +1336,8 @@ export default function AppointmentsPage() {
                         const dateStr = dayApts[0]?.appointment_date;
                         return (
                           <div
-                            key={day}
                             className="border border-admin-border-primary/30 rounded-xl overflow-hidden"
+                            key={day}
                           >
                             <div className="px-4 py-2 bg-admin-bg-tertiary/50 border-b border-admin-border-primary/30 flex justify-between items-center">
                               <span className="font-bold text-sm text-admin-text-primary">
@@ -1352,8 +1358,8 @@ export default function AppointmentsPage() {
                             <div className="divide-y divide-admin-border-primary/20">
                               {dayApts.map((apt) => (
                                 <div
-                                  key={apt.id}
                                   className="px-4 py-3 flex items-center justify-between gap-4 hover:bg-admin-bg-tertiary/20"
+                                  key={apt.id}
                                 >
                                   <div className="flex items-center gap-3 min-w-0">
                                     <span className="text-xs font-mono font-bold text-admin-text-tertiary shrink-0">

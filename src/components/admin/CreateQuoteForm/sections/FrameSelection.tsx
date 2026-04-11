@@ -1,9 +1,10 @@
-import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Loader2, Package, Search, X } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Search, Package, Loader2, X } from "lucide-react";
+
 import { useFrameSearch } from "../hooks";
 import { Frame } from "../types/quote.types";
 
@@ -14,7 +15,7 @@ interface FrameSelectionProps {
   onCustomerOwnFrameChange: (checked: boolean) => void;
   onFrameSelect: (frame: Frame) => void;
   onFrameClear: () => void;
-  onManualFrameDataChange: (field: string, value: any) => void;
+  onManualFrameDataChange: (field: string, value: unknown) => void;
   frameData: {
     frame_name: string;
     frame_sku: string;
@@ -79,14 +80,14 @@ export function FrameSelection({
         {/* Customer Own Frame Checkbox */}
         <div className="flex items-center gap-2">
           <input
-            type="checkbox"
-            id="customer_own_frame"
             checked={customerOwnFrame}
-            onChange={(e) => onCustomerOwnFrameChange(e.target.checked)}
             className="h-4 w-4 rounded border-gray-300"
             disabled={disabled}
+            id="customer_own_frame"
+            type="checkbox"
+            onChange={(e) => onCustomerOwnFrameChange(e.target.checked)}
           />
-          <Label htmlFor="customer_own_frame" className="cursor-pointer">
+          <Label className="cursor-pointer" htmlFor="customer_own_frame">
             Cliente trae marco (recambio de cristales)
           </Label>
         </div>
@@ -97,24 +98,24 @@ export function FrameSelection({
             <div>
               <Label>Nombre del Marco *</Label>
               <Input
+                required
+                disabled={disabled}
+                placeholder="Marco del cliente"
                 value={frameData.frame_name}
                 onChange={(e) =>
                   onManualFrameDataChange("frame_name", e.target.value)
                 }
-                placeholder="Marco del cliente"
-                required
-                disabled={disabled}
               />
             </div>
             <div>
               <Label>Número de Serie</Label>
               <Input
+                disabled={disabled}
+                placeholder="Número de serie del marco"
                 value={frameData.frame_sku}
                 onChange={(e) =>
                   onManualFrameDataChange("frame_sku", e.target.value)
                 }
-                placeholder="Número de serie del marco"
-                disabled={disabled}
               />
             </div>
           </div>
@@ -135,11 +136,11 @@ export function FrameSelection({
               </div>
             </div>
             <Button
+              disabled={disabled}
+              size="sm"
               type="button"
               variant="outline"
-              size="sm"
               onClick={handleFrameClear}
-              disabled={disabled}
             >
               <X className="h-4 w-4 mr-2" />
               Cambiar
@@ -150,11 +151,11 @@ export function FrameSelection({
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-tierra-media" />
             <Input
+              className="pl-10"
+              disabled={disabled}
               placeholder="Buscar marco por nombre, marca o SKU..."
               value={frameSearch}
               onChange={(e) => handleSearchChange(e.target.value)}
-              className="pl-10"
-              disabled={disabled}
             />
             {frameSearch.length >= 2 && (
               <div className="absolute z-10 w-full mt-1 bg-white border rounded-lg shadow-lg max-h-60 overflow-y-auto">
@@ -165,8 +166,8 @@ export function FrameSelection({
                 ) : frameResults.length > 0 ? (
                   frameResults.map((frame) => (
                     <div
-                      key={frame.id}
                       className="p-3 hover:bg-gray-100 cursor-pointer border-b"
+                      key={frame.id}
                       onClick={() => handleFrameSelect(frame)}
                     >
                       <div className="font-medium">{frame.name}</div>
@@ -195,17 +196,19 @@ export function FrameSelection({
             <div>
               <Label>Nombre del Marco</Label>
               <Input
+                disabled={disabled}
+                placeholder="Ej: Ray-Ban RB2140"
                 value={frameData.frame_name}
                 onChange={(e) =>
                   onManualFrameDataChange("frame_name", e.target.value)
                 }
-                placeholder="Ej: Ray-Ban RB2140"
-                disabled={disabled}
               />
             </div>
             <div>
               <Label>Precio del Marco</Label>
               <Input
+                disabled={disabled}
+                placeholder="0"
                 type="number"
                 value={frameData.frame_price || ""}
                 onChange={(e) => {
@@ -213,8 +216,6 @@ export function FrameSelection({
                   onManualFrameDataChange("frame_price", price);
                   onManualFrameDataChange("frame_cost", price);
                 }}
-                placeholder="0"
-                disabled={disabled}
               />
             </div>
           </div>

@@ -1,23 +1,42 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useParams, useRouter } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Loader2, ArrowLeft, AlertCircle } from "lucide-react";
-import { toast } from "sonner";
+import { AlertCircle, ArrowLeft, Loader2 } from "lucide-react";
 import Link from "next/link";
+import { useParams, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useBranch } from "@/hooks/useBranch";
-import { getBranchHeader } from "@/lib/utils/branch";
 import { formatCurrency, formatDateTime } from "@/lib/utils";
+import { getBranchHeader } from "@/lib/utils/branch";
+
+interface OrderDetail {
+  id: string;
+  order_number: string;
+  created_at: string;
+  status: "completed" | "cancelled" | "processing";
+  payment_status: "paid" | "partial" | "pending" | "refunded";
+  email?: string;
+  payment_method_type?: string;
+  total_amount: number;
+  cancellation_reason?: string | null;
+  order_items?: Array<{
+    product_name: string;
+    quantity: number;
+    unit_price: number;
+    total_price: number;
+  }>;
+}
 
 export default function OrderDetailPage() {
   const params = useParams();
   const router = useRouter();
   const orderId = params.id as string;
   const { currentBranchId } = useBranch();
-  const [order, setOrder] = useState<any>(null);
+  const [order, setOrder] = useState<OrderDetail | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -34,13 +53,13 @@ export default function OrderDetailPage() {
 
       const response = await fetch(`/api/admin/orders/${orderId}`, { headers });
       if (response.ok) {
-        const data = await response.json();
+        const data = (await response.json()) as { order: OrderDetail };
         setOrder(data.order);
       } else {
         const error = await response.json();
         toast.error(error.error || "Error al cargar la orden");
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error fetching order:", error);
       toast.error("Error al cargar la orden");
     } finally {
@@ -223,10 +242,10 @@ export default function OrderDetailPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {order.order_items.map((item: any, idx: number) => (
+              {order.order_items.map((item, idx) => (
                 <div
-                  key={idx}
                   className="flex justify-between items-center py-2 border-b last:border-b-0"
+                  key={idx}
                 >
                   <div className="flex-1">
                     <p className="font-medium">{item.product_name}</p>

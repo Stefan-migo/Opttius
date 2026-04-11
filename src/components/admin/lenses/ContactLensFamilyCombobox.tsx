@@ -1,14 +1,9 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
 import { Check, ChevronsUpDown } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { useCallback, useEffect, useState } from "react";
+
 import { Button } from "@/components/ui/button";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import {
   Command,
   CommandEmpty,
@@ -17,7 +12,13 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { extractDataFromResponse } from "@/lib/api/response-helpers";
+import { cn } from "@/lib/utils";
 
 export interface ContactLensFamilyOption {
   id: string;
@@ -122,19 +123,19 @@ export function ContactLensFamilyCombobox({
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button
-          variant="outline"
-          role="combobox"
           aria-expanded={open}
-          disabled={disabled || loading}
           className={cn("w-full justify-between font-normal", className)}
+          disabled={disabled || loading}
+          role="combobox"
+          variant="outline"
         >
           {loading ? "Cargando..." : displayValue || placeholder}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent
-        className="w-[var(--radix-popover-trigger-width)] p-0"
         align="start"
+        className="w-[var(--radix-popover-trigger-width)] p-0"
       >
         <Command shouldFilter={false}>
           <CommandInput

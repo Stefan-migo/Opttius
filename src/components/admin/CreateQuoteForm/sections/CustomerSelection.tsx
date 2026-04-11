@@ -1,8 +1,10 @@
-import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Loader2, Search, User, X } from "lucide-react";
+import { useEffect } from "react";
+
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Search, User, Loader2, X } from "lucide-react";
+
 import { useCustomerSearch } from "../hooks";
 import { Customer } from "../types/quote.types";
 
@@ -71,9 +73,9 @@ export function CustomerSelection({
               </div>
             </div>
             <Button
+              size="sm"
               type="button"
               variant="outline"
-              size="sm"
               onClick={handleClear}
             >
               <X className="h-4 w-4 mr-2" />
@@ -97,11 +99,11 @@ export function CustomerSelection({
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-admin-text-tertiary" />
           <Input
+            className="pl-10"
+            disabled={disabled}
             placeholder="Buscar cliente por nombre o email..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="pl-10"
-            disabled={disabled}
           />
           {search.length >= 2 && (
             <div className="absolute z-10 w-full mt-1 bg-white border rounded-lg shadow-lg max-h-60 overflow-y-auto">
@@ -112,8 +114,8 @@ export function CustomerSelection({
               ) : results.length > 0 ? (
                 results.map((customer) => (
                   <div
-                    key={customer.id}
                     className="p-3 hover:bg-gray-100 cursor-pointer border-b"
+                    key={customer.id}
                     onClick={() => handleSelect(customer)}
                   >
                     <div className="font-medium">

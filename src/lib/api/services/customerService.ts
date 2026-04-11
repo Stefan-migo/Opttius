@@ -5,10 +5,10 @@
  * Provides type-safe methods for CRUD operations on customers.
  */
 
-import { ApiClient, isSuccess, unwrapData } from "../client-helpers";
 import { handleApiError } from "@/lib/services/errorService";
 import { getBranchAndOperativoHeaders } from "@/lib/utils/branch";
 
+import { ApiClient, isSuccess, unwrapData } from "../client-helpers";
 // Import shared types from other services to avoid duplication
 import type { Appointment } from "./appointmentService";
 import type { Quote } from "./quoteService";
@@ -55,7 +55,7 @@ export interface Customer {
   country?: string | null;
 
   // Related data
-  orders?: any[];
+  orders?: unknown[];
   prescriptions?: Prescription[];
   appointments?: Appointment[];
   quotes?: Quote[];

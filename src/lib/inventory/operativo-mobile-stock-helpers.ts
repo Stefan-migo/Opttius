@@ -1,4 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+
 import { appLogger as logger } from "@/lib/logger";
 
 /**

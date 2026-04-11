@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient, createServiceRoleClient } from "@/utils/supabase/server";
+
 import {
   getBranchContext,
   getFieldOperationFromRequest,
@@ -7,6 +7,7 @@ import {
 } from "@/lib/api/branch-middleware";
 import { appLogger as logger } from "@/lib/logger";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
+import { createClient, createServiceRoleClient } from "@/utils/supabase/server";
 
 /**
  * GET /api/admin/cash-register/close
@@ -169,7 +170,7 @@ export async function GET(request: NextRequest) {
     // IMPORTANT: Initialize sessionPayments BEFORE using it in the summary calculation
     // ✅ CORREGIDO: Buscar sesión más reciente (open o la última del día si fue reabierta)
     let openingCash = 0;
-    let sessionPayments: any[] = [];
+    let sessionPayments: unknown[] = [];
     let sessionId: string | null = null;
 
     if (effectiveBranchId) {
@@ -245,7 +246,7 @@ export async function GET(request: NextRequest) {
         // Subtract refunds from payment totals (handled below with sessionPayments)
         sessionPayments = [
           ...sessionPayments,
-          ...(creditNoteMovements || []).map((cnm: any) => ({
+          ...(creditNoteMovements || []).map((cnm: unknown) => ({
             amount: Number(cnm.amount) || 0, // negative
             payment_method: cnm.refund_method,
           })),
@@ -276,7 +277,7 @@ export async function GET(request: NextRequest) {
     };
 
     // Process each order (for totals, subtotals, taxes) - exclude cancelled
-    (orders || []).forEach((order: any) => {
+    (orders || []).forEach((order: unknown) => {
       if (order.status === "cancelled") return;
       summary.total_sales += Number(order.total_amount) || 0;
       summary.total_subtotal += Number(order.subtotal) || 0;
@@ -289,7 +290,7 @@ export async function GET(request: NextRequest) {
     let cash_inflows = 0;
     let cash_outflows = 0;
     if (sessionPayments.length > 0) {
-      sessionPayments.forEach((payment: any) => {
+      sessionPayments.forEach((payment: unknown) => {
         const amount = Number(payment.amount) || 0;
         if (payment.payment_method === "cash") {
           if (amount >= 0) cash_inflows += amount;
@@ -317,7 +318,7 @@ export async function GET(request: NextRequest) {
       });
     } else if (orders && orders.length > 0) {
       // Fallback: Get payments from order_payments table (more accurate than mp_payment_method)
-      const orderIds = orders.map((o: any) => o.id);
+      const orderIds = orders.map((o: unknown) => o.id);
       const { data: orderPayments } = await supabaseServiceRole
         .from("order_payments")
         .select("amount, payment_method")
@@ -325,7 +326,7 @@ export async function GET(request: NextRequest) {
 
       if (orderPayments && orderPayments.length > 0) {
         // Use order_payments (most accurate)
-        orderPayments.forEach((payment: any) => {
+        orderPayments.forEach((payment: unknown) => {
           const amount = Number(payment.amount) || 0;
           const method = payment.payment_method;
 
@@ -351,7 +352,7 @@ export async function GET(request: NextRequest) {
         });
       } else {
         // Final fallback: Use mp_payment_method from orders (normalized values)
-        (orders || []).forEach((order: any) => {
+        (orders || []).forEach((order: unknown) => {
           const paymentMethod = order.mp_payment_method || "cash";
           switch (paymentMethod) {
             case "cash":
@@ -416,7 +417,7 @@ export async function GET(request: NextRequest) {
       },
       previous_closure: previousClosure,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error("Error in cash register closure API:", { error });
     return NextResponse.json(
       {
@@ -659,7 +660,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Get ALL payments from the session (including payments for older orders)
-    let sessionPayments: any[] = [];
+    let sessionPayments: unknown[] = [];
     if (sessionIdForClosure) {
       const { data: payments, error: paymentsError } = await supabaseServiceRole
         .from("order_payments")
@@ -697,7 +698,7 @@ export async function POST(request: NextRequest) {
 
         sessionPayments = [
           ...sessionPayments,
-          ...(creditNoteMovements || []).map((cnm: any) => ({
+          ...(creditNoteMovements || []).map((cnm: unknown) => ({
             amount: Number(cnm.amount) || 0,
             payment_method: cnm.refund_method,
           })),
@@ -711,7 +712,7 @@ export async function POST(request: NextRequest) {
     let totalTax = 0;
     let totalDiscounts = 0;
 
-    (orders || []).forEach((order: any) => {
+    (orders || []).forEach((order: unknown) => {
       if (order.status === "cancelled") return;
       totalSales += Number(order.total_amount) || 0;
       totalSubtotal += Number(order.subtotal) || 0;
@@ -728,7 +729,7 @@ export async function POST(request: NextRequest) {
     let installmentsSales = 0;
     let otherPaymentSales = 0;
 
-    sessionPayments.forEach((payment: any) => {
+    sessionPayments.forEach((payment: unknown) => {
       const amount = Number(payment.amount) || 0;
       const method = payment.payment_method;
 
@@ -760,7 +761,7 @@ export async function POST(request: NextRequest) {
       });
 
       // Try to get payments from order_payments table (more accurate)
-      const orderIds = orders.map((o: any) => o.id);
+      const orderIds = orders.map((o: unknown) => o.id);
       const { data: orderPayments } = await supabaseServiceRole
         .from("order_payments")
         .select("amount, payment_method")
@@ -768,7 +769,7 @@ export async function POST(request: NextRequest) {
 
       if (orderPayments && orderPayments.length > 0) {
         // Use order_payments (most accurate - uses normalized payment_method values)
-        orderPayments.forEach((payment: any) => {
+        orderPayments.forEach((payment: unknown) => {
           const amount = Number(payment.amount) || 0;
           const method = payment.payment_method;
 
@@ -800,7 +801,7 @@ export async function POST(request: NextRequest) {
             orderIds,
           },
         );
-        (orders || []).forEach((order: any) => {
+        (orders || []).forEach((order: unknown) => {
           const paymentMethod = order.mp_payment_method || "cash";
           switch (paymentMethod) {
             case "cash":
@@ -1090,7 +1091,7 @@ export async function POST(request: NextRequest) {
       success: true,
       closure,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error("Error in cash register closure POST API:", { error });
     return NextResponse.json(
       {

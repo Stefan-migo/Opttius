@@ -2,20 +2,21 @@
 
 import {
   AlertTriangle,
-  TrendingUp,
-  Info,
   CheckCircle,
   ExternalLink,
+  Info,
+  TrendingUp,
 } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 import type { DatabaseInsight } from "@/lib/ai/insights/schemas";
+import { cn } from "@/lib/utils";
 
 const typeConfig = {
   warning: {
@@ -127,13 +128,13 @@ export function InsightDetailDialog({
         {insight.action_label && insight.action_url && (
           <div className="p-4 sm:p-5 pt-3 border-t shrink-0">
             <Button
-              variant="outline"
               className={cn(
                 "w-full sm:w-auto",
                 config.color,
                 config.borderColor,
                 "hover:bg-white dark:hover:bg-gray-900",
               )}
+              variant="outline"
               onClick={handleActionClick}
             >
               {insight.action_label}

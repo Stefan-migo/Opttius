@@ -39,8 +39,8 @@ export async function createClient() {
  *   - getUser: Helper function that handles both cookie and Bearer token authentication
  */
 export async function createClientFromRequest(request?: NextRequest): Promise<{
-  client: any; // Flexible type for test compatibility
-  getUser: () => Promise<{ data: { user: any } | null; error: any }>;
+  client: unknown; // Flexible type for test compatibility
+  getUser: () => Promise<{ data: { user: unknown } | null; error: unknown }>;
 }> {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
@@ -90,8 +90,8 @@ export function createServiceRoleClient() {
   return createSupabaseClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL || "",
     process.env.SUPABASE_SERVICE_ROLE_KEY ||
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
-    "",
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+      "",
     {
       auth: {
         autoRefreshToken: false,

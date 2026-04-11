@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient, createServiceRoleClient } from "@/utils/supabase/server";
+
 import { appLogger as logger } from "@/lib/logger";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
+import { createClient, createServiceRoleClient } from "@/utils/supabase/server";
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const ALLOWED_TYPES = [
@@ -159,7 +160,7 @@ export async function POST(request: NextRequest) {
       rowCount,
       headers,
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
     logger.error("Upload import file error", { error: err?.message });
     return NextResponse.json(
       { error: err?.message || "Internal server error" },

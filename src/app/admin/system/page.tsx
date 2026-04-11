@@ -1,10 +1,37 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import {
+  AlertTriangle,
+  Bell,
+  CheckCircle,
+  Clock,
+  Database,
+  FileText,
+  Mail,
+  MessageCircle,
+  Monitor,
+  Receipt,
+  RefreshCw,
+  RotateCcw,
+  Shield,
+  Star,
+  Trash2,
+  Users,
+  XCircle,
+} from "lucide-react";
+import dynamic from "next/dynamic";
 import { useSearchParams } from "next/navigation";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+
+import EmailConfigCard from "@/components/admin/EmailConfigCard";
+import EmailTemplatesManager from "@/components/admin/EmailTemplatesManager";
+import NotificationSettings from "@/components/admin/NotificationSettings";
+import SurveysConfig from "@/components/admin/SurveysConfig";
+import WhatsAppSettingsCard from "@/components/admin/WhatsAppSettingsCard";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -14,43 +41,16 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  RefreshCw,
-  CheckCircle,
-  AlertTriangle,
-  XCircle,
-  Clock,
-  Monitor,
-  Mail,
-  Bell,
-  Database,
-  Shield,
-  RotateCcw,
-  Trash2,
-  Download,
-  Receipt,
-  Users,
-  FileText,
-  MessageCircle,
-  Star,
-} from "lucide-react";
-import { toast } from "sonner";
 import { useBranch } from "@/hooks/useBranch";
-import { BranchSelector } from "@/components/admin/BranchSelector";
-import EmailTemplatesManager from "@/components/admin/EmailTemplatesManager";
-import EmailConfigCard from "@/components/admin/EmailConfigCard";
-import NotificationSettings from "@/components/admin/NotificationSettings";
-import { useSystemConfig } from "./hooks/useSystemConfig";
-import { useSystemHealth } from "./hooks/useSystemHealth";
-import { useBackups, BackupResult } from "./hooks/useBackups";
-import SystemOverview from "./components/SystemOverview";
+
+import FormOptionsConfig from "./components/FormOptionsConfig";
 import SystemConfig from "./components/SystemConfig";
 import SystemHealth from "./components/SystemHealth";
 import SystemMaintenance from "./components/SystemMaintenance";
-import FormOptionsConfig from "./components/FormOptionsConfig";
-import WhatsAppSettingsCard from "@/components/admin/WhatsAppSettingsCard";
-import SurveysConfig from "@/components/admin/SurveysConfig";
-import dynamic from "next/dynamic";
+import SystemOverview from "./components/SystemOverview";
+import { BackupResult, useBackups } from "./hooks/useBackups";
+import { useSystemConfig } from "./hooks/useSystemConfig";
+import { useSystemHealth } from "./hooks/useSystemHealth";
 
 const POSBillingSettings = dynamic(
   () => import("./pos-billing-settings/page").then((mod) => mod.default),
@@ -102,16 +102,16 @@ export default function SystemAdministrationPage() {
     issues_count: number;
   } | null>(null);
   const [showSystemStatusDialog, setShowSystemStatusDialog] = useState(false);
-  const [systemStatusReport, setSystemStatusReport] = useState<any>(null);
+  const [systemStatusReport, setSystemStatusReport] = useState<unknown>(null);
   const [showBackupDialog, setShowBackupDialog] = useState(false);
   const [backupResult, setBackupResult] = useState<BackupResult | null>(null);
 
   // Backup restoration states
   const [showRestoreDialog, setShowRestoreDialog] = useState(false);
-  const [selectedBackup, setSelectedBackup] = useState<any | null>(null);
+  const [selectedBackup, setSelectedBackup] = useState<unknown | null>(null);
   const [showRestoreResultsDialog, setShowRestoreResultsDialog] =
     useState(false);
-  const [restoreResults, setRestoreResults] = useState<any | null>(null);
+  const [restoreResults, setRestoreResults] = useState<unknown | null>(null);
   const [showDeleteBackupDialog, setShowDeleteBackupDialog] = useState(false);
 
   // Hooks with React Query
@@ -221,7 +221,7 @@ export default function SystemAdministrationPage() {
     }
   };
 
-  const handleViewBackupDetails = async (backup: any) => {
+  const handleViewBackupDetails = async (backup: unknown) => {
     try {
       const result = await getBackupDetails(backup);
       setBackupResult(result);
@@ -231,7 +231,7 @@ export default function SystemAdministrationPage() {
     }
   };
 
-  const handleRestoreBackup = async (backup: any) => {
+  const handleRestoreBackup = async (backup: unknown) => {
     setSelectedBackup(backup);
     setShowRestoreDialog(true);
   };
@@ -251,7 +251,7 @@ export default function SystemAdministrationPage() {
     }
   };
 
-  const handleDeleteBackup = async (backup: any) => {
+  const handleDeleteBackup = async (backup: unknown) => {
     setSelectedBackup(backup);
     setShowDeleteBackupDialog(true);
   };
@@ -286,7 +286,10 @@ export default function SystemAdministrationPage() {
   };
 
   const getHealthStatusBadge = (status: string) => {
-    const config: Record<string, { variant: any; label: string; icon: any }> = {
+    const config: Record<
+      string,
+      { variant: unknown; label: string; icon: unknown }
+    > = {
       healthy: { variant: "default", label: "Saludable", icon: CheckCircle },
       warning: {
         variant: "secondary",
@@ -300,7 +303,7 @@ export default function SystemAdministrationPage() {
     const Icon = statusConfig.icon;
 
     return (
-      <Badge variant={statusConfig.variant} className="flex items-center gap-1">
+      <Badge className="flex items-center gap-1" variant={statusConfig.variant}>
         <Icon className="h-3 w-3" />
         {statusConfig.label}
       </Badge>
@@ -324,12 +327,12 @@ export default function SystemAdministrationPage() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
           {[...Array(4)].map((_, i) => (
             <Card
-              key={i}
               className="rounded-xl border border-border animate-pulse"
+              key={i}
             >
               <CardContent className="p-4 sm:p-6">
-                <div className="h-3 bg-epoch-primary/10 rounded w-3/4 mb-2"></div>
-                <div className="h-6 bg-epoch-primary/10 rounded w-1/2"></div>
+                <div className="h-3 bg-epoch-primary/10 rounded w-3/4 mb-2" />
+                <div className="h-6 bg-epoch-primary/10 rounded w-1/2" />
               </CardContent>
             </Card>
           ))}
@@ -357,8 +360,8 @@ export default function SystemAdministrationPage() {
             </h3>
             <p className="text-sm text-epoch-primary/80 mb-4">{error}</p>
             <Button
-              onClick={() => window.location.reload()}
               className="rounded-xl bg-epoch-primary hover:bg-epoch-surface text-white min-h-[44px]"
+              onClick={() => window.location.reload()}
             >
               Reintentar
             </Button>
@@ -383,10 +386,10 @@ export default function SystemAdministrationPage() {
         </p>
         <div className="flex justify-start sm:justify-end">
           <Button
+            className="rounded-xl border-epoch-primary/20 min-h-[44px] w-full sm:w-auto"
+            disabled={refreshing}
             variant="outline"
             onClick={() => refreshHealth()}
-            disabled={refreshing}
-            className="rounded-xl border-epoch-primary/20 min-h-[44px] w-full sm:w-auto"
           >
             <RefreshCw
               className={`h-4 w-4 mr-2 shrink-0 ${refreshing ? "animate-spin" : ""}`}
@@ -470,82 +473,82 @@ export default function SystemAdministrationPage() {
 
       {/* Main Content Tabs - scroll horizontal para móvil */}
       <Tabs
+        className="space-y-4 sm:space-y-6"
         value={activeTab}
         onValueChange={setActiveTab}
-        className="space-y-4 sm:space-y-6"
       >
         <TabsList className="flex w-full justify-start md:justify-center gap-1 sm:gap-2 h-auto p-1 overflow-x-auto overflow-y-hidden min-w-0 [scrollbar-width:thin] [&::-webkit-scrollbar]:h-1 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-epoch-primary/30 rounded-xl border border-epoch-primary/10 bg-epoch-background/50">
           <TabsTrigger
-            value="overview"
             className="flex-shrink-0 text-xs sm:text-sm px-3 py-2 min-h-[44px]"
+            value="overview"
           >
             Resumen
           </TabsTrigger>
           <TabsTrigger
-            value="config"
             className="flex-shrink-0 text-xs sm:text-sm px-3 py-2 min-h-[44px]"
+            value="config"
           >
             Configuración
           </TabsTrigger>
           <TabsTrigger
-            value="email"
             className="flex-shrink-0 text-xs sm:text-sm px-3 py-2 min-h-[44px]"
+            value="email"
           >
             <Mail className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1 shrink-0" />
             Email
           </TabsTrigger>
           <TabsTrigger
-            value="notifications"
             className="flex-shrink-0 text-xs sm:text-sm px-3 py-2 min-h-[44px]"
+            value="notifications"
           >
             <Bell className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1 shrink-0" />
             Notificaciones
           </TabsTrigger>
           <TabsTrigger
-            value="billing"
             className="flex-shrink-0 text-xs sm:text-sm px-3 py-2 min-h-[44px]"
+            value="billing"
           >
             <Receipt className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1 shrink-0" />
             Boletas
           </TabsTrigger>
           <TabsTrigger
-            value="formularios"
             className="flex-shrink-0 text-xs sm:text-sm px-3 py-2 min-h-[44px]"
+            value="formularios"
           >
             <FileText className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1 shrink-0" />
             Formularios
           </TabsTrigger>
           <TabsTrigger
-            value="whatsapp"
             className="flex-shrink-0 text-xs sm:text-sm px-3 py-2 min-h-[44px]"
+            value="whatsapp"
           >
             <MessageCircle className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1 shrink-0" />
             WhatsApp
           </TabsTrigger>
           <TabsTrigger
-            value="encuestas"
             className="flex-shrink-0 text-xs sm:text-sm px-3 py-2 min-h-[44px]"
+            value="encuestas"
           >
             <Star className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1 shrink-0" />
             Encuestas
           </TabsTrigger>
           <TabsTrigger
-            value="health"
             className="flex-shrink-0 text-xs sm:text-sm px-3 py-2 min-h-[44px]"
+            value="health"
           >
             Salud
           </TabsTrigger>
           <TabsTrigger
-            value="maintenance"
             className="flex-shrink-0 text-xs sm:text-sm px-3 py-2 min-h-[44px]"
+            value="maintenance"
           >
             Mantenimiento
           </TabsTrigger>
         </TabsList>
 
         <TabsContent
-          value="overview"
           className="space-y-4 sm:space-y-6 mt-4 sm:mt-6"
+          value="overview"
         >
           <SystemOverview
             healthStatus={healthStatus}
@@ -554,39 +557,39 @@ export default function SystemAdministrationPage() {
         </TabsContent>
 
         <TabsContent
-          value="config"
           className="space-y-4 sm:space-y-6 mt-4 sm:mt-6"
+          value="config"
         >
           <SystemConfig
             configs={configs}
-            onUpdateConfig={updateConfig}
-            isUpdating={isUpdating}
             configScope={configScope}
-            onConfigScopeChange={setConfigScope}
             currentBranchId={currentBranchId}
             hasMultipleBranches={(branches?.length ?? 0) > 1}
+            isUpdating={isUpdating}
+            onConfigScopeChange={setConfigScope}
+            onUpdateConfig={updateConfig}
           />
         </TabsContent>
 
         <TabsContent
-          value="email"
           className="space-y-4 sm:space-y-6 mt-4 sm:mt-6"
+          value="email"
         >
           <EmailTemplatesManager organizationId={organizationId ?? undefined} />
           <EmailConfigCard configs={configs} />
         </TabsContent>
 
         <TabsContent
-          value="notifications"
           className="space-y-4 sm:space-y-6 mt-4 sm:mt-6"
+          value="notifications"
         >
           <p className="text-xs sm:text-sm text-epoch-primary/80">
             Para ver qué emails se envían automáticamente a los clientes,
             consulta la pestaña{" "}
             <button
+              className="text-epoch-accent font-medium hover:underline"
               type="button"
               onClick={() => setActiveTab("email")}
-              className="text-epoch-accent font-medium hover:underline"
             >
               Email
             </button>
@@ -594,75 +597,75 @@ export default function SystemAdministrationPage() {
           </p>
           <NotificationSettings
             branchId={configScope === "branch" ? currentBranchId : null}
-            organizationId={organizationId ?? undefined}
             branchName={
               configScope === "branch" ? currentBranchName : undefined
             }
             configScope={configScope}
-            onConfigScopeChange={setConfigScope}
             hasMultipleBranches={(branches?.length ?? 0) > 1}
+            organizationId={organizationId ?? undefined}
+            onConfigScopeChange={setConfigScope}
           />
         </TabsContent>
 
         <TabsContent
-          value="billing"
           className="space-y-4 sm:space-y-6 mt-4 sm:mt-6"
+          value="billing"
         >
           <POSBillingSettings />
         </TabsContent>
 
         <TabsContent
-          value="formularios"
           className="space-y-4 sm:space-y-6 mt-4 sm:mt-6"
+          value="formularios"
         >
           <FormOptionsConfig />
         </TabsContent>
 
         <TabsContent
-          value="whatsapp"
           className="space-y-4 sm:space-y-6 mt-4 sm:mt-6"
+          value="whatsapp"
         >
           <WhatsAppSettingsCard />
         </TabsContent>
 
         <TabsContent
-          value="encuestas"
           className="space-y-4 sm:space-y-6 mt-4 sm:mt-6"
+          value="encuestas"
         >
           <SurveysConfig />
         </TabsContent>
 
         <TabsContent
-          value="health"
           className="space-y-4 sm:space-y-6 mt-4 sm:mt-6"
+          value="health"
         >
           <SystemHealth
+            clearingMemory={clearingMemory}
             healthMetrics={healthMetrics}
             healthStatus={healthStatus}
-            onRefresh={refreshHealth}
-            onClearMemory={clearMemory}
             refreshing={refreshing}
-            clearingMemory={clearingMemory}
+            onClearMemory={clearMemory}
+            onRefresh={refreshHealth}
           />
         </TabsContent>
 
         <TabsContent
-          value="maintenance"
           className="space-y-4 sm:space-y-6 mt-4 sm:mt-6"
+          value="maintenance"
         >
           <SystemMaintenance
-            onMaintenanceAction={handleMaintenanceAction}
-            maintenanceLoading={false}
-            currentAction={null}
             backups={backups}
-            loadingBackups={backupsLoading}
-            onRefreshBackups={refetchBackups}
-            onCreateBackup={handleCreateBackup}
-            onRestoreBackup={handleRestoreBackup}
-            onDeleteBackup={handleDeleteBackup}
-            onViewBackupDetails={handleViewBackupDetails}
-            restoringBackup={isRestoring}
+            currentAction={null}
             deletingBackup={isDeleting}
+            loadingBackups={backupsLoading}
+            maintenanceLoading={false}
+            restoringBackup={isRestoring}
+            onCreateBackup={handleCreateBackup}
+            onDeleteBackup={handleDeleteBackup}
+            onMaintenanceAction={handleMaintenanceAction}
+            onRefreshBackups={refetchBackups}
+            onRestoreBackup={handleRestoreBackup}
+            onViewBackupDetails={handleViewBackupDetails}
           />
         </TabsContent>
       </Tabs>
@@ -704,8 +707,8 @@ export default function SystemAdministrationPage() {
                   <ul className="list-disc list-inside space-y-1">
                     {securityAuditResults.issues.map((issue, index) => (
                       <li
-                        key={index}
                         className="text-sm text-admin-text-tertiary pl-2"
+                        key={index}
                       >
                         {issue}
                       </li>
@@ -1026,13 +1029,13 @@ export default function SystemAdministrationPage() {
                     descargarlo ahora o más tarde desde Supabase Storage.
                   </p>
                   <Button
+                    className="w-full rounded-xl min-h-[44px]"
                     onClick={() =>
                       handleDownloadBackup(
                         backupResult.download_url!,
                         backupResult.backup_file,
                       )
                     }
-                    className="w-full rounded-xl min-h-[44px]"
                   >
                     <Database className="h-4 w-4 mr-2" />
                     Descargar Backup Ahora
@@ -1066,21 +1069,21 @@ export default function SystemAdministrationPage() {
 
           <DialogFooter className="flex-col sm:flex-row gap-2">
             <Button
+              className="w-full sm:w-auto rounded-xl min-h-[44px]"
               variant="outline"
               onClick={() => setShowBackupDialog(false)}
-              className="w-full sm:w-auto rounded-xl min-h-[44px]"
             >
               Cerrar
             </Button>
             {backupResult?.download_url && (
               <Button
+                className="w-full sm:w-auto rounded-xl min-h-[44px]"
                 onClick={() =>
                   handleDownloadBackup(
                     backupResult.download_url!,
                     backupResult.backup_file,
                   )
                 }
-                className="w-full sm:w-auto rounded-xl min-h-[44px]"
               >
                 <Database className="h-4 w-4 mr-2" />
                 Descargar
@@ -1187,9 +1190,9 @@ export default function SystemAdministrationPage() {
               Cancelar
             </Button>
             <Button
+              disabled={isRestoring}
               variant="destructive"
               onClick={confirmRestoreBackup}
-              disabled={isRestoring}
             >
               {isRestoring ? (
                 <>
@@ -1313,9 +1316,8 @@ export default function SystemAdministrationPage() {
                   <CardContent className="p-4">
                     <div className="space-y-2">
                       {Object.entries(restoreResults.restore_results).map(
-                        ([tableName, result]: [string, any]) => (
+                        ([tableName, result]: [string, unknown]) => (
                           <div
-                            key={tableName}
                             className={`p-3 rounded-lg border ${
                               result.status === "success"
                                 ? "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800"
@@ -1323,6 +1325,7 @@ export default function SystemAdministrationPage() {
                                   ? "bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800"
                                   : "bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800"
                             }`}
+                            key={tableName}
                           >
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-2">
@@ -1488,9 +1491,9 @@ export default function SystemAdministrationPage() {
               Cancelar
             </Button>
             <Button
+              disabled={isDeleting}
               variant="destructive"
               onClick={confirmDeleteBackup}
-              disabled={isDeleting}
             >
               {isDeleting ? (
                 <>

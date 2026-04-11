@@ -1,19 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient, createServiceRoleClient } from "@/utils/supabase/server";
-import { getBranchContext } from "@/lib/api/branch-middleware";
-import { appLogger as logger } from "@/lib/logger";
-import {
-  createApiSuccessResponse,
-  createApiErrorResponse,
-} from "@/lib/api/response";
 import { z } from "zod";
+
+import { getBranchContext } from "@/lib/api/branch-middleware";
 import { ValidationError } from "@/lib/api/errors";
+import { createApiSuccessResponse } from "@/lib/api/response";
 import {
   parseAndValidateBody,
   validationErrorResponse,
 } from "@/lib/api/validation/zod-helpers";
 import { pendingBalancePaySchema } from "@/lib/api/validation/zod-schemas";
+import { appLogger as logger } from "@/lib/logger";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
+import { createClient, createServiceRoleClient } from "@/utils/supabase/server";
 
 /**
  * POST /api/admin/pos/pending-balance/pay
@@ -101,7 +99,7 @@ export async function POST(request: NextRequest) {
 
     // Calculate total paid so far
     const totalPaid = (order.order_payments || []).reduce(
-      (sum: number, payment: any) => sum + (payment.amount || 0),
+      (sum: number, payment: unknown) => sum + (payment.amount || 0),
       0,
     );
     const newTotal = totalPaid + payment_amount;
@@ -211,7 +209,7 @@ export async function POST(request: NextRequest) {
 
       // Update all work orders with new payment information
       for (const workOrder of workOrders) {
-        const updateData: any = {
+        const updateData: unknown = {
           deposit_amount: newDepositAmount,
           balance_amount: newPendingAmount,
           payment_status: newWorkOrderPaymentStatus,
@@ -261,7 +259,7 @@ export async function POST(request: NextRequest) {
         ? "Pago registrado. Saldo aún pendiente"
         : "Pago completado. Orden finalizada",
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error("Error in pending balance payment API", { error });
     return NextResponse.json(
       {

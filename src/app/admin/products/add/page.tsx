@@ -1,23 +1,14 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { AlertTriangle, ArrowLeft, Save, X } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useProtectedForm } from "@/hooks/useFormProtection";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { useState } from "react";
+import { toast } from "sonner";
+
+import { useCategories } from "@/app/admin/products/hooks/useCategories";
 import { Badge } from "@/components/ui/badge";
-import RichTextEditor from "@/components/ui/RichTextEditor";
-import ImageUpload from "@/components/ui/ImageUpload";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -26,11 +17,20 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { X, Plus, Save, ArrowLeft, AlertTriangle } from "lucide-react";
-import { toast } from "sonner";
-import { useProductOptions } from "@/hooks/useProductOptions";
+import ImageUpload from "@/components/ui/ImageUpload";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import RichTextEditor from "@/components/ui/RichTextEditor";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useBranch } from "@/hooks/useBranch";
-import { useCategories } from "@/app/admin/products/hooks/useCategories";
+import { useProtectedForm } from "@/hooks/useFormProtection";
+import { useProductOptions } from "@/hooks/useProductOptions";
 import { productService } from "@/lib/api/services";
 
 export default function AddProductPage() {
@@ -117,7 +117,7 @@ export default function AddProductPage() {
   });
 
   // Helper function to get options from database or fallback to defaults
-  const getOptions = (fieldKey: string, fallback: any[] = []) => {
+  const getOptions = (fieldKey: string, fallback: unknown[] = []) => {
     if (optionsLoading) return fallback;
     const dbOptions = productOptions[fieldKey];
     if (dbOptions && dbOptions.length > 0) {
@@ -274,8 +274,8 @@ export default function AddProductPage() {
       .trim();
   };
 
-  const handleInputChange = (field: string, value: any) => {
-    const updates: any = { [field]: value };
+  const handleInputChange = (field: string, value: unknown) => {
+    const updates: unknown = { [field]: value };
 
     // Auto-generate slug from name
     if (field === "name" && value) {
@@ -401,7 +401,7 @@ export default function AddProductPage() {
             acc[key] = formData[key as keyof typeof formData];
           }
           return acc;
-        }, {} as any),
+        }, {} as unknown),
       });
 
       // Validate and parse price
@@ -431,7 +431,7 @@ export default function AddProductPage() {
       }
 
       // Build product data object, explicitly setting price to avoid null/undefined issues
-      const productData: any = {
+      const productData: unknown = {
         name: formData.name,
         slug: formData.slug,
         short_description: formData.short_description || null,
@@ -551,7 +551,7 @@ export default function AddProductPage() {
         priceTypeAfterJSON: typeof parsedBody.price,
       });
 
-      await productService.createProduct(productData as any);
+      await productService.createProduct(productData as unknown);
 
       toast.success("Producto creado exitosamente");
       markAsSaved(); // 🚀 Mark as saved to allow navigation
@@ -581,9 +581,9 @@ export default function AddProductPage() {
           )}
         </div>
         <Button
+          className="h-10 w-10 sm:h-auto sm:w-auto sm:px-4 shrink-0"
           variant="outline"
           onClick={() => router.back()}
-          className="h-10 w-10 sm:h-auto sm:w-auto sm:px-4 shrink-0"
         >
           <ArrowLeft className="h-4 w-4 sm:mr-2" />
           <span className="hidden sm:inline">Volver</span>
@@ -591,7 +591,7 @@ export default function AddProductPage() {
       </div>
 
       {/* Product Form */}
-      <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
+      <form className="space-y-4 sm:space-y-6" onSubmit={handleSubmit}>
         {/* Product Type & Category - MOVED TO FIRST POSITION */}
         <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.4)]">
           <CardHeader className="px-4 sm:px-6 py-4 sm:py-6">
@@ -656,22 +656,22 @@ export default function AddProductPage() {
               <div>
                 <Label htmlFor="name">Nombre del Producto *</Label>
                 <Input
-                  id="name"
-                  value={formData.name}
-                  onChange={(e) => handleInputChange("name", e.target.value)}
-                  placeholder="Ej: Ray-Ban RB2140 Wayfarer"
                   required
                   className="border-black/20"
+                  id="name"
+                  placeholder="Ej: Ray-Ban RB2140 Wayfarer"
+                  value={formData.name}
+                  onChange={(e) => handleInputChange("name", e.target.value)}
                 />
               </div>
               <div>
                 <Label htmlFor="slug">URL (slug)</Label>
                 <Input
+                  className="border-black/20"
                   id="slug"
+                  placeholder="Se genera automáticamente"
                   value={formData.slug}
                   onChange={(e) => handleInputChange("slug", e.target.value)}
-                  placeholder="Se genera automáticamente"
-                  className="border-black/20"
                 />
               </div>
             </div>
@@ -679,12 +679,12 @@ export default function AddProductPage() {
             <div>
               <Label htmlFor="short_description">Descripción</Label>
               <RichTextEditor
+                placeholder="Descripción del producto"
+                rows={3}
                 value={formData.short_description}
                 onChange={(value) =>
                   handleInputChange("short_description", value)
                 }
-                placeholder="Descripción del producto"
-                rows={3}
               />
             </div>
           </CardContent>
@@ -699,14 +699,14 @@ export default function AddProductPage() {
               <div>
                 <Label htmlFor="price">Precio *</Label>
                 <Input
-                  id="price"
-                  type="number"
-                  step="0.01"
-                  value={formData.price}
-                  onChange={(e) => handleInputChange("price", e.target.value)}
-                  placeholder="0.00"
                   required
                   className="border-black/20"
+                  id="price"
+                  placeholder="0.00"
+                  step="0.01"
+                  type="number"
+                  value={formData.price}
+                  onChange={(e) => handleInputChange("price", e.target.value)}
                 />
               </div>
               <div>
@@ -714,15 +714,15 @@ export default function AddProductPage() {
                   Cantidad en Stock (Sucursal Actual)
                 </Label>
                 <Input
+                  className="border-black/20"
                   id="stock_quantity"
+                  min="0"
+                  placeholder="0"
                   type="number"
                   value={formData.stock_quantity}
                   onChange={(e) =>
                     handleInputChange("stock_quantity", e.target.value)
                   }
-                  placeholder="0"
-                  className="border-black/20"
-                  min="0"
                 />
                 <p className="text-xs text-muted-foreground mt-1">
                   Stock inicial para esta sucursal. Puede agregar más stock
@@ -734,15 +734,15 @@ export default function AddProductPage() {
                   Umbral de Stock Bajo
                 </Label>
                 <Input
+                  className="border-black/20"
                   id="low_stock_threshold"
+                  min="0"
+                  placeholder="5"
                   type="number"
                   value={formData.low_stock_threshold}
                   onChange={(e) =>
                     handleInputChange("low_stock_threshold", e.target.value)
                   }
-                  placeholder="5"
-                  className="border-black/20"
-                  min="0"
                 />
                 <p className="text-xs text-muted-foreground mt-1">
                   Alerta cuando el stock disponible sea menor o igual a este
@@ -752,17 +752,17 @@ export default function AddProductPage() {
             </div>
             <div className="flex items-center space-x-2">
               <input
-                type="checkbox"
-                id="price_includes_tax"
                 checked={formData.price_includes_tax}
+                className="h-4 w-4 rounded border-gray-300 text-epoch-primary focus:ring-epoch-primary"
+                id="price_includes_tax"
+                type="checkbox"
                 onChange={(e) =>
                   handleInputChange("price_includes_tax", e.target.checked)
                 }
-                className="h-4 w-4 rounded border-gray-300 text-epoch-primary focus:ring-epoch-primary"
               />
               <Label
-                htmlFor="price_includes_tax"
                 className="text-sm font-normal cursor-pointer"
+                htmlFor="price_includes_tax"
               >
                 El precio ya incluye IVA
               </Label>
@@ -781,35 +781,35 @@ export default function AddProductPage() {
                 <div>
                   <Label htmlFor="brand">Marca</Label>
                   <Input
+                    className="border-black/20"
                     id="brand"
+                    placeholder="Ej: Ray-Ban"
                     value={formData.brand}
                     onChange={(e) => handleInputChange("brand", e.target.value)}
-                    placeholder="Ej: Ray-Ban"
-                    className="border-black/20"
                   />
                 </div>
                 <div>
                   <Label htmlFor="manufacturer">Fabricante</Label>
                   <Input
+                    className="border-black/20"
                     id="manufacturer"
+                    placeholder="Ej: Luxottica"
                     value={formData.manufacturer}
                     onChange={(e) =>
                       handleInputChange("manufacturer", e.target.value)
                     }
-                    placeholder="Ej: Luxottica"
-                    className="border-black/20"
                   />
                 </div>
                 <div>
                   <Label htmlFor="model_number">Número de Modelo</Label>
                   <Input
+                    className="border-black/20"
                     id="model_number"
+                    placeholder="Ej: RB2140"
                     value={formData.model_number}
                     onChange={(e) =>
                       handleInputChange("model_number", e.target.value)
                     }
-                    placeholder="Ej: RB2140"
-                    className="border-black/20"
                   />
                 </div>
               </div>
@@ -827,21 +827,21 @@ export default function AddProductPage() {
               <div>
                 <Label htmlFor="sku">SKU</Label>
                 <Input
+                  className="border-black/20"
                   id="sku"
+                  placeholder="Código SKU"
                   value={formData.sku}
                   onChange={(e) => handleInputChange("sku", e.target.value)}
-                  placeholder="Código SKU"
-                  className="border-black/20"
                 />
               </div>
               <div>
                 <Label htmlFor="barcode">Código de Barras</Label>
                 <Input
+                  className="border-black/20"
                   id="barcode"
+                  placeholder="Código de barras"
                   value={formData.barcode}
                   onChange={(e) => handleInputChange("barcode", e.target.value)}
-                  placeholder="Código de barras"
-                  className="border-black/20"
                 />
               </div>
             </div>
@@ -856,9 +856,9 @@ export default function AddProductPage() {
             <div>
               <Label htmlFor="featured_image">Imagen del Producto</Label>
               <ImageUpload
+                placeholder="Seleccionar imagen del producto"
                 value={formData.featured_image}
                 onChange={(url) => handleInputChange("featured_image", url)}
-                placeholder="Seleccionar imagen del producto"
               />
             </div>
           </CardContent>
@@ -975,12 +975,12 @@ export default function AddProductPage() {
                 <div>
                   <Label>Color Principal</Label>
                   <Input
+                    className="border-black/20"
+                    placeholder="Ej: Negro"
                     value={formData.frame_color}
                     onChange={(e) =>
                       handleInputChange("frame_color", e.target.value)
                     }
-                    placeholder="Ej: Negro"
-                    className="border-black/20"
                   />
                 </div>
               </div>
@@ -992,61 +992,61 @@ export default function AddProductPage() {
                   <div>
                     <Label className="text-xs">Ancho de Lente</Label>
                     <Input
+                      className="border-black/20"
+                      placeholder="52"
                       type="number"
                       value={formData.frame_measurements.lens_width}
                       onChange={(e) =>
                         updateFrameMeasurement("lens_width", e.target.value)
                       }
-                      placeholder="52"
-                      className="border-black/20"
                     />
                   </div>
                   <div>
                     <Label className="text-xs">Puente</Label>
                     <Input
+                      className="border-black/20"
+                      placeholder="18"
                       type="number"
                       value={formData.frame_measurements.bridge_width}
                       onChange={(e) =>
                         updateFrameMeasurement("bridge_width", e.target.value)
                       }
-                      placeholder="18"
-                      className="border-black/20"
                     />
                   </div>
                   <div>
                     <Label className="text-xs">Largo de Varilla</Label>
                     <Input
+                      className="border-black/20"
+                      placeholder="140"
                       type="number"
                       value={formData.frame_measurements.temple_length}
                       onChange={(e) =>
                         updateFrameMeasurement("temple_length", e.target.value)
                       }
-                      placeholder="140"
-                      className="border-black/20"
                     />
                   </div>
                   <div>
                     <Label className="text-xs">Alto de Lente</Label>
                     <Input
+                      className="border-black/20"
+                      placeholder="40"
                       type="number"
                       value={formData.frame_measurements.lens_height}
                       onChange={(e) =>
                         updateFrameMeasurement("lens_height", e.target.value)
                       }
-                      placeholder="40"
-                      className="border-black/20"
                     />
                   </div>
                   <div>
                     <Label className="text-xs">Ancho Total</Label>
                     <Input
+                      className="border-black/20"
+                      placeholder="140"
                       type="number"
                       value={formData.frame_measurements.total_width}
                       onChange={(e) =>
                         updateFrameMeasurement("total_width", e.target.value)
                       }
-                      placeholder="140"
-                      className="border-black/20"
                     />
                   </div>
                 </div>
@@ -1058,9 +1058,9 @@ export default function AddProductPage() {
                 <div className="flex flex-wrap gap-2 mt-2">
                   {formData.frame_features.map((feature) => (
                     <Badge
+                      className="flex items-center gap-1"
                       key={feature}
                       variant="secondary"
-                      className="flex items-center gap-1"
                     >
                       {feature.replace(/_/g, " ")}
                       <X
@@ -1144,14 +1144,14 @@ export default function AddProductPage() {
                 <div>
                   <Label>Índice de Refracción</Label>
                   <Input
-                    type="number"
+                    className="border-black/20"
+                    placeholder="Ej: 1.67"
                     step="0.01"
+                    type="number"
                     value={formData.lens_index}
                     onChange={(e) =>
                       handleInputChange("lens_index", e.target.value)
                     }
-                    placeholder="Ej: 1.67"
-                    className="border-black/20"
                   />
                 </div>
                 <div>
@@ -1179,13 +1179,13 @@ export default function AddProductPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="flex items-center space-x-2">
                   <input
-                    type="checkbox"
-                    id="blue_light_filter"
                     checked={formData.blue_light_filter}
+                    className="rounded"
+                    id="blue_light_filter"
+                    type="checkbox"
                     onChange={(e) =>
                       handleInputChange("blue_light_filter", e.target.checked)
                     }
-                    className="rounded"
                   />
                   <Label htmlFor="blue_light_filter">Filtro de Luz Azul</Label>
                 </div>
@@ -1193,9 +1193,11 @@ export default function AddProductPage() {
                   <div>
                     <Label>Porcentaje de Filtro (%)</Label>
                     <Input
-                      type="number"
-                      min="0"
+                      className="border-black/20"
                       max="100"
+                      min="0"
+                      placeholder="Ej: 40"
+                      type="number"
                       value={formData.blue_light_filter_percentage}
                       onChange={(e) =>
                         handleInputChange(
@@ -1203,20 +1205,18 @@ export default function AddProductPage() {
                           e.target.value,
                         )
                       }
-                      placeholder="Ej: 40"
-                      className="border-black/20"
                     />
                   </div>
                 )}
                 <div className="flex items-center space-x-2">
                   <input
-                    type="checkbox"
-                    id="photochromic"
                     checked={formData.photochromic}
+                    className="rounded"
+                    id="photochromic"
+                    type="checkbox"
                     onChange={(e) =>
                       handleInputChange("photochromic", e.target.checked)
                     }
-                    className="rounded"
                   />
                   <Label htmlFor="photochromic">
                     Fotocromático (Transitions)
@@ -1224,16 +1224,16 @@ export default function AddProductPage() {
                 </div>
                 <div className="flex items-center space-x-2">
                   <input
-                    type="checkbox"
-                    id="prescription_available"
                     checked={formData.prescription_available}
+                    className="rounded"
+                    id="prescription_available"
+                    type="checkbox"
                     onChange={(e) =>
                       handleInputChange(
                         "prescription_available",
                         e.target.checked,
                       )
                     }
-                    className="rounded"
                   />
                   <Label htmlFor="prescription_available">
                     Disponible con Receta
@@ -1247,9 +1247,9 @@ export default function AddProductPage() {
                 <div className="flex flex-wrap gap-2 mt-2">
                   {formData.lens_coatings.map((coating) => (
                     <Badge
+                      className="flex items-center gap-1"
                       key={coating}
                       variant="secondary"
-                      className="flex items-center gap-1"
                     >
                       {coating.replace(/_/g, " ")}
                       <X
@@ -1289,79 +1289,79 @@ export default function AddProductPage() {
                     <div>
                       <Label className="text-xs">SPH Mínimo</Label>
                       <Input
-                        type="number"
+                        className="border-black/20"
+                        placeholder="-10.00"
                         step="0.25"
+                        type="number"
                         value={formData.prescription_range.sph_min}
                         onChange={(e) =>
                           updatePrescriptionRange("sph_min", e.target.value)
                         }
-                        placeholder="-10.00"
-                        className="border-black/20"
                       />
                     </div>
                     <div>
                       <Label className="text-xs">SPH Máximo</Label>
                       <Input
-                        type="number"
+                        className="border-black/20"
+                        placeholder="+6.00"
                         step="0.25"
+                        type="number"
                         value={formData.prescription_range.sph_max}
                         onChange={(e) =>
                           updatePrescriptionRange("sph_max", e.target.value)
                         }
-                        placeholder="+6.00"
-                        className="border-black/20"
                       />
                     </div>
                     <div>
                       <Label className="text-xs">CIL Mínimo</Label>
                       <Input
-                        type="number"
+                        className="border-black/20"
+                        placeholder="-4.00"
                         step="0.25"
+                        type="number"
                         value={formData.prescription_range.cyl_min}
                         onChange={(e) =>
                           updatePrescriptionRange("cyl_min", e.target.value)
                         }
-                        placeholder="-4.00"
-                        className="border-black/20"
                       />
                     </div>
                     <div>
                       <Label className="text-xs">CIL Máximo</Label>
                       <Input
-                        type="number"
+                        className="border-black/20"
+                        placeholder="+4.00"
                         step="0.25"
+                        type="number"
                         value={formData.prescription_range.cyl_max}
                         onChange={(e) =>
                           updatePrescriptionRange("cyl_max", e.target.value)
                         }
-                        placeholder="+4.00"
-                        className="border-black/20"
                       />
                     </div>
                     <div>
                       <Label className="text-xs">ADD Mínimo</Label>
                       <Input
-                        type="number"
+                        className="border-black/20"
+                        placeholder="0.00"
                         step="0.25"
+                        type="number"
                         value={formData.prescription_range.add_min}
                         onChange={(e) =>
                           updatePrescriptionRange("add_min", e.target.value)
                         }
-                        placeholder="0.00"
-                        className="border-black/20"
                       />
                     </div>
                     <div>
                       <Label className="text-xs">ADD Máximo</Label>
                       <Input
-                        type="number"
+                        className="border-black/20"
+                        placeholder="+4.00"
                         step="0.25"
+                        type="number"
                         value={formData.prescription_range.add_max}
                         onChange={(e) =>
                           updatePrescriptionRange("add_max", e.target.value)
                         }
-                        placeholder="+4.00"
-                        className="border-black/20"
                       />
                     </div>
                   </div>
@@ -1381,37 +1381,37 @@ export default function AddProductPage() {
               <div>
                 <Label htmlFor="warranty_months">Garantía (meses)</Label>
                 <Input
+                  className="border-black/20"
                   id="warranty_months"
+                  placeholder="Ej: 12"
                   type="number"
                   value={formData.warranty_months}
                   onChange={(e) =>
                     handleInputChange("warranty_months", e.target.value)
                   }
-                  placeholder="Ej: 12"
-                  className="border-black/20"
                 />
               </div>
               <div className="flex items-center space-x-2">
                 <input
-                  type="checkbox"
-                  id="requires_prescription"
                   checked={formData.requires_prescription}
+                  className="rounded"
+                  id="requires_prescription"
+                  type="checkbox"
                   onChange={(e) =>
                     handleInputChange("requires_prescription", e.target.checked)
                   }
-                  className="rounded"
                 />
                 <Label htmlFor="requires_prescription">Requiere Receta</Label>
               </div>
               <div className="flex items-center space-x-2">
                 <input
-                  type="checkbox"
-                  id="is_customizable"
                   checked={formData.is_customizable}
+                  className="rounded"
+                  id="is_customizable"
+                  type="checkbox"
                   onChange={(e) =>
                     handleInputChange("is_customizable", e.target.checked)
                   }
-                  className="rounded"
                 />
                 <Label htmlFor="is_customizable">Personalizable</Label>
               </div>
@@ -1419,12 +1419,12 @@ export default function AddProductPage() {
             <div>
               <Label htmlFor="warranty_details">Detalles de Garantía</Label>
               <RichTextEditor
+                placeholder="Detalles de la garantía, condiciones, etc."
+                rows={3}
                 value={formData.warranty_details}
                 onChange={(value) =>
                   handleInputChange("warranty_details", value)
                 }
-                placeholder="Detalles de la garantía, condiciones, etc."
-                rows={3}
               />
             </div>
           </CardContent>
@@ -1432,28 +1432,28 @@ export default function AddProductPage() {
 
         <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-4">
           <Button
+            className="w-full sm:w-auto"
             type="button"
             variant="outline"
             onClick={() => router.back()}
-            className="w-full sm:w-auto"
           >
             Cancelar
           </Button>
           <Button
+            className="flex items-center justify-center gap-2 w-full sm:w-auto"
+            disabled={loading}
             type="button"
             variant="secondary"
-            disabled={loading}
             onClick={() => handleSubmit(undefined, "draft")}
-            className="flex items-center justify-center gap-2 w-full sm:w-auto"
           >
             <Save className="h-4 w-4" />
             {loading ? "Guardando..." : "Borrador"}
           </Button>
           <Button
-            type="button"
-            disabled={loading}
-            onClick={() => setShowPublishAlert(true)}
             className="flex items-center justify-center gap-2 w-full sm:w-auto"
+            disabled={loading}
+            type="button"
+            onClick={() => setShowPublishAlert(true)}
           >
             <Save className="h-4 w-4" />
             {loading ? "Guardando..." : "Guardar Producto"}
@@ -1499,27 +1499,27 @@ export default function AddProductPage() {
           </DialogHeader>
           <DialogFooter>
             <Button
+              disabled={loading}
               variant="outline"
               onClick={() => setShowPublishAlert(false)}
-              disabled={loading}
             >
               Cancelar
             </Button>
             <Button
+              className="text-white"
+              disabled={loading}
+              style={{ backgroundColor: "var(--admin-accent-tertiary)" }}
               variant="secondary"
               onClick={() => handleSubmit(undefined, "draft")}
-              disabled={loading}
-              className="text-white"
-              style={{ backgroundColor: "var(--admin-accent-tertiary)" }}
             >
               Guardar como Borrador
             </Button>
             <Button
+              disabled={loading}
               onClick={() => {
                 setShowPublishAlert(false);
                 handleSubmit(undefined, "active");
               }}
-              disabled={loading}
             >
               {loading ? "Publicando..." : "Sí, Publicar Producto"}
             </Button>

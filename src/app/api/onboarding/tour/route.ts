@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+
 import { createClientFromRequest } from "@/utils/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -94,7 +95,7 @@ export async function POST(request: NextRequest) {
 
     const organizationId = adminUser?.organization_id || null;
 
-    let updateData: any = {};
+    let updateData: unknown = {};
 
     switch (action) {
       case "start":

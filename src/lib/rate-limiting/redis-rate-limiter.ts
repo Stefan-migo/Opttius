@@ -1,6 +1,7 @@
 import { Redis } from "ioredis";
-import { getRedisClient } from "@/lib/redis";
+
 import { appLogger as logger } from "@/lib/logger";
+import { getRedisClient } from "@/lib/redis";
 
 /**
  * Redis-based Rate Limiter Implementation

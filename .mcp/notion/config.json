@@ -1,0 +1,55 @@
+{
+  "name": "opttius-notion-mcp-server",
+  "version": "1.0.0",
+  "description": "Local Notion MCP Server for Opttius project",
+  "author": "Opttius Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/opttius/opttius-app"
+  },
+  "homepage": "https://opttius.com",
+  "capabilities": {
+    "resources": {},
+    "tools": {
+      "search_pages": {
+        "description": "Search pages in Notion with optional query and filter"
+      },
+      "get_page": {
+        "description": "Get a page by ID with all its content and properties"
+      },
+      "create_page": {
+        "description": "Create a new page in Notion"
+      },
+      "update_page": {
+        "description": "Update an existing page"
+      },
+      "query_database": {
+        "description": "Query a Notion database with filters and sorts"
+      },
+      "create_database_page": {
+        "description": "Create a new page in a database with structured properties"
+      }
+    }
+  },
+  "settings": {
+    "env": {
+      "NOTION_API_KEY": {
+        "description": "Notion Internal Integration Token",
+        "required": true
+      },
+      "NOTION_DATABASE_DOCS": {
+        "description": "Documentation database ID",
+        "required": false
+      },
+      "NOTION_DATABASE_TASKS": {
+        "description": "Tasks database ID",
+        "required": false
+      },
+      "NOTION_DATABASE_FEATURES": {
+        "description": "Features database ID",
+        "required": false
+      }
+    }
+  }
+}

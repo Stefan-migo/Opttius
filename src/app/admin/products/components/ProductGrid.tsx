@@ -1,19 +1,20 @@
 "use client";
 
-import { memo } from "react";
-import Link from "next/link";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import {
-  Eye,
-  Edit,
-  Trash2,
   AlertTriangle,
+  Edit,
+  Eye,
   Package,
-  Star,
   RefreshCw,
+  Star,
+  Trash2,
 } from "lucide-react";
+import Link from "next/link";
+import { memo } from "react";
+
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
 import { Product } from "../hooks/useProducts";
 
 interface ProductGridProps {
@@ -59,11 +60,11 @@ function ProductGridComponent({
       {onRefresh && (
         <div className="flex justify-end">
           <Button
-            variant="outline"
-            size="sm"
-            onClick={onRefresh}
-            disabled={isRefreshing}
             className="h-9 px-4 rounded-xl border-admin-border-primary/10 font-display font-bold text-[10px] tracking-widest uppercase"
+            disabled={isRefreshing}
+            size="sm"
+            variant="outline"
+            onClick={onRefresh}
           >
             <RefreshCw
               className={`h-4 w-4 mr-2 ${isRefreshing ? "animate-spin" : ""}`}
@@ -86,20 +87,21 @@ function ProductGridComponent({
             p.total_low_stock_threshold ?? p.low_stock_threshold ?? 5;
           const isLowStock = stockQuantity <= threshold;
           const hasImage =
-            (product as any).featured_image || (product as any).gallery?.[0];
+            (product as unknown).featured_image ||
+            (product as unknown).gallery?.[0];
 
           return (
             <Card
-              key={product.id}
               className="group relative flex flex-col transition-all duration-300 border border-admin-border-primary/20 bg-admin-bg-tertiary rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.3)] hover:shadow-lg transition-shadow duration-300 overflow-hidden"
+              key={product.id}
             >
               {/* Checkbox - Top Right */}
               <div className="absolute top-4 right-4 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
                 <input
-                  type="checkbox"
                   checked={selectedProducts.includes(product.id)}
-                  onChange={() => onSelectProduct(product.id)}
                   className="w-4 h-4 rounded-xl border-admin-border-primary/20 cursor-pointer accent-epoch-primary"
+                  type="checkbox"
+                  onChange={() => onSelectProduct(product.id)}
                   onClick={(e) => e.stopPropagation()}
                 />
               </div>
@@ -118,12 +120,12 @@ function ProductGridComponent({
               <div className="relative w-full h-28 sm:h-40 md:h-48 lg:h-56 bg-admin-border-primary/5 overflow-hidden border-b border-admin-border-primary/10 shrink-0">
                 {hasImage ? (
                   <img
-                    src={
-                      (product as any).featured_image ||
-                      (product as any).gallery[0]
-                    }
                     alt={product.name || product.title || "Producto"}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-90 group-hover:opacity-100"
+                    src={
+                      (product as unknown).featured_image ||
+                      (product as unknown).gallery[0]
+                    }
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">
@@ -139,6 +141,24 @@ function ProductGridComponent({
               </div>
 
               <CardHeader className="p-3 sm:p-4 md:p-6 pb-2 space-y-1 bg-transparent">
+                {/* Product Type Badge */}
+                {product.product_type && product.product_type !== "frame" && (
+                  <p className="text-[9px] font-display font-bold uppercase tracking-wider">
+                    {product.product_type === "contact_lens" && (
+                      <span className="text-blue-600">Lentes de Contacto</span>
+                    )}
+                    {product.product_type === "accessory" && (
+                      <span className="text-green-600">Accesorio</span>
+                    )}
+                    {product.product_type === "service" && (
+                      <span className="text-purple-600">Servicio</span>
+                    )}
+                    {product.product_type === "lens" && (
+                      <span className="text-orange-600">Cristal</span>
+                    )}
+                  </p>
+                )}
+
                 {/* Category Badge */}
                 <p className="text-[10px] font-serif italic text-admin-text-tertiary uppercase tracking-wider">
                   {product.categories?.name ||
@@ -206,36 +226,36 @@ function ProductGridComponent({
                 {/* Action Buttons - fondo claro cuando tarjeta en hover para contraste */}
                 <div className="product-grid-actions flex flex-wrap items-center gap-1.5 sm:gap-2 pt-3 sm:pt-4 mt-3 sm:mt-4 border-t border-admin-border-primary/10">
                   <Link
-                    href={`/admin/products/${product.slug}`}
                     className="flex-1"
+                    href={`/admin/products/${product.slug}`}
                   >
                     <Button
-                      variant="outline"
-                      size="sm"
                       className="product-grid-card-btn w-full h-8 sm:h-9 rounded-lg sm:rounded-xl border-admin-border-primary/20 text-[8px] sm:text-[10px] font-display font-bold tracking-widest uppercase hover:bg-epoch-primary/10 hover:border-epoch-primary/30 text-epoch-primary transition-all"
+                      size="sm"
+                      variant="outline"
                     >
                       <Eye className="h-3 w-3 sm:h-3.5 sm:w-3.5 sm:mr-2" />
                       <span className="hidden sm:inline">ARCHIVO</span>
                     </Button>
                   </Link>
                   <Link
-                    href={`/admin/products/edit/${product.id}`}
                     className="flex-1"
+                    href={`/admin/products/edit/${product.id}`}
                   >
                     <Button
-                      variant="outline"
-                      size="sm"
                       className="product-grid-card-btn w-full h-8 sm:h-9 rounded-lg sm:rounded-xl border-admin-border-primary/20 text-[8px] sm:text-[10px] font-display font-bold tracking-widest uppercase hover:bg-epoch-primary/10 hover:border-epoch-primary/30 text-epoch-primary transition-all"
+                      size="sm"
+                      variant="outline"
                     >
                       <Edit className="h-3 w-3 sm:h-3.5 sm:w-3.5 sm:mr-2" />
                       <span className="hidden sm:inline">EDITAR</span>
                     </Button>
                   </Link>
                   <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => onDelete(product)}
                     className="product-grid-card-btn product-grid-card-btn-delete h-8 sm:h-9 px-2 sm:px-4 rounded-lg sm:rounded-xl border-admin-error/30 text-admin-error hover:bg-admin-error/10 hover:border-admin-error/50 transition-all shrink-0"
+                    size="sm"
+                    variant="outline"
+                    onClick={() => onDelete(product)}
                   >
                     <Trash2 className="h-3.5 w-3.5" />
                   </Button>

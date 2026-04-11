@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { SaasBackupService } from "@/lib/saas-backup-service";
+
 import { appLogger as logger } from "@/lib/logger";
+import { SaasBackupService } from "@/lib/saas-backup-service";
 
 /**
  * POST /api/cron/saas-backup
@@ -58,7 +59,7 @@ export async function POST(request: NextRequest) {
       { error: result.error || "Failed to register backup" },
       { status: 500 },
     );
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error("Error en registro de backup SaaS", { error: error.message });
     return NextResponse.json(
       { error: "Internal Server Error", details: error.message },

@@ -43,7 +43,7 @@ export interface LLMMessage {
 export interface ToolCall {
   id: string;
   name: string;
-  arguments: any;
+  arguments: unknown;
 }
 
 export interface LLMResponse {
@@ -70,7 +70,7 @@ export interface LLMTool {
   function: {
     name: string;
     description: string;
-    parameters: Record<string, any>;
+    parameters: Record<string, unknown>;
   };
 }
 

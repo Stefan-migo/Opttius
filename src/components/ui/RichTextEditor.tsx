@@ -1,17 +1,18 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import {
+  AlignCenter,
+  AlignLeft,
+  AlignRight,
   Bold,
   Italic,
-  Underline,
   Type,
-  AlignLeft,
-  AlignCenter,
-  AlignRight,
+  Underline,
 } from "lucide-react";
+import { useRef, useState } from "react";
+
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 
 interface RichTextEditorProps {
   value: string;
@@ -105,11 +106,11 @@ export default function RichTextEditor({
       {/* Toolbar */}
       <div className="flex items-center gap-1 p-2 rounded-md">
         <Button
+          className="mr-2"
+          size="sm"
           type="button"
           variant={isRichMode ? "default" : "outline"}
-          size="sm"
           onClick={() => setIsRichMode(!isRichMode)}
-          className="mr-2"
         >
           <Type className="h-4 w-4 mr-1" />
           {isRichMode ? "Modo Simple" : "Formato"}
@@ -121,11 +122,11 @@ export default function RichTextEditor({
               {formatButtons.map((button, index) => (
                 <Button
                   key={index}
+                  size="sm"
+                  title={button.tooltip}
                   type="button"
                   variant="outline"
-                  size="sm"
                   onClick={() => applyFormat(button.format)}
-                  title={button.tooltip}
                 >
                   <button.icon className="h-4 w-4" />
                 </Button>
@@ -136,11 +137,11 @@ export default function RichTextEditor({
               {alignmentButtons.map((button, index) => (
                 <Button
                   key={index}
+                  size="sm"
+                  title={button.tooltip}
                   type="button"
                   variant="outline"
-                  size="sm"
                   onClick={() => applyAlignment(button.format)}
-                  title={button.tooltip}
                 >
                   <button.icon className="h-4 w-4" />
                 </Button>
@@ -152,12 +153,12 @@ export default function RichTextEditor({
 
       {/* Text Area */}
       <Textarea
+        className="min-h-[100px]"
+        placeholder={placeholder}
         ref={textareaRef}
+        rows={rows}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder}
-        rows={rows}
-        className="min-h-[100px]"
       />
 
       {isRichMode && (

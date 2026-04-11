@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireRoot } from "@/lib/api/root-middleware";
+
+import { parseAndValidateBody } from "@/lib/api/validation/zod-helpers";
+import { createSaasSupportMessageSchema } from "@/lib/api/validation/zod-schemas";
+import { appLogger as logger } from "@/lib/logger";
 import { createClient } from "@/utils/supabase/server";
 import { createServiceRoleClient } from "@/utils/supabase/service-role";
-import { appLogger as logger } from "@/lib/logger";
-import { AuthorizationError } from "@/lib/api/errors";
-import { createSaasSupportMessageSchema } from "@/lib/api/validation/zod-schemas";
-import { parseAndValidateBody } from "@/lib/api/validation/zod-helpers";
 
 /**
  * GET /api/admin/saas-management/support/tickets/[id]/messages
@@ -193,12 +192,12 @@ export async function POST(
       last_response_at: now,
     };
 
-    if (!(ticket as any)?.first_response_at && !isFromCustomer) {
+    if (!(ticket as unknown)?.first_response_at && !isFromCustomer) {
       updates.first_response_at = now;
 
       // Calcular tiempo de primera respuesta
-      if ((ticket as any)?.created_at) {
-        const created = new Date((ticket as any).created_at);
+      if ((ticket as unknown)?.created_at) {
+        const created = new Date((ticket as unknown).created_at);
         const firstResponse = new Date();
         const diffMinutes = Math.floor(
           (firstResponse.getTime() - created.getTime()) / (1000 * 60),
@@ -258,7 +257,7 @@ export async function POST(
                 category: fullTicket.category,
                 requester_name: fullTicket.requester_name,
                 requester_email: fullTicket.requester_email,
-                organization: fullTicket.organization as any,
+                organization: fullTicket.organization as unknown,
               },
               {
                 message: body.message,
@@ -287,8 +286,8 @@ export async function POST(
         );
         await NotificationService.notifySaasSupportNewMessage(
           params.id,
-          (ticket as any)?.ticket_number,
-          (ticket as any)?.subject,
+          (ticket as unknown)?.ticket_number,
+          (ticket as unknown)?.subject,
           true,
         );
       } catch (pushErr) {

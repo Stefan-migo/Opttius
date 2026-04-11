@@ -1,7 +1,8 @@
 "use client";
 
+import { AlertTriangle, BarChart3, Package, TrendingUp } from "lucide-react";
+
 import { Card, CardContent } from "@/components/ui/card";
-import { Package, TrendingUp, AlertTriangle, BarChart3 } from "lucide-react";
 
 interface ProductStatsProps {
   stats: {

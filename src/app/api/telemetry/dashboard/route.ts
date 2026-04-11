@@ -1,5 +1,5 @@
-import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { NextRequest, NextResponse } from "next/server";
 
 // Initialize Supabase client for server-side operations
 const supabase = createClient(
@@ -49,7 +49,7 @@ export async function GET(request: NextRequest) {
 }
 
 // Process raw telemetry events into dashboard-friendly format
-function processTelemetryData(events: any[], days: number) {
+function processTelemetryData(events: unknown[], days: number) {
   // Calculate overview metrics
   const totalEvents = events.length;
   const uniqueUsers = new Set(events.map((e) => e.user_id).filter(Boolean))

@@ -13,8 +13,8 @@ export interface ValidationResult {
 export class QuoteFormValidator {
   static validate(
     formData: QuoteFormData,
-    selectedCustomer: any,
-    selectedPrescription: any,
+    selectedCustomer: unknown,
+    selectedPrescription: unknown,
   ): ValidationResult {
     const errors: ValidationError[] = [];
 
@@ -182,8 +182,8 @@ export class QuoteFormValidator {
 export function useQuoteValidation() {
   const validate = (
     formData: QuoteFormData,
-    selectedCustomer: any,
-    selectedPrescription: any,
+    selectedCustomer: unknown,
+    selectedPrescription: unknown,
   ) => {
     return QuoteFormValidator.validate(
       formData,
@@ -194,7 +194,7 @@ export function useQuoteValidation() {
 
   const validateField = (
     field: string,
-    value: any,
+    value: unknown,
     formData: QuoteFormData,
   ) => {
     const tempData = { ...formData, [field]: value };

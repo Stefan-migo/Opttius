@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireRoot } from "@/lib/api/root-middleware";
-import { createServiceRoleClient } from "@/utils/supabase/service-role";
-import { appLogger as logger } from "@/lib/logger";
+
 import { AuthorizationError } from "@/lib/api/errors";
+import { requireRoot } from "@/lib/api/root-middleware";
 import { updateSaasUserSchema } from "@/lib/api/validation/zod-schemas";
+import { appLogger as logger } from "@/lib/logger";
+import { createServiceRoleClient } from "@/utils/supabase/service-role";
 
 /**
  * GET /api/admin/saas-management/users/[id]
@@ -61,7 +62,7 @@ export async function GET(
 
     // Enriquecer con información de sucursales
     const enrichedBranchAccess = await Promise.all(
-      (branchAccess || []).map(async (access: any) => {
+      (branchAccess || []).map(async (access: unknown) => {
         if (access.branch_id) {
           const { data: branch } = await supabaseServiceRole
             .from("branches")
@@ -142,7 +143,7 @@ export async function PATCH(
     }
 
     // Preparar updates
-    const updates: any = {};
+    const updates: unknown = {};
 
     if (organization_id !== undefined) {
       // Validar que la organización existe si se proporciona

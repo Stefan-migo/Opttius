@@ -1,7 +1,8 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Eye } from "lucide-react";
+
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export interface PrescriptionDisplayData {
   id?: string;
@@ -142,11 +143,11 @@ export function PrescriptionFullDisplay({
       )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-        <EyeSection label="Ojo Derecho (OD)" prefix="od" data={prescription} />
+        <EyeSection data={prescription} label="Ojo Derecho (OD)" prefix="od" />
         <EyeSection
+          data={prescription}
           label="Ojo Izquierdo (OS)"
           prefix="os"
-          data={prescription}
         />
       </div>
 

@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/utils/supabase/server";
-import { createServiceRoleClient } from "@/lib/supabase";
+
 import { appLogger as logger } from "@/lib/logger";
+import { createServiceRoleClient } from "@/lib/supabase";
+import { createClient } from "@/utils/supabase/server";
 
 /**
  * GET /api/admin/system/backups
@@ -84,7 +85,7 @@ export async function GET(request: NextRequest) {
       }
 
       const backupText = await backupFile.text();
-      let backupData: any;
+      let backupData: unknown;
       try {
         backupData = JSON.parse(backupText);
       } catch (parseError) {
@@ -120,9 +121,12 @@ export async function GET(request: NextRequest) {
         .createSignedUrl(filename, 3600);
 
       const totalRecords = backupData.tables
-        ? Object.values(backupData.tables).reduce((sum: number, table: any) => {
-            return sum + (table.record_count || 0);
-          }, 0)
+        ? Object.values(backupData.tables).reduce(
+            (sum: number, table: unknown) => {
+              return sum + (table.record_count || 0);
+            },
+            0,
+          )
         : 0;
 
       return NextResponse.json({

@@ -1,11 +1,24 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import {
+  AlertTriangle,
+  ArrowLeft,
+  Mail,
+  MessageSquare,
+  Package,
+  Phone,
+  Plus,
+  Search,
+  User,
+} from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -13,19 +26,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  ArrowLeft,
-  User,
-  AlertTriangle,
-  MessageSquare,
-  Search,
-  Plus,
-  Mail,
-  Phone,
-  Package,
-} from "lucide-react";
-import Link from "next/link";
-import { toast } from "sonner";
+import { Textarea } from "@/components/ui/textarea";
 import { extractDataFromResponse } from "@/lib/api/response-helpers";
 
 interface Customer {
@@ -61,7 +62,7 @@ export default function NewTicketPage() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
-  const [adminUsers, setAdminUsers] = useState<any[]>([]);
+  const [adminUsers, setAdminUsers] = useState<unknown[]>([]);
   const [searchingCustomers, setSearchingCustomers] = useState(false);
   const [searchingOrders, setSearchingOrders] = useState(false);
 
@@ -272,7 +273,7 @@ export default function NewTicketPage() {
       {/* Header */}
       <div className="flex items-center gap-4">
         <Link href="/admin/support">
-          <Button variant="outline" size="sm">
+          <Button size="sm" variant="outline">
             <ArrowLeft className="h-4 w-4 mr-2" />
             Volver
           </Button>
@@ -288,8 +289,8 @@ export default function NewTicketPage() {
       </div>
 
       <form
-        onSubmit={handleSubmit}
         className="grid grid-cols-1 lg:grid-cols-3 gap-6"
+        onSubmit={handleSubmit}
       >
         {/* Main Form */}
         <div className="lg:col-span-2 space-y-6">
@@ -307,12 +308,12 @@ export default function NewTicketPage() {
                   Título <span className="text-red-500">*</span>
                 </label>
                 <Input
+                  required
                   placeholder="Describe brevemente el problema..."
                   value={form.title}
                   onChange={(e) =>
                     setForm((prev) => ({ ...prev, title: e.target.value }))
                   }
-                  required
                 />
               </div>
 
@@ -321,7 +322,9 @@ export default function NewTicketPage() {
                   Descripción <span className="text-red-500">*</span>
                 </label>
                 <Textarea
+                  required
                   placeholder="Describe el problema en detalle..."
+                  rows={6}
                   value={form.description}
                   onChange={(e) =>
                     setForm((prev) => ({
@@ -329,8 +332,6 @@ export default function NewTicketPage() {
                       description: e.target.value,
                     }))
                   }
-                  rows={6}
-                  required
                 />
               </div>
 
@@ -431,10 +432,10 @@ export default function NewTicketPage() {
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-admin-text-tertiary h-4 w-4" />
                   <Input
+                    className="pl-10"
                     placeholder="Buscar por nombre o email..."
                     value={customerSearch}
                     onChange={(e) => setCustomerSearch(e.target.value)}
-                    className="pl-10"
                   />
                 </div>
 
@@ -448,10 +449,10 @@ export default function NewTicketPage() {
                   <div className="mt-2 border rounded-md max-h-48 overflow-y-auto">
                     {customers.map((customer) => (
                       <button
+                        className="w-full text-left p-3 hover:bg-gray-50 border-b border-gray-100 last:border-b-0"
                         key={customer.id}
                         type="button"
                         onClick={() => handleSelectCustomer(customer)}
-                        className="w-full text-left p-3 hover:bg-gray-50 border-b border-gray-100 last:border-b-0"
                       >
                         <div className="font-medium">
                           {customer.first_name && customer.last_name
@@ -477,8 +478,9 @@ export default function NewTicketPage() {
                   Email del Cliente <span className="text-red-500">*</span>
                 </label>
                 <Input
-                  type="email"
+                  required
                   placeholder="cliente@ejemplo.com"
+                  type="email"
                   value={form.customer_email}
                   onChange={(e) =>
                     setForm((prev) => ({
@@ -486,7 +488,6 @@ export default function NewTicketPage() {
                       customer_email: e.target.value,
                     }))
                   }
-                  required
                 />
               </div>
 
@@ -549,10 +550,10 @@ export default function NewTicketPage() {
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-admin-text-tertiary h-4 w-4" />
                   <Input
+                    className="pl-10"
                     placeholder="Buscar por número de pedido..."
                     value={orderSearch}
                     onChange={(e) => setOrderSearch(e.target.value)}
-                    className="pl-10"
                   />
                 </div>
 
@@ -566,10 +567,10 @@ export default function NewTicketPage() {
                   <div className="mt-2 border rounded-md max-h-48 overflow-y-auto">
                     {orders.map((order) => (
                       <button
+                        className="w-full text-left p-3 hover:bg-gray-50 border-b border-gray-100 last:border-b-0"
                         key={order.id}
                         type="button"
                         onClick={() => handleSelectOrder(order)}
-                        className="w-full text-left p-3 hover:bg-gray-50 border-b border-gray-100 last:border-b-0"
                       >
                         <div className="font-medium">#{order.order_number}</div>
                         <div className="text-sm text-admin-text-tertiary">
@@ -613,13 +614,13 @@ export default function NewTicketPage() {
           <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)]">
             <CardContent className="p-6">
               <div className="space-y-3">
-                <Button type="submit" className="w-full" disabled={loading}>
+                <Button className="w-full" disabled={loading} type="submit">
                   <Plus className="h-4 w-4 mr-2" />
                   {loading ? "Creando Ticket..." : "Crear Ticket"}
                 </Button>
 
                 <Link href="/admin/support">
-                  <Button variant="outline" className="w-full">
+                  <Button className="w-full" variant="outline">
                     Cancelar
                   </Button>
                 </Link>

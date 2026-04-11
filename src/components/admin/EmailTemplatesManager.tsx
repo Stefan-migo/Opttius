@@ -1,17 +1,29 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
+import { Edit, Eye, Plus, Send, Trash2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import {
   Table,
@@ -21,32 +33,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Mail,
-  Plus,
-  Edit,
-  Trash2,
-  Send,
-  Eye,
-  CheckCircle,
-  XCircle,
-} from "lucide-react";
-import { toast } from "sonner";
+
 import EmailTemplateEditor from "./EmailTemplateEditor";
 
 interface EmailTemplate {
@@ -327,7 +314,7 @@ export default function EmailTemplatesManager({
   // En modo organization: mostrar todos los ESSENTIAL_TYPES, con placeholder si no existe plantilla
   const templatesFilteredByEssential =
     mode === "organization"
-      ? templates.filter((t) => ESSENTIAL_TYPES.includes(t.type as any))
+      ? templates.filter((t) => ESSENTIAL_TYPES.includes(t.type as unknown))
       : templates;
 
   const templatesByType = new Map(
@@ -361,11 +348,11 @@ export default function EmailTemplatesManager({
           </p>
         </div>
         <Button
+          className="rounded-xl min-h-[44px] w-full sm:w-auto"
           onClick={() => {
             setCreateInitialType(undefined);
             setShowCreateDialog(true);
           }}
-          className="rounded-xl min-h-[44px] w-full sm:w-auto"
         >
           <Plus className="h-4 w-4 mr-2 shrink-0" />
           Nueva Plantilla
@@ -485,12 +472,12 @@ export default function EmailTemplatesManager({
                 <TableBody>
                   {filteredTemplates.map(({ type, template }) => (
                     <TableRow
-                      key={type}
                       className={
                         template && !template.is_active
                           ? "opacity-70"
                           : undefined
                       }
+                      key={type}
                     >
                       <TableCell className="font-medium text-xs sm:text-sm">
                         <span className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 min-w-0">
@@ -503,8 +490,8 @@ export default function EmailTemplatesManager({
                           </span>
                           {template && !template.is_active && (
                             <Badge
-                              variant="secondary"
                               className="text-[10px] sm:text-xs w-fit shrink-0"
+                              variant="secondary"
                             >
                               Inactiva
                             </Badge>
@@ -513,8 +500,8 @@ export default function EmailTemplatesManager({
                       </TableCell>
                       <TableCell>
                         <Badge
-                          variant="outline"
                           className="text-[10px] sm:text-xs"
+                          variant="outline"
                         >
                           {getTypeLabel(type)}
                         </Badge>
@@ -554,36 +541,36 @@ export default function EmailTemplatesManager({
                           {template ? (
                             <>
                               <Button
-                                variant="ghost"
+                                className="h-9 w-9 sm:h-9 sm:w-9 p-0 rounded-xl"
                                 size="sm"
+                                title="Ver plantilla"
+                                variant="ghost"
                                 onClick={() => {
                                   setSelectedTemplate(template);
                                   setShowPreviewDialog(true);
                                 }}
-                                title="Ver plantilla"
-                                className="h-9 w-9 sm:h-9 sm:w-9 p-0 rounded-xl"
                               >
                                 <Eye className="h-4 w-4" />
                               </Button>
                               <Button
-                                variant="ghost"
+                                className="h-9 w-9 sm:h-9 sm:w-9 p-0 rounded-xl"
                                 size="sm"
+                                title="Editar plantilla"
+                                variant="ghost"
                                 onClick={() => {
                                   setSelectedTemplate(template);
                                   setShowEditDialog(true);
                                 }}
-                                title="Editar plantilla"
-                                className="h-9 w-9 sm:h-9 sm:w-9 p-0 rounded-xl"
                               >
                                 <Edit className="h-4 w-4" />
                               </Button>
                               <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => handleTestEmail(template)}
-                                disabled={testing === template.id}
-                                title="Enviar email de prueba"
                                 className="h-9 w-9 sm:h-9 sm:w-9 p-0 rounded-xl"
+                                disabled={testing === template.id}
+                                size="sm"
+                                title="Enviar email de prueba"
+                                variant="ghost"
+                                onClick={() => handleTestEmail(template)}
                               >
                                 <Send
                                   className={`h-4 w-4 ${testing === template.id ? "animate-spin" : ""}`}
@@ -591,10 +578,10 @@ export default function EmailTemplatesManager({
                               </Button>
                               {!template.is_system && (
                                 <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => handleDeleteClick(template)}
                                   className="text-red-600 h-9 w-9 sm:h-9 sm:w-9 p-0 rounded-xl"
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() => handleDeleteClick(template)}
                                 >
                                   <Trash2 className="h-4 w-4" />
                                 </Button>
@@ -602,12 +589,12 @@ export default function EmailTemplatesManager({
                             </>
                           ) : (
                             <Button
+                              className="rounded-xl min-h-[44px] text-xs sm:text-sm"
                               size="sm"
                               onClick={() => {
                                 setCreateInitialType(type);
                                 setShowCreateDialog(true);
                               }}
-                              className="rounded-xl min-h-[44px] text-xs sm:text-sm"
                             >
                               <Plus className="h-4 w-4 mr-1 shrink-0" />
                               <span className="truncate">Crear plantilla</span>
@@ -627,10 +614,10 @@ export default function EmailTemplatesManager({
       {/* Edit Dialog */}
       {showEditDialog && selectedTemplate && (
         <EmailTemplateEditor
-          template={selectedTemplate}
           mode={mode}
-          organizationId={organizationId}
           open={showEditDialog}
+          organizationId={organizationId}
+          template={selectedTemplate}
           onOpenChange={setShowEditDialog}
           onSave={() => {
             setShowEditDialog(false);
@@ -642,9 +629,10 @@ export default function EmailTemplatesManager({
       {/* Create Dialog */}
       {showCreateDialog && (
         <EmailTemplateEditor
+          initialType={createInitialType}
           mode={mode}
-          organizationId={organizationId}
           open={showCreateDialog}
+          organizationId={organizationId}
           onOpenChange={(open) => {
             if (!open) setCreateInitialType(undefined);
             setShowCreateDialog(open);
@@ -654,7 +642,6 @@ export default function EmailTemplatesManager({
             setCreateInitialType(undefined);
             fetchTemplates();
           }}
-          initialType={createInitialType}
         />
       )}
 
@@ -705,19 +692,19 @@ export default function EmailTemplatesManager({
           </DialogHeader>
           <DialogFooter>
             <Button
+              disabled={deleting}
               variant="outline"
               onClick={() => {
                 setShowDeleteDialog(false);
                 setTemplateToDelete(null);
               }}
-              disabled={deleting}
             >
               Cancelar
             </Button>
             <Button
+              disabled={deleting}
               variant="destructive"
               onClick={confirmDelete}
-              disabled={deleting}
             >
               {deleting ? "Eliminando..." : "Eliminar"}
             </Button>
@@ -743,12 +730,12 @@ export default function EmailTemplatesManager({
               <div className="space-y-2">
                 <Label htmlFor="test-email">Email de destino *</Label>
                 <Input
+                  required
                   id="test-email"
+                  placeholder="ejemplo@email.com"
                   type="email"
                   value={testEmail}
                   onChange={(e) => setTestEmail(e.target.value)}
-                  placeholder="ejemplo@email.com"
-                  required
                 />
                 <p className="text-xs text-muted-foreground">
                   El email se enviará con variables de ejemplo reemplazadas.
@@ -757,18 +744,18 @@ export default function EmailTemplatesManager({
             </div>
             <DialogFooter>
               <Button
+                disabled={testing === selectedTemplate.id}
                 variant="outline"
                 onClick={() => {
                   setShowTestDialog(false);
                   setTestEmail("");
                 }}
-                disabled={testing === selectedTemplate.id}
               >
                 Cancelar
               </Button>
               <Button
-                onClick={confirmTestEmail}
                 disabled={!testEmail || testing === selectedTemplate.id}
+                onClick={confirmTestEmail}
               >
                 {testing === selectedTemplate.id ? (
                   <>

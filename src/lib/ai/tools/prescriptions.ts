@@ -2,20 +2,22 @@
  * AI Agent tools for prescription-based lens suggestions
  */
 import { z } from "zod";
-import type { ToolDefinition, ToolResult } from "./types";
+
 import {
-  hasAddition,
-  getDefaultPresbyopiaSolution,
-  getRecommendedLensTypes,
-  getFarSphere,
   getCylinder,
+  getDefaultPresbyopiaSolution,
+  getFarSphere,
+  getRecommendedLensTypes,
+  hasAddition,
   type Prescription,
 } from "@/lib/presbyopia-helpers";
+
 import {
-  resolvePrescriptionByNumber,
-  resolveCustomerByNameOrRut,
   resolveBranchByName,
+  resolveCustomerByNameOrRut,
+  resolvePrescriptionByNumber,
 } from "./resolvers";
+import type { ToolDefinition, ToolResult } from "./types";
 
 const suggestLensFromPrescriptionSchema = z
   .object({

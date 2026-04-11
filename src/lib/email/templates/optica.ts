@@ -4,12 +4,12 @@
  */
 
 import { sendEmail } from "../client";
-import { loadEmailTemplate, incrementTemplateUsage } from "../template-loader";
-import {
-  replaceTemplateVariables,
-  getDefaultVariables,
-} from "../template-utils";
 import { getOrganizationInfoWithFallbacks } from "../org-utils";
+import { incrementTemplateUsage, loadEmailTemplate } from "../template-loader";
+import {
+  getDefaultVariables,
+  replaceTemplateVariables,
+} from "../template-utils";
 
 // ============================================================================
 // Interfaces para tipos de datos

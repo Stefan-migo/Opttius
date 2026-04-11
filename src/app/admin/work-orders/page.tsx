@@ -1,9 +1,36 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import {
+  AlertCircle,
+  CheckCircle,
+  ChevronLeft,
+  ChevronRight,
+  Eye,
+  Factory,
+  FileText,
+  Package,
+  RefreshCw,
+  Search,
+  Send,
+  Trash2,
+  Truck,
+  XCircle,
+} from "lucide-react";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -21,45 +48,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import {
-  Search,
-  Plus,
-  Eye,
-  Package,
-  Calendar,
-  User,
-  DollarSign,
-  ChevronLeft,
-  ChevronRight,
-  RefreshCw,
-  Factory,
-  CheckCircle,
-  Clock,
-  Send,
-  Truck,
-  AlertCircle,
-  XCircle,
-  FileText,
-  Trash2,
-} from "lucide-react";
-import { toast } from "sonner";
-import Link from "next/link";
 // dynamic import eliminado: CreateWorkOrderForm ya no se usa
 import { useBranch } from "@/hooks/useBranch";
-import { getBranchHeader } from "@/lib/utils/branch";
-import { formatCurrency, formatDate } from "@/lib/utils";
 import {
   extractDataFromResponse,
   extractPaginationFromResponse,
 } from "@/lib/api/response-helpers";
+import { formatCurrency } from "@/lib/utils";
+import { getBranchHeader } from "@/lib/utils/branch";
 
 // CreateWorkOrderForm eliminado: Los trabajos solo se crean desde POS (process-sale)
 // Esto previene trabajos "fantasma" sin vínculo financiero ni control de inventario
@@ -74,7 +70,7 @@ interface WorkOrder {
     last_name?: string;
     email?: string;
   };
-  prescription?: any;
+  prescription?: unknown;
   frame_name?: string;
   lens_type?: string;
   lens_material?: string;
@@ -162,7 +158,7 @@ export default function WorkOrdersPage() {
   const getStatusBadge = (status: string) => {
     const config: Record<
       string,
-      { variant: any; label: string; icon: any; color: string }
+      { variant: unknown; label: string; icon: unknown; color: string }
     > = {
       quote: {
         variant: "outline",
@@ -235,7 +231,7 @@ export default function WorkOrdersPage() {
     const Icon = statusConfig.icon;
 
     return (
-      <Badge variant={statusConfig.variant} className="flex items-center gap-1">
+      <Badge className="flex items-center gap-1" variant={statusConfig.variant}>
         <Icon className="h-3 w-3" />
         {statusConfig.label}
       </Badge>
@@ -243,7 +239,7 @@ export default function WorkOrdersPage() {
   };
 
   const getPaymentStatusBadge = (status: string) => {
-    const config: Record<string, { variant: any; label: string }> = {
+    const config: Record<string, { variant: unknown; label: string }> = {
       pending: { variant: "outline", label: "Pendiente" },
       partial: { variant: "secondary", label: "Parcial" },
       paid: { variant: "default", label: "Pagado" },
@@ -302,7 +298,7 @@ export default function WorkOrdersPage() {
       setDeleteDialogOpen(false);
       setWorkOrderToDelete(null);
       fetchWorkOrders();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error deleting work order:", error);
       toast.error(error.message || "Error al eliminar trabajo");
     } finally {
@@ -343,7 +339,7 @@ export default function WorkOrdersPage() {
 
       toast.success("Estado de pago actualizado");
       setEditingPaymentStatus(null);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error updating payment status:", error);
       toast.error(error.message || "Error al actualizar estado de pago");
       // Refresh to get correct state
@@ -456,10 +452,10 @@ export default function WorkOrdersPage() {
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-admin-text-tertiary" />
                 <Input
+                  className="pl-10 h-12 text-base"
                   placeholder="Buscar por número, cliente, marco, laboratorio..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 h-12 text-base"
                 />
               </div>
             </div>
@@ -580,22 +576,22 @@ export default function WorkOrdersPage() {
                           {editingPaymentStatus === workOrder.id ? (
                             <div className="flex items-center gap-2">
                               <Select
+                                disabled={
+                                  updatingPaymentStatus === workOrder.id
+                                }
+                                open={true}
                                 value={workOrder.payment_status}
+                                onOpenChange={(open) => {
+                                  if (!open) {
+                                    setEditingPaymentStatus(null);
+                                  }
+                                }}
                                 onValueChange={(value) => {
                                   handlePaymentStatusChange(
                                     workOrder.id,
                                     value,
                                   );
                                   setEditingPaymentStatus(null);
-                                }}
-                                disabled={
-                                  updatingPaymentStatus === workOrder.id
-                                }
-                                open={true}
-                                onOpenChange={(open) => {
-                                  if (!open) {
-                                    setEditingPaymentStatus(null);
-                                  }
                                 }}
                               >
                                 <SelectTrigger className="w-[140px] h-7">
@@ -620,11 +616,11 @@ export default function WorkOrdersPage() {
                             </div>
                           ) : (
                             <div
+                              className="cursor-pointer hover:opacity-80 transition-opacity inline-block group"
+                              title="Haz clic para editar el estado de pago"
                               onClick={() =>
                                 setEditingPaymentStatus(workOrder.id)
                               }
-                              className="cursor-pointer hover:opacity-80 transition-opacity inline-block group"
-                              title="Haz clic para editar el estado de pago"
                             >
                               <div className="flex items-center gap-1">
                                 {getPaymentStatusBadge(
@@ -643,21 +639,21 @@ export default function WorkOrdersPage() {
                         <TableCell>
                           <div className="flex items-center gap-2">
                             <Link href={`/admin/work-orders/${workOrder.id}`}>
-                              <Button variant="outline" size="sm">
+                              <Button size="sm" variant="outline">
                                 <Eye className="h-4 w-4 mr-1" />
                                 Ver
                               </Button>
                             </Link>
                             <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleDeleteClick(workOrder.id)}
+                              className="text-red-600 hover:text-red-700 hover:bg-red-50"
                               disabled={
                                 workOrder.status === "delivered" ||
                                 workOrder.payment_status === "paid" ||
                                 workOrder.payment_status === "partial"
                               }
-                              className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleDeleteClick(workOrder.id)}
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>
@@ -677,20 +673,20 @@ export default function WorkOrdersPage() {
                   </div>
                   <div className="flex gap-2">
                     <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                       disabled={currentPage === 1}
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                     >
                       <ChevronLeft className="h-4 w-4" />
                     </Button>
                     <Button
-                      variant="outline"
+                      disabled={currentPage === totalPages}
                       size="sm"
+                      variant="outline"
                       onClick={() =>
                         setCurrentPage((p) => Math.min(totalPages, p + 1))
                       }
-                      disabled={currentPage === totalPages}
                     >
                       <ChevronRight className="h-4 w-4" />
                     </Button>
@@ -716,19 +712,19 @@ export default function WorkOrdersPage() {
           </DialogHeader>
           <DialogFooter>
             <Button
+              disabled={deleting}
               variant="outline"
               onClick={() => {
                 setDeleteDialogOpen(false);
                 setWorkOrderToDelete(null);
               }}
-              disabled={deleting}
             >
               Cancelar
             </Button>
             <Button
+              disabled={deleting}
               variant="destructive"
               onClick={handleDeleteConfirm}
-              disabled={deleting}
             >
               {deleting ? (
                 <>

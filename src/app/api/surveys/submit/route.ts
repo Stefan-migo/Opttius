@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createServiceRoleClient } from "@/utils/supabase/server";
-import { appLogger as logger } from "@/lib/logger";
 import { z } from "zod";
+
+import { appLogger as logger } from "@/lib/logger";
+import { createServiceRoleClient } from "@/utils/supabase/server";
 
 const surveySubmitSchema = z.object({
   token: z.string().min(1, "Token requerido"),

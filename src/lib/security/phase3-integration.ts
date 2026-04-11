@@ -11,9 +11,10 @@
  */
 
 import { appLogger as logger } from "@/lib/logger";
+
 import { behavioralAnalytics } from "./behavioral-analytics";
-import { threatDetector } from "./threat-detection";
 import { incidentResponse } from "./incident-response";
+import { threatDetector } from "./threat-detection";
 
 // Types for Phase 3 security orchestration
 export interface SecurityOrchestrationConfig {
@@ -136,7 +137,7 @@ export class Phase3SecurityOrchestrator {
   /**
    * Process security events through all Phase 3 systems
    */
-  async processSecurityEvents(events: any[]): Promise<void> {
+  async processSecurityEvents(events: unknown[]): Promise<void> {
     const startTime = Date.now();
 
     try {
@@ -175,7 +176,7 @@ export class Phase3SecurityOrchestrator {
   /**
    * Process behavioral analysis
    */
-  private async processBehavioralAnalysis(events: any[]): Promise<void> {
+  private async processBehavioralAnalysis(events: unknown[]): Promise<void> {
     for (const event of events) {
       if (event.userId && event.actionType) {
         await behavioralAnalytics.recordUserAction({
@@ -195,7 +196,7 @@ export class Phase3SecurityOrchestrator {
   /**
    * Process threat detection
    */
-  private async processThreatDetection(events: any[]): Promise<void> {
+  private async processThreatDetection(events: unknown[]): Promise<void> {
     const threats = await threatDetector.analyzeUserBehavior(
       "system", // placeholder userId
       events.map((event) => ({
@@ -220,7 +221,7 @@ export class Phase3SecurityOrchestrator {
   /**
    * Process incident response
    */
-  private async processIncidentResponse(events: any[]): Promise<void> {
+  private async processIncidentResponse(events: unknown[]): Promise<void> {
     const incidents = await incidentResponse.processSecurityEvents(
       events.map((event) => ({
         id: event.id || `evt_${Date.now()}`,
@@ -272,9 +273,9 @@ export class Phase3SecurityOrchestrator {
     metrics: SecurityMetrics;
     uptime: number;
     components: {
-      behavioralAnalytics: any;
-      threatDetection: any;
-      incidentResponse: any;
+      behavioralAnalytics: unknown;
+      threatDetection: unknown;
+      incidentResponse: unknown;
     };
   } {
     return {
@@ -349,7 +350,10 @@ export class Phase3SecurityOrchestrator {
   /**
    * SOC 2 controls assessment
    */
-  private async checkSOC2Controls(): Promise<{ score: number; details: any }> {
+  private async checkSOC2Controls(): Promise<{
+    score: number;
+    details: unknown;
+  }> {
     // Placeholder implementation - in production, this would check actual controls
     const controls = {
       accessControl: 90,
@@ -434,4 +438,4 @@ Zero Trust: ${this.config.zeroTrust.enabled ? "Enabled" : "Disabled"}
 export const phase3Security = new Phase3SecurityOrchestrator();
 
 // Convenience exports
-export { behavioralAnalytics, threatDetector, incidentResponse };
+export { behavioralAnalytics, incidentResponse, threatDetector };

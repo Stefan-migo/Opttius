@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+
 import { createClient, createServiceRoleClient } from "@/utils/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -25,7 +26,7 @@ export async function GET(
     }
 
     return NextResponse.json({ category });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("API error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
@@ -145,7 +146,7 @@ export async function PUT(
     }
 
     return NextResponse.json({ category: data });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("API error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
@@ -263,7 +264,7 @@ export async function DELETE(
     }
 
     return NextResponse.json({ success: true });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("API error:", error);
     return NextResponse.json(
       { error: "Internal server error" },

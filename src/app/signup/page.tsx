@@ -1,33 +1,31 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import Link from "next/link";
-import Image from "next/image";
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import { useAuthContext } from "@/contexts/AuthContext";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent } from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
 import {
-  Loader2,
+  ArrowRight,
+  CheckCircle2,
   Eye,
   EyeOff,
-  User,
+  Loader2,
+  Lock,
   Mail,
   Phone,
-  Lock,
-  ArrowRight,
-  Shield,
-  CheckCircle2,
-  Sparkles,
-  Award,
+  User,
 } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
+
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useAuthContext } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
 
 const signupSchema = z
@@ -132,7 +130,7 @@ export default function SignupPage() {
       setTimeout(() => {
         router.push("/onboarding/choice");
       }, 1500);
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(err.message || "An error occurred during signup");
     }
   };
@@ -160,11 +158,11 @@ export default function SignupPage() {
             <div className="bg-epoch-primary p-6 sm:p-10 text-center">
               <div className="relative mx-auto mb-6 flex justify-center">
                 <Image
-                  src="/logoYopttius.png"
                   alt="Opttius"
-                  width={248}
-                  height={227}
                   className="h-24 w-28 object-contain"
+                  height={227}
+                  src="/logoYopttius.png"
+                  width={248}
                 />
               </div>
               <div className="inline-flex items-center justify-center w-20 h-20 border-2 border-epoch-accent/40 rounded-full mb-6">
@@ -187,8 +185,8 @@ export default function SignupPage() {
                     bandeja de entrada y active su cuenta para comenzar.
                   </p>
                   <Button
-                    onClick={() => router.push("/login")}
                     className="w-full min-h-14 sm:h-16 px-4 overflow-hidden bg-epoch-accent hover:bg-epoch-accent/90 text-epoch-primary rounded-xl font-display font-bold uppercase text-[10px] sm:text-[11px] tracking-[0.12em] sm:tracking-[0.3em] transition-all shadow-xl group flex items-center justify-center gap-2 py-3 sm:py-4 whitespace-normal"
+                    onClick={() => router.push("/login")}
                   >
                     <span className="break-words text-center">
                       REGRESAR AL ACCESO
@@ -203,8 +201,8 @@ export default function SignupPage() {
                     inicial...
                   </p>
                   <Button
-                    onClick={() => router.push("/onboarding/choice")}
                     className="w-full min-h-14 sm:h-16 px-4 overflow-hidden bg-epoch-accent hover:bg-epoch-accent/90 text-epoch-primary rounded-xl font-display font-bold uppercase text-[10px] sm:text-[11px] tracking-[0.12em] sm:tracking-[0.3em] transition-all shadow-xl group flex items-center justify-center gap-2 py-3 sm:py-4 whitespace-normal"
+                    onClick={() => router.push("/onboarding/choice")}
                   >
                     <span className="break-words text-center">CONTINUAR</span>
                     <ArrowRight className="h-4 w-4 shrink-0 transition-transform group-hover:translate-x-2" />
@@ -228,25 +226,25 @@ export default function SignupPage() {
       <div className="relative hidden lg:flex lg:w-5/12 xl:w-1/2 overflow-hidden items-center justify-center bg-epoch-primary">
         <div className="absolute inset-0 z-0">
           <Image
-            src="/images/landing/Hero.webp"
-            alt="Elite Setup"
             fill
-            sizes="(max-width: 1024px) 100vw, 50vw"
-            className="object-cover opacity-20 grayscale"
             priority
+            alt="Elite Setup"
+            className="object-cover opacity-20 grayscale"
+            sizes="(max-width: 1024px) 100vw, 50vw"
+            src="/images/landing/Hero.webp"
           />
           <div className="absolute inset-0 bg-gradient-to-br from-epoch-primary via-epoch-primary/80 to-epoch-accent/10" />
         </div>
 
         <div className="relative z-10 p-20 w-full h-full flex flex-col justify-between">
-          <Link href="/" className="group flex flex-col items-start w-fit">
+          <Link className="group flex flex-col items-start w-fit" href="/">
             <div className="relative mb-1 group-hover:scale-110 transition-transform duration-500">
               <Image
-                src="/logo-text-default.svg"
                 alt="Opttius"
-                width={192}
-                height={56}
                 className="h-14 w-48 opacity-100 object-contain object-left"
+                height={56}
+                src="/logo-text-default.svg"
+                width={192}
               />
             </div>
           </Link>
@@ -276,8 +274,8 @@ export default function SignupPage() {
                 "Acompañamiento especializado",
               ].map((item, i) => (
                 <div
-                  key={i}
                   className="flex items-center gap-4 text-white/80 font-display text-[10px] uppercase tracking-[0.2em]"
+                  key={i}
                 >
                   <div className="w-1.5 h-[1px] bg-epoch-accent" />
                   {item}
@@ -310,11 +308,11 @@ export default function SignupPage() {
 
           <Card className="border-epoch-primary/5 bg-white shadow-2xl rounded-xl">
             <CardContent className="p-8 sm:p-12">
-              <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+              <form className="space-y-8" onSubmit={handleSubmit(onSubmit)}>
                 {error && (
                   <Alert
-                    variant="destructive"
                     className="bg-red-500/10 border-red-500/20 rounded-xl"
+                    variant="destructive"
                   >
                     <AlertDescription className="text-red-950 font-serif italic text-xs">
                       {error}
@@ -369,8 +367,8 @@ export default function SignupPage() {
                     </Label>
                     <div className="relative group">
                       <Input
-                        type="email"
                         placeholder="directorio@optica.com"
+                        type="email"
                         {...register("email")}
                         className={cn(
                           "h-14 rounded-xl border-epoch-primary/10 bg-epoch-background/50 pl-12 focus:bg-white transition-all font-body text-epoch-primary shadow-inner",
@@ -389,8 +387,8 @@ export default function SignupPage() {
                     </Label>
                     <div className="relative group">
                       <Input
-                        type="tel"
                         placeholder="+1 555-0100"
+                        type="tel"
                         {...register("phone")}
                         className="h-14 rounded-xl border-epoch-primary/10 bg-epoch-background/50 pl-12 focus:bg-white transition-all font-body text-epoch-primary shadow-inner"
                         disabled={loading}
@@ -407,8 +405,8 @@ export default function SignupPage() {
                     </Label>
                     <div className="relative group">
                       <Input
-                        type={showPassword ? "text" : "password"}
                         placeholder="••••••••"
+                        type={showPassword ? "text" : "password"}
                         {...register("password")}
                         className={cn(
                           "h-14 rounded-xl border-epoch-primary/10 bg-epoch-background/50 pl-12 pr-12 focus:bg-white transition-all font-body text-epoch-primary shadow-inner",
@@ -419,10 +417,10 @@ export default function SignupPage() {
                       />
                       <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-epoch-primary/30 group-focus-within:text-epoch-primary transition-colors stroke-[1px]" />
                       <Button
+                        className="absolute right-2 top-1/2 -translate-y-1/2 h-10 w-10 hover:bg-transparent text-epoch-primary/30"
+                        size="sm"
                         type="button"
                         variant="ghost"
-                        size="sm"
-                        className="absolute right-2 top-1/2 -translate-y-1/2 h-10 w-10 hover:bg-transparent text-epoch-primary/30"
                         onClick={() => setShowPassword(!showPassword)}
                       >
                         {showPassword ? (
@@ -440,8 +438,8 @@ export default function SignupPage() {
                     </Label>
                     <div className="relative group">
                       <Input
-                        type={showConfirmPassword ? "text" : "password"}
                         placeholder="••••••••"
+                        type={showConfirmPassword ? "text" : "password"}
                         {...register("confirmPassword")}
                         className={cn(
                           "h-14 rounded-xl border-epoch-primary/10 bg-epoch-background/50 pl-12 pr-12 focus:bg-white transition-all font-body text-epoch-primary shadow-inner",
@@ -452,10 +450,10 @@ export default function SignupPage() {
                       />
                       <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-epoch-primary/30 group-focus-within:text-epoch-primary transition-colors stroke-[1px]" />
                       <Button
+                        className="absolute right-2 top-1/2 -translate-y-1/2 h-10 w-10 hover:bg-transparent text-epoch-primary/30"
+                        size="sm"
                         type="button"
                         variant="ghost"
-                        size="sm"
-                        className="absolute right-2 top-1/2 -translate-y-1/2 h-10 w-10 hover:bg-transparent text-epoch-primary/30"
                         onClick={() =>
                           setShowConfirmPassword(!showConfirmPassword)
                         }
@@ -471,10 +469,10 @@ export default function SignupPage() {
                 </div>
 
                 <Button
-                  type="submit"
-                  size="lg"
                   className="w-full h-16 rounded-xl bg-epoch-primary hover:bg-epoch-surface text-white font-display font-bold uppercase text-xs tracking-[0.4em] group transition-all shadow-xl"
                   disabled={loading}
+                  size="lg"
+                  type="submit"
                 >
                   {loading ? (
                     <Loader2 className="h-5 w-5 animate-spin" />
@@ -492,8 +490,8 @@ export default function SignupPage() {
                   ¿Ya tiene cuenta?
                 </p>
                 <Link
-                  href="/login"
                   className="inline-flex items-center gap-2 text-xs font-display font-bold text-epoch-accent uppercase tracking-[0.2em] hover:text-epoch-primary transition-all group"
+                  href="/login"
                 >
                   Iniciar sesión
                   <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
@@ -504,11 +502,11 @@ export default function SignupPage() {
 
           <p className="mt-12 text-center text-[8px] font-display font-bold text-epoch-primary/30 uppercase tracking-[0.2em] max-w-lg mx-auto leading-relaxed">
             Al registrarse en Opttius, usted acepta nuestros{" "}
-            <Link href="#" className="underline hover:text-epoch-primary">
+            <Link className="underline hover:text-epoch-primary" href="#">
               Términos de uso
             </Link>{" "}
             y{" "}
-            <Link href="#" className="underline hover:text-epoch-primary">
+            <Link className="underline hover:text-epoch-primary" href="#">
               Política de Privacidad
             </Link>
             .

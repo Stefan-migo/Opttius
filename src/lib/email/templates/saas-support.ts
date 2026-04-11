@@ -1,7 +1,7 @@
 import { sendEmail } from "../client";
-import { loadEmailTemplate, incrementTemplateUsage } from "../template-loader";
-import { replaceTemplateVariables } from "../template-utils";
 import { wrapInModernLayout } from "../layout";
+import { incrementTemplateUsage, loadEmailTemplate } from "../template-loader";
+import { replaceTemplateVariables } from "../template-utils";
 
 interface SaasSupportTicket {
   id: string;

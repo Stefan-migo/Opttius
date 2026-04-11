@@ -1,4 +1,5 @@
 import { z } from "zod";
+
 import type { ToolDefinition, ToolResult } from "./types";
 
 const optimizeInventorySchema = z.object({
@@ -143,7 +144,7 @@ export const inventoryTools: ToolDefinition[] = [
           .filter((a) => a.status !== "healthy")
           .sort((a, b) => {
             // Prioridad: out_of_stock > critical_low > low_supply > overstock
-            const priorities: any = {
+            const priorities: unknown = {
               out_of_stock: 0,
               critical_low: 1,
               low_supply: 2,
@@ -175,7 +176,7 @@ export const inventoryTools: ToolDefinition[] = [
           },
           message: `Optimización de inventario completada. ${actionableItems.length} productos requieren atención.`,
         };
-      } catch (error: any) {
+      } catch (error: unknown) {
         return {
           success: false,
           error: error.message || "Failed to optimize inventory",

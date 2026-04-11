@@ -1,35 +1,32 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { useTelemetry } from "@/lib/telemetry/hooks/use-telemetry";
-import { useAuthContext } from "@/contexts/AuthContext";
-import { useRouter } from "next/navigation";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import {
-  Building2,
-  Users,
-  CreditCard,
-  TrendingUp,
-  DollarSign,
-  Settings,
-  HelpCircle,
-  ArrowRight,
-  Zap,
-  Mail,
-  Shield,
-  Database,
-  HardDrive,
-  CheckCircle2,
-  AlertCircle,
-  BarChart3,
-  ShieldCheck,
   Activity,
-  RotateCcw,
+  AlertCircle,
+  ArrowRight,
+  BarChart3,
+  Building2,
+  CheckCircle2,
+  CreditCard,
+  DollarSign,
+  HelpCircle,
+  Mail,
   MessageCircle,
+  RotateCcw,
+  Settings,
+  Shield,
+  ShieldCheck,
+  TrendingUp,
+  Users,
+  Zap,
 } from "lucide-react";
-import { Switch } from "@/components/ui/switch";
+import { useRouter } from "next/navigation";
+import React, { useEffect, useState } from "react";
+import { toast } from "sonner";
+
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -38,7 +35,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { toast } from "sonner";
+import { Switch } from "@/components/ui/switch";
+import { useAuthContext } from "@/contexts/AuthContext";
+import { useTelemetry } from "@/lib/telemetry/hooks/use-telemetry";
 
 interface SaasMetrics {
   totalOrganizations: number;
@@ -201,7 +200,7 @@ export default function SaaSDashboard() {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center space-y-4">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-epoch-primary mx-auto"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-epoch-primary mx-auto" />
           <p className="text-epoch-primary/70">Cargando métricas del SaaS...</p>
         </div>
       </div>
@@ -246,79 +245,79 @@ export default function SaaSDashboard() {
   return (
     <div className="space-y-6 p-6">
       <div>
-        <h1 className="text-3xl font-display font-bold text-epoch-primary tracking-tight">
-          Gestión SaaS Opttius
+        <h1 className="text-3xl font-display font-bold text-white tracking-tight">
+          SaaS Engine
         </h1>
-        <p className="text-admin-text-tertiary mt-2">
+        <p className="text-white/50 mt-2">
           Dashboard principal con métricas del sistema completo
         </p>
       </div>
 
       {/* Métricas principales */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="admin-card">
+        <Card className="bg-white/5 border-white/10">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
+            <CardTitle className="text-sm font-medium text-white/70">
               Organizaciones Activas
             </CardTitle>
-            <Building2 className="h-4 w-4 text-muted-foreground" />
+            <Building2 className="h-4 w-4 text-[#C5A059]" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
+            <div className="text-2xl font-bold text-white">
               {metrics?.activeOrganizations || 0}
             </div>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-white/50">
               de {metrics?.totalOrganizations || 0} totales
             </p>
           </CardContent>
         </Card>
 
-        <Card className="admin-card">
+        <Card className="bg-white/5 border-white/10">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
+            <CardTitle className="text-sm font-medium text-white/70">
               Usuarios Activos
             </CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
+            <Users className="h-4 w-4 text-[#C5A059]" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
+            <div className="text-2xl font-bold text-white">
               {metrics?.activeUsers || 0}
             </div>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-white/50">
               de {metrics?.totalUsers || 0} totales
             </p>
           </CardContent>
         </Card>
 
-        <Card className="admin-card">
+        <Card className="bg-white/5 border-white/10">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
+            <CardTitle className="text-sm font-medium text-white/70">
               Suscripciones Activas
             </CardTitle>
-            <CreditCard className="h-4 w-4 text-muted-foreground" />
+            <CreditCard className="h-4 w-4 text-[#C5A059]" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
+            <div className="text-2xl font-bold text-white">
               {metrics?.activeSubscriptions || 0}
             </div>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-white/50">
               de {metrics?.totalSubscriptions || 0} totales
             </p>
           </CardContent>
         </Card>
 
-        <Card className="admin-card">
+        <Card className="bg-white/5 border-white/10">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
+            <CardTitle className="text-sm font-medium text-white/70">
               Ingresos Mensuales
             </CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
+            <DollarSign className="h-4 w-4 text-[#C5A059]" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
+            <div className="text-2xl font-bold text-white">
               {formatPrice(metrics?.monthlyRevenue || 0)}
             </div>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-white/50">
               {metrics?.organizationGrowth || 0}% crecimiento
             </p>
           </CardContent>
@@ -341,12 +340,14 @@ export default function SaaSDashboard() {
           </CardContent>
         </Card>
 
-        <Card className="admin-card">
+        <Card className="bg-white/5 border-white/10">
           <CardHeader>
-            <CardTitle>Tasa de Conversión de Trials</CardTitle>
+            <CardTitle className="text-white">
+              Tasa de Conversión de Trials
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">
+            <div className="text-3xl font-bold text-white">
               {metrics?.trialConversionRate || 0}%
             </div>
           </CardContent>
@@ -355,16 +356,19 @@ export default function SaaSDashboard() {
 
       {/* Distribución por tier */}
       {metrics?.tierDistribution && (
-        <Card className="admin-card">
+        <Card className="bg-white/5 border-white/10">
           <CardHeader>
-            <CardTitle>Distribución por Tier</CardTitle>
+            <CardTitle className="text-white">Distribución por Tier</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {Object.entries(metrics.tierDistribution).map(([tier, count]) => (
-                <div key={tier} className="p-4 border rounded-lg text-center">
-                  <div className="text-2xl font-bold">{count}</div>
-                  <div className="text-sm text-gray-600 mt-1">
+                <div
+                  className="p-4 border border-white/10 rounded-lg text-center bg-white/5"
+                  key={tier}
+                >
+                  <div className="text-2xl font-bold text-white">{count}</div>
+                  <div className="text-sm text-white/50 mt-1">
                     {tier === "basic"
                       ? "Básico"
                       : tier === "pro"
@@ -382,25 +386,23 @@ export default function SaaSDashboard() {
 
       {/* Crecimiento */}
       {metrics?.organizationsLast30Days !== undefined && (
-        <Card className="admin-card">
+        <Card className="bg-white/5 border-white/10">
           <CardHeader>
-            <CardTitle>Crecimiento</CardTitle>
+            <CardTitle className="text-white">Crecimiento</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               <div>
-                <div className="text-sm text-epoch-primary/70">
+                <div className="text-sm text-white/50">
                   Organizaciones creadas (últimos 30 días)
                 </div>
-                <div className="text-2xl font-bold">
+                <div className="text-2xl font-bold text-white">
                   {metrics.organizationsLast30Days}
                 </div>
               </div>
               <div>
-                <div className="text-sm text-epoch-primary/70">
-                  Crecimiento mensual
-                </div>
-                <div className="text-2xl font-bold">
+                <div className="text-sm text-white/50">Crecimiento mensual</div>
+                <div className="text-2xl font-bold text-emerald-400">
                   {metrics.organizationGrowth > 0 ? "+" : ""}
                   {metrics.organizationGrowth.toFixed(1)}%
                 </div>
@@ -413,50 +415,52 @@ export default function SaaSDashboard() {
       {/* Sección de Seguridad y Backups SaaS */}
       <div className="grid grid-cols-1 gap-6">
         <Card
-          className="admin-card border-l-4 border-l-epoch-primary cursor-pointer hover:shadow-lg transition-all"
+          className="bg-white/5 border-white/10 cursor-pointer hover:bg-white/10 transition-all border-l-4 border-l-[#C5A059]"
           onClick={() => router.push("/admin/saas-management/backups")}
         >
           <CardHeader>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-epoch-primary/10 rounded-lg">
-                  <Shield className="h-6 w-6 text-epoch-primary" />
+                <div className="p-2 bg-[#C5A059]/20 rounded-lg">
+                  <Shield className="h-6 w-6 text-[#C5A059]" />
                 </div>
                 <div>
-                  <CardTitle>SaaS Disaster Recovery & Backups</CardTitle>
-                  <p className="text-sm text-muted-foreground mt-1">
+                  <CardTitle className="text-white">
+                    SaaS Disaster Recovery & Backups
+                  </CardTitle>
+                  <p className="text-sm text-white/50 mt-1">
                     Gestión integral de respaldos del servidor y descarga de
                     volcados SQL
                   </p>
                 </div>
               </div>
-              <ArrowRight className="h-5 w-5 text-muted-foreground" />
+              <ArrowRight className="h-5 w-5 text-white/50" />
             </div>
           </CardHeader>
           <CardContent>
-            <div className="flex flex-col md:flex-row gap-6 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-dashed border-gray-300">
+            <div className="flex flex-col md:flex-row gap-6 p-4 bg-white/5 rounded-xl border border-white/10">
               <div className="flex-1 space-y-3">
-                <div className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                  <CheckCircle2 className="h-4 w-4 text-green-500" />
+                <div className="flex items-center gap-2 text-sm font-medium text-white">
+                  <CheckCircle2 className="h-4 w-4 text-emerald-400" />
                   Triple Capa de Seguridad Activa
                 </div>
-                <ul className="text-xs text-muted-foreground space-y-2 list-disc pl-5">
+                <ul className="text-xs text-white/50 space-y-2 list-disc pl-5">
                   <li>Backups individuales por organización (diarios)</li>
                   <li>Backups integrales de todo el SaaS (semanales)</li>
                   <li>Cifrado AES-256 de archivos en reposo</li>
                 </ul>
               </div>
-              <div className="flex-1 border-l pl-6 border-gray-200 dark:border-gray-700">
-                <div className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                  <AlertCircle className="h-4 w-4 text-amber-500" />
+              <div className="flex-1 border-l border-white/10 pl-6">
+                <div className="flex items-center gap-2 text-sm font-medium text-white">
+                  <AlertCircle className="h-4 w-4 text-amber-400" />
                   Estado del Sistema
                 </div>
                 <div className="mt-2 flex items-center gap-2">
                   <span className="relative flex h-3 w-3">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
+                    <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500" />
                   </span>
-                  <span className="text-xs text-epoch-primary/70">
+                  <span className="text-xs text-white/50">
                     Almacenamiento Conectado & Protegido
                   </span>
                 </div>
@@ -468,43 +472,47 @@ export default function SaaSDashboard() {
 
       {/* Estado del Sistema y Telemetría */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-        <Card className="admin-card border-l-4 border-l-epoch-primary">
+        <Card className="bg-white/5 border-white/10 border-l-4 border-l-[#C5A059]">
           <CardHeader className="pb-2">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <ShieldCheck className="h-5 w-5 text-epoch-primary" />
-                <CardTitle className="text-lg">Estado de Telemetría</CardTitle>
+                <ShieldCheck className="h-5 w-5 text-[#C5A059]" />
+                <CardTitle className="text-lg text-white">
+                  Estado de Telemetría
+                </CardTitle>
               </div>
               <div className="flex items-center gap-2">
                 <span
-                  className={`text-sm font-medium ${telemetryEnabled ? "text-green-600" : "text-red-500"}`}
+                  className={`text-sm font-medium ${telemetryEnabled ? "text-emerald-400" : "text-red-400"}`}
                 >
                   {telemetryEnabled ? "Activa" : "Inactiva"}
                 </span>
                 <Switch
                   checked={telemetryEnabled}
-                  onCheckedChange={handleToggleTelemetry}
                   disabled={updatingTelemetry}
+                  onCheckedChange={handleToggleTelemetry}
                 />
               </div>
             </div>
-            <p className="text-xs text-muted-foreground mt-1">
+            <p className="text-xs text-white/50 mt-1">
               Control global de recolección de métricas y tracking de eventos.
               Desactívelo para reducir carga en el servidor.
             </p>
           </CardHeader>
         </Card>
 
-        <Card className="admin-card border-l-4 border-l-green-500">
+        <Card className="bg-white/5 border-white/10 border-l-4 border-l-emerald-500">
           <CardHeader className="pb-2">
             <div className="flex items-center gap-2">
-              <Activity className="h-5 w-5 text-green-600" />
-              <CardTitle className="text-lg">Salud del Sistema</CardTitle>
+              <Activity className="h-5 w-5 text-emerald-400" />
+              <CardTitle className="text-lg text-white">
+                Salud del Sistema
+              </CardTitle>
             </div>
             <div className="flex items-center gap-2 mt-2">
               <div className="flex items-center gap-1">
-                <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse"></div>
-                <span className="text-sm font-medium text-green-600">
+                <div className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+                <span className="text-sm font-medium text-emerald-400">
                   Sistemas operacionales
                 </span>
               </div>
@@ -514,10 +522,10 @@ export default function SaaSDashboard() {
       </div>
 
       {/* Navegación rápida a secciones de gestión */}
-      <Card className="admin-card">
+      <Card className="bg-white/5 border-white/10">
         <CardHeader>
-          <CardTitle>Gestión del Sistema</CardTitle>
-          <p className="text-sm text-muted-foreground mt-2">
+          <CardTitle className="text-white">Gestión del Sistema</CardTitle>
+          <p className="text-sm text-white/50 mt-2">
             Acceso rápido a las herramientas de administración SaaS
           </p>
         </CardHeader>
@@ -525,31 +533,31 @@ export default function SaaSDashboard() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {/* Analytics Dashboard */}
             <Card
-              className="admin-card cursor-pointer hover:shadow-lg transition-shadow border-l-4 border-l-epoch-primary"
+              className="bg-white/5 border-white/10 cursor-pointer hover:bg-white/10 transition-all border-l-4 border-l-[#C5A059]"
               onClick={() => router.push("/admin/saas-management/analytics")}
             >
               <CardContent className="pt-6">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="p-2 bg-epoch-primary/10 rounded-lg">
-                      <BarChart3 className="h-6 w-6 text-epoch-primary" />
+                    <div className="p-2 bg-[#C5A059]/20 rounded-lg">
+                      <BarChart3 className="h-6 w-6 text-[#C5A059]" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-lg">
+                      <h3 className="font-semibold text-lg text-white">
                         Analytics Dashboard
                       </h3>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-sm text-white/50">
                         Telemetría y métricas de uso del sistema
                       </p>
                     </div>
                   </div>
-                  <ArrowRight className="h-5 w-5 text-muted-foreground" />
+                  <ArrowRight className="h-5 w-5 text-white/50" />
                 </div>
               </CardContent>
             </Card>
             {/* Organizaciones */}
             <Card
-              className="admin-card cursor-pointer hover:shadow-lg transition-shadow border-l-4 border-l-epoch-primary"
+              className="bg-white/5 border-white/10 cursor-pointer hover:bg-white/10 transition-all border-l-4 border-l-[#C5A059]"
               onClick={() =>
                 router.push("/admin/saas-management/organizations")
               }
@@ -557,47 +565,51 @@ export default function SaaSDashboard() {
               <CardContent className="pt-6">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="p-2 bg-epoch-primary/10 rounded-lg">
-                      <Building2 className="h-6 w-6 text-epoch-primary" />
+                    <div className="p-2 bg-[#C5A059]/20 rounded-lg">
+                      <Building2 className="h-6 w-6 text-[#C5A059]" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-lg">Organizaciones</h3>
-                      <p className="text-sm text-muted-foreground">
+                      <h3 className="font-semibold text-lg text-white">
+                        Organizaciones
+                      </h3>
+                      <p className="text-sm text-white/50">
                         Gestionar todas las organizaciones
                       </p>
                     </div>
                   </div>
-                  <ArrowRight className="h-5 w-5 text-muted-foreground" />
+                  <ArrowRight className="h-5 w-5 text-white/50" />
                 </div>
               </CardContent>
             </Card>
 
             {/* Usuarios */}
             <Card
-              className="admin-card cursor-pointer hover:shadow-lg transition-shadow border-l-4 border-l-epoch-primary"
+              className="bg-white/5 border-white/10 cursor-pointer hover:bg-white/10 transition-all border-l-4 border-l-[#C5A059]"
               onClick={() => router.push("/admin/saas-management/users")}
             >
               <CardContent className="pt-6">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="p-2 bg-epoch-primary/10 rounded-lg">
-                      <Users className="h-6 w-6 text-epoch-primary" />
+                    <div className="p-2 bg-[#C5A059]/20 rounded-lg">
+                      <Users className="h-6 w-6 text-[#C5A059]" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-lg">Usuarios</h3>
-                      <p className="text-sm text-muted-foreground">
+                      <h3 className="font-semibold text-lg text-white">
+                        Usuarios
+                      </h3>
+                      <p className="text-sm text-white/50">
                         Administrar usuarios globales
                       </p>
                     </div>
                   </div>
-                  <ArrowRight className="h-5 w-5 text-muted-foreground" />
+                  <ArrowRight className="h-5 w-5 text-white/50" />
                 </div>
               </CardContent>
             </Card>
 
             {/* Suscripciones */}
             <Card
-              className="admin-card cursor-pointer hover:shadow-lg transition-shadow border-l-4 border-l-epoch-accent"
+              className="bg-white/5 border-white/10 cursor-pointer hover:bg-white/10 transition-all border-l-4 border-l-[#C5A059]"
               onClick={() =>
                 router.push("/admin/saas-management/subscriptions")
               }
@@ -605,72 +617,76 @@ export default function SaaSDashboard() {
               <CardContent className="pt-6">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="p-2 bg-epoch-accent/10 rounded-lg">
-                      <CreditCard className="h-6 w-6 text-epoch-accent" />
+                    <div className="p-2 bg-[#C5A059]/20 rounded-lg">
+                      <CreditCard className="h-6 w-6 text-[#C5A059]" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-lg">Suscripciones</h3>
-                      <p className="text-sm text-muted-foreground">
+                      <h3 className="font-semibold text-lg text-white">
+                        Suscripciones
+                      </h3>
+                      <p className="text-sm text-white/50">
                         Gestionar suscripciones activas
                       </p>
                     </div>
                   </div>
-                  <ArrowRight className="h-5 w-5 text-muted-foreground" />
+                  <ArrowRight className="h-5 w-5 text-white/50" />
                 </div>
               </CardContent>
             </Card>
 
             {/* Tiers */}
             <Card
-              className="admin-card cursor-pointer hover:shadow-lg transition-shadow border-l-4 border-l-epoch-accent"
+              className="bg-white/5 border-white/10 cursor-pointer hover:bg-white/10 transition-all border-l-4 border-l-[#C5A059]"
               onClick={() => router.push("/admin/saas-management/tiers")}
             >
               <CardContent className="pt-6">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="p-2 bg-epoch-accent/10 rounded-lg">
-                      <Settings className="h-6 w-6 text-epoch-accent" />
+                    <div className="p-2 bg-[#C5A059]/20 rounded-lg">
+                      <Settings className="h-6 w-6 text-[#C5A059]" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-lg">Tiers</h3>
-                      <p className="text-sm text-muted-foreground">
+                      <h3 className="font-semibold text-lg text-white">
+                        Tiers
+                      </h3>
+                      <p className="text-sm text-white/50">
                         Configurar planes de suscripción
                       </p>
                     </div>
                   </div>
-                  <ArrowRight className="h-5 w-5 text-muted-foreground" />
+                  <ArrowRight className="h-5 w-5 text-white/50" />
                 </div>
               </CardContent>
             </Card>
 
             {/* Configuración SaaS */}
             <Card
-              className="admin-card cursor-pointer hover:shadow-lg transition-shadow border-l-4 border-l-epoch-accent"
+              className="bg-white/5 border-white/10 cursor-pointer hover:bg-white/10 transition-all border-l-4 border-l-[#C5A059]"
               onClick={() => router.push("/admin/saas-management/config")}
             >
               <CardContent className="pt-6">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="p-2 bg-epoch-accent/10 rounded-lg">
-                      <Settings className="h-6 w-6 text-epoch-accent" />
+                    <div className="p-2 bg-[#C5A059]/20 rounded-lg">
+                      <Settings className="h-6 w-6 text-[#C5A059]" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-lg">
+                      <h3 className="font-semibold text-lg text-white">
                         Configuración SaaS
                       </h3>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-sm text-white/50">
                         Período de prueba por defecto y parámetros
                       </p>
                     </div>
                   </div>
-                  <ArrowRight className="h-5 w-5 text-muted-foreground" />
+                  <ArrowRight className="h-5 w-5 text-white/50" />
                 </div>
               </CardContent>
             </Card>
 
             {/* Flujos de Nuevos Usuarios */}
             <Card
-              className="admin-card cursor-pointer hover:shadow-lg transition-shadow border-l-4 border-l-epoch-primary"
+              className="bg-white/5 border-white/10 cursor-pointer hover:bg-white/10 transition-all border-l-4 border-l-[#C5A059]"
               onClick={() =>
                 router.push("/admin/saas-management/new-users-flow")
               }
@@ -678,140 +694,144 @@ export default function SaaSDashboard() {
               <CardContent className="pt-6">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="p-2 bg-epoch-primary/10 rounded-lg">
-                      <Users className="h-6 w-6 text-epoch-primary" />
+                    <div className="p-2 bg-[#C5A059]/20 rounded-lg">
+                      <Users className="h-6 w-6 text-[#C5A059]" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-lg">
+                      <h3 className="font-semibold text-lg text-white">
                         Flujos de Nuevos Usuarios
                       </h3>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-sm text-white/50">
                         Solicitudes demo, ópticas conocidas y aprobaciones
                       </p>
                     </div>
                   </div>
-                  <ArrowRight className="h-5 w-5 text-muted-foreground" />
+                  <ArrowRight className="h-5 w-5 text-white/50" />
                 </div>
               </CardContent>
             </Card>
 
             {/* Soporte */}
             <Card
-              className="admin-card cursor-pointer hover:shadow-lg transition-shadow border-l-4 border-l-epoch-accent"
+              className="bg-white/5 border-white/10 cursor-pointer hover:bg-white/10 transition-all border-l-4 border-l-[#C5A059]"
               onClick={() => router.push("/admin/saas-management/support")}
             >
               <CardContent className="pt-6">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="p-2 bg-epoch-accent/10 rounded-lg">
-                      <HelpCircle className="h-6 w-6 text-epoch-accent" />
+                    <div className="p-2 bg-[#C5A059]/20 rounded-lg">
+                      <HelpCircle className="h-6 w-6 text-[#C5A059]" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-lg">Soporte</h3>
-                      <p className="text-sm text-muted-foreground">
+                      <h3 className="font-semibold text-white">Soporte</h3>
+                      <p className="text-sm text-white/50">
                         Búsqueda rápida y resolución
                       </p>
                     </div>
                   </div>
-                  <ArrowRight className="h-5 w-5 text-muted-foreground" />
+                  <ArrowRight className="h-5 w-5 text-white/50" />
                 </div>
               </CardContent>
             </Card>
 
             {/* Gestión de Emails */}
             <Card
-              className="admin-card cursor-pointer hover:shadow-lg transition-shadow border-l-4 border-l-epoch-accent"
+              className="bg-white/5 border-white/10 cursor-pointer hover:bg-white/10 transition-all border-l-4 border-l-[#C5A059]"
               onClick={() => router.push("/admin/saas-management/emails")}
             >
               <CardContent className="pt-6">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="p-2 bg-epoch-accent/10 rounded-lg">
-                      <Mail className="h-6 w-6 text-epoch-accent" />
+                    <div className="p-2 bg-[#C5A059]/20 rounded-lg">
+                      <Mail className="h-6 w-6 text-[#C5A059]" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-lg">Emails</h3>
-                      <p className="text-sm text-muted-foreground">
+                      <h3 className="font-semibold text-lg text-white">
+                        Emails
+                      </h3>
+                      <p className="text-sm text-white/50">
                         Configurar plantillas y comunicaciones SaaS
                       </p>
                     </div>
                   </div>
-                  <ArrowRight className="h-5 w-5 text-muted-foreground" />
+                  <ArrowRight className="h-5 w-5 text-white/50" />
                 </div>
               </CardContent>
             </Card>
 
             {/* WhatsApp */}
             <Card
-              className="admin-card cursor-pointer hover:shadow-lg transition-shadow border-l-4 border-l-epoch-accent"
+              className="bg-white/5 border-white/10 cursor-pointer hover:bg-white/10 transition-all border-l-4 border-l-[#C5A059]"
               onClick={() => router.push("/admin/saas-management/whatsapp")}
             >
               <CardContent className="pt-6">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="p-2 bg-epoch-accent/10 rounded-lg">
-                      <MessageCircle className="h-6 w-6 text-epoch-accent" />
+                    <div className="p-2 bg-[#C5A059]/20 rounded-lg">
+                      <MessageCircle className="h-6 w-6 text-[#C5A059]" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-lg">WhatsApp</h3>
-                      <p className="text-sm text-muted-foreground">
+                      <h3 className="font-semibold text-lg text-white">
+                        WhatsApp
+                      </h3>
+                      <p className="text-sm text-white/50">
                         Configurar números y ver conversaciones del canal
                         WhatsApp
                       </p>
                     </div>
                   </div>
-                  <ArrowRight className="h-5 w-5 text-muted-foreground" />
+                  <ArrowRight className="h-5 w-5 text-white/50" />
                 </div>
               </CardContent>
             </Card>
 
             {/* Pasarelas de Pago */}
             <Card
-              className="admin-card cursor-pointer hover:shadow-lg transition-shadow border-l-4 border-l-epoch-accent"
+              className="bg-white/5 border-white/10 cursor-pointer hover:bg-white/10 transition-all border-l-4 border-l-[#C5A059]"
               onClick={() => router.push("/admin/saas-management/payments")}
             >
               <CardContent className="pt-6">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="p-2 bg-epoch-accent/10 rounded-lg">
-                      <Zap className="h-6 w-6 text-epoch-accent" />
+                    <div className="p-2 bg-[#C5A059]/20 rounded-lg">
+                      <Zap className="h-6 w-6 text-[#C5A059]" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-lg">
+                      <h3 className="font-semibold text-lg text-white">
                         Pasarelas de Pago
                       </h3>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-sm text-white/50">
                         Habilitar/deshabilitar métodos de pago
                       </p>
                     </div>
                   </div>
-                  <ArrowRight className="h-5 w-5 text-muted-foreground" />
+                  <ArrowRight className="h-5 w-5 text-white/50" />
                 </div>
               </CardContent>
             </Card>
 
             {/* Resetear Óptica Demo - Herramientas de desarrollo */}
             <Card
-              className="admin-card cursor-pointer hover:shadow-lg transition-shadow border-l-4 border-l-amber-500 border-amber-100 dark:border-amber-900/50"
+              className="bg-white/5 border-white/10 cursor-pointer hover:bg-white/10 transition-all border-l-4 border-l-amber-500"
               onClick={() => setShowResetDemoDialog(true)}
             >
               <CardContent className="pt-6">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="p-2 bg-amber-100 dark:bg-amber-900 rounded-lg">
-                      <RotateCcw className="h-6 w-6 text-amber-600 dark:text-amber-400" />
+                    <div className="p-2 bg-amber-500/20 rounded-lg">
+                      <RotateCcw className="h-6 w-6 text-amber-400" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-lg">
+                      <h3 className="font-semibold text-lg text-white">
                         Resetear Óptica Demo
                       </h3>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-sm text-white/50">
                         Restaurar la base de datos de la Óptica Demo al estado
                         inicial (solo dev)
                       </p>
                     </div>
                   </div>
-                  <ArrowRight className="h-5 w-5 text-muted-foreground" />
+                  <ArrowRight className="h-5 w-5 text-white/50" />
                 </div>
               </CardContent>
             </Card>
@@ -833,16 +853,16 @@ export default function SaaSDashboard() {
           </DialogHeader>
           <DialogFooter>
             <Button
+              disabled={resettingDemo}
               variant="outline"
               onClick={() => setShowResetDemoDialog(false)}
-              disabled={resettingDemo}
             >
               Cancelar
             </Button>
             <Button
+              disabled={resettingDemo}
               variant="destructive"
               onClick={handleResetDemo}
-              disabled={resettingDemo}
             >
               {resettingDemo ? (
                 <>

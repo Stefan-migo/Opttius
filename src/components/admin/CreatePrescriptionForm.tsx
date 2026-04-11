@@ -1,11 +1,14 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
+import { Eye, FileText, Loader2, Plus } from "lucide-react";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+
 import { useSystemConfig } from "@/app/admin/system/hooks/useSystemConfig";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -13,16 +16,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
-import { Eye, Loader2, Plus, Calendar, User, FileText } from "lucide-react";
-import { toast } from "sonner";
+import { Textarea } from "@/components/ui/textarea";
 
 interface CreatePrescriptionFormProps {
   customerId: string;
   onSuccess: () => void;
   onCancel: () => void;
-  initialData?: any;
+  initialData?: unknown;
 }
 
 /** Add months to a date string (YYYY-MM-DD), returns YYYY-MM-DD */
@@ -214,7 +215,7 @@ export default function CreatePrescriptionForm({
           : "Receta creada exitosamente",
       );
       onSuccess();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error saving prescription:", error);
       toast.error(error.message || "Error al guardar receta");
     } finally {
@@ -224,8 +225,8 @@ export default function CreatePrescriptionForm({
 
   return (
     <form
-      onSubmit={handleSubmit}
       className="space-y-6 min-w-0 w-full overflow-hidden"
+      onSubmit={handleSubmit}
     >
       {/* Prescription Header */}
       <Card className="overflow-hidden">
@@ -239,15 +240,16 @@ export default function CreatePrescriptionForm({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 min-w-0">
             <div className="min-w-0 space-y-2">
               <Label
-                htmlFor="prescription_date"
                 className="block text-sm font-medium"
+                htmlFor="prescription_date"
               >
                 Fecha de Receta *
               </Label>
               <Input
+                required
+                className="w-full"
                 id="prescription_date"
                 type="date"
-                className="w-full"
                 value={formData.prescription_date}
                 onChange={(e) =>
                   setFormData((prev) => ({
@@ -255,19 +257,18 @@ export default function CreatePrescriptionForm({
                     prescription_date: e.target.value,
                   }))
                 }
-                required
               />
             </div>
             <div className="min-w-0 space-y-2">
               <Label
-                htmlFor="expiration_date"
                 className="block text-sm font-medium"
+                htmlFor="expiration_date"
               >
                 Fecha de Vencimiento
               </Label>
               <Input
-                id="expiration_date"
                 className="w-full"
+                id="expiration_date"
                 type="date"
                 value={formData.expiration_date}
                 onChange={(e) =>
@@ -280,14 +281,15 @@ export default function CreatePrescriptionForm({
             </div>
             <div className="min-w-0 space-y-2">
               <Label
-                htmlFor="prescription_number"
                 className="block text-sm font-medium"
+                htmlFor="prescription_number"
               >
                 Número de Receta
               </Label>
               <Input
-                id="prescription_number"
                 className="w-full"
+                id="prescription_number"
+                placeholder="Número único de receta"
                 value={formData.prescription_number}
                 onChange={(e) =>
                   setFormData((prev) => ({
@@ -295,16 +297,16 @@ export default function CreatePrescriptionForm({
                     prescription_number: e.target.value,
                   }))
                 }
-                placeholder="Número único de receta"
               />
             </div>
             <div className="min-w-0 space-y-2">
-              <Label htmlFor="issued_by" className="block text-sm font-medium">
+              <Label className="block text-sm font-medium" htmlFor="issued_by">
                 Emitida por
               </Label>
               <Input
-                id="issued_by"
                 className="w-full"
+                id="issued_by"
+                placeholder="Nombre del oftalmólogo/optómetra"
                 value={formData.issued_by}
                 onChange={(e) =>
                   setFormData((prev) => ({
@@ -312,19 +314,19 @@ export default function CreatePrescriptionForm({
                     issued_by: e.target.value,
                   }))
                 }
-                placeholder="Nombre del oftalmólogo/optómetra"
               />
             </div>
             <div className="min-w-0 space-y-2">
               <Label
-                htmlFor="issued_by_license"
                 className="block text-sm font-medium"
+                htmlFor="issued_by_license"
               >
                 Licencia Profesional
               </Label>
               <Input
-                id="issued_by_license"
                 className="w-full"
+                id="issued_by_license"
+                placeholder="Número de licencia"
                 value={formData.issued_by_license}
                 onChange={(e) =>
                   setFormData((prev) => ({
@@ -332,13 +334,12 @@ export default function CreatePrescriptionForm({
                     issued_by_license: e.target.value,
                   }))
                 }
-                placeholder="Número de licencia"
               />
             </div>
             <div className="min-w-0 space-y-2">
               <Label
-                htmlFor="prescription_type"
                 className="block text-sm font-medium"
+                htmlFor="prescription_type"
               >
                 Tipo de Receta
               </Label>
@@ -349,8 +350,8 @@ export default function CreatePrescriptionForm({
                 }
               >
                 <SelectTrigger
-                  id="prescription_type"
                   className="w-full min-w-0"
+                  id="prescription_type"
                 >
                   <SelectValue placeholder="Selecciona tipo" />
                 </SelectTrigger>
@@ -378,13 +379,15 @@ export default function CreatePrescriptionForm({
         <CardContent className="space-y-4 min-w-0">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 min-w-0">
             <div className="space-y-2">
-              <Label htmlFor="od_sphere" className="block text-sm font-medium">
+              <Label className="block text-sm font-medium" htmlFor="od_sphere">
                 Esfera (SPH)
               </Label>
               <Input
+                className="w-full"
                 id="od_sphere"
-                type="number"
+                placeholder="Ej: -2.50"
                 step="0.25"
+                type="number"
                 value={formData.od_sphere}
                 onChange={(e) =>
                   setFormData((prev) => ({
@@ -392,21 +395,21 @@ export default function CreatePrescriptionForm({
                     od_sphere: e.target.value,
                   }))
                 }
-                placeholder="Ej: -2.50"
-                className="w-full"
               />
             </div>
             <div className="space-y-2">
               <Label
-                htmlFor="od_cylinder"
                 className="block text-sm font-medium"
+                htmlFor="od_cylinder"
               >
                 Cilindro (CYL)
               </Label>
               <Input
+                className="w-full"
                 id="od_cylinder"
-                type="number"
+                placeholder="Ej: -1.00"
                 step="0.25"
+                type="number"
                 value={formData.od_cylinder}
                 onChange={(e) =>
                   setFormData((prev) => ({
@@ -414,69 +417,67 @@ export default function CreatePrescriptionForm({
                     od_cylinder: e.target.value,
                   }))
                 }
-                placeholder="Ej: -1.00"
-                className="w-full"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="od_axis" className="block text-sm font-medium">
+              <Label className="block text-sm font-medium" htmlFor="od_axis">
                 Eje (AXIS)
               </Label>
               <Input
+                className="w-full"
                 id="od_axis"
-                type="number"
-                min="0"
                 max="180"
+                min="0"
+                placeholder="0-180"
+                type="number"
                 value={formData.od_axis}
                 onChange={(e) =>
                   setFormData((prev) => ({ ...prev, od_axis: e.target.value }))
                 }
-                placeholder="0-180"
-                className="w-full"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="od_add" className="block text-sm font-medium">
+              <Label className="block text-sm font-medium" htmlFor="od_add">
                 Adición (ADD)
               </Label>
               <Input
+                className="w-full"
                 id="od_add"
-                type="number"
+                placeholder="Para lectura"
                 step="0.25"
+                type="number"
                 value={formData.od_add}
                 onChange={(e) =>
                   setFormData((prev) => ({ ...prev, od_add: e.target.value }))
                 }
-                placeholder="Para lectura"
-                className="w-full"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="prism_od" className="block text-sm font-medium">
+              <Label className="block text-sm font-medium" htmlFor="prism_od">
                 Prisma OD
               </Label>
               <Input
+                className="w-full"
                 id="prism_od"
+                placeholder="Ej: 2.0 Base Up"
                 value={formData.prism_od}
                 onChange={(e) =>
                   setFormData((prev) => ({ ...prev, prism_od: e.target.value }))
                 }
-                placeholder="Ej: 2.0 Base Up"
-                className="w-full"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="tint_od" className="block text-sm font-medium">
+              <Label className="block text-sm font-medium" htmlFor="tint_od">
                 Tinte OD
               </Label>
               <Input
+                className="w-full"
                 id="tint_od"
+                placeholder="Ej: Gris 20%"
                 value={formData.tint_od}
                 onChange={(e) =>
                   setFormData((prev) => ({ ...prev, tint_od: e.target.value }))
                 }
-                placeholder="Ej: Gris 20%"
-                className="w-full"
               />
             </div>
           </div>
@@ -496,13 +497,15 @@ export default function CreatePrescriptionForm({
         <CardContent className="space-y-4 min-w-0">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 min-w-0">
             <div className="space-y-2">
-              <Label htmlFor="os_sphere" className="block text-sm font-medium">
+              <Label className="block text-sm font-medium" htmlFor="os_sphere">
                 Esfera (SPH)
               </Label>
               <Input
+                className="w-full"
                 id="os_sphere"
-                type="number"
+                placeholder="Ej: -2.50"
                 step="0.25"
+                type="number"
                 value={formData.os_sphere}
                 onChange={(e) =>
                   setFormData((prev) => ({
@@ -510,21 +513,21 @@ export default function CreatePrescriptionForm({
                     os_sphere: e.target.value,
                   }))
                 }
-                placeholder="Ej: -2.50"
-                className="w-full"
               />
             </div>
             <div className="space-y-2">
               <Label
-                htmlFor="os_cylinder"
                 className="block text-sm font-medium"
+                htmlFor="os_cylinder"
               >
                 Cilindro (CYL)
               </Label>
               <Input
+                className="w-full"
                 id="os_cylinder"
-                type="number"
+                placeholder="Ej: -1.00"
                 step="0.25"
+                type="number"
                 value={formData.os_cylinder}
                 onChange={(e) =>
                   setFormData((prev) => ({
@@ -532,69 +535,67 @@ export default function CreatePrescriptionForm({
                     os_cylinder: e.target.value,
                   }))
                 }
-                placeholder="Ej: -1.00"
-                className="w-full"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="os_axis" className="block text-sm font-medium">
+              <Label className="block text-sm font-medium" htmlFor="os_axis">
                 Eje (AXIS)
               </Label>
               <Input
+                className="w-full"
                 id="os_axis"
-                type="number"
-                min="0"
                 max="180"
+                min="0"
+                placeholder="0-180"
+                type="number"
                 value={formData.os_axis}
                 onChange={(e) =>
                   setFormData((prev) => ({ ...prev, os_axis: e.target.value }))
                 }
-                placeholder="0-180"
-                className="w-full"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="os_add" className="block text-sm font-medium">
+              <Label className="block text-sm font-medium" htmlFor="os_add">
                 Adición (ADD)
               </Label>
               <Input
+                className="w-full"
                 id="os_add"
-                type="number"
+                placeholder="Para lectura"
                 step="0.25"
+                type="number"
                 value={formData.os_add}
                 onChange={(e) =>
                   setFormData((prev) => ({ ...prev, os_add: e.target.value }))
                 }
-                placeholder="Para lectura"
-                className="w-full"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="prism_os" className="block text-sm font-medium">
+              <Label className="block text-sm font-medium" htmlFor="prism_os">
                 Prisma OS
               </Label>
               <Input
+                className="w-full"
                 id="prism_os"
+                placeholder="Ej: 2.0 Base Up"
                 value={formData.prism_os}
                 onChange={(e) =>
                   setFormData((prev) => ({ ...prev, prism_os: e.target.value }))
                 }
-                placeholder="Ej: 2.0 Base Up"
-                className="w-full"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="tint_os" className="block text-sm font-medium">
+              <Label className="block text-sm font-medium" htmlFor="tint_os">
                 Tinte OS
               </Label>
               <Input
+                className="w-full"
                 id="tint_os"
+                placeholder="Ej: Gris 20%"
                 value={formData.tint_os}
                 onChange={(e) =>
                   setFormData((prev) => ({ ...prev, tint_os: e.target.value }))
                 }
-                placeholder="Ej: Gris 20%"
-                className="w-full"
               />
             </div>
           </div>
@@ -612,64 +613,66 @@ export default function CreatePrescriptionForm({
         <CardContent className="space-y-4 min-w-0">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 min-w-0">
             <div className="space-y-2">
-              <Label htmlFor="pd" className="block text-sm font-medium">
+              <Label className="block text-sm font-medium" htmlFor="pd">
                 PD Lejos (Distancia)
               </Label>
               <Input
+                className="w-full"
                 id="pd"
-                type="number"
+                placeholder="mm (binocular)"
                 step="0.1"
+                type="number"
                 value={formData.pd}
                 onChange={(e) =>
                   setFormData((prev) => ({ ...prev, pd: e.target.value }))
                 }
-                placeholder="mm (binocular)"
-                className="w-full"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="near_pd" className="block text-sm font-medium">
+              <Label className="block text-sm font-medium" htmlFor="near_pd">
                 PD Cerca (Lectura)
               </Label>
               <Input
+                className="w-full"
                 id="near_pd"
-                type="number"
+                placeholder="mm (binocular)"
                 step="0.1"
+                type="number"
                 value={formData.near_pd}
                 onChange={(e) =>
                   setFormData((prev) => ({ ...prev, near_pd: e.target.value }))
                 }
-                placeholder="mm (binocular)"
-                className="w-full"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="frame_pd" className="block text-sm font-medium">
+              <Label className="block text-sm font-medium" htmlFor="frame_pd">
                 PD del Marco
               </Label>
               <Input
+                className="w-full"
                 id="frame_pd"
-                type="number"
+                placeholder="Distancia entre lentes (mm)"
                 step="0.1"
+                type="number"
                 value={formData.frame_pd}
                 onChange={(e) =>
                   setFormData((prev) => ({ ...prev, frame_pd: e.target.value }))
                 }
-                placeholder="Distancia entre lentes (mm)"
-                className="w-full"
               />
             </div>
             <div className="space-y-2">
               <Label
-                htmlFor="height_segmentation"
                 className="block text-sm font-medium"
+                htmlFor="height_segmentation"
               >
                 Altura de Segmentación
               </Label>
               <Input
+                className="w-full"
                 id="height_segmentation"
-                type="number"
+                placeholder="Para bifocal/progresivo (mm)"
                 step="0.1"
+                type="number"
                 value={formData.height_segmentation}
                 onChange={(e) =>
                   setFormData((prev) => ({
@@ -677,8 +680,6 @@ export default function CreatePrescriptionForm({
                     height_segmentation: e.target.value,
                   }))
                 }
-                placeholder="Para bifocal/progresivo (mm)"
-                className="w-full"
               />
             </div>
           </div>
@@ -694,11 +695,13 @@ export default function CreatePrescriptionForm({
         </CardHeader>
         <CardContent className="space-y-4 min-w-0">
           <div className="space-y-2">
-            <Label htmlFor="observations" className="block text-sm font-medium">
+            <Label className="block text-sm font-medium" htmlFor="observations">
               Observaciones Clínicas
             </Label>
             <Textarea
               id="observations"
+              placeholder="Observaciones del examen..."
+              rows={3}
               value={formData.observations}
               onChange={(e) =>
                 setFormData((prev) => ({
@@ -706,19 +709,19 @@ export default function CreatePrescriptionForm({
                   observations: e.target.value,
                 }))
               }
-              placeholder="Observaciones del examen..."
-              rows={3}
             />
           </div>
           <div className="space-y-2">
             <Label
-              htmlFor="recommendations"
               className="block text-sm font-medium"
+              htmlFor="recommendations"
             >
               Recomendaciones
             </Label>
             <Textarea
               id="recommendations"
+              placeholder="Recomendaciones para el paciente..."
+              rows={3}
               value={formData.recommendations}
               onChange={(e) =>
                 setFormData((prev) => ({
@@ -726,19 +729,17 @@ export default function CreatePrescriptionForm({
                   recommendations: e.target.value,
                 }))
               }
-              placeholder="Recomendaciones para el paciente..."
-              rows={3}
             />
           </div>
           <div>
             <Label>Notas Generales</Label>
             <Textarea
+              placeholder="Notas adicionales..."
+              rows={3}
               value={formData.notes}
               onChange={(e) =>
                 setFormData((prev) => ({ ...prev, notes: e.target.value }))
               }
-              placeholder="Notas adicionales..."
-              rows={3}
             />
           </div>
         </CardContent>
@@ -786,7 +787,7 @@ export default function CreatePrescriptionForm({
         <Button type="button" variant="outline" onClick={onCancel}>
           Cancelar
         </Button>
-        <Button type="submit" disabled={saving}>
+        <Button disabled={saving} type="submit">
           {saving ? (
             <>
               <Loader2 className="h-4 w-4 mr-2 animate-spin" />

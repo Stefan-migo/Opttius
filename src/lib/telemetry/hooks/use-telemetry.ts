@@ -1,4 +1,5 @@
-import { useEffect, useCallback, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
+
 import { telemetryCollector } from "../collector/browser-collector";
 
 /**
@@ -25,7 +26,7 @@ export function usePageTracking() {
  */
 export function useFeatureTracking(featureName: string) {
   const trackInteraction = useCallback(
-    (action: string, details?: any) => {
+    (action: string, details?: unknown) => {
       telemetryCollector.trackFeatureUsage(featureName, action, details);
     },
     [featureName],
@@ -33,7 +34,7 @@ export function useFeatureTracking(featureName: string) {
 
   // Also provide a direct feature usage tracker
   const trackFeatureUsage = useCallback(
-    (action: string, details?: any) => {
+    (action: string, details?: unknown) => {
       telemetryCollector.trackFeatureUsage(featureName, action, details);
     },
     [featureName],
@@ -243,7 +244,7 @@ export function useNavigationTracking() {
  */
 export function useErrorTracking(componentName: string) {
   const trackError = useCallback(
-    (error: Error, errorInfo?: any) => {
+    (error: Error, errorInfo?: unknown) => {
       telemetryCollector.trackUserInteraction({
         element: componentName,
         action: "error_caught",

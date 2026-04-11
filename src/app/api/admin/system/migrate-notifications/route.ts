@@ -1,10 +1,10 @@
-import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/utils/supabase/server";
-import { createServiceRoleClient } from "@/utils/supabase/server";
 import fs from "fs";
+import { NextRequest, NextResponse } from "next/server";
 import path from "path";
+
 import { appLogger as logger } from "@/lib/logger";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
+import { createClient } from "@/utils/supabase/server";
 
 export const dynamic = "force-dynamic";
 export async function POST(request: NextRequest) {
@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
         "5. Click Run",
       ],
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error("Error in migration endpoint:", { error });
     return NextResponse.json(
       {

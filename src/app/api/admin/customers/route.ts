@@ -1,39 +1,39 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClientFromRequest } from "@/utils/supabase/server";
-import { NotificationService } from "@/lib/notifications/notification-service";
+import { z } from "zod";
+
 import {
-  getBranchContext,
   addBranchFilter,
+  getBranchContext,
   getFieldOperationFromRequest,
 } from "@/lib/api/branch-middleware";
-import { appLogger as logger } from "@/lib/logger";
-import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
-import { withRateLimit, rateLimitConfigs } from "@/lib/api/middleware";
 import {
-  RateLimitError,
-  ValidationError,
   AuthenticationError,
   AuthorizationError,
   NotFoundError,
+  RateLimitError,
+  ValidationError,
 } from "@/lib/api/errors";
+import { rateLimitConfigs, withRateLimit } from "@/lib/api/middleware";
 import {
-  createPaginatedResponse,
-  createApiSuccessResponse,
   createApiErrorResponse,
+  createApiSuccessResponse,
+  createPaginatedResponse,
   extractPaginationParams,
 } from "@/lib/api/response";
-import { z } from "zod";
 import {
-  createCustomerSchema,
-  searchCustomerSchema,
-  paginationSchema,
-} from "@/lib/api/validation/zod-schemas";
-import {
-  parseAndValidateBody,
   parseAndValidateQuery,
   validateBody,
   validationErrorResponse,
 } from "@/lib/api/validation/zod-helpers";
+import {
+  createCustomerSchema,
+  paginationSchema,
+  searchCustomerSchema,
+} from "@/lib/api/validation/zod-schemas";
+import { appLogger as logger } from "@/lib/logger";
+import { NotificationService } from "@/lib/notifications/notification-service";
+import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
+import { createClientFromRequest } from "@/utils/supabase/server";
 
 export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
@@ -135,7 +135,7 @@ export async function GET(request: NextRequest) {
     const userOrganizationId = adminUser?.organization_id;
 
     // Build branch filter function
-    const applyBranchFilter = (query: any) => {
+    const applyBranchFilter = (query: unknown) => {
       // For customers, we should filter by organization_id first
       // Then optionally filter by branch_id if a specific branch is selected
       if (userOrganizationId) {
@@ -182,7 +182,7 @@ export async function GET(request: NextRequest) {
         .from("agreement_customers")
         .select("customer_id")
         .eq("agreement_id", agreementId);
-      agreementCustomerIds = (acRows || []).map((r: any) => r.customer_id);
+      agreementCustomerIds = (acRows || []).map((r: unknown) => r.customer_id);
       if (agreementCustomerIds.length === 0) {
         // No customers for this agreement - return empty result
         return createPaginatedResponse(
@@ -260,9 +260,9 @@ export async function GET(request: NextRequest) {
     });
 
     // Fetch order aggregates for customers on this page (customer_id or email for legacy)
-    const customerIds = (customers || []).map((c: any) => c.id);
+    const customerIds = (customers || []).map((c: unknown) => c.id);
 
-    let orderStatsMap: Record<
+    const orderStatsMap: Record<
       string,
       { totalSpent: number; orderCount: number; lastOrderDate: string | null }
     > = {};
@@ -280,7 +280,9 @@ export async function GET(request: NextRequest) {
         .in("customer_id", customerIds);
 
       const customerEmailsList = [
-        ...new Set((customers || []).map((c: any) => c.email).filter(Boolean)),
+        ...new Set(
+          (customers || []).map((c: unknown) => c.email).filter(Boolean),
+        ),
       ];
       const { data: ordersByEmail } =
         customerEmailsList.length > 0
@@ -293,23 +295,23 @@ export async function GET(request: NextRequest) {
 
       for (const c of customers || []) {
         const byId = (ordersById || []).filter(
-          (o: any) => o.customer_id === c.id,
+          (o: unknown) => o.customer_id === c.id,
         );
         const byEmail = (ordersByEmail || []).filter(
-          (o: any) =>
+          (o: unknown) =>
             o.email && o.email.toLowerCase() === (c.email || "").toLowerCase(),
         );
         const allOrders = [...byId, ...byEmail];
 
         const totalSpent = allOrders.reduce(
-          (s: number, o: any) => s + (o.total_amount || 0),
+          (s: number, o: unknown) => s + (o.total_amount || 0),
           0,
         );
         const orderCount = allOrders.length;
         const lastOrder =
           allOrders.length > 0
             ? [...allOrders].sort(
-                (a: any, b: any) =>
+                (a: unknown, b: unknown) =>
                   new Date(b.created_at).getTime() -
                   new Date(a.created_at).getTime(),
               )[0]
@@ -330,13 +332,13 @@ export async function GET(request: NextRequest) {
         .from("agreement_customers")
         .select("customer_id")
         .in("customer_id", customerIds);
-      (acRows || []).forEach((r: any) =>
+      (acRows || []).forEach((r: unknown) =>
         convenioCustomerIds.add(r.customer_id),
       );
     }
 
     // Calculate customer analytics
-    const customerStats = (customers || []).map((customer: any) => {
+    const customerStats = (customers || []).map((customer: unknown) => {
       const stats = orderStatsMap[customer.id] || {
         totalSpent: 0,
         orderCount: 0,
@@ -386,7 +388,7 @@ export async function GET(request: NextRequest) {
 // Handle both analytics and customer creation
 export async function POST(request: NextRequest) {
   try {
-    return await (withRateLimit(rateLimitConfigs.modification) as any)(
+    return await (withRateLimit(rateLimitConfigs.modification) as unknown)(
       request,
       async () => {
         try {
@@ -440,7 +442,7 @@ export async function POST(request: NextRequest) {
           const userOrganizationId = adminUser.organization_id;
 
           // Get request body to determine action
-          let body: any;
+          let body: unknown;
           try {
             body = await request.json();
             logger.debug("Request body parsed successfully", {
@@ -810,7 +812,7 @@ export async function POST(request: NextRequest) {
             );
 
             // Build branch filter function
-            const applyBranchFilter = (query: any) => {
+            const applyBranchFilter = (query: unknown) => {
               return addBranchFilter(
                 query,
                 branchContext.branchId,

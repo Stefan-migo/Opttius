@@ -7,11 +7,12 @@
  * @module tests/security/phase2-security.test
  */
 
-import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import { SecurityMonitor, getSecurityMonitor } from "@/lib/security/monitoring";
-import { SecurityAlerting, getSecurityAlerting } from "@/lib/security/alerting";
-import { SecurityEvent, SecurityAlert } from "@/lib/security/events";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
 import { appLogger } from "@/lib/logger";
+import { getSecurityAlerting, SecurityAlerting } from "@/lib/security/alerting";
+import { SecurityAlert, SecurityEvent } from "@/lib/security/events";
+import { getSecurityMonitor, SecurityMonitor } from "@/lib/security/monitoring";
 
 // Mock logger
 vi.mock("@/lib/logger", () => ({
@@ -71,7 +72,7 @@ describe("Phase 2 Security Implementation Tests", () => {
       };
 
       monitor.logAuthEvent(
-        authEvent.eventType as any,
+        authEvent.eventType as unknown,
         {
           username: authEvent.details.method,
           sessionId: authEvent.details.sessionId,
@@ -101,7 +102,7 @@ describe("Phase 2 Security Implementation Tests", () => {
         },
         {
           ipAddress: "192.168.1.100",
-        }
+        },
       );
 
       expect(appLogger.warn).toHaveBeenCalledWith(
@@ -130,7 +131,7 @@ describe("Phase 2 Security Implementation Tests", () => {
       };
 
       monitor.logPaymentEvent(
-        paymentEvent.eventType as any,
+        paymentEvent.eventType as unknown,
         {
           amount: paymentEvent.details.amount,
           currency: paymentEvent.details.currency,
@@ -168,7 +169,7 @@ describe("Phase 2 Security Implementation Tests", () => {
       };
 
       monitor.logDataEvent(
-        dataEvent.eventType as any,
+        dataEvent.eventType as unknown,
         {
           resource: dataEvent.details.resourceId,
           dataSize: dataEvent.details.recordCount,
@@ -200,14 +201,14 @@ describe("Phase 2 Security Implementation Tests", () => {
         const securityEvent: SecurityEvent = {
           id: `test-${event.type}`,
           timestamp: new Date().toISOString(),
-          eventType: event.type as any,
-          severity: event.expectedSeverity as any,
+          eventType: event.type as unknown,
+          severity: event.expectedSeverity as unknown,
           source: "test",
           details: {},
         };
 
         monitor.logEvent(
-          securityEvent.eventType as any,
+          securityEvent.eventType as unknown,
           securityEvent.details,
           {
             userId: securityEvent.userId,
@@ -471,14 +472,10 @@ describe("Phase 2 Security Implementation Tests", () => {
 
       // Log failed login events
       failedLogins.forEach((event) =>
-        monitor.logAuthEvent(
-          "auth.login_failure",
-          event.details as any,
-          {
-            userId: event.userId,
-            ipAddress: event.ipAddress,
-          },
-        ),
+        monitor.logAuthEvent("auth.login_failure", event.details as unknown, {
+          userId: event.userId,
+          ipAddress: event.ipAddress,
+        }),
       );
 
       // Send alert for multiple failed attempts
@@ -529,7 +526,7 @@ describe("Phase 2 Security Implementation Tests", () => {
       };
 
       monitor.logRateLimitEvent(
-        rateLimitEvent.eventType as any,
+        rateLimitEvent.eventType as unknown,
         {
           endpoint: rateLimitEvent.details.endpoint,
           requestCount: rateLimitEvent.details.actual,
@@ -600,7 +597,7 @@ describe("Phase 2 Security Implementation Tests", () => {
       paymentEvents.forEach((event) => {
         if (event.eventType === "payment.fraud_suspected") {
           monitor.logPaymentEvent(
-            event.eventType as any,
+            event.eventType as unknown,
             {
               amount: event.details.amount,
               currency: event.details.currency,
@@ -613,7 +610,7 @@ describe("Phase 2 Security Implementation Tests", () => {
             },
           );
         } else {
-          monitor.logEvent(event.eventType as any, event.details, {
+          monitor.logEvent(event.eventType as unknown, event.details, {
             userId: event.userId,
             ipAddress: event.ipAddress,
           });
@@ -624,8 +621,8 @@ describe("Phase 2 Security Implementation Tests", () => {
       await alerting.sendAlert(
         "Payment Security Alert",
         "Multiple suspicious payment activities detected",
-        "critical" as any,
-        paymentEvents as any,
+        "critical" as unknown,
+        paymentEvents as unknown,
         [
           "Freeze affected accounts",
           "Contact payment provider",
@@ -735,7 +732,7 @@ describe("Phase 2 Security Implementation Tests", () => {
       // Log all events
       const startTime = Date.now();
       highVolumeEvents.forEach((event) =>
-        monitor.logEvent(event.eventType as any, event.details, {
+        monitor.logEvent(event.eventType as unknown, event.details, {
           userId: event.userId,
           ipAddress: event.ipAddress,
         }),
@@ -757,7 +754,7 @@ describe("Phase 2 Security Implementation Tests", () => {
       const alerts = Array.from({ length: 100 }, (_, i) => ({
         title: `Bulk Alert ${i}`,
         description: `Test alert #${i}`,
-        severity: ["low", "medium", "high"][i % 3] as any,
+        severity: ["low", "medium", "high"][i % 3] as unknown,
       }));
 
       const startTime = Date.now();
@@ -794,7 +791,7 @@ describe("Phase 2 Security Implementation Tests", () => {
           details: { concurrent: true },
         };
 
-        monitor.logEvent(event.eventType as any, event.details, {
+        monitor.logEvent(event.eventType as unknown, event.details, {
           userId: event.userId,
           ipAddress: event.ipAddress,
         });

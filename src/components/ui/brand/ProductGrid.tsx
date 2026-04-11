@@ -1,10 +1,20 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import ProductCard from "./ProductCard";
+import {
+  ArrowUpDown,
+  Grid2X2,
+  Grid3X3,
+  Search,
+  SlidersHorizontal,
+  Star,
+  TrendingUp,
+  X,
+} from "lucide-react";
+import { useMemo, useState } from "react";
+
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
@@ -13,17 +23,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
-import {
-  Search,
-  SlidersHorizontal,
-  Grid3X3,
-  Grid2X2,
-  Filter,
-  X,
-  ArrowUpDown,
-  Star,
-  TrendingUp,
-} from "lucide-react";
+
+import ProductCard from "./ProductCard";
 
 interface Product {
   id: string;
@@ -217,10 +218,10 @@ export default function ProductGrid({
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-text-secondary h-4 w-4" />
             <Input
+              className="pl-10"
               placeholder="Buscar productos..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
             />
           </div>
         )}
@@ -230,14 +231,14 @@ export default function ProductGrid({
           {/* Filters Toggle */}
           {showFilters && (
             <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setShowFiltersPanel(!showFiltersPanel)}
               className={cn(
                 "transition-all duration-300",
                 showFiltersPanel &&
                   "bg-brand-primary/10 border-brand-primary text-brand-primary",
               )}
+              size="sm"
+              variant="outline"
+              onClick={() => setShowFiltersPanel(!showFiltersPanel)}
             >
               <SlidersHorizontal className="h-4 w-4 mr-2" />
               Filtros
@@ -272,32 +273,32 @@ export default function ProductGrid({
           {showGridToggle && (
             <div className="flex gap-1 border rounded-lg p-1">
               <Button
-                variant={gridCols === 2 ? "default" : "ghost"}
-                size="sm"
-                onClick={() => setGridCols(2)}
                 className="h-8 w-8 p-0"
+                size="sm"
+                variant={gridCols === 2 ? "default" : "ghost"}
+                onClick={() => setGridCols(2)}
               >
                 <Grid2X2 className="h-4 w-4" />
               </Button>
               <Button
-                variant={gridCols === 3 ? "default" : "ghost"}
-                size="sm"
-                onClick={() => setGridCols(3)}
                 className="h-8 w-8 p-0"
+                size="sm"
+                variant={gridCols === 3 ? "default" : "ghost"}
+                onClick={() => setGridCols(3)}
               >
                 <Grid3X3 className="h-4 w-4" />
               </Button>
               <Button
-                variant={gridCols === 4 ? "default" : "ghost"}
-                size="sm"
-                onClick={() => setGridCols(4)}
                 className="h-8 w-8 p-0"
+                size="sm"
+                variant={gridCols === 4 ? "default" : "ghost"}
+                onClick={() => setGridCols(4)}
               >
                 <div className="grid grid-cols-2 gap-0.5 h-4 w-4">
-                  <div className="bg-current rounded-sm"></div>
-                  <div className="bg-current rounded-sm"></div>
-                  <div className="bg-current rounded-sm"></div>
-                  <div className="bg-current rounded-sm"></div>
+                  <div className="bg-current rounded-sm" />
+                  <div className="bg-current rounded-sm" />
+                  <div className="bg-current rounded-sm" />
+                  <div className="bg-current rounded-sm" />
                 </div>
               </Button>
             </div>
@@ -358,10 +359,10 @@ export default function ProductGrid({
             {hasActiveFilters && (
               <div className="flex items-end">
                 <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={clearFilters}
                   className="text-brand-primary hover:text-brand-primary/80"
+                  size="sm"
+                  variant="ghost"
+                  onClick={clearFilters}
                 >
                   <X className="h-4 w-4 mr-2" />
                   Limpiar filtros
@@ -387,17 +388,17 @@ export default function ProductGrid({
             </span>
             <div className="flex gap-2">
               {searchQuery && (
-                <Badge variant="secondary" className="text-xs">
+                <Badge className="text-xs" variant="secondary">
                   Búsqueda: &quot;{searchQuery}&quot;
                 </Badge>
               )}
               {selectedCategory !== "all" && (
-                <Badge variant="secondary" className="text-xs">
+                <Badge className="text-xs" variant="secondary">
                   {selectedCategory}
                 </Badge>
               )}
               {selectedPriceRange !== "all" && (
-                <Badge variant="secondary" className="text-xs">
+                <Badge className="text-xs" variant="secondary">
                   Precio: {selectedPriceRange}
                 </Badge>
               )}
@@ -431,22 +432,22 @@ export default function ProductGrid({
         >
           {filteredAndSortedProducts.map((product) => (
             <ProductCard
-              key={product.id}
-              id={product.id}
-              name={product.name}
-              description={product.description}
-              price={product.price}
-              originalPrice={product.originalPrice}
               category={product.category}
+              description={product.description}
+              id={product.id}
               imageUrl={product.imageUrl}
-              rating={product.rating}
               isNatural={product.isNatural}
               isNew={product.isNew}
               isOnSale={product.isOnSale}
-              stock={product.stock}
-              size={product.size}
-              variant={variant}
+              key={product.id}
               lineTheme={product.lineTheme || lineTheme}
+              name={product.name}
+              originalPrice={product.originalPrice}
+              price={product.price}
+              rating={product.rating}
+              size={product.size}
+              stock={product.stock}
+              variant={variant}
               onAddToCart={onAddToCart}
             />
           ))}

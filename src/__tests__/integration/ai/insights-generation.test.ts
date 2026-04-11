@@ -1,4 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
 import { generateInsights } from "@/lib/ai/insights/generator";
 import type { InsightSection } from "@/lib/ai/insights/schemas";
 import type { MaturityLevel } from "@/lib/ai/memory/organizational";
@@ -22,8 +23,8 @@ vi.mock("@/lib/logger", () => ({
 }));
 
 describe("Insights Generation Integration", () => {
-  let mockProvider: any;
-  let mockFactory: any;
+  let mockProvider: unknown;
+  let mockFactory: unknown;
 
   beforeEach(() => {
     vi.clearAllMocks();

@@ -1,8 +1,21 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import {
+  Bot,
+  Download,
+  Edit2,
+  History,
+  MoreVertical,
+  PanelRightClose,
+  PanelRightOpen,
+  Plus,
+  Settings,
+  Trash2,
+  X,
+} from "lucide-react";
+import { useEffect, useState } from "react";
+
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,22 +24,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Settings,
-  History,
-  Wrench,
-  MoreVertical,
-  Download,
-  Trash2,
-  Copy,
-  Plus,
-  Edit2,
-  X,
-  Bot,
-  PanelRightOpen,
-  PanelRightClose,
-} from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Input } from "@/components/ui/input";
 
 interface ChatHeaderProps {
   title: string;
@@ -95,12 +93,12 @@ export function ChatHeader({
           <div className="flex items-center gap-1.5 sm:gap-2 group/title min-w-0">
             {isEditing ? (
               <Input
-                value={editTitle}
-                onChange={(e) => setEditTitle(e.target.value)}
-                onBlur={handleTitleSubmit}
-                onKeyDown={handleTitleKeyDown}
-                className="h-6 sm:h-7 text-xs sm:text-sm font-bold bg-white/10 border-white/20 text-white placeholder:text-white/50 focus-visible:ring-white/30 min-w-0"
                 autoFocus
+                className="h-6 sm:h-7 text-xs sm:text-sm font-bold bg-white/10 border-white/20 text-white placeholder:text-white/50 focus-visible:ring-white/30 min-w-0"
+                value={editTitle}
+                onBlur={handleTitleSubmit}
+                onChange={(e) => setEditTitle(e.target.value)}
+                onKeyDown={handleTitleKeyDown}
               />
             ) : (
               <h2
@@ -114,8 +112,8 @@ export function ChatHeader({
           </div>
           <div className="flex items-center gap-1.5 mt-0.5">
             <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500" />
             </span>
             <span className="text-[11px] font-medium text-white/80 tracking-wide uppercase">
               En línea ahora
@@ -128,9 +126,9 @@ export function ChatHeader({
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
-              variant="ghost"
-              size="icon"
               className="text-white hover:bg-white/10 rounded-full h-9 w-9"
+              size="icon"
+              variant="ghost"
             >
               <MoreVertical className="w-5 h-5" />
             </Button>
@@ -138,25 +136,25 @@ export function ChatHeader({
           <DropdownMenuContent align="end" className="w-56 z-[200]">
             <DropdownMenuLabel>Gestión de Sesión</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={onNewConversation} className="gap-2">
+            <DropdownMenuItem className="gap-2" onClick={onNewConversation}>
               <Plus className="w-4 h-4" /> Nueva conversación
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={onHistoryClick} className="gap-2">
+            <DropdownMenuItem className="gap-2" onClick={onHistoryClick}>
               <History className="w-4 h-4" /> Ver historial
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={onSettingsClick} className="gap-2">
+            <DropdownMenuItem className="gap-2" onClick={onSettingsClick}>
               <Settings className="w-4 h-4" /> Configuración
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={onExport} className="gap-2">
+            <DropdownMenuItem className="gap-2" onClick={onExport}>
               <Download className="w-4 h-4" /> Exportar chat
             </DropdownMenuItem>
             <DropdownMenuItem onClick={onClear}>
               Limpiar mensajes
             </DropdownMenuItem>
             <DropdownMenuItem
-              onClick={onDelete}
               className="text-destructive gap-2 font-medium"
+              onClick={onDelete}
             >
               <Trash2 className="w-4 h-4" /> Eliminar sesión
             </DropdownMenuItem>
@@ -165,15 +163,15 @@ export function ChatHeader({
 
         {onExpandClick && (
           <Button
-            variant="ghost"
-            size="icon"
-            onClick={onExpandClick}
             className="text-white hover:bg-white/10 rounded-xl h-9 w-9"
+            size="icon"
             title={
               isSidebarMode
                 ? "Volver a ventana flotante"
                 : "Expandir como panel lateral"
             }
+            variant="ghost"
+            onClick={onExpandClick}
           >
             {isSidebarMode ? (
               <PanelRightClose className="w-5 h-5" />
@@ -185,10 +183,10 @@ export function ChatHeader({
 
         {onClose && (
           <Button
-            variant="ghost"
-            size="icon"
-            onClick={onClose}
             className="text-white hover:bg-white/10 rounded-full h-9 w-9"
+            size="icon"
+            variant="ghost"
+            onClick={onClose}
           >
             <X className="w-6 h-6" />
           </Button>

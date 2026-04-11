@@ -5,16 +5,18 @@
  */
 
 import { randomUUID } from "crypto";
-import { createServiceRoleClient } from "@/utils/supabase/server";
-import { sendEmail } from "./client";
-import { loadEmailTemplate, incrementTemplateUsage } from "./template-loader";
-import {
-  replaceTemplateVariables,
-  getDefaultVariables,
-} from "./template-utils";
-import { getOrganizationInfoWithFallbacks } from "./org-utils";
-import { wrapInModernLayout } from "./layout";
+
 import { appLogger as logger } from "@/lib/logger";
+import { createServiceRoleClient } from "@/utils/supabase/server";
+
+import { sendEmail } from "./client";
+import { wrapInModernLayout } from "./layout";
+import { getOrganizationInfoWithFallbacks } from "./org-utils";
+import { incrementTemplateUsage, loadEmailTemplate } from "./template-loader";
+import {
+  getDefaultVariables,
+  replaceTemplateVariables,
+} from "./template-utils";
 
 function htmlToText(html: string): string {
   return html

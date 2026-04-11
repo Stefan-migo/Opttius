@@ -1,20 +1,20 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import {
-  Mail,
-  Settings,
-  History,
-  BarChart3,
   ArrowLeft,
+  BarChart3,
+  History,
+  Mail,
   MousePointer,
 } from "lucide-react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import EmailTemplatesManager from "@/components/admin/EmailTemplatesManager";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+
 import { EmailEventsHistory } from "@/components/admin/EmailEventsHistory";
+import EmailTemplatesManager from "@/components/admin/EmailTemplatesManager";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface EmailMetrics {
   totalDelivered: number;
@@ -41,11 +41,11 @@ export default function SaasEmailsPage() {
     <div className="space-y-6 p-6">
       <div className="flex items-center gap-4">
         <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => router.push("/admin/saas-management/dashboard")}
-          title="Volver al dashboard"
           className="rounded-xl text-epoch-primary hover:bg-epoch-primary/10"
+          size="icon"
+          title="Volver al dashboard"
+          variant="ghost"
+          onClick={() => router.push("/admin/saas-management/dashboard")}
         >
           <ArrowLeft className="h-5 w-5" />
         </Button>
@@ -106,41 +106,41 @@ export default function SaasEmailsPage() {
       </div>
 
       <Tabs
+        className="space-y-6"
         value={activeTab}
         onValueChange={setActiveTab}
-        className="space-y-6"
       >
         <TabsList className="flex w-full justify-start gap-1 h-auto bg-transparent border-b rounded-xl">
           <TabsTrigger
-            value="templates"
             className="rounded-t-lg data-[state=active]:bg-white"
+            value="templates"
           >
             Plantillas
           </TabsTrigger>
           <TabsTrigger
-            value="history"
             className="rounded-t-lg data-[state=active]:bg-white"
+            value="history"
           >
             <History className="h-4 w-4 mr-1" />
             Historial
           </TabsTrigger>
           <TabsTrigger
-            value="config"
             className="rounded-t-lg data-[state=active]:bg-white"
+            value="config"
           >
             Configuración Resend
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="templates" className="space-y-6">
+        <TabsContent className="space-y-6" value="templates">
           <EmailTemplatesManager mode="saas" />
         </TabsContent>
 
-        <TabsContent value="history" className="space-y-6">
+        <TabsContent className="space-y-6" value="history">
           <EmailEventsHistory />
         </TabsContent>
 
-        <TabsContent value="config" className="space-y-6">
+        <TabsContent className="space-y-6" value="config">
           <Card className="admin-card">
             <CardContent className="p-6">
               <h3 className="text-lg font-semibold mb-4">

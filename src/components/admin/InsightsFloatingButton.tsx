@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { Sparkles } from "lucide-react";
 import { usePathname } from "next/navigation";
+import { useState } from "react";
+
+import { SmartContextWidget } from "@/components/ai/SmartContextWidget";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Sparkles } from "lucide-react";
-import { SmartContextWidget } from "@/components/ai/SmartContextWidget";
 import type { InsightSection } from "@/lib/ai/insights/schemas";
 import { cn } from "@/lib/utils";
 
@@ -48,21 +49,21 @@ export function InsightsFloatingButton({
       <div className="hidden lg:flex">
         <SheetTrigger asChild>
           <Button
-            variant="default"
-            size="icon"
             className={cn(
               "rounded-full w-14 h-14 shadow-[0_8px_30px_rgb(0,0,0,0.12)] transition-all duration-300 hover:scale-110 active:scale-95",
               "bg-primary text-primary-foreground",
             )}
+            size="icon"
             title="Insights Inteligentes"
+            variant="default"
           >
             <Sparkles className="w-6 h-6" />
           </Button>
         </SheetTrigger>
       </div>
       <SheetContent
-        side="right"
         className="w-full max-w-full sm:w-[420px] p-0 flex flex-col overflow-hidden"
+        side="right"
       >
         <div className="flex-1 overflow-hidden min-h-0">
           <SmartContextWidget

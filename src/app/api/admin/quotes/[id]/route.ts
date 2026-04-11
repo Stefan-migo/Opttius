@@ -1,19 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/utils/supabase/server";
-import { createServiceRoleClient } from "@/utils/supabase/server";
-import { getBranchContext, addBranchFilter } from "@/lib/api/branch-middleware";
-import { appLogger as logger } from "@/lib/logger";
+
+import { addBranchFilter, getBranchContext } from "@/lib/api/branch-middleware";
+import { AuthenticationError, AuthorizationError } from "@/lib/api/errors";
 import {
-  createApiSuccessResponse,
   createApiErrorResponse,
+  createApiSuccessResponse,
 } from "@/lib/api/response";
 import { EmailNotificationService } from "@/lib/email/notifications";
-import {
-  AuthenticationError,
-  AuthorizationError,
-  APIError,
-} from "@/lib/api/errors";
+import { appLogger as logger } from "@/lib/logger";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
+import { createClient } from "@/utils/supabase/server";
+import { createServiceRoleClient } from "@/utils/supabase/server";
 
 export const dynamic = "force-dynamic";
 export async function GET(
@@ -168,7 +165,7 @@ export async function GET(
     }
 
     // Now fetch relations separately to avoid foreign key constraint issues
-    const relations: any = {};
+    const relations: unknown = {};
 
     // Fetch customer - always try to fetch if customer_id exists
     if (quoteData.customer_id) {
@@ -397,7 +394,7 @@ export async function PUT(
 
     // First, verify the quote exists and user has access
     const { data: existingQuote, error: fetchError } = await applyBranchFilter(
-      supabase.from("quotes").select("id, branch_id, customer_id") as any,
+      supabase.from("quotes").select("id, branch_id, customer_id") as unknown,
     )
       .eq("id", id)
       .single();
@@ -605,7 +602,7 @@ export async function PUT(
     if (
       body.status === "sent" &&
       updatedQuote.status === "sent" &&
-      (updatedQuote.customer?.email || (updatedQuote as any).guest_email)
+      (updatedQuote.customer?.email || (updatedQuote as unknown).guest_email)
     ) {
       (async () => {
         try {
@@ -622,7 +619,7 @@ export async function PUT(
                 "Cliente",
               customer_email:
                 updatedQuote.customer?.email ||
-                (updatedQuote as any).guest_email,
+                (updatedQuote as unknown).guest_email,
               quote_number: updatedQuote.quote_number,
               total_amount: updatedQuote.total_amount,
               expiration_date: updatedQuote.expiration_date,

@@ -1,18 +1,19 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { useTelemetry } from "@/lib/telemetry/hooks/use-telemetry";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import {
-  BarChart3,
-  ArrowLeft,
-  Users,
   Activity,
+  ArrowLeft,
+  BarChart3,
   Clock,
   TrendingUp,
+  Users,
 } from "lucide-react";
 import Link from "next/link";
+import React, { useEffect, useState } from "react";
+
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { useTelemetry } from "@/lib/telemetry/hooks/use-telemetry";
 
 interface DashboardData {
   overview: {
@@ -72,7 +73,7 @@ export default function SaaSAnalyticsPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600" />
       </div>
     );
   }
@@ -97,9 +98,9 @@ export default function SaaSAnalyticsPage() {
         <div className="flex items-center gap-4 mb-4">
           <Link href="/admin/saas-management/dashboard">
             <Button
-              variant="outline"
-              size="sm"
               className="flex items-center gap-2"
+              size="sm"
+              variant="outline"
             >
               <ArrowLeft className="h-4 w-4" />
               Volver al Dashboard
@@ -124,13 +125,13 @@ export default function SaaSAnalyticsPage() {
         <div className="flex gap-2 mt-4">
           {["7d", "30d", "90d"].map((range) => (
             <button
-              key={range}
-              onClick={() => setTimeRange(range)}
               className={`px-4 py-2 rounded-lg ${
                 timeRange === range
                   ? "bg-blue-600 text-white"
                   : "bg-gray-100 text-gray-700 hover:bg-gray-200"
               }`}
+              key={range}
+              onClick={() => setTimeRange(range)}
             >
               {range}
             </button>
@@ -241,8 +242,8 @@ export default function SaaSAnalyticsPage() {
             <div className="space-y-3">
               {dashboardData?.topFeatures?.map((feature, index) => (
                 <div
-                  key={index}
                   className="flex justify-between items-center p-3 bg-gray-50 rounded-lg"
+                  key={index}
                 >
                   <span className="text-gray-700 font-medium">
                     {feature.name}
@@ -277,8 +278,8 @@ export default function SaaSAnalyticsPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {dashboardData?.trends?.performanceMetrics?.map((metric, index) => (
               <div
-                key={index}
                 className="border rounded-lg p-4 hover:shadow-md transition-shadow"
+                key={index}
               >
                 <h4 className="font-medium text-gray-900">{metric.metric}</h4>
                 <p className="text-2xl font-bold mt-2">

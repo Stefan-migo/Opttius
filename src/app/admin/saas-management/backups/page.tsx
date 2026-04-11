@@ -1,14 +1,31 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { format } from "date-fns";
+import { es } from "date-fns/locale";
+import {
+  AlertTriangle,
+  Calendar,
+  CheckCircle2,
+  Database,
+  Download,
+  FileText,
+  HardDrive,
+  Loader2,
+  RefreshCcw,
+  ShieldAlert,
+  Trash2,
+} from "lucide-react";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
+  CardDescription,
   CardHeader,
   CardTitle,
-  CardDescription,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -17,22 +34,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  Database,
-  Download,
-  Trash2,
-  RefreshCcw,
-  ShieldAlert,
-  FileText,
-  Calendar,
-  HardDrive,
-  Loader2,
-  CheckCircle2,
-  AlertTriangle,
-} from "lucide-react";
-import { toast } from "sonner";
-import { format } from "date-fns";
-import { es } from "date-fns/locale";
 
 interface BackupFile {
   id: string;
@@ -87,7 +88,7 @@ export default function SaasBackupsPage() {
       } else {
         throw new Error(data.error || "Fallo en la generación");
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error(err.message, { id: toastId });
     } finally {
       setIsGenerating(false);
@@ -160,15 +161,15 @@ export default function SaasBackupsPage() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={fetchBackups} disabled={loading}>
+          <Button disabled={loading} variant="outline" onClick={fetchBackups}>
             <RefreshCcw
               className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`}
             />
             Actualizar
           </Button>
           <Button
-            onClick={() => setCreateBackupConfirmOpen(true)}
             disabled={isGenerating}
+            onClick={() => setCreateBackupConfirmOpen(true)}
           >
             {isGenerating ? (
               <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -252,8 +253,8 @@ export default function SaasBackupsPage() {
               <div className="space-y-4">
                 {backups.map((backup) => (
                   <div
-                    key={backup.id}
                     className="flex items-center justify-between p-4 border rounded-xl hover:bg-gray-50 transition-colors"
+                    key={backup.id}
                   >
                     <div className="flex items-center gap-4">
                       <div className="p-3 bg-blue-50 text-blue-600 rounded-lg">
@@ -280,22 +281,22 @@ export default function SaasBackupsPage() {
                     </div>
                     <div className="flex gap-2">
                       <Button
-                        variant="ghost"
-                        size="icon"
                         className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                        onClick={() => handleDownload(backup.name)}
+                        size="icon"
                         title="Descargar SQL"
+                        variant="ghost"
+                        onClick={() => handleDownload(backup.name)}
                       >
                         <Download className="h-4 w-4" />
                       </Button>
                       <Button
-                        variant="ghost"
-                        size="icon"
                         className="text-red-500 hover:text-red-600 hover:bg-red-50"
+                        size="icon"
+                        title="Eliminar permanentemente"
+                        variant="ghost"
                         onClick={() =>
                           setDeleteBackupConfirmFileName(backup.name)
                         }
-                        title="Eliminar permanentemente"
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -332,7 +333,7 @@ export default function SaasBackupsPage() {
             >
               Cancelar
             </Button>
-            <Button onClick={handleCreateBackup} disabled={isGenerating}>
+            <Button disabled={isGenerating} onClick={handleCreateBackup}>
               {isGenerating ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />

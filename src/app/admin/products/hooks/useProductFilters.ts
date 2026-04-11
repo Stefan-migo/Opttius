@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useCallback, useState } from "react";
+
 import { Product } from "./useProducts";
 
 export interface ProductFilters {
@@ -8,6 +9,7 @@ export interface ProductFilters {
   categoryFilter: string;
   statusFilter: string;
   showLowStockOnly: boolean;
+  productTypeFilter: string;
 }
 
 const defaultFilters: ProductFilters = {
@@ -15,14 +17,18 @@ const defaultFilters: ProductFilters = {
   categoryFilter: "all",
   statusFilter: "active",
   showLowStockOnly: false,
+  productTypeFilter: "all",
 };
 
 export function useProductFilters() {
   const [filters, setFilters] = useState<ProductFilters>(defaultFilters);
 
-  const updateFilter = useCallback((key: keyof ProductFilters, value: any) => {
-    setFilters((prev) => ({ ...prev, [key]: value }));
-  }, []);
+  const updateFilter = useCallback(
+    (key: keyof ProductFilters, value: unknown) => {
+      setFilters((prev) => ({ ...prev, [key]: value }));
+    },
+    [],
+  );
 
   const resetFilters = () => {
     setFilters(defaultFilters);

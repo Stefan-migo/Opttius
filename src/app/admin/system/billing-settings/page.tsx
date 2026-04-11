@@ -1,29 +1,17 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Building2, Copy, FileText, Save, Sparkles } from "lucide-react";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import ImageUpload from "@/components/ui/ImageUpload";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
-import {
-  Settings,
-  Upload,
-  Save,
-  Building2,
-  FileText,
-  Image as ImageIcon,
-  CheckCircle,
-  Copy,
-  Loader2,
-  Sparkles,
-} from "lucide-react";
-import { toast } from "sonner";
 import { useBranch } from "@/hooks/useBranch";
 import { getBranchHeader } from "@/lib/utils/branch";
-import ImageUpload from "@/components/ui/ImageUpload";
-import Image from "next/image";
 
 interface BillingSettings {
   id?: string;
@@ -85,7 +73,7 @@ export default function BillingSettingsPage() {
         const error = await response.json();
         toast.error(error.error || "Error al cargar configuración");
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error fetching settings:", error);
       toast.error("Error al cargar configuración");
     } finally {
@@ -120,7 +108,7 @@ export default function BillingSettingsPage() {
         const error = await response.json();
         toast.error(error.error || "Error al guardar configuración");
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error saving settings:", error);
       toast.error("Error al guardar configuración");
     } finally {
@@ -153,7 +141,7 @@ export default function BillingSettingsPage() {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-epoch-primary mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-epoch-primary mx-auto mb-4" />
           <p className="text-admin-text-tertiary">Cargando configuración...</p>
         </div>
       </div>
@@ -171,10 +159,10 @@ export default function BillingSettingsPage() {
             Personaliza tus boletas y facturas
           </p>
         </div>
-        <Button onClick={handleSave} disabled={saving}>
+        <Button disabled={saving} onClick={handleSave}>
           {saving ? (
             <>
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
               Guardando...
             </>
           ) : (
@@ -199,53 +187,53 @@ export default function BillingSettingsPage() {
             <div>
               <Label>Nombre de la Empresa *</Label>
               <Input
+                placeholder="Ej: Óptica Central"
                 value={settings.business_name}
                 onChange={(e) =>
                   setSettings({ ...settings, business_name: e.target.value })
                 }
-                placeholder="Ej: Óptica Central"
               />
             </div>
             <div>
               <Label>RUT de la Empresa *</Label>
               <Input
+                className="font-mono"
+                placeholder="Ej: 76.123.456-7"
                 value={settings.business_rut}
                 onChange={(e) =>
                   setSettings({ ...settings, business_rut: e.target.value })
                 }
-                placeholder="Ej: 76.123.456-7"
-                className="font-mono"
               />
             </div>
             <div>
               <Label>Dirección</Label>
               <Input
+                placeholder="Dirección completa"
                 value={settings.business_address || ""}
                 onChange={(e) =>
                   setSettings({ ...settings, business_address: e.target.value })
                 }
-                placeholder="Dirección completa"
               />
             </div>
             <div>
               <Label>Teléfono</Label>
               <Input
+                placeholder="+56 9 1234 5678"
                 value={settings.business_phone || ""}
                 onChange={(e) =>
                   setSettings({ ...settings, business_phone: e.target.value })
                 }
-                placeholder="+56 9 1234 5678"
               />
             </div>
             <div>
               <Label>Email</Label>
               <Input
+                placeholder="contacto@empresa.cl"
                 type="email"
                 value={settings.business_email || ""}
                 onChange={(e) =>
                   setSettings({ ...settings, business_email: e.target.value })
                 }
-                placeholder="contacto@empresa.cl"
               />
             </div>
           </CardContent>
@@ -287,18 +275,18 @@ export default function BillingSettingsPage() {
 
               <div className="space-y-4">
                 <ImageUpload
+                  folder="billing"
                   value={settings.logo_url || ""}
                   onChange={(url) =>
                     setSettings({ ...settings, logo_url: url })
                   }
-                  folder="billing"
                 />
 
                 <Button
+                  className="w-full text-xs"
+                  size="sm"
                   type="button"
                   variant="outline"
-                  size="sm"
-                  className="w-full text-xs"
                   onClick={handleReuseMainLogo}
                 >
                   <Copy className="h-3 w-3 mr-2" />
@@ -309,14 +297,14 @@ export default function BillingSettingsPage() {
             <div>
               <Label>Tipo de Documento por Defecto</Label>
               <select
+                className="w-full px-3 py-2 border rounded-md"
                 value={settings.default_document_type}
                 onChange={(e) =>
                   setSettings({
                     ...settings,
-                    default_document_type: e.target.value as any,
+                    default_document_type: e.target.value as unknown,
                   })
                 }
-                className="w-full px-3 py-2 border rounded-md"
               >
                 <option value="boleta">Boleta</option>
                 <option value="factura">Factura</option>
@@ -325,28 +313,30 @@ export default function BillingSettingsPage() {
             <div>
               <Label>Texto de Encabezado (opcional)</Label>
               <Textarea
+                placeholder="Texto que aparecerá en el encabezado de las boletas"
+                rows={3}
                 value={settings.header_text || ""}
                 onChange={(e) =>
                   setSettings({ ...settings, header_text: e.target.value })
                 }
-                placeholder="Texto que aparecerá en el encabezado de las boletas"
-                rows={3}
               />
             </div>
             <div>
               <Label>Texto de Pie de Página (opcional)</Label>
               <Textarea
+                placeholder="Texto que aparecerá en el pie de página"
+                rows={3}
                 value={settings.footer_text || ""}
                 onChange={(e) =>
                   setSettings({ ...settings, footer_text: e.target.value })
                 }
-                placeholder="Texto que aparecerá en el pie de página"
-                rows={3}
               />
             </div>
             <div>
               <Label>Términos y Condiciones (opcional)</Label>
               <Textarea
+                placeholder="Términos y condiciones que aparecerán en las boletas"
+                rows={4}
                 value={settings.terms_and_conditions || ""}
                 onChange={(e) =>
                   setSettings({
@@ -354,8 +344,6 @@ export default function BillingSettingsPage() {
                     terms_and_conditions: e.target.value,
                   })
                 }
-                placeholder="Términos y condiciones que aparecerán en las boletas"
-                rows={4}
               />
             </div>
           </CardContent>

@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createServiceRoleClient } from "@/lib/supabase";
-import { appLogger as logger } from "@/lib/logger";
-import { prepareInsightData } from "@/lib/ai/insights/prepare-data";
+
 import { generateInsights } from "@/lib/ai/insights/generator";
+import { prepareInsightData } from "@/lib/ai/insights/prepare-data";
+import type { InsightSection } from "@/lib/ai/insights/schemas";
 import { createOrganizationalMemory } from "@/lib/ai/memory/organizational";
 import type { BranchContext } from "@/lib/api/branch-middleware";
-import type { InsightSection } from "@/lib/ai/insights/schemas";
+import { appLogger as logger } from "@/lib/logger";
+import { createServiceRoleClient } from "@/lib/supabase";
 
 /**
  * GET /api/cron/generate-insights
@@ -197,7 +198,7 @@ export async function GET(request: NextRequest) {
 
           // Small delay between LLM calls to avoid rate limits
           await new Promise((r) => setTimeout(r, 500));
-        } catch (err: any) {
+        } catch (err: unknown) {
           orgErrors.push(`${section}: ${err?.message || "Unknown error"}`);
           logger.error("Insight generation failed for org/section", {
             orgId: org.id,

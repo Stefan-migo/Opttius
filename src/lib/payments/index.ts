@@ -4,11 +4,11 @@
  * @module lib/payments
  */
 
-import type { IPaymentGateway, PaymentIntentResponse } from "./interfaces";
 import { FlowGateway } from "./flow/gateway";
+import type { IPaymentGateway } from "./interfaces";
 import { MercadoPagoGateway } from "./mercadopago/gateway";
-import { PayPalGateway } from "./paypal/gateway";
 import { NowPaymentsGateway } from "./nowpayments/gateway";
+import { PayPalGateway } from "./paypal/gateway";
 
 export type PaymentGatewayType =
   | "flow"
@@ -33,10 +33,10 @@ export class PaymentGatewayFactory {
   }
 }
 
-export type { IPaymentGateway, PaymentIntentResponse } from "./interfaces";
-export { PaymentService } from "./services/payment-service";
 export {
+  type OrderPaymentMethod,
   PAYMENT_METHOD_MAP,
   PAYMENT_METHODS_ORDER_PAYMENTS,
-  type OrderPaymentMethod,
 } from "./constants";
+export type { IPaymentGateway, PaymentIntentResponse } from "./interfaces";
+export { PaymentService } from "./services/payment-service";

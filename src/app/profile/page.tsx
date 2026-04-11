@@ -1,15 +1,16 @@
 "use client";
 
-import { Suspense } from "react";
-import { ProfilePageContent } from "@/components/profile";
 import { Loader2 } from "lucide-react";
+import { Suspense } from "react";
+
+import { ProfilePageContent } from "@/components/profile";
 
 function ProfilePageInner() {
   return (
     <ProfilePageContent
-      variant="public"
-      title="Mi Perfil"
       subtitle="Gestiona tu información personal, preferencias y configuración de cuenta con seguridad."
+      title="Mi Perfil"
+      variant="public"
     />
   );
 }

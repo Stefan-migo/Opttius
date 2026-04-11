@@ -1,9 +1,9 @@
-import { describe, it, expect, beforeEach, vi } from "vitest";
-import { POST } from "@/app/api/upload/route";
 import { NextRequest } from "next/server";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+import { POST } from "@/app/api/upload/route";
+import { isR2Configured, r2Client } from "@/lib/r2/client";
 import { createClient } from "@/utils/supabase/server";
-import { r2Client, isR2Configured } from "@/lib/r2/client";
-import { PutObjectCommand } from "@aws-sdk/client-s3";
 
 // Mock Supabase
 vi.mock("@/utils/supabase/server", () => ({
@@ -32,7 +32,7 @@ vi.mock("@/lib/logger", () => ({
 }));
 
 describe("POST /api/upload", () => {
-  let mockSupabase: any;
+  let mockSupabase: unknown;
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -56,7 +56,7 @@ describe("POST /api/upload", () => {
       },
     };
 
-    (createClient as any).mockResolvedValue(mockSupabase);
+    (createClient as unknown).mockResolvedValue(mockSupabase);
   });
 
   it("should return 401 if user is not authenticated", async () => {
@@ -96,7 +96,7 @@ describe("POST /api/upload", () => {
     const req = {
       formData: vi.fn().mockResolvedValue(formData),
       url: "http://localhost/api/upload",
-    } as any;
+    } as unknown;
 
     const res = await POST(req);
     expect(res.status).toBe(413);
@@ -110,7 +110,7 @@ describe("POST /api/upload", () => {
     const req = {
       formData: vi.fn().mockResolvedValue(formData),
       url: "http://localhost/api/upload",
-    } as any;
+    } as unknown;
 
     const res = await POST(req);
     expect(res.status).toBe(400);
@@ -119,7 +119,7 @@ describe("POST /api/upload", () => {
   });
 
   it("should upload to R2 if configured", async () => {
-    (isR2Configured as any).mockReturnValue(true);
+    (isR2Configured as unknown).mockReturnValue(true);
     const validFile = new File(["dummy content"], "test.png", {
       type: "image/png",
     });
@@ -134,7 +134,7 @@ describe("POST /api/upload", () => {
     const req = {
       formData: vi.fn().mockResolvedValue(formData),
       url: "http://localhost/api/upload",
-    } as any;
+    } as unknown;
 
     const res = await POST(req);
 
@@ -152,7 +152,7 @@ describe("POST /api/upload", () => {
   });
 
   it("should fallback to Supabase if R2 is not configured", async () => {
-    (isR2Configured as any).mockReturnValue(false);
+    (isR2Configured as unknown).mockReturnValue(false);
     const validFile = new File(["dummy content"], "test.png", {
       type: "image/png",
     });
@@ -162,7 +162,7 @@ describe("POST /api/upload", () => {
     const req = {
       formData: vi.fn().mockResolvedValue(formData),
       url: "http://localhost/api/upload",
-    } as any;
+    } as unknown;
 
     const res = await POST(req);
     expect(res.status).toBe(200);

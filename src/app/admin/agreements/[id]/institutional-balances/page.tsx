@@ -1,9 +1,19 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { ArrowLeft, Check, DollarSign, Loader2 } from "lucide-react";
+import Link from "next/link";
 import { useParams } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useEffect, useState } from "react";
+
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   Table,
   TableBody,
@@ -13,21 +23,12 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import { ArrowLeft, DollarSign, Loader2, Check } from "lucide-react";
-import Link from "next/link";
-import {
-  agreementService,
   AgreementInstitutionalBalance,
+  agreementService,
 } from "@/lib/api/services/agreementService";
 import { handleApiError } from "@/lib/services/errorService";
-import { formatCurrency, formatDate } from "@/lib/utils";
 import { success } from "@/lib/services/notificationService";
+import { formatCurrency, formatDate } from "@/lib/utils";
 
 export default function InstitutionalBalancesPage() {
   const params = useParams();
@@ -114,7 +115,7 @@ export default function InstitutionalBalancesPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex items-center gap-4">
           <Link href={`/admin/agreements/${agreementId}`}>
-            <Button variant="ghost" size="icon">
+            <Button size="icon" variant="ghost">
               <ArrowLeft className="h-4 w-4" />
             </Button>
           </Link>
@@ -128,8 +129,8 @@ export default function InstitutionalBalancesPage() {
           </div>
         </div>
         <Button
-          onClick={() => setReconcileOpen(true)}
           disabled={selectedIds.size === 0}
+          onClick={() => setReconcileOpen(true)}
         >
           <Check className="h-4 w-4 mr-2" />
           Conciliar seleccionados ({selectedIds.size})
@@ -164,11 +165,11 @@ export default function InstitutionalBalancesPage() {
                 <TableRow>
                   <TableHead>
                     <input
-                      type="checkbox"
                       checked={
                         selectedIds.size === balances.length &&
                         balances.length > 0
                       }
+                      type="checkbox"
                       onChange={selectAll}
                     />
                   </TableHead>
@@ -183,8 +184,8 @@ export default function InstitutionalBalancesPage() {
                   <TableRow key={b.id}>
                     <TableCell>
                       <input
-                        type="checkbox"
                         checked={selectedIds.has(b.id)}
+                        type="checkbox"
                         onChange={() => toggleSelect(b.id)}
                       />
                     </TableCell>
@@ -215,21 +216,21 @@ export default function InstitutionalBalancesPage() {
           <div>
             <label className="text-sm font-medium">Referencia de pago</label>
             <input
-              type="text"
               className="mt-1 w-full rounded border px-3 py-2"
               placeholder="Nº transferencia, cheque, etc."
+              type="text"
               value={paymentRef}
               onChange={(e) => setPaymentRef(e.target.value)}
             />
           </div>
           <div className="flex items-center gap-2">
             <input
-              type="checkbox"
-              id="emit-invoice"
               checked={emitInvoice}
+              id="emit-invoice"
+              type="checkbox"
               onChange={(e) => setEmitInvoice(e.target.checked)}
             />
-            <label htmlFor="emit-invoice" className="text-sm">
+            <label className="text-sm" htmlFor="emit-invoice">
               Generar factura a institución
             </label>
           </div>
@@ -237,7 +238,7 @@ export default function InstitutionalBalancesPage() {
             <Button variant="outline" onClick={() => setReconcileOpen(false)}>
               Cancelar
             </Button>
-            <Button onClick={handleReconcile} disabled={reconciling}>
+            <Button disabled={reconciling} onClick={handleReconcile}>
               {reconciling ? (
                 <Loader2 className="h-4 w-4 animate-spin mr-2" />
               ) : null}

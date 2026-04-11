@@ -1,19 +1,22 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+  ArrowLeft,
+  Edit,
+  Eye,
+  EyeOff,
+  Plus,
+  RefreshCw,
+  Search,
+  Trash2,
+} from "lucide-react";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -22,6 +25,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Pagination } from "@/components/ui/pagination";
 import {
   Select,
   SelectContent,
@@ -30,24 +36,19 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  Plus,
-  Edit,
-  Trash2,
-  Search,
-  RefreshCw,
-  Eye,
-  EyeOff,
-  ArrowLeft,
-} from "lucide-react";
-import Link from "next/link";
-import { toast } from "sonner";
-import { Badge } from "@/components/ui/badge";
-import { Pagination } from "@/components/ui/pagination";
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Textarea } from "@/components/ui/textarea";
 import type {
   ContactLensFamily,
-  ContactLensUseType,
   ContactLensModality,
   ContactLensPackaging,
+  ContactLensUseType,
 } from "@/types/contact-lens";
 
 const USE_TYPES = [
@@ -212,7 +213,7 @@ export default function ContactLensFamiliesPage() {
         : "/api/admin/contact-lens-families";
       const method = editingFamily ? "PUT" : "POST";
 
-      const body: any = {
+      const body: unknown = {
         name: formData.name,
         brand: formData.brand || null,
         category_id: formData.category_id || null,
@@ -253,7 +254,7 @@ export default function ContactLensFamiliesPage() {
       );
       handleCloseDialog();
       fetchFamilies();
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast.error(error.message || "Error al guardar familia");
     }
   };
@@ -274,7 +275,7 @@ export default function ContactLensFamiliesPage() {
 
       toast.success("Familia eliminada exitosamente");
       fetchFamilies();
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast.error(error.message || "Error al eliminar familia");
     }
   };
@@ -296,8 +297,8 @@ export default function ContactLensFamiliesPage() {
   return (
     <div className="container mx-auto py-6 space-y-6">
       <Link
-        href="/admin/products"
         className="inline-flex items-center gap-2 text-sm text-admin-text-tertiary hover:text-epoch-primary transition-colors"
+        href="/admin/products"
       >
         <ArrowLeft className="h-4 w-4" />
         Volver a Productos
@@ -308,14 +309,14 @@ export default function ContactLensFamiliesPage() {
             <CardTitle>Familias de Lentes de Contacto</CardTitle>
             <div className="flex gap-2">
               <Button
-                onClick={() => fetchFamilies()}
-                variant="outline"
                 size="sm"
+                variant="outline"
+                onClick={() => fetchFamilies()}
               >
                 <RefreshCw className="h-4 w-4 mr-2" />
                 Actualizar
               </Button>
-              <Button onClick={() => handleOpenDialog()} size="sm">
+              <Button size="sm" onClick={() => handleOpenDialog()}>
                 <Plus className="h-4 w-4 mr-2" />
                 Nueva Familia
               </Button>
@@ -327,24 +328,24 @@ export default function ContactLensFamiliesPage() {
             <div className="relative flex-1">
               <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
+                className="pl-8"
                 placeholder="Buscar por nombre o marca..."
                 value={searchTerm}
                 onChange={(e) => {
                   setSearchTerm(e.target.value);
                   setCurrentPage(1);
                 }}
-                className="pl-8"
               />
             </div>
             <div className="flex items-center gap-2">
               <input
-                type="checkbox"
-                id="includeInactive"
                 checked={includeInactive}
-                onChange={(e) => setIncludeInactive(e.target.checked)}
                 className="rounded"
+                id="includeInactive"
+                type="checkbox"
+                onChange={(e) => setIncludeInactive(e.target.checked)}
               />
-              <Label htmlFor="includeInactive" className="cursor-pointer">
+              <Label className="cursor-pointer" htmlFor="includeInactive">
                 Incluir inactivas
               </Label>
             </div>
@@ -370,7 +371,7 @@ export default function ContactLensFamiliesPage() {
                   <TableBody>
                     {paginatedFamilies.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={7} className="text-center py-8">
+                        <TableCell className="text-center py-8" colSpan={7}>
                           No se encontraron familias
                         </TableCell>
                       </TableRow>
@@ -423,15 +424,15 @@ export default function ContactLensFamiliesPage() {
                           <TableCell className="text-right">
                             <div className="flex justify-end gap-2">
                               <Button
-                                variant="ghost"
                                 size="sm"
+                                variant="ghost"
                                 onClick={() => handleOpenDialog(family)}
                               >
                                 <Edit className="h-4 w-4" />
                               </Button>
                               <Button
-                                variant="ghost"
                                 size="sm"
+                                variant="ghost"
                                 onClick={() => handleDelete(family.id)}
                               >
                                 <Trash2 className="h-4 w-4" />
@@ -448,9 +449,9 @@ export default function ContactLensFamiliesPage() {
               {totalPages > 1 && (
                 <Pagination
                   currentPage={currentPage}
-                  totalPages={totalPages}
                   itemsPerPage={itemsPerPage}
                   totalItems={filteredFamilies.length}
+                  totalPages={totalPages}
                   onPageChange={setCurrentPage}
                 />
               )}
@@ -480,12 +481,12 @@ export default function ContactLensFamiliesPage() {
                     Nombre <span className="text-red-500">*</span>
                   </Label>
                   <Input
+                    required
                     id="name"
                     value={formData.name}
                     onChange={(e) =>
                       setFormData({ ...formData, name: e.target.value })
                     }
-                    required
                   />
                 </div>
                 <div className="space-y-2">
@@ -532,7 +533,7 @@ export default function ContactLensFamiliesPage() {
                   </Label>
                   <Select
                     value={formData.use_type}
-                    onValueChange={(value: any) =>
+                    onValueChange={(value: unknown) =>
                       setFormData({ ...formData, use_type: value })
                     }
                   >
@@ -554,7 +555,7 @@ export default function ContactLensFamiliesPage() {
                   </Label>
                   <Select
                     value={formData.modality}
-                    onValueChange={(value: any) =>
+                    onValueChange={(value: unknown) =>
                       setFormData({ ...formData, modality: value })
                     }
                   >
@@ -603,7 +604,7 @@ export default function ContactLensFamiliesPage() {
                   </Label>
                   <Select
                     value={formData.packaging}
-                    onValueChange={(value: any) =>
+                    onValueChange={(value: unknown) =>
                       setFormData({ ...formData, packaging: value })
                     }
                   >
@@ -626,30 +627,30 @@ export default function ContactLensFamiliesPage() {
                   <Label htmlFor="base_curve">Curva Base (BC)</Label>
                   <Input
                     id="base_curve"
-                    type="number"
-                    step="0.1"
-                    min="7.0"
                     max="10.0"
+                    min="7.0"
+                    placeholder="Ej: 8.4"
+                    step="0.1"
+                    type="number"
                     value={formData.base_curve}
                     onChange={(e) =>
                       setFormData({ ...formData, base_curve: e.target.value })
                     }
-                    placeholder="Ej: 8.4"
                   />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="diameter">Diámetro (DIA)</Label>
                   <Input
                     id="diameter"
-                    type="number"
-                    step="0.1"
-                    min="13.0"
                     max="15.0"
+                    min="13.0"
+                    placeholder="Ej: 14.0"
+                    step="0.1"
+                    type="number"
                     value={formData.diameter}
                     onChange={(e) =>
                       setFormData({ ...formData, diameter: e.target.value })
                     }
-                    placeholder="Ej: 14.0"
                   />
                 </div>
               </div>
@@ -658,25 +659,25 @@ export default function ContactLensFamiliesPage() {
                 <Label htmlFor="description">Descripción</Label>
                 <Textarea
                   id="description"
+                  rows={3}
                   value={formData.description}
                   onChange={(e) =>
                     setFormData({ ...formData, description: e.target.value })
                   }
-                  rows={3}
                 />
               </div>
 
               <div className="flex items-center gap-2">
                 <input
-                  type="checkbox"
-                  id="is_active"
                   checked={formData.is_active}
+                  className="rounded"
+                  id="is_active"
+                  type="checkbox"
                   onChange={(e) =>
                     setFormData({ ...formData, is_active: e.target.checked })
                   }
-                  className="rounded"
                 />
-                <Label htmlFor="is_active" className="cursor-pointer">
+                <Label className="cursor-pointer" htmlFor="is_active">
                   Activa
                 </Label>
               </div>

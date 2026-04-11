@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireRoot } from "@/lib/api/root-middleware";
-import { createServiceRoleClient } from "@/utils/supabase/service-role";
-import { appLogger as logger } from "@/lib/logger";
+
 import { AuthorizationError } from "@/lib/api/errors";
+import { requireRoot } from "@/lib/api/root-middleware";
+import { appLogger as logger } from "@/lib/logger";
+import { createServiceRoleClient } from "@/utils/supabase/service-role";
 
 export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
@@ -63,7 +64,7 @@ export async function GET(request: NextRequest) {
 
     // Calcular ingresos mensuales
     let monthlyRevenue = 0;
-    activeSubscriptions?.forEach((sub: any) => {
+    activeSubscriptions?.forEach((sub: unknown) => {
       const tier = sub.organization?.subscription_tier;
       if (tier && tierPrices[tier]) {
         monthlyRevenue += tierPrices[tier];

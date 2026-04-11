@@ -1,22 +1,23 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import {
-  Settings,
-  Mail,
-  Bell,
   Activity,
-  Database,
-  Shield,
-  Monitor,
   AlertTriangle,
-  XCircle,
-  Clock,
+  Bell,
   CheckCircle,
+  Database,
+  Mail,
+  Monitor,
   Receipt,
+  Settings,
+  Shield,
+  XCircle,
 } from "lucide-react";
+
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
 import { HealthStatus } from "../hooks/useSystemHealth";
 
 interface SystemOverviewProps {
@@ -25,7 +26,10 @@ interface SystemOverviewProps {
 }
 
 const getHealthStatusBadge = (status: string) => {
-  const config: Record<string, { variant: any; label: string; icon: any }> = {
+  const config: Record<
+    string,
+    { variant: unknown; label: string; icon: unknown }
+  > = {
     healthy: { variant: "default", label: "Saludable", icon: CheckCircle },
     warning: {
       variant: "secondary",
@@ -39,7 +43,7 @@ const getHealthStatusBadge = (status: string) => {
   const Icon = statusConfig.icon;
 
   return (
-    <Badge variant={statusConfig.variant} className="flex items-center gap-1">
+    <Badge className="flex items-center gap-1" variant={statusConfig.variant}>
       <Icon className="h-3 w-3" />
       {statusConfig.label}
     </Badge>
@@ -71,56 +75,56 @@ export default function SystemOverview({
           <CardContent className="p-4 sm:p-6 pt-4 space-y-3 sm:space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
               <Button
-                variant="outline"
                 className="justify-start rounded-xl border-epoch-primary/20 min-h-[44px] text-xs sm:text-sm"
+                variant="outline"
                 onClick={() => onTabChange("config")}
               >
                 <Settings className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2 shrink-0" />
                 Configuración
               </Button>
               <Button
-                variant="outline"
                 className="justify-start rounded-xl border-epoch-primary/20 min-h-[44px] text-xs sm:text-sm"
+                variant="outline"
                 onClick={() => onTabChange("email")}
               >
                 <Mail className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2 shrink-0" />
                 Plantillas Email
               </Button>
               <Button
-                variant="outline"
                 className="justify-start rounded-xl border-epoch-primary/20 min-h-[44px] text-xs sm:text-sm"
+                variant="outline"
                 onClick={() => onTabChange("notifications")}
               >
                 <Bell className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2 shrink-0" />
                 Notificaciones
               </Button>
               <Button
-                variant="outline"
                 className="justify-start rounded-xl border-epoch-primary/20 min-h-[44px] text-xs sm:text-sm"
+                variant="outline"
                 onClick={() => onTabChange("health")}
               >
                 <Activity className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2 shrink-0" />
                 Salud del Sistema
               </Button>
               <Button
-                variant="outline"
                 className="justify-start rounded-xl border-epoch-primary/20 min-h-[44px] text-xs sm:text-sm"
+                variant="outline"
                 onClick={() => onTabChange("maintenance")}
               >
                 <Database className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2 shrink-0" />
                 Mantenimiento
               </Button>
               <Button
-                variant="outline"
                 className="justify-start rounded-xl border-epoch-primary/20 min-h-[44px] text-xs sm:text-sm"
+                variant="outline"
                 onClick={() => onTabChange("billing")}
               >
                 <Receipt className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2 shrink-0" />
                 Boletas y Facturas
               </Button>
               <Button
-                variant="outline"
                 className="justify-start rounded-xl border-epoch-primary/20 min-h-[44px] text-xs sm:text-sm"
+                variant="outline"
                 onClick={() => onTabChange("maintenance")}
               >
                 <Shield className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2 shrink-0" />

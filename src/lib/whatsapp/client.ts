@@ -3,8 +3,9 @@
  * Usado para B2B (notificaciones) y B2C (respuestas del Agent)
  */
 
-import type { WhatsAppSendTextRequest, WhatsAppSendResponse } from "./types";
 import { appLogger as logger } from "@/lib/logger";
+
+import type { WhatsAppSendResponse, WhatsAppSendTextRequest } from "./types";
 
 const META_GRAPH_API_BASE = "https://graph.facebook.com/v18.0";
 

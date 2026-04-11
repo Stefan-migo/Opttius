@@ -1,8 +1,9 @@
 "use client";
 
+import { AlertCircle, Home, RefreshCw } from "lucide-react";
 import { useEffect } from "react";
+
 import { Button } from "@/components/ui/button";
-import { AlertCircle, RefreshCw, Home } from "lucide-react";
 import { logger } from "@/lib/logger";
 
 /**
@@ -18,7 +19,7 @@ export default function Error({
 }) {
   useEffect(() => {
     // Log error to logger
-    logger.error("Global error page triggered", error as any, {
+    logger.error("Global error page triggered", error as unknown, {
       digest: error.digest,
       globalError: true,
       timestamp: new Date().toISOString(),
@@ -54,16 +55,16 @@ export default function Error({
         </div>
 
         <div className="flex flex-col gap-2 sm:flex-row">
-          <Button onClick={reset} variant="default" className="flex-1">
+          <Button className="flex-1" variant="default" onClick={reset}>
             <RefreshCw className="mr-2 h-4 w-4" />
             Intentar de nuevo
           </Button>
           <Button
+            className="flex-1"
+            variant="outline"
             onClick={() => {
               window.location.href = "/";
             }}
-            variant="outline"
-            className="flex-1"
           >
             <Home className="mr-2 h-4 w-4" />
             Volver al inicio

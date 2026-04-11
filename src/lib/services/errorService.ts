@@ -30,7 +30,7 @@ export interface StandardError {
   message: string;
   userMessage: string;
   code?: string;
-  details?: any;
+  details?: unknown;
   timestamp: string;
 }
 

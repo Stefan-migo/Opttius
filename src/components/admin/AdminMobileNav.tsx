@@ -1,10 +1,11 @@
 "use client";
 
-import { MessageSquare, Sparkles, Building2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { BranchSelector } from "@/components/admin/BranchSelector";
+import { Building2, MessageSquare, Sparkles } from "lucide-react";
+
 import AdminNotificationDropdown from "@/components/admin/AdminNotificationDropdown";
+import { BranchSelector } from "@/components/admin/BranchSelector";
 import { ThemeSelector } from "@/components/theme-selector";
+import { Button } from "@/components/ui/button";
 
 interface AdminMobileNavProps {
   onChatbotClick: () => void;
@@ -20,8 +21,8 @@ export function AdminMobileNav({
       <div className="flex items-center justify-around h-16 px-1 [&_button]:text-[#F9F7F2] [&_button:hover]:text-white [&_button:hover]:bg-white/10 [&_svg]:text-[#F9F7F2]">
         <div className="relative flex items-center justify-center min-w-[44px] min-h-[44px]">
           <Building2
-            className="h-5 w-5 flex-shrink-0 text-[#F9F7F2] pointer-events-none"
             aria-hidden
+            className="h-5 w-5 flex-shrink-0 text-[#F9F7F2] pointer-events-none"
           />
           <div className="absolute inset-0 flex items-center justify-center [&_button]:border-0 [&_button]:shadow-none [&_button]:bg-transparent [&_button]:opacity-0 [&_button>span]:hidden [&_button]:w-full [&_button]:h-full [&_button]:min-w-0">
             <BranchSelector />
@@ -33,11 +34,11 @@ export function AdminMobileNav({
         {/* Chatbot - center, opens full screen */}
         <div className="flex items-center justify-center min-w-[44px] min-h-[44px]">
           <Button
-            variant="ghost"
-            size="icon"
-            onClick={onChatbotClick}
-            className="min-w-[44px] min-h-[44px] rounded-xl text-[#F9F7F2] hover:bg-white/10 hover:text-white"
             aria-label="Asistente IA"
+            className="min-w-[44px] min-h-[44px] rounded-xl text-[#F9F7F2] hover:bg-white/10 hover:text-white"
+            size="icon"
+            variant="ghost"
+            onClick={onChatbotClick}
           >
             <MessageSquare className="h-5 w-5" />
           </Button>
@@ -45,11 +46,11 @@ export function AdminMobileNav({
         {/* Insights */}
         <div className="flex items-center justify-center min-w-[44px] min-h-[44px]">
           <Button
-            variant="ghost"
-            size="icon"
-            onClick={onInsightsClick}
-            className="min-w-[44px] min-h-[44px] rounded-xl text-[#F9F7F2] hover:bg-white/10 hover:text-white"
             aria-label="Insights Inteligentes"
+            className="min-w-[44px] min-h-[44px] rounded-xl text-[#F9F7F2] hover:bg-white/10 hover:text-white"
+            size="icon"
+            variant="ghost"
+            onClick={onInsightsClick}
           >
             <Sparkles className="h-5 w-5" />
           </Button>

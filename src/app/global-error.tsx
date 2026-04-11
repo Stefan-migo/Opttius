@@ -27,7 +27,6 @@ export default function GlobalError({
           <h2>Algo salió mal</h2>
           <p>Ha ocurrido un error inesperado. El equipo ha sido notificado.</p>
           <button
-            onClick={() => reset()}
             style={{
               marginTop: "1rem",
               padding: "0.5rem 1rem",
@@ -37,6 +36,7 @@ export default function GlobalError({
               border: "none",
               borderRadius: "4px",
             }}
+            onClick={() => reset()}
           >
             Intentar de nuevo
           </button>

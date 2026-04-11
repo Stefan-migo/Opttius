@@ -1,14 +1,27 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import {
-  extractDataFromResponse,
-  extractPaginationFromResponse,
-} from "@/lib/api/response-helpers";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+  ArrowLeft,
+  ArrowRight,
+  Building2,
+  CheckCircle2,
+  Filter,
+  Loader2,
+  MessageSquare,
+  RefreshCw,
+  Search,
+  User,
+  XCircle,
+} from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+
+import { SupportMetrics } from "@/components/admin/saas-support/SupportMetrics";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -18,23 +31,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  Search,
-  Building2,
-  User,
-  Loader2,
-  ArrowRight,
-  Shield,
-  CheckCircle2,
-  XCircle,
-  ArrowLeft,
-  MessageSquare,
-  Filter,
-  RefreshCw,
-  BarChart3,
-} from "lucide-react";
-import { toast } from "sonner";
-import Link from "next/link";
-import { SupportMetrics } from "@/components/admin/saas-support/SupportMetrics";
+  extractDataFromResponse,
+  extractPaginationFromResponse,
+} from "@/lib/api/response-helpers";
 
 interface SearchResult {
   organizations: Array<{
@@ -255,41 +254,41 @@ export default function SupportPage() {
   };
 
   return (
-    <div className="space-y-6 p-6 bg-epoch-background min-h-screen">
+    <div className="space-y-6 p-6 bg-[#0D1117] min-h-screen">
       <div className="flex items-center gap-4">
         <Button
-          variant="ghost"
+          className="rounded-xl text-white hover:bg-white/10"
           size="icon"
-          onClick={() => router.push("/admin/saas-management/dashboard")}
           title="Volver al dashboard"
-          className="rounded-xl text-epoch-primary hover:bg-epoch-primary/10"
+          variant="ghost"
+          onClick={() => router.push("/admin/saas-management/dashboard")}
         >
           <ArrowLeft className="h-5 w-5" />
         </Button>
         <div>
-          <h1 className="text-3xl font-display font-bold text-epoch-primary tracking-tight">
+          <h1 className="text-3xl font-display font-bold text-white tracking-tight">
             Panel de Soporte
           </h1>
-          <p className="text-epoch-primary/80 mt-2">
+          <p className="text-white/50 mt-2">
             Gestión de tickets de soporte SaaS y búsqueda rápida
           </p>
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-2 border-b border-epoch-primary/20">
+      <div className="flex gap-2 border-b border-white/10">
         <Button
+          className={`rounded-xl rounded-b-none ${activeTab === "tickets" ? "bg-epoch-primary hover:bg-epoch-surface text-white font-display font-bold text-[10px] tracking-[0.2em] uppercase" : "text-epoch-primary"}`}
           variant={activeTab === "tickets" ? "default" : "ghost"}
           onClick={() => setActiveTab("tickets")}
-          className={`rounded-xl rounded-b-none ${activeTab === "tickets" ? "bg-epoch-primary hover:bg-epoch-surface text-white font-display font-bold text-[10px] tracking-[0.2em] uppercase" : "text-epoch-primary"}`}
         >
           <MessageSquare className="h-4 w-4 mr-2" />
           Tickets de Soporte
         </Button>
         <Button
+          className={`rounded-xl rounded-b-none ${activeTab === "search" ? "bg-epoch-primary hover:bg-epoch-surface text-white font-display font-bold text-[10px] tracking-[0.2em] uppercase" : "text-epoch-primary"}`}
           variant={activeTab === "search" ? "default" : "ghost"}
           onClick={() => setActiveTab("search")}
-          className={`rounded-xl rounded-b-none ${activeTab === "search" ? "bg-epoch-primary hover:bg-epoch-surface text-white font-display font-bold text-[10px] tracking-[0.2em] uppercase" : "text-epoch-primary"}`}
         >
           <Search className="h-4 w-4 mr-2" />
           Búsqueda Rápida
@@ -397,6 +396,7 @@ export default function SupportPage() {
                   <label className="text-sm font-medium">Buscar</label>
                   <div className="flex gap-2">
                     <Input
+                      className="rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20"
                       placeholder="Ticket #, asunto, email..."
                       value={filters.search}
                       onChange={(e) =>
@@ -406,14 +406,13 @@ export default function SupportPage() {
                           page: 1,
                         }))
                       }
-                      className="rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20"
                     />
                     <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={loadTickets}
-                      title="Refrescar"
                       className="rounded-xl border-admin-border-primary/20"
+                      size="icon"
+                      title="Refrescar"
+                      variant="outline"
+                      onClick={loadTickets}
                     >
                       <RefreshCw className="h-4 w-4" />
                     </Button>
@@ -444,8 +443,8 @@ export default function SupportPage() {
                 <div className="space-y-2">
                   {tickets.map((ticket) => (
                     <Link
-                      key={ticket.id}
                       href={`/admin/saas-management/support/tickets/${ticket.id}`}
+                      key={ticket.id}
                     >
                       <div className="flex items-center justify-between p-4 border rounded-xl hover:bg-epoch-primary/5 cursor-pointer transition-colors">
                         <div className="flex-1">
@@ -501,30 +500,30 @@ export default function SupportPage() {
                   </p>
                   <div className="flex gap-2">
                     <Button
-                      variant="outline"
-                      size="sm"
                       className="rounded-xl border-admin-border-primary/20"
+                      disabled={pagination.page === 1}
+                      size="sm"
+                      variant="outline"
                       onClick={() =>
                         setPagination((prev) => ({
                           ...prev,
                           page: Math.max(1, prev.page - 1),
                         }))
                       }
-                      disabled={pagination.page === 1}
                     >
                       Anterior
                     </Button>
                     <Button
-                      variant="outline"
-                      size="sm"
                       className="rounded-xl border-admin-border-primary/20"
+                      disabled={pagination.page === pagination.totalPages}
+                      size="sm"
+                      variant="outline"
                       onClick={() =>
                         setPagination((prev) => ({
                           ...prev,
                           page: Math.min(prev.totalPages, prev.page + 1),
                         }))
                       }
-                      disabled={pagination.page === pagination.totalPages}
                     >
                       Siguiente
                     </Button>
@@ -545,10 +544,10 @@ export default function SupportPage() {
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-epoch-accent" />
                 <Input
+                  className="pl-10 rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20"
                   placeholder="Buscar por nombre, slug, email..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20"
                 />
               </div>
               {searching && (
@@ -576,8 +575,8 @@ export default function SupportPage() {
                     <div className="space-y-3">
                       {searchResults.organizations.map((org) => (
                         <div
-                          key={org.id}
                           className="flex items-center justify-between p-4 border rounded-xl hover:bg-epoch-primary/5 transition-colors"
+                          key={org.id}
                         >
                           <div className="flex-1">
                             <div className="flex items-center gap-2">
@@ -597,9 +596,9 @@ export default function SupportPage() {
                             href={`/admin/saas-management/organizations/${org.id}`}
                           >
                             <Button
-                              variant="outline"
-                              size="sm"
                               className="rounded-xl border-admin-border-primary/20"
+                              size="sm"
+                              variant="outline"
                             >
                               Ver detalles
                               <ArrowRight className="h-4 w-4 ml-2" />
@@ -625,8 +624,8 @@ export default function SupportPage() {
                     <div className="space-y-3">
                       {searchResults.users.map((user) => (
                         <div
-                          key={user.id}
                           className="flex items-center justify-between p-4 border rounded-xl hover:bg-epoch-primary/5 transition-colors"
+                          key={user.id}
                         >
                           <div className="flex-1">
                             <div className="flex items-center gap-2">
@@ -660,9 +659,9 @@ export default function SupportPage() {
                             href={`/admin/saas-management/users/${user.id}`}
                           >
                             <Button
-                              variant="outline"
-                              size="sm"
                               className="rounded-xl border-admin-border-primary/20"
+                              size="sm"
+                              variant="outline"
                             >
                               Ver detalles
                               <ArrowRight className="h-4 w-4 ml-2" />

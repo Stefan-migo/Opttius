@@ -8,10 +8,11 @@
  */
 
 import { z } from "zod";
+
 import {
+  completeRUTIfNeeded,
   isValidRUT,
   isValidRUTFormat,
-  completeRUTIfNeeded,
 } from "@/lib/utils/rut";
 
 /**

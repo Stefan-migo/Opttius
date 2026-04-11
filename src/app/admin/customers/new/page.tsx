@@ -1,23 +1,24 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { ArrowLeft, MapPin, Save, User } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useEffect, useState } from "react";
+
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import FormField, { FormFieldActionsExtended } from "@/components/ui/FormField";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Save, User, MapPin } from "lucide-react";
-import { useForm } from "@/hooks/useForm";
-import FormField, { FormFieldActionsExtended } from "@/components/ui/FormField";
-import { customerSchema } from "@/lib/validation/formValidation";
-import {
-  success,
-  error as notifyError,
-} from "@/lib/services/notificationService";
-import { handleApiError } from "@/lib/services/errorService";
 import { useBranch } from "@/hooks/useBranch";
+import { useForm } from "@/hooks/useForm";
 import { customerService } from "@/lib/api/services/customerService";
+import { handleApiError } from "@/lib/services/errorService";
+import {
+  error as notifyError,
+  success,
+} from "@/lib/services/notificationService";
 import { formatRUT } from "@/lib/utils/rut";
+import { customerSchema } from "@/lib/validation/formValidation";
 
 export default function NewCustomerPage() {
   const router = useRouter();
@@ -119,10 +120,10 @@ export default function NewCustomerPage() {
       <div className="space-y-4">
         <div className="flex items-center gap-3">
           <Button
-            variant="outline"
-            size="sm"
-            onClick={() => router.back()}
             className="min-h-[44px] shrink-0"
+            size="sm"
+            variant="outline"
+            onClick={() => router.back()}
           >
             <ArrowLeft className="h-4 w-4" />
           </Button>
@@ -134,12 +135,12 @@ export default function NewCustomerPage() {
           Registro de Archivo en la Base de Datos
         </p>
         <FormFieldActionsExtended
-          onCancel={() => router.back()}
-          onSubmit={form.handleSubmit}
           isSubmitting={form.isSubmitting}
+          submitIcon={<Save className="h-4 w-4 mr-2" />}
           submitLabel="Crear Cliente"
           submittingLabel="Creando..."
-          submitIcon={<Save className="h-4 w-4 mr-2" />}
+          onCancel={() => router.back()}
+          onSubmit={form.handleSubmit}
         />
       </div>
 
@@ -153,7 +154,7 @@ export default function NewCustomerPage() {
       )}
 
       {/* Form */}
-      <form onSubmit={form.handleSubmit} className="space-y-6">
+      <form className="space-y-6" onSubmit={form.handleSubmit}>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
           {/* Personal Information */}
           <Card className="border border-admin-border-primary/30 bg-admin-bg-tertiary shadow-premium-sm rounded-xl overflow-hidden">
@@ -166,87 +167,87 @@ export default function NewCustomerPage() {
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <FormField
-                  label="Nombre"
                   required
                   error={form.errors.first_name?.message}
+                  label="Nombre"
                   labelClassName="text-xs sm:text-sm"
                 >
                   <Input
+                    aria-invalid={!!form.errors.first_name}
+                    className="h-12 sm:h-14"
                     id="first_name"
+                    placeholder="Nombre"
                     value={form.values.first_name}
                     onChange={(e) =>
                       form.setValue("first_name", e.target.value)
                     }
-                    placeholder="Nombre"
-                    aria-invalid={!!form.errors.first_name}
-                    className="h-12 sm:h-14"
                   />
                 </FormField>
 
                 <FormField
-                  label="Apellido"
                   required
                   error={form.errors.last_name?.message}
+                  label="Apellido"
                   labelClassName="text-xs sm:text-sm"
                 >
                   <Input
-                    id="last_name"
-                    value={form.values.last_name}
-                    onChange={(e) => form.setValue("last_name", e.target.value)}
-                    placeholder="Apellido"
                     aria-invalid={!!form.errors.last_name}
                     className="h-12 sm:h-14"
+                    id="last_name"
+                    placeholder="Apellido"
+                    value={form.values.last_name}
+                    onChange={(e) => form.setValue("last_name", e.target.value)}
                   />
                 </FormField>
               </div>
 
               <FormField
-                label="Email"
-                error={form.errors.email?.message}
                 description="Opcional"
+                error={form.errors.email?.message}
+                label="Email"
                 labelClassName="text-xs sm:text-sm"
               >
                 <Input
+                  aria-invalid={!!form.errors.email}
+                  className="h-12 sm:h-14"
                   id="email"
+                  placeholder="email@ejemplo.com"
                   type="email"
                   value={form.values.email}
                   onChange={(e) => form.setValue("email", e.target.value)}
-                  placeholder="email@ejemplo.com"
-                  aria-invalid={!!form.errors.email}
-                  className="h-12 sm:h-14"
                 />
               </FormField>
 
               <FormField
-                label="Teléfono"
-                error={form.errors.phone?.message}
                 description="Opcional"
+                error={form.errors.phone?.message}
+                label="Teléfono"
                 labelClassName="text-xs sm:text-sm"
               >
                 <Input
-                  id="phone"
-                  value={form.values.phone}
-                  onChange={(e) => form.setValue("phone", e.target.value)}
-                  placeholder="+54 9 11 1234-5678"
                   aria-invalid={!!form.errors.phone}
                   className="h-12 sm:h-14"
+                  id="phone"
+                  placeholder="+54 9 11 1234-5678"
+                  value={form.values.phone}
+                  onChange={(e) => form.setValue("phone", e.target.value)}
                 />
               </FormField>
 
               <FormField
-                label="RUT"
-                error={form.errors.rut?.message}
                 description="Rol Único Tributario (opcional)"
+                error={form.errors.rut?.message}
+                label="RUT"
                 labelClassName="text-xs sm:text-sm"
               >
                 <Input
-                  id="rut"
-                  value={form.values.rut}
-                  onChange={(e) => handleRUTChange(e.target.value)}
-                  onBlur={(e) => handleRUTBlur(e.target.value)}
-                  placeholder="12.345.678-9 o 123456789"
                   aria-invalid={!!form.errors.rut}
                   className="h-12 sm:h-14"
+                  id="rut"
+                  placeholder="12.345.678-9 o 123456789"
+                  value={form.values.rut}
+                  onBlur={(e) => handleRUTBlur(e.target.value)}
+                  onChange={(e) => handleRUTChange(e.target.value)}
                 />
               </FormField>
             </CardContent>
@@ -262,102 +263,102 @@ export default function NewCustomerPage() {
             </CardHeader>
             <CardContent className="space-y-4">
               <FormField
-                label="Dirección"
                 error={form.errors.address_line_1?.message}
+                label="Dirección"
                 labelClassName="text-xs sm:text-sm"
               >
                 <Input
+                  aria-invalid={!!form.errors.address_line_1}
+                  className="h-12 sm:h-14"
                   id="address_line_1"
+                  placeholder="Calle y número"
                   value={form.values.address_line_1}
                   onChange={(e) =>
                     form.setValue("address_line_1", e.target.value)
                   }
-                  placeholder="Calle y número"
-                  aria-invalid={!!form.errors.address_line_1}
-                  className="h-12 sm:h-14"
                 />
               </FormField>
 
               <FormField
-                label="Dirección 2"
-                error={form.errors.address_line_2?.message}
                 description="Opcional - Departamento, piso, etc."
+                error={form.errors.address_line_2?.message}
+                label="Dirección 2"
                 labelClassName="text-xs sm:text-sm"
               >
                 <Input
+                  aria-invalid={!!form.errors.address_line_2}
+                  className="h-12 sm:h-14"
                   id="address_line_2"
+                  placeholder="Departamento, piso, etc."
                   value={form.values.address_line_2}
                   onChange={(e) =>
                     form.setValue("address_line_2", e.target.value)
                   }
-                  placeholder="Departamento, piso, etc."
-                  aria-invalid={!!form.errors.address_line_2}
-                  className="h-12 sm:h-14"
                 />
               </FormField>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <FormField
-                  label="Ciudad"
                   error={form.errors.city?.message}
+                  label="Ciudad"
                   labelClassName="text-xs sm:text-sm"
                 >
                   <Input
-                    id="city"
-                    value={form.values.city}
-                    onChange={(e) => form.setValue("city", e.target.value)}
-                    placeholder="Ciudad"
                     aria-invalid={!!form.errors.city}
                     className="h-12 sm:h-14"
+                    id="city"
+                    placeholder="Ciudad"
+                    value={form.values.city}
+                    onChange={(e) => form.setValue("city", e.target.value)}
                   />
                 </FormField>
 
                 <FormField
-                  label="Provincia"
                   error={form.errors.state?.message}
+                  label="Provincia"
                   labelClassName="text-xs sm:text-sm"
                 >
                   <Input
-                    id="state"
-                    value={form.values.state}
-                    onChange={(e) => form.setValue("state", e.target.value)}
-                    placeholder="Provincia"
                     aria-invalid={!!form.errors.state}
                     className="h-12 sm:h-14"
+                    id="state"
+                    placeholder="Provincia"
+                    value={form.values.state}
+                    onChange={(e) => form.setValue("state", e.target.value)}
                   />
                 </FormField>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <FormField
-                  label="Código Postal"
                   error={form.errors.postal_code?.message}
+                  label="Código Postal"
                   labelClassName="text-xs sm:text-sm"
                 >
                   <Input
+                    aria-invalid={!!form.errors.postal_code}
+                    className="h-12 sm:h-14"
                     id="postal_code"
+                    placeholder="1234"
                     value={form.values.postal_code}
                     onChange={(e) =>
                       form.setValue("postal_code", e.target.value)
                     }
-                    placeholder="1234"
-                    aria-invalid={!!form.errors.postal_code}
-                    className="h-12 sm:h-14"
                   />
                 </FormField>
 
                 <FormField
-                  label="País"
                   error={form.errors.country?.message}
+                  label="País"
                   labelClassName="text-xs sm:text-sm"
                 >
                   <Input
-                    id="country"
-                    value={form.values.country}
-                    onChange={(e) => form.setValue("country", e.target.value)}
-                    placeholder="País"
                     aria-invalid={!!form.errors.country}
                     className="h-12 sm:h-14"
+                    id="country"
+                    placeholder="País"
+                    value={form.values.country}
+                    onChange={(e) => form.setValue("country", e.target.value)}
                   />
                 </FormField>
               </div>
@@ -373,18 +374,18 @@ export default function NewCustomerPage() {
             </CardHeader>
             <CardContent>
               <FormField
-                label="Notas"
-                error={form.errors.notes?.message}
                 description="Notas sobre el cliente"
+                error={form.errors.notes?.message}
+                label="Notas"
                 labelClassName="text-xs sm:text-sm"
               >
                 <Textarea
+                  aria-invalid={!!form.errors.notes}
+                  className="min-h-[100px]"
                   id="notes"
+                  placeholder="Notas sobre el cliente..."
                   value={form.values.notes}
                   onChange={(e) => form.setValue("notes", e.target.value)}
-                  placeholder="Notas sobre el cliente..."
-                  className="min-h-[100px]"
-                  aria-invalid={!!form.errors.notes}
                 />
               </FormField>
             </CardContent>

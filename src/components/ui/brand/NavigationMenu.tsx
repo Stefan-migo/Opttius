@@ -1,18 +1,19 @@
 "use client";
 
-import React, { useState } from "react";
 import { cva, type VariantProps } from "class-variance-authority";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import {
   ChevronDown,
   ChevronRight,
   Home,
   Leaf,
-  Sparkles,
   ShoppingBag,
+  Sparkles,
 } from "lucide-react";
+import React, { useState } from "react";
+
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 const navigationVariants = cva(
   "relative bg-white border-b shadow-sm transition-all duration-300",
@@ -119,12 +120,12 @@ export function NavigationMenu({
             <div className="hidden md:flex items-center space-x-1">
               {items.map((item, index) => (
                 <NavItemComponent
-                  key={`${item.label}-${index}`}
-                  item={item}
                   isActive={activeMenu === item.label}
+                  item={item}
+                  key={`${item.label}-${index}`}
+                  onClick={onItemClick}
                   onHover={handleItemHover}
                   onLeave={handleMenuLeave}
-                  onClick={onItemClick}
                 />
               ))}
             </div>
@@ -171,20 +172,20 @@ function NavItemComponent({
       onMouseLeave={() => hasChildren && onLeave()}
     >
       <Button
-        variant="ghost"
+        asChild={!!item.href}
         className={cn(
           "group/button relative px-4 py-2 h-auto font-medium transition-all duration-200 hover:bg-line-lightest/50",
           isActive && "text-line-primary bg-line-lightest/30",
         )}
+        variant="ghost"
         onClick={handleClick}
-        asChild={!!item.href}
       >
         {item.href ? (
-          <a href={item.href} className="flex items-center space-x-2">
+          <a className="flex items-center space-x-2" href={item.href}>
             {item.icon && <span className="w-4 h-4">{item.icon}</span>}
             <span>{item.label}</span>
             {item.badge && (
-              <Badge variant="secondary" className="ml-2 text-xs">
+              <Badge className="ml-2 text-xs" variant="secondary">
                 {item.badge}
               </Badge>
             )}
@@ -197,7 +198,7 @@ function NavItemComponent({
             {item.icon && <span className="w-4 h-4">{item.icon}</span>}
             <span>{item.label}</span>
             {item.badge && (
-              <Badge variant="secondary" className="ml-2 text-xs">
+              <Badge className="ml-2 text-xs" variant="secondary">
                 {item.badge}
               </Badge>
             )}
@@ -211,10 +212,10 @@ function NavItemComponent({
       {/* Mega Menu */}
       {hasChildren && (
         <MegaMenu
-          item={item}
-          isOpen={isActive}
-          onClose={onLeave}
           className={cn(megaMenuVariants({ lineTheme: item.lineTheme }))}
+          isOpen={isActive}
+          item={item}
+          onClose={onLeave}
         />
       )}
     </div>
@@ -229,7 +230,7 @@ function MegaMenu({ item, isOpen, onClose, className }: MegaMenuProps) {
       <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-8">
           {item.children.map((child, index) => (
-            <div key={`${child.label}-${index}`} className="space-y-4">
+            <div className="space-y-4" key={`${child.label}-${index}`}>
               <div className="flex items-center space-x-2">
                 {child.icon && (
                   <div className="w-5 h-5 text-line-primary">{child.icon}</div>
@@ -238,7 +239,7 @@ function MegaMenu({ item, isOpen, onClose, className }: MegaMenuProps) {
                   {child.label}
                 </h3>
                 {child.featured && (
-                  <Badge variant="secondary" className="text-xs">
+                  <Badge className="text-xs" variant="secondary">
                     Popular
                   </Badge>
                 )}
@@ -249,8 +250,8 @@ function MegaMenu({ item, isOpen, onClose, className }: MegaMenuProps) {
                   {child.children.map((grandchild, gIndex) => (
                     <li key={`${grandchild.label}-${gIndex}`}>
                       <a
-                        href={grandchild.href}
                         className="flex items-center space-x-2 text-muted-foreground hover:text-line-primary transition-colors duration-200 group"
+                        href={grandchild.href}
                         onClick={() => {
                           if (grandchild.onClick) grandchild.onClick();
                           onClose();
@@ -259,7 +260,7 @@ function MegaMenu({ item, isOpen, onClose, className }: MegaMenuProps) {
                         <ChevronRight className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
                         <span>{grandchild.label}</span>
                         {grandchild.badge && (
-                          <Badge variant="outline" className="text-xs">
+                          <Badge className="text-xs" variant="outline">
                             {grandchild.badge}
                           </Badge>
                         )}
@@ -284,8 +285,8 @@ export function Breadcrumb({
   return (
     <nav className={cn("flex items-center space-x-2 text-sm", className)}>
       <a
-        href="/"
         className="flex items-center text-muted-foreground hover:text-line-primary transition-colors"
+        href="/"
       >
         <Home className="w-4 h-4" />
         <span className="sr-only">Home</span>
@@ -296,8 +297,8 @@ export function Breadcrumb({
           {separator}
           {item.href ? (
             <a
-              href={item.href}
               className="text-muted-foreground hover:text-line-primary transition-colors"
+              href={item.href}
             >
               {item.label}
             </a>

@@ -1,9 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { ArrowLeft, Loader2 } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useState } from "react";
+
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -13,13 +16,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ArrowLeft, Loader2 } from "lucide-react";
-import Link from "next/link";
-import { formatRUT, formatRUTAsYouType } from "@/lib/utils/rut";
 import { useBranch } from "@/hooks/useBranch";
 import { agreementService } from "@/lib/api/services/agreementService";
 import { handleApiError } from "@/lib/services/errorService";
 import { success } from "@/lib/services/notificationService";
+import { formatRUT, formatRUTAsYouType } from "@/lib/utils/rut";
 
 export default function NewAgreementPage() {
   const router = useRouter();
@@ -84,7 +85,7 @@ export default function NewAgreementPage() {
     <div className="space-y-6">
       <div className="flex items-center gap-4">
         <Link href="/admin/agreements">
-          <Button variant="ghost" size="icon">
+          <Button size="icon" variant="ghost">
             <ArrowLeft className="h-4 w-4" />
           </Button>
         </Link>
@@ -114,12 +115,12 @@ export default function NewAgreementPage() {
               <div>
                 <Label htmlFor="name">Nombre del convenio</Label>
                 <Input
+                  required
                   id="name"
+                  minLength={2}
+                  placeholder="Ej: Minera X - Sucursal Centro"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="Ej: Minera X - Sucursal Centro"
-                  required
-                  minLength={2}
                 />
               </div>
               <div>
@@ -148,22 +149,21 @@ export default function NewAgreementPage() {
                   Razón social institucional
                 </Label>
                 <Input
+                  required
                   id="institutionName"
+                  minLength={2}
+                  placeholder="Ej: Minera Escondida Ltda."
                   value={institutionName}
                   onChange={(e) => setInstitutionName(e.target.value)}
-                  placeholder="Ej: Minera Escondida Ltda."
-                  required
-                  minLength={2}
                 />
               </div>
               <div>
                 <Label htmlFor="institutionRut">RUT institucional</Label>
                 <Input
+                  required
                   id="institutionRut"
+                  placeholder="12.345.678-9"
                   value={institutionRut}
-                  onChange={(e) =>
-                    setInstitutionRut(formatRUTAsYouType(e.target.value))
-                  }
                   onBlur={(e) => {
                     const val = e.target.value.trim();
                     if (val) {
@@ -171,8 +171,9 @@ export default function NewAgreementPage() {
                       if (formatted) setInstitutionRut(formatted);
                     }
                   }}
-                  placeholder="12.345.678-9"
-                  required
+                  onChange={(e) =>
+                    setInstitutionRut(formatRUTAsYouType(e.target.value))
+                  }
                 />
               </div>
             </div>
@@ -182,9 +183,9 @@ export default function NewAgreementPage() {
                 <Label htmlFor="representativeName">Nombre del contacto</Label>
                 <Input
                   id="representativeName"
+                  placeholder="RR.HH."
                   value={representativeName}
                   onChange={(e) => setRepresentativeName(e.target.value)}
-                  placeholder="RR.HH."
                 />
               </div>
               <div>
@@ -210,11 +211,11 @@ export default function NewAgreementPage() {
               <div>
                 <Label htmlFor="validFrom">Vigencia desde</Label>
                 <Input
+                  required
                   id="validFrom"
                   type="date"
                   value={validFrom}
                   onChange={(e) => setValidFrom(e.target.value)}
-                  required
                 />
               </div>
               <div>
@@ -233,9 +234,9 @@ export default function NewAgreementPage() {
                 <Label htmlFor="copagoPercent">% Copago (trabajador)</Label>
                 <Input
                   id="copagoPercent"
-                  type="number"
-                  min={0}
                   max={100}
+                  min={0}
+                  type="number"
                   value={copagoPercent}
                   onChange={(e) => setCopagoPercent(Number(e.target.value))}
                 />
@@ -247,9 +248,9 @@ export default function NewAgreementPage() {
                 <Label htmlFor="discountPercent">% Descuento (opcional)</Label>
                 <Input
                   id="discountPercent"
-                  type="number"
-                  min={0}
                   max={100}
+                  min={0}
+                  type="number"
                   value={discountPercent}
                   onChange={(e) =>
                     setDiscountPercent(
@@ -264,14 +265,14 @@ export default function NewAgreementPage() {
               <Label htmlFor="notes">Notas</Label>
               <Input
                 id="notes"
+                placeholder="Notas internas"
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                placeholder="Notas internas"
               />
             </div>
 
             <div className="flex gap-2">
-              <Button type="submit" disabled={loading}>
+              <Button disabled={loading} type="submit">
                 {loading ? (
                   <Loader2 className="h-4 w-4 animate-spin mr-2" />
                 ) : null}

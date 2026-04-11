@@ -1,9 +1,10 @@
 "use client";
 
+import { AuthError, Session, User } from "@supabase/supabase-js";
 import { useEffect, useState } from "react";
-import { User, Session, AuthError } from "@supabase/supabase-js";
-import { createClient } from "@/utils/supabase/client";
+
 import { Tables } from "@/types/database";
+import { createClient } from "@/utils/supabase/client";
 
 type Profile = Tables<"profiles">;
 

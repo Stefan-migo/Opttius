@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient, createServiceRoleClient } from "@/utils/supabase/server";
-import { appLogger as logger } from "@/lib/logger";
 import { z } from "zod";
+
+import { appLogger as logger } from "@/lib/logger";
+import { createClient, createServiceRoleClient } from "@/utils/supabase/server";
 
 const SURVEY_CONFIG_KEYS = [
   "survey_enabled",

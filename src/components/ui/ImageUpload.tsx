@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { Loader2, Upload, X } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
+
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent } from "@/components/ui/card";
-import { Upload, X, Image as ImageIcon, Loader2 } from "lucide-react";
-import { toast } from "sonner";
 
 interface ImageUploadProps {
   value: string;
@@ -122,18 +123,18 @@ export default function ImageUpload({
             </Label>
             <div className="space-y-2">
               <input
+                accept="image/*"
+                className="hidden"
                 ref={fileInputRef}
                 type="file"
-                accept="image/*"
                 onChange={handleFileSelect}
-                className="hidden"
               />
               <Button
+                className="w-full"
+                disabled={uploading}
                 type="button"
                 variant="outline"
                 onClick={openFileDialog}
-                disabled={uploading}
-                className="w-full"
               >
                 {uploading ? (
                   <>
@@ -187,9 +188,9 @@ export default function ImageUpload({
             <div className="flex items-center justify-between mb-2">
               <Label className="text-sm font-medium">Vista previa</Label>
               <Button
+                size="sm"
                 type="button"
                 variant="outline"
-                size="sm"
                 onClick={clearImage}
               >
                 <X className="h-4 w-4" />
@@ -197,9 +198,9 @@ export default function ImageUpload({
             </div>
             <div className="relative">
               <img
-                src={preview || value}
                 alt="Preview"
                 className="w-full h-auto max-h-48 object-contain rounded-md border bg-white p-2"
+                src={preview || value}
                 onError={() => {
                   toast.error("Error al cargar la imagen");
                   setPreview(null);

@@ -1,29 +1,31 @@
 "use client";
 
-import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  Sparkles,
   ChevronDown,
   ChevronUp,
-  X,
-  RefreshCw,
   Loader2,
+  RefreshCw,
+  Sparkles,
+  X,
 } from "lucide-react";
-import { InsightCard } from "./InsightCard";
-import { InsightDetailDialog } from "./InsightDetailDialog";
+import { useState } from "react";
+import { toast } from "sonner";
+
 import { Button } from "@/components/ui/button";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
-import { toast } from "sonner";
 import type {
-  InsightSection,
   DatabaseInsight,
+  InsightSection,
 } from "@/lib/ai/insights/schemas";
+import { cn } from "@/lib/utils";
+
+import { InsightCard } from "./InsightCard";
+import { InsightDetailDialog } from "./InsightDetailDialog";
 
 interface SmartContextWidgetProps {
   section: InsightSection;
@@ -147,7 +149,7 @@ export function SmartContextWidget({
       sections.forEach((s) => {
         queryClient.invalidateQueries({ queryKey: ["ai-insights", s] });
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast.error("Error generando insights", {
         description: error.message || "Intenta nuevamente",
       });
@@ -190,15 +192,15 @@ export function SmartContextWidget({
         </div>
         <div className="flex items-center gap-1">
           <Button
-            variant="ghost"
-            size="sm"
             className="h-6 w-6 p-0"
+            disabled={isRegenerating}
+            size="sm"
+            title="Regenerar insights"
+            variant="ghost"
             onClick={(e) => {
               e.stopPropagation();
               regenerateInsights();
             }}
-            disabled={isRegenerating}
-            title="Regenerar insights"
           >
             <RefreshCw
               className={cn(
@@ -208,9 +210,9 @@ export function SmartContextWidget({
             />
           </Button>
           <Button
-            variant="ghost"
-            size="sm"
             className="h-6 w-6 p-0"
+            size="sm"
+            variant="ghost"
             onClick={(e) => {
               e.stopPropagation();
               handleClose();
@@ -237,11 +239,11 @@ export function SmartContextWidget({
               No hay insights disponibles aún
             </p>
             <Button
-              onClick={regenerateInsights}
-              disabled={isRegenerating}
-              variant="outline"
-              size="sm"
               className="mt-2"
+              disabled={isRegenerating}
+              size="sm"
+              variant="outline"
+              onClick={regenerateInsights}
             >
               {isRegenerating ? (
                 <>
@@ -260,16 +262,18 @@ export function SmartContextWidget({
           <>
             {sortedInsights.map((insight, index) => (
               <div
-                key={insight.id}
                 className={cn(
                   "p-3 border-b border-epoch-primary/10 last:border-b-0 dark:border-gray-800",
                   index === 0 &&
                     "bg-epoch-background/80 dark:bg-epoch-primary/10",
                 )}
+                key={insight.id}
               >
                 <InsightCard
+                  compact={true}
                   insight={insight}
                   onDismiss={() => dismissInsight.mutate(insight.id)}
+                  onExpand={() => openInsightDetail(insight)}
                   onFeedback={(score, comment) =>
                     sendFeedback.mutate({
                       insightId: insight.id,
@@ -277,8 +281,6 @@ export function SmartContextWidget({
                       comment,
                     })
                   }
-                  compact={true}
-                  onExpand={() => openInsightDetail(insight)}
                 />
               </div>
             ))}
@@ -306,8 +308,6 @@ export function SmartContextWidget({
       <Popover open={isOpen} onOpenChange={setIsOpen}>
         <PopoverTrigger asChild>
           <Button
-            variant="outline"
-            size="sm"
             className={cn(
               "shadow-xl bg-epoch-background/80 backdrop-blur-md hover:bg-epoch-background border-2 transition-all hover:scale-105 active:scale-95 rounded-xl",
               hasInsights
@@ -317,6 +317,8 @@ export function SmartContextWidget({
                 "opacity-50 cursor-not-allowed border-[var(--accent-foreground)]",
             )}
             disabled={isLoading}
+            size="sm"
+            variant="outline"
           >
             <Sparkles
               className={cn(
@@ -345,8 +347,8 @@ export function SmartContextWidget({
           </Button>
         </PopoverTrigger>
         <PopoverContent
-          className="w-96 max-w-[calc(100vw-2rem)] sm:w-[400px] md:w-[420px] p-0 shadow-2xl border-epoch-primary/20 rounded-xl overflow-hidden"
           align="start"
+          className="w-96 max-w-[calc(100vw-2rem)] sm:w-[400px] md:w-[420px] p-0 shadow-2xl border-epoch-primary/20 rounded-xl overflow-hidden"
           side="top"
           sideOffset={10}
         >

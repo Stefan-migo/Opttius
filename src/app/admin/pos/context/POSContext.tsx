@@ -1,7 +1,12 @@
 "use client";
 
 import React, { createContext, useContext, useMemo } from "react";
-import type { POSCartItem, POSCustomer, PaymentMethod } from "../types";
+
+import type {
+  POSPaymentMethod as PaymentMethod,
+  POSCartItem,
+  POSCustomer,
+} from "../types";
 
 export interface POSContextValue {
   branchId: string | null;

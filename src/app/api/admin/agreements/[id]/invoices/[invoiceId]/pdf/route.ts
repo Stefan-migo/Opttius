@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient, createServiceRoleClient } from "@/utils/supabase/server";
-import { appLogger as logger } from "@/lib/logger";
-import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
+
+import type { InstitutionalInvoiceItem } from "@/lib/billing/adapters/InstitutionalInvoiceAdapter";
 import {
   generateInstitutionalInvoiceHTML,
   type InstitutionalInvoiceDocumentData,
 } from "@/lib/billing/pdf-generator";
-import type { InstitutionalInvoiceItem } from "@/lib/billing/adapters/InstitutionalInvoiceAdapter";
+import { appLogger as logger } from "@/lib/logger";
+import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
+import { createClient, createServiceRoleClient } from "@/utils/supabase/server";
 
 export const dynamic = "force-dynamic";
 
@@ -69,8 +70,11 @@ export async function GET(
       .eq("invoice_id", invoiceId);
 
     const items: InstitutionalInvoiceItem[] = (invoiceBalances ?? []).map(
-      (ib: any) => {
-        const bal = ib.agreement_institutional_balances;
+      (ib) => {
+        const bal = ib.agreement_institutional_balances as {
+          orders?: { order_number: string } | null;
+          agreement_purchase_orders?: { oc_number: string } | null;
+        } | null;
         const order = bal?.orders;
         const po = bal?.agreement_purchase_orders;
         return {

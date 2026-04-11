@@ -1,21 +1,22 @@
 "use client";
 
-import { useState } from "react";
+import {
+  ArrowRight,
+  Calendar,
+  Clock,
+  Heart,
+  MapPin,
+  Star,
+  Users,
+  Video,
+} from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { useState } from "react";
+
 import { Badge } from "@/components/ui/badge";
-import { 
-  Calendar, 
-  Clock, 
-  Users, 
-  Heart, 
-  Star,
-  MapPin,
-  Video,
-  ArrowRight 
-} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 
 interface ServiceCardProps {
   id: string;
@@ -26,8 +27,8 @@ interface ServiceCardProps {
   category: string;
   imageUrl: string;
   rating: number;
-  location: 'online' | 'presencial' | 'ambos';
-  groupSize: 'individual' | 'grupal' | 'ambos';
+  location: "online" | "presencial" | "ambos";
+  groupSize: "individual" | "grupal" | "ambos";
   features: string[];
   isPopular?: boolean;
   nextAvailableDate?: string;
@@ -63,32 +64,32 @@ export default function ServiceCard({
   };
 
   const formatPrice = (amount: number) => {
-    return new Intl.NumberFormat('es-AR', {
-      style: 'currency',
-      currency: 'ARS',
+    return new Intl.NumberFormat("es-AR", {
+      style: "currency",
+      currency: "ARS",
     }).format(amount);
   };
 
   const renderStars = (rating: number) => {
     return Array.from({ length: 5 }, (_, index) => (
       <Star
-        key={index}
         className={`h-4 w-4 ${
           index < Math.floor(rating)
-            ? 'fill-dorado text-dorado'
-            : 'text-gray-300'
+            ? "fill-dorado text-dorado"
+            : "text-gray-300"
         }`}
+        key={index}
       />
     ));
   };
 
   const getLocationIcon = () => {
     switch (location) {
-      case 'online':
+      case "online":
         return <Video className="h-4 w-4 text-turquesa-claro" />;
-      case 'presencial':
+      case "presencial":
         return <MapPin className="h-4 w-4 text-verde-suave" />;
-      case 'ambos':
+      case "ambos":
         return <Users className="h-4 w-4 text-azul-profundo" />;
       default:
         return <MapPin className="h-4 w-4 text-verde-suave" />;
@@ -97,19 +98,19 @@ export default function ServiceCard({
 
   const getLocationText = () => {
     switch (location) {
-      case 'online':
-        return 'Online';
-      case 'presencial':
-        return 'Presencial';
-      case 'ambos':
-        return 'Online & Presencial';
+      case "online":
+        return "Online";
+      case "presencial":
+        return "Presencial";
+      case "ambos":
+        return "Online & Presencial";
       default:
-        return 'Presencial';
+        return "Presencial";
     }
   };
 
   return (
-    <Card 
+    <Card
       className={`group relative overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${className}`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -118,12 +119,12 @@ export default function ServiceCard({
         {/* Service Image */}
         <div className="relative h-48 overflow-hidden bg-verde-suave/10">
           <Image
-            src={imageUrl}
-            alt={title}
             fill
+            alt={title}
             className="object-cover transition-transform duration-300 group-hover:scale-105"
+            src={imageUrl}
           />
-          
+
           {/* Popular Badge */}
           {isPopular && (
             <div className="absolute top-4 left-4">
@@ -164,23 +165,19 @@ export default function ServiceCard({
               {category}
             </div>
             <div className="flex items-center gap-1">
-              <div className="flex items-center">
-                {renderStars(rating)}
-              </div>
+              <div className="flex items-center">{renderStars(rating)}</div>
             </div>
           </div>
 
           {/* Title */}
-          <Link href={`/servicios/${id}` as any}>
+          <Link href={`/servicios/${id}` as unknown}>
             <h3 className="text-xl font-semibold text-azul-profundo line-clamp-2 hover:text-azul-profundo/80 transition-colors">
               {title}
             </h3>
           </Link>
 
           {/* Description */}
-          <p className="text-tierra-media line-clamp-3">
-            {description}
-          </p>
+          <p className="text-tierra-media line-clamp-3">{description}</p>
 
           {/* Features */}
           <div className="space-y-2">
@@ -189,8 +186,11 @@ export default function ServiceCard({
             </h4>
             <ul className="space-y-1">
               {features.slice(0, 3).map((feature, index) => (
-                <li key={index} className="text-sm text-tierra-media flex items-center gap-2">
-                  <div className="h-1.5 w-1.5 rounded-full bg-dorado"></div>
+                <li
+                  className="text-sm text-tierra-media flex items-center gap-2"
+                  key={index}
+                >
+                  <div className="h-1.5 w-1.5 rounded-full bg-dorado" />
                   {feature}
                 </li>
               ))}
@@ -216,9 +216,9 @@ export default function ServiceCard({
           <div className="flex items-center gap-2 text-sm text-tierra-media">
             <Users className="h-4 w-4" />
             <span>
-              {groupSize === 'individual' && 'Sesión Individual'}
-              {groupSize === 'grupal' && 'Sesión Grupal'}
-              {groupSize === 'ambos' && 'Individual o Grupal'}
+              {groupSize === "individual" && "Sesión Individual"}
+              {groupSize === "grupal" && "Sesión Grupal"}
+              {groupSize === "ambos" && "Individual o Grupal"}
             </span>
           </div>
 
@@ -227,7 +227,10 @@ export default function ServiceCard({
             <div className="flex items-center gap-2 text-sm">
               <Calendar className="h-4 w-4 text-verde-suave" />
               <span className="text-tierra-media">
-                Próxima fecha: <span className="font-semibold text-azul-profundo">{nextAvailableDate}</span>
+                Próxima fecha:{" "}
+                <span className="font-semibold text-azul-profundo">
+                  {nextAvailableDate}
+                </span>
               </span>
             </div>
           )}
@@ -235,17 +238,15 @@ export default function ServiceCard({
           {/* Action Buttons */}
           <div className="flex gap-2 pt-2">
             <Button
-              variant="outline"
-              className="flex-1 border-azul-profundo text-azul-profundo hover:bg-azul-profundo hover:text-white"
               asChild
+              className="flex-1 border-azul-profundo text-azul-profundo hover:bg-azul-profundo hover:text-white"
+              variant="outline"
             >
-              <Link href={`/servicios/${id}` as any}>
-                Más Info
-              </Link>
+              <Link href={`/servicios/${id}` as unknown}>Más Info</Link>
             </Button>
             <Button
-              onClick={handleBookSession}
               className="flex-1 bg-dorado hover:bg-dorado/90 text-azul-profundo font-semibold"
+              onClick={handleBookSession}
             >
               Reservar
               <ArrowRight className="h-4 w-4 ml-2" />
@@ -255,4 +256,4 @@ export default function ServiceCard({
       </div>
     </Card>
   );
-} 
+}

@@ -1,34 +1,27 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/utils/supabase/server";
-import { createServiceRoleClient } from "@/utils/supabase/server";
-import { NotificationService } from "@/lib/notifications/notification-service";
-import { formatRUT } from "@/lib/utils/rut";
-import { getBranchContext, addBranchFilter } from "@/lib/api/branch-middleware";
-import { appLogger as logger } from "@/lib/logger";
-import { EmailNotificationService } from "@/lib/email/notifications";
-import type {
-  IsAdminParams,
-  IsAdminResult,
-  CheckAppointmentAvailabilityParams,
-  CheckAppointmentAvailabilityResult,
-} from "@/types/supabase-rpc";
+
+import { addBranchFilter, getBranchContext } from "@/lib/api/branch-middleware";
 import {
-  ValidationError,
   AuthenticationError,
   AuthorizationError,
+  ValidationError,
 } from "@/lib/api/errors";
 import {
-  createPaginatedResponse,
-  createApiSuccessResponse,
   createApiErrorResponse,
-  extractPaginationParams,
+  createApiSuccessResponse,
 } from "@/lib/api/response";
-import { createAppointmentSchema } from "@/lib/api/validation/zod-schemas";
 import {
-  parseAndValidateBody,
   validateBody,
   validationErrorResponse,
 } from "@/lib/api/validation/zod-helpers";
+import { createAppointmentSchema } from "@/lib/api/validation/zod-schemas";
+import { EmailNotificationService } from "@/lib/email/notifications";
+import { appLogger as logger } from "@/lib/logger";
+import { NotificationService } from "@/lib/notifications/notification-service";
+import { formatRUT } from "@/lib/utils/rut";
+import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
+import { createClient } from "@/utils/supabase/server";
+import { createServiceRoleClient } from "@/utils/supabase/server";
 
 export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
@@ -279,7 +272,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Get body first for guest_customer (not in schema yet)
-    let body: any;
+    let body: unknown;
     try {
       body = await request.json();
     } catch (error) {
@@ -376,9 +369,9 @@ export async function POST(request: NextRequest) {
           (await supabaseServiceRole.rpc("get_available_time_slots", {
             p_date: validatedBody.appointment_date,
             p_duration_minutes: durationMinutes,
-            p_staff_id: (validatedBody as any).assigned_to || null,
+            p_staff_id: (validatedBody as unknown).assigned_to || null,
             p_branch_id: finalBranchId,
-          })) as { data: any[] | null; error: Error | null };
+          })) as { data: unknown[] | null; error: Error | null };
 
         if (slotsError) {
           logger.error("Error fetching available slots", { error: slotsError });
@@ -387,7 +380,7 @@ export async function POST(request: NextRequest) {
           // Find the specific time slot in the results
           const normalizedTimeForCompare = timeForRPC.substring(0, 5); // HH:MM format
 
-          const matchingSlot = slots.find((slot: any) => {
+          const matchingSlot = slots.find((slot: unknown) => {
             let slotTime = slot.time_slot;
             // Handle different TIME formats from PostgreSQL
             if (typeof slotTime === "object" && slotTime !== null) {
@@ -416,13 +409,15 @@ export async function POST(request: NextRequest) {
               isAvailable,
               totalSlots: slots.length,
               availableSlots: slots.filter(
-                (s: any) => s.available === true || s.available === "t",
+                (s: unknown) => s.available === true || s.available === "t",
               ).length,
             });
           } else {
             logger.warn("Time slot not found in available slots list", {
               requestedTime: normalizedTimeForCompare,
-              availableTimes: slots.map((s: any) => s.time_slot).slice(0, 10),
+              availableTimes: slots
+                .map((s: unknown) => s.time_slot)
+                .slice(0, 10),
             });
             // If we can't find the slot, assume it's not available
             isAvailable = false;
@@ -457,7 +452,7 @@ export async function POST(request: NextRequest) {
       p_time: timeForRPC,
       p_duration_minutes: validatedBody.duration_minutes || 30,
       p_appointment_id: null,
-      p_staff_id: (validatedBody as any).assigned_to || null,
+      p_staff_id: (validatedBody as unknown).assigned_to || null,
     });
 
     // Handle boolean result - Supabase might return it as a string 't'/'f' or boolean
@@ -597,14 +592,14 @@ export async function POST(request: NextRequest) {
       appointment_time: normalizedTime,
       duration_minutes: validatedBody.duration_minutes || 30,
       appointment_type: validatedBody.appointment_type,
-      status: (body as any)?.status || "scheduled",
-      assigned_to: (body as any)?.assigned_to || null,
+      status: (body as unknown)?.status || "scheduled",
+      assigned_to: (body as unknown)?.assigned_to || null,
       notes: validatedBody.notes || null,
-      reason: (body as any)?.reason || null,
-      prescription_id: (body as any)?.prescription_id || null,
-      order_id: (body as any)?.order_id || null,
-      follow_up_required: (body as any)?.follow_up_required || false,
-      follow_up_date: (body as any)?.follow_up_date || null,
+      reason: (body as unknown)?.reason || null,
+      prescription_id: (body as unknown)?.prescription_id || null,
+      order_id: (body as unknown)?.order_id || null,
+      follow_up_required: (body as unknown)?.follow_up_required || false,
+      follow_up_date: (body as unknown)?.follow_up_date || null,
       created_by: user.id,
       branch_id: finalBranchId, // Always include branch_id (required by database)
       organization_id: branchContext.organizationId, // Set organization_id for multi-tenancy

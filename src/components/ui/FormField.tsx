@@ -8,9 +8,10 @@
  */
 
 import * as React from "react";
+import { FieldError } from "react-hook-form";
+
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
-import { FieldError } from "react-hook-form";
 
 /**
  * Props del componente FormField
@@ -102,13 +103,13 @@ export default function FormField({
     >
       {label && (
         <Label
-          htmlFor={labelId}
           className={cn(
             "text-sm font-medium",
             labelPosition === "left" && "min-w-[120px] pt-2",
             disabled && "opacity-50",
             labelClassName,
           )}
+          htmlFor={labelId}
         >
           {label}
           {required && <span className="text-destructive ml-1">*</span>}
@@ -116,7 +117,7 @@ export default function FormField({
       )}
 
       <div className={cn("flex-1", className)}>
-        {React.cloneElement(children as React.ReactElement<any>, {
+        {React.cloneElement(children as React.ReactElement<unknown>, {
           id: labelId,
           "aria-describedby": cn(
             description && descriptionId,
@@ -127,34 +128,34 @@ export default function FormField({
         })}
 
         {description && !errorMessage && (
-          <p id={descriptionId} className="text-xs text-muted-foreground mt-1">
+          <p className="text-xs text-muted-foreground mt-1" id={descriptionId}>
             {description}
           </p>
         )}
 
         {errorMessage && (
           <p
-            id={errorId}
             className={cn(
               "text-xs text-destructive mt-1 flex items-center gap-1",
               errorClassName,
             )}
+            id={errorId}
             role="alert"
           >
             <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="12"
-              height="12"
-              viewBox="0 0 24 24"
               fill="none"
+              height="12"
               stroke="currentColor"
-              strokeWidth="2"
               strokeLinecap="round"
               strokeLinejoin="round"
+              strokeWidth="2"
+              viewBox="0 0 24 24"
+              width="12"
+              xmlns="http://www.w3.org/2000/svg"
             >
               <circle cx="12" cy="12" r="10" />
-              <line x1="12" y1="8" x2="12" y2="12" />
-              <line x1="12" y1="16" x2="12.01" y2="16" />
+              <line x1="12" x2="12" y1="8" y2="12" />
+              <line x1="12" x2="12.01" y1="16" y2="16" />
             </svg>
             {errorMessage}
           </p>
@@ -255,9 +256,9 @@ export function FormFieldSection({
           </div>
           {collapsible && (
             <button
+              className="text-sm text-muted-foreground hover:text-foreground"
               type="button"
               onClick={() => setIsCollapsed(!isCollapsed)}
-              className="text-sm text-muted-foreground hover:text-foreground"
             >
               {isCollapsed ? "Mostrar" : "Ocultar"}
             </button>
@@ -338,20 +339,20 @@ export function FormFieldActionsExtended({
     <FormFieldActions align={align} className={className} {...props}>
       {onCancel && (
         <button
-          type="button"
           className="px-6 py-2 border border-admin-border-primary/50 rounded-lg text-admin-text-secondary hover:bg-admin-bg-tertiary transition-all disabled:opacity-50 font-medium text-sm"
-          onClick={onCancel}
           disabled={isSubmitting}
+          type="button"
+          onClick={onCancel}
         >
           Cancelar
         </button>
       )}
       {onSubmit && (
         <button
-          type="button"
           className="px-6 py-2 bg-admin-accent-primary text-[#1A2B23] rounded-lg hover:bg-admin-accent-secondary transition-all disabled:opacity-50 flex items-center gap-2 font-bold text-sm shadow-premium-sm"
-          onClick={onSubmit as any}
           disabled={isSubmitting}
+          type="button"
+          onClick={onSubmit as unknown}
         >
           {submitIcon}
           {isSubmitting ? submittingLabel : submitLabel}

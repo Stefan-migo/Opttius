@@ -1,7 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { ArrowLeft, Package, RefreshCw } from "lucide-react";
+import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -12,11 +16,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ArrowLeft, Package, RefreshCw } from "lucide-react";
-import Link from "next/link";
 import { useBranch } from "@/hooks/useBranch";
 import { getBranchHeader } from "@/lib/utils/branch";
-import { toast } from "sonner";
 
 interface Product {
   id: string;
@@ -189,8 +190,8 @@ export default function PrepareFieldOperationPage() {
     <div className="space-y-6">
       <div className="space-y-4">
         <Link
-          href={`/admin/field-operations/${id}`}
           className="inline-flex items-center gap-2 text-sm text-admin-text-tertiary hover:text-admin-text-primary min-h-[44px] items-center"
+          href={`/admin/field-operations/${id}`}
         >
           <ArrowLeft className="h-4 w-4 shrink-0" />
           <span className="truncate max-w-[calc(100vw-8rem)]">
@@ -219,8 +220,8 @@ export default function PrepareFieldOperationPage() {
             <p className="py-6 text-admin-text-tertiary text-sm">
               No hay productos con stock en la sucursal.{" "}
               <Link
-                href={`/admin/field-operations/${id}`}
                 className="text-admin-accent-primary hover:underline"
+                href={`/admin/field-operations/${id}`}
               >
                 Volver al operativo
               </Link>
@@ -247,7 +248,7 @@ export default function PrepareFieldOperationPage() {
                   </TableHeader>
                   <TableBody>
                     {productsWithStock.map((p) => (
-                      <TableRow key={p.id} className="hover:bg-[#AE000025]">
+                      <TableRow className="hover:bg-[#AE000025]" key={p.id}>
                         <TableCell className="font-medium text-admin-text-primary">
                           {p.name}
                         </TableCell>
@@ -259,14 +260,14 @@ export default function PrepareFieldOperationPage() {
                         </TableCell>
                         <TableCell className="text-right">
                           <Input
-                            type="number"
-                            min={0}
+                            className="h-11 sm:h-10 min-h-[44px] w-24 text-right"
                             max={productStocks[p.id] ?? 0}
+                            min={0}
+                            type="number"
                             value={quantities[p.id] ?? 0}
                             onChange={(e) =>
                               setQuantity(p.id, parseInt(e.target.value) || 0)
                             }
-                            className="h-11 sm:h-10 min-h-[44px] w-24 text-right"
                           />
                         </TableCell>
                       </TableRow>
@@ -276,9 +277,9 @@ export default function PrepareFieldOperationPage() {
               </div>
               <div className="flex justify-end pt-4 sm:pt-6">
                 <Button
-                  type="submit"
-                  disabled={transferring || !hasItemsToTransfer}
                   className="min-h-[44px]"
+                  disabled={transferring || !hasItemsToTransfer}
+                  type="submit"
                 >
                   {transferring ? "Transfiriendo..." : "Transferir todo"}
                 </Button>

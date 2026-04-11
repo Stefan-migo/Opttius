@@ -1,21 +1,22 @@
-import { NextRequest, NextResponse } from "next/server";
-import { createClient, createServiceRoleClient } from "@/utils/supabase/server";
-import { sendQuoteWhatsApp } from "@/lib/whatsapp/notifications-b2b";
-import { getBranchContext, addBranchFilter } from "@/lib/api/branch-middleware";
-import { appLogger as logger } from "@/lib/logger";
+import { NextRequest } from "next/server";
+
+import { addBranchFilter, getBranchContext } from "@/lib/api/branch-middleware";
 import {
-  createApiSuccessResponse,
-  createApiErrorResponse,
-} from "@/lib/api/response";
-import {
+  APIError,
   AuthenticationError,
   AuthorizationError,
   NotFoundError,
   ValidationError,
-  APIError,
 } from "@/lib/api/errors";
-import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
+import {
+  createApiErrorResponse,
+  createApiSuccessResponse,
+} from "@/lib/api/response";
 import { sendQuoteEmailToClient } from "@/lib/email/send-quote-email";
+import { appLogger as logger } from "@/lib/logger";
+import { sendQuoteWhatsApp } from "@/lib/whatsapp/notifications-b2b";
+import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
+import { createClient, createServiceRoleClient } from "@/utils/supabase/server";
 
 export const dynamic = "force-dynamic";
 export async function POST(
@@ -46,7 +47,7 @@ export async function POST(
     const { id } = params;
     const branchContext = await getBranchContext(request, user.id);
 
-    const applyBranchFilter = (query: any) => {
+    const applyBranchFilter = (query: unknown) => {
       return addBranchFilter(
         query,
         branchContext.branchId,

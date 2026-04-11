@@ -1,42 +1,38 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { CardPayment, initMercadoPago } from "@mercadopago/sdk-react";
+import {
+  AlertCircle,
+  ArrowDown,
+  ArrowUp,
+  Check,
+  CheckCircle,
+  Coins,
+  CreditCard,
+  Globe,
+  Loader2,
+  Lock,
+  ShieldCheck,
+  Star,
+  Zap,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useAuthContext } from "@/contexts/AuthContext";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
-  CardHeader,
   CardDescription,
+  CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
-import { initMercadoPago, CardPayment } from "@mercadopago/sdk-react";
+import { useAuthContext } from "@/contexts/AuthContext";
+import { type SubscriptionTier, TIER_LIMITS } from "@/lib/saas/tier-config";
 import { cn } from "@/lib/utils";
-import { toast } from "sonner";
-import {
-  Loader2,
-  CreditCard,
-  CheckCircle,
-  ArrowUp,
-  ArrowDown,
-  Info,
-  AlertCircle,
-  ShieldCheck,
-  Lock,
-  Star,
-  Zap,
-  Check,
-  Globe,
-  Coins,
-} from "lucide-react";
-import {
-  getTierConfig,
-  TIER_LIMITS,
-  type SubscriptionTier,
-} from "@/lib/saas/tier-config";
 
 interface Tier {
   name: string;
@@ -78,7 +74,7 @@ export function CheckoutPageContent() {
   const [paymentId, setPaymentId] = useState<string | null>(null);
   const [saveCard, setSaveCard] = useState(false);
   const [selectedGateway, setSelectedGateway] = useState<string>("mercadopago");
-  const [availableGateways, setAvailableGateways] = useState<any[]>([]);
+  const [availableGateways, setAvailableGateways] = useState<unknown[]>([]);
 
   useEffect(() => {
     // Initialize MercadoPago
@@ -377,8 +373,8 @@ export function CheckoutPageContent() {
         {/* Header Section */}
         <div className="text-center space-y-4 sm:space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-1000">
           <Badge
-            variant="outline"
             className="px-3 sm:px-4 py-1 border-admin-accent-primary/20 bg-admin-accent-primary/5 text-admin-accent-primary rounded-xl font-display font-black text-[9px] sm:text-[10px] uppercase tracking-[0.2em] sm:tracking-[0.3em]"
+            variant="outline"
           >
             Protocolo de Pago Seguro
           </Badge>
@@ -393,8 +389,8 @@ export function CheckoutPageContent() {
 
         {currentSubscription?.currentTier && (
           <Card
-            variant="glass"
             className="border-admin-accent-secondary/20 bg-admin-bg-secondary/80 backdrop-blur-md rounded-xl sm:rounded-2xl shadow-premium-lg animate-in zoom-in-95 duration-700 overflow-hidden"
+            variant="glass"
           >
             <CardContent className="p-4 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 min-w-0">
               <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
@@ -454,9 +450,6 @@ export function CheckoutPageContent() {
 
                   return (
                     <button
-                      key={tier.name}
-                      type="button"
-                      onClick={() => handleTierSelect(tierName)}
                       className={cn(
                         "relative flex flex-col p-5 sm:p-6 md:p-8 rounded-xl border-2 text-left transition-all duration-500 group hover:scale-[1.02] active:scale-[0.98] min-w-0",
                         isSelected
@@ -464,6 +457,9 @@ export function CheckoutPageContent() {
                           : "border-admin-border-primary/20 bg-admin-bg-secondary/40 hover:border-admin-accent-primary/40",
                         isCurrent && "opacity-60",
                       )}
+                      key={tier.name}
+                      type="button"
+                      onClick={() => handleTierSelect(tierName)}
                     >
                       {isCurrent && (
                         <div className="absolute -top-2.5 sm:-top-3 left-4 sm:left-6 px-3 sm:px-4 py-1 sm:py-1.5 bg-admin-accent-secondary text-[#1A2B23] text-[8px] sm:text-[9px] font-display font-black rounded-xl uppercase tracking-widest shadow-lg border border-admin-accent-secondary/20">
@@ -527,12 +523,12 @@ export function CheckoutPageContent() {
                           tierChange !== "new" && (
                             <div className="mt-auto pt-3 sm:pt-4">
                               <Badge
+                                className="w-full justify-center py-1.5 rounded-xl font-bold text-[10px] sm:text-xs"
                                 variant={
                                   tierChange === "upgrade"
                                     ? "default"
                                     : "secondary"
                                 }
-                                className="w-full justify-center py-1.5 rounded-xl font-bold text-[10px] sm:text-xs"
                               >
                                 {tierChange === "upgrade" ? (
                                   <>
@@ -577,15 +573,15 @@ export function CheckoutPageContent() {
                 ) : (
                   availableGateways.map((gw) => (
                     <button
-                      key={gw.gateway_id}
-                      type="button"
-                      onClick={() => setSelectedGateway(gw.gateway_id)}
                       className={cn(
                         "flex flex-col items-center justify-center p-4 sm:p-6 md:p-8 rounded-xl border-2 transition-all duration-500 group relative min-w-0",
                         selectedGateway === gw.gateway_id
                           ? "border-admin-accent-primary bg-epoch-accent/10 shadow-premium-xl ring-4 ring-admin-accent-primary/5"
                           : "border-admin-border-primary/10 bg-admin-bg-secondary/40 hover:border-admin-accent-primary/30",
                       )}
+                      key={gw.gateway_id}
+                      type="button"
+                      onClick={() => setSelectedGateway(gw.gateway_id)}
                     >
                       <div
                         className={cn(
@@ -620,7 +616,6 @@ export function CheckoutPageContent() {
                       </span>
                       {gw.config?.badge && (
                         <Badge
-                          variant="healty"
                           className={cn(
                             "mt-1 sm:mt-2 border-none px-2 py-0 text-[9px] sm:text-[10px] font-black uppercase tracking-wider",
                             gw.config.badge === "PROXIMAMENTE" ||
@@ -628,6 +623,7 @@ export function CheckoutPageContent() {
                               ? "bg-admin-border-primary text-admin-text-tertiary"
                               : "bg-admin-success/10 text-admin-success",
                           )}
+                          variant="healty"
                         >
                           {gw.config.badge}
                         </Badge>
@@ -695,9 +691,9 @@ export function CheckoutPageContent() {
                       {!paymentId && (
                         <div className="pt-2 sm:pt-4">
                           <Button
-                            onClick={handleCreateIntent}
-                            disabled={!selectedTier || processing}
                             className="w-full min-h-[48px] sm:h-14 md:h-16 bg-admin-accent-primary text-[#1A2B23] hover:bg-admin-accent-secondary rounded-xl font-display font-black text-[10px] sm:text-[11px] md:text-[12px] tracking-[0.15em] sm:tracking-[0.2em] uppercase transition-all shadow-premium-sm px-4"
+                            disabled={!selectedTier || processing}
+                            onClick={handleCreateIntent}
                           >
                             {processing ? (
                               <>
@@ -782,8 +778,8 @@ export function CheckoutPageContent() {
                     </div>
                   ) : (
                     <Card
-                      variant="glass"
                       className="border-2 border-admin-border-secondary dark:border-admin-border-primary shadow-2xl bg-admin-bg-tertiary rounded-xl sm:rounded-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-500 min-w-0"
+                      variant="glass"
                     >
                       <CardHeader className="p-4 sm:p-5 md:p-6 border-b border-admin-border-secondary dark:border-admin-border-primary bg-admin-bg-tertiary">
                         <div className="flex items-center gap-3 min-w-0">
@@ -803,8 +799,8 @@ export function CheckoutPageContent() {
                       <CardContent className="p-4 sm:p-5 md:p-6 bg-admin-bg-tertiary">
                         {error && (
                           <Alert
-                            variant="destructive"
                             className="mb-4 sm:mb-5 rounded-xl border border-admin-error/30 bg-admin-error/10 dark:bg-admin-error/20"
+                            variant="destructive"
                           >
                             <AlertCircle className="h-4 w-4 shrink-0 text-admin-error" />
                             <AlertDescription className="font-bold text-sm break-words text-admin-error dark:text-red-400">
@@ -827,10 +823,10 @@ export function CheckoutPageContent() {
 
                         <label className="flex items-start sm:items-center gap-3 mb-4 sm:mb-5 p-3 sm:p-4 rounded-xl border border-admin-border-secondary dark:border-admin-border-primary bg-white/60 dark:bg-admin-bg-secondary/30 cursor-pointer min-w-0">
                           <input
-                            type="checkbox"
                             checked={saveCard}
-                            onChange={(e) => setSaveCard(e.target.checked)}
                             className="rounded border-admin-border-primary text-admin-accent-primary focus:ring-admin-accent-primary shrink-0 mt-0.5 sm:mt-0"
+                            type="checkbox"
+                            onChange={(e) => setSaveCard(e.target.checked)}
                           />
                           <span className="text-xs sm:text-sm font-medium text-admin-text-primary break-words">
                             Guardar tarjeta para próximos pagos y renovaciones
@@ -839,15 +835,6 @@ export function CheckoutPageContent() {
 
                         <div className="mercadopago-brick-container min-h-[260px] sm:min-h-[300px] rounded-xl overflow-hidden">
                           <CardPayment
-                            initialization={{
-                              amount: Math.round(amount),
-                              ...(user?.email && {
-                                payer: { email: user.email },
-                              }),
-                            }}
-                            onSubmit={async (formData) => {
-                              await handlePaymentSubmit(formData);
-                            }}
                             customization={{
                               paymentMethods: {
                                 // Default is all
@@ -857,6 +844,15 @@ export function CheckoutPageContent() {
                                   theme: "flat",
                                 },
                               },
+                            }}
+                            initialization={{
+                              amount: Math.round(amount),
+                              ...(user?.email && {
+                                payer: { email: user.email },
+                              }),
+                            }}
+                            onSubmit={async (formData) => {
+                              await handlePaymentSubmit(formData);
                             }}
                           />
                         </div>

@@ -1,10 +1,14 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { AlertCircle, ArrowLeft, CreditCard, Loader2 } from "lucide-react";
+import Link from "next/link";
 import { useParams } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -13,18 +17,15 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Loader2, ArrowLeft, AlertCircle, CreditCard } from "lucide-react";
-import { toast } from "sonner";
-import Link from "next/link";
 import { useBranch } from "@/hooks/useBranch";
-import { getBranchHeader } from "@/lib/utils/branch";
 import { formatCurrency, formatDateTime } from "@/lib/utils";
+import { getBranchHeader } from "@/lib/utils/branch";
 
 export default function AdminOrderDetailPage() {
   const params = useParams();
   const orderId = params.id as string;
   const { currentBranchId } = useBranch();
-  const [order, setOrder] = useState<any>(null);
+  const [order, setOrder] = useState<unknown>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -46,7 +47,7 @@ export default function AdminOrderDetailPage() {
         const error = await response.json();
         toast.error(error.error || "Error al cargar la orden");
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error fetching order:", error);
       toast.error("Error al cargar la orden");
     } finally {
@@ -56,7 +57,7 @@ export default function AdminOrderDetailPage() {
 
   const paidAmount =
     order?.order_payments?.reduce(
-      (sum: number, p: any) => sum + Number(p.amount),
+      (sum: number, p: unknown) => sum + Number(p.amount),
       0,
     ) || 0;
   const pendingAmount = Math.max(0, (order?.total_amount || 0) - paidAmount);
@@ -72,7 +73,7 @@ export default function AdminOrderDetailPage() {
   const paymentMethodLabel =
     order?.order_payments && order.order_payments.length > 0
       ? Array.from(
-          new Set(order.order_payments.map((p: any) => p.payment_method)),
+          new Set(order.order_payments.map((p: unknown) => p.payment_method)),
         ).join(", ")
       : order?.mp_payment_method === "cash"
         ? "Efectivo"
@@ -100,9 +101,9 @@ export default function AdminOrderDetailPage() {
         <div className="flex gap-2">
           <Link href="/admin/cash-register">
             <Button
-              variant="outline"
-              size="sm"
               className="min-h-[44px] sm:min-h-0"
+              size="sm"
+              variant="outline"
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
               Caja
@@ -123,9 +124,9 @@ export default function AdminOrderDetailPage() {
       <div className="flex gap-2">
         <Link href="/admin/cash-register">
           <Button
-            variant="outline"
-            size="sm"
             className="min-h-[44px] sm:min-h-0"
+            size="sm"
+            variant="outline"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Caja
@@ -291,11 +292,11 @@ export default function AdminOrderDetailPage() {
                 <TableBody>
                   {[...(order.order_payments || [])]
                     .sort(
-                      (a: any, b: any) =>
+                      (a: unknown, b: unknown) =>
                         new Date(a.paid_at).getTime() -
                         new Date(b.paid_at).getTime(),
                     )
-                    .map((payment: any, idx: number) => (
+                    .map((payment: unknown, idx: number) => (
                       <TableRow key={payment.id || idx}>
                         <TableCell className="text-xs sm:text-sm whitespace-nowrap py-3">
                           {formatDateTime(payment.paid_at)}
@@ -334,10 +335,10 @@ export default function AdminOrderDetailPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {order.order_items.map((item: any, idx: number) => (
+              {order.order_items.map((item: unknown, idx: number) => (
                 <div
-                  key={item.id || idx}
                   className="flex justify-between items-start sm:items-center gap-3 py-3 border-b last:border-b-0"
+                  key={item.id || idx}
                 >
                   <div className="flex-1 min-w-0">
                     <p className="text-sm sm:text-base font-medium break-words">

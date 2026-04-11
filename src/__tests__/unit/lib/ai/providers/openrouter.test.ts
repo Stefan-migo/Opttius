@@ -1,6 +1,7 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
 import { OpenRouterProvider } from "@/lib/ai/providers/openrouter";
-import type { LLMConfig, LLMMessage, LLMTool } from "@/lib/ai/types";
+import type { LLMConfig, LLMMessage } from "@/lib/ai/types";
 
 // Mock fetch globally
 global.fetch = vi.fn();
@@ -115,7 +116,7 @@ describe("OpenRouterProvider", () => {
         model: "anthropic/claude-3.5-sonnet",
       };
 
-      (global.fetch as any).mockResolvedValue({
+      (global.fetch as unknown).mockResolvedValue({
         ok: true,
         json: async () => mockResponse,
       });
@@ -153,7 +154,7 @@ describe("OpenRouterProvider", () => {
     });
 
     it("should include OpenRouter-specific headers", async () => {
-      (global.fetch as any).mockResolvedValue({
+      (global.fetch as unknown).mockResolvedValue({
         ok: true,
         json: async () => ({
           choices: [{ message: { content: "Test" }, finish_reason: "stop" }],
@@ -162,7 +163,7 @@ describe("OpenRouterProvider", () => {
 
       await provider.generateText(mockMessages, undefined, mockConfig);
 
-      const fetchCall = (global.fetch as any).mock.calls[0];
+      const fetchCall = (global.fetch as unknown).mock.calls[0];
       const headers = fetchCall[1].headers;
 
       expect(headers["HTTP-Referer"]).toBeDefined();
@@ -190,7 +191,7 @@ describe("OpenRouterProvider", () => {
         ],
       };
 
-      (global.fetch as any).mockResolvedValue({
+      (global.fetch as unknown).mockResolvedValue({
         ok: true,
         json: async () => mockResponseWithTools,
       });
@@ -211,7 +212,7 @@ describe("OpenRouterProvider", () => {
     });
 
     it("should throw error on API failure", async () => {
-      (global.fetch as any).mockResolvedValue({
+      (global.fetch as unknown).mockResolvedValue({
         ok: false,
         statusText: "Unauthorized",
         json: async () => ({ error: { message: "Invalid API key" } }),
@@ -224,7 +225,7 @@ describe("OpenRouterProvider", () => {
 
     it("should use environment variable API key if not in config", async () => {
       process.env.OPENROUTER_API_KEY = "sk-or-v1-env-key";
-      (global.fetch as any).mockResolvedValue({
+      (global.fetch as unknown).mockResolvedValue({
         ok: true,
         json: async () => ({
           choices: [{ message: { content: "Test" }, finish_reason: "stop" }],
@@ -282,7 +283,7 @@ describe("OpenRouterProvider", () => {
           .mockResolvedValueOnce({ done: true }),
       };
 
-      (global.fetch as any).mockResolvedValue({
+      (global.fetch as unknown).mockResolvedValue({
         ok: true,
         body: { getReader: () => mockReader },
       });
@@ -322,7 +323,7 @@ describe("OpenRouterProvider", () => {
           .mockResolvedValueOnce({ done: true }),
       };
 
-      (global.fetch as any).mockResolvedValue({
+      (global.fetch as unknown).mockResolvedValue({
         ok: true,
         body: { getReader: () => mockReader },
       });
@@ -345,7 +346,7 @@ describe("OpenRouterProvider", () => {
     });
 
     it("should throw error if stream fails", async () => {
-      (global.fetch as any).mockResolvedValue({
+      (global.fetch as unknown).mockResolvedValue({
         ok: false,
         statusText: "Bad Request",
         json: async () => ({ error: { message: "Invalid request" } }),
@@ -370,7 +371,7 @@ describe("OpenRouterProvider", () => {
         baseURL: "https://custom-proxy.com/api/v1",
       };
 
-      (global.fetch as any).mockResolvedValue({
+      (global.fetch as unknown).mockResolvedValue({
         ok: true,
         json: async () => ({
           choices: [{ message: { content: "Test" }, finish_reason: "stop" }],

@@ -1,0 +1,33 @@
+{
+  "mcpServers": {
+    "opttius-notion": {
+      "command": "node",
+      "args": ["${PROJECT_ROOT}/.mcp/notion/start-server.js"],
+      "env": {
+        "NODE_ENV": "development",
+        "NOTION_API_KEY": "${NOTION_API_KEY}",
+        "NOTION_DATABASE_DOCS": "${NOTION_DATABASE_DOCS}",
+        "NOTION_DATABASE_TASKS": "${NOTION_DATABASE_TASKS}",
+        "NOTION_DATABASE_FEATURES": "${NOTION_DATABASE_FEATURES}"
+      }
+    },
+    "opttius-supabase": {
+      "command": "node",
+      "args": ["${PROJECT_ROOT}/.mcp/supabase/start-server.js"],
+      "env": {
+        "NODE_ENV": "development",
+        "SUPABASE_URL": "${NEXT_PUBLIC_SUPABASE_URL}",
+        "SUPABASE_ANON_KEY": "${NEXT_PUBLIC_SUPABASE_ANON_KEY}",
+        "SUPABASE_SERVICE_ROLE_KEY": "${SUPABASE_SERVICE_ROLE_KEY}"
+      }
+    },
+    "opttius-github": {
+      "command": "node",
+      "args": ["${PROJECT_ROOT}/.mcp/github/start-server.js"],
+      "env": {
+        "NODE_ENV": "development",
+        "GITHUB_TOKEN": "${GITHUB_TOKEN}"
+      }
+    }
+  }
+}

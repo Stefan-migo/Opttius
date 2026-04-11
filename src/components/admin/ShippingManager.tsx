@@ -1,19 +1,27 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import {
+  AlertTriangle,
+  DollarSign,
+  Edit,
+  MapPin,
+  Plus,
+  Save,
+  Trash2,
+  Truck,
+} from "lucide-react";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
+  CardDescription,
   CardHeader,
   CardTitle,
-  CardDescription,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Switch } from "@/components/ui/switch";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog,
   DialogContent,
@@ -22,6 +30,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -29,6 +39,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import {
   Table,
   TableBody,
@@ -37,19 +48,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Truck,
-  Plus,
-  MapPin,
-  DollarSign,
-  Package,
-  Edit,
-  Trash2,
-  X,
-  Save,
-  AlertTriangle,
-} from "lucide-react";
-import { toast } from "sonner";
+import { Textarea } from "@/components/ui/textarea";
 
 interface ShippingZone {
   id: string;
@@ -545,7 +544,7 @@ export default function ShippingManager() {
                 configuradas
               </CardDescription>
             </div>
-            <Button onClick={handleCreateZone} size="sm">
+            <Button size="sm" onClick={handleCreateZone}>
               <Plus className="h-4 w-4 mr-2" />
               Nueva Zona
             </Button>
@@ -585,15 +584,15 @@ export default function ShippingManager() {
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
                         <Button
-                          variant="ghost"
                           size="sm"
+                          variant="ghost"
                           onClick={() => handleEditZone(zone)}
                         >
                           <Edit className="h-4 w-4" />
                         </Button>
                         <Button
-                          variant="ghost"
                           size="sm"
+                          variant="ghost"
                           onClick={() => handleDeleteZone(zone)}
                         >
                           <Trash2 className="h-4 w-4 text-red-500" />
@@ -626,9 +625,9 @@ export default function ShippingManager() {
               </CardDescription>
             </div>
             <Button
-              onClick={handleCreateRate}
-              size="sm"
               disabled={zones.length === 0}
+              size="sm"
+              onClick={handleCreateRate}
             >
               <Plus className="h-4 w-4 mr-2" />
               Nueva Tarifa
@@ -698,15 +697,15 @@ export default function ShippingManager() {
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
                           <Button
-                            variant="ghost"
                             size="sm"
+                            variant="ghost"
                             onClick={() => handleEditRate(rate)}
                           >
                             <Edit className="h-4 w-4" />
                           </Button>
                           <Button
-                            variant="ghost"
                             size="sm"
+                            variant="ghost"
                             onClick={() => handleDeleteRate(rate)}
                           >
                             <Trash2 className="h-4 w-4 text-red-500" />
@@ -740,7 +739,7 @@ export default function ShippingManager() {
                 configurados
               </CardDescription>
             </div>
-            <Button onClick={handleCreateCarrier} size="sm">
+            <Button size="sm" onClick={handleCreateCarrier}>
               <Plus className="h-4 w-4 mr-2" />
               Nuevo Transportista
             </Button>
@@ -788,15 +787,15 @@ export default function ShippingManager() {
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
                         <Button
-                          variant="ghost"
                           size="sm"
+                          variant="ghost"
                           onClick={() => handleEditCarrier(carrier)}
                         >
                           <Edit className="h-4 w-4" />
                         </Button>
                         <Button
-                          variant="ghost"
                           size="sm"
+                          variant="ghost"
                           onClick={() => handleDeleteCarrier(carrier)}
                         >
                           <Trash2 className="h-4 w-4 text-red-500" />
@@ -826,27 +825,28 @@ export default function ShippingManager() {
             <div>
               <Label>Nombre *</Label>
               <Input
+                placeholder="Ej: Argentina, CABA, Interior"
                 value={zoneForm.name}
                 onChange={(e) =>
                   setZoneForm({ ...zoneForm, name: e.target.value })
                 }
-                placeholder="Ej: Argentina, CABA, Interior"
               />
             </div>
             <div>
               <Label>Descripción</Label>
               <Textarea
+                placeholder="Descripción de la zona"
+                rows={3}
                 value={zoneForm.description}
                 onChange={(e) =>
                   setZoneForm({ ...zoneForm, description: e.target.value })
                 }
-                placeholder="Descripción de la zona"
-                rows={3}
               />
             </div>
             <div>
               <Label>Países (separados por comas)</Label>
               <Input
+                placeholder="Argentina, Uruguay"
                 value={zoneForm.countries.join(", ")}
                 onChange={(e) =>
                   setZoneForm({
@@ -857,7 +857,6 @@ export default function ShippingManager() {
                       .filter((c) => c),
                   })
                 }
-                placeholder="Argentina, Uruguay"
               />
             </div>
             <div className="flex items-center gap-2">
@@ -917,29 +916,29 @@ export default function ShippingManager() {
             <div>
               <Label>Nombre *</Label>
               <Input
+                placeholder="Ej: Envío Estándar, Envío Express"
                 value={rateForm.name}
                 onChange={(e) =>
                   setRateForm({ ...rateForm, name: e.target.value })
                 }
-                placeholder="Ej: Envío Estándar, Envío Express"
               />
             </div>
             <div>
               <Label>Descripción</Label>
               <Textarea
+                placeholder="Descripción de la tarifa"
+                rows={2}
                 value={rateForm.description}
                 onChange={(e) =>
                   setRateForm({ ...rateForm, description: e.target.value })
                 }
-                placeholder="Descripción de la tarifa"
-                rows={2}
               />
             </div>
             <div>
               <Label>Tipo de Tarifa *</Label>
               <Select
                 value={rateForm.rate_type}
-                onValueChange={(value: any) =>
+                onValueChange={(value: unknown) =>
                   setRateForm({ ...rateForm, rate_type: value })
                 }
               >
@@ -958,6 +957,7 @@ export default function ShippingManager() {
               <div>
                 <Label>Precio Fijo (ARS) *</Label>
                 <Input
+                  placeholder="5000"
                   type="number"
                   value={rateForm.flat_rate}
                   onChange={(e) =>
@@ -966,7 +966,6 @@ export default function ShippingManager() {
                       flat_rate: parseFloat(e.target.value) || 0,
                     })
                   }
-                  placeholder="5000"
                 />
               </div>
             )}
@@ -974,6 +973,7 @@ export default function ShippingManager() {
               <div>
                 <Label>Precio por kg (ARS) *</Label>
                 <Input
+                  placeholder="1000"
                   type="number"
                   value={rateForm.weight_rate_per_kg}
                   onChange={(e) =>
@@ -982,7 +982,6 @@ export default function ShippingManager() {
                       weight_rate_per_kg: parseFloat(e.target.value) || 0,
                     })
                   }
-                  placeholder="1000"
                 />
               </div>
             )}
@@ -990,6 +989,7 @@ export default function ShippingManager() {
               <div>
                 <Label>Porcentaje del precio (%) *</Label>
                 <Input
+                  placeholder="5"
                   type="number"
                   value={rateForm.price_rate_percentage}
                   onChange={(e) =>
@@ -998,7 +998,6 @@ export default function ShippingManager() {
                       price_rate_percentage: parseFloat(e.target.value) || 0,
                     })
                   }
-                  placeholder="5"
                 />
               </div>
             )}
@@ -1006,6 +1005,7 @@ export default function ShippingManager() {
               <div>
                 <Label>Días estimados (mínimo)</Label>
                 <Input
+                  placeholder="3"
                   type="number"
                   value={rateForm.estimated_days_min || ""}
                   onChange={(e) =>
@@ -1016,12 +1016,12 @@ export default function ShippingManager() {
                         : undefined,
                     })
                   }
-                  placeholder="3"
                 />
               </div>
               <div>
                 <Label>Días estimados (máximo)</Label>
                 <Input
+                  placeholder="7"
                   type="number"
                   value={rateForm.estimated_days_max || ""}
                   onChange={(e) =>
@@ -1032,13 +1032,13 @@ export default function ShippingManager() {
                         : undefined,
                     })
                   }
-                  placeholder="7"
                 />
               </div>
             </div>
             <div>
               <Label>Umbral de envío gratis (ARS)</Label>
               <Input
+                placeholder="50000"
                 type="number"
                 value={rateForm.free_shipping_threshold || ""}
                 onChange={(e) =>
@@ -1049,7 +1049,6 @@ export default function ShippingManager() {
                       : undefined,
                   })
                 }
-                placeholder="50000"
               />
               <p className="text-xs text-tierra-media mt-1">
                 Si el pedido supera este monto, el envío será gratis
@@ -1092,16 +1091,18 @@ export default function ShippingManager() {
             <div>
               <Label>Nombre *</Label>
               <Input
+                placeholder="Ej: OCA, Andreani"
                 value={carrierForm.name}
                 onChange={(e) =>
                   setCarrierForm({ ...carrierForm, name: e.target.value })
                 }
-                placeholder="Ej: OCA, Andreani"
               />
             </div>
             <div>
               <Label>Código *</Label>
               <Input
+                disabled={!!editingCarrier}
+                placeholder="oca, andreani"
                 value={carrierForm.code}
                 onChange={(e) =>
                   setCarrierForm({
@@ -1109,8 +1110,6 @@ export default function ShippingManager() {
                     code: e.target.value.toLowerCase().replace(/\s+/g, "_"),
                   })
                 }
-                placeholder="oca, andreani"
-                disabled={!!editingCarrier}
               />
               <p className="text-xs text-tierra-media mt-1">
                 Código único (solo minúsculas y guiones bajos)
@@ -1119,6 +1118,7 @@ export default function ShippingManager() {
             <div>
               <Label>URL de Seguimiento</Label>
               <Input
+                placeholder="https://example.com/track/{tracking_number}"
                 value={carrierForm.tracking_url_template}
                 onChange={(e) =>
                   setCarrierForm({
@@ -1126,7 +1126,6 @@ export default function ShippingManager() {
                     tracking_url_template: e.target.value,
                   })
                 }
-                placeholder="https://example.com/track/{tracking_number}"
               />
               <p className="text-xs text-tierra-media mt-1">
                 Usa {"{tracking_number}"} como placeholder para el número de
@@ -1136,12 +1135,12 @@ export default function ShippingManager() {
             <div>
               <Label>API Key (opcional)</Label>
               <Input
+                placeholder="API key para integración"
                 type="password"
                 value={carrierForm.api_key}
                 onChange={(e) =>
                   setCarrierForm({ ...carrierForm, api_key: e.target.value })
                 }
-                placeholder="API key para integración"
               />
             </div>
             <div className="flex items-center gap-2">

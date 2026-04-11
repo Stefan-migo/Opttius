@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireRoot } from "@/lib/api/root-middleware";
-import { createServiceRoleClient } from "@/utils/supabase/service-role";
-import { appLogger as logger } from "@/lib/logger";
+
 import { AuthorizationError } from "@/lib/api/errors";
+import { requireRoot } from "@/lib/api/root-middleware";
 import { createOrgUserSchema } from "@/lib/api/validation/zod-schemas";
+import { appLogger as logger } from "@/lib/logger";
+import { createServiceRoleClient } from "@/utils/supabase/service-role";
 
 /**
  * GET /api/admin/saas-management/organizations/[id]/users
@@ -51,7 +52,7 @@ export async function GET(
 
     // Enriquecer con perfiles
     const usersWithDetails = await Promise.all(
-      (users || []).map(async (user: any) => {
+      (users || []).map(async (user: unknown) => {
         const { data: profile } = await supabaseServiceRole
           .from("profiles")
           .select("id, first_name, last_name, phone")

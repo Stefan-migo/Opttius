@@ -1,11 +1,45 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { useRouter, useParams } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import {
+  AlertCircle,
+  ArrowLeft,
+  ArrowRight,
+  Calculator,
+  CheckCircle,
+  DollarSign,
+  Edit,
+  Eye,
+  Factory,
+  FileText,
+  Package,
+  Printer,
+  RefreshCw,
+  Send,
+  Trash2,
+  Truck,
+  User,
+  XCircle,
+} from "lucide-react";
+import Link from "next/link";
+import { useParams, useRouter } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
+import { toast } from "sonner";
+
+import { PrescriptionFullDisplay } from "@/components/admin/PrescriptionFullDisplay";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -13,45 +47,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import {
-  ArrowLeft,
-  Edit,
-  FileText,
-  User,
-  Eye,
-  Package,
-  Calculator,
-  Calendar,
-  DollarSign,
-  Factory,
-  CheckCircle,
-  Clock,
-  Send,
-  Truck,
-  AlertCircle,
-  XCircle,
-  RefreshCw,
-  Printer,
-  ArrowRight,
-  Trash2,
-} from "lucide-react";
-import { toast } from "sonner";
-import Link from "next/link";
-import { formatCurrency, formatDate, formatDateTime } from "@/lib/utils";
 import { getLensTypeLabel } from "@/lib/lens-type-labels";
-import { PrescriptionFullDisplay } from "@/components/admin/PrescriptionFullDisplay";
+import { formatCurrency, formatDate } from "@/lib/utils";
 
 interface WorkOrder {
   id: string;
@@ -64,9 +63,9 @@ interface WorkOrder {
     email?: string;
     phone?: string;
   };
-  prescription?: any;
-  quote?: any;
-  frame_product?: any;
+  prescription?: unknown;
+  quote?: unknown;
+  frame_product?: unknown;
   frame_name: string;
   frame_brand?: string;
   frame_model?: string;
@@ -232,7 +231,7 @@ export default function WorkOrderDetailPage() {
 
     setUpdatingStatus(true);
     try {
-      const updateData: any = {
+      const updateData: unknown = {
         status: newStatus,
         notes: statusNotes,
       };
@@ -265,7 +264,7 @@ export default function WorkOrderDetailPage() {
       setNewStatus("");
       setStatusNotes("");
       fetchWorkOrder();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error updating status:", error);
       toast.error(error.message || "Error al actualizar estado");
     } finally {
@@ -320,7 +319,7 @@ export default function WorkOrderDetailPage() {
         // Refresh manually
         await fetchWorkOrder();
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error delivering work order:", error);
       toast.error(error.message || "Error al entregar trabajo");
     } finally {
@@ -346,7 +345,7 @@ export default function WorkOrderDetailPage() {
 
       toast.success("Trabajo eliminado exitosamente");
       router.push("/admin/work-orders");
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error deleting work order:", error);
       toast.error(error.message || "Error al eliminar trabajo");
       setDeleteDialogOpen(false);
@@ -358,7 +357,7 @@ export default function WorkOrderDetailPage() {
   const getStatusBadge = (status: string) => {
     const config: Record<
       string,
-      { variant: any; label: string; icon: any; color: string }
+      { variant: unknown; label: string; icon: unknown; color: string }
     > = {
       quote: {
         variant: "outline",
@@ -443,7 +442,7 @@ export default function WorkOrderDetailPage() {
     const Icon = statusConfig.icon;
 
     return (
-      <Badge variant={statusConfig.variant} className="flex items-center gap-1">
+      <Badge className="flex items-center gap-1" variant={statusConfig.variant}>
         <Icon className="h-3 w-3" />
         {statusConfig.label}
       </Badge>
@@ -666,7 +665,7 @@ export default function WorkOrderDetailPage() {
   }, [workOrder, orgName]);
 
   const getPaymentStatusBadge = (status: string) => {
-    const config: Record<string, { variant: any; label: string }> = {
+    const config: Record<string, { variant: unknown; label: string }> = {
       pending: { variant: "outline", label: "Pendiente" },
       partial: { variant: "secondary", label: "Parcial" },
       paid: { variant: "default", label: "Pagado" },
@@ -684,7 +683,7 @@ export default function WorkOrderDetailPage() {
     return (
       <div className="space-y-6">
         <div className="flex items-center space-x-4">
-          <Button variant="outline" size="sm">
+          <Button size="sm" variant="outline">
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div>
@@ -701,7 +700,7 @@ export default function WorkOrderDetailPage() {
     return (
       <div className="space-y-6">
         <div className="flex items-center space-x-4">
-          <Button variant="outline" size="sm" onClick={() => router.back()}>
+          <Button size="sm" variant="outline" onClick={() => router.back()}>
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div>
@@ -735,11 +734,11 @@ export default function WorkOrderDetailPage() {
         {/* Row 1: Back + Title */}
         <div className="flex items-center gap-2">
           <Button
-            variant="outline"
-            size="icon"
-            onClick={() => router.back()}
-            className="h-9 w-9 shrink-0"
             aria-label="Volver"
+            className="h-9 w-9 shrink-0"
+            size="icon"
+            variant="outline"
+            onClick={() => router.back()}
           >
             <ArrowLeft className="h-4 w-4" />
           </Button>
@@ -758,7 +757,7 @@ export default function WorkOrderDetailPage() {
               {(() => {
                 const statusConfig: Record<
                   string,
-                  { label: string; icon: any }
+                  { label: string; icon: unknown }
                 > = {
                   quote: { label: "Presupuesto", icon: FileText },
                   ordered: { label: "Ordenado", icon: Package },
@@ -804,11 +803,11 @@ export default function WorkOrderDetailPage() {
             {availableStatuses.length > 0 && (
               <DialogTrigger asChild>
                 <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setStatusDialogOpenedFromTimeline(false)}
-                  className="h-9 min-w-0 sm:w-auto sm:px-3 gap-1.5"
                   aria-label="Cambiar estado"
+                  className="h-9 min-w-0 sm:w-auto sm:px-3 gap-1.5"
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setStatusDialogOpenedFromTimeline(false)}
                 >
                   <Edit className="h-4 w-4 shrink-0" />
                   <span className="text-xs sm:text-sm whitespace-nowrap">
@@ -848,6 +847,7 @@ export default function WorkOrderDetailPage() {
                     <div>
                       <Label>Nombre del Laboratorio *</Label>
                       <Input
+                        placeholder="Ej: Laboratorio Óptico Central"
                         value={labInfo.lab_name}
                         onChange={(e) =>
                           setLabInfo((prev) => ({
@@ -855,12 +855,12 @@ export default function WorkOrderDetailPage() {
                             lab_name: e.target.value,
                           }))
                         }
-                        placeholder="Ej: Laboratorio Óptico Central"
                       />
                     </div>
                     <div>
                       <Label>Contacto del Laboratorio</Label>
                       <Input
+                        placeholder="Teléfono o email"
                         value={labInfo.lab_contact}
                         onChange={(e) =>
                           setLabInfo((prev) => ({
@@ -868,12 +868,12 @@ export default function WorkOrderDetailPage() {
                             lab_contact: e.target.value,
                           }))
                         }
-                        placeholder="Teléfono o email"
                       />
                     </div>
                     <div>
                       <Label>Número de Orden del Lab</Label>
                       <Input
+                        placeholder="Número asignado por el laboratorio"
                         value={labInfo.lab_order_number}
                         onChange={(e) =>
                           setLabInfo((prev) => ({
@@ -881,7 +881,6 @@ export default function WorkOrderDetailPage() {
                             lab_order_number: e.target.value,
                           }))
                         }
-                        placeholder="Número asignado por el laboratorio"
                       />
                     </div>
                     <div>
@@ -903,10 +902,10 @@ export default function WorkOrderDetailPage() {
                 <div>
                   <Label>Notas (opcional)</Label>
                   <Textarea
-                    value={statusNotes}
-                    onChange={(e) => setStatusNotes(e.target.value)}
                     placeholder="Notas sobre el cambio de estado..."
                     rows={3}
+                    value={statusNotes}
+                    onChange={(e) => setStatusNotes(e.target.value)}
                   />
                 </div>
 
@@ -918,12 +917,12 @@ export default function WorkOrderDetailPage() {
                     Cancelar
                   </Button>
                   <Button
-                    onClick={handleStatusUpdate}
                     disabled={
                       updatingStatus ||
                       !newStatus ||
                       (newStatus === "sent_to_lab" && !labInfo.lab_name)
                     }
+                    onClick={handleStatusUpdate}
                   >
                     {updatingStatus ? (
                       <>
@@ -939,21 +938,21 @@ export default function WorkOrderDetailPage() {
             </DialogContent>
           </Dialog>
           <Button
-            variant="outline"
-            size="sm"
-            onClick={handlePrint}
-            className="h-9 w-9 sm:w-auto sm:px-3"
             aria-label="Imprimir"
+            className="h-9 w-9 sm:w-auto sm:px-3"
+            size="sm"
+            variant="outline"
+            onClick={handlePrint}
           >
             <Printer className="h-4 w-4 sm:mr-2 shrink-0" />
             <span className="hidden lg:inline">Imprimir</span>
           </Button>
           <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setDeleteDialogOpen(true)}
-            className="h-9 w-9 sm:w-auto sm:px-3 text-red-600 hover:text-red-700 hover:bg-red-50"
             aria-label="Eliminar"
+            className="h-9 w-9 sm:w-auto sm:px-3 text-red-600 hover:text-red-700 hover:bg-red-50"
+            size="sm"
+            variant="outline"
+            onClick={() => setDeleteDialogOpen(true)}
           >
             <Trash2 className="h-4 w-4 sm:mr-2 shrink-0" />
             <span className="hidden lg:inline">Eliminar</span>
@@ -1046,8 +1045,8 @@ export default function WorkOrderDetailPage() {
 
                     return (
                       <div
-                        key={step.status}
                         className="relative flex items-start gap-3 pb-5 last:pb-0"
+                        key={step.status}
                       >
                         {idx < steps.length - 1 && (
                           <div
@@ -1057,6 +1056,13 @@ export default function WorkOrderDetailPage() {
                           />
                         )}
                         <div
+                          className={`relative z-10 flex-shrink-0 w-11 h-11 rounded-full flex items-center justify-center border-2 cursor-pointer transition-transform active:scale-95 ${
+                            isCurrent
+                              ? "bg-green-500 border-green-600 text-white shadow-lg shadow-green-500/50"
+                              : isCompleted
+                                ? "bg-gray-300 border-gray-400 text-gray-600"
+                                : "bg-gray-200 border-gray-300 text-gray-400"
+                          }`}
                           role="button"
                           tabIndex={0}
                           onClick={() => handleStepClick(step)}
@@ -1066,13 +1072,6 @@ export default function WorkOrderDetailPage() {
                               handleStepClick(step);
                             }
                           }}
-                          className={`relative z-10 flex-shrink-0 w-11 h-11 rounded-full flex items-center justify-center border-2 cursor-pointer transition-transform active:scale-95 ${
-                            isCurrent
-                              ? "bg-green-500 border-green-600 text-white shadow-lg shadow-green-500/50"
-                              : isCompleted
-                                ? "bg-gray-300 border-gray-400 text-gray-600"
-                                : "bg-gray-200 border-gray-300 text-gray-400"
-                          }`}
                         >
                           {isCurrent ? (
                             <>
@@ -1132,11 +1131,18 @@ export default function WorkOrderDetailPage() {
 
                     return (
                       <div
-                        key={step.status}
                         className="flex items-center flex-shrink-0"
+                        key={step.status}
                       >
                         <div className="flex flex-col items-center">
                           <div
+                            className={`w-14 h-14 rounded-full flex items-center justify-center border-2 relative cursor-pointer transition-transform hover:scale-105 ${
+                              isCurrent
+                                ? "bg-green-500 border-green-600 text-white shadow-lg shadow-green-500/50"
+                                : isCompleted
+                                  ? "bg-gray-300 border-gray-400 text-gray-600"
+                                  : "bg-gray-200 border-gray-300 text-gray-400"
+                            }`}
                             role="button"
                             tabIndex={0}
                             onClick={() => handleStepClick(step)}
@@ -1146,13 +1152,6 @@ export default function WorkOrderDetailPage() {
                                 handleStepClick(step);
                               }
                             }}
-                            className={`w-14 h-14 rounded-full flex items-center justify-center border-2 relative cursor-pointer transition-transform hover:scale-105 ${
-                              isCurrent
-                                ? "bg-green-500 border-green-600 text-white shadow-lg shadow-green-500/50"
-                                : isCompleted
-                                  ? "bg-gray-300 border-gray-400 text-gray-600"
-                                  : "bg-gray-200 border-gray-300 text-gray-400"
-                            }`}
                           >
                             {isCurrent ? (
                               <>
@@ -1216,7 +1215,7 @@ export default function WorkOrderDetailPage() {
       </Card>
 
       {/* Main Content */}
-      <Tabs defaultValue="overview" className="space-y-6">
+      <Tabs className="space-y-6" defaultValue="overview">
         <TabsList>
           <TabsTrigger value="overview">Resumen</TabsTrigger>
           <TabsTrigger value="details">Detalles</TabsTrigger>
@@ -1225,7 +1224,7 @@ export default function WorkOrderDetailPage() {
         </TabsList>
 
         {/* Overview Tab */}
-        <TabsContent value="overview" className="space-y-6">
+        <TabsContent className="space-y-6" value="overview">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Customer Info */}
             <Card>
@@ -1253,7 +1252,7 @@ export default function WorkOrderDetailPage() {
                   </div>
                 )}
                 <Link href={`/admin/customers/${workOrder.customer?.id}`}>
-                  <Button variant="outline" size="sm" className="w-full mt-4">
+                  <Button className="w-full mt-4" size="sm" variant="outline">
                     Ver Cliente
                   </Button>
                 </Link>
@@ -1455,12 +1454,11 @@ export default function WorkOrderDetailPage() {
         </TabsContent>
 
         {/* Details Tab */}
-        <TabsContent value="details" className="space-y-6">
+        <TabsContent className="space-y-6" value="details">
           {/* Prescription Details - Critical for Lab */}
           {workOrder.prescription && (
             <PrescriptionFullDisplay
               prescription={workOrder.prescription}
-              title="Detalles de la Receta (Para Laboratorio)"
               subtitle={
                 workOrder.prescription.prescription_date && (
                   <>
@@ -1474,6 +1472,7 @@ export default function WorkOrderDetailPage() {
                   </>
                 )
               }
+              title="Detalles de la Receta (Para Laboratorio)"
             />
           )}
 
@@ -1767,7 +1766,7 @@ export default function WorkOrderDetailPage() {
         </TabsContent>
 
         {/* Pricing Tab */}
-        <TabsContent value="pricing" className="space-y-6">
+        <TabsContent className="space-y-6" value="pricing">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center">
@@ -1892,7 +1891,7 @@ export default function WorkOrderDetailPage() {
         </TabsContent>
 
         {/* History Tab */}
-        <TabsContent value="history" className="space-y-6">
+        <TabsContent className="space-y-6" value="history">
           <Card>
             <CardHeader>
               <CardTitle>Historial de Estados</CardTitle>
@@ -1910,22 +1909,22 @@ export default function WorkOrderDetailPage() {
 
                     return (
                       <div
-                        key={entry.id}
                         className={`flex items-start space-x-4 pb-4 border-b last:border-0 ${
                           isCurrentStatus
                             ? "bg-green-50 p-4 rounded-lg border-green-200"
                             : "bg-gray-50 p-3 rounded-lg border-gray-200"
                         }`}
+                        key={entry.id}
                       >
                         <div className="flex-1">
                           <div className="flex items-center gap-2 flex-wrap">
                             <Badge
-                              variant="outline"
                               className={
                                 isCurrentStatus
                                   ? "bg-gray-200 border-gray-300 text-gray-600"
                                   : "bg-gray-100 border-gray-200 text-gray-500"
                               }
+                              variant="outline"
                             >
                               {getStatusLabel(entry.from_status || "Inicial")}
                             </Badge>
@@ -2004,16 +2003,16 @@ export default function WorkOrderDetailPage() {
           </DialogHeader>
           <DialogFooter>
             <Button
+              disabled={deleting}
               variant="outline"
               onClick={() => setDeleteDialogOpen(false)}
-              disabled={deleting}
             >
               Cancelar
             </Button>
             <Button
+              disabled={deleting}
               variant="destructive"
               onClick={handleDelete}
-              disabled={deleting}
             >
               {deleting ? (
                 <>
@@ -2088,12 +2087,12 @@ export default function WorkOrderDetailPage() {
           </DialogHeader>
           <DialogFooter>
             <Button
+              disabled={delivering}
               variant="outline"
               onClick={() => {
                 setDeliveryDialogOpen(false);
                 setDeliveryError(null);
               }}
-              disabled={delivering}
             >
               Cancelar
             </Button>
@@ -2120,9 +2119,9 @@ export default function WorkOrderDetailPage() {
               </Button>
             ) : (
               <Button
-                onClick={handleDeliver}
-                disabled={delivering}
                 className="bg-green-600 hover:bg-green-700"
+                disabled={delivering}
+                onClick={handleDeliver}
               >
                 {delivering ? (
                   <>

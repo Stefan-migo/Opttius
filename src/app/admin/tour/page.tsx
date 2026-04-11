@@ -8,21 +8,10 @@
  */
 
 import { useSearchParams } from "next/navigation";
+
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import {
-  LayoutDashboard,
-  Users,
-  Package,
-  FileText,
-  Calendar,
-  ShoppingCart,
-  BarChart3,
-  Settings,
-  Wrench,
-} from "lucide-react";
 
 export default function TourMockupPage() {
   const searchParams = useSearchParams();
@@ -115,7 +104,7 @@ function CustomersMockup() {
           <CardTitle>Buscar Clientes</CardTitle>
         </CardHeader>
         <CardContent>
-          <div data-tour="customers-search" className="space-y-4">
+          <div className="space-y-4" data-tour="customers-search">
             <Input placeholder="Buscar por RUT, nombre o email..." />
             <div className="text-sm text-tierra-media">
               Puedes buscar clientes por RUT (con o sin formato), nombre o email
@@ -223,8 +212,8 @@ function AppointmentsMockup() {
       <Card>
         <CardContent className="p-6">
           <div
-            data-tour="appointments-calendar"
             className="text-center text-tierra-media"
+            data-tour="appointments-calendar"
           >
             Calendario de citas (vista mockup para tour)
           </div>

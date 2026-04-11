@@ -1,19 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/utils/supabase/server";
-import { createServiceRoleClient } from "@/utils/supabase/server";
+import { z } from "zod";
+
 import {
   getBranchContext,
   getFieldOperationFromRequest,
   validateBranchAccess,
 } from "@/lib/api/branch-middleware";
+import { rateLimitConfigs, withRateLimit } from "@/lib/api/middleware";
+import { createApiSuccessResponse } from "@/lib/api/response";
 import { appLogger as logger } from "@/lib/logger";
-import {
-  createApiSuccessResponse,
-  createApiErrorResponse,
-} from "@/lib/api/response";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
-import { withRateLimit, rateLimitConfigs } from "@/lib/api/middleware";
-import { z } from "zod";
+import { createClient } from "@/utils/supabase/server";
+import { createServiceRoleClient } from "@/utils/supabase/server";
 
 const openCashRegisterSchema = z.object({
   opening_cash_amount: z.number().min(0).default(0),
@@ -23,7 +21,7 @@ const openCashRegisterSchema = z.object({
 export const dynamic = "force-dynamic";
 export async function POST(request: NextRequest) {
   try {
-    return await (withRateLimit(rateLimitConfigs.modification) as any)(
+    return await (withRateLimit(rateLimitConfigs.modification) as unknown)(
       request,
       async () => {
         const supabase = await createClient();
@@ -249,7 +247,7 @@ export async function POST(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   try {
-    return await (withRateLimit(rateLimitConfigs.modification) as any)(
+    return await (withRateLimit(rateLimitConfigs.modification) as unknown)(
       request,
       async () => {
         const supabase = await createClient();

@@ -7,21 +7,25 @@
  * @module hooks/useForm
  */
 
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useState } from "react";
 import {
-  useForm as useReactHookForm,
-  UseFormReturn,
   FieldErrors,
   Path,
+  useForm as useReactHookForm,
+  UseFormReturn,
 } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z, ZodSchema } from "zod";
-import { useState } from "react";
-import { handleApiError, withErrorHandling } from "@/lib/services";
+import { z } from "zod";
+
+import { handleApiError } from "@/lib/services";
 
 /**
  * Opciones para el hook useForm
  */
-export interface UseFormOptions<T extends z.ZodType<any, any, any>, R = void> {
+export interface UseFormOptions<
+  T extends z.ZodType<unknown, unknown, unknown>,
+  R = void,
+> {
   /** Valores iniciales del formulario */
   defaultValues: z.infer<T>;
   /** Esquema de validación Zod */
@@ -46,7 +50,7 @@ export interface UseFormOptions<T extends z.ZodType<any, any, any>, R = void> {
  * Return type del hook useForm
  */
 export interface UseFormReturnExtended<
-  T extends z.ZodType<any, any, any>,
+  T extends z.ZodType<unknown, unknown, unknown>,
   R = void,
 > {
   /** Si el formulario está siendo enviado */
@@ -58,7 +62,7 @@ export interface UseFormReturnExtended<
   /** Función para resetear el formulario */
   resetForm: () => void;
   /** Función para setear valores específicos */
-  setFieldValue: (field: keyof z.infer<T>, value: any) => void;
+  setFieldValue: (field: keyof z.infer<T>, value: unknown) => void;
   /** Función para setear múltiples valores */
   setFieldValues: (values: Partial<z.infer<T>>) => void;
   /** Valores actuales del formulario */
@@ -121,9 +125,10 @@ export interface UseFormReturnExtended<
  *   </Button>
  * </form>
  */
-export function useForm<T extends z.ZodType<any, any, any>, R = void>(
-  options: UseFormOptions<T, R>,
-): UseFormReturnExtended<T, R> {
+export function useForm<
+  T extends z.ZodType<unknown, unknown, unknown>,
+  R = void,
+>(options: UseFormOptions<T, R>): UseFormReturnExtended<T, R> {
   const {
     defaultValues,
     validationSchema,
@@ -227,7 +232,7 @@ export function useForm<T extends z.ZodType<any, any, any>, R = void>(
   /**
    * Setea el valor de un campo específico
    */
-  const setFieldValue = (field: keyof z.infer<T>, value: any) => {
+  const setFieldValue = (field: keyof z.infer<T>, value: unknown) => {
     reactHookForm.setValue(field as Path<z.infer<T>>, value);
     // Limpiar error del campo
     reactHookForm.clearErrors(field as Path<z.infer<T>>);
@@ -281,12 +286,12 @@ export function useForm<T extends z.ZodType<any, any, any>, R = void>(
  *   }
  * );
  */
-export function useFormSimple<T extends Record<string, any>, R = void>(
+export function useFormSimple<T extends Record<string, unknown>, R = void>(
   defaultValues: T,
   onSubmit: (values: T) => Promise<R>,
   options?: Partial<
     Omit<
-      UseFormOptions<any, R>,
+      UseFormOptions<unknown, R>,
       "defaultValues" | "onSubmit" | "validationSchema"
     >
   >,
@@ -320,7 +325,10 @@ export function useFormSimple<T extends Record<string, any>, R = void>(
  *   }
  * );
  */
-export function useFormAsync<T extends z.ZodType<any, any, any>, R = void>(
+export function useFormAsync<
+  T extends z.ZodType<unknown, unknown, unknown>,
+  R = void,
+>(
   defaultValues: z.infer<T>,
   validationSchema: T,
   onSubmit: (values: z.infer<T>) => Promise<R>,

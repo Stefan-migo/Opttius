@@ -20,9 +20,9 @@
  */
 
 import type {
+  EmbeddingBatchResult,
   EmbeddingProvider,
   EmbeddingResult,
-  EmbeddingBatchResult,
   TransformersEmbeddingConfig,
 } from "./types";
 
@@ -30,10 +30,10 @@ const DEFAULT_MODEL = "Xenova/all-MiniLM-L6-v2";
 const EMBEDDING_DIMENSIONS = 384;
 
 // Lazy load the transformers library to avoid loading it if not needed
-let pipeline: any = null;
-let embeddingPipeline: any = null;
+let pipeline: unknown = null;
+let embeddingPipeline: unknown = null;
 let isLoading = false;
-let loadPromise: Promise<any> | null = null;
+let loadPromise: Promise<unknown> | null = null;
 let loadError: Error | null = null;
 
 async function getEmbeddingPipeline(modelName: string) {
@@ -82,7 +82,7 @@ async function getEmbeddingPipeline(modelName: string) {
       console.log("Transformers.js model loaded successfully");
 
       return embeddingPipeline;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Failed to load Transformers.js:", error);
       loadError = error;
       throw error;
@@ -167,7 +167,7 @@ export class TransformersEmbeddingProvider implements EmbeddingProvider {
         dimensions: vector.length,
         provider: this.name,
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       throw new Error(`Transformers.js embedding failed: ${error.message}`);
     }
   }
@@ -207,7 +207,7 @@ export class TransformersEmbeddingProvider implements EmbeddingProvider {
         embeddings,
         provider: this.name,
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       throw new Error(
         `Transformers.js batch embedding failed: ${error.message}`,
       );

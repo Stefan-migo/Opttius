@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireRoot } from "@/lib/api/root-middleware";
-import { createServiceRoleClient } from "@/utils/supabase/service-role";
-import { appLogger as logger } from "@/lib/logger";
+
 import { AuthorizationError } from "@/lib/api/errors";
+import { requireRoot } from "@/lib/api/root-middleware";
+import { appLogger as logger } from "@/lib/logger";
+import { createServiceRoleClient } from "@/utils/supabase/service-role";
 
 /**
  * GET /api/admin/saas-management/telemetry-config

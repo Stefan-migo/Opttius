@@ -1,17 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/utils/supabase/server";
+
 import { appLogger as logger } from "@/lib/logger";
+import { getOrganizationFeatures } from "@/lib/saas/tier-validator";
 import type {
-  IsAdminParams,
-  IsAdminResult,
   GetAdminRoleParams,
   GetAdminRoleResult,
-  IsSuperAdminParams,
-  IsSuperAdminResult,
+  IsAdminParams,
+  IsAdminResult,
   IsRootUserParams,
   IsRootUserResult,
+  IsSuperAdminParams,
+  IsSuperAdminResult,
 } from "@/types/supabase-rpc";
-import { getOrganizationFeatures } from "@/lib/saas/tier-validator";
+import { createClient } from "@/utils/supabase/server";
 
 const DEMO_ORG_ID =
   process.env.NEXT_PUBLIC_DEMO_ORG_ID || "00000000-0000-0000-0000-000000000001";

@@ -1,8 +1,9 @@
 import { NextRequest } from "next/server";
-import { createClient } from "@/utils/supabase/server";
-import { createServiceRoleClient } from "@/utils/supabase/service-role";
+
 import { AuthorizationError } from "@/lib/api/errors";
 import { appLogger as logger } from "@/lib/logger";
+import { createClient } from "@/utils/supabase/server";
+import { createServiceRoleClient } from "@/utils/supabase/service-role";
 
 /**
  * Require root or dev role for access

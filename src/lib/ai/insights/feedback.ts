@@ -1,9 +1,9 @@
-import { InsightSection, InsightFeedback, DatabaseInsight } from "./schemas";
+import { DatabaseInsight, InsightFeedback, InsightSection } from "./schemas";
 
 export class InsightFeedbackSystem {
-  private supabase: any;
+  private supabase: unknown;
 
-  constructor(supabase: any) {
+  constructor(supabase: unknown) {
     this.supabase = supabase;
   }
 

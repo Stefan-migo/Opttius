@@ -1,31 +1,26 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import {
+  Calculator,
+  CheckCircle,
+  Eye,
+  Loader2,
+  Package,
+  Plus,
   Search,
   User,
-  Eye,
-  Package,
-  Loader2,
-  Calculator,
-  Plus,
-  X,
-  CheckCircle,
 } from "lucide-react";
+import { Info } from "lucide-react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
+
+import CreatePrescriptionForm from "@/components/admin/CreatePrescriptionForm";
+import { ContactLensFamilyCombobox } from "@/components/admin/lenses/ContactLensFamilyCombobox";
+import { LensFamilyCombobox } from "@/components/admin/lenses/LensFamilyCombobox";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -33,41 +28,41 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import CreatePrescriptionForm from "@/components/admin/CreatePrescriptionForm";
-import { useBranch } from "@/hooks/useBranch";
-import { getBranchAndOperativoHeaders } from "@/lib/utils/branch";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
-  calculatePriceWithTax,
-  calculateTotal as calculateTotalTax,
-} from "@/lib/utils/tax";
-import { getTaxPercentage } from "@/lib/utils/tax-config";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { useBranch } from "@/hooks/useBranch";
 import { useLensPriceCalculation } from "@/hooks/useLensPriceCalculation";
 import {
-  hasAddition,
-  getMaxAddition,
-  getFarSphere,
+  contactLensFamilyService,
+  contactLensMatrixService,
+  customerService,
+  lensFamilyService,
+  productService,
+  quoteService,
+  quoteSettingsService,
+} from "@/lib/api/services";
+import {
   getCylinder,
-  getNearSphere,
   getDefaultPresbyopiaSolution,
-  getRecommendedLensTypes,
+  getFarSphere,
+  getMaxAddition,
+  getNearSphere,
+  hasAddition,
   type PresbyopiaSolution,
 } from "@/lib/presbyopia-helpers";
 import { translatePrescriptionType } from "@/lib/prescription-helpers";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Info } from "lucide-react";
-import { extractDataFromResponse } from "@/lib/api/response-helpers";
-import {
-  lensFamilyService,
-  contactLensFamilyService,
-  contactLensMatrixService,
-  quoteSettingsService,
-  customerService,
-  productService,
-  quoteService,
-} from "@/lib/api/services";
-import { LensFamilyCombobox } from "@/components/admin/lenses/LensFamilyCombobox";
-import { ContactLensFamilyCombobox } from "@/components/admin/lenses/ContactLensFamilyCombobox";
+import { getBranchAndOperativoHeaders } from "@/lib/utils/branch";
+import { calculatePriceWithTax } from "@/lib/utils/tax";
+import { getTaxPercentage } from "@/lib/utils/tax-config";
 
 interface CreateQuoteFormProps {
   onSuccess: () => void;
@@ -98,31 +93,32 @@ export default function CreateQuoteForm({
   const [discountType, setDiscountType] = useState<"percentage" | "amount">(
     "amount",
   );
-  const [quoteSettings, setQuoteSettings] = useState<any>(null);
+  const [quoteSettings, setQuoteSettings] = useState<unknown>(null);
   const [loadingSettings, setLoadingSettings] = useState(true);
 
   // Customer selection
   const [customerSearch, setCustomerSearch] = useState("");
-  const [customerResults, setCustomerResults] = useState<any[]>([]);
-  const [selectedCustomer, setSelectedCustomer] = useState<any>(null);
+  const [customerResults, setCustomerResults] = useState<unknown[]>([]);
+  const [selectedCustomer, setSelectedCustomer] = useState<unknown>(null);
   const [searchingCustomers, setSearchingCustomers] = useState(false);
 
   // Prescription selection
-  const [prescriptions, setPrescriptions] = useState<any[]>([]);
-  const [selectedPrescription, setSelectedPrescription] = useState<any>(null);
+  const [prescriptions, setPrescriptions] = useState<unknown[]>([]);
+  const [selectedPrescription, setSelectedPrescription] =
+    useState<unknown>(null);
   const [loadingPrescriptions, setLoadingPrescriptions] = useState(false);
   const [showCreatePrescription, setShowCreatePrescription] = useState(false);
 
   // Frame selection
   const [frameSearch, setFrameSearch] = useState("");
-  const [frameResults, setFrameResults] = useState<any[]>([]);
-  const [selectedFrame, setSelectedFrame] = useState<any>(null);
+  const [frameResults, setFrameResults] = useState<unknown[]>([]);
+  const [selectedFrame, setSelectedFrame] = useState<unknown>(null);
   const [searchingFrames, setSearchingFrames] = useState(false);
 
   // Second frame for two separate lenses (near vision)
   const [nearFrameSearch, setNearFrameSearch] = useState("");
-  const [nearFrameResults, setNearFrameResults] = useState<any[]>([]);
-  const [selectedNearFrame, setSelectedNearFrame] = useState<any>(null);
+  const [nearFrameResults, setNearFrameResults] = useState<unknown[]>([]);
+  const [selectedNearFrame, setSelectedNearFrame] = useState<unknown>(null);
   const [searchingNearFrames, setSearchingNearFrames] = useState(false);
   const [taxPercentage, setTaxPercentage] = useState<number>(19.0);
   const [customerOwnFrame, setCustomerOwnFrame] = useState<boolean>(false);
@@ -131,13 +127,13 @@ export default function CreateQuoteForm({
   const [manualLensPrice, setManualLensPrice] = useState<boolean>(false);
 
   // Lens families and price calculation
-  const [lensFamilies, setLensFamilies] = useState<any[]>([]);
+  const [lensFamilies, setLensFamilies] = useState<unknown[]>([]);
   const [loadingFamilies, setLoadingFamilies] = useState(false);
   const { calculateLensPrice, loading: calculatingPrice } =
     useLensPriceCalculation();
 
   // Contact lens families and price calculation
-  const [contactLensFamilies, setContactLensFamilies] = useState<any[]>([]);
+  const [contactLensFamilies, setContactLensFamilies] = useState<unknown[]>([]);
   const [loadingContactLensFamilies, setLoadingContactLensFamilies] =
     useState(false);
   const [lensType, setLensType] = useState<"optical" | "contact">("optical"); // Toggle between optical and contact lenses
@@ -170,6 +166,7 @@ export default function CreateQuoteForm({
     lens_treatments: [] as string[],
     lens_tint_color: "",
     lens_tint_percentage: 0,
+    lens_sourcing_type: "surfaced" as "stock" | "surfaced",
     frame_cost: 0,
     lens_cost: 0,
     treatments_cost: 0,
@@ -499,7 +496,7 @@ export default function CreateQuoteForm({
 
       setFormData((prev) => {
         // Only update if the value has actually changed
-        const updates: any = {};
+        const updates: unknown = {};
         if (prev.labor_cost !== newLaborCost) {
           updates.labor_cost = newLaborCost;
         }
@@ -617,10 +614,12 @@ export default function CreateQuoteForm({
   const fetchQuoteSettings = async () => {
     try {
       setLoadingSettings(true);
+
+      // Fetch settings
       const settings = await quoteSettingsService.get();
 
       // Always create a new object to ensure React detects the change
-      const newSettings = settings ? ({ ...settings } as any) : null;
+      const newSettings = settings ? ({ ...settings } as unknown) : null;
       setQuoteSettings(newSettings);
 
       // Set default values from settings
@@ -664,7 +663,7 @@ export default function CreateQuoteForm({
   };
 
   // Helper function to get treatment price (supports both old format: number, and new format: {price, enabled})
-  const getTreatmentPrice = (value: any): number => {
+  const getTreatmentPrice = (value: unknown): number => {
     if (typeof value === "number") return value;
     if (value && typeof value === "object" && "price" in value)
       return value.price;
@@ -672,14 +671,14 @@ export default function CreateQuoteForm({
   };
 
   // Helper function to check if treatment is enabled (supports both formats)
-  const isTreatmentEnabled = (value: any): boolean => {
+  const isTreatmentEnabled = (value: unknown): boolean => {
     if (typeof value === "number") return true; // Backward compatibility: number = enabled
     if (value && typeof value === "object" && "enabled" in value)
       return value.enabled;
     return true; // Default to enabled if format is unknown
   };
 
-  // Get available treatments from settings (only enabled ones)
+  // Get available treatments from quoteSettings
   const availableTreatments = quoteSettings
     ? [
         {
@@ -694,27 +693,6 @@ export default function CreateQuoteForm({
           ),
         },
         {
-          value: "blue_light_filter",
-          label: "Filtro Luz Azul",
-          cost:
-            getTreatmentPrice(
-              quoteSettings.treatment_prices?.blue_light_filter,
-            ) || 20000,
-          enabled: isTreatmentEnabled(
-            quoteSettings.treatment_prices?.blue_light_filter,
-          ),
-        },
-        {
-          value: "uv_protection",
-          label: "Protección UV",
-          cost:
-            getTreatmentPrice(quoteSettings.treatment_prices?.uv_protection) ||
-            10000,
-          enabled: isTreatmentEnabled(
-            quoteSettings.treatment_prices?.uv_protection,
-          ),
-        },
-        {
           value: "scratch_resistant",
           label: "Anti-rayas",
           cost:
@@ -726,63 +704,39 @@ export default function CreateQuoteForm({
           ),
         },
         {
-          value: "anti_fog",
-          label: "Anti-empañamiento",
-          cost:
-            getTreatmentPrice(quoteSettings.treatment_prices?.anti_fog) || 8000,
-          enabled: isTreatmentEnabled(quoteSettings.treatment_prices?.anti_fog),
-        },
-        {
-          value: "photochromic",
-          label: "Fotocromático",
-          cost:
-            getTreatmentPrice(quoteSettings.treatment_prices?.photochromic) ||
-            35000,
-          enabled: isTreatmentEnabled(
-            quoteSettings.treatment_prices?.photochromic,
-          ),
-        },
-        {
-          value: "polarized",
-          label: "Polarizado",
-          cost:
-            getTreatmentPrice(quoteSettings.treatment_prices?.polarized) ||
-            25000,
-          enabled: isTreatmentEnabled(
-            quoteSettings.treatment_prices?.polarized,
-          ),
-        },
-        {
           value: "tint",
           label: "Tinte",
           cost:
             getTreatmentPrice(quoteSettings.treatment_prices?.tint) || 15000,
           enabled: isTreatmentEnabled(quoteSettings.treatment_prices?.tint),
         },
+        // Servicio personalizado
+        ...(quoteSettings.treatment_prices?.custom_service?.enabled
+          ? [
+              {
+                value: "custom_service",
+                label:
+                  quoteSettings.treatment_prices.custom_service.name ||
+                  "Servicio Extra",
+                cost: quoteSettings.treatment_prices.custom_service.price || 0,
+                enabled: true,
+              },
+            ]
+          : []),
+        // Prisma siempre disponible (no se cobra extra, es manual)
         {
           value: "prism_extra",
           label: "Prisma (extra)",
           cost: 0,
           enabled: true,
-        }, // Prisma always enabled
+        },
       ].filter((t) => t.enabled)
     : [
+        // Defaults si no hay settings
         {
           value: "anti_reflective",
           label: "Anti-reflejante",
           cost: 15000,
-          enabled: true,
-        },
-        {
-          value: "blue_light_filter",
-          label: "Filtro Luz Azul",
-          cost: 20000,
-          enabled: true,
-        },
-        {
-          value: "uv_protection",
-          label: "Protección UV",
-          cost: 10000,
           enabled: true,
         },
         {
@@ -791,19 +745,6 @@ export default function CreateQuoteForm({
           cost: 12000,
           enabled: true,
         },
-        {
-          value: "anti_fog",
-          label: "Anti-empañamiento",
-          cost: 8000,
-          enabled: true,
-        },
-        {
-          value: "photochromic",
-          label: "Fotocromático",
-          cost: 35000,
-          enabled: true,
-        },
-        { value: "polarized", label: "Polarizado", cost: 25000, enabled: true },
         { value: "tint", label: "Tinte", cost: 15000, enabled: true },
         {
           value: "prism_extra",
@@ -1142,7 +1083,7 @@ export default function CreateQuoteForm({
     }));
   };
 
-  const handleFrameSelect = (frame: any) => {
+  const handleFrameSelect = (frame: unknown) => {
     setSelectedFrame(frame);
     setFormData((prev) => ({
       ...prev,
@@ -1161,7 +1102,7 @@ export default function CreateQuoteForm({
     setFrameResults([]);
   };
 
-  const handleNearFrameSelect = (frame: any) => {
+  const handleNearFrameSelect = (frame: unknown) => {
     setSelectedNearFrame(frame);
     const nearFrameCost = frame.price || 0;
     setFormData((prev) => ({
@@ -1346,6 +1287,7 @@ export default function CreateQuoteForm({
         lens_treatments: lensType === "contact" ? [] : formData.lens_treatments,
         lens_tint_color: formData.lens_tint_color || null,
         lens_tint_percentage: formData.lens_tint_percentage || null,
+        lens_sourcing_type: formData.lens_sourcing_type || "surfaced",
         presbyopia_solution: formData.presbyopia_solution || "none",
         far_lens_family_id:
           presbyopiaSolution === "two_separate"
@@ -1421,7 +1363,7 @@ export default function CreateQuoteForm({
 
       toast.success("Presupuesto creado exitosamente");
       onSuccess();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error creating quote:", error);
       toast.error(error.message || "Error al crear presupuesto");
     } finally {
@@ -1437,7 +1379,7 @@ export default function CreateQuoteForm({
     }).format(amount);
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form className="space-y-6" onSubmit={handleSubmit}>
       {/* Customer Selection */}
       <Card>
         <CardHeader>
@@ -1461,9 +1403,9 @@ export default function CreateQuoteForm({
                 </div>
               </div>
               <Button
+                size="sm"
                 type="button"
                 variant="outline"
-                size="sm"
                 onClick={() => {
                   setSelectedCustomer(null);
                   setSelectedPrescription(null);
@@ -1477,10 +1419,10 @@ export default function CreateQuoteForm({
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-admin-text-tertiary" />
               <Input
+                className="pl-10"
                 placeholder="Buscar cliente por nombre o email..."
                 value={customerSearch}
                 onChange={(e) => setCustomerSearch(e.target.value)}
-                className="pl-10"
               />
               {customerSearch.length >= 2 && (
                 <div className="absolute z-10 w-full mt-1 bg-white border rounded-lg shadow-lg max-h-60 overflow-y-auto">
@@ -1491,8 +1433,8 @@ export default function CreateQuoteForm({
                   ) : (customerResults || []).length > 0 ? (
                     customerResults.map((customer) => (
                       <div
-                        key={customer.id}
                         className="p-3 hover:bg-gray-100 cursor-pointer border-b"
+                        key={customer.id}
                         onClick={() => {
                           setSelectedCustomer(customer);
                           setCustomerSearch("");
@@ -1626,6 +1568,7 @@ export default function CreateQuoteForm({
                   </AlertDescription>
                 </Alert>
                 <RadioGroup
+                  className="space-y-3"
                   value={presbyopiaSolution}
                   onValueChange={(value) => {
                     const solution = value as PresbyopiaSolution;
@@ -1668,29 +1611,28 @@ export default function CreateQuoteForm({
                       }));
                     }
                   }}
-                  className="space-y-3"
                 >
                   <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="progressive" id="progressive" />
-                    <Label htmlFor="progressive" className="cursor-pointer">
+                    <RadioGroupItem id="progressive" value="progressive" />
+                    <Label className="cursor-pointer" htmlFor="progressive">
                       Progresivo (Recomendado)
                     </Label>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="bifocal" id="bifocal" />
-                    <Label htmlFor="bifocal" className="cursor-pointer">
+                    <RadioGroupItem id="bifocal" value="bifocal" />
+                    <Label className="cursor-pointer" htmlFor="bifocal">
                       Bifocal
                     </Label>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="trifocal" id="trifocal" />
-                    <Label htmlFor="trifocal" className="cursor-pointer">
+                    <RadioGroupItem id="trifocal" value="trifocal" />
+                    <Label className="cursor-pointer" htmlFor="trifocal">
                       Trifocal
                     </Label>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="two_separate" id="two_separate" />
-                    <Label htmlFor="two_separate" className="cursor-pointer">
+                    <RadioGroupItem id="two_separate" value="two_separate" />
+                    <Label className="cursor-pointer" htmlFor="two_separate">
                       Dos lentes separados (Lejos + Cerca)
                     </Label>
                   </div>
@@ -1714,9 +1656,10 @@ export default function CreateQuoteForm({
         <CardContent className="space-y-4">
           <div className="flex items-center gap-2">
             <input
-              type="checkbox"
-              id="customer_own_frame"
               checked={customerOwnFrame}
+              className="h-4 w-4 rounded border-gray-300"
+              id="customer_own_frame"
+              type="checkbox"
               onChange={(e) => {
                 setCustomerOwnFrame(e.target.checked);
                 if (e.target.checked) {
@@ -1735,9 +1678,8 @@ export default function CreateQuoteForm({
                   }));
                 }
               }}
-              className="h-4 w-4 rounded border-gray-300"
             />
-            <Label htmlFor="customer_own_frame" className="cursor-pointer">
+            <Label className="cursor-pointer" htmlFor="customer_own_frame">
               Cliente trae marco (recambio de cristales)
             </Label>
           </div>
@@ -1747,6 +1689,8 @@ export default function CreateQuoteForm({
               <div>
                 <Label>Nombre del Marco *</Label>
                 <Input
+                  required
+                  placeholder="Marco del cliente"
                   value={formData.frame_name}
                   onChange={(e) =>
                     setFormData((prev) => ({
@@ -1754,13 +1698,12 @@ export default function CreateQuoteForm({
                       frame_name: e.target.value,
                     }))
                   }
-                  placeholder="Marco del cliente"
-                  required
                 />
               </div>
               <div>
                 <Label>Número de Serie</Label>
                 <Input
+                  placeholder="Número de serie del marco"
                   value={formData.frame_sku}
                   onChange={(e) =>
                     setFormData((prev) => ({
@@ -1768,7 +1711,6 @@ export default function CreateQuoteForm({
                       frame_sku: e.target.value,
                     }))
                   }
-                  placeholder="Número de serie del marco"
                 />
               </div>
             </div>
@@ -1795,9 +1737,9 @@ export default function CreateQuoteForm({
                 </div>
               </div>
               <Button
+                size="sm"
                 type="button"
                 variant="outline"
-                size="sm"
                 onClick={() => {
                   setSelectedFrame(null);
                   setFormData((prev) => ({
@@ -1821,10 +1763,10 @@ export default function CreateQuoteForm({
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-admin-text-tertiary" />
               <Input
+                className="pl-10"
                 placeholder="Buscar marco por nombre, marca o SKU..."
                 value={frameSearch}
                 onChange={(e) => setFrameSearch(e.target.value)}
-                className="pl-10"
               />
               {frameSearch.length >= 2 && (
                 <div className="absolute z-10 w-full mt-1 bg-white border rounded-lg shadow-lg max-h-60 overflow-y-auto">
@@ -1835,8 +1777,8 @@ export default function CreateQuoteForm({
                   ) : (frameResults || []).length > 0 ? (
                     frameResults.map((frame) => (
                       <div
-                        key={frame.id}
                         className="p-3 hover:bg-gray-100 cursor-pointer border-b"
+                        key={frame.id}
                         onClick={() => handleFrameSelect(frame)}
                       >
                         <div className="font-medium">{frame.name}</div>
@@ -1867,6 +1809,7 @@ export default function CreateQuoteForm({
               <div>
                 <Label>Nombre del Marco</Label>
                 <Input
+                  placeholder="Ej: Ray-Ban RB2140"
                   value={formData.frame_name}
                   onChange={(e) =>
                     setFormData((prev) => ({
@@ -1874,12 +1817,12 @@ export default function CreateQuoteForm({
                       frame_name: e.target.value,
                     }))
                   }
-                  placeholder="Ej: Ray-Ban RB2140"
                 />
               </div>
               <div>
                 <Label>Precio del Marco</Label>
                 <Input
+                  placeholder="0"
                   type="number"
                   value={formData.frame_price || ""}
                   onChange={(e) => {
@@ -1890,7 +1833,6 @@ export default function CreateQuoteForm({
                       frame_cost: price,
                     }));
                   }}
-                  placeholder="0"
                 />
               </div>
             </div>
@@ -1904,9 +1846,10 @@ export default function CreateQuoteForm({
               </Label>
               <div className="flex items-center gap-2 mb-4">
                 <input
-                  type="checkbox"
-                  id="customer_own_near_frame"
                   checked={customerOwnNearFrame}
+                  className="h-4 w-4 rounded border-gray-300"
+                  id="customer_own_near_frame"
+                  type="checkbox"
                   onChange={(e) => {
                     setCustomerOwnNearFrame(e.target.checked);
                     if (e.target.checked) {
@@ -1925,11 +1868,10 @@ export default function CreateQuoteForm({
                       }));
                     }
                   }}
-                  className="h-4 w-4 rounded border-gray-300"
                 />
                 <Label
-                  htmlFor="customer_own_near_frame"
                   className="cursor-pointer"
+                  htmlFor="customer_own_near_frame"
                 >
                   Cliente trae marco (recambio de cristales)
                 </Label>
@@ -1939,6 +1881,8 @@ export default function CreateQuoteForm({
                   <div>
                     <Label>Nombre del Marco (Cerca) *</Label>
                     <Input
+                      required
+                      placeholder="Marco del cliente"
                       value={formData.near_frame_name}
                       onChange={(e) =>
                         setFormData((prev) => ({
@@ -1946,13 +1890,12 @@ export default function CreateQuoteForm({
                           near_frame_name: e.target.value,
                         }))
                       }
-                      placeholder="Marco del cliente"
-                      required
                     />
                   </div>
                   <div>
                     <Label>Número de Serie</Label>
                     <Input
+                      placeholder="Número de serie del marco"
                       value={formData.near_frame_sku}
                       onChange={(e) =>
                         setFormData((prev) => ({
@@ -1960,7 +1903,6 @@ export default function CreateQuoteForm({
                           near_frame_sku: e.target.value,
                         }))
                       }
-                      placeholder="Número de serie del marco"
                     />
                   </div>
                 </div>
@@ -1983,9 +1925,9 @@ export default function CreateQuoteForm({
                     </div>
                   </div>
                   <Button
+                    size="sm"
                     type="button"
                     variant="outline"
-                    size="sm"
                     onClick={() => {
                       setSelectedNearFrame(null);
                       setFormData((prev) => ({
@@ -2009,10 +1951,10 @@ export default function CreateQuoteForm({
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-admin-text-tertiary" />
                   <Input
+                    className="pl-10"
                     placeholder="Buscar marco para cerca por nombre, marca o SKU..."
                     value={nearFrameSearch}
                     onChange={(e) => setNearFrameSearch(e.target.value)}
-                    className="pl-10"
                   />
                   {nearFrameSearch.length >= 2 && (
                     <div className="absolute z-10 w-full mt-1 bg-white border rounded-lg shadow-lg max-h-60 overflow-y-auto">
@@ -2023,8 +1965,8 @@ export default function CreateQuoteForm({
                       ) : (nearFrameResults || []).length > 0 ? (
                         nearFrameResults.map((frame) => (
                           <div
-                            key={frame.id}
                             className="p-3 hover:bg-gray-100 cursor-pointer border-b"
+                            key={frame.id}
                             onClick={() => handleNearFrameSelect(frame)}
                           >
                             <div className="font-medium">{frame.name}</div>
@@ -2055,6 +1997,7 @@ export default function CreateQuoteForm({
                   <div>
                     <Label>Nombre del Marco (Cerca)</Label>
                     <Input
+                      placeholder="Ej: Ray-Ban RB2140"
                       value={formData.near_frame_name}
                       onChange={(e) =>
                         setFormData((prev) => ({
@@ -2062,12 +2005,12 @@ export default function CreateQuoteForm({
                           near_frame_name: e.target.value,
                         }))
                       }
-                      placeholder="Ej: Ray-Ban RB2140"
                     />
                   </div>
                   <div>
                     <Label>Precio del Marco (Cerca)</Label>
                     <Input
+                      placeholder="0"
                       type="number"
                       value={formData.near_frame_price || ""}
                       onChange={(e) => {
@@ -2078,7 +2021,6 @@ export default function CreateQuoteForm({
                           near_frame_cost: price,
                         }));
                       }}
-                      placeholder="0"
                     />
                   </div>
                 </div>
@@ -2105,9 +2047,9 @@ export default function CreateQuoteForm({
               <Label className="font-medium">Tipo de Lente:</Label>
               <div className="flex gap-2">
                 <Button
+                  size="sm"
                   type="button"
                   variant={lensType === "optical" ? "default" : "outline"}
-                  size="sm"
                   onClick={() => {
                     setLensType("optical");
                     // Reset contact lens fields when switching to optical
@@ -2123,9 +2065,9 @@ export default function CreateQuoteForm({
                   Lentes Ópticos
                 </Button>
                 <Button
+                  size="sm"
                   type="button"
                   variant={lensType === "contact" ? "default" : "outline"}
-                  size="sm"
                   onClick={() => {
                     setLensType("contact");
                     // Reset optical lens fields when switching to contact
@@ -2147,6 +2089,9 @@ export default function CreateQuoteForm({
                 <div>
                   <Label>Familia de Lentes de Contacto</Label>
                   <ContactLensFamilyCombobox
+                    categorySlug="lentes-contacto"
+                    families={contactLensFamilies}
+                    loading={loadingContactLensFamilies}
                     value={formData.contact_lens_family_id || ""}
                     onChange={(value) => {
                       setFormData((prev) => ({
@@ -2156,9 +2101,6 @@ export default function CreateQuoteForm({
                         contact_lens_price: 0,
                       }));
                     }}
-                    families={contactLensFamilies}
-                    loading={loadingContactLensFamilies}
-                    categorySlug="lentes-contacto"
                   />
                 </div>
 
@@ -2168,8 +2110,8 @@ export default function CreateQuoteForm({
                       <div>
                         <Label>Cantidad de Cajas</Label>
                         <Input
-                          type="number"
                           min="1"
+                          type="number"
                           value={formData.contact_lens_quantity || 1}
                           onChange={(e) => {
                             const quantity = parseInt(e.target.value) || 1;
@@ -2183,6 +2125,7 @@ export default function CreateQuoteForm({
                       <div>
                         <Label>Precio Total</Label>
                         <Input
+                          placeholder="Se calcula automáticamente"
                           type="number"
                           value={formData.contact_lens_price || ""}
                           onChange={(e) => {
@@ -2192,7 +2135,6 @@ export default function CreateQuoteForm({
                               contact_lens_price: price,
                             }));
                           }}
-                          placeholder="Se calcula automáticamente"
                         />
                       </div>
                     </div>
@@ -2216,6 +2158,9 @@ export default function CreateQuoteForm({
                     <div className="space-y-2">
                       <Label>Lente de Lejos</Label>
                       <LensFamilyCombobox
+                        families={lensFamilies}
+                        loading={loadingFamilies}
+                        presbyopiaSolution="two_separate"
                         value={farLensFamilyId || ""}
                         onChange={(familyId) => {
                           setFarLensFamilyId(familyId);
@@ -2224,9 +2169,6 @@ export default function CreateQuoteForm({
                             far_lens_family_id: familyId,
                           }));
                         }}
-                        presbyopiaSolution="two_separate"
-                        families={lensFamilies}
-                        loading={loadingFamilies}
                       />
                       {farLensCost > 0 && (
                         <p className="text-sm text-green-600 font-medium">
@@ -2239,6 +2181,9 @@ export default function CreateQuoteForm({
                     <div className="space-y-2">
                       <Label>Lente de Cerca</Label>
                       <LensFamilyCombobox
+                        families={lensFamilies}
+                        loading={loadingFamilies}
+                        presbyopiaSolution="two_separate"
                         value={nearLensFamilyId || ""}
                         onChange={(familyId) => {
                           setNearLensFamilyId(familyId);
@@ -2247,9 +2192,6 @@ export default function CreateQuoteForm({
                             near_lens_family_id: familyId,
                           }));
                         }}
-                        presbyopiaSolution="two_separate"
-                        families={lensFamilies}
-                        loading={loadingFamilies}
                       />
                       {nearLensCost > 0 && (
                         <p className="text-sm text-green-600 font-medium">
@@ -2273,6 +2215,13 @@ export default function CreateQuoteForm({
                       </div>
                     </div>
                     <LensFamilyCombobox
+                      families={lensFamilies}
+                      loading={loadingFamilies}
+                      placeholder="Selecciona familia (opcional)"
+                      presbyopiaSolution={presbyopiaSolution}
+                      prescriptionType={
+                        selectedPrescription?.prescription_type ?? undefined
+                      }
                       value={formData.lens_family_id || ""}
                       onChange={(value) => {
                         setFormData((prev) => ({
@@ -2281,13 +2230,6 @@ export default function CreateQuoteForm({
                           lens_cost: 0,
                         }));
                       }}
-                      presbyopiaSolution={presbyopiaSolution}
-                      prescriptionType={
-                        selectedPrescription?.prescription_type ?? undefined
-                      }
-                      families={lensFamilies}
-                      loading={loadingFamilies}
-                      placeholder="Selecciona familia (opcional)"
                     />
                     {formData.lens_family_id &&
                       (() => {
@@ -2334,11 +2276,70 @@ export default function CreateQuoteForm({
                     </div>
                   )
                 ) : formData.lens_family_id ? (
-                  <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                    <p className="text-sm text-blue-800">
-                      Tipo: {formData.lens_type || "—"} · Material:{" "}
-                      {formData.lens_material || "—"} (heredados de la familia)
-                    </p>
+                  <div className="space-y-3">
+                    <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                      <p className="text-sm text-blue-800">
+                        Tipo: {formData.lens_type || "—"} · Material:{" "}
+                        {formData.lens_material || "—"} (heredados de la
+                        familia)
+                      </p>
+                    </div>
+
+                    {/* Stock vs Tallado Selector */}
+                    {formData.lens_family_id &&
+                      (() => {
+                        const selectedFamily = lensFamilies.find(
+                          (f) => f.id === formData.lens_family_id,
+                        );
+                        const hasStockAvailable =
+                          selectedFamily?.is_stock_available === true;
+
+                        if (!hasStockAvailable) return null;
+
+                        return (
+                          <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+                            <Label className="text-sm font-medium text-green-800 block mb-2">
+                              Disponibilidad del Lente
+                            </Label>
+                            <RadioGroup
+                              value={formData.lens_sourcing_type}
+                              onValueChange={(value: "stock" | "surfaced") => {
+                                setFormData((prev) => ({
+                                  ...prev,
+                                  lens_sourcing_type: value,
+                                }));
+                              }}
+                              className="flex gap-4"
+                            >
+                              <div className="flex items-center space-x-2">
+                                <RadioGroupItem value="stock" id="lens-stock" />
+                                <Label
+                                  htmlFor="lens-stock"
+                                  className="cursor-pointer"
+                                >
+                                  📦 Stock (Entrega inmediata)
+                                </Label>
+                              </div>
+                              <div className="flex items-center space-x-2">
+                                <RadioGroupItem
+                                  value="surfaced"
+                                  id="lens-surfaced"
+                                />
+                                <Label
+                                  htmlFor="lens-surfaced"
+                                  className="cursor-pointer"
+                                >
+                                  🔧 Tallado a pedido
+                                </Label>
+                              </div>
+                            </RadioGroup>
+                            <p className="text-xs text-green-700 mt-1">
+                              Este lens tiene stock disponible. Selecciona
+                              "Stock" para entrega inmediata.
+                            </p>
+                          </div>
+                        );
+                      })()}
                   </div>
                 ) : (
                   <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
@@ -2370,8 +2371,17 @@ export default function CreateQuoteForm({
               <div>
                 <Label>Índice de Refracción</Label>
                 <Input
-                  type="number"
+                  className={formData.lens_family_id ? "bg-gray-50" : ""}
+                  placeholder={
+                    formData.lens_family_id
+                      ? formData.lens_index
+                        ? formData.lens_index.toString()
+                        : "—"
+                      : "Ej: 1.67"
+                  }
+                  readOnly={!!formData.lens_family_id}
                   step="0.01"
+                  type="number"
                   value={formData.lens_index || ""}
                   onChange={(e) =>
                     setFormData((prev) => ({
@@ -2381,15 +2391,6 @@ export default function CreateQuoteForm({
                         : parseFloat(e.target.value) || null,
                     }))
                   }
-                  placeholder={
-                    formData.lens_family_id
-                      ? formData.lens_index
-                        ? formData.lens_index.toString()
-                        : "—"
-                      : "Ej: 1.67"
-                  }
-                  readOnly={!!formData.lens_family_id}
-                  className={formData.lens_family_id ? "bg-gray-50" : ""}
                 />
                 {formData.lens_family_id && formData.lens_material && (
                   <p className="text-xs text-gray-500 mt-1">
@@ -2405,9 +2406,10 @@ export default function CreateQuoteForm({
                 <div>
                   <Label>Tratamientos y Recubrimientos</Label>
                   <p className="text-xs text-gray-500 mb-2">
-                    Con familia: ocultamos estándar (AR, Blue, UV, Anti-rayas,
-                    Foto, Polarizado). Extras permitidos: Tinte, Prisma.
+                    Selecciona los tratamientos adicionales que deseas agregar
+                    al lente.
                   </p>
+
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2">
                     {availableTreatments
                       .filter((t) => {
@@ -2431,12 +2433,12 @@ export default function CreateQuoteForm({
                           ].includes(treatment.value);
                         return (
                           <div
-                            key={treatment.value}
                             className={`p-3 border rounded-lg cursor-pointer transition-colors ${
                               isSelected
                                 ? "border-admin-success bg-admin-success/10"
                                 : "border-gray-200 hover:border-epoch-primary"
                             } ${disabled ? "opacity-60 cursor-not-allowed" : ""}`}
+                            key={treatment.value}
                             onClick={() =>
                               !disabled && handleTreatmentToggle(treatment)
                             }
@@ -2473,6 +2475,7 @@ export default function CreateQuoteForm({
                       <div>
                         <Label>Color del Tinte</Label>
                         <Input
+                          placeholder="Ej: Gris, Marrón, Verde"
                           value={formData.lens_tint_color}
                           onChange={(e) =>
                             setFormData((prev) => ({
@@ -2480,15 +2483,15 @@ export default function CreateQuoteForm({
                               lens_tint_color: e.target.value,
                             }))
                           }
-                          placeholder="Ej: Gris, Marrón, Verde"
                         />
                       </div>
                       <div>
                         <Label>Porcentaje de Tinte (%)</Label>
                         <Input
-                          type="number"
-                          min="0"
                           max="100"
+                          min="0"
+                          placeholder="0-100"
+                          type="number"
                           value={formData.lens_tint_percentage || ""}
                           onChange={(e) =>
                             setFormData((prev) => ({
@@ -2497,7 +2500,6 @@ export default function CreateQuoteForm({
                                 parseInt(e.target.value) || 0,
                             }))
                           }
-                          placeholder="0-100"
                         />
                       </div>
                     </div>
@@ -2588,10 +2590,10 @@ export default function CreateQuoteForm({
                   : "Descuento ($)"}
               </Label>
               <Input
-                type="number"
-                min="0"
                 max={discountType === "percentage" ? "100" : undefined}
+                min="0"
                 step={discountType === "percentage" ? "0.01" : "1"}
+                type="number"
                 value={
                   discountType === "percentage"
                     ? formData.discount_percentage || ""
@@ -2624,6 +2626,10 @@ export default function CreateQuoteForm({
                 <div>
                   <Label>Costo interno de Marco</Label>
                   <Input
+                    className={
+                      presbyopiaSolution === "two_separate" ? "bg-gray-50" : ""
+                    }
+                    readOnly={presbyopiaSolution === "two_separate"}
                     type="number"
                     value={
                       presbyopiaSolution === "two_separate"
@@ -2643,10 +2649,6 @@ export default function CreateQuoteForm({
                       }));
                       // No need to call calculateTotal here - useEffect will handle it when formData.frame_cost changes
                     }}
-                    className={
-                      presbyopiaSolution === "two_separate" ? "bg-gray-50" : ""
-                    }
-                    readOnly={presbyopiaSolution === "two_separate"}
                   />
                   {presbyopiaSolution === "two_separate" && (
                     <p className="text-xs text-gray-500 mt-1">
@@ -2660,6 +2662,16 @@ export default function CreateQuoteForm({
                 <div>
                   <Label>Costo interno de Lente</Label>
                   <Input
+                    className={
+                      presbyopiaSolution === "two_separate" ||
+                      (formData.lens_family_id && !manualLensPrice)
+                        ? "bg-gray-50"
+                        : ""
+                    }
+                    readOnly={
+                      presbyopiaSolution === "two_separate" ||
+                      (!!formData.lens_family_id && !manualLensPrice)
+                    }
                     type="number"
                     value={
                       presbyopiaSolution === "two_separate"
@@ -2679,16 +2691,6 @@ export default function CreateQuoteForm({
                       }));
                       // No need to call calculateTotal here - useEffect will handle it when formData.lens_cost changes
                     }}
-                    className={
-                      presbyopiaSolution === "two_separate" ||
-                      (formData.lens_family_id && !manualLensPrice)
-                        ? "bg-gray-50"
-                        : ""
-                    }
-                    readOnly={
-                      presbyopiaSolution === "two_separate" ||
-                      (!!formData.lens_family_id && !manualLensPrice)
-                    }
                   />
                   {presbyopiaSolution === "two_separate" && (
                     <p className="text-xs text-gray-500 mt-1">
@@ -2700,9 +2702,9 @@ export default function CreateQuoteForm({
                   {formData.lens_family_id && (
                     <div className="flex items-center gap-2 mt-2">
                       <Button
+                        size="sm"
                         type="button"
                         variant="outline"
-                        size="sm"
                         onClick={() => setManualLensPrice((v) => !v)}
                       >
                         {manualLensPrice ? "Auto" : "Manual"}
@@ -2719,15 +2721,16 @@ export default function CreateQuoteForm({
                 <div>
                   <Label>Costo interno de Tratamientos</Label>
                   <Input
-                    type="number"
-                    value={formData.treatments_cost || ""}
                     readOnly
                     className="bg-gray-100"
+                    type="number"
+                    value={formData.treatments_cost || ""}
                   />
                 </div>
                 <div>
                   <Label>Costo interno Mano de Obra</Label>
                   <Input
+                    placeholder="Ej: 15000"
                     type="number"
                     value={formData.labor_cost || ""}
                     onChange={(e) => {
@@ -2738,7 +2741,6 @@ export default function CreateQuoteForm({
                       }));
                       // No need to call calculateTotal here - useEffect will handle it when formData.labor_cost changes
                     }}
-                    placeholder="Ej: 15000"
                   />
                 </div>
               </div>
@@ -2770,17 +2772,19 @@ export default function CreateQuoteForm({
           <div>
             <Label>Notas Internas</Label>
             <Textarea
+              placeholder="Notas para el equipo..."
+              rows={3}
               value={formData.notes}
               onChange={(e) =>
                 setFormData((prev) => ({ ...prev, notes: e.target.value }))
               }
-              placeholder="Notas para el equipo..."
-              rows={3}
             />
           </div>
           <div>
             <Label>Notas para el Cliente</Label>
             <Textarea
+              placeholder="Notas visibles para el cliente..."
+              rows={3}
               value={formData.customer_notes}
               onChange={(e) =>
                 setFormData((prev) => ({
@@ -2788,8 +2792,6 @@ export default function CreateQuoteForm({
                   customer_notes: e.target.value,
                 }))
               }
-              placeholder="Notas visibles para el cliente..."
-              rows={3}
             />
           </div>
         </CardContent>
@@ -2800,7 +2802,7 @@ export default function CreateQuoteForm({
         <Button type="button" variant="outline" onClick={onCancel}>
           Cancelar
         </Button>
-        <Button type="submit" disabled={saving}>
+        <Button disabled={saving} type="submit">
           {saving ? (
             <>
               <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -2831,11 +2833,11 @@ export default function CreateQuoteForm({
             </DialogHeader>
             <CreatePrescriptionForm
               customerId={selectedCustomer.id}
+              onCancel={() => setShowCreatePrescription(false)}
               onSuccess={() => {
                 setShowCreatePrescription(false);
                 fetchPrescriptions(selectedCustomer.id);
               }}
-              onCancel={() => setShowCreatePrescription(false)}
             />
           </DialogContent>
         </Dialog>

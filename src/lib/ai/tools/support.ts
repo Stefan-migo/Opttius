@@ -1,6 +1,7 @@
 import { z } from "zod";
-import type { ToolDefinition, ToolResult } from "./types";
+
 import { resolveOpticalTicketByNumber } from "./resolvers";
+import type { ToolDefinition, ToolResult } from "./types";
 
 // Optical internal support uses: open, assigned, in_progress, waiting_customer, resolved, closed
 const getTicketsSchema = z.object({
@@ -160,7 +161,7 @@ export const supportTools: ToolDefinition[] = [
           },
           message: `Encontrados ${data?.length || 0} tickets de incidentes`,
         };
-      } catch (error: any) {
+      } catch (error: unknown) {
         return {
           success: false,
           error: error.message || "Failed to get tickets",
@@ -257,7 +258,7 @@ export const supportTools: ToolDefinition[] = [
           },
           message: `Ticket ${ticket.ticket_number} obtenido`,
         };
-      } catch (error: any) {
+      } catch (error: unknown) {
         return {
           success: false,
           error: error.message || "Failed to get ticket",
@@ -340,8 +341,8 @@ export const supportTools: ToolDefinition[] = [
         };
 
         if (validated.status === "resolved" || validated.status === "closed") {
-          (updateData as any).resolved_at = new Date().toISOString();
-          (updateData as any).resolved_by = context.userId;
+          (updateData as unknown).resolved_at = new Date().toISOString();
+          (updateData as unknown).resolved_by = context.userId;
         }
 
         const { data, error } = await supabase
@@ -361,7 +362,7 @@ export const supportTools: ToolDefinition[] = [
           data,
           message: `Estado del ticket actualizado a ${validated.status}`,
         };
-      } catch (error: any) {
+      } catch (error: unknown) {
         return {
           success: false,
           error: error.message || "Failed to update ticket status",
@@ -489,7 +490,7 @@ export const supportTools: ToolDefinition[] = [
           data: newMessage,
           message: "Respuesta agregada al ticket",
         };
-      } catch (error: any) {
+      } catch (error: unknown) {
         return {
           success: false,
           error: error.message || "Failed to create ticket response",

@@ -8,11 +8,12 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
+
 import {
-  handleApiError,
   ApplicationError,
   AuthenticationError,
   AuthorizationError,
+  handleApiError,
 } from "@/lib/errors/comprehensive-handler";
 import { appLogger as logger } from "@/lib/logger";
 
@@ -208,7 +209,7 @@ export function handleDelete(
  */
 export async function validateRequestBody<T>(
   request: NextRequest,
-  validator: (data: any) => T,
+  validator: (data: unknown) => T,
 ): Promise<T> {
   try {
     const body = await request.json();
@@ -323,7 +324,7 @@ export function successResponse<T>(
   data: T,
   options?: {
     message?: string;
-    meta?: Record<string, any>;
+    meta?: Record<string, unknown>;
   },
 ): NextResponse {
   return NextResponse.json({

@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/utils/supabase/server";
+import { z } from "zod";
+
+import { rateLimitConfigs, withRateLimit } from "@/lib/api/middleware";
+import {
+  createApiErrorResponse,
+  createApiSuccessResponse,
+} from "@/lib/api/response";
 import { appLogger as logger } from "@/lib/logger";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
-import { withRateLimit, rateLimitConfigs } from "@/lib/api/middleware";
-import {
-  createApiSuccessResponse,
-  createApiErrorResponse,
-} from "@/lib/api/response";
-import { z } from "zod";
+import { createClient } from "@/utils/supabase/server";
 
 const statusSchema = z.object({
   status: z.enum(["active", "suspended", "expired", "cancelled"]),
@@ -20,7 +21,7 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    return await (withRateLimit(rateLimitConfigs.agreements) as any)(
+    return await (withRateLimit(rateLimitConfigs.agreements) as unknown)(
       request,
       async () => {
         const { id } = await params;

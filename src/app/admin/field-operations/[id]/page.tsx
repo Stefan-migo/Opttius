@@ -1,29 +1,51 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useParams, useRouter, useSearchParams } from "next/navigation";
+import {
+  AlertCircle,
+  ArrowLeft,
+  Banknote,
+  Calendar,
+  CheckCircle,
+  ClipboardList,
+  ExternalLink,
+  Eye,
+  Factory,
+  FilePlus,
+  FileText,
+  MapPin,
+  Package,
+  Pencil,
+  Plus,
+  RefreshCw,
+  RotateCcw,
+  ShoppingCart,
+  Stethoscope,
+  Trash2,
+  Truck,
+  UserPlus,
+  Users,
+  XCircle,
+} from "lucide-react";
 import dynamic from "next/dynamic";
-import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+
+import AddCustomerForm from "@/components/admin/AddCustomerForm";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
-  DialogTitle,
   DialogDescription,
   DialogFooter,
+  DialogHeader,
+  DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -32,45 +54,24 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  ArrowLeft,
-  MapPin,
-  Calendar,
-  Package,
-  Truck,
-  ClipboardList,
-  RefreshCw,
-  ShoppingCart,
-  Users,
-  FileText,
-  ExternalLink,
-  UserPlus,
-  Plus,
-  Pencil,
-  Trash2,
-  Stethoscope,
-  FilePlus,
-  Eye,
-  Banknote,
-  Factory,
-  CheckCircle,
-  XCircle,
-  AlertCircle,
-  RotateCcw,
-} from "lucide-react";
-import Link from "next/link";
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useBranch } from "@/hooks/useBranch";
-import { getBranchHeader } from "@/lib/utils/branch";
-import { formatDate, formatPrice } from "@/lib/utils";
-import { formatRUT } from "@/lib/utils/rut";
-import { toast } from "sonner";
+import { posService, type Quote, quoteService } from "@/lib/api/services";
 import {
-  customerService,
   type Customer,
+  customerService,
 } from "@/lib/api/services/customerService";
-import { quoteService, posService, type Quote } from "@/lib/api/services";
-import AddCustomerForm from "@/components/admin/AddCustomerForm";
+import { formatDate, formatPrice } from "@/lib/utils";
+import { getBranchHeader } from "@/lib/utils/branch";
 import { getBranchAndOperativoHeaders } from "@/lib/utils/branch";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { formatRUT } from "@/lib/utils/rut";
 
 const CreateQuoteForm = dynamic(
   () => import("@/components/admin/CreateQuoteForm"),
@@ -443,7 +444,7 @@ export default function FieldOperationDetailPage() {
       setDeliverSelectedIds(new Set());
       fetchWorkOrders();
       fetchDetail();
-    } catch (e: any) {
+    } catch (e: unknown) {
       toast.error(e?.message || "Error al registrar entrega");
     } finally {
       setDeliverLoading(false);
@@ -462,7 +463,7 @@ export default function FieldOperationDetailPage() {
       toast.success("Cliente eliminado");
       setDeleteCustomerId(null);
       fetchCustomers();
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error(err?.message || "Error al eliminar cliente");
     } finally {
       setDeletingCustomer(false);
@@ -481,7 +482,7 @@ export default function FieldOperationDetailPage() {
       toast.success("Presupuesto eliminado");
       setDeleteQuoteId(null);
       fetchQuotes();
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error(err?.message || "Error al eliminar presupuesto");
     } finally {
       setDeletingQuote(false);
@@ -547,7 +548,7 @@ export default function FieldOperationDetailPage() {
     };
     const Icon = c.icon;
     return (
-      <Badge variant={c.variant} className="flex items-center gap-1 w-fit">
+      <Badge className="flex items-center gap-1 w-fit" variant={c.variant}>
         <Icon className="h-3 w-3" />
         {c.label}
       </Badge>
@@ -574,8 +575,8 @@ export default function FieldOperationDetailPage() {
   return (
     <div className="space-y-6">
       <Link
-        href="/admin/field-operations"
         className="inline-flex items-center gap-2 text-sm text-admin-text-tertiary hover:text-admin-text-primary min-h-[44px] items-center"
+        href="/admin/field-operations"
       >
         <ArrowLeft className="h-4 w-4 shrink-0" />
         Volver a operativos
@@ -600,9 +601,9 @@ export default function FieldOperationDetailPage() {
           </div>
         </div>
         <Select
+          disabled={updatingStatus}
           value={operation.status}
           onValueChange={handleStatusChange}
-          disabled={updatingStatus}
         >
           <SelectTrigger className="w-[160px] min-h-[44px] shrink-0 text-admin-text-primary border-admin-border-primary/30">
             <SelectValue />
@@ -610,9 +611,9 @@ export default function FieldOperationDetailPage() {
           <SelectContent>
             {Object.entries(STATUS_CONFIG).map(([value, { label }]) => (
               <SelectItem
+                className="text-admin-text-primary"
                 key={value}
                 value={value}
-                className="text-admin-text-primary"
               >
                 {label}
               </SelectItem>
@@ -656,8 +657,8 @@ export default function FieldOperationDetailPage() {
                 )}
               </p>
               <Link
-                href={`/admin/cash-register?field_operation_id=${id}`}
                 className="text-sm font-medium text-admin-accent-primary hover:underline"
+                href={`/admin/cash-register?field_operation_id=${id}`}
               >
                 Cerrar caja →
               </Link>
@@ -666,9 +667,9 @@ export default function FieldOperationDetailPage() {
             <>
               <p className="text-sm text-admin-text-secondary">Caja cerrada</p>
               <button
+                className="text-sm font-medium text-admin-accent-primary hover:underline text-left"
                 type="button"
                 onClick={() => setShowOpenCashDialog(true)}
-                className="text-sm font-medium text-admin-accent-primary hover:underline text-left"
               >
                 Abrir caja
               </button>
@@ -676,26 +677,26 @@ export default function FieldOperationDetailPage() {
           )}
         </div>
         <Link
-          href={`/admin/pos?field_operation_id=${id}`}
           className="block rounded-xl border border-admin-border-primary/30 bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.4)] p-4 min-h-[44px] flex items-center gap-3"
+          href={`/admin/pos?field_operation_id=${id}`}
         >
           <ShoppingCart className="h-5 w-5 shrink-0 text-admin-accent-primary" />
           <span className="font-medium text-admin-text-primary">Abrir POS</span>
           <ExternalLink className="h-4 w-4 ml-auto text-admin-text-tertiary" />
         </Link>
         <button
+          className="block w-full rounded-xl border border-admin-border-primary/30 bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.4)] p-4 min-h-[44px] flex items-center gap-3 text-left"
           type="button"
           onClick={() => setShowAddCustomer(true)}
-          className="block w-full rounded-xl border border-admin-border-primary/30 bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.4)] p-4 min-h-[44px] flex items-center gap-3 text-left"
         >
           <Users className="h-5 w-5 shrink-0 text-admin-accent-primary" />
           <span className="font-medium text-admin-text-primary">Clientes</span>
           <UserPlus className="h-4 w-4 ml-auto text-admin-text-tertiary" />
         </button>
         <button
+          className="block w-full rounded-xl border border-admin-border-primary/30 bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.4)] p-4 min-h-[44px] flex items-center gap-3 text-left"
           type="button"
           onClick={() => setShowCreateQuote(true)}
-          className="block w-full rounded-xl border border-admin-border-primary/30 bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.4)] p-4 min-h-[44px] flex items-center gap-3 text-left"
         >
           <FileText className="h-5 w-5 shrink-0 text-admin-accent-primary" />
           <span className="font-medium text-admin-text-primary">
@@ -705,47 +706,47 @@ export default function FieldOperationDetailPage() {
         </button>
       </div>
 
-      <Tabs defaultValue={defaultTab} className="space-y-4 sm:space-y-6">
+      <Tabs className="space-y-4 sm:space-y-6" defaultValue={defaultTab}>
         <TabsList className="flex w-full justify-start md:justify-center gap-1 sm:gap-2 h-auto p-1 overflow-x-auto overflow-y-hidden min-w-0 [scrollbar-width:thin] [&::-webkit-scrollbar]:h-1 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-admin-accent-primary/30 rounded-xl border border-admin-border-primary/20 bg-admin-bg-tertiary/50">
           <TabsTrigger
-            value="resumen"
             className="flex-shrink-0 text-xs sm:text-sm px-3 py-2 min-h-[44px]"
+            value="resumen"
           >
             Resumen
           </TabsTrigger>
           <TabsTrigger
-            value="clientes"
             className="flex-shrink-0 text-xs sm:text-sm px-3 py-2 min-h-[44px]"
+            value="clientes"
           >
             Clientes
           </TabsTrigger>
           <TabsTrigger
-            value="presupuestos"
             className="flex-shrink-0 text-xs sm:text-sm px-3 py-2 min-h-[44px]"
+            value="presupuestos"
           >
             Presupuestos
           </TabsTrigger>
           <TabsTrigger
-            value="trabajos"
             className="flex-shrink-0 text-xs sm:text-sm px-3 py-2 min-h-[44px]"
+            value="trabajos"
           >
             Trabajos
           </TabsTrigger>
           <TabsTrigger
-            value="entrega"
             className="flex-shrink-0 text-xs sm:text-sm px-3 py-2 min-h-[44px]"
+            value="entrega"
           >
             Entrega
           </TabsTrigger>
           <TabsTrigger
-            value="stock"
             className="flex-shrink-0 text-xs sm:text-sm px-3 py-2 min-h-[44px]"
+            value="stock"
           >
             Stock Móvil
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="resumen" className="space-y-4 mt-4 sm:mt-6">
+        <TabsContent className="space-y-4 mt-4 sm:mt-6" value="resumen">
           <div className="rounded-xl border border-admin-border-primary/30 bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.4)] overflow-hidden">
             <div className="p-4 sm:p-6 border-b border-admin-border-primary/20">
               <h3 className="text-admin-text-primary font-semibold">
@@ -769,7 +770,7 @@ export default function FieldOperationDetailPage() {
           </div>
         </TabsContent>
 
-        <TabsContent value="clientes" className="space-y-4 mt-4 sm:mt-6">
+        <TabsContent className="space-y-4 mt-4 sm:mt-6" value="clientes">
           <div className="rounded-xl border border-admin-border-primary/30 bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)] overflow-hidden">
             <div className="p-4 sm:p-6 border-b border-admin-border-primary/20 flex items-center justify-between">
               <h3 className="flex items-center gap-2 text-admin-text-primary font-semibold">
@@ -777,9 +778,9 @@ export default function FieldOperationDetailPage() {
                 Clientes del operativo
               </h3>
               <Button
+                className="min-h-[44px] bg-admin-accent-primary hover:bg-admin-accent-secondary text-[#1A2B23]"
                 size="sm"
                 onClick={() => setShowAddCustomer(true)}
-                className="min-h-[44px] bg-admin-accent-primary hover:bg-admin-accent-secondary text-[#1A2B23]"
               >
                 <UserPlus className="h-4 w-4 mr-2" />
                 Nuevo cliente
@@ -818,7 +819,7 @@ export default function FieldOperationDetailPage() {
                   </TableHeader>
                   <TableBody>
                     {customers.map((c) => (
-                      <TableRow key={c.id} className="hover:bg-[#AE000025]">
+                      <TableRow className="hover:bg-[#AE000025]" key={c.id}>
                         <TableCell className="font-medium text-admin-text-primary">
                           {[c.first_name, c.last_name]
                             .filter(Boolean)
@@ -836,45 +837,45 @@ export default function FieldOperationDetailPage() {
                         <TableCell>
                           <div className="flex items-center gap-2 flex-wrap">
                             <Link
-                              href={`/admin/customers/${c.id}`}
                               className="text-admin-accent-primary hover:underline text-sm font-medium"
+                              href={`/admin/customers/${c.id}`}
                             >
                               Ver
                             </Link>
                             <button
+                              className="inline-flex items-center gap-1 text-admin-text-tertiary hover:text-admin-accent-primary text-sm"
+                              title="Nueva receta"
                               type="button"
                               onClick={() => {
                                 setPrescriptionCustomerId(c.id);
                                 setShowCreatePrescription(true);
                               }}
-                              className="inline-flex items-center gap-1 text-admin-text-tertiary hover:text-admin-accent-primary text-sm"
-                              title="Nueva receta"
                             >
                               <Stethoscope className="h-4 w-4" />
                             </button>
                             <button
+                              className="inline-flex items-center gap-1 text-admin-text-tertiary hover:text-admin-accent-primary text-sm"
+                              title="Nuevo presupuesto"
                               type="button"
                               onClick={() => {
                                 setQuoteInitialCustomerId(c.id);
                                 setShowCreateQuote(true);
                               }}
-                              className="inline-flex items-center gap-1 text-admin-text-tertiary hover:text-admin-accent-primary text-sm"
-                              title="Nuevo presupuesto"
                             >
                               <FilePlus className="h-4 w-4" />
                             </button>
                             <Link
-                              href={`/admin/customers/${c.id}/edit?return_to=${encodeURIComponent(operativoReturnUrl)}`}
                               className="inline-flex items-center gap-1 text-admin-text-tertiary hover:text-admin-accent-primary text-sm"
+                              href={`/admin/customers/${c.id}/edit?return_to=${encodeURIComponent(operativoReturnUrl)}`}
                               title="Editar"
                             >
                               <Pencil className="h-4 w-4" />
                             </Link>
                             <button
-                              type="button"
-                              onClick={() => setDeleteCustomerId(c.id)}
                               className="inline-flex items-center gap-1 text-admin-text-tertiary hover:text-red-500 text-sm"
                               title="Eliminar"
+                              type="button"
+                              onClick={() => setDeleteCustomerId(c.id)}
                             >
                               <Trash2 className="h-4 w-4" />
                             </button>
@@ -889,7 +890,7 @@ export default function FieldOperationDetailPage() {
           </div>
         </TabsContent>
 
-        <TabsContent value="presupuestos" className="space-y-4 mt-4 sm:mt-6">
+        <TabsContent className="space-y-4 mt-4 sm:mt-6" value="presupuestos">
           <div className="rounded-xl border border-admin-border-primary/30 bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)] overflow-hidden">
             <div className="p-4 sm:p-6 border-b border-admin-border-primary/20 flex items-center justify-between">
               <h3 className="flex items-center gap-2 text-admin-text-primary font-semibold">
@@ -897,9 +898,9 @@ export default function FieldOperationDetailPage() {
                 Presupuestos del operativo
               </h3>
               <Button
+                className="min-h-[44px] bg-admin-accent-primary hover:bg-admin-accent-secondary text-[#1A2B23]"
                 size="sm"
                 onClick={() => setShowCreateQuote(true)}
-                className="min-h-[44px] bg-admin-accent-primary hover:bg-admin-accent-secondary text-[#1A2B23]"
               >
                 <Plus className="h-4 w-4 mr-2" />
                 Nuevo presupuesto
@@ -944,7 +945,7 @@ export default function FieldOperationDetailPage() {
                   </TableHeader>
                   <TableBody>
                     {quotes.map((q) => (
-                      <TableRow key={q.id} className="hover:bg-[#AE000025]">
+                      <TableRow className="hover:bg-[#AE000025]" key={q.id}>
                         <TableCell className="font-medium text-admin-text-primary font-mono text-sm">
                           {q.quote_number || "—"}
                         </TableCell>
@@ -962,7 +963,7 @@ export default function FieldOperationDetailPage() {
                           {q.customer?.phone || q.customer?.email || "—"}
                         </TableCell>
                         <TableCell>
-                          <Badge variant="outline" className="text-xs">
+                          <Badge className="text-xs" variant="outline">
                             {q.status}
                           </Badge>
                         </TableCell>
@@ -972,8 +973,8 @@ export default function FieldOperationDetailPage() {
                         <TableCell>
                           <div className="flex items-center gap-2 flex-wrap">
                             <Link
-                              href={`/admin/quotes/${q.id}`}
                               className="inline-flex items-center gap-1 text-admin-accent-primary hover:underline text-sm font-medium"
+                              href={`/admin/quotes/${q.id}`}
                             >
                               <Eye className="h-4 w-4" />
                               Ver
@@ -981,8 +982,8 @@ export default function FieldOperationDetailPage() {
                             {q.status !== "accepted" &&
                               !q.converted_to_work_order_id && (
                                 <Link
-                                  href={`/admin/pos?quoteId=${q.id}&field_operation_id=${id}`}
                                   className="inline-flex items-center gap-1 text-green-600 hover:text-green-700 text-sm font-medium"
+                                  href={`/admin/pos?quoteId=${q.id}&field_operation_id=${id}`}
                                   title="Cargar al POS del operativo"
                                 >
                                   <ShoppingCart className="h-4 w-4" />
@@ -990,14 +991,14 @@ export default function FieldOperationDetailPage() {
                                 </Link>
                               )}
                             <button
-                              type="button"
-                              onClick={() => handleDeleteQuoteClick(q.id)}
+                              className="inline-flex items-center gap-1 text-admin-text-tertiary hover:text-red-500 text-sm disabled:opacity-50"
                               disabled={
                                 q.status === "accepted" ||
                                 !!q.converted_to_work_order_id
                               }
-                              className="inline-flex items-center gap-1 text-admin-text-tertiary hover:text-red-500 text-sm disabled:opacity-50"
                               title="Eliminar"
+                              type="button"
+                              onClick={() => handleDeleteQuoteClick(q.id)}
                             >
                               <Trash2 className="h-4 w-4" />
                             </button>
@@ -1012,7 +1013,7 @@ export default function FieldOperationDetailPage() {
           </div>
         </TabsContent>
 
-        <TabsContent value="stock" className="space-y-4 mt-4 sm:mt-6">
+        <TabsContent className="space-y-4 mt-4 sm:mt-6" value="stock">
           <div className="rounded-xl border border-admin-border-primary/30 bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.4)] overflow-hidden">
             <div className="p-4 sm:p-6 border-b border-admin-border-primary/20 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
               <h3 className="flex items-center gap-2 text-admin-text-primary font-semibold">
@@ -1022,12 +1023,12 @@ export default function FieldOperationDetailPage() {
               <div className="flex items-center gap-2 flex-wrap">
                 {mobileStock.length > 0 && (
                   <Button
+                    className="min-h-[44px] border-admin-border-primary/30"
+                    disabled={returningStock}
+                    size="sm"
                     type="button"
                     variant="outline"
-                    size="sm"
                     onClick={handleReturnStock}
-                    disabled={returningStock}
-                    className="min-h-[44px] border-admin-border-primary/30"
                   >
                     {returningStock ? (
                       <RefreshCw className="h-4 w-4 animate-spin mr-2" />
@@ -1038,8 +1039,8 @@ export default function FieldOperationDetailPage() {
                   </Button>
                 )}
                 <Link
-                  href={`/admin/field-operations/${id}/prepare`}
                   className="inline-flex items-center gap-2 text-sm font-medium text-admin-accent-primary hover:text-admin-accent-secondary"
+                  href={`/admin/field-operations/${id}/prepare`}
                 >
                   <Plus className="h-4 w-4" />
                   Agregar stock
@@ -1051,8 +1052,8 @@ export default function FieldOperationDetailPage() {
                 <p className="py-4 text-admin-text-tertiary">
                   No hay productos en la bodega móvil.{" "}
                   <Link
-                    href={`/admin/field-operations/${id}/prepare`}
                     className="text-admin-accent-primary hover:underline"
+                    href={`/admin/field-operations/${id}/prepare`}
                   >
                     Transferir stock
                   </Link>
@@ -1076,8 +1077,8 @@ export default function FieldOperationDetailPage() {
                     <TableBody>
                       {mobileStock.map((item) => (
                         <TableRow
-                          key={item.id}
                           className="hover:bg-[#AE000025]"
+                          key={item.id}
                         >
                           <TableCell className="font-medium text-admin-text-primary">
                             {item.products?.name || "—"}
@@ -1098,7 +1099,7 @@ export default function FieldOperationDetailPage() {
           </div>
         </TabsContent>
 
-        <TabsContent value="trabajos" className="space-y-4 mt-4 sm:mt-6">
+        <TabsContent className="space-y-4 mt-4 sm:mt-6" value="trabajos">
           <div className="rounded-xl border border-admin-border-primary/30 bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)] overflow-hidden">
             <div className="p-4 sm:p-6 border-b border-admin-border-primary/20">
               <h3 className="flex items-center gap-2 text-admin-text-primary font-semibold">
@@ -1151,7 +1152,7 @@ export default function FieldOperationDetailPage() {
                     </TableHeader>
                     <TableBody>
                       {workOrders.map((wo) => (
-                        <TableRow key={wo.id} className="hover:bg-[#AE000025]">
+                        <TableRow className="hover:bg-[#AE000025]" key={wo.id}>
                           <TableCell className="font-medium text-admin-text-primary">
                             {wo.work_order_number}
                           </TableCell>
@@ -1210,7 +1211,7 @@ export default function FieldOperationDetailPage() {
                           </TableCell>
                           <TableCell>
                             <Link href={`/admin/work-orders/${wo.id}`}>
-                              <Button variant="outline" size="sm">
+                              <Button size="sm" variant="outline">
                                 <Eye className="h-4 w-4 mr-1" />
                                 Ver
                               </Button>
@@ -1226,7 +1227,7 @@ export default function FieldOperationDetailPage() {
           </div>
         </TabsContent>
 
-        <TabsContent value="entrega" className="space-y-4 mt-4 sm:mt-6">
+        <TabsContent className="space-y-4 mt-4 sm:mt-6" value="entrega">
           <div className="rounded-xl border border-admin-border-primary/30 bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)] p-4 sm:p-6">
             <h3 className="flex items-center gap-2 text-admin-text-primary font-semibold mb-4">
               <Truck className="h-5 w-5 shrink-0" />
@@ -1246,12 +1247,13 @@ export default function FieldOperationDetailPage() {
                   <div className="mt-2 space-y-2 max-h-48 overflow-y-auto border border-admin-border-primary/20 rounded-lg p-2">
                     {readyForPickupOrders.map((wo) => (
                       <label
-                        key={wo.id}
                         className="flex items-center gap-3 p-2 rounded-lg hover:bg-[#AE000010] cursor-pointer"
+                        key={wo.id}
                       >
                         <input
-                          type="checkbox"
                           checked={deliverSelectedIds.has(wo.id)}
+                          className="rounded"
+                          type="checkbox"
                           onChange={(e) => {
                             setDeliverSelectedIds((prev) => {
                               const next = new Set(prev);
@@ -1260,7 +1262,6 @@ export default function FieldOperationDetailPage() {
                               return next;
                             });
                           }}
-                          className="rounded"
                         />
                         <span className="text-admin-text-primary text-sm">
                           {wo.work_order_number} —{" "}
@@ -1279,10 +1280,10 @@ export default function FieldOperationDetailPage() {
                     Nombre del receptor *
                   </Label>
                   <Input
+                    className="mt-1 h-11 min-h-[44px] border-admin-border-primary/30"
+                    placeholder="Ej: Juan Pérez"
                     value={deliverRecipient}
                     onChange={(e) => setDeliverRecipient(e.target.value)}
-                    placeholder="Ej: Juan Pérez"
-                    className="mt-1 h-11 min-h-[44px] border-admin-border-primary/30"
                   />
                 </div>
                 <div>
@@ -1290,20 +1291,20 @@ export default function FieldOperationDetailPage() {
                     Notas (opcional)
                   </Label>
                   <Input
+                    className="mt-1 h-11 min-h-[44px] border-admin-border-primary/30"
+                    placeholder="Observaciones de la entrega"
                     value={deliverNotes}
                     onChange={(e) => setDeliverNotes(e.target.value)}
-                    placeholder="Observaciones de la entrega"
-                    className="mt-1 h-11 min-h-[44px] border-admin-border-primary/30"
                   />
                 </div>
                 <Button
-                  onClick={handleDeliver}
+                  className="min-h-[44px] rounded-xl bg-admin-accent-primary hover:bg-admin-accent-secondary text-[#1A2B23]"
                   disabled={
                     deliverLoading ||
                     deliverSelectedIds.size === 0 ||
                     !deliverRecipient.trim()
                   }
-                  className="min-h-[44px] rounded-xl bg-admin-accent-primary hover:bg-admin-accent-secondary text-[#1A2B23]"
+                  onClick={handleDeliver}
                 >
                   {deliverLoading ? (
                     <RefreshCw className="h-4 w-4 animate-spin mr-2" />
@@ -1331,16 +1332,16 @@ export default function FieldOperationDetailPage() {
           </DialogHeader>
           <DialogFooter>
             <Button
+              disabled={deletingCustomer}
               variant="outline"
               onClick={() => setDeleteCustomerId(null)}
-              disabled={deletingCustomer}
             >
               Cancelar
             </Button>
             <Button
+              disabled={deletingCustomer}
               variant="destructive"
               onClick={handleDeleteCustomer}
-              disabled={deletingCustomer}
             >
               {deletingCustomer ? (
                 <>
@@ -1373,16 +1374,16 @@ export default function FieldOperationDetailPage() {
           </DialogHeader>
           <DialogFooter>
             <Button
+              disabled={deletingQuote}
               variant="outline"
               onClick={() => setDeleteQuoteId(null)}
-              disabled={deletingQuote}
             >
               Cancelar
             </Button>
             <Button
+              disabled={deletingQuote}
               variant="destructive"
               onClick={handleDeleteQuoteConfirm}
-              disabled={deletingQuote}
             >
               {deletingQuote ? (
                 <>
@@ -1410,13 +1411,13 @@ export default function FieldOperationDetailPage() {
             </DialogDescription>
           </DialogHeader>
           <AddCustomerForm
-            fieldOperationId={id}
             branchId={operation.branch_id}
+            fieldOperationId={id}
+            onCancel={() => setShowAddCustomer(false)}
             onSuccess={() => {
               setShowAddCustomer(false);
               fetchCustomers();
             }}
-            onCancel={() => setShowAddCustomer(false)}
           />
         </DialogContent>
       </Dialog>
@@ -1439,19 +1440,19 @@ export default function FieldOperationDetailPage() {
             </DialogDescription>
           </DialogHeader>
           <CreateQuoteForm
+            initialBranchId={operation?.branch_id}
+            initialCustomerId={quoteInitialCustomerId}
+            initialFieldOperationId={id}
+            onCancel={() => {
+              setShowCreateQuote(false);
+              setQuoteInitialCustomerId(undefined);
+            }}
             onSuccess={() => {
               setShowCreateQuote(false);
               setQuoteInitialCustomerId(undefined);
               fetchQuotes();
               fetchWorkOrders();
             }}
-            onCancel={() => {
-              setShowCreateQuote(false);
-              setQuoteInitialCustomerId(undefined);
-            }}
-            initialCustomerId={quoteInitialCustomerId}
-            initialFieldOperationId={id}
-            initialBranchId={operation?.branch_id}
           />
         </DialogContent>
       </Dialog>
@@ -1474,35 +1475,35 @@ export default function FieldOperationDetailPage() {
           <div className="space-y-4 py-2">
             <div>
               <label
-                htmlFor="opening-cash"
                 className="text-sm font-medium text-admin-text-primary"
+                htmlFor="opening-cash"
               >
                 Monto inicial
               </label>
               <Input
+                className="mt-1"
                 id="opening-cash"
-                type="number"
                 min={0}
-                step={0.01}
                 placeholder="0"
+                step={0.01}
+                type="number"
                 value={openingCashAmount}
                 onChange={(e) => setOpeningCashAmount(e.target.value)}
-                className="mt-1"
               />
             </div>
           </div>
           <DialogFooter>
             <Button
+              disabled={openingCash}
               variant="outline"
               onClick={() => {
                 setShowOpenCashDialog(false);
                 setOpeningCashAmount("");
               }}
-              disabled={openingCash}
             >
               Cancelar
             </Button>
-            <Button onClick={handleOpenCash} disabled={openingCash}>
+            <Button disabled={openingCash} onClick={handleOpenCash}>
               {openingCash ? "Abriendo…" : "Abrir caja"}
             </Button>
           </DialogFooter>
@@ -1527,14 +1528,14 @@ export default function FieldOperationDetailPage() {
           {prescriptionCustomerId && (
             <CreatePrescriptionForm
               customerId={prescriptionCustomerId}
+              onCancel={() => {
+                setShowCreatePrescription(false);
+                setPrescriptionCustomerId(null);
+              }}
               onSuccess={() => {
                 setShowCreatePrescription(false);
                 setPrescriptionCustomerId(null);
                 fetchCustomers();
-              }}
-              onCancel={() => {
-                setShowCreatePrescription(false);
-                setPrescriptionCustomerId(null);
               }}
             />
           )}

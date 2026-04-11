@@ -1,9 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { ArrowLeft, Download, Loader2 } from "lucide-react";
+import Link from "next/link";
 import { useParams } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useEffect, useState } from "react";
+
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -12,9 +15,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ArrowLeft, Download, Loader2 } from "lucide-react";
-import Link from "next/link";
-import { agreementService } from "@/lib/api/services/agreementService";
+import {
+  agreementService,
+  AgreementInstitutionalInvoice,
+} from "@/lib/api/services/agreementService";
 import { handleApiError } from "@/lib/services/errorService";
 import { formatCurrency, formatDate } from "@/lib/utils";
 
@@ -23,7 +27,26 @@ export default function AgreementInvoiceDetailPage() {
   const agreementId = params.id as string;
   const invoiceId = params.invoiceId as string;
 
-  const [invoice, setInvoice] = useState<any>(null);
+  const [invoice, setInvoice] = useState<
+    | (AgreementInstitutionalInvoice & {
+        items?: Array<{
+          balance_id: string;
+          amount: number;
+          order_number: string;
+          oc_number: string | null;
+          customer_name: string | null;
+          order_created_at: string | null;
+          subtotal?: number;
+          tax_amount?: number;
+        }>;
+        institution_name?: string;
+        institution_rut?: string;
+        payment_reference?: string | null;
+        subtotal?: number;
+        tax_amount?: number;
+      })
+    | null
+  >(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -81,7 +104,7 @@ export default function AgreementInvoiceDetailPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex items-center gap-4">
           <Link href={`/admin/agreements/${agreementId}/invoices`}>
-            <Button variant="ghost" size="icon">
+            <Button size="icon" variant="ghost">
               <ArrowLeft className="h-4 w-4" />
             </Button>
           </Link>
@@ -95,7 +118,7 @@ export default function AgreementInvoiceDetailPage() {
             </p>
           </div>
         </div>
-        <a href={pdfUrl} target="_blank" rel="noopener noreferrer">
+        <a href={pdfUrl} rel="noopener noreferrer" target="_blank">
           <Button>
             <Download className="h-4 w-4 mr-2" />
             Descargar PDF
@@ -166,7 +189,7 @@ export default function AgreementInvoiceDetailPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {invoice.items.map((item: any, idx: number) => (
+                {invoice.items?.map((item, idx: number) => (
                   <TableRow key={idx}>
                     <TableCell>{item.order_number}</TableCell>
                     <TableCell>{item.oc_number ?? "-"}</TableCell>

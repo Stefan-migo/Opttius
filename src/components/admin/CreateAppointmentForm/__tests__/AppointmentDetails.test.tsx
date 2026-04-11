@@ -1,5 +1,6 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
 import AppointmentDetails from "../AppointmentDetails";
 
 describe("AppointmentDetails", () => {
@@ -37,7 +38,7 @@ describe("AppointmentDetails", () => {
     render(<AppointmentDetails {...mockProps} />);
 
     // Component should render without throwing errors
-    expect(screen.getByRole('combobox')).toBeInTheDocument();
+    expect(screen.getByRole("combobox")).toBeInTheDocument();
   });
 
   it("should display selected appointment type", () => {
@@ -57,14 +58,23 @@ describe("AppointmentDetails", () => {
   it("should display reason text", () => {
     render(<AppointmentDetails {...mockProps} reason="Regular checkup" />);
 
-    const reasonInput = screen.getByPlaceholderText("Describa brevemente el motivo...") as HTMLInputElement;
+    const reasonInput = screen.getByPlaceholderText(
+      "Describa brevemente el motivo...",
+    ) as HTMLInputElement;
     expect(reasonInput.value).toBe("Regular checkup");
   });
 
   it("should display notes text", () => {
-    render(<AppointmentDetails {...mockProps} notes="Patient complains of headaches" />);
+    render(
+      <AppointmentDetails
+        {...mockProps}
+        notes="Patient complains of headaches"
+      />,
+    );
 
-    const notesInput = screen.getByPlaceholderText("Información relevante para el profesional...") as HTMLTextAreaElement;
+    const notesInput = screen.getByPlaceholderText(
+      "Información relevante para el profesional...",
+    ) as HTMLTextAreaElement;
     expect(notesInput.value).toBe("Patient complains of headaches");
   });
 
@@ -92,7 +102,9 @@ describe("AppointmentDetails", () => {
   it("should call onReasonChange when reason changes", () => {
     render(<AppointmentDetails {...mockProps} />);
 
-    const reasonInput = screen.getByPlaceholderText("Describa brevemente el motivo...");
+    const reasonInput = screen.getByPlaceholderText(
+      "Describa brevemente el motivo...",
+    );
     fireEvent.change(reasonInput, { target: { value: "Follow-up visit" } });
 
     expect(mockProps.onReasonChange).toHaveBeenCalledWith("Follow-up visit");
@@ -101,10 +113,16 @@ describe("AppointmentDetails", () => {
   it("should call onNotesChange when notes change", () => {
     render(<AppointmentDetails {...mockProps} />);
 
-    const notesInput = screen.getByPlaceholderText("Información relevante para el profesional...");
-    fireEvent.change(notesInput, { target: { value: "Patient needs new prescription" } });
+    const notesInput = screen.getByPlaceholderText(
+      "Información relevante para el profesional...",
+    );
+    fireEvent.change(notesInput, {
+      target: { value: "Patient needs new prescription" },
+    });
 
-    expect(mockProps.onNotesChange).toHaveBeenCalledWith("Patient needs new prescription");
+    expect(mockProps.onNotesChange).toHaveBeenCalledWith(
+      "Patient needs new prescription",
+    );
   });
 
   it("should render all appointment type options", () => {
@@ -146,11 +164,11 @@ describe("AppointmentDetails", () => {
 
   it("should display follow-up date when provided", () => {
     render(
-      <AppointmentDetails 
-        {...mockProps} 
-        followUpRequired={true} 
-        followUpDate="2024-02-01" 
-      />
+      <AppointmentDetails
+        {...mockProps}
+        followUpDate="2024-02-01"
+        followUpRequired={true}
+      />,
     );
 
     // Component should render with follow-up date without errors
@@ -159,7 +177,7 @@ describe("AppointmentDetails", () => {
 
   it("should render all appointment type options", () => {
     render(<AppointmentDetails {...mockProps} />);
-    
+
     // Component should render with appointment types without errors
     expect(mockProps.appointmentTypes).toHaveLength(3);
   });
@@ -172,49 +190,63 @@ describe("AppointmentDetails", () => {
   });
 
   it("should preserve text input when switching appointment types", () => {
-    const { rerender } = render(<AppointmentDetails {...mockProps} reason="Initial reason" />);
+    const { rerender } = render(
+      <AppointmentDetails {...mockProps} reason="Initial reason" />,
+    );
 
     // Change appointment type
-    rerender(<AppointmentDetails {...mockProps} appointmentType="eye_exam" reason="Initial reason" />);
+    rerender(
+      <AppointmentDetails
+        {...mockProps}
+        appointmentType="eye_exam"
+        reason="Initial reason"
+      />,
+    );
 
-    const reasonInput = screen.getByPlaceholderText("Describa brevemente el motivo...") as HTMLInputElement;
+    const reasonInput = screen.getByPlaceholderText(
+      "Describa brevemente el motivo...",
+    ) as HTMLInputElement;
     expect(reasonInput.value).toBe("Initial reason");
   });
 
   it("should handle special characters in reason and notes", () => {
-    const specialText = "Patient's complaint: \"severe\" headaches & dizziness";
+    const specialText = 'Patient\'s complaint: "severe" headaches & dizziness';
     render(
-      <AppointmentDetails 
-        {...mockProps} 
-        reason={specialText}
+      <AppointmentDetails
+        {...mockProps}
         notes={specialText}
-      />
+        reason={specialText}
+      />,
     );
 
-    const reasonInput = screen.getByPlaceholderText("Describa brevemente el motivo...") as HTMLInputElement;
-    const notesInput = screen.getByPlaceholderText("Información relevante para el profesional...") as HTMLTextAreaElement;
-    
+    const reasonInput = screen.getByPlaceholderText(
+      "Describa brevemente el motivo...",
+    ) as HTMLInputElement;
+    const notesInput = screen.getByPlaceholderText(
+      "Información relevante para el profesional...",
+    ) as HTMLTextAreaElement;
+
     expect(reasonInput.value).toBe(specialText);
     expect(notesInput.value).toBe(specialText);
   });
 
   it("should maintain follow-up state when other fields change", () => {
     const { rerender } = render(
-      <AppointmentDetails 
-        {...mockProps} 
-        followUpRequired={true}
+      <AppointmentDetails
+        {...mockProps}
         followUpDate="2024-02-01"
-      />
+        followUpRequired={true}
+      />,
     );
 
     // Change another field
     rerender(
-      <AppointmentDetails 
-        {...mockProps} 
-        followUpRequired={true}
+      <AppointmentDetails
+        {...mockProps}
         followUpDate="2024-02-01"
+        followUpRequired={true}
         reason="Updated reason"
-      />
+      />,
     );
 
     // Component should maintain follow-up section
@@ -224,16 +256,12 @@ describe("AppointmentDetails", () => {
   it("should handle very long text inputs", () => {
     const longText = "A".repeat(1000);
     render(
-      <AppointmentDetails 
-        {...mockProps} 
-        reason={longText}
-        notes={longText}
-      />
+      <AppointmentDetails {...mockProps} notes={longText} reason={longText} />,
     );
 
     const reasonInput = screen.getByLabelText("Motivo") as HTMLTextAreaElement;
     const notesInput = screen.getByLabelText("Notas") as HTMLTextAreaElement;
-    
+
     expect(reasonInput.value).toBe(longText);
     expect(notesInput.value).toBe(longText);
   });
@@ -274,12 +302,14 @@ describe("AppointmentDetails", () => {
   it("should preserve cursor position when typing in text areas", () => {
     render(<AppointmentDetails {...mockProps} />);
 
-    const reasonInput = screen.getByPlaceholderText("Describa brevemente el motivo...");
-    
+    const reasonInput = screen.getByPlaceholderText(
+      "Describa brevemente el motivo...",
+    );
+
     // This is more of a browser behavior test, but we can verify the events fire correctly
     fireEvent.focus(reasonInput);
     fireEvent.change(reasonInput, { target: { value: "Test" } });
-    
+
     expect(mockProps.onReasonChange).toHaveBeenCalledWith("Test");
   });
 
@@ -298,7 +328,7 @@ describe("AppointmentDetails", () => {
 
     // Re-render with same props
     rerender(<AppointmentDetails {...mockProps} />);
-    
+
     // Should still be there
     expect(screen.getByText("Consulta")).toBeInTheDocument();
   });

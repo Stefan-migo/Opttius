@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient, createServiceRoleClient } from "@/utils/supabase/server";
+
 import {
   getBranchContext,
   getFieldOperationFromRequest,
@@ -7,6 +7,7 @@ import {
 } from "@/lib/api/branch-middleware";
 import { appLogger as logger } from "@/lib/logger";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
+import { createClient, createServiceRoleClient } from "@/utils/supabase/server";
 
 /**
  * GET /api/admin/cash-register/closures
@@ -137,7 +138,7 @@ export async function GET(request: NextRequest) {
 
     // Fetch user profiles separately
     const closuresWithUsers = await Promise.all(
-      (closures || []).map(async (closure: any) => {
+      (closures || []).map(async (closure: unknown) => {
         if (closure.closed_by) {
           const { data: profile } = await supabaseServiceRole
             .from("profiles")
@@ -166,7 +167,7 @@ export async function GET(request: NextRequest) {
         totalPages: Math.ceil((count || 0) / limit),
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error("Error in cash register closures API:", { error });
     return NextResponse.json(
       {

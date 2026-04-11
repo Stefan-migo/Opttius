@@ -23,7 +23,7 @@
  * const legacyResponse = { customers: [{ id: 1 }], pagination: {...} };
  * const data = extractDataFromResponse(legacyResponse); // [{ id: 1 }]
  */
-export function extractDataFromResponse<T>(response: any): T[] {
+export function extractDataFromResponse<T>(response: unknown): T[] {
   // Handle null/undefined
   if (!response) {
     return [];
@@ -78,7 +78,7 @@ export function extractDataFromResponse<T>(response: any): T[] {
  * const legacyResponse = { customers: [...], pagination: {...} };
  * const pagination = extractPaginationFromResponse(legacyResponse);
  */
-export function extractPaginationFromResponse(response: any): {
+export function extractPaginationFromResponse(response: unknown): {
   page: number;
   limit: number;
   total: number;
@@ -130,7 +130,7 @@ export function extractPaginationFromResponse(response: any): {
  * const legacyResponse = { customers: [...], total: 100 };
  * const total = extractTotalFromResponse(legacyResponse); // 100
  */
-export function extractTotalFromResponse(response: any): number {
+export function extractTotalFromResponse(response: unknown): number {
   // Handle null/undefined
   if (!response) {
     return 0;
@@ -173,7 +173,7 @@ export function extractTotalFromResponse(response: any): number {
  * const legacyResponse = { customers: [...], pagination: {...} };
  * const isSuccess = isResponseSuccessful(legacyResponse); // true
  */
-export function isResponseSuccessful(response: any): boolean {
+export function isResponseSuccessful(response: unknown): boolean {
   // Handle null/undefined
   if (!response) {
     return false;
@@ -203,7 +203,7 @@ export function isResponseSuccessful(response: any): boolean {
  * const legacyResponse = { error: 'Something went wrong' };
  * const error = extractErrorFromResponse(legacyResponse); // 'Something went wrong'
  */
-export function extractErrorFromResponse(response: any): string | null {
+export function extractErrorFromResponse(response: unknown): string | null {
   // Handle null/undefined
   if (!response) {
     return null;

@@ -7,7 +7,7 @@ export interface TelemetryEvent {
   sessionId: string;
   eventType: string;
   source: "frontend" | "backend" | "api" | "system";
-  payload: Record<string, any>;
+  payload: Record<string, unknown>;
   metadata: {
     userAgent?: string;
     ipAddress?: string;
@@ -119,7 +119,7 @@ export class TelemetryCollector {
   trackFeatureUsage(
     featureName: string,
     action: string,
-    details?: Record<string, any>,
+    details?: Record<string, unknown>,
     userId?: string,
   ): string {
     const eventId = uuidv4();
@@ -244,7 +244,7 @@ export class TelemetryCollector {
   /**
    * Track navigation timing
    */
-  trackNavigationTiming(timing: any): void {
+  trackNavigationTiming(timing: unknown): void {
     const event: TelemetryEvent = {
       eventId: uuidv4(),
       timestamp: new Date(),

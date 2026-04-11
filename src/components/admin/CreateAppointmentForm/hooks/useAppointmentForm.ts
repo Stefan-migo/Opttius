@@ -1,7 +1,8 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+
+import { useAuthContext } from "@/contexts/AuthContext";
 import { useBranch } from "@/hooks/useBranch";
 import { getBranchHeader } from "@/lib/utils/branch";
-import { useAuthContext } from "@/contexts/AuthContext";
 
 interface AppointmentFormData {
   appointment_date: string;
@@ -19,8 +20,8 @@ interface AppointmentFormData {
 }
 
 interface UseAppointmentFormProps {
-  initialData?: any;
-  scheduleSettings: any;
+  initialData?: unknown;
+  scheduleSettings: unknown;
   effectiveBranchId?: string | null;
 }
 
@@ -84,7 +85,7 @@ export function useAppointmentForm({
     }
   }, [scheduleSettings, initialData?.duration_minutes]);
 
-  const updateField = (field: keyof AppointmentFormData, value: any) => {
+  const updateField = (field: keyof AppointmentFormData, value: unknown) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
     // Clear error for this field
     if (errors[field]) {
@@ -140,9 +141,9 @@ export function useAppointmentForm({
 
   const handleSubmit = async (
     e: React.FormEvent,
-    selectedCustomer: any,
+    selectedCustomer: unknown,
     isGuestCustomer: boolean,
-    guestCustomerData: any,
+    guestCustomerData: unknown,
     onSuccess: () => void,
     lockDateTime: boolean = false,
   ) => {
@@ -206,7 +207,7 @@ export function useAppointmentForm({
         }
       }
 
-      const requestBody: any = {
+      const requestBody: unknown = {
         appointment_date: formData.appointment_date,
         appointment_time: appointmentTime,
         duration_minutes: formData.duration_minutes,
@@ -259,7 +260,7 @@ export function useAppointmentForm({
       }
 
       return true;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error saving appointment:", error);
       throw error;
     } finally {

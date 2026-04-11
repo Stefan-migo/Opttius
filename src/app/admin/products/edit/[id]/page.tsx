@@ -1,12 +1,19 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter, useParams } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { AlertTriangle, ArrowLeft, Package, Save, X } from "lucide-react";
+import Link from "next/link";
+import { useParams, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import ImageUpload from "@/components/ui/ImageUpload";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import RichTextEditor from "@/components/ui/RichTextEditor";
 import {
   Select,
   SelectContent,
@@ -14,15 +21,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
-import { Switch } from "@/components/ui/switch";
-import { toast } from "sonner";
-import { ArrowLeft, Package, Save, AlertTriangle, Plus, X } from "lucide-react";
-import Link from "next/link";
-import RichTextEditor from "@/components/ui/RichTextEditor";
-import ImageUpload from "@/components/ui/ImageUpload";
-import { useProductOptions } from "@/hooks/useProductOptions";
 import { useBranch } from "@/hooks/useBranch";
+import { useProductOptions } from "@/hooks/useProductOptions";
 import { productService } from "@/lib/api/services";
 
 export default function EditProductPage() {
@@ -35,12 +35,12 @@ export default function EditProductPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [categories, setCategories] = useState<any[]>([]);
+  const [categories, setCategories] = useState<unknown[]>([]);
   const { options: productOptions, loading: optionsLoading } =
     useProductOptions();
 
   // Helper function to get options from database or fallback to defaults
-  const getOptions = (fieldKey: string, fallback: any[] = []) => {
+  const getOptions = (fieldKey: string, fallback: unknown[] = []) => {
     if (optionsLoading) return fallback;
     const dbOptions = productOptions[fieldKey];
     if (dbOptions && dbOptions.length > 0) {
@@ -320,10 +320,10 @@ export default function EditProductPage() {
 
   // Form protection state
   const [hasChanges, setHasChanges] = useState(false);
-  const [initialData, setInitialData] = useState<any>(null);
+  const [initialData, setInitialData] = useState<unknown>(null);
 
   // Update form data with change detection
-  const updateFormData = (updates: any) => {
+  const updateFormData = (updates: unknown) => {
     setFormData((prev) => {
       const newData = { ...prev, ...updates };
 
@@ -514,7 +514,7 @@ export default function EditProductPage() {
     }
   }, [productId, currentBranchId, isSuperAdmin]);
 
-  const handleInputChange = (field: string, value: any) => {
+  const handleInputChange = (field: string, value: unknown) => {
     updateFormData({
       [field]: value,
     });
@@ -669,7 +669,7 @@ export default function EditProductPage() {
 
       const result = await productService.updateProduct(
         productId,
-        productData as any,
+        productData as unknown,
         currentBranchId || (isSuperAdmin ? "global" : undefined),
       );
 
@@ -696,8 +696,8 @@ export default function EditProductPage() {
     return (
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         <div className="animate-pulse space-y-6">
-          <div className="h-8 bg-gray-200 rounded w-64"></div>
-          <div className="h-96 bg-gray-200 rounded"></div>
+          <div className="h-8 bg-gray-200 rounded w-64" />
+          <div className="h-96 bg-gray-200 rounded" />
         </div>
       </div>
     );
@@ -708,7 +708,7 @@ export default function EditProductPage() {
     return (
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         <div className="flex items-center gap-3 mb-6">
-          <Button variant="ghost" size="sm" asChild>
+          <Button asChild size="sm" variant="ghost">
             <Link href="/admin/products">
               <ArrowLeft className="h-4 w-4 mr-2" />
               Volver a Productos
@@ -758,11 +758,11 @@ export default function EditProductPage() {
             </span>
           )}
         </div>
-        <Link href="/admin/products" className="w-full sm:w-auto">
+        <Link className="w-full sm:w-auto" href="/admin/products">
           <Button
-            variant="outline"
-            size="default"
             className="w-full sm:w-auto min-h-[44px] px-4 sm:px-6 font-medium shrink-0"
+            size="default"
+            variant="outline"
           >
             <ArrowLeft className="h-4 w-4 mr-2 shrink-0" />
             Volver a Productos
@@ -771,7 +771,7 @@ export default function EditProductPage() {
       </div>
 
       {/* Product Form */}
-      <form onSubmit={handleSubmit} className="space-y-6 min-w-0">
+      <form className="space-y-6 min-w-0" onSubmit={handleSubmit}>
         {/* Product Type & Category - MOVED TO FIRST POSITION */}
         <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.4)] min-w-0 overflow-hidden">
           <CardHeader>
@@ -850,22 +850,22 @@ export default function EditProductPage() {
               <div>
                 <Label htmlFor="name">Nombre del Producto *</Label>
                 <Input
-                  id="name"
-                  value={formData.name}
-                  onChange={(e) => handleInputChange("name", e.target.value)}
-                  placeholder="Ej: Ray-Ban RB2140 Wayfarer"
                   required
                   className="border-black/20"
+                  id="name"
+                  placeholder="Ej: Ray-Ban RB2140 Wayfarer"
+                  value={formData.name}
+                  onChange={(e) => handleInputChange("name", e.target.value)}
                 />
               </div>
               <div>
                 <Label htmlFor="slug">URL (slug)</Label>
                 <Input
+                  className="border-black/20"
                   id="slug"
+                  placeholder="Se genera automáticamente"
                   value={formData.slug}
                   onChange={(e) => handleInputChange("slug", e.target.value)}
-                  placeholder="Se genera automáticamente"
-                  className="border-black/20"
                 />
               </div>
             </div>
@@ -873,22 +873,22 @@ export default function EditProductPage() {
             <div>
               <Label htmlFor="short_description">Descripción Corta</Label>
               <RichTextEditor
+                placeholder="Descripción breve para listados"
+                rows={2}
                 value={formData.short_description}
                 onChange={(value) =>
                   handleInputChange("short_description", value)
                 }
-                placeholder="Descripción breve para listados"
-                rows={2}
               />
             </div>
 
             <div>
               <Label htmlFor="description">Descripción Completa</Label>
               <RichTextEditor
-                value={formData.description}
-                onChange={(value) => handleInputChange("description", value)}
                 placeholder="Descripción detallada del producto..."
                 rows={4}
+                value={formData.description}
+                onChange={(value) => handleInputChange("description", value)}
               />
             </div>
           </CardContent>
@@ -903,14 +903,14 @@ export default function EditProductPage() {
               <div>
                 <Label htmlFor="price">Precio (CLP) *</Label>
                 <Input
-                  id="price"
-                  type="number"
-                  step="0.01"
-                  value={formData.price}
-                  onChange={(e) => handleInputChange("price", e.target.value)}
-                  placeholder="15000"
                   required
                   className="border-black/20"
+                  id="price"
+                  placeholder="15000"
+                  step="0.01"
+                  type="number"
+                  value={formData.price}
+                  onChange={(e) => handleInputChange("price", e.target.value)}
                 />
               </div>
               <div>
@@ -918,17 +918,17 @@ export default function EditProductPage() {
                   Stock (Sucursal Actual) *
                 </Label>
                 <Input
+                  className="border-black/20"
+                  disabled={!currentBranchId || currentBranchId === "global"}
                   id="stock_quantity"
+                  min="0"
+                  placeholder="50"
+                  required={!!currentBranchId}
                   type="number"
                   value={formData.stock_quantity}
                   onChange={(e) =>
                     handleInputChange("stock_quantity", e.target.value)
                   }
-                  placeholder="50"
-                  required={!!currentBranchId}
-                  min="0"
-                  disabled={!currentBranchId || currentBranchId === "global"}
-                  className="border-black/20"
                 />
                 <p className="text-xs text-muted-foreground mt-1">
                   {currentBranchId && currentBranchId !== "global"
@@ -941,16 +941,16 @@ export default function EditProductPage() {
                   Umbral de Stock Bajo
                 </Label>
                 <Input
+                  className="border-black/20"
+                  disabled={!currentBranchId || currentBranchId === "global"}
                   id="low_stock_threshold"
+                  min="0"
+                  placeholder="5"
                   type="number"
                   value={formData.low_stock_threshold}
                   onChange={(e) =>
                     handleInputChange("low_stock_threshold", e.target.value)
                   }
-                  placeholder="5"
-                  min="0"
-                  disabled={!currentBranchId || currentBranchId === "global"}
-                  className="border-black/20"
                 />
                 <p className="text-xs text-muted-foreground mt-1">
                   Alerta cuando el stock disponible sea menor o igual a este
@@ -960,17 +960,17 @@ export default function EditProductPage() {
             </div>
             <div className="flex items-center space-x-2">
               <input
-                type="checkbox"
-                id="price_includes_tax"
                 checked={formData.price_includes_tax}
+                className="h-4 w-4 rounded border-gray-300 text-epoch-primary focus:ring-epoch-primary"
+                id="price_includes_tax"
+                type="checkbox"
                 onChange={(e) =>
                   handleInputChange("price_includes_tax", e.target.checked)
                 }
-                className="h-4 w-4 rounded border-gray-300 text-epoch-primary focus:ring-epoch-primary"
               />
               <Label
-                htmlFor="price_includes_tax"
                 className="text-sm font-normal cursor-pointer"
+                htmlFor="price_includes_tax"
               >
                 El precio ya incluye IVA
               </Label>
@@ -989,35 +989,35 @@ export default function EditProductPage() {
                 <div>
                   <Label htmlFor="brand">Marca</Label>
                   <Input
+                    className="border-black/20"
                     id="brand"
+                    placeholder="Ej: Ray-Ban"
                     value={formData.brand}
                     onChange={(e) => handleInputChange("brand", e.target.value)}
-                    placeholder="Ej: Ray-Ban"
-                    className="border-black/20"
                   />
                 </div>
                 <div>
                   <Label htmlFor="manufacturer">Fabricante</Label>
                   <Input
+                    className="border-black/20"
                     id="manufacturer"
+                    placeholder="Ej: Luxottica"
                     value={formData.manufacturer}
                     onChange={(e) =>
                       handleInputChange("manufacturer", e.target.value)
                     }
-                    placeholder="Ej: Luxottica"
-                    className="border-black/20"
                   />
                 </div>
                 <div>
                   <Label htmlFor="model_number">Número de Modelo</Label>
                   <Input
+                    className="border-black/20"
                     id="model_number"
+                    placeholder="Ej: RB2140"
                     value={formData.model_number}
                     onChange={(e) =>
                       handleInputChange("model_number", e.target.value)
                     }
-                    placeholder="Ej: RB2140"
-                    className="border-black/20"
                   />
                 </div>
               </div>
@@ -1035,21 +1035,21 @@ export default function EditProductPage() {
               <div>
                 <Label htmlFor="sku">SKU</Label>
                 <Input
+                  className="border-black/20"
                   id="sku"
+                  placeholder="Código SKU"
                   value={formData.sku}
                   onChange={(e) => handleInputChange("sku", e.target.value)}
-                  placeholder="Código SKU"
-                  className="border-black/20"
                 />
               </div>
               <div>
                 <Label htmlFor="barcode">Código de Barras</Label>
                 <Input
+                  className="border-black/20"
                   id="barcode"
+                  placeholder="Código de barras"
                   value={formData.barcode}
                   onChange={(e) => handleInputChange("barcode", e.target.value)}
-                  placeholder="Código de barras"
-                  className="border-black/20"
                 />
               </div>
             </div>
@@ -1064,9 +1064,9 @@ export default function EditProductPage() {
             <div>
               <Label htmlFor="featured_image">Imagen del Producto</Label>
               <ImageUpload
+                placeholder="Seleccionar imagen del producto"
                 value={formData.featured_image}
                 onChange={(url) => handleInputChange("featured_image", url)}
-                placeholder="Seleccionar imagen del producto"
               />
             </div>
           </CardContent>
@@ -1183,12 +1183,12 @@ export default function EditProductPage() {
                 <div>
                   <Label>Color Principal</Label>
                   <Input
+                    className="border-black/20"
+                    placeholder="Ej: Negro"
                     value={formData.frame_color}
                     onChange={(e) =>
                       handleInputChange("frame_color", e.target.value)
                     }
-                    placeholder="Ej: Negro"
-                    className="border-black/20"
                   />
                 </div>
               </div>
@@ -1200,61 +1200,61 @@ export default function EditProductPage() {
                   <div>
                     <Label className="text-xs">Ancho de Lente</Label>
                     <Input
+                      className="border-black/20"
+                      placeholder="52"
                       type="number"
                       value={formData.frame_measurements.lens_width}
                       onChange={(e) =>
                         updateFrameMeasurement("lens_width", e.target.value)
                       }
-                      placeholder="52"
-                      className="border-black/20"
                     />
                   </div>
                   <div>
                     <Label className="text-xs">Puente</Label>
                     <Input
+                      className="border-black/20"
+                      placeholder="18"
                       type="number"
                       value={formData.frame_measurements.bridge_width}
                       onChange={(e) =>
                         updateFrameMeasurement("bridge_width", e.target.value)
                       }
-                      placeholder="18"
-                      className="border-black/20"
                     />
                   </div>
                   <div>
                     <Label className="text-xs">Largo de Varilla</Label>
                     <Input
+                      className="border-black/20"
+                      placeholder="140"
                       type="number"
                       value={formData.frame_measurements.temple_length}
                       onChange={(e) =>
                         updateFrameMeasurement("temple_length", e.target.value)
                       }
-                      placeholder="140"
-                      className="border-black/20"
                     />
                   </div>
                   <div>
                     <Label className="text-xs">Alto de Lente</Label>
                     <Input
+                      className="border-black/20"
+                      placeholder="40"
                       type="number"
                       value={formData.frame_measurements.lens_height}
                       onChange={(e) =>
                         updateFrameMeasurement("lens_height", e.target.value)
                       }
-                      placeholder="40"
-                      className="border-black/20"
                     />
                   </div>
                   <div>
                     <Label className="text-xs">Ancho Total</Label>
                     <Input
+                      className="border-black/20"
+                      placeholder="140"
                       type="number"
                       value={formData.frame_measurements.total_width}
                       onChange={(e) =>
                         updateFrameMeasurement("total_width", e.target.value)
                       }
-                      placeholder="140"
-                      className="border-black/20"
                     />
                   </div>
                 </div>
@@ -1266,9 +1266,9 @@ export default function EditProductPage() {
                 <div className="flex flex-wrap gap-2 mt-2">
                   {formData.frame_features.map((feature) => (
                     <Badge
+                      className="flex items-center gap-1"
                       key={feature}
                       variant="secondary"
-                      className="flex items-center gap-1"
                     >
                       {feature.replace(/_/g, " ")}
                       <X
@@ -1352,14 +1352,14 @@ export default function EditProductPage() {
                 <div>
                   <Label>Índice de Refracción</Label>
                   <Input
-                    type="number"
+                    className="border-black/20"
+                    placeholder="Ej: 1.67"
                     step="0.01"
+                    type="number"
                     value={formData.lens_index}
                     onChange={(e) =>
                       handleInputChange("lens_index", e.target.value)
                     }
-                    placeholder="Ej: 1.67"
-                    className="border-black/20"
                   />
                 </div>
                 <div>
@@ -1387,13 +1387,13 @@ export default function EditProductPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 min-w-0">
                 <div className="flex items-center space-x-2">
                   <input
-                    type="checkbox"
-                    id="blue_light_filter"
                     checked={formData.blue_light_filter}
+                    className="rounded"
+                    id="blue_light_filter"
+                    type="checkbox"
                     onChange={(e) =>
                       handleInputChange("blue_light_filter", e.target.checked)
                     }
-                    className="rounded"
                   />
                   <Label htmlFor="blue_light_filter">Filtro de Luz Azul</Label>
                 </div>
@@ -1401,9 +1401,11 @@ export default function EditProductPage() {
                   <div>
                     <Label>Porcentaje de Filtro (%)</Label>
                     <Input
-                      type="number"
-                      min="0"
+                      className="border-black/20"
                       max="100"
+                      min="0"
+                      placeholder="Ej: 40"
+                      type="number"
                       value={formData.blue_light_filter_percentage}
                       onChange={(e) =>
                         handleInputChange(
@@ -1411,20 +1413,18 @@ export default function EditProductPage() {
                           e.target.value,
                         )
                       }
-                      placeholder="Ej: 40"
-                      className="border-black/20"
                     />
                   </div>
                 )}
                 <div className="flex items-center space-x-2">
                   <input
-                    type="checkbox"
-                    id="photochromic"
                     checked={formData.photochromic}
+                    className="rounded"
+                    id="photochromic"
+                    type="checkbox"
                     onChange={(e) =>
                       handleInputChange("photochromic", e.target.checked)
                     }
-                    className="rounded"
                   />
                   <Label htmlFor="photochromic">
                     Fotocromático (Transitions)
@@ -1432,16 +1432,16 @@ export default function EditProductPage() {
                 </div>
                 <div className="flex items-center space-x-2">
                   <input
-                    type="checkbox"
-                    id="prescription_available"
                     checked={formData.prescription_available}
+                    className="rounded"
+                    id="prescription_available"
+                    type="checkbox"
                     onChange={(e) =>
                       handleInputChange(
                         "prescription_available",
                         e.target.checked,
                       )
                     }
-                    className="rounded"
                   />
                   <Label htmlFor="prescription_available">
                     Disponible con Receta
@@ -1455,9 +1455,9 @@ export default function EditProductPage() {
                 <div className="flex flex-wrap gap-2 mt-2">
                   {formData.lens_coatings.map((coating) => (
                     <Badge
+                      className="flex items-center gap-1"
                       key={coating}
                       variant="secondary"
-                      className="flex items-center gap-1"
                     >
                       {coating.replace(/_/g, " ")}
                       <X
@@ -1497,79 +1497,79 @@ export default function EditProductPage() {
                     <div>
                       <Label className="text-xs">SPH Mínimo</Label>
                       <Input
-                        type="number"
+                        className="border-black/20"
+                        placeholder="-10.00"
                         step="0.25"
+                        type="number"
                         value={formData.prescription_range.sph_min}
                         onChange={(e) =>
                           updatePrescriptionRange("sph_min", e.target.value)
                         }
-                        placeholder="-10.00"
-                        className="border-black/20"
                       />
                     </div>
                     <div>
                       <Label className="text-xs">SPH Máximo</Label>
                       <Input
-                        type="number"
+                        className="border-black/20"
+                        placeholder="+6.00"
                         step="0.25"
+                        type="number"
                         value={formData.prescription_range.sph_max}
                         onChange={(e) =>
                           updatePrescriptionRange("sph_max", e.target.value)
                         }
-                        placeholder="+6.00"
-                        className="border-black/20"
                       />
                     </div>
                     <div>
                       <Label className="text-xs">CIL Mínimo</Label>
                       <Input
-                        type="number"
+                        className="border-black/20"
+                        placeholder="-4.00"
                         step="0.25"
+                        type="number"
                         value={formData.prescription_range.cyl_min}
                         onChange={(e) =>
                           updatePrescriptionRange("cyl_min", e.target.value)
                         }
-                        placeholder="-4.00"
-                        className="border-black/20"
                       />
                     </div>
                     <div>
                       <Label className="text-xs">CIL Máximo</Label>
                       <Input
-                        type="number"
+                        className="border-black/20"
+                        placeholder="+4.00"
                         step="0.25"
+                        type="number"
                         value={formData.prescription_range.cyl_max}
                         onChange={(e) =>
                           updatePrescriptionRange("cyl_max", e.target.value)
                         }
-                        placeholder="+4.00"
-                        className="border-black/20"
                       />
                     </div>
                     <div>
                       <Label className="text-xs">ADD Mínimo</Label>
                       <Input
-                        type="number"
+                        className="border-black/20"
+                        placeholder="0.00"
                         step="0.25"
+                        type="number"
                         value={formData.prescription_range.add_min}
                         onChange={(e) =>
                           updatePrescriptionRange("add_min", e.target.value)
                         }
-                        placeholder="0.00"
-                        className="border-black/20"
                       />
                     </div>
                     <div>
                       <Label className="text-xs">ADD Máximo</Label>
                       <Input
-                        type="number"
+                        className="border-black/20"
+                        placeholder="+4.00"
                         step="0.25"
+                        type="number"
                         value={formData.prescription_range.add_max}
                         onChange={(e) =>
                           updatePrescriptionRange("add_max", e.target.value)
                         }
-                        placeholder="+4.00"
-                        className="border-black/20"
                       />
                     </div>
                   </div>
@@ -1589,37 +1589,37 @@ export default function EditProductPage() {
               <div>
                 <Label htmlFor="warranty_months">Garantía (meses)</Label>
                 <Input
+                  className="border-black/20"
                   id="warranty_months"
+                  placeholder="Ej: 12"
                   type="number"
                   value={formData.warranty_months}
                   onChange={(e) =>
                     handleInputChange("warranty_months", e.target.value)
                   }
-                  placeholder="Ej: 12"
-                  className="border-black/20"
                 />
               </div>
               <div className="flex items-center space-x-2">
                 <input
-                  type="checkbox"
-                  id="requires_prescription"
                   checked={formData.requires_prescription}
+                  className="rounded"
+                  id="requires_prescription"
+                  type="checkbox"
                   onChange={(e) =>
                     handleInputChange("requires_prescription", e.target.checked)
                   }
-                  className="rounded"
                 />
                 <Label htmlFor="requires_prescription">Requiere Receta</Label>
               </div>
               <div className="flex items-center space-x-2">
                 <input
-                  type="checkbox"
-                  id="is_customizable"
                   checked={formData.is_customizable}
+                  className="rounded"
+                  id="is_customizable"
+                  type="checkbox"
                   onChange={(e) =>
                     handleInputChange("is_customizable", e.target.checked)
                   }
-                  className="rounded"
                 />
                 <Label htmlFor="is_customizable">Personalizable</Label>
               </div>
@@ -1627,12 +1627,12 @@ export default function EditProductPage() {
             <div>
               <Label htmlFor="warranty_details">Detalles de Garantía</Label>
               <RichTextEditor
+                placeholder="Detalles de la garantía, condiciones, etc."
+                rows={3}
                 value={formData.warranty_details}
                 onChange={(value) =>
                   handleInputChange("warranty_details", value)
                 }
-                placeholder="Detalles de la garantía, condiciones, etc."
-                rows={3}
               />
             </div>
           </CardContent>
@@ -1640,30 +1640,30 @@ export default function EditProductPage() {
 
         {/* Submit Buttons - mobile: stacked full-width, desktop: row */}
         <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:gap-4 min-w-0">
-          <Link href="/admin/products" className="w-full sm:w-auto sm:order-1">
+          <Link className="w-full sm:w-auto sm:order-1" href="/admin/products">
             <Button
+              className="w-full sm:w-auto min-h-[44px]"
               type="button"
               variant="outline"
-              className="w-full sm:w-auto min-h-[44px]"
             >
               Cancelar
             </Button>
           </Link>
           <Button
+            className="w-full sm:w-auto min-h-[44px] flex items-center justify-center gap-2 text-white sm:order-2"
+            disabled={saving}
+            style={{ backgroundColor: "var(--admin-accent-tertiary)" }}
             type="button"
             variant="secondary"
-            disabled={saving}
             onClick={() => handleSubmit(undefined, "draft")}
-            className="w-full sm:w-auto min-h-[44px] flex items-center justify-center gap-2 text-white sm:order-2"
-            style={{ backgroundColor: "var(--admin-accent-tertiary)" }}
           >
             <Save className="h-4 w-4 shrink-0" />
             {saving ? "Guardando..." : "Guardar como Borrador"}
           </Button>
           <Button
-            type="submit"
-            disabled={saving}
             className="w-full sm:flex-1 min-h-[44px] flex items-center justify-center gap-2 sm:order-3 sm:min-w-[140px]"
+            disabled={saving}
+            type="submit"
           >
             <Save className="h-4 w-4 shrink-0" />
             {saving ? "Guardando..." : "Guardar Cambios"}

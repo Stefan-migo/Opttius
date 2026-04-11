@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { AlertCircle, CreditCard, MessageCircle } from "lucide-react";
 import Link from "next/link";
+import { useEffect, useState } from "react";
+
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const PAYFLOW_ENABLED = process.env.NEXT_PUBLIC_PAYFLOW_ENABLED !== "false";
 
@@ -61,7 +62,7 @@ export default function SubscriptionRequiredPage() {
 
           <div className="flex flex-col gap-3">
             {PAYFLOW_ENABLED ? (
-              <Link href="/checkout" className="w-full">
+              <Link className="w-full" href="/checkout">
                 <Button className="w-full h-12 font-bold" size="lg">
                   <CreditCard className="h-5 w-5 mr-2" />
                   Suscribirme ahora
@@ -70,13 +71,13 @@ export default function SubscriptionRequiredPage() {
             ) : null}
 
             <Link
-              href="/admin/help"
               className={PAYFLOW_ENABLED ? "w-full" : ""}
+              href="/admin/help"
             >
               <Button
-                variant={PAYFLOW_ENABLED ? "outline" : "default"}
                 className="w-full h-12"
                 size="lg"
+                variant={PAYFLOW_ENABLED ? "outline" : "default"}
               >
                 <MessageCircle className="h-5 w-5 mr-2" />
                 Contactar soporte

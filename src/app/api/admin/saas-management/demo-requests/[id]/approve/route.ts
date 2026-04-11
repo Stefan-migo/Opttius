@@ -3,10 +3,11 @@
  * Approve a demo request: create user (invite) if needed, create demo org, send email (root only)
  */
 import { NextRequest, NextResponse } from "next/server";
+
 import { requireRoot } from "@/lib/api/root-middleware";
-import { createServiceRoleClient } from "@/utils/supabase/service-role";
-import { appLogger as logger } from "@/lib/logger";
 import { sendDemoApprovedEmail } from "@/lib/email/templates/saas";
+import { appLogger as logger } from "@/lib/logger";
+import { createServiceRoleClient } from "@/utils/supabase/service-role";
 
 export const dynamic = "force-dynamic";
 
@@ -58,6 +59,8 @@ export async function POST(
       isExistingUser = true;
     }
     if (!targetUserId) {
+      // Usar invitación por email de Supabase - funciona en producción
+      // En local, los emails van a Inbucket
       const { data: inviteData, error: inviteError } =
         await supabase.auth.admin.inviteUserByEmail(email, {
           redirectTo: `${process.env.NEXT_PUBLIC_APP_URL || "https://www.opttius.cl"}/reset-password`,

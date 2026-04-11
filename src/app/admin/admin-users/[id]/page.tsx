@@ -1,26 +1,26 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useParams, useRouter } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import {
+  Activity,
   ArrowLeft,
+  Calendar,
+  Clock,
   Crown,
+  Globe,
   Mail,
   Phone,
-  Calendar,
-  Activity,
-  Clock,
   Shield,
-  Globe,
-  Building2,
 } from "lucide-react";
 import Link from "next/link";
+import { useParams, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { useBranch } from "@/hooks/useBranch";
+
 import BranchAccessManager from "@/components/admin/BranchAccessManager";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useBranch } from "@/hooks/useBranch";
 
 interface AdminUser {
   id: string;
@@ -119,9 +119,9 @@ export default function AdminUserDetailPage() {
                 {error || "Administrador no encontrado"}
               </p>
               <Button
-                onClick={() => router.push("/admin/admin-users")}
-                variant="outline"
                 className="rounded-xl border-epoch-primary/20 min-h-[44px] px-6"
+                variant="outline"
+                onClick={() => router.push("/admin/admin-users")}
               >
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Volver a Administradores
@@ -190,9 +190,9 @@ export default function AdminUserDetailPage() {
         <div className="flex items-center gap-3">
           <Link href="/admin/admin-users">
             <Button
-              variant="ghost"
-              size="sm"
               className="rounded-xl text-epoch-primary hover:bg-epoch-primary/10 min-h-[44px] shrink-0"
+              size="sm"
+              variant="ghost"
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
               Volver
@@ -246,11 +246,11 @@ export default function AdminUserDetailPage() {
                 )}
                 {isSuperAdmin && (
                   <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleToggleStatus}
-                    disabled={togglingStatus}
                     className="rounded-xl border-epoch-primary/20 min-h-[44px]"
+                    disabled={togglingStatus}
+                    size="sm"
+                    variant="outline"
+                    onClick={handleToggleStatus}
                   >
                     {togglingStatus
                       ? "Actualizando..."
@@ -274,30 +274,30 @@ export default function AdminUserDetailPage() {
                 {adminUser.is_super_admin ||
                 adminUser.role === "super_admin" ? (
                   <Badge
-                    variant="default"
                     className="flex items-center gap-1 w-fit bg-epoch-accent text-epoch-primary"
+                    variant="default"
                   >
                     <Globe className="h-3 w-3" />
                     Super Administrador
                   </Badge>
                 ) : adminUser.role === "vendedor" ? (
                   <Badge
-                    variant="secondary"
                     className="flex items-center gap-1 w-fit"
+                    variant="secondary"
                   >
                     Vendedor
                   </Badge>
                 ) : adminUser.role === "employee" ? (
                   <Badge
-                    variant="secondary"
                     className="flex items-center gap-1 w-fit"
+                    variant="secondary"
                   >
                     Empleado
                   </Badge>
                 ) : (
                   <Badge
-                    variant="default"
                     className="flex items-center gap-1 w-fit"
+                    variant="default"
                   >
                     <Crown className="h-3 w-3" />
                     Administrador
@@ -397,10 +397,10 @@ export default function AdminUserDetailPage() {
       {(isSuperAdmin || adminUser.role === "admin") && (
         <BranchAccessManager
           adminUserId={adminId}
+          canEdit={isSuperAdmin || adminUser.role === "admin"}
           isSuperAdmin={
             adminUser.is_super_admin || adminUser.role === "super_admin"
           }
-          canEdit={isSuperAdmin || adminUser.role === "admin"}
         />
       )}
 
@@ -417,8 +417,8 @@ export default function AdminUserDetailPage() {
             {Object.entries(adminUser.permissions || {}).map(
               ([resource, actions]) => (
                 <div
-                  key={resource}
                   className="p-3 rounded-xl border border-epoch-primary/10 bg-epoch-background/50"
+                  key={resource}
                 >
                   <div className="font-medium text-sm capitalize mb-2 text-epoch-primary">
                     {resource.replace("_", " ")}
@@ -426,9 +426,9 @@ export default function AdminUserDetailPage() {
                   <div className="flex flex-wrap gap-1">
                     {actions.map((action) => (
                       <Badge
+                        className="text-[10px] sm:text-xs border-epoch-primary/20"
                         key={action}
                         variant="outline"
-                        className="text-[10px] sm:text-xs border-epoch-primary/20"
                       >
                         {action}
                       </Badge>

@@ -1,10 +1,11 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { FileText, Package, Plus, Users, Zap } from "lucide-react";
 import Link from "next/link";
-import { Package, Users, Plus, Zap, FileText } from "lucide-react";
+
 import { DashboardSearch } from "@/components/admin/DashboardSearch";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface QuickActionsPanelProps {
   onNewAppointment: () => void;
@@ -32,16 +33,16 @@ export function QuickActionsPanel({
       </CardHeader>
       <CardContent className="p-6 space-y-6">
         <div className="space-y-3">
-          <DashboardSearch type="customer" placeholder="LOCALIZAR CLIENTE..." />
+          <DashboardSearch placeholder="LOCALIZAR CLIENTE..." type="customer" />
           <DashboardSearch
-            type="product"
             placeholder="IDENTIFICAR PRODUCTO..."
+            type="product"
           />
         </div>
 
         <Button
-          onClick={onNewAppointment}
           className="w-full h-12 bg-epoch-primary hover:bg-epoch-surface text-white font-display font-bold text-[10px] tracking-[0.2em] rounded-xl shadow-premium-sm transition-all flex items-center justify-center gap-3 uppercase cursor-pointer"
+          onClick={onNewAppointment}
         >
           <Plus className="h-4 w-4" />
           Nueva Cita Médica
@@ -49,9 +50,9 @@ export function QuickActionsPanel({
 
         <div className="grid grid-cols-2 gap-2">
           <Button
-            variant="outline"
             asChild
             className="h-20 flex-col gap-2 bg-admin-bg-tertiary/50 border-admin-border-primary/20 hover:border-epoch-accent/40 text-admin-text-primary rounded-xl transition-all cursor-pointer hover:shadow-md"
+            variant="outline"
           >
             <Link href="/admin/products">
               <Package className="h-5 w-5 text-epoch-primary" />
@@ -61,9 +62,9 @@ export function QuickActionsPanel({
             </Link>
           </Button>
           <Button
-            variant="outline"
             asChild
             className="h-20 flex-col gap-2 bg-admin-bg-tertiary/50 border-admin-border-primary/20 hover:border-epoch-accent/40 text-admin-text-primary rounded-xl transition-all cursor-pointer hover:shadow-md"
+            variant="outline"
           >
             <Link href="/admin/customers">
               <Users className="h-5 w-5 text-epoch-accent" />
@@ -87,9 +88,9 @@ export function QuickActionsPanel({
               óptica.&quot;
             </p>
             <Button
-              variant="link"
               asChild
               className="h-auto p-0 text-[10px] font-display font-bold text-epoch-accent uppercase tracking-widest hover:text-epoch-primary"
+              variant="link"
             >
               <Link href="/admin/docs">Ver Documentación →</Link>
             </Button>

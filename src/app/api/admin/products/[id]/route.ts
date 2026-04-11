@@ -1,15 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
+
+import { getBranchContext } from "@/lib/api/branch-middleware";
+import {
+  DEFAULT_LOW_STOCK_THRESHOLD,
+  getProductStock,
+  updateProductStock,
+} from "@/lib/inventory/stock-helpers";
+import { appLogger as logger } from "@/lib/logger";
 import {
   createClientFromRequest,
   createServiceRoleClient,
 } from "@/utils/supabase/server";
-import { appLogger as logger } from "@/lib/logger";
-import { getBranchContext } from "@/lib/api/branch-middleware";
-import {
-  getProductStock,
-  updateProductStock,
-  DEFAULT_LOW_STOCK_THRESHOLD,
-} from "@/lib/inventory/stock-helpers";
 
 export const dynamic = "force-dynamic";
 export async function GET(
@@ -119,7 +120,7 @@ export async function GET(
     }
 
     // Type assertion for product with stock
-    const productWithStock = product as any;
+    const productWithStock = product as unknown;
 
     // CRITICAL: Verify organization_id matches user's organization (multi-tenancy check)
     // This is a safety check in case the query filter didn't work correctly
@@ -149,7 +150,7 @@ export async function GET(
       // Filter stock array to only include the current branch
       if (Array.isArray(productWithStock.product_branch_stock)) {
         const filteredStock = productWithStock.product_branch_stock.filter(
-          (stock: any) => stock?.branch_id === currentBranchId,
+          (stock: unknown) => stock?.branch_id === currentBranchId,
         );
         productWithStock.product_branch_stock =
           filteredStock.length > 0 ? filteredStock : null;

@@ -1,11 +1,39 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import {
+  AlertTriangle,
+  ArrowLeft,
+  Building2,
+  CheckCircle2,
+  Crown,
+  Edit,
+  Loader2,
+  MapPin,
+  Package,
+  Pause,
+  Play,
+  Plus,
+  ShoppingCart,
+  Trash2,
+  Users,
+  XCircle,
+} from "lucide-react";
+import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { extractDataFromResponse } from "@/lib/api/response-helpers";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -15,15 +43,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
   Table,
   TableBody,
   TableCell,
@@ -31,26 +50,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  ArrowLeft,
-  Building2,
-  Users,
-  MapPin,
-  Package,
-  ShoppingCart,
-  Edit,
-  Loader2,
-  CheckCircle2,
-  XCircle,
-  Pause,
-  Play,
-  Crown,
-  Trash2,
-  AlertTriangle,
-  Plus,
-} from "lucide-react";
-import Link from "next/link";
-import { toast } from "sonner";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { extractDataFromResponse } from "@/lib/api/response-helpers";
 import { formatDate } from "@/lib/utils";
 
 interface OrganizationDetails {
@@ -60,7 +61,7 @@ interface OrganizationDetails {
   subscription_tier: string;
   status: string;
   owner_id?: string;
-  metadata?: any;
+  metadata?: unknown;
   created_at: string;
   updated_at: string;
   stats: {
@@ -128,9 +129,9 @@ export default function OrganizationDetailsPage() {
   const [activeTab, setActiveTab] = useState("overview");
 
   // Branches CRUD
-  const [branches, setBranches] = useState<Array<any>>([]);
+  const [branches, setBranches] = useState<Array<unknown>>([]);
   const [showBranchDialog, setShowBranchDialog] = useState(false);
-  const [editingBranch, setEditingBranch] = useState<any>(null);
+  const [editingBranch, setEditingBranch] = useState<unknown>(null);
   const [branchFormData, setBranchFormData] = useState({
     name: "",
     code: "",
@@ -150,9 +151,9 @@ export default function OrganizationDetailsPage() {
   );
 
   // Users CRUD
-  const [users, setUsers] = useState<Array<any>>([]);
+  const [users, setUsers] = useState<Array<unknown>>([]);
   const [showUserDialog, setShowUserDialog] = useState(false);
-  const [editingUser, setEditingUser] = useState<any>(null);
+  const [editingUser, setEditingUser] = useState<unknown>(null);
   const [userFormData, setUserFormData] = useState({
     email: "",
     password: "",
@@ -569,7 +570,7 @@ export default function OrganizationDetailsPage() {
             <div className="text-center text-red-600">
               <p>Error: {error || "Organización no encontrada"}</p>
               <Link href="/admin/saas-management/organizations">
-                <Button variant="outline" className="mt-4">
+                <Button className="mt-4" variant="outline">
                   Volver a organizaciones
                 </Button>
               </Link>
@@ -586,7 +587,7 @@ export default function OrganizationDetailsPage() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Link href="/admin/saas-management/organizations">
-            <Button variant="ghost" size="sm">
+            <Button size="sm" variant="ghost">
               <ArrowLeft className="h-4 w-4 mr-2" />
               Volver
             </Button>
@@ -699,9 +700,9 @@ export default function OrganizationDetailsPage() {
               </p>
             )}
             <Button
-              variant="outline"
-              size="sm"
               className="mt-2"
+              size="sm"
+              variant="outline"
               onClick={() =>
                 router.push(
                   `/admin/saas-management/subscriptions?organization_id=${orgId}`,
@@ -716,9 +717,9 @@ export default function OrganizationDetailsPage() {
 
       {/* Tabs para gestión detallada */}
       <Tabs
+        className="space-y-6"
         value={activeTab}
         onValueChange={setActiveTab}
-        className="space-y-6"
       >
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="overview">
@@ -736,7 +737,7 @@ export default function OrganizationDetailsPage() {
         </TabsList>
 
         {/* Tab: Resumen */}
-        <TabsContent value="overview" className="space-y-6">
+        <TabsContent className="space-y-6" value="overview">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Información general */}
             <Card className="admin-card">
@@ -811,8 +812,8 @@ export default function OrganizationDetailsPage() {
                   <div className="space-y-2">
                     {organization.recentUsers.map((user) => (
                       <div
-                        key={user.id}
                         className="flex items-center justify-between p-3 border rounded-lg"
+                        key={user.id}
                       >
                         <div>
                           <p className="font-medium">
@@ -848,7 +849,7 @@ export default function OrganizationDetailsPage() {
         </TabsContent>
 
         {/* Tab: Sucursales */}
-        <TabsContent value="branches" className="space-y-6">
+        <TabsContent className="space-y-6" value="branches">
           <Card className="admin-card">
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle>Sucursales</CardTitle>
@@ -912,8 +913,8 @@ export default function OrganizationDetailsPage() {
                           <TableCell className="text-right">
                             <div className="flex justify-end gap-2">
                               <Button
-                                variant="ghost"
                                 size="sm"
+                                variant="ghost"
                                 onClick={() => {
                                   setEditingBranch(branch);
                                   setBranchFormData({
@@ -931,8 +932,8 @@ export default function OrganizationDetailsPage() {
                                 <Edit className="h-4 w-4" />
                               </Button>
                               <Button
-                                variant="ghost"
                                 size="sm"
+                                variant="ghost"
                                 onClick={() =>
                                   handleDeleteBranchClick(branch.id)
                                 }
@@ -952,7 +953,7 @@ export default function OrganizationDetailsPage() {
         </TabsContent>
 
         {/* Tab: Usuarios */}
-        <TabsContent value="users" className="space-y-6">
+        <TabsContent className="space-y-6" value="users">
           <Card className="admin-card">
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle>Usuarios</CardTitle>
@@ -1012,8 +1013,8 @@ export default function OrganizationDetailsPage() {
                           <TableCell className="text-right">
                             <div className="flex justify-end gap-2">
                               <Button
-                                variant="ghost"
                                 size="sm"
+                                variant="ghost"
                                 onClick={() => {
                                   setEditingUser(user);
                                   setUserFormData({
@@ -1030,8 +1031,8 @@ export default function OrganizationDetailsPage() {
                                 <Edit className="h-4 w-4" />
                               </Button>
                               <Button
-                                variant="ghost"
                                 size="sm"
+                                variant="ghost"
                                 onClick={() => handleDeleteUserClick(user.id)}
                               >
                                 <Trash2 className="h-4 w-4 text-red-600" />
@@ -1067,6 +1068,7 @@ export default function OrganizationDetailsPage() {
               <div>
                 <label className="text-sm font-medium">Nombre *</label>
                 <Input
+                  placeholder="Ej: Sucursal Centro"
                   value={branchFormData.name}
                   onChange={(e) =>
                     setBranchFormData({
@@ -1074,12 +1076,12 @@ export default function OrganizationDetailsPage() {
                       name: e.target.value,
                     })
                   }
-                  placeholder="Ej: Sucursal Centro"
                 />
               </div>
               <div>
                 <label className="text-sm font-medium">Código</label>
                 <Input
+                  placeholder="Se genera automáticamente si se deja vacío"
                   value={branchFormData.code}
                   onChange={(e) =>
                     setBranchFormData({
@@ -1087,13 +1089,13 @@ export default function OrganizationDetailsPage() {
                       code: e.target.value,
                     })
                   }
-                  placeholder="Se genera automáticamente si se deja vacío"
                 />
               </div>
             </div>
             <div>
               <label className="text-sm font-medium">Dirección</label>
               <Input
+                placeholder="Dirección línea 1"
                 value={branchFormData.address_line_1}
                 onChange={(e) =>
                   setBranchFormData({
@@ -1101,23 +1103,23 @@ export default function OrganizationDetailsPage() {
                     address_line_1: e.target.value,
                   })
                 }
-                placeholder="Dirección línea 1"
               />
             </div>
             <div>
               <label className="text-sm font-medium">Ciudad</label>
               <Input
+                placeholder="Ciudad"
                 value={branchFormData.city}
                 onChange={(e) =>
                   setBranchFormData({ ...branchFormData, city: e.target.value })
                 }
-                placeholder="Ciudad"
               />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="text-sm font-medium">Teléfono</label>
                 <Input
+                  placeholder="Teléfono"
                   value={branchFormData.phone}
                   onChange={(e) =>
                     setBranchFormData({
@@ -1125,12 +1127,12 @@ export default function OrganizationDetailsPage() {
                       phone: e.target.value,
                     })
                   }
-                  placeholder="Teléfono"
                 />
               </div>
               <div>
                 <label className="text-sm font-medium">Email</label>
                 <Input
+                  placeholder="Email"
                   type="email"
                   value={branchFormData.email}
                   onChange={(e) =>
@@ -1139,24 +1141,23 @@ export default function OrganizationDetailsPage() {
                       email: e.target.value,
                     })
                   }
-                  placeholder="Email"
                 />
               </div>
             </div>
             <div className="flex items-center gap-2">
               <input
-                type="checkbox"
-                id="branch-active"
                 checked={branchFormData.is_active}
+                className="rounded"
+                id="branch-active"
+                type="checkbox"
                 onChange={(e) =>
                   setBranchFormData({
                     ...branchFormData,
                     is_active: e.target.checked,
                   })
                 }
-                className="rounded"
               />
-              <label htmlFor="branch-active" className="text-sm font-medium">
+              <label className="text-sm font-medium" htmlFor="branch-active">
                 Sucursal activa
               </label>
             </div>
@@ -1198,6 +1199,7 @@ export default function OrganizationDetailsPage() {
               <div>
                 <label className="text-sm font-medium">Nombre</label>
                 <Input
+                  placeholder="Nombre"
                   value={userFormData.first_name}
                   onChange={(e) =>
                     setUserFormData({
@@ -1205,12 +1207,12 @@ export default function OrganizationDetailsPage() {
                       first_name: e.target.value,
                     })
                   }
-                  placeholder="Nombre"
                 />
               </div>
               <div>
                 <label className="text-sm font-medium">Apellido</label>
                 <Input
+                  placeholder="Apellido"
                   value={userFormData.last_name}
                   onChange={(e) =>
                     setUserFormData({
@@ -1218,26 +1220,26 @@ export default function OrganizationDetailsPage() {
                       last_name: e.target.value,
                     })
                   }
-                  placeholder="Apellido"
                 />
               </div>
             </div>
             <div>
               <label className="text-sm font-medium">Email *</label>
               <Input
+                disabled={!!editingUser}
+                placeholder="email@ejemplo.com"
                 type="email"
                 value={userFormData.email}
                 onChange={(e) =>
                   setUserFormData({ ...userFormData, email: e.target.value })
                 }
-                placeholder="email@ejemplo.com"
-                disabled={!!editingUser}
               />
             </div>
             {!editingUser && (
               <div>
                 <label className="text-sm font-medium">Contraseña *</label>
                 <Input
+                  placeholder="Mínimo 8 caracteres"
                   type="password"
                   value={userFormData.password}
                   onChange={(e) =>
@@ -1246,7 +1248,6 @@ export default function OrganizationDetailsPage() {
                       password: e.target.value,
                     })
                   }
-                  placeholder="Mínimo 8 caracteres"
                 />
               </div>
             )}
@@ -1330,8 +1331,8 @@ export default function OrganizationDetailsPage() {
             <div>
               <label className="text-sm font-medium">Nombre</label>
               <input
-                type="text"
                 className="w-full mt-1 px-3 py-2 border rounded-md"
+                type="text"
                 value={editData.name}
                 onChange={(e) =>
                   setEditData({ ...editData, name: e.target.value })
@@ -1341,8 +1342,8 @@ export default function OrganizationDetailsPage() {
             <div>
               <label className="text-sm font-medium">Slug</label>
               <input
-                type="text"
                 className="w-full mt-1 px-3 py-2 border rounded-md"
+                type="text"
                 value={editData.slug}
                 onChange={(e) =>
                   setEditData({
@@ -1393,7 +1394,7 @@ export default function OrganizationDetailsPage() {
             <Button variant="outline" onClick={() => setShowEditDialog(false)}>
               Cancelar
             </Button>
-            <Button onClick={handleUpdate} disabled={editing}>
+            <Button disabled={editing} onClick={handleUpdate}>
               {editing ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -1472,16 +1473,16 @@ export default function OrganizationDetailsPage() {
           </DialogHeader>
           <DialogFooter>
             <Button
+              disabled={deleting}
               variant="outline"
               onClick={() => setDeleteDialogOpen(false)}
-              disabled={deleting}
             >
               Cancelar
             </Button>
             <Button
+              disabled={deleting}
               variant="destructive"
               onClick={handleDeleteConfirm}
-              disabled={deleting}
             >
               {deleting ? (
                 <>

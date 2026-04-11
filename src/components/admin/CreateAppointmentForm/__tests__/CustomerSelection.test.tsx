@@ -1,5 +1,6 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
 import CustomerSelection from "../CustomerSelection";
 import type { Customer } from "../types/appointment.types";
 
@@ -52,7 +53,9 @@ describe("CustomerSelection", () => {
 
     expect(screen.getByText("Identificación del Cliente")).toBeInTheDocument();
     expect(screen.getByText("Cliente Registrado")).toBeInTheDocument();
-    expect(screen.getByPlaceholderText("Buscar por Nombre, RUT o Email...")).toBeInTheDocument();
+    expect(
+      screen.getByPlaceholderText("Buscar por Nombre, RUT o Email..."),
+    ).toBeInTheDocument();
     expect(screen.queryByText("Cliente Ocasional")).not.toBeInTheDocument();
   });
 
@@ -63,11 +66,15 @@ describe("CustomerSelection", () => {
     expect(screen.getByPlaceholderText("Nombre")).toBeInTheDocument();
     expect(screen.getByPlaceholderText("Apellido")).toBeInTheDocument();
     expect(screen.getByPlaceholderText("12.345.678-9")).toBeInTheDocument();
-    expect(screen.queryByPlaceholderText("Buscar por Nombre, RUT o Email...")).not.toBeInTheDocument();
+    expect(
+      screen.queryByPlaceholderText("Buscar por Nombre, RUT o Email..."),
+    ).not.toBeInTheDocument();
   });
 
   it("should display selected customer information", () => {
-    render(<CustomerSelection {...mockProps} selectedCustomer={mockCustomer} />);
+    render(
+      <CustomerSelection {...mockProps} selectedCustomer={mockCustomer} />,
+    );
 
     expect(screen.getByText("John Doe")).toBeInTheDocument();
     expect(screen.getByText("john@example.com")).toBeInTheDocument();
@@ -77,7 +84,9 @@ describe("CustomerSelection", () => {
   it("should call onCustomerSearchChange when typing in search box", async () => {
     render(<CustomerSelection {...mockProps} />);
 
-    const searchInput = screen.getByPlaceholderText("Buscar por Nombre, RUT o Email...");
+    const searchInput = screen.getByPlaceholderText(
+      "Buscar por Nombre, RUT o Email...",
+    );
     fireEvent.change(searchInput, { target: { value: "John" } });
 
     await waitFor(() => {
@@ -88,11 +97,11 @@ describe("CustomerSelection", () => {
   it("should show customer search results", () => {
     const customerResults = [mockCustomer];
     render(
-      <CustomerSelection 
-        {...mockProps} 
-        customerSearch="John" 
-        customerResults={customerResults} 
-      />
+      <CustomerSelection
+        {...mockProps}
+        customerResults={customerResults}
+        customerSearch="John"
+      />,
     );
 
     expect(screen.getByText("John Doe")).toBeInTheDocument();
@@ -102,11 +111,11 @@ describe("CustomerSelection", () => {
   it("should call onCustomerSelect when clicking a customer result", () => {
     const customerResults = [mockCustomer];
     render(
-      <CustomerSelection 
-        {...mockProps} 
-        customerSearch="John" 
-        customerResults={customerResults} 
-      />
+      <CustomerSelection
+        {...mockProps}
+        customerResults={customerResults}
+        customerSearch="John"
+      />,
     );
 
     // Click directly on the customer name in the dropdown
@@ -118,19 +127,23 @@ describe("CustomerSelection", () => {
 
   it("should show loading indicator when searching", () => {
     render(
-      <CustomerSelection 
-        {...mockProps} 
-        customerSearch="John" 
-        searchingCustomers={true} 
-      />
+      <CustomerSelection
+        {...mockProps}
+        customerSearch="John"
+        searchingCustomers={true}
+      />,
     );
 
     // Simply check that the component renders without error when loading
-    expect(screen.getByPlaceholderText("Buscar por Nombre, RUT o Email...")).toBeInTheDocument();
+    expect(
+      screen.getByPlaceholderText("Buscar por Nombre, RUT o Email..."),
+    ).toBeInTheDocument();
   });
 
   it("should call onCustomerClear when clicking clear button", () => {
-    render(<CustomerSelection {...mockProps} selectedCustomer={mockCustomer} />);
+    render(
+      <CustomerSelection {...mockProps} selectedCustomer={mockCustomer} />,
+    );
 
     const clearButton = screen.getByRole("button", { name: "Cambiar" });
     fireEvent.click(clearButton);
@@ -166,17 +179,23 @@ describe("CustomerSelection", () => {
     const firstNameInput = screen.getByPlaceholderText("Nombre");
     fireEvent.change(firstNameInput, { target: { value: "Jane" } });
 
-    expect(mockProps.onGuestDataChange).toHaveBeenCalledWith({ first_name: "Jane" });
+    expect(mockProps.onGuestDataChange).toHaveBeenCalledWith({
+      first_name: "Jane",
+    });
 
     const lastNameInput = screen.getByPlaceholderText("Apellido");
     fireEvent.change(lastNameInput, { target: { value: "Smith" } });
 
-    expect(mockProps.onGuestDataChange).toHaveBeenCalledWith({ last_name: "Smith" });
+    expect(mockProps.onGuestDataChange).toHaveBeenCalledWith({
+      last_name: "Smith",
+    });
 
     const rutInput = screen.getByPlaceholderText("12.345.678-9");
     fireEvent.change(rutInput, { target: { value: "98765432-1" } });
 
-    expect(mockProps.onGuestDataChange).toHaveBeenCalledWith({ rut: "98765432-1" });
+    expect(mockProps.onGuestDataChange).toHaveBeenCalledWith({
+      rut: "98765432-1",
+    });
   });
 
   it("should accept errors prop for guest customer", () => {
@@ -190,7 +209,9 @@ describe("CustomerSelection", () => {
     };
 
     // Component accepts the errors prop without crashing
-    expect(() => render(<CustomerSelection {...propsWithError} />)).not.toThrow();
+    expect(() =>
+      render(<CustomerSelection {...propsWithError} />),
+    ).not.toThrow();
   });
 
   it("should show validation error for registered customer", () => {
@@ -217,18 +238,22 @@ describe("CustomerSelection", () => {
   // });
 
   it("should not show customer results when search is empty", () => {
-    render(<CustomerSelection {...mockProps} customerResults={[mockCustomer]} />);
+    render(
+      <CustomerSelection {...mockProps} customerResults={[mockCustomer]} />,
+    );
 
-    expect(screen.queryByText("Resultados de búsqueda")).not.toBeInTheDocument();
+    expect(
+      screen.queryByText("Resultados de búsqueda"),
+    ).not.toBeInTheDocument();
   });
 
   it("should show customer results when search has content", () => {
     render(
-      <CustomerSelection 
-        {...mockProps} 
-        customerSearch="John" 
-        customerResults={[mockCustomer]} 
-      />
+      <CustomerSelection
+        {...mockProps}
+        customerResults={[mockCustomer]}
+        customerSearch="John"
+      />,
     );
 
     expect(screen.getByText("John Doe")).toBeInTheDocument();
@@ -236,28 +261,34 @@ describe("CustomerSelection", () => {
 
   it("should show no results message when search returns empty", () => {
     render(
-      <CustomerSelection 
-        {...mockProps} 
-        customerSearch="NonExistent" 
-        customerResults={[]} 
-      />
+      <CustomerSelection
+        {...mockProps}
+        customerResults={[]}
+        customerSearch="NonExistent"
+      />,
     );
 
     expect(screen.getByText("Sin coincidencias")).toBeInTheDocument();
   });
 
   it("should disable inputs when in registered customer mode with selection", () => {
-    render(<CustomerSelection {...mockProps} selectedCustomer={mockCustomer} />);
+    render(
+      <CustomerSelection {...mockProps} selectedCustomer={mockCustomer} />,
+    );
 
     // When customer is selected, the search input is not rendered
-    expect(screen.queryByPlaceholderText("Buscar por Nombre, RUT o Email...")).not.toBeInTheDocument();
+    expect(
+      screen.queryByPlaceholderText("Buscar por Nombre, RUT o Email..."),
+    ).not.toBeInTheDocument();
   });
 
   it("should enable inputs when in registered customer mode without selection", () => {
     render(<CustomerSelection {...mockProps} />);
 
-    const searchInput = screen.getByPlaceholderText("Buscar por Nombre, RUT o Email...");
-    expect(searchInput).not.toHaveAttribute('disabled');
+    const searchInput = screen.getByPlaceholderText(
+      "Buscar por Nombre, RUT o Email...",
+    );
+    expect(searchInput).not.toHaveAttribute("disabled");
   });
 
   it("should format RUT input for guest customer", async () => {
@@ -285,7 +316,13 @@ describe("CustomerSelection", () => {
 
   it("should handle customer selection with click", () => {
     const customerResults = [mockCustomer];
-    render(<CustomerSelection {...mockProps} customerSearch="John" customerResults={customerResults} />);
+    render(
+      <CustomerSelection
+        {...mockProps}
+        customerResults={customerResults}
+        customerSearch="John"
+      />,
+    );
 
     // Wait for the dropdown to appear and click on the customer name
     const customerName = screen.getByText("John Doe");

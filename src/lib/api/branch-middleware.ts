@@ -1,6 +1,7 @@
-import { NextRequest } from "next/server";
-import { createClient } from "@/utils/supabase/server";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { NextRequest } from "next/server";
+
+import { createClient } from "@/utils/supabase/server";
 
 export interface BranchContext {
   branchId: string | null;
@@ -73,12 +74,12 @@ export async function getBranchFromRequest(
 export async function getBranchContext(
   request: NextRequest,
   userId: string,
-  supabaseClient?: SupabaseClient<any>,
+  supabaseClient?: SupabaseClient<unknown>,
 ): Promise<BranchContext> {
-  let supabase: SupabaseClient<any>;
+  let supabase: SupabaseClient<unknown>;
   try {
     supabase = supabaseClient || (await createClient());
-  } catch (clientError: any) {
+  } catch (clientError: unknown) {
     console.error(
       "Error creating Supabase client in getBranchContext:",
       clientError,
@@ -138,7 +139,7 @@ export async function getBranchContext(
   }
 
   // Get user's accessible branches
-  let branches: any[] = [];
+  let branches: unknown[] = [];
   try {
     const { data: branchesData, error: branchesError } = await supabase.rpc(
       "get_user_branches",
@@ -172,7 +173,7 @@ export async function getBranchContext(
     };
   }
 
-  const accessibleBranches = (branches || []).map((b: any) => ({
+  const accessibleBranches = (branches || []).map((b: unknown) => ({
     id: b.branch_id,
     name: b.branch_name,
     code: b.branch_code,
@@ -265,7 +266,7 @@ export async function validateBranchAccess(
  * never shows data from other organizations.
  */
 export function addBranchFilter(
-  query: any,
+  query: unknown,
   branchId: string | null,
   isSuperAdmin: boolean,
   organizationId?: string | null,
@@ -292,9 +293,9 @@ export function addBranchFilter(
  * When in global view, fetches branch IDs for the org and filters by .in("branch_id", ids).
  */
 export async function addBranchFilterForBranchScopedTable(
-  query: any,
+  query: unknown,
   branchContext: BranchContext,
-  supabase: SupabaseClient<any>,
+  supabase: SupabaseClient<unknown>,
 ) {
   const { branchId, isSuperAdmin, organizationId, accessibleBranches } =
     branchContext;

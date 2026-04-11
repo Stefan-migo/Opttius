@@ -8,19 +8,20 @@
  * 4. Validation
  */
 
-import { describe, it, expect, beforeAll, afterAll } from "vitest";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
+
 import {
-  createTestOrganization,
-  createTestUser,
-  createTestBranch,
-  createTestProduct,
-  cleanupTestData,
-  makeAuthenticatedRequest,
-  isMultiTenancyAvailable,
   assignTestUserBranchAccess,
+  cleanupTestData,
+  createTestBranch,
+  createTestOrganization,
+  createTestProduct,
+  createTestUser,
+  isMultiTenancyAvailable,
+  makeAuthenticatedRequest,
+  type TestBranch,
   type TestOrganization,
   type TestUser,
-  type TestBranch,
 } from "../helpers/test-setup";
 
 // Check infrastructure availability - will be set in beforeAll
@@ -33,8 +34,8 @@ describe("Products API - Integration Tests", () => {
   let userB: TestUser;
   let branchA: TestBranch;
   let branchB: TestBranch;
-  let productA: any;
-  let productB: any;
+  let productA: unknown;
+  let productB: unknown;
 
   beforeAll(async () => {
     // Check if multi-tenancy infrastructure is available
@@ -110,7 +111,7 @@ describe("Products API - Integration Tests", () => {
       // Debug: Log response data
       console.log("[Test Debug] Products response:", {
         productsCount: data.products?.length || 0,
-        productIds: data.products?.map((p: any) => p.id) || [],
+        productIds: data.products?.map((p: unknown) => p.id) || [],
         expectedProductA: productA.id,
         expectedProductB: productB.id,
         branchA: branchA.id,
@@ -119,7 +120,7 @@ describe("Products API - Integration Tests", () => {
 
       // User A should only see products from orgA
       expect(data.products).toBeDefined();
-      const productIds = data.products.map((p: any) => p.id);
+      const productIds = data.products.map((p: unknown) => p.id);
       expect(productIds).toContain(productA.id);
       expect(productIds).not.toContain(productB.id);
     });
@@ -326,7 +327,7 @@ describe("Products API - Integration Tests", () => {
 
       // Should find the product we just created
       const found = data.products.find(
-        (p: any) => p.id === searchTestProduct.id,
+        (p: unknown) => p.id === searchTestProduct.id,
       );
       expect(found).toBeDefined();
       expect(found?.name).toBe(searchTestProductName);
@@ -355,7 +356,7 @@ describe("Products API - Integration Tests", () => {
       const data = await response.json();
       expect(data.products).toBeDefined();
       // All returned products should be active
-      data.products.forEach((p: any) => {
+      data.products.forEach((p: unknown) => {
         expect(p.status).toBe("active");
       });
     });

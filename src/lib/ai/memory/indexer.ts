@@ -5,14 +5,13 @@
  * for semantic search. Generates embeddings and stores them in the database.
  */
 
-import type { SupabaseClient } from "@supabase/supabase-js";
-import type {
-  MemoryContext,
-  IndexingResult,
-  IndexingOptions,
-  EmbeddingRecord,
-} from "./types";
 import { SemanticMemory } from "./semantic";
+import type {
+  EmbeddingRecord,
+  IndexingOptions,
+  IndexingResult,
+  MemoryContext,
+} from "./types";
 
 export class MemoryIndexer {
   private context: MemoryContext;
@@ -96,7 +95,7 @@ export class MemoryIndexer {
             const indexed =
               await this.semanticMemory.storeEmbeddingBatch(records);
             result.indexed += indexed;
-          } catch (err: any) {
+          } catch (err: unknown) {
             result.failed += records.length;
             result.errors.push(
               `Batch ${i / batchSize + 1} failed: ${err.message}`,
@@ -107,7 +106,7 @@ export class MemoryIndexer {
 
       console.log(`Products indexed: ${result.indexed}/${result.totalRecords}`);
       return result;
-    } catch (error: any) {
+    } catch (error: unknown) {
       result.errors.push(`Indexing failed: ${error.message}`);
       return result;
     }
@@ -181,7 +180,7 @@ export class MemoryIndexer {
             const indexed =
               await this.semanticMemory.storeEmbeddingBatch(records);
             result.indexed += indexed;
-          } catch (err: any) {
+          } catch (err: unknown) {
             result.failed += records.length;
             result.errors.push(`Batch failed: ${err.message}`);
           }
@@ -192,7 +191,7 @@ export class MemoryIndexer {
         `Customers indexed: ${result.indexed}/${result.totalRecords}`,
       );
       return result;
-    } catch (error: any) {
+    } catch (error: unknown) {
       result.errors.push(`Indexing failed: ${error.message}`);
       return result;
     }
@@ -268,7 +267,7 @@ export class MemoryIndexer {
             const indexed =
               await this.semanticMemory.storeEmbeddingBatch(records);
             result.indexed += indexed;
-          } catch (err: any) {
+          } catch (err: unknown) {
             result.failed += records.length;
             result.errors.push(`Batch failed: ${err.message}`);
           }
@@ -277,7 +276,7 @@ export class MemoryIndexer {
 
       console.log(`Orders indexed: ${result.indexed}/${result.totalRecords}`);
       return result;
-    } catch (error: any) {
+    } catch (error: unknown) {
       result.errors.push(`Indexing failed: ${error.message}`);
       return result;
     }
@@ -313,7 +312,7 @@ export class MemoryIndexer {
 
       result.totalRecords = messages.length;
 
-      const records: EmbeddingRecord[] = messages.map((msg: any) => ({
+      const records: EmbeddingRecord[] = messages.map((msg: unknown) => ({
         sourceType: "chat_message",
         sourceId: msg.id,
         content: msg.content || "",
@@ -328,13 +327,13 @@ export class MemoryIndexer {
       try {
         const indexed = await this.semanticMemory.storeEmbeddingBatch(records);
         result.indexed = indexed;
-      } catch (err: any) {
+      } catch (err: unknown) {
         result.failed = records.length;
         result.errors.push(`Indexing failed: ${err.message}`);
       }
 
       return result;
-    } catch (error: any) {
+    } catch (error: unknown) {
       result.errors.push(`Indexing failed: ${error.message}`);
       return result;
     }
@@ -404,7 +403,7 @@ export class MemoryIndexer {
           const indexed =
             await this.semanticMemory.storeEmbeddingBatch(records);
           result.indexed += indexed;
-        } catch (err: any) {
+        } catch (err: unknown) {
           result.failed = records.length;
           result.errors.push(`Indexing failed: ${err.message}`);
         }
@@ -414,7 +413,7 @@ export class MemoryIndexer {
         `Categories indexed: ${result.indexed}/${result.totalRecords}`,
       );
       return result;
-    } catch (error: any) {
+    } catch (error: unknown) {
       result.errors.push(`Indexing failed: ${error.message}`);
       return result;
     }
@@ -447,7 +446,7 @@ export class MemoryIndexer {
 
   // Helper methods to build content strings
 
-  private buildProductContent(product: any): string {
+  private buildProductContent(product: unknown): string {
     const parts = [
       `Producto: ${product.name}`,
       product.description && `Descripción: ${product.description}`,
@@ -461,7 +460,7 @@ export class MemoryIndexer {
     return parts.join(". ");
   }
 
-  private buildCustomerContent(customer: any): string {
+  private buildCustomerContent(customer: unknown): string {
     const name =
       `${customer.first_name || ""} ${customer.last_name || ""}`.trim();
     const parts = [
@@ -476,7 +475,7 @@ export class MemoryIndexer {
     return parts.join(". ");
   }
 
-  private buildOrderContent(order: any): string {
+  private buildOrderContent(order: unknown): string {
     const customerName = order.customers
       ? `${order.customers.first_name || ""} ${order.customers.last_name || ""}`.trim()
       : "Cliente desconocido";

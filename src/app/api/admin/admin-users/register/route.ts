@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/utils/supabase/server";
-import { createServiceRoleClient } from "@/utils/supabase/service-role";
-import { appLogger as logger } from "@/lib/logger";
+
 import { getDefaultPermissions } from "@/lib/admin/permissions";
+import { appLogger as logger } from "@/lib/logger";
 import type {
   GetAdminRoleParams,
   GetAdminRoleResult,
 } from "@/types/supabase-rpc";
+import { createClient } from "@/utils/supabase/server";
+import { createServiceRoleClient } from "@/utils/supabase/service-role";
 
 export const dynamic = "force-dynamic";
 export async function POST(request: NextRequest) {

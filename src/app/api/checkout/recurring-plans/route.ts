@@ -4,9 +4,10 @@
  * Creates MP plans on first request if gateway_plan_id is missing (lazy init).
  */
 import { NextResponse } from "next/server";
-import { createClient, createServiceRoleClient } from "@/utils/supabase/server";
-import { PaymentGatewayFactory } from "@/lib/payments";
+
 import { appLogger as logger } from "@/lib/logger";
+import { PaymentGatewayFactory } from "@/lib/payments";
+import { createClient, createServiceRoleClient } from "@/utils/supabase/server";
 
 function getBackUrl(): string {
   const base =

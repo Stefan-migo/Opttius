@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Info, Loader2, Mail, Save } from "lucide-react";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Mail, Save, Loader2, Info } from "lucide-react";
-import { toast } from "sonner";
 
 interface SystemConfigItem {
   config_key: string;
@@ -143,12 +144,12 @@ export default function EmailConfigCard({
                 </span>
               </p>
               <Input
+                className="w-full"
                 id="email_display_name"
+                placeholder={suggestedDisplayName}
                 type="text"
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
-                placeholder={suggestedDisplayName}
-                className="w-full"
               />
             </div>
 
@@ -163,20 +164,20 @@ export default function EmailConfigCard({
                 </span>
               </p>
               <Input
+                className="w-full"
                 id="support_email"
+                placeholder={suggestedReplyTo}
                 type="email"
                 value={replyTo}
                 onChange={(e) => setReplyTo(e.target.value)}
-                placeholder={suggestedReplyTo}
-                className="w-full"
               />
             </div>
 
             <div className="flex justify-end pt-4 border-t border-border">
               <Button
-                onClick={handleSave}
-                disabled={saving}
                 className="min-w-[120px] rounded-xl min-h-[44px] w-full sm:w-auto"
+                disabled={saving}
+                onClick={handleSave}
               >
                 {saving ? (
                   <>

@@ -1,6 +1,7 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { render, screen, waitFor } from "@testing-library/react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
 import { SmartContextWidget } from "@/components/ai/SmartContextWidget";
 
 describe("SmartContextWidget", () => {
@@ -91,11 +92,13 @@ describe("SmartContextWidget", () => {
     );
 
     // Component should handle error without crashing
-    expect(() => render(
-      <QueryClientProvider client={queryClient}>
-        <SmartContextWidget section="dashboard" />
-      </QueryClientProvider>,
-    )).not.toThrow();
+    expect(() =>
+      render(
+        <QueryClientProvider client={queryClient}>
+          <SmartContextWidget section="dashboard" />
+        </QueryClientProvider>,
+      ),
+    ).not.toThrow();
   });
 
   it("should handle dismiss action", async () => {
@@ -137,7 +140,9 @@ describe("SmartContextWidget", () => {
 
     // Component should accept dismiss callback without errors
     expect(() => {
-      global.fetch = vi.fn().mockResolvedValue({ ok: true, json: async () => ({}) });
+      global.fetch = vi
+        .fn()
+        .mockResolvedValue({ ok: true, json: async () => ({}) });
     }).not.toThrow();
   });
 
@@ -180,7 +185,9 @@ describe("SmartContextWidget", () => {
 
     // Component should accept feedback callback without errors
     expect(() => {
-      global.fetch = vi.fn().mockResolvedValue({ ok: true, json: async () => ({}) });
+      global.fetch = vi
+        .fn()
+        .mockResolvedValue({ ok: true, json: async () => ({}) });
     }).not.toThrow();
   });
 });

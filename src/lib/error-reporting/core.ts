@@ -8,7 +8,7 @@ import { appLogger as logger } from "@/lib/logger";
 // Type definitions
 interface ErrorReport {
   error: Error;
-  context?: Record<string, any>;
+  context?: Record<string, unknown>;
   severity: "low" | "medium" | "high" | "critical";
   userId?: string;
   sessionId?: string;
@@ -248,7 +248,7 @@ export async function reportDatabaseError(
 
 export async function reportUnhandledError(
   error: Error,
-  context?: Record<string, any>,
+  context?: Record<string, unknown>,
 ): Promise<void> {
   await reportError({
     error,

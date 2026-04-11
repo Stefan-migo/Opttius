@@ -1,7 +1,8 @@
-import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/utils/supabase/server";
 import { MercadoPagoConfig, Payment } from "mercadopago";
+import { NextRequest, NextResponse } from "next/server";
+
 import { appLogger as logger } from "@/lib/logger";
+import { createClient } from "@/utils/supabase/server";
 
 export const dynamic = "force-dynamic";
 export async function POST(request: NextRequest) {
@@ -95,7 +96,7 @@ export async function POST(request: NextRequest) {
         message: "Conexión con MercadoPago exitosa",
         ...testResult,
       });
-    } catch (mpError: any) {
+    } catch (mpError: unknown) {
       logger.error("MercadoPago connection error", { error: mpError });
       return NextResponse.json(
         {

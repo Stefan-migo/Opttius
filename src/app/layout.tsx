@@ -1,15 +1,17 @@
+import "./globals.css";
+
 import type { Metadata } from "next";
-import { Inter, Cormorant_Garamond } from "next/font/google";
+import { Cormorant_Garamond, Inter } from "next/font/google";
+
+import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { LandingStructuredData } from "@/components/landing/LandingStructuredData";
+import { TelemetryProvider } from "@/components/providers/telemetry-provider";
 import { ThemeProvider } from "@/components/theme-provider";
+import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { BranchProvider } from "@/contexts/BranchContext";
 import { QueryProvider } from "@/lib/react-query/QueryProvider";
-import { ErrorBoundary } from "@/components/ErrorBoundary";
-import { Toaster } from "@/components/ui/toaster";
-import { TelemetryProvider } from "@/components/providers/telemetry-provider";
 import { createClient } from "@/utils/supabase/server";
-import { LandingStructuredData } from "@/components/landing/LandingStructuredData";
-import "./globals.css";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -88,7 +90,7 @@ export default async function RootLayout({
   } = await supabase.auth.getUser();
 
   return (
-    <html lang="es" suppressHydrationWarning>
+    <html suppressHydrationWarning lang="es">
       <body
         className={`${inter.variable} ${cormorantGaramond.variable} font-sans antialiased`}
       >

@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/utils/supabase/server";
-import { createServiceRoleClient } from "@/utils/supabase/server";
-import { appLogger as logger } from "@/lib/logger";
-import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
+
 import {
-  createPaginatedResponse,
   createApiErrorResponse,
+  createPaginatedResponse,
 } from "@/lib/api/response";
 import { extractPaginationParams } from "@/lib/api/response";
+import { appLogger as logger } from "@/lib/logger";
+import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
+import { createClient } from "@/utils/supabase/server";
+import { createServiceRoleClient } from "@/utils/supabase/server";
 
 export const dynamic = "force-dynamic";
 
@@ -79,7 +80,7 @@ export async function GET(
       if (countError) {
         logger.warn("agreement_customers query failed (table may not exist)", {
           error: countError,
-          code: (countError as any)?.code,
+          code: (countError as unknown)?.code,
         });
         return createPaginatedResponse([], { page, limit, total: 0 });
       }
@@ -105,7 +106,7 @@ export async function GET(
 
       // Fetch customer details in a separate query
       const customerIds = paginatedRows
-        .map((r: any) => r.customer_id)
+        .map((r: unknown) => r.customer_id)
         .filter(Boolean);
       const customersMap: Record<
         string,
@@ -122,12 +123,12 @@ export async function GET(
           .from("customers")
           .select("id, first_name, last_name, email, phone, rut")
           .in("id", customerIds);
-        (customers || []).forEach((c: any) => {
+        (customers || []).forEach((c: unknown) => {
           customersMap[c.id] = c;
         });
       }
 
-      items = paginatedRows.map((r: any) => {
+      items = paginatedRows.map((r: unknown) => {
         const cust = customersMap[r.customer_id];
         return {
           customer_id: r.customer_id,

@@ -4,7 +4,7 @@
  * Supports customization (logo, header, footer)
  */
 
-import { Order, OrderItem } from "./adapters/BillingAdapter";
+import { OrderItem } from "./adapters/BillingAdapter";
 import type { InstitutionalInvoiceItem } from "./adapters/InstitutionalInvoiceAdapter";
 
 export interface BillingDocumentData {

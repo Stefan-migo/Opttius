@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, memo } from "react";
+import { memo, useMemo } from "react";
 
 interface PieChartProps {
   data: Array<{ label: string; value: number; color?: string }>;
@@ -107,20 +107,20 @@ function PieChartComponent({
         {/* Pie Chart SVG */}
         <div className="relative w-64 h-64">
           <svg
-            viewBox="0 0 100 100"
             className="w-full h-full transform -rotate-90"
+            viewBox="0 0 100 100"
           >
             {chartData.map((item, index) => (
               <path
-                key={index}
+                className="transition-all hover:opacity-80 cursor-pointer"
                 d={createArc(item.startAngle, item.endAngle, 45)}
                 fill={item.color}
-                className="transition-all hover:opacity-80 cursor-pointer"
+                key={index}
                 style={{ transformOrigin: "50% 50%" }}
               />
             ))}
             {/* Center circle for donut effect */}
-            <circle cx="50" cy="50" r="25" fill="white" />
+            <circle cx="50" cy="50" fill="white" r="25" />
           </svg>
 
           {/* Center text */}
@@ -137,8 +137,8 @@ function PieChartComponent({
           <div className="flex-1 space-y-2">
             {chartData.map((item, index) => (
               <div
-                key={index}
                 className="flex items-center justify-between p-2 hover:bg-gray-50 rounded transition-colors"
+                key={index}
               >
                 <div className="flex items-center space-x-3">
                   <div

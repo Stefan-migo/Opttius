@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireRoot } from "@/lib/api/root-middleware";
-import { createServiceRoleClient } from "@/utils/supabase/service-role";
-import { appLogger as logger } from "@/lib/logger";
+
 import { AuthorizationError, ValidationError } from "@/lib/api/errors";
-import { tierUpdateSchema } from "@/lib/api/validation/zod-schemas";
+import { requireRoot } from "@/lib/api/root-middleware";
 import {
   parseAndValidateBody,
   validationErrorResponse,
 } from "@/lib/api/validation/zod-helpers";
+import { tierUpdateSchema } from "@/lib/api/validation/zod-schemas";
+import { appLogger as logger } from "@/lib/logger";
+import { createServiceRoleClient } from "@/utils/supabase/service-role";
 
 /**
  * GET /api/admin/saas-management/tiers
@@ -118,7 +119,7 @@ export async function PATCH(request: NextRequest) {
     }
 
     // Preparar updates
-    const updates: any = {};
+    const updates: unknown = {};
 
     if (price_monthly !== undefined) {
       if (price_monthly < 0) {

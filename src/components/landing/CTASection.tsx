@@ -1,9 +1,10 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
 import { ArrowRight, Sparkles } from "lucide-react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
+
+import { Button } from "@/components/ui/button";
 
 export function CTASection() {
   const router = useRouter();
@@ -19,12 +20,12 @@ export function CTASection() {
         {/* Background Image Overlay */}
         <div className="absolute inset-0 z-0">
           <Image
-            src="/images/landing/Hero.webp"
-            alt="Legacy Pattern"
             fill
+            alt="Legacy Pattern"
             className="object-cover opacity-20 grayscale scale-110"
+            src="/images/landing/Hero.webp"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-epoch-primary via-epoch-primary/50 to-transparent"></div>
+          <div className="absolute inset-0 bg-gradient-to-t from-epoch-primary via-epoch-primary/50 to-transparent" />
         </div>
 
         <div className="relative z-10 py-20 sm:py-32 px-4 sm:px-6 flex flex-col items-center text-center">
@@ -44,16 +45,16 @@ export function CTASection() {
 
           <div className="flex flex-col sm:flex-row gap-8 w-full justify-center items-center">
             <Button
-              onClick={() => router.push("/solicitar-demo")}
-              size="lg"
               className="bg-epoch-accent hover:bg-white text-epoch-surface rounded-xl h-16 px-16 text-xs font-sans font-semibold tracking-[0.2em] uppercase transition-all duration-500 w-full sm:w-auto shadow-2xl"
+              size="lg"
+              onClick={() => router.push("/solicitar-demo")}
             >
               Solicitar Demo
               <ArrowRight className="ml-3 h-4 w-4" />
             </Button>
             <button
-              onClick={handleExploreClick}
               className="text-white/60 hover:text-white font-sans text-lg tracking-wide transition-all duration-300 border-b border-white/20 hover:border-white pb-1"
+              onClick={handleExploreClick}
             >
               Explorar la plataforma
             </button>
@@ -61,15 +62,15 @@ export function CTASection() {
 
           <div className="mt-20 flex flex-wrap justify-center gap-12 text-[9px] uppercase font-display tracking-[0.3em] text-white/30">
             <span className="flex items-center gap-3">
-              <div className="h-1 w-1 bg-epoch-accent rounded-full animate-pulse"></div>
+              <div className="h-1 w-1 bg-epoch-accent rounded-full animate-pulse" />
               Sin Tarjeta
             </span>
             <span className="flex items-center gap-3">
-              <div className="h-1 w-1 bg-epoch-accent rounded-full animate-pulse"></div>
+              <div className="h-1 w-1 bg-epoch-accent rounded-full animate-pulse" />
               Configuración guiada
             </span>
             <span className="flex items-center gap-3">
-              <div className="h-1 w-1 bg-epoch-accent rounded-full animate-pulse"></div>
+              <div className="h-1 w-1 bg-epoch-accent rounded-full animate-pulse" />
               Soporte especializado
             </span>
           </div>

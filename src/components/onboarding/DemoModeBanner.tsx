@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { ArrowRight, Sparkles, X } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { X, Sparkles, ArrowRight } from "lucide-react";
 
 // Tiempo en milisegundos antes de volver a mostrar el banner (24 horas)
 const BANNER_REAPPEAR_DELAY = 24 * 60 * 60 * 1000; // 24 horas
@@ -98,28 +99,28 @@ export function DemoModeBanner() {
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 shrink-0">
           <div className="flex flex-col sm:flex-row gap-2">
             <Button
-              onClick={handleActivate}
-              size="sm"
               className="w-full sm:w-auto bg-admin-accent-secondary hover:bg-admin-accent-secondary/90 text-[#1A2B23] font-display font-bold rounded-xl uppercase tracking-widest text-[9px] h-10 sm:h-9 px-4 shadow-lg shadow-admin-accent-secondary/10"
+              size="sm"
+              onClick={handleActivate}
             >
               Activar mi Óptica
               <ArrowRight className="ml-2 h-3.5 w-3.5" />
             </Button>
             <Button
-              onClick={handleDismiss}
-              variant="ghost"
-              size="sm"
               className="w-full sm:w-auto text-admin-text-tertiary hover:text-admin-text-primary hover:bg-admin-bg-secondary/10 font-display font-bold rounded-xl uppercase tracking-widest text-[9px] h-10 sm:h-9"
+              size="sm"
+              variant="ghost"
+              onClick={handleDismiss}
             >
               Más tarde
             </Button>
           </div>
 
           <Button
-            onClick={handleDismiss}
-            variant="ghost"
-            size="icon"
             className="h-10 w-10 sm:h-8 sm:w-8 text-admin-text-tertiary/40 hover:text-admin-error hover:bg-admin-error/5 rounded-xl transition-colors self-end sm:self-center"
+            size="icon"
+            variant="ghost"
+            onClick={handleDismiss}
           >
             <X className="h-4 w-4" />
           </Button>

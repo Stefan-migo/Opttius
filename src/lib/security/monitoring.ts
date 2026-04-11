@@ -1,12 +1,13 @@
 import { appLogger as logger } from "@/lib/logger";
+
 import {
-  SecurityEvent,
-  SecurityEventType,
-  SecuritySeverity,
+  DEFAULT_SECURITY_CONFIG,
   generateSecurityEventId,
   getSeverityForEventType,
+  SecurityEvent,
+  SecurityEventType,
   SecurityMonitoringConfig,
-  DEFAULT_SECURITY_CONFIG,
+  SecuritySeverity,
 } from "./events";
 
 /**
@@ -39,7 +40,7 @@ export class SecurityMonitor {
    */
   logEvent(
     eventType: SecurityEventType,
-    details: Record<string, any> = {},
+    details: Record<string, unknown> = {},
     options: {
       userId?: string;
       ipAddress?: string;
@@ -153,7 +154,7 @@ export class SecurityMonitor {
       suspicionReason?: string;
       expectedSignature?: string;
       receivedSignature?: string;
-    } & Record<string, any>,
+    } & Record<string, unknown>,
     options: {
       userId?: string;
       ipAddress?: string;

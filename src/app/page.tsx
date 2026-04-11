@@ -1,14 +1,14 @@
 "use client";
 
-import { LandingHeader } from "@/components/landing/LandingHeader";
-import { HeroSection } from "@/components/landing/HeroSection";
-import { ProblemSolutionSection } from "@/components/landing/ProblemSolutionSection";
-import { FeaturesSection } from "@/components/landing/FeaturesSection";
 import { BenefitsSection } from "@/components/landing/BenefitsSection";
-import { SupportImplementationSection } from "@/components/landing/SupportImplementationSection";
 import { CTASection } from "@/components/landing/CTASection";
-import { PricingSection } from "@/components/landing/PricingSection";
+import { FeaturesSection } from "@/components/landing/FeaturesSection";
+import { HeroSection } from "@/components/landing/HeroSection";
 import { LandingFooter } from "@/components/landing/LandingFooter";
+import { LandingHeader } from "@/components/landing/LandingHeader";
+import { PricingSection } from "@/components/landing/PricingSection";
+import { ProblemSolutionSection } from "@/components/landing/ProblemSolutionSection";
+import { SupportImplementationSection } from "@/components/landing/SupportImplementationSection";
 
 export default function LandingPage() {
   return (

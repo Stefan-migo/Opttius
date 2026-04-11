@@ -1,18 +1,19 @@
 "use client";
 
-import { useState } from "react";
-import Image from "next/image";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import {
-  Star,
-  Quote,
-  Heart,
   Award,
   ChevronLeft,
   ChevronRight,
+  Heart,
+  Quote,
+  Star,
 } from "lucide-react";
+import Image from "next/image";
+import { useState } from "react";
+
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 
 interface TestimonialCardProps {
   id: string;
@@ -56,12 +57,12 @@ export default function TestimonialCard({
   const renderStars = (rating: number) => {
     return Array.from({ length: 5 }, (_, index) => (
       <Star
-        key={index}
         className={`h-4 w-4 ${
           index < Math.floor(rating)
             ? "fill-dorado text-dorado"
             : "text-gray-300"
         }`}
+        key={index}
       />
     ));
   };
@@ -71,8 +72,8 @@ export default function TestimonialCard({
       case "producto":
         return (
           <Badge
-            variant="secondary"
             className="bg-verde-suave/20 text-verde-suave"
+            variant="secondary"
           >
             Producto
           </Badge>
@@ -80,8 +81,8 @@ export default function TestimonialCard({
       case "servicio":
         return (
           <Badge
-            variant="secondary"
             className="bg-turquesa-claro/20 text-turquesa-claro"
+            variant="secondary"
           >
             Servicio
           </Badge>
@@ -89,8 +90,8 @@ export default function TestimonialCard({
       case "membresia":
         return (
           <Badge
-            variant="secondary"
             className="bg-dorado/20 text-azul-profundo"
+            variant="secondary"
           >
             Membresía
           </Badge>
@@ -118,11 +119,11 @@ export default function TestimonialCard({
             <div className="relative">
               {avatar ? (
                 <Image
-                  src={avatar}
                   alt={name}
-                  width={48}
-                  height={48}
                   className="rounded-full object-cover"
+                  height={48}
+                  src={avatar}
+                  width={48}
                 />
               ) : (
                 <div className="h-12 w-12 rounded-full bg-dorado/20 flex items-center justify-center">
@@ -144,8 +145,8 @@ export default function TestimonialCard({
                 <h4 className="font-semibold text-azul-profundo">{name}</h4>
                 {isVerified && (
                   <Badge
-                    variant="secondary"
                     className="text-xs bg-verde-suave/20 text-verde-suave"
+                    variant="secondary"
                   >
                     Verificado
                   </Badge>
@@ -193,26 +194,26 @@ export default function TestimonialCard({
           <div className="mb-4">
             <div className="relative aspect-video rounded-lg overflow-hidden bg-verde-suave/10">
               <Image
-                src={images[currentImageIndex]}
-                alt={`Foto de testimonial ${currentImageIndex + 1}`}
                 fill
+                alt={`Foto de testimonial ${currentImageIndex + 1}`}
                 className="object-cover"
+                src={images[currentImageIndex]}
               />
 
               {images.length > 1 && (
                 <>
                   <Button
-                    variant="secondary"
-                    size="sm"
                     className="absolute left-2 top-1/2 -translate-y-1/2 h-8 w-8 p-0 bg-white/80 hover:bg-white"
+                    size="sm"
+                    variant="secondary"
                     onClick={prevImage}
                   >
                     <ChevronLeft className="h-4 w-4" />
                   </Button>
                   <Button
-                    variant="secondary"
-                    size="sm"
                     className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 p-0 bg-white/80 hover:bg-white"
+                    size="sm"
+                    variant="secondary"
                     onClick={nextImage}
                   >
                     <ChevronRight className="h-4 w-4" />
@@ -222,12 +223,12 @@ export default function TestimonialCard({
                   <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
                     {images.map((_, index) => (
                       <button
-                        key={index}
                         className={`h-2 w-2 rounded-full transition-colors ${
                           index === currentImageIndex
                             ? "bg-white"
                             : "bg-white/50"
                         }`}
+                        key={index}
                         onClick={() => setCurrentImageIndex(index)}
                       />
                     ))}

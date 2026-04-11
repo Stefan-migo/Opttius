@@ -1,10 +1,27 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import {
+  AlertCircle,
+  Building2,
+  Calendar,
+  CheckCircle,
+  Clock,
+  Eye,
+  Loader2,
+  Package,
+  RefreshCw,
+  Search,
+  Truck,
+  User,
+  Wrench,
+} from "lucide-react";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -12,37 +29,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
-import {
-  Search,
-  User,
-  Calendar,
-  Clock,
-  Loader2,
-  Plus,
-  Eye,
-  Package,
-  Truck,
-  Wrench,
-  AlertCircle,
-  RefreshCw,
-  CheckCircle,
-  Building2,
-} from "lucide-react";
-import { toast } from "sonner";
-import { cn } from "@/lib/utils";
-import { formatRUT } from "@/lib/utils/rut";
-import { useBranch } from "@/hooks/useBranch";
-import { getBranchHeader } from "@/lib/utils/branch";
+import { Textarea } from "@/components/ui/textarea";
 import { useAuthContext } from "@/contexts/AuthContext";
-import { extractDataFromResponse } from "@/lib/api/response-helpers";
+import { useBranch } from "@/hooks/useBranch";
 import { useFormOptions } from "@/hooks/useFormOptions";
+import { extractDataFromResponse } from "@/lib/api/response-helpers";
+import { cn } from "@/lib/utils";
+import { getBranchHeader } from "@/lib/utils/branch";
+import { formatRUT } from "@/lib/utils/rut";
 
 interface CreateAppointmentFormProps {
   onSuccess: () => void;
   onCancel: () => void;
-  initialData?: any;
+  initialData?: unknown;
   initialCustomerId?: string;
   lockDateTime?: boolean; // Lock date and time when opened from calendar slot
   /** When in global view, branch to scope customer search and appointment creation */
@@ -86,8 +86,8 @@ export default function CreateAppointmentForm({
 
   // Customer selection
   const [customerSearch, setCustomerSearch] = useState("");
-  const [customerResults, setCustomerResults] = useState<any[]>([]);
-  const [selectedCustomer, setSelectedCustomer] = useState<any>(
+  const [customerResults, setCustomerResults] = useState<unknown[]>([]);
+  const [selectedCustomer, setSelectedCustomer] = useState<unknown>(
     initialData?.customer || null,
   );
   const [searchingCustomers, setSearchingCustomers] = useState(false);
@@ -106,7 +106,7 @@ export default function CreateAppointmentForm({
   });
 
   // Schedule settings
-  const [scheduleSettings, setScheduleSettings] = useState<any>(null);
+  const [scheduleSettings, setScheduleSettings] = useState<unknown>(null);
 
   // Available time slots
   const [availableSlots, setAvailableSlots] = useState<
@@ -330,7 +330,7 @@ export default function CreateAppointmentForm({
         console.log("✅ Available slots response:", data);
         console.log("📊 Total slots:", data.slots?.length || 0);
         const availableCount =
-          data.slots?.filter((s: any) => s.available === true).length || 0;
+          data.slots?.filter((s: unknown) => s.available === true).length || 0;
         console.log("📊 Available slots:", availableCount);
         console.log("📋 First few slots:", data.slots?.slice(0, 5));
 
@@ -465,7 +465,7 @@ export default function CreateAppointmentForm({
         guestCustomerData,
       });
 
-      const requestBody: any = {
+      const requestBody: unknown = {
         appointment_date: formData.appointment_date,
         appointment_time: appointmentTime,
         duration_minutes: formData.duration_minutes,
@@ -525,7 +525,7 @@ export default function CreateAppointmentForm({
         );
       }
       onSuccess();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error saving appointment:", error);
       toast.error(error.message || "Error al guardar cita");
     } finally {
@@ -570,9 +570,9 @@ export default function CreateAppointmentForm({
 
   return (
     <form
+      className="flex flex-col min-h-0 flex-1"
       id="create-appointment-form"
       onSubmit={handleSubmit}
-      className="flex flex-col min-h-0 flex-1"
     >
       <div className="flex-1 min-h-0 overflow-y-auto space-y-4 sm:space-y-6 md:space-y-8 pb-4">
         {/* Customer Selection */}
@@ -598,6 +598,7 @@ export default function CreateAppointmentForm({
               </div>
               <Switch
                 checked={!isGuestCustomer}
+                className="data-[state=checked]:bg-admin-accent-primary"
                 onCheckedChange={(checked) => {
                   setIsGuestCustomer(!checked);
                   if (!checked) {
@@ -614,7 +615,6 @@ export default function CreateAppointmentForm({
                     });
                   }
                 }}
-                className="data-[state=checked]:bg-admin-accent-primary"
               />
             </div>
 
@@ -637,6 +637,8 @@ export default function CreateAppointmentForm({
                       Nombre *
                     </Label>
                     <Input
+                      required
+                      className="h-11 rounded-xl border-admin-border-primary/50 bg-white/50 focus:bg-white transition-all"
                       placeholder="Nombre"
                       value={guestCustomerData.first_name}
                       onChange={(e) =>
@@ -645,8 +647,6 @@ export default function CreateAppointmentForm({
                           first_name: e.target.value,
                         }))
                       }
-                      className="h-11 rounded-xl border-admin-border-primary/50 bg-white/50 focus:bg-white transition-all"
-                      required
                     />
                   </div>
                   <div className="space-y-2">
@@ -654,6 +654,8 @@ export default function CreateAppointmentForm({
                       Apellido *
                     </Label>
                     <Input
+                      required
+                      className="h-11 rounded-xl border-admin-border-primary/50 bg-white/50 focus:bg-white transition-all"
                       placeholder="Apellido"
                       value={guestCustomerData.last_name}
                       onChange={(e) =>
@@ -662,8 +664,6 @@ export default function CreateAppointmentForm({
                           last_name: e.target.value,
                         }))
                       }
-                      className="h-11 rounded-xl border-admin-border-primary/50 bg-white/50 focus:bg-white transition-all"
-                      required
                     />
                   </div>
                 </div>
@@ -674,6 +674,8 @@ export default function CreateAppointmentForm({
                       RUT *
                     </Label>
                     <Input
+                      required
+                      className="h-11 rounded-xl border-admin-border-primary/50 bg-white/50 focus:bg-white transition-all"
                       placeholder="12.345.678-9"
                       value={guestCustomerData.rut}
                       onChange={(e) => {
@@ -684,8 +686,6 @@ export default function CreateAppointmentForm({
                           rut: formatted,
                         }));
                       }}
-                      className="h-11 rounded-xl border-admin-border-primary/50 bg-white/50 focus:bg-white transition-all"
-                      required
                     />
                   </div>
                   <div className="space-y-2">
@@ -693,8 +693,9 @@ export default function CreateAppointmentForm({
                       Teléfono
                     </Label>
                     <Input
-                      type="tel"
+                      className="h-11 rounded-xl border-admin-border-primary/50 bg-white/50 focus:bg-white transition-all"
                       placeholder="+56 9..."
+                      type="tel"
                       value={guestCustomerData.phone}
                       onChange={(e) =>
                         setGuestCustomerData((prev) => ({
@@ -702,7 +703,6 @@ export default function CreateAppointmentForm({
                           phone: e.target.value,
                         }))
                       }
-                      className="h-11 rounded-xl border-admin-border-primary/50 bg-white/50 focus:bg-white transition-all"
                     />
                   </div>
                 </div>
@@ -712,8 +712,9 @@ export default function CreateAppointmentForm({
                     Email
                   </Label>
                   <Input
-                    type="email"
+                    className="h-11 rounded-xl border-admin-border-primary/50 bg-white/50 focus:bg-white transition-all"
                     placeholder="cliente@ejemplo.com"
+                    type="email"
                     value={guestCustomerData.email}
                     onChange={(e) =>
                       setGuestCustomerData((prev) => ({
@@ -721,7 +722,6 @@ export default function CreateAppointmentForm({
                         email: e.target.value,
                       }))
                     }
-                    className="h-11 rounded-xl border-admin-border-primary/50 bg-white/50 focus:bg-white transition-all"
                   />
                 </div>
               </div>
@@ -761,10 +761,10 @@ export default function CreateAppointmentForm({
                     </div>
                   </div>
                   <Button
+                    className="h-9 sm:h-8 w-full sm:w-auto rounded-lg text-admin-accent-primary hover:bg-admin-accent-primary/10 font-bold text-[10px] uppercase tracking-widest shrink-0"
+                    size="sm"
                     type="button"
                     variant="ghost"
-                    size="sm"
-                    className="h-9 sm:h-8 w-full sm:w-auto rounded-lg text-admin-accent-primary hover:bg-admin-accent-primary/10 font-bold text-[10px] uppercase tracking-widest shrink-0"
                     onClick={() => {
                       setSelectedCustomer(null);
                       setFormData((prev) => ({
@@ -787,10 +787,10 @@ export default function CreateAppointmentForm({
                   )}
                 </div>
                 <Input
+                  className="h-12 pl-12 rounded-2xl border-admin-border-primary/50 bg-white/60 focus:bg-white focus:ring-2 focus:ring-admin-accent-primary/20 transition-all font-medium text-sm"
                   placeholder="Buscar por Nombre, RUT o Email..."
                   value={customerSearch}
                   onChange={(e) => setCustomerSearch(e.target.value)}
-                  className="h-12 pl-12 rounded-2xl border-admin-border-primary/50 bg-white/60 focus:bg-white focus:ring-2 focus:ring-admin-accent-primary/20 transition-all font-medium text-sm"
                 />
 
                 {customerSearch.length >= 1 && (
@@ -799,8 +799,8 @@ export default function CreateAppointmentForm({
                       {customerResults.length > 0
                         ? customerResults.map((customer) => (
                             <div
-                              key={customer.id}
                               className="flex items-center gap-3 p-3 hover:bg-admin-accent-primary/5 cursor-pointer rounded-xl transition-colors group"
+                              key={customer.id}
                               onClick={() => {
                                 setSelectedCustomer(customer);
                                 setCustomerSearch("");
@@ -855,6 +855,15 @@ export default function CreateAppointmentForm({
                 </Label>
                 <div className="relative">
                   <Input
+                    required
+                    className={cn(
+                      "h-11 rounded-xl border-admin-border-primary/50 bg-white/50 focus:bg-white transition-all font-bold px-4",
+                      lockDateTime &&
+                        "opacity-60 grayscale cursor-not-allowed bg-admin-bg-tertiary",
+                    )}
+                    disabled={lockDateTime}
+                    max={getMaxDate()}
+                    min={getMinDate()}
                     type="date"
                     value={formData.appointment_date}
                     onChange={(e) => {
@@ -874,15 +883,6 @@ export default function CreateAppointmentForm({
                       }));
                       setAvailableSlots([]);
                     }}
-                    min={getMinDate()}
-                    max={getMaxDate()}
-                    className={cn(
-                      "h-11 rounded-xl border-admin-border-primary/50 bg-white/50 focus:bg-white transition-all font-bold px-4",
-                      lockDateTime &&
-                        "opacity-60 grayscale cursor-not-allowed bg-admin-bg-tertiary",
-                    )}
-                    disabled={lockDateTime}
-                    required
                   />
                   {lockDateTime && (
                     <div className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 bg-white rounded-full flex items-center justify-center shadow-sm">
@@ -916,22 +916,22 @@ export default function CreateAppointmentForm({
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent className="rounded-xl border-admin-border-primary shadow-premium-lg">
-                    <SelectItem value="15" className="font-bold">
+                    <SelectItem className="font-bold" value="15">
                       15 MINUTOS
                     </SelectItem>
-                    <SelectItem value="30" className="font-bold">
+                    <SelectItem className="font-bold" value="30">
                       30 MINUTOS
                     </SelectItem>
-                    <SelectItem value="45" className="font-bold">
+                    <SelectItem className="font-bold" value="45">
                       45 MINUTOS
                     </SelectItem>
-                    <SelectItem value="60" className="font-bold">
+                    <SelectItem className="font-bold" value="60">
                       1 HORA
                     </SelectItem>
-                    <SelectItem value="90" className="font-bold">
+                    <SelectItem className="font-bold" value="90">
                       1.5 HORAS
                     </SelectItem>
-                    <SelectItem value="120" className="font-bold">
+                    <SelectItem className="font-bold" value="120">
                       2 HORAS
                     </SelectItem>
                   </SelectContent>
@@ -955,8 +955,8 @@ export default function CreateAppointmentForm({
                   <div className="grid grid-cols-4 gap-2">
                     {[1, 2, 3, 4].map((i) => (
                       <div
-                        key={i}
                         className="h-10 bg-admin-bg-tertiary/30 rounded-lg animate-pulse"
+                        key={i}
                       />
                     ))}
                   </div>
@@ -984,6 +984,16 @@ export default function CreateAppointmentForm({
 
                         return (
                           <Button
+                            className={cn(
+                              "h-10 rounded-xl font-black text-[10px] tracking-tighter transition-all duration-300 border flex flex-col items-center justify-center p-0",
+                              isSelected
+                                ? "bg-admin-accent-primary text-white border-admin-accent-primary shadow-premium-sm scale-[1.05] z-10"
+                                : "bg-white border-admin-border-primary/30 text-admin-text-secondary hover:border-admin-accent-primary/40 hover:bg-admin-accent-primary/[0.02]",
+                              lockDateTime &&
+                                !isSelected &&
+                                "opacity-30 grayscale cursor-not-allowed",
+                            )}
+                            disabled={lockDateTime && !isSelected}
                             key={slot.time_slot}
                             type="button"
                             variant="ghost"
@@ -995,16 +1005,6 @@ export default function CreateAppointmentForm({
                                 appointment_time: slot.time_slot,
                               }));
                             }}
-                            className={cn(
-                              "h-10 rounded-xl font-black text-[10px] tracking-tighter transition-all duration-300 border flex flex-col items-center justify-center p-0",
-                              isSelected
-                                ? "bg-admin-accent-primary text-white border-admin-accent-primary shadow-premium-sm scale-[1.05] z-10"
-                                : "bg-white border-admin-border-primary/30 text-admin-text-secondary hover:border-admin-accent-primary/40 hover:bg-admin-accent-primary/[0.02]",
-                              lockDateTime &&
-                                !isSelected &&
-                                "opacity-30 grayscale cursor-not-allowed",
-                            )}
-                            disabled={lockDateTime && !isSelected}
                           >
                             <span className="leading-none">
                               {formatTime(slot.time_slot)}
@@ -1046,9 +1046,9 @@ export default function CreateAppointmentForm({
                     const Icon = type.icon;
                     return (
                       <SelectItem
+                        className="font-bold"
                         key={type.value}
                         value={type.value}
-                        className="font-bold"
                       >
                         <div className="flex items-center gap-2">
                           <Icon className="h-3.5 w-3.5 opacity-60" />
@@ -1083,26 +1083,26 @@ export default function CreateAppointmentForm({
                 </SelectTrigger>
                 <SelectContent className="rounded-xl border-admin-border-primary shadow-premium-lg">
                   <SelectItem
-                    value="scheduled"
                     className="font-bold text-[11px] uppercase tracking-tight"
+                    value="scheduled"
                   >
                     Programada
                   </SelectItem>
                   <SelectItem
-                    value="confirmed"
                     className="font-bold text-[11px] uppercase tracking-tight"
+                    value="confirmed"
                   >
                     Confirmada
                   </SelectItem>
                   <SelectItem
-                    value="completed"
                     className="font-bold text-[11px] uppercase tracking-tight"
+                    value="completed"
                   >
                     Completada
                   </SelectItem>
                   <SelectItem
-                    value="cancelled"
                     className="font-bold text-[11px] uppercase tracking-tight text-red-600"
+                    value="cancelled"
                   >
                     Cancelada
                   </SelectItem>
@@ -1126,12 +1126,12 @@ export default function CreateAppointmentForm({
                 Motivo de la Cita
               </Label>
               <Input
+                className="h-11 rounded-xl border-admin-border-primary/50 bg-white/50 focus:bg-white transition-all"
+                placeholder="Describa brevemente el motivo..."
                 value={formData.reason}
                 onChange={(e) =>
                   setFormData((prev) => ({ ...prev, reason: e.target.value }))
                 }
-                placeholder="Describa brevemente el motivo..."
-                className="h-11 rounded-xl border-admin-border-primary/50 bg-white/50 focus:bg-white transition-all"
               />
             </div>
 
@@ -1140,13 +1140,13 @@ export default function CreateAppointmentForm({
                 Observaciones Internas
               </Label>
               <Textarea
+                className="rounded-xl border-admin-border-primary/50 bg-white/50 focus:bg-white transition-all resize-none p-4"
+                placeholder="Información relevante para el profesional..."
+                rows={3}
                 value={formData.notes}
                 onChange={(e) =>
                   setFormData((prev) => ({ ...prev, notes: e.target.value }))
                 }
-                placeholder="Información relevante para el profesional..."
-                rows={3}
-                className="rounded-xl border-admin-border-primary/50 bg-white/50 focus:bg-white transition-all resize-none p-4"
               />
             </div>
 
@@ -1161,6 +1161,7 @@ export default function CreateAppointmentForm({
               </div>
               <Switch
                 checked={formData.follow_up_required}
+                className="data-[state=checked]:bg-admin-accent-primary"
                 onCheckedChange={(checked) => {
                   const baseDate = formData.appointment_date
                     ? new Date(formData.appointment_date)
@@ -1175,7 +1176,6 @@ export default function CreateAppointmentForm({
                       : "",
                   }));
                 }}
-                className="data-[state=checked]:bg-admin-accent-primary"
               />
             </div>
 
@@ -1185,6 +1185,7 @@ export default function CreateAppointmentForm({
                   Cita Proyectada
                 </Label>
                 <Input
+                  className="h-11 rounded-xl border-admin-border-primary/50 bg-white/50 focus:bg-white transition-all"
                   type="date"
                   value={formData.follow_up_date}
                   onChange={(e) =>
@@ -1193,7 +1194,6 @@ export default function CreateAppointmentForm({
                       follow_up_date: e.target.value,
                     }))
                   }
-                  className="h-11 rounded-xl border-admin-border-primary/50 bg-white/50 focus:bg-white transition-all"
                 />
               </div>
             )}
@@ -1220,9 +1220,9 @@ export default function CreateAppointmentForm({
                 <SelectContent className="rounded-xl border-admin-border-primary shadow-premium-lg">
                   {branches.map((b) => (
                     <SelectItem
+                      className="font-bold text-[11px] uppercase tracking-tight"
                       key={b.id}
                       value={b.id}
-                      className="font-bold text-[11px] uppercase tracking-tight"
                     >
                       {b.name}
                     </SelectItem>
@@ -1242,17 +1242,17 @@ export default function CreateAppointmentForm({
       {/* Actions - sticky footer, always visible */}
       <div className="shrink-0 flex flex-row justify-end gap-3 sm:gap-4 p-4 sm:p-6 md:p-8 pt-4 border-t border-admin-border-primary/10 bg-white">
         <Button
+          className="h-10 sm:h-12 px-4 sm:px-8 rounded-xl font-bold text-admin-text-tertiary hover:bg-admin-bg-tertiary/20 uppercase text-[10px] sm:text-[11px] tracking-widest transition-all"
           type="button"
           variant="ghost"
           onClick={onCancel}
-          className="h-10 sm:h-12 px-4 sm:px-8 rounded-xl font-bold text-admin-text-tertiary hover:bg-admin-bg-tertiary/20 uppercase text-[10px] sm:text-[11px] tracking-widest transition-all"
         >
           Descartar
         </Button>
         <Button
-          type="submit"
-          disabled={!canSubmit}
           className="h-10 sm:h-12 px-6 sm:px-10 rounded-xl bg-admin-accent-primary hover:bg-admin-accent-primary/90 text-white shadow-premium-md font-bold uppercase text-[10px] sm:text-[11px] tracking-widest transition-all active:scale-[0.98] disabled:opacity-50"
+          disabled={!canSubmit}
+          type="submit"
         >
           {saving ? (
             <>

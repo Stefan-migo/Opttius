@@ -1,6 +1,7 @@
 import { z } from "zod";
-import type { ToolDefinition, ToolResult } from "./types";
+
 import { createOrganizationalMemory } from "../memory/organizational";
+import type { ToolDefinition, ToolResult } from "./types";
 
 const generateRecommendationsSchema = z.object({
   focus: z
@@ -141,7 +142,7 @@ export const recommendationTools: ToolDefinition[] = [
           },
           message: `Recomendaciones generadas para fase ${maturity.level}`,
         };
-      } catch (error: any) {
+      } catch (error: unknown) {
         return {
           success: false,
           error: error.message || "Failed to generate recommendations",

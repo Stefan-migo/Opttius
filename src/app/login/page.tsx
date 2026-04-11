@@ -1,29 +1,29 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
-import Image from "next/image";
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import { useAuthContext } from "@/contexts/AuthContext";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent } from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
 import {
-  Loader2,
+  ArrowRight,
   Eye,
   EyeOff,
+  Loader2,
   Lock,
   Mail,
-  ArrowRight,
   Sparkles,
 } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
+
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useAuthContext } from "@/contexts/AuthContext";
+import { cn } from "@/lib/utils";
 
 const loginSchema = z.object({
   email: z.string().email("Por favor ingresa un email válido"),
@@ -64,7 +64,7 @@ export default function LoginPage() {
         // Ir a onboarding/choice: si tiene org redirige a /admin, si no muestra opciones (demo/crear)
         router.replace("/onboarding/choice");
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(err.message || "An error occurred during login");
     }
   };
@@ -75,24 +75,24 @@ export default function LoginPage() {
       <div className="relative hidden lg:flex lg:w-1/2 xl:w-7/12 overflow-hidden items-center justify-center bg-epoch-surface">
         <div className="absolute inset-0 z-0">
           <Image
-            src="/images/landing/Hero.webp"
-            alt="Vintage Optics"
             fill
-            className="object-cover opacity-30 grayscale"
             priority
+            alt="Vintage Optics"
+            className="object-cover opacity-30 grayscale"
+            src="/images/landing/Hero.webp"
           />
           <div className="absolute inset-0 bg-gradient-to-tr from-epoch-primary via-epoch-primary/40 to-transparent" />
         </div>
 
         <div className="relative z-10 p-20 w-full h-full flex flex-col justify-between">
-          <Link href="/" className="group flex flex-col items-start w-fit">
+          <Link className="group flex flex-col items-start w-fit" href="/">
             <div className="relative mb-1 group-hover:scale-110 transition-transform duration-500">
               <Image
-                src="/logo-text-default.svg"
                 alt="Opttius"
-                width={192}
-                height={56}
                 className="h-14 w-48 opacity-100 object-contain object-left"
+                height={56}
+                src="/logo-text-default.svg"
+                width={192}
               />
             </div>
           </Link>
@@ -105,7 +105,7 @@ export default function LoginPage() {
                 precisión ocular
               </span>
             </h2>
-            <div className="w-24 h-[1px] bg-epoch-accent mb-8"></div>
+            <div className="w-24 h-[1px] bg-epoch-accent mb-8" />
             <p className="text-xl text-white/70 font-serif italic tracking-wide leading-relaxed">
               Acceda al sistema de gestión diseñado para su óptica.
             </p>
@@ -140,11 +140,11 @@ export default function LoginPage() {
 
           <Card className="border-epoch-primary/5 bg-white shadow-2xl rounded-xl">
             <CardContent className="p-8 sm:p-12">
-              <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+              <form className="space-y-8" onSubmit={handleSubmit(onSubmit)}>
                 {error && (
                   <Alert
-                    variant="destructive"
                     className="bg-red-500/10 border-red-500/20 rounded-xl animate-in shake-in duration-500"
+                    variant="destructive"
                   >
                     <AlertDescription className="text-red-950 font-serif italic text-xs">
                       {error}
@@ -154,16 +154,16 @@ export default function LoginPage() {
 
                 <div className="space-y-3">
                   <Label
-                    htmlFor="email"
                     className="text-[10px] font-display font-bold text-epoch-primary/40 uppercase tracking-[0.3em] ml-1"
+                    htmlFor="email"
                   >
                     Email
                   </Label>
                   <div className="relative group">
                     <Input
                       id="email"
-                      type="email"
                       placeholder="maestro@opttius.com"
+                      type="email"
                       {...register("email")}
                       className={cn(
                         "h-14 rounded-xl border-epoch-primary/10 bg-epoch-background/50 pl-14 focus:bg-white transition-all font-body text-epoch-primary shadow-inner",
@@ -184,15 +184,15 @@ export default function LoginPage() {
                 <div className="space-y-3">
                   <div className="flex items-center justify-between gap-4 mb-1 px-1">
                     <Label
-                      htmlFor="password"
                       className="text-[10px] font-display font-bold text-epoch-primary/40 uppercase tracking-[0.3em]"
+                      htmlFor="password"
                     >
                       Contraseña
                     </Label>
                     <Link
+                      className="text-[10px] font-display font-bold text-epoch-accent hover:text-epoch-primary uppercase tracking-widest transition-colors shrink-0"
                       href="/reset-password"
                       title="Restablecer"
-                      className="text-[10px] font-display font-bold text-epoch-accent hover:text-epoch-primary uppercase tracking-widest transition-colors shrink-0"
                     >
                       ¿Olvidó su contraseña?
                     </Link>
@@ -200,8 +200,8 @@ export default function LoginPage() {
                   <div className="relative group">
                     <Input
                       id="password"
-                      type={showPassword ? "text" : "password"}
                       placeholder="••••••••"
+                      type={showPassword ? "text" : "password"}
                       {...register("password")}
                       className={cn(
                         "h-14 rounded-xl border-epoch-primary/10 bg-epoch-background/50 pl-14 pr-14 focus:bg-white transition-all font-body text-epoch-primary shadow-inner",
@@ -212,12 +212,12 @@ export default function LoginPage() {
                     />
                     <Lock className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-epoch-primary/30 group-focus-within:text-epoch-primary transition-colors stroke-[1px]" />
                     <Button
+                      className="absolute right-3 top-1/2 -translate-y-1/2 h-10 w-10 p-0 rounded-xl hover:bg-epoch-primary/5 text-epoch-primary/30"
+                      disabled={loading}
+                      size="sm"
                       type="button"
                       variant="ghost"
-                      size="sm"
-                      className="absolute right-3 top-1/2 -translate-y-1/2 h-10 w-10 p-0 rounded-xl hover:bg-epoch-primary/5 text-epoch-primary/30"
                       onClick={() => setShowPassword(!showPassword)}
-                      disabled={loading}
                     >
                       {showPassword ? (
                         <EyeOff className="h-4 w-4 stroke-[1px]" />
@@ -229,10 +229,10 @@ export default function LoginPage() {
                 </div>
 
                 <Button
-                  type="submit"
-                  size="lg"
                   className="w-full h-16 rounded-xl bg-epoch-primary hover:bg-epoch-surface text-white font-display font-bold uppercase text-[10px] sm:text-xs tracking-[0.2em] sm:tracking-[0.4em] group overflow-hidden transition-all duration-500 shadow-xl"
                   disabled={loading}
+                  size="lg"
+                  type="submit"
                 >
                   {loading ? (
                     <Loader2 className="h-5 w-5 animate-spin" />
@@ -251,8 +251,8 @@ export default function LoginPage() {
                   ¿Primera vez aquí?
                 </p>
                 <Link
-                  href={signupEnabled ? "/signup" : "/solicitar-demo"}
                   className="inline-flex items-center gap-4 px-10 py-4 border border-epoch-primary/10 text-xs font-display font-bold text-epoch-primary uppercase tracking-[0.3em] hover:bg-epoch-primary hover:text-white transition-all duration-500 hover:-translate-y-1"
+                  href={signupEnabled ? "/signup" : "/solicitar-demo"}
                 >
                   {signupEnabled ? "Crear cuenta" : "Solicitar demo"}
                   <ArrowRight className="h-3 w-3" />
@@ -263,20 +263,20 @@ export default function LoginPage() {
 
           <div className="mt-12 flex justify-center gap-8 text-[9px] font-display font-bold text-epoch-primary/30 uppercase tracking-[0.3em]">
             <Link
-              href="#"
               className="hover:text-epoch-accent transition-colors"
+              href="#"
             >
               Soporte
             </Link>
             <Link
-              href="#"
               className="hover:text-epoch-accent transition-colors"
+              href="#"
             >
               Privacidad
             </Link>
             <Link
-              href="#"
               className="hover:text-epoch-accent transition-colors"
+              href="#"
             >
               Legales
             </Link>

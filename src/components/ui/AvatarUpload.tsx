@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
-import { useFileUpload } from "@/hooks/useFileUpload";
+import { Camera, Check, Loader2, Upload, User } from "lucide-react";
+import { useCallback, useRef, useState } from "react";
+
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Camera, Upload, X, Check, User, Loader2 } from "lucide-react";
+import { useFileUpload } from "@/hooks/useFileUpload";
 
 interface AvatarUploadProps {
   currentAvatarUrl?: string;
@@ -125,10 +126,10 @@ export default function AvatarUpload({
           ${hasError ? "border-red-500" : ""}
           ${isSuccess ? "border-admin-success" : ""}
         `}
-        onDrop={isEditing ? handleDrop : undefined}
-        onDragOver={isEditing ? handleDragOver : undefined}
-        onDragLeave={isEditing ? handleDragLeave : undefined}
         onClick={isEditing ? triggerFileInput : undefined}
+        onDragLeave={isEditing ? handleDragLeave : undefined}
+        onDragOver={isEditing ? handleDragOver : undefined}
+        onDrop={isEditing ? handleDrop : undefined}
       >
         {/* Background overlay during upload */}
         {isUploading && (
@@ -147,9 +148,9 @@ export default function AvatarUpload({
         {/* Avatar Image or Placeholder */}
         {currentImage ? (
           <img
-            src={currentImage}
             alt="Avatar"
             className="w-full h-full rounded-full object-cover"
+            src={currentImage}
           />
         ) : (
           <User
@@ -168,15 +169,15 @@ export default function AvatarUpload({
       {/* Upload Button - always visible when editing, below avatar */}
       {isEditing && (
         <Button
-          type="button"
-          size="sm"
-          variant="secondary"
           className="mt-3 w-full max-w-[140px] sm:max-w-[160px] h-9 sm:h-10 rounded-xl bg-epoch-accent hover:bg-epoch-accent/90 text-[#1A2B23] font-semibold text-xs sm:text-sm disabled:opacity-50 shrink-0"
+          disabled={isUploading}
+          size="sm"
+          type="button"
+          variant="secondary"
           onClick={(e) => {
             e.stopPropagation();
             triggerFileInput();
           }}
-          disabled={isUploading}
         >
           {isUploading ? (
             <Loader2
@@ -193,11 +194,11 @@ export default function AvatarUpload({
 
       {/* Hidden File Input */}
       <Input
+        accept="image/jpeg,image/png,image/gif,image/webp"
+        className="hidden"
         ref={fileInputRef}
         type="file"
-        accept="image/jpeg,image/png,image/gif,image/webp"
         onChange={handleInputChange}
-        className="hidden"
       />
 
       {/* Upload Instructions - always visible when editing */}
@@ -215,7 +216,7 @@ export default function AvatarUpload({
       {/* Upload Progress */}
       {isUploading && (
         <div className="mt-2 w-full">
-          <Progress value={uploadState.progress} className="h-2" />
+          <Progress className="h-2" value={uploadState.progress} />
           <p className="text-xs text-muted-foreground text-center mt-1">
             Subiendo... {uploadState.progress}%
           </p>

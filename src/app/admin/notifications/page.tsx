@@ -1,10 +1,24 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import {
+  AlertTriangle,
+  Bell,
+  Check,
+  CheckCheck,
+  ChevronRight,
+  Filter,
+  Info,
+  RefreshCw,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+
+import { BranchSelector } from "@/components/admin/BranchSelector";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Select,
   SelectContent,
@@ -12,30 +26,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { toast } from "sonner";
-import { cn } from "@/lib/utils";
-import {
-  Bell,
-  Check,
-  CheckCheck,
-  Filter,
-  AlertTriangle,
-  Info,
-  RefreshCw,
-  ChevronRight,
-} from "lucide-react";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useBranch } from "@/hooks/useBranch";
 import { useRoot } from "@/hooks/useRoot";
-import { BranchSelector } from "@/components/admin/BranchSelector";
-import { createClient } from "@/utils/supabase/client";
 import {
+  formatTimeSince,
   NOTIFICATION_ICONS,
   NOTIFICATION_TYPE_LABELS,
   PRIORITY_COLORS,
-  formatTimeSince,
 } from "@/lib/notifications/constants";
+import { cn } from "@/lib/utils";
+import { createClient } from "@/utils/supabase/client";
 
 interface AdminNotification {
   id: string;
@@ -47,7 +48,7 @@ interface AdminNotification {
   related_entity_id?: string;
   action_url?: string;
   action_label?: string;
-  metadata?: any;
+  metadata?: unknown;
   is_read: boolean;
   created_at: string;
 }
@@ -227,20 +228,20 @@ export default function NotificationsPage() {
           {isSuperAdmin && !isRoot && <BranchSelector />}
           {unreadCount > 0 && (
             <Button
-              onClick={markAllAsRead}
+              className="h-10 px-4 text-xs font-bold border-admin-accent-primary/20 hover:bg-admin-accent-primary hover:text-white transition-all rounded-xl"
               disabled={loading}
               variant="outline"
-              className="h-10 px-4 text-xs font-bold border-admin-accent-primary/20 hover:bg-admin-accent-primary hover:text-white transition-all rounded-xl"
+              onClick={markAllAsRead}
             >
               <CheckCheck className="h-4 w-4 mr-2" />
               Marcar todo como leído
             </Button>
           )}
           <Button
-            onClick={fetchNotifications}
+            className="h-10 px-4 text-xs font-bold bg-admin-bg-tertiary hover:bg-admin-border-primary transition-all rounded-xl"
             disabled={loading}
             variant="secondary"
-            className="h-10 px-4 text-xs font-bold bg-admin-bg-tertiary hover:bg-admin-border-primary transition-all rounded-xl"
+            onClick={fetchNotifications}
           >
             <RefreshCw
               className={cn("h-4 w-4 mr-2", loading && "animate-spin")}
@@ -276,8 +277,8 @@ export default function NotificationsPage() {
           },
         ].map((stat, idx) => (
           <Card
-            key={idx}
             className="border border-admin-border-primary/30 shadow-soft overflow-hidden group bg-white"
+            key={idx}
           >
             <CardContent className="p-0">
               <div className="flex items-center p-6 bg-white relative">
@@ -358,9 +359,9 @@ export default function NotificationsPage() {
                       {Object.entries(NOTIFICATION_TYPE_LABELS).map(
                         ([value, label]) => (
                           <SelectItem
+                            className="text-xs"
                             key={value}
                             value={value}
-                            className="text-xs"
                           >
                             {label}
                           </SelectItem>
@@ -388,18 +389,18 @@ export default function NotificationsPage() {
                     </SelectTrigger>
                     <SelectContent className="rounded-xl border-admin-border-primary">
                       <SelectItem value="all">Cualquier prioridad</SelectItem>
-                      <SelectItem value="low" className="text-xs">
+                      <SelectItem className="text-xs" value="low">
                         Baja (Info)
                       </SelectItem>
-                      <SelectItem value="medium" className="text-xs">
+                      <SelectItem className="text-xs" value="medium">
                         Media (Aviso)
                       </SelectItem>
-                      <SelectItem value="high" className="text-xs">
+                      <SelectItem className="text-xs" value="high">
                         Alta (Importante)
                       </SelectItem>
                       <SelectItem
-                        value="urgent"
                         className="text-xs text-admin-error font-bold"
+                        value="urgent"
                       >
                         Urgente (Crítico)
                       </SelectItem>
@@ -408,8 +409,8 @@ export default function NotificationsPage() {
                 </div>
 
                 <Button
-                  variant="ghost"
                   className="w-full text-[10px] font-bold text-admin-text-tertiary hover:text-admin-text-primary uppercase tracking-tighter"
+                  variant="ghost"
                   onClick={() =>
                     setFilters({ unreadOnly: false, type: "", priority: "" })
                   }
@@ -464,11 +465,11 @@ export default function NotificationsPage() {
 
                       return (
                         <div
-                          key={notification.id}
                           className={cn(
                             "group p-6 transition-all duration-300 relative hover:bg-admin-bg-tertiary/20",
                             isUnread ? "bg-admin-accent-primary/[0.02]" : "",
                           )}
+                          key={notification.id}
                           onClick={() =>
                             markAsRead(notification.id, notification.action_url)
                           }
@@ -538,8 +539,8 @@ export default function NotificationsPage() {
                               <div className="flex flex-wrap items-center justify-between gap-4 pt-4 border-t border-admin-border-primary/20">
                                 <div className="flex items-center gap-2">
                                   <Badge
-                                    variant="outline"
                                     className="text-[10px] font-bold bg-admin-bg-tertiary/30 border-none text-admin-text-tertiary px-2 py-1 rounded-lg"
+                                    variant="outline"
                                   >
                                     {NOTIFICATION_TYPE_LABELS[
                                       notification.type
@@ -548,9 +549,9 @@ export default function NotificationsPage() {
                                 </div>
                                 {notification.action_label && (
                                   <Button
-                                    variant="link"
-                                    size="sm"
                                     className="h-auto p-0 text-xs font-bold text-admin-accent-primary hover:no-underline group-hover:translate-x-1 transition-transform"
+                                    size="sm"
+                                    variant="link"
                                     onClick={(e) => {
                                       e.stopPropagation();
                                       markAsRead(
@@ -586,22 +587,22 @@ export default function NotificationsPage() {
                 </span>
                 <div className="flex gap-3">
                   <Button
-                    variant="outline"
-                    size="sm"
                     className="h-9 px-4 text-xs font-bold rounded-xl bg-admin-bg-secondary border-admin-border-primary/50 hover:bg-admin-accent-primary hover:text-white transition-all"
-                    onClick={() => setCurrentPage(Math.max(0, currentPage - 1))}
                     disabled={currentPage === 0 || loading}
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setCurrentPage(Math.max(0, currentPage - 1))}
                   >
                     Anterior
                   </Button>
                   <Button
-                    variant="outline"
-                    size="sm"
                     className="h-9 px-4 text-xs font-bold rounded-xl bg-admin-bg-secondary border-admin-border-primary/50 hover:bg-admin-accent-primary hover:text-white transition-all"
+                    disabled={currentPage >= totalPages - 1 || loading}
+                    size="sm"
+                    variant="outline"
                     onClick={() =>
                       setCurrentPage(Math.min(totalPages - 1, currentPage + 1))
                     }
-                    disabled={currentPage >= totalPages - 1 || loading}
                   >
                     Siguiente
                   </Button>

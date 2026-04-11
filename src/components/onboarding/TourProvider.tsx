@@ -1,13 +1,15 @@
 "use client";
 
-import { useEffect, useState, useCallback, useRef } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { useTour } from "@/hooks/useTour";
+import { useCallback, useEffect, useRef, useState } from "react";
+
 import { useRoot } from "@/hooks/useRoot";
-import { TourOverlay } from "./TourOverlay";
+import { useTour } from "@/hooks/useTour";
+import { TOUR_CONFIG, TOUR_STEPS } from "@/lib/onboarding/tour-config";
+
 import { TourCard } from "./TourCard";
+import { TourOverlay } from "./TourOverlay";
 import { TourProgress } from "./TourProgress";
-import { TOUR_STEPS, TOUR_CONFIG } from "@/lib/onboarding/tour-config";
 
 interface TourProviderProps {
   children: React.ReactNode;
@@ -299,17 +301,17 @@ export function TourProvider({ children }: TourProviderProps) {
         />
       )}
       {/* Mostrar overlay y tarjeta incluso si no se encuentra el elemento */}
-      <TourOverlay selector={currentStepData.selector} isActive={isActive}>
+      <TourOverlay isActive={isActive} selector={currentStepData.selector}>
         <TourCard
-          step={currentStepData}
           currentStep={currentStep}
+          elementBounds={elementBounds}
+          position={currentStepData.position}
+          step={currentStepData}
           totalSteps={totalSteps}
+          onComplete={completeTour}
           onNext={handleNext}
           onPrevious={handlePrevious}
           onSkip={handleSkip}
-          onComplete={completeTour}
-          position={currentStepData.position}
-          elementBounds={elementBounds}
         />
       </TourOverlay>
     </>

@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -11,6 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 
 export interface LensFamilyFormData {
   name: string;
@@ -79,7 +80,7 @@ export function LensFamilyBasicForm({
       .catch(() => setCategories([]));
   }, []);
 
-  const handleChange = (field: keyof LensFamilyFormData, value: any) => {
+  const handleChange = (field: keyof LensFamilyFormData, value: unknown) => {
     onChange({ ...data, [field]: value });
   };
 
@@ -89,11 +90,11 @@ export function LensFamilyBasicForm({
         <div className="space-y-2">
           <Label htmlFor="name">Nombre de la Familia *</Label>
           <Input
+            className={errors.name ? "border-red-500" : ""}
             id="name"
+            placeholder="Ej: Varilux Comfort"
             value={data.name}
             onChange={(e) => handleChange("name", e.target.value)}
-            placeholder="Ej: Varilux Comfort"
-            className={errors.name ? "border-red-500" : ""}
           />
           {errors.name && <p className="text-xs text-red-500">{errors.name}</p>}
         </div>
@@ -102,9 +103,9 @@ export function LensFamilyBasicForm({
           <Label htmlFor="brand">Marca</Label>
           <Input
             id="brand"
+            placeholder="Ej: Essilor"
             value={data.brand}
             onChange={(e) => handleChange("brand", e.target.value)}
-            placeholder="Ej: Essilor"
           />
         </div>
       </div>
@@ -183,22 +184,22 @@ export function LensFamilyBasicForm({
         <Label htmlFor="description">Descripción</Label>
         <Textarea
           id="description"
-          value={data.description}
-          onChange={(e) => handleChange("description", e.target.value)}
           placeholder="Descripción detallada de la familia de lentes..."
           rows={3}
+          value={data.description}
+          onChange={(e) => handleChange("description", e.target.value)}
         />
       </div>
 
       <div className="flex items-center space-x-2">
         <input
-          type="checkbox"
-          id="is_active_family"
           checked={data.is_active}
-          onChange={(e) => handleChange("is_active", e.target.checked)}
           className="h-4 w-4 rounded border-gray-300"
+          id="is_active_family"
+          type="checkbox"
+          onChange={(e) => handleChange("is_active", e.target.checked)}
         />
-        <Label htmlFor="is_active_family" className="cursor-pointer">
+        <Label className="cursor-pointer" htmlFor="is_active_family">
           Familia Activa
         </Label>
       </div>

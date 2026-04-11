@@ -3,8 +3,9 @@
  * Global test configuration and utilities
  */
 
-import { vi } from "vitest";
 import "@testing-library/jest-dom";
+
+import { vi } from "vitest";
 
 // Mock environment variables
 process.env.NEXT_PUBLIC_SUPABASE_URL = "http://localhost:54321";
@@ -34,7 +35,7 @@ console.warn = vi.fn();
 console.error = vi.fn();
 
 // Global test utilities
-(global as any).testUtils = {
+(global as unknown).testUtils = {
   // Create mock user
   createMockUser: (overrides = {}) => ({
     id: "test-user-id",
@@ -52,7 +53,7 @@ console.error = vi.fn();
   }),
 
   // Create mock response
-  createMockResponse: (data: any, status = 200) => ({
+  createMockResponse: (data: unknown, status = 200) => ({
     ok: status >= 200 && status < 300,
     status,
     json: () => Promise.resolve(data),

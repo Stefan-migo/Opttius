@@ -6,6 +6,7 @@
  */
 
 import { createClient } from "@supabase/supabase-js";
+
 import type { Database } from "@/types/database";
 
 /**
@@ -14,8 +15,7 @@ import type { Database } from "@/types/database";
 function createTestServiceRoleClient() {
   const supabaseUrl =
     process.env.NEXT_PUBLIC_SUPABASE_URL || "http://127.0.0.1:54321";
-  const serviceRoleKey =
-    process.env.SUPABASE_SERVICE_ROLE_KEY || "";
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
 
   return createClient(supabaseUrl, serviceRoleKey, {
     auth: {
@@ -28,12 +28,12 @@ function createTestServiceRoleClient() {
 type Tables<T extends keyof Database["public"]["Tables"]> =
   Database["public"]["Tables"][T]["Row"];
 // Use any for tables that might not be in the Database type yet
-type Organization = any; // Tables<"organizations">;
-type AdminUser = any; // Tables<"admin_users">;
-type Branch = any; // Tables<"branches">;
-type Customer = any; // Tables<"customers">;
-type Product = any; // Tables<"products">;
-type Order = any; // Tables<"orders">;
+type Organization = unknown; // Tables<"organizations">;
+type AdminUser = unknown; // Tables<"admin_users">;
+type Branch = unknown; // Tables<"branches">;
+type Customer = unknown; // Tables<"customers">;
+type Product = unknown; // Tables<"products">;
+type Order = unknown; // Tables<"orders">;
 
 export interface TestOrganization {
   id: string;
@@ -54,7 +54,7 @@ export interface TestUser {
       expires_at?: number;
       token_type?: string;
     };
-    user?: any;
+    user?: unknown;
   };
 }
 
@@ -88,7 +88,7 @@ export async function isMultiTenancyAvailable(): Promise<boolean> {
       `[Test Setup] Multi-tenancy infrastructure available: ${!error}`,
     );
     return !error;
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.log(
       `[Test Setup] Exception checking multi-tenancy: ${err?.message}`,
     );
@@ -490,7 +490,7 @@ export async function makeAuthenticatedRequest(
       expires_at?: number;
       token_type?: string;
     };
-    user?: any;
+    user?: unknown;
   },
 ): Promise<Response> {
   const headers = new Headers(options.headers);

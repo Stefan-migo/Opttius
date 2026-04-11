@@ -4,9 +4,10 @@
  * @module __tests__/integration/api/webhooks/nowpayments.test
  */
 
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { POST, GET } from "@/app/api/webhooks/nowpayments/route";
 import { NextRequest } from "next/server";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+import { GET, POST } from "@/app/api/webhooks/nowpayments/route";
 
 // Mock dependencies
 vi.mock("@/lib/payments", () => ({
@@ -86,7 +87,7 @@ describe("NOWPayments Webhook API", () => {
         processWebhookEvent: vi.fn(async () => {
           throw new Error("Invalid signature");
         }),
-      } as any);
+      } as unknown);
 
       const request = new NextRequest(
         "http://localhost:3000/api/webhooks/nowpayments",

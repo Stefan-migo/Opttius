@@ -42,7 +42,7 @@ export const appLogger = {
    * Debug level - detailed information for debugging
    * Only shown in development
    */
-  debug: (message: string, data?: any) => {
+  debug: (message: string, data?: unknown) => {
     if (data) {
       logger.debug(data, message);
     } else {
@@ -53,7 +53,7 @@ export const appLogger = {
   /**
    * Info level - general informational messages
    */
-  info: (message: string, data?: any) => {
+  info: (message: string, data?: unknown) => {
     if (data) {
       logger.info(data, message);
     } else {
@@ -64,7 +64,7 @@ export const appLogger = {
   /**
    * Warn level - warning messages
    */
-  warn: (message: string, data?: any) => {
+  warn: (message: string, data?: unknown) => {
     if (data) {
       logger.warn(data, message);
     } else {
@@ -76,7 +76,7 @@ export const appLogger = {
    * Error level - error messages
    * Accepts Error objects or plain messages
    */
-  error: (message: string, errorOrData?: any, data?: any) => {
+  error: (message: string, errorOrData?: unknown, data?: unknown) => {
     // Handle case where error is passed as second argument
     const error = errorOrData instanceof Error ? errorOrData : undefined;
     const errorData = errorOrData instanceof Error ? data : errorOrData;

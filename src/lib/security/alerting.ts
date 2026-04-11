@@ -1,15 +1,17 @@
 import axios from "axios";
+
 import { appLogger as logger } from "@/lib/logger";
+
 import {
+  AlertChannel,
+  EmailAlertConfig,
+  generateAlertId,
+  PagerDutyAlertConfig,
   SecurityAlert,
   SecurityEvent,
   SecuritySeverity,
-  AlertChannel,
-  EmailAlertConfig,
   SlackAlertConfig,
-  PagerDutyAlertConfig,
   WebhookAlertConfig,
-  generateAlertId,
 } from "./events";
 
 /**
@@ -24,7 +26,7 @@ import {
 export class SecurityAlerting {
   private channels: AlertChannel[] = [];
   private alertHistory: SecurityAlert[] = [];
-  private transporter: any | null = null;
+  private transporter: unknown | null = null;
   private readonly ALERT_HISTORY_LIMIT = 1000;
   private readonly DEDUPLICATION_WINDOW = 5 * 60 * 1000; // 5 minutes
 
@@ -580,7 +582,7 @@ export class SecurityAlerting {
     // In a real implementation, this would be configured with actual SMTP settings
     // For now, we'll create a mock transporter for testing
     this.transporter = {
-      sendMail: async (mailOptions: any) => {
+      sendMail: async (mailOptions: unknown) => {
         logger.debug("Mock email sent", {
           to: mailOptions.to,
           subject: mailOptions.subject,

@@ -1,7 +1,16 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { Cpu, DollarSign, RefreshCw, Zap } from "lucide-react";
+import { useEffect, useState } from "react";
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -10,14 +19,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Cpu, DollarSign, RefreshCw, Zap } from "lucide-react";
 
 interface UsageSummary {
   totalPromptTokens: number;
@@ -67,7 +68,7 @@ export function AIUsageCard() {
       }
       const json = await res.json();
       setData(json);
-    } catch (e: any) {
+    } catch (e: unknown) {
       setError(e?.message || "Error loading AI usage");
     } finally {
       setLoading(false);

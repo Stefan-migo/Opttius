@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/utils/supabase/server";
+
+import {
+  createApiErrorResponse,
+  createApiSuccessResponse,
+} from "@/lib/api/response";
 import { appLogger as logger } from "@/lib/logger";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
-import {
-  createApiSuccessResponse,
-  createApiErrorResponse,
-} from "@/lib/api/response";
+import { createClient } from "@/utils/supabase/server";
 
 export const dynamic = "force-dynamic";
 
@@ -72,8 +73,15 @@ export async function GET(
       )
       .eq("invoice_id", invoiceId);
 
-    const items = (invoiceBalances ?? []).map((ib: any) => {
-      const bal = ib.agreement_institutional_balances;
+    const items = (invoiceBalances ?? []).map((ib) => {
+      const bal = ib.agreement_institutional_balances as {
+        orders?: {
+          order_number: string;
+          customer_name: string;
+          created_at: string;
+        } | null;
+        agreement_purchase_orders?: { oc_number: string } | null;
+      } | null;
       const order = bal?.orders;
       const po = bal?.agreement_purchase_orders;
       return {

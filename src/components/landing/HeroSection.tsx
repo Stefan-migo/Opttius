@@ -1,9 +1,10 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
 import { ArrowRight, Sparkles } from "lucide-react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
+
+import { Button } from "@/components/ui/button";
 
 export function HeroSection() {
   const router = useRouter();
@@ -22,14 +23,14 @@ export function HeroSection() {
       {/* Background Image with Overlay */}
       <div className="absolute inset-0 z-0 scale-105 animate-pulse-slow">
         <Image
-          src="/images/landing/Hero.webp"
-          alt="Fondo con equipamiento de examen visual y lentes - Opttius, software de gestión para ópticas"
           fill
-          className="object-cover opacity-40 mix-blend-luminosity grayscale"
           priority
+          alt="Fondo con equipamiento de examen visual y lentes - Opttius, software de gestión para ópticas"
+          className="object-cover opacity-40 mix-blend-luminosity grayscale"
+          src="/images/landing/Hero.webp"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-epoch-primary/90 via-epoch-primary/60 to-epoch-surface"></div>
-        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10"></div>
+        <div className="absolute inset-0 bg-gradient-to-b from-epoch-primary/90 via-epoch-primary/60 to-epoch-surface" />
+        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10" />
       </div>
 
       <div className="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 sm:pt-32 pb-28 sm:pb-48 md:pb-72 text-center">
@@ -55,16 +56,16 @@ export function HeroSection() {
 
           <div className="flex flex-col sm:flex-row gap-4 sm:gap-8 justify-center items-center animate-in fade-in slide-in-from-bottom-20 duration-1000 delay-600">
             <Button
-              onClick={handleSolicitarDemoClick}
-              size="lg"
               className="bg-epoch-accent hover:bg-white text-epoch-surface rounded-xl h-16 px-16 text-xs font-sans font-semibold tracking-[0.2em] uppercase transition-all duration-500 shadow-2xl"
+              size="lg"
+              onClick={handleSolicitarDemoClick}
             >
               Solicitar Demo
               <ArrowRight className="ml-3 h-4 w-4" />
             </Button>
             <button
-              onClick={handleExploreClick}
               className="text-white/60 hover:text-white font-sans text-lg tracking-wide transition-all duration-300 border-b border-white/20 hover:border-white pb-1"
+              onClick={handleExploreClick}
             >
               Explorar la plataforma
             </button>

@@ -1,10 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { Loader2, Plus, Search, Trash2 } from "lucide-react";
+import { useEffect, useState } from "react";
+
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import FormField, { FormFieldActions } from "@/components/ui/FormField";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -12,24 +15,22 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import FormField, { FormFieldActions } from "@/components/ui/FormField";
-import { Plus, Trash2, Search, User, Loader2 } from "lucide-react";
-import { extractDataFromResponse } from "@/lib/api/response-helpers";
-import { useFormSimple } from "@/hooks/useForm";
+import { Textarea } from "@/components/ui/textarea";
 import { useBranch } from "@/hooks/useBranch";
-import { getBranchHeader } from "@/lib/utils/branch";
+import { useFormSimple } from "@/hooks/useForm";
+import { extractDataFromResponse } from "@/lib/api/response-helpers";
 import {
-  success,
-  error as notifyError,
-} from "@/lib/services/notificationService";
-import {
-  handleApiError,
   getUserFriendlyMessage,
+  handleApiError,
 } from "@/lib/services/errorService";
+import {
+  error as notifyError,
+  success,
+} from "@/lib/services/notificationService";
+import { getBranchHeader } from "@/lib/utils/branch";
 
 interface CreateManualOrderFormProps {
-  onSubmit: (orderData: any) => void;
+  onSubmit: (orderData: unknown) => void;
   onCancel: () => void;
 }
 
@@ -102,10 +103,10 @@ export default function CreateManualOrderForm({
   );
 
   const [customerSearch, setCustomerSearch] = useState("");
-  const [customerResults, setCustomerResults] = useState<any[]>([]);
+  const [customerResults, setCustomerResults] = useState<unknown[]>([]);
   const [searchingCustomers, setSearchingCustomers] = useState(false);
   const [productSearch, setProductSearch] = useState("");
-  const [productResults, setProductResults] = useState<any[]>([]);
+  const [productResults, setProductResults] = useState<unknown[]>([]);
   const [searchingProducts, setSearchingProducts] = useState(false);
   const [openCustomerSearch, setOpenCustomerSearch] = useState(false);
   const [openProductSearch, setOpenProductSearch] = useState(false);
@@ -191,7 +192,7 @@ export default function CreateManualOrderForm({
     });
   };
 
-  const loadCustomerData = (customer: any) => {
+  const loadCustomerData = (customer: unknown) => {
     form.setFieldValues({
       email: customer.email,
       shipping: {
@@ -208,7 +209,7 @@ export default function CreateManualOrderForm({
     setOpenCustomerSearch(false);
   };
 
-  const addProductToOrder = (product: any) => {
+  const addProductToOrder = (product: unknown) => {
     form.setValue("items", [
       ...form.getValues().items,
       {
@@ -233,17 +234,17 @@ export default function CreateManualOrderForm({
   const removeItem = (index: number) => {
     form.setValue(
       "items",
-      form.getValues().items.filter((_: any, i: number) => i !== index),
+      form.getValues().items.filter((_: unknown, i: number) => i !== index),
     );
     calculateTotal();
   };
 
-  const updateItem = (index: number, field: string, value: any) => {
+  const updateItem = (index: number, field: string, value: unknown) => {
     form.setValue(
       "items",
       form
         .getValues()
-        .items.map((item: any, i: number) =>
+        .items.map((item: unknown, i: number) =>
           i === index ? { ...item, [field]: value } : item,
         ),
     );
@@ -254,7 +255,7 @@ export default function CreateManualOrderForm({
     const itemsTotal = form
       .getValues()
       .items.reduce(
-        (sum: number, item: any) => sum + item.quantity * item.unit_price,
+        (sum: number, item: unknown) => sum + item.quantity * item.unit_price,
         0,
       );
     form.setFieldValues({
@@ -264,7 +265,7 @@ export default function CreateManualOrderForm({
   };
 
   return (
-    <form onSubmit={form.handleSubmit} className="space-y-6">
+    <form className="space-y-6" onSubmit={form.handleSubmit}>
       {/* Customer Information */}
       <Card>
         <CardHeader>
@@ -279,13 +280,13 @@ export default function CreateManualOrderForm({
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
               <Input
+                className="pl-10"
                 placeholder="Buscar por email o nombre..."
                 value={customerSearch}
                 onChange={(e) => {
                   setCustomerSearch(e.target.value);
                   setOpenCustomerSearch(true);
                 }}
-                className="pl-10"
               />
               {searchingCustomers && (
                 <Loader2 className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 animate-spin text-gray-400" />
@@ -297,10 +298,10 @@ export default function CreateManualOrderForm({
               <div className="absolute z-50 w-full mt-1 bg-white border rounded-md shadow-lg max-h-60 overflow-y-auto">
                 {customerResults.map((customer) => (
                   <button
+                    className="w-full p-3 text-left hover:bg-gray-100 border-b last:border-b-0"
                     key={customer.id}
                     type="button"
                     onClick={() => loadCustomerData(customer)}
-                    className="w-full p-3 text-left hover:bg-gray-100 border-b last:border-b-0"
                   >
                     <div className="font-medium">{customer.name}</div>
                     <div className="text-sm text-gray-600">
@@ -318,13 +319,13 @@ export default function CreateManualOrderForm({
             )}
           </div>
 
-          <FormField label="Email del Cliente" required>
+          <FormField required label="Email del Cliente">
             <Input
+              required
               id="email"
               type="email"
               value={form.values.email}
               onChange={(e) => form.setValue("email", e.target.value)}
-              required
             />
           </FormField>
         </CardContent>
@@ -394,14 +395,14 @@ export default function CreateManualOrderForm({
           </FormField>
 
           <FormField
-            label="Notas del Pedido"
             description="Notas adicionales sobre el pedido"
+            label="Notas del Pedido"
           >
             <Textarea
               id="notes"
+              placeholder="Notas adicionales sobre el pedido..."
               value={form.values.notes}
               onChange={(e) => form.setValue("notes", e.target.value)}
-              placeholder="Notas adicionales sobre el pedido..."
             />
           </FormField>
         </CardContent>
@@ -496,13 +497,13 @@ export default function CreateManualOrderForm({
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
               <Input
+                className="pl-10"
                 placeholder="Buscar productos por nombre..."
                 value={productSearch}
                 onChange={(e) => {
                   setProductSearch(e.target.value);
                   setOpenProductSearch(true);
                 }}
-                className="pl-10"
               />
               {searchingProducts && (
                 <Loader2 className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 animate-spin text-gray-400" />
@@ -514,10 +515,10 @@ export default function CreateManualOrderForm({
               <div className="absolute z-50 w-full mt-1 bg-white border rounded-md shadow-lg max-h-60 overflow-y-auto">
                 {productResults.map((product) => (
                   <button
+                    className="w-full p-3 text-left hover:bg-gray-100 border-b last:border-b-0"
                     key={product.id}
                     type="button"
                     onClick={() => addProductToOrder(product)}
-                    className="w-full p-3 text-left hover:bg-gray-100 border-b last:border-b-0"
                   >
                     <div className="flex justify-between items-start">
                       <div>
@@ -539,24 +540,24 @@ export default function CreateManualOrderForm({
           {/* Selected Products */}
           {(form.values.items ?? []).map((item: OrderItem, index: number) => (
             <div
-              key={index}
               className="flex gap-4 items-end p-3 bg-gray-50 rounded-lg"
+              key={index}
             >
               <div className="flex-1">
                 <Label>Nombre del Producto</Label>
                 <Input
+                  placeholder="Ej: Crema Hidratante Rosa Mosqueta"
                   value={item.product_name}
                   onChange={(e) =>
                     updateItem(index, "product_name", e.target.value)
                   }
-                  placeholder="Ej: Crema Hidratante Rosa Mosqueta"
                 />
               </div>
               <div className="w-24">
                 <Label>Cantidad</Label>
                 <Input
-                  type="number"
                   min="1"
+                  type="number"
                   value={item.quantity}
                   onChange={(e) => {
                     updateItem(
@@ -570,9 +571,9 @@ export default function CreateManualOrderForm({
               <div className="w-32">
                 <Label>Precio Unitario</Label>
                 <Input
-                  type="number"
                   min="0"
                   step="0.01"
+                  type="number"
                   value={item.unit_price}
                   onChange={(e) => {
                     updateItem(
@@ -584,9 +585,9 @@ export default function CreateManualOrderForm({
                 />
               </div>
               <Button
+                size="icon"
                 type="button"
                 variant="outline"
-                size="icon"
                 onClick={() => removeItem(index)}
               >
                 <Trash2 className="h-4 w-4" />
@@ -595,10 +596,10 @@ export default function CreateManualOrderForm({
           ))}
 
           <Button
+            className="w-full"
             type="button"
             variant="outline"
             onClick={addItem}
-            className="w-full"
           >
             <Plus className="h-4 w-4 mr-2" />
             Agregar Producto Manual
@@ -623,7 +624,7 @@ export default function CreateManualOrderForm({
         <Button type="button" variant="outline" onClick={onCancel}>
           Cancelar
         </Button>
-        <Button type="submit" disabled={form.isSubmitting}>
+        <Button disabled={form.isSubmitting} type="submit">
           {form.isSubmitting ? "Creando..." : "Crear Pedido"}
         </Button>
       </FormFieldActions>

@@ -1,16 +1,17 @@
-import { useState, useCallback, useRef, useEffect } from "react";
-import { useChatSession } from "@/hooks/useChatSession";
-import { useChatConfig } from "@/hooks/useChatConfig";
+import { useCallback, useEffect, useRef, useState } from "react";
+
 import { useBranch } from "@/hooks/useBranch";
+import { useChatConfig } from "@/hooks/useChatConfig";
+import { useChatSession } from "@/hooks/useChatSession";
 
 interface Message {
   id: string;
   role: "user" | "assistant" | "system" | "tool";
   content: string;
   timestamp?: string;
-  toolCalls?: any;
-  toolResults?: any;
-  metadata?: any;
+  toolCalls?: unknown;
+  toolResults?: unknown;
+  metadata?: unknown;
 }
 
 interface UseChatMessagesReturn {
@@ -52,7 +53,7 @@ export function useChatMessages(currentSection: string | null) {
       if (response.ok) {
         const data = await response.json();
         // Map messages and ensure no duplicates by using id as key
-        const loadedMessages = (data.messages || []).map((msg: any) => ({
+        const loadedMessages = (data.messages || []).map((msg: unknown) => ({
           id: msg.id,
           role: msg.role,
           content: msg.content,
@@ -64,7 +65,7 @@ export function useChatMessages(currentSection: string | null) {
 
         // Remove duplicates by id before setting
         const uniqueMessages = Array.from(
-          new Map(loadedMessages.map((msg: any) => [msg.id, msg])).values(),
+          new Map(loadedMessages.map((msg: unknown) => [msg.id, msg])).values(),
         ) as Message[];
 
         setMessages(uniqueMessages);
@@ -118,13 +119,13 @@ export function useChatMessages(currentSection: string | null) {
             provider,
             model.trim(),
             undefined,
-            apiConfig as any,
+            apiConfig as unknown,
           );
           if (!sessionToUse) {
             console.error("Failed to create session - no session returned");
             return;
           }
-        } catch (error: any) {
+        } catch (error: unknown) {
           console.error("Error creating session:", error);
           return;
         }
@@ -278,7 +279,7 @@ export function useChatMessages(currentSection: string | null) {
             }
           }
         }
-      } catch (error: any) {
+      } catch (error: unknown) {
         if (error.name === "AbortError") {
           // User stopped the response - finalize with partial content and re-enable input
           setMessages((prev) => {

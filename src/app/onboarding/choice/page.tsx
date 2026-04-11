@@ -1,8 +1,19 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import {
+  ArrowRight,
+  Building2,
+  CheckCircle2,
+  Loader2,
+  Sparkles,
+} from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useAuthContext } from "@/contexts/AuthContext";
+import { useEffect, useState } from "react";
+
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -11,17 +22,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
-import {
-  Loader2,
-  Sparkles,
-  ArrowRight,
-  CheckCircle2,
-  Building2,
-} from "lucide-react";
-import Image from "next/image";
-import Link from "next/link";
+import { useAuthContext } from "@/contexts/AuthContext";
 
 export default function OnboardingChoicePage() {
   const router = useRouter();
@@ -92,7 +93,7 @@ export default function OnboardingChoicePage() {
 
       // Redirigir al admin con organización demo
       router.push("/admin");
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(err.message || "Error al asignar organización demo");
       setIsLoading(false);
     }
@@ -137,11 +138,11 @@ export default function OnboardingChoicePage() {
         <div className="text-center mb-16 animate-in fade-in slide-in-from-bottom-4 duration-1000">
           <div className="inline-flex items-center justify-center mb-10 relative group">
             <Image
-              src="/OpttiusTextCentered-on-light.svg"
               alt="Opttius"
-              width={240}
-              height={53}
               className="h-14 sm:h-16 md:h-20 w-auto max-w-[240px] relative z-10 transition-transform duration-500 group-hover:scale-105 object-contain"
+              height={53}
+              src="/OpttiusTextCentered-on-light.svg"
+              width={240}
             />
           </div>
           <h1 className="text-5xl md:text-6xl font-display font-bold text-epoch-primary mb-4 tracking-tight uppercase">
@@ -157,8 +158,8 @@ export default function OnboardingChoicePage() {
 
         {error && (
           <Alert
-            variant="destructive"
             className="mb-8 animate-in zoom-in-95 duration-300"
+            variant="destructive"
           >
             <AlertDescription>{error}</AlertDescription>
           </Alert>
@@ -168,13 +169,13 @@ export default function OnboardingChoicePage() {
         <div className="grid md:grid-cols-2 gap-10 h-full">
           {/* Demo Option */}
           <Card
-            variant="interactive"
             className="flex flex-col h-full group bg-white border border-epoch-primary/5 rounded-xl shadow-premium hover:shadow-premium-xl hover:border-epoch-accent/30 transition-all duration-500 overflow-hidden"
+            variant="interactive"
           >
             <div className="h-2 w-full bg-epoch-primary group-hover:bg-epoch-accent transition-colors duration-500" />
             <CardHeader
-              padding="lg"
               className="border-b border-epoch-primary/5"
+              padding="lg"
             >
               <div className="flex items-center justify-between mb-6">
                 <div className="p-4 bg-epoch-primary/5 rounded-xl group-hover:bg-epoch-primary group-hover:text-white transition-all duration-500 shadow-sm">
@@ -185,14 +186,14 @@ export default function OnboardingChoicePage() {
                 </Badge>
               </div>
               <CardTitle
-                size="lg"
                 className="text-2xl font-display font-bold text-epoch-primary tracking-tight uppercase"
+                size="lg"
               >
                 Entorno de Prueba
               </CardTitle>
               <CardDescription
-                size="lg"
                 className="mt-4 font-serif italic text-epoch-primary/60 text-[15px] leading-relaxed"
+                size="lg"
               >
                 Acceda al sistema con una arquitectura pre-configurada. Ideal
                 para conocer la suite técnica de Opttius en segundos.
@@ -206,7 +207,7 @@ export default function OnboardingChoicePage() {
                   "Flujo integrado de ventas y agenda",
                   "Sin compromiso, migre cuando esté listo",
                 ].map((item, i) => (
-                  <div key={i} className="flex items-start gap-4">
+                  <div className="flex items-start gap-4" key={i}>
                     <div className="mt-1 bg-epoch-accent/10 rounded-full p-1 border border-epoch-accent/20">
                       <CheckCircle2 className="h-3 w-3 text-epoch-accent" />
                     </div>
@@ -218,10 +219,10 @@ export default function OnboardingChoicePage() {
               </div>
 
               <Button
-                onClick={handleDemoChoice}
+                className="w-full bg-epoch-primary hover:bg-epoch-surface text-white rounded-xl font-display font-bold uppercase text-[10px] tracking-[0.3em] h-14 transition-all shadow-xl group/btn overflow-hidden relative"
                 disabled={isLoading}
                 size="lg"
-                className="w-full bg-epoch-primary hover:bg-epoch-surface text-white rounded-xl font-display font-bold uppercase text-[10px] tracking-[0.3em] h-14 transition-all shadow-xl group/btn overflow-hidden relative"
+                onClick={handleDemoChoice}
               >
                 <span className="relative z-10 flex items-center justify-center">
                   {isLoading ? (
@@ -243,13 +244,13 @@ export default function OnboardingChoicePage() {
 
           {/* Real Option */}
           <Card
-            variant="interactive"
             className="flex flex-col h-full group bg-white border border-epoch-primary/5 rounded-xl shadow-premium hover:shadow-premium-xl hover:border-epoch-accent/30 transition-all duration-500 overflow-hidden"
+            variant="interactive"
           >
             <div className="h-2 w-full bg-epoch-accent" />
             <CardHeader
-              padding="lg"
               className="border-b border-epoch-primary/5"
+              padding="lg"
             >
               <div className="flex items-center justify-between mb-6">
                 <div className="p-4 bg-epoch-accent/5 rounded-xl group-hover:bg-epoch-accent group-hover:text-white transition-all duration-500 shadow-sm border border-epoch-accent/10">
@@ -260,14 +261,14 @@ export default function OnboardingChoicePage() {
                 </Badge>
               </div>
               <CardTitle
-                size="lg"
                 className="text-2xl font-display font-bold text-epoch-primary tracking-tight uppercase"
+                size="lg"
               >
                 Configurar mi Óptica
               </CardTitle>
               <CardDescription
-                size="lg"
                 className="mt-4 font-serif italic text-epoch-primary/60 text-[15px] leading-relaxed"
+                size="lg"
               >
                 Inicie hoy mismo con su propia infraestructura digital.
                 Configure su marca, sucursales y equipo de trabajo profesional.
@@ -281,7 +282,7 @@ export default function OnboardingChoicePage() {
                   "Personalización total de flujos de trabajo",
                   "Arquitectura escalable para crecimiento",
                 ].map((item, i) => (
-                  <div key={i} className="flex items-start gap-4">
+                  <div className="flex items-start gap-4" key={i}>
                     <div className="mt-1 bg-epoch-accent/10 rounded-full p-1 border border-epoch-accent/20">
                       <CheckCircle2 className="h-3 w-3 text-epoch-accent" />
                     </div>
@@ -293,10 +294,10 @@ export default function OnboardingChoicePage() {
               </div>
 
               <Button
-                onClick={handleRealChoice}
+                className="w-full bg-epoch-primary hover:bg-epoch-surface text-white rounded-xl font-display font-bold uppercase text-[10px] tracking-[0.3em] h-14 transition-all shadow-xl group/btn overflow-hidden relative"
                 disabled={isLoading}
                 size="lg"
-                className="w-full bg-epoch-primary hover:bg-epoch-surface text-white rounded-xl font-display font-bold uppercase text-[10px] tracking-[0.3em] h-14 transition-all shadow-xl group/btn overflow-hidden relative"
+                onClick={handleRealChoice}
               >
                 <span className="relative z-10 flex items-center justify-center">
                   INICIAR PROTOCOLO
@@ -313,8 +314,8 @@ export default function OnboardingChoicePage() {
           <p className="text-[10px] font-display font-bold text-epoch-primary/40 uppercase tracking-[0.3em] flex items-center justify-center gap-3">
             ¿Requiere asistencia especializada?{" "}
             <Link
-              href="/support"
               className="text-epoch-accent hover:text-epoch-primary transition-colors hover:underline underline-offset-4"
+              href="/support"
             >
               Contactar Soporte de Élite
             </Link>

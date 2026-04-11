@@ -1,32 +1,48 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import {
+  ArrowLeft,
+  Calendar,
+  CheckCircle2,
+  Clock,
+  FileText,
+  LayoutGrid,
+  List,
+  Loader2,
+  Target,
+  Trash2,
+  TrendingUp,
+  Users,
+  Video,
+  XCircle,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { LeadKanbanBoard } from "@/components/admin/saas-management/leads/LeadKanbanBoard";
 import {
-  Loader2,
-  ArrowLeft,
-  CheckCircle2,
-  XCircle,
-  Users,
-  Clock,
-  Mail,
-  TrendingUp,
-  Calendar,
-  Video,
-  FileText,
-  Target,
-  Trash2,
-} from "lucide-react";
-import { toast } from "sonner";
+  LeadDetailPanel,
+  type LeadDetail,
+  type LeadDetailPanelProps,
+} from "@/components/admin/saas-management/leads/LeadDetailPanel";
+import {
+  LeadEmailModal,
+  type LeadEmailModalProps,
+} from "@/components/admin/saas-management/leads/LeadEmailModal";
+import {
+  LeadAIGeneratorModal,
+  type LeadAIGeneratorModalProps,
+} from "@/components/admin/saas-management/leads/LeadAIGeneratorModal";
 
 type FunnelStage =
   | "pending"
@@ -62,6 +78,12 @@ interface DemoRequest {
   notes: string | null;
   last_contact_at: string | null;
   lost_reason: string | null;
+  lead_score?: number;
+  priority_level?: string;
+  score_last_calculated_at?: string;
+  assigned_to?: string;
+  next_followup_at?: string;
+  first_contact_at?: string;
 }
 
 interface Stats {
@@ -117,6 +139,7 @@ export default function NewUsersFlowPage() {
   const [tab, setTab] = useState<"activos" | "convertidos" | "perdidos">(
     "activos",
   );
+  const [viewMode, setViewMode] = useState<"kanban" | "table">("kanban");
   const [selectedRequest, setSelectedRequest] = useState<DemoRequest | null>(
     null,
   );
@@ -132,6 +155,9 @@ export default function NewUsersFlowPage() {
   const [requestToDelete, setRequestToDelete] = useState<DemoRequest | null>(
     null,
   );
+  const [detailPanelOpen, setDetailPanelOpen] = useState(false);
+  const [emailModalOpen, setEmailModalOpen] = useState(false);
+  const [aiModalOpen, setAiModalOpen] = useState(false);
 
   const fetchData = async () => {
     setLoading(true);
@@ -278,7 +304,20 @@ export default function NewUsersFlowPage() {
     }
   };
 
+  // Handler for Kanban quick stage changes
+  const handleKanbanStageChange = async (
+    leadId: string,
+    newStage: FunnelStage,
+  ) => {
+    await handleFunnelUpdate(leadId, newStage);
+  };
+
   const openLeadModal = (r: DemoRequest) => {
+    setSelectedRequest(r);
+    setDetailPanelOpen(true);
+  };
+
+  const openLegacyModal = (r: DemoRequest) => {
     setSelectedRequest(r);
     setFunnelForm({
       meeting_url: r.meeting_url ?? "",
@@ -290,6 +329,44 @@ export default function NewUsersFlowPage() {
       lost_reason: r.lost_reason ?? "",
     });
     setFunnelModalOpen(true);
+  };
+
+  // Handlers for email modals
+  const handleSendEmail = async (
+    leadId: string,
+    subject: string,
+    body: string,
+  ) => {
+    const res = await fetch(
+      `/api/admin/saas-management/leads/${leadId}/email/send`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ subject, body }),
+      },
+    );
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.error || "Error al enviar");
+    }
+    toast.success("Email enviado correctamente");
+    fetchData();
+  };
+
+  const handleGenerateAIEmail = async (leadId: string, prompt: string) => {
+    const res = await fetch(
+      `/api/admin/saas-management/leads/${leadId}/email/generate`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt }),
+      },
+    );
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.error || "Error al generar");
+    }
+    return { subject: data.subject, body: data.body };
   };
 
   const formatDate = (s: string | null) => {
@@ -321,21 +398,21 @@ export default function NewUsersFlowPage() {
   };
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="min-h-screen bg-[#0D1117] space-y-6 p-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-display font-bold text-epoch-primary tracking-tight">
-            Flujos de Nuevos Usuarios
+          <h1 className="text-2xl font-display font-bold text-white tracking-tight">
+            Pipeline de Leads
           </h1>
-          <p className="text-muted-foreground mt-1">
-            Solicitudes de demo y acceso para ópticas conocidas
+          <p className="text-white/50 mt-1">
+            Gestiona tus leads y sigue el funnel de ventas
           </p>
         </div>
         <Button
-          variant="outline"
           size="icon"
-          onClick={() => router.push("/admin/saas-management/dashboard")}
           title="Volver al dashboard"
+          variant="outline"
+          onClick={() => router.push("/admin/saas-management/dashboard")}
         >
           <ArrowLeft className="h-5 w-5" />
         </Button>
@@ -343,66 +420,70 @@ export default function NewUsersFlowPage() {
 
       {stats && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-          <Card className="admin-card">
+          <Card className="bg-white/5 border-white/10">
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium flex items-center gap-2">
-                <Clock className="h-4 w-4" />
+              <CardTitle className="text-sm font-medium flex items-center gap-2 text-white/70">
+                <Clock className="h-4 w-4 text-amber-400" />
                 Pendientes
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.pendingRequests}</div>
+              <div className="text-3xl font-bold text-white">
+                {stats.pendingRequests}
+              </div>
             </CardContent>
           </Card>
-          <Card className="admin-card">
+          <Card className="bg-white/5 border-white/10">
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium flex items-center gap-2">
-                <CheckCircle2 className="h-4 w-4" />
+              <CardTitle className="text-sm font-medium flex items-center gap-2 text-white/70">
+                <CheckCircle2 className="h-4 w-4 text-emerald-400" />
                 Aprobadas este mes
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">
+              <div className="text-3xl font-bold text-white">
                 {stats.approvedThisMonth}
               </div>
             </CardContent>
           </Card>
-          <Card className="admin-card">
+          <Card className="bg-white/5 border-white/10">
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium flex items-center gap-2">
-                <Users className="h-4 w-4" />
+              <CardTitle className="text-sm font-medium flex items-center gap-2 text-white/70">
+                <Users className="h-4 w-4 text-blue-400" />
                 Demos activas
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.activeDemos}</div>
+              <div className="text-3xl font-bold text-white">
+                {stats.activeDemos}
+              </div>
             </CardContent>
           </Card>
-          <Card className="admin-card">
+          <Card className="bg-white/5 border-white/10">
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium flex items-center gap-2">
-                <TrendingUp className="h-4 w-4" />
+              <CardTitle className="text-sm font-medium flex items-center gap-2 text-white/70">
+                <TrendingUp className="h-4 w-4 text-purple-400" />
                 Tasa conversión
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">
+              <div className="text-3xl font-bold text-white">
                 {stats.conversionRate ?? 0}%
               </div>
-              <p className="text-xs text-muted-foreground mt-1">
+              <p className="text-xs text-white/40 mt-1">
                 {stats.totalConverted ?? 0} / {stats.totalApproved ?? 0}
               </p>
             </CardContent>
           </Card>
-          <Card className="admin-card">
+          <Card className="bg-white/5 border-white/10">
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium flex items-center gap-2">
-                <Calendar className="h-4 w-4" />
+              <CardTitle className="text-sm font-medium flex items-center gap-2 text-white/70">
+                <Calendar className="h-4 w-4 text-orange-400" />
                 Por vencer (2 días)
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">
+              <div className="text-3xl font-bold text-white">
                 {stats.expiringSoon ?? 0}
               </div>
             </CardContent>
@@ -410,22 +491,21 @@ export default function NewUsersFlowPage() {
         </div>
       )}
 
-      <Card className="admin-card">
+      <Card className="bg-white/5 border-white/10">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Target className="h-5 w-5" />
+          <CardTitle className="flex items-center gap-2 text-white">
+            <Target className="h-5 w-5 text-amber-400" />
             Pipeline de Ventas
           </CardTitle>
-          <p className="text-sm text-muted-foreground">
-            Solicitudes desde /solicitar-demo. Gestiona cada etapa del funnel
-            hasta la conversión.
+          <p className="text-sm text-white/50">
+            Gestiona cada etapa del funnel hasta la conversión.
           </p>
           <div className="flex gap-2 mt-4">
             {(["activos", "convertidos", "perdidos"] as const).map((t) => (
               <Button
                 key={t}
-                variant={tab === t ? "default" : "outline"}
                 size="sm"
+                variant={tab === t ? "default" : "outline"}
                 onClick={() => setTab(t)}
               >
                 {t === "activos" && "Activos"}
@@ -433,28 +513,59 @@ export default function NewUsersFlowPage() {
                 {t === "perdidos" && "Perdidos/Rechazados"}
               </Button>
             ))}
+            <div className="ml-auto flex gap-1 border rounded-md p-1">
+              <Button
+                size="sm"
+                variant={viewMode === "kanban" ? "default" : "ghost"}
+                onClick={() => setViewMode("kanban")}
+                title="Vista Kanban"
+              >
+                <LayoutGrid className="h-4 w-4" />
+              </Button>
+              <Button
+                size="sm"
+                variant={viewMode === "table" ? "default" : "ghost"}
+                onClick={() => setViewMode("table")}
+                title="Vista Tabla"
+              >
+                <List className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
         </CardHeader>
         <CardContent>
           {loading ? (
             <div className="flex justify-center py-12">
-              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+              <Loader2 className="h-8 w-8 animate-spin text-white/50" />
             </div>
           ) : requests.length === 0 ? (
-            <p className="text-center py-8 text-muted-foreground">
+            <p className="text-center py-8 text-white/50">
               No hay solicitudes en esta categoría
             </p>
+          ) : viewMode === "kanban" ? (
+            <LeadKanbanBoard
+              leads={requests}
+              onLeadClick={(lead) => openLeadModal(lead as DemoRequest)}
+              onStageChange={handleKanbanStageChange}
+              loading={loading}
+            />
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b">
-                    <th className="text-left py-3 px-2">Email</th>
-                    <th className="text-left py-3 px-2">Nombre / Óptica</th>
-                    <th className="text-left py-3 px-2">Etapa</th>
-                    <th className="text-left py-3 px-2">Días demo</th>
-                    <th className="text-left py-3 px-2">Último contacto</th>
-                    <th className="text-right py-3 px-2">Acciones</th>
+                  <tr className="border-b border-white/10">
+                    <th className="text-left py-3 px-2 text-white/70">Email</th>
+                    <th className="text-left py-3 px-2 text-white/70">
+                      Nombre / Óptica
+                    </th>
+                    <th className="text-left py-3 px-2 text-white/70">Etapa</th>
+                    <th className="text-left py-3 px-2 text-white/70">Score</th>
+                    <th className="text-left py-3 px-2 text-white/70">
+                      Último contacto
+                    </th>
+                    <th className="text-right py-3 px-2 text-white/70">
+                      Acciones
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -463,33 +574,37 @@ export default function NewUsersFlowPage() {
                     const days = daysInDemo(r);
                     return (
                       <tr
+                        className="border-b border-white/10 hover:bg-white/5 cursor-pointer"
                         key={r.id}
-                        className="border-b hover:bg-muted/50 cursor-pointer"
                         onClick={() => openLeadModal(r)}
                       >
-                        <td className="py-3 px-2">{r.email}</td>
+                        <td className="py-3 px-2 text-white">{r.email}</td>
                         <td className="py-3 px-2">
-                          <div>{r.full_name || "—"}</div>
+                          <div className="text-white">{r.full_name || "—"}</div>
                           {r.optica_name && (
-                            <div className="text-xs text-muted-foreground">
+                            <div className="text-xs text-white/50">
                               {r.optica_name}
                             </div>
                           )}
                         </td>
                         <td className="py-3 px-2">
                           <Badge
+                            className={`${STAGE_COLORS[stage] || ""} bg-opacity-20 text-white border-0`}
                             variant="secondary"
-                            className={STAGE_COLORS[stage] || ""}
                           >
                             {STAGE_LABELS[stage] || stage}
                           </Badge>
                         </td>
                         <td className="py-3 px-2">
-                          {days
-                            ? `${days.days}${days.expired ? " (expiró)" : ""}`
-                            : "—"}
+                          {r.lead_score !== undefined && r.lead_score > 0 ? (
+                            <span className="text-amber-400 font-medium">
+                              {r.lead_score}
+                            </span>
+                          ) : (
+                            <span className="text-white/30">—</span>
+                          )}
                         </td>
-                        <td className="py-3 px-2">
+                        <td className="py-3 px-2 text-white/70">
                           {formatDate(r.last_contact_at || r.created_at)}
                         </td>
                         <td
@@ -500,10 +615,10 @@ export default function NewUsersFlowPage() {
                             {stage === "pending" && (
                               <>
                                 <Button
+                                  disabled={actioning === r.id}
                                   size="sm"
                                   variant="default"
                                   onClick={() => handleApprove(r.id)}
-                                  disabled={actioning === r.id}
                                 >
                                   {actioning === r.id ? (
                                     <Loader2 className="h-4 w-4 animate-spin" />
@@ -515,10 +630,10 @@ export default function NewUsersFlowPage() {
                                   )}
                                 </Button>
                                 <Button
+                                  disabled={actioning === r.id}
                                   size="sm"
                                   variant="outline"
                                   onClick={() => handleReject(r.id)}
-                                  disabled={actioning === r.id}
                                 >
                                   <XCircle className="h-4 w-4 mr-1" />
                                   Rechazar
@@ -555,15 +670,15 @@ export default function NewUsersFlowPage() {
                               </Button>
                             )}
                             <Button
-                              size="sm"
-                              variant="ghost"
                               className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                              disabled={actioning === r.id}
+                              size="sm"
+                              title="Eliminar solicitud"
+                              variant="ghost"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 handleDeleteClick(r);
                               }}
-                              disabled={actioning === r.id}
-                              title="Eliminar solicitud"
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>
@@ -588,11 +703,11 @@ export default function NewUsersFlowPage() {
             <div className="space-y-4">
               <div>
                 <p className="text-sm font-medium">Email</p>
-                <p className="text-muted-foreground">{selectedRequest.email}</p>
+                <p className="text-white/50">{selectedRequest.email}</p>
               </div>
               <div>
                 <p className="text-sm font-medium">Nombre / Óptica</p>
-                <p className="text-muted-foreground">
+                <p className="text-white/50">
                   {selectedRequest.full_name || "—"} /{" "}
                   {selectedRequest.optica_name || "—"}
                 </p>
@@ -600,11 +715,11 @@ export default function NewUsersFlowPage() {
               <div>
                 <p className="text-sm font-medium">Etapa actual</p>
                 <Badge
-                  variant="secondary"
                   className={
                     STAGE_COLORS[selectedRequest.funnel_stage || "pending"] ||
                     ""
                   }
+                  variant="secondary"
                 >
                   {STAGE_LABELS[selectedRequest.funnel_stage || "pending"]}
                 </Badge>
@@ -612,9 +727,9 @@ export default function NewUsersFlowPage() {
               <div>
                 <p className="text-sm font-medium">URL de reunión</p>
                 <input
-                  type="url"
                   className="w-full px-3 py-2 border rounded-md text-sm"
                   placeholder="https://meet.google.com/..."
+                  type="url"
                   value={funnelForm.meeting_url}
                   onChange={(e) =>
                     setFunnelForm((f) => ({
@@ -640,6 +755,7 @@ export default function NewUsersFlowPage() {
                   selectedRequest.funnel_stage || "",
                 ) && (
                   <Button
+                    disabled={actioning === selectedRequest.id}
                     size="sm"
                     onClick={() => {
                       const url =
@@ -658,52 +774,52 @@ export default function NewUsersFlowPage() {
                         },
                       );
                     }}
-                    disabled={actioning === selectedRequest.id}
                   >
                     Agendar reunión
                   </Button>
                 )}
                 {selectedRequest.funnel_stage === "meeting_scheduled" && (
                   <Button
+                    disabled={actioning === selectedRequest.id}
                     size="sm"
                     onClick={() =>
                       handleFunnelUpdate(selectedRequest.id, "post_meeting", {
                         notes: funnelForm.notes || undefined,
                       })
                     }
-                    disabled={actioning === selectedRequest.id}
                   >
                     Reunión completada
                   </Button>
                 )}
                 {selectedRequest.funnel_stage === "post_meeting" && (
                   <Button
+                    disabled={actioning === selectedRequest.id}
                     size="sm"
                     onClick={() =>
                       handleFunnelUpdate(selectedRequest.id, "negotiation", {
                         notes: funnelForm.notes || undefined,
                       })
                     }
-                    disabled={actioning === selectedRequest.id}
                   >
                     Enviar oferta
                   </Button>
                 )}
                 {selectedRequest.funnel_stage === "negotiation" && (
                   <Button
+                    disabled={actioning === selectedRequest.id}
                     size="sm"
                     onClick={() =>
                       handleFunnelUpdate(selectedRequest.id, "migration", {
                         notes: funnelForm.notes || undefined,
                       })
                     }
-                    disabled={actioning === selectedRequest.id}
                   >
                     Iniciar migración
                   </Button>
                 )}
                 {selectedRequest.funnel_stage === "migration" && (
                   <Button
+                    disabled={actioning === selectedRequest.id}
                     size="sm"
                     variant="default"
                     onClick={() =>
@@ -711,7 +827,6 @@ export default function NewUsersFlowPage() {
                         notes: funnelForm.notes || undefined,
                       })
                     }
-                    disabled={actioning === selectedRequest.id}
                   >
                     Marcar convertido
                   </Button>
@@ -723,6 +838,7 @@ export default function NewUsersFlowPage() {
                   "negotiation",
                 ].includes(selectedRequest.funnel_stage || "") && (
                   <Button
+                    disabled={actioning === selectedRequest.id}
                     size="sm"
                     variant="destructive"
                     onClick={() => {
@@ -733,20 +849,19 @@ export default function NewUsersFlowPage() {
                           notes: funnelForm.notes || undefined,
                         });
                     }}
-                    disabled={actioning === selectedRequest.id}
                   >
                     Marcar perdido
                   </Button>
                 )}
                 <Button
+                  className="ml-auto"
+                  disabled={actioning === selectedRequest.id}
                   size="sm"
                   variant="destructive"
-                  className="ml-auto"
                   onClick={() => {
                     setFunnelModalOpen(false);
                     handleDeleteClick(selectedRequest);
                   }}
-                  disabled={actioning === selectedRequest.id}
                 >
                   <Trash2 className="h-4 w-4 mr-1" />
                   Eliminar solicitud
@@ -764,7 +879,7 @@ export default function NewUsersFlowPage() {
           </DialogHeader>
           {requestToDelete && (
             <div className="space-y-4">
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-white/50">
                 ¿Estás seguro de eliminar la solicitud de{" "}
                 <strong>
                   {requestToDelete.full_name || requestToDelete.email}
@@ -785,9 +900,9 @@ export default function NewUsersFlowPage() {
                   Cancelar
                 </Button>
                 <Button
+                  disabled={actioning === requestToDelete.id}
                   variant="destructive"
                   onClick={handleDeleteConfirm}
-                  disabled={actioning === requestToDelete.id}
                 >
                   {actioning === requestToDelete.id ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
@@ -800,6 +915,42 @@ export default function NewUsersFlowPage() {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Lead Detail Panel with Timeline */}
+      <LeadDetailPanel
+        lead={selectedRequest as LeadDetail}
+        open={detailPanelOpen}
+        onOpenChange={setDetailPanelOpen}
+        onUpdateStage={handleFunnelUpdate}
+        onApprove={handleApprove}
+        onReject={handleReject}
+        onSendEmail={() => {
+          setDetailPanelOpen(false);
+          setEmailModalOpen(true);
+        }}
+        onGenerateAIEmail={() => {
+          setDetailPanelOpen(false);
+          setAiModalOpen(true);
+        }}
+        actioning={actioning}
+      />
+
+      {/* Manual Email Modal */}
+      <LeadEmailModal
+        lead={selectedRequest as LeadEmailModalProps["lead"]}
+        open={emailModalOpen}
+        onOpenChange={setEmailModalOpen}
+        onSend={handleSendEmail}
+      />
+
+      {/* AI Generator Modal */}
+      <LeadAIGeneratorModal
+        lead={selectedRequest as LeadAIGeneratorModalProps["lead"]}
+        open={aiModalOpen}
+        onOpenChange={setAiModalOpen}
+        onGenerate={handleGenerateAIEmail}
+        onSend={handleSendEmail}
+      />
     </div>
   );
 }

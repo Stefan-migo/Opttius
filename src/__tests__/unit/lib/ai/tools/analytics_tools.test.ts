@@ -1,7 +1,8 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
 import { marketTrendsTools } from "@/lib/ai/tools/analyzeMarketTrends";
-import { inventoryTools } from "@/lib/ai/tools/optimizeInventory";
 import { recommendationTools } from "@/lib/ai/tools/generateRecommendations";
+import { inventoryTools } from "@/lib/ai/tools/optimizeInventory";
 
 // Mock Organizational Memory since it uses helper function
 vi.mock("@/lib/ai/memory/organizational", () => ({
@@ -26,8 +27,8 @@ vi.mock("@/lib/ai/memory/organizational", () => ({
 }));
 
 describe("Analytics Tools", () => {
-  let mockSupabase: any;
-  let mockContext: any;
+  let mockSupabase: unknown;
+  let mockContext: unknown;
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -148,7 +149,7 @@ describe("Analytics Tools", () => {
           select: vi.fn().mockReturnThis(),
           eq: vi.fn().mockReturnThis(),
           gte: vi.fn().mockReturnThis(),
-          then: null as any,
+          then: null as unknown,
         };
 
         if (table === "products") {
@@ -173,9 +174,9 @@ describe("Analytics Tools", () => {
                 },
               ],
               error: null,
-            }) as any,
+            }) as unknown,
             // Direct resolve if no category
-            then: (resolve: any) =>
+            then: (resolve: unknown) =>
               resolve({
                 data: [
                   {
@@ -195,7 +196,7 @@ describe("Analytics Tools", () => {
                 ],
                 error: null,
               }),
-          } as any);
+          } as unknown);
         } else if (table === "order_items") {
           // ... sales query
           chain.select = vi.fn().mockReturnThis();
@@ -204,7 +205,7 @@ describe("Analytics Tools", () => {
               { product_id: "p1", quantity: 5 }, // High velocity for low item
             ],
             error: null,
-          }) as any;
+          }) as unknown;
         }
         return chain;
       });
@@ -245,7 +246,7 @@ describe("Analytics Tools", () => {
         select: vi.fn().mockReturnThis(),
         eq: vi.fn().mockReturnThis(),
         gte: vi.fn().mockResolvedValue(salesMock), // For order_items
-        then: (cb: any) => cb(productsMock), // For products (first await) - simplistic approach
+        then: (cb: unknown) => cb(productsMock), // For products (first await) - simplistic approach
       });
       // Actually optimizeInventory does: await productsQuery; await salesQuery;
       // So we need distinct mocks.
@@ -274,7 +275,7 @@ describe("Analytics Tools", () => {
           return {
             select: vi.fn().mockReturnThis(),
             eq: vi.fn().mockReturnThis(),
-            then: (resolve: any) => resolve(productsMock), // Simulate await
+            then: (resolve: unknown) => resolve(productsMock), // Simulate await
           };
         }
         if (table === "order_items") {

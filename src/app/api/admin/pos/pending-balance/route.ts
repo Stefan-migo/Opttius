@@ -1,12 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient, createServiceRoleClient } from "@/utils/supabase/server";
+
 import { getBranchContext } from "@/lib/api/branch-middleware";
+import { createApiSuccessResponse } from "@/lib/api/response";
 import { appLogger as logger } from "@/lib/logger";
-import {
-  createApiSuccessResponse,
-  createApiErrorResponse,
-} from "@/lib/api/response";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
+import { createClient, createServiceRoleClient } from "@/utils/supabase/server";
 
 /**
  * GET /api/admin/pos/pending-balance
@@ -113,7 +111,7 @@ export async function GET(request: NextRequest) {
 
     // Fetch customer information for search and display
     const uniqueEmails = [
-      ...new Set((orders || []).map((o: any) => o.email).filter(Boolean)),
+      ...new Set((orders || []).map((o: unknown) => o.email).filter(Boolean)),
     ];
     const customerMapByEmail = new Map();
     const { data: customersByEmail } =
@@ -124,7 +122,7 @@ export async function GET(request: NextRequest) {
             .in("email", uniqueEmails)
         : { data: null };
 
-    (customersByEmail || []).forEach((customer: any) => {
+    (customersByEmail || []).forEach((customer: unknown) => {
       if (customer.email) {
         customerMapByEmail.set(customer.email.toLowerCase(), customer);
       }
@@ -135,7 +133,7 @@ export async function GET(request: NextRequest) {
     if (searchTerm) {
       const searchLower = searchTerm.toLowerCase();
       try {
-        filteredOrders = filteredOrders.filter((order: any) => {
+        filteredOrders = filteredOrders.filter((order: unknown) => {
           // Check main fields
           if (
             order.order_number?.toLowerCase().includes(searchLower) ||
@@ -171,11 +169,11 @@ export async function GET(request: NextRequest) {
     }
 
     // Calculate pending amount for each order using customer info already fetched
-    let ordersWithBalance: any[] = [];
+    let ordersWithBalance: unknown[] = [];
     try {
-      ordersWithBalance = filteredOrders.map((order: any) => {
+      ordersWithBalance = filteredOrders.map((order: unknown) => {
         const totalPaid = (order.order_payments || []).reduce(
-          (sum: number, payment: any) => sum + (payment.amount || 0),
+          (sum: number, payment: unknown) => sum + (payment.amount || 0),
           0,
         );
         const pendingAmount = Math.max(0, order.total_amount - totalPaid);
@@ -216,7 +214,7 @@ export async function GET(request: NextRequest) {
     });
 
     return createApiSuccessResponse(ordersWithBalance);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("[PENDING-BALANCE-API] Catch block error:", {
       message: error.message,
       stack: error.stack,

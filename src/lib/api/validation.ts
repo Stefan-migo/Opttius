@@ -22,7 +22,7 @@ import { ValidationError } from "./errors";
  *   minLength: 5
  * }
  */
-export type ValidationRule<T = any> = {
+export type ValidationRule<T = unknown> = {
   required?: boolean;
   type?: "string" | "number" | "boolean" | "object" | "array" | "email" | "url";
   minLength?: number;
@@ -31,7 +31,7 @@ export type ValidationRule<T = any> = {
   max?: number;
   pattern?: RegExp;
   enum?: T[];
-  custom?: (value: any) => boolean | string;
+  custom?: (value: unknown) => boolean | string;
 };
 
 /**
@@ -69,7 +69,7 @@ const ARGENTINA_PHONE_REGEX = /^(\+54)?[0-9]{10,11}$/;
  */
 function validateField(
   fieldName: string,
-  value: any,
+  value: unknown,
   rule: ValidationRule,
 ): string[] {
   const errors: string[] = [];
@@ -198,7 +198,10 @@ function validateField(
  * }
  * ```
  */
-export function validateRequestBody(body: any, schema: ValidationSchema): void {
+export function validateRequestBody(
+  body: unknown,
+  schema: ValidationSchema,
+): void {
   const errors: string[] = [];
 
   for (const [fieldName, rule] of Object.entries(schema)) {
@@ -240,7 +243,7 @@ export function validateQueryParams(
   const errors: string[] = [];
 
   for (const [fieldName, rule] of Object.entries(schema)) {
-    let value: any = searchParams.get(fieldName);
+    let value: unknown = searchParams.get(fieldName);
 
     // Convert string values to appropriate types
     if (value !== null && rule.type) {
@@ -376,7 +379,7 @@ export const commonSchemas = {
  * sanitizeInput(["  a  ", "  b  "]) // ["a", "b"]
  * ```
  */
-export function sanitizeInput(data: any): any {
+export function sanitizeInput(data: unknown): unknown {
   if (typeof data === "string") {
     return data.trim();
   }
@@ -386,7 +389,7 @@ export function sanitizeInput(data: any): any {
   }
 
   if (data && typeof data === "object") {
-    const sanitized: any = {};
+    const sanitized: unknown = {};
     for (const [key, value] of Object.entries(data)) {
       sanitized[key] = sanitizeInput(value);
     }
@@ -424,7 +427,7 @@ export function sanitizeInput(data: any): any {
 export async function parseAndValidateBody(
   request: Request,
   schema: ValidationSchema,
-): Promise<any> {
+): Promise<unknown> {
   try {
     const body = await request.json();
     const sanitizedBody = sanitizeInput(body);

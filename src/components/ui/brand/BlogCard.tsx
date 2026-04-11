@@ -1,20 +1,21 @@
 "use client";
 
-import { useState } from "react";
+import {
+  ArrowRight,
+  BookOpen,
+  Calendar,
+  Clock,
+  Heart,
+  Share2,
+  User,
+} from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { Card, CardContent } from "@/components/ui/card";
+import { useState } from "react";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { 
-  Calendar, 
-  Clock, 
-  User, 
-  ArrowRight, 
-  BookOpen,
-  Heart,
-  Share2
-} from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 
 interface BlogCardProps {
   id: string;
@@ -67,10 +68,10 @@ export default function BlogCard({
   const [isHovered, setIsHovered] = useState(false);
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('es-AR', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
+    return new Date(dateString).toLocaleDateString("es-AR", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
     });
   };
 
@@ -95,7 +96,7 @@ export default function BlogCard({
   };
 
   const hasValidImage = () => {
-    return mainImage?.asset?.url && mainImage.asset.url.trim() !== '';
+    return mainImage?.asset?.url && mainImage.asset.url.trim() !== "";
   };
 
   const getAuthorImageUrl = () => {
@@ -107,11 +108,11 @@ export default function BlogCard({
   };
 
   const hasValidAuthorImage = () => {
-    return author?.image?.asset?.url && author.image.asset.url.trim() !== '';
+    return author?.image?.asset?.url && author.image.asset.url.trim() !== "";
   };
 
   return (
-    <Card 
+    <Card
       className={`group relative overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${className}`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -122,12 +123,15 @@ export default function BlogCard({
           <div className="relative aspect-[16/10] overflow-hidden bg-verde-suave/10">
             {hasValidImage() ? (
               <Image
-                src={getImageUrl()}
-                alt={mainImage?.alt || title}
                 fill
+                alt={mainImage?.alt || title}
                 className="object-cover transition-transform duration-300 group-hover:scale-105"
+                src={getImageUrl()}
                 onError={(e) => {
-                  console.error('Error loading blog image:', mainImage?.asset?.url);
+                  console.error(
+                    "Error loading blog image:",
+                    mainImage?.asset?.url,
+                  );
                 }}
               />
             ) : (
@@ -138,7 +142,7 @@ export default function BlogCard({
                 </div>
               </div>
             )}
-            
+
             {/* Featured Badge */}
             {featured && (
               <div className="absolute top-4 left-4">
@@ -153,14 +157,16 @@ export default function BlogCard({
             {categories && categories.length > 0 && (
               <div className="absolute top-4 right-4 flex flex-wrap gap-1">
                 {categories.slice(0, 2).map((category, index) => (
-                  <Badge 
-                    key={index}
-                    variant="secondary" 
+                  <Badge
                     className="bg-white/90 text-azul-profundo text-xs"
-                    style={{ 
-                      backgroundColor: category.color ? `${category.color}20` : undefined,
-                      color: category.color || undefined 
+                    key={index}
+                    style={{
+                      backgroundColor: category.color
+                        ? `${category.color}20`
+                        : undefined,
+                      color: category.color || undefined,
                     }}
+                    variant="secondary"
                   >
                     {category.title}
                   </Badge>
@@ -169,28 +175,32 @@ export default function BlogCard({
             )}
 
             {/* Quick Actions */}
-            <div className={`absolute bottom-4 right-4 flex gap-2 transition-opacity duration-300 ${
-              isHovered ? 'opacity-100' : 'opacity-0'
-            }`}>
+            <div
+              className={`absolute bottom-4 right-4 flex gap-2 transition-opacity duration-300 ${
+                isHovered ? "opacity-100" : "opacity-0"
+              }`}
+            >
               {onToggleFavorite && (
                 <Button
-                  variant="secondary"
-                  size="sm"
                   className="h-8 w-8 p-0 bg-white/90 hover:bg-white"
+                  size="sm"
+                  variant="secondary"
                   onClick={handleToggleFavorite}
                 >
-                  <Heart 
+                  <Heart
                     className={`h-4 w-4 ${
-                      isFavorite ? 'fill-coral-suave text-coral-suave' : 'text-tierra-media'
+                      isFavorite
+                        ? "fill-coral-suave text-coral-suave"
+                        : "text-tierra-media"
                     }`}
                   />
                 </Button>
               )}
               {onShare && (
                 <Button
-                  variant="secondary"
-                  size="sm"
                   className="h-8 w-8 p-0 bg-white/90 hover:bg-white"
+                  size="sm"
+                  variant="secondary"
                   onClick={handleShare}
                 >
                   <Share2 className="h-4 w-4 text-tierra-media" />
@@ -233,12 +243,15 @@ export default function BlogCard({
                 <div className="relative h-8 w-8 rounded-full overflow-hidden bg-verde-suave/20">
                   {hasValidAuthorImage() ? (
                     <Image
-                      src={getAuthorImageUrl()}
-                      alt={author?.name || "Author"}
                       fill
+                      alt={author?.name || "Author"}
                       className="object-cover"
+                      src={getAuthorImageUrl()}
                       onError={(e) => {
-                        console.error('Error loading author image:', author?.image?.asset?.url);
+                        console.error(
+                          "Error loading author image:",
+                          author?.image?.asset?.url,
+                        );
                       }}
                     />
                   ) : (
@@ -265,4 +278,4 @@ export default function BlogCard({
       </Link>
     </Card>
   );
-} 
+}

@@ -6,11 +6,12 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { createServiceRoleClient } from "@/utils/supabase/server";
+
+import { appLogger as logger } from "@/lib/logger";
 import { MercadoPagoGateway } from "@/lib/payments/mercadopago/gateway";
 import { MercadoPagoWebhookValidator } from "@/lib/payments/mercadopago/webhook-validator";
 import { PaymentService } from "@/lib/payments/services/payment-service";
-import { appLogger as logger } from "@/lib/logger";
+import { createServiceRoleClient } from "@/utils/supabase/server";
 
 async function processWebhook(request: NextRequest): Promise<NextResponse> {
   const supabase = createServiceRoleClient();

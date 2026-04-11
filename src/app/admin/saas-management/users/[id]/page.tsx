@@ -1,30 +1,30 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useParams, useRouter } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import {
-  ArrowLeft,
-  User,
-  Mail,
-  Phone,
-  Shield,
-  Building2,
-  MapPin,
-  Calendar,
   Activity,
+  AlertTriangle,
+  ArrowLeft,
+  Building2,
+  Calendar,
   CheckCircle2,
-  XCircle,
   Crown,
   Loader2,
+  Mail,
+  MapPin,
+  Phone,
+  Shield,
   Trash2,
-  AlertTriangle,
+  User,
+  XCircle,
 } from "lucide-react";
 import Link from "next/link";
+import { useParams, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { formatDate } from "@/lib/utils";
+
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -33,6 +33,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { formatDate } from "@/lib/utils";
 
 interface UserDetails {
   id: string;
@@ -222,10 +223,10 @@ export default function UserDetailsPage() {
       <div className="space-y-6 p-6">
         <div className="flex items-center gap-4">
           <Button
-            variant="ghost"
             size="icon"
-            onClick={() => router.push("/admin/saas-management/users")}
             title="Volver a usuarios"
+            variant="ghost"
+            onClick={() => router.push("/admin/saas-management/users")}
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
@@ -263,10 +264,10 @@ export default function UserDetailsPage() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Button
-            variant="ghost"
             size="icon"
-            onClick={() => router.push("/admin/saas-management/users")}
             title="Volver a usuarios"
+            variant="ghost"
+            onClick={() => router.push("/admin/saas-management/users")}
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
@@ -395,7 +396,7 @@ export default function UserDetailsPage() {
               <Link
                 href={`/admin/saas-management/organizations/${user.organization.id}`}
               >
-                <Button variant="outline" size="sm">
+                <Button size="sm" variant="outline">
                   Ver organización
                 </Button>
               </Link>
@@ -424,8 +425,8 @@ export default function UserDetailsPage() {
             <div className="space-y-2">
               {branches.map((branch) => (
                 <div
-                  key={branch?.id}
                   className="flex items-center justify-between p-3 border rounded-lg"
+                  key={branch?.id}
                 >
                   <div>
                     <p className="font-semibold">{branch?.name}</p>
@@ -457,8 +458,8 @@ export default function UserDetailsPage() {
             <div className="space-y-2">
               {user.recentActivity.slice(0, 10).map((activity) => (
                 <div
-                  key={activity.id}
                   className="flex items-center justify-between p-3 border rounded-lg"
+                  key={activity.id}
                 >
                   <div>
                     <p className="font-semibold">{activity.action}</p>
@@ -552,16 +553,16 @@ export default function UserDetailsPage() {
           </DialogHeader>
           <DialogFooter>
             <Button
+              disabled={deleting}
               variant="outline"
               onClick={() => setDeleteDialogOpen(false)}
-              disabled={deleting}
             >
               Cancelar
             </Button>
             <Button
+              disabled={deleting}
               variant="destructive"
               onClick={handleDeleteUser}
-              disabled={deleting}
             >
               {deleting ? (
                 <>

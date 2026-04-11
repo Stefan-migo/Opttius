@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClientFromRequest } from "@/utils/supabase/server";
-import { appLogger as logger } from "@/lib/logger";
-import { withRateLimit, rateLimitConfigs } from "@/lib/api/middleware";
-import { getBranchContext } from "@/lib/api/branch-middleware";
+
 import { prepareInsightData } from "@/lib/ai/insights/prepare-data";
 import type { InsightSection } from "@/lib/ai/insights/schemas";
+import { getBranchContext } from "@/lib/api/branch-middleware";
+import { rateLimitConfigs, withRateLimit } from "@/lib/api/middleware";
+import { appLogger as logger } from "@/lib/logger";
+import { createClientFromRequest } from "@/utils/supabase/server";
 
 /**
  * POST /api/ai/insights/prepare-data
@@ -85,7 +86,7 @@ export async function POST(request: NextRequest) {
         section: result.section,
         data: result.data,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error("Prepare data POST error", { error: error.message });
       return NextResponse.json(
         { error: "Internal server error" },
@@ -166,7 +167,7 @@ export async function GET(request: NextRequest) {
         section: result.section,
         data: result.data,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error("Prepare data API error", {
         error: error.message,
         stack: error.stack,

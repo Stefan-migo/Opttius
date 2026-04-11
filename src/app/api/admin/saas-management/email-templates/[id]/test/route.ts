@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createServiceRoleClient } from "@/utils/supabase/server";
+
+import { requireRoot } from "@/lib/api/root-middleware";
 import { sendEmail } from "@/lib/email/client";
 import { wrapInModernLayout } from "@/lib/email/layout";
 import { replaceTemplateVariables } from "@/lib/email/template-utils";
 import { appLogger as logger } from "@/lib/logger";
-import { requireRoot } from "@/lib/api/root-middleware";
+import { createServiceRoleClient } from "@/utils/supabase/server";
 
 export const dynamic = "force-dynamic";
 

@@ -8,13 +8,14 @@
  * 4. Dismiss and feedback actions
  */
 
-import { describe, it, expect, beforeAll, afterAll } from "vitest";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
+
 import {
+  cleanupTestData,
   createTestOrganization,
   createTestUser,
-  cleanupTestData,
-  makeAuthenticatedRequest,
   isMultiTenancyAvailable,
+  makeAuthenticatedRequest,
   type TestOrganization,
   type TestUser,
 } from "../../helpers/test-setup";
@@ -26,8 +27,8 @@ describe("AI Insights API - Integration Tests", () => {
   let orgB: TestOrganization;
   let userA: TestUser;
   let userB: TestUser;
-  let insightA: any;
-  let insightB: any;
+  let insightA: unknown;
+  let insightB: unknown;
 
   beforeAll(async () => {
     infrastructureCheck = await isMultiTenancyAvailable();
@@ -145,7 +146,7 @@ describe("AI Insights API - Integration Tests", () => {
       expect(response.status).toBe(200);
       const data = await response.json();
       const dismissed = data.insights.find(
-        (i: any) => i.id === dismissedInsight?.id,
+        (i: unknown) => i.id === dismissedInsight?.id,
       );
       expect(dismissed).toBeUndefined();
     });
@@ -197,7 +198,7 @@ describe("AI Insights API - Integration Tests", () => {
 
       expect(response.status).toBe(200);
       const data = await response.json();
-      const priorities = data.insights.map((i: any) => i.priority);
+      const priorities = data.insights.map((i: unknown) => i.priority);
       expect(priorities).toEqual([...priorities].sort((a, b) => b - a));
     });
 
@@ -216,7 +217,7 @@ describe("AI Insights API - Integration Tests", () => {
 
       const dataA = await responseA.json();
       const orgAInsights = dataA.insights.filter(
-        (i: any) => i.organization_id === orgA.id,
+        (i: unknown) => i.organization_id === orgA.id,
       );
       expect(orgAInsights.length).toBeGreaterThan(0);
 
@@ -230,13 +231,13 @@ describe("AI Insights API - Integration Tests", () => {
 
       const dataB = await responseB.json();
       const orgBInsights = dataB.insights.filter(
-        (i: any) => i.organization_id === orgB.id,
+        (i: unknown) => i.organization_id === orgB.id,
       );
       expect(orgBInsights.length).toBeGreaterThan(0);
 
       // User A should not see org B insights
       const userASeesOrgB = dataA.insights.some(
-        (i: any) => i.organization_id === orgB.id,
+        (i: unknown) => i.organization_id === orgB.id,
       );
       expect(userASeesOrgB).toBe(false);
     });

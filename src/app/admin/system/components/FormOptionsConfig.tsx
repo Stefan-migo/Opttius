@@ -1,11 +1,20 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import {
+  Edit2,
+  Eye,
+  EyeOff,
+  FileText,
+  GripVertical,
+  Plus,
+  Trash2,
+} from "lucide-react";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -14,6 +23,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -21,16 +32,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Plus,
-  Edit2,
-  Trash2,
-  GripVertical,
-  Eye,
-  EyeOff,
-  FileText,
-} from "lucide-react";
-import { toast } from "sonner";
 
 const FORM_TYPES = [
   {
@@ -319,9 +320,9 @@ export default function FormOptionsConfig() {
             <SelectContent className="rounded-xl border-admin-border-primary/20">
               {FORM_TYPES.map((ft) => (
                 <SelectItem
+                  className="font-display text-[10px] tracking-widest uppercase"
                   key={ft.value}
                   value={ft.value}
-                  className="font-display text-[10px] tracking-widest uppercase"
                 >
                   {ft.label}
                 </SelectItem>
@@ -351,8 +352,8 @@ export default function FormOptionsConfig() {
           ) : (
             currentFields.map((field) => (
               <div
-                key={field.id}
                 className="border border-border rounded-lg p-2 sm:p-3 bg-epoch-background/30 overflow-hidden"
+                key={field.id}
               >
                 <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 sm:gap-3 mb-2 sm:mb-3">
                   <div className="min-w-0 flex-1">
@@ -366,8 +367,8 @@ export default function FormOptionsConfig() {
                       </code>
                       {field.is_array && (
                         <Badge
-                          variant="secondary"
                           className="ml-1.5 rounded text-[8px] font-display font-bold uppercase tracking-wider"
+                          variant="secondary"
                         >
                           Múltiples valores
                         </Badge>
@@ -375,9 +376,9 @@ export default function FormOptionsConfig() {
                     </p>
                   </div>
                   <Button
+                    className="flex items-center gap-1.5 h-8 px-2 sm:px-3 rounded-lg border-border font-display font-bold text-[9px] sm:text-[10px] tracking-widest uppercase w-full sm:w-auto shrink-0"
                     size="sm"
                     onClick={() => openAddDialog(field)}
-                    className="flex items-center gap-1.5 h-8 px-2 sm:px-3 rounded-lg border-border font-display font-bold text-[9px] sm:text-[10px] tracking-widest uppercase w-full sm:w-auto shrink-0"
                   >
                     <Plus className="h-3.5 w-3.5" />
                     Agregar Opción
@@ -388,12 +389,12 @@ export default function FormOptionsConfig() {
                   {field.values && field.values.length > 0 ? (
                     field.values.map((value) => (
                       <div
-                        key={value.id}
                         className={`flex items-center justify-between gap-2 p-2 sm:p-2.5 rounded-lg border border-border overflow-hidden min-w-0 ${
                           !value.is_active
                             ? "bg-epoch-background/20 opacity-60"
                             : "bg-epoch-background/40"
                         }`}
+                        key={value.id}
                       >
                         <div className="flex items-center gap-1.5 sm:gap-2 flex-1 min-w-0 overflow-hidden">
                           <GripVertical className="h-3.5 w-3.5 text-epoch-primary/50 shrink-0" />
@@ -410,8 +411,8 @@ export default function FormOptionsConfig() {
                           )}
                           {!value.is_active && (
                             <Badge
-                              variant="secondary"
                               className="text-[7px] sm:text-[8px] font-display font-bold uppercase rounded shrink-0"
+                              variant="secondary"
                             >
                               Inactivo
                             </Badge>
@@ -419,11 +420,11 @@ export default function FormOptionsConfig() {
                         </div>
                         <div className="flex items-center gap-0.5 sm:gap-1 shrink-0">
                           <Button
+                            className="text-epoch-primary/70 hover:text-epoch-primary hover:bg-epoch-primary/10 rounded h-7 w-7 p-0 min-w-7"
                             size="sm"
+                            title={value.is_active ? "Desactivar" : "Activar"}
                             variant="ghost"
                             onClick={() => handleToggleValueActive(value)}
-                            title={value.is_active ? "Desactivar" : "Activar"}
-                            className="text-epoch-primary/70 hover:text-epoch-primary hover:bg-epoch-primary/10 rounded h-7 w-7 p-0 min-w-7"
                           >
                             {value.is_active ? (
                               <Eye className="h-3.5 w-3.5" />
@@ -432,20 +433,20 @@ export default function FormOptionsConfig() {
                             )}
                           </Button>
                           <Button
+                            className="text-epoch-primary/70 hover:text-epoch-primary hover:bg-epoch-primary/10 rounded h-7 w-7 p-0 min-w-7"
                             size="sm"
+                            title="Editar"
                             variant="ghost"
                             onClick={() => openEditDialog(value)}
-                            title="Editar"
-                            className="text-epoch-primary/70 hover:text-epoch-primary hover:bg-epoch-primary/10 rounded h-7 w-7 p-0 min-w-7"
                           >
                             <Edit2 className="h-3.5 w-3.5" />
                           </Button>
                           <Button
+                            className="text-red-600 hover:text-red-700 hover:bg-red-500/10 rounded h-7 w-7 p-0 min-w-7"
                             size="sm"
+                            title="Eliminar"
                             variant="ghost"
                             onClick={() => handleDeleteValue(value)}
-                            title="Eliminar"
-                            className="text-red-600 hover:text-red-700 hover:bg-red-500/10 rounded h-7 w-7 p-0 min-w-7"
                           >
                             <Trash2 className="h-3.5 w-3.5" />
                           </Button>
@@ -478,8 +479,8 @@ export default function FormOptionsConfig() {
           <div className="space-y-4">
             <div>
               <Label
-                htmlFor="new_value"
                 className="text-[10px] font-display font-bold text-admin-text-primary uppercase tracking-widest block mb-2"
+                htmlFor="new_value"
               >
                 Valor
               </Label>
@@ -487,7 +488,9 @@ export default function FormOptionsConfig() {
                 Código interno utilizado por el sistema
               </p>
               <Input
+                className="h-11 bg-admin-bg-tertiary border-admin-border-primary/10 rounded-xl font-display text-sm"
                 id="new_value"
+                placeholder="Ej: nuevo_tipo"
                 value={newValue.value}
                 onChange={(e) =>
                   setNewValue({
@@ -495,40 +498,38 @@ export default function FormOptionsConfig() {
                     value: e.target.value.toLowerCase().replace(/\s+/g, "_"),
                   })
                 }
-                placeholder="Ej: nuevo_tipo"
-                className="h-11 bg-admin-bg-tertiary border-admin-border-primary/10 rounded-xl font-display text-sm"
               />
             </div>
             <div>
               <Label
-                htmlFor="new_label"
                 className="text-[10px] font-display font-bold text-admin-text-primary uppercase tracking-widest block mb-2"
+                htmlFor="new_label"
               >
                 Etiqueta (mostrar)
               </Label>
               <Input
+                className="h-11 bg-admin-bg-tertiary border-admin-border-primary/10 rounded-xl font-display text-sm"
                 id="new_label"
+                placeholder="Ej: Nuevo Tipo"
                 value={newValue.label}
                 onChange={(e) =>
                   setNewValue({ ...newValue, label: e.target.value })
                 }
-                placeholder="Ej: Nuevo Tipo"
-                className="h-11 bg-admin-bg-tertiary border-admin-border-primary/10 rounded-xl font-display text-sm"
               />
             </div>
             <div className="flex items-center space-x-2">
               <input
-                type="checkbox"
-                id="is_default"
                 checked={newValue.is_default}
+                className="rounded border-admin-border-primary text-admin-accent-primary focus:ring-admin-accent-primary"
+                id="is_default"
+                type="checkbox"
                 onChange={(e) =>
                   setNewValue({ ...newValue, is_default: e.target.checked })
                 }
-                className="rounded border-admin-border-primary text-admin-accent-primary focus:ring-admin-accent-primary"
               />
               <Label
-                htmlFor="is_default"
                 className="text-[11px] font-serif italic text-admin-text-secondary"
+                htmlFor="is_default"
               >
                 Marcar como opción por defecto
               </Label>
@@ -536,15 +537,15 @@ export default function FormOptionsConfig() {
           </div>
           <DialogFooter>
             <Button
+              className="rounded-xl border-admin-border-primary/20 font-display font-bold text-[10px] tracking-widest uppercase"
               variant="outline"
               onClick={() => setShowAddValueDialog(false)}
-              className="rounded-xl border-admin-border-primary/20 font-display font-bold text-[10px] tracking-widest uppercase"
             >
               Cancelar
             </Button>
             <Button
-              onClick={handleAddValue}
               className="rounded-xl bg-admin-accent-primary hover:bg-admin-accent-secondary text-[#1A2B23] font-display font-bold text-[10px] tracking-widest uppercase"
+              onClick={handleAddValue}
             >
               Agregar
             </Button>
@@ -566,16 +567,16 @@ export default function FormOptionsConfig() {
           <div className="space-y-4">
             <div>
               <Label
-                htmlFor="edit_value"
                 className="text-[10px] font-display font-bold text-admin-text-primary uppercase tracking-widest block mb-2"
+                htmlFor="edit_value"
               >
                 Valor
               </Label>
               <Input
-                id="edit_value"
-                value={newValue.value}
                 disabled
                 className="h-11 bg-admin-bg-tertiary border-admin-border-primary/10 rounded-xl font-display text-sm text-admin-text-tertiary"
+                id="edit_value"
+                value={newValue.value}
               />
               <p className="text-[11px] font-serif italic text-admin-text-tertiary mt-1">
                 El valor no se puede modificar
@@ -583,34 +584,34 @@ export default function FormOptionsConfig() {
             </div>
             <div>
               <Label
-                htmlFor="edit_label"
                 className="text-[10px] font-display font-bold text-admin-text-primary uppercase tracking-widest block mb-2"
+                htmlFor="edit_label"
               >
                 Etiqueta (mostrar)
               </Label>
               <Input
+                className="h-11 bg-admin-bg-tertiary border-admin-border-primary/10 rounded-xl font-display text-sm"
                 id="edit_label"
+                placeholder="Ej: Nuevo Tipo"
                 value={newValue.label}
                 onChange={(e) =>
                   setNewValue({ ...newValue, label: e.target.value })
                 }
-                placeholder="Ej: Nuevo Tipo"
-                className="h-11 bg-admin-bg-tertiary border-admin-border-primary/10 rounded-xl font-display text-sm"
               />
             </div>
             <div className="flex items-center space-x-2">
               <input
-                type="checkbox"
-                id="edit_is_default"
                 checked={newValue.is_default}
+                className="rounded border-admin-border-primary text-admin-accent-primary focus:ring-admin-accent-primary"
+                id="edit_is_default"
+                type="checkbox"
                 onChange={(e) =>
                   setNewValue({ ...newValue, is_default: e.target.checked })
                 }
-                className="rounded border-admin-border-primary text-admin-accent-primary focus:ring-admin-accent-primary"
               />
               <Label
-                htmlFor="edit_is_default"
                 className="text-[11px] font-serif italic text-admin-text-secondary"
+                htmlFor="edit_is_default"
               >
                 Marcar como opción por defecto
               </Label>
@@ -618,15 +619,15 @@ export default function FormOptionsConfig() {
           </div>
           <DialogFooter>
             <Button
+              className="rounded-xl border-admin-border-primary/20 font-display font-bold text-[10px] tracking-widest uppercase"
               variant="outline"
               onClick={() => setShowEditValueDialog(false)}
-              className="rounded-xl border-admin-border-primary/20 font-display font-bold text-[10px] tracking-widest uppercase"
             >
               Cancelar
             </Button>
             <Button
-              onClick={handleEditValue}
               className="rounded-xl bg-admin-accent-primary hover:bg-admin-accent-secondary text-[#1A2B23] font-display font-bold text-[10px] tracking-widest uppercase"
+              onClick={handleEditValue}
             >
               Guardar Cambios
             </Button>

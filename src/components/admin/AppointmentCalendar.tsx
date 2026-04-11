@@ -1,21 +1,20 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import {
+  AlertCircle,
+  Calendar as CalendarIcon,
   Clock,
-  User,
   Eye,
   Package,
-  Truck,
-  Wrench,
-  AlertCircle,
-  RefreshCw,
   Plus,
-  Calendar as CalendarIcon,
+  RefreshCw,
+  Truck,
+  User,
+  Wrench,
 } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+
+import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
 const CUSTOM_SCROLLBAR_CSS =
@@ -297,7 +296,7 @@ export default function AppointmentCalendar({
   };
 
   const getAppointmentTypeIcon = (type: string) => {
-    const icons: Record<string, any> = {
+    const icons: Record<string, unknown> = {
       eye_exam: Eye,
       consultation: User,
       fitting: Package,
@@ -430,8 +429,8 @@ export default function AppointmentCalendar({
 
                 return (
                   <div
-                    key={timeSlot}
                     className="grid grid-cols-[auto_1fr] gap-2 sm:gap-3 min-h-[60px] sm:min-h-[70px] w-full items-stretch"
+                    key={timeSlot}
                   >
                     <div className="text-[9px] sm:text-[10px] font-black text-admin-text-tertiary py-3 sm:py-4 text-right pr-2 sm:pr-4 flex flex-col justify-start opacity-40">
                       <span>{timeSlot.split(":")[0]}</span>
@@ -440,12 +439,6 @@ export default function AppointmentCalendar({
                       </span>
                     </div>
                     <div
-                      onClick={(e) => {
-                        if (isClickable && onSlotClick) {
-                          e.stopPropagation();
-                          onSlotClick(dayDate, timeSlot);
-                        }
-                      }}
                       className={cn(
                         "min-h-[60px] sm:min-h-[70px] border border-admin-border-primary/20 rounded-xl p-1.5 sm:p-2 relative transition-all duration-300 group",
                         (!isSlotAvailable || isPastDate || isPastTime) &&
@@ -458,6 +451,12 @@ export default function AppointmentCalendar({
                           onSlotClick &&
                           "cursor-pointer hover:bg-white hover:border-admin-accent-primary/30 hover:shadow-premium-sm",
                       )}
+                      onClick={(e) => {
+                        if (isClickable && onSlotClick) {
+                          e.stopPropagation();
+                          onSlotClick(dayDate, timeSlot);
+                        }
+                      }}
                     >
                       {isClickable && (
                         <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
@@ -479,21 +478,21 @@ export default function AppointmentCalendar({
 
                             return (
                               <div
-                                key={apt.id}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  onAppointmentClick(apt);
-                                }}
                                 className={cn(
                                   "text-[9px] sm:text-[10px] p-2 rounded-xl cursor-pointer hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 border backdrop-blur-md z-10 flex flex-col justify-between overflow-hidden",
                                   getAppointmentStatusColor(apt.status),
                                 )}
+                                key={apt.id}
                                 style={{
                                   height: `${Math.max(56, (apt.duration_minutes / (scheduleSettings?.slot_duration_minutes || 15)) * 60 - 4)}px`,
                                   position: "absolute",
                                   width: "calc(100% - 8px)",
                                   top: "4px",
                                   left: "4px",
+                                }}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  onAppointmentClick(apt);
                                 }}
                               >
                                 <div className="space-y-0.5 sm:space-y-1">
@@ -554,13 +553,13 @@ export default function AppointmentCalendar({
                 </div>
                 {weekDays.map((day, idx) => (
                   <div
-                    key={idx}
                     className={cn(
                       "relative text-center py-2 px-1 rounded-xl transition-all duration-300 border border-transparent",
                       isToday(day)
                         ? "bg-admin-accent-primary/10 border-admin-accent-primary/20 shadow-premium-sm"
                         : "hover:bg-white/40",
                     )}
+                    key={idx}
                   >
                     <div
                       className={cn(
@@ -593,8 +592,8 @@ export default function AppointmentCalendar({
               <div className="p-2 space-y-1 w-full relative">
                 {timeSlots.map((timeSlot) => (
                   <div
-                    key={timeSlot}
                     className="grid grid-cols-8 gap-1.5 sm:gap-2 min-h-[60px] sm:min-h-[70px] w-full"
+                    key={timeSlot}
                   >
                     <div className="text-[10px] font-black text-admin-text-tertiary py-4 text-right pr-4 flex flex-col justify-start opacity-40">
                       <span>{timeSlot.split(":")[0]}</span>
@@ -623,13 +622,6 @@ export default function AppointmentCalendar({
 
                       return (
                         <div
-                          key={dayIdx}
-                          onClick={(e) => {
-                            if (isClickable && onSlotClick) {
-                              e.stopPropagation();
-                              onSlotClick(day, timeSlot);
-                            }
-                          }}
                           className={cn(
                             "min-h-[70px] border border-admin-border-primary/20 rounded-xl p-1 relative transition-all duration-300 group",
                             (!isSlotAvailable || isPastDate || isPastTime) &&
@@ -642,6 +634,13 @@ export default function AppointmentCalendar({
                               onSlotClick &&
                               "cursor-pointer hover:bg-white hover:border-admin-accent-primary/30 hover:shadow-premium-sm",
                           )}
+                          key={dayIdx}
+                          onClick={(e) => {
+                            if (isClickable && onSlotClick) {
+                              e.stopPropagation();
+                              onSlotClick(day, timeSlot);
+                            }
+                          }}
                         >
                           {isClickable && (
                             <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
@@ -664,21 +663,21 @@ export default function AppointmentCalendar({
 
                                 return (
                                   <div
-                                    key={apt.id}
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      onAppointmentClick(apt);
-                                    }}
                                     className={cn(
                                       "text-[10px] p-2 rounded-xl cursor-pointer hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 border backdrop-blur-md z-10 flex flex-col justify-between overflow-hidden",
                                       getAppointmentStatusColor(apt.status),
                                     )}
+                                    key={apt.id}
                                     style={{
                                       height: `${(apt.duration_minutes / (scheduleSettings?.slot_duration_minutes || 15)) * 70 - 4}px`,
                                       position: "absolute",
                                       width: "calc(100% - 8px)",
                                       top: "4px",
                                       left: "4px",
+                                    }}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      onAppointmentClick(apt);
                                     }}
                                   >
                                     <div className="space-y-1">
@@ -733,8 +732,8 @@ export default function AppointmentCalendar({
       <div className="grid grid-cols-7 gap-2 bg-admin-bg-tertiary/20 p-2 rounded-2xl border border-admin-border-primary/30 backdrop-blur-sm">
         {["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"].map((day) => (
           <div
-            key={day}
             className="text-center font-bold text-[10px] text-admin-text-tertiary uppercase tracking-widest py-2"
+            key={day}
           >
             {day}
           </div>
@@ -751,7 +750,6 @@ export default function AppointmentCalendar({
 
           return (
             <Card
-              key={idx}
               className={cn(
                 "min-h-[140px] cursor-pointer hover:shadow-premium-md transition-all duration-300 border-admin-border-primary/20 bg-white/50 backdrop-blur-sm relative overflow-hidden group",
                 !isCurrentMonth && "opacity-30",
@@ -759,6 +757,7 @@ export default function AppointmentCalendar({
                 isDayToday &&
                   "bg-admin-accent-primary/[0.03] border-admin-accent-primary/40 shadow-premium-sm ring-1 ring-admin-accent-primary/20",
               )}
+              key={idx}
               onClick={() => {
                 setSelectedDate(day);
                 onDateChange(day);
@@ -786,15 +785,15 @@ export default function AppointmentCalendar({
                     {dayAppointments.slice(0, 3).map((apt) => {
                       return (
                         <div
+                          className={cn(
+                            "text-[8px] p-1.5 rounded-lg cursor-pointer hover:scale-[1.03] transition-all border font-bold uppercase tracking-tighter truncate leading-tight shadow-sm",
+                            getAppointmentStatusColor(apt.status),
+                          )}
                           key={apt.id}
                           onClick={(e) => {
                             e.stopPropagation();
                             onAppointmentClick(apt);
                           }}
-                          className={cn(
-                            "text-[8px] p-1.5 rounded-lg cursor-pointer hover:scale-[1.03] transition-all border font-bold uppercase tracking-tighter truncate leading-tight shadow-sm",
-                            getAppointmentStatusColor(apt.status),
-                          )}
                         >
                           <div className="flex items-center gap-1">
                             <span className="opacity-70">

@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createServiceRoleClient } from "@/lib/supabase";
-import { appLogger as logger } from "@/lib/logger";
+
 import { BackupService } from "@/lib/backup-service";
+import { appLogger as logger } from "@/lib/logger";
+import { createServiceRoleClient } from "@/lib/supabase";
 
 /**
  * GET /api/cron/backups
@@ -76,7 +77,7 @@ export async function GET(request: NextRequest) {
         }
 
         results.success++;
-      } catch (e: any) {
+      } catch (e: unknown) {
         logger.error(`Backup failed for org ${org.slug}`, { error: e });
         results.failed++;
         results.errors.push(`${org.slug}: ${e.message}`);
@@ -91,7 +92,7 @@ export async function GET(request: NextRequest) {
       results,
       duration_seconds: duration,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error("Cron backup job failed", { error });
     return NextResponse.json(
       { error: "Internal Server Error", details: error.message },

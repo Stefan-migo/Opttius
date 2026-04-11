@@ -1,11 +1,11 @@
-import { OpenAIProvider } from "./openai";
+import type { LLMProvider, LLMProviderInterface } from "../types";
 import { AnthropicProvider } from "./anthropic";
-import { GoogleProvider } from "./google";
 import { DeepSeekProvider } from "./deepseek";
-import { OpenRouterProvider } from "./openrouter";
+import { GoogleProvider } from "./google";
 import { KilocodeProvider } from "./kilocode";
 import { MinimaxProvider } from "./minimax";
-import type { LLMProviderInterface, LLMProvider } from "../types";
+import { OpenAIProvider } from "./openai";
+import { OpenRouterProvider } from "./openrouter";
 
 export const providers: Record<LLMProvider, () => LLMProviderInterface> = {
   openai: () => new OpenAIProvider(),

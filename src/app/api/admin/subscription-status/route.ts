@@ -3,8 +3,9 @@
  * Returns subscription status for the current user's organization
  */
 import { NextResponse } from "next/server";
-import { createClient } from "@/utils/supabase/server";
+
 import { getSubscriptionStatus } from "@/lib/saas/subscription-status";
+import { createClient } from "@/utils/supabase/server";
 
 export const dynamic = "force-dynamic";
 export async function GET() {

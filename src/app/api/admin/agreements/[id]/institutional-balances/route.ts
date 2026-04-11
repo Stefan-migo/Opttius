@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/utils/supabase/server";
+
+import {
+  createApiErrorResponse,
+  createApiSuccessResponse,
+} from "@/lib/api/response";
 import { appLogger as logger } from "@/lib/logger";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
-import {
-  createApiSuccessResponse,
-  createApiErrorResponse,
-} from "@/lib/api/response";
+import { createClient } from "@/utils/supabase/server";
 
 export const dynamic = "force-dynamic";
 
@@ -85,7 +86,7 @@ export async function GET(
       return createApiErrorResponse(new Error(error.message));
     }
 
-    const flattened = (balances || []).map((b: any) => ({
+    const flattened = (balances || []).map((b: unknown) => ({
       ...b,
       order_number: b.orders?.order_number,
       order_total: b.orders?.total_amount,

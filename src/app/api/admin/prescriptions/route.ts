@@ -1,24 +1,25 @@
 import { NextRequest } from "next/server";
-import { createClient } from "@/utils/supabase/server";
-import { createServiceRoleClient } from "@/utils/supabase/server";
-import { getBranchContext, addBranchFilter } from "@/lib/api/branch-middleware";
-import { normalizeRUT } from "@/lib/utils/rut";
-import { appLogger as logger } from "@/lib/logger";
-import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
+
+import { addBranchFilter, getBranchContext } from "@/lib/api/branch-middleware";
 import {
   APIError,
   AuthenticationError,
   AuthorizationError,
 } from "@/lib/api/errors";
 import {
-  createPaginatedResponse,
   createApiErrorResponse,
+  createPaginatedResponse,
 } from "@/lib/api/response";
-import { prescriptionListQuerySchema } from "@/lib/api/validation/zod-schemas";
 import {
   parseAndValidateQuery,
   validationErrorResponse,
 } from "@/lib/api/validation/zod-helpers";
+import { prescriptionListQuerySchema } from "@/lib/api/validation/zod-schemas";
+import { appLogger as logger } from "@/lib/logger";
+import { normalizeRUT } from "@/lib/utils/rut";
+import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
+import { createClient } from "@/utils/supabase/server";
+import { createServiceRoleClient } from "@/utils/supabase/server";
 
 export const dynamic = "force-dynamic";
 

@@ -105,7 +105,7 @@ export interface SecurityEvent {
   userAgent?: string;
 
   /** Additional event details */
-  details: Record<string, any>;
+  details: Record<string, unknown>;
 
   /** Correlation ID for linking related events */
   correlationId?: string;
@@ -244,7 +244,7 @@ export interface AlertChannel {
   enabled: boolean;
 
   /** Channel-specific configuration */
-  config: Record<string, any>;
+  config: Record<string, unknown>;
 
   /** Human-readable name for the channel */
   name: string;
@@ -471,5 +471,3 @@ export function getSeverityForEventType(
   if (mediumEvents.includes(eventType)) return "medium";
   return "low";
 }
-
-

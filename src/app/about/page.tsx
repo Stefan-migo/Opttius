@@ -1,6 +1,7 @@
+import { ArrowLeft, ArrowRight } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowLeft, ArrowRight } from "lucide-react";
+
 import { MinimalLandingHeader } from "@/components/landing/MinimalLandingHeader";
 import { BreadcrumbStructuredData } from "@/components/seo/BreadcrumbStructuredData";
 
@@ -50,8 +51,8 @@ export default function AboutPage() {
 
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-24 md:py-32 pt-32">
         <Link
-          href="/"
           className="inline-flex items-center gap-2 text-epoch-primary/70 hover:text-epoch-primary font-sans text-sm font-medium transition-colors mb-12"
+          href="/"
         >
           <ArrowLeft className="h-4 w-4" />
           Volver al inicio
@@ -97,8 +98,8 @@ export default function AboutPage() {
           <div className="grid md:grid-cols-1 gap-12">
             {pillars.map((pillar, index) => (
               <div
-                key={index}
                 className="space-y-4 p-6 border border-epoch-primary/5 bg-white"
+                key={index}
               >
                 <div className="w-12 h-[1px] bg-epoch-accent" />
                 <h3 className="text-lg font-display font-bold text-epoch-primary uppercase tracking-wider">
@@ -125,8 +126,8 @@ export default function AboutPage() {
             rentabilidad comercial. Hemos unido ambos mundos.
           </p>
           <Link
-            href="/solicitar-demo"
             className="inline-flex items-center gap-3 px-10 py-4 bg-epoch-primary hover:bg-epoch-surface text-white font-display font-bold uppercase text-xs tracking-[0.3em] transition-all duration-500 group"
+            href="/solicitar-demo"
           >
             Elevar el Estándar de mi Óptica
             <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-2" />
@@ -138,26 +139,26 @@ export default function AboutPage() {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-wrap gap-6 justify-center text-[10px] font-display uppercase tracking-[0.2em]">
             <Link
-              href="/legal/privacidad"
               className="text-epoch-primary/70 hover:text-epoch-primary"
+              href="/legal/privacidad"
             >
               Privacidad
             </Link>
             <Link
-              href="/legal/terminos"
               className="text-epoch-primary/70 hover:text-epoch-primary"
+              href="/legal/terminos"
             >
               Términos
             </Link>
             <Link
-              href="/legal/cookies"
               className="text-epoch-primary/70 hover:text-epoch-primary"
+              href="/legal/cookies"
             >
               Cookies
             </Link>
             <Link
-              href="/legal/seguridad"
               className="text-epoch-primary/70 hover:text-epoch-primary"
+              href="/legal/seguridad"
             >
               Seguridad
             </Link>

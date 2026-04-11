@@ -4,8 +4,8 @@
  * Values are the same as in Gestión SaaS Opttius so the landing always reflects current pricing.
  * Uses service role when available; falls back to anon (RLS allows public read via policy).
  */
-import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;

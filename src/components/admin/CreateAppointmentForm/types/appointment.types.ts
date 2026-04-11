@@ -59,7 +59,7 @@ export interface AppointmentType {
 export interface CreateAppointmentFormProps {
   onSuccess: () => void;
   onCancel: () => void;
-  initialData?: any;
+  initialData?: unknown;
   initialCustomerId?: string;
   lockDateTime?: boolean;
   /**

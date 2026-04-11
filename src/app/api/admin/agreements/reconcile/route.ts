@@ -1,26 +1,27 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient, createServiceRoleClient } from "@/utils/supabase/server";
-import { appLogger as logger } from "@/lib/logger";
-import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
-import { withRateLimit, rateLimitConfigs } from "@/lib/api/middleware";
+
+import { ValidationError } from "@/lib/api/errors";
+import { rateLimitConfigs, withRateLimit } from "@/lib/api/middleware";
 import {
-  createApiSuccessResponse,
   createApiErrorResponse,
+  createApiSuccessResponse,
 } from "@/lib/api/response";
-import { reconcileSchema } from "@/lib/api/validation/zod-schemas";
 import {
   parseAndValidateBody,
   validationErrorResponse,
 } from "@/lib/api/validation/zod-helpers";
-import { ValidationError } from "@/lib/api/errors";
-import { InternalInstitutionalBilling } from "@/lib/billing/adapters/InternalInstitutionalBilling";
+import { reconcileSchema } from "@/lib/api/validation/zod-schemas";
 import type { InstitutionalInvoice } from "@/lib/billing/adapters/InstitutionalInvoiceAdapter";
+import { InternalInstitutionalBilling } from "@/lib/billing/adapters/InternalInstitutionalBilling";
+import { appLogger as logger } from "@/lib/logger";
+import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
+import { createClient, createServiceRoleClient } from "@/utils/supabase/server";
 
 export const dynamic = "force-dynamic";
 
 export async function POST(request: NextRequest) {
   try {
-    return await (withRateLimit(rateLimitConfigs.agreements) as any)(
+    return await (withRateLimit(rateLimitConfigs.agreements) as unknown)(
       request,
       async () => {
         const supabase = await createClient();
@@ -100,9 +101,9 @@ export async function POST(request: NextRequest) {
             if (
               balancesWithDetails &&
               balancesWithDetails.length > 0 &&
-              (balancesWithDetails[0] as any).agreement_id
+              (balancesWithDetails[0] as unknown).agreement_id
             ) {
-              const first = balancesWithDetails[0] as any;
+              const first = balancesWithDetails[0] as unknown;
               const agreementId = first.agreement_id;
 
               const { data: agreement } = await serviceSupabase
@@ -118,7 +119,7 @@ export async function POST(request: NextRequest) {
                   agreement.branch_id ??
                   (first.orders?.branch_id as string | undefined);
                 if (branchId) {
-                  const dates = (balancesWithDetails as any[])
+                  const dates = (balancesWithDetails as unknown[])
                     .map((b) => b.created_at)
                     .filter(Boolean);
                   const periodFrom = dates.length
@@ -136,7 +137,7 @@ export async function POST(request: NextRequest) {
                         .slice(0, 10)
                     : new Date().toISOString().slice(0, 10);
 
-                  const items = (balancesWithDetails as any[]).map((b) => ({
+                  const items = (balancesWithDetails as unknown[]).map((b) => ({
                     order_number: b.orders?.order_number ?? b.id,
                     oc_number: b.agreement_purchase_orders?.oc_number,
                     description: `Servicios ópticos - Orden ${b.orders?.order_number ?? b.id}`,

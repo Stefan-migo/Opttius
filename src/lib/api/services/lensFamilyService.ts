@@ -1,11 +1,12 @@
 /**
  * Lens Family Service
- * 
+ *
  * Service for managing lens families and their configurations.
  */
 
-import { ApiClient, isSuccess, unwrapData } from '../client-helpers';
-import { handleApiError } from '@/lib/services/errorService';
+import { handleApiError } from "@/lib/services/errorService";
+
+import { ApiClient, isSuccess, unwrapData } from "../client-helpers";
 
 // ============================================
 // Types
@@ -49,8 +50,10 @@ class LensFamilyService {
         include_inactive: includeInactive.toString(),
       });
 
-      const response = await this.client.get<LensFamily[]>(`/api/admin/lens-families?${params}`);
-      
+      const response = await this.client.get<LensFamily[]>(
+        `/api/admin/lens-families?${params}`,
+      );
+
       if (isSuccess(response)) {
         const data = unwrapData(response);
         return Array.isArray(data) ? data : [];
@@ -70,8 +73,10 @@ class LensFamilyService {
    */
   async getById(id: string): Promise<LensFamily | null> {
     try {
-      const response = await this.client.get<LensFamily>(`/api/admin/lens-families/${id}`);
-      
+      const response = await this.client.get<LensFamily>(
+        `/api/admin/lens-families/${id}`,
+      );
+
       if (isSuccess(response)) {
         return unwrapData(response);
       }

@@ -1,18 +1,31 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import {
+  AlertTriangle,
+  CheckCircle,
+  Copy,
+  CreditCard,
+  Eye,
+  EyeOff,
+  Globe,
+  Settings,
+  Shield,
+  TestTube,
+} from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
+
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
+  CardDescription,
   CardHeader,
   CardTitle,
-  CardDescription,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
@@ -20,19 +33,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  CreditCard,
-  Eye,
-  EyeOff,
-  Copy,
-  CheckCircle,
-  AlertTriangle,
-  TestTube,
-  Globe,
-  Shield,
-  Settings,
-} from "lucide-react";
-import { toast } from "sonner";
+import { Switch } from "@/components/ui/switch";
 
 interface PaymentConfig {
   mercadopago_access_token?: string;
@@ -46,8 +47,8 @@ interface PaymentConfig {
 }
 
 interface PaymentConfigProps {
-  configs: any[];
-  onUpdate: (configKey: string, value: any) => Promise<void>;
+  configs: unknown[];
+  onUpdate: (configKey: string, value: unknown) => Promise<void>;
 }
 
 export default function PaymentConfig({
@@ -167,12 +168,12 @@ export default function PaymentConfig({
     );
   };
 
-  const getConfigValue = (key: string): any => {
+  const getConfigValue = (key: string): unknown => {
     const config = configs.find((c) => c.config_key === `mercadopago_${key}`);
     return config?.config_value;
   };
 
-  const handleUpdate = async (key: string, value: any) => {
+  const handleUpdate = async (key: string, value: unknown) => {
     try {
       setLoading(true);
       await onUpdate(`mercadopago_${key}`, value);
@@ -260,7 +261,7 @@ export default function PaymentConfig({
           {/* Production Credentials Section */}
           <div className="space-y-4">
             <div className="flex items-center gap-2 pb-2 border-b">
-              <Badge variant="default" className="font-semibold">
+              <Badge className="font-semibold" variant="default">
                 Producción
               </Badge>
               <p className="text-xs text-muted-foreground">
@@ -274,7 +275,10 @@ export default function PaymentConfig({
               <div className="flex gap-2">
                 <div className="relative flex-1">
                   <Input
+                    className="pr-10"
+                    disabled={loading}
                     id="access_token"
+                    placeholder="PROD_ACCESS_TOKEN_HERE"
                     type={showTokens.access_token ? "text" : "password"}
                     value={
                       showTokens.access_token
@@ -285,19 +289,16 @@ export default function PaymentConfig({
                           ? maskValue(credentialValues.access_token)
                           : maskValue(getConfigValue("access_token"))
                     }
+                    onBlur={() => handleCredentialBlur("access_token")}
                     onChange={(e) =>
                       handleCredentialChange("access_token", e.target.value)
                     }
-                    onBlur={() => handleCredentialBlur("access_token")}
-                    placeholder="PROD_ACCESS_TOKEN_HERE"
-                    disabled={loading}
-                    className="pr-10"
                   />
                   <Button
+                    className="absolute right-0 top-0 h-full px-3"
+                    size="sm"
                     type="button"
                     variant="ghost"
-                    size="sm"
-                    className="absolute right-0 top-0 h-full px-3"
                     onClick={() => handleToggleVisibility("access_token")}
                   >
                     {showTokens.access_token ? (
@@ -319,7 +320,10 @@ export default function PaymentConfig({
               <div className="flex gap-2">
                 <div className="relative flex-1">
                   <Input
+                    className="pr-10"
+                    disabled={loading}
                     id="public_key"
+                    placeholder="PUBLIC_KEY_HERE"
                     type={showTokens.public_key ? "text" : "password"}
                     value={
                       showTokens.public_key
@@ -330,19 +334,16 @@ export default function PaymentConfig({
                           ? maskValue(credentialValues.public_key)
                           : maskValue(getConfigValue("public_key"))
                     }
+                    onBlur={() => handleCredentialBlur("public_key")}
                     onChange={(e) =>
                       handleCredentialChange("public_key", e.target.value)
                     }
-                    onBlur={() => handleCredentialBlur("public_key")}
-                    placeholder="PUBLIC_KEY_HERE"
-                    disabled={loading}
-                    className="pr-10"
                   />
                   <Button
+                    className="absolute right-0 top-0 h-full px-3"
+                    size="sm"
                     type="button"
                     variant="ghost"
-                    size="sm"
-                    className="absolute right-0 top-0 h-full px-3"
                     onClick={() => handleToggleVisibility("public_key")}
                   >
                     {showTokens.public_key ? (
@@ -367,7 +368,10 @@ export default function PaymentConfig({
               <div className="flex gap-2">
                 <div className="relative flex-1">
                   <Input
+                    className="pr-10"
+                    disabled={loading}
                     id="webhook_secret"
+                    placeholder="WEBHOOK_SECRET_HERE"
                     type={showTokens.webhook_secret ? "text" : "password"}
                     value={
                       showTokens.webhook_secret
@@ -378,19 +382,16 @@ export default function PaymentConfig({
                           ? maskValue(credentialValues.webhook_secret)
                           : maskValue(getConfigValue("webhook_secret"))
                     }
+                    onBlur={() => handleCredentialBlur("webhook_secret")}
                     onChange={(e) =>
                       handleCredentialChange("webhook_secret", e.target.value)
                     }
-                    onBlur={() => handleCredentialBlur("webhook_secret")}
-                    placeholder="WEBHOOK_SECRET_HERE"
-                    disabled={loading}
-                    className="pr-10"
                   />
                   <Button
+                    className="absolute right-0 top-0 h-full px-3"
+                    size="sm"
                     type="button"
                     variant="ghost"
-                    size="sm"
-                    className="absolute right-0 top-0 h-full px-3"
                     onClick={() => handleToggleVisibility("webhook_secret")}
                   >
                     {showTokens.webhook_secret ? (
@@ -411,7 +412,7 @@ export default function PaymentConfig({
           {/* Test Credentials Section */}
           <div className="space-y-4 p-4 bg-muted/30 rounded-lg border border-dashed">
             <div className="flex items-center gap-2 pb-2 border-b">
-              <Badge variant="default" className="font-semibold">
+              <Badge className="font-semibold" variant="default">
                 Prueba (Sandbox)
               </Badge>
               <p className="text-xs text-muted-foreground">
@@ -425,7 +426,10 @@ export default function PaymentConfig({
               <div className="flex gap-2">
                 <div className="relative flex-1">
                   <Input
+                    className="pr-10"
+                    disabled={loading}
                     id="test_access_token"
+                    placeholder="TEST_ACCESS_TOKEN_HERE"
                     type={showTokens.test_access_token ? "text" : "password"}
                     value={
                       showTokens.test_access_token
@@ -436,22 +440,19 @@ export default function PaymentConfig({
                           ? maskValue(credentialValues.test_access_token)
                           : maskValue(getConfigValue("test_access_token"))
                     }
+                    onBlur={() => handleCredentialBlur("test_access_token")}
                     onChange={(e) =>
                       handleCredentialChange(
                         "test_access_token",
                         e.target.value,
                       )
                     }
-                    onBlur={() => handleCredentialBlur("test_access_token")}
-                    placeholder="TEST_ACCESS_TOKEN_HERE"
-                    disabled={loading}
-                    className="pr-10"
                   />
                   <Button
+                    className="absolute right-0 top-0 h-full px-3"
+                    size="sm"
                     type="button"
                     variant="ghost"
-                    size="sm"
-                    className="absolute right-0 top-0 h-full px-3"
                     onClick={() => handleToggleVisibility("test_access_token")}
                   >
                     {showTokens.test_access_token ? (
@@ -473,7 +474,10 @@ export default function PaymentConfig({
               <div className="flex gap-2">
                 <div className="relative flex-1">
                   <Input
+                    className="pr-10"
+                    disabled={loading}
                     id="test_public_key"
+                    placeholder="TEST_PUBLIC_KEY_HERE"
                     type={showTokens.test_public_key ? "text" : "password"}
                     value={
                       showTokens.test_public_key
@@ -484,19 +488,16 @@ export default function PaymentConfig({
                           ? maskValue(credentialValues.test_public_key)
                           : maskValue(getConfigValue("test_public_key"))
                     }
+                    onBlur={() => handleCredentialBlur("test_public_key")}
                     onChange={(e) =>
                       handleCredentialChange("test_public_key", e.target.value)
                     }
-                    onBlur={() => handleCredentialBlur("test_public_key")}
-                    placeholder="TEST_PUBLIC_KEY_HERE"
-                    disabled={loading}
-                    className="pr-10"
                   />
                   <Button
+                    className="absolute right-0 top-0 h-full px-3"
+                    size="sm"
                     type="button"
                     variant="ghost"
-                    size="sm"
-                    className="absolute right-0 top-0 h-full px-3"
                     onClick={() => handleToggleVisibility("test_public_key")}
                   >
                     {showTokens.test_public_key ? (
@@ -520,7 +521,10 @@ export default function PaymentConfig({
               <div className="flex gap-2">
                 <div className="relative flex-1">
                   <Input
+                    className="pr-10"
+                    disabled={loading}
                     id="test_webhook_secret"
+                    placeholder="TEST_WEBHOOK_SECRET_HERE"
                     type={showTokens.test_webhook_secret ? "text" : "password"}
                     value={
                       showTokens.test_webhook_secret
@@ -531,22 +535,19 @@ export default function PaymentConfig({
                           ? maskValue(credentialValues.test_webhook_secret)
                           : maskValue(getConfigValue("test_webhook_secret"))
                     }
+                    onBlur={() => handleCredentialBlur("test_webhook_secret")}
                     onChange={(e) =>
                       handleCredentialChange(
                         "test_webhook_secret",
                         e.target.value,
                       )
                     }
-                    onBlur={() => handleCredentialBlur("test_webhook_secret")}
-                    placeholder="TEST_WEBHOOK_SECRET_HERE"
-                    disabled={loading}
-                    className="pr-10"
                   />
                   <Button
+                    className="absolute right-0 top-0 h-full px-3"
+                    size="sm"
                     type="button"
                     variant="ghost"
-                    size="sm"
-                    className="absolute right-0 top-0 h-full px-3"
                     onClick={() =>
                       handleToggleVisibility("test_webhook_secret")
                     }
@@ -585,19 +586,19 @@ export default function PaymentConfig({
               </p>
             </div>
             <Switch
-              id="test_mode"
               checked={getConfigValue("test_mode") || false}
-              onCheckedChange={(checked) => handleUpdate("test_mode", checked)}
               disabled={loading}
+              id="test_mode"
+              onCheckedChange={(checked) => handleUpdate("test_mode", checked)}
             />
           </div>
 
           {/* Test Connection Button */}
           <div className="flex items-center gap-4 pt-4 border-t">
             <Button
-              onClick={handleTestConnection}
               disabled={testing || loading}
               variant="outline"
+              onClick={handleTestConnection}
             >
               <TestTube
                 className={`h-4 w-4 mr-2 ${testing ? "animate-spin" : ""}`}
@@ -645,18 +646,18 @@ export default function PaymentConfig({
           {/* Account Money - Always Available (cannot be disabled by MercadoPago API) */}
           <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg border border-dashed">
             <div className="flex items-center gap-2">
-              <Label htmlFor="method_account_money" className="font-semibold">
+              <Label className="font-semibold" htmlFor="method_account_money">
                 Dinero en cuenta de Mercado Pago
               </Label>
-              <Badge variant="default" className="text-xs">
+              <Badge className="text-xs" variant="default">
                 Siempre disponible
               </Badge>
             </div>
             <Switch
-              id="method_account_money"
               checked={true}
-              disabled={true}
               className="opacity-50"
+              disabled={true}
+              id="method_account_money"
             />
           </div>
 
@@ -676,13 +677,14 @@ export default function PaymentConfig({
                 currentMethods.includes(method);
 
               return (
-                <div key={method} className="flex items-center justify-between">
+                <div className="flex items-center justify-between" key={method}>
                   <Label htmlFor={`method_${method}`}>
                     {methodNames[method]}
                   </Label>
                   <Switch
-                    id={`method_${method}`}
                     checked={isEnabled}
+                    disabled={loading}
+                    id={`method_${method}`}
                     onCheckedChange={(checked) => {
                       const current = getConfigValue("payment_methods") || [];
                       const updated = checked
@@ -692,7 +694,6 @@ export default function PaymentConfig({
                           : [];
                       handleUpdate("payment_methods", updated);
                     }}
-                    disabled={loading}
                   />
                 </div>
               );
@@ -720,11 +721,11 @@ export default function PaymentConfig({
           <div className="space-y-2">
             <Label htmlFor="max_installments">Máximo de Cuotas</Label>
             <Select
+              disabled={loading}
               value={String(getConfigValue("max_installments") || 12)}
               onValueChange={(value) =>
                 handleUpdate("max_installments", parseInt(value))
               }
-              disabled={loading}
             >
               <SelectTrigger id="max_installments">
                 <SelectValue />
@@ -751,12 +752,12 @@ export default function PaymentConfig({
               </p>
             </div>
             <Switch
-              id="auto_return"
               checked={getConfigValue("auto_return") ?? true}
+              disabled={loading}
+              id="auto_return"
               onCheckedChange={(checked) =>
                 handleUpdate("auto_return", checked)
               }
-              disabled={loading}
             />
           </div>
 
@@ -770,12 +771,12 @@ export default function PaymentConfig({
               </p>
             </div>
             <Switch
-              id="binary_mode"
               checked={getConfigValue("binary_mode") || false}
+              disabled={loading}
+              id="binary_mode"
               onCheckedChange={(checked) =>
                 handleUpdate("binary_mode", checked)
               }
-              disabled={loading}
             />
           </div>
         </CardContent>
@@ -800,9 +801,9 @@ export default function PaymentConfig({
             <Label>URL del Webhook</Label>
             <div className="flex gap-2">
               <Input
-                value={webhookUrl}
                 readOnly
                 className="font-mono text-sm"
+                value={webhookUrl}
               />
               <Button
                 type="button"

@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { CheckCircle2, Loader2, Star } from "lucide-react";
 import { useParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
 import {
   Card,
   CardContent,
@@ -12,8 +13,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Star, CheckCircle2, Loader2 } from "lucide-react";
-import { toast } from "sonner";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 
 export default function EncuestaPage() {
   const params = useParams();
@@ -148,17 +149,17 @@ export default function EncuestaPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form className="space-y-6" onSubmit={handleSubmit}>
               <div className="space-y-3">
                 <Label>Puntuación</Label>
                 <div className="flex gap-2 justify-center py-4">
                   {[1, 2, 3, 4, 5].map((n) => (
                     <button
+                      aria-label={`${n} estrellas`}
+                      className="p-2 rounded-lg transition-colors hover:bg-epoch-primary/10 focus:outline-none focus:ring-2 focus:ring-epoch-primary/30"
                       key={n}
                       type="button"
                       onClick={() => setScore(n)}
-                      className="p-2 rounded-lg transition-colors hover:bg-epoch-primary/10 focus:outline-none focus:ring-2 focus:ring-epoch-primary/30"
-                      aria-label={`${n} estrellas`}
                     >
                       <Star
                         className={`h-10 w-10 ${
@@ -175,20 +176,20 @@ export default function EncuestaPage() {
               <div className="space-y-2">
                 <Label htmlFor="comment">Comentario (opcional)</Label>
                 <Textarea
+                  className="resize-none"
                   id="comment"
-                  value={comment}
-                  onChange={(e) => setComment(e.target.value)}
+                  maxLength={1000}
                   placeholder="¿Algo que quieras agregar?"
                   rows={3}
-                  maxLength={1000}
-                  className="resize-none"
+                  value={comment}
+                  onChange={(e) => setComment(e.target.value)}
                 />
               </div>
 
               <Button
-                type="submit"
-                disabled={score === null || submitting}
                 className="w-full"
+                disabled={score === null || submitting}
+                type="submit"
               >
                 {submitting ? (
                   <>

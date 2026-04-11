@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
+
+import { AuthorizationError } from "@/lib/api/errors";
 import { requireRoot } from "@/lib/api/root-middleware";
+import { parseAndValidateBody } from "@/lib/api/validation/zod-helpers";
+import { updateSaasSupportTicketSchema } from "@/lib/api/validation/zod-schemas";
+import { appLogger as logger } from "@/lib/logger";
 import { createClient } from "@/utils/supabase/server";
 import { createServiceRoleClient } from "@/utils/supabase/service-role";
-import { appLogger as logger } from "@/lib/logger";
-import { AuthorizationError } from "@/lib/api/errors";
-import { updateSaasSupportTicketSchema } from "@/lib/api/validation/zod-schemas";
-import { parseAndValidateBody } from "@/lib/api/validation/zod-helpers";
 
 /**
  * GET /api/admin/saas-management/support/tickets/[id]
@@ -219,7 +220,7 @@ export async function PATCH(
                 category: ticket.category,
                 requester_name: ticket.requester_name,
                 requester_email: ticket.requester_email,
-                organization: ticket.organization as any,
+                organization: ticket.organization as unknown,
               },
               assignedUser.email,
             );
@@ -261,7 +262,7 @@ export async function PATCH(
               category: ticket.category,
               requester_name: ticket.requester_name,
               requester_email: ticket.requester_email,
-              organization: ticket.organization as any,
+              organization: ticket.organization as unknown,
             },
             body.resolution || ticket.resolution || null,
           );

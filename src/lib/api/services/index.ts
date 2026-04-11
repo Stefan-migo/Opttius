@@ -6,187 +6,187 @@
  */
 
 // Customer Service
+export type {
+  CreateCustomerData,
+  CreatePrescriptionData,
+  Customer,
+  CustomerAnalytics,
+  CustomerListResponse,
+  CustomerSearchParams,
+  LensPurchase,
+  Prescription,
+  UpdateCustomerData,
+} from "./customerService";
 export {
-  customerService,
-  getCustomers,
-  getCustomer,
   createCustomer,
-  updateCustomer,
+  createPrescription,
+  customerService,
   deleteCustomer,
-  searchCustomers,
+  getCustomer,
+  getCustomers,
   getCustomerStats,
   getPrescriptions,
-  createPrescription,
-} from "./customerService";
-export type {
-  Customer,
-  CreateCustomerData,
-  UpdateCustomerData,
-  CustomerSearchParams,
-  CustomerListResponse,
-  Prescription,
-  CreatePrescriptionData,
-  LensPurchase,
-  CustomerAnalytics,
+  searchCustomers,
+  updateCustomer,
 } from "./customerService";
 
 // Product Service
-export {
-  productService,
-  getProducts,
-  getProduct,
-  createProduct,
-  updateProduct,
-  deleteProduct,
-  searchProducts,
-  updateProductStock,
-  bulkProductOperations,
-} from "./productService";
 export type {
-  Product,
-  CreateProductData,
-  UpdateProductData,
-  ProductSearchParams,
-  ProductListResponse,
   BulkProductOperationData,
+  CreateProductData,
+  Product,
+  ProductListResponse,
+  ProductSearchParams,
+  UpdateProductData,
+} from "./productService";
+export {
+  bulkProductOperations,
+  createProduct,
+  deleteProduct,
+  getProduct,
+  getProducts,
+  productService,
+  searchProducts,
+  updateProduct,
+  updateProductStock,
 } from "./productService";
 
 // Appointment Service
-export {
-  appointmentService,
-  getAppointments,
-  getAppointment,
-  createAppointment,
-  updateAppointment,
-  deleteAppointment,
-  getAvailability,
-  getScheduleSettings,
-  updateScheduleSettings,
-  confirmAppointment,
-  cancelAppointment,
-} from "./appointmentService";
 export type {
   Appointment,
-  CreateAppointmentData,
-  UpdateAppointmentData,
-  AppointmentSearchParams,
   AppointmentListResponse,
+  AppointmentSearchParams,
   AvailabilitySlot,
+  CreateAppointmentData,
   ScheduleSettings,
+  UpdateAppointmentData,
+} from "./appointmentService";
+export {
+  appointmentService,
+  cancelAppointment,
+  confirmAppointment,
+  createAppointment,
+  deleteAppointment,
+  getAppointment,
+  getAppointments,
+  getAvailability,
+  getScheduleSettings,
+  updateAppointment,
+  updateScheduleSettings,
 } from "./appointmentService";
 
 // Quote Service
-export {
-  quoteService,
-  getQuotes,
-  getQuote,
-  createQuote,
-  updateQuote,
-  deleteQuote,
-  sendQuote,
-  acceptQuote,
-  rejectQuote,
-  convertQuoteToOrder,
-  addQuoteItem,
-  updateQuoteItem,
-  removeQuoteItem,
-} from "./quoteService";
 export type {
+  CreateQuoteData,
   Quote,
   QuoteItem,
-  CreateQuoteData,
-  UpdateQuoteData,
-  QuoteSearchParams,
   QuoteListResponse,
+  QuoteSearchParams,
   QuoteWithItems,
+  UpdateQuoteData,
+} from "./quoteService";
+export {
+  acceptQuote,
+  addQuoteItem,
+  convertQuoteToOrder,
+  createQuote,
+  deleteQuote,
+  getQuote,
+  getQuotes,
+  quoteService,
+  rejectQuote,
+  removeQuoteItem,
+  sendQuote,
+  updateQuote,
+  updateQuoteItem,
 } from "./quoteService";
 
 // Order Service
-export {
-  orderService,
-  getOrders,
-  getOrder,
-  createOrder,
-  createManualOrder,
-  updateOrder,
-  deleteOrder,
-  updateOrderStatus,
-  updatePaymentStatus,
-  addOrderItem,
-  updateOrderItem,
-  removeOrderItem,
-  processRefund,
-} from "./orderService";
 export type {
+  CreateOrderData,
   Order,
   OrderItem,
-  ShippingInfo,
-  CreateOrderData,
-  UpdateOrderData,
-  OrderSearchParams,
   OrderListResponse,
+  OrderSearchParams,
   OrderWithItems,
+  ShippingInfo,
+  UpdateOrderData,
+} from "./orderService";
+export {
+  addOrderItem,
+  createManualOrder,
+  createOrder,
+  deleteOrder,
+  getOrder,
+  getOrders,
+  orderService,
+  processRefund,
+  removeOrderItem,
+  updateOrder,
+  updateOrderItem,
+  updateOrderStatus,
+  updatePaymentStatus,
 } from "./orderService";
 
 // POS Service
-export { posService } from "./posService";
 export type {
   CashRegisterStatus,
   PendingBalanceOrder,
-  ProcessSaleRequest,
-  ProcessSaleResponse,
   PendingPaymentRequest,
   PendingPaymentResponse,
+  ProcessSaleRequest,
+  ProcessSaleResponse,
 } from "./posService";
+export { posService } from "./posService";
 
 // Quote Settings Service
-export { quoteSettingsService } from "./quoteSettingsService";
 export type {
   QuoteSettings,
   UpdateQuoteSettingsData,
 } from "./quoteSettingsService";
+export { quoteSettingsService } from "./quoteSettingsService";
 
 // Lens Family Service
-export { lensFamilyService } from "./lensFamilyService";
 export type { LensFamily, LensFamilyListResponse } from "./lensFamilyService";
+export { lensFamilyService } from "./lensFamilyService";
 
 // Contact Lens Family Service
-export { contactLensFamilyService } from "./contactLensFamilyService";
 export type {
   ContactLensFamily,
   ContactLensFamilyListResponse,
 } from "./contactLensFamilyService";
+export { contactLensFamilyService } from "./contactLensFamilyService";
 
 // Contact Lens Matrix Service
-export { contactLensMatrixService } from "./contactLensMatrixService";
 export type {
   ContactLensMatrixCalculationRequest,
-  ContactLensMatrixCalculationResult,
   ContactLensMatrixCalculationResponse,
+  ContactLensMatrixCalculationResult,
 } from "./contactLensMatrixService";
+export { contactLensMatrixService } from "./contactLensMatrixService";
 
 // Agreement Service
-export {
-  agreementService,
-  getAgreements,
-  getAgreement,
-  createAgreement,
-  updateAgreement,
-  updateAgreementStatus,
-  getPurchaseOrders,
-  createPurchaseOrder,
-  updatePurchaseOrder,
-  getInstitutionalBalances,
-  reconcileBalances,
-  getAgreementAnalytics,
-} from "./agreementService";
 export type {
   Agreement,
-  AgreementPurchaseOrder,
   AgreementInstitutionalBalance,
+  AgreementListParams,
+  AgreementListResponse,
+  AgreementPurchaseOrder,
   CreateAgreementData,
   CreatePurchaseOrderData,
   ReconcileData,
-  AgreementListParams,
-  AgreementListResponse,
+} from "./agreementService";
+export {
+  agreementService,
+  createAgreement,
+  createPurchaseOrder,
+  getAgreement,
+  getAgreementAnalytics,
+  getAgreements,
+  getInstitutionalBalances,
+  getPurchaseOrders,
+  reconcileBalances,
+  updateAgreement,
+  updateAgreementStatus,
+  updatePurchaseOrder,
 } from "./agreementService";

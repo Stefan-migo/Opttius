@@ -1,7 +1,8 @@
 "use client";
 
-import * as React from "react";
 import { ChevronLeft, ChevronRight, MoreHorizontal } from "lucide-react";
+import * as React from "react";
+
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -119,11 +120,11 @@ export function Pagination({
 
       <div className="flex flex-wrap items-center justify-center sm:justify-end gap-1.5 sm:gap-2 order-1 sm:order-2">
         <Button
-          variant="outline"
-          size="sm"
-          onClick={() => onPageChange(currentPage - 1)}
-          disabled={currentPage === 1}
           className="h-8 w-8 sm:h-9 sm:w-9 p-0"
+          disabled={currentPage === 1}
+          size="sm"
+          variant="outline"
+          onClick={() => onPageChange(currentPage - 1)}
         >
           <ChevronLeft className="h-4 w-4" />
           <span className="sr-only">Página anterior</span>
@@ -134,8 +135,8 @@ export function Pagination({
             if (page === "...") {
               return (
                 <span
-                  key={`ellipsis-${index}`}
                   className="px-2 py-1 text-sm text-muted-foreground"
+                  key={`ellipsis-${index}`}
                 >
                   <MoreHorizontal className="h-4 w-4" />
                 </span>
@@ -147,11 +148,11 @@ export function Pagination({
 
             return (
               <Button
-                key={pageNumber}
-                variant={isCurrentPage ? "default" : "outline"}
-                size="sm"
-                onClick={() => onPageChange(pageNumber)}
                 className={`h-8 w-8 sm:h-9 sm:w-9 p-0 min-w-0 ${isCurrentPage ? "" : ""}`}
+                key={pageNumber}
+                size="sm"
+                variant={isCurrentPage ? "default" : "outline"}
+                onClick={() => onPageChange(pageNumber)}
               >
                 {pageNumber}
               </Button>
@@ -160,11 +161,11 @@ export function Pagination({
         </div>
 
         <Button
-          variant="outline"
-          size="sm"
-          onClick={() => onPageChange(currentPage + 1)}
-          disabled={currentPage === totalPages || totalPages === 0}
           className="h-8 w-8 sm:h-9 sm:w-9 p-0"
+          disabled={currentPage === totalPages || totalPages === 0}
+          size="sm"
+          variant="outline"
+          onClick={() => onPageChange(currentPage + 1)}
         >
           <ChevronRight className="h-4 w-4" />
           <span className="sr-only">Página siguiente</span>

@@ -1,26 +1,27 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useParams, useRouter } from "next/navigation";
-import { extractDataFromResponse } from "@/lib/api/response-helpers";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import {
   ArrowLeft,
-  DollarSign,
-  CreditCard,
   Banknote,
+  Building2,
   Calendar,
   CheckCircle,
+  CreditCard,
+  DollarSign,
   FileText,
-  TrendingUp,
-  TrendingDown,
   RefreshCw,
+  TrendingDown,
+  TrendingUp,
   User,
-  Building2,
-  AlertCircle,
 } from "lucide-react";
+import Link from "next/link";
+import { useParams, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Select,
   SelectContent,
@@ -36,9 +37,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { toast } from "sonner";
-import { getBranchHeader } from "@/lib/utils/branch";
-import Link from "next/link";
+import { extractDataFromResponse } from "@/lib/api/response-helpers";
 import { formatCurrency, formatDateTime } from "@/lib/utils";
 
 interface CashClosure {
@@ -159,7 +158,7 @@ export default function CashClosureDetailPage() {
         toast.error(error.error || "Error al cargar el cierre de caja");
         router.push("/admin/cash-register");
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error fetching closure:", error);
       toast.error("Error al cargar el cierre de caja");
       router.push("/admin/cash-register");
@@ -182,7 +181,7 @@ export default function CashClosureDetailPage() {
       } else {
         console.error("Error fetching movements");
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error fetching movements:", error);
     } finally {
       setLoadingMovements(false);
@@ -190,9 +189,11 @@ export default function CashClosureDetailPage() {
   };
 
   const getStatusBadge = (status: string, reopenedAt?: string | null) => {
-    const config: Record<string, { variant: any; label: string }> = {
+    type BadgeVariant = "default" | "secondary" | "destructive" | "outline";
+
+    const config: Record<string, { variant: BadgeVariant; label: string }> = {
       draft: { variant: "outline", label: "Borrador" },
-      confirmed: { variant: "default", label: "Confirmado" },
+      confirmed: { variant: "secondary", label: "Confirmado" },
       reviewed: { variant: "secondary", label: "Revisado" },
       closed: { variant: "default", label: "Cerrada" },
       reopened: { variant: "secondary", label: "Abierta" },
@@ -200,15 +201,18 @@ export default function CashClosureDetailPage() {
 
     // Si está cerrada pero fue reabierta, mostrar como "Abierta"
     if (status === "closed" && reopenedAt) {
-      const statusConfig = config.reopened || config[status];
-      return <Badge variant={statusConfig.variant}>{statusConfig.label}</Badge>;
+      const badgeConfig = config.reopened || {
+        variant: "outline" as BadgeVariant,
+        label: "Abierta",
+      };
+      return <Badge variant={badgeConfig.variant}>{badgeConfig.label}</Badge>;
     }
 
-    const statusConfig = config[status] || {
-      variant: "outline",
+    const badgeConfig = config[status] || {
+      variant: "outline" as BadgeVariant,
       label: status,
     };
-    return <Badge variant={statusConfig.variant}>{statusConfig.label}</Badge>;
+    return <Badge variant={badgeConfig.variant}>{badgeConfig.label}</Badge>;
   };
 
   const getPaymentMethodLabel = (method: string) => {
@@ -244,8 +248,8 @@ export default function CashClosureDetailPage() {
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4 min-w-0">
-          <Link href="/admin/cash-register" className="shrink-0">
-            <Button variant="outline" size="sm" className="w-full sm:w-auto">
+          <Link className="shrink-0" href="/admin/cash-register">
+            <Button className="w-full sm:w-auto" size="sm" variant="outline">
               <ArrowLeft className="h-4 w-4 mr-2" />
               Volver
             </Button>
@@ -802,8 +806,8 @@ export default function CashClosureDetailPage() {
             <div className="space-y-2 max-h-96 overflow-y-auto">
               {orders.map((order) => (
                 <div
-                  key={order.id}
                   className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 p-3 border rounded-lg"
+                  key={order.id}
                 >
                   <div>
                     <p className="font-semibold">{order.order_number}</p>

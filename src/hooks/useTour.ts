@@ -1,8 +1,9 @@
 "use client";
 
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback } from "react";
-import { TOUR_STEPS, TOUR_CONFIG } from "@/lib/onboarding/tour-config";
+
+import { TOUR_STEPS } from "@/lib/onboarding/tour-config";
 
 export interface TourProgress {
   status: "not_started" | "in_progress" | "completed" | "disabled";

@@ -1,9 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { ArrowLeft } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -13,11 +17,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ArrowLeft } from "lucide-react";
-import Link from "next/link";
 import { useBranch } from "@/hooks/useBranch";
 import { getBranchHeader } from "@/lib/utils/branch";
-import { toast } from "sonner";
 
 export default function NewFieldOperationPage() {
   const router = useRouter();
@@ -88,8 +89,8 @@ export default function NewFieldOperationPage() {
       {/* Header */}
       <div className="space-y-4">
         <Link
-          href="/admin/field-operations"
           className="inline-flex items-center gap-2 text-sm text-admin-text-tertiary hover:text-admin-text-primary min-h-[44px] items-center"
+          href="/admin/field-operations"
         >
           <ArrowLeft className="h-4 w-4 shrink-0" />
           Volver a operativos
@@ -113,59 +114,59 @@ export default function NewFieldOperationPage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="p-4 sm:p-6">
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form className="space-y-4" onSubmit={handleSubmit}>
               <div className="space-y-2">
-                <Label htmlFor="name" className="text-admin-text-primary">
+                <Label className="text-admin-text-primary" htmlFor="name">
                   Nombre *
                 </Label>
                 <Input
-                  id="name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="Ej: Operativo Empresa ABC - Marzo 2026"
                   required
                   className="h-11 sm:h-10 min-h-[44px]"
+                  id="name"
+                  placeholder="Ej: Operativo Empresa ABC - Marzo 2026"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
                 />
               </div>
 
               <div className="space-y-2">
                 <Label
-                  htmlFor="scheduled_date"
                   className="text-admin-text-primary"
+                  htmlFor="scheduled_date"
                 >
                   Fecha programada *
                 </Label>
                 <Input
+                  required
+                  className="h-11 sm:h-10 min-h-[44px]"
                   id="scheduled_date"
                   type="date"
                   value={scheduledDate}
                   onChange={(e) => setScheduledDate(e.target.value)}
-                  required
-                  className="h-11 sm:h-10 min-h-[44px]"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="location" className="text-admin-text-primary">
+                <Label className="text-admin-text-primary" htmlFor="location">
                   Ubicación
                 </Label>
                 <Input
+                  className="h-11 sm:h-10 min-h-[44px]"
                   id="location"
+                  placeholder="Ej: Empresa ABC, Av. Principal 123"
                   value={location}
                   onChange={(e) => setLocation(e.target.value)}
-                  placeholder="Ej: Empresa ABC, Av. Principal 123"
-                  className="h-11 sm:h-10 min-h-[44px]"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="branch_id" className="text-admin-text-primary">
+                <Label className="text-admin-text-primary" htmlFor="branch_id">
                   Sucursal origen *
                 </Label>
-                <Select value={branchId} onValueChange={setBranchId} required>
+                <Select required value={branchId} onValueChange={setBranchId}>
                   <SelectTrigger
-                    id="branch_id"
                     className="h-11 sm:h-10 min-h-[44px]"
+                    id="branch_id"
                   >
                     <SelectValue placeholder="Seleccionar sucursal" />
                   </SelectTrigger>
@@ -180,19 +181,19 @@ export default function NewFieldOperationPage() {
               </div>
 
               <div className="flex flex-col-reverse sm:flex-row gap-3 pt-4">
-                <Link href="/admin/field-operations" className="sm:order-2">
+                <Link className="sm:order-2" href="/admin/field-operations">
                   <Button
+                    className="w-full sm:w-auto min-h-[44px]"
                     type="button"
                     variant="outline"
-                    className="w-full sm:w-auto min-h-[44px]"
                   >
                     Cancelar
                   </Button>
                 </Link>
                 <Button
-                  type="submit"
-                  disabled={loading}
                   className="w-full sm:w-auto min-h-[44px] sm:order-1"
+                  disabled={loading}
+                  type="submit"
                 >
                   {loading ? "Creando..." : "Crear operativo"}
                 </Button>

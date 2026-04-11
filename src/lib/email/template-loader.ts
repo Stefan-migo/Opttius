@@ -123,8 +123,8 @@ export async function incrementTemplateUsage(
 
 // Re-export client-side utilities for convenience
 export {
-  replaceTemplateVariables,
-  getDefaultVariables,
   formatOrderItemsHTML,
   formatOrderItemsText,
+  getDefaultVariables,
+  replaceTemplateVariables,
 } from "./template-utils";

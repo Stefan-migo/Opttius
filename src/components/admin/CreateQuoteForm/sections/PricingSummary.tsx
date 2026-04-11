@@ -1,4 +1,6 @@
-import { useState, useEffect } from "react";
+import { Calculator, ChevronDown, ChevronRight } from "lucide-react";
+import { useEffect, useState } from "react";
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,7 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Calculator, ChevronDown, ChevronRight } from "lucide-react";
+
 import { QuoteFormData } from "../types/quote.types";
 
 interface PricingSummaryProps {
@@ -18,7 +20,7 @@ interface PricingSummaryProps {
   discountType: "percentage" | "amount";
   taxPercentage: number;
   manualLensPrice: boolean;
-  onUpdateField: (field: keyof QuoteFormData, value: any) => void;
+  onUpdateField: (field: keyof QuoteFormData, value: unknown) => void;
   onDiscountTypeChange: (type: "percentage" | "amount") => void;
   onCalculateTotal: () => void;
   disabled?: boolean;
@@ -163,6 +165,7 @@ export function PricingSummary({
           <div>
             <Label>Tipo de Descuento</Label>
             <Select
+              disabled={disabled}
               value={discountType}
               onValueChange={(value: "percentage" | "amount") => {
                 onDiscountTypeChange(value);
@@ -175,7 +178,6 @@ export function PricingSummary({
                 // Recalculate total after clearing
                 setTimeout(onCalculateTotal, 0);
               }}
-              disabled={disabled}
             >
               <SelectTrigger>
                 <SelectValue />
@@ -194,8 +196,10 @@ export function PricingSummary({
                 : "Descuento ($)"}
             </Label>
             <Input
-              type="number"
+              disabled={disabled}
+              placeholder={discountType === "percentage" ? "0.00" : "0"}
               step={discountType === "percentage" ? "0.01" : "1"}
+              type="number"
               value={
                 discountType === "percentage"
                   ? formData.discount_percentage || ""
@@ -209,8 +213,6 @@ export function PricingSummary({
                   onUpdateField("discount_amount", value);
                 }
               }}
-              placeholder={discountType === "percentage" ? "0.00" : "0"}
-              disabled={disabled}
             />
           </div>
         </div>
@@ -218,10 +220,10 @@ export function PricingSummary({
         {/* Detailed Cost Breakdown */}
         <div>
           <button
-            type="button"
             className="flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-gray-900"
-            onClick={() => setShowDetails(!showDetails)}
             disabled={disabled}
+            type="button"
+            onClick={() => setShowDetails(!showDetails)}
           >
             {showDetails ? (
               <ChevronDown className="h-4 w-4" />
@@ -238,6 +240,11 @@ export function PricingSummary({
                 <div>
                   <Label>Costo interno de Marco</Label>
                   <Input
+                    className={
+                      presbyopiaSolution === "two_separate" ? "bg-gray-50" : ""
+                    }
+                    disabled={disabled}
+                    readOnly={presbyopiaSolution === "two_separate"}
                     type="number"
                     value={
                       presbyopiaSolution === "two_separate"
@@ -253,11 +260,6 @@ export function PricingSummary({
                       const newValue = parseFloat(e.target.value) || 0;
                       onUpdateField("frame_cost", newValue);
                     }}
-                    className={
-                      presbyopiaSolution === "two_separate" ? "bg-gray-50" : ""
-                    }
-                    readOnly={presbyopiaSolution === "two_separate"}
-                    disabled={disabled}
                   />
                   {presbyopiaSolution === "two_separate" && (
                     <p className="text-xs text-gray-500 mt-1">
@@ -272,6 +274,17 @@ export function PricingSummary({
                 <div>
                   <Label>Costo interno de Lente</Label>
                   <Input
+                    className={
+                      presbyopiaSolution === "two_separate" ||
+                      (formData.lens_family_id && !manualLensPrice)
+                        ? "bg-gray-50"
+                        : ""
+                    }
+                    disabled={disabled}
+                    readOnly={
+                      presbyopiaSolution === "two_separate" ||
+                      (!!formData.lens_family_id && !manualLensPrice)
+                    }
                     type="number"
                     value={
                       presbyopiaSolution === "two_separate"
@@ -287,17 +300,6 @@ export function PricingSummary({
                       const newValue = parseFloat(e.target.value) || 0;
                       onUpdateField("lens_cost", newValue);
                     }}
-                    className={
-                      presbyopiaSolution === "two_separate" ||
-                      (formData.lens_family_id && !manualLensPrice)
-                        ? "bg-gray-50"
-                        : ""
-                    }
-                    readOnly={
-                      presbyopiaSolution === "two_separate" ||
-                      (!!formData.lens_family_id && !manualLensPrice)
-                    }
-                    disabled={disabled}
                   />
                   {presbyopiaSolution === "two_separate" && (
                     <p className="text-xs text-gray-500 mt-1">
@@ -321,28 +323,28 @@ export function PricingSummary({
                 <div>
                   <Label>Costo de Tratamientos</Label>
                   <Input
+                    disabled={disabled}
+                    placeholder="0"
                     type="number"
                     value={formData.treatments_cost || ""}
                     onChange={(e) => {
                       const newValue = parseFloat(e.target.value) || 0;
                       onUpdateField("treatments_cost", newValue);
                     }}
-                    placeholder="0"
-                    disabled={disabled}
                   />
                 </div>
 
                 <div>
                   <Label>Costo de Mano de Obra</Label>
                   <Input
+                    disabled={disabled}
+                    placeholder="Ej: 15000"
                     type="number"
                     value={formData.labor_cost || ""}
                     onChange={(e) => {
                       const newValue = parseFloat(e.target.value) || 0;
                       onUpdateField("labor_cost", newValue);
                     }}
-                    placeholder="Ej: 15000"
-                    disabled={disabled}
                   />
                 </div>
               </div>
@@ -354,13 +356,13 @@ export function PricingSummary({
         <div>
           <Label>Validez del Presupuesto (días)</Label>
           <Input
+            disabled={disabled}
+            placeholder="30"
             type="number"
             value={formData.expiration_days}
             onChange={(e) =>
               onUpdateField("expiration_days", parseInt(e.target.value) || 30)
             }
-            placeholder="30"
-            disabled={disabled}
           />
         </div>
       </CardContent>

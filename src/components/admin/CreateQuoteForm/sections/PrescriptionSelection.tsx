@@ -1,6 +1,11 @@
-import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Eye, Loader2, Plus } from "lucide-react";
+
+import { PrescriptionFullDisplay } from "@/components/admin/PrescriptionFullDisplay";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Select,
   SelectContent,
@@ -8,20 +13,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Plus, Eye, Loader2 } from "lucide-react";
-import { usePrescriptionSearch } from "../hooks";
-import { PrescriptionFullDisplay } from "@/components/admin/PrescriptionFullDisplay";
-import { Prescription } from "../types/quote.types";
-import { formatDate } from "@/lib/utils";
+import { getMaxAddition, hasAddition } from "@/lib/presbyopia-helpers";
 import { translatePrescriptionType } from "@/lib/prescription-helpers";
-import {
-  hasAddition,
-  getMaxAddition,
-  getRecommendedLensTypes,
-} from "@/lib/presbyopia-helpers";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Label } from "@/components/ui/label";
+import { formatDate } from "@/lib/utils";
+
+import { usePrescriptionSearch } from "../hooks";
+import { Prescription } from "../types/quote.types";
 
 interface PrescriptionSelectionProps {
   customerId: string | null;
@@ -70,8 +67,18 @@ export function PrescriptionSelection({
     return (
       <div className="space-y-4">
         <PrescriptionFullDisplay
+          badges={
+            <Button
+              disabled={disabled}
+              size="sm"
+              type="button"
+              variant="outline"
+              onClick={handleClear}
+            >
+              Cambiar receta
+            </Button>
+          }
           prescription={selectedPrescription}
-          title="Receta seleccionada"
           subtitle={
             selectedPrescription.prescription_date && (
               <>
@@ -91,17 +98,7 @@ export function PrescriptionSelection({
               </>
             )
           }
-          badges={
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={handleClear}
-              disabled={disabled}
-            >
-              Cambiar receta
-            </Button>
-          }
+          title="Receta seleccionada"
         />
 
         {/* Presbyopia Solution Selector */}
@@ -122,31 +119,31 @@ export function PrescriptionSelection({
                 </AlertDescription>
               </Alert>
               <RadioGroup
+                className="space-y-3"
                 value={presbyopiaSolution}
                 onValueChange={onPresbyopiaSolutionChange}
-                className="space-y-3"
               >
                 <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="progressive" id="progressive" />
-                  <Label htmlFor="progressive" className="cursor-pointer">
+                  <RadioGroupItem id="progressive" value="progressive" />
+                  <Label className="cursor-pointer" htmlFor="progressive">
                     Progresivo (Recomendado)
                   </Label>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="bifocal" id="bifocal" />
-                  <Label htmlFor="bifocal" className="cursor-pointer">
+                  <RadioGroupItem id="bifocal" value="bifocal" />
+                  <Label className="cursor-pointer" htmlFor="bifocal">
                     Bifocal
                   </Label>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="trifocal" id="trifocal" />
-                  <Label htmlFor="trifocal" className="cursor-pointer">
+                  <RadioGroupItem id="trifocal" value="trifocal" />
+                  <Label className="cursor-pointer" htmlFor="trifocal">
                     Trifocal
                   </Label>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="two_separate" id="two_separate" />
-                  <Label htmlFor="two_separate" className="cursor-pointer">
+                  <RadioGroupItem id="two_separate" value="two_separate" />
+                  <Label className="cursor-pointer" htmlFor="two_separate">
                     Dos lentes separados (Lejos + Cerca)
                   </Label>
                 </div>
@@ -178,10 +175,10 @@ export function PrescriptionSelection({
               Este cliente no tiene recetas registradas
             </p>
             <Button
+              disabled={disabled}
               type="button"
               variant="outline"
               onClick={onCreateNewPrescription}
-              disabled={disabled}
             >
               <Plus className="h-4 w-4 mr-2" />
               Crear Nueva Receta

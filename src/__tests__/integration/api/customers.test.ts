@@ -8,18 +8,19 @@
  * 4. Validation
  */
 
-import { describe, it, expect, beforeAll, afterAll } from "vitest";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
+
 import {
-  createTestOrganization,
-  createTestUser,
+  cleanupTestData,
   createTestBranch,
   createTestCustomer,
-  cleanupTestData,
-  makeAuthenticatedRequest,
+  createTestOrganization,
+  createTestUser,
   isMultiTenancyAvailable,
+  makeAuthenticatedRequest,
+  type TestBranch,
   type TestOrganization,
   type TestUser,
-  type TestBranch,
 } from "../helpers/test-setup";
 
 // Check infrastructure availability - will be set in beforeAll
@@ -32,8 +33,8 @@ describe("Customers API - Integration Tests", () => {
   let userB: TestUser;
   let branchA: TestBranch;
   let branchB: TestBranch;
-  let customerA: any;
-  let customerB: any;
+  let customerA: unknown;
+  let customerB: unknown;
 
   beforeAll(async () => {
     // Check if multi-tenancy infrastructure is available
@@ -94,7 +95,7 @@ describe("Customers API - Integration Tests", () => {
 
       // User A should only see customers from orgA
       expect(data.customers).toBeDefined();
-      const customerIds = data.customers.map((c: any) => c.id);
+      const customerIds = data.customers.map((c: unknown) => c.id);
       expect(customerIds).toContain(customerA.id);
       expect(customerIds).not.toContain(customerB.id);
     });
@@ -273,7 +274,7 @@ describe("Customers API - Integration Tests", () => {
       const data = await response.json();
       expect(data.customers).toBeDefined();
       // Should find customerA
-      const found = data.customers.find((c: any) => c.id === customerA.id);
+      const found = data.customers.find((c: unknown) => c.id === customerA.id);
       expect(found).toBeDefined();
     });
   });

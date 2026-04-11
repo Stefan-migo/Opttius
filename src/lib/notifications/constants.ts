@@ -1,16 +1,15 @@
 import {
-  Bell,
-  Package,
-  ShoppingCart,
   AlertTriangle,
-  MessageSquare,
-  TrendingUp,
-  Shield,
-  Info,
-  FileText,
   Calendar,
-  UserPlus,
+  FileText,
+  Info,
   type LucideIcon,
+  MessageSquare,
+  Package,
+  Shield,
+  ShoppingCart,
+  TrendingUp,
+  UserPlus,
 } from "lucide-react";
 
 /**

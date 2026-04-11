@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { Check, Loader2, Sparkles } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+
 import { Button } from "@/components/ui/button";
-import { Check, Sparkles, Loader2 } from "lucide-react";
 
 type TierName = "basic" | "pro" | "premium";
 
@@ -256,7 +257,7 @@ export function PricingSection() {
         });
 
   return (
-    <section id="precios" className="py-20 sm:py-32 bg-epoch-background">
+    <section className="py-20 sm:py-32 bg-epoch-background" id="precios">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-24 max-w-3xl mx-auto">
           <div className="inline-flex items-center gap-3 px-5 py-2 bg-epoch-primary/10 border border-epoch-primary/40 rounded-full text-epoch-primary text-[10px] sm:text-[11px] font-sans font-semibold tracking-[0.35em] uppercase mb-6">
@@ -281,12 +282,12 @@ export function PricingSection() {
           <div className="grid lg:grid-cols-3 gap-8 items-stretch">
             {plans.map((plan) => (
               <div
-                key={plan.displayName}
                 className={`relative flex flex-col p-6 sm:p-10 rounded-xl transition-all duration-500 border ${
                   plan.popular
                     ? "bg-white border-epoch-accent shadow-lg shadow-epoch-primary/10 lg:scale-105 z-10"
                     : "bg-white border-epoch-primary/10 hover:border-epoch-primary/20 shadow-sm hover:shadow-md"
                 }`}
+                key={plan.displayName}
               >
                 {plan.popular && (
                   <div className="absolute -top-5 left-1/2 -translate-x-1/2">
@@ -322,7 +323,7 @@ export function PricingSection() {
                   </p>
                   <ul className="space-y-4">
                     {plan.features.map((feature, featureIndex) => (
-                      <li key={featureIndex} className="flex items-start gap-3">
+                      <li className="flex items-start gap-3" key={featureIndex}>
                         <div className="mt-1 h-5 w-5 rounded-xl border border-epoch-accent/30 flex items-center justify-center text-epoch-accent flex-shrink-0">
                           <Check className="h-3 w-3" strokeWidth={3} />
                         </div>
@@ -335,13 +336,13 @@ export function PricingSection() {
                 </div>
 
                 <Button
-                  onClick={handleGetStarted}
                   className={`w-full h-14 rounded-xl font-display font-bold transition-all duration-300 ${
                     plan.popular
                       ? "bg-epoch-primary text-white hover:bg-epoch-surface shadow-md hover:scale-[1.02]"
                       : "bg-epoch-background text-epoch-primary hover:bg-epoch-primary/10 border border-epoch-primary/10"
                   }`}
                   variant={plan.popular ? "default" : "outline"}
+                  onClick={handleGetStarted}
                 >
                   Comenzar ahora
                 </Button>
@@ -359,14 +360,14 @@ export function PricingSection() {
             La integración con SII y la conexión con Fonasa e Isapres están
             disponibles bajo solicitud. Contacta directamente a{" "}
             <Link
-              href="/support"
               className="text-epoch-primary font-medium underline underline-offset-2 hover:text-epoch-accent transition-colors"
+              href="/support"
             >
               soporte
             </Link>{" "}
             para solicitar estas características.
           </p>
-          <div className="h-px w-20 bg-epoch-primary/20 mx-auto"></div>
+          <div className="h-px w-20 bg-epoch-primary/20 mx-auto" />
         </div>
       </div>
     </section>

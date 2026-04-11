@@ -3,9 +3,10 @@
  * Usa el mismo Agent (core.ts) con config por canal (whatsapp / whatsapp_customer)
  */
 
-import { createAgent } from "./core";
-import type { WhatsAppContext } from "@/lib/whatsapp/context-resolver";
 import { appLogger as logger } from "@/lib/logger";
+import type { WhatsAppContext } from "@/lib/whatsapp/context-resolver";
+
+import { createAgent } from "./core";
 
 /** Tools permitidas para clientes (consulta + confirmación, validan ownership) */
 export const CUSTOMER_SAFE_TOOLS: string[] = [

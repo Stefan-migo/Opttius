@@ -8,18 +8,19 @@
  * 4. Validation
  */
 
-import { describe, it, expect, beforeAll, afterAll } from "vitest";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
+
 import {
-  createTestOrganization,
-  createTestUser,
+  cleanupTestData,
   createTestBranch,
   createTestOrder,
-  cleanupTestData,
-  makeAuthenticatedRequest,
+  createTestOrganization,
+  createTestUser,
   isMultiTenancyAvailable,
+  makeAuthenticatedRequest,
+  type TestBranch,
   type TestOrganization,
   type TestUser,
-  type TestBranch,
 } from "../helpers/test-setup";
 
 // Check infrastructure availability - will be set in beforeAll
@@ -32,8 +33,8 @@ describe("Orders API - Integration Tests", () => {
   let userB: TestUser;
   let branchA: TestBranch;
   let branchB: TestBranch;
-  let orderA: any;
-  let orderB: any;
+  let orderA: unknown;
+  let orderB: unknown;
 
   beforeAll(async () => {
     // Check if multi-tenancy infrastructure is available
@@ -102,7 +103,7 @@ describe("Orders API - Integration Tests", () => {
 
       // User A should only see orders from orgA
       expect(data.orders).toBeDefined();
-      const orderIds = data.orders.map((o: any) => o.id);
+      const orderIds = data.orders.map((o: unknown) => o.id);
       expect(orderIds).toContain(orderA.id);
       expect(orderIds).not.toContain(orderB.id);
     });
@@ -144,11 +145,11 @@ describe("Orders API - Integration Tests", () => {
       const data = await response.json();
       expect(data.orders).toBeDefined();
       // All returned orders should be pending and from orgA
-      data.orders.forEach((o: any) => {
+      data.orders.forEach((o: unknown) => {
         expect(o.status).toBe("pending");
       });
       // Should not include orders from orgB
-      const orderIds = data.orders.map((o: any) => o.id);
+      const orderIds = data.orders.map((o: unknown) => o.id);
       expect(orderIds).not.toContain(orderB.id);
     });
 
@@ -182,11 +183,11 @@ describe("Orders API - Integration Tests", () => {
       // that if orders are returned, they belong to orgA
       if (data.orders.length > 0) {
         const paidOrderIds = data.orders
-          .filter((o: any) => o.payment_status === "paid")
-          .map((o: any) => o.id);
+          .filter((o: unknown) => o.payment_status === "paid")
+          .map((o: unknown) => o.id);
         // If the filter works, our paid order should be in the results
         // If not, we at least verify multi-tenancy (no orders from orgB)
-        const orderIds = data.orders.map((o: any) => o.id);
+        const orderIds = data.orders.map((o: unknown) => o.id);
         expect(orderIds).not.toContain(orderB.id);
       }
     });

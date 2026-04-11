@@ -5,13 +5,14 @@
  */
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { createServiceRoleClient } from "@/utils/supabase/service-role";
+
 import {
   parseAndValidateBody,
   ValidationError,
   validationErrorResponse,
 } from "@/lib/api/validation/zod-helpers";
 import { appLogger as logger } from "@/lib/logger";
+import { createServiceRoleClient } from "@/utils/supabase/service-role";
 
 const demoRequestSchema = z.object({
   email: z.string().email("Email inválido"),

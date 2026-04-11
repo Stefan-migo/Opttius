@@ -1,8 +1,33 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter, useParams } from "next/navigation";
-import { extractDataFromResponse } from "@/lib/api/response-helpers";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  ArrowLeft,
+  Building2,
+  Calendar,
+  CheckCircle2,
+  Clock,
+  Edit,
+  FileText,
+  Loader2,
+  MessageSquare,
+  Package,
+  Receipt,
+  Send,
+  User,
+  UserPlus,
+  XCircle,
+} from "lucide-react";
+import Link from "next/link";
+import { useParams, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { SubmitHandler, useForm } from "react-hook-form";
+import { toast } from "sonner";
+import type { z } from "zod";
+
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -10,18 +35,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   Dialog,
   DialogContent,
@@ -30,34 +43,21 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
 import {
-  Loader2,
-  ArrowLeft,
-  Calendar,
-  MessageSquare,
-  CheckCircle2,
-  Clock,
-  AlertCircle,
-  XCircle,
-  Send,
-  User,
-  Building2,
-  Edit,
-  UserPlus,
-  Package,
-  Receipt,
-  FileText,
-} from "lucide-react";
-import { toast } from "sonner";
-import Link from "next/link";
-import { useForm, SubmitHandler } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { useBranch } from "@/hooks/useBranch";
+import { extractDataFromResponse } from "@/lib/api/response-helpers";
 import {
   createOpticalInternalSupportMessageSchema,
   updateOpticalInternalSupportTicketSchema,
 } from "@/lib/api/validation/zod-schemas";
-import type { z } from "zod";
-import { useBranch } from "@/hooks/useBranch";
 
 type MessageForm = z.infer<typeof createOpticalInternalSupportMessageSchema>;
 type UpdateTicketForm = z.infer<
@@ -208,7 +208,7 @@ export default function OpticalInternalSupportTicketDetailPage() {
     handleSubmit: handleSubmitMessage,
     formState: { errors: messageErrors },
     reset: resetMessage,
-  } = useForm<any>({
+  } = useForm<unknown>({
     resolver: zodResolver(createOpticalInternalSupportMessageSchema),
     defaultValues: {
       is_internal: true,
@@ -224,14 +224,14 @@ export default function OpticalInternalSupportTicketDetailPage() {
     reset: resetUpdate,
     watch: watchUpdate,
     setValue: setUpdateValue,
-  } = useForm<any>({
+  } = useForm<unknown>({
     resolver: zodResolver(updateOpticalInternalSupportTicketSchema),
   });
 
   useEffect(() => {
     if (ticket) {
-      setUpdateValue("status", ticket.status as any);
-      setUpdateValue("priority", ticket.priority as any);
+      setUpdateValue("status", ticket.status as unknown);
+      setUpdateValue("priority", ticket.priority as unknown);
       setUpdateValue("assigned_to", ticket.assigned_to || undefined);
       setUpdateValue("resolution", ticket.resolution || undefined);
       setUpdateValue("resolution_notes", ticket.resolution_notes || undefined);
@@ -295,7 +295,7 @@ export default function OpticalInternalSupportTicketDetailPage() {
     }
   };
 
-  const onSubmitMessage: SubmitHandler<any> = async (data) => {
+  const onSubmitMessage: SubmitHandler<unknown> = async (data) => {
     setSendingMessage(true);
     try {
       const response = await fetch(
@@ -325,7 +325,7 @@ export default function OpticalInternalSupportTicketDetailPage() {
     }
   };
 
-  const onSubmitUpdate: SubmitHandler<any> = async (data) => {
+  const onSubmitUpdate: SubmitHandler<unknown> = async (data) => {
     setUpdatingTicket(true);
     try {
       const response = await fetch(
@@ -380,8 +380,8 @@ export default function OpticalInternalSupportTicketDetailPage() {
                   Ticket no encontrado
                 </h2>
                 <Button
-                  onClick={() => router.push("/admin/support")}
                   className="rounded-xl bg-epoch-primary hover:bg-epoch-surface text-white font-display font-bold text-[10px] tracking-[0.2em] uppercase min-h-[44px] px-6"
+                  onClick={() => router.push("/admin/support")}
                 >
                   Volver a Tickets
                 </Button>
@@ -400,11 +400,11 @@ export default function OpticalInternalSupportTicketDetailPage() {
         <div className="flex flex-col gap-4 sm:gap-6">
           <div className="flex items-center gap-3">
             <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => router.push("/admin/support")}
-              className="rounded-xl text-epoch-primary hover:bg-epoch-primary/10 min-h-[44px] min-w-[44px] shrink-0"
               aria-label="Volver a tickets"
+              className="rounded-xl text-epoch-primary hover:bg-epoch-primary/10 min-h-[44px] min-w-[44px] shrink-0"
+              size="icon"
+              variant="ghost"
+              onClick={() => router.push("/admin/support")}
             >
               <ArrowLeft className="h-5 w-5" />
             </Button>
@@ -417,9 +417,9 @@ export default function OpticalInternalSupportTicketDetailPage() {
           </p>
           <div className="flex flex-wrap items-center gap-2">
             <Button
+              className="rounded-xl border-admin-border-primary/20 min-h-[44px] shrink-0"
               variant="outline"
               onClick={() => setShowUpdateDialog(true)}
-              className="rounded-xl border-admin-border-primary/20 min-h-[44px] shrink-0"
             >
               <Edit className="h-4 w-4 mr-2 shrink-0" />
               Editar
@@ -435,8 +435,8 @@ export default function OpticalInternalSupportTicketDetailPage() {
               {priorityLabels[ticket.priority]}
             </Badge>
             <Badge
-              variant="outline"
               className="text-[10px] sm:text-xs px-1.5 py-0"
+              variant="outline"
             >
               {categoryLabels[ticket.category]}
             </Badge>
@@ -503,8 +503,8 @@ export default function OpticalInternalSupportTicketDetailPage() {
                   <div className="space-y-3 sm:space-y-4">
                     {messages.map((msg) => (
                       <div
-                        key={msg.id}
                         className="p-3 sm:p-4 rounded-xl border bg-white border-epoch-primary/20 text-epoch-primary"
+                        key={msg.id}
                       >
                         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-1 sm:gap-2 mb-2">
                           <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
@@ -514,24 +514,24 @@ export default function OpticalInternalSupportTicketDetailPage() {
                             </span>
                             {msg.message_type === "status_change" && (
                               <Badge
-                                variant="outline"
                                 className="text-[10px] sm:text-xs px-1.5 py-0"
+                                variant="outline"
                               >
                                 Cambio de Estado
                               </Badge>
                             )}
                             {msg.message_type === "assignment" && (
                               <Badge
-                                variant="outline"
                                 className="text-[10px] sm:text-xs px-1.5 py-0"
+                                variant="outline"
                               >
                                 Asignación
                               </Badge>
                             )}
                             {msg.message_type === "resolution" && (
                               <Badge
-                                variant="outline"
                                 className="text-[10px] sm:text-xs px-1.5 py-0"
+                                variant="outline"
                               >
                                 Resolución
                               </Badge>
@@ -565,19 +565,19 @@ export default function OpticalInternalSupportTicketDetailPage() {
                 </CardHeader>
                 <CardContent className="p-4 sm:p-6 pt-4">
                   <form
-                    onSubmit={handleSubmitMessage(onSubmitMessage)}
                     className="space-y-4"
+                    onSubmit={handleSubmitMessage(onSubmitMessage)}
                   >
                     <div className="space-y-2">
-                      <Label htmlFor="message" className="text-xs sm:text-sm">
+                      <Label className="text-xs sm:text-sm" htmlFor="message">
                         Mensaje <span className="text-red-500">*</span>
                       </Label>
                       <Textarea
                         id="message"
                         {...registerMessage("message")}
+                        className={`rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20 bg-white text-epoch-primary placeholder:text-epoch-primary/50 text-sm sm:text-base min-h-[120px] ${messageErrors.message ? "border-red-500" : ""}`}
                         placeholder="Escribe tu mensaje aquí..."
                         rows={5}
-                        className={`rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20 bg-white text-epoch-primary placeholder:text-epoch-primary/50 text-sm sm:text-base min-h-[120px] ${messageErrors.message ? "border-red-500" : ""}`}
                       />
                       {messageErrors.message && (
                         <p className="text-xs sm:text-sm text-red-500">
@@ -587,9 +587,9 @@ export default function OpticalInternalSupportTicketDetailPage() {
                     </div>
 
                     <Button
-                      type="submit"
-                      disabled={sendingMessage}
                       className="w-full rounded-xl bg-epoch-primary hover:bg-epoch-surface text-white font-display font-bold text-[10px] tracking-[0.2em] uppercase min-h-[44px]"
+                      disabled={sendingMessage}
+                      type="submit"
                     >
                       {sendingMessage ? (
                         <>
@@ -650,8 +650,8 @@ export default function OpticalInternalSupportTicketDetailPage() {
                         </p>
                       )}
                       <Link
-                        href={`/admin/customers/${ticket.customer.id}`}
                         className="text-[10px] sm:text-xs text-epoch-accent hover:text-epoch-primary hover:underline mt-1 inline-block"
+                        href={`/admin/customers/${ticket.customer.id}`}
                       >
                         Ver cliente →
                       </Link>
@@ -684,8 +684,8 @@ export default function OpticalInternalSupportTicketDetailPage() {
                         Pedido Relacionado
                       </Label>
                       <Link
-                        href={`/admin/orders/${ticket.related_order.id}`}
                         className="text-xs sm:text-sm font-medium text-epoch-accent hover:text-epoch-primary hover:underline block truncate"
+                        href={`/admin/orders/${ticket.related_order.id}`}
                       >
                         {ticket.related_order.order_number} →
                       </Link>
@@ -701,8 +701,8 @@ export default function OpticalInternalSupportTicketDetailPage() {
                         Trabajo Relacionado
                       </Label>
                       <Link
-                        href={`/admin/work-orders/${ticket.related_work_order.id}`}
                         className="text-xs sm:text-sm font-medium text-epoch-accent hover:text-epoch-primary hover:underline block truncate"
+                        href={`/admin/work-orders/${ticket.related_work_order.id}`}
                       >
                         {ticket.related_work_order.work_order_number} →
                       </Link>
@@ -718,8 +718,8 @@ export default function OpticalInternalSupportTicketDetailPage() {
                         Presupuesto Relacionado
                       </Label>
                       <Link
-                        href={`/admin/quotes/${ticket.related_quote.id}`}
                         className="text-xs sm:text-sm font-medium text-epoch-accent hover:text-epoch-primary hover:underline block truncate"
+                        href={`/admin/quotes/${ticket.related_quote.id}`}
                       >
                         {ticket.related_quote.quote_number} →
                       </Link>
@@ -829,8 +829,8 @@ export default function OpticalInternalSupportTicketDetailPage() {
               </DialogDescription>
             </DialogHeader>
             <form
-              onSubmit={handleSubmitUpdate(onSubmitUpdate)}
               className="space-y-4"
+              onSubmit={handleSubmitUpdate(onSubmitUpdate)}
             >
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
@@ -838,12 +838,12 @@ export default function OpticalInternalSupportTicketDetailPage() {
                   <Select
                     value={watchUpdate("status") || ticket.status}
                     onValueChange={(value) =>
-                      setUpdateValue("status", value as any)
+                      setUpdateValue("status", value as unknown)
                     }
                   >
                     <SelectTrigger
-                      id="status"
                       className="rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20"
+                      id="status"
                     >
                       <SelectValue />
                     </SelectTrigger>
@@ -862,12 +862,12 @@ export default function OpticalInternalSupportTicketDetailPage() {
                   <Select
                     value={watchUpdate("priority") || ticket.priority}
                     onValueChange={(value) =>
-                      setUpdateValue("priority", value as any)
+                      setUpdateValue("priority", value as unknown)
                     }
                   >
                     <SelectTrigger
-                      id="priority"
                       className="rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20"
+                      id="priority"
                     >
                       <SelectValue />
                     </SelectTrigger>
@@ -894,8 +894,8 @@ export default function OpticalInternalSupportTicketDetailPage() {
                   }
                 >
                   <SelectTrigger
-                    id="assigned_to"
                     className="rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20"
+                    id="assigned_to"
                   >
                     <SelectValue placeholder="Sin asignar" />
                   </SelectTrigger>
@@ -915,9 +915,9 @@ export default function OpticalInternalSupportTicketDetailPage() {
                 <Textarea
                   id="resolution"
                   {...registerUpdate("resolution")}
+                  className="rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20"
                   placeholder="Describe cómo se resolvió el problema..."
                   rows={4}
-                  className="rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20"
                 />
               </div>
 
@@ -926,25 +926,25 @@ export default function OpticalInternalSupportTicketDetailPage() {
                 <Textarea
                   id="resolution_notes"
                   {...registerUpdate("resolution_notes")}
+                  className="rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20"
                   placeholder="Notas adicionales sobre la resolución..."
                   rows={3}
-                  className="rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20"
                 />
               </div>
 
               <DialogFooter className="flex-col sm:flex-row gap-2">
                 <Button
+                  className="rounded-xl border-admin-border-primary/20 w-full sm:w-auto min-h-[44px]"
                   type="button"
                   variant="outline"
-                  className="rounded-xl border-admin-border-primary/20 w-full sm:w-auto min-h-[44px]"
                   onClick={() => setShowUpdateDialog(false)}
                 >
                   Cancelar
                 </Button>
                 <Button
-                  type="submit"
-                  disabled={updatingTicket}
                   className="rounded-xl bg-epoch-primary hover:bg-epoch-surface text-white font-display font-bold text-[10px] tracking-[0.2em] uppercase w-full sm:w-auto min-h-[44px]"
+                  disabled={updatingTicket}
+                  type="submit"
                 >
                   {updatingTicket ? (
                     <>

@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/utils/supabase/server";
-import { createServiceRoleClient } from "@/utils/supabase/service-role";
-import { appLogger as logger } from "@/lib/logger";
+
+import { activateRealOrgSchema } from "@/lib/api/validation/organization-schemas";
 import {
   parseAndValidateBody,
   ValidationError,
   validationErrorResponse,
 } from "@/lib/api/validation/zod-helpers";
-import { activateRealOrgSchema } from "@/lib/api/validation/organization-schemas";
+import { appLogger as logger } from "@/lib/logger";
+import { createClient } from "@/utils/supabase/server";
+import { createServiceRoleClient } from "@/utils/supabase/service-role";
 
 const DEMO_ORG_ID =
   process.env.NEXT_PUBLIC_DEMO_ORG_ID || "00000000-0000-0000-0000-000000000001";
@@ -232,7 +233,8 @@ export async function POST(request: NextRequest) {
         .select("order_id")
         .eq("created_by", user.id);
 
-      const userOrderIds = userOrderPayments?.map((p: any) => p.order_id) || [];
+      const userOrderIds =
+        userOrderPayments?.map((p: unknown) => p.order_id) || [];
 
       if (userOrderIds.length > 0) {
         await supabaseServiceRole

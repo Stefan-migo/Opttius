@@ -1,21 +1,18 @@
 import { NextRequest } from "next/server";
-import { createClient } from "@/utils/supabase/server";
-import { appLogger as logger } from "@/lib/logger";
-import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
+
 import { APIError } from "@/lib/api/errors";
 import {
-  createApiSuccessResponse,
   createApiErrorResponse,
+  createApiSuccessResponse,
 } from "@/lib/api/response";
+import { validationErrorResponse } from "@/lib/api/validation/zod-helpers";
 import {
-  createLensFamilySchema,
   createLensFamilyFullSchema,
+  createLensFamilySchema,
 } from "@/lib/api/validation/zod-schemas";
-import {
-  parseAndValidateBody,
-  parseAndValidateQuery,
-  validationErrorResponse,
-} from "@/lib/api/validation/zod-helpers";
+import { appLogger as logger } from "@/lib/logger";
+import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
+import { createClient } from "@/utils/supabase/server";
 
 export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
@@ -186,7 +183,7 @@ export async function POST(request: NextRequest) {
 
     // Parse body as JSON once
     const bodyRaw = await request.json();
-    let body: any;
+    let body: unknown;
 
     // Full creation: with matrices or with defaults (empty matrices)
     const hasMatrices = bodyRaw.matrices && Array.isArray(bodyRaw.matrices);
@@ -226,7 +223,7 @@ export async function POST(request: NextRequest) {
       const { data: createdFamily } = await supabase
         .from("lens_families")
         .select("*")
-        .eq("id", (familyId as any).id) // RPC returns object with id
+        .eq("id", (familyId as unknown).id) // RPC returns object with id
         .single();
 
       return createApiSuccessResponse(createdFamily, { statusCode: 201 });
@@ -254,7 +251,7 @@ export async function POST(request: NextRequest) {
 
       return createApiSuccessResponse(family, { statusCode: 201 });
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error("Error in lens families API POST", error);
     return createApiErrorResponse(
       error instanceof Error ? error : new Error("Internal server error"),

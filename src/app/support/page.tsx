@@ -1,16 +1,26 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
-import { useForm, type SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { createPublicSaasSupportTicketSchema } from "@/lib/api/validation/zod-schemas";
+import {
+  AlertCircle,
+  ArrowLeft,
+  Building2,
+  CheckCircle2,
+  HelpCircle,
+  Loader2,
+  Mail,
+  MessageSquare,
+  User,
+} from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { type SubmitHandler, useForm } from "react-hook-form";
+import { toast } from "sonner";
 import type { z } from "zod";
+
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
 import {
   Card,
   CardContent,
@@ -18,6 +28,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -25,19 +37,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import {
-  Loader2,
-  Mail,
-  User,
-  MessageSquare,
-  Building2,
-  CheckCircle2,
-  AlertCircle,
-  ArrowLeft,
-  HelpCircle,
-} from "lucide-react";
-import { toast } from "sonner";
+import { Textarea } from "@/components/ui/textarea";
+import { createPublicSaasSupportTicketSchema } from "@/lib/api/validation/zod-schemas";
 
 type SupportForm = z.infer<typeof createPublicSaasSupportTicketSchema>;
 
@@ -69,7 +70,7 @@ export default function SupportPage() {
     formState: { errors },
     setValue,
     watch,
-  } = useForm<any>({
+  } = useForm<unknown>({
     resolver: zodResolver(createPublicSaasSupportTicketSchema),
     defaultValues: {
       requester_name: "",
@@ -159,19 +160,19 @@ export default function SupportPage() {
 
               <div className="flex gap-4">
                 <Button
+                  className="flex-1 rounded-xl border-admin-border-primary/20"
+                  variant="outline"
                   onClick={() => {
                     setIsSuccess(false);
                     setTicketNumber(null);
                     router.refresh();
                   }}
-                  variant="outline"
-                  className="flex-1 rounded-xl border-admin-border-primary/20"
                 >
                   Crear Otro Ticket
                 </Button>
                 <Button
-                  onClick={() => router.push(`/support/ticket/${ticketNumber}`)}
                   className="flex-1 rounded-xl bg-epoch-primary hover:bg-epoch-surface text-white font-display font-bold text-[10px] tracking-[0.2em] uppercase"
+                  onClick={() => router.push(`/support/ticket/${ticketNumber}`)}
                 >
                   Ver Estado del Ticket
                 </Button>
@@ -179,8 +180,8 @@ export default function SupportPage() {
 
               <div className="text-center pt-4 border-t">
                 <Link
-                  href="/"
                   className="text-sm text-epoch-primary/70 hover:text-epoch-primary inline-flex items-center gap-1"
+                  href="/"
                 >
                   <ArrowLeft className="h-4 w-4" />
                   Volver al inicio
@@ -199,8 +200,8 @@ export default function SupportPage() {
         {/* Header */}
         <div className="mb-8">
           <Link
-            href="/"
             className="inline-flex items-center gap-2 text-sm text-epoch-primary/70 hover:text-epoch-primary mb-4"
+            href="/"
           >
             <ArrowLeft className="h-4 w-4" />
             Volver al inicio
@@ -232,7 +233,7 @@ export default function SupportPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+            <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
               {/* Información de Contacto */}
               <div className="space-y-4">
                 <h3 className="text-lg font-display font-semibold text-epoch-primary flex items-center gap-2">
@@ -248,8 +249,8 @@ export default function SupportPage() {
                     <Input
                       id="requester_name"
                       {...register("requester_name")}
-                      placeholder="Juan Pérez"
                       className={errors.requester_name ? "border-red-500" : ""}
+                      placeholder="Juan Pérez"
                     />
                     {errors.requester_name && (
                       <p className="text-sm text-red-500">
@@ -268,10 +269,10 @@ export default function SupportPage() {
                         id="requester_email"
                         type="email"
                         {...register("requester_email")}
-                        placeholder="tu@email.com"
                         className={`pl-10 ${
                           errors.requester_email ? "border-red-500" : ""
                         }`}
+                        placeholder="tu@email.com"
                       />
                     </div>
                     {errors.requester_email && (
@@ -291,8 +292,8 @@ export default function SupportPage() {
                     <Input
                       id="organization_name"
                       {...register("organization_name")}
-                      placeholder="Nombre de tu organización"
                       className="pl-10"
+                      placeholder="Nombre de tu organización"
                     />
                   </div>
                   <p className="text-xs text-epoch-primary/70">
@@ -316,12 +317,12 @@ export default function SupportPage() {
                     <Select
                       value={category}
                       onValueChange={(value) =>
-                        setValue("category", value as any)
+                        setValue("category", value as unknown)
                       }
                     >
                       <SelectTrigger
-                        id="category"
                         className={`rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20 ${errors.category ? "border-red-500" : ""}`}
+                        id="category"
                       >
                         <SelectValue placeholder="Selecciona una categoría" />
                       </SelectTrigger>
@@ -349,12 +350,12 @@ export default function SupportPage() {
                     <Select
                       value={priority}
                       onValueChange={(value) =>
-                        setValue("priority", value as any)
+                        setValue("priority", value as unknown)
                       }
                     >
                       <SelectTrigger
-                        id="priority"
                         className={`rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20 ${errors.priority ? "border-red-500" : ""}`}
+                        id="priority"
                       >
                         <SelectValue placeholder="Selecciona una prioridad" />
                       </SelectTrigger>
@@ -383,8 +384,8 @@ export default function SupportPage() {
                   <Input
                     id="subject"
                     {...register("subject")}
-                    placeholder="Resumen breve del problema"
                     className={errors.subject ? "border-red-500" : ""}
+                    placeholder="Resumen breve del problema"
                   />
                   {errors.subject && (
                     <p className="text-sm text-red-500">
@@ -400,9 +401,9 @@ export default function SupportPage() {
                   <Textarea
                     id="description"
                     {...register("description")}
+                    className={errors.description ? "border-red-500" : ""}
                     placeholder="Describe tu problema o solicitud en detalle..."
                     rows={6}
-                    className={errors.description ? "border-red-500" : ""}
                   />
                   {errors.description && (
                     <p className="text-sm text-red-500">
@@ -419,17 +420,17 @@ export default function SupportPage() {
               {/* Submit Button */}
               <div className="flex gap-4 pt-4">
                 <Button
+                  className="flex-1 rounded-xl border-admin-border-primary/20"
                   type="button"
                   variant="outline"
                   onClick={() => router.push("/")}
-                  className="flex-1 rounded-xl border-admin-border-primary/20"
                 >
                   Cancelar
                 </Button>
                 <Button
-                  type="submit"
-                  disabled={isSubmitting}
                   className="flex-1 rounded-xl bg-epoch-primary hover:bg-epoch-surface text-white font-display font-bold text-[10px] tracking-[0.2em] uppercase"
+                  disabled={isSubmitting}
+                  type="submit"
                 >
                   {isSubmitting ? (
                     <>

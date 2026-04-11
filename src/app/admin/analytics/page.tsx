@@ -1,9 +1,39 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import {
+  Activity,
+  AlertTriangle,
+  ArrowDownRight,
+  ArrowUpRight,
+  BarChart3,
+  Calendar,
+  CheckCircle,
+  Clock,
+  DollarSign,
+  Headphones,
+  LineChart as LineChartIcon,
+  Package,
+  PieChart as PieChartIcon,
+  Receipt,
+  RefreshCw,
+  ShoppingCart,
+  Target,
+  TrendingUp,
+  User,
+  Users,
+  Wrench,
+  XCircle,
+} from "lucide-react";
+import { useEffect, useState } from "react";
+
+import { EnhancedAreaChart } from "@/components/admin/charts/EnhancedAreaChart";
+import { EnhancedBarChart } from "@/components/admin/charts/EnhancedBarChart";
+import { EnhancedColumnChart } from "@/components/admin/charts/EnhancedColumnChart";
+import { EnhancedLineChart } from "@/components/admin/charts/EnhancedLineChart";
+import { EnhancedPieChart } from "@/components/admin/charts/EnhancedPieChart";
+import { MetricTooltip } from "@/components/admin/MetricTooltip";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Select,
   SelectContent,
@@ -20,41 +50,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  BarChart3,
-  TrendingUp,
-  TrendingDown,
-  PieChart as PieChartIcon,
-  Calendar,
-  DollarSign,
-  Users,
-  Package,
-  Target,
-  Download,
-  RefreshCw,
-  AlertTriangle,
-  Activity,
-  ShoppingCart,
-  ArrowUpRight,
-  ArrowDownRight,
-  User,
-  LineChart as LineChartIcon,
-  Receipt,
-  Wrench,
-  Eye,
-  Clock,
-  CheckCircle,
-  XCircle,
-  Headphones,
-} from "lucide-react";
-import { EnhancedPieChart } from "@/components/admin/charts/EnhancedPieChart";
-import { EnhancedBarChart } from "@/components/admin/charts/EnhancedBarChart";
-import { EnhancedAreaChart } from "@/components/admin/charts/EnhancedAreaChart";
-import { EnhancedColumnChart } from "@/components/admin/charts/EnhancedColumnChart";
-import { EnhancedLineChart } from "@/components/admin/charts/EnhancedLineChart";
 import { useBranch } from "@/hooks/useBranch";
 import { getBranchHeader } from "@/lib/utils/branch";
-import { MetricTooltip } from "@/components/admin/MetricTooltip";
 
 interface AnalyticsData {
   kpis: {
@@ -300,10 +297,10 @@ export default function AnalyticsPage() {
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6">
           {[...Array(8)].map((_, i) => (
-            <Card key={i} rounded="none" className="animate-pulse">
+            <Card className="animate-pulse" key={i} rounded="none">
               <CardContent className="p-6">
-                <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-                <div className="h-8 bg-gray-200 rounded w-1/2"></div>
+                <div className="h-4 bg-gray-200 rounded w-3/4 mb-2" />
+                <div className="h-8 bg-gray-200 rounded w-1/2" />
               </CardContent>
             </Card>
           ))}
@@ -367,10 +364,10 @@ export default function AnalyticsPage() {
             </SelectContent>
           </Select>
           <Button
+            className="min-h-[44px] flex-1 sm:flex-initial"
+            disabled={refreshing}
             variant="outline"
             onClick={fetchAnalytics}
-            disabled={refreshing}
-            className="min-h-[44px] flex-1 sm:flex-initial"
           >
             <RefreshCw
               className={`h-4 w-4 mr-2 ${refreshing ? "animate-spin" : ""}`}
@@ -383,8 +380,8 @@ export default function AnalyticsPage() {
       {/* Main KPI Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
         <Card
-          rounded="none"
           className="bg-admin-bg-tertiary border border-admin-border-primary shadow-lg hover:shadow-xl transition-all duration-300"
+          rounded="none"
         >
           <CardContent className="p-4 sm:p-6">
             <div className="flex items-center justify-between mb-2 sm:mb-3">
@@ -418,8 +415,8 @@ export default function AnalyticsPage() {
         </Card>
 
         <Card
-          rounded="none"
           className="bg-admin-bg-tertiary border border-admin-border-primary shadow-lg hover:shadow-xl transition-all duration-300"
+          rounded="none"
         >
           <CardContent className="p-4 sm:p-6">
             <div className="flex items-center justify-between mb-2 sm:mb-3">
@@ -456,8 +453,8 @@ export default function AnalyticsPage() {
         </Card>
 
         <Card
-          rounded="none"
           className="bg-admin-bg-tertiary border border-admin-border-primary shadow-lg hover:shadow-xl transition-all duration-300"
+          rounded="none"
         >
           <CardContent className="p-4 sm:p-6">
             <div className="flex items-center justify-between mb-2 sm:mb-3">
@@ -486,8 +483,8 @@ export default function AnalyticsPage() {
         </Card>
 
         <Card
-          rounded="none"
           className="bg-admin-bg-tertiary border border-admin-border-primary shadow-lg hover:shadow-xl transition-all duration-300"
+          rounded="none"
         >
           <CardContent className="p-4 sm:p-6">
             <div className="flex items-center justify-between mb-2 sm:mb-3">
@@ -520,8 +517,8 @@ export default function AnalyticsPage() {
       {/* Secondary KPI Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6">
         <Card
-          rounded="none"
           className="bg-admin-bg-tertiary border border-admin-border-primary shadow-md hover:shadow-lg transition-all duration-300"
+          rounded="none"
         >
           <CardContent className="p-4 sm:p-5">
             <div className="flex items-start justify-between gap-2">
@@ -552,8 +549,8 @@ export default function AnalyticsPage() {
         </Card>
 
         <Card
-          rounded="none"
           className="bg-admin-bg-tertiary border border-admin-border-primary shadow-md hover:shadow-lg transition-all duration-300"
+          rounded="none"
         >
           <CardContent className="p-4 sm:p-5">
             <div className="flex items-start justify-between gap-2">
@@ -582,8 +579,8 @@ export default function AnalyticsPage() {
         </Card>
 
         <Card
-          rounded="none"
           className="bg-admin-bg-tertiary border border-admin-border-primary shadow-md hover:shadow-lg transition-all duration-300"
+          rounded="none"
         >
           <CardContent className="p-4 sm:p-5">
             <div className="flex items-start justify-between gap-2">
@@ -612,8 +609,8 @@ export default function AnalyticsPage() {
         </Card>
 
         <Card
-          rounded="none"
           className="bg-admin-bg-tertiary border border-admin-border-primary shadow-md hover:shadow-lg transition-all duration-300"
+          rounded="none"
         >
           <CardContent className="p-4 sm:p-5">
             <div className="flex items-start justify-between gap-2">
@@ -661,43 +658,43 @@ export default function AnalyticsPage() {
       </div>
 
       {/* Analytics Tabs */}
-      <Tabs defaultValue="overview" className="space-y-6">
+      <Tabs className="space-y-6" defaultValue="overview">
         <div className="overflow-x-auto overflow-y-hidden -mx-4 px-4 sm:mx-0 sm:px-0 min-w-0 [scrollbar-width:thin] [&::-webkit-scrollbar]:h-1 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-admin-border-primary/40">
           <TabsList className="inline-flex w-max min-w-full sm:min-w-0 sm:w-full flex-nowrap gap-1 sm:gap-2 p-1 h-auto rounded-md bg-muted">
             <TabsTrigger
-              value="overview"
               className="shrink-0 text-[10px] sm:text-sm px-2 sm:px-4 py-2 min-h-[44px]"
+              value="overview"
             >
               Resumen
             </TabsTrigger>
             <TabsTrigger
-              value="work-orders"
               className="shrink-0 text-[10px] sm:text-sm px-2 sm:px-4 py-2 min-h-[44px]"
+              value="work-orders"
             >
               Trabajos
             </TabsTrigger>
             <TabsTrigger
-              value="quotes"
               className="shrink-0 text-[10px] sm:text-sm px-2 sm:px-4 py-2 min-h-[44px]"
+              value="quotes"
             >
               Presupuestos
             </TabsTrigger>
             <TabsTrigger
-              value="sales"
               className="shrink-0 text-[10px] sm:text-sm px-2 sm:px-4 py-2 min-h-[44px]"
+              value="sales"
             >
               Ventas
             </TabsTrigger>
             <TabsTrigger
-              value="products"
               className="shrink-0 text-[10px] sm:text-sm px-2 sm:px-4 py-2 min-h-[44px]"
+              value="products"
             >
               Productos
             </TabsTrigger>
             {analytics.support && (
               <TabsTrigger
-                value="support"
                 className="shrink-0 text-[10px] sm:text-sm px-2 sm:px-4 py-2 min-h-[44px]"
+                value="support"
               >
                 Incidentes
               </TabsTrigger>
@@ -705,12 +702,12 @@ export default function AnalyticsPage() {
           </TabsList>
         </div>
 
-        <TabsContent value="overview" className="space-y-4 sm:space-y-6">
+        <TabsContent className="space-y-4 sm:space-y-6" value="overview">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
             {/* Revenue Trend */}
             <Card
-              rounded="none"
               className="bg-admin-bg-tertiary border border-admin-border-primary shadow-soft hover:shadow-medium transition-all duration-300"
+              rounded="none"
             >
               <CardHeader className="p-4 sm:p-6">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
@@ -722,23 +719,23 @@ export default function AnalyticsPage() {
                   </div>
                   <div className="flex gap-1 shrink-0">
                     <Button
+                      className="h-8 sm:h-7 px-2 sm:px-3 text-xs min-h-[44px] sm:min-h-0"
+                      size="sm"
                       variant={
                         salesChartType === "column" ? "default" : "outline"
                       }
-                      size="sm"
                       onClick={() => setSalesChartType("column")}
-                      className="h-8 sm:h-7 px-2 sm:px-3 text-xs min-h-[44px] sm:min-h-0"
                     >
                       <BarChart3 className="h-3 w-3 mr-1" />
                       Barras
                     </Button>
                     <Button
+                      className="h-8 sm:h-7 px-2 sm:px-3 text-xs min-h-[44px] sm:min-h-0"
+                      size="sm"
                       variant={
                         salesChartType === "line" ? "default" : "outline"
                       }
-                      size="sm"
                       onClick={() => setSalesChartType("line")}
-                      className="h-8 sm:h-7 px-2 sm:px-3 text-xs min-h-[44px] sm:min-h-0"
                     >
                       <LineChartIcon className="h-3 w-3 mr-1" />
                       Líneas
@@ -749,20 +746,20 @@ export default function AnalyticsPage() {
               <CardContent className="p-4 sm:p-6 pt-0">
                 {salesChartType === "column" ? (
                   <EnhancedColumnChart
-                    data={analytics.trends.sales}
-                    title="Ingresos por Período"
                     color="#C5A059"
+                    data={analytics.trends.sales}
                     formatValue={formatPrice}
                     height={250}
+                    title="Ingresos por Período"
                   />
                 ) : (
                   <EnhancedLineChart
-                    data={analytics.trends.sales}
-                    title="Evolución de Ingresos"
                     color="#C5A059"
+                    data={analytics.trends.sales}
                     formatValue={formatPrice}
-                    showGrid={true}
                     height={250}
+                    showGrid={true}
+                    title="Evolución de Ingresos"
                   />
                 )}
               </CardContent>
@@ -770,8 +767,8 @@ export default function AnalyticsPage() {
 
             {/* Work Orders Trend */}
             <Card
-              rounded="none"
               className="bg-admin-bg-tertiary border border-admin-border-primary shadow-soft hover:shadow-medium transition-all duration-300"
+              rounded="none"
             >
               <CardHeader className="p-4 sm:p-6">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
@@ -783,23 +780,23 @@ export default function AnalyticsPage() {
                   </div>
                   <div className="flex gap-1 shrink-0">
                     <Button
+                      className="h-8 sm:h-7 px-2 sm:px-3 text-xs min-h-[44px] sm:min-h-0"
+                      size="sm"
                       variant={
                         workOrdersChartType === "column" ? "default" : "outline"
                       }
-                      size="sm"
                       onClick={() => setWorkOrdersChartType("column")}
-                      className="h-8 sm:h-7 px-2 sm:px-3 text-xs min-h-[44px] sm:min-h-0"
                     >
                       <BarChart3 className="h-3 w-3 mr-1" />
                       Barras
                     </Button>
                     <Button
+                      className="h-8 sm:h-7 px-2 sm:px-3 text-xs min-h-[44px] sm:min-h-0"
+                      size="sm"
                       variant={
                         workOrdersChartType === "line" ? "default" : "outline"
                       }
-                      size="sm"
                       onClick={() => setWorkOrdersChartType("line")}
-                      className="h-8 sm:h-7 px-2 sm:px-3 text-xs min-h-[44px] sm:min-h-0"
                     >
                       <LineChartIcon className="h-3 w-3 mr-1" />
                       Líneas
@@ -810,20 +807,20 @@ export default function AnalyticsPage() {
               <CardContent className="p-4 sm:p-6 pt-0">
                 {workOrdersChartType === "column" ? (
                   <EnhancedColumnChart
-                    data={analytics.trends.workOrders}
-                    title="Trabajos por Período"
                     color="#1A2B23"
+                    data={analytics.trends.workOrders}
                     formatValue={(val) => Math.round(val).toString()}
                     height={250}
+                    title="Trabajos por Período"
                   />
                 ) : (
                   <EnhancedLineChart
-                    data={analytics.trends.workOrders}
-                    title="Evolución de Trabajos"
                     color="#1A2B23"
+                    data={analytics.trends.workOrders}
                     formatValue={(val) => Math.round(val).toString()}
-                    showGrid={true}
                     height={250}
+                    showGrid={true}
+                    title="Evolución de Trabajos"
                   />
                 )}
               </CardContent>
@@ -831,8 +828,8 @@ export default function AnalyticsPage() {
 
             {/* Work Orders Status Distribution */}
             <Card
-              rounded="none"
               className="bg-admin-bg-tertiary border border-admin-border-primary shadow-soft hover:shadow-medium transition-all duration-300"
+              rounded="none"
             >
               <CardHeader className="p-4 sm:p-6">
                 <div className="flex items-center gap-2 min-w-0">
@@ -851,11 +848,11 @@ export default function AnalyticsPage() {
                         value: count as number,
                       }),
                     )}
-                    title="Distribución por Estado"
-                    showLegend={true}
-                    showPercentage={true}
                     formatValue={(val) => Math.round(val).toString()}
                     height={250}
+                    showLegend={true}
+                    showPercentage={true}
+                    title="Distribución por Estado"
                   />
                 ) : (
                   <div className="text-center py-8 text-admin-text-tertiary">
@@ -867,8 +864,8 @@ export default function AnalyticsPage() {
 
             {/* Quotes Status Distribution */}
             <Card
-              rounded="none"
               className="bg-admin-bg-tertiary border border-admin-border-primary shadow-soft hover:shadow-medium transition-all duration-300"
+              rounded="none"
             >
               <CardHeader className="p-4 sm:p-6">
                 <div className="flex items-center gap-2 min-w-0">
@@ -887,11 +884,11 @@ export default function AnalyticsPage() {
                         value: count as number,
                       }),
                     )}
-                    title="Distribución por Estado"
-                    showLegend={true}
-                    showPercentage={true}
                     formatValue={(val) => Math.round(val).toString()}
                     height={250}
+                    showLegend={true}
+                    showPercentage={true}
+                    title="Distribución por Estado"
                   />
                 ) : (
                   <div className="text-center py-8 text-admin-text-tertiary">
@@ -903,12 +900,12 @@ export default function AnalyticsPage() {
           </div>
         </TabsContent>
 
-        <TabsContent value="work-orders" className="space-y-4 sm:space-y-6">
+        <TabsContent className="space-y-4 sm:space-y-6" value="work-orders">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
             {/* Work Orders Metrics */}
             <Card
-              rounded="none"
               className="bg-admin-bg-tertiary border border-admin-border-primary shadow-soft hover:shadow-medium transition-all duration-300"
+              rounded="none"
             >
               <CardHeader className="p-4 sm:p-6">
                 <CardTitle className="flex items-center text-base sm:text-lg">
@@ -956,8 +953,8 @@ export default function AnalyticsPage() {
 
             {/* Work Orders Trend */}
             <Card
-              rounded="none"
               className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)]"
+              rounded="none"
             >
               <CardHeader className="p-4 sm:p-6">
                 <CardTitle className="flex items-center text-base sm:text-lg">
@@ -967,24 +964,24 @@ export default function AnalyticsPage() {
               </CardHeader>
               <CardContent className="p-4 sm:p-6 pt-0">
                 <EnhancedAreaChart
-                  data={analytics.trends.workOrders}
-                  title="Trabajos Creados por Día"
                   color="#1A2B23"
-                  showGrid={true}
+                  data={analytics.trends.workOrders}
                   formatValue={(val) => Math.round(val).toString()}
                   height={250}
+                  showGrid={true}
+                  title="Trabajos Creados por Día"
                 />
               </CardContent>
             </Card>
           </div>
         </TabsContent>
 
-        <TabsContent value="quotes" className="space-y-4 sm:space-y-6">
+        <TabsContent className="space-y-4 sm:space-y-6" value="quotes">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
             {/* Quotes Metrics */}
             <Card
-              rounded="none"
               className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)]"
+              rounded="none"
             >
               <CardHeader className="p-4 sm:p-6">
                 <CardTitle className="flex items-center text-base sm:text-lg">
@@ -1040,8 +1037,8 @@ export default function AnalyticsPage() {
 
             {/* Quotes Trend */}
             <Card
-              rounded="none"
               className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)]"
+              rounded="none"
             >
               <CardHeader className="p-4 sm:p-6">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
@@ -1053,23 +1050,23 @@ export default function AnalyticsPage() {
                   </div>
                   <div className="flex gap-1 shrink-0">
                     <Button
+                      className="h-8 sm:h-7 px-2 sm:px-3 text-xs min-h-[44px] sm:min-h-0"
+                      size="sm"
                       variant={
                         quotesChartType === "column" ? "default" : "outline"
                       }
-                      size="sm"
                       onClick={() => setQuotesChartType("column")}
-                      className="h-8 sm:h-7 px-2 sm:px-3 text-xs min-h-[44px] sm:min-h-0"
                     >
                       <BarChart3 className="h-3 w-3 mr-1" />
                       Barras
                     </Button>
                     <Button
+                      className="h-8 sm:h-7 px-2 sm:px-3 text-xs min-h-[44px] sm:min-h-0"
+                      size="sm"
                       variant={
                         quotesChartType === "line" ? "default" : "outline"
                       }
-                      size="sm"
                       onClick={() => setQuotesChartType("line")}
-                      className="h-8 sm:h-7 px-2 sm:px-3 text-xs min-h-[44px] sm:min-h-0"
                     >
                       <LineChartIcon className="h-3 w-3 mr-1" />
                       Líneas
@@ -1080,20 +1077,20 @@ export default function AnalyticsPage() {
               <CardContent className="p-4 sm:p-6 pt-0">
                 {quotesChartType === "column" ? (
                   <EnhancedColumnChart
-                    data={analytics.trends.quotes}
-                    title="Presupuestos por Período"
                     color="#C5A059"
+                    data={analytics.trends.quotes}
                     formatValue={(val) => Math.round(val).toString()}
                     height={250}
+                    title="Presupuestos por Período"
                   />
                 ) : (
                   <EnhancedLineChart
-                    data={analytics.trends.quotes}
-                    title="Presupuestos Creados por Día"
                     color="#C5A059"
-                    showGrid={true}
+                    data={analytics.trends.quotes}
                     formatValue={(val) => Math.round(val).toString()}
                     height={250}
+                    showGrid={true}
+                    title="Presupuestos Creados por Día"
                   />
                 )}
               </CardContent>
@@ -1101,12 +1098,12 @@ export default function AnalyticsPage() {
           </div>
         </TabsContent>
 
-        <TabsContent value="sales" className="space-y-4 sm:space-y-6">
+        <TabsContent className="space-y-4 sm:space-y-6" value="sales">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
             {/* Revenue by Category */}
             <Card
-              rounded="none"
               className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)]"
+              rounded="none"
             >
               <CardHeader className="p-4 sm:p-6">
                 <CardTitle className="flex items-center text-base sm:text-lg">
@@ -1117,13 +1114,11 @@ export default function AnalyticsPage() {
               <CardContent className="p-4 sm:p-6 pt-0">
                 {analytics.products.categoryRevenue.length > 0 ? (
                   <EnhancedBarChart
+                    color="#C5A059"
                     data={analytics.products.categoryRevenue.map((cat) => ({
                       label: cat.category,
                       value: cat.revenue,
                     }))}
-                    title="Categorías Más Rentables"
-                    color="#C5A059"
-                    horizontal={true}
                     formatValue={formatPrice}
                     height={Math.max(
                       220,
@@ -1132,6 +1127,8 @@ export default function AnalyticsPage() {
                         analytics.products.categoryRevenue.length * 36,
                       ),
                     )}
+                    horizontal={true}
+                    title="Categorías Más Rentables"
                   />
                 ) : (
                   <div className="text-center py-8 text-admin-text-tertiary">
@@ -1143,8 +1140,8 @@ export default function AnalyticsPage() {
 
             {/* Payment Methods */}
             <Card
-              rounded="none"
               className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)]"
+              rounded="none"
             >
               <CardHeader className="p-4 sm:p-6">
                 <CardTitle className="flex items-center text-base sm:text-lg">
@@ -1159,11 +1156,11 @@ export default function AnalyticsPage() {
                       label: getPaymentMethodLabel(pm.method),
                       value: pm.revenue,
                     }))}
-                    title="Distribución de Pagos"
-                    showLegend={true}
-                    showPercentage={true}
                     formatValue={formatPrice}
                     height={280}
+                    showLegend={true}
+                    showPercentage={true}
+                    title="Distribución de Pagos"
                   />
                 ) : (
                   <div className="text-center py-8 text-admin-text-tertiary">
@@ -1175,8 +1172,8 @@ export default function AnalyticsPage() {
 
             {/* Sales Metrics */}
             <Card
-              rounded="none"
               className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)]"
+              rounded="none"
             >
               <CardHeader className="p-4 sm:p-6">
                 <CardTitle className="flex items-center text-base sm:text-lg">
@@ -1226,12 +1223,12 @@ export default function AnalyticsPage() {
           </div>
         </TabsContent>
 
-        <TabsContent value="products" className="space-y-4 sm:space-y-6">
+        <TabsContent className="space-y-4 sm:space-y-6" value="products">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
             {/* Top Products */}
             <Card
-              rounded="none"
               className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)]"
+              rounded="none"
             >
               <CardHeader className="p-4 sm:p-6">
                 <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
@@ -1242,15 +1239,13 @@ export default function AnalyticsPage() {
               <CardContent className="p-4 sm:p-6 pt-0">
                 {analytics.products.topProducts.length > 0 ? (
                   <EnhancedBarChart
+                    color="#C5A059"
                     data={analytics.products.topProducts
                       .slice(0, 8)
                       .map((prod) => ({
                         label: prod.name,
                         value: prod.revenue,
                       }))}
-                    title="Por Ingresos"
-                    color="#C5A059"
-                    horizontal={true}
                     formatValue={formatPrice}
                     height={Math.min(
                       320,
@@ -1259,6 +1254,8 @@ export default function AnalyticsPage() {
                         analytics.products.topProducts.slice(0, 8).length * 40,
                       ),
                     )}
+                    horizontal={true}
+                    title="Por Ingresos"
                   />
                 ) : (
                   <div className="text-center py-8 text-admin-text-tertiary">
@@ -1270,8 +1267,8 @@ export default function AnalyticsPage() {
 
             {/* Product Performance Table */}
             <Card
-              rounded="none"
               className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)]"
+              rounded="none"
             >
               <CardHeader className="p-4 sm:p-6">
                 <CardTitle className="flex items-center text-base sm:text-lg">
@@ -1327,8 +1324,8 @@ export default function AnalyticsPage() {
 
             {/* Inventory Alerts */}
             <Card
-              rounded="none"
               className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)]"
+              rounded="none"
             >
               <CardHeader className="p-4 sm:p-6">
                 <CardTitle className="flex items-center text-base sm:text-lg">
@@ -1361,12 +1358,12 @@ export default function AnalyticsPage() {
         </TabsContent>
 
         {analytics.support && (
-          <TabsContent value="support" className="space-y-4 sm:space-y-6">
+          <TabsContent className="space-y-4 sm:space-y-6" value="support">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
               {/* Support KPIs */}
               <Card
-                rounded="none"
                 className="bg-admin-bg-tertiary border border-admin-border-primary shadow-soft hover:shadow-medium transition-all duration-300"
+                rounded="none"
               >
                 <CardHeader className="p-4 sm:p-6">
                   <div className="flex items-center gap-2 min-w-0">
@@ -1419,8 +1416,8 @@ export default function AnalyticsPage() {
 
               {/* Support Trend */}
               <Card
-                rounded="none"
                 className="bg-admin-bg-tertiary border border-admin-border-primary shadow-soft hover:shadow-medium transition-all duration-300"
+                rounded="none"
               >
                 <CardHeader className="p-4 sm:p-6">
                   <CardTitle className="flex items-center text-base sm:text-lg">
@@ -1431,11 +1428,11 @@ export default function AnalyticsPage() {
                 <CardContent className="p-4 sm:p-6 pt-0">
                   {analytics.support.trends.some((t) => t.value > 0) ? (
                     <EnhancedColumnChart
-                      data={analytics.support.trends}
-                      title="Tickets por Día"
                       color="#C5A059"
+                      data={analytics.support.trends}
                       formatValue={(val) => Math.round(val).toString()}
                       height={250}
+                      title="Tickets por Día"
                     />
                   ) : (
                     <div className="text-center py-8 text-admin-text-tertiary">
@@ -1447,8 +1444,8 @@ export default function AnalyticsPage() {
 
               {/* By Status */}
               <Card
-                rounded="none"
                 className="bg-admin-bg-tertiary border border-admin-border-primary shadow-soft hover:shadow-medium transition-all duration-300"
+                rounded="none"
               >
                 <CardHeader className="p-4 sm:p-6">
                   <CardTitle className="flex items-center text-base sm:text-lg">
@@ -1465,11 +1462,11 @@ export default function AnalyticsPage() {
                           value: count as number,
                         }),
                       )}
-                      title="Distribución por Estado"
-                      showLegend={true}
-                      showPercentage={true}
                       formatValue={(val) => Math.round(val).toString()}
                       height={250}
+                      showLegend={true}
+                      showPercentage={true}
+                      title="Distribución por Estado"
                     />
                   ) : (
                     <div className="text-center py-8 text-admin-text-tertiary">
@@ -1481,8 +1478,8 @@ export default function AnalyticsPage() {
 
               {/* By Category */}
               <Card
-                rounded="none"
                 className="bg-admin-bg-tertiary border border-admin-border-primary shadow-soft hover:shadow-medium transition-all duration-300"
+                rounded="none"
               >
                 <CardHeader className="p-4 sm:p-6">
                   <CardTitle className="flex items-center text-base sm:text-lg">
@@ -1499,11 +1496,11 @@ export default function AnalyticsPage() {
                           value: count as number,
                         }),
                       )}
-                      title="Distribución por Categoría"
-                      showLegend={true}
-                      showPercentage={true}
                       formatValue={(val) => Math.round(val).toString()}
                       height={250}
+                      showLegend={true}
+                      showPercentage={true}
+                      title="Distribución por Categoría"
                     />
                   ) : (
                     <div className="text-center py-8 text-admin-text-tertiary">

@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
+
+import { appLogger as logger } from "@/lib/logger";
 import { createClient } from "@/utils/supabase/server";
 import { createServiceRoleClient } from "@/utils/supabase/service-role";
-import { appLogger as logger } from "@/lib/logger";
 
 const DEMO_ORG_ID =
   process.env.NEXT_PUBLIC_DEMO_ORG_ID || "00000000-0000-0000-0000-000000000001";

@@ -1,18 +1,20 @@
 "use client";
 
-import { useEffect, useRef, useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
+
+import { Separator } from "@/components/ui/separator";
+
 import { MessageBubble } from "./MessageBubble";
 import { TypingIndicator } from "./TypingIndicator";
-import { Separator } from "@/components/ui/separator";
 
 interface Message {
   id: string;
   role: "user" | "assistant" | "system" | "tool";
   content: string;
   timestamp?: string;
-  toolCalls?: any;
-  toolResults?: any;
-  metadata?: any;
+  toolCalls?: unknown;
+  toolResults?: unknown;
+  metadata?: unknown;
 }
 
 interface MessageListProps {
@@ -94,7 +96,7 @@ export function MessageList({
         )}
 
         {groupedMessages.map((group, groupIndex) => (
-          <div key={group.date} className="space-y-2">
+          <div className="space-y-2" key={group.date}>
             {groupIndex > 0 && <Separator className="my-4" />}
 
             <div className="sticky top-0 z-10 flex items-center gap-2 mb-2">
@@ -107,16 +109,16 @@ export function MessageList({
 
             {group.messages.map((message) => (
               <MessageBubble
-                key={message.id}
-                role={message.role}
                 content={message.content}
+                key={message.id}
+                metadata={message.metadata}
+                role={message.role}
                 timestamp={message.timestamp}
                 toolCalls={message.toolCalls}
                 toolResults={message.toolResults}
-                metadata={message.metadata}
                 onCopy={() => onMessageAction?.(message.id, "copy")}
-                onEdit={() => onMessageAction?.(message.id, "edit")}
                 onDelete={() => onMessageAction?.(message.id, "delete")}
+                onEdit={() => onMessageAction?.(message.id, "edit")}
                 onRegenerate={() => onMessageAction?.(message.id, "regenerate")}
               />
             ))}

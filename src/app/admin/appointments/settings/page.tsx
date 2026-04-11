@@ -1,27 +1,28 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  AlertCircle,
+  ArrowLeft,
+  Calendar,
+  Clock,
+  Loader2,
+  Save,
+  Settings,
+  Sparkles,
+} from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
+import { toast } from "sonner";
+
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import {
-  ArrowLeft,
-  Save,
-  Settings,
-  Clock,
-  Calendar,
-  Loader2,
-  AlertCircle,
-  Sparkles,
-} from "lucide-react";
-import { cn } from "@/lib/utils";
-import { toast } from "sonner";
-import { useRouter } from "next/navigation";
-import { useBranch } from "@/hooks/useBranch";
-import { getBranchHeader } from "@/lib/utils/branch";
 import { useAuthContext } from "@/contexts/AuthContext";
+import { useBranch } from "@/hooks/useBranch";
+import { cn } from "@/lib/utils";
+import { getBranchHeader } from "@/lib/utils/branch";
 
 interface DayConfig {
   enabled: boolean;
@@ -96,7 +97,7 @@ export default function ScheduleSettingsPage() {
   const updateDayConfig = (
     day: keyof ScheduleSettings["working_hours"],
     field: keyof DayConfig,
-    value: any,
+    value: unknown,
   ) => {
     if (!settings) return;
 
@@ -167,9 +168,13 @@ export default function ScheduleSettingsPage() {
 
       toast.success("Configuración guardada exitosamente");
       router.push("/admin/appointments");
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error saving settings:", error);
-      toast.error(error.message || "Error al guardar configuración");
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Error al guardar configuración";
+      toast.error(errorMessage);
     } finally {
       setSaving(false);
     }
@@ -190,10 +195,10 @@ export default function ScheduleSettingsPage() {
       <div className="space-y-6 max-w-6xl mx-auto pb-12">
         <div className="flex items-center gap-4">
           <Button
-            variant="outline"
-            size="sm"
-            onClick={() => router.back()}
             className="h-10 w-10 sm:h-11 sm:w-11 rounded-xl shrink-0"
+            size="sm"
+            variant="outline"
+            onClick={() => router.back()}
           >
             <ArrowLeft className="h-4 w-4" />
           </Button>
@@ -212,10 +217,10 @@ export default function ScheduleSettingsPage() {
       <div className="space-y-6 max-w-6xl mx-auto pb-12">
         <div className="flex items-center gap-4">
           <Button
-            variant="outline"
-            size="sm"
-            onClick={() => router.back()}
             className="h-10 w-10 sm:h-11 sm:w-11 rounded-xl shrink-0"
+            size="sm"
+            variant="outline"
+            onClick={() => router.back()}
           >
             <ArrowLeft className="h-4 w-4" />
           </Button>
@@ -238,10 +243,10 @@ export default function ScheduleSettingsPage() {
       <div className="flex flex-col gap-4 sm:gap-6 pb-6 border-b border-admin-border-primary/10">
         <div className="flex flex-col sm:flex-row sm:items-start gap-4">
           <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => router.back()}
             className="h-10 w-10 sm:h-11 sm:w-11 rounded-xl bg-white shadow-soft border border-admin-border-primary/30 text-admin-text-tertiary hover:text-admin-accent-primary transition-all shrink-0"
+            size="icon"
+            variant="ghost"
+            onClick={() => router.back()}
           >
             <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
           </Button>
@@ -263,9 +268,9 @@ export default function ScheduleSettingsPage() {
         </div>
         <div className="flex justify-end">
           <Button
-            onClick={handleSave}
-            disabled={saving}
             className="h-10 w-10 sm:h-12 sm:w-auto sm:px-8 rounded-xl bg-admin-accent-primary hover:bg-admin-accent-primary/90 text-white shadow-premium-md font-bold uppercase text-[10px] sm:text-[11px] tracking-widest transition-all active:scale-[0.98]"
+            disabled={saving}
+            onClick={handleSave}
           >
             {saving ? (
               <>
@@ -300,10 +305,11 @@ export default function ScheduleSettingsPage() {
                   </Label>
                   <div className="relative group">
                     <Input
-                      type="number"
-                      min="5"
+                      className="h-10 sm:h-12 rounded-xl border-admin-border-primary/50 bg-white/50 focus:bg-white transition-all font-bold pl-4"
                       max="60"
+                      min="5"
                       step="5"
+                      type="number"
                       value={settings.slot_duration_minutes}
                       onChange={(e) =>
                         setSettings({
@@ -311,7 +317,6 @@ export default function ScheduleSettingsPage() {
                           slot_duration_minutes: parseInt(e.target.value) || 15,
                         })
                       }
-                      className="h-10 sm:h-12 rounded-xl border-admin-border-primary/50 bg-white/50 focus:bg-white transition-all font-bold pl-4"
                     />
                     <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-black text-admin-text-tertiary uppercase tracking-tight">
                       min
@@ -328,10 +333,11 @@ export default function ScheduleSettingsPage() {
                   </Label>
                   <div className="relative group">
                     <Input
-                      type="number"
-                      min="15"
+                      className="h-10 sm:h-12 rounded-xl border-admin-border-primary/50 bg-white/50 focus:bg-white transition-all font-bold pl-4"
                       max="240"
+                      min="15"
                       step="15"
+                      type="number"
                       value={settings.default_appointment_duration}
                       onChange={(e) =>
                         setSettings({
@@ -340,7 +346,6 @@ export default function ScheduleSettingsPage() {
                             parseInt(e.target.value) || 30,
                         })
                       }
-                      className="h-10 sm:h-12 rounded-xl border-admin-border-primary/50 bg-white/50 focus:bg-white transition-all font-bold pl-4"
                     />
                     <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-black text-admin-text-tertiary uppercase tracking-tight">
                       min
@@ -357,9 +362,10 @@ export default function ScheduleSettingsPage() {
                   </Label>
                   <div className="relative group">
                     <Input
-                      type="number"
-                      min="0"
+                      className="h-10 sm:h-12 rounded-xl border-admin-border-primary/50 bg-white/50 focus:bg-white transition-all font-bold pl-4"
                       max="48"
+                      min="0"
+                      type="number"
                       value={settings.min_advance_booking_hours}
                       onChange={(e) =>
                         setSettings({
@@ -368,7 +374,6 @@ export default function ScheduleSettingsPage() {
                             parseInt(e.target.value) || 0,
                         })
                       }
-                      className="h-10 sm:h-12 rounded-xl border-admin-border-primary/50 bg-white/50 focus:bg-white transition-all font-bold pl-4"
                     />
                     <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-black text-admin-text-tertiary uppercase tracking-tight">
                       horas
@@ -385,9 +390,10 @@ export default function ScheduleSettingsPage() {
                   </Label>
                   <div className="relative group">
                     <Input
-                      type="number"
-                      min="1"
+                      className="h-10 sm:h-12 rounded-xl border-admin-border-primary/50 bg-white/50 focus:bg-white transition-all font-bold pl-4"
                       max="365"
+                      min="1"
+                      type="number"
                       value={settings.max_advance_booking_days}
                       onChange={(e) =>
                         setSettings({
@@ -396,7 +402,6 @@ export default function ScheduleSettingsPage() {
                             parseInt(e.target.value) || 90,
                         })
                       }
-                      className="h-10 sm:h-12 rounded-xl border-admin-border-primary/50 bg-white/50 focus:bg-white transition-all font-bold pl-4"
                     />
                     <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-black text-admin-text-tertiary uppercase tracking-tight">
                       días
@@ -433,13 +438,13 @@ export default function ScheduleSettingsPage() {
                 const dayConfig = settings.working_hours[day];
                 return (
                   <div
-                    key={day}
                     className={cn(
                       "rounded-xl p-3 sm:p-4 transition-all duration-300 border",
                       dayConfig.enabled
                         ? "bg-admin-bg-tertiary/50 border-admin-border-primary/20 shadow-none hover:shadow-md"
                         : "bg-admin-bg-tertiary/20 border-admin-border-primary/10 opacity-70",
                     )}
+                    key={day}
                   >
                     <div className="flex items-center justify-between mb-3 sm:mb-4 px-0 sm:px-2">
                       <div className="flex items-center gap-2 sm:gap-3">
@@ -457,10 +462,10 @@ export default function ScheduleSettingsPage() {
                       </div>
                       <Switch
                         checked={dayConfig.enabled}
+                        className="data-[state=checked]:bg-admin-accent-primary shrink-0"
                         onCheckedChange={(checked) =>
                           updateDayConfig(day, "enabled", checked)
                         }
-                        className="data-[state=checked]:bg-admin-accent-primary shrink-0"
                       />
                     </div>
 
@@ -471,12 +476,12 @@ export default function ScheduleSettingsPage() {
                             Apertura
                           </Label>
                           <Input
+                            className="h-11 sm:h-10 rounded-xl bg-admin-bg-tertiary/20 border-admin-border-primary/40 focus:bg-white transition-all font-bold text-xs min-h-[44px]"
                             type="time"
                             value={dayConfig.start_time}
                             onChange={(e) =>
                               updateDayConfig(day, "start_time", e.target.value)
                             }
-                            className="h-11 sm:h-10 rounded-xl bg-admin-bg-tertiary/20 border-admin-border-primary/40 focus:bg-white transition-all font-bold text-xs min-h-[44px]"
                           />
                         </div>
                         <div className="space-y-1.5">
@@ -487,12 +492,12 @@ export default function ScheduleSettingsPage() {
                             <span className="sm:hidden">Cierre</span>
                           </Label>
                           <Input
+                            className="h-11 sm:h-10 rounded-xl bg-admin-bg-tertiary/20 border-admin-border-primary/40 focus:bg-white transition-all font-bold text-xs min-h-[44px]"
                             type="time"
                             value={dayConfig.end_time}
                             onChange={(e) =>
                               updateDayConfig(day, "end_time", e.target.value)
                             }
-                            className="h-11 sm:h-10 rounded-xl bg-admin-bg-tertiary/20 border-admin-border-primary/40 focus:bg-white transition-all font-bold text-xs min-h-[44px]"
                           />
                         </div>
                         <div className="space-y-1.5">
@@ -503,6 +508,7 @@ export default function ScheduleSettingsPage() {
                             <span className="sm:hidden">Almuerzo Inicio</span>
                           </Label>
                           <Input
+                            className="h-11 sm:h-10 rounded-xl bg-admin-bg-tertiary/20 border-admin-border-primary/40 focus:bg-white transition-all font-bold text-xs min-h-[44px]"
                             type="time"
                             value={dayConfig.lunch_start || ""}
                             onChange={(e) =>
@@ -512,7 +518,6 @@ export default function ScheduleSettingsPage() {
                                 e.target.value || null,
                               )
                             }
-                            className="h-11 sm:h-10 rounded-xl bg-admin-bg-tertiary/20 border-admin-border-primary/40 focus:bg-white transition-all font-bold text-xs min-h-[44px]"
                           />
                         </div>
                         <div className="space-y-1.5">
@@ -523,6 +528,7 @@ export default function ScheduleSettingsPage() {
                             <span className="sm:hidden">Almuerzo Fin</span>
                           </Label>
                           <Input
+                            className="h-11 sm:h-10 rounded-xl bg-admin-bg-tertiary/20 border-admin-border-primary/40 focus:bg-white transition-all font-bold text-xs min-h-[44px]"
                             type="time"
                             value={dayConfig.lunch_end || ""}
                             onChange={(e) =>
@@ -532,7 +538,6 @@ export default function ScheduleSettingsPage() {
                                 e.target.value || null,
                               )
                             }
-                            className="h-11 sm:h-10 rounded-xl bg-admin-bg-tertiary/20 border-admin-border-primary/40 focus:bg-white transition-all font-bold text-xs min-h-[44px]"
                           />
                         </div>
                       </div>
@@ -560,15 +565,15 @@ export default function ScheduleSettingsPage() {
                 </Label>
                 <div className="flex gap-2">
                   <Input
+                    className="h-10 sm:h-11 rounded-xl bg-admin-bg-tertiary/20 border-admin-border-primary/40 focus:bg-white transition-all font-bold text-xs flex-1 min-h-[44px]"
                     type="date"
                     value={newBlockedDate}
                     onChange={(e) => setNewBlockedDate(e.target.value)}
-                    className="h-10 sm:h-11 rounded-xl bg-admin-bg-tertiary/20 border-admin-border-primary/40 focus:bg-white transition-all font-bold text-xs flex-1 min-h-[44px]"
                   />
                   <Button
+                    className="h-10 sm:h-11 w-11 sm:w-auto sm:px-4 rounded-xl bg-admin-bg-tertiary text-admin-text-primary hover:bg-admin-bg-tertiary/80 font-bold shrink-0"
                     type="button"
                     onClick={addBlockedDate}
-                    className="h-10 sm:h-11 w-11 sm:w-auto sm:px-4 rounded-xl bg-admin-bg-tertiary text-admin-text-primary hover:bg-admin-bg-tertiary/80 font-bold shrink-0"
                   >
                     +
                   </Button>
@@ -580,8 +585,8 @@ export default function ScheduleSettingsPage() {
                   <div className="flex flex-col gap-2">
                     {settings.blocked_dates.map((date) => (
                       <div
-                        key={date}
                         className="flex items-center justify-between bg-admin-bg-tertiary/20 border border-admin-border-primary/30 rounded-xl px-3 sm:px-4 py-2.5 sm:py-3 hover:bg-white transition-all group"
+                        key={date}
                       >
                         <span className="text-[11px] sm:text-xs font-bold text-admin-text-primary truncate">
                           {new Date(date).toLocaleDateString("es-CL", {
@@ -591,11 +596,11 @@ export default function ScheduleSettingsPage() {
                           })}
                         </span>
                         <Button
+                          className="h-8 w-8 sm:h-7 sm:w-7 p-0 rounded-lg text-admin-text-tertiary hover:text-admin-error hover:bg-admin-error/5 transition-all shrink-0"
+                          size="sm"
                           type="button"
                           variant="ghost"
-                          size="sm"
                           onClick={() => removeBlockedDate(date)}
-                          className="h-8 w-8 sm:h-7 sm:w-7 p-0 rounded-lg text-admin-text-tertiary hover:text-admin-error hover:bg-admin-error/5 transition-all shrink-0"
                         >
                           ×
                         </Button>
@@ -640,9 +645,9 @@ export default function ScheduleSettingsPage() {
       {/* Final Save Button - Floating Style for convenience */}
       <div className="fixed bottom-8 right-8 z-50 md:hidden">
         <Button
-          onClick={handleSave}
-          disabled={saving}
           className="h-14 w-14 rounded-full bg-admin-accent-primary shadow-premium-lg text-white font-bold transition-all active:scale-90"
+          disabled={saving}
+          onClick={handleSave}
         >
           {saving ? (
             <Loader2 className="h-5 w-5 animate-spin" />

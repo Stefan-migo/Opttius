@@ -1,32 +1,28 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import {
+  AlertCircle,
+  CheckCircle,
+  Clock,
+  Copy,
+  Eye,
+  RefreshCw,
+  TestTube,
+  XCircle,
+  Zap,
+} from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import { toast } from "sonner";
+
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
+  CardDescription,
   CardHeader,
   CardTitle,
-  CardDescription,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -35,18 +31,23 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
-  Zap,
-  Copy,
-  CheckCircle,
-  XCircle,
-  Clock,
-  RefreshCw,
-  TestTube,
-  Eye,
-  AlertCircle,
-} from "lucide-react";
-import { toast } from "sonner";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 interface WebhookLog {
   id: string;
@@ -55,7 +56,7 @@ interface WebhookLog {
   status: string;
   response_code: number;
   error_message?: string;
-  payload?: any;
+  payload?: unknown;
   created_at: string;
   processed_at?: string;
 }
@@ -225,7 +226,7 @@ export default function WebhookMonitor() {
             Monitorea el estado y las entregas de webhooks
           </p>
         </div>
-        <Button variant="outline" onClick={fetchData} disabled={loading}>
+        <Button disabled={loading} variant="outline" onClick={fetchData}>
           <RefreshCw
             className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`}
           />
@@ -252,25 +253,25 @@ export default function WebhookMonitor() {
             <CardContent>
               <div className="flex gap-2">
                 <Input
-                  value={status.urls.mercadopago}
                   readOnly
                   className="font-mono text-xs"
+                  value={status.urls.mercadopago}
                 />
                 <Button
-                  variant="outline"
                   size="sm"
+                  title="Copiar URL"
+                  variant="outline"
                   onClick={() =>
                     handleCopyUrl(status.urls.mercadopago, "MercadoPago")
                   }
-                  title="Copiar URL"
                 >
                   <Copy className="h-4 w-4" />
                 </Button>
                 <Button
-                  variant="outline"
                   size="sm"
-                  onClick={() => handleTestWebhook("mercadopago")}
                   title="Probar webhook"
+                  variant="outline"
+                  onClick={() => handleTestWebhook("mercadopago")}
                 >
                   <TestTube className="h-4 w-4" />
                 </Button>
@@ -318,23 +319,23 @@ export default function WebhookMonitor() {
             <CardContent>
               <div className="flex gap-2">
                 <Input
-                  value={status.urls.sanity}
                   readOnly
                   className="font-mono text-xs"
+                  value={status.urls.sanity}
                 />
                 <Button
-                  variant="outline"
                   size="sm"
-                  onClick={() => handleCopyUrl(status.urls.sanity, "Sanity")}
                   title="Copiar URL"
+                  variant="outline"
+                  onClick={() => handleCopyUrl(status.urls.sanity, "Sanity")}
                 >
                   <Copy className="h-4 w-4" />
                 </Button>
                 <Button
-                  variant="outline"
                   size="sm"
-                  onClick={() => handleTestWebhook("sanity")}
                   title="Probar webhook"
+                  variant="outline"
+                  onClick={() => handleTestWebhook("sanity")}
                 >
                   <TestTube className="h-4 w-4" />
                 </Button>
@@ -465,10 +466,10 @@ export default function WebhookMonitor() {
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
                         <Button
-                          variant="ghost"
                           size="sm"
-                          onClick={() => handleViewDetails(log)}
                           title="Ver detalles"
+                          variant="ghost"
+                          onClick={() => handleViewDetails(log)}
                         >
                           <Eye className="h-4 w-4" />
                         </Button>

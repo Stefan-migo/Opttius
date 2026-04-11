@@ -212,7 +212,11 @@ export const mockDbResults = {
 };
 
 // Utility functions
-export const createMockListResponse = (items: any[], page = 1, limit = 10) => ({
+export const createMockListResponse = (
+  items: unknown[],
+  page = 1,
+  limit = 10,
+) => ({
   data: items.slice((page - 1) * limit, page * limit),
   pagination: {
     page,
@@ -223,7 +227,7 @@ export const createMockListResponse = (items: any[], page = 1, limit = 10) => ({
 });
 
 export const createMockEntityWithTimestamps = (
-  entity: any,
+  entity: unknown,
   overrides = {},
 ) => ({
   ...entity,

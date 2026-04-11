@@ -1,7 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { toast } from "sonner";
+
 import { useBranch } from "@/hooks/useBranch";
 import { getBranchHeader } from "@/lib/utils/branch";
-import { toast } from "sonner";
 
 interface TimeSlot {
   time_slot: string;
@@ -17,7 +18,7 @@ interface UseAvailabilityReturn {
 }
 
 interface UseAvailabilityProps {
-  scheduleSettings: any;
+  scheduleSettings: unknown;
   effectiveBranchId?: string | null;
 }
 
@@ -80,7 +81,7 @@ export function useAvailability({
         console.log("✅ Available slots response:", data);
         console.log("📊 Total slots:", data.slots?.length || 0);
         const availableCount =
-          data.slots?.filter((s: any) => s.available === true).length || 0;
+          data.slots?.filter((s: unknown) => s.available === true).length || 0;
         console.log("📊 Available slots:", availableCount);
         console.log("📋 First few slots:", data.slots?.slice(0, 5));
 

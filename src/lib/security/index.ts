@@ -6,46 +6,40 @@
  * @module lib/security
  */
 
+export type { SecurityAlerting } from "./alerting";
+export { getSecurityAlerting } from "./alerting";
+export * from "./events";
+export {
+  type NextRequest,
+  type NextResponse,
+  paymentSecurity,
+  securityMiddleware,
+  withAuthSecurity,
+  withDataSecurity,
+  withRateLimitSecurity,
+} from "./integration";
 export type { SecurityMonitor } from "./monitoring";
 export { getSecurityMonitor } from "./monitoring";
 
-export type { SecurityAlerting } from "./alerting";
-export { getSecurityAlerting } from "./alerting";
-
-export {
-  withAuthSecurity,
-  withRateLimitSecurity,
-  withDataSecurity,
-  securityMiddleware,
-  paymentSecurity,
-  type NextRequest,
-  type NextResponse,
-} from "./integration";
-
-export * from "./events";
-
 // Phase 3 Advanced Security Components
-export {
-  phase3Security,
-  behavioralAnalytics,
-  threatDetector,
-  incidentResponse,
-} from "./phase3-integration";
-
 export type {
-  UserAction,
   BehaviorBaseline,
   ThreatAssessment,
+  UserAction,
 } from "./behavioral-analytics";
-
-export type {
-  ThreatIndicator,
-  ZeroTrustEvaluation,
-  DeceptionAsset,
-} from "./threat-detection";
-
 export type {
   Incident,
   IncidentCategory,
   ResponsePlaybook,
 } from "./incident-response";
+export {
+  behavioralAnalytics,
+  incidentResponse,
+  phase3Security,
+  threatDetector,
+} from "./phase3-integration";
+export type {
+  DeceptionAsset,
+  ThreatIndicator,
+  ZeroTrustEvaluation,
+} from "./threat-detection";

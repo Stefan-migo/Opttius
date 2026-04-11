@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient, createServiceRoleClient } from "@/utils/supabase/server";
+
 import { getBranchContext } from "@/lib/api/branch-middleware";
 import { appLogger as logger } from "@/lib/logger";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
+import { createClient, createServiceRoleClient } from "@/utils/supabase/server";
 
 /**
  * GET /api/admin/cash-register/session-movements
@@ -124,9 +125,9 @@ export async function GET(request: NextRequest) {
 
     // Fetch order details for credit notes that have order_id
     const orderIds = (creditNoteMovements || [])
-      .map((cnm: any) => cnm.credit_notes?.order_id)
+      .map((cnm: unknown) => cnm.credit_notes?.order_id)
       .filter(Boolean);
-    let ordersMap: Record<string, any> = {};
+    let ordersMap: Record<string, unknown> = {};
     if (orderIds.length > 0) {
       const { data: orders } = await supabaseServiceRole
         .from("orders")
@@ -135,7 +136,7 @@ export async function GET(request: NextRequest) {
         )
         .in("id", orderIds);
       if (orders) {
-        ordersMap = Object.fromEntries(orders.map((o: any) => [o.id, o]));
+        ordersMap = Object.fromEntries(orders.map((o: unknown) => [o.id, o]));
       }
     }
 
@@ -148,7 +149,7 @@ export async function GET(request: NextRequest) {
     };
 
     // Transform credit note movements into movement format
-    const cnMovements = (creditNoteMovements || []).map((cnm: any) => {
+    const cnMovements = (creditNoteMovements || []).map((cnm: unknown) => {
       const order = cnm.credit_notes?.order_id
         ? ordersMap[cnm.credit_notes.order_id]
         : null;
@@ -180,7 +181,7 @@ export async function GET(request: NextRequest) {
     });
 
     // Transform payments into movements with additional info
-    const paymentMovements = (payments || []).map((payment: any) => {
+    const paymentMovements = (payments || []).map((payment: unknown) => {
       const order = payment.order;
 
       // Extract customer information from order fields
@@ -251,7 +252,7 @@ export async function GET(request: NextRequest) {
       total_movements: movements.length,
       total_amount: movements.reduce((sum, m) => sum + m.amount, 0),
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error("Error in session movements API:", error);
     return NextResponse.json(
       { error: "Internal server error", details: error.message },

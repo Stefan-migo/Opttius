@@ -1,5 +1,5 @@
-import * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
+import * as React from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -69,7 +69,6 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
     ref,
   ) => (
     <div
-      ref={ref}
       className={cn(
         cardVariants({ variant, padding, rounded }),
         shimmer &&
@@ -77,6 +76,7 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
         float && "animate-premium-float",
         className,
       )}
+      ref={ref}
       {...props}
     />
   ),
@@ -111,8 +111,8 @@ export interface CardHeaderProps
 const CardHeader = React.forwardRef<HTMLDivElement, CardHeaderProps>(
   ({ className, padding, align, ...props }, ref) => (
     <div
-      ref={ref}
       className={cn(cardHeaderVariants({ padding, align }), className)}
+      ref={ref}
       {...props}
     />
   ),
@@ -147,8 +147,8 @@ export interface CardTitleProps
 const CardTitle = React.forwardRef<HTMLDivElement, CardTitleProps>(
   ({ className, size, theme, ...props }, ref) => (
     <div
-      ref={ref}
       className={cn(cardTitleVariants({ size, theme }), className)}
+      ref={ref}
       {...props}
     />
   ),
@@ -181,8 +181,8 @@ export interface CardDescriptionProps
 const CardDescription = React.forwardRef<HTMLDivElement, CardDescriptionProps>(
   ({ className, size, theme, ...props }, ref) => (
     <div
-      ref={ref}
       className={cn(cardDescriptionVariants({ size, theme }), className)}
+      ref={ref}
       {...props}
     />
   ),
@@ -218,8 +218,8 @@ export interface CardContentProps
 const CardContent = React.forwardRef<HTMLDivElement, CardContentProps>(
   ({ className, padding, spacing, ...props }, ref) => (
     <div
-      ref={ref}
       className={cn(cardContentVariants({ padding, spacing }), className)}
+      ref={ref}
       {...props}
     />
   ),
@@ -263,11 +263,11 @@ export interface CardFooterProps
 const CardFooter = React.forwardRef<HTMLDivElement, CardFooterProps>(
   ({ className, padding, justify, direction, ...props }, ref) => (
     <div
-      ref={ref}
       className={cn(
         cardFooterVariants({ padding, justify, direction }),
         className,
       )}
+      ref={ref}
       {...props}
     />
   ),
@@ -276,15 +276,15 @@ CardFooter.displayName = "CardFooter";
 
 export {
   Card,
-  CardHeader,
-  CardFooter,
-  CardTitle,
-  CardDescription,
   CardContent,
-  cardVariants,
-  cardHeaderVariants,
-  cardTitleVariants,
-  cardDescriptionVariants,
   cardContentVariants,
+  CardDescription,
+  cardDescriptionVariants,
+  CardFooter,
   cardFooterVariants,
+  CardHeader,
+  cardHeaderVariants,
+  CardTitle,
+  cardTitleVariants,
+  cardVariants,
 };

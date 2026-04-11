@@ -1,14 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireRoot } from "@/lib/api/root-middleware";
-import { createClient } from "@/utils/supabase/server";
-import { createServiceRoleClient } from "@/utils/supabase/service-role";
-import { appLogger as logger } from "@/lib/logger";
+
 import { AuthorizationError } from "@/lib/api/errors";
+import { parseAndValidateBody } from "@/lib/api/validation/zod-helpers";
 import {
   createSaasSupportTicketSchema,
   saasSupportTicketFiltersSchema,
 } from "@/lib/api/validation/zod-schemas";
-import { parseAndValidateBody } from "@/lib/api/validation/zod-helpers";
+import { appLogger as logger } from "@/lib/logger";
+import { createClient } from "@/utils/supabase/server";
+import { createServiceRoleClient } from "@/utils/supabase/service-role";
 
 /**
  * GET /api/admin/saas-management/support/tickets
@@ -124,7 +124,7 @@ export async function GET(request: NextRequest) {
 
     // Enriquecer tickets con información relacionada
     const enrichedTickets = await Promise.all(
-      (tickets || []).map(async (ticket: any) => {
+      (tickets || []).map(async (ticket: unknown) => {
         // Obtener organización
         let organization = null;
         if (ticket.organization_id) {
@@ -279,7 +279,7 @@ export async function POST(request: NextRequest) {
           category: body.category,
           requester_name: adminUser.email?.split("@")[0] || "Usuario",
           requester_email: adminUser.email || user.email || "",
-          organization: ticket.organization as any,
+          organization: ticket.organization as unknown,
         });
         logger.info("Ticket creation email sent successfully");
       } else {

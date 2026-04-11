@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { initMercadoPago, Wallet } from "@mercadopago/sdk-react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2 } from "lucide-react";
+import { useEffect, useState } from "react";
+
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Card, CardContent } from "@/components/ui/card";
 
 interface MercadoPagoButtonProps {
   preferenceId: string;
@@ -70,9 +71,7 @@ export function MercadoPagoButton({
 
   return (
     <div className="w-full">
-      <Wallet
-        initialization={{ preferenceId }}
-      />
+      <Wallet initialization={{ preferenceId }} />
     </div>
   );
 }

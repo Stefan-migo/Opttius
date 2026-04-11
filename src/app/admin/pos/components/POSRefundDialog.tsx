@@ -1,6 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { Loader2, RotateCcw } from "lucide-react";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -9,15 +13,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Loader2, RotateCcw } from "lucide-react";
-import { formatCurrency } from "@/lib/utils";
 import { posService } from "@/lib/api/services";
 import { orderService } from "@/lib/api/services";
-import { toast } from "sonner";
+import { formatCurrency } from "@/lib/utils";
 
 interface OrderItem {
   id: string;
@@ -69,17 +70,21 @@ export function POSRefundDialog({
     setLoading(true);
     setError(null);
     try {
-      const order = await orderService.getOrder(orderId);
-      const items = (order as any)?.order_items ?? [];
+      const order = (await orderService.getOrder(orderId)) as {
+        order_items?: OrderItem[];
+      } | null;
+      const items = order?.order_items ?? [];
       setOrderItems(items);
       const initial: Record<string, number> = {};
       items.forEach((item: OrderItem) => {
         initial[item.id] = 0;
       });
       setRefundQuantities(initial);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Error fetching order:", err);
-      setError(err.message || "Error al cargar la orden");
+      const errorMessage =
+        err instanceof Error ? err.message : "Error al cargar la orden";
+      setError(errorMessage);
       setOrderItems([]);
     } finally {
       setLoading(false);
@@ -140,8 +145,10 @@ export function POSRefundDialog({
       } else {
         toast.error("Error al procesar la devolución");
       }
-    } catch (err: any) {
-      toast.error(err.message || "Error al procesar la devolución");
+    } catch (err: unknown) {
+      const errorMessage =
+        err instanceof Error ? err.message : "Error al procesar la devolución";
+      toast.error(errorMessage);
     } finally {
       setSubmitting(false);
     }
@@ -183,8 +190,8 @@ export function POSRefundDialog({
                   .filter((item) => item.product_id)
                   .map((item) => (
                     <div
-                      key={item.id}
                       className="flex items-center justify-between p-3"
+                      key={item.id}
                     >
                       <div className="flex-1 min-w-0">
                         <div className="font-medium text-sm truncate">
@@ -197,9 +204,10 @@ export function POSRefundDialog({
                       </div>
                       <div className="flex items-center gap-2 ml-2">
                         <Input
-                          type="number"
-                          min={0}
+                          className="w-16 text-center"
                           max={item.quantity}
+                          min={0}
+                          type="number"
                           value={refundQuantities[item.id] || 0}
                           onChange={(e) =>
                             handleQuantityChange(
@@ -207,7 +215,6 @@ export function POSRefundDialog({
                               parseInt(e.target.value) || 0,
                             )
                           }
-                          className="w-16 text-center"
                         />
                         <span className="text-xs text-gray-500">
                           / {item.quantity}
@@ -227,12 +234,12 @@ export function POSRefundDialog({
             <div>
               <Label htmlFor="refund-reason">Motivo (requerido)</Label>
               <Textarea
+                className="mt-1"
                 id="refund-reason"
+                placeholder="Ej: Producto defectuoso, cliente cambió de opinión..."
+                rows={2}
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
-                placeholder="Ej: Producto defectuoso, cliente cambió de opinión..."
-                className="mt-1"
-                rows={2}
               />
             </div>
 
@@ -255,7 +262,7 @@ export function POSRefundDialog({
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancelar
           </Button>
-          <Button onClick={handleSubmit} disabled={!canSubmit || submitting}>
+          <Button disabled={!canSubmit || submitting} onClick={handleSubmit}>
             {submitting ? (
               <>
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />

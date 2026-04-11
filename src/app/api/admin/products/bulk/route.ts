@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient, createServiceRoleClient } from "@/utils/supabase/server";
-import { appLogger as logger } from "@/lib/logger";
+
 import { getBranchContext } from "@/lib/api/branch-middleware";
+import { appLogger as logger } from "@/lib/logger";
 import type {
   IsAdminParams,
   IsAdminResult,
   LogAdminActivityParams,
 } from "@/types/supabase-rpc";
+import { createClient, createServiceRoleClient } from "@/utils/supabase/server";
 
 export const dynamic = "force-dynamic";
 export async function POST(request: NextRequest) {
@@ -571,7 +572,9 @@ export async function GET(request: NextRequest) {
         created_at,
         updated_at`;
 
-    let query = supabase.from("products").select(selectFields as any) as any;
+    let query = supabase
+      .from("products")
+      .select(selectFields as unknown) as unknown;
 
     if (branchId) {
       query = query.eq("product_branch_stock.branch_id", branchId);
@@ -617,7 +620,7 @@ export async function GET(request: NextRequest) {
 
       const csvRows = [
         headers.join(","),
-        ...(products || []).map((product: any) =>
+        ...(products || []).map((product: unknown) =>
           [
             product.id,
             `"${product.name || ""}"`,
@@ -627,7 +630,7 @@ export async function GET(request: NextRequest) {
             product.compare_at_price || "",
             // Use stock from product_branch_stock if available, otherwise fallback to deprecated inventory_quantity
             (() => {
-              const stock = (product as any).product_branch_stock?.[0];
+              const stock = (product as unknown).product_branch_stock?.[0];
               return (
                 stock?.available_quantity ??
                 stock?.quantity ??
@@ -646,10 +649,10 @@ export async function GET(request: NextRequest) {
             `"${(() => {
               if (Array.isArray(product.category)) {
                 return product.category.length > 0
-                  ? (product.category[0] as any)?.name || ""
+                  ? (product.category[0] as unknown)?.name || ""
                   : "";
               }
-              return (product.category as any)?.name || "";
+              return (product.category as unknown)?.name || "";
             })()}"`,
             new Date(product.created_at).toLocaleDateString("es-AR"),
           ].join(","),

@@ -1,9 +1,24 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  AlertTriangle,
+  ArrowUpRight,
+  CheckCircle,
+  Edit,
+  Eye,
+  Mail,
+  Phone,
+  Search,
+  UserPlus,
+  Users,
+} from "lucide-react";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -20,33 +35,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Users,
-  UserPlus,
-  Star,
-  Calendar,
-  Mail,
-  Phone,
-  MapPin,
-  Package,
-  CreditCard,
-  TrendingUp,
-  Search,
-  Filter,
-  Eye,
-  Edit,
-  AlertTriangle,
-  CheckCircle,
-  Crown,
-  ArrowUpRight,
-} from "lucide-react";
-import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
 import { useBranch } from "@/hooks/useBranch";
-import { customerService, Customer } from "@/lib/api/services/customerService";
 import { agreementService } from "@/lib/api/services/agreementService";
+import { Customer, customerService } from "@/lib/api/services/customerService";
 import { handleApiError } from "@/lib/services/errorService";
-import { success } from "@/lib/services/notificationService";
 
 interface CustomerStats {
   totalCustomers: number;
@@ -190,10 +182,10 @@ export default function CustomersPage() {
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 sm:gap-6">
           {[...Array(4)].map((_, i) => (
-            <Card key={i} className="animate-pulse">
+            <Card className="animate-pulse" key={i}>
               <CardContent className="p-6">
-                <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-                <div className="h-8 bg-gray-200 rounded w-1/2"></div>
+                <div className="h-4 bg-gray-200 rounded w-3/4 mb-2" />
+                <div className="h-8 bg-gray-200 rounded w-1/2" />
               </CardContent>
             </Card>
           ))}
@@ -236,8 +228,8 @@ export default function CustomersPage() {
             Clientes del operativo: {operativoName || "..."}
           </span>
           <Link
-            href={`/admin/field-operations/${fieldOperationIdFromUrl}`}
             className="text-sm text-admin-accent-primary hover:underline font-medium"
+            href={`/admin/field-operations/${fieldOperationIdFromUrl}`}
           >
             Volver al operativo
           </Link>
@@ -256,6 +248,7 @@ export default function CustomersPage() {
         </p>
         <div className="flex justify-end">
           <Button
+            className="min-h-[44px]"
             onClick={() =>
               router.push(
                 fieldOperationIdFromUrl
@@ -263,7 +256,6 @@ export default function CustomersPage() {
                   : "/admin/customers/new",
               )
             }
-            className="min-h-[44px]"
           >
             <UserPlus className="h-4 w-4 mr-2" />
             Nuevo Cliente
@@ -351,6 +343,7 @@ export default function CustomersPage() {
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-admin-text-tertiary h-4 w-4" />
                 <Input
+                  className="pl-10"
                   data-tour="customers-search"
                   placeholder="Buscar por nombre, email, teléfono o RUT..."
                   value={searchTerm}
@@ -363,7 +356,6 @@ export default function CustomersPage() {
                       fetchCustomers();
                     }
                   }}
-                  className="pl-10"
                 />
               </div>
             </div>
@@ -425,7 +417,7 @@ export default function CustomersPage() {
               <TableBody>
                 {customers.length === 0 && !loading ? (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center py-12">
+                    <TableCell className="text-center py-12" colSpan={6}>
                       <Users className="h-12 w-12 text-admin-text-tertiary mx-auto mb-4" />
                       <h3 className="text-lg font-semibold text-admin-text-primary mb-2">
                         No se encontraron clientes
@@ -438,8 +430,8 @@ export default function CustomersPage() {
                 ) : (
                   customers.map((customer) => (
                     <TableRow
-                      key={customer.id}
                       className="hover:bg-[#AE000025] transition-colors"
+                      key={customer.id}
                     >
                       <TableCell>
                         <div>
@@ -498,9 +490,9 @@ export default function CustomersPage() {
                         <div className="flex flex-wrap gap-1">
                           {customer.is_active !== false ? (
                             <Badge
-                              variant="default"
                               className="bg-admin-success text-white"
                               style={{ color: "var(--admin-accent-secondary)" }}
+                              variant="default"
                             >
                               <CheckCircle className="h-3 w-3 mr-1" />
                               Activo
@@ -513,8 +505,8 @@ export default function CustomersPage() {
                           )}
                           {customer.is_convenio_client && (
                             <Badge
-                              variant="outline"
                               className="border-admin-accent-primary/50 text-admin-accent-primary"
+                              variant="outline"
                             >
                               Convenio
                             </Badge>
@@ -531,12 +523,12 @@ export default function CustomersPage() {
                       <TableCell>
                         <div className="flex space-x-2">
                           <Link href={`/admin/customers/${customer.id}`}>
-                            <Button variant="outline" size="sm">
+                            <Button size="sm" variant="outline">
                               <Eye className="h-3 w-3" />
                             </Button>
                           </Link>
                           <Link href={`/admin/customers/${customer.id}/edit`}>
-                            <Button variant="outline" size="sm">
+                            <Button size="sm" variant="outline">
                               <Edit className="h-3 w-3" />
                             </Button>
                           </Link>
@@ -553,8 +545,8 @@ export default function CustomersPage() {
           {totalPages > 1 && (
             <div className="flex justify-center items-center mt-6 space-x-2">
               <Button
-                variant="outline"
                 disabled={currentPage === 1}
+                variant="outline"
                 onClick={() => setCurrentPage(currentPage - 1)}
               >
                 Anterior
@@ -565,8 +557,8 @@ export default function CustomersPage() {
               </span>
 
               <Button
-                variant="outline"
                 disabled={currentPage === totalPages}
+                variant="outline"
                 onClick={() => setCurrentPage(currentPage + 1)}
               >
                 Siguiente

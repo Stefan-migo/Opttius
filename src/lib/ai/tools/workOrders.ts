@@ -1,6 +1,7 @@
 import { z } from "zod";
-import type { ToolDefinition, ToolResult } from "./types";
+
 import { resolveBranchByName } from "./resolvers";
+import type { ToolDefinition, ToolResult } from "./types";
 
 const WORK_ORDER_STATUSES = [
   "quote",

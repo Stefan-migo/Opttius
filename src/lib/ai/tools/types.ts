@@ -1,10 +1,10 @@
-import type { z } from "zod";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import type { z } from "zod";
 
 export interface ToolExecutionContext {
   userId: string;
   organizationId: string;
-  supabase: SupabaseClient<any>;
+  supabase: SupabaseClient<unknown>;
   currency?: string;
 
   // New context for Super Admin awareness
@@ -21,7 +21,7 @@ export interface ToolExecutionContext {
   customerId?: string | null;
 }
 
-export interface ToolResult<T = any> {
+export interface ToolResult<T = unknown> {
   success: boolean;
   data?: T;
   error?: string;
@@ -31,10 +31,10 @@ export interface ToolResult<T = any> {
 export interface ToolError {
   code: string;
   message: string;
-  details?: any;
+  details?: unknown;
 }
 
-export type ToolFunction<TParams = any, TResult = any> = (
+export type ToolFunction<TParams = unknown, TResult = unknown> = (
   params: TParams,
   context: ToolExecutionContext,
 ) => Promise<ToolResult<TResult>>;
@@ -42,7 +42,7 @@ export type ToolFunction<TParams = any, TResult = any> = (
 export interface ToolDefinition {
   name: string;
   description: string;
-  parameters: Record<string, any>;
+  parameters: Record<string, unknown>;
   execute: ToolFunction;
   requiresConfirmation?: boolean;
   category?: string;

@@ -90,7 +90,7 @@ export interface ErrorResponse {
     code: string;
     timestamp: string;
     requestId?: string;
-    details?: any;
+    details?: unknown;
   };
 }
 
@@ -133,9 +133,9 @@ export function createErrorResponse(
 
 // Error handler middleware wrapper
 export function withErrorHandler(
-  handler: (request: any, context?: any) => Promise<NextResponse>,
+  handler: (request: unknown, context?: unknown) => Promise<NextResponse>,
 ) {
-  return async (request: any, context?: any): Promise<NextResponse> => {
+  return async (request: unknown, context?: unknown): Promise<NextResponse> => {
     try {
       return await handler(request, context);
     } catch (error) {
@@ -151,7 +151,7 @@ export function withErrorHandler(
 }
 
 // Success response builder
-export interface SuccessResponse<T = any> {
+export interface SuccessResponse<T = unknown> {
   success: true;
   data: T;
   timestamp: string;
@@ -175,9 +175,9 @@ export function createSuccessResponse<T>(
 
 // Async handler wrapper with error handling
 export function asyncHandler(
-  fn: (request: any, context?: any) => Promise<NextResponse>,
+  fn: (request: unknown, context?: unknown) => Promise<NextResponse>,
 ) {
-  return (request: any, context?: any) => {
+  return (request: unknown, context?: unknown) => {
     return Promise.resolve(fn(request, context)).catch((error) => {
       const requestId = crypto.randomUUID();
       return createErrorResponse(error, requestId);

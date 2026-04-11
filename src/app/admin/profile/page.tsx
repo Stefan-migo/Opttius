@@ -1,15 +1,16 @@
 "use client";
 
-import { Suspense } from "react";
-import { ProfilePageContent } from "@/components/profile";
 import { Loader2 } from "lucide-react";
+import { Suspense } from "react";
+
+import { ProfilePageContent } from "@/components/profile";
 
 function ProfilePageInner() {
   return (
     <ProfilePageContent
-      variant="admin"
-      title="Mi Perfil Administrativo"
       subtitle="Gestiona tu información personal, preferencias y seguridad de acceso."
+      title="Mi Perfil Administrativo"
+      variant="admin"
     />
   );
 }

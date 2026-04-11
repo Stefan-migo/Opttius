@@ -1,11 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/utils/supabase/server";
-import {
-  getBranchContext,
-  validateBranchAccess,
-} from "@/lib/api/branch-middleware";
-import { validateTierLimit } from "@/lib/saas/tier-validator";
+
+import { getBranchContext } from "@/lib/api/branch-middleware";
 import { appLogger as logger } from "@/lib/logger";
+import { validateTierLimit } from "@/lib/saas/tier-validator";
+import { createClient } from "@/utils/supabase/server";
 
 export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
@@ -104,7 +102,7 @@ export async function GET(request: NextRequest) {
       isSuperAdmin: branchContext.isSuperAdmin,
       organizationId: userOrganizationId ?? null,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error("Error in GET /api/admin/branches", error);
     return NextResponse.json(
       { error: error.message || "Internal server error" },
@@ -258,7 +256,7 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json({ branch: newBranch }, { status: 201 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error("Error in POST /api/admin/branches", error);
     return NextResponse.json(
       { error: error.message || "Internal server error" },

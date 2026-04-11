@@ -4,10 +4,11 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { WhatsAppSignatureValidator } from "@/lib/whatsapp/signature-validator";
-import { handleWebhookPayload } from "@/lib/whatsapp/webhook-handler";
+
 import { appLogger as logger } from "@/lib/logger";
+import { WhatsAppSignatureValidator } from "@/lib/whatsapp/signature-validator";
 import type { WhatsAppWebhookPayload } from "@/lib/whatsapp/types";
+import { handleWebhookPayload } from "@/lib/whatsapp/webhook-handler";
 
 export const dynamic = "force-dynamic";
 

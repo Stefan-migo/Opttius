@@ -1,6 +1,7 @@
 "use client";
 
 import { HelpCircle } from "lucide-react";
+
 import {
   Tooltip,
   TooltipContent,
@@ -29,15 +30,15 @@ export function MetricTooltip({
       <TooltipTrigger asChild>
         {children ?? (
           <button
-            type="button"
-            className={`inline-flex items-center justify-center rounded-full p-0.5 text-admin-text-tertiary hover:text-admin-accent-primary focus:outline-none focus:ring-2 focus:ring-admin-accent-primary/50 ${className ?? ""}`}
             aria-label={`Ayuda: ${help.title}`}
+            className={`inline-flex items-center justify-center rounded-full p-0.5 text-admin-text-tertiary hover:text-admin-accent-primary focus:outline-none focus:ring-2 focus:ring-admin-accent-primary/50 ${className ?? ""}`}
+            type="button"
           >
             <HelpCircle className="h-3.5 w-3.5" />
           </button>
         )}
       </TooltipTrigger>
-      <TooltipContent side="top" className="max-w-[280px] p-3 text-left">
+      <TooltipContent className="max-w-[280px] p-3 text-left" side="top">
         <div className="space-y-2">
           <p className="font-semibold text-sm">{help.title}</p>
           <p className="text-xs text-muted-foreground">{help.description}</p>

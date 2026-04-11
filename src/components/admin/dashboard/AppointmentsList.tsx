@@ -1,17 +1,10 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { ArrowRight, Calendar, ChevronRight, Clock } from "lucide-react";
 import Link from "next/link";
-import {
-  Calendar,
-  ArrowRight,
-  Clock,
-  CheckCircle,
-  XCircle,
-  ChevronRight,
-} from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface AppointmentItem {
   id: string;
@@ -52,9 +45,9 @@ export function AppointmentsList({
           </div>
           <Link href="/admin/appointments">
             <Button
-              variant="ghost"
-              size="sm"
               className="h-9 px-4 font-display font-bold text-[10px] text-epoch-primary hover:bg-epoch-primary/5 rounded-xl group transition-all tracking-widest uppercase"
+              size="sm"
+              variant="ghost"
             >
               GESTIONAR AGENDA
               <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
@@ -67,9 +60,9 @@ export function AppointmentsList({
           {appointments.length > 0 ? (
             appointments.map((appointment) => (
               <Link
-                key={appointment.id}
-                href="/admin/appointments"
                 className="group flex items-center p-6 hover:bg-admin-bg-tertiary/60 active:bg-admin-bg-tertiary/70 transition-all duration-300 relative overflow-hidden border-l-2 border-l-transparent hover:border-l-epoch-accent/50 block"
+                href="/admin/appointments"
+                key={appointment.id}
               >
                 <div className="flex-shrink-0 mr-6 text-center min-w-[70px] pr-6">
                   <p className="text-sm font-display font-bold text-admin-text-primary leading-none tracking-wider">

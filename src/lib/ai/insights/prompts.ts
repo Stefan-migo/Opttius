@@ -8,12 +8,12 @@
  * @module lib/ai/insights/prompts
  */
 
-import type { InsightSection } from "./schemas";
 import {
   INSIGHT_ROUTES,
-  ROUTES_BY_SECTION,
   INVALID_ROUTES,
+  ROUTES_BY_SECTION,
 } from "./routes-reference";
+import type { InsightSection } from "./schemas";
 
 /**
  * Base prompt instructions for all insights
@@ -50,9 +50,9 @@ No uses claves en español. Usa exactamente: type, title, message, priority, act
  */
 export function getSectionPrompt(
   section: InsightSection,
-  data: any,
+  data: unknown,
   organizationName: string,
-  additionalContext?: Record<string, any>,
+  additionalContext?: Record<string, unknown>,
 ): string {
   const sectionPrompts: Record<InsightSection, string> = {
     dashboard: getDashboardPrompt(organizationName, data, additionalContext),
@@ -78,7 +78,7 @@ export function getDailySummaryPrompt(
     pendingQuotes?: number;
   },
   dateStr: string,
-  additionalContext?: Record<string, any>,
+  additionalContext?: Record<string, unknown>,
 ): string {
   const organizationAge = additionalContext?.organizationAge || 0;
   const totalOrders = additionalContext?.totalOrders || 0;
@@ -120,7 +120,7 @@ function getDashboardPrompt(
     overdueWorkOrders?: number;
     pendingQuotes?: number;
   },
-  additionalContext?: Record<string, any>,
+  additionalContext?: Record<string, unknown>,
 ): string {
   // Detectar estado de la óptica
   const isNewOrganization = additionalContext?.isNewOrganization || false;
@@ -273,7 +273,7 @@ function getInventoryPrompt(
     }>;
     lowStockProducts?: number;
   },
-  additionalContext?: Record<string, any>,
+  additionalContext?: Record<string, unknown>,
 ): string {
   return `
 Eres un auditor de inventario de la óptica "${organizationName}".
@@ -318,7 +318,7 @@ function getClientsPrompt(
       contactLensRenewal?: boolean;
     }>;
   },
-  additionalContext?: Record<string, any>,
+  additionalContext?: Record<string, unknown>,
 ): string {
   return `
 Eres un especialista en marketing y fidelización de la óptica "${organizationName}".
@@ -376,7 +376,7 @@ function getPOSPrompt(
       };
     };
   },
-  additionalContext?: Record<string, any>,
+  additionalContext?: Record<string, unknown>,
 ): string {
   return `
 Eres un experto óptico de la óptica "${organizationName}" especializado en venta y mejora de la experiencia visual.
@@ -424,7 +424,7 @@ function getAnalyticsPrompt(
       factor?: string;
     };
   },
-  additionalContext?: Record<string, any>,
+  additionalContext?: Record<string, unknown>,
 ): string {
   return `
 Actúa como un analista de datos experto para la óptica "${organizationName}".
@@ -461,6 +461,6 @@ Ejemplos de insights:
 /**
  * Get user message for LLM based on section and data
  */
-export function getUserMessage(section: InsightSection, data: any): string {
+export function getUserMessage(section: InsightSection, data: unknown): string {
   return `Analiza los siguientes datos para la sección "${section}" y genera insights accionables:\n\n${JSON.stringify(data, null, 2)}`;
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, memo } from "react";
+import { memo, useMemo } from "react";
 
 interface AreaChartProps {
   data: Array<{ date: string; value: number; count?: number }>;
@@ -139,7 +139,7 @@ function AreaChartComponent({
           {/* Y-axis labels */}
           <div className="flex flex-col justify-between h-64 text-xs text-tierra-media">
             {yAxisLabels.map((label, idx) => (
-              <div key={idx} className="text-right w-16">
+              <div className="text-right w-16" key={idx}>
                 {label.label}
               </div>
             ))}
@@ -148,25 +148,25 @@ function AreaChartComponent({
           {/* Chart area */}
           <div className="flex-1 relative">
             <svg
-              width="100%"
-              height="256"
-              viewBox="0 0 100 100"
-              preserveAspectRatio="none"
               className="overflow-visible"
+              height="256"
+              preserveAspectRatio="none"
+              viewBox="0 0 100 100"
+              width="100%"
             >
               {/* Grid lines */}
               {showGrid &&
                 yAxisLabels.map((label, idx) => (
                   <line
                     key={idx}
-                    x1="0"
-                    y1={label.y}
-                    x2="100"
-                    y2={label.y}
                     stroke="#E5E7EB"
-                    strokeWidth="0.5"
                     strokeDasharray="2 2"
+                    strokeWidth="0.5"
                     vectorEffect="non-scaling-stroke"
+                    x1="0"
+                    x2="100"
+                    y1={label.y}
+                    y2={label.y}
                   />
                 ))}
 
@@ -175,8 +175,8 @@ function AreaChartComponent({
                 <linearGradient
                   id={`area-gradient-${title}`}
                   x1="0%"
-                  y1="0%"
                   x2="0%"
+                  y1="0%"
                   y2="100%"
                 >
                   <stop offset="0%" stopColor={color} stopOpacity="0.6" />
@@ -187,9 +187,9 @@ function AreaChartComponent({
 
               {/* Area fill */}
               <path
+                className="transition-all duration-300"
                 d={areaPath}
                 fill={`url(#area-gradient-${title})`}
-                className="transition-all duration-300"
               />
 
               {/* Line */}
@@ -197,32 +197,32 @@ function AreaChartComponent({
                 d={linePath}
                 fill="none"
                 stroke={color}
-                strokeWidth="1"
                 strokeLinecap="round"
                 strokeLinejoin="round"
+                strokeWidth="1"
                 vectorEffect="non-scaling-stroke"
               />
             </svg>
 
             {/* Hover points overlay */}
             <svg
-              width="100%"
-              height="256"
-              viewBox="0 0 100 100"
-              preserveAspectRatio="none"
               className="absolute top-0 left-0 pointer-events-none"
+              height="256"
+              preserveAspectRatio="none"
+              viewBox="0 0 100 100"
+              width="100%"
             >
               {points.map((point, index) => (
                 <g key={index}>
                   <circle
+                    className="opacity-0 hover:opacity-100 transition-opacity pointer-events-auto cursor-pointer"
                     cx={point.x}
                     cy={point.y}
-                    r="1.5"
                     fill={color}
+                    r="1.5"
                     stroke="white"
                     strokeWidth="0.5"
                     vectorEffect="non-scaling-stroke"
-                    className="opacity-0 hover:opacity-100 transition-opacity pointer-events-auto cursor-pointer"
                   >
                     <title>
                       {point.date}: {formatValue(point.value)}

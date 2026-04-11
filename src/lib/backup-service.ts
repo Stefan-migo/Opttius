@@ -1,8 +1,8 @@
-import { createServiceRoleClient } from "@/utils/supabase/server";
 import { appLogger as logger } from "@/lib/logger";
+import { createServiceRoleClient } from "@/utils/supabase/server";
 
 export interface BackupTableData {
-  data: any[];
+  data: unknown[];
   record_count: number;
   error?: string;
   skipped?: boolean;
@@ -23,7 +23,7 @@ export interface RestoreResult {
   tables_restored: number;
   total_records_restored: number;
   errors: number;
-  restore_results: Record<string, any>;
+  restore_results: Record<string, unknown>;
   duration_seconds: number;
 }
 
@@ -194,7 +194,7 @@ export class BackupService {
           };
           if (data && data.length > 0)
             idsCache[config.name] = data
-              .map((row: any) => row.id ?? row[config.filter])
+              .map((row: unknown) => row.id ?? row[config.filter])
               .filter(Boolean);
         } else if (config.anchor) {
           const anchorIds = idsCache[config.anchor] || [];
@@ -212,7 +212,7 @@ export class BackupService {
             chunks.push(anchorIds.slice(i, i + 500));
           }
 
-          let allData: any[] = [];
+          let allData: unknown[] = [];
           for (const chunk of chunks) {
             const { data, error } = await supabaseService
               .from(config.name)
@@ -228,7 +228,7 @@ export class BackupService {
           };
           if (allData.length > 0)
             idsCache[config.name] = allData
-              .map((row: any) => row.id)
+              .map((row: unknown) => row.id)
               .filter(Boolean);
         } else {
           let q = query;
@@ -245,10 +245,10 @@ export class BackupService {
           };
           if (data && data.length > 0)
             idsCache[config.name] = data
-              .map((row: any) => row.id)
+              .map((row: unknown) => row.id)
               .filter(Boolean);
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
         logger.error(`Error en backup de tabla ${config.name}`, {
           error: err.message,
           organizationId,
@@ -270,7 +270,7 @@ export class BackupService {
   ): Promise<RestoreResult> {
     const restoreStartTime = new Date();
     const supabaseService = createServiceRoleClient();
-    const restoreResults: Record<string, any> = {};
+    const restoreResults: Record<string, unknown> = {};
     let totalRestored = 0;
     let totalErrors = 0;
 
@@ -338,7 +338,7 @@ export class BackupService {
         };
         totalRestored += inserted;
         totalErrors += insertErrors;
-      } catch (e: any) {
+      } catch (e: unknown) {
         logger.error(`Excepcion en restauracion de ${config.name}`, {
           error: e.message,
         });

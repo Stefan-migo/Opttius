@@ -1,6 +1,6 @@
 "use client";
 
-import { Clock, TrendingUp, Heart, Shield } from "lucide-react";
+import { Clock, Heart, Shield, TrendingUp } from "lucide-react";
 
 const benefits = [
   {
@@ -42,7 +42,7 @@ export function BenefitsSection() {
       id="beneficios"
     >
       {/* Texture overlay */}
-      <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10 pointer-events-none"></div>
+      <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10 pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="flex flex-col lg:flex-row items-center gap-20">
@@ -56,7 +56,7 @@ export function BenefitsSection() {
               Menos fricción operativa. Mayor rentabilidad.
             </h2>
 
-            <div className="w-24 h-[1px] bg-epoch-accent"></div>
+            <div className="w-24 h-[1px] bg-epoch-accent" />
 
             <p className="text-xl text-white/70 font-sans tracking-wide max-w-xl leading-relaxed">
               Opttius no es solo un registro; es un motor de crecimiento. Las
@@ -67,8 +67,8 @@ export function BenefitsSection() {
             <div className="grid sm:grid-cols-2 gap-6">
               {benefits.map((benefit, index) => (
                 <div
-                  key={index}
                   className="space-y-4 group p-6 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 hover:border-epoch-accent/30 transition-all duration-500"
+                  key={index}
                 >
                   <div className="flex items-center gap-4">
                     <div className="p-3 rounded-xl border border-epoch-accent/40 text-epoch-accent transition-colors duration-500 group-hover:bg-epoch-accent group-hover:text-epoch-primary">
@@ -92,20 +92,20 @@ export function BenefitsSection() {
           {/* Visual Element */}
           <div className="lg:w-1/2 relative group">
             {/* Decorative Frame */}
-            <div className="absolute -inset-4 border border-epoch-accent/20 rounded-2xl -translate-x-4 -translate-y-4 pointer-events-none transition-transform duration-700 group-hover:translate-x-0 group-hover:translate-y-0"></div>
+            <div className="absolute -inset-4 border border-epoch-accent/20 rounded-2xl -translate-x-4 -translate-y-4 pointer-events-none transition-transform duration-700 group-hover:translate-x-0 group-hover:translate-y-0" />
 
             <div className="relative aspect-[4/5] md:aspect-square overflow-hidden shadow-2xl rounded-xl">
               <Image
-                src="/images/landing/Vision.webp"
-                alt="Precision Vision"
                 fill
+                alt="Precision Vision"
                 className="object-cover grayscale hover:grayscale-0 transition-all duration-1000 scale-105 group-hover:scale-100"
+                src="/images/landing/Vision.webp"
               />
-              <div className="absolute inset-0 bg-epoch-primary/20 group-hover:bg-transparent transition-colors duration-1000"></div>
+              <div className="absolute inset-0 bg-epoch-primary/20 group-hover:bg-transparent transition-colors duration-1000" />
             </div>
 
             {/* Aesthetic Arch Background - hidden on mobile */}
-            <div className="absolute -bottom-10 -right-10 w-40 h-40 border border-epoch-accent/10 rounded-full blur-2xl pointer-events-none hidden md:block"></div>
+            <div className="absolute -bottom-10 -right-10 w-40 h-40 border border-epoch-accent/10 rounded-full blur-2xl pointer-events-none hidden md:block" />
           </div>
         </div>
       </div>

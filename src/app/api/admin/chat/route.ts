@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/utils/supabase/server";
+
 import { createAgent } from "@/lib/ai/agent/core";
 import { LLMFactory } from "@/lib/ai/factory";
 import type { LLMProvider, ToolCall } from "@/lib/ai/types";
 import { appLogger as logger } from "@/lib/logger";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
+import { createClient } from "@/utils/supabase/server";
 
 export const dynamic = "force-dynamic";
 export async function POST(request: NextRequest) {

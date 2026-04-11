@@ -1,15 +1,20 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { ArrowLeft, Eye, EyeOff, Loader2, UserPlus } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
+  CardDescription,
   CardHeader,
   CardTitle,
-  CardDescription,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -19,10 +24,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2, UserPlus, ArrowLeft, Eye, EyeOff } from "lucide-react";
-import Link from "next/link";
-import { toast } from "sonner";
 import { useBranch } from "@/hooks/useBranch";
 
 interface Branch {
@@ -168,9 +169,9 @@ export default function RegisterUserPage() {
         <div className="flex items-center gap-3">
           <Link href="/admin/admin-users">
             <Button
-              variant="ghost"
-              size="sm"
               className="rounded-xl text-epoch-primary hover:bg-epoch-primary/10 min-h-[44px] shrink-0"
+              size="sm"
+              variant="ghost"
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
               Volver
@@ -196,7 +197,7 @@ export default function RegisterUserPage() {
           </CardDescription>
         </CardHeader>
         <CardContent className="p-4 sm:p-6 pt-4">
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form className="space-y-4" onSubmit={handleSubmit}>
             {error && (
               <Alert variant="destructive">
                 <AlertDescription className="text-sm">{error}</AlertDescription>
@@ -206,61 +207,61 @@ export default function RegisterUserPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label
-                  htmlFor="firstName"
                   className="text-xs sm:text-sm text-epoch-primary/80"
+                  htmlFor="firstName"
                 >
                   Nombre
                 </Label>
                 <Input
+                  className="rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20 min-h-[44px]"
                   id="firstName"
                   value={formData.firstName}
                   onChange={(e) =>
                     setFormData({ ...formData, firstName: e.target.value })
                   }
-                  className="rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20 min-h-[44px]"
                 />
               </div>
               <div className="space-y-2">
                 <Label
-                  htmlFor="lastName"
                   className="text-xs sm:text-sm text-epoch-primary/80"
+                  htmlFor="lastName"
                 >
                   Apellido
                 </Label>
                 <Input
+                  className="rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20 min-h-[44px]"
                   id="lastName"
                   value={formData.lastName}
                   onChange={(e) =>
                     setFormData({ ...formData, lastName: e.target.value })
                   }
-                  className="rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20 min-h-[44px]"
                 />
               </div>
             </div>
 
             <div className="space-y-2">
               <Label
-                htmlFor="email"
                 className="text-xs sm:text-sm text-epoch-primary/80"
+                htmlFor="email"
               >
                 Email *
               </Label>
               <Input
+                required
+                className="rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20 min-h-[44px]"
                 id="email"
                 type="email"
-                required
                 value={formData.email}
                 onChange={(e) =>
                   setFormData({ ...formData, email: e.target.value })
                 }
-                className="rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20 min-h-[44px]"
               />
             </div>
 
             <div className="space-y-2">
               <Label
-                htmlFor="role"
                 className="text-xs sm:text-sm text-epoch-primary/80"
+                htmlFor="role"
               >
                 Rol *
               </Label>
@@ -297,8 +298,8 @@ export default function RegisterUserPage() {
             {requiresBranch && (
               <div className="space-y-2">
                 <Label
-                  htmlFor="branch_id"
                   className="text-xs sm:text-sm text-epoch-primary/80"
+                  htmlFor="branch_id"
                 >
                   Sucursal {branches.length > 0 ? "*" : ""}
                 </Label>
@@ -340,28 +341,28 @@ export default function RegisterUserPage() {
 
             <div className="space-y-2">
               <Label
-                htmlFor="password"
                 className="text-xs sm:text-sm text-epoch-primary/80"
+                htmlFor="password"
               >
                 Contraseña *
               </Label>
               <div className="relative">
                 <Input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
                   required
+                  className="pr-12 rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20 min-h-[44px]"
+                  id="password"
+                  minLength={8}
+                  type={showPassword ? "text" : "password"}
                   value={formData.password}
                   onChange={(e) =>
                     setFormData({ ...formData, password: e.target.value })
                   }
-                  minLength={8}
-                  className="pr-12 rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20 min-h-[44px]"
                 />
                 <Button
+                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent min-h-[44px] min-w-[44px]"
+                  size="sm"
                   type="button"
                   variant="ghost"
-                  size="sm"
-                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent min-h-[44px] min-w-[44px]"
                   onClick={() => setShowPassword(!showPassword)}
                 >
                   {showPassword ? (
@@ -378,16 +379,18 @@ export default function RegisterUserPage() {
 
             <div className="space-y-2">
               <Label
-                htmlFor="confirmPassword"
                 className="text-xs sm:text-sm text-epoch-primary/80"
+                htmlFor="confirmPassword"
               >
                 Confirmar Contraseña *
               </Label>
               <div className="relative">
                 <Input
-                  id="confirmPassword"
-                  type={showConfirmPassword ? "text" : "password"}
                   required
+                  className="pr-12 rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20 min-h-[44px]"
+                  id="confirmPassword"
+                  minLength={8}
+                  type={showConfirmPassword ? "text" : "password"}
                   value={formData.confirmPassword}
                   onChange={(e) =>
                     setFormData({
@@ -395,14 +398,12 @@ export default function RegisterUserPage() {
                       confirmPassword: e.target.value,
                     })
                   }
-                  minLength={8}
-                  className="pr-12 rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20 min-h-[44px]"
                 />
                 <Button
+                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent min-h-[44px] min-w-[44px]"
+                  size="sm"
                   type="button"
                   variant="ghost"
-                  size="sm"
-                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent min-h-[44px] min-w-[44px]"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                 >
                   {showConfirmPassword ? (
@@ -416,17 +417,17 @@ export default function RegisterUserPage() {
 
             <div className="flex flex-col-reverse sm:flex-row gap-3 pt-4">
               <Button
+                className="rounded-xl border-epoch-primary/20 min-h-[44px] w-full sm:w-auto order-2 sm:order-1"
                 type="button"
                 variant="outline"
                 onClick={() => router.back()}
-                className="rounded-xl border-epoch-primary/20 min-h-[44px] w-full sm:w-auto order-2 sm:order-1"
               >
                 Cancelar
               </Button>
               <Button
-                type="submit"
-                disabled={loading}
                 className="rounded-xl bg-epoch-primary hover:bg-epoch-surface text-white font-display font-bold text-[10px] tracking-[0.2em] uppercase min-h-[44px] w-full sm:w-auto order-1 sm:order-2"
+                disabled={loading}
+                type="submit"
               >
                 {loading ? (
                   <>

@@ -1,21 +1,16 @@
 import { NextRequest } from "next/server";
-import { createClient } from "@/utils/supabase/server";
-import { appLogger as logger } from "@/lib/logger";
-import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
-import {
-  createContactLensFamilyWithMatricesSchema,
-  updateContactLensFamilySchema,
-} from "@/lib/api/validation/zod-schemas";
-import {
-  parseAndValidateBody,
-  validationErrorResponse,
-} from "@/lib/api/validation/zod-helpers";
+
 import { APIError } from "@/lib/api/errors";
 import {
-  createApiSuccessResponse,
   createApiErrorResponse,
+  createApiSuccessResponse,
 } from "@/lib/api/response";
+import { parseAndValidateBody } from "@/lib/api/validation/zod-helpers";
+import { createContactLensFamilyWithMatricesSchema } from "@/lib/api/validation/zod-schemas";
 import { CONTACT_LENS_DEFAULT_MATRICES } from "@/lib/lens-matrices/constants";
+import { appLogger as logger } from "@/lib/logger";
+import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
+import { createClient } from "@/utils/supabase/server";
 
 export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {

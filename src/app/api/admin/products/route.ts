@@ -1,27 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
+
+import { getBranchContext } from "@/lib/api/branch-middleware";
+import { RateLimitError, ValidationError } from "@/lib/api/errors";
+import { rateLimitConfigs, withRateLimit } from "@/lib/api/middleware";
+import { createPaginatedResponse } from "@/lib/api/response";
+import {
+  validateBody,
+  validationErrorResponse,
+} from "@/lib/api/validation/zod-helpers";
+import { createProductSchema } from "@/lib/api/validation/zod-schemas";
+import { DEFAULT_LOW_STOCK_THRESHOLD } from "@/lib/inventory/constants";
+import { appLogger as logger } from "@/lib/logger";
+import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
 import {
   createClientFromRequest,
   createServiceRoleClient,
 } from "@/utils/supabase/server";
-import { getBranchContext } from "@/lib/api/branch-middleware";
-import { appLogger as logger } from "@/lib/logger";
-import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
-import { withRateLimit, rateLimitConfigs } from "@/lib/api/middleware";
-import { RateLimitError, ValidationError } from "@/lib/api/errors";
-import { z } from "zod";
-import {
-  createProductSchema,
-  searchProductSchema,
-  paginationSchema,
-} from "@/lib/api/validation/zod-schemas";
-import {
-  parseAndValidateBody,
-  parseAndValidateQuery,
-  validateBody,
-  validationErrorResponse,
-} from "@/lib/api/validation/zod-helpers";
-import { DEFAULT_LOW_STOCK_THRESHOLD } from "@/lib/inventory/constants";
-import { createPaginatedResponse } from "@/lib/api/response";
 
 export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
@@ -324,7 +319,7 @@ export async function GET(request: NextRequest) {
         requestedBranchId,
         userOrganizationId,
         productIds:
-          products?.map((p: any) => ({
+          products?.map((p: unknown) => ({
             id: p.id,
             name: p.name,
             branch_id: p.branch_id,
@@ -375,7 +370,7 @@ export async function GET(request: NextRequest) {
     // Also filter products by branch_id and organization_id (we do this in post-processing to avoid conflicts with search .or())
     let processedProducts =
       products
-        ?.map((product: any) => {
+        ?.map((product: unknown) => {
           // CRITICAL: Filter by organization_id in post-processing when there's a search query
           // This ensures multi-tenancy isolation even if the .or() search filter somehow interferes
           // with the organization filter in the query
@@ -396,7 +391,7 @@ export async function GET(request: NextRequest) {
             if (product.product_branch_stock) {
               if (Array.isArray(product.product_branch_stock)) {
                 stockData = product.product_branch_stock.find(
-                  (s: any) => s.branch_id === currentBranchId,
+                  (s: unknown) => s.branch_id === currentBranchId,
                 );
               } else if (
                 product.product_branch_stock.branch_id === currentBranchId
@@ -438,14 +433,14 @@ export async function GET(request: NextRequest) {
           }
           return product;
         })
-        .filter((p: any) => p !== null) || [];
+        .filter((p: unknown) => p !== null) || [];
 
     // Debug logging for search queries after post-processing
     if (search) {
       logger.debug("Search query results - AFTER post-processing", {
         search,
         processedProductsCount: processedProducts.length,
-        processedProductIds: processedProducts.map((p: any) => ({
+        processedProductIds: processedProducts.map((p: unknown) => ({
           id: p.id,
           name: p.name,
           branch_id: p.branch_id,
@@ -458,13 +453,13 @@ export async function GET(request: NextRequest) {
     // Apply stock filters in post-processing
     if (stockFilters.inStock && currentBranchId) {
       processedProducts = processedProducts.filter(
-        (p: any) => (p.total_available_quantity || 0) > 0,
+        (p: unknown) => (p.total_available_quantity || 0) > 0,
       );
     }
 
     if (stockFilters.lowStockOnly && currentBranchId) {
       processedProducts = processedProducts.filter(
-        (p: any) =>
+        (p: unknown) =>
           (p.total_available_quantity || 0) <=
           (p.total_low_stock_threshold ?? DEFAULT_LOW_STOCK_THRESHOLD),
       );
@@ -504,7 +499,7 @@ export async function GET(request: NextRequest) {
 // POST method for creating products
 export async function POST(request: NextRequest) {
   try {
-    return await (withRateLimit(rateLimitConfigs.modification) as any)(
+    return await (withRateLimit(rateLimitConfigs.modification) as unknown)(
       request,
       async () => {
         try {
@@ -560,7 +555,7 @@ export async function POST(request: NextRequest) {
           const userOrganizationId = adminUser.organization_id;
 
           // Get request body first (needed for fields not in Zod schema)
-          let body: any;
+          let body: unknown;
           try {
             body = await request.json();
             logger.debug("Request body parsed successfully for product", {
@@ -784,35 +779,36 @@ export async function POST(request: NextRequest) {
             lens_material: validatedBody.lens_material || null,
             // Note: lens_coating, lens_prescription_type are not in the products table schema
             // Additional optional fields from body (not in schema yet)
-            frame_colors: (body as any).frame_colors || [],
-            frame_brand: (body as any).frame_brand || null,
-            frame_model: (body as any).frame_model || null,
-            frame_sku: (body as any).frame_sku || null,
-            frame_gender: (body as any).frame_gender || null,
-            frame_age_group: (body as any).frame_age_group || null,
-            frame_features: (body as any).frame_features || [],
-            frame_measurements: (body as any).frame_measurements || null,
-            lens_index: (body as any).lens_index
-              ? parseFloat((body as any).lens_index)
+            frame_colors: (body as unknown).frame_colors || [],
+            frame_brand: (body as unknown).frame_brand || null,
+            frame_model: (body as unknown).frame_model || null,
+            frame_sku: (body as unknown).frame_sku || null,
+            frame_gender: (body as unknown).frame_gender || null,
+            frame_age_group: (body as unknown).frame_age_group || null,
+            frame_features: (body as unknown).frame_features || [],
+            frame_measurements: (body as unknown).frame_measurements || null,
+            lens_index: (body as unknown).lens_index
+              ? parseFloat((body as unknown).lens_index)
               : null,
-            lens_coatings: (body as any).lens_coatings || [],
-            lens_tint_options: (body as any).lens_tint_options || [],
-            uv_protection: (body as any).uv_protection || null,
-            blue_light_filter: (body as any).blue_light_filter || false,
-            blue_light_filter_percentage: (body as any)
+            lens_coatings: (body as unknown).lens_coatings || [],
+            lens_tint_options: (body as unknown).lens_tint_options || [],
+            uv_protection: (body as unknown).uv_protection || null,
+            blue_light_filter: (body as unknown).blue_light_filter || false,
+            blue_light_filter_percentage: (body as unknown)
               .blue_light_filter_percentage
-              ? parseInt((body as any).blue_light_filter_percentage)
+              ? parseInt((body as unknown).blue_light_filter_percentage)
               : null,
-            photochromic: (body as any).photochromic || false,
+            photochromic: (body as unknown).photochromic || false,
             prescription_available:
-              (body as any).prescription_available || false,
-            prescription_range: (body as any).prescription_range || null,
-            requires_prescription: (body as any).requires_prescription || false,
-            is_customizable: (body as any).is_customizable || false,
-            warranty_months: (body as any).warranty_months
-              ? parseInt((body as any).warranty_months)
+              (body as unknown).prescription_available || false,
+            prescription_range: (body as unknown).prescription_range || null,
+            requires_prescription:
+              (body as unknown).requires_prescription || false,
+            is_customizable: (body as unknown).is_customizable || false,
+            warranty_months: (body as unknown).warranty_months
+              ? parseInt((body as unknown).warranty_months)
               : null,
-            warranty_details: (body as any).warranty_details || null,
+            warranty_details: (body as unknown).warranty_details || null,
           };
 
           // Add optional fields only if they exist (and are valid DB columns)

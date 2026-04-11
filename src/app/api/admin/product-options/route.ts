@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createServiceRoleClient } from "@/lib/supabase";
+
 import { appLogger as logger } from "@/lib/logger";
+import { createServiceRoleClient } from "@/lib/supabase";
 
 const supabase = createServiceRoleClient();
 
@@ -55,8 +56,10 @@ export async function GET(request: NextRequest) {
       ...field,
       values:
         field.values
-          ?.filter((v: any) => includeInactive || v.is_active)
-          .sort((a: any, b: any) => a.display_order - b.display_order) || [],
+          ?.filter((v: unknown) => includeInactive || v.is_active)
+          .sort(
+            (a: unknown, b: unknown) => a.display_order - b.display_order,
+          ) || [],
     }));
 
     return NextResponse.json({ fields: fieldsWithSortedValues || [] });

@@ -1,11 +1,18 @@
+import { AlertCircle, Package, RefreshCw } from "lucide-react";
+
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Package, RefreshCw, AlertCircle } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+
 import type { AppointmentType } from "./types/appointment.types";
 
 interface AppointmentDetailsProps {
@@ -51,10 +58,7 @@ export default function AppointmentDetails({
             </CardTitle>
           </CardHeader>
           <CardContent className="p-5">
-            <Select
-              value={appointmentType}
-              onValueChange={onTypeChange}
-            >
+            <Select value={appointmentType} onValueChange={onTypeChange}>
               <SelectTrigger className="h-11 rounded-xl border-admin-border-primary/50 bg-white/50 focus:bg-white transition-all font-bold">
                 <SelectValue />
               </SelectTrigger>
@@ -63,9 +67,9 @@ export default function AppointmentDetails({
                   const Icon = type.icon;
                   return (
                     <SelectItem
+                      className="font-bold"
                       key={type.value}
                       value={type.value}
-                      className="font-bold"
                     >
                       <div className="flex items-center gap-2">
                         <Icon className="h-3.5 w-3.5 opacity-60" />
@@ -89,35 +93,32 @@ export default function AppointmentDetails({
             </CardTitle>
           </CardHeader>
           <CardContent className="p-5">
-            <Select
-              value={status}
-              onValueChange={onStatusChange}
-            >
+            <Select value={status} onValueChange={onStatusChange}>
               <SelectTrigger className="h-11 rounded-xl border-admin-border-primary/50 bg-white/50 focus:bg-white transition-all font-bold">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent className="rounded-xl border-admin-border-primary shadow-premium-lg">
                 <SelectItem
-                  value="scheduled"
                   className="font-bold text-[11px] uppercase tracking-tight"
+                  value="scheduled"
                 >
                   Programada
                 </SelectItem>
                 <SelectItem
-                  value="confirmed"
                   className="font-bold text-[11px] uppercase tracking-tight"
+                  value="confirmed"
                 >
                   Confirmada
                 </SelectItem>
                 <SelectItem
-                  value="completed"
                   className="font-bold text-[11px] uppercase tracking-tight"
+                  value="completed"
                 >
                   Completada
                 </SelectItem>
                 <SelectItem
-                  value="cancelled"
                   className="font-bold text-[11px] uppercase tracking-tight text-red-600"
+                  value="cancelled"
                 >
                   Cancelada
                 </SelectItem>
@@ -141,10 +142,10 @@ export default function AppointmentDetails({
               Motivo de la Cita
             </Label>
             <Input
+              className="h-11 rounded-xl border-admin-border-primary/50 bg-white/50 focus:bg-white transition-all"
+              placeholder="Describa brevemente el motivo..."
               value={reason}
               onChange={(e) => onReasonChange(e.target.value)}
-              placeholder="Describa brevemente el motivo..."
-              className="h-11 rounded-xl border-admin-border-primary/50 bg-white/50 focus:bg-white transition-all"
             />
           </div>
 
@@ -153,11 +154,11 @@ export default function AppointmentDetails({
               Observaciones Internas
             </Label>
             <Textarea
-              value={notes}
-              onChange={(e) => onNotesChange(e.target.value)}
+              className="rounded-xl border-admin-border-primary/50 bg-white/50 focus:bg-white transition-all resize-none p-4"
               placeholder="Información relevante para el profesional..."
               rows={3}
-              className="rounded-xl border-admin-border-primary/50 bg-white/50 focus:bg-white transition-all resize-none p-4"
+              value={notes}
+              onChange={(e) => onNotesChange(e.target.value)}
             />
           </div>
 
@@ -172,8 +173,8 @@ export default function AppointmentDetails({
             </div>
             <Switch
               checked={followUpRequired}
-              onCheckedChange={onFollowUpToggle}
               className="data-[state=checked]:bg-admin-accent-primary"
+              onCheckedChange={onFollowUpToggle}
             />
           </div>
 
@@ -183,10 +184,10 @@ export default function AppointmentDetails({
                 Cita Proyectada
               </Label>
               <Input
+                className="h-11 rounded-xl border-admin-border-primary/50 bg-white/50 focus:bg-white transition-all"
                 type="date"
                 value={followUpDate}
                 onChange={(e) => onFollowUpDateChange(e.target.value)}
-                className="h-11 rounded-xl border-admin-border-primary/50 bg-white/50 focus:bg-white transition-all"
               />
             </div>
           )}

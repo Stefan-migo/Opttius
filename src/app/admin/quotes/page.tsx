@@ -1,9 +1,38 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import {
+  CheckCircle,
+  ChevronLeft,
+  ChevronRight,
+  Clock,
+  Eye,
+  FileText,
+  Plus,
+  RefreshCw,
+  Search,
+  Send,
+  Settings,
+  ShoppingCart,
+  Trash2,
+  XCircle,
+} from "lucide-react";
+import dynamic from "next/dynamic";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -20,38 +49,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import {
-  Search,
-  Plus,
-  Eye,
-  FileText,
-  Calendar,
-  User,
-  DollarSign,
-  ChevronLeft,
-  ChevronRight,
-  CheckCircle,
-  XCircle,
-  Clock,
-  Send,
-  RefreshCw,
-  Settings,
-  Trash2,
-  ShoppingCart,
-} from "lucide-react";
-import { toast } from "sonner";
-import Link from "next/link";
-import dynamic from "next/dynamic";
-import { useSearchParams } from "next/navigation";
 import { useBranch } from "@/hooks/useBranch";
 
 // Lazy load CreateQuoteForm to reduce initial bundle size
@@ -61,7 +58,7 @@ const CreateQuoteForm = dynamic(
     loading: () => (
       <div className="flex items-center justify-center py-12">
         <div className="text-center space-y-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-epoch-primary mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-epoch-primary mx-auto" />
           <p className="text-admin-text-tertiary">Cargando formulario...</p>
         </div>
       </div>
@@ -69,13 +66,10 @@ const CreateQuoteForm = dynamic(
     ssr: false,
   },
 );
-import { formatDate, formatCurrency } from "@/lib/utils";
-import { quoteService, Quote } from "@/lib/api/services";
+
+import { Quote, quoteService } from "@/lib/api/services";
 import type { UpdateQuoteData } from "@/lib/api/services/quoteService";
-import {
-  extractDataFromResponse,
-  extractPaginationFromResponse,
-} from "@/lib/api/response-helpers";
+import { formatCurrency, formatDate } from "@/lib/utils";
 
 export default function QuotesPage() {
   const searchParams = useSearchParams();
@@ -160,7 +154,10 @@ export default function QuotesPage() {
     // Always show the current status (which should be 'accepted' when converted)
     const displayStatus = status;
 
-    const config: Record<string, { variant: any; label: string; icon: any }> = {
+    const config: Record<
+      string,
+      { variant: unknown; label: string; icon: unknown }
+    > = {
       draft: { variant: "outline", label: "Borrador", icon: FileText },
       sent: { variant: "secondary", label: "Enviado", icon: Send },
       accepted: { variant: "default", label: "Aceptado", icon: CheckCircle },
@@ -181,7 +178,7 @@ export default function QuotesPage() {
     const Icon = statusConfig.icon;
 
     return (
-      <Badge variant={statusConfig.variant} className="flex items-center gap-1">
+      <Badge className="flex items-center gap-1" variant={statusConfig.variant}>
         <Icon className="h-3 w-3" />
         {statusConfig.label}
       </Badge>
@@ -224,7 +221,7 @@ export default function QuotesPage() {
       setDeleteDialogOpen(false);
       setQuoteToDelete(null);
       fetchQuotes();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error deleting quote:", error);
       toast.error(error.message || "Error al eliminar presupuesto");
     } finally {
@@ -241,8 +238,8 @@ export default function QuotesPage() {
             Presupuestos del operativo: {operativoName || "..."}
           </span>
           <Link
-            href={`/admin/field-operations/${fieldOperationIdFromUrl}`}
             className="text-sm text-admin-accent-primary hover:underline font-medium"
+            href={`/admin/field-operations/${fieldOperationIdFromUrl}`}
           >
             Volver al operativo
           </Link>
@@ -267,19 +264,19 @@ export default function QuotesPage() {
         <div className="flex flex-wrap items-center gap-2">
           <Link href="/admin/quotes/settings">
             <Button
-              variant="outline"
-              size="sm"
-              className="h-9 w-9 sm:w-auto sm:px-3"
               aria-label="Configuración"
+              className="h-9 w-9 sm:w-auto sm:px-3"
+              size="sm"
+              variant="outline"
             >
               <Settings className="h-4 w-4 sm:mr-2 shrink-0" />
               <span className="hidden sm:inline">Configuración</span>
             </Button>
           </Link>
           <Button
-            onClick={() => setShowCreateQuote(true)}
-            size="sm"
             className="h-9 gap-1.5"
+            size="sm"
+            onClick={() => setShowCreateQuote(true)}
           >
             <Plus className="h-4 w-4 shrink-0" />
             <span className="text-xs sm:text-sm">Nuevo Presupuesto</span>
@@ -295,10 +292,10 @@ export default function QuotesPage() {
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-admin-text-tertiary" />
                 <Input
+                  className="pl-10 w-full"
                   placeholder="Buscar por número, cliente, email..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 w-full"
                 />
               </div>
             </div>
@@ -411,8 +408,8 @@ export default function QuotesPage() {
 
                             return (
                               <Select
-                                value={displayStatus}
                                 disabled={isConverted}
+                                value={displayStatus}
                                 onValueChange={async (value) => {
                                   const newStatus = value as
                                     | "draft"
@@ -511,8 +508,8 @@ export default function QuotesPage() {
                         <TableCell>
                           {quote.converted_to_work_order_id ? (
                             <Badge
-                              variant="default"
                               className="flex items-center gap-1 bg-green-600"
+                              variant="default"
                             >
                               <RefreshCw className="h-3 w-3" />
                               Convertido
@@ -542,7 +539,7 @@ export default function QuotesPage() {
                         <TableCell>
                           <div className="flex items-center gap-2">
                             <Link href={`/admin/quotes/${quote.id}`}>
-                              <Button variant="outline" size="sm">
+                              <Button size="sm" variant="outline">
                                 <Eye className="h-4 w-4 mr-1" />
                                 Ver
                               </Button>
@@ -557,9 +554,9 @@ export default function QuotesPage() {
                                   }
                                 >
                                   <Button
-                                    variant="outline"
-                                    size="sm"
                                     className="text-green-600 hover:text-green-700 hover:bg-green-50"
+                                    size="sm"
+                                    variant="outline"
                                   >
                                     <ShoppingCart className="h-4 w-4 mr-1" />
                                     Cargar al POS
@@ -567,14 +564,14 @@ export default function QuotesPage() {
                                 </Link>
                               )}
                             <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleDeleteClick(quote.id)}
+                              className="text-red-600 hover:text-red-700 hover:bg-red-50"
                               disabled={
                                 quote.status === "accepted" ||
                                 !!quote.converted_to_work_order_id
                               }
-                              className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleDeleteClick(quote.id)}
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>
@@ -594,20 +591,20 @@ export default function QuotesPage() {
                   </div>
                   <div className="flex gap-2">
                     <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                       disabled={currentPage === 1}
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                     >
                       <ChevronLeft className="h-4 w-4" />
                     </Button>
                     <Button
-                      variant="outline"
+                      disabled={currentPage === totalPages}
                       size="sm"
+                      variant="outline"
                       onClick={() =>
                         setCurrentPage((p) => Math.min(totalPages, p + 1))
                       }
-                      disabled={currentPage === totalPages}
                     >
                       <ChevronRight className="h-4 w-4" />
                     </Button>
@@ -629,10 +626,10 @@ export default function QuotesPage() {
             </DialogDescription>
           </DialogHeader>
           <CreateQuoteForm
-            onSuccess={handleQuoteCreated}
-            onCancel={() => setShowCreateQuote(false)}
-            initialFieldOperationId={fieldOperationIdFromUrl || undefined}
             initialBranchId={operativoBranchId ?? undefined}
+            initialFieldOperationId={fieldOperationIdFromUrl || undefined}
+            onCancel={() => setShowCreateQuote(false)}
+            onSuccess={handleQuoteCreated}
           />
         </DialogContent>
       </Dialog>
@@ -649,19 +646,19 @@ export default function QuotesPage() {
           </DialogHeader>
           <DialogFooter>
             <Button
+              disabled={deleting}
               variant="outline"
               onClick={() => {
                 setDeleteDialogOpen(false);
                 setQuoteToDelete(null);
               }}
-              disabled={deleting}
             >
               Cancelar
             </Button>
             <Button
+              disabled={deleting}
               variant="destructive"
               onClick={handleDeleteConfirm}
-              disabled={deleting}
             >
               {deleting ? (
                 <>

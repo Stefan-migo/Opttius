@@ -1,7 +1,17 @@
 "use client";
 
+import { ChevronDown, ChevronRight, Edit, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
+
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -12,23 +22,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Plus, Edit, Trash2, ChevronDown, ChevronRight } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { formatCurrency } from "@/lib/utils";
 import { CONTACT_LENS_DEFAULT_MATRICES } from "@/lib/lens-matrices/constants";
 import {
-  CONTACT_LENS_MATRIX_SUGGESTION_TITLE,
   CONTACT_LENS_MATRIX_SUGGESTION_DESCRIPTION,
   CONTACT_LENS_MATRIX_SUGGESTION_ROWS,
+  CONTACT_LENS_MATRIX_SUGGESTION_TITLE,
 } from "@/lib/lens-matrices/suggestion-text";
+import { formatCurrency } from "@/lib/utils";
 
 export interface ContactLensMatrixFormData {
   id: string;
@@ -170,9 +170,9 @@ export function ContactLensMatrixManager({
       {!readOnly && (
         <div className="border rounded-lg overflow-hidden">
           <button
+            className="w-full flex items-center justify-between p-4 text-left bg-gray-50 hover:bg-gray-100 transition-colors"
             type="button"
             onClick={() => setSuggestionOpen(!suggestionOpen)}
-            className="w-full flex items-center justify-between p-4 text-left bg-gray-50 hover:bg-gray-100 transition-colors"
           >
             <span className="font-medium text-sm text-gray-700">
               {CONTACT_LENS_MATRIX_SUGGESTION_TITLE}
@@ -211,9 +211,9 @@ export function ContactLensMatrixManager({
                 </Table>
               </div>
               <Button
+                size="sm"
                 type="button"
                 variant="outline"
-                size="sm"
                 onClick={handleApplyTemplate}
               >
                 Crear Rango base + Fallback
@@ -227,9 +227,9 @@ export function ContactLensMatrixManager({
         <h3 className="text-lg font-medium">Matrices de Precios</h3>
         {!readOnly && (
           <Button
-            onClick={() => handleOpenDialog()}
-            variant="outline"
             size="sm"
+            variant="outline"
+            onClick={() => handleOpenDialog()}
           >
             <Plus className="h-4 w-4 mr-2" />
             Agregar Matriz
@@ -283,15 +283,15 @@ export function ContactLensMatrixManager({
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
                         <Button
-                          variant="ghost"
                           size="sm"
+                          variant="ghost"
                           onClick={() => handleOpenDialog(matrix)}
                         >
                           <Edit className="h-4 w-4" />
                         </Button>
                         <Button
-                          variant="ghost"
                           size="sm"
+                          variant="ghost"
                           onClick={() => handleDelete(matrix.id)}
                         >
                           <Trash2 className="h-4 w-4" />
@@ -339,27 +339,27 @@ export function ContactLensMatrixManager({
                   <div>
                     <Label htmlFor="sphere_min">Esfera Min</Label>
                     <Input
+                      required
                       id="sphere_min"
-                      type="number"
                       step="0.25"
+                      type="number"
                       value={formData.sphere_min}
                       onChange={(e) =>
                         setFormData({ ...formData, sphere_min: e.target.value })
                       }
-                      required
                     />
                   </div>
                   <div>
                     <Label htmlFor="sphere_max">Esfera Max</Label>
                     <Input
+                      required
                       id="sphere_max"
-                      type="number"
                       step="0.25"
+                      type="number"
                       value={formData.sphere_max}
                       onChange={(e) =>
                         setFormData({ ...formData, sphere_max: e.target.value })
                       }
-                      required
                     />
                   </div>
                 </div>
@@ -367,9 +367,10 @@ export function ContactLensMatrixManager({
                   <div>
                     <Label htmlFor="cylinder_min">Cilindro Min</Label>
                     <Input
+                      required
                       id="cylinder_min"
-                      type="number"
                       step="0.25"
+                      type="number"
                       value={formData.cylinder_min}
                       onChange={(e) =>
                         setFormData({
@@ -377,15 +378,15 @@ export function ContactLensMatrixManager({
                           cylinder_min: e.target.value,
                         })
                       }
-                      required
                     />
                   </div>
                   <div>
                     <Label htmlFor="cylinder_max">Cilindro Max</Label>
                     <Input
+                      required
                       id="cylinder_max"
-                      type="number"
                       step="0.25"
+                      type="number"
                       value={formData.cylinder_max}
                       onChange={(e) =>
                         setFormData({
@@ -393,7 +394,6 @@ export function ContactLensMatrixManager({
                           cylinder_max: e.target.value,
                         })
                       }
-                      required
                     />
                   </div>
                 </div>
@@ -401,29 +401,29 @@ export function ContactLensMatrixManager({
                   <div>
                     <Label htmlFor="axis_min">Eje Min</Label>
                     <Input
+                      required
                       id="axis_min"
-                      type="number"
-                      min="0"
                       max="180"
+                      min="0"
+                      type="number"
                       value={formData.axis_min}
                       onChange={(e) =>
                         setFormData({ ...formData, axis_min: e.target.value })
                       }
-                      required
                     />
                   </div>
                   <div>
                     <Label htmlFor="axis_max">Eje Max</Label>
                     <Input
+                      required
                       id="axis_max"
-                      type="number"
-                      min="0"
                       max="180"
+                      min="0"
+                      type="number"
                       value={formData.axis_max}
                       onChange={(e) =>
                         setFormData({ ...formData, axis_max: e.target.value })
                       }
-                      required
                     />
                   </div>
                 </div>
@@ -431,9 +431,10 @@ export function ContactLensMatrixManager({
                   <div>
                     <Label htmlFor="addition_min">Adición Min</Label>
                     <Input
+                      required
                       id="addition_min"
-                      type="number"
                       step="0.25"
+                      type="number"
                       value={formData.addition_min}
                       onChange={(e) =>
                         setFormData({
@@ -441,15 +442,15 @@ export function ContactLensMatrixManager({
                           addition_min: e.target.value,
                         })
                       }
-                      required
                     />
                   </div>
                   <div>
                     <Label htmlFor="addition_max">Adición Max</Label>
                     <Input
+                      required
                       id="addition_max"
-                      type="number"
                       step="0.25"
+                      type="number"
                       value={formData.addition_max}
                       onChange={(e) =>
                         setFormData({
@@ -457,7 +458,6 @@ export function ContactLensMatrixManager({
                           addition_max: e.target.value,
                         })
                       }
-                      required
                     />
                   </div>
                 </div>
@@ -469,45 +469,45 @@ export function ContactLensMatrixManager({
                 <div>
                   <Label htmlFor="base_price">Precio Base</Label>
                   <Input
+                    required
                     id="base_price"
-                    type="number"
-                    step="0.01"
                     min="0"
+                    step="0.01"
+                    type="number"
                     value={formData.base_price}
                     onChange={(e) =>
                       setFormData({ ...formData, base_price: e.target.value })
                     }
-                    required
                   />
                 </div>
                 <div>
                   <Label htmlFor="cost">Costo</Label>
                   <Input
+                    required
                     id="cost"
-                    type="number"
-                    step="0.01"
                     min="0"
+                    step="0.01"
+                    type="number"
                     value={formData.cost}
                     onChange={(e) =>
                       setFormData({ ...formData, cost: e.target.value })
                     }
-                    required
                   />
                 </div>
                 <div className="flex items-center gap-2">
                   <input
-                    type="checkbox"
-                    id="is_active"
                     checked={formData.is_active}
+                    className="rounded"
+                    id="is_active"
+                    type="checkbox"
                     onChange={(e) =>
                       setFormData({
                         ...formData,
                         is_active: e.target.checked,
                       })
                     }
-                    className="rounded"
                   />
-                  <Label htmlFor="is_active" className="cursor-pointer">
+                  <Label className="cursor-pointer" htmlFor="is_active">
                     Activa
                   </Label>
                 </div>

@@ -1,19 +1,20 @@
 "use client";
 
-import { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { 
-  Package, 
-  ArrowLeft, 
+import {
   AlertTriangle,
+  ArrowLeft,
   CheckCircle,
-  Eye
-} from 'lucide-react';
-import Image from 'next/image';
-import Link from 'next/link';
+  Eye,
+  Package,
+} from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { useParams, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 
 interface Product {
   id: string;
@@ -46,7 +47,7 @@ export default function ProductPage() {
   const params = useParams();
   const router = useRouter();
   const slug = params?.slug as string;
-  
+
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -62,21 +63,21 @@ export default function ProductPage() {
     try {
       setLoading(true);
       setError(null);
-      
+
       const response = await fetch(`/api/products/${slug}`);
-      
+
       if (!response.ok) {
         if (response.status === 404) {
-          setError('Producto no encontrado');
+          setError("Producto no encontrado");
         } else {
-          setError('Error al cargar el producto');
+          setError("Error al cargar el producto");
         }
         return;
       }
 
       const data = await response.json();
       setProduct(data.product);
-      
+
       // Set initial selected image
       if (data.product.featured_image) {
         setSelectedImage(data.product.featured_image);
@@ -84,17 +85,17 @@ export default function ProductPage() {
         setSelectedImage(data.product.gallery[0]);
       }
     } catch (err) {
-      console.error('Error fetching product:', err);
-      setError('Error al cargar el producto');
+      console.error("Error fetching product:", err);
+      setError("Error al cargar el producto");
     } finally {
       setLoading(false);
     }
   };
 
   const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('es-AR', {
-      style: 'currency',
-      currency: 'ARS',
+    return new Intl.NumberFormat("es-AR", {
+      style: "currency",
+      currency: "ARS",
     }).format(price);
   };
 
@@ -118,26 +119,24 @@ export default function ProductPage() {
       <div className="min-h-screen bg-gradient-to-b from-admin-bg-primary to-admin-bg-secondary p-6">
         <div className="max-w-7xl mx-auto">
           <Button
+            className="mb-6"
             variant="outline"
             onClick={() => router.back()}
-            className="mb-6"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Volver
           </Button>
-          
+
           <Card className="bg-admin-bg-tertiary">
             <CardContent className="p-12 text-center">
               <AlertTriangle className="h-16 w-16 text-red-500 mx-auto mb-4" />
               <h1 className="text-2xl font-bold text-azul-profundo mb-2">
-                {error || 'Producto no encontrado'}
+                {error || "Producto no encontrado"}
               </h1>
               <p className="text-tierra-media mb-6">
                 El producto que buscas no existe o no está disponible.
               </p>
-              <Button onClick={() => router.push('/')}>
-                Ir al inicio
-              </Button>
+              <Button onClick={() => router.push("/")}>Ir al inicio</Button>
             </CardContent>
           </Card>
         </div>
@@ -145,10 +144,16 @@ export default function ProductPage() {
     );
   }
 
-  const categoryName = product.categories?.name || product.category?.name || 'Sin categoría';
-  const hasDiscount = product.compare_at_price && product.compare_at_price > product.price;
-  const discountPercentage = hasDiscount 
-    ? Math.round(((product.compare_at_price! - product.price) / product.compare_at_price!) * 100)
+  const categoryName =
+    product.categories?.name || product.category?.name || "Sin categoría";
+  const hasDiscount =
+    product.compare_at_price && product.compare_at_price > product.price;
+  const discountPercentage = hasDiscount
+    ? Math.round(
+        ((product.compare_at_price! - product.price) /
+          product.compare_at_price!) *
+          100,
+      )
     : 0;
   const inStock = product.inventory_quantity > 0;
 
@@ -157,9 +162,9 @@ export default function ProductPage() {
       <div className="max-w-7xl mx-auto">
         {/* Back Button */}
         <Button
+          className="mb-6"
           variant="outline"
           onClick={() => router.back()}
-          className="mb-6"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
           Volver
@@ -175,11 +180,11 @@ export default function ProductPage() {
                 <div className="relative aspect-square bg-white rounded-lg overflow-hidden border-2 border-gray-200">
                   {selectedImage ? (
                     <Image
-                      src={selectedImage}
-                      alt={product.name}
                       fill
-                      className="object-contain p-4"
                       priority
+                      alt={product.name}
+                      className="object-contain p-4"
+                      src={selectedImage}
                     />
                   ) : (
                     <div className="flex items-center justify-center h-full">
@@ -193,36 +198,38 @@ export default function ProductPage() {
                   <div className="grid grid-cols-4 gap-2">
                     {product.featured_image && (
                       <button
-                        onClick={() => setSelectedImage(product.featured_image!)}
                         className={`relative aspect-square rounded-lg overflow-hidden border-2 ${
                           selectedImage === product.featured_image
-                            ? 'border-azul-profundo'
-                            : 'border-gray-200'
+                            ? "border-azul-profundo"
+                            : "border-gray-200"
                         }`}
+                        onClick={() =>
+                          setSelectedImage(product.featured_image!)
+                        }
                       >
                         <Image
-                          src={product.featured_image}
-                          alt={product.name}
                           fill
+                          alt={product.name}
                           className="object-cover"
+                          src={product.featured_image}
                         />
                       </button>
                     )}
                     {product.gallery.map((image, index) => (
                       <button
-                        key={index}
-                        onClick={() => setSelectedImage(image)}
                         className={`relative aspect-square rounded-lg overflow-hidden border-2 ${
                           selectedImage === image
-                            ? 'border-azul-profundo'
-                            : 'border-gray-200'
+                            ? "border-azul-profundo"
+                            : "border-gray-200"
                         }`}
+                        key={index}
+                        onClick={() => setSelectedImage(image)}
                       >
                         <Image
-                          src={image}
-                          alt={`${product.name} - Imagen ${index + 1}`}
                           fill
+                          alt={`${product.name} - Imagen ${index + 1}`}
                           className="object-cover"
+                          src={image}
                         />
                       </button>
                     ))}
@@ -279,7 +286,8 @@ export default function ProductPage() {
                     <>
                       <CheckCircle className="h-5 w-5 text-verde-suave" />
                       <span className="text-verde-suave font-medium">
-                        En stock ({product.inventory_quantity} unidades disponibles)
+                        En stock ({product.inventory_quantity} unidades
+                        disponibles)
                       </span>
                     </>
                   ) : (
@@ -309,7 +317,7 @@ export default function ProductPage() {
                 </div>
 
                 {/* Product Type Specific Info */}
-                {product.product_type === 'frame' && (
+                {product.product_type === "frame" && (
                   <div className="space-y-2 p-4 bg-white/50 rounded-lg">
                     <h3 className="font-semibold text-azul-profundo mb-2">
                       Especificaciones del Marco
@@ -318,32 +326,40 @@ export default function ProductPage() {
                       {product.frame_type && (
                         <div>
                           <span className="text-tierra-media">Tipo: </span>
-                          <span className="font-medium">{product.frame_type}</span>
+                          <span className="font-medium">
+                            {product.frame_type}
+                          </span>
                         </div>
                       )}
                       {product.frame_material && (
                         <div>
                           <span className="text-tierra-media">Material: </span>
-                          <span className="font-medium">{product.frame_material}</span>
+                          <span className="font-medium">
+                            {product.frame_material}
+                          </span>
                         </div>
                       )}
                       {product.frame_shape && (
                         <div>
                           <span className="text-tierra-media">Forma: </span>
-                          <span className="font-medium">{product.frame_shape}</span>
+                          <span className="font-medium">
+                            {product.frame_shape}
+                          </span>
                         </div>
                       )}
                       {product.frame_color && (
                         <div>
                           <span className="text-tierra-media">Color: </span>
-                          <span className="font-medium">{product.frame_color}</span>
+                          <span className="font-medium">
+                            {product.frame_color}
+                          </span>
                         </div>
                       )}
                     </div>
                   </div>
                 )}
 
-                {product.product_type === 'lens' && (
+                {product.product_type === "lens" && (
                   <div className="space-y-2 p-4 bg-white/50 rounded-lg">
                     <h3 className="font-semibold text-azul-profundo mb-2">
                       Especificaciones de la Lente
@@ -352,13 +368,17 @@ export default function ProductPage() {
                       {product.lens_type && (
                         <div>
                           <span className="text-tierra-media">Tipo: </span>
-                          <span className="font-medium">{product.lens_type}</span>
+                          <span className="font-medium">
+                            {product.lens_type}
+                          </span>
                         </div>
                       )}
                       {product.lens_material && (
                         <div>
                           <span className="text-tierra-media">Material: </span>
-                          <span className="font-medium">{product.lens_material}</span>
+                          <span className="font-medium">
+                            {product.lens_material}
+                          </span>
                         </div>
                       )}
                     </div>
@@ -368,10 +388,10 @@ export default function ProductPage() {
                 {/* Actions */}
                 <div className="flex gap-4 pt-4">
                   <Button
-                    variant="outline"
-                    size="lg"
                     asChild
                     className="w-full"
+                    size="lg"
+                    variant="outline"
                   >
                     <Link href={`/admin/products/edit/${product.id}`}>
                       <Eye className="h-5 w-5 mr-2" />
@@ -388,7 +408,7 @@ export default function ProductPage() {
                 <h2 className="text-2xl font-bold text-azul-profundo mb-4">
                   Descripción
                 </h2>
-                <div 
+                <div
                   className="prose max-w-none text-tierra-media"
                   dangerouslySetInnerHTML={{ __html: product.description }}
                 />

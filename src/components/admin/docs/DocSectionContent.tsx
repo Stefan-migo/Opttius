@@ -1,6 +1,7 @@
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
 import { DOC_CONTENT } from "./docContent";
 
 interface DocSectionContentProps {

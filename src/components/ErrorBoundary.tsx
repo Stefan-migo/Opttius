@@ -1,12 +1,13 @@
 "use client";
 
+import { AlertCircle, Home, RefreshCw } from "lucide-react";
 import React from "react";
 import {
   ErrorBoundary as ReactErrorBoundary,
   FallbackProps,
 } from "react-error-boundary";
+
 import { Button } from "@/components/ui/button";
-import { AlertCircle, RefreshCw, Home } from "lucide-react";
 import { logger } from "@/lib/logger";
 
 /**
@@ -17,7 +18,7 @@ function ErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
   // Log error to logger
   React.useEffect(() => {
     const errorObj = error instanceof Error ? error : new Error(String(error));
-    logger.error("Error Boundary caught an error", errorObj as any, {
+    logger.error("Error Boundary caught an error", errorObj as unknown, {
       errorBoundary: true,
       timestamp: new Date().toISOString(),
     });
@@ -52,19 +53,19 @@ function ErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
 
         <div className="flex flex-col gap-2 sm:flex-row">
           <Button
-            onClick={resetErrorBoundary}
-            variant="default"
             className="flex-1"
+            variant="default"
+            onClick={resetErrorBoundary}
           >
             <RefreshCw className="mr-2 h-4 w-4" />
             Intentar de nuevo
           </Button>
           <Button
+            className="flex-1"
+            variant="outline"
             onClick={() => {
               window.location.href = "/";
             }}
-            variant="outline"
-            className="flex-1"
           >
             <Home className="mr-2 h-4 w-4" />
             Volver al inicio
@@ -94,7 +95,7 @@ export function ErrorBoundary({ children }: { children: React.ReactNode }) {
         // Additional error logging
         const errorObj =
           error instanceof Error ? error : new Error(String(error));
-        logger.error("Error Boundary onError", errorObj as any, {
+        logger.error("Error Boundary onError", errorObj as unknown, {
           componentStack: errorInfo.componentStack,
           errorBoundary: true,
         });

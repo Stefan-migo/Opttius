@@ -1,11 +1,42 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Activity,
+  AlertTriangle,
+  Building2,
+  CheckCircle,
+  Clock,
+  Crown,
+  Edit,
+  Eye,
+  Globe,
+  MoreVertical,
+  Phone,
+  Search,
+  Shield,
+  Trash2,
+  User,
+  UserPlus,
+  Users,
+} from "lucide-react";
+import Link from "next/link";
+import { useCallback, useEffect, useState } from "react";
+import { toast } from "sonner";
+
+import PermissionsEditor from "@/components/admin/PermissionsEditor";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Pagination } from "@/components/ui/pagination";
 import {
   Select,
   SelectContent,
@@ -21,41 +52,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  Users,
-  UserPlus,
-  Crown,
-  Shield,
-  User,
-  Settings,
-  Search,
-  Eye,
-  Edit,
-  Trash2,
-  AlertTriangle,
-  CheckCircle,
-  Activity,
-  Clock,
-  Mail,
-  Phone,
-  MoreVertical,
-  Building2,
-  Globe,
-} from "lucide-react";
-import Link from "next/link";
-import { toast } from "sonner";
-import PermissionsEditor from "@/components/admin/PermissionsEditor";
-import { Pagination } from "@/components/ui/pagination";
 import { useBranch } from "@/hooks/useBranch";
-import { formatTimeAgo, formatDate } from "@/lib/utils";
+import { formatDate, formatTimeAgo } from "@/lib/utils";
 
 interface AdminUser {
   id: string;
@@ -243,8 +241,8 @@ export default function AdminUsersPage() {
     if (admin.is_super_admin || admin.role === "super_admin") {
       return (
         <Badge
-          variant="default"
           className="flex items-center gap-1 bg-epoch-accent text-epoch-primary"
+          variant="default"
         >
           <Globe className="h-3 w-3" />
           Super Administrador
@@ -253,7 +251,7 @@ export default function AdminUsersPage() {
     }
     if (admin.role === "vendedor") {
       return (
-        <Badge variant="secondary" className="flex items-center gap-1">
+        <Badge className="flex items-center gap-1" variant="secondary">
           <User className="h-3 w-3" />
           Vendedor
         </Badge>
@@ -261,14 +259,14 @@ export default function AdminUsersPage() {
     }
     if (admin.role === "employee") {
       return (
-        <Badge variant="secondary" className="flex items-center gap-1">
+        <Badge className="flex items-center gap-1" variant="secondary">
           <User className="h-3 w-3" />
           Empleado
         </Badge>
       );
     }
     return (
-      <Badge variant="default" className="flex items-center gap-1">
+      <Badge className="flex items-center gap-1" variant="default">
         <Crown className="h-3 w-3" />
         Administrador
       </Badge>
@@ -302,12 +300,12 @@ export default function AdminUsersPage() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
           {[...Array(4)].map((_, i) => (
             <Card
-              key={i}
               className="rounded-xl border border-border animate-pulse"
+              key={i}
             >
               <CardContent className="p-4 sm:p-6">
-                <div className="h-3 bg-epoch-primary/10 rounded w-3/4 mb-2"></div>
-                <div className="h-6 bg-epoch-primary/10 rounded w-1/2"></div>
+                <div className="h-3 bg-epoch-primary/10 rounded w-3/4 mb-2" />
+                <div className="h-6 bg-epoch-primary/10 rounded w-1/2" />
               </CardContent>
             </Card>
           ))}
@@ -335,8 +333,8 @@ export default function AdminUsersPage() {
             </h3>
             <p className="text-sm text-epoch-primary/80 mb-4">{error}</p>
             <Button
-              onClick={fetchAdminUsers}
               className="rounded-xl bg-epoch-primary hover:bg-epoch-surface text-white min-h-[44px]"
+              onClick={fetchAdminUsers}
             >
               Reintentar
             </Button>
@@ -447,10 +445,10 @@ export default function AdminUsersPage() {
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-epoch-primary/70 h-4 w-4 z-10" />
                 <Input
+                  className="pl-10 rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20 min-h-[44px]"
                   placeholder="Buscar por email o nombre..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20 min-h-[44px]"
                 />
               </div>
             </div>
@@ -495,8 +493,8 @@ export default function AdminUsersPage() {
               <TableBody>
                 {adminUsers.map((admin) => (
                   <TableRow
-                    key={admin.id}
                     className="hover:bg-[#AE000025] transition-colors"
+                    key={admin.id}
                   >
                     <TableCell>
                       <div>
@@ -520,8 +518,8 @@ export default function AdminUsersPage() {
                     <TableCell>
                       {admin.is_super_admin ? (
                         <Badge
-                          variant="outline"
                           className="flex items-center gap-1 w-fit"
+                          variant="outline"
                         >
                           <Globe className="h-3 w-3" />
                           Todas las sucursales
@@ -530,9 +528,9 @@ export default function AdminUsersPage() {
                         <div className="flex flex-col gap-1">
                           {admin.branches.slice(0, 2).map((branch) => (
                             <Badge
+                              className="flex items-center gap-1 w-fit text-xs"
                               key={branch.id}
                               variant="outline"
-                              className="flex items-center gap-1 w-fit text-xs"
                             >
                               <Building2 className="h-3 w-3" />
                               {branch.name}
@@ -582,9 +580,9 @@ export default function AdminUsersPage() {
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button
-                            variant="ghost"
-                            size="sm"
                             className="h-8 w-8 p-0 min-h-[44px] min-w-[44px] sm:min-h-8 sm:min-w-8"
+                            size="sm"
+                            variant="ghost"
                           >
                             <span className="sr-only">Abrir menú</span>
                             <MoreVertical className="h-4 w-4" />
@@ -595,8 +593,8 @@ export default function AdminUsersPage() {
                           <DropdownMenuSeparator />
                           <DropdownMenuItem asChild>
                             <Link
-                              href={`/admin/admin-users/${admin.id}`}
                               className="flex items-center cursor-pointer"
+                              href={`/admin/admin-users/${admin.id}`}
                             >
                               <Eye className="mr-2 h-4 w-4" />
                               Ver detalles
@@ -604,19 +602,19 @@ export default function AdminUsersPage() {
                           </DropdownMenuItem>
                           <DropdownMenuItem asChild>
                             <Link
-                              href={`/admin/admin-users/${admin.id}/edit`}
                               className="flex items-center cursor-pointer"
+                              href={`/admin/admin-users/${admin.id}/edit`}
                             >
                               <Edit className="mr-2 h-4 w-4" />
                               Editar
                             </Link>
                           </DropdownMenuItem>
                           <DropdownMenuItem
+                            className="flex items-center cursor-pointer"
                             onClick={() => {
                               setSelectedUserForPermissions(admin);
                               setShowPermissionsEditor(true);
                             }}
-                            className="flex items-center cursor-pointer"
                           >
                             <Shield className="mr-2 h-4 w-4" />
                             Editar Permisos
@@ -624,10 +622,10 @@ export default function AdminUsersPage() {
                           <DropdownMenuSeparator />
                           {isSuperAdmin && (
                             <DropdownMenuItem
+                              className="flex items-center cursor-pointer"
                               onClick={() =>
                                 handleToggleStatus(admin.id, admin.is_active)
                               }
-                              className="flex items-center cursor-pointer"
                             >
                               {admin.is_active ? (
                                 <>
@@ -644,10 +642,10 @@ export default function AdminUsersPage() {
                           )}
                           <DropdownMenuSeparator />
                           <DropdownMenuItem
+                            className="flex items-center cursor-pointer text-red-500 focus:text-red-500"
                             onClick={() =>
                               handleDeleteAdmin(admin.id, admin.email)
                             }
-                            className="flex items-center cursor-pointer text-red-500 focus:text-red-500"
                           >
                             <Trash2 className="mr-2 h-4 w-4" />
                             Eliminar
@@ -666,12 +664,12 @@ export default function AdminUsersPage() {
             <div className="mt-4">
               <Pagination
                 currentPage={currentPage}
-                totalPages={Math.ceil(totalCount / itemsPerPage)}
                 itemsPerPage={itemsPerPage}
-                totalItems={totalCount}
-                onPageChange={setCurrentPage}
-                onItemsPerPageChange={setItemsPerPage}
                 itemsPerPageOptions={[10, 20, 50, 100]}
+                totalItems={totalCount}
+                totalPages={Math.ceil(totalCount / itemsPerPage)}
+                onItemsPerPageChange={setItemsPerPage}
+                onPageChange={setCurrentPage}
               />
             </div>
           )}
@@ -693,9 +691,9 @@ export default function AdminUsersPage() {
       {/* Permissions Editor Dialog */}
       {showPermissionsEditor && selectedUserForPermissions && (
         <PermissionsEditor
-          userId={selectedUserForPermissions.id}
           currentPermissions={selectedUserForPermissions.permissions || {}}
           open={showPermissionsEditor}
+          userId={selectedUserForPermissions.id}
           onOpenChange={setShowPermissionsEditor}
           onSave={() => {
             fetchAdminUsers();

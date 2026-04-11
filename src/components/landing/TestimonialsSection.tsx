@@ -1,7 +1,6 @@
 "use client";
 
-import { Star, Quote, Sparkles } from "lucide-react";
-import businessConfig from "@/config/business";
+import { Quote, Sparkles, Star } from "lucide-react";
 
 const testimonials = [
   {
@@ -52,14 +51,14 @@ export function TestimonialsSection() {
         <div className="grid md:grid-cols-3 gap-10">
           {testimonials.map((testimonial, index) => (
             <div
-              key={index}
               className="relative p-10 bg-white rounded-[3rem] shadow-premium hover:shadow-premium-lg transition-all duration-500 border border-gray-100 group overflow-hidden"
+              key={index}
             >
               <Quote className="absolute -top-4 -right-4 h-24 w-24 text-gray-50 opacity-50 transition-colors group-hover:text-primary/10" />
 
               <div className="flex items-center gap-1 mb-8">
                 {[...Array(testimonial.rating)].map((_, i) => (
-                  <Star key={i} className="h-4 w-4 fill-primary text-primary" />
+                  <Star className="h-4 w-4 fill-primary text-primary" key={i} />
                 ))}
               </div>
 
@@ -70,9 +69,9 @@ export function TestimonialsSection() {
               <div className="flex items-center gap-5">
                 <div className="h-16 w-16 rounded-2xl overflow-hidden border-2 border-primary/10">
                   <img
-                    src={testimonial.image}
                     alt={testimonial.name}
                     className="h-full w-full object-cover"
+                    src={testimonial.image}
                   />
                 </div>
                 <div>

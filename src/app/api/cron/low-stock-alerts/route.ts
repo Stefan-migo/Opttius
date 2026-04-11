@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createServiceRoleClient } from "@/utils/supabase/server";
+
 import { EmailNotificationService } from "@/lib/email/notifications";
-import { sendLowStockAlertWhatsApp } from "@/lib/whatsapp/notifications-b2b";
 import { appLogger as logger } from "@/lib/logger";
+import { sendLowStockAlertWhatsApp } from "@/lib/whatsapp/notifications-b2b";
+import { createServiceRoleClient } from "@/utils/supabase/server";
 
 /**
  * GET /api/cron/low-stock-alerts

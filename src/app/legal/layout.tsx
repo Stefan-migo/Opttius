@@ -1,7 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+import Link from "next/link";
+
 import { MinimalLandingHeader } from "@/components/landing/MinimalLandingHeader";
 
 const legalNavItems = [
@@ -24,8 +25,8 @@ export default function LegalLayout({
       <main className="flex-1 pt-24 md:pt-28">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">
           <Link
-            href="/"
             className="inline-flex items-center gap-2 text-epoch-primary/70 hover:text-epoch-primary font-sans text-sm font-medium transition-colors mb-8"
+            href="/"
           >
             <ArrowLeft className="h-4 w-4" />
             Volver al inicio
@@ -38,32 +39,32 @@ export default function LegalLayout({
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-wrap gap-6 justify-center text-[10px] font-display uppercase tracking-[0.2em]">
             <Link
-              href="/legal/privacidad"
               className="text-epoch-primary/70 hover:text-epoch-primary"
+              href="/legal/privacidad"
             >
               Privacidad
             </Link>
             <Link
-              href="/legal/terminos"
               className="text-epoch-primary/70 hover:text-epoch-primary"
+              href="/legal/terminos"
             >
               Términos
             </Link>
             <Link
-              href="/legal/cookies"
               className="text-epoch-primary/70 hover:text-epoch-primary"
+              href="/legal/cookies"
             >
               Cookies
             </Link>
             <Link
-              href="/legal/seguridad"
               className="text-epoch-primary/70 hover:text-epoch-primary"
+              href="/legal/seguridad"
             >
               Seguridad
             </Link>
             <Link
-              href="/about"
               className="text-epoch-primary/70 hover:text-epoch-primary"
+              href="/about"
             >
               Nosotros
             </Link>

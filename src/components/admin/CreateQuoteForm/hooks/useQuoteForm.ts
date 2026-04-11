@@ -1,10 +1,12 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+
 import { useBranch } from "@/hooks/useBranch";
 import { getTaxPercentage } from "@/lib/utils/tax-config";
+
 import {
+  PresbyopiaSolution,
   QuoteFormData,
   QuoteSettings,
-  PresbyopiaSolution,
 } from "../types/quote.types";
 
 const DEFAULT_FORM_DATA: QuoteFormData = {

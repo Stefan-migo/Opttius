@@ -1,8 +1,9 @@
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
+
 import {
-  personalInfoSchema,
   addressSchema,
   passwordChangeSchema,
+  personalInfoSchema,
   profileUpdateSchema,
 } from "@/lib/api/validation/profile-schemas";
 

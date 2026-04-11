@@ -1,16 +1,15 @@
 "use client";
 
+import { useMemo } from "react";
 import {
-  LineChart as RechartsLineChart,
+  CartesianGrid,
   Line,
+  LineChart as RechartsLineChart,
+  ResponsiveContainer,
+  Tooltip,
   XAxis,
   YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  Legend,
 } from "recharts";
-import { useMemo } from "react";
 
 interface EnhancedLineChartProps {
   data: Array<{ date: string; value: number; count?: number }>;
@@ -57,7 +56,7 @@ export function EnhancedLineChart({
     );
   }
 
-  const CustomTooltip = ({ active, payload }: any) => {
+  const CustomTooltip = ({ active, payload }: unknown) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       return (
@@ -88,52 +87,52 @@ export function EnhancedLineChart({
         </h4>
       )}
 
-      <ResponsiveContainer width="100%" height={height}>
+      <ResponsiveContainer height={height} width="100%">
         <RechartsLineChart
-          id="enhanced-line-chart"
           data={chartData}
+          id="enhanced-line-chart"
           margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
         >
           {showGrid && (
             <CartesianGrid
-              strokeDasharray="3 3"
-              stroke="#E5E7EB"
-              opacity={0.3}
               className="dark:opacity-20"
+              opacity={0.3}
+              stroke="#E5E7EB"
+              strokeDasharray="3 3"
             />
           )}
           <XAxis
-            dataKey="formattedDate"
-            stroke="#6B7280"
-            fontSize={12}
-            tickLine={false}
             axisLine={false}
-            interval="preserveStartEnd"
             className="dark:text-gray-400"
+            dataKey="formattedDate"
+            fontSize={12}
+            interval="preserveStartEnd"
+            stroke="#6B7280"
+            tickLine={false}
           />
           <YAxis
-            stroke="#6B7280"
-            fontSize={12}
-            tickLine={false}
             axisLine={false}
+            className="dark:text-gray-400"
+            fontSize={12}
+            stroke="#6B7280"
             tickFormatter={(value) => {
               // Format large numbers
               if (value >= 1000000) return `${(value / 1000000).toFixed(1)}M`;
               if (value >= 1000) return `${(value / 1000).toFixed(1)}K`;
               return formatValue(value);
             }}
-            className="dark:text-gray-400"
+            tickLine={false}
           />
           <Tooltip content={<CustomTooltip />} />
           <Line
-            type="monotone"
-            dataKey="displayValue"
-            stroke={color}
-            strokeWidth={2}
-            dot={{ fill: color, r: 4 }}
             activeDot={{ r: 6, fill: color }}
             animationDuration={1000}
             animationEasing="ease-out"
+            dataKey="displayValue"
+            dot={{ fill: color, r: 4 }}
+            stroke={color}
+            strokeWidth={2}
+            type="monotone"
           />
         </RechartsLineChart>
       </ResponsiveContainer>

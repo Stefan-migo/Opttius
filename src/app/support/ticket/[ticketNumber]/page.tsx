@@ -1,15 +1,27 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter, useParams } from "next/navigation";
-import Link from "next/link";
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  AlertCircle,
+  ArrowLeft,
+  Calendar,
+  Clock,
+  Loader2,
+  MessageSquare,
+  Send,
+  User,
+  XCircle,
+} from "lucide-react";
+import Link from "next/link";
+import { useParams, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
+
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
 import {
   Card,
   CardContent,
@@ -17,22 +29,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import {
-  Loader2,
-  ArrowLeft,
-  Mail,
-  Calendar,
-  MessageSquare,
-  CheckCircle2,
-  Clock,
-  AlertCircle,
-  XCircle,
-  Send,
-  User,
-} from "lucide-react";
-import { toast } from "sonner";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 
 const messageSchema = z.object({
   message: z
@@ -255,8 +254,8 @@ export default function TicketViewPage() {
         {/* Header */}
         <div className="mb-6">
           <Link
-            href="/support"
             className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 mb-4"
+            href="/support"
           >
             <ArrowLeft className="h-4 w-4" />
             Volver al soporte
@@ -331,12 +330,12 @@ export default function TicketViewPage() {
                   <div className="space-y-4">
                     {ticket.messages.map((msg) => (
                       <div
-                        key={msg.id}
                         className={`p-4 rounded-lg ${
                           msg.is_from_customer
                             ? "bg-blue-50 border border-blue-200"
                             : "bg-gray-50 border border-gray-200"
                         }`}
+                        key={msg.id}
                       >
                         <div className="flex items-start justify-between mb-2">
                           <div className="flex items-center gap-2">
@@ -345,7 +344,7 @@ export default function TicketViewPage() {
                               {msg.sender_name}
                             </span>
                             {msg.is_from_customer && (
-                              <Badge variant="outline" className="text-xs">
+                              <Badge className="text-xs" variant="outline">
                                 Tú
                               </Badge>
                             )}
@@ -373,7 +372,7 @@ export default function TicketViewPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+                <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
                   <div className="space-y-2">
                     <Label htmlFor="requester_email">
                       Tu Email <span className="text-red-500">*</span>
@@ -382,8 +381,8 @@ export default function TicketViewPage() {
                       id="requester_email"
                       type="email"
                       {...register("requester_email")}
-                      placeholder="tu@email.com"
                       className={errors.requester_email ? "border-red-500" : ""}
+                      placeholder="tu@email.com"
                     />
                     {errors.requester_email && (
                       <p className="text-sm text-red-500">
@@ -411,9 +410,9 @@ export default function TicketViewPage() {
                     <Textarea
                       id="message"
                       {...register("message")}
+                      className={errors.message ? "border-red-500" : ""}
                       placeholder="Escribe tu mensaje aquí..."
                       rows={4}
-                      className={errors.message ? "border-red-500" : ""}
                     />
                     {errors.message && (
                       <p className="text-sm text-red-500">
@@ -423,9 +422,9 @@ export default function TicketViewPage() {
                   </div>
 
                   <Button
-                    type="submit"
-                    disabled={isSubmitting}
                     className="w-full"
+                    disabled={isSubmitting}
+                    type="submit"
                   >
                     {isSubmitting ? (
                       <>

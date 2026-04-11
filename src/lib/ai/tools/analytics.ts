@@ -1,4 +1,5 @@
 import { z } from "zod";
+
 import type { ToolDefinition, ToolResult } from "./types";
 
 const getDashboardStatsSchema = z.object({});
@@ -66,7 +67,7 @@ export const analyticsTools: ToolDefinition[] = [
 
         const activeProducts = products.filter((p) => p.status === "active");
         const lowStockProducts = activeProducts.filter(
-          (p: any) =>
+          (p: unknown) =>
             (p.inventory_quantity || 0) <= (p.low_stock_threshold || 5) &&
             (p.inventory_quantity || 0) > 0,
         ).length;
@@ -127,7 +128,7 @@ export const analyticsTools: ToolDefinition[] = [
           data: stats,
           message: "Dashboard statistics retrieved",
         };
-      } catch (error: any) {
+      } catch (error: unknown) {
         return {
           success: false,
           error: error.message || "Failed to get dashboard stats",
@@ -200,7 +201,7 @@ export const analyticsTools: ToolDefinition[] = [
           },
           message: `Revenue trend for last ${validated.days} days`,
         };
-      } catch (error: any) {
+      } catch (error: unknown) {
         return {
           success: false,
           error: error.message || "Failed to get revenue trend",
@@ -290,7 +291,7 @@ export const analyticsTools: ToolDefinition[] = [
           },
           message: `Top ${validated.limit} products for last ${validated.days} days`,
         };
-      } catch (error: any) {
+      } catch (error: unknown) {
         return {
           success: false,
           error: error.message || "Failed to get top products",
@@ -398,7 +399,7 @@ export const analyticsTools: ToolDefinition[] = [
           data: report,
           message: `Sales report generated for period`,
         };
-      } catch (error: any) {
+      } catch (error: unknown) {
         return {
           success: false,
           error: error.message || "Failed to generate sales report",

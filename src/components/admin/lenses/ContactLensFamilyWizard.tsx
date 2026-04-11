@@ -1,12 +1,14 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { ArrowLeft, ArrowRight, Save } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -14,17 +16,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { toast } from "sonner";
-import { ArrowLeft, ArrowRight, Save } from "lucide-react";
-import {
-  ContactLensMatrixManager,
-  ContactLensMatrixFormData,
-} from "./ContactLensMatrixManager";
+import { Textarea } from "@/components/ui/textarea";
 import type {
-  ContactLensUseType,
   ContactLensModality,
   ContactLensPackaging,
+  ContactLensUseType,
 } from "@/types/contact-lens";
+
+import {
+  ContactLensMatrixFormData,
+  ContactLensMatrixManager,
+} from "./ContactLensMatrixManager";
 
 const USE_TYPES = [
   { value: "daily", label: "Diario" },
@@ -321,13 +323,13 @@ export function ContactLensFamilyWizard({
                 <div className="space-y-2">
                   <Label htmlFor="name">Nombre *</Label>
                   <Input
+                    className={errors.name ? "border-red-500" : ""}
                     id="name"
+                    placeholder="Ej: Air Optix Aqua"
                     value={data.name}
                     onChange={(e) =>
                       setData((prev) => ({ ...prev, name: e.target.value }))
                     }
-                    placeholder="Ej: Air Optix Aqua"
-                    className={errors.name ? "border-red-500" : ""}
                   />
                   {errors.name && (
                     <p className="text-xs text-red-500">{errors.name}</p>
@@ -337,11 +339,11 @@ export function ContactLensFamilyWizard({
                   <Label htmlFor="brand">Marca</Label>
                   <Input
                     id="brand"
+                    placeholder="Ej: Alcon"
                     value={data.brand}
                     onChange={(e) =>
                       setData((prev) => ({ ...prev, brand: e.target.value }))
                     }
-                    placeholder="Ej: Alcon"
                   />
                 </div>
               </div>
@@ -466,10 +468,11 @@ export function ContactLensFamilyWizard({
                   <Label htmlFor="base_curve">Curva Base (BC)</Label>
                   <Input
                     id="base_curve"
-                    type="number"
-                    step="0.1"
-                    min="7"
                     max="10"
+                    min="7"
+                    placeholder="Ej: 8.4"
+                    step="0.1"
+                    type="number"
                     value={data.base_curve}
                     onChange={(e) =>
                       setData((prev) => ({
@@ -477,22 +480,21 @@ export function ContactLensFamilyWizard({
                         base_curve: e.target.value,
                       }))
                     }
-                    placeholder="Ej: 8.4"
                   />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="diameter">Diámetro (DIA)</Label>
                   <Input
                     id="diameter"
-                    type="number"
-                    step="0.1"
-                    min="13"
                     max="15"
+                    min="13"
+                    placeholder="Ej: 14.0"
+                    step="0.1"
+                    type="number"
                     value={data.diameter}
                     onChange={(e) =>
                       setData((prev) => ({ ...prev, diameter: e.target.value }))
                     }
-                    placeholder="Ej: 14.0"
                   />
                 </div>
               </div>
@@ -501,6 +503,8 @@ export function ContactLensFamilyWizard({
                 <Label htmlFor="description">Descripción</Label>
                 <Textarea
                   id="description"
+                  placeholder="Descripción opcional"
+                  rows={3}
                   value={data.description}
                   onChange={(e) =>
                     setData((prev) => ({
@@ -508,25 +512,23 @@ export function ContactLensFamilyWizard({
                       description: e.target.value,
                     }))
                   }
-                  rows={3}
-                  placeholder="Descripción opcional"
                 />
               </div>
 
               <div className="flex items-center gap-2">
                 <input
-                  type="checkbox"
-                  id="is_active"
                   checked={data.is_active}
+                  className="rounded"
+                  id="is_active"
+                  type="checkbox"
                   onChange={(e) =>
                     setData((prev) => ({
                       ...prev,
                       is_active: e.target.checked,
                     }))
                   }
-                  className="rounded"
                 />
-                <Label htmlFor="is_active" className="cursor-pointer">
+                <Label className="cursor-pointer" htmlFor="is_active">
                   Activa
                 </Label>
               </div>
@@ -557,7 +559,7 @@ export function ContactLensFamilyWizard({
                 <ArrowRight className="h-4 w-4 ml-2" />
               </Button>
             ) : (
-              <Button onClick={handleSubmit} disabled={loading}>
+              <Button disabled={loading} onClick={handleSubmit}>
                 {loading ? (
                   "Guardando..."
                 ) : (

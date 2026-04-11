@@ -1,24 +1,24 @@
 "use client";
 
-import { useState, memo } from "react";
-import Image from "next/image";
-import Link from "next/link";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import {
   Heart,
-  ShoppingCart,
-  Star,
   Leaf,
-  Sparkles,
-  Eye,
-  Plus,
   Minus,
+  Plus,
+  ShoppingCart,
+  Sparkles,
+  Star,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { useLike } from "@/contexts/LikeContext";
+import Image from "next/image";
+import Link from "next/link";
+import { memo, useState } from "react";
+
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import RichTextDisplay from "@/components/ui/RichTextDisplay";
+import { useLike } from "@/contexts/LikeContext";
+import { cn } from "@/lib/utils";
 
 interface ProductCardProps {
   id: string;
@@ -147,10 +147,10 @@ function ProductCard({
   const renderStars = (rating: number) => {
     return Array.from({ length: 5 }, (_, index) => (
       <Star
-        key={index}
         className={`h-4 w-4 transition-colors ${
           index < Math.floor(rating) ? theme.star : "text-gray-300"
         }`}
+        key={index}
       />
     ));
   };
@@ -163,10 +163,10 @@ function ProductCard({
         cardVariants[variant],
         className,
       )}
+      style={{ pointerEvents: "auto" }}
+      onClick={() => console.log("Card clicked for product:", id)}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      onClick={() => console.log("Card clicked for product:", id)}
-      style={{ pointerEvents: "auto" }}
     >
       <div className="relative flex-1 flex flex-col">
         {/* Product Image */}
@@ -175,20 +175,20 @@ function ProductCard({
             <div className="absolute inset-0 bg-gradient-to-br from-gray-200 to-gray-300 animate-pulse" />
           )}
           <Image
-            src={
-              imageUrl && !imageUrl.startsWith("file://")
-                ? imageUrl
-                : "/images/placeholder-product.jpg"
-            }
-            alt={name}
             fill
+            alt={name}
             className={cn(
               "object-cover transition-all duration-700",
               "group-hover:scale-110 group-hover:brightness-105",
               imageLoaded ? "opacity-100" : "opacity-0",
             )}
-            onLoad={() => setImageLoaded(true)}
+            src={
+              imageUrl && !imageUrl.startsWith("file://")
+                ? imageUrl
+                : "/images/placeholder-product.jpg"
+            }
             onError={() => setImageLoaded(true)}
+            onLoad={() => setImageLoaded(true)}
           />
 
           {/* Like Button - Just heart icon, no button wrapper */}
@@ -212,7 +212,7 @@ function ProductCard({
               isHovered ? "opacity-100" : "opacity-0",
             )}
           >
-            <Link href={`/productos/${id}`} className="block">
+            <Link className="block" href={`/productos/${id}`}>
               <div className="bg-white/90 text-gray-800 px-3 py-2 lg:px-6 lg:py-3 rounded-lg font-semibold shadow-lg hover:bg-white hover:scale-105 transition-all duration-300 text-xs lg:text-sm">
                 Ver producto
               </div>
@@ -223,8 +223,8 @@ function ProductCard({
           {stock <= 5 && stock > 0 && (
             <div className="hidden lg:block absolute bottom-2 left-2 lg:bottom-3 lg:left-3">
               <Badge
-                variant="outline"
                 className="bg-white/95 text-orange-600 border-orange-300 shadow-md backdrop-blur-sm animate-pulse-gentle text-xs px-1.5 py-0.5 lg:text-sm lg:px-2 lg:py-1"
+                variant="outline"
               >
                 ¡Solo {stock} disponibles!
               </Badge>
@@ -234,8 +234,8 @@ function ProductCard({
           {stock === 0 && (
             <div className="absolute inset-0 bg-black/60 flex items-center justify-center backdrop-blur-sm pointer-events-none">
               <Badge
-                variant="secondary"
                 className="bg-white text-gray-800 shadow-xl px-4 py-2 text-base"
+                variant="secondary"
               >
                 Sin Stock
               </Badge>
@@ -244,7 +244,7 @@ function ProductCard({
         </div>
 
         {/* Product Info */}
-        <CardContent padding="none" className="p-2 flex-1 flex flex-col">
+        <CardContent className="p-2 flex-1 flex flex-col" padding="none">
           {/* Desktop Layout */}
           <div className="hidden lg:flex lg:flex-col lg:h-full lg:justify-between">
             {/* Top Content */}
@@ -253,8 +253,8 @@ function ProductCard({
               <div className="flex flex-wrap gap-1">
                 {isOnSale && (
                   <Badge
-                    variant="destructive"
                     className="bg-gradient-to-r from-red-500 to-red-600 text-white shadow-md text-sm px-2 py-1"
+                    variant="destructive"
                   >
                     <span className="font-bold">OFERTA DEL DÍA</span>
                   </Badge>
@@ -272,8 +272,8 @@ function ProductCard({
                 )}
                 {isNatural && (
                   <Badge
-                    variant="secondary"
                     className="bg-green-100 text-green-800 border-green-200 shadow-md text-sm px-2 py-1"
+                    variant="secondary"
                   >
                     <Leaf className="h-3 w-3 mr-1" />
                     Natural
@@ -283,7 +283,7 @@ function ProductCard({
 
               {/* Name */}
               <div className="space-y-3">
-                <Link href={`/productos/${id}`} className="block group/link">
+                <Link className="block group/link" href={`/productos/${id}`}>
                   <h3
                     className="font-normal text-lg text-text-primary line-clamp-2 group-hover/link:text-brand-primary transition-colors duration-300 leading-tight"
                     style={{
@@ -326,8 +326,8 @@ function ProductCard({
               {/* Description */}
               <div className="text-sm text-text-secondary line-clamp-2 leading-relaxed">
                 <RichTextDisplay
-                  content={description}
                   className="text-sm text-text-secondary line-clamp-2 leading-relaxed [&_strong]:font-semibold [&_em]:italic [&_u]:underline [&_p]:m-0 [&_p]:p-0"
+                  content={description}
                 />
               </div>
 
@@ -349,9 +349,10 @@ function ProductCard({
                     {/* Desktop: Full quantity selector */}
                     <div className="flex items-center border border-border rounded-lg bg-white shadow-sm">
                       <Button
-                        variant="ghost"
-                        size="sm"
                         className="h-9 w-9 p-0 hover:bg-gray-50 rounded-l-lg disabled:opacity-50"
+                        disabled={quantity <= 1}
+                        size="sm"
+                        variant="ghost"
                         onClick={() => {
                           console.log(
                             "Minus clicked, current quantity:",
@@ -359,7 +360,6 @@ function ProductCard({
                           );
                           setQuantity(Math.max(1, quantity - 1));
                         }}
-                        disabled={quantity <= 1}
                       >
                         <Minus className="h-4 w-4" />
                       </Button>
@@ -367,9 +367,10 @@ function ProductCard({
                         {quantity}
                       </span>
                       <Button
-                        variant="ghost"
-                        size="sm"
                         className="h-9 w-9 p-0 hover:bg-gray-50 rounded-r-lg disabled:opacity-50"
+                        disabled={quantity >= stock}
+                        size="sm"
+                        variant="ghost"
                         onClick={() => {
                           console.log(
                             "Plus clicked, current quantity:",
@@ -379,7 +380,6 @@ function ProductCard({
                           );
                           setQuantity(Math.min(stock, quantity + 1));
                         }}
-                        disabled={quantity >= stock}
                       >
                         <Plus className="h-4 w-4" />
                       </Button>
@@ -387,8 +387,6 @@ function ProductCard({
 
                     {/* Desktop: Add button */}
                     <Button
-                      onClick={handleAddToCart}
-                      disabled={stock === 0}
                       className={cn(
                         "flex-1 font-semibold shadow-md transition-all duration-300",
                         "hover:shadow-lg hover:scale-105 active:scale-95",
@@ -396,7 +394,9 @@ function ProductCard({
                         "text-sm h-9",
                         theme.button,
                       )}
+                      disabled={stock === 0}
                       size="sm"
+                      onClick={handleAddToCart}
                     >
                       <ShoppingCart className="h-4 w-4 mr-2" />
                       {stock > 0 ? "Agregar al carrito" : "Sin Stock"}
@@ -407,9 +407,9 @@ function ProductCard({
                 {stock === 0 && (
                   <Button
                     disabled
-                    variant="secondary"
                     className="w-full opacity-60 h-9"
                     size="sm"
+                    variant="secondary"
                   >
                     Sin Stock
                   </Button>
@@ -426,8 +426,8 @@ function ProductCard({
               <div className="flex flex-wrap gap-1">
                 {isOnSale && (
                   <Badge
-                    variant="destructive"
                     className="bg-gradient-to-r from-red-500 to-red-600 text-white shadow-md text-[10px] px-1 py-0.5"
+                    variant="destructive"
                   >
                     <span className="font-bold">OFERTA DEL DÍA</span>
                   </Badge>
@@ -445,8 +445,8 @@ function ProductCard({
                 )}
                 {isNatural && (
                   <Badge
-                    variant="secondary"
                     className="bg-green-100 text-green-800 border-green-200 shadow-md text-[10px] px-1 py-0.5"
+                    variant="secondary"
                   >
                     <Leaf className="h-1.5 w-1.5 mr-0.5" />
                     Natural
@@ -455,7 +455,7 @@ function ProductCard({
               </div>
 
               {/* Name - Smaller, Left aligned */}
-              <Link href={`/productos/${id}`} className="block group/link">
+              <Link className="block group/link" href={`/productos/${id}`}>
                 <h3
                   className="font-normal text-sm text-text-primary line-clamp-2 group-hover/link:text-brand-primary transition-colors duration-300 leading-tight text-left"
                   style={{
@@ -473,12 +473,12 @@ function ProductCard({
                 <div className="flex items-center gap-0.5">
                   {Array.from({ length: 5 }, (_, index) => (
                     <Star
-                      key={index}
                       className={`h-2.5 w-2.5 transition-colors ${
                         index < Math.floor(rating)
                           ? theme.star
                           : "text-gray-300"
                       }`}
+                      key={index}
                     />
                   ))}
                 </div>
@@ -500,8 +500,8 @@ function ProductCard({
               {stock <= 5 && stock > 0 && (
                 <div>
                   <Badge
-                    variant="outline"
                     className="bg-orange-50 text-orange-600 border-orange-300 text-[10px] px-1 py-0.5"
+                    variant="outline"
                   >
                     ¡Solo {stock} disponibles!
                   </Badge>
@@ -513,8 +513,6 @@ function ProductCard({
             <div className="mt-auto pt-2">
               {stock > 0 ? (
                 <Button
-                  onClick={handleAddToCart}
-                  disabled={stock === 0}
                   className={cn(
                     "w-full font-semibold shadow-md transition-all duration-300",
                     "hover:shadow-lg hover:scale-105 active:scale-95",
@@ -522,7 +520,9 @@ function ProductCard({
                     "text-xs h-7",
                     theme.button,
                   )}
+                  disabled={stock === 0}
                   size="sm"
+                  onClick={handleAddToCart}
                 >
                   <ShoppingCart className="h-3 w-3 mr-1" />
                   Agregar
@@ -530,9 +530,9 @@ function ProductCard({
               ) : (
                 <Button
                   disabled
-                  variant="secondary"
                   className="w-full opacity-60 h-7"
                   size="sm"
+                  variant="secondary"
                 >
                   Sin Stock
                 </Button>

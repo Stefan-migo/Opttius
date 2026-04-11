@@ -1,18 +1,29 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import {
+  Building2,
+  CheckCircle,
+  Edit,
+  Loader2,
+  Mail,
+  MapPin,
+  Phone,
+  Plus,
+  Trash2,
+  XCircle,
+} from "lucide-react";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
+  CardDescription,
   CardHeader,
   CardTitle,
-  CardDescription,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog,
   DialogContent,
@@ -22,14 +33,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -38,18 +43,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  Plus,
-  Edit,
-  Trash2,
-  Building2,
-  MapPin,
-  Phone,
-  Mail,
-  CheckCircle,
-  XCircle,
-  Loader2,
-} from "lucide-react";
-import { toast } from "sonner";
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { useBranch } from "@/hooks/useBranch";
 
 interface Branch {
@@ -65,7 +65,7 @@ interface Branch {
   phone?: string;
   email?: string;
   is_active: boolean;
-  settings?: any;
+  settings?: unknown;
   created_at: string;
   updated_at: string;
 }
@@ -109,7 +109,7 @@ export default function BranchesPage() {
 
       const data = await response.json();
       setBranches(data.branches || []);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error fetching branches:", error);
       toast.error("Error al cargar sucursales");
     } finally {
@@ -198,9 +198,11 @@ export default function BranchesPage() {
       if (refreshBranches) {
         await refreshBranches();
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error saving branch:", error);
-      toast.error(error.message || "Error al guardar sucursal");
+      const errorMessage =
+        error instanceof Error ? error.message : "Error al guardar sucursal";
+      toast.error(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
@@ -228,9 +230,11 @@ export default function BranchesPage() {
       if (refreshBranches) {
         await refreshBranches();
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error deleting branch:", error);
-      toast.error(error.message || "Error al eliminar sucursal");
+      const errorMessage =
+        error instanceof Error ? error.message : "Error al eliminar sucursal";
+      toast.error(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
@@ -271,8 +275,8 @@ export default function BranchesPage() {
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
               <Button
-                onClick={() => handleOpenDialog()}
                 className="rounded-xl bg-epoch-primary hover:bg-epoch-surface text-white font-display font-bold text-[10px] tracking-[0.2em] uppercase min-h-[44px] px-6 w-full sm:w-auto"
+                onClick={() => handleOpenDialog()}
               >
                 <Plus className="h-4 w-4 mr-2 shrink-0" />
                 Nueva Sucursal
@@ -294,31 +298,35 @@ export default function BranchesPage() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label
-                        htmlFor="name"
                         className="text-xs sm:text-sm text-epoch-primary/80"
+                        htmlFor="name"
                       >
                         Nombre <span className="text-destructive">*</span>
                       </Label>
                       <Input
+                        required
+                        className="rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20 min-h-[44px]"
                         id="name"
+                        placeholder="Ej: Sucursal Centro"
                         value={formData.name}
                         onChange={(e) =>
                           setFormData({ ...formData, name: e.target.value })
                         }
-                        placeholder="Ej: Sucursal Centro"
-                        required
-                        className="rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20 min-h-[44px]"
                       />
                     </div>
                     <div className="space-y-2">
                       <Label
-                        htmlFor="code"
                         className="text-xs sm:text-sm text-epoch-primary/80"
+                        htmlFor="code"
                       >
                         Código <span className="text-destructive">*</span>
                       </Label>
                       <Input
+                        required
+                        className="rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20 min-h-[44px]"
+                        disabled={!!selectedBranch}
                         id="code"
+                        placeholder="Ej: SUC-001"
                         value={formData.code}
                         onChange={(e) =>
                           setFormData({
@@ -326,10 +334,6 @@ export default function BranchesPage() {
                             code: e.target.value.toUpperCase(),
                           })
                         }
-                        placeholder="Ej: SUC-001"
-                        required
-                        disabled={!!selectedBranch}
-                        className="rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20 min-h-[44px]"
                       />
                       {selectedBranch && (
                         <p className="text-xs text-epoch-primary/70">
@@ -341,13 +345,15 @@ export default function BranchesPage() {
 
                   <div className="space-y-2">
                     <Label
-                      htmlFor="address_line_1"
                       className="text-xs sm:text-sm text-epoch-primary/80"
+                      htmlFor="address_line_1"
                     >
                       Dirección Línea 1
                     </Label>
                     <Input
+                      className="rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20 min-h-[44px]"
                       id="address_line_1"
+                      placeholder="Calle y número"
                       value={formData.address_line_1}
                       onChange={(e) =>
                         setFormData({
@@ -355,20 +361,20 @@ export default function BranchesPage() {
                           address_line_1: e.target.value,
                         })
                       }
-                      placeholder="Calle y número"
-                      className="rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20 min-h-[44px]"
                     />
                   </div>
 
                   <div className="space-y-2">
                     <Label
-                      htmlFor="address_line_2"
                       className="text-xs sm:text-sm text-epoch-primary/80"
+                      htmlFor="address_line_2"
                     >
                       Dirección Línea 2
                     </Label>
                     <Input
+                      className="rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20 min-h-[44px]"
                       id="address_line_2"
+                      placeholder="Depto, oficina, etc."
                       value={formData.address_line_2}
                       onChange={(e) =>
                         setFormData({
@@ -376,55 +382,55 @@ export default function BranchesPage() {
                           address_line_2: e.target.value,
                         })
                       }
-                      placeholder="Depto, oficina, etc."
-                      className="rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20 min-h-[44px]"
                     />
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div className="space-y-2">
                       <Label
-                        htmlFor="city"
                         className="text-xs sm:text-sm text-epoch-primary/80"
+                        htmlFor="city"
                       >
                         Ciudad
                       </Label>
                       <Input
+                        className="rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20 min-h-[44px]"
                         id="city"
+                        placeholder="Ciudad"
                         value={formData.city}
                         onChange={(e) =>
                           setFormData({ ...formData, city: e.target.value })
                         }
-                        placeholder="Ciudad"
-                        className="rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20 min-h-[44px]"
                       />
                     </div>
                     <div className="space-y-2">
                       <Label
-                        htmlFor="state"
                         className="text-xs sm:text-sm text-epoch-primary/80"
+                        htmlFor="state"
                       >
                         Región/Estado
                       </Label>
                       <Input
+                        className="rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20 min-h-[44px]"
                         id="state"
+                        placeholder="Región"
                         value={formData.state}
                         onChange={(e) =>
                           setFormData({ ...formData, state: e.target.value })
                         }
-                        placeholder="Región"
-                        className="rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20 min-h-[44px]"
                       />
                     </div>
                     <div className="space-y-2">
                       <Label
-                        htmlFor="postal_code"
                         className="text-xs sm:text-sm text-epoch-primary/80"
+                        htmlFor="postal_code"
                       >
                         Código Postal
                       </Label>
                       <Input
+                        className="rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20 min-h-[44px]"
                         id="postal_code"
+                        placeholder="Código postal"
                         value={formData.postal_code}
                         onChange={(e) =>
                           setFormData({
@@ -432,72 +438,70 @@ export default function BranchesPage() {
                             postal_code: e.target.value,
                           })
                         }
-                        placeholder="Código postal"
-                        className="rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20 min-h-[44px]"
                       />
                     </div>
                   </div>
 
                   <div className="space-y-2">
                     <Label
-                      htmlFor="country"
                       className="text-xs sm:text-sm text-epoch-primary/80"
+                      htmlFor="country"
                     >
                       País
                     </Label>
                     <Input
+                      className="rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20 min-h-[44px]"
                       id="country"
+                      placeholder="País"
                       value={formData.country}
                       onChange={(e) =>
                         setFormData({ ...formData, country: e.target.value })
                       }
-                      placeholder="País"
-                      className="rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20 min-h-[44px]"
                     />
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label
-                        htmlFor="phone"
                         className="text-xs sm:text-sm text-epoch-primary/80"
+                        htmlFor="phone"
                       >
                         Teléfono
                       </Label>
                       <Input
+                        className="rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20 min-h-[44px]"
                         id="phone"
+                        placeholder="+56 9 1234 5678"
                         value={formData.phone}
                         onChange={(e) =>
                           setFormData({ ...formData, phone: e.target.value })
                         }
-                        placeholder="+56 9 1234 5678"
-                        className="rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20 min-h-[44px]"
                       />
                     </div>
                     <div className="space-y-2">
                       <Label
-                        htmlFor="email"
                         className="text-xs sm:text-sm text-epoch-primary/80"
+                        htmlFor="email"
                       >
                         Email
                       </Label>
                       <Input
+                        className="rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20 min-h-[44px]"
                         id="email"
+                        placeholder="sucursal@ejemplo.com"
                         type="email"
                         value={formData.email}
                         onChange={(e) =>
                           setFormData({ ...formData, email: e.target.value })
                         }
-                        placeholder="sucursal@ejemplo.com"
-                        className="rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20 min-h-[44px]"
                       />
                     </div>
                   </div>
 
                   <div className="space-y-2">
                     <Label
-                      htmlFor="is_active"
                       className="text-xs sm:text-sm text-epoch-primary/80"
+                      htmlFor="is_active"
                     >
                       Estado
                     </Label>
@@ -522,18 +526,18 @@ export default function BranchesPage() {
                 </div>
                 <DialogFooter className="flex-col sm:flex-row gap-2">
                   <Button
+                    className="rounded-xl border-epoch-primary/20 w-full sm:w-auto min-h-[44px]"
+                    disabled={isSubmitting}
                     type="button"
                     variant="outline"
                     onClick={handleCloseDialog}
-                    disabled={isSubmitting}
-                    className="rounded-xl border-epoch-primary/20 w-full sm:w-auto min-h-[44px]"
                   >
                     Cancelar
                   </Button>
                   <Button
-                    type="submit"
-                    disabled={isSubmitting}
                     className="rounded-xl bg-epoch-primary hover:bg-epoch-surface text-white w-full sm:w-auto min-h-[44px]"
+                    disabled={isSubmitting}
+                    type="submit"
                   >
                     {isSubmitting ? (
                       <>
@@ -575,8 +579,8 @@ export default function BranchesPage() {
                 Crea tu primera sucursal para comenzar
               </p>
               <Button
-                onClick={() => handleOpenDialog()}
                 className="rounded-xl bg-epoch-primary hover:bg-epoch-surface text-white font-display font-bold text-[10px] tracking-[0.2em] uppercase min-h-[44px] px-6"
+                onClick={() => handleOpenDialog()}
               >
                 <Plus className="h-4 w-4 mr-2" />
                 Crear Sucursal
@@ -615,8 +619,8 @@ export default function BranchesPage() {
                       </TableCell>
                       <TableCell>
                         <Badge
-                          variant="outline"
                           className="border-epoch-primary/20 text-epoch-primary font-medium text-[10px] sm:text-xs"
+                          variant="outline"
                         >
                           {branch.code}
                         </Badge>
@@ -660,8 +664,8 @@ export default function BranchesPage() {
                           </Badge>
                         ) : (
                           <Badge
-                            variant="outline"
                             className="border-epoch-primary/20 text-epoch-primary/70 text-[10px] sm:text-xs"
+                            variant="outline"
                           >
                             <XCircle className="h-3 w-3 mr-1 shrink-0" />
                             Inactiva
@@ -671,22 +675,22 @@ export default function BranchesPage() {
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-1 sm:gap-2">
                           <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleOpenDialog(branch)}
                             className="min-h-[44px] min-w-[44px] sm:min-h-8 sm:min-w-8 rounded-xl"
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => handleOpenDialog(branch)}
                           >
                             <Edit className="h-4 w-4" />
                           </Button>
                           <Button
-                            variant="ghost"
+                            className="min-h-[44px] min-w-[44px] sm:min-h-8 sm:min-w-8 rounded-xl"
+                            disabled={branch.code === "MAIN"}
                             size="sm"
+                            variant="ghost"
                             onClick={() => {
                               setSelectedBranch(branch);
                               setIsDeleteDialogOpen(true);
                             }}
-                            disabled={branch.code === "MAIN"}
-                            className="min-h-[44px] min-w-[44px] sm:min-h-8 sm:min-w-8 rounded-xl"
                           >
                             <Trash2 className="h-4 w-4 text-destructive" />
                           </Button>
@@ -721,21 +725,21 @@ export default function BranchesPage() {
           </DialogHeader>
           <DialogFooter className="flex-col sm:flex-row gap-2">
             <Button
+              className="rounded-xl border-epoch-primary/20 w-full sm:w-auto min-h-[44px]"
+              disabled={isSubmitting}
               variant="outline"
               onClick={() => {
                 setIsDeleteDialogOpen(false);
                 setSelectedBranch(null);
               }}
-              disabled={isSubmitting}
-              className="rounded-xl border-epoch-primary/20 w-full sm:w-auto min-h-[44px]"
             >
               Cancelar
             </Button>
             <Button
+              className="rounded-xl w-full sm:w-auto min-h-[44px]"
+              disabled={isSubmitting || selectedBranch?.code === "MAIN"}
               variant="destructive"
               onClick={handleDelete}
-              disabled={isSubmitting || selectedBranch?.code === "MAIN"}
-              className="rounded-xl w-full sm:w-auto min-h-[44px]"
             >
               {isSubmitting ? (
                 <>

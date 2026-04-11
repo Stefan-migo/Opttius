@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/utils/supabase/server";
+
 import { appLogger as logger } from "@/lib/logger";
+import { createClient } from "@/utils/supabase/server";
 
 /**
  * GET /api/admin/ai/usage
@@ -154,7 +155,7 @@ export async function GET(request: NextRequest) {
       })),
       recentLogs: (logs || []).slice(0, 50),
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
     logger.error("AI usage API error", { error: err?.message });
     return NextResponse.json(
       { error: err?.message || "Internal server error" },

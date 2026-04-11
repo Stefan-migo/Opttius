@@ -1,9 +1,10 @@
-import { useState, useCallback } from "react";
-import { posService } from "@/lib/api/services";
+import { useCallback, useState } from "react";
+
+import { type PendingBalanceOrder, posService } from "@/lib/api/services";
 
 export function usePOSPendingBalance(branchId: string | null) {
-  const [orders, setOrders] = useState<any[]>([]);
-  const [allOrders, setAllOrders] = useState<any[]>([]);
+  const [orders, setOrders] = useState<PendingBalanceOrder[]>([]);
+  const [allOrders, setAllOrders] = useState<PendingBalanceOrder[]>([]);
   const [loading, setLoading] = useState(false);
 
   const fetchOrders = useCallback(
@@ -17,7 +18,7 @@ export function usePOSPendingBalance(branchId: string | null) {
         );
         setAllOrders(result || []);
         setOrders(result || []);
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error("Error fetching pending balance orders:", error);
         setOrders([]);
         setAllOrders([]);
@@ -29,7 +30,7 @@ export function usePOSPendingBalance(branchId: string | null) {
   );
 
   const filterBySearch = useCallback(
-    (searchTerm: string, ordersToFilter: any[] = allOrders) => {
+    (searchTerm: string, ordersToFilter: PendingBalanceOrder[] = allOrders) => {
       const term = searchTerm.trim().toLowerCase();
       if (!term) {
         setOrders(ordersToFilter);

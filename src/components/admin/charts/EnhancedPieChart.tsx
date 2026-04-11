@@ -1,13 +1,13 @@
 "use client";
 
+import { useMemo } from "react";
 import {
-  PieChart as RechartsPieChart,
-  Pie,
   Cell,
+  Pie,
+  PieChart as RechartsPieChart,
   ResponsiveContainer,
   Tooltip,
 } from "recharts";
-import { useMemo } from "react";
 
 interface EnhancedPieChartProps {
   data: Array<{ label: string; value: number; color?: string }>;
@@ -40,20 +40,20 @@ const renderCustomizedLabel = ({
   innerRadius,
   outerRadius,
   percent,
-}: any) => {
+}: unknown) => {
   const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
   const x = cx + radius * Math.cos(-midAngle * RADIAN);
   const y = cy + radius * Math.sin(-midAngle * RADIAN);
 
   return (
     <text
-      x={x}
-      y={y}
-      fill="white"
-      textAnchor={x > cx ? "start" : "end"}
       dominantBaseline="central"
+      fill="white"
       fontSize={12}
       fontWeight="bold"
+      textAnchor={x > cx ? "start" : "end"}
+      x={x}
+      y={y}
     >
       {`${(percent * 100).toFixed(0)}%`}
     </text>
@@ -87,7 +87,7 @@ export function EnhancedPieChart({
     );
   }
 
-  const CustomTooltip = ({ active, payload }: any) => {
+  const CustomTooltip = ({ active, payload }: unknown) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       return (
@@ -122,25 +122,25 @@ export function EnhancedPieChart({
       )}
 
       <div className="shrink-0" style={{ height: pieHeight }}>
-        <ResponsiveContainer width="100%" height="100%">
+        <ResponsiveContainer height="100%" width="100%">
           <RechartsPieChart
             id="enhanced-pie-chart"
             margin={{ top: 4, right: 4, bottom: 4, left: 4 }}
           >
             <Pie
-              data={chartData}
-              cx="50%"
-              cy="50%"
-              labelLine={false}
-              label={showPercentage ? renderCustomizedLabel : false}
-              outerRadius={outerRadius}
-              fill="#8884d8"
-              dataKey="value"
               animationDuration={1000}
               animationEasing="ease-out"
+              cx="50%"
+              cy="50%"
+              data={chartData}
+              dataKey="value"
+              fill="#8884d8"
+              label={showPercentage ? renderCustomizedLabel : false}
+              labelLine={false}
+              outerRadius={outerRadius}
             >
               {chartData.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={entry.color} />
+                <Cell fill={entry.color} key={`cell-${index}`} />
               ))}
             </Pie>
             <Tooltip content={<CustomTooltip />} />
@@ -152,8 +152,8 @@ export function EnhancedPieChart({
         <div className="flex flex-wrap justify-center gap-x-4 gap-y-2 mt-3 shrink-0">
           {chartData.map((entry, index) => (
             <div
-              key={`legend-${index}`}
               className="flex items-center gap-2 text-xs sm:text-sm"
+              key={`legend-${index}`}
             >
               <div
                 className="w-3 h-3 sm:w-4 sm:h-4 rounded-full shrink-0"

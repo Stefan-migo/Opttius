@@ -1,26 +1,27 @@
 "use client";
 
-import { useState } from "react";
-import { cn } from "@/lib/utils";
 import {
   Bot,
-  User,
-  Copy,
   Check,
+  Copy,
   Edit2,
-  Trash2,
   RotateCw,
   Sparkles,
+  Trash2,
+  User,
 } from "lucide-react";
+import { useState } from "react";
+
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 interface MessageBubbleProps {
   role: "user" | "assistant" | "system" | "tool";
   content: string;
   timestamp?: string;
-  toolCalls?: any;
-  toolResults?: any;
-  metadata?: any;
+  toolCalls?: unknown;
+  toolResults?: unknown;
+  metadata?: unknown;
   onCopy?: () => void;
   onEdit?: () => void;
   onDelete?: () => void;
@@ -56,8 +57,8 @@ function renderInlineMarkdown(
       // Inline code: `code`
       parts.push(
         <code
-          key={`${keyPrefix}code-${matchIndex}`}
           className="bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded text-[11px] font-mono text-primary font-bold"
+          key={`${keyPrefix}code-${matchIndex}`}
         >
           {fullMatch.slice(1, -1)}
         </code>,
@@ -66,8 +67,8 @@ function renderInlineMarkdown(
       // Bold: **text**
       parts.push(
         <strong
-          key={`${keyPrefix}bold-${matchIndex}`}
           className="font-extrabold text-slate-900 dark:text-white"
+          key={`${keyPrefix}bold-${matchIndex}`}
         >
           {fullMatch.slice(2, -2)}
         </strong>,
@@ -76,8 +77,8 @@ function renderInlineMarkdown(
       // Italic: *text*
       parts.push(
         <em
-          key={`${keyPrefix}italic-${matchIndex}`}
           className="italic opacity-90"
+          key={`${keyPrefix}italic-${matchIndex}`}
         >
           {fullMatch.slice(1, -1)}
         </em>,
@@ -88,11 +89,11 @@ function renderInlineMarkdown(
       if (linkMatch) {
         parts.push(
           <a
-            key={`${keyPrefix}link-${matchIndex}`}
-            href={linkMatch[2]}
-            target="_blank"
-            rel="noopener noreferrer"
             className="text-primary hover:underline font-bold decoration-primary/30"
+            href={linkMatch[2]}
+            key={`${keyPrefix}link-${matchIndex}`}
+            rel="noopener noreferrer"
+            target="_blank"
           >
             {linkMatch[1]}
           </a>,
@@ -152,8 +153,8 @@ function renderMarkdown(content: string) {
     if (segment.type === "codeBlock") {
       parts.push(
         <pre
-          key={`codeblock-${segIndex}`}
           className="bg-slate-950 text-slate-100 p-4 rounded-xl overflow-x-auto my-3 text-[13px] font-mono shadow-2xl border border-white/5"
+          key={`codeblock-${segIndex}`}
         >
           <div className="flex items-center justify-between mb-2 pb-2 border-b border-white/10 opacity-50 uppercase text-[10px] font-bold tracking-widest">
             <span>{segment.lang || "code"}</span>
@@ -174,8 +175,8 @@ function renderMarkdown(content: string) {
           const headingContent = trimmedLine.substring(3);
           parts.push(
             <h2
-              key={`h2-${lineKey}`}
               className="text-lg font-bold mt-5 mb-2.5 text-slate-900 dark:text-white"
+              key={`h2-${lineKey}`}
             >
               {renderInlineMarkdown(headingContent, `h2-${lineKey}-`)}
             </h2>,
@@ -186,8 +187,8 @@ function renderMarkdown(content: string) {
           const headingContent = trimmedLine.substring(4);
           parts.push(
             <h3
-              key={`h3-${lineKey}`}
               className="text-base font-bold mt-4 mb-2 text-slate-800 dark:text-slate-100"
+              key={`h3-${lineKey}`}
             >
               {renderInlineMarkdown(headingContent, `h3-${lineKey}-`)}
             </h3>,
@@ -198,8 +199,8 @@ function renderMarkdown(content: string) {
           const headingContent = trimmedLine.substring(2);
           parts.push(
             <h1
-              key={`h1-${lineKey}`}
               className="text-xl font-black mt-6 mb-3 text-slate-950 dark:text-white underline decoration-primary/20 underline-offset-4"
+              key={`h1-${lineKey}`}
             >
               {renderInlineMarkdown(headingContent, `h1-${lineKey}-`)}
             </h1>,
@@ -210,8 +211,8 @@ function renderMarkdown(content: string) {
           const listContent = trimmedLine.replace(/^[-*]\s+/, "");
           parts.push(
             <div
-              key={`ul-${lineKey}`}
               className="flex items-start gap-3 ml-2 my-1.5"
+              key={`ul-${lineKey}`}
             >
               <span className="text-primary font-black mt-0.5">•</span>
               <span className="text-slate-700 dark:text-slate-300">
@@ -226,8 +227,8 @@ function renderMarkdown(content: string) {
           if (numMatch) {
             parts.push(
               <div
-                key={`ol-${lineKey}`}
                 className="flex items-start gap-3 ml-2 my-1.5"
+                key={`ol-${lineKey}`}
               >
                 <span className="text-primary font-bold min-w-[1.2em]">
                   {numMatch[1]}.
@@ -241,14 +242,14 @@ function renderMarkdown(content: string) {
         }
         // Empty line
         else if (trimmedLine === "") {
-          parts.push(<div key={`br-${lineKey}`} className="h-3" />);
+          parts.push(<div className="h-3" key={`br-${lineKey}`} />);
         }
         // Regular paragraph
         else {
           parts.push(
             <p
-              key={`p-${lineKey}`}
               className="my-1.5 leading-relaxed text-slate-700 dark:text-slate-300"
+              key={`p-${lineKey}`}
             >
               {renderInlineMarkdown(line, `p-${lineKey}-`)}
             </p>,
@@ -352,7 +353,7 @@ export function MessageBubble({
                 : toolCallsData
                   ? [toolCallsData]
                   : [];
-              toolCallsArray.forEach((tc: any, index: number) => {
+              toolCallsArray.forEach((tc: unknown, index: number) => {
                 const result =
                   toolResultsData?.[tc.id] || toolResultsData?.[index];
                 if (result && result.success === false) {
@@ -386,11 +387,11 @@ export function MessageBubble({
 
             <div className="flex items-center gap-0.5">
               <Button
-                variant="ghost"
-                size="icon"
                 className="h-7 w-7 rounded-lg text-slate-400 hover:text-primary hover:bg-primary/5 transition-colors"
-                onClick={handleCopy}
+                size="icon"
                 title="Copiar texto"
+                variant="ghost"
+                onClick={handleCopy}
               >
                 {copied ? (
                   <Check className="w-3.5 h-3.5" />
@@ -401,11 +402,11 @@ export function MessageBubble({
 
               {isUser && onEdit && (
                 <Button
-                  variant="ghost"
-                  size="icon"
                   className="h-7 w-7 rounded-lg text-slate-400 hover:text-primary hover:bg-primary/5 transition-colors"
-                  onClick={onEdit}
+                  size="icon"
                   title="Editar mensaje"
+                  variant="ghost"
+                  onClick={onEdit}
                 >
                   <Edit2 className="w-3.5 h-3.5" />
                 </Button>
@@ -413,11 +414,11 @@ export function MessageBubble({
 
               {!isUser && onRegenerate && (
                 <Button
-                  variant="ghost"
-                  size="icon"
                   className="h-7 w-7 rounded-lg text-slate-400 hover:text-primary hover:bg-primary/5 transition-colors"
-                  onClick={onRegenerate}
+                  size="icon"
                   title="Regenerar respuesta"
+                  variant="ghost"
+                  onClick={onRegenerate}
                 >
                   <RotateCw className="w-3.5 h-3.5" />
                 </Button>
@@ -425,11 +426,11 @@ export function MessageBubble({
 
               {onDelete && (
                 <Button
-                  variant="ghost"
-                  size="icon"
                   className="h-7 w-7 rounded-lg text-slate-400 hover:text-destructive hover:bg-destructive/5 transition-colors"
-                  onClick={onDelete}
+                  size="icon"
                   title="Eliminar mensaje"
+                  variant="ghost"
+                  onClick={onDelete}
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                 </Button>

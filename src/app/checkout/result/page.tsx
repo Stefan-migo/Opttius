@@ -1,18 +1,19 @@
 "use client";
 
-import { Suspense } from "react";
-import { useSearchParams } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import {
-  CheckCircle,
-  XCircle,
-  Clock,
   AlertCircle,
+  CheckCircle,
+  Clock,
   CreditCard,
   LayoutDashboard,
+  XCircle,
 } from "lucide-react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import { Suspense } from "react";
+
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 function CheckoutResultContent() {
   const searchParams = useSearchParams();
@@ -85,8 +86,8 @@ function CheckoutResultContent() {
       </div>
 
       <Card
-        variant="glass"
         className="max-w-xl w-full border-2 border-admin-border-secondary shadow-2xl overflow-hidden relative z-10 animate-in zoom-in-95 duration-500 rounded-xl sm:rounded-2xl bg-admin-bg-tertiary"
+        variant="glass"
       >
         {/* Status bar */}
         <div className={`h-1.5 sm:h-2 w-full ${statusInfo.barColor}`} />
@@ -123,12 +124,12 @@ function CheckoutResultContent() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <Button
               asChild
-              variant="outline"
               className="h-12 sm:h-14 rounded-xl sm:rounded-2xl border-2 border-admin-accent-primary font-display font-bold text-[10px] sm:text-xs uppercase tracking-[0.15em] text-admin-accent-primary hover:bg-admin-accent-primary/10 hover:text-admin-accent-primary hover:border-admin-accent-primary transition-all min-h-[48px]"
+              variant="outline"
             >
               <Link
-                href="/profile?tab=subscription"
                 className="flex items-center justify-center gap-2"
+                href="/profile?tab=subscription"
               >
                 <CreditCard className="h-4 w-4 sm:h-5 sm:w-5 shrink-0" />
                 <span>Gestionar Suscripción</span>
@@ -136,12 +137,12 @@ function CheckoutResultContent() {
             </Button>
             <Button
               asChild
-              className="h-12 sm:h-14 rounded-xl sm:rounded-2xl bg-admin-accent-primary text-[#1A2B23] hover:bg-admin-accent-secondary font-display font-black text-[10px] sm:text-xs uppercase tracking-[0.15em] shadow-xl shadow-admin-accent-primary/25 transition-all min-h-[48px]"
               shimmer
+              className="h-12 sm:h-14 rounded-xl sm:rounded-2xl bg-admin-accent-primary text-[#1A2B23] hover:bg-admin-accent-secondary font-display font-black text-[10px] sm:text-xs uppercase tracking-[0.15em] shadow-xl shadow-admin-accent-primary/25 transition-all min-h-[48px]"
             >
               <Link
-                href="/admin"
                 className="flex items-center justify-center gap-2"
+                href="/admin"
               >
                 <LayoutDashboard className="h-4 w-4 sm:h-5 sm:w-5 shrink-0" />
                 <span>Ir al Dashboard</span>
@@ -153,8 +154,8 @@ function CheckoutResultContent() {
           <p className="text-center text-[9px] sm:text-[10px] font-bold text-admin-text-tertiary uppercase tracking-widest">
             ¿Necesitas ayuda?{" "}
             <Link
-              href="/support"
               className="text-admin-accent-primary hover:underline transition-colors"
+              href="/support"
             >
               Abre un ticket de soporte
             </Link>

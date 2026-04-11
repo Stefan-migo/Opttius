@@ -1,4 +1,5 @@
 import Redis from "ioredis";
+
 import { appLogger as logger } from "@/lib/logger";
 
 /**

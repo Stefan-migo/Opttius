@@ -1,22 +1,22 @@
-import { productTools } from "./products";
-import { categoryTools } from "./categories";
-import { orderTools } from "./orders";
-import { customerTools } from "./customers";
+import type { LLMTool } from "../types";
 import { analyticsTools } from "./analytics";
-import { supportTools } from "./support";
 import { businessFlowTools } from "./analyzeBusinessFlow";
-import { diagnoseSystemTools } from "./diagnoseSystem";
 import { marketTrendsTools } from "./analyzeMarketTrends";
-import { inventoryTools } from "./optimizeInventory";
+import { appointmentTools } from "./appointments";
+import { categoryTools } from "./categories";
+import { customerTools } from "./customers";
+import { customerWhatsAppTools } from "./customerWhatsApp";
+import { diagnoseSystemTools } from "./diagnoseSystem";
 import { recommendationTools } from "./generateRecommendations";
 import { importBulkTools } from "./importBulk";
-import { customerWhatsAppTools } from "./customerWhatsApp";
-import { appointmentTools } from "./appointments";
-import { workOrderTools } from "./workOrders";
-import { quoteTools } from "./quotes";
+import { inventoryTools } from "./optimizeInventory";
+import { orderTools } from "./orders";
 import { prescriptionTools } from "./prescriptions";
+import { productTools } from "./products";
+import { quoteTools } from "./quotes";
+import { supportTools } from "./support";
 import type { ToolDefinition } from "./types";
-import type { LLMTool } from "../types";
+import { workOrderTools } from "./workOrders";
 
 export const allTools: ToolDefinition[] = [
   ...productTools,
@@ -63,7 +63,7 @@ export function convertToolsToLLMTools(tools: ToolDefinition[]): LLMTool[] {
 
 export function validateToolCall(
   toolName: string,
-  params: any,
+  params: unknown,
 ): { valid: boolean; error?: string } {
   const tool = getToolByName(toolName);
   if (!tool) {
@@ -76,7 +76,7 @@ export function validateToolCall(
       zodSchema.parse(params);
     }
     return { valid: true };
-  } catch (error: any) {
+  } catch (error: unknown) {
     return { valid: false, error: error.message };
   }
 }

@@ -1,21 +1,20 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
-import { useCategories } from "../hooks/useCategories";
-import type { Category } from "../hooks/useCategories";
 import {
-  Package,
-  Tag,
-  Plus,
-  Edit,
-  Trash2,
   CheckCircle,
-  Layers,
+  Edit,
   Glasses,
+  Layers,
+  Package,
+  Plus,
+  Tag,
+  Trash2,
 } from "lucide-react";
+import { useMemo, useState } from "react";
+import { toast } from "sonner";
+
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -24,10 +23,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Textarea } from "@/components/ui/textarea";
+
+import type { Category } from "../hooks/useCategories";
+import { useCategories } from "../hooks/useCategories";
 
 const SORT_ORDER_THRESHOLD = 10;
 
@@ -71,17 +73,17 @@ function CategoryCard({
           </div>
           <div className="flex gap-1 opacity-60 group-hover:opacity-100 transition-opacity shrink-0">
             <Button
-              variant="ghost"
-              size="sm"
               className="h-8 w-8 p-0 rounded-lg hover:bg-admin-accent-primary/10 text-epoch-primary"
+              size="sm"
+              variant="ghost"
               onClick={() => onEdit(category)}
             >
               <Edit className="h-3.5 w-3.5" />
             </Button>
             <Button
-              variant="ghost"
-              size="sm"
               className="h-8 w-8 p-0 rounded-lg hover:bg-admin-error/10 text-admin-error"
+              size="sm"
+              variant="ghost"
               onClick={() => onDelete(category)}
             >
               <Trash2 className="h-3.5 w-3.5" />
@@ -139,10 +141,10 @@ function CategorySection({
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
         {categories.map((category) => (
           <CategoryCard
-            key={category.id}
             category={category}
-            onEdit={onEdit}
+            key={category.id}
             onDelete={onDelete}
+            onEdit={onEdit}
           />
         ))}
       </div>
@@ -272,7 +274,7 @@ export default function CategoriesManagementSection() {
             <Skeleton className="h-5 w-40 mb-4" />
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {[...Array(6)].map((_, i) => (
-                <Skeleton key={i} className="h-24 rounded-xl" />
+                <Skeleton className="h-24 rounded-xl" key={i} />
               ))}
             </div>
           </div>
@@ -280,7 +282,7 @@ export default function CategoriesManagementSection() {
             <Skeleton className="h-5 w-48 mb-4" />
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {[...Array(6)].map((_, i) => (
-                <Skeleton key={i} className="h-24 rounded-xl" />
+                <Skeleton className="h-24 rounded-xl" key={i} />
               ))}
             </div>
           </div>
@@ -311,8 +313,8 @@ export default function CategoriesManagementSection() {
             organizar tu inventario.
           </p>
           <Button
-            onClick={openCreateCategoryDialog}
             className="bg-epoch-primary hover:bg-epoch-primary/90 text-white rounded-xl text-[10px] font-display font-bold tracking-widest uppercase px-8 py-4 h-auto"
+            onClick={openCreateCategoryDialog}
           >
             <Plus className="h-4 w-4 mr-2" />
             Crear primera categoría
@@ -337,8 +339,8 @@ export default function CategoriesManagementSection() {
               </p>
             </div>
             <Button
-              onClick={openCreateCategoryDialog}
               className="bg-epoch-primary hover:bg-epoch-primary/90 text-white rounded-xl text-[9px] sm:text-[10px] font-display font-bold tracking-widest uppercase px-4 sm:px-6 py-3 sm:py-4 h-auto border-none shadow-premium-sm shrink-0"
+              onClick={openCreateCategoryDialog}
             >
               <Plus className="h-4 w-4 sm:mr-2" />
               <span className="hidden sm:inline">Nueva categoría</span>
@@ -347,20 +349,20 @@ export default function CategoriesManagementSection() {
         </CardHeader>
         <CardContent className="p-4 sm:p-6 md:p-8 space-y-10 sm:space-y-12">
           <CategorySection
-            title="Categorías principales"
-            subtitle="Productos generales: marcos, lentes de sol, accesorios y servicios"
-            icon={Layers}
             categories={principales}
-            onEdit={openEditCategoryDialog}
+            icon={Layers}
+            subtitle="Productos generales: marcos, lentes de sol, accesorios y servicios"
+            title="Categorías principales"
             onDelete={handleDeleteCategory}
+            onEdit={openEditCategoryDialog}
           />
           <CategorySection
-            title="Categorías especializadas de lentes"
-            subtitle="Tipos de productos ópticos: lectura, ocupacional, deportivo, lentes de contacto"
-            icon={Glasses}
             categories={especializadas}
-            onEdit={openEditCategoryDialog}
+            icon={Glasses}
+            subtitle="Tipos de productos ópticos: lectura, ocupacional, deportivo, lentes de contacto"
+            title="Categorías especializadas de lentes"
             onDelete={handleDeleteCategory}
+            onEdit={openEditCategoryDialog}
           />
         </CardContent>
       </Card>
@@ -376,43 +378,43 @@ export default function CategoriesManagementSection() {
             </DialogDescription>
           </DialogHeader>
 
-          <form onSubmit={handleCategorySubmit} className="p-8 space-y-6">
+          <form className="p-8 space-y-6" onSubmit={handleCategorySubmit}>
             <div className="space-y-4">
               <div className="space-y-2">
                 <Label
-                  htmlFor="category-name"
                   className="text-[10px] font-display font-bold text-admin-text-tertiary uppercase tracking-widest"
+                  htmlFor="category-name"
                 >
                   Nombre *
                 </Label>
                 <Input
+                  required
+                  className="rounded-xl border-admin-border-primary/20 focus:border-epoch-primary focus:ring-0 p-6 text-sm font-display"
                   id="category-name"
+                  placeholder="Ej: Marcos"
                   value={categoryFormData.name}
                   onChange={(e) =>
                     handleCategoryInputChange("name", e.target.value)
                   }
-                  placeholder="Ej: Marcos"
-                  required
-                  className="rounded-xl border-admin-border-primary/20 focus:border-epoch-primary focus:ring-0 p-6 text-sm font-display"
                 />
               </div>
 
               <div className="space-y-2">
                 <Label
-                  htmlFor="category-slug"
                   className="text-[10px] font-display font-bold text-admin-text-tertiary uppercase tracking-widest"
+                  htmlFor="category-slug"
                 >
                   Slug
                 </Label>
                 <div className="relative">
                   <Input
+                    className="rounded-xl border-admin-border-primary/20 bg-admin-bg-tertiary/30 focus:border-epoch-primary focus:ring-0 p-6 pl-10 text-xs font-mono lowercase"
                     id="category-slug"
+                    placeholder="marcos"
                     value={categoryFormData.slug}
                     onChange={(e) =>
                       handleCategoryInputChange("slug", e.target.value)
                     }
-                    placeholder="marcos"
-                    className="rounded-xl border-admin-border-primary/20 bg-admin-bg-tertiary/30 focus:border-epoch-primary focus:ring-0 p-6 pl-10 text-xs font-mono lowercase"
                   />
                   <Tag className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-admin-text-tertiary opacity-30" />
                 </div>
@@ -420,38 +422,38 @@ export default function CategoriesManagementSection() {
 
               <div className="space-y-2">
                 <Label
-                  htmlFor="category-description"
                   className="text-[10px] font-display font-bold text-admin-text-tertiary uppercase tracking-widest"
+                  htmlFor="category-description"
                 >
                   Descripción
                 </Label>
                 <Textarea
+                  className="rounded-xl border-admin-border-primary/20 focus:border-epoch-primary focus:ring-0 p-4 text-xs font-serif italic resize-none"
                   id="category-description"
+                  placeholder="Descripción opcional..."
+                  rows={3}
                   value={categoryFormData.description}
                   onChange={(e) =>
                     handleCategoryInputChange("description", e.target.value)
                   }
-                  placeholder="Descripción opcional..."
-                  rows={3}
-                  className="rounded-xl border-admin-border-primary/20 focus:border-epoch-primary focus:ring-0 p-4 text-xs font-serif italic resize-none"
                 />
               </div>
             </div>
 
             <DialogFooter className="gap-2 sm:gap-0 pt-4 border-t border-admin-border-primary/10">
               <Button
+                className="rounded-xl text-[10px] font-display font-bold tracking-widest uppercase hover:bg-admin-bg-tertiary"
+                disabled={categoryFormLoading}
                 type="button"
                 variant="ghost"
                 onClick={() => setCategoryDialogOpen(false)}
-                disabled={categoryFormLoading}
-                className="rounded-xl text-[10px] font-display font-bold tracking-widest uppercase hover:bg-admin-bg-tertiary"
               >
                 Cancelar
               </Button>
               <Button
-                type="submit"
-                disabled={categoryFormLoading}
                 className="bg-epoch-primary hover:bg-epoch-primary/90 text-white rounded-xl text-[10px] font-display font-bold tracking-widest uppercase px-8 border-none shadow-premium-sm"
+                disabled={categoryFormLoading}
+                type="submit"
               >
                 {categoryFormLoading ? (
                   <Package className="h-3 w-3 mr-2 animate-spin" />

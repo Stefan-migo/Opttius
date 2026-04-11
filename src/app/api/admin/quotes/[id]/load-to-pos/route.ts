@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/utils/supabase/server";
-import { createServiceRoleClient } from "@/utils/supabase/server";
-import { getBranchContext, addBranchFilter } from "@/lib/api/branch-middleware";
+
+import { addBranchFilter, getBranchContext } from "@/lib/api/branch-middleware";
 import { appLogger as logger } from "@/lib/logger";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
+import { createClient } from "@/utils/supabase/server";
+import { createServiceRoleClient } from "@/utils/supabase/server";
 
 /**
  * Endpoint para cargar un presupuesto al POS
@@ -60,7 +61,7 @@ export async function POST(
         customer:customers!quotes_customer_id_fkey(id, first_name, last_name, email, phone),
         prescription:prescriptions!quotes_prescription_id_fkey(*),
         frame_product:products!quotes_frame_product_id_fkey(id, name, sku, price, featured_image, barcode)
-      `) as any,
+      `) as unknown,
     )
       .eq("id", id)
       .single();
@@ -90,7 +91,7 @@ export async function POST(
     }
 
     // Build items array for POS cart
-    const items: any[] = [];
+    const items: unknown[] = [];
 
     // Add frame as item if exists
     // Check if there's any frame data (name, brand, model, or product_id)

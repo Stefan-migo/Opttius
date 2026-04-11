@@ -1,14 +1,15 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import {
   createContext,
+  ReactNode,
   useContext,
   useEffect,
   useRef,
   useState,
-  ReactNode,
 } from "react";
-import { usePathname } from "next/navigation";
+
 import { useAuthContext } from "./AuthContext";
 
 export interface Branch {

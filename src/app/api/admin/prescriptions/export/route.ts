@@ -1,12 +1,13 @@
 import { NextRequest } from "next/server";
+import { z } from "zod";
+
+import { addBranchFilter, getBranchContext } from "@/lib/api/branch-middleware";
+import { AuthenticationError, AuthorizationError } from "@/lib/api/errors";
+import { appLogger as logger } from "@/lib/logger";
+import { formatRUT } from "@/lib/utils/rut";
+import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
 import { createClient } from "@/utils/supabase/server";
 import { createServiceRoleClient } from "@/utils/supabase/server";
-import { getBranchContext, addBranchFilter } from "@/lib/api/branch-middleware";
-import { formatRUT } from "@/lib/utils/rut";
-import { appLogger as logger } from "@/lib/logger";
-import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
-import { AuthenticationError, AuthorizationError } from "@/lib/api/errors";
-import { z } from "zod";
 
 export const dynamic = "force-dynamic";
 

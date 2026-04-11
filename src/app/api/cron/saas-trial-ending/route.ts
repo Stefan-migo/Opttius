@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createServiceRoleClient } from "@/utils/supabase/server";
+
 import { sendSaaSTrialEnding } from "@/lib/email/templates/saas";
 import { appLogger as logger } from "@/lib/logger";
+import { createServiceRoleClient } from "@/utils/supabase/server";
 
 const DAYS_BEFORE = parseInt(
   process.env.SAAS_TRIAL_ENDING_DAYS_BEFORE || "3",

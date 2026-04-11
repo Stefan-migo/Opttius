@@ -1,20 +1,20 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import {
+  Calendar,
+  History,
+  Loader2,
+  MessageSquare,
+  Plus,
+  Search,
+  Trash2,
+  X,
+} from "lucide-react";
+import { useEffect, useState } from "react";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import {
-  Trash2,
-  Plus,
-  Search,
-  MessageSquare,
-  Clock,
-  Loader2,
-  X,
-  History,
-  Calendar,
-} from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface ChatSession {
@@ -152,10 +152,10 @@ export function ChatHistorySidebar({
           </h2>
         </div>
         <Button
-          variant="ghost"
-          size="icon"
-          onClick={onClose}
           className="rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+          size="icon"
+          variant="ghost"
+          onClick={onClose}
         >
           <X className="w-5 h-5 text-slate-500" />
         </Button>
@@ -164,9 +164,9 @@ export function ChatHistorySidebar({
       <div className="p-4 space-y-4">
         <div className="flex items-center gap-2">
           <Button
-            onClick={onNewSession}
-            size="sm"
             className="flex-1 rounded-xl h-10 font-bold tracking-tight shadow-md hover:shadow-primary/20 transition-all font-sans"
+            size="sm"
+            onClick={onNewSession}
           >
             <Plus className="w-4 h-4 mr-2" />
             Nueva conversación
@@ -176,10 +176,10 @@ export function ChatHistorySidebar({
         <div className="relative group">
           <Search className="absolute left-3.5 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-primary transition-colors" />
           <Input
+            className="pl-10 h-10 rounded-xl bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800 focus:ring-primary/10 transition-all text-sm"
             placeholder="Buscar en el historial..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 h-10 rounded-xl bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800 focus:ring-primary/10 transition-all text-sm"
           />
         </div>
       </div>
@@ -210,14 +210,14 @@ export function ChatHistorySidebar({
           <div className="space-y-2.5">
             {filteredSessions.map((session) => (
               <div
-                key={session.id}
-                onClick={() => onSessionSelect(session.id)}
                 className={cn(
                   "group relative p-4 rounded-2xl cursor-pointer transition-all border duration-200 animate-in fade-in slide-in-from-bottom-1",
                   currentSessionId === session.id
                     ? "bg-primary/5 border-primary/20 shadow-sm"
                     : "bg-white dark:bg-slate-900/40 border-slate-100 dark:border-slate-800 hover:border-primary/20 hover:shadow-md hover:shadow-slate-200/20 dark:hover:shadow-none hover:-translate-y-0.5",
                 )}
+                key={session.id}
+                onClick={() => onSessionSelect(session.id)}
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex-1 min-w-0">
@@ -264,14 +264,14 @@ export function ChatHistorySidebar({
                   </div>
 
                   <Button
-                    variant="ghost"
-                    size="icon"
                     className={cn(
                       "h-8 w-8 rounded-xl opacity-0 group-hover:opacity-100 transition-all",
                       "hover:bg-destructive/10 hover:text-destructive",
                     )}
-                    onClick={(e) => handleDelete(session.id, e)}
                     disabled={deletingId === session.id}
+                    size="icon"
+                    variant="ghost"
+                    onClick={(e) => handleDelete(session.id, e)}
                   >
                     {deletingId === session.id ? (
                       <Loader2 className="w-4 h-4 animate-spin" />

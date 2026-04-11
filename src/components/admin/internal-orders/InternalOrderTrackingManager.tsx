@@ -1,19 +1,30 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import {
+  AlertTriangle,
+  Building,
+  Clock,
+  Edit,
+  MapPin,
+  Package,
+  Plus,
+  Save,
+  Trash2,
+  Truck,
+  X,
+} from "lucide-react";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
+  CardDescription,
   CardHeader,
   CardTitle,
-  CardDescription,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Switch } from "@/components/ui/switch";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog,
   DialogContent,
@@ -22,6 +33,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -37,21 +50,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Truck,
-  Plus,
-  MapPin,
-  Package,
-  Edit,
-  Trash2,
-  X,
-  Save,
-  AlertTriangle,
-  Clock,
-  User,
-  Building,
-} from "lucide-react";
-import { toast } from "sonner";
+import { Textarea } from "@/components/ui/textarea";
 
 // Internal Order Interfaces
 interface InternalOrder {
@@ -263,7 +262,7 @@ export default function InternalOrderTrackingManager() {
   const getStatusBadge = (status: string) => {
     const statusConfig: Record<
       string,
-      { variant: any; label: string; icon: React.ReactNode }
+      { variant: unknown; label: string; icon: React.ReactNode }
     > = {
       pending: {
         variant: "secondary",
@@ -294,7 +293,7 @@ export default function InternalOrderTrackingManager() {
 
     const config = statusConfig[status] || statusConfig.pending;
     return (
-      <Badge variant={config.variant} className="flex items-center gap-1">
+      <Badge className="flex items-center gap-1" variant={config.variant}>
         {config.icon}
         {config.label}
       </Badge>
@@ -302,12 +301,13 @@ export default function InternalOrderTrackingManager() {
   };
 
   const getPriorityBadge = (priority: string) => {
-    const priorityConfig: Record<string, { variant: any; label: string }> = {
-      low: { variant: "secondary", label: "Baja" },
-      medium: { variant: "default", label: "Media" },
-      high: { variant: "destructive", label: "Alta" },
-      urgent: { variant: "destructive", label: "Urgente" },
-    };
+    const priorityConfig: Record<string, { variant: unknown; label: string }> =
+      {
+        low: { variant: "secondary", label: "Baja" },
+        medium: { variant: "default", label: "Media" },
+        high: { variant: "destructive", label: "Alta" },
+        urgent: { variant: "destructive", label: "Urgente" },
+      };
 
     const config = priorityConfig[priority] || priorityConfig.medium;
     return <Badge variant={config.variant}>{config.label}</Badge>;
@@ -435,15 +435,15 @@ export default function InternalOrderTrackingManager() {
                       <TableCell>
                         <div className="flex items-center gap-2">
                           <Button
-                            variant="outline"
                             size="sm"
+                            variant="outline"
                             onClick={() => handleEditOrder(order)}
                           >
                             <Edit className="h-4 w-4" />
                           </Button>
                           <Button
-                            variant="outline"
                             size="sm"
+                            variant="outline"
                             onClick={() => handleDeleteOrder(order)}
                           >
                             <Trash2 className="h-4 w-4" />
@@ -524,7 +524,7 @@ export default function InternalOrderTrackingManager() {
                 <Select
                   value={orderForm.priority}
                   onValueChange={(value) =>
-                    setOrderForm({ ...orderForm, priority: value as any })
+                    setOrderForm({ ...orderForm, priority: value as unknown })
                   }
                 >
                   <SelectTrigger>
@@ -617,12 +617,12 @@ export default function InternalOrderTrackingManager() {
             <div>
               <Label>Notas</Label>
               <Textarea
+                placeholder="Instrucciones especiales o notas adicionales"
+                rows={3}
                 value={orderForm.notes}
                 onChange={(e) =>
                   setOrderForm({ ...orderForm, notes: e.target.value })
                 }
-                placeholder="Instrucciones especiales o notas adicionales"
-                rows={3}
               />
             </div>
           </div>

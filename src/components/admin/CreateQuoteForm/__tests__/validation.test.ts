@@ -1,6 +1,7 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+import { PresbyopiaSolution, QuoteFormData } from "../types/quote.types";
 import { QuoteFormValidator } from "../utils/validation";
-import { QuoteFormData, PresbyopiaSolution } from "../types/quote.types";
 
 // Mock the translation function
 vi.mock("@/hooks/useTranslation", () => ({
@@ -40,8 +41,8 @@ vi.mock("@/hooks/useTranslation", () => ({
 
 describe("QuoteFormValidator", () => {
   let validFormData: QuoteFormData;
-  let validCustomer: any;
-  let validPrescription: any;
+  let validCustomer: unknown;
+  let validPrescription: unknown;
 
   beforeEach(() => {
     validFormData = {

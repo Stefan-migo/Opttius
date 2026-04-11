@@ -8,31 +8,33 @@
  * @module lib/ai/insights/generator
  */
 
+import type { SupabaseClient } from "@supabase/supabase-js";
+
+import { appLogger as logger } from "@/lib/logger";
+
 import { LLMFactory } from "../factory";
+import type { MaturityLevel } from "../memory/organizational";
+import { logAIUsage } from "../usage-logger";
+import { OrganizationalMaturitySystem } from "./maturity";
 import {
-  InsightsResponseSchema,
-  InsightSchema,
-  type Insight,
-  type InsightSection,
-} from "./schemas";
-import {
-  getSectionPrompt,
   getDailySummaryPrompt,
+  getSectionPrompt,
   getUserMessage,
 } from "./prompts";
-import { OrganizationalMaturitySystem } from "./maturity";
-import { appLogger as logger } from "@/lib/logger";
-import { logAIUsage } from "../usage-logger";
-import type { MaturityLevel } from "../memory/organizational";
-import type { SupabaseClient } from "@supabase/supabase-js";
+import {
+  type Insight,
+  InsightSchema,
+  type InsightSection,
+  InsightsResponseSchema,
+} from "./schemas";
 
 export interface GenerateInsightsOptions {
   section: InsightSection;
-  data: any;
+  data: unknown;
   organizationName: string;
   organizationId?: string;
   maturityLevel?: MaturityLevel;
-  additionalContext?: Record<string, any>;
+  additionalContext?: Record<string, unknown>;
   temperature?: number;
   maxRetries?: number;
   useMaturityAdaptation?: boolean;
@@ -161,7 +163,7 @@ export async function generateInsights(
       }
 
       // Parse JSON from response
-      let parsedResponse: any;
+      let parsedResponse: unknown;
       try {
         // Try to parse as JSON first
         parsedResponse = JSON.parse(response.content);
@@ -198,7 +200,7 @@ export async function generateInsights(
       });
 
       return validated.insights;
-    } catch (error: any) {
+    } catch (error: unknown) {
       lastError = error;
       logger.warn(`Insight generation attempt ${attempt + 1} failed`, {
         section,
@@ -256,6 +258,6 @@ export async function generateSingleInsight(
  * Validate insights without generating new ones
  * Useful for testing or re-validation
  */
-export function validateInsights(insights: any[]): Insight[] {
+export function validateInsights(insights: unknown[]): Insight[] {
   return insights.map((insight) => InsightSchema.parse(insight));
 }

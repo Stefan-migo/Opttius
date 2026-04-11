@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSecurityMonitor, getSecurityAlerting } from "@/lib/security";
-import { appLogger as logger } from "@/lib/logger";
+
 import { getClientIdentifier } from "@/lib/rate-limiting/config";
+import { getSecurityAlerting, getSecurityMonitor } from "@/lib/security";
 
 /**
  * Security Integration Middleware

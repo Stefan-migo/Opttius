@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/utils/supabase/server";
-import { createServiceRoleClient } from "@/utils/supabase/server";
-import { NotificationService } from "@/lib/notifications/notification-service";
+
 import { validateBranchAccess } from "@/lib/api/branch-middleware";
-import { appLogger as logger } from "@/lib/logger";
 import { EmailNotificationService } from "@/lib/email/notifications";
 import { sendDeliveryCompletionEmail } from "@/lib/email/send-delivery-completion-email";
+import { appLogger as logger } from "@/lib/logger";
+import { NotificationService } from "@/lib/notifications/notification-service";
 import { sendWorkOrderReadyWhatsApp } from "@/lib/whatsapp/notifications-b2b";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
+import { createClient } from "@/utils/supabase/server";
+import { createServiceRoleClient } from "@/utils/supabase/server";
 
 export const dynamic = "force-dynamic";
 export async function PUT(
@@ -103,7 +104,7 @@ export async function PUT(
 
     // Update additional fields if provided
     if (Object.keys(additionalData).length > 0) {
-      const updateData: any = {
+      const updateData: unknown = {
         updated_at: new Date().toISOString(),
       };
 
@@ -228,7 +229,8 @@ export async function PUT(
               first_name?: string;
               last_name?: string;
             } | null;
-            const hasEmail = customer?.email || (updatedWorkOrder as any).email;
+            const hasEmail =
+              customer?.email || (updatedWorkOrder as unknown).email;
 
             if (hasEmail) {
               const { data: adminUser } = await supabaseServiceRole
@@ -245,7 +247,7 @@ export async function PUT(
                     `${customer?.first_name || ""} ${customer?.last_name || ""}`.trim() ||
                     "Cliente",
                   customer_email:
-                    customer?.email || (updatedWorkOrder as any).email,
+                    customer?.email || (updatedWorkOrder as unknown).email,
                   work_order_number: updatedWorkOrder.work_order_number,
                 },
                 organizationId ?? undefined,

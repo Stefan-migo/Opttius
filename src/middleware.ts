@@ -1,7 +1,7 @@
-import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { createClient } from "@supabase/supabase-js";
+import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 
 /**
  * Middleware: Refresca la sesión de Supabase y protege rutas /admin

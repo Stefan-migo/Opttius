@@ -1,24 +1,24 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClientFromRequest } from "@/utils/supabase/server";
+
 import {
   getBranchContext,
   getFieldOperationFromRequest,
 } from "@/lib/api/branch-middleware";
-import { appLogger as logger } from "@/lib/logger";
-import { EmailNotificationService } from "@/lib/email/notifications";
-import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
-import { withRateLimit, rateLimitConfigs } from "@/lib/api/middleware";
 import {
-  RateLimitError,
   AuthenticationError,
   AuthorizationError,
+  RateLimitError,
 } from "@/lib/api/errors";
+import { rateLimitConfigs, withRateLimit } from "@/lib/api/middleware";
 import {
-  createPaginatedResponse,
   createApiErrorResponse,
-  extractPaginationParams,
+  createPaginatedResponse,
 } from "@/lib/api/response";
+import { EmailNotificationService } from "@/lib/email/notifications";
+import { appLogger as logger } from "@/lib/logger";
 import { getLocalDateBoundsUTC } from "@/lib/utils/date-timezone";
+import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
+import { createClientFromRequest } from "@/utils/supabase/server";
 
 export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
@@ -199,10 +199,10 @@ export async function GET(request: NextRequest) {
     });
 
     // Transform data to include customer names
-    const transformedOrders = orders?.map((order: any) => ({
+    const transformedOrders = orders?.map((order: unknown) => ({
       id: order.id,
       order_number: order.order_number,
-      customer_name: (order as any).customer_name || "Cliente",
+      customer_name: (order as unknown).customer_name || "Cliente",
       customer_email: order.email,
       total_amount: order.total_amount,
       status: order.status,
@@ -213,7 +213,7 @@ export async function GET(request: NextRequest) {
       mp_payment_method: order.mp_payment_method,
       mp_payment_type: order.mp_payment_type,
       order_items: order.order_items || [],
-      order_payments: (order as any).order_payments || [],
+      order_payments: (order as unknown).order_payments || [],
     }));
 
     // Use standardized paginated response
@@ -237,7 +237,7 @@ export async function GET(request: NextRequest) {
 
 // Create manual order or get statistics
 export async function POST(request: NextRequest) {
-  return (withRateLimit(rateLimitConfigs.modification) as any)(
+  return (withRateLimit(rateLimitConfigs.modification) as unknown)(
     request,
     async () => {
       try {
@@ -266,7 +266,7 @@ export async function POST(request: NextRequest) {
         let branchContext;
         try {
           branchContext = await getBranchContext(request, user.id, supabase);
-        } catch (branchError: any) {
+        } catch (branchError: unknown) {
           logger.error("Error getting branch context", branchError);
           return NextResponse.json(
             {
@@ -296,10 +296,10 @@ export async function POST(request: NextRequest) {
         const userOrganizationId = (adminUser as { organization_id?: string })
           ?.organization_id;
 
-        let body: any;
+        let body: unknown;
         try {
           body = await request.json();
-        } catch (jsonError: any) {
+        } catch (jsonError: unknown) {
           logger.error("Error parsing request body", jsonError);
           return NextResponse.json(
             {
@@ -448,7 +448,8 @@ export async function POST(request: NextRequest) {
 
             const totalRevenue =
               revenueData?.reduce(
-                (sum: number, order: any) => sum + (order.total_amount || 0),
+                (sum: number, order: unknown) =>
+                  sum + (order.total_amount || 0),
                 0,
               ) || 0;
 
@@ -508,7 +509,7 @@ export async function POST(request: NextRequest) {
                 orderCounts: statusCounts, // This is an object, not an array
                 totalRevenue,
                 recentOrders:
-                  recentOrders?.map((order: any) => ({
+                  recentOrders?.map((order: unknown) => ({
                     id: order.id,
                     order_number: order.order_number,
                     customer_name: "Cliente", // Generic name for now
@@ -519,7 +520,7 @@ export async function POST(request: NextRequest) {
                   })) || [],
               },
             });
-          } catch (statsError: any) {
+          } catch (statsError: unknown) {
             logger.error("Error in get_stats action", statsError);
             return NextResponse.json(
               {
@@ -639,26 +640,28 @@ export async function POST(request: NextRequest) {
             "@/lib/notifications/notification-service"
           );
           NotificationService.notifyNewSale(
-            (newOrder as any).id,
-            (newOrder as any).order_number,
-            (newOrder as any).email,
-            (newOrder as any).total_amount,
-            (newOrder as any).branch_id ?? undefined,
+            (newOrder as unknown).id,
+            (newOrder as unknown).order_number,
+            (newOrder as unknown).email,
+            (newOrder as unknown).total_amount,
+            (newOrder as unknown).branch_id ?? undefined,
           ).catch((err) => logger.error("Error creating notification", err));
 
           // Send Customer Order Confirmation (non-blocking)
-          if ((newOrder as any).email) {
+          if ((newOrder as unknown).email) {
             (async () => {
               try {
                 // Prepare order object for email service
                 const emailOrder = {
-                  ...(newOrder as any),
-                  user_email: (newOrder as any).email,
-                  email: (newOrder as any).email,
+                  ...(newOrder as unknown),
+                  user_email: (newOrder as unknown).email,
+                  email: (newOrder as unknown).email,
                   currency:
-                    (newOrder as any).currency || orderData.currency || "CLP",
+                    (newOrder as unknown).currency ||
+                    orderData.currency ||
+                    "CLP",
                   customer_name:
-                    (newOrder as any).customer_name ||
+                    (newOrder as unknown).customer_name ||
                     orderData.customer_name?.trim() ||
                     (orderData.shipping?.first_name &&
                     orderData.shipping?.last_name
@@ -666,7 +669,7 @@ export async function POST(request: NextRequest) {
                       : null) ||
                     "Cliente",
                   items:
-                    orderData.items?.map((item: any) => ({
+                    orderData.items?.map((item: unknown) => ({
                       id: item.product_id,
                       name: item.product_name,
                       quantity: item.quantity,
@@ -674,14 +677,14 @@ export async function POST(request: NextRequest) {
                       variant_title: item.variant_title,
                     })) || [],
                   payment_method:
-                    (newOrder as any).mp_payment_method ||
+                    (newOrder as unknown).mp_payment_method ||
                     orderData.payment_method ||
                     "manual",
-                  organization_id: (newOrder as any).organization_id,
+                  organization_id: (newOrder as unknown).organization_id,
                 };
 
                 await EmailNotificationService.sendOrderConfirmation(
-                  emailOrder as any,
+                  emailOrder as unknown,
                 );
               } catch (err) {
                 logger.error("Error sending order confirmation email", err);

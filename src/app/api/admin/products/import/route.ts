@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient, createServiceRoleClient } from "@/utils/supabase/server";
-import { appLogger as logger } from "@/lib/logger";
+
 import { getBranchContext } from "@/lib/api/branch-middleware";
+import { appLogger as logger } from "@/lib/logger";
 import type {
   IsAdminParams,
   IsAdminResult,
   LogAdminActivityParams,
 } from "@/types/supabase-rpc";
+import { createClient, createServiceRoleClient } from "@/utils/supabase/server";
 
 export const dynamic = "force-dynamic";
 export async function POST(request: NextRequest) {
@@ -111,7 +112,7 @@ export async function POST(request: NextRequest) {
       .select("id, name, slug");
 
     const categoryMap =
-      categories?.reduce((acc: any, cat) => {
+      categories?.reduce((acc: unknown, cat) => {
         acc[cat.name.toLowerCase()] = cat.id;
         acc[cat.slug.toLowerCase()] = cat.id;
         return acc;
@@ -130,7 +131,7 @@ export async function POST(request: NextRequest) {
           continue;
         }
 
-        const rowData: any = {};
+        const rowData: unknown = {};
         headers.forEach((header, index) => {
           const mappedField = columnMappings[header.toLowerCase()];
           if (mappedField) {
@@ -139,7 +140,7 @@ export async function POST(request: NextRequest) {
         });
 
         // Process and validate product data
-        const product: any = {
+        const product: unknown = {
           name: rowData.name?.trim(),
           slug: rowData.slug?.trim() || generateSlug(rowData.name || ""),
           short_description: rowData.short_description?.trim(),
@@ -240,7 +241,7 @@ export async function POST(request: NextRequest) {
       skipped: 0,
       errors: [...errors],
       warnings: [...warnings],
-      details: [] as any[],
+      details: [] as unknown[],
     };
 
     for (const product of products) {

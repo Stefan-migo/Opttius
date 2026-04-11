@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
+
+import { addBranchFilter, getBranchContext } from "@/lib/api/branch-middleware";
+import { appLogger as logger } from "@/lib/logger";
+import { NotificationService } from "@/lib/notifications/notification-service";
+import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
 import { createClient } from "@/utils/supabase/server";
 import { createServiceRoleClient } from "@/utils/supabase/server";
-import { NotificationService } from "@/lib/notifications/notification-service";
-import { getBranchContext, addBranchFilter } from "@/lib/api/branch-middleware";
-import { appLogger as logger } from "@/lib/logger";
-import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
 
 export const dynamic = "force-dynamic";
 export async function POST(
@@ -51,7 +52,7 @@ export async function POST(
 
     // Fetch quote with branch access check
     const { data: quote, error: quoteError } = await applyBranchFilter(
-      supabaseServiceRole.from("quotes").select("*") as any,
+      supabaseServiceRole.from("quotes").select("*") as unknown,
     )
       .eq("id", id)
       .single();
@@ -118,6 +119,7 @@ export async function POST(
           customer_own_frame: quote.customer_own_frame ?? false,
           lens_family_id: quote.lens_family_id || null,
           lens_type: quote.lens_type,
+          lens_sourcing_type: quote.lens_sourcing_type || "surfaced",
           lens_material: quote.lens_material,
           lens_index: quote.lens_index,
           lens_treatments: quote.lens_treatments || [],

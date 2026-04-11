@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient, createServiceRoleClient } from "@/utils/supabase/server";
-import { appLogger as logger } from "@/lib/logger";
-import { createConfigValueSchema } from "@/lib/api/validation/zod-schemas";
+
 import { mergeConfigsByScope } from "@/lib/admin/system-config-utils";
+import { createConfigValueSchema } from "@/lib/api/validation/zod-schemas";
+import { appLogger as logger } from "@/lib/logger";
+import { createClient, createServiceRoleClient } from "@/utils/supabase/server";
 
 /** Detect if error is due to legacy schema (missing organization_id/branch_id columns). */
 function isLegacySchemaError(
@@ -754,7 +755,7 @@ export async function PUT(request: NextRequest) {
           continue;
         }
 
-        let updateQuery = dbClient
+        const updateQuery = dbClient
           .from("system_config")
           .update({
             config_value: JSON.stringify(validatedValue),

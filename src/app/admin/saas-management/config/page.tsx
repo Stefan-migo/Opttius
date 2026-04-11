@@ -1,18 +1,31 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import {
+  ArrowLeft,
+  Calendar,
+  Copy,
+  Key,
+  Link2,
+  Loader2,
+  Save,
+  Trash2,
+  Users,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useCallback, useEffect, useState } from "react";
+import { toast } from "sonner";
+
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import {
   Table,
   TableBody,
@@ -21,18 +34,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  ArrowLeft,
-  Loader2,
-  Save,
-  Calendar,
-  Users,
-  Key,
-  Link2,
-  Copy,
-  Trash2,
-} from "lucide-react";
-import { toast } from "sonner";
 
 type OpticasToken = {
   id: string;
@@ -252,10 +253,10 @@ export default function SaasConfigPage() {
     <div className="space-y-6 p-6">
       <div className="flex items-center gap-4">
         <Button
-          variant="ghost"
           size="icon"
-          onClick={() => router.push("/admin/saas-management/dashboard")}
           title="Volver al dashboard"
+          variant="ghost"
+          onClick={() => router.push("/admin/saas-management/dashboard")}
         >
           <ArrowLeft className="h-5 w-5" />
         </Button>
@@ -287,14 +288,14 @@ export default function SaasConfigPage() {
               <Label htmlFor="trial_days">Días de prueba</Label>
               <Input
                 id="trial_days"
-                type="number"
-                min={1}
                 max={365}
+                min={1}
+                type="number"
                 value={trialDays}
                 onChange={(e) => setTrialDays(e.target.value)}
               />
             </div>
-            <Button onClick={handleSave} disabled={saving}>
+            <Button disabled={saving} onClick={handleSave}>
               {saving ? (
                 <Loader2 className="h-4 w-4 animate-spin mr-2" />
               ) : (
@@ -331,8 +332,8 @@ export default function SaasConfigPage() {
             </div>
             <Switch
               checked={signupEnabled}
-              onCheckedChange={setSignupEnabled}
               disabled={savingOnboarding}
+              onCheckedChange={setSignupEnabled}
             />
           </div>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -347,14 +348,14 @@ export default function SaasConfigPage() {
             </div>
             <Switch
               checked={onboardingStageMode}
-              onCheckedChange={setOnboardingStageMode}
               disabled={savingOnboarding}
+              onCheckedChange={setOnboardingStageMode}
             />
           </div>
           <Button
-            onClick={handleSaveOnboarding}
-            disabled={savingOnboarding}
             className="mt-2"
+            disabled={savingOnboarding}
+            onClick={handleSaveOnboarding}
           >
             {savingOnboarding ? (
               <Loader2 className="h-4 w-4 animate-spin mr-2" />
@@ -380,8 +381,8 @@ export default function SaasConfigPage() {
         </CardHeader>
         <CardContent className="space-y-4">
           <Button
-            onClick={() => handleGenerateOpticasToken()}
             disabled={generatingToken}
+            onClick={() => handleGenerateOpticasToken()}
           >
             {generatingToken ? (
               <Loader2 className="h-4 w-4 animate-spin mr-2" />
@@ -419,16 +420,16 @@ export default function SaasConfigPage() {
                       </TableCell>
                       <TableCell className="text-right space-x-2">
                         <Button
-                          variant="outline"
                           size="sm"
+                          variant="outline"
                           onClick={() => handleCopyOpticasUrl(t.id)}
                         >
                           <Copy className="h-3 w-3 mr-1" />
                           Copiar URL
                         </Button>
                         <Button
-                          variant="outline"
                           size="sm"
+                          variant="outline"
                           onClick={() => handleRevokeOpticasToken(t.id)}
                         >
                           <Trash2 className="h-3 w-3 mr-1" />
@@ -458,8 +459,8 @@ export default function SaasConfigPage() {
           <div className="flex gap-2">
             <Input
               readOnly
-              value={newTokenModal.url}
               className="font-mono text-sm"
+              value={newTokenModal.url}
             />
             <Button
               variant="outline"

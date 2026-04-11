@@ -6,12 +6,13 @@
  * - Downgrade: cambio al final del periodo actual (sin prorrateo)
  */
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/utils/supabase/server";
+
 import { appLogger as logger } from "@/lib/logger";
 import { getSubscriptionStatus } from "@/lib/saas/subscription-status";
-import { canUpgrade } from "@/lib/saas/tier-config";
-import type { SubscriptionTier } from "@/lib/saas/tier-config";
 import { recordTierChange } from "@/lib/saas/tier-change-audit";
+import type { SubscriptionTier } from "@/lib/saas/tier-config";
+import { canUpgrade } from "@/lib/saas/tier-config";
+import { createClient } from "@/utils/supabase/server";
 
 export const dynamic = "force-dynamic";
 export async function POST(request: NextRequest) {

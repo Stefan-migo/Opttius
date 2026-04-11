@@ -8,8 +8,9 @@
  */
 
 import { appLogger as logger } from "@/lib/logger";
-import { SecurityEvent, SecuritySeverity } from "./events";
+
 import { getSecurityAlerting, type SecurityAlerting } from "./alerting";
+import { SecurityEvent, SecuritySeverity } from "./events";
 
 // Types for incident response
 export interface Incident {
@@ -662,7 +663,7 @@ Please review incident details and take appropriate action.
 
   private async sendNotification(
     recipient: string,
-    notification: any,
+    notification: unknown,
   ): Promise<void> {
     // Integration with notification system would go here
     logger.info(`Sending notification to ${recipient}`, {

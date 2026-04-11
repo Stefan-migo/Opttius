@@ -1,11 +1,35 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useAuthContext } from "@/contexts/AuthContext";
-import { createClient } from "@/utils/supabase/client";
+import {
+  ArrowRight,
+  Award,
+  Bell,
+  Building2,
+  CreditCard,
+  Edit3,
+  Eye,
+  EyeOff,
+  Loader2,
+  Lock,
+  MapPin,
+  Save,
+  Settings,
+  Sparkles,
+  User,
+  X,
+  XCircle,
+  Zap,
+} from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+
+import { SubscriptionManagementSection } from "@/components/admin/SubscriptionManagementSection";
+import AvatarUpload from "@/components/ui/AvatarUpload";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -13,12 +37,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Select,
   SelectContent,
@@ -26,40 +46,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import AvatarUpload from "@/components/ui/AvatarUpload";
+import { Switch } from "@/components/ui/switch";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
+import { useAuthContext } from "@/contexts/AuthContext";
+import { useBranch } from "@/hooks/useBranch";
 import {
-  User,
-  MapPin,
-  Edit3,
-  Save,
-  X,
-  Lock,
-  Eye,
-  EyeOff,
-  Bell,
-  Award,
-  Loader2,
-  Sparkles,
-  Settings,
-  CreditCard,
-  ArrowRight,
-  Zap,
-  Building2,
-  XCircle,
-} from "lucide-react";
-import { toast } from "sonner";
-import { formatDate } from "@/lib/utils";
-import { SubscriptionManagementSection } from "@/components/admin/SubscriptionManagementSection";
-import {
-  personalInfoSchema,
+  type AddressForm,
   addressSchema,
+  type PasswordChangeForm,
   passwordChangeSchema,
   type PersonalInfoForm,
-  type AddressForm,
-  type PasswordChangeForm,
+  personalInfoSchema,
 } from "@/lib/api/validation/profile-schemas";
-import { useBranch } from "@/hooks/useBranch";
-import { Switch } from "@/components/ui/switch";
+import { formatDate } from "@/lib/utils";
+import { createClient } from "@/utils/supabase/client";
 
 export interface ProfilePageContentProps {
   variant: "public" | "admin";
@@ -91,8 +92,8 @@ export function ProfilePageContent({
   const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  const [adminData, setAdminData] = useState<any>(null);
-  const [subscriptionData, setSubscriptionData] = useState<any>(null);
+  const [adminData, setAdminData] = useState<unknown>(null);
+  const [subscriptionData, setSubscriptionData] = useState<unknown>(null);
   const [dataLoading, setDataLoading] = useState(true);
 
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
@@ -285,7 +286,7 @@ export function ProfilePageContent({
       passwordForm.reset();
       setIsChangingPassword(false);
       toast.success("Contraseña cambiada exitosamente");
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error changing password:", error);
       toast.error(error.message || "Error al cambiar la contraseña");
     } finally {
@@ -359,9 +360,9 @@ export function ProfilePageContent({
         </div>
 
         <Card
-          variant="glass"
-          rounded="lg"
           className="mb-6 sm:mb-8 md:mb-10 overflow-hidden border-white/20 dark:border-slate-800/50 shadow-2xl animate-in zoom-in-95 duration-500 bg-[var(--admin-bg-tertiary)] backdrop-blur-xl"
+          rounded="lg"
+          variant="glass"
         >
           <CardContent className="p-4 sm:p-6 md:p-8 lg:p-10">
             <div className="flex flex-col md:flex-row items-center md:items-start gap-6 sm:gap-8 md:gap-10">
@@ -370,9 +371,9 @@ export function ProfilePageContent({
                 <div className="relative z-10">
                   <AvatarUpload
                     currentAvatarUrl={profile?.avatar_url || undefined}
-                    onUploadSuccess={handleAvatarUpload}
                     isEditing={true}
                     size="lg"
+                    onUploadSuccess={handleAvatarUpload}
                   />
                 </div>
               </div>
@@ -387,8 +388,8 @@ export function ProfilePageContent({
                     </h2>
                     {showRoleBadge && (
                       <Badge
-                        variant="healty"
                         className="w-fit mx-auto md:mx-0 bg-green-500/10 text-green-600 border-none px-2 sm:px-3 py-1 font-bold text-[9px] sm:text-[10px] uppercase"
+                        variant="healty"
                       >
                         {adminData?.adminCheck?.role || "ADMINISTRADOR"}
                       </Badge>
@@ -409,8 +410,8 @@ export function ProfilePageContent({
                     </Badge>
                   )}
                   <Badge
-                    variant="outline"
                     className="gap-1.5 sm:gap-2 border-slate-200 dark:border-slate-700 bg-white/50 dark:bg-slate-800/50 px-3 sm:px-4 py-1.5 rounded-full transition-all"
+                    variant="outline"
                   >
                     <Award className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0 text-amber-500" />
                     <span className="text-slate-600 dark:text-slate-400 text-[9px] sm:text-[10px] font-bold uppercase">
@@ -424,9 +425,9 @@ export function ProfilePageContent({
         </Card>
 
         <Tabs
+          className="space-y-6 sm:space-y-8"
           value={activeTab}
           onValueChange={setActiveTab}
-          className="space-y-6 sm:space-y-8"
         >
           <div className="overflow-x-auto overflow-y-hidden -mx-4 px-4 sm:mx-0 sm:px-0 [scrollbar-width:thin]">
             <TabsList className="p-1.5 bg-slate-200/50 dark:bg-slate-800/50 backdrop-blur-md rounded-xl sm:rounded-2xl inline-flex flex-nowrap gap-1.5 sm:gap-2 shrink-0">
@@ -445,9 +446,9 @@ export function ProfilePageContent({
                 })
                 .map((tab) => (
                   <TabsTrigger
+                    className="rounded-lg sm:rounded-xl py-2.5 sm:py-3 px-2 sm:px-3 text-xs sm:text-sm data-[state=active]:bg-[var(--admin-bg-secondary)] data-[state=active]:shadow-lg data-[state=active]:text-[var(--admin-accent-secondary)] transition-all duration-300 min-h-[44px] sm:min-h-0 shrink-0 whitespace-nowrap"
                     key={tab.id}
                     value={tab.id}
-                    className="rounded-lg sm:rounded-xl py-2.5 sm:py-3 px-2 sm:px-3 text-xs sm:text-sm data-[state=active]:bg-[var(--admin-bg-secondary)] data-[state=active]:shadow-lg data-[state=active]:text-[var(--admin-accent-secondary)] transition-all duration-300 min-h-[44px] sm:min-h-0 shrink-0 whitespace-nowrap"
                   >
                     <tab.icon
                       className={`h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2 shrink-0 ${variant === "admin" ? "text-[var(--admin-accent-secondary)]" : ""}`}
@@ -463,13 +464,13 @@ export function ProfilePageContent({
           </div>
 
           <TabsContent
-            value="overview"
             className="space-y-6 sm:space-y-8 animate-in fade-in slide-in-from-top-2 duration-500"
+            value="overview"
           >
             {variant === "public" && !dataLoading && needsOnboarding && (
               <Card
-                variant="glass"
                 className="border-primary/20 bg-primary/5 shadow-xl shadow-primary/5 overflow-hidden"
+                variant="glass"
               >
                 <CardContent className="p-4 sm:p-6 md:p-8">
                   <div className="flex flex-col md:flex-row items-center gap-4 sm:gap-6 md:gap-8">
@@ -490,10 +491,10 @@ export function ProfilePageContent({
                       </p>
                     </div>
                     <Button
-                      onClick={() => router.push("/onboarding/choice")}
-                      size="lg"
                       shimmer
                       className="w-full md:w-auto min-h-[44px] shadow-xl shadow-primary/20 font-bold"
+                      size="lg"
+                      onClick={() => router.push("/onboarding/choice")}
                     >
                       Comenzar Ahora
                       <ArrowRight className="ml-2 h-5 w-5 shrink-0" />
@@ -505,8 +506,8 @@ export function ProfilePageContent({
 
             {variant === "public" && !dataLoading && hasOrganization && (
               <Card
-                variant="elevated"
                 className="overflow-hidden border-2 border-primary/5 shadow-2xl shadow-primary/5"
+                variant="elevated"
               >
                 <CardHeader className="bg-slate-50/50 dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-800 p-4 sm:p-6">
                   <CardTitle className="flex items-center gap-2 sm:gap-3 text-lg sm:text-xl md:text-2xl font-bold font-cormorant tracking-tight">
@@ -524,8 +525,8 @@ export function ProfilePageContent({
                           Estado Cuenta
                         </p>
                         <Badge
-                          variant="healty"
                           className="px-3 sm:px-4 py-1 text-[9px] sm:text-[10px] font-bold"
+                          variant="healty"
                         >
                           ACTIVA
                         </Badge>
@@ -541,17 +542,17 @@ export function ProfilePageContent({
                     </div>
                     <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full md:w-auto">
                       <Button
+                        className="flex-1 md:flex-none border-2 h-12 min-h-[44px]"
                         variant="outline"
                         onClick={() => router.push("/admin/settings")}
-                        className="flex-1 md:flex-none border-2 h-12 min-h-[44px]"
                       >
                         <Settings className="h-5 w-5 mr-2 shrink-0" />
                         Ajustes
                       </Button>
                       <Button
-                        onClick={() => router.push("/admin")}
-                        className="flex-1 md:flex-none h-12 min-h-[44px] shadow-xl shadow-primary/10"
                         shimmer
+                        className="flex-1 md:flex-none h-12 min-h-[44px] shadow-xl shadow-primary/10"
+                        onClick={() => router.push("/admin")}
                       >
                         Panel Administrativo
                         <ArrowRight className="ml-2 h-5 w-5 shrink-0" />
@@ -563,7 +564,7 @@ export function ProfilePageContent({
             )}
 
             <div className="grid gap-4 sm:gap-6 md:gap-8 grid-cols-1 md:grid-cols-2">
-              <Card variant="interactive" className="group">
+              <Card className="group" variant="interactive">
                 <CardHeader className="p-4 sm:p-6 pb-4">
                   <CardTitle className="flex items-center gap-2 sm:gap-3 text-base sm:text-lg md:text-xl font-bold font-cormorant tracking-tight text-slate-800 dark:text-white group-hover:text-primary transition-colors">
                     <div className="p-1.5 sm:p-2 bg-[var(--admin-bg-tertiary)] rounded-lg sm:rounded-xl group-hover:bg-primary/10 transition-colors">
@@ -572,7 +573,7 @@ export function ProfilePageContent({
                     Información Base
                   </CardTitle>
                 </CardHeader>
-                <CardContent spacing="relaxed" className="p-4 sm:p-6 pt-0">
+                <CardContent className="p-4 sm:p-6 pt-0" spacing="relaxed">
                   <div className="space-y-3 sm:space-y-4">
                     <div className="bg-slate-100/50 dark:bg-slate-900/50 p-4 sm:p-5 rounded-2xl sm:rounded-3xl border border-[var(--admin-border-secondary)] group-hover:border-primary/30 transition-all">
                       <Label className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest">
@@ -614,8 +615,8 @@ export function ProfilePageContent({
                     </div>
                   </div>
                   <Button
-                    variant="outline"
                     className="w-full mt-4 sm:mt-6 border-2 border-[var(--accent-foreground)] text-[var(--accent-foreground)] rounded-xl sm:rounded-2xl font-bold h-12 min-h-[44px] hover:bg-primary hover:text-white hover:border-primary transition-all duration-300"
+                    variant="outline"
                     onClick={() => {
                       setActiveTab("personal");
                       setIsEditingPersonal(true);
@@ -627,7 +628,7 @@ export function ProfilePageContent({
                 </CardContent>
               </Card>
 
-              <Card variant="interactive" className="group">
+              <Card className="group" variant="interactive">
                 <CardHeader className="p-4 sm:p-6 pb-4">
                   <CardTitle className="flex items-center gap-2 sm:gap-3 text-base sm:text-lg md:text-xl font-bold font-cormorant tracking-tight text-[var(--accent-foreground)] transition-colors">
                     <div className="p-1.5 sm:p-2 bg-[var(--admin-bg-tertiary)] rounded-lg sm:rounded-xl transition-colors">
@@ -636,7 +637,7 @@ export function ProfilePageContent({
                     Ubicación Principal
                   </CardTitle>
                 </CardHeader>
-                <CardContent spacing="relaxed" className="p-4 sm:p-6 pt-0">
+                <CardContent className="p-4 sm:p-6 pt-0" spacing="relaxed">
                   <div className="space-y-3 sm:space-y-4">
                     <div className="bg-[var(--admin-bg-tertiary)] p-4 sm:p-5 rounded-2xl sm:rounded-3xl border border-[var(--admin-border-secondary)] group-hover:border-primary/30 transition-all min-h-[72px] sm:min-h-[84px]">
                       <Label className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest">
@@ -673,8 +674,8 @@ export function ProfilePageContent({
                     </div>
                   </div>
                   <Button
-                    variant="outline"
                     className="w-full mt-4 sm:mt-6 bg-[var(--accent-foreground)] border-2 border-[var(--admin-border-secondary)] text-[var(--admin-bg-primary)] rounded-xl sm:rounded-2xl font-bold h-12 min-h-[44px] hover:bg-[var(--accent-foreground)] hover:text-white hover:border-[var(--accent-foreground)] transition-all duration-300"
+                    variant="outline"
                     onClick={() => {
                       setActiveTab("address");
                       setIsEditingAddress(true);
@@ -686,7 +687,7 @@ export function ProfilePageContent({
                 </CardContent>
               </Card>
 
-              <Card variant="interactive" className="group md:col-span-2">
+              <Card className="group md:col-span-2" variant="interactive">
                 <CardHeader className="p-4 sm:p-6 pb-4">
                   <CardTitle className="flex items-center gap-2 sm:gap-3 text-base sm:text-lg md:text-xl font-bold font-cormorant tracking-tight text-slate-800 dark:text-white group-hover:text-primary transition-colors">
                     <div className="p-1.5 sm:p-2 bg-[var(--admin-bg-tertiary)] rounded-lg sm:rounded-xl group-hover:bg-primary/10 transition-colors">
@@ -712,11 +713,11 @@ export function ProfilePageContent({
                     </div>
                     <div className="w-full md:w-auto">
                       <Button
-                        size="lg"
-                        className="w-full md:w-auto min-h-[44px] h-12 sm:h-14 rounded-xl sm:rounded-2xl font-bold px-6 sm:px-8 shadow-xl shadow-primary/20"
-                        onClick={() => setActiveTab("subscription")}
-                        disabled={!adminData?.adminCheck?.isOwner}
                         shimmer
+                        className="w-full md:w-auto min-h-[44px] h-12 sm:h-14 rounded-xl sm:rounded-2xl font-bold px-6 sm:px-8 shadow-xl shadow-primary/20"
+                        disabled={!adminData?.adminCheck?.isOwner}
+                        size="lg"
+                        onClick={() => setActiveTab("subscription")}
                       >
                         Gestionar Suscripción
                         <ArrowRight className="h-5 w-5 ml-2 shrink-0" />
@@ -729,27 +730,27 @@ export function ProfilePageContent({
           </TabsContent>
 
           <TabsContent
-            value="personal"
             className="animate-in fade-in slide-in-from-top-2 duration-500"
+            value="personal"
           >
-            <Card variant="elevated" className="border-0 shadow-2xl">
+            <Card className="border-0 shadow-2xl" variant="elevated">
               <CardHeader
-                padding="lg"
                 className="border-b border-slate-100 dark:border-slate-800 p-4 sm:p-6"
+                padding="lg"
               >
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                   <CardTitle
+                    className="font-cormorant text-lg sm:text-xl"
                     size="lg"
                     theme="modern"
-                    className="font-cormorant text-lg sm:text-xl"
                   >
                     Datos Personales
                   </CardTitle>
                   {!isEditingPersonal && (
                     <Button
-                      onClick={() => setIsEditingPersonal(true)}
-                      variant="outline"
                       className="border-2 font-bold px-4 sm:px-6 text-[var(--accent-foreground)] bg-[var(--admin-border-primary)] border-[var(--admin-border-secondary)] min-h-[44px] w-full sm:w-auto"
+                      variant="outline"
+                      onClick={() => setIsEditingPersonal(true)}
                     >
                       <Edit3 className="h-4 w-4 mr-2 shrink-0" />
                       Editar Información
@@ -757,24 +758,24 @@ export function ProfilePageContent({
                   )}
                 </div>
               </CardHeader>
-              <CardContent padding="lg" className="p-4 sm:p-6">
+              <CardContent className="p-4 sm:p-6" padding="lg">
                 <form
-                  onSubmit={personalForm.handleSubmit(handlePersonalInfoSubmit)}
                   className="space-y-6 sm:space-y-8"
+                  onSubmit={personalForm.handleSubmit(handlePersonalInfoSubmit)}
                 >
                   <div className="grid gap-4 sm:gap-6 grid-cols-1 md:grid-cols-2">
                     <div className="space-y-3">
                       <Label
-                        htmlFor="firstName"
                         className="text-sm font-bold text-slate-700 dark:text-slate-300"
+                        htmlFor="firstName"
                       >
                         Nombre <span className="text-red-500">*</span>
                       </Label>
                       <Input
                         id="firstName"
                         {...personalForm.register("firstName")}
-                        disabled={!isEditingPersonal || isLoading}
                         className="h-12 bg-[var(--admin-bg-primary)] border-[var(--admin-border-secondary)] transition-all focus:ring-4 focus:ring-primary/10"
+                        disabled={!isEditingPersonal || isLoading}
                       />
                       {personalForm.formState.errors.firstName && (
                         <p className="text-xs font-medium text-red-500 flex items-center gap-1">
@@ -785,16 +786,16 @@ export function ProfilePageContent({
                     </div>
                     <div className="space-y-3">
                       <Label
-                        htmlFor="lastName"
                         className="text-sm font-bold text-slate-700 dark:text-slate-300"
+                        htmlFor="lastName"
                       >
                         Apellido <span className="text-red-500">*</span>
                       </Label>
                       <Input
                         id="lastName"
                         {...personalForm.register("lastName")}
-                        disabled={!isEditingPersonal || isLoading}
                         className="h-12 bg-[var(--admin-bg-primary)] border-[var(--admin-border-secondary)] transition-all focus:ring-4 focus:ring-primary/10"
+                        disabled={!isEditingPersonal || isLoading}
                       />
                       {personalForm.formState.errors.lastName && (
                         <p className="text-xs font-medium text-red-500 flex items-center gap-1">
@@ -807,8 +808,8 @@ export function ProfilePageContent({
                   <div className="grid gap-4 sm:gap-6 grid-cols-1 md:grid-cols-2">
                     <div className="space-y-3">
                       <Label
-                        htmlFor="phone"
                         className="text-sm font-bold text-slate-700 dark:text-slate-300"
+                        htmlFor="phone"
                       >
                         Teléfono
                       </Label>
@@ -816,14 +817,14 @@ export function ProfilePageContent({
                         id="phone"
                         type="tel"
                         {...personalForm.register("phone")}
-                        disabled={!isEditingPersonal || isLoading}
                         className="h-12 bg-slate-50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 transition-all focus:ring-4 focus:ring-primary/10"
+                        disabled={!isEditingPersonal || isLoading}
                       />
                     </div>
                     <div className="space-y-3">
                       <Label
-                        htmlFor="dateOfBirth"
                         className="text-sm font-bold text-slate-700 dark:text-slate-300"
+                        htmlFor="dateOfBirth"
                       >
                         Fecha de Nacimiento
                       </Label>
@@ -831,25 +832,25 @@ export function ProfilePageContent({
                         id="dateOfBirth"
                         type="date"
                         {...personalForm.register("dateOfBirth")}
-                        disabled={!isEditingPersonal || isLoading}
                         className="h-12 bg-[var(--admin-bg-primary)] border-[var(--admin-border-secondary)] transition-all focus:ring-4 focus:ring-primary/10"
+                        disabled={!isEditingPersonal || isLoading}
                       />
                     </div>
                   </div>
                   <div className="space-y-3">
                     <Label
-                      htmlFor="bio"
                       className="text-sm font-bold text-slate-700 dark:text-slate-300"
+                      htmlFor="bio"
                     >
                       Biografía
                     </Label>
                     <Textarea
                       id="bio"
                       {...personalForm.register("bio")}
-                      disabled={!isEditingPersonal || isLoading}
-                      rows={5}
-                      placeholder="Cuéntanos un poco sobre ti, tu rol en la óptica, etc."
                       className="bg-[var(--admin-bg-primary)] border-[var(--admin-border-secondary)] transition-all focus:ring-4 focus:ring-primary/10 rounded-2xl p-4 disabled:opacity-100"
+                      disabled={!isEditingPersonal || isLoading}
+                      placeholder="Cuéntanos un poco sobre ti, tu rol en la óptica, etc."
+                      rows={5}
                     />
                     {personalForm.formState.errors.bio && (
                       <p className="text-xs font-medium text-red-500">
@@ -860,10 +861,10 @@ export function ProfilePageContent({
                   {isEditingPersonal && (
                     <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4">
                       <Button
-                        type="submit"
-                        disabled={isLoading}
-                        className="flex-1 h-12 min-h-[44px] shadow-xl shadow-primary/20"
                         shimmer
+                        className="flex-1 h-12 min-h-[44px] shadow-xl shadow-primary/20"
+                        disabled={isLoading}
+                        type="submit"
                       >
                         {isLoading ? (
                           <Loader2 className="h-5 w-5 mr-2 animate-spin shrink-0" />
@@ -873,9 +874,10 @@ export function ProfilePageContent({
                         Guardar Cambios
                       </Button>
                       <Button
+                        className="flex-1 h-12 min-h-[44px] border-2"
+                        disabled={isLoading}
                         type="button"
                         variant="outline"
-                        className="flex-1 h-12 min-h-[44px] border-2"
                         onClick={() => {
                           setIsEditingPersonal(false);
                           personalForm.reset({
@@ -886,7 +888,6 @@ export function ProfilePageContent({
                             bio: profile?.bio || "",
                           });
                         }}
-                        disabled={isLoading}
                       >
                         <X className="h-5 w-5 mr-2" />
                         Cancelar
@@ -899,27 +900,27 @@ export function ProfilePageContent({
           </TabsContent>
 
           <TabsContent
-            value="address"
             className="animate-in fade-in slide-in-from-top-2 duration-500"
+            value="address"
           >
-            <Card variant="elevated" className="border-0 shadow-2xl">
+            <Card className="border-0 shadow-2xl" variant="elevated">
               <CardHeader
-                padding="lg"
                 className="border-b border-slate-100 dark:border-slate-800 p-4 sm:p-6"
+                padding="lg"
               >
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                   <CardTitle
+                    className="font-cormorant text-lg sm:text-xl"
                     size="lg"
                     theme="modern"
-                    className="font-cormorant text-lg sm:text-xl"
                   >
                     Dirección de Envío / Oficina
                   </CardTitle>
                   {!isEditingAddress && (
                     <Button
-                      onClick={() => setIsEditingAddress(true)}
-                      variant="outline"
                       className="border-2 font-bold px-4 sm:px-6 min-h-[44px] w-full sm:w-auto"
+                      variant="outline"
+                      onClick={() => setIsEditingAddress(true)}
                     >
                       <Edit3 className="h-4 w-4 mr-2 shrink-0" />
                       Editar Dirección
@@ -927,99 +928,99 @@ export function ProfilePageContent({
                   )}
                 </div>
               </CardHeader>
-              <CardContent padding="lg" className="p-4 sm:p-6">
+              <CardContent className="p-4 sm:p-6" padding="lg">
                 <form
-                  onSubmit={addressForm.handleSubmit(handleAddressSubmit)}
                   className="space-y-6 sm:space-y-8"
+                  onSubmit={addressForm.handleSubmit(handleAddressSubmit)}
                 >
                   <div className="grid gap-6 sm:gap-8">
                     <div className="grid gap-4 sm:gap-6 grid-cols-1 md:grid-cols-2">
                       <div className="space-y-3">
                         <Label
-                          htmlFor="addressLine1"
                           className="text-sm font-bold text-slate-700 dark:text-slate-300"
+                          htmlFor="addressLine1"
                         >
                           Dirección Línea 1
                         </Label>
                         <Input
                           id="addressLine1"
                           {...addressForm.register("addressLine1")}
-                          disabled={!isEditingAddress || isLoading}
                           className="h-12 bg-[var(--admin-bg-primary)] border-[var(--admin-border-secondary)] transition-all focus:ring-4 focus:ring-primary/10"
+                          disabled={!isEditingAddress || isLoading}
                         />
                       </div>
                       <div className="space-y-3">
                         <Label
-                          htmlFor="addressLine2"
                           className="text-sm font-bold text-slate-700 dark:text-slate-300"
+                          htmlFor="addressLine2"
                         >
                           Dirección Línea 2
                         </Label>
                         <Input
                           id="addressLine2"
                           {...addressForm.register("addressLine2")}
-                          disabled={!isEditingAddress || isLoading}
                           className="h-12 bg-[var(--admin-bg-primary)] border-[var(--admin-border-secondary)] transition-all focus:ring-4 focus:ring-primary/10"
+                          disabled={!isEditingAddress || isLoading}
                         />
                       </div>
                     </div>
                     <div className="grid gap-4 sm:gap-6 grid-cols-1 md:grid-cols-2">
                       <div className="space-y-3">
                         <Label
-                          htmlFor="city"
                           className="text-sm font-bold text-slate-700 dark:text-slate-300"
+                          htmlFor="city"
                         >
                           Ciudad
                         </Label>
                         <Input
                           id="city"
                           {...addressForm.register("city")}
-                          disabled={!isEditingAddress || isLoading}
                           className="h-12 bg-[var(--admin-bg-primary)] border-[var(--admin-border-secondary)] transition-all focus:ring-4 focus:ring-primary/10"
+                          disabled={!isEditingAddress || isLoading}
                         />
                       </div>
                       <div className="space-y-3">
                         <Label
-                          htmlFor="state"
                           className="text-sm font-bold text-slate-700 dark:text-slate-300"
+                          htmlFor="state"
                         >
                           Región / Provincia
                         </Label>
                         <Input
                           id="state"
                           {...addressForm.register("state")}
-                          disabled={!isEditingAddress || isLoading}
                           className="h-12 bg-[var(--admin-bg-primary)] border-[var(--admin-border-secondary)] transition-all focus:ring-4 focus:ring-primary/10"
+                          disabled={!isEditingAddress || isLoading}
                         />
                       </div>
                     </div>
                     <div className="grid gap-4 sm:gap-6 grid-cols-1 md:grid-cols-2">
                       <div className="space-y-3">
                         <Label
-                          htmlFor="postalCode"
                           className="text-sm font-bold text-slate-700 dark:text-slate-300"
+                          htmlFor="postalCode"
                         >
                           Código Postal
                         </Label>
                         <Input
                           id="postalCode"
                           {...addressForm.register("postalCode")}
-                          disabled={!isEditingAddress || isLoading}
                           className="h-12 bg-slate-50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 transition-all focus:ring-4 focus:ring-primary/10"
+                          disabled={!isEditingAddress || isLoading}
                         />
                       </div>
                       <div className="space-y-3">
                         <Label
-                          htmlFor="country"
                           className="text-sm font-bold text-slate-700 dark:text-slate-300"
+                          htmlFor="country"
                         >
                           País
                         </Label>
                         <Input
                           id="country"
                           {...addressForm.register("country")}
-                          disabled={!isEditingAddress || isLoading}
                           className="h-12 bg-[var(--admin-bg-primary)] border-[var(--admin-border-secondary)] transition-all focus:ring-4 focus:ring-primary/10"
+                          disabled={!isEditingAddress || isLoading}
                         />
                       </div>
                     </div>
@@ -1027,10 +1028,10 @@ export function ProfilePageContent({
                   {isEditingAddress && (
                     <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4">
                       <Button
-                        type="submit"
-                        disabled={isLoading}
-                        className="flex-1 h-12 min-h-[44px] shadow-xl shadow-primary/20"
                         shimmer
+                        className="flex-1 h-12 min-h-[44px] shadow-xl shadow-primary/20"
+                        disabled={isLoading}
+                        type="submit"
                       >
                         {isLoading ? (
                           <Loader2 className="h-5 w-5 mr-2 animate-spin shrink-0" />
@@ -1040,9 +1041,10 @@ export function ProfilePageContent({
                         Guardar Dirección
                       </Button>
                       <Button
+                        className="flex-1 h-12 min-h-[44px] border-2"
+                        disabled={isLoading}
                         type="button"
                         variant="outline"
-                        className="flex-1 h-12 min-h-[44px] border-2"
                         onClick={() => {
                           setIsEditingAddress(false);
                           addressForm.reset({
@@ -1054,7 +1056,6 @@ export function ProfilePageContent({
                             country: profile?.country || "Chile",
                           });
                         }}
-                        disabled={isLoading}
                       >
                         <X className="h-5 w-5 mr-2" />
                         Cancelar
@@ -1067,23 +1068,23 @@ export function ProfilePageContent({
           </TabsContent>
 
           <TabsContent
-            value="subscription"
             className="space-y-8 animate-in fade-in slide-in-from-top-2 duration-500"
+            value="subscription"
           >
             <SubscriptionManagementSection />
           </TabsContent>
 
           <TabsContent
-            value="settings"
             className="space-y-8 animate-in fade-in slide-in-from-top-2 duration-500"
+            value="settings"
           >
             <Card
-              variant="elevated"
               className="border-0 shadow-2xl overflow-hidden"
+              variant="elevated"
             >
               <CardHeader
-                padding="lg"
                 className="bg-[var(--admin-bg-tertiary)] p-4 sm:p-6"
+                padding="lg"
               >
                 <CardTitle className="flex items-center gap-2 sm:gap-3 text-base sm:text-lg md:text-xl font-bold font-cormorant tracking-tight">
                   <div className="p-1.5 sm:p-2 bg-primary/10 rounded-lg sm:rounded-xl">
@@ -1096,7 +1097,7 @@ export function ProfilePageContent({
                   contraseña actual para realizar el cambio.
                 </CardDescription>
               </CardHeader>
-              <CardContent padding="lg" className="p-4 sm:p-6">
+              <CardContent className="p-4 sm:p-6" padding="lg">
                 {!isChangingPassword ? (
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-4 sm:p-6 bg-[var(--admin-bg-primary)] rounded-xl sm:rounded-2xl border border-dashed border-[var(--admin-border-secondary)]">
                     <div>
@@ -1108,22 +1109,22 @@ export function ProfilePageContent({
                       </p>
                     </div>
                     <Button
+                      className="border-2 font-bold min-h-[44px] w-full sm:w-auto"
                       variant="outline"
                       onClick={() => setIsChangingPassword(true)}
-                      className="border-2 font-bold min-h-[44px] w-full sm:w-auto"
                     >
                       Cambiar Contraseña
                     </Button>
                   </div>
                 ) : (
                   <form
-                    onSubmit={passwordForm.handleSubmit(handlePasswordChange)}
                     className="space-y-6 max-w-xl"
+                    onSubmit={passwordForm.handleSubmit(handlePasswordChange)}
                   >
                     <div className="space-y-3">
                       <Label
-                        htmlFor="currentPassword"
                         className="text-sm font-bold"
+                        htmlFor="currentPassword"
                       >
                         Contraseña Actual
                       </Label>
@@ -1132,14 +1133,14 @@ export function ProfilePageContent({
                           id="currentPassword"
                           type={showCurrentPassword ? "text" : "password"}
                           {...passwordForm.register("currentPassword")}
-                          disabled={isLoading}
                           className="h-12 pr-12 rounded-2xl border-slate-200 dark:border-slate-800 transition-all focus:ring-4 focus:ring-primary/10"
+                          disabled={isLoading}
                         />
                         <Button
+                          className="absolute right-2 top-1/2 -translate-y-1/2 hover:bg-transparent"
+                          size="icon"
                           type="button"
                           variant="ghost"
-                          size="icon"
-                          className="absolute right-2 top-1/2 -translate-y-1/2 hover:bg-transparent"
                           onClick={() =>
                             setShowCurrentPassword(!showCurrentPassword)
                           }
@@ -1155,8 +1156,8 @@ export function ProfilePageContent({
                     <div className="grid gap-4 sm:gap-6 grid-cols-1 md:grid-cols-2">
                       <div className="space-y-3">
                         <Label
-                          htmlFor="newPassword"
                           className="text-sm font-bold"
+                          htmlFor="newPassword"
                         >
                           Nueva Contraseña
                         </Label>
@@ -1165,14 +1166,14 @@ export function ProfilePageContent({
                             id="newPassword"
                             type={showNewPassword ? "text" : "password"}
                             {...passwordForm.register("newPassword")}
-                            disabled={isLoading}
                             className="h-12 pr-12 rounded-2xl border-slate-200 dark:border-slate-800 transition-all focus:ring-4 focus:ring-primary/10"
+                            disabled={isLoading}
                           />
                           <Button
+                            className="absolute right-2 top-1/2 -translate-y-1/2 hover:bg-transparent"
+                            size="icon"
                             type="button"
                             variant="ghost"
-                            size="icon"
-                            className="absolute right-2 top-1/2 -translate-y-1/2 hover:bg-transparent"
                             onClick={() => setShowNewPassword(!showNewPassword)}
                           >
                             {showNewPassword ? (
@@ -1190,8 +1191,8 @@ export function ProfilePageContent({
                       </div>
                       <div className="space-y-3">
                         <Label
-                          htmlFor="confirmPassword"
                           className="text-sm font-bold"
+                          htmlFor="confirmPassword"
                         >
                           Confirmar Nueva
                         </Label>
@@ -1200,14 +1201,14 @@ export function ProfilePageContent({
                             id="confirmPassword"
                             type={showConfirmPassword ? "text" : "password"}
                             {...passwordForm.register("confirmPassword")}
-                            disabled={isLoading}
                             className="h-12 pr-12 rounded-2xl border-slate-200 dark:border-slate-800 transition-all focus:ring-4 focus:ring-primary/10"
+                            disabled={isLoading}
                           />
                           <Button
+                            className="absolute right-2 top-1/2 -translate-y-1/2 hover:bg-transparent"
+                            size="icon"
                             type="button"
                             variant="ghost"
-                            size="icon"
-                            className="absolute right-2 top-1/2 -translate-y-1/2 hover:bg-transparent"
                             onClick={() =>
                               setShowConfirmPassword(!showConfirmPassword)
                             }
@@ -1223,10 +1224,10 @@ export function ProfilePageContent({
                     </div>
                     <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4">
                       <Button
-                        type="submit"
-                        disabled={isLoading}
-                        className="flex-1 h-12 min-h-[44px] shadow-xl shadow-primary/20"
                         shimmer
+                        className="flex-1 h-12 min-h-[44px] shadow-xl shadow-primary/20"
+                        disabled={isLoading}
+                        type="submit"
                       >
                         {isLoading ? (
                           <Loader2 className="h-5 w-5 animate-spin shrink-0" />
@@ -1236,14 +1237,14 @@ export function ProfilePageContent({
                         Actualizar Ahora
                       </Button>
                       <Button
+                        className="flex-1 h-12 min-h-[44px] border-2"
+                        disabled={isLoading}
                         type="button"
                         variant="outline"
-                        className="flex-1 h-12 min-h-[44px] border-2"
                         onClick={() => {
                           setIsChangingPassword(false);
                           passwordForm.reset();
                         }}
-                        disabled={isLoading}
                       >
                         Cancelar
                       </Button>
@@ -1254,12 +1255,12 @@ export function ProfilePageContent({
             </Card>
 
             <Card
-              variant="elevated"
               className="border-0 shadow-2xl overflow-hidden"
+              variant="elevated"
             >
               <CardHeader
-                padding="lg"
                 className="bg-[var(--admin-bg-tertiary)] p-4 sm:p-6"
+                padding="lg"
               >
                 <CardTitle className="flex items-center gap-2 sm:gap-3 text-base sm:text-lg md:text-xl font-bold font-cormorant tracking-tight">
                   <div className="p-1.5 sm:p-2 bg-amber-500/10 rounded-lg sm:rounded-xl">
@@ -1272,13 +1273,13 @@ export function ProfilePageContent({
                 </CardDescription>
               </CardHeader>
               <CardContent
+                className="p-4 sm:p-6"
                 padding="lg"
                 spacing="relaxed"
-                className="p-4 sm:p-6"
               >
                 <div className="space-y-4 sm:space-y-6 max-w-md">
                   <div className="space-y-3">
-                    <Label htmlFor="timezone" className="text-sm font-bold">
+                    <Label className="text-sm font-bold" htmlFor="timezone">
                       Zona Horaria Regional
                     </Label>
                     <Select
@@ -1288,8 +1289,8 @@ export function ProfilePageContent({
                       }
                     >
                       <SelectTrigger
-                        id="timezone"
                         className="h-12 rounded-2xl border-slate-200 dark:border-slate-800"
+                        id="timezone"
                       >
                         <SelectValue />
                       </SelectTrigger>
@@ -1314,7 +1315,7 @@ export function ProfilePageContent({
                   </div>
 
                   <div className="space-y-3">
-                    <Label htmlFor="language" className="text-sm font-bold">
+                    <Label className="text-sm font-bold" htmlFor="language">
                       Idioma
                     </Label>
                     <Select
@@ -1324,8 +1325,8 @@ export function ProfilePageContent({
                       }
                     >
                       <SelectTrigger
-                        id="language"
                         className="h-12 rounded-2xl border-slate-200 dark:border-slate-800"
+                        id="language"
                       >
                         <SelectValue />
                       </SelectTrigger>
@@ -1339,8 +1340,8 @@ export function ProfilePageContent({
                   {branches.length > 1 && (
                     <div className="space-y-3">
                       <Label
-                        htmlFor="preferred_branch"
                         className="text-sm font-bold"
+                        htmlFor="preferred_branch"
                       >
                         Sucursal Preferida
                       </Label>
@@ -1354,8 +1355,8 @@ export function ProfilePageContent({
                         }
                       >
                         <SelectTrigger
-                          id="preferred_branch"
                           className="h-12 rounded-2xl border-slate-200 dark:border-slate-800"
+                          id="preferred_branch"
                         >
                           <SelectValue placeholder="Sin preferencia" />
                         </SelectTrigger>
@@ -1373,7 +1374,7 @@ export function ProfilePageContent({
 
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-xl sm:rounded-2xl border border-slate-200 dark:border-slate-800 p-4">
                     <div className="space-y-0.5">
-                      <Label htmlFor="newsletter" className="text-sm font-bold">
+                      <Label className="text-sm font-bold" htmlFor="newsletter">
                         Recibir novedades y ofertas por email
                       </Label>
                       <p className="text-xs text-muted-foreground">
@@ -1381,8 +1382,8 @@ export function ProfilePageContent({
                       </p>
                     </div>
                     <Switch
-                      id="newsletter"
                       checked={preferences.newsletter_subscribed}
+                      id="newsletter"
                       onCheckedChange={(checked) =>
                         setPreferences((prev) => ({
                           ...prev,
@@ -1393,9 +1394,9 @@ export function ProfilePageContent({
                   </div>
 
                   <Button
-                    onClick={handlePreferencesUpdate}
-                    className="w-full h-12 min-h-[44px] shadow-xl shadow-amber-500/20"
                     shimmer
+                    className="w-full h-12 min-h-[44px] shadow-xl shadow-amber-500/20"
+                    onClick={handlePreferencesUpdate}
                   >
                     {isLoading ? (
                       <Loader2 className="h-5 w-5 animate-spin" />

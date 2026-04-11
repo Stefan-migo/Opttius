@@ -1,7 +1,8 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+
+import { useAuthContext } from "@/contexts/AuthContext";
 import { useBranch } from "@/hooks/useBranch";
 import { getBranchHeader } from "@/lib/utils/branch";
-import { useAuthContext } from "@/contexts/AuthContext";
 
 interface ScheduleSettings {
   id: string;

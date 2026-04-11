@@ -5,10 +5,11 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { createServiceRoleClient } from "@/utils/supabase/server";
+
 import { requireAuth } from "@/lib/api/middleware";
 import { getTierConfig, SubscriptionTier } from "@/lib/saas/tier-config";
 import { validateTierLimit } from "@/lib/saas/tier-validator";
+import { createServiceRoleClient } from "@/utils/supabase/server";
 
 export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
@@ -102,7 +103,7 @@ export async function GET(request: NextRequest) {
     };
 
     return NextResponse.json(limits);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error getting organization limits:", error);
     return NextResponse.json(
       { error: error.message || "Internal server error" },

@@ -1,7 +1,6 @@
 "use client";
 
 import { Bot } from "lucide-react";
-import { cn } from "@/lib/utils";
 
 export function TypingIndicator() {
   return (

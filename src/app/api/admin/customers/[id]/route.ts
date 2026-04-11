@@ -1,13 +1,13 @@
-import { NextRequest, NextResponse } from "next/server";
-import { createClientFromRequest } from "@/utils/supabase/server";
-import { getBranchContext, addBranchFilter } from "@/lib/api/branch-middleware";
-import { appLogger as logger } from "@/lib/logger";
-import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
-import {
-  createApiSuccessResponse,
-  createApiErrorResponse,
-} from "@/lib/api/response";
+import { NextRequest } from "next/server";
+
+import { addBranchFilter, getBranchContext } from "@/lib/api/branch-middleware";
 import { AuthenticationError, AuthorizationError } from "@/lib/api/errors";
+import {
+  createApiErrorResponse,
+  createApiSuccessResponse,
+} from "@/lib/api/response";
+import { appLogger as logger } from "@/lib/logger";
+import { createClientFromRequest } from "@/utils/supabase/server";
 
 export const dynamic = "force-dynamic";
 export async function GET(
@@ -58,7 +58,7 @@ export async function GET(
     const branchContext = await getBranchContext(request, user.id, supabase);
 
     // Build branch filter function
-    const applyBranchFilter = (query: any) => {
+    const applyBranchFilter = (query: unknown) => {
       // For customers, we should filter by organization_id first
       // Then optionally filter by branch_id if a specific branch is selected
       if (userOrganizationId && !branchContext.isSuperAdmin) {
@@ -223,9 +223,9 @@ export async function GET(
       )
       .eq("customer_id", params.id);
 
-    const agreement_usage = (acRows || []).map((r: any) => ({
+    const agreement_usage = (acRows || []).map((r: unknown) => ({
       agreement_id: r.agreement_id,
-      agreement_name: (r as any).agreements?.name ?? null,
+      agreement_name: (r as unknown).agreements?.name ?? null,
       order_count: r.order_count,
       last_order_at: r.last_order_at,
       total_copago: Number(r.total_copago ?? 0),
@@ -236,7 +236,7 @@ export async function GET(
     // Calculate analytics
     const totalSpent =
       orders?.reduce(
-        (sum: number, order: any) => sum + (order.total_amount || 0),
+        (sum: number, order: unknown) => sum + (order.total_amount || 0),
         0,
       ) || 0;
     const orderCount = orders?.length || 0;
@@ -263,15 +263,15 @@ export async function GET(
 
     // Order status counts
     const orderStatusCounts =
-      orders?.reduce((acc: Record<string, number>, order: any) => {
+      orders?.reduce((acc: Record<string, number>, order: unknown) => {
         acc[order.status] = (acc[order.status] || 0) + 1;
         return acc;
       }, {}) || {};
 
     // Favorite products (most purchased)
     const productCounts =
-      orders?.reduce((acc: Record<string, any>, order: any) => {
-        order.order_items?.forEach((item: any) => {
+      orders?.reduce((acc: Record<string, unknown>, order: unknown) => {
+        order.order_items?.forEach((item: unknown) => {
           // Try both 'products' and 'product' for compatibility
           const product = item.products || item.product;
           if (product) {
@@ -307,7 +307,7 @@ export async function GET(
       }, {}) || {};
 
     const favoriteProducts = Object.values(productCounts)
-      .sort((a: any, b: any) => b.quantity - a.quantity)
+      .sort((a: unknown, b: unknown) => b.quantity - a.quantity)
       .slice(0, 5);
 
     // Monthly spending (last 12 months)
@@ -318,13 +318,13 @@ export async function GET(
       const nextMonth = new Date(now.getFullYear(), now.getMonth() - i + 1, 1);
 
       const monthOrders =
-        orders?.filter((order: any) => {
+        orders?.filter((order: unknown) => {
           const orderDate = new Date(order.created_at);
           return orderDate >= month && orderDate < nextMonth;
         }) || [];
 
       const monthAmount = monthOrders.reduce(
-        (sum: number, order: any) => sum + (order.total_amount || 0),
+        (sum: number, order: unknown) => sum + (order.total_amount || 0),
         0,
       );
 
@@ -411,7 +411,7 @@ export async function PUT(
     logger.debug("Update data received", { body });
 
     // Prepare update data for customers table
-    const updateData: any = {
+    const updateData: unknown = {
       first_name: body.first_name || null,
       last_name: body.last_name || null,
       email: body.email || null,
@@ -455,7 +455,7 @@ export async function PUT(
     const branchContext = await getBranchContext(request, user.id, supabase);
 
     // Build branch filter function
-    const applyBranchFilter = (query: any) => {
+    const applyBranchFilter = (query: unknown) => {
       // For customers, we should filter by organization_id first
       // Then optionally filter by branch_id if a specific branch is selected
       if (userOrganizationId && !branchContext.isSuperAdmin) {
@@ -579,7 +579,7 @@ export async function DELETE(
     const branchContext = await getBranchContext(request, user.id, supabase);
 
     // Build branch filter function
-    const applyBranchFilter = (query: any) => {
+    const applyBranchFilter = (query: unknown) => {
       // For customers, we should filter by organization_id first
       // Then optionally filter by branch_id if a specific branch is selected
       if (userOrganizationId && !branchContext.isSuperAdmin) {

@@ -4,17 +4,18 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { appLogger as logger } from "@/lib/logger";
+import { z } from "zod";
+
 import { reportApiError } from "@/lib/error-reporting";
 import {
   ApplicationError,
-  ValidationError,
-  AuthorizationError,
   AuthenticationError,
-  handleApiError,
+  AuthorizationError,
   generateRequestId,
+  handleApiError,
+  ValidationError,
 } from "@/lib/errors/comprehensive-handler";
-import { z } from "zod";
+import { appLogger as logger } from "@/lib/logger";
 
 interface EnhancedErrorHandlerOptions {
   requireAuth?: boolean;
@@ -244,7 +245,7 @@ export class TimeoutError extends ApplicationError {
 // Export enhanced error classes
 export {
   ApplicationError,
-  ValidationError,
-  AuthorizationError,
   AuthenticationError,
+  AuthorizationError,
+  ValidationError,
 };

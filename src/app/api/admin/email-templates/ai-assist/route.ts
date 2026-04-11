@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/utils/supabase/server";
+
 import { LLMFactory } from "@/lib/ai/factory";
-import { appLogger as logger } from "@/lib/logger";
-import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
 import type { LLMProvider } from "@/lib/ai/types";
 import { buildVariablesPromptForAgent } from "@/lib/email/ai-template-variables";
+import { appLogger as logger } from "@/lib/logger";
+import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
+import { createClient } from "@/utils/supabase/server";
 
 /**
  * POST /api/admin/email-templates/ai-assist

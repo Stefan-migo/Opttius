@@ -1,24 +1,25 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
-import { extractDataFromResponse } from "@/lib/api/response-helpers";
-import { productService } from "@/lib/api/services";
-import type { Product } from "@/lib/api/services";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  AlertTriangle,
+  ArrowLeft,
+  Download,
+  Edit,
+  Eye,
+  Package,
+  RefreshCw,
+  Trash2,
+  Upload,
+} from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -28,6 +29,15 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -36,26 +46,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  ArrowLeft,
-  Download,
-  Upload,
-  Edit,
-  Trash2,
-  Copy,
-  Package,
-  FileText,
-  AlertTriangle,
-  CheckCircle,
-  RefreshCw,
-  Settings,
-  Eye,
-  Filter,
-} from "lucide-react";
-import Link from "next/link";
-import { toast } from "sonner";
 import { useBranch } from "@/hooks/useBranch";
+import { extractDataFromResponse } from "@/lib/api/response-helpers";
+import type { Product } from "@/lib/api/services";
+import { productService } from "@/lib/api/services";
 import { formatCurrency, formatDate } from "@/lib/utils";
 
 interface ProductListItem {
@@ -74,7 +68,7 @@ interface BulkOperationResult {
   success: boolean;
   operation: string;
   affected_count: number;
-  results: any[];
+  results: unknown[];
 }
 
 interface ImportResult {
@@ -101,7 +95,7 @@ export default function BulkOperationsPage() {
   const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState(false);
-  const [categories, setCategories] = useState<any[]>([]);
+  const [categories, setCategories] = useState<unknown[]>([]);
 
   // Filters
   const [searchTerm, setSearchTerm] = useState("");
@@ -110,7 +104,7 @@ export default function BulkOperationsPage() {
 
   // Bulk operation states
   const [bulkOperation, setBulkOperation] = useState("");
-  const [bulkUpdates, setBulkUpdates] = useState<any>({});
+  const [bulkUpdates, setBulkUpdates] = useState<unknown>({});
   const [showBulkDialog, setShowBulkDialog] = useState(false);
   const [showImportDialog, setShowImportDialog] = useState(false);
   const [importMode, setImportMode] = useState<"create" | "update" | "skip">(
@@ -280,7 +274,7 @@ export default function BulkOperationsPage() {
   };
 
   const getStatusBadge = (status: string) => {
-    const config: Record<string, { variant: any; label: string }> = {
+    const config: Record<string, { variant: unknown; label: string }> = {
       active: { variant: "default", label: "Activo" },
       draft: { variant: "secondary", label: "Borrador" },
       archived: { variant: "outline", label: "Archivado" },
@@ -365,13 +359,13 @@ export default function BulkOperationsPage() {
                 {bulkUpdates.adjustment_type === "percentage" ? "(%)" : "($)"}
               </Label>
               <Input
-                type="number"
-                step="0.01"
                 placeholder={
                   bulkUpdates.adjustment_type === "percentage"
                     ? "ej: 10 para +10%"
                     : "ej: 500 para +$500"
                 }
+                step="0.01"
+                type="number"
                 onChange={(e) =>
                   setBulkUpdates({
                     ...bulkUpdates,
@@ -409,12 +403,12 @@ export default function BulkOperationsPage() {
                   : "Ajuste (+/-)"}
               </Label>
               <Input
-                type="number"
                 placeholder={
                   bulkUpdates.adjustment_type === "set"
                     ? "ej: 50"
                     : "ej: -10 o +20"
                 }
+                type="number"
                 value={bulkUpdates.inventory_adjustment ?? ""}
                 onChange={(e) => {
                   const value = e.target.value;
@@ -495,7 +489,7 @@ export default function BulkOperationsPage() {
     return (
       <div className="space-y-6">
         <div className="flex items-center space-x-4">
-          <Button variant="outline" size="sm">
+          <Button size="sm" variant="outline">
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div>
@@ -515,7 +509,7 @@ export default function BulkOperationsPage() {
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
           <Link href="/admin/products">
-            <Button variant="outline" size="sm">
+            <Button size="sm" variant="outline">
               <ArrowLeft className="h-4 w-4" />
             </Button>
           </Link>
@@ -579,9 +573,9 @@ export default function BulkOperationsPage() {
                 <div>
                   <Label htmlFor="csv_file">Archivo CSV</Label>
                   <Input
+                    accept=".csv"
                     ref={fileInputRef}
                     type="file"
-                    accept=".csv"
                     onChange={(e) => {
                       const file = e.target.files?.[0];
                       if (file) {
@@ -655,8 +649,8 @@ export default function BulkOperationsPage() {
                   {selectedProducts.length} productos seleccionados
                 </Badge>
                 <Button
-                  variant="outline"
                   size="sm"
+                  variant="outline"
                   onClick={() => setSelectedProducts([])}
                 >
                   Limpiar selección
@@ -748,8 +742,8 @@ export default function BulkOperationsPage() {
                                 Archivar Productos (Eliminación Suave)
                               </SelectItem>
                               <SelectItem
-                                value="hard_delete"
                                 className="text-red-600 font-medium"
+                                value="hard_delete"
                               >
                                 ⚠️ Eliminar Permanentemente
                               </SelectItem>
@@ -774,7 +768,6 @@ export default function BulkOperationsPage() {
                         Cancelar
                       </Button>
                       <Button
-                        onClick={handleBulkOperation}
                         disabled={processing || !bulkOperation}
                         variant={
                           bulkOperation === "delete" ||
@@ -782,6 +775,7 @@ export default function BulkOperationsPage() {
                             ? "destructive"
                             : "default"
                         }
+                        onClick={handleBulkOperation}
                       >
                         {processing && (
                           <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
@@ -852,13 +846,13 @@ export default function BulkOperationsPage() {
             </div>
             <div className="flex items-center space-x-2">
               <input
-                type="checkbox"
                 checked={
                   selectedProducts.length === products.length &&
                   products.length > 0
                 }
-                onChange={handleSelectAll}
                 className="rounded border-gray-300"
+                type="checkbox"
+                onChange={handleSelectAll}
               />
               <span className="text-sm text-tierra-media">
                 Seleccionar todos
@@ -873,13 +867,13 @@ export default function BulkOperationsPage() {
                 <TableRow>
                   <TableHead className="w-12">
                     <input
-                      type="checkbox"
                       checked={
                         selectedProducts.length === products.length &&
                         products.length > 0
                       }
-                      onChange={handleSelectAll}
                       className="rounded border-gray-300"
+                      type="checkbox"
+                      onChange={handleSelectAll}
                     />
                   </TableHead>
                   <TableHead>Producto</TableHead>
@@ -896,10 +890,10 @@ export default function BulkOperationsPage() {
                   <TableRow key={product.id}>
                     <TableCell>
                       <input
-                        type="checkbox"
                         checked={selectedProducts.includes(product.id)}
-                        onChange={() => handleSelectProduct(product.id)}
                         className="rounded border-gray-300"
+                        type="checkbox"
+                        onChange={() => handleSelectProduct(product.id)}
                       />
                     </TableCell>
 
@@ -910,7 +904,7 @@ export default function BulkOperationsPage() {
                           {product.slug}
                         </div>
                         {product.is_featured && (
-                          <Badge variant="outline" className="text-xs">
+                          <Badge className="text-xs" variant="outline">
                             Destacado
                           </Badge>
                         )}
@@ -949,12 +943,12 @@ export default function BulkOperationsPage() {
                     <TableCell>
                       <div className="flex space-x-2">
                         <Link href={`/admin/products/${product.id}`}>
-                          <Button variant="outline" size="sm">
+                          <Button size="sm" variant="outline">
                             <Eye className="h-3 w-3" />
                           </Button>
                         </Link>
                         <Link href={`/admin/products/edit/${product.id}`}>
-                          <Button variant="outline" size="sm">
+                          <Button size="sm" variant="outline">
                             <Edit className="h-3 w-3" />
                           </Button>
                         </Link>

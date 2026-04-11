@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/utils/supabase/server";
+
 import { getBranchContext } from "@/lib/api/branch-middleware";
 import { appLogger as logger } from "@/lib/logger";
+import { createClient } from "@/utils/supabase/server";
 
 // GET /api/admin/internal-orders - List internal orders
 export const dynamic = "force-dynamic";
@@ -169,7 +170,7 @@ export async function POST(req: NextRequest) {
         .eq("admin_user_id", user.id);
 
       const accessibleBranchIds =
-        userBranches.data?.map((b: any) => b.branch_id) || [];
+        userBranches.data?.map((b: unknown) => b.branch_id) || [];
 
       if (
         !accessibleBranchIds.includes(origin_branch_id) &&
@@ -226,7 +227,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Create order items
-    const orderItems = items.map((item: any) => ({
+    const orderItems = items.map((item: unknown) => ({
       internal_order_id: order.id,
       product_id: item.product_id,
       quantity: item.quantity,

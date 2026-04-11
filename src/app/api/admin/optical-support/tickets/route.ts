@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/utils/supabase/server";
-import { createServiceRoleClient } from "@/utils/supabase/service-role";
-import { appLogger as logger } from "@/lib/logger";
+
+import { getBranchContext } from "@/lib/api/branch-middleware";
+import { parseAndValidateBody } from "@/lib/api/validation/zod-helpers";
 import {
   createOpticalInternalSupportTicketSchema,
   opticalInternalSupportTicketFiltersSchema,
 } from "@/lib/api/validation/zod-schemas";
-import { parseAndValidateBody } from "@/lib/api/validation/zod-helpers";
-import { getBranchContext } from "@/lib/api/branch-middleware";
+import { appLogger as logger } from "@/lib/logger";
+import { createClient } from "@/utils/supabase/server";
+import { createServiceRoleClient } from "@/utils/supabase/service-role";
 
 /**
  * GET /api/admin/optical-support/tickets
@@ -128,7 +129,7 @@ export async function GET(request: NextRequest) {
         { count: "exact" },
       )
       .eq("organization_id", organizationId) // Solo tickets de su organización
-      .order((filters.sort_by || "created_at") as any, {
+      .order((filters.sort_by || "created_at") as unknown, {
         ascending: filters.sort_order === "asc",
       });
 

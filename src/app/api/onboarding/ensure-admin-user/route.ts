@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
+
+import { appLogger as logger } from "@/lib/logger";
 import { createClient } from "@/utils/supabase/server";
 import { createServiceRoleClient } from "@/utils/supabase/service-role";
-import { appLogger as logger } from "@/lib/logger";
 
 /**
  * POST /api/onboarding/ensure-admin-user

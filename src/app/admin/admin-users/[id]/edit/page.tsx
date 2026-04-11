@@ -1,10 +1,23 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import {
+  ArrowLeft,
+  Building2,
+  Crown,
+  Globe,
+  Save,
+  User,
+  X,
+} from "lucide-react";
+import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+
+import BranchAccessManager from "@/components/admin/BranchAccessManager";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -14,19 +27,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  ArrowLeft,
-  Crown,
-  Save,
-  X,
-  Globe,
-  User,
-  Building2,
-} from "lucide-react";
-import Link from "next/link";
-import { toast } from "sonner";
 import { useBranch } from "@/hooks/useBranch";
-import BranchAccessManager from "@/components/admin/BranchAccessManager";
 
 interface AdminUser {
   id: string;
@@ -154,8 +155,8 @@ export default function EditAdminUserPage() {
               </p>
               <Link href="/admin/admin-users">
                 <Button
-                  variant="outline"
                   className="rounded-xl border-epoch-primary/20 min-h-[44px] px-6"
+                  variant="outline"
                 >
                   <ArrowLeft className="mr-2 h-4 w-4" />
                   Volver a Administradores
@@ -175,9 +176,9 @@ export default function EditAdminUserPage() {
         <div className="flex items-center gap-3">
           <Link href={`/admin/admin-users/${adminId}`}>
             <Button
-              variant="ghost"
-              size="sm"
               className="rounded-xl text-epoch-primary hover:bg-epoch-primary/10 min-h-[44px] shrink-0"
+              size="sm"
+              variant="ghost"
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
               Volver
@@ -204,17 +205,17 @@ export default function EditAdminUserPage() {
           {/* Email (read-only) */}
           <div className="space-y-2">
             <Label
-              htmlFor="email"
               className="text-xs sm:text-sm text-epoch-primary/80"
+              htmlFor="email"
             >
               Email
             </Label>
             <Input
+              disabled
+              className="rounded-xl bg-epoch-background/50 border-epoch-primary/10 min-h-[44px]"
               id="email"
               type="email"
               value={adminUser.email}
-              disabled
-              className="rounded-xl bg-epoch-background/50 border-epoch-primary/10 min-h-[44px]"
             />
             <p className="text-xs sm:text-sm text-epoch-primary/70 mt-1">
               El email no puede ser modificado
@@ -277,12 +278,12 @@ export default function EditAdminUserPage() {
             <div className="flex flex-wrap items-center gap-4">
               <label className="flex items-center gap-2 cursor-pointer min-h-[44px]">
                 <input
-                  type="checkbox"
                   checked={formData.is_active}
+                  className="h-4 w-4 rounded border-epoch-primary/30"
+                  type="checkbox"
                   onChange={(e) =>
                     setFormData({ ...formData, is_active: e.target.checked })
                   }
-                  className="h-4 w-4 rounded border-epoch-primary/30"
                 />
                 <span className="text-sm text-epoch-primary">
                   {formData.is_active ? "Activo" : "Inactivo"}
@@ -316,22 +317,22 @@ export default function EditAdminUserPage() {
           {/* Actions - optimizado para móvil */}
           <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-4 border-t border-epoch-primary/10">
             <Link
-              href={`/admin/admin-users/${adminId}`}
               className="w-full sm:w-auto"
+              href={`/admin/admin-users/${adminId}`}
             >
               <Button
+                className="w-full rounded-xl border-epoch-primary/20 min-h-[44px]"
                 type="button"
                 variant="outline"
-                className="w-full rounded-xl border-epoch-primary/20 min-h-[44px]"
               >
                 <X className="mr-2 h-4 w-4" />
                 Cancelar
               </Button>
             </Link>
             <Button
-              onClick={handleSave}
-              disabled={saving}
               className="w-full sm:w-auto rounded-xl bg-epoch-primary hover:bg-epoch-surface text-white font-display font-bold text-[10px] tracking-[0.2em] uppercase min-h-[44px]"
+              disabled={saving}
+              onClick={handleSave}
             >
               <Save className="mr-2 h-4 w-4" />
               {saving ? "Guardando..." : "Guardar Cambios"}
@@ -343,8 +344,8 @@ export default function EditAdminUserPage() {
       {/* Branch Access Manager - Admin y Super Admin pueden asignar/editar sucursal */}
       <BranchAccessManager
         adminUserId={adminId}
-        isSuperAdmin={adminUser?.role === "super_admin"}
         canEdit={true}
+        isSuperAdmin={adminUser?.role === "super_admin"}
       />
     </div>
   );

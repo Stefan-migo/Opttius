@@ -1,11 +1,12 @@
 "use client";
 
+import { RotateCcw, Sparkles, X } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { X, RotateCcw, Sparkles } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
 import { type ChatConfig } from "@/hooks/useChatConfig";
 import { SYSTEM_PROMPTS } from "@/lib/ai/agent/config";
 
@@ -36,10 +37,10 @@ export function SettingsPanel({
           </h2>
         </div>
         <Button
-          variant="ghost"
-          size="icon"
-          onClick={onClose}
           className="rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+          size="icon"
+          variant="ghost"
+          onClick={onClose}
         >
           <X className="w-5 h-5 text-slate-500" />
         </Button>
@@ -64,15 +65,15 @@ export function SettingsPanel({
                   System Prompt Personalizado
                 </Label>
                 <Button
-                  variant="ghost"
+                  className="h-7 px-2.5 text-[10px] font-bold text-slate-400 hover:text-primary hover:bg-primary/5 transition-all"
                   size="sm"
+                  variant="ghost"
                   onClick={() =>
                     updateConfig({
                       systemPrompt: SYSTEM_PROMPTS.default,
                       systemPromptPreset: "default",
                     })
                   }
-                  className="h-7 px-2.5 text-[10px] font-bold text-slate-400 hover:text-primary hover:bg-primary/5 transition-all"
                 >
                   <RotateCcw className="w-3 h-3 mr-1.5" />
                   RESETEAR
@@ -81,6 +82,9 @@ export function SettingsPanel({
 
               <div className="relative group">
                 <Textarea
+                  className="min-h-[400px] font-mono text-[13px] leading-relaxed p-4 bg-slate-50/50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 focus:border-primary/50 focus:ring-primary/10 transition-all resize-none shadow-inner"
+                  placeholder="Define aquí la personalidad especializada de tu asistente..."
+                  rows={20}
                   value={config.systemPrompt}
                   onChange={(e) =>
                     updateConfig({
@@ -88,9 +92,6 @@ export function SettingsPanel({
                       systemPromptPreset: "custom",
                     })
                   }
-                  rows={20}
-                  className="min-h-[400px] font-mono text-[13px] leading-relaxed p-4 bg-slate-50/50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 focus:border-primary/50 focus:ring-primary/10 transition-all resize-none shadow-inner"
-                  placeholder="Define aquí la personalidad especializada de tu asistente..."
                 />
               </div>
 

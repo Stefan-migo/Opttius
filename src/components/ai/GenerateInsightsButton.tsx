@@ -1,9 +1,10 @@
 "use client";
 
+import { Loader2, Sparkles } from "lucide-react";
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Sparkles, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+
+import { Button } from "@/components/ui/button";
 import type { InsightSection } from "@/lib/ai/insights/schemas";
 
 interface GenerateInsightsButtonProps {
@@ -59,7 +60,7 @@ export function GenerateInsightsButton({
       setTimeout(() => {
         window.location.reload();
       }, 1000);
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast.error("Error generando insights", {
         description: error.message || "Intenta nuevamente",
       });
@@ -70,11 +71,11 @@ export function GenerateInsightsButton({
 
   return (
     <Button
-      onClick={handleGenerate}
-      disabled={isGenerating}
-      variant="outline"
-      size="sm"
       className={className}
+      disabled={isGenerating}
+      size="sm"
+      variant="outline"
+      onClick={handleGenerate}
     >
       {isGenerating ? (
         <>

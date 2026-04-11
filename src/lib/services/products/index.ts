@@ -5,12 +5,12 @@
 
 export { ProductsService } from "./service";
 export type {
-  ProductRow,
   ProductInsert,
-  ProductUpdate,
-  ProductWithRelations,
   ProductListParams,
   ProductListResponse,
+  ProductRow,
+  ProductServiceContext,
   ProductStockInfo,
-  ProductServiceContext
+  ProductUpdate,
+  ProductWithRelations,
 } from "./types";

@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient, createServiceRoleClient } from "@/utils/supabase/server";
+
 import { getBranchContext } from "@/lib/api/branch-middleware";
 import { appLogger as logger } from "@/lib/logger";
 import type {
-  IsAdminParams,
-  IsAdminResult,
   GetAdminRoleParams,
   GetAdminRoleResult,
+  IsAdminParams,
+  IsAdminResult,
 } from "@/types/supabase-rpc";
+import { createClient, createServiceRoleClient } from "@/utils/supabase/server";
 
 /**
  * POST /api/admin/cash-register/reopen
@@ -247,7 +248,7 @@ export async function POST(request: NextRequest) {
       session: updatedSession,
       message: "Caja reabierta correctamente",
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error("Error in reopen cash register API:", { error });
     return NextResponse.json(
       {

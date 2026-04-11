@@ -1,11 +1,12 @@
 /**
  * Contact Lens Family Service
- * 
+ *
  * Service for managing contact lens families and their configurations.
  */
 
-import { ApiClient, isSuccess, unwrapData } from '../client-helpers';
-import { handleApiError } from '@/lib/services/errorService';
+import { handleApiError } from "@/lib/services/errorService";
+
+import { ApiClient, isSuccess, unwrapData } from "../client-helpers";
 
 // ============================================
 // Types
@@ -14,10 +15,15 @@ import { handleApiError } from '@/lib/services/errorService';
 export interface ContactLensFamily {
   id: string;
   name: string;
-  brand: string;
-  type: string;
-  replacement_schedule: string;
-  base_price: number;
+  brand: string | null;
+  modality: string; // spherical, toric, multifocal
+  use_type: string; // daily, bi_weekly, monthly, extended_wear
+  packaging: string; // box_30, box_6, box_3, bottle
+  material: string | null;
+  base_curve: number | null;
+  diameter: number | null;
+  description: string | null;
+  category_id: string | null;
   is_active: boolean;
   created_at: string;
   updated_at?: string;
@@ -49,8 +55,10 @@ class ContactLensFamilyService {
         include_inactive: includeInactive.toString(),
       });
 
-      const response = await this.client.get<ContactLensFamily[]>(`/api/admin/contact-lens-families?${params}`);
-      
+      const response = await this.client.get<ContactLensFamily[]>(
+        `/api/admin/contact-lens-families?${params}`,
+      );
+
       if (isSuccess(response)) {
         const data = unwrapData(response);
         return Array.isArray(data) ? data : [];
@@ -70,8 +78,10 @@ class ContactLensFamilyService {
    */
   async getById(id: string): Promise<ContactLensFamily | null> {
     try {
-      const response = await this.client.get<ContactLensFamily>(`/api/admin/contact-lens-families/${id}`);
-      
+      const response = await this.client.get<ContactLensFamily>(
+        `/api/admin/contact-lens-families/${id}`,
+      );
+
       if (isSuccess(response)) {
         return unwrapData(response);
       }

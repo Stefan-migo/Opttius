@@ -1,26 +1,26 @@
 "use client";
 
-import { useState } from "react";
-import Link from "next/link";
-import Image from "next/image";
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  ArrowRight,
+  Building2,
+  CheckCircle2,
+  Mail,
+  Phone,
+  User,
+} from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent } from "@/components/ui/card";
+
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
-import {
-  Loader2,
-  Mail,
-  User,
-  Building2,
-  Phone,
-  ArrowRight,
-  CheckCircle2,
-} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 const solicitarDemoSchema = z.object({
   email: z.string().email("Por favor ingresa un email válido"),
@@ -84,11 +84,11 @@ export default function SolicitarDemoPage() {
             <div className="bg-epoch-primary p-6 sm:p-10 text-center">
               <div className="relative mx-auto mb-6 flex justify-center">
                 <Image
-                  src="/logoYopttius.png"
                   alt="Opttius"
-                  width={248}
-                  height={227}
                   className="h-24 w-28 object-contain"
+                  height={227}
+                  src="/logoYopttius.png"
+                  width={248}
                 />
               </div>
               <div className="inline-flex items-center justify-center w-20 h-20 border-2 border-epoch-accent/40 rounded-full mb-6">
@@ -125,24 +125,24 @@ export default function SolicitarDemoPage() {
       <div className="relative hidden lg:flex lg:w-1/2 xl:w-7/12 overflow-hidden items-center justify-center bg-epoch-surface">
         <div className="absolute inset-0 z-0">
           <Image
-            src="/images/landing/Hero.webp"
-            alt="Óptica"
             fill
-            className="object-cover opacity-30 grayscale"
             priority
+            alt="Óptica"
+            className="object-cover opacity-30 grayscale"
+            src="/images/landing/Hero.webp"
           />
           <div className="absolute inset-0 bg-gradient-to-tr from-epoch-primary via-epoch-primary/40 to-transparent" />
         </div>
 
         <div className="relative z-10 p-20 w-full h-full flex flex-col justify-between">
-          <Link href="/" className="group flex flex-col items-start w-fit">
+          <Link className="group flex flex-col items-start w-fit" href="/">
             <div className="relative mb-1 group-hover:scale-110 transition-transform duration-500">
               <Image
-                src="/logo-text-default.svg"
                 alt="Opttius"
-                width={192}
-                height={56}
                 className="h-14 w-48 opacity-100 object-contain object-left"
+                height={56}
+                src="/logo-text-default.svg"
+                width={192}
               />
             </div>
           </Link>
@@ -171,11 +171,11 @@ export default function SolicitarDemoPage() {
           <div className="lg:hidden mb-8">
             <Link href="/">
               <Image
-                src="/logo-text-default.svg"
                 alt="Opttius"
-                width={140}
-                height={40}
                 className="h-10"
+                height={40}
+                src="/logo-text-default.svg"
+                width={140}
               />
             </Link>
           </div>
@@ -187,7 +187,7 @@ export default function SolicitarDemoPage() {
             Déjanos tus datos y te contactaremos para darte acceso.
           </p>
 
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+          <form className="space-y-5" onSubmit={handleSubmit(onSubmit)}>
             {error && (
               <Alert variant="destructive">
                 <AlertDescription>{error}</AlertDescription>
@@ -199,10 +199,10 @@ export default function SolicitarDemoPage() {
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  id="email"
-                  type="email"
-                  placeholder="tu@optica.cl"
                   className="pl-10"
+                  id="email"
+                  placeholder="tu@optica.cl"
+                  type="email"
                   {...register("email")}
                 />
               </div>
@@ -218,9 +218,9 @@ export default function SolicitarDemoPage() {
               <div className="relative">
                 <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
+                  className="pl-10"
                   id="full_name"
                   placeholder="Juan Pérez"
-                  className="pl-10"
                   {...register("full_name")}
                 />
               </div>
@@ -231,9 +231,9 @@ export default function SolicitarDemoPage() {
               <div className="relative">
                 <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
+                  className="pl-10"
                   id="optica_name"
                   placeholder="Óptica Vista Clara"
-                  className="pl-10"
                   {...register("optica_name")}
                 />
               </div>
@@ -244,18 +244,18 @@ export default function SolicitarDemoPage() {
               <div className="relative">
                 <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  id="phone"
-                  type="tel"
-                  placeholder="+56 9 1234 5678"
                   className="pl-10"
+                  id="phone"
+                  placeholder="+56 9 1234 5678"
+                  type="tel"
                   {...register("phone")}
                 />
               </div>
             </div>
 
             <Button
-              type="submit"
               className="w-full min-h-12 bg-epoch-primary hover:bg-epoch-primary/90 text-white font-display font-bold uppercase tracking-widest"
+              type="submit"
             >
               Enviar solicitud
               <ArrowRight className="ml-2 h-4 w-4" />
@@ -264,7 +264,7 @@ export default function SolicitarDemoPage() {
 
           <p className="mt-8 text-center text-sm text-muted-foreground">
             ¿Ya tienes cuenta?{" "}
-            <Link href="/login" className="text-epoch-primary hover:underline">
+            <Link className="text-epoch-primary hover:underline" href="/login">
               Iniciar sesión
             </Link>
           </p>

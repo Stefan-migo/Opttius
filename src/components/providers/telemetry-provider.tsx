@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect } from "react";
+
 import { useTelemetry } from "@/lib/telemetry/hooks/use-telemetry";
 
 interface TelemetryProviderProps {

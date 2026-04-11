@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import {
-  getRateLimiter,
-  getRateLimitConfig,
-  getIPAddress,
-} from "@/lib/rate-limiting";
+
 import { appLogger as logger } from "@/lib/logger";
+import {
+  getIPAddress,
+  getRateLimitConfig,
+  getRateLimiter,
+} from "@/lib/rate-limiting";
 
 /**
  * Redis-based Rate Limiting Middleware

@@ -1,26 +1,29 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useParams, useRouter } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import {
+  AlertCircle,
+  AlertTriangle,
   ArrowLeft,
-  CreditCard,
   Building2,
   Calendar,
   CheckCircle2,
-  XCircle,
   Clock,
-  AlertTriangle,
-  AlertCircle,
-  Loader2,
+  CreditCard,
   DollarSign,
-  Save,
+  Loader2,
   Pencil,
+  Save,
   Trash2,
+  XCircle,
 } from "lucide-react";
+import Link from "next/link";
+import { useParams, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -29,6 +32,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -36,10 +41,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import Link from "next/link";
-import { toast } from "sonner";
 import { formatDate } from "@/lib/utils";
 
 interface SubscriptionDetails {
@@ -236,7 +237,7 @@ export default function SubscriptionDetailsPage() {
     }
 
     return (
-      <Badge variant={variant} className={className}>
+      <Badge className={className} variant={variant}>
         <Icon className="h-3 w-3 mr-1" />
         {status === "active"
           ? "Activa"
@@ -271,10 +272,10 @@ export default function SubscriptionDetailsPage() {
       <div className="space-y-6 p-6">
         <div className="flex items-center gap-4">
           <Button
-            variant="ghost"
             size="icon"
-            onClick={() => router.push("/admin/saas-management/subscriptions")}
             title="Volver a suscripciones"
+            variant="ghost"
+            onClick={() => router.push("/admin/saas-management/subscriptions")}
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
@@ -301,10 +302,10 @@ export default function SubscriptionDetailsPage() {
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div className="flex items-center gap-4">
           <Button
-            variant="ghost"
             size="icon"
-            onClick={() => router.push("/admin/saas-management/subscriptions")}
             title="Volver a suscripciones"
+            variant="ghost"
+            onClick={() => router.push("/admin/saas-management/subscriptions")}
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
@@ -319,18 +320,18 @@ export default function SubscriptionDetailsPage() {
         </div>
         <div className="flex gap-2">
           <Button
-            variant={editing ? "default" : "outline"}
             size="sm"
+            variant={editing ? "default" : "outline"}
             onClick={() => setEditing(!editing)}
           >
             <Pencil className="h-4 w-4 mr-2" />
             {editing ? "Cancelar edición" : "Editar"}
           </Button>
           <Button
-            variant="destructive"
-            size="sm"
-            onClick={() => setShowDeleteConfirm(true)}
             disabled={deleteLoading}
+            size="sm"
+            variant="destructive"
+            onClick={() => setShowDeleteConfirm(true)}
           >
             {deleteLoading ? (
               <Loader2 className="h-4 w-4 animate-spin mr-2" />
@@ -493,7 +494,7 @@ export default function SubscriptionDetailsPage() {
                 />
               </div>
             </div>
-            <Button onClick={handleSaveEdit} disabled={saveLoading}>
+            <Button disabled={saveLoading} onClick={handleSaveEdit}>
               {saveLoading ? (
                 <Loader2 className="h-4 w-4 animate-spin mr-2" />
               ) : (
@@ -576,7 +577,7 @@ export default function SubscriptionDetailsPage() {
               <Link
                 href={`/admin/saas-management/organizations/${subscription.organization.id}`}
               >
-                <Button variant="outline" size="sm">
+                <Button size="sm" variant="outline">
                   Ver organización
                 </Button>
               </Link>
@@ -639,8 +640,8 @@ export default function SubscriptionDetailsPage() {
               Volver
             </Button>
             <Button
-              variant="destructive"
               disabled={deleteLoading}
+              variant="destructive"
               onClick={handleDelete}
             >
               {deleteLoading ? (

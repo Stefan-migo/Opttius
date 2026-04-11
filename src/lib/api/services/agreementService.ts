@@ -5,13 +5,14 @@
  * Provides type-safe methods for CRUD and management of B2B agreements.
  */
 
+import { handleApiError } from "@/lib/services/errorService";
+
 import {
   ApiClient,
+  handlePaginatedResponse,
   isSuccess,
   unwrapData,
-  handlePaginatedResponse,
 } from "../client-helpers";
-import { handleApiError } from "@/lib/services/errorService";
 
 export interface Agreement {
   id: string;
@@ -167,7 +168,7 @@ export async function getAgreements(
       };
     }
     throw new Error(
-      (response as any).error?.message || "Error al obtener convenios",
+      (response as unknown).error?.message || "Error al obtener convenios",
     );
   } catch (error) {
     handleApiError(error, "getAgreements");

@@ -1,9 +1,30 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  BarChart3,
+  Building2,
+  Database,
+  Eye,
+  EyeOff,
+  FileText,
+  HardDrive,
+  Loader2,
+  Mail,
+  Package,
+  Save,
+  Server,
+  Settings,
+  Shield,
+  Users,
+} from "lucide-react";
+import Image from "next/image";
+import { useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import ImageUpload from "@/components/ui/ImageUpload";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -13,32 +34,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Settings,
-  Mail,
-  Package,
-  HardDrive,
-  Users,
-  Server,
-  Database,
-  BarChart3,
-  Shield,
-  Eye,
-  EyeOff,
-  Save,
-  Building2,
-  Image as ImageIcon,
-  Loader2,
-  FileText,
-} from "lucide-react";
+
 import { SystemConfig as SystemConfigType } from "../hooks/useSystemConfig";
-import { toast } from "sonner";
-import Image from "next/image";
-import ImageUpload from "@/components/ui/ImageUpload";
 
 interface SystemConfigProps {
   configs: SystemConfigType[];
-  onUpdateConfig: (key: string, value: any) => Promise<void>;
+  onUpdateConfig: (key: string, value: unknown) => Promise<void>;
   isUpdating?: boolean;
   configScope?: "global" | "branch";
   onConfigScopeChange?: (scope: "global" | "branch") => void;
@@ -47,7 +48,7 @@ interface SystemConfigProps {
 }
 
 const getCategoryIcon = (category: string) => {
-  const icons: Record<string, any> = {
+  const icons: Record<string, unknown> = {
     general: Settings,
     contact: Mail,
     ecommerce: Package,
@@ -158,7 +159,7 @@ export default function SystemConfig({
 
   // Local state for config values (to prevent page reload on input)
   const [localConfigValues, setLocalConfigValues] = useState<
-    Record<string, any>
+    Record<string, unknown>
   >({});
   const [savingConfigKeys, setSavingConfigKeys] = useState<Set<string>>(
     new Set(),
@@ -219,7 +220,7 @@ export default function SystemConfig({
   }, [configs, categoryFilter, showSensitive]);
 
   const configsByCategory = useMemo(() => {
-    return filteredConfigs.reduce((acc: any, config) => {
+    return filteredConfigs.reduce((acc: unknown, config) => {
       if (!acc[config.category]) {
         acc[config.category] = [];
       }
@@ -254,7 +255,7 @@ export default function SystemConfig({
 
   // Initialize local config values from props
   useEffect(() => {
-    const initialValues: Record<string, any> = {};
+    const initialValues: Record<string, unknown> = {};
     configs.forEach((config) => {
       initialValues[config.config_key] = config.config_value;
     });
@@ -348,7 +349,7 @@ export default function SystemConfig({
         // Reload page to update header
         window.location.reload();
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error saving organization:", error);
       toast.error(
         error.message || "Error al guardar la información de la óptica",
@@ -368,7 +369,7 @@ export default function SystemConfig({
               <Settings className="h-4 w-4 sm:h-5 sm:w-5 mr-2 shrink-0" />
               Configuración del Sistema
             </div>
-            <Badge variant="outline" className="text-[10px] sm:text-xs w-fit">
+            <Badge className="text-[10px] sm:text-xs w-fit" variant="outline">
               {configs.length}{" "}
               {configs.length === 1 ? "configuración" : "configuraciones"}
             </Badge>
@@ -432,9 +433,9 @@ export default function SystemConfig({
                 Opciones
               </Label>
               <Button
+                className="w-full md:w-auto rounded-xl border-epoch-primary/20 min-h-[44px] text-left justify-center sm:justify-center overflow-hidden"
                 variant="outline"
                 onClick={() => setShowSensitive(!showSensitive)}
-                className="w-full md:w-auto rounded-xl border-epoch-primary/20 min-h-[44px] text-left justify-center sm:justify-center overflow-hidden"
               >
                 {showSensitive ? (
                   <>
@@ -466,7 +467,7 @@ export default function SystemConfig({
                 <Building2 className="h-4 w-4 sm:h-5 sm:w-5 mr-2 shrink-0" />
                 Información de la Óptica (Header)
               </div>
-              <Badge variant="default" className="text-[10px] sm:text-xs w-fit">
+              <Badge className="text-[10px] sm:text-xs w-fit" variant="default">
                 Personalización
               </Badge>
             </CardTitle>
@@ -487,14 +488,14 @@ export default function SystemConfig({
                     Este nombre se mostrará en el header de las secciones
                   </p>
                   <Input
+                    className="w-full"
                     id="clinic_name"
+                    placeholder="Ej: Óptica Visión Premium"
                     type="text"
                     value={localOrgData.name}
                     onChange={(e) =>
                       setLocalOrgData({ ...localOrgData, name: e.target.value })
                     }
-                    placeholder="Ej: Óptica Visión Premium"
-                    className="w-full"
                   />
                 </div>
 
@@ -506,7 +507,9 @@ export default function SystemConfig({
                     header
                   </p>
                   <Input
+                    className="w-full"
                     id="slogan"
+                    placeholder="Ej: Tu visión, nuestra pasión"
                     type="text"
                     value={localOrgData.slogan}
                     onChange={(e) =>
@@ -515,8 +518,6 @@ export default function SystemConfig({
                         slogan: e.target.value,
                       })
                     }
-                    placeholder="Ej: Tu visión, nuestra pasión"
-                    className="w-full"
                   />
                 </div>
 
@@ -531,11 +532,11 @@ export default function SystemConfig({
                   <div className="flex flex-col sm:flex-row gap-6 items-start">
                     <div className="flex-1 w-full max-w-sm">
                       <ImageUpload
+                        folder="logos"
                         value={localOrgData.logo_url || ""}
                         onChange={(url) =>
                           setLocalOrgData({ ...localOrgData, logo_url: url })
                         }
-                        folder="logos"
                       />
                     </div>
 
@@ -544,11 +545,11 @@ export default function SystemConfig({
                         <Label className="text-xs">Vista Previa Actual</Label>
                         <div className="relative w-32 h-32 rounded-xl overflow-hidden border-2 border-border bg-white shadow-sm flex items-center justify-center">
                           <Image
-                            src={localOrgData.logo_url}
                             alt="Logo preview"
-                            width={128}
-                            height={128}
                             className="object-contain p-2"
+                            height={128}
+                            src={localOrgData.logo_url}
+                            width={128}
                           />
                         </div>
                       </div>
@@ -559,9 +560,9 @@ export default function SystemConfig({
                 {/* Save Button */}
                 <div className="flex justify-end pt-4 border-t border-border">
                   <Button
-                    onClick={handleSaveOrganization}
-                    disabled={savingOrg}
                     className="min-w-[120px] rounded-xl min-h-[44px] w-full sm:w-auto"
+                    disabled={savingOrg}
+                    onClick={handleSaveOrganization}
                   >
                     {savingOrg ? (
                       <>
@@ -590,7 +591,7 @@ export default function SystemConfig({
           const categoryConfigs =
             configsByCategory.contact as SystemConfigType[];
           return (
-            <Card key="contact" className="rounded-xl border border-border">
+            <Card className="rounded-xl border border-border" key="contact">
               <CardHeader className="p-4 sm:p-6 pb-0">
                 <CardTitle className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 font-display text-epoch-primary text-base sm:text-lg">
                   <div className="flex items-center">
@@ -598,8 +599,8 @@ export default function SystemConfig({
                     {categoryNames.contact}
                   </div>
                   <Badge
-                    variant="default"
                     className="text-[10px] sm:text-xs w-fit"
+                    variant="default"
                   >
                     {categoryConfigs.length}{" "}
                     {categoryConfigs.length === 1
@@ -616,8 +617,8 @@ export default function SystemConfig({
                     const isSaving = savingConfigKeys.has(config.config_key);
                     return (
                       <div
-                        key={config.id}
                         className="p-3 sm:p-4 rounded-xl border border-border hover:border-epoch-primary/30 transition-colors"
+                        key={config.id}
                       >
                         <div className="space-y-3">
                           <div className="flex items-start justify-between">
@@ -628,24 +629,24 @@ export default function SystemConfig({
                                 </h4>
                                 {config.is_sensitive && (
                                   <Badge
-                                    variant="outline"
                                     className="text-[10px] sm:text-xs shrink-0"
+                                    variant="outline"
                                   >
                                     <Shield className="h-3 w-3 mr-1" /> Sensible
                                   </Badge>
                                 )}
                                 {config.is_public && (
                                   <Badge
-                                    variant="outline"
                                     className="text-[10px] sm:text-xs"
+                                    variant="outline"
                                   >
                                     Público
                                   </Badge>
                                 )}
                                 {hasChanges && (
                                   <Badge
-                                    variant="outline"
                                     className="text-[10px] sm:text-xs bg-blue-50 border-blue-200 text-blue-700"
+                                    variant="outline"
                                   >
                                     Sin guardar
                                   </Badge>
@@ -665,6 +666,7 @@ export default function SystemConfig({
                               </Label>
                               {config.value_type === "boolean" ? (
                                 <Select
+                                  disabled={isUpdating || isSaving}
                                   value={
                                     localValue !== undefined
                                       ? localValue.toString()
@@ -676,7 +678,6 @@ export default function SystemConfig({
                                       [config.config_key]: v === "true",
                                     })
                                   }
-                                  disabled={isUpdating || isSaving}
                                 >
                                   <SelectTrigger className="w-full sm:w-[180px] rounded-xl">
                                     <SelectValue />
@@ -690,6 +691,8 @@ export default function SystemConfig({
                                 </Select>
                               ) : config.value_type === "number" ? (
                                 <Input
+                                  className="w-full sm:w-[200px] rounded-xl"
+                                  disabled={isUpdating || isSaving}
                                   type="number"
                                   value={
                                     localValue !== undefined
@@ -703,11 +706,14 @@ export default function SystemConfig({
                                         parseFloat(e.target.value) || 0,
                                     })
                                   }
-                                  className="w-full sm:w-[200px] rounded-xl"
-                                  disabled={isUpdating || isSaving}
                                 />
                               ) : (
                                 <Input
+                                  className="w-full sm:max-w-[400px] rounded-xl"
+                                  disabled={isUpdating || isSaving}
+                                  placeholder={getContactPlaceholder(
+                                    config.config_key,
+                                  )}
                                   type="text"
                                   value={
                                     localValue !== undefined
@@ -720,23 +726,18 @@ export default function SystemConfig({
                                       [config.config_key]: e.target.value,
                                     })
                                   }
-                                  placeholder={getContactPlaceholder(
-                                    config.config_key,
-                                  )}
-                                  className="w-full sm:max-w-[400px] rounded-xl"
-                                  disabled={isUpdating || isSaving}
                                 />
                               )}
                             </div>
                             <div className="flex flex-col sm:items-end gap-2">
                               {hasChanges && (
                                 <Button
+                                  className="min-w-[100px] rounded-xl min-h-[44px] w-full sm:w-auto"
+                                  disabled={isSaving}
                                   size="sm"
                                   onClick={() =>
                                     handleSaveConfig(config.config_key)
                                   }
-                                  disabled={isSaving}
-                                  className="min-w-[100px] rounded-xl min-h-[44px] w-full sm:w-auto"
                                 >
                                   {isSaving ? (
                                     <>
@@ -787,7 +788,7 @@ export default function SystemConfig({
                 <FileText className="h-4 w-4 sm:h-5 sm:w-5 mr-2 shrink-0" />
                 Recetas
               </div>
-              <Badge variant="default" className="text-[10px] sm:text-xs w-fit">
+              <Badge className="text-[10px] sm:text-xs w-fit" variant="default">
                 Configuración
               </Badge>
             </CardTitle>
@@ -802,16 +803,21 @@ export default function SystemConfig({
             <div className="flex flex-col sm:flex-row sm:items-end gap-4">
               <div className="flex-1 w-full sm:max-w-[200px]">
                 <Label
-                  htmlFor="prescription_expiration_months"
                   className="text-xs sm:text-sm"
+                  htmlFor="prescription_expiration_months"
                 >
                   Tiempo de expiración por defecto (meses)
                 </Label>
                 <Input
+                  className="mt-2 rounded-xl"
+                  disabled={
+                    isUpdating ||
+                    savingConfigKeys.has("prescription_expiration_months")
+                  }
                   id="prescription_expiration_months"
-                  type="number"
-                  min={1}
                   max={24}
+                  min={1}
+                  type="number"
                   value={
                     localConfigValues["prescription_expiration_months"] ??
                     configs.find(
@@ -826,18 +832,10 @@ export default function SystemConfig({
                       prescription_expiration_months: value,
                     }));
                   }}
-                  className="mt-2 rounded-xl"
-                  disabled={
-                    isUpdating ||
-                    savingConfigKeys.has("prescription_expiration_months")
-                  }
                 />
               </div>
               <Button
-                size="sm"
-                onClick={() =>
-                  handleSaveConfig("prescription_expiration_months")
-                }
+                className="min-w-[100px] rounded-xl min-h-[44px] w-full sm:w-auto"
                 disabled={
                   savingConfigKeys.has("prescription_expiration_months") ||
                   (localConfigValues["prescription_expiration_months"] ===
@@ -848,7 +846,10 @@ export default function SystemConfig({
                       (c) => c.config_key === "prescription_expiration_months",
                     ))
                 }
-                className="min-w-[100px] rounded-xl min-h-[44px] w-full sm:w-auto"
+                size="sm"
+                onClick={() =>
+                  handleSaveConfig("prescription_expiration_months")
+                }
               >
                 {savingConfigKeys.has("prescription_expiration_months") ? (
                   <>
@@ -890,7 +891,7 @@ export default function SystemConfig({
             const Icon = getCategoryIcon(category);
 
             return (
-              <Card key={category} className="rounded-xl border border-border">
+              <Card className="rounded-xl border border-border" key={category}>
                 <CardHeader className="p-4 sm:p-6 pb-0">
                   <CardTitle className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 font-display text-epoch-primary text-base sm:text-lg">
                     <div className="flex items-center">
@@ -899,8 +900,8 @@ export default function SystemConfig({
                         category.charAt(0).toUpperCase() + category.slice(1)}
                     </div>
                     <Badge
-                      variant="default"
                       className="text-[10px] sm:text-xs w-fit"
+                      variant="default"
                     >
                       {(categoryConfigs as SystemConfigType[]).length}{" "}
                       {(categoryConfigs as SystemConfigType[]).length === 1
@@ -918,8 +919,8 @@ export default function SystemConfig({
 
                       return (
                         <div
-                          key={config.id}
                           className="p-3 sm:p-4 rounded-xl border border-border hover:border-epoch-primary/30 transition-colors"
+                          key={config.id}
                         >
                           <div className="space-y-3">
                             <div className="flex items-start justify-between">
@@ -930,8 +931,8 @@ export default function SystemConfig({
                                   </h4>
                                   {config.is_sensitive && (
                                     <Badge
-                                      variant="outline"
                                       className="text-xs bg-yellow-50 border-yellow-200"
+                                      variant="outline"
                                     >
                                       <Shield className="h-3 w-3 mr-1" />
                                       Sensible
@@ -939,16 +940,16 @@ export default function SystemConfig({
                                   )}
                                   {config.is_public && (
                                     <Badge
-                                      variant="outline"
                                       className="text-xs"
+                                      variant="outline"
                                     >
                                       Público
                                     </Badge>
                                   )}
                                   {hasChanges && (
                                     <Badge
-                                      variant="outline"
                                       className="text-xs bg-blue-50 border-blue-200 text-blue-700"
+                                      variant="outline"
                                     >
                                       Sin guardar
                                     </Badge>
@@ -969,6 +970,7 @@ export default function SystemConfig({
                                 </Label>
                                 {config.value_type === "boolean" ? (
                                   <Select
+                                    disabled={isUpdating || isSaving}
                                     value={
                                       localValue !== undefined
                                         ? localValue.toString()
@@ -980,7 +982,6 @@ export default function SystemConfig({
                                         [config.config_key]: value === "true",
                                       });
                                     }}
-                                    disabled={isUpdating || isSaving}
                                   >
                                     <SelectTrigger className="w-full sm:w-[180px] rounded-xl">
                                       <SelectValue />
@@ -996,6 +997,8 @@ export default function SystemConfig({
                                   </Select>
                                 ) : config.value_type === "number" ? (
                                   <Input
+                                    className="w-full sm:w-[200px] rounded-xl"
+                                    disabled={isUpdating || isSaving}
                                     type="number"
                                     value={
                                       localValue !== undefined
@@ -1010,11 +1013,18 @@ export default function SystemConfig({
                                         [config.config_key]: value,
                                       });
                                     }}
-                                    className="w-full sm:w-[200px] rounded-xl"
-                                    disabled={isUpdating || isSaving}
                                   />
                                 ) : (
                                   <Input
+                                    className="w-full sm:max-w-[400px] rounded-xl"
+                                    disabled={isUpdating || isSaving}
+                                    placeholder={
+                                      category === "contact"
+                                        ? getContactPlaceholder(
+                                            config.config_key,
+                                          )
+                                        : undefined
+                                    }
                                     type="text"
                                     value={
                                       localValue !== undefined
@@ -1027,15 +1037,6 @@ export default function SystemConfig({
                                         [config.config_key]: e.target.value,
                                       });
                                     }}
-                                    placeholder={
-                                      category === "contact"
-                                        ? getContactPlaceholder(
-                                            config.config_key,
-                                          )
-                                        : undefined
-                                    }
-                                    className="w-full sm:max-w-[400px] rounded-xl"
-                                    disabled={isUpdating || isSaving}
                                   />
                                 )}
                               </div>
@@ -1043,12 +1044,12 @@ export default function SystemConfig({
                               <div className="flex flex-col sm:items-end gap-2">
                                 {hasChanges && (
                                   <Button
+                                    className="min-w-[100px] rounded-xl min-h-[44px] w-full sm:w-auto"
+                                    disabled={isSaving}
                                     size="sm"
                                     onClick={() =>
                                       handleSaveConfig(config.config_key)
                                     }
-                                    disabled={isSaving}
-                                    className="min-w-[100px] rounded-xl min-h-[44px] w-full sm:w-auto"
                                   >
                                     {isSaving ? (
                                       <>

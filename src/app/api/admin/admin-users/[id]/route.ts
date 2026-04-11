@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/utils/supabase/server";
+
 import { getBranchContext } from "@/lib/api/branch-middleware";
 import { appLogger as logger } from "@/lib/logger";
 import type {
   GetAdminRoleParams,
   GetAdminRoleResult,
 } from "@/types/supabase-rpc";
+import { createClient } from "@/utils/supabase/server";
 
 export const dynamic = "force-dynamic";
 export async function GET(
@@ -91,11 +92,11 @@ export async function GET(
     // Process branch access
     const branchAccess = adminUser.admin_branch_access || [];
     const isSuperAdmin = branchAccess.some(
-      (access: any) => access.branch_id === null,
+      (access: unknown) => access.branch_id === null,
     );
     const branches = branchAccess
-      .filter((access: any) => access.branch_id !== null)
-      .map((access: any) => ({
+      .filter((access: unknown) => access.branch_id !== null)
+      .map((access: unknown) => ({
         id: access.branch_id,
         name: access.branches?.name || "N/A",
         code: access.branches?.code || "N/A",
@@ -325,7 +326,7 @@ export async function PUT(
     }
 
     // Prepare update data
-    const updateData: any = {
+    const updateData: unknown = {
       updated_at: new Date().toISOString(),
     };
 
@@ -525,14 +526,14 @@ export async function DELETE(
 }
 
 // Helper function to calculate most frequent actions
-function getMostFrequentActions(activities: any[]) {
-  const actionCounts = activities.reduce((acc: any, activity) => {
+function getMostFrequentActions(activities: unknown[]) {
+  const actionCounts = activities.reduce((acc: unknown, activity) => {
     acc[activity.action] = (acc[activity.action] || 0) + 1;
     return acc;
   }, {});
 
   return Object.entries(actionCounts)
     .map(([action, count]) => ({ action, count }))
-    .sort((a: any, b: any) => b.count - a.count)
+    .sort((a: unknown, b: unknown) => b.count - a.count)
     .slice(0, 5);
 }

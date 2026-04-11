@@ -4,9 +4,9 @@
  */
 
 import type {
+  ApiErrorResponse,
   ApiResponse,
   ApiSuccessResponse,
-  ApiErrorResponse,
   PaginationMeta,
 } from "./response";
 
@@ -27,7 +27,7 @@ export class ApiClient {
   /**
    * Make a GET request
    */
-  async get<T = any>(
+  async get<T = unknown>(
     endpoint: string,
     options?: RequestInit,
   ): Promise<ApiResponse<T>> {
@@ -40,9 +40,9 @@ export class ApiClient {
   /**
    * Make a POST request
    */
-  async post<T = any>(
+  async post<T = unknown>(
     endpoint: string,
-    data?: any,
+    data?: unknown,
     options?: RequestInit,
   ): Promise<ApiResponse<T>> {
     return this.request<T>(endpoint, {
@@ -55,9 +55,9 @@ export class ApiClient {
   /**
    * Make a PUT request
    */
-  async put<T = any>(
+  async put<T = unknown>(
     endpoint: string,
-    data?: any,
+    data?: unknown,
     options?: RequestInit,
   ): Promise<ApiResponse<T>> {
     return this.request<T>(endpoint, {
@@ -70,7 +70,7 @@ export class ApiClient {
   /**
    * Make a DELETE request
    */
-  async delete<T = any>(
+  async delete<T = unknown>(
     endpoint: string,
     options?: RequestInit,
   ): Promise<ApiResponse<T>> {
@@ -129,7 +129,7 @@ export function isSuccess<T>(
  * Helper to check if an API response is an error
  */
 export function isError(
-  response: ApiResponse<any>,
+  response: ApiResponse<unknown>,
 ): response is ApiErrorResponse {
   return response.success === false;
 }
@@ -152,7 +152,7 @@ export function unwrapData<T>(response: ApiResponse<T>): T {
 /**
  * Extract error message from an error response
  */
-export function getErrorMessage(response: ApiResponse<any>): string {
+export function getErrorMessage(response: ApiResponse<unknown>): string {
   if (isError(response)) {
     return response.error?.message || "Unknown error";
   }
@@ -223,7 +223,7 @@ export async function fetchCustomers(params: {
   limit?: number;
   search?: string;
   status?: string;
-}): Promise<PaginatedResult<any>> {
+}): Promise<PaginatedResult<unknown>> {
   const client = new ApiClient();
   const queryString = new URLSearchParams(
     Object.entries(params).filter(([_, v]) => v !== undefined) as [
@@ -232,14 +232,16 @@ export async function fetchCustomers(params: {
     ][],
   ).toString();
 
-  const response = await client.get(`/api/admin/customers?${queryString}`);
+  const response = await client.get<unknown[]>(
+    `/api/admin/customers?${queryString}`,
+  );
   return handlePaginatedResponse(response);
 }
 
 /**
  * Type guard for validation errors
  */
-export function isValidationError(response: ApiResponse<any>): boolean {
+export function isValidationError(response: ApiResponse<unknown>): boolean {
   return isError(response) && response.error.code === "VALIDATION_ERROR";
 }
 
@@ -247,7 +249,7 @@ export function isValidationError(response: ApiResponse<any>): boolean {
  * Extract validation error details
  */
 export function getValidationErrors(
-  response: ApiResponse<any>,
+  response: ApiResponse<unknown>,
 ): Array<{ field: string; message: string }> | null {
   if (!isError(response)) {
     return null;
@@ -265,7 +267,7 @@ export function getValidationErrors(
 /**
  * Format error for display
  */
-export function formatErrorForDisplay(response: ApiResponse<any>): string {
+export function formatErrorForDisplay(response: ApiResponse<unknown>): string {
   if (!isError(response)) {
     return "";
   }

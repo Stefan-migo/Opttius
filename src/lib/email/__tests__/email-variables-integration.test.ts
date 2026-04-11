@@ -3,7 +3,7 @@
  * Verifies that each send function produces correct variables from input data
  */
 
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // Capture variables passed to replaceTemplateVariables
 let capturedVariables: Record<string, string | number | null | undefined>[] =

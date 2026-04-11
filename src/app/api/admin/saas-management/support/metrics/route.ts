@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireRoot } from "@/lib/api/root-middleware";
-import { createServiceRoleClient } from "@/utils/supabase/service-role";
-import { appLogger as logger } from "@/lib/logger";
+
 import { AuthorizationError } from "@/lib/api/errors";
+import { requireRoot } from "@/lib/api/root-middleware";
+import { appLogger as logger } from "@/lib/logger";
+import { createServiceRoleClient } from "@/utils/supabase/service-role";
 
 /**
  * GET /api/admin/saas-management/support/metrics
@@ -55,7 +56,7 @@ export async function GET(request: NextRequest) {
       closed: 0,
     };
 
-    ticketsByStatus?.forEach((ticket: any) => {
+    ticketsByStatus?.forEach((ticket: unknown) => {
       if (ticket.status in statusCounts) {
         statusCounts[ticket.status as keyof typeof statusCounts]++;
       }
@@ -88,7 +89,7 @@ export async function GET(request: NextRequest) {
       urgent: 0,
     };
 
-    ticketsByPriority?.forEach((ticket: any) => {
+    ticketsByPriority?.forEach((ticket: unknown) => {
       if (ticket.priority in priorityCounts) {
         priorityCounts[ticket.priority as keyof typeof priorityCounts]++;
       }
@@ -109,7 +110,7 @@ export async function GET(request: NextRequest) {
     const { data: ticketsByCategory } = await categoryQuery;
 
     const categoryCounts: Record<string, number> = {};
-    ticketsByCategory?.forEach((ticket: any) => {
+    ticketsByCategory?.forEach((ticket: unknown) => {
       categoryCounts[ticket.category] =
         (categoryCounts[ticket.category] || 0) + 1;
     });
@@ -132,7 +133,7 @@ export async function GET(request: NextRequest) {
     const avgResponseTime =
       ticketsWithResponseTime && ticketsWithResponseTime.length > 0
         ? ticketsWithResponseTime.reduce(
-            (sum: number, ticket: any) =>
+            (sum: number, ticket: unknown) =>
               sum + (ticket.response_time_minutes || 0),
             0,
           ) / ticketsWithResponseTime.length
@@ -156,7 +157,7 @@ export async function GET(request: NextRequest) {
     const avgResolutionTime =
       ticketsWithResolutionTime && ticketsWithResolutionTime.length > 0
         ? ticketsWithResolutionTime.reduce(
-            (sum: number, ticket: any) =>
+            (sum: number, ticket: unknown) =>
               sum + (ticket.resolution_time_minutes || 0),
             0,
           ) / ticketsWithResolutionTime.length
@@ -180,7 +181,7 @@ export async function GET(request: NextRequest) {
     const avgSatisfaction =
       ticketsWithRating && ticketsWithRating.length > 0
         ? ticketsWithRating.reduce(
-            (sum: number, ticket: any) =>
+            (sum: number, ticket: unknown) =>
               sum + (ticket.customer_satisfaction_rating || 0),
             0,
           ) / ticketsWithRating.length
@@ -197,7 +198,7 @@ export async function GET(request: NextRequest) {
       .order("created_at", { ascending: true });
 
     const ticketsPerDay: Record<string, number> = {};
-    recentTickets?.forEach((ticket: any) => {
+    recentTickets?.forEach((ticket: unknown) => {
       const date = new Date(ticket.created_at).toISOString().split("T")[0];
       ticketsPerDay[date] = (ticketsPerDay[date] || 0) + 1;
     });
@@ -218,7 +219,7 @@ export async function GET(request: NextRequest) {
     const { data: ticketsByOrg } = await orgQuery;
 
     const orgTicketCounts: Record<string, { name: string; count: number }> = {};
-    ticketsByOrg?.forEach((ticket: any) => {
+    ticketsByOrg?.forEach((ticket: unknown) => {
       const orgId = ticket.organization_id;
       if (orgId) {
         if (!orgTicketCounts[orgId]) {

@@ -15,19 +15,19 @@ export * from "./organization-schemas";
 
 // Export validation helpers (excluding conflicting names)
 export {
-  validateBody,
   parseAndValidateBody,
   parseAndValidateParams,
-  validationErrorResponse,
+  validateBody,
   ValidationError,
+  validationErrorResponse,
 } from "./zod-helpers";
 
 // Export middleware (excluding conflicting names)
 export {
   withBodyValidation,
-  withQueryValidation,
-  withPathValidation,
   withValidation as withCombinedValidation,
+  withPathValidation,
+  withQueryValidation,
 } from "./middleware";
 
 // Export types

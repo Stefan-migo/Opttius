@@ -1,8 +1,9 @@
 "use client";
 
+import { AlertTriangle, Package, Plus, Settings } from "lucide-react";
 import Link from "next/link";
+
 import { Card, CardContent } from "@/components/ui/card";
-import { Plus, AlertTriangle, Package, Settings } from "lucide-react";
 
 interface QuickActionsProps {
   onShowLowStock: () => void;
@@ -22,7 +23,7 @@ export default function QuickActions({
       {/* Agregar Nuevo Producto */}
       <Card className="group cursor-pointer transition-shadow duration-300 border border-admin-border-primary/20 bg-admin-bg-tertiary/50 rounded-xl shadow-none hover:shadow-lg overflow-hidden">
         <CardContent className="p-3 sm:p-4">
-          <Link href="/admin/products/add" className="block">
+          <Link className="block" href="/admin/products/add">
             <div className="flex flex-col items-center justify-center text-center space-y-1.5 sm:space-y-2 min-h-[64px] sm:min-h-[80px]">
               <div className="p-2 sm:p-3 bg-epoch-primary/5 border border-epoch-primary/10 transition-transform group-hover:scale-110">
                 <Plus className="h-5 w-5 sm:h-6 sm:w-6 text-epoch-primary" />
@@ -92,7 +93,7 @@ export default function QuickActions({
       {/* Opciones de Producto */}
       <Card className="group cursor-pointer transition-shadow duration-300 border border-admin-border-primary/20 bg-admin-bg-tertiary/50 rounded-xl shadow-none hover:shadow-lg overflow-hidden">
         <CardContent className="p-3 sm:p-4">
-          <Link href="/admin/products/options" className="block">
+          <Link className="block" href="/admin/products/options">
             <div className="flex flex-col items-center justify-center text-center space-y-1.5 sm:space-y-2 min-h-[64px] sm:min-h-[80px]">
               <div className="p-2 sm:p-3 bg-epoch-primary/5 border border-epoch-primary/10 transition-transform group-hover:scale-110">
                 <Settings className="h-5 w-5 sm:h-6 sm:w-6 text-epoch-primary" />

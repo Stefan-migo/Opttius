@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createServiceRoleClient } from "@/utils/supabase/server";
+
 import { sendSaaSPaymentReminder } from "@/lib/email/templates/saas";
 import { appLogger as logger } from "@/lib/logger";
+import { createServiceRoleClient } from "@/utils/supabase/server";
 
 /**
  * GET /api/cron/saas-payment-reminder

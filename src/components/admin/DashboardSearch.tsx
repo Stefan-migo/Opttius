@@ -1,7 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Input } from "@/components/ui/input";
+import { Loader2, Package, Search, User } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -10,9 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Search, User, Package, Loader2 } from "lucide-react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { Input } from "@/components/ui/input";
 import { extractDataFromResponse } from "@/lib/api/response-helpers";
 
 interface SearchResult {
@@ -63,7 +63,7 @@ export function DashboardSearch({ type, placeholder }: DashboardSearchProps) {
       if (response.ok) {
         if (type === "customer") {
           setResults(
-            (extractDataFromResponse(data) || []).map((c: any) => ({
+            (extractDataFromResponse(data) || []).map((c: unknown) => ({
               id: c.id,
               name:
                 `${c.first_name || ""} ${c.last_name || ""}`.trim() ||
@@ -75,7 +75,7 @@ export function DashboardSearch({ type, placeholder }: DashboardSearchProps) {
           );
         } else {
           setResults(
-            (extractDataFromResponse(data) || []).map((p: any) => ({
+            (extractDataFromResponse(data) || []).map((p: unknown) => ({
               id: p.id,
               name: p.name,
               type: "product" as const,
@@ -108,9 +108,9 @@ export function DashboardSearch({ type, placeholder }: DashboardSearchProps) {
   return (
     <>
       <Button
+        className="w-full justify-start h-10 hover:bg-[#AE0000]/5 hover:border-[#AE0000] border-gray-300 transition-all duration-300"
         variant="outline"
         onClick={() => setOpen(true)}
-        className="w-full justify-start h-10 hover:bg-[#AE0000]/5 hover:border-[#AE0000] border-gray-300 transition-all duration-300"
       >
         {type === "customer" ? (
           <User className="h-4 w-4 mr-2 flex-shrink-0 text-[var(--admin-accent-secondary)]" />
@@ -137,6 +137,8 @@ export function DashboardSearch({ type, placeholder }: DashboardSearchProps) {
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input
+                autoFocus
+                className="pl-10"
                 placeholder={
                   placeholder ||
                   (type === "customer"
@@ -145,8 +147,6 @@ export function DashboardSearch({ type, placeholder }: DashboardSearchProps) {
                 }
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                className="pl-10"
-                autoFocus
               />
             </div>
 
@@ -166,9 +166,9 @@ export function DashboardSearch({ type, placeholder }: DashboardSearchProps) {
               <div className="max-h-[400px] overflow-y-auto space-y-1">
                 {results.map((result) => (
                   <button
+                    className="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition-colors border border-transparent hover:border-gray-200"
                     key={result.id}
                     onClick={() => handleSelect(result)}
-                    className="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition-colors border border-transparent hover:border-gray-200"
                   >
                     <div className="flex items-center gap-3">
                       {result.type === "customer" ? (

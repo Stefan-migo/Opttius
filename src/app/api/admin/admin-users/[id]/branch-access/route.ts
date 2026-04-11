@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/utils/supabase/server";
-import { createServiceRoleClient } from "@/utils/supabase/service-role";
+
 import { getBranchContext } from "@/lib/api/branch-middleware";
 import { appLogger as logger } from "@/lib/logger";
 import type {
   GetAdminRoleParams,
   GetAdminRoleResult,
 } from "@/types/supabase-rpc";
+import { createClient } from "@/utils/supabase/server";
+import { createServiceRoleClient } from "@/utils/supabase/service-role";
 
 // GET: Get branch access for an admin user
 export const dynamic = "force-dynamic";
@@ -72,7 +73,7 @@ export async function GET(
     }
 
     return NextResponse.json({ branchAccess: branchAccess || [] });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error("Error in GET branch access:", { error, adminUserId: id });
     return NextResponse.json(
       { error: error.message || "Internal server error" },
@@ -238,7 +239,7 @@ export async function POST(
     }
 
     return NextResponse.json({ branchAccess });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error("Error in POST branch access:", { error, adminUserId: id });
     return NextResponse.json(
       { error: error.message || "Internal server error" },
@@ -323,7 +324,7 @@ export async function DELETE(
     }
 
     return NextResponse.json({ success: true });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error("Error in DELETE branch access:", { error, adminUserId: id });
     return NextResponse.json(
       { error: error.message || "Internal server error" },

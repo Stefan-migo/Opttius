@@ -1,4 +1,4 @@
-import { clsx, type ClassValue } from "clsx";
+import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
@@ -7,14 +7,14 @@ export function cn(...inputs: ClassValue[]) {
 
 // Re-export formatting utilities
 export {
-  formatDate,
-  formatRelativeDate,
+  type CurrencyFormatOptions,
+  type DateFormatOptions,
   formatCurrency,
-  formatPrice,
-  formatNumber,
+  formatDate,
   formatDateTime,
+  formatNumber,
+  formatPrice,
+  formatRelativeDate,
   formatTimeAgo,
   type Locale,
-  type DateFormatOptions,
-  type CurrencyFormatOptions,
 } from "./utils/formatting";

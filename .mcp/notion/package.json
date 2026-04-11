@@ -1,0 +1,64 @@
+{
+  "name": "opttius-notion-mcp-server",
+  "version": "1.0.0",
+  "description": "Local Notion MCP Server for Opttius project",
+  "main": "start-server.js",
+  "scripts": {
+    "start": "node start-server.js",
+    "test": "node start-server.js --test",
+    "dev": "node start-server.js --debug",
+    "sync-env": "node sync-env.js",
+    "postinstall": "node sync-env.js",
+    "test-connection": "node test-connection.js",
+    "setup-claude": "node setup-claude.js",
+    "install-deps": "npm install"
+  },
+  "keywords": [
+    "mcp",
+    "notion",
+    "opttius",
+    "claude",
+    "integration"
+  ],
+  "author": "Opttius Team",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^0.6.0",
+    "@notionhq/client": "^2.2.15",
+    "dotenv": "^16.4.5",
+    "yargs": "^17.7.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.24"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "mcp": {
+    "name": "notion",
+    "version": "1.0.0",
+    "capabilities": {
+      "resources": {},
+      "tools": {
+        "search_pages": {
+          "description": "Search pages in Notion"
+        },
+        "get_page": {
+          "description": "Get a page by ID"
+        },
+        "create_page": {
+          "description": "Create a new page"
+        },
+        "update_page": {
+          "description": "Update an existing page"
+        },
+        "query_database": {
+          "description": "Query a database"
+        },
+        "create_database_page": {
+          "description": "Create a new page in a database"
+        }
+      }
+    }
+  }
+}

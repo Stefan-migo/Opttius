@@ -7,16 +7,11 @@
  * @module tests/security/phase1-security.test
  */
 
-import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import { z } from "zod";
-import {
-  commonSchemas,
-  withBodyValidation,
-  withQueryValidation,
-  withPathValidation,
-} from "@/lib/validation";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
 import { RedisRateLimiter } from "@/lib/rate-limiting/redis-rate-limiter";
 import { getRedisClient } from "@/lib/redis/client";
+import { commonSchemas } from "@/lib/validation";
 
 // Mock Redis for testing
 vi.mock("@/lib/redis/client", () => ({
@@ -26,16 +21,16 @@ vi.mock("@/lib/redis/client", () => ({
     ttl: vi.fn().mockResolvedValue(300),
     setex: vi.fn().mockImplementation((key, ttl, value) => {
       // Store the value for later retrieval
-      (global as any).__redisStore = (global as any).__redisStore || {};
-      (global as any).__redisStore[key] = value;
+      (global as unknown).__redisStore = (global as unknown).__redisStore || {};
+      (global as unknown).__redisStore[key] = value;
       return Promise.resolve("OK");
     }),
     get: vi.fn().mockImplementation((key) => {
-      const store = (global as any).__redisStore || {};
+      const store = (global as unknown).__redisStore || {};
       return Promise.resolve(store[key] || null);
     }),
     del: vi.fn().mockImplementation((key) => {
-      const store = (global as any).__redisStore || {};
+      const store = (global as unknown).__redisStore || {};
       if (store[key] !== undefined) {
         delete store[key];
         return Promise.resolve(1);
@@ -46,14 +41,14 @@ vi.mock("@/lib/redis/client", () => ({
     zremrangebyscore: vi.fn().mockResolvedValue(0),
     zadd: vi.fn().mockImplementation((key, score, member) => {
       // Track requests per key
-      const requestCounts = (global as any).__requestCounts || {};
+      const requestCounts = (global as unknown).__requestCounts || {};
       requestCounts[key] = (requestCounts[key] || 0) + 1;
-      (global as any).__requestCounts = requestCounts;
+      (global as unknown).__requestCounts = requestCounts;
       return Promise.resolve(1);
     }),
     zcard: vi.fn().mockImplementation((key) => {
       // Return current request count for this key
-      const requestCounts = (global as any).__requestCounts || {};
+      const requestCounts = (global as unknown).__requestCounts || {};
       return Promise.resolve(requestCounts[key] || 0);
     }),
     pexpire: vi.fn().mockResolvedValue(1),
@@ -210,7 +205,7 @@ describe("Phase 1 Security Implementation Tests", () => {
             ping: vi.fn().mockRejectedValue(new Error("Connection failed")),
             setex: vi.fn().mockRejectedValue(new Error("Connection failed")),
             get: vi.fn().mockRejectedValue(new Error("Connection failed")),
-          }) as any,
+          }) as unknown,
       );
 
       const client = getRedisClient();
@@ -309,7 +304,7 @@ describe("Phase 1 Security Implementation Tests", () => {
           ({
             incr: vi.fn().mockRejectedValue(new Error("Redis unavailable")),
             expire: vi.fn().mockRejectedValue(new Error("Redis unavailable")),
-          }) as any,
+          }) as unknown,
       );
 
       const result = await rateLimiter.isRateLimited("test-client-error", {
@@ -415,13 +410,13 @@ describe("Phase 1 Security Implementation Tests", () => {
       // Test validation errors
       try {
         commonSchemas.email.parse("invalid-email");
-      } catch (error: any) {
+      } catch (error: unknown) {
         expect(error.errors[0].message).toBe("Must be a valid email address");
       }
 
       try {
         commonSchemas.pagination.parse({ page: 0 });
-      } catch (error: any) {
+      } catch (error: unknown) {
         expect(error.errors[0].message).toBe("Page must be 1 or greater");
       }
     });
@@ -453,13 +448,13 @@ describe("Phase 1 Security Implementation Tests", () => {
           return {
             incr: vi.fn().mockRejectedValue(new Error("Temporary failure")),
             expire: vi.fn().mockRejectedValue(new Error("Temporary failure")),
-          } as any;
+          } as unknown;
         }
         return {
           incr: vi.fn().mockResolvedValue(1),
           expire: vi.fn().mockResolvedValue("OK"),
           ttl: vi.fn().mockResolvedValue(300),
-        } as any;
+        } as unknown;
       });
 
       const rateLimiter = new RedisRateLimiter();

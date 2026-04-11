@@ -1,6 +1,7 @@
 "use client";
 
-import { X, ChevronLeft, ChevronRight, Check } from "lucide-react";
+import { Check, ChevronLeft, ChevronRight, X } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TourStep } from "@/lib/onboarding/tour-config";
@@ -105,11 +106,11 @@ export function TourCard({
             </p>
           </div>
           <Button
-            variant="ghost"
-            size="icon"
             className="h-6 w-6"
-            onClick={onSkip}
+            size="icon"
             title="Cerrar tour"
+            variant="ghost"
+            onClick={onSkip}
           >
             <X className="h-4 w-4" />
           </Button>
@@ -121,7 +122,7 @@ export function TourCard({
         {step.keyActions.length > 0 && (
           <ul className="space-y-2">
             {step.keyActions.map((action, index) => (
-              <li key={index} className="flex items-start gap-2 text-sm">
+              <li className="flex items-start gap-2 text-sm" key={index}>
                 <Check className="h-4 w-4 text-green-600 mt-0.5 shrink-0" />
                 <span className="text-muted-foreground">{action}</span>
               </li>
@@ -131,8 +132,8 @@ export function TourCard({
 
         {step.actionUrl && step.actionLabel && (
           <Button
-            variant="outline"
             className="w-full"
+            variant="outline"
             onClick={() => {
               window.location.href = step.actionUrl!;
             }}
@@ -143,17 +144,17 @@ export function TourCard({
 
         <div className="flex items-center justify-between pt-2 border-t">
           <Button
-            variant="ghost"
-            size="sm"
-            onClick={onPrevious}
             disabled={isFirstStep}
+            size="sm"
+            variant="ghost"
+            onClick={onPrevious}
           >
             <ChevronLeft className="h-4 w-4 mr-1" />
             Anterior
           </Button>
 
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="sm" onClick={onSkip}>
+            <Button size="sm" variant="ghost" onClick={onSkip}>
               Saltar Tour
             </Button>
             {isLastStep ? (

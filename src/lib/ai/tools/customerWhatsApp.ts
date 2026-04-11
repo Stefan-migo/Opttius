@@ -1,6 +1,7 @@
 /**
  * Tools para clientes por WhatsApp (solo consulta, validan ownership) */
 import { z } from "zod";
+
 import type { ToolDefinition, ToolResult } from "./types";
 
 const getAppointmentStatusSchema = z.object({

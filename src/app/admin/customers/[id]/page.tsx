@@ -1,11 +1,43 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter, useParams } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Activity,
+  AlertTriangle,
+  ArrowLeft,
+  Calendar,
+  Calendar as CalendarIcon,
+  CheckCircle,
+  Clock,
+  Crown,
+  DollarSign,
+  Edit,
+  Eye,
+  FileText,
+  Heart,
+  MapPin,
+  Package,
+  Plus,
+  ShoppingBag,
+  Star,
+  TrendingUp,
+  User,
+} from "lucide-react";
+import dynamic from "next/dynamic";
+import Link from "next/link";
+import { useParams, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+
+import { PrescriptionFullDisplay } from "@/components/admin/PrescriptionFullDisplay";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   Table,
   TableBody,
@@ -14,52 +46,16 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
-  ArrowLeft,
-  User,
-  Mail,
-  Phone,
-  MapPin,
-  Calendar,
-  Package,
-  CreditCard,
-  TrendingUp,
-  Star,
-  AlertTriangle,
-  CheckCircle,
-  MessageSquare,
-  Heart,
-  ShoppingBag,
-  DollarSign,
-  Activity,
-  Edit,
-  Eye,
-  FileText,
-  Clock,
-  Plus,
-  X,
-  Crown,
-  Calendar as CalendarIcon,
-} from "lucide-react";
-import Link from "next/link";
-import { formatCurrency, formatDate } from "@/lib/utils";
-import {
-  customerService,
-  Customer,
-  Prescription,
   Appointment,
-  Quote,
+  Customer,
+  customerService,
   LensPurchase,
+  Prescription,
+  Quote,
 } from "@/lib/api/services";
-import { PrescriptionFullDisplay } from "@/components/admin/PrescriptionFullDisplay";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import dynamic from "next/dynamic";
+import { formatCurrency, formatDate } from "@/lib/utils";
 
 // Lazy load large form components to reduce initial bundle size
 const CreatePrescriptionForm = dynamic(
@@ -67,7 +63,7 @@ const CreatePrescriptionForm = dynamic(
   {
     loading: () => (
       <div className="flex items-center justify-center py-8">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-admin-text-primary"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-admin-text-primary" />
       </div>
     ),
     ssr: false,
@@ -79,7 +75,7 @@ const CreateAppointmentForm = dynamic(
   {
     loading: () => (
       <div className="flex items-center justify-center py-8">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-admin-text-primary"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-admin-text-primary" />
       </div>
     ),
     ssr: false,
@@ -91,7 +87,7 @@ const CreateQuoteForm = dynamic(
   {
     loading: () => (
       <div className="flex items-center justify-center py-8">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-admin-text-primary"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-admin-text-primary" />
       </div>
     ),
     ssr: false,
@@ -163,7 +159,7 @@ export default function CustomerDetailPage() {
   const getSegmentBadge = (segment: string) => {
     const variants: Record<
       string,
-      { variant: any; label: string; icon: any; color: string }
+      { variant: unknown; label: string; icon: unknown; color: string }
     > = {
       new: {
         variant: "secondary",
@@ -201,7 +197,7 @@ export default function CustomerDetailPage() {
     const Icon = config.icon;
 
     return (
-      <Badge variant={config.variant} className="flex items-center gap-1">
+      <Badge className="flex items-center gap-1" variant={config.variant}>
         <Icon className="h-3 w-3" />
         {config.label}
       </Badge>
@@ -221,7 +217,7 @@ export default function CustomerDetailPage() {
   };
 
   const getOrderStatusBadge = (status: string) => {
-    const config: Record<string, { variant: any; label: string }> = {
+    const config: Record<string, { variant: unknown; label: string }> = {
       pending: { variant: "outline", label: "Pendiente" },
       processing: { variant: "secondary", label: "Procesando" },
       shipped: { variant: "default", label: "Enviado" },
@@ -242,7 +238,7 @@ export default function CustomerDetailPage() {
       <div className="space-y-6">
         <div className="space-y-4">
           <div className="flex items-center gap-3">
-            <Button variant="outline" size="sm" className="min-h-[44px]">
+            <Button className="min-h-[44px]" size="sm" variant="outline">
               <ArrowLeft className="h-4 w-4" />
             </Button>
             <h1 className="text-2xl sm:text-3xl font-bold text-admin-text-primary">
@@ -255,10 +251,10 @@ export default function CustomerDetailPage() {
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
           {[...Array(6)].map((_, i) => (
-            <Card key={i} className="animate-pulse">
+            <Card className="animate-pulse" key={i}>
               <CardContent className="p-6">
-                <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-                <div className="h-8 bg-gray-200 rounded w-1/2"></div>
+                <div className="h-4 bg-gray-200 rounded w-3/4 mb-2" />
+                <div className="h-8 bg-gray-200 rounded w-1/2" />
               </CardContent>
             </Card>
           ))}
@@ -273,10 +269,10 @@ export default function CustomerDetailPage() {
         <div className="space-y-4">
           <div className="flex items-center gap-3">
             <Button
-              variant="outline"
-              size="sm"
-              onClick={() => router.back()}
               className="min-h-[44px]"
+              size="sm"
+              variant="outline"
+              onClick={() => router.back()}
             >
               <ArrowLeft className="h-4 w-4" />
             </Button>
@@ -315,10 +311,10 @@ export default function CustomerDetailPage() {
       <div className="space-y-4">
         <div className="flex items-center gap-3">
           <Button
-            variant="outline"
-            size="sm"
-            onClick={() => router.back()}
             className="min-h-[44px] shrink-0"
+            size="sm"
+            variant="outline"
+            onClick={() => router.back()}
           >
             <ArrowLeft className="h-4 w-4" />
           </Button>
@@ -334,8 +330,8 @@ export default function CustomerDetailPage() {
             getSegmentBadge(customer.analytics.segment)}
           {customer.is_convenio_client && (
             <Badge
-              variant="outline"
               className="border-admin-accent-primary/50 text-admin-accent-primary"
+              variant="outline"
             >
               <FileText className="h-3 w-3 mr-1" />
               Cliente convenio
@@ -418,48 +414,48 @@ export default function CustomerDetailPage() {
       </div>
 
       {/* Main Content - Tabs styled like /admin/system */}
-      <Tabs defaultValue="overview" className="space-y-4 sm:space-y-6">
+      <Tabs className="space-y-4 sm:space-y-6" defaultValue="overview">
         <TabsList className="flex w-full justify-start md:justify-center gap-1 sm:gap-2 h-auto p-1 overflow-x-auto overflow-y-hidden min-w-0 [scrollbar-width:thin] [&::-webkit-scrollbar]:h-1 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-epoch-primary/30 rounded-xl border border-epoch-primary/10 bg-epoch-background/50">
           <TabsTrigger
-            value="overview"
             className="flex-shrink-0 text-xs sm:text-sm px-3 py-2 min-h-[44px]"
+            value="overview"
           >
             Resumen
           </TabsTrigger>
           <TabsTrigger
-            value="prescriptions"
             className="flex-shrink-0 text-xs sm:text-sm px-3 py-2 min-h-[44px]"
+            value="prescriptions"
           >
             Recetas
           </TabsTrigger>
           <TabsTrigger
-            value="appointments"
             className="flex-shrink-0 text-xs sm:text-sm px-3 py-2 min-h-[44px]"
+            value="appointments"
           >
             Citas
           </TabsTrigger>
           <TabsTrigger
-            value="quotes"
             className="flex-shrink-0 text-xs sm:text-sm px-3 py-2 min-h-[44px]"
+            value="quotes"
           >
             Presupuestos
           </TabsTrigger>
           <TabsTrigger
-            value="purchases"
             className="flex-shrink-0 text-xs sm:text-sm px-3 py-2 min-h-[44px]"
+            value="purchases"
           >
             Compras
           </TabsTrigger>
           <TabsTrigger
-            value="analytics"
             className="flex-shrink-0 text-xs sm:text-sm px-3 py-2 min-h-[44px]"
+            value="analytics"
           >
             Analíticas
           </TabsTrigger>
           {customer.agreement_usage && customer.agreement_usage.length > 0 && (
             <TabsTrigger
-              value="convenios"
               className="flex-shrink-0 text-xs sm:text-sm px-3 py-2 min-h-[44px]"
+              value="convenios"
             >
               Convenios
             </TabsTrigger>
@@ -467,8 +463,8 @@ export default function CustomerDetailPage() {
         </TabsList>
 
         <TabsContent
-          value="overview"
           className="space-y-4 sm:space-y-6 mt-4 sm:mt-6"
+          value="overview"
         >
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
             {/* Customer Information */}
@@ -590,9 +586,9 @@ export default function CustomerDetailPage() {
                       {customer.allergies.map(
                         (allergy: string, idx: number) => (
                           <Badge
+                            className="bg-red-50 text-red-700"
                             key={idx}
                             variant="outline"
-                            className="bg-red-50 text-red-700"
                           >
                             {allergy}
                           </Badge>
@@ -711,7 +707,7 @@ export default function CustomerDetailPage() {
                     Pedidos Recientes
                   </div>
                   <Link href={`/admin/customers/${customer.id}?tab=orders`}>
-                    <Button variant="outline" size="sm">
+                    <Button size="sm" variant="outline">
                       Ver todos
                     </Button>
                   </Link>
@@ -721,8 +717,8 @@ export default function CustomerDetailPage() {
                 <div className="space-y-3">
                   {customer.orders.slice(0, 5).map((order) => (
                     <div
-                      key={order.id}
                       className="flex items-center justify-between p-3 border rounded-lg"
+                      key={order.id}
                     >
                       <div className="flex items-center space-x-3">
                         <div>
@@ -741,7 +737,7 @@ export default function CustomerDetailPage() {
                           {getOrderStatusBadge(order.status)}
                         </div>
                         <Link href={`/admin/orders/${order.id}`}>
-                          <Button variant="outline" size="sm">
+                          <Button size="sm" variant="outline">
                             Ver
                           </Button>
                         </Link>
@@ -755,8 +751,8 @@ export default function CustomerDetailPage() {
         </TabsContent>
 
         <TabsContent
-          value="prescriptions"
           className="space-y-4 sm:space-y-6 mt-4 sm:mt-6"
+          value="prescriptions"
         >
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
             <CardTitle className="flex items-center text-admin-text-primary">
@@ -764,11 +760,11 @@ export default function CustomerDetailPage() {
               Recetas Ópticas ({customer.prescriptions?.length || 0})
             </CardTitle>
             <Button
+              className="min-h-[44px] w-full sm:w-auto"
               onClick={() => {
                 setEditingPrescription(null);
                 setShowCreatePrescription(true);
               }}
-              className="min-h-[44px] w-full sm:w-auto"
             >
               <Plus className="h-4 w-4 mr-2" />
               Nueva Receta
@@ -779,8 +775,8 @@ export default function CustomerDetailPage() {
             <div className="space-y-4">
               {customer.prescriptions.map((prescription: Prescription) => (
                 <Card
-                  key={prescription.id}
                   className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)]"
+                  key={prescription.id}
                 >
                   <CardHeader className="p-4 sm:p-6">
                     <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
@@ -816,13 +812,13 @@ export default function CustomerDetailPage() {
                           <Badge variant="outline">Inactiva</Badge>
                         )}
                         <Button
-                          variant="outline"
+                          className="min-h-[44px] w-full sm:w-auto"
                           size="sm"
+                          variant="outline"
                           onClick={() => {
                             setEditingPrescription(prescription);
                             setShowCreatePrescription(true);
                           }}
-                          className="min-h-[44px] w-full sm:w-auto"
                         >
                           <Edit className="h-3 w-3 mr-1" />
                           Editar
@@ -864,8 +860,8 @@ export default function CustomerDetailPage() {
         </TabsContent>
 
         <TabsContent
-          value="appointments"
           className="space-y-4 sm:space-y-6 mt-4 sm:mt-6"
+          value="appointments"
         >
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
             <CardTitle className="flex items-center text-admin-text-primary">
@@ -873,11 +869,11 @@ export default function CustomerDetailPage() {
               Citas y Agendas ({customer.appointments?.length || 0})
             </CardTitle>
             <Button
+              className="min-h-[44px] w-full sm:w-auto"
               onClick={() => {
                 setEditingAppointment(null);
                 setShowCreateAppointment(true);
               }}
-              className="min-h-[44px] w-full sm:w-auto"
             >
               <Plus className="h-4 w-4 mr-2" />
               Nueva Cita
@@ -901,8 +897,8 @@ export default function CustomerDetailPage() {
 
                 return (
                   <Card
-                    key={appointment.id}
                     className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)]"
+                    key={appointment.id}
                   >
                     <CardHeader className="p-4 sm:p-6">
                       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
@@ -1008,13 +1004,13 @@ export default function CustomerDetailPage() {
                         )}
                       <div className="mt-4 pt-4 border-t flex justify-end">
                         <Button
-                          variant="outline"
+                          className="min-h-[44px] w-full sm:w-auto"
                           size="sm"
+                          variant="outline"
                           onClick={() => {
                             setEditingAppointment(appointment);
                             setShowCreateAppointment(true);
                           }}
-                          className="min-h-[44px] w-full sm:w-auto"
                         >
                           <Edit className="h-4 w-4 mr-2" />
                           Editar Cita
@@ -1050,8 +1046,8 @@ export default function CustomerDetailPage() {
         </TabsContent>
 
         <TabsContent
-          value="quotes"
           className="space-y-4 sm:space-y-6 mt-4 sm:mt-6"
+          value="quotes"
         >
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
             <CardTitle className="flex items-center text-admin-text-primary">
@@ -1059,8 +1055,8 @@ export default function CustomerDetailPage() {
               Presupuestos ({customer.quotes?.length || 0})
             </CardTitle>
             <Button
-              onClick={() => setShowCreateQuote(true)}
               className="min-h-[44px] w-full sm:w-auto"
+              onClick={() => setShowCreateQuote(true)}
             >
               <Plus className="h-4 w-4 mr-2" />
               Nuevo Presupuesto
@@ -1073,7 +1069,7 @@ export default function CustomerDetailPage() {
                 const getStatusBadge = (status: string) => {
                   const config: Record<
                     string,
-                    { variant: any; label: string }
+                    { variant: unknown; label: string }
                   > = {
                     draft: { variant: "outline", label: "Borrador" },
                     sent: { variant: "default", label: "Enviado" },
@@ -1098,8 +1094,8 @@ export default function CustomerDetailPage() {
 
                 return (
                   <Card
-                    key={quote.id}
                     className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)]"
+                    key={quote.id}
                   >
                     <CardHeader className="p-4 sm:p-6">
                       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
@@ -1129,13 +1125,13 @@ export default function CustomerDetailPage() {
                             <Link
                               href={`/admin/work-orders/${quote.converted_to_work_order_id}`}
                             >
-                              <Button variant="outline" size="sm">
+                              <Button size="sm" variant="outline">
                                 Ver Trabajo
                               </Button>
                             </Link>
                           )}
                           <Link href={`/admin/quotes/${quote.id}`}>
-                            <Button variant="outline" size="sm">
+                            <Button size="sm" variant="outline">
                               Ver Detalle
                             </Button>
                           </Link>
@@ -1265,8 +1261,8 @@ export default function CustomerDetailPage() {
         </TabsContent>
 
         <TabsContent
-          value="purchases"
           className="space-y-4 sm:space-y-6 mt-4 sm:mt-6"
+          value="purchases"
         >
           {/* Lens Purchases Section */}
           <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)]">
@@ -1290,8 +1286,8 @@ export default function CustomerDetailPage() {
 
                     return (
                       <Card
-                        key={purchase.id}
                         className="bg-admin-bg-primary border border-admin-border-primary/20 shadow-sm"
+                        key={purchase.id}
                       >
                         <CardHeader className="p-4 sm:p-6">
                           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
@@ -1443,19 +1439,19 @@ export default function CustomerDetailPage() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {customer.orders.map((order: any) => (
+                      {customer.orders.map((order: unknown) => (
                         <>
                           <TableRow
-                            key={order.id}
                             className="hover:bg-[#AE000010]"
+                            key={order.id}
                           >
                             <TableCell>
                               <div className="flex items-center space-x-2">
                                 <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => toggleOrderExpansion(order.id)}
                                   className="min-h-[44px] min-w-[44px] p-0"
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() => toggleOrderExpansion(order.id)}
                                 >
                                   {expandedOrders.has(order.id) ? "−" : "+"}
                                 </Button>
@@ -1509,7 +1505,7 @@ export default function CustomerDetailPage() {
 
                             <TableCell>
                               <Link href={`/admin/orders/${order.id}`}>
-                                <Button variant="outline" size="sm">
+                                <Button size="sm" variant="outline">
                                   Ver Detalle
                                 </Button>
                               </Link>
@@ -1522,8 +1518,8 @@ export default function CustomerDetailPage() {
                             order.order_items.length > 0 && (
                               <TableRow key={`${order.id}-items`}>
                                 <TableCell
-                                  colSpan={6}
                                   className="bg-admin-bg-tertiary/50 p-4"
+                                  colSpan={6}
                                 >
                                   <div className="space-y-2">
                                     <p className="text-xs sm:text-sm font-medium text-admin-text-primary mb-3">
@@ -1531,23 +1527,23 @@ export default function CustomerDetailPage() {
                                     </p>
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                                       {order.order_items.map(
-                                        (item: any, idx: number) => {
+                                        (item: unknown, idx: number) => {
                                           const product =
                                             item.products || item.product;
                                           return (
                                             <div
-                                              key={idx}
                                               className="flex items-center justify-between p-2 bg-admin-bg-primary rounded border border-admin-border-primary/20"
+                                              key={idx}
                                             >
                                               <div className="flex items-center space-x-3">
                                                 {product?.featured_image ? (
                                                   <img
-                                                    src={product.featured_image}
                                                     alt={
                                                       product.name ||
                                                       item.product_name
                                                     }
                                                     className="w-10 h-10 object-cover rounded"
+                                                    src={product.featured_image}
                                                   />
                                                 ) : (
                                                   <div className="w-10 h-10 bg-admin-bg-tertiary rounded flex items-center justify-center shrink-0">
@@ -1600,8 +1596,8 @@ export default function CustomerDetailPage() {
         </TabsContent>
 
         <TabsContent
-          value="analytics"
           className="space-y-4 sm:space-y-6 mt-4 sm:mt-6"
+          value="analytics"
         >
           {/* Empty State for No Orders */}
           {customer.analytics?.orderCount === 0 && (
@@ -1638,17 +1634,17 @@ export default function CustomerDetailPage() {
                         <div className="space-y-3">
                           {customer.analytics.favoriteProducts
                             .slice(0, 5)
-                            .map((item: any, index: number) => (
+                            .map((item: unknown, index: number) => (
                               <div
-                                key={index}
                                 className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-3 border rounded-lg hover:bg-[#AE000010] transition-colors"
+                                key={index}
                               >
                                 <div className="flex items-center space-x-3 min-w-0">
                                   {item.product?.featured_image ? (
                                     <img
-                                      src={item.product.featured_image}
                                       alt={item.product.name || "Product"}
                                       className="w-10 h-10 sm:w-12 sm:h-12 object-cover rounded border border-admin-border-primary/20 shrink-0"
+                                      src={item.product.featured_image}
                                     />
                                   ) : (
                                     <div className="w-10 h-10 sm:w-12 sm:h-12 bg-admin-bg-primary rounded border border-admin-border-primary/20 flex items-center justify-center shrink-0">
@@ -1701,8 +1697,8 @@ export default function CustomerDetailPage() {
                           customer.analytics.orderStatusCounts,
                         ).map(([status, count]) => (
                           <div
-                            key={status}
                             className="flex items-center justify-between"
+                            key={status}
                           >
                             <div className="flex items-center space-x-2">
                               {getOrderStatusBadge(status)}
@@ -1734,14 +1730,14 @@ export default function CustomerDetailPage() {
                     <CardContent>
                       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
                         {customer.analytics.monthlySpending.map(
-                          (month: any, index: number) => (
+                          (month: unknown, index: number) => (
                             <div
-                              key={index}
                               className={`text-center p-3 border rounded-lg transition-all hover:shadow-md ${
                                 month.amount > 0
                                   ? "bg-admin-success/10 border-admin-success/30"
                                   : "bg-gray-50"
                               }`}
+                              key={index}
                             >
                               <p className="text-xs font-medium text-admin-text-tertiary mb-1">
                                 {month.month}
@@ -1776,7 +1772,7 @@ export default function CustomerDetailPage() {
                             {formatCurrency(
                               Math.max(
                                 ...customer.analytics.monthlySpending.map(
-                                  (m: any) => m.amount,
+                                  (m: unknown) => m.amount,
                                 ),
                               ),
                             )}
@@ -1789,7 +1785,7 @@ export default function CustomerDetailPage() {
                           <p className="font-bold text-lg text-admin-accent-primary">
                             {
                               customer.analytics.monthlySpending.filter(
-                                (m: any) => m.amount > 0,
+                                (m: unknown) => m.amount > 0,
                               ).length
                             }
                           </p>
@@ -1804,8 +1800,8 @@ export default function CustomerDetailPage() {
 
         {customer.agreement_usage && customer.agreement_usage.length > 0 && (
           <TabsContent
-            value="convenios"
             className="space-y-4 sm:space-y-6 mt-4 sm:mt-6"
+            value="convenios"
           >
             <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)]">
               <CardHeader className="p-4 sm:p-6">
@@ -1833,8 +1829,8 @@ export default function CustomerDetailPage() {
                       <TableRow key={u.agreement_id}>
                         <TableCell>
                           <Link
-                            href={`/admin/agreements/${u.agreement_id}`}
                             className="font-medium text-admin-accent-primary hover:underline"
+                            href={`/admin/agreements/${u.agreement_id}`}
                           >
                             {u.agreement_name || "Sin nombre"}
                           </Link>
@@ -1876,14 +1872,14 @@ export default function CustomerDetailPage() {
           <CreatePrescriptionForm
             customerId={customerId}
             initialData={editingPrescription || undefined}
+            onCancel={() => {
+              setShowCreatePrescription(false);
+              setEditingPrescription(null);
+            }}
             onSuccess={() => {
               setShowCreatePrescription(false);
               setEditingPrescription(null);
               fetchCustomer();
-            }}
-            onCancel={() => {
-              setShowCreatePrescription(false);
-              setEditingPrescription(null);
             }}
           />
         </DialogContent>
@@ -1906,16 +1902,16 @@ export default function CustomerDetailPage() {
             </DialogDescription>
           </DialogHeader>
           <CreateAppointmentForm
-            initialData={editingAppointment || undefined}
             initialCustomerId={customerId}
+            initialData={editingAppointment || undefined}
+            onCancel={() => {
+              setShowCreateAppointment(false);
+              setEditingAppointment(null);
+            }}
             onSuccess={() => {
               setShowCreateAppointment(false);
               setEditingAppointment(null);
               fetchCustomer();
-            }}
-            onCancel={() => {
-              setShowCreateAppointment(false);
-              setEditingAppointment(null);
             }}
           />
         </DialogContent>
@@ -1931,13 +1927,13 @@ export default function CustomerDetailPage() {
             </DialogDescription>
           </DialogHeader>
           <CreateQuoteForm
+            initialCustomerId={customerId}
+            initialFieldOperationId={customer?.field_operation_id ?? undefined}
+            onCancel={() => setShowCreateQuote(false)}
             onSuccess={() => {
               setShowCreateQuote(false);
               fetchCustomer();
             }}
-            onCancel={() => setShowCreateQuote(false)}
-            initialCustomerId={customerId}
-            initialFieldOperationId={customer?.field_operation_id ?? undefined}
           />
         </DialogContent>
       </Dialog>

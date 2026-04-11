@@ -2,17 +2,18 @@
  * Webhook Handler: Parsea payload de Meta y despacha a procesadores
  */
 
-import type {
-  WhatsAppWebhookPayload,
-  WhatsAppIncomingMessage,
-  WhatsAppWebhookValue,
-} from "./types";
+import { processWhatsAppMessage } from "@/lib/ai/agent/whatsapp-adapter";
+import { appLogger as logger } from "@/lib/logger";
+import { createServiceRoleClient } from "@/utils/supabase/server";
+
+import { WhatsAppClient } from "./client";
 import { resolveWhatsAppContext } from "./context-resolver";
 import { getOrCreateWhatsAppSession } from "./session-manager";
-import { processWhatsAppMessage } from "@/lib/ai/agent/whatsapp-adapter";
-import { WhatsAppClient } from "./client";
-import { createServiceRoleClient } from "@/utils/supabase/server";
-import { appLogger as logger } from "@/lib/logger";
+import type {
+  WhatsAppIncomingMessage,
+  WhatsAppWebhookPayload,
+  WhatsAppWebhookValue,
+} from "./types";
 
 export interface ProcessedMessage {
   waId: string;

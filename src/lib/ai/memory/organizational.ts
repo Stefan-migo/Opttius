@@ -7,8 +7,6 @@
  * @module lib/ai/memory/organizational
  */
 
-import type { ToolExecutionContext } from "../tools/types";
-
 export interface OrganizationalContext {
   name: string;
   specialty: string;
@@ -54,10 +52,10 @@ export interface MaturityLevel {
 
 export class OrganizationalMemory {
   private organizationId: string;
-  private supabase: any;
+  private supabase: unknown;
   private contextCache: Map<string, OrganizationalContext> = new Map();
 
-  constructor(organizationId: string, supabase: any) {
+  constructor(organizationId: string, supabase: unknown) {
     this.organizationId = organizationId;
     this.supabase = supabase;
   }
@@ -331,7 +329,7 @@ export class OrganizationalMemory {
 
   // Private helper methods
 
-  private async getOrganizationData(): Promise<any> {
+  private async getOrganizationData(): Promise<unknown> {
     const { data, error } = await this.supabase
       .from("organizations")
       .select(
@@ -350,7 +348,7 @@ export class OrganizationalMemory {
     return data;
   }
 
-  private async getOrganizationSettings(): Promise<any> {
+  private async getOrganizationSettings(): Promise<unknown> {
     const { data, error } = await this.supabase
       .from("organization_settings")
       .select("*")
@@ -506,7 +504,7 @@ export class OrganizationalMemory {
  */
 export function createOrganizationalMemory(
   organizationId: string,
-  supabase: any,
+  supabase: unknown,
 ): OrganizationalMemory {
   return new OrganizationalMemory(organizationId, supabase);
 }

@@ -1,18 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClientFromRequest } from "@/utils/supabase/server";
-import { appLogger as logger } from "@/lib/logger";
+import { z } from "zod";
+
 import { generateInsights } from "@/lib/ai/insights/generator";
-import {
-  InsightSectionSchema,
-  CreateInsightSchema,
-} from "@/lib/ai/insights/schemas";
+import { InsightSectionSchema } from "@/lib/ai/insights/schemas";
+import { createOrganizationalMemory } from "@/lib/ai/memory/organizational";
+import { rateLimitConfigs, withRateLimit } from "@/lib/api/middleware";
 import {
   parseAndValidateBody,
   parseAndValidateQuery,
 } from "@/lib/api/validation/zod-helpers";
-import { z } from "zod";
-import { withRateLimit, rateLimitConfigs } from "@/lib/api/middleware";
-import { createOrganizationalMemory } from "@/lib/ai/memory/organizational";
+import { appLogger as logger } from "@/lib/logger";
+import { createClientFromRequest } from "@/utils/supabase/server";
 
 const generateQuerySchema = z.object({
   section: InsightSectionSchema.optional(),
@@ -218,7 +216,7 @@ export async function POST(request: NextRequest) {
         insights: insertedInsights || [],
         count: insertedInsights?.length || 0,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error("Generate insights API error", {
         error: error.message,
         stack: error.stack,
@@ -303,7 +301,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({
         recentGenerations: recentInsights || [],
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error("Get generation info error", { error: error.message });
       return NextResponse.json(
         { error: "Internal server error" },

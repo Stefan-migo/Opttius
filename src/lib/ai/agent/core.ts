@@ -1,23 +1,23 @@
+import type { SupabaseClient } from "@supabase/supabase-js";
+
 import { LLMFactory } from "../factory";
-import { getAllTools, convertToolsToLLMTools } from "../tools";
-import { ToolExecutor } from "./tool-executor";
-import { getAgentConfig } from "./config";
-import type {
-  LLMProvider,
-  LLMMessage,
-  LLMTool,
-  LLMStreamChunk,
-  ToolCall,
-} from "../types";
-import type { ToolExecutionContext } from "../tools/types";
-import type { MemoryManager } from "../memory";
-import type { OrganizationalMemory } from "../memory/organizational";
 import {
   getKnowledgeBase,
   type KnowledgeContext,
 } from "../knowledge/base/knowledge-manager";
+import type { MemoryManager } from "../memory";
+import type { OrganizationalMemory } from "../memory/organizational";
+import { convertToolsToLLMTools, getAllTools } from "../tools";
+import type { ToolExecutionContext } from "../tools/types";
+import type {
+  LLMMessage,
+  LLMProvider,
+  LLMStreamChunk,
+  ToolCall,
+} from "../types";
 import { logAIUsage } from "../usage-logger";
-import type { SupabaseClient } from "@supabase/supabase-js";
+import { getAgentConfig } from "./config";
+import { ToolExecutor } from "./tool-executor";
 
 export interface AgentConfig {
   systemPrompt?: string;
@@ -552,7 +552,7 @@ INSTRUCCIONES:
           temperature: config.temperature,
           maxTokens: config.maxTokens,
         };
-      } catch (error: any) {
+      } catch (error: unknown) {
         yield {
           content: `Error: No hay proveedores de IA configurados. Por favor, configura al menos un proveedor en las variables de entorno.`,
           done: true,
@@ -844,7 +844,7 @@ INSTRUCCIONES:
                 // Tool error - LLM receives it via messages, can include in final response
                 console.error(`[Agent] Tool ${toolName} failed:`, result.error);
               }
-            } catch (toolError: any) {
+            } catch (toolError: unknown) {
               const toolName =
                 toolCall.name?.trim() || "herramienta desconocida";
               const errorMsg = `Error ejecutando ${toolName}: ${toolError.message}`;
@@ -859,7 +859,7 @@ INSTRUCCIONES:
           }
 
           stepCount++;
-        } catch (streamError: any) {
+        } catch (streamError: unknown) {
           console.error("Stream error in agent:", streamError);
           const errorMessage =
             streamError.message || "Error procesando la solicitud";
@@ -883,7 +883,7 @@ INSTRUCCIONES:
       }
 
       yield { content: "", done: true };
-    } catch (error: any) {
+    } catch (error: unknown) {
       yield {
         content: `Error: ${error.message || "Error desconocido"}`,
         done: true,

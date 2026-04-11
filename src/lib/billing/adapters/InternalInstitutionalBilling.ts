@@ -5,13 +5,14 @@
  * Usa folio secuencial FAC-INST-XXXXXX por sucursal.
  */
 
+import { appLogger as logger } from "@/lib/logger";
+import { createServiceRoleClient } from "@/utils/supabase/server";
+
 import type {
   InstitutionalInvoice,
   InstitutionalInvoiceAdapter,
   InstitutionalInvoiceBillingResult,
 } from "./InstitutionalInvoiceAdapter";
-import { createServiceRoleClient } from "@/utils/supabase/server";
-import { appLogger as logger } from "@/lib/logger";
 
 export class InternalInstitutionalBilling
   implements InstitutionalInvoiceAdapter

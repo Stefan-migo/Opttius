@@ -1,15 +1,17 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { renderHook, act } from "@testing-library/react";
-import { useQuoteForm } from "../hooks/useQuoteForm";
+import { act, renderHook } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
 import * as branchHook from "@/hooks/useBranch";
 import * as taxConfig from "@/lib/utils/tax-config";
+
+import { useQuoteForm } from "../hooks/useQuoteForm";
 
 // Mock dependencies
 vi.mock("@/hooks/useBranch");
 vi.mock("@/lib/utils/tax-config");
 
-const mockUseBranch = branchHook.useBranch as any;
-const mockGetTaxPercentage = taxConfig.getTaxPercentage as any;
+const mockUseBranch = branchHook.useBranch as unknown;
+const mockGetTaxPercentage = taxConfig.getTaxPercentage as unknown;
 
 describe("useQuoteForm", () => {
   beforeEach(() => {

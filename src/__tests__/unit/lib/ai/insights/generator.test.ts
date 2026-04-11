@@ -1,9 +1,10 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+import { LLMFactory } from "@/lib/ai/factory";
 import {
   generateInsights,
   generateSingleInsight,
 } from "@/lib/ai/insights/generator";
-import { LLMFactory } from "@/lib/ai/factory";
 
 // Mock LLMFactory
 vi.mock("@/lib/ai/factory", () => ({
@@ -25,8 +26,8 @@ vi.mock("@/lib/logger", () => ({
 }));
 
 describe("Insight Generator", () => {
-  let mockProvider: any;
-  let mockFactory: any;
+  let mockProvider: unknown;
+  let mockFactory: unknown;
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -46,7 +47,7 @@ describe("Insight Generator", () => {
       }),
     };
 
-    vi.mocked(LLMFactory.getInstance).mockReturnValue(mockFactory as any);
+    vi.mocked(LLMFactory.getInstance).mockReturnValue(mockFactory as unknown);
   });
 
   describe("generateInsights", () => {

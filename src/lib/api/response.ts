@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
-import { APIError } from "./errors";
+
 import { appLogger as logger } from "@/lib/logger";
+
+import { APIError } from "./errors";
 
 /**
  * Standardized API Response Types
@@ -18,14 +20,14 @@ export interface PaginationMeta {
 }
 
 // Standard success response
-export interface ApiSuccessResponse<T = any> {
+export interface ApiSuccessResponse<T = unknown> {
   success: true;
   data: T;
   meta?: {
     pagination?: PaginationMeta;
     timestamp: string;
     requestId?: string;
-    [key: string]: any;
+    [key: string]: unknown;
   };
 }
 
@@ -35,7 +37,9 @@ export interface ApiErrorResponse {
   error: {
     code: string;
     message: string;
-    details?: Record<string, unknown> | Array<{ field: string; message: string }>;
+    details?:
+      | Record<string, unknown>
+      | Array<{ field: string; message: string }>;
     timestamp: string;
     requestId?: string;
     stack?: string; // Only in development
@@ -43,7 +47,7 @@ export interface ApiErrorResponse {
 }
 
 // Union type for all API responses
-export type ApiResponse<T = any> = ApiSuccessResponse<T> | ApiErrorResponse;
+export type ApiResponse<T = unknown> = ApiSuccessResponse<T> | ApiErrorResponse;
 
 /**
  * Create a standardized success response
@@ -54,7 +58,7 @@ export function createApiSuccessResponse<T>(
     statusCode?: number;
     requestId?: string;
     pagination?: PaginationMeta;
-    meta?: Record<string, any>;
+    meta?: Record<string, unknown>;
   },
 ): NextResponse<ApiSuccessResponse<T>> {
   const { statusCode = 200, requestId, pagination, meta = {} } = options || {};
@@ -80,7 +84,9 @@ export function createApiErrorResponse(
   error: APIError | Error,
   options?: {
     requestId?: string;
-    details?: Record<string, unknown> | Array<{ field: string; message: string }>;
+    details?:
+      | Record<string, unknown>
+      | Array<{ field: string; message: string }>;
   },
 ): NextResponse<ApiErrorResponse> {
   const { requestId, details } = options || {};
@@ -103,7 +109,8 @@ export function createApiErrorResponse(
       timestamp: new Date().toISOString(),
       ...(requestId && { requestId }),
       ...(details && { details }),
-      ...(process.env.NODE_ENV === "development" && error.stack && { stack: error.stack }),
+      ...(process.env.NODE_ENV === "development" &&
+        error.stack && { stack: error.stack }),
     },
   };
 
@@ -131,7 +138,7 @@ export function createPaginatedResponse<T>(
   },
   options?: {
     requestId?: string;
-    meta?: Record<string, any>;
+    meta?: Record<string, unknown>;
   },
 ): NextResponse<ApiSuccessResponse<T[]>> {
   const { page, limit, total } = pagination;
@@ -157,13 +164,13 @@ export function createPaginatedResponse<T>(
 /**
  * API Response wrapper for consistent handling
  */
-export class ApiResponseBuilder<T = any> {
+export class ApiResponseBuilder<T = unknown> {
   private data?: T;
   private error?: APIError | Error;
   private statusCode: number = 200;
   private requestId?: string;
   private pagination?: PaginationMeta;
-  private meta: Record<string, any> = {};
+  private meta: Record<string, unknown> = {};
 
   /**
    * Set success data
@@ -213,7 +220,7 @@ export class ApiResponseBuilder<T = any> {
   /**
    * Add custom metadata
    */
-  addMeta(key: string, value: any): this {
+  addMeta(key: string, value: unknown): this {
     this.meta[key] = value;
     return this;
   }
@@ -240,10 +247,16 @@ export class ApiResponseBuilder<T = any> {
 /**
  * Async handler with standardized response format
  */
-export function withApiResponse<T = any>(
-  handler: (request: Request, context?: any) => Promise<T>,
-): (request: Request, context?: any) => Promise<NextResponse<ApiResponse<T>>> {
-  return async (request: Request, context?: any): Promise<NextResponse<ApiResponse<T>>> => {
+export function withApiResponse<T = unknown>(
+  handler: (request: Request, context?: unknown) => Promise<T>,
+): (
+  request: Request,
+  context?: unknown,
+) => Promise<NextResponse<ApiResponse<T>>> {
+  return async (
+    request: Request,
+    context?: unknown,
+  ): Promise<NextResponse<ApiResponse<T>>> => {
     const requestId = crypto.randomUUID();
 
     try {
@@ -289,7 +302,7 @@ export function isSuccessResponse<T>(
  * Helper to check if response is an error
  */
 export function isErrorResponse(
-  response: ApiResponse<any>,
+  response: ApiResponse<unknown>,
 ): response is ApiErrorResponse {
   return response.success === false;
 }

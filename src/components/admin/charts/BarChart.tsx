@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, memo } from "react";
+import { memo, useMemo } from "react";
 
 interface BarChartProps {
   data: Array<{ label: string; value: number }>;
@@ -40,7 +40,7 @@ function BarChartComponent({
         )}
         <div className="space-y-3">
           {data.map((item, index) => (
-            <div key={index} className="flex items-center space-x-3">
+            <div className="flex items-center space-x-3" key={index}>
               <div
                 className="w-32 text-sm truncate font-medium"
                 title={item.label}
@@ -79,8 +79,8 @@ function BarChartComponent({
       <div className="flex items-end justify-between space-x-2 h-64">
         {data.map((item, index) => (
           <div
-            key={index}
             className="flex-1 flex flex-col items-center space-y-2"
+            key={index}
           >
             <div className="relative w-full h-full flex flex-col justify-end">
               {showValues && item.value > 0 && (

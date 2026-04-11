@@ -1,11 +1,14 @@
--- Allow public (unauthenticated) read of subscription_tiers for landing page pricing
--- The landing /api/landing/tiers fetches this; visitors are not authenticated.
--- Service role bypasses RLS, but if fallback to anon key is used, this policy allows read.
+-- Migration: Fix schedule_settings unique index for proper upsert support
+-- This adds proper unique constraints to support the upsert in the API
 
-CREATE POLICY "Public can view subscription tiers for landing"
-ON public.subscription_tiers
-FOR SELECT
-USING (true);
+-- 1. Drop existing partial indexes
+DROP INDEX IF EXISTS public.idx_schedule_settings_branch_unique;
+DROP INDEX IF EXISTS public.idx_schedule_settings_global_unique;
 
-COMMENT ON POLICY "Public can view subscription tiers for landing" ON public.subscription_tiers
-IS 'Allows unauthenticated visitors to read tier pricing for the public landing page';
+-- 2. Create proper unique index on (organization_id, branch_id) 
+-- This allows one settings record per branch per organization
+CREATE UNIQUE INDEX IF NOT EXISTS idx_schedule_settings_org_branch 
+ON public.schedule_settings(organization_id, branch_id);
+
+-- 3. Add comment
+COMMENT ON INDEX idx_schedule_settings_org_branch IS 'Ensures one schedule settings record per branch per organization';

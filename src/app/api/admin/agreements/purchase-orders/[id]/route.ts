@@ -1,18 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/utils/supabase/server";
-import { appLogger as logger } from "@/lib/logger";
-import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
-import { withRateLimit, rateLimitConfigs } from "@/lib/api/middleware";
+
+import { ValidationError } from "@/lib/api/errors";
+import { rateLimitConfigs, withRateLimit } from "@/lib/api/middleware";
 import {
-  createApiSuccessResponse,
   createApiErrorResponse,
+  createApiSuccessResponse,
 } from "@/lib/api/response";
-import { updatePurchaseOrderSchema } from "@/lib/api/validation/zod-schemas";
 import {
   parseAndValidateBody,
   validationErrorResponse,
 } from "@/lib/api/validation/zod-helpers";
-import { ValidationError } from "@/lib/api/errors";
+import { updatePurchaseOrderSchema } from "@/lib/api/validation/zod-schemas";
+import { appLogger as logger } from "@/lib/logger";
+import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
+import { createClient } from "@/utils/supabase/server";
 
 export const dynamic = "force-dynamic";
 
@@ -21,7 +22,7 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    return await (withRateLimit(rateLimitConfigs.agreements) as any)(
+    return await (withRateLimit(rateLimitConfigs.agreements) as unknown)(
       request,
       async () => {
         const { id: purchaseOrderId } = await params;

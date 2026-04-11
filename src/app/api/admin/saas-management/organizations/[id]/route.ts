@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireRoot } from "@/lib/api/root-middleware";
-import { createServiceRoleClient } from "@/utils/supabase/service-role";
-import { appLogger as logger } from "@/lib/logger";
+
 import { AuthorizationError } from "@/lib/api/errors";
+import { requireRoot } from "@/lib/api/root-middleware";
 import { updateOrganizationSchema } from "@/lib/api/validation/zod-schemas";
+import { appLogger as logger } from "@/lib/logger";
+import { createServiceRoleClient } from "@/utils/supabase/service-role";
 
 /**
  * GET /api/admin/saas-management/organizations/[id]
@@ -105,7 +106,7 @@ export async function GET(
 
     // Enriquecer usuarios recientes con perfiles
     const recentUsers = await Promise.all(
-      (recentUsersData || []).map(async (user: any) => {
+      (recentUsersData || []).map(async (user: unknown) => {
         const { data: profile } = await supabaseServiceRole
           .from("profiles")
           .select("first_name, last_name")
@@ -188,7 +189,7 @@ export async function PATCH(
     }
 
     // Preparar updates
-    const updates: any = {};
+    const updates: unknown = {};
 
     if (name !== undefined) updates.name = name;
     if (slug !== undefined) {

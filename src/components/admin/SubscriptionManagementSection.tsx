@@ -1,8 +1,26 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import {
+  AlertCircle,
+  ArrowRight,
+  Building2,
+  Calendar,
+  CreditCard,
+  Loader2,
+  RefreshCw,
+  ShieldCheck,
+  TrendingUp,
+  XCircle,
+  Zap,
+} from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -10,28 +28,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import {
-  CreditCard,
-  Loader2,
-  Calendar,
-  AlertCircle,
-  XCircle,
-  ArrowRight,
-  RefreshCw,
-  CheckCircle,
-  Clock,
-  Building2,
-  Info,
-  ShieldCheck,
-  Zap,
-  TrendingUp,
-} from "lucide-react";
-import { toast } from "sonner";
+import { type SubscriptionTier, TIER_LIMITS } from "@/lib/saas/tier-config";
 import { formatDate } from "@/lib/utils";
-import { TIER_LIMITS, type SubscriptionTier } from "@/lib/saas/tier-config";
 
 interface SubscriptionStatusResult {
   status: string;
@@ -80,7 +78,7 @@ export function SubscriptionManagementSection() {
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
-  const [dbTiers, setDbTiers] = useState<any[]>([]);
+  const [dbTiers, setDbTiers] = useState<unknown[]>([]);
 
   const fetchStatus = async () => {
     setLoading(true);
@@ -240,10 +238,10 @@ export function SubscriptionManagementSection() {
             </CardHeader>
             <CardContent className="p-8 pt-4 space-y-4">
               <Button
-                variant="destructive"
                 className="w-full h-12 rounded-2xl font-bold shadow-lg shadow-red-500/20"
-                onClick={handleCancel}
                 disabled={!!actionLoading}
+                variant="destructive"
+                onClick={handleCancel}
               >
                 {actionLoading === "cancel" ? (
                   <Loader2 className="h-5 w-5 animate-spin mr-2" />
@@ -253,10 +251,10 @@ export function SubscriptionManagementSection() {
                 Confirmar Cancelación
               </Button>
               <Button
-                variant="outline"
                 className="w-full h-12 rounded-2xl border-2 font-bold"
-                onClick={() => setShowCancelConfirm(false)}
                 disabled={!!actionLoading}
+                variant="outline"
+                onClick={() => setShowCancelConfirm(false)}
               >
                 Mantener mi Plan Premium
               </Button>
@@ -268,8 +266,8 @@ export function SubscriptionManagementSection() {
       {/* Main Stats Summary */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
         <Card
-          variant="glass"
           className="bg-admin-bg-tertiary shadow-xl shadow-primary/5 border-none"
+          variant="glass"
         >
           <CardContent className="p-4 sm:p-6 md:p-8 flex flex-col items-center text-center space-y-3">
             <div className="p-3 bg-primary/10 rounded-2xl group-hover:scale-110 transition-transform">
@@ -284,8 +282,8 @@ export function SubscriptionManagementSection() {
           </CardContent>
         </Card>
         <Card
-          variant="glass"
           className="bg-admin-bg-tertiary shadow-xl shadow-emerald-500/5 border-none"
+          variant="glass"
         >
           <CardContent className="p-4 sm:p-6 md:p-8 flex flex-col items-center text-center space-y-3">
             <div className="p-3 bg-emerald-500/10 rounded-2xl">
@@ -301,8 +299,8 @@ export function SubscriptionManagementSection() {
           </CardContent>
         </Card>
         <Card
-          variant="glass"
           className="bg-admin-bg-tertiary shadow-xl shadow-blue-500/5 border-none"
+          variant="glass"
         >
           <CardContent className="p-4 sm:p-6 md:p-8 flex flex-col items-center text-center space-y-3">
             <div className="p-3 bg-blue-500/10 rounded-2xl">
@@ -312,8 +310,8 @@ export function SubscriptionManagementSection() {
               Estado de Cuenta
             </p>
             <Badge
-              variant={isActive ? "healty" : "destructive"}
               className="px-6 py-1.5 font-black text-[11px] tracking-widest bg-[var(--admin-bg-primary)] border-solid border-[var(--admin-border-secondary)] shadow-sm"
+              variant={isActive ? "healty" : "destructive"}
             >
               {statusLabel.toUpperCase()}
             </Badge>
@@ -378,8 +376,8 @@ export function SubscriptionManagementSection() {
                       </span>
                     </p>
                     <Button
-                      variant="link"
                       className="h-auto p-0 text-[10px] font-black uppercase text-primary shrink-0 w-fit min-w-0"
+                      variant="link"
                       onClick={() => router.push("/checkout")}
                     >
                       Configurar
@@ -391,10 +389,10 @@ export function SubscriptionManagementSection() {
               {/* Action Buttons */}
               <div className="pt-6 sm:pt-8 border-t border-slate-200/50 dark:border-slate-800/50 flex flex-col sm:flex-row gap-3 sm:gap-4 min-w-0 overflow-hidden">
                 <Button
-                  type="button"
-                  size="lg"
-                  className="w-full sm:w-auto min-h-[44px] h-12 sm:h-14 rounded-xl sm:rounded-2xl font-bold px-6 sm:px-10 shadow-xl shadow-primary/25 shrink-0 min-w-0 overflow-hidden justify-center sm:justify-start"
                   shimmer
+                  className="w-full sm:w-auto min-h-[44px] h-12 sm:h-14 rounded-xl sm:rounded-2xl font-bold px-6 sm:px-10 shadow-xl shadow-primary/25 shrink-0 min-w-0 overflow-hidden justify-center sm:justify-start"
+                  size="lg"
+                  type="button"
                   onClick={() => router.push("/checkout")}
                 >
                   <RefreshCw className="h-5 w-5 mr-2 shrink-0" />
@@ -405,11 +403,11 @@ export function SubscriptionManagementSection() {
 
                 {isActive && (
                   <Button
-                    variant="outline"
-                    size="lg"
                     className="w-full sm:w-auto min-h-[44px] h-12 sm:h-14 rounded-xl sm:rounded-2xl border-2 font-bold px-6 sm:px-10 hover:bg-red-50 dark:hover:bg-red-500/10 hover:text-red-600 dark:hover:text-red-500 hover:border-red-200 dark:hover:border-red-500/30 transition-all duration-300 shrink-0 min-w-0 overflow-hidden justify-center sm:justify-start"
-                    onClick={() => setShowCancelConfirm(true)}
                     disabled={!!actionLoading}
+                    size="lg"
+                    variant="outline"
+                    onClick={() => setShowCancelConfirm(true)}
                   >
                     <XCircle className="h-5 w-5 mr-2 shrink-0" />
                     <span className="truncate min-w-0">
@@ -420,11 +418,11 @@ export function SubscriptionManagementSection() {
 
                 {isCancelled && (
                   <Button
-                    variant="outline"
-                    size="lg"
                     className="w-full sm:w-auto min-h-[44px] h-12 sm:h-14 rounded-xl sm:rounded-2xl border-2 font-bold px-6 sm:px-10 bg-emerald-50/50 dark:bg-emerald-500/5 border-emerald-200/50 dark:border-emerald-500/20 text-emerald-600 dark:text-emerald-500 hover:bg-emerald-100 transition-all shrink-0 min-w-0 overflow-hidden justify-center sm:justify-start"
-                    onClick={handleReactivate}
                     disabled={!!actionLoading}
+                    size="lg"
+                    variant="outline"
+                    onClick={handleReactivate}
                   >
                     {actionLoading === "reactivate" ? (
                       <Loader2 className="h-5 w-5 animate-spin mr-2 shrink-0" />

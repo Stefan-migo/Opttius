@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/utils/supabase/server";
+
 import { validateBranchAccess } from "@/lib/api/branch-middleware";
 import { appLogger as logger } from "@/lib/logger";
+import { createClient } from "@/utils/supabase/server";
 
 export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
@@ -92,7 +93,7 @@ export async function GET(request: NextRequest) {
           const revenueData = await revenue;
           const branchRevenue =
             revenueData.data?.reduce(
-              (sum: number, order: any) =>
+              (sum: number, order: unknown) =>
                 sum + (parseFloat(order.total_amount) || 0),
               0,
             ) || 0;
@@ -115,7 +116,7 @@ export async function GET(request: NextRequest) {
     const revenueData = await totalRevenue;
     const globalRevenue =
       revenueData.data?.reduce(
-        (sum: number, order: any) =>
+        (sum: number, order: unknown) =>
           sum + (parseFloat(order.total_amount) || 0),
         0,
       ) || 0;
@@ -142,7 +143,7 @@ export async function GET(request: NextRequest) {
     };
 
     return NextResponse.json({ stats: globalStats });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error("Error in GET /api/admin/branches/global/stats:", { error });
     return NextResponse.json(
       { error: error.message || "Internal server error" },

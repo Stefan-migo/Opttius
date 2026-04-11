@@ -1,15 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/utils/supabase/server";
-import { createServiceRoleClient } from "@/utils/supabase/server";
+import { z } from "zod";
+
 import { getBranchContext } from "@/lib/api/branch-middleware";
+import { APIError } from "@/lib/api/errors";
+import {
+  createApiErrorResponse,
+  createApiSuccessResponse,
+} from "@/lib/api/response";
 import { appLogger as logger } from "@/lib/logger";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
-import {
-  createApiSuccessResponse,
-  createApiErrorResponse,
-} from "@/lib/api/response";
-import { APIError } from "@/lib/api/errors";
-import { z } from "zod";
+import { createClient } from "@/utils/supabase/server";
+import { createServiceRoleClient } from "@/utils/supabase/server";
 
 const refundSchema = z.object({
   order_id: z.string().uuid(),
@@ -257,7 +258,7 @@ export async function POST(request: NextRequest) {
               credit_note_number: cnNumber,
               order_id,
               branch_id: branchId,
-              organization_id: (branchRow as any)?.organization_id ?? null,
+              organization_id: (branchRow as unknown)?.organization_id ?? null,
               amount: refundAmount,
               reason,
               refund_method: refund_method ?? "cash",

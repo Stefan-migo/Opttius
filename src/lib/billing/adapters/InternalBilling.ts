@@ -5,18 +5,15 @@
  * Genera folios internos y PDFs simples sin conexión al SII.
  */
 
+import { appLogger as logger } from "@/lib/logger";
+import { createServiceRoleClient } from "@/utils/supabase/server";
+
 import {
   BillingAdapter,
   BillingResult,
   DocumentStatus,
   Order,
 } from "./BillingAdapter";
-import { createServiceRoleClient } from "@/utils/supabase/server";
-import { appLogger as logger } from "@/lib/logger";
-import {
-  generateBillingPDF,
-  generateBillingHTML,
-} from "@/lib/billing/pdf-generator";
 
 export class InternalBilling implements BillingAdapter {
   private supabase = createServiceRoleClient();
@@ -28,9 +25,9 @@ export class InternalBilling implements BillingAdapter {
     try {
       // Determine document type from order
       const documentType =
-        (order as any).sii_invoice_type === "factura"
+        (order as unknown).sii_invoice_type === "factura"
           ? "factura"
-          : (order as any).sii_invoice_type === "boleta"
+          : (order as unknown).sii_invoice_type === "boleta"
             ? "boleta"
             : "internal_ticket";
 
@@ -55,7 +52,7 @@ export class InternalBilling implements BillingAdapter {
           folio: folio,
           order_id: order.id,
           branch_id: order.branch_id,
-          purchase_order_reference: (order as any).oc_number ?? null,
+          purchase_order_reference: (order as unknown).oc_number ?? null,
           customer_id: order.customer_id || null,
           customer_name:
             order.customer?.first_name && order.customer?.last_name

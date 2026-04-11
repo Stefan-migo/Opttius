@@ -1,24 +1,49 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useSearchParams } from "next/navigation";
 import {
-  extractDataFromResponse,
-  extractTotalFromResponse,
-} from "@/lib/api/response-helpers";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+  AlertCircle,
+  ArrowLeft,
+  Calendar,
+  CheckCircle,
+  ChevronDown,
+  ChevronUp,
+  DollarSign,
+  Eye,
+  FileText,
+  Filter,
+  RefreshCw,
+  RotateCcw,
+  Search,
+  ShoppingBag,
+  TrendingDown,
+  TrendingUp,
+} from "lucide-react";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
 } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Pagination } from "@/components/ui/pagination";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -28,43 +53,13 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  DollarSign,
-  CreditCard,
-  Banknote,
-  Calendar,
-  CheckCircle,
-  XCircle,
-  AlertCircle,
-  RefreshCw,
-  Eye,
-  FileText,
-  TrendingUp,
-  TrendingDown,
-  ArrowLeft,
-  ShoppingBag,
-  Search,
-  RotateCcw,
-  Filter,
-  ChevronDown,
-  ChevronUp,
-} from "lucide-react";
-import { toast } from "sonner";
 import { useBranch } from "@/hooks/useBranch";
 import {
-  getBranchHeader,
-  getBranchAndOperativoHeaders,
-} from "@/lib/utils/branch";
-import { Pagination } from "@/components/ui/pagination";
-import Link from "next/link";
+  extractDataFromResponse,
+  extractTotalFromResponse,
+} from "@/lib/api/response-helpers";
 import { formatCurrency, formatDate, formatDateTime } from "@/lib/utils";
+import { getBranchAndOperativoHeaders } from "@/lib/utils/branch";
 import { getTodayInTimezone } from "@/lib/utils/date-timezone";
 
 interface CashClosure {
@@ -182,7 +177,7 @@ export default function CashRegisterPage() {
   const [checkingCashStatus, setCheckingCashStatus] = useState(true);
   const [openingCashInput, setOpeningCashInput] = useState<string>("");
   const [openingCashRegister, setOpeningCashRegister] = useState(false);
-  const [orders, setOrders] = useState<any[]>([]);
+  const [orders, setOrders] = useState<unknown[]>([]);
   const [loadingOrders, setLoadingOrders] = useState(false);
   const [ordersTab, setOrdersTab] = useState(false);
   // Fecha en zona Chile (America/Santiago) para filtros
@@ -196,7 +191,7 @@ export default function CashRegisterPage() {
   const [orderSearchTerm, setOrderSearchTerm] = useState("");
   const [orderProductFilter, setOrderProductFilter] = useState("");
   const [selectedOrderForAction, setSelectedOrderForAction] =
-    useState<any>(null);
+    useState<unknown>(null);
   const [orderActionDialog, setOrderActionDialog] = useState<
     "cancel" | "delete" | null
   >(null);
@@ -205,7 +200,7 @@ export default function CashRegisterPage() {
   const [processingOrderAction, setProcessingOrderAction] = useState(false);
 
   // Credit notes (use wider date range to avoid timezone issues)
-  const [creditNotes, setCreditNotes] = useState<any[]>([]);
+  const [creditNotes, setCreditNotes] = useState<unknown[]>([]);
   const [loadingCreditNotes, setLoadingCreditNotes] = useState(false);
   const getCreditNotesDateRange = () => {
     // Wide range (5 years back, 1 year ahead) to show all notes including "antiguas"
@@ -351,7 +346,7 @@ export default function CashRegisterPage() {
         const error = await response.json();
         console.error("Error checking cash status:", error);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error checking cash status:", error);
     } finally {
       setCheckingCashStatus(false);
@@ -395,7 +390,7 @@ export default function CashRegisterPage() {
         const error = await response.json();
         toast.error(error.error || "Error al abrir la caja");
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error opening cash register:", error);
       toast.error("Error al abrir la caja");
     } finally {
@@ -436,7 +431,7 @@ export default function CashRegisterPage() {
         // Apply search filter (client-side for now, could be moved to backend)
         if (orderSearchTerm) {
           filteredOrders = filteredOrders.filter(
-            (order: any) =>
+            (order: unknown) =>
               order.order_number
                 ?.toLowerCase()
                 .includes(orderSearchTerm.toLowerCase()) ||
@@ -461,9 +456,9 @@ export default function CashRegisterPage() {
             transfer: ["transfer"],
           };
           const allowed = methodMap[orderFilters.payment_method] || [];
-          filteredOrders = filteredOrders.filter((order: any) => {
+          filteredOrders = filteredOrders.filter((order: unknown) => {
             const payments = order.order_payments || [];
-            const hasMatch = payments.some((p: any) =>
+            const hasMatch = payments.some((p: unknown) =>
               allowed.includes((p.payment_method || "").toLowerCase()),
             );
             if (hasMatch) return true;
@@ -475,10 +470,10 @@ export default function CashRegisterPage() {
         // Filter by product name in order_items
         if (orderProductFilter.trim()) {
           const term = orderProductFilter.trim().toLowerCase();
-          filteredOrders = filteredOrders.filter((order: any) => {
+          filteredOrders = filteredOrders.filter((order: unknown) => {
             const items = order.order_items || [];
             return items.some(
-              (item: any) =>
+              (item: unknown) =>
                 (item.product_name || "").toLowerCase().includes(term) ||
                 (item.variant_title || "").toLowerCase().includes(term),
             );
@@ -494,7 +489,7 @@ export default function CashRegisterPage() {
         const error = await response.json();
         toast.error(error.error || "Error al cargar órdenes");
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error fetching orders:", error);
       toast.error("Error al cargar órdenes");
     } finally {
@@ -544,7 +539,7 @@ export default function CashRegisterPage() {
         const error = await response.json();
         toast.error(error.error || "Error al cargar cierres de caja");
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error fetching closures:", error);
       toast.error("Error al cargar cierres de caja");
     } finally {
@@ -599,7 +594,7 @@ export default function CashRegisterPage() {
         const error = await response.json();
         toast.error(error.error || "Error al cargar resumen del día");
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error fetching daily summary:", error);
       toast.error("Error al cargar resumen del día");
     } finally {
@@ -622,7 +617,7 @@ export default function CashRegisterPage() {
           await fetchMovements(data.session.id);
         }
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error fetching session ID:", error);
     }
   };
@@ -646,7 +641,7 @@ export default function CashRegisterPage() {
         const error = await response.json();
         console.error("Error fetching movements:", error);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error fetching movements:", error);
     } finally {
       setLoadingMovements(false);
@@ -743,7 +738,7 @@ export default function CashRegisterPage() {
       setTransferTotal(0);
       setNotes("");
       setDiscrepancies("");
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error closing cash register:", error);
       toast.error(error.message || "Error al cerrar la caja");
     } finally {
@@ -782,7 +777,7 @@ export default function CashRegisterPage() {
         const error = await response.json();
         toast.error(error.error || "Error al reabrir la caja");
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error reopening cash register:", error);
       toast.error("Error al reabrir la caja");
     } finally {
@@ -861,7 +856,7 @@ export default function CashRegisterPage() {
         }
         toast.error(msg);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error cancelling order:", error);
       toast.error("Error al anular venta");
     } finally {
@@ -888,7 +883,7 @@ export default function CashRegisterPage() {
         const error = await response.json();
         toast.error(error.error || "Error al eliminar venta");
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error deleting order:", error);
       toast.error("Error al eliminar venta");
     } finally {
@@ -901,7 +896,10 @@ export default function CashRegisterPage() {
     reopenedAt?: string | null,
     posSessionId?: string | null,
   ) => {
-    const config: Record<string, { variant: any; label: string; icon: any }> = {
+    const config: Record<
+      string,
+      { variant: unknown; label: string; icon: unknown }
+    > = {
       draft: { variant: "secondary", label: "Abierta", icon: RefreshCw }, // draft = caja abierta
       confirmed: { variant: "default", label: "Confirmado", icon: CheckCircle },
       reviewed: { variant: "secondary", label: "Revisado", icon: Eye },
@@ -932,7 +930,7 @@ export default function CashRegisterPage() {
     const Icon = statusConfig.icon;
 
     return (
-      <Badge variant={statusConfig.variant} className="flex items-center gap-1">
+      <Badge className="flex items-center gap-1" variant={statusConfig.variant}>
         <Icon className="h-3 w-3" />
         {statusConfig.label}
       </Badge>
@@ -997,15 +995,15 @@ export default function CashRegisterPage() {
                 : "/admin/pos"
             }
           >
-            <Button variant="outline" size="sm" className="shrink-0">
+            <Button className="shrink-0" size="sm" variant="outline">
               <ArrowLeft className="h-4 w-4 mr-2" />
               Volver al POS
             </Button>
           </Link>
           <Button
-            onClick={() => setShowCloseDialog(true)}
-            disabled={!effectiveBranchId && !isSuperAdmin}
             className="shrink-0"
+            disabled={!effectiveBranchId && !isSuperAdmin}
+            onClick={() => setShowCloseDialog(true)}
           >
             <DollarSign className="h-4 w-4 mr-2" />
             Cerrar Caja
@@ -1034,8 +1032,8 @@ export default function CashRegisterPage() {
                 <RefreshCw className="h-4 w-4 animate-spin text-gray-400" />
               ) : (
                 <Badge
-                  variant={isCashOpen ? "default" : "destructive"}
                   className="w-fit text-sm px-3 py-1"
+                  variant={isCashOpen ? "default" : "destructive"}
                 >
                   {isCashOpen ? "Abierta" : "Cerrada"}
                 </Badge>
@@ -1072,19 +1070,19 @@ export default function CashRegisterPage() {
                   <div className="space-y-3">
                     <Label htmlFor="opening_cash">Monto Inicial de Caja</Label>
                     <Input
+                      className="w-full sm:max-w-xs h-12"
                       id="opening_cash"
-                      type="number"
                       min="0"
+                      placeholder="0"
                       step="0.01"
+                      type="number"
                       value={openingCashInput}
                       onChange={(e) => setOpeningCashInput(e.target.value)}
-                      placeholder="0"
-                      className="w-full sm:max-w-xs h-12"
                     />
                     <Button
-                      onClick={handleOpenCashRegister}
-                      disabled={openingCashRegister || !openingCashInput}
                       className="w-full sm:w-auto h-12"
+                      disabled={openingCashRegister || !openingCashInput}
+                      onClick={handleOpenCashRegister}
                     >
                       {openingCashRegister ? (
                         <>
@@ -1155,25 +1153,25 @@ export default function CashRegisterPage() {
       )}
 
       {/* Tabs for Closures, Orders and Credit Notes - responsive */}
-      <Tabs defaultValue="orders" className="space-y-4">
+      <Tabs className="space-y-4" defaultValue="orders">
         <TabsList className="flex flex-col sm:flex-row h-auto w-full sm:w-auto">
           <TabsTrigger
-            value="closures"
             className="w-full sm:w-auto data-[state=active]:bg-admin-accent-secondary data-[state=active]:text-[#1A2B23]"
+            value="closures"
           >
             Cierres de Caja
           </TabsTrigger>
           <TabsTrigger
+            className="w-full sm:w-auto data-[state=active]:bg-admin-accent-secondary data-[state=active]:text-[#1A2B23]"
             value="orders"
             onClick={() => setOrdersTab(true)}
-            className="w-full sm:w-auto data-[state=active]:bg-admin-accent-secondary data-[state=active]:text-[#1A2B23]"
           >
             Ventas / Órdenes
           </TabsTrigger>
           <TabsTrigger
+            className="w-full sm:w-auto data-[state=active]:bg-admin-accent-secondary data-[state=active]:text-[#1A2B23]"
             value="credit_notes"
             onClick={() => fetchCreditNotes()}
-            className="w-full sm:w-auto data-[state=active]:bg-admin-accent-secondary data-[state=active]:text-[#1A2B23]"
           >
             Notas de Crédito
           </TabsTrigger>
@@ -1314,15 +1312,15 @@ export default function CashRegisterPage() {
                                   closure.status === "draft") &&
                                 closure.pos_session_id && (
                                   <Button
+                                    disabled={reopening}
+                                    size="sm"
+                                    title="Solo superadmin puede reabrir cajas cerradas"
+                                    variant="outline"
                                     onClick={() =>
                                       handleReopenCash(
                                         closure.pos_session_id || "",
                                       )
                                     }
-                                    variant="outline"
-                                    size="sm"
-                                    disabled={reopening}
-                                    title="Solo superadmin puede reabrir cajas cerradas"
                                   >
                                     <RotateCcw className="h-4 w-4 mr-1" />
                                     Reabrir
@@ -1330,13 +1328,13 @@ export default function CashRegisterPage() {
                                 )}
                               <Link href={`/admin/cash-register/${closure.id}`}>
                                 <Button
-                                  variant="outline"
                                   size="sm"
                                   title={
                                     closure.reopened_at
                                       ? `Caja reabierta${closure.reopen_count && closure.reopen_count > 1 ? ` ${closure.reopen_count} veces` : ""}${closure.reopen_notes ? `. Notas: ${closure.reopen_notes}` : ""}`
                                       : undefined
                                   }
+                                  variant="outline"
                                 >
                                   <Eye className="h-4 w-4 mr-1" />
                                   Ver
@@ -1360,14 +1358,14 @@ export default function CashRegisterPage() {
                   <Pagination
                     className="flex-wrap gap-y-2"
                     currentPage={closuresCurrentPage}
+                    itemsPerPage={closuresItemsPerPage}
+                    itemsPerPageOptions={[10, 20, 50, 100]}
+                    totalItems={closuresTotalCount}
                     totalPages={Math.ceil(
                       closuresTotalCount / closuresItemsPerPage,
                     )}
-                    itemsPerPage={closuresItemsPerPage}
-                    totalItems={closuresTotalCount}
-                    onPageChange={setClosuresCurrentPage}
                     onItemsPerPageChange={setClosuresItemsPerPage}
-                    itemsPerPageOptions={[10, 20, 50, 100]}
+                    onPageChange={setClosuresCurrentPage}
                   />
                 </div>
               )}
@@ -1380,7 +1378,7 @@ export default function CashRegisterPage() {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle>Ventas / Órdenes</CardTitle>
-                <Button onClick={fetchOrders} variant="outline" size="sm">
+                <Button size="sm" variant="outline" onClick={fetchOrders}>
                   <RefreshCw className="h-4 w-4 mr-2" />
                   Actualizar
                 </Button>
@@ -1396,21 +1394,21 @@ export default function CashRegisterPage() {
                       <div className="relative">
                         <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-400" />
                         <Input
+                          className="pl-8 text-sm"
                           placeholder="Orden, email, cliente..."
                           value={orderSearchTerm}
                           onChange={(e) => {
                             setOrderSearchTerm(e.target.value);
                             fetchOrders();
                           }}
-                          className="pl-8 text-sm"
                         />
                       </div>
                     </div>
                     <Button
+                      className="md:hidden w-full sm:w-auto flex items-center justify-center gap-2"
+                      size="sm"
                       type="button"
                       variant="outline"
-                      size="sm"
-                      className="md:hidden w-full sm:w-auto flex items-center justify-center gap-2"
                       onClick={() => setOrderFiltersExpanded((v) => !v)}
                     >
                       <Filter className="h-4 w-4" />
@@ -1483,15 +1481,16 @@ export default function CashRegisterPage() {
                     <div>
                       <Label className="text-xs sm:text-sm">Producto</Label>
                       <Input
+                        className="text-sm h-9"
                         placeholder="Ej: Kit Limpieza"
                         value={orderProductFilter}
                         onChange={(e) => setOrderProductFilter(e.target.value)}
-                        className="text-sm h-9"
                       />
                     </div>
                     <div>
                       <Label className="text-xs sm:text-sm">Fecha Desde</Label>
                       <Input
+                        className="text-sm h-9"
                         type="date"
                         value={orderFilters.date_from}
                         onChange={(e) => {
@@ -1500,12 +1499,12 @@ export default function CashRegisterPage() {
                             date_from: e.target.value,
                           });
                         }}
-                        className="text-sm h-9"
                       />
                     </div>
                     <div>
                       <Label className="text-xs sm:text-sm">Fecha Hasta</Label>
                       <Input
+                        className="text-sm h-9"
                         type="date"
                         value={orderFilters.date_to}
                         onChange={(e) => {
@@ -1514,15 +1513,14 @@ export default function CashRegisterPage() {
                             date_to: e.target.value,
                           });
                         }}
-                        className="text-sm h-9"
                       />
                     </div>
                     <div className="flex items-end">
                       <Button
+                        className="h-9 text-xs"
+                        size="sm"
                         type="button"
                         variant="outline"
-                        size="sm"
-                        className="h-9 text-xs"
                         onClick={() => {
                           const today = getTodayInTimezone("America/Santiago");
                           setOrderFilters((prev) => ({
@@ -1628,11 +1626,11 @@ export default function CashRegisterPage() {
                                 <>
                                   {order.order_items
                                     .slice(0, 2)
-                                    .map((item: any, idx: number) => {
+                                    .map((item: unknown, idx: number) => {
                                       const productName =
                                         item.product_name || "Producto";
                                       return (
-                                        <div key={idx} className="text-sm">
+                                        <div className="text-sm" key={idx}>
                                           <span className="font-medium">
                                             {item.quantity}x
                                           </span>{" "}
@@ -1665,7 +1663,7 @@ export default function CashRegisterPage() {
                             {(() => {
                               const paid =
                                 order.order_payments?.reduce(
-                                  (sum: number, p: any) =>
+                                  (sum: number, p: unknown) =>
                                     sum + Number(p.amount || 0),
                                   0,
                                 ) || 0;
@@ -1687,7 +1685,7 @@ export default function CashRegisterPage() {
                             {(() => {
                               const methodsFromPayments =
                                 order.order_payments?.map(
-                                  (p: any) => p.payment_method,
+                                  (p: unknown) => p.payment_method,
                                 ) || [];
                               const uniqueMethods = Array.from(
                                 new Set(methodsFromPayments),
@@ -1697,11 +1695,11 @@ export default function CashRegisterPage() {
                                 return (
                                   <div className="flex flex-wrap gap-1">
                                     {uniqueMethods.map(
-                                      (method: any, idx: number) => (
+                                      (method: unknown, idx: number) => (
                                         <Badge
+                                          className="text-[10px] px-1 h-5 capitalize"
                                           key={idx}
                                           variant="outline"
-                                          className="text-[10px] px-1 h-5 capitalize"
                                         >
                                           {method === "cash"
                                             ? "Efectivo"
@@ -1721,8 +1719,8 @@ export default function CashRegisterPage() {
 
                               return (
                                 <Badge
-                                  variant="outline"
                                   className="text-[10px] px-1 h-5"
+                                  variant="outline"
                                 >
                                   {order.payment_method_type === "cash" &&
                                     "Efectivo"}
@@ -1786,31 +1784,29 @@ export default function CashRegisterPage() {
                               <Link
                                 href={`/admin/cash-register/orders/${order.id}`}
                               >
-                                <Button variant="outline" size="sm">
+                                <Button size="sm" variant="outline">
                                   <Eye className="h-4 w-4 mr-1" />
                                   Ver
                                 </Button>
                               </Link>
                               {isSuperAdmin && order.status !== "cancelled" && (
-                                <>
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    className="text-red-600 hover:text-red-700"
-                                    onClick={() => {
-                                      setSelectedOrderForAction(order);
-                                      setOrderActionDialog("cancel");
-                                    }}
-                                  >
-                                    Anular
-                                  </Button>
-                                </>
+                                <Button
+                                  className="text-red-600 hover:text-red-700"
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => {
+                                    setSelectedOrderForAction(order);
+                                    setOrderActionDialog("cancel");
+                                  }}
+                                >
+                                  Anular
+                                </Button>
                               )}
                               {isSuperAdmin && order.status === "cancelled" && (
                                 <Button
-                                  variant="outline"
-                                  size="sm"
                                   className="text-red-600 hover:text-red-700"
+                                  size="sm"
+                                  variant="outline"
                                   onClick={() => {
                                     setSelectedOrderForAction(order);
                                     setOrderActionDialog("delete");
@@ -1834,14 +1830,14 @@ export default function CashRegisterPage() {
                   <Pagination
                     className="flex-wrap gap-y-2"
                     currentPage={ordersCurrentPage}
+                    itemsPerPage={ordersItemsPerPage}
+                    itemsPerPageOptions={[10, 20, 50, 100]}
+                    totalItems={ordersTotalCount}
                     totalPages={Math.ceil(
                       ordersTotalCount / ordersItemsPerPage,
                     )}
-                    itemsPerPage={ordersItemsPerPage}
-                    totalItems={ordersTotalCount}
-                    onPageChange={setOrdersCurrentPage}
                     onItemsPerPageChange={setOrdersItemsPerPage}
-                    itemsPerPageOptions={[10, 20, 50, 100]}
+                    onPageChange={setOrdersCurrentPage}
                   />
                 </div>
               )}
@@ -1898,7 +1894,7 @@ export default function CashRegisterPage() {
                               <Link
                                 href={`/admin/cash-register/orders/${cn.order_id}`}
                               >
-                                <Button variant="link" className="p-0 h-auto">
+                                <Button className="p-0 h-auto" variant="link">
                                   {cn.order_number || "Ver orden"}
                                 </Button>
                               </Link>
@@ -1929,7 +1925,7 @@ export default function CashRegisterPage() {
                               <Link
                                 href={`/admin/cash-register/orders/${cn.order_id}`}
                               >
-                                <Button variant="outline" size="sm">
+                                <Button size="sm" variant="outline">
                                   <Eye className="h-4 w-4 mr-1" />
                                   Ver orden
                                 </Button>
@@ -2267,8 +2263,8 @@ export default function CashRegisterPage() {
                                     </TableCell>
                                     <TableCell className="whitespace-nowrap py-2 sm:py-3">
                                       <Badge
-                                        variant="outline"
                                         className="text-[10px] sm:text-xs"
+                                        variant="outline"
                                       >
                                         {movement.payment_method}
                                       </Badge>
@@ -2284,12 +2280,12 @@ export default function CashRegisterPage() {
                                     </TableCell>
                                     <TableCell className="whitespace-nowrap py-2 sm:py-3">
                                       <Badge
+                                        className="text-[10px] sm:text-xs"
                                         variant={
                                           movement.payment_status === "Completo"
                                             ? "default"
                                             : "secondary"
                                         }
-                                        className="text-[10px] sm:text-xs"
                                       >
                                         {movement.payment_status}
                                       </Badge>
@@ -2327,11 +2323,11 @@ export default function CashRegisterPage() {
                     Monto Inicial de Caja
                   </Label>
                   <Input
+                    className="h-11 sm:h-12 text-sm sm:text-base mt-1"
+                    placeholder="0"
                     type="number"
                     value={openingCash}
                     onChange={(e) => setOpeningCash(Number(e.target.value))}
-                    placeholder="0"
-                    className="h-11 sm:h-12 text-sm sm:text-base mt-1"
                   />
                 </div>
                 <div className="sm:col-span-2">
@@ -2339,15 +2335,15 @@ export default function CashRegisterPage() {
                     Efectivo Físico Contado *
                   </Label>
                   <Input
+                    required
+                    className="h-11 sm:h-12 text-sm sm:text-base mt-1"
+                    placeholder="Monto contado físicamente"
                     type="number"
                     value={actualCash ?? ""}
                     onChange={(e) => {
                       const value = e.target.value;
                       setActualCash(value === "" ? null : Number(value));
                     }}
-                    placeholder="Monto contado físicamente"
-                    required
-                    className="h-11 sm:h-12 text-sm sm:text-base mt-1"
                   />
                   <p className="text-[10px] sm:text-xs text-admin-text-tertiary mt-1 break-words">
                     Efectivo esperado:{" "}
@@ -2371,13 +2367,13 @@ export default function CashRegisterPage() {
                     Total Máquina Débito
                   </Label>
                   <Input
+                    className="h-11 sm:h-12 text-sm sm:text-base mt-1"
+                    placeholder="0"
                     type="number"
                     value={cardMachineDebit}
                     onChange={(e) =>
                       setCardMachineDebit(Number(e.target.value))
                     }
-                    placeholder="0"
-                    className="h-11 sm:h-12 text-sm sm:text-base mt-1"
                   />
                 </div>
                 <div>
@@ -2385,13 +2381,13 @@ export default function CashRegisterPage() {
                     Total Máquina Crédito
                   </Label>
                   <Input
+                    className="h-11 sm:h-12 text-sm sm:text-base mt-1"
+                    placeholder="0"
                     type="number"
                     value={cardMachineCredit}
                     onChange={(e) =>
                       setCardMachineCredit(Number(e.target.value))
                     }
-                    placeholder="0"
-                    className="h-11 sm:h-12 text-sm sm:text-base mt-1"
                   />
                 </div>
                 <div>
@@ -2399,29 +2395,29 @@ export default function CashRegisterPage() {
                     Total Transferencias
                   </Label>
                   <Input
+                    className="h-11 sm:h-12 text-sm sm:text-base mt-1"
+                    placeholder="0"
                     type="number"
                     value={transferTotal}
                     onChange={(e) => setTransferTotal(Number(e.target.value))}
-                    placeholder="0"
-                    className="h-11 sm:h-12 text-sm sm:text-base mt-1"
                   />
                 </div>
                 <div>
                   <Label className="text-xs sm:text-sm">Notas</Label>
                   <Input
+                    className="h-11 sm:h-12 text-sm sm:text-base mt-1"
+                    placeholder="Notas adicionales..."
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
-                    placeholder="Notas adicionales..."
-                    className="h-11 sm:h-12 text-sm sm:text-base mt-1"
                   />
                 </div>
                 <div>
                   <Label className="text-xs sm:text-sm">Discrepancias</Label>
                   <Input
+                    className="h-11 sm:h-12 text-sm sm:text-base mt-1"
+                    placeholder="Describa discrepancia..."
                     value={discrepancies}
                     onChange={(e) => setDiscrepancies(e.target.value)}
-                    placeholder="Describa discrepancia..."
-                    className="h-11 sm:h-12 text-sm sm:text-base mt-1"
                   />
                 </div>
               </div>
@@ -2439,12 +2435,12 @@ export default function CashRegisterPage() {
             <div className="flex flex-wrap gap-2 w-full sm:w-auto order-2 sm:order-1">
               {isOperativoMode && fieldOperationIdFromUrl && (
                 <Link
-                  href={`/admin/field-operations/${fieldOperationIdFromUrl}`}
                   className="inline-flex"
+                  href={`/admin/field-operations/${fieldOperationIdFromUrl}`}
                 >
                   <Button
-                    variant="outline"
                     className="w-full sm:w-auto min-h-[44px] sm:min-h-0"
+                    variant="outline"
                   >
                     <ArrowLeft className="h-4 w-4 mr-2" />
                     Volver al operativo
@@ -2452,17 +2448,17 @@ export default function CashRegisterPage() {
                 </Link>
               )}
               <Button
+                className="w-full sm:w-auto min-h-[44px] sm:min-h-0"
                 variant="outline"
                 onClick={() => setShowCloseDialog(false)}
-                className="w-full sm:w-auto min-h-[44px] sm:min-h-0"
               >
                 Cancelar
               </Button>
             </div>
             <Button
-              onClick={handleCloseCashRegister}
-              disabled={closing || !dailySummary}
               className="w-full sm:w-auto min-h-[44px] sm:min-h-0 order-1 sm:order-2"
+              disabled={closing || !dailySummary}
+              onClick={handleCloseCashRegister}
             >
               {closing ? (
                 <>
@@ -2578,6 +2574,7 @@ export default function CashRegisterPage() {
           </div>
           <DialogFooter>
             <Button
+              disabled={processingOrderAction}
               variant="outline"
               onClick={() => {
                 setOrderActionDialog(null);
@@ -2585,11 +2582,14 @@ export default function CashRegisterPage() {
                 setOrderActionReason("");
                 setRefundMethod("cash");
               }}
-              disabled={processingOrderAction}
             >
               Cancelar
             </Button>
             <Button
+              disabled={
+                processingOrderAction ||
+                (orderActionDialog === "cancel" && !orderActionReason)
+              }
               variant={
                 orderActionDialog === "delete" ? "destructive" : "default"
               }
@@ -2604,10 +2604,6 @@ export default function CashRegisterPage() {
                   handleDeleteOrder(selectedOrderForAction.id);
                 }
               }}
-              disabled={
-                processingOrderAction ||
-                (orderActionDialog === "cancel" && !orderActionReason)
-              }
             >
               {processingOrderAction ? (
                 <>

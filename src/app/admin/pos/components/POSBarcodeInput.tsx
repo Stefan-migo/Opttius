@@ -1,8 +1,9 @@
 "use client";
 
-import { useRef, useEffect, useCallback } from "react";
-import { Input } from "@/components/ui/input";
 import { Scan } from "lucide-react";
+import { useCallback, useEffect, useRef } from "react";
+
+import { Input } from "@/components/ui/input";
 
 interface POSBarcodeInputProps {
   value: string;
@@ -125,15 +126,15 @@ export function POSBarcodeInput({
     <div className={`relative ${className || ""}`}>
       <Scan className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
       <Input
+        autoComplete="off"
+        autoFocus={autoFocus}
+        className="pl-10"
+        placeholder={placeholder}
         ref={inputRef as React.Ref<HTMLInputElement>}
         type="text"
         value={value}
         onChange={handleChange}
         onKeyDown={handleKeyDown}
-        placeholder={placeholder}
-        className="pl-10"
-        autoComplete="off"
-        autoFocus={autoFocus}
       />
     </div>
   );

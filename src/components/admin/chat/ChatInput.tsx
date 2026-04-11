@@ -1,16 +1,17 @@
 "use client";
 
-import { useState, KeyboardEvent, useRef, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import {
-  SendHorizonal,
-  Sparkles,
   Command,
   Paperclip,
-  X,
+  SendHorizonal,
+  Sparkles,
   Square,
+  X,
 } from "lucide-react";
+import { KeyboardEvent, useEffect, useRef, useState } from "react";
+
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 
 interface ChatInputProps {
@@ -71,7 +72,7 @@ export function ChatInput({
         filename: data.filename,
         rowCount: data.rowCount ?? 0,
       });
-    } catch (err: any) {
+    } catch (err: unknown) {
       alert(err?.message || "Error al subir el archivo");
     } finally {
       setUploading(false);
@@ -109,10 +110,10 @@ export function ChatInput({
   return (
     <div className="p-4 bg-white dark:bg-slate-950/20 backdrop-blur-xl border-t border-slate-100 dark:border-slate-800/50">
       <input
-        ref={fileInputRef}
-        type="file"
         accept=".csv,.xlsx,.xls"
         className="hidden"
+        ref={fileInputRef}
+        type="file"
         onChange={handleFileSelect}
       />
       <div className="max-w-4xl mx-auto">
@@ -124,9 +125,9 @@ export function ChatInput({
               {attachedFile.rowCount} filas
             </span>
             <button
+              className="p-1 hover:bg-primary/20 rounded"
               type="button"
               onClick={() => setAttachedFile(null)}
-              className="p-1 hover:bg-primary/20 rounded"
             >
               <X className="h-4 w-4" />
             </button>
@@ -134,47 +135,47 @@ export function ChatInput({
         )}
         <div className="relative flex items-end gap-2 bg-white dark:bg-slate-900 rounded-[24px] p-2 pr-2.5 border border-slate-200 dark:border-slate-800 shadow-lg shadow-slate-200/20 dark:shadow-none focus-within:border-primary/50 focus-within:ring-4 focus-within:ring-primary/5 transition-all">
           <Button
+            className="shrink-0 rounded-xl w-10 h-10"
+            disabled={disabled || uploading}
+            size="icon"
+            title="Adjuntar CSV o Excel para importar"
             type="button"
             variant="ghost"
-            size="icon"
-            className="shrink-0 rounded-xl w-10 h-10"
             onClick={() => fileInputRef.current?.click()}
-            disabled={disabled || uploading}
-            title="Adjuntar CSV o Excel para importar"
           >
             <Paperclip className="w-5 h-5" />
           </Button>
           <Textarea
+            className="resize-none min-h-[44px] max-h-48 bg-transparent border-0 focus-visible:ring-0 focus-visible:ring-offset-0 px-4 py-3 text-[14.5px] leading-relaxed placeholder:text-slate-400 dark:placeholder:text-slate-500"
+            disabled={disabled}
+            placeholder={placeholder}
             ref={textareaRef}
+            rows={1}
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder={placeholder}
-            disabled={disabled}
-            rows={1}
-            className="resize-none min-h-[44px] max-h-48 bg-transparent border-0 focus-visible:ring-0 focus-visible:ring-offset-0 px-4 py-3 text-[14.5px] leading-relaxed placeholder:text-slate-400 dark:placeholder:text-slate-500"
           />
           {disabled && onStop ? (
             <Button
-              onClick={onStop}
-              variant="destructive"
-              size="icon"
               className="shrink-0 rounded-xl w-10 h-10"
+              size="icon"
               title="Detener respuesta"
+              variant="destructive"
+              onClick={onStop}
             >
               <Square className="w-5 h-5 fill-current" />
             </Button>
           ) : (
             <Button
-              onClick={handleSend}
-              disabled={disabled || (!message.trim() && !attachedFile)}
-              size="icon"
               className={cn(
                 "shrink-0 rounded-xl w-10 h-10 transition-all duration-300",
                 message.trim()
                   ? "bg-primary text-white shadow-md shadow-primary/20 scale-100 opacity-100"
                   : "bg-slate-100 dark:bg-slate-800 text-slate-400 scale-90 opacity-50",
               )}
+              disabled={disabled || (!message.trim() && !attachedFile)}
+              size="icon"
+              onClick={handleSend}
             >
               <SendHorizonal className="w-5 h-5" />
             </Button>

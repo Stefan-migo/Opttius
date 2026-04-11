@@ -5,9 +5,10 @@
  * Provides type-safe methods for CRUD operations on products.
  */
 
-import { ApiClient, isSuccess, unwrapData } from "../client-helpers";
 import { handleApiError } from "@/lib/services/errorService";
 import { getBranchAndOperativoHeaders } from "@/lib/utils/branch";
+
+import { ApiClient, isSuccess, unwrapData } from "../client-helpers";
 
 // Types
 export interface Product {
@@ -393,7 +394,7 @@ export interface BulkProductData {
 export interface BulkProductOperationData {
   operation: string;
   product_ids: string[];
-  updates?: Record<string, any>;
+  updates?: Record<string, unknown>;
   force_delete?: boolean;
 }
 

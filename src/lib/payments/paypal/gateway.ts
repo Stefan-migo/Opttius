@@ -5,9 +5,11 @@
  */
 
 import type { NextRequest } from "next/server";
-import type { IPaymentGateway, PaymentIntentResponse } from "../interfaces";
-import type { PaymentStatus, WebhookEvent } from "@/types/payment";
+
 import { appLogger as logger } from "@/lib/logger";
+import type { PaymentStatus, WebhookEvent } from "@/types/payment";
+
+import type { IPaymentGateway, PaymentIntentResponse } from "../interfaces";
 
 function getPayPalBaseUrl(): string {
   const base = process.env.PAYPAL_API_BASE_URL;

@@ -4,6 +4,7 @@
  * Used by landing components and signup page to decide whether to show signup or redirect to solicitar-demo.
  */
 import { NextResponse } from "next/server";
+
 import { createServiceRoleClient } from "@/utils/supabase/service-role";
 
 export const dynamic = "force-dynamic";

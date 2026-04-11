@@ -1,9 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { ArrowLeft, Download, Eye, Loader2, Receipt } from "lucide-react";
+import Link from "next/link";
 import { useParams } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useEffect, useState } from "react";
+
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -12,11 +15,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ArrowLeft, Receipt, Loader2, Eye, Download } from "lucide-react";
-import Link from "next/link";
 import {
-  agreementService,
   AgreementInstitutionalInvoice,
+  agreementService,
 } from "@/lib/api/services/agreementService";
 import { handleApiError } from "@/lib/services/errorService";
 import { formatCurrency, formatDate } from "@/lib/utils";
@@ -55,7 +56,7 @@ export default function AgreementInvoicesPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex items-center gap-4">
           <Link href={`/admin/agreements/${agreementId}`}>
-            <Button variant="ghost" size="icon">
+            <Button size="icon" variant="ghost">
               <ArrowLeft className="h-4 w-4" />
             </Button>
           </Link>
@@ -101,7 +102,7 @@ export default function AgreementInvoicesPage() {
                   <TableHead>Fecha emisión</TableHead>
                   <TableHead>Monto</TableHead>
                   <TableHead>Estado</TableHead>
-                  <TableHead></TableHead>
+                  <TableHead />
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -123,7 +124,7 @@ export default function AgreementInvoicesPage() {
                         <Link
                           href={`/admin/agreements/${agreementId}/invoices/${inv.id}`}
                         >
-                          <Button variant="outline" size="sm">
+                          <Button size="sm" variant="outline">
                             <Eye className="h-4 w-4 mr-1" />
                             Ver
                           </Button>
@@ -131,10 +132,10 @@ export default function AgreementInvoicesPage() {
                         {inv.pdf_url && (
                           <a
                             href={inv.pdf_url}
-                            target="_blank"
                             rel="noopener noreferrer"
+                            target="_blank"
                           >
-                            <Button variant="outline" size="sm">
+                            <Button size="sm" variant="outline">
                               <Download className="h-4 w-4 mr-1" />
                               PDF
                             </Button>

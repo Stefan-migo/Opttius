@@ -2,9 +2,9 @@
  * Service to send quote by email to a client.
  * Used by the quotes send API route and the AI agent sendQuoteByEmail tool.
  */
-import { createServiceRoleClient } from "@/utils/supabase/server";
-import { sendEmail } from "@/lib/email/client";
 import businessConfig from "@/config/business";
+import { sendEmail } from "@/lib/email/client";
+import { createServiceRoleClient } from "@/utils/supabase/server";
 
 export interface SendQuoteEmailContext {
   organizationId: string;

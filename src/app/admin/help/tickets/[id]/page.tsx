@@ -1,27 +1,27 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useParams, useRouter } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
+import { zodResolver } from "@hookform/resolvers/zod";
 import {
-  Loader2,
   ArrowLeft,
-  MessageSquare,
-  XCircle,
-  Send,
-  User,
   Calendar,
   Copy,
+  Loader2,
+  MessageSquare,
+  Send,
+  User,
 } from "lucide-react";
+import { useParams, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { SubmitHandler, useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { useForm, SubmitHandler } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { createSaasSupportMessageSchema } from "@/lib/api/validation/zod-schemas";
 import type { z } from "zod";
+
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { createSaasSupportMessageSchema } from "@/lib/api/validation/zod-schemas";
 
 type MessageForm = z.input<typeof createSaasSupportMessageSchema>;
 
@@ -217,8 +217,8 @@ export default function HelpTicketDetailPage() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Button
-            variant="ghost"
             size="icon"
+            variant="ghost"
             onClick={() => router.push("/admin/help")}
           >
             <ArrowLeft className="h-5 w-5" />
@@ -229,10 +229,10 @@ export default function HelpTicketDetailPage() {
                 Ticket #{ticket.ticket_number}
               </h1>
               <Button
-                variant="ghost"
                 size="icon"
-                onClick={copyTicketNumber}
                 title="Copiar número de ticket"
+                variant="ghost"
+                onClick={copyTicketNumber}
               >
                 <Copy className="h-4 w-4" />
               </Button>
@@ -296,12 +296,12 @@ export default function HelpTicketDetailPage() {
                     .filter((m) => !m.is_internal)
                     .map((msg) => (
                       <div
-                        key={msg.id}
                         className={`p-4 rounded-lg border ${
                           msg.is_from_customer
                             ? "bg-blue-50 border-blue-200"
                             : "bg-gray-50 border-gray-200"
                         }`}
+                        key={msg.id}
                       >
                         <div className="flex items-start justify-between mb-2">
                           <div className="flex items-center gap-2">
@@ -330,8 +330,8 @@ export default function HelpTicketDetailPage() {
             </CardHeader>
             <CardContent>
               <form
-                onSubmit={handleSubmit(onSubmitMessage)}
                 className="space-y-4"
+                onSubmit={handleSubmit(onSubmitMessage)}
               >
                 <div className="space-y-2">
                   <Label htmlFor="message">
@@ -340,9 +340,9 @@ export default function HelpTicketDetailPage() {
                   <Textarea
                     id="message"
                     {...register("message")}
+                    className={errors.message ? "border-red-500" : ""}
                     placeholder="Escribe tu respuesta aquí..."
                     rows={6}
-                    className={errors.message ? "border-red-500" : ""}
                   />
                   {errors.message && (
                     <p className="text-sm text-red-500">
@@ -352,9 +352,9 @@ export default function HelpTicketDetailPage() {
                 </div>
 
                 <Button
-                  type="submit"
-                  disabled={sendingMessage}
                   className="w-full"
+                  disabled={sendingMessage}
+                  type="submit"
                 >
                   {sendingMessage ? (
                     <>

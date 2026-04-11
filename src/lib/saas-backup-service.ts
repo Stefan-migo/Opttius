@@ -1,10 +1,11 @@
 import { exec } from "child_process";
-import { promisify } from "util";
-import { createServiceRoleClient } from "@/lib/supabase";
-import { appLogger as logger } from "@/lib/logger";
 import fs from "fs";
-import path from "path";
 import os from "os";
+import path from "path";
+import { promisify } from "util";
+
+import { appLogger as logger } from "@/lib/logger";
+import { createServiceRoleClient } from "@/lib/supabase";
 
 const execAsync = promisify(exec);
 
@@ -118,7 +119,7 @@ export class SaasBackupService {
         sizeBytes: fileStats.size,
         durationSeconds: duration,
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error("Error crítico en SaaS Full Backup", {
         error: error.message,
       });

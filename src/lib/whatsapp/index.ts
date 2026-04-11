@@ -5,18 +5,18 @@
  */
 
 export { WhatsAppClient } from "./client";
-export type { WhatsAppSendTextRequest, WhatsAppSendResponse } from "./types";
-export { WhatsAppSignatureValidator } from "./signature-validator";
-export {
-  resolveWhatsAppContext,
-  normalizePhoneForWhatsApp,
-} from "./context-resolver";
 export type { WhatsAppContext } from "./context-resolver";
-export { getOrCreateWhatsAppSession } from "./session-manager";
 export {
-  sendLowStockAlertWhatsApp,
+  normalizePhoneForWhatsApp,
+  resolveWhatsAppContext,
+} from "./context-resolver";
+export {
+  getOrgOwnerPhoneForWhatsApp,
   sendAppointmentReminderWhatsApp,
+  sendLowStockAlertWhatsApp,
   sendQuoteWhatsApp,
   sendWorkOrderReadyWhatsApp,
-  getOrgOwnerPhoneForWhatsApp,
 } from "./notifications-b2b";
+export { getOrCreateWhatsAppSession } from "./session-manager";
+export { WhatsAppSignatureValidator } from "./signature-validator";
+export type { WhatsAppSendResponse, WhatsAppSendTextRequest } from "./types";

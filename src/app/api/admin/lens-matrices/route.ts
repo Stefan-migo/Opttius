@@ -1,14 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/utils/supabase/server";
-import { appLogger as logger } from "@/lib/logger";
-import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
+
 import { ValidationError } from "@/lib/api/errors";
-import { createLensPriceMatrixSchema } from "@/lib/api/validation/zod-schemas";
 import {
   parseAndValidateBody,
-  parseAndValidateQuery,
   validationErrorResponse,
 } from "@/lib/api/validation/zod-helpers";
+import { createLensPriceMatrixSchema } from "@/lib/api/validation/zod-schemas";
+import { appLogger as logger } from "@/lib/logger";
+import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
+import { createClient } from "@/utils/supabase/server";
 
 export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
@@ -212,9 +212,9 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json({ matrix }, { status: 201 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     if (error instanceof ValidationError) {
-      return validationErrorResponse(error as any);
+      return validationErrorResponse(error as unknown);
     } else {
       logger.error("Error in lens matrices API POST", error);
       return NextResponse.json(

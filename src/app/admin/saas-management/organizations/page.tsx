@@ -1,18 +1,28 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import {
+  AlertTriangle,
+  ArrowLeft,
+  CheckCircle2,
+  Eye,
+  Loader2,
+  MapPin,
+  MoreVertical,
+  Pause,
+  Play,
+  Plus,
+  Search,
+  Trash2,
+  Users,
+  XCircle,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -23,6 +33,21 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Table,
   TableBody,
   TableCell,
@@ -30,35 +55,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  Building2,
-  Plus,
-  Search,
-  Eye,
-  Edit,
-  MoreVertical,
-  CheckCircle2,
-  XCircle,
-  Pause,
-  Play,
-  Crown,
-  Users,
-  MapPin,
-  Loader2,
-  ArrowLeft,
-  Trash2,
-  AlertTriangle,
-} from "lucide-react";
-import Link from "next/link";
-import { toast } from "sonner";
 import { formatDate } from "@/lib/utils";
 
 interface Organization {
@@ -354,18 +350,18 @@ export default function OrganizationsPage() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Button
-            variant="ghost"
             size="icon"
-            onClick={() => router.push("/admin/saas-management/dashboard")}
             title="Volver al dashboard"
+            variant="ghost"
+            onClick={() => router.push("/admin/saas-management/dashboard")}
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div>
-            <h1 className="text-3xl font-display font-bold text-epoch-primary tracking-tight">
+            <h1 className="text-3xl font-display font-bold text-white tracking-tight">
               Gestión de Organizaciones
             </h1>
-            <p className="text-muted-foreground mt-2">
+            <p className="text-white/50 mt-2">
               Administra todas las organizaciones del sistema
             </p>
           </div>
@@ -388,16 +384,17 @@ export default function OrganizationsPage() {
               <div>
                 <label className="text-sm font-medium">Nombre *</label>
                 <Input
+                  placeholder="Ej: Óptica Centro"
                   value={newOrgData.name}
                   onChange={(e) =>
                     setNewOrgData({ ...newOrgData, name: e.target.value })
                   }
-                  placeholder="Ej: Óptica Centro"
                 />
               </div>
               <div>
                 <label className="text-sm font-medium">Slug *</label>
                 <Input
+                  placeholder="optica-centro"
                   value={newOrgData.slug}
                   onChange={(e) =>
                     setNewOrgData({
@@ -405,7 +402,6 @@ export default function OrganizationsPage() {
                       slug: e.target.value.toLowerCase().replace(/\s+/g, "-"),
                     })
                   }
-                  placeholder="optica-centro"
                 />
                 <p className="text-xs text-gray-500 mt-1">
                   Solo letras minúsculas, números y guiones
@@ -437,7 +433,7 @@ export default function OrganizationsPage() {
               >
                 Cancelar
               </Button>
-              <Button onClick={handleCreateOrganization} disabled={creating}>
+              <Button disabled={creating} onClick={handleCreateOrganization}>
                 {creating ? (
                   <>
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -453,20 +449,20 @@ export default function OrganizationsPage() {
       </div>
 
       {/* Filtros y búsqueda */}
-      <Card className="admin-card">
+      <Card className="bg-white/5 border-white/10">
         <CardContent className="pt-6">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/40" />
                 <Input
+                  className="rounded-xl pl-10 bg-white/5 border-white/10 text-white placeholder:text-white/40"
                   placeholder="Buscar por nombre o slug..."
                   value={searchTerm}
                   onChange={(e) => {
                     setSearchTerm(e.target.value);
                     setCurrentPage(1);
                   }}
-                  className="rounded-xl pl-10"
                 />
               </div>
             </div>
@@ -502,7 +498,7 @@ export default function OrganizationsPage() {
               </span>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm">
+                  <Button size="sm" variant="outline">
                     Acciones masivas
                   </Button>
                 </DropdownMenuTrigger>
@@ -536,8 +532,8 @@ export default function OrganizationsPage() {
                 </DropdownMenuContent>
               </DropdownMenu>
               <Button
-                variant="ghost"
                 size="sm"
+                variant="ghost"
                 onClick={() => setSelectedOrgs(new Set())}
               >
                 Limpiar selección
@@ -548,19 +544,21 @@ export default function OrganizationsPage() {
       </Card>
 
       {/* Tabla de organizaciones */}
-      <Card className="admin-card">
+      <Card className="bg-white/5 border-white/10">
         <CardHeader>
-          <CardTitle>Organizaciones ({totalCount})</CardTitle>
+          <CardTitle className="text-white">
+            Organizaciones ({totalCount})
+          </CardTitle>
         </CardHeader>
         <CardContent>
           {loading ? (
             <div className="flex items-center justify-center py-12">
-              <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+              <Loader2 className="h-8 w-8 animate-spin text-[#C5A059]" />
             </div>
           ) : error ? (
-            <div className="text-center py-12 text-red-600">{error}</div>
+            <div className="text-center py-12 text-red-400">{error}</div>
           ) : organizations.length === 0 ? (
-            <div className="text-center py-12 text-gray-500">
+            <div className="text-center py-12 text-white/40">
               No se encontraron organizaciones
             </div>
           ) : (
@@ -568,14 +566,14 @@ export default function OrganizationsPage() {
               <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0">
                 <Table>
                   <TableHeader>
-                    <TableRow>
-                      <TableHead className="w-12">
+                    <TableRow className="border-white/10 hover:bg-white/5">
+                      <TableHead className="w-12 text-white/70">
                         <input
-                          type="checkbox"
                           checked={
                             selectedOrgs.size === organizations.length &&
                             organizations.length > 0
                           }
+                          type="checkbox"
                           onChange={(e) => {
                             if (e.target.checked) {
                               setSelectedOrgs(
@@ -587,23 +585,32 @@ export default function OrganizationsPage() {
                           }}
                         />
                       </TableHead>
-                      <TableHead>Organización</TableHead>
-                      <TableHead>Tier</TableHead>
-                      <TableHead>Estado</TableHead>
-                      <TableHead>Usuarios</TableHead>
-                      <TableHead>Sucursales</TableHead>
-                      <TableHead>Owner</TableHead>
-                      <TableHead>Creada</TableHead>
-                      <TableHead className="text-right">Acciones</TableHead>
+                      <TableHead className="text-white/70">
+                        Organización
+                      </TableHead>
+                      <TableHead className="text-white/70">Tier</TableHead>
+                      <TableHead className="text-white/70">Estado</TableHead>
+                      <TableHead className="text-white/70">Usuarios</TableHead>
+                      <TableHead className="text-white/70">
+                        Sucursales
+                      </TableHead>
+                      <TableHead className="text-white/70">Owner</TableHead>
+                      <TableHead className="text-white/70">Creada</TableHead>
+                      <TableHead className="text-right text-white/70">
+                        Acciones
+                      </TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {organizations.map((org) => (
-                      <TableRow key={org.id}>
+                      <TableRow
+                        key={org.id}
+                        className="border-white/10 hover:bg-white/5"
+                      >
                         <TableCell>
                           <input
-                            type="checkbox"
                             checked={selectedOrgs.has(org.id)}
+                            type="checkbox"
                             onChange={(e) => {
                               const newSelected = new Set(selectedOrgs);
                               if (e.target.checked) {
@@ -617,8 +624,10 @@ export default function OrganizationsPage() {
                         </TableCell>
                         <TableCell>
                           <div>
-                            <div className="font-medium">{org.name}</div>
-                            <div className="text-sm text-gray-500">
+                            <div className="font-medium text-white">
+                              {org.name}
+                            </div>
+                            <div className="text-sm text-white/40">
                               {org.slug}
                             </div>
                           </div>
@@ -628,38 +637,38 @@ export default function OrganizationsPage() {
                         </TableCell>
                         <TableCell>{getStatusBadge(org.status)}</TableCell>
                         <TableCell>
-                          <div className="flex items-center gap-1">
-                            <Users className="h-4 w-4 text-gray-400" />
+                          <div className="flex items-center gap-1 text-white/70">
+                            <Users className="h-4 w-4" />
                             {org.stats?.activeUsers || 0}
                           </div>
                         </TableCell>
                         <TableCell>
-                          <div className="flex items-center gap-1">
-                            <MapPin className="h-4 w-4 text-gray-400" />
+                          <div className="flex items-center gap-1 text-white/70">
+                            <MapPin className="h-4 w-4" />
                             {org.stats?.branches || 0}
                           </div>
                         </TableCell>
                         <TableCell>
                           {org.owner ? (
                             <div>
-                              <div className="text-sm">
+                              <div className="text-sm text-white">
                                 {org.owner.first_name} {org.owner.last_name}
                               </div>
-                              <div className="text-xs text-gray-500">
+                              <div className="text-xs text-white/40">
                                 {org.owner.email}
                               </div>
                             </div>
                           ) : (
-                            <span className="text-gray-400">Sin owner</span>
+                            <span className="text-white/40">Sin owner</span>
                           )}
                         </TableCell>
-                        <TableCell className="text-sm text-gray-500">
+                        <TableCell className="text-sm text-white/50">
                           {formatDate(org.created_at)}
                         </TableCell>
                         <TableCell className="text-right">
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="sm">
+                              <Button size="sm" variant="ghost">
                                 <MoreVertical className="h-4 w-4" />
                               </Button>
                             </DropdownMenuTrigger>
@@ -718,8 +727,8 @@ export default function OrganizationsPage() {
                               </DropdownMenuItem>
                               <DropdownMenuSeparator />
                               <DropdownMenuItem
-                                onClick={() => handleDeleteClick(org)}
                                 className="text-red-600 focus:text-red-600"
+                                onClick={() => handleDeleteClick(org)}
                               >
                                 <Trash2 className="h-4 w-4 mr-2" />
                                 Eliminar Organización
@@ -741,20 +750,20 @@ export default function OrganizationsPage() {
                   </div>
                   <div className="flex gap-2">
                     <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                       disabled={currentPage === 1}
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                     >
                       Anterior
                     </Button>
                     <Button
-                      variant="outline"
+                      disabled={currentPage === totalPages}
                       size="sm"
+                      variant="outline"
                       onClick={() =>
                         setCurrentPage((p) => Math.min(totalPages, p + 1))
                       }
-                      disabled={currentPage === totalPages}
                     >
                       Siguiente
                     </Button>
@@ -826,19 +835,19 @@ export default function OrganizationsPage() {
           </DialogHeader>
           <DialogFooter>
             <Button
+              disabled={deleting}
               variant="outline"
               onClick={() => {
                 setDeleteDialogOpen(false);
                 setOrgToDelete(null);
               }}
-              disabled={deleting}
             >
               Cancelar
             </Button>
             <Button
+              disabled={deleting}
               variant="destructive"
               onClick={handleDeleteConfirm}
-              disabled={deleting}
             >
               {deleting ? (
                 <>

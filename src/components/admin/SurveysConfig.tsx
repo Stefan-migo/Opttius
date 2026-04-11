@@ -1,6 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { Loader2, RefreshCw, Star } from "lucide-react";
+import { useEffect, useState } from "react";
+
+import { useSurveyConfig } from "@/app/admin/system/hooks/useSurveyConfig";
+import { useSurveyResponses } from "@/app/admin/system/hooks/useSurveyResponses";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -8,10 +14,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -19,6 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import {
   Table,
   TableBody,
@@ -27,10 +31,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Star, RefreshCw, Loader2 } from "lucide-react";
-import { useSurveyConfig } from "@/app/admin/system/hooks/useSurveyConfig";
-import { useSurveyResponses } from "@/app/admin/system/hooks/useSurveyResponses";
+import { Textarea } from "@/components/ui/textarea";
 
 export default function SurveysConfig() {
   const { config, isLoading, updateConfig, isUpdating } = useSurveyConfig();
@@ -94,7 +95,7 @@ export default function SurveysConfig() {
         <CardContent className="space-y-6">
           <div className="flex items-center justify-between rounded-lg border p-4">
             <div>
-              <Label htmlFor="survey-enabled" className="text-base font-medium">
+              <Label className="text-base font-medium" htmlFor="survey-enabled">
                 Encuestas activas
               </Label>
               <p className="text-sm text-muted-foreground">
@@ -103,8 +104,8 @@ export default function SurveysConfig() {
               </p>
             </div>
             <Switch
-              id="survey-enabled"
               checked={localEnabled}
+              id="survey-enabled"
               onCheckedChange={setLocalEnabled}
             />
           </div>
@@ -131,16 +132,16 @@ export default function SurveysConfig() {
             </Label>
             <Textarea
               id="survey-question"
-              value={localQuestion}
-              onChange={(e) => setLocalQuestion(e.target.value)}
+              maxLength={500}
               placeholder="¿Cómo calificarías tu experiencia?"
               rows={2}
-              maxLength={500}
+              value={localQuestion}
+              onChange={(e) => setLocalQuestion(e.target.value)}
             />
           </div>
 
           {hasChanges && (
-            <Button onClick={handleSave} disabled={isUpdating}>
+            <Button disabled={isUpdating} onClick={handleSave}>
               {isUpdating ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -161,10 +162,10 @@ export default function SurveysConfig() {
             <CardDescription>Respuestas del último mes</CardDescription>
           </div>
           <Button
-            variant="outline"
-            size="sm"
-            onClick={() => refetch()}
             disabled={responsesLoading}
+            size="sm"
+            variant="outline"
+            onClick={() => refetch()}
           >
             <RefreshCw
               className={`h-4 w-4 mr-2 ${responsesLoading ? "animate-spin" : ""}`}
@@ -197,7 +198,7 @@ export default function SurveysConfig() {
                 </p>
                 <div className="flex gap-2 flex-wrap">
                   {[1, 2, 3, 4, 5].map((n) => (
-                    <Badge key={n} variant="secondary" className="font-normal">
+                    <Badge className="font-normal" key={n} variant="secondary">
                       {n}★: {metrics.distribution[n] ?? 0}
                     </Badge>
                   ))}

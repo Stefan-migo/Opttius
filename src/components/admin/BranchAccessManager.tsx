@@ -1,26 +1,20 @@
 "use client";
 
-import { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { 
+import { Building2, Crown, Globe, Loader2, Plus, X } from "lucide-react";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { 
-  Building2, 
-  Globe, 
-  Plus, 
-  X, 
-  Loader2,
-  Crown
-} from 'lucide-react';
-import { toast } from 'sonner';
+} from "@/components/ui/select";
 
 interface Branch {
   id: string;
@@ -42,17 +36,17 @@ interface BranchAccessManagerProps {
   canEdit: boolean;
 }
 
-export default function BranchAccessManager({ 
-  adminUserId, 
+export default function BranchAccessManager({
+  adminUserId,
   isSuperAdmin: initialIsSuperAdmin,
-  canEdit 
+  canEdit,
 }: BranchAccessManagerProps) {
   const [branchAccess, setBranchAccess] = useState<BranchAccess[]>([]);
   const [availableBranches, setAvailableBranches] = useState<Branch[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [isSuperAdmin, setIsSuperAdmin] = useState(initialIsSuperAdmin);
-  const [selectedBranchId, setSelectedBranchId] = useState<string>('');
+  const [selectedBranchId, setSelectedBranchId] = useState<string>("");
 
   useEffect(() => {
     fetchBranchAccess();
@@ -62,16 +56,20 @@ export default function BranchAccessManager({
   const fetchBranchAccess = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`/api/admin/admin-users/${adminUserId}/branch-access`);
+      const response = await fetch(
+        `/api/admin/admin-users/${adminUserId}/branch-access`,
+      );
       if (response.ok) {
         const data = await response.json();
         setBranchAccess(data.branchAccess || []);
-        const hasSuperAdmin = data.branchAccess?.some((access: BranchAccess) => access.branch_id === null);
+        const hasSuperAdmin = data.branchAccess?.some(
+          (access: BranchAccess) => access.branch_id === null,
+        );
         setIsSuperAdmin(hasSuperAdmin);
       }
     } catch (error) {
-      console.error('Error fetching branch access:', error);
-      toast.error('Error al cargar acceso a sucursales');
+      console.error("Error fetching branch access:", error);
+      toast.error("Error al cargar acceso a sucursales");
     } finally {
       setLoading(false);
     }
@@ -79,40 +77,53 @@ export default function BranchAccessManager({
 
   const fetchAvailableBranches = async () => {
     try {
-      const response = await fetch('/api/admin/branches');
+      const response = await fetch("/api/admin/branches");
       if (response.ok) {
         const data = await response.json();
         setAvailableBranches(data.branches || []);
       }
     } catch (error) {
-      console.error('Error fetching branches:', error);
+      console.error("Error fetching branches:", error);
     }
   };
 
   const handleAssignSuperAdmin = async () => {
     if (!canEdit) {
-      toast.error('No tienes permisos para realizar esta acción');
+      toast.error("No tienes permisos para realizar esta acción");
       return;
     }
 
     try {
       setSaving(true);
-      const response = await fetch(`/api/admin/admin-users/${adminUserId}/branch-access`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ branch_id: null, role: 'manager', is_primary: true }),
-      });
+      const response = await fetch(
+        `/api/admin/admin-users/${adminUserId}/branch-access`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            branch_id: null,
+            role: "manager",
+            is_primary: true,
+          }),
+        },
+      );
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Error al asignar super administrador');
+        throw new Error(
+          errorData.error || "Error al asignar super administrador",
+        );
       }
 
-      toast.success('Super administrador asignado exitosamente');
+      toast.success("Super administrador asignado exitosamente");
       fetchBranchAccess();
     } catch (error) {
-      console.error('Error assigning super admin:', error);
-      toast.error(error instanceof Error ? error.message : 'Error al asignar super administrador');
+      console.error("Error assigning super admin:", error);
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Error al asignar super administrador",
+      );
     } finally {
       setSaving(false);
     }
@@ -125,27 +136,32 @@ export default function BranchAccessManager({
 
     try {
       setSaving(true);
-      const response = await fetch(`/api/admin/admin-users/${adminUserId}/branch-access`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          branch_id: selectedBranchId, 
-          role: 'manager', 
-          is_primary: branchAccess.length === 0 
-        }),
-      });
+      const response = await fetch(
+        `/api/admin/admin-users/${adminUserId}/branch-access`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            branch_id: selectedBranchId,
+            role: "manager",
+            is_primary: branchAccess.length === 0,
+          }),
+        },
+      );
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Error al asignar sucursal');
+        throw new Error(errorData.error || "Error al asignar sucursal");
       }
 
-      toast.success('Sucursal asignada exitosamente');
-      setSelectedBranchId('');
+      toast.success("Sucursal asignada exitosamente");
+      setSelectedBranchId("");
       fetchBranchAccess();
     } catch (error) {
-      console.error('Error assigning branch:', error);
-      toast.error(error instanceof Error ? error.message : 'Error al asignar sucursal');
+      console.error("Error assigning branch:", error);
+      toast.error(
+        error instanceof Error ? error.message : "Error al asignar sucursal",
+      );
     } finally {
       setSaving(false);
     }
@@ -153,34 +169,36 @@ export default function BranchAccessManager({
 
   const handleRemoveBranch = async (branchId: string | null) => {
     if (!canEdit) {
-      toast.error('No tienes permisos para realizar esta acción');
+      toast.error("No tienes permisos para realizar esta acción");
       return;
     }
 
-    if (!confirm('¿Estás seguro de que quieres remover este acceso?')) {
+    if (!confirm("¿Estás seguro de que quieres remover este acceso?")) {
       return;
     }
 
     try {
       setSaving(true);
-      const url = branchId 
+      const url = branchId
         ? `/api/admin/admin-users/${adminUserId}/branch-access?branch_id=${branchId}`
         : `/api/admin/admin-users/${adminUserId}/branch-access?branch_id=null`;
-      
+
       const response = await fetch(url, {
-        method: 'DELETE',
+        method: "DELETE",
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Error al remover acceso');
+        throw new Error(errorData.error || "Error al remover acceso");
       }
 
-      toast.success('Acceso removido exitosamente');
+      toast.success("Acceso removido exitosamente");
       fetchBranchAccess();
     } catch (error) {
-      console.error('Error removing branch access:', error);
-      toast.error(error instanceof Error ? error.message : 'Error al remover acceso');
+      console.error("Error removing branch access:", error);
+      toast.error(
+        error instanceof Error ? error.message : "Error al remover acceso",
+      );
     } finally {
       setSaving(false);
     }
@@ -199,11 +217,11 @@ export default function BranchAccessManager({
   }
 
   const assignedBranchIds = branchAccess
-    .filter(access => access.branch_id !== null)
-    .map(access => access.branch_id);
-  
+    .filter((access) => access.branch_id !== null)
+    .map((access) => access.branch_id);
+
   const unassignedBranches = availableBranches.filter(
-    branch => !assignedBranchIds.includes(branch.id)
+    (branch) => !assignedBranchIds.includes(branch.id),
   );
 
   return (
@@ -222,16 +240,20 @@ export default function BranchAccessManager({
               <div className="flex items-center gap-2">
                 <Globe className="h-5 w-5 text-dorado" />
                 <div>
-                  <div className="font-medium text-dorado">Super Administrador</div>
-                  <div className="text-sm text-tierra-media">Acceso a todas las sucursales</div>
+                  <div className="font-medium text-dorado">
+                    Super Administrador
+                  </div>
+                  <div className="text-sm text-tierra-media">
+                    Acceso a todas las sucursales
+                  </div>
                 </div>
               </div>
               {canEdit && (
                 <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleRemoveBranch(null)}
                   disabled={saving}
+                  size="sm"
+                  variant="outline"
+                  onClick={() => handleRemoveBranch(null)}
                 >
                   <X className="h-4 w-4 mr-2" />
                   Remover
@@ -239,26 +261,30 @@ export default function BranchAccessManager({
               )}
             </div>
           </div>
-        ) : canEdit && (
-          <div className="p-4 border rounded-md">
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="font-medium mb-1">Asignar Super Administrador</div>
-                <div className="text-sm text-tierra-media">
-                  Otorga acceso a todas las sucursales
+        ) : (
+          canEdit && (
+            <div className="p-4 border rounded-md">
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="font-medium mb-1">
+                    Asignar Super Administrador
+                  </div>
+                  <div className="text-sm text-tierra-media">
+                    Otorga acceso a todas las sucursales
+                  </div>
                 </div>
+                <Button
+                  disabled={saving}
+                  size="sm"
+                  variant="outline"
+                  onClick={handleAssignSuperAdmin}
+                >
+                  <Crown className="h-4 w-4 mr-2" />
+                  Asignar
+                </Button>
               </div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleAssignSuperAdmin}
-                disabled={saving}
-              >
-                <Crown className="h-4 w-4 mr-2" />
-                Asignar
-              </Button>
             </div>
-          </div>
+          )
         )}
 
         {/* Branch Access List */}
@@ -266,36 +292,38 @@ export default function BranchAccessManager({
           <>
             <div className="space-y-2">
               <Label>Sucursales Asignadas</Label>
-              {branchAccess.filter(access => access.branch_id !== null).length === 0 ? (
+              {branchAccess.filter((access) => access.branch_id !== null)
+                .length === 0 ? (
                 <div className="p-4 text-center text-tierra-media border rounded-md">
                   No hay sucursales asignadas
                 </div>
               ) : (
                 <div className="space-y-2">
                   {branchAccess
-                    .filter(access => access.branch_id !== null)
+                    .filter((access) => access.branch_id !== null)
                     .map((access) => (
                       <div
-                        key={access.id}
                         className="flex items-center justify-between p-3 border rounded-md bg-admin-bg-secondary"
+                        key={access.id}
                       >
                         <div className="flex items-center gap-2">
                           <Building2 className="h-4 w-4 text-admin-accent-tertiary" />
                           <span className="font-medium">
-                            {access.branches?.name || 'N/A'} ({access.branches?.code || 'N/A'})
+                            {access.branches?.name || "N/A"} (
+                            {access.branches?.code || "N/A"})
                           </span>
                           {access.is_primary && (
-                            <Badge variant="outline" className="text-xs">
+                            <Badge className="text-xs" variant="outline">
                               Principal
                             </Badge>
                           )}
                         </div>
                         {canEdit && (
                           <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleRemoveBranch(access.branch_id)}
                             disabled={saving}
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => handleRemoveBranch(access.branch_id)}
                           >
                             <X className="h-4 w-4" />
                           </Button>
@@ -311,7 +339,10 @@ export default function BranchAccessManager({
               <div className="space-y-2">
                 <Label>Asignar Nueva Sucursal</Label>
                 <div className="flex gap-2">
-                  <Select value={selectedBranchId} onValueChange={setSelectedBranchId}>
+                  <Select
+                    value={selectedBranchId}
+                    onValueChange={setSelectedBranchId}
+                  >
                     <SelectTrigger className="flex-1">
                       <SelectValue placeholder="Seleccionar sucursal" />
                     </SelectTrigger>
@@ -324,8 +355,8 @@ export default function BranchAccessManager({
                     </SelectContent>
                   </Select>
                   <Button
-                    onClick={handleAssignBranch}
                     disabled={!selectedBranchId || saving}
+                    onClick={handleAssignBranch}
                   >
                     <Plus className="h-4 w-4 mr-2" />
                     Agregar

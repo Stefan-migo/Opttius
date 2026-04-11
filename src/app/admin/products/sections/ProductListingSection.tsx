@@ -1,21 +1,14 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { useSearchParams } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
-import { Card, CardContent } from "@/components/ui/card";
+import { AlertTriangle, Edit, RefreshCw, Trash2 } from "lucide-react";
+import { useSearchParams } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { useProducts } from "../hooks/useProducts";
-import { useProductStats } from "../hooks/useProductStats";
-import { useCategories } from "../hooks/useCategories";
-import { useProductFilters } from "../hooks/useProductFilters";
-import ProductStats from "../components/ProductStats";
-import ProductFilters from "../components/ProductFilters";
-import ProductList from "../components/ProductList";
-import ProductPagination from "../components/ProductPagination";
-import { formatCurrency, cn } from "@/lib/utils";
+
 import { Badge } from "@/components/ui/badge";
-import { Edit, Trash2, AlertTriangle, RefreshCw, Package } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -24,7 +17,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -33,15 +26,24 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { productService, bulkProductOperations } from "@/lib/api/services";
+import { bulkProductOperations, productService } from "@/lib/api/services";
+import { cn, formatCurrency } from "@/lib/utils";
+
+import ProductFilters from "../components/ProductFilters";
+import ProductList from "../components/ProductList";
+import ProductPagination from "../components/ProductPagination";
+import ProductStats from "../components/ProductStats";
+import { useCategories } from "../hooks/useCategories";
+import { useProductFilters } from "../hooks/useProductFilters";
+import { useProducts } from "../hooks/useProducts";
+import { useProductStats } from "../hooks/useProductStats";
 
 interface ProductListingSectionProps {
   currentBranchId: string | null;
   isSuperAdmin: boolean;
   isGlobalView: boolean;
-  branches: any[];
+  branches: unknown[];
 }
 
 export default function ProductListingSection({
@@ -106,14 +108,27 @@ export default function ProductListingSection({
 
   // Client-side filtering for search (instant, no reload)
   const filteredProducts = products.filter((product) => {
-    if (!filters.searchTerm) return true;
-    const searchLower = filters.searchTerm.toLowerCase();
-    return (
-      product.name.toLowerCase().includes(searchLower) ||
-      (product.sku || "").toLowerCase().includes(searchLower) ||
-      (product.brand || "").toLowerCase().includes(searchLower) ||
-      (product.barcode || "").toLowerCase().includes(searchLower)
-    );
+    // Search filter
+    if (filters.searchTerm) {
+      const searchLower = filters.searchTerm.toLowerCase();
+      if (
+        !product.name.toLowerCase().includes(searchLower) &&
+        !(product.sku || "").toLowerCase().includes(searchLower) &&
+        !(product.brand || "").toLowerCase().includes(searchLower) &&
+        !(product.barcode || "").toLowerCase().includes(searchLower)
+      ) {
+        return false;
+      }
+    }
+
+    // Product type filter
+    if (filters.productTypeFilter !== "all") {
+      if (product.product_type !== filters.productTypeFilter) {
+        return false;
+      }
+    }
+
+    return true;
   });
 
   // Calculate total pages based on filtered results
@@ -130,7 +145,7 @@ export default function ProductListingSection({
 
   // Bulk operation states
   const [bulkOperation, setBulkOperation] = useState("");
-  const [bulkUpdates, setBulkUpdates] = useState<any>({});
+  const [bulkUpdates, setBulkUpdates] = useState<unknown>({});
   const [showBulkDialog, setShowBulkDialog] = useState(false);
   const [isDeleteDialog, setIsDeleteDialog] = useState(false);
   const [processing, setProcessing] = useState(false);
@@ -138,7 +153,7 @@ export default function ProductListingSection({
 
   // Single product delete
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [productToDelete, setProductToDelete] = useState<any>(null);
+  const [productToDelete, setProductToDelete] = useState<unknown>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
 
   // URL state: apply filter=low_stock when coming from QuickActions (run once on mount)
@@ -260,7 +275,7 @@ export default function ProductListingSection({
     }
   };
 
-  const openDeleteDialog = (product: any) => {
+  const openDeleteDialog = (product: unknown) => {
     setProductToDelete(product);
     setDeleteDialogOpen(true);
   };
@@ -271,7 +286,7 @@ export default function ProductListingSection({
   };
 
   const getStatusBadge = (status: string) => {
-    const config: Record<string, { variant: any; label: string }> = {
+    const config: Record<string, { variant: unknown; label: string }> = {
       active: { variant: "default", label: "Activo" },
       draft: { variant: "secondary", label: "Borrador" },
       archived: { variant: "outline", label: "Archivado" },
@@ -289,8 +304,8 @@ export default function ProductListingSection({
         <div className="grid grid-cols-1 md:grid-cols-4 gap-0 border border-admin-border-primary/20 bg-white">
           {[...Array(4)].map((_, i) => (
             <div
-              key={i}
               className="p-8 border-r border-admin-border-primary/10"
+              key={i}
             >
               <Skeleton className="h-3 w-24 mb-3 opacity-50" />
               <Skeleton className="h-8 w-32 mb-4" />
@@ -314,8 +329,8 @@ export default function ProductListingSection({
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {[...Array(8)].map((_, i) => (
             <Card
-              key={i}
               className="border border-admin-border-primary/10 rounded-xl shadow-none bg-white"
+              key={i}
             >
               <div className="aspect-square bg-admin-bg-tertiary/20 relative overflow-hidden">
                 <Skeleton className="absolute inset-0" />
@@ -354,8 +369,8 @@ export default function ProductListingSection({
                   : "Error desconocido"}
               </p>
               <button
-                onClick={() => refetchProducts()}
                 className="px-4 py-2 bg-epoch-primary text-white rounded-xl hover:bg-epoch-surface transition-all font-display font-bold text-[10px] tracking-widest uppercase"
+                onClick={() => refetchProducts()}
               >
                 Reintentar
               </button>
@@ -384,28 +399,30 @@ export default function ProductListingSection({
     <>
       {/* Stats Cards */}
       <ProductStats
+        formatPrice={formatPrice}
         stats={stats}
         statsLabel={statsLabel}
-        formatPrice={formatPrice}
       />
 
       {/* Search and Filters */}
       <ProductFilters
-        searchTerm={filters.searchTerm}
-        categoryFilter={filters.categoryFilter}
-        statusFilter={filters.statusFilter}
-        showLowStockOnly={filters.showLowStockOnly}
-        viewMode={viewMode}
         categories={categories}
-        onSearchChange={(term) => updateFilter("searchTerm", term)}
+        categoryFilter={filters.categoryFilter}
+        searchTerm={filters.searchTerm}
+        showLowStockOnly={filters.showLowStockOnly}
+        statusFilter={filters.statusFilter}
+        viewMode={viewMode}
+        productTypeFilter={filters.productTypeFilter}
         onCategoryChange={(category) =>
           updateFilter("categoryFilter", category)
         }
-        onStatusChange={(status) => updateFilter("statusFilter", status)}
         onLowStockToggle={() =>
           updateFilter("showLowStockOnly", !filters.showLowStockOnly)
         }
+        onSearchChange={(term) => updateFilter("searchTerm", term)}
+        onStatusChange={(status) => updateFilter("statusFilter", status)}
         onViewModeChange={handleViewModeChange}
+        onProductTypeChange={(type) => updateFilter("productTypeFilter", type)}
       />
 
       {/* Bulk Operations Panel - Shows when products are selected */}
@@ -436,8 +453,9 @@ export default function ProductListingSection({
                 </div>
               </div>
               <Button
-                variant="ghost"
+                className="h-7 w-7 p-0 text-admin-text-tertiary hover:text-admin-text-primary"
                 size="sm"
+                variant="ghost"
                 onClick={() => {
                   setIsDeleteDialog(false);
                   setBulkOperation("");
@@ -445,18 +463,17 @@ export default function ProductListingSection({
                   setForceDelete(false);
                   setSelectedProducts([]);
                 }}
-                className="h-7 w-7 p-0 text-admin-text-tertiary hover:text-admin-text-primary"
               >
                 <svg
-                  xmlns="http://www.w3.org/2000/svg"
                   className="h-3.5 w-3.5"
-                  viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
                   strokeWidth="2"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
                 >
-                  <line x1="18" y1="6" x2="6" y2="18"></line>
-                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                  <line x1="18" x2="6" y1="6" y2="18" />
+                  <line x1="6" x2="18" y1="6" y2="18" />
                 </svg>
               </Button>
             </div>
@@ -464,8 +481,8 @@ export default function ProductListingSection({
             {!isDeleteDialog && (
               <div className="mb-4">
                 <Label
-                  htmlFor="operation"
                   className="text-[10px] font-display font-bold text-admin-text-primary uppercase tracking-widest mb-2 block"
+                  htmlFor="operation"
                 >
                   Seleccionar Operación
                 </Label>
@@ -496,8 +513,8 @@ export default function ProductListingSection({
                       Archivar Productos (Eliminación Suave)
                     </SelectItem>
                     <SelectItem
-                      value="hard_delete"
                       className="text-admin-error font-display font-bold"
+                      value="hard_delete"
                     >
                       ⚠️ Eliminar Permanentemente
                     </SelectItem>
@@ -521,6 +538,8 @@ export default function ProductListingSection({
 
             <div className="flex items-center justify-end space-x-4 pt-6 mt-4 border-t border-admin-border-primary/10">
               <Button
+                className="text-admin-text-tertiary hover:text-admin-text-primary uppercase text-[10px] font-bold tracking-widest"
+                disabled={processing}
                 variant="ghost"
                 onClick={() => {
                   setIsDeleteDialog(false);
@@ -529,13 +548,16 @@ export default function ProductListingSection({
                   setForceDelete(false);
                   setSelectedProducts([]);
                 }}
-                disabled={processing}
-                className="text-admin-text-tertiary hover:text-admin-text-primary uppercase text-[10px] font-bold tracking-widest"
               >
                 Cancelar
               </Button>
               <Button
-                onClick={handleBulkOperation}
+                className={cn(
+                  "min-w-[180px] h-12 rounded-xl font-display font-black text-[10px] tracking-[0.2em] uppercase transition-all shadow-premium-sm",
+                  bulkOperation !== "delete" &&
+                    bulkOperation !== "hard_delete" &&
+                    "bg-admin-accent-primary text-[#1A2B23] hover:bg-admin-accent-secondary",
+                )}
                 disabled={
                   processing ||
                   !bulkOperation ||
@@ -546,12 +568,7 @@ export default function ProductListingSection({
                     ? "destructive"
                     : "default"
                 }
-                className={cn(
-                  "min-w-[180px] h-12 rounded-xl font-display font-black text-[10px] tracking-[0.2em] uppercase transition-all shadow-premium-sm",
-                  bulkOperation !== "delete" &&
-                    bulkOperation !== "hard_delete" &&
-                    "bg-admin-accent-primary text-[#1A2B23] hover:bg-admin-accent-secondary",
-                )}
+                onClick={handleBulkOperation}
               >
                 {processing ? (
                   <>
@@ -573,27 +590,27 @@ export default function ProductListingSection({
 
       {/* Products Display */}
       <ProductList
-        products={paginatedProducts}
-        viewMode={viewMode}
-        selectedProducts={selectedProducts}
-        onSelectProduct={handleSelectProduct}
-        onSelectAll={handleSelectAll}
-        onDelete={openDeleteDialog}
         formatPrice={formatPrice}
         getStatusBadge={getStatusBadge}
-        onRefresh={handleRefresh}
         isRefreshing={productsLoading}
+        products={paginatedProducts}
+        selectedProducts={selectedProducts}
+        viewMode={viewMode}
+        onDelete={openDeleteDialog}
+        onRefresh={handleRefresh}
+        onSelectAll={handleSelectAll}
+        onSelectProduct={handleSelectProduct}
       />
 
       {/* Pagination - Show if there are products or if totalPages > 1 */}
       {(filteredProducts.length > 0 || totalPages > 1) && (
         <ProductPagination
           currentPage={currentPage}
+          itemsPerPage={itemsPerPage}
           totalPages={totalPages}
           totalProducts={filteredProducts.length}
-          itemsPerPage={itemsPerPage}
-          onPageChange={setCurrentPage}
           onItemsPerPageChange={handleItemsPerPageChange}
+          onPageChange={setCurrentPage}
         />
       )}
 
@@ -627,21 +644,21 @@ export default function ProductListingSection({
             </p>
             <DialogFooter className="flex items-center justify-end gap-3 pt-4">
               <Button
+                className="h-10 px-6 font-display font-bold text-[10px] tracking-widest uppercase rounded-xl border-admin-border-primary/20"
+                disabled={deleteLoading}
                 variant="outline"
                 onClick={() => {
                   setDeleteDialogOpen(false);
                   setProductToDelete(null);
                 }}
-                disabled={deleteLoading}
-                className="h-10 px-6 font-display font-bold text-[10px] tracking-widest uppercase rounded-xl border-admin-border-primary/20"
               >
                 CANCELAR
               </Button>
               <Button
+                className="h-10 px-8 font-display font-bold text-[10px] tracking-widest uppercase rounded-xl bg-admin-error hover:bg-admin-error/90"
+                disabled={deleteLoading}
                 variant="destructive"
                 onClick={handleDeleteProduct}
-                disabled={deleteLoading}
-                className="h-10 px-8 font-display font-bold text-[10px] tracking-widest uppercase rounded-xl bg-admin-error hover:bg-admin-error/90"
               >
                 {deleteLoading ? (
                   <>
@@ -666,9 +683,9 @@ export default function ProductListingSection({
 // Helper function for bulk operation forms
 function renderBulkOperationForm(
   bulkOperation: string,
-  bulkUpdates: any,
-  setBulkUpdates: (updates: any) => void,
-  categories: any[],
+  bulkUpdates: unknown,
+  setBulkUpdates: (updates: unknown) => void,
+  categories: unknown[],
   forceDelete: boolean,
   setForceDelete: (value: boolean) => void,
 ) {
@@ -678,8 +695,8 @@ function renderBulkOperationForm(
         <div className="space-y-2">
           <div>
             <Label
-              htmlFor="status"
               className="text-[10px] font-display font-bold text-admin-text-primary uppercase tracking-widest mb-2 block"
+              htmlFor="status"
             >
               Nuevo Estado
             </Label>
@@ -707,8 +724,8 @@ function renderBulkOperationForm(
         <div className="space-y-2">
           <div>
             <Label
-              htmlFor="category"
               className="text-[10px] font-display font-bold text-admin-text-primary uppercase tracking-widest mb-2 block"
+              htmlFor="category"
             >
               Nueva Categoría
             </Label>
@@ -738,8 +755,8 @@ function renderBulkOperationForm(
         <div className="space-y-2">
           <div>
             <Label
-              htmlFor="adjustment_type"
               className="text-[10px] font-display font-bold text-admin-text-primary uppercase tracking-widest mb-2 block"
+              htmlFor="adjustment_type"
             >
               Tipo de Ajuste
             </Label>
@@ -760,21 +777,21 @@ function renderBulkOperationForm(
           </div>
           <div>
             <Label
-              htmlFor="price_adjustment"
               className="text-[10px] font-display font-bold text-admin-text-primary uppercase tracking-widest mb-2 block"
+              htmlFor="price_adjustment"
             >
               Ajuste{" "}
               {bulkUpdates.adjustment_type === "percentage" ? "(%)" : "($)"}
             </Label>
             <Input
-              type="number"
-              step="0.01"
               className="h-11 mt-1 bg-admin-bg-tertiary border-admin-border-primary/10 rounded-xl font-display text-[10px] tracking-widest"
               placeholder={
                 bulkUpdates.adjustment_type === "percentage"
                   ? "ej: 10 para +10%"
                   : "ej: 500 para +$500"
               }
+              step="0.01"
+              type="number"
               onChange={(e) =>
                 setBulkUpdates({
                   ...bulkUpdates,
@@ -791,8 +808,8 @@ function renderBulkOperationForm(
         <div className="space-y-2">
           <div>
             <Label
-              htmlFor="inventory_adjustment_type"
               className="text-[10px] font-display font-bold text-admin-text-primary uppercase tracking-widest mb-2 block"
+              htmlFor="inventory_adjustment_type"
             >
               Tipo de Ajuste
             </Label>
@@ -813,21 +830,21 @@ function renderBulkOperationForm(
           </div>
           <div>
             <Label
-              htmlFor="inventory_adjustment"
               className="text-[10px] font-display font-bold text-admin-text-primary uppercase tracking-widest mb-2 block"
+              htmlFor="inventory_adjustment"
             >
               {bulkUpdates.adjustment_type === "set"
                 ? "Nueva Cantidad"
                 : "Ajuste (+/-)"}
             </Label>
             <Input
-              type="number"
               className="h-11 mt-1 bg-admin-bg-tertiary border-admin-border-primary/10 rounded-xl font-display text-[10px] tracking-widest"
               placeholder={
                 bulkUpdates.adjustment_type === "set"
                   ? "ej: 50"
                   : "ej: -10 o +20"
               }
+              type="number"
               onChange={(e) =>
                 setBulkUpdates({
                   ...bulkUpdates,
@@ -883,15 +900,15 @@ function renderBulkOperationForm(
           <div className="p-2.5 bg-orange-50 border border-orange-200 rounded-xl">
             <div className="flex items-start space-x-2">
               <input
-                type="checkbox"
-                id="force-delete"
                 checked={forceDelete}
-                onChange={(e) => setForceDelete(e.target.checked)}
                 className="mt-0.5"
+                id="force-delete"
+                type="checkbox"
+                onChange={(e) => setForceDelete(e.target.checked)}
               />
               <label
-                htmlFor="force-delete"
                 className="text-xs text-orange-900 font-medium cursor-pointer leading-tight"
+                htmlFor="force-delete"
               >
                 Confirmo que entiendo que esta acción es irreversible y deseo
                 continuar.

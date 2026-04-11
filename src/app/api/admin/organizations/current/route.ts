@@ -1,11 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
+
+import { createApiSuccessResponse } from "@/lib/api/response";
+import { appLogger as logger } from "@/lib/logger";
 import { createClient } from "@/utils/supabase/server";
 import { createServiceRoleClient } from "@/utils/supabase/service-role";
-import { appLogger as logger } from "@/lib/logger";
-import {
-  createApiSuccessResponse,
-  createApiErrorResponse,
-} from "@/lib/api/response";
 
 /**
  * GET /api/admin/organizations/current

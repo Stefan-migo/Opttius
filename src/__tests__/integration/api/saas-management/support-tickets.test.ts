@@ -8,15 +8,16 @@
  * 4. Email notifications
  */
 
-import { describe, it, expect, beforeAll, afterAll } from "vitest";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
+
 import {
-  createTestOrganization,
-  createTestUser,
-  createTestRootUser,
-  cleanupTestData,
   cleanupRootUser,
-  makeAuthenticatedRequest,
+  cleanupTestData,
+  createTestOrganization,
+  createTestRootUser,
+  createTestUser,
   isMultiTenancyAvailable,
+  makeAuthenticatedRequest,
   type TestOrganization,
   type TestUser,
 } from "../../helpers/test-setup";
@@ -29,8 +30,8 @@ describe("SaaS Support Tickets API - Integration Tests", () => {
   let userA: TestUser;
   let userB: TestUser;
   let rootUser: TestUser;
-  let ticketA: any;
-  let ticketB: any;
+  let ticketA: unknown;
+  let ticketB: unknown;
 
   beforeAll(async () => {
     infrastructureCheck = await isMultiTenancyAvailable();
@@ -173,7 +174,7 @@ describe("SaaS Support Tickets API - Integration Tests", () => {
       expect(Array.isArray(data.tickets)).toBe(true);
 
       // User A should only see tickets from orgA
-      const ticketIds = data.tickets.map((t: any) => t.id);
+      const ticketIds = data.tickets.map((t: unknown) => t.id);
       expect(ticketIds).toContain(ticketA.id);
       expect(ticketIds).not.toContain(ticketB.id);
     });
@@ -194,7 +195,7 @@ describe("SaaS Support Tickets API - Integration Tests", () => {
       expect(Array.isArray(data.tickets)).toBe(true);
 
       // Root should see all tickets
-      const ticketIds = data.tickets.map((t: any) => t.id);
+      const ticketIds = data.tickets.map((t: unknown) => t.id);
       expect(ticketIds).toContain(ticketA.id);
       expect(ticketIds).toContain(ticketB.id);
     });
@@ -211,7 +212,7 @@ describe("SaaS Support Tickets API - Integration Tests", () => {
 
       expect(response.status).toBe(200);
       const data = await response.json();
-      data.tickets.forEach((ticket: any) => {
+      data.tickets.forEach((ticket: unknown) => {
         expect(ticket.status).toBe("open");
       });
     });
@@ -228,7 +229,7 @@ describe("SaaS Support Tickets API - Integration Tests", () => {
 
       expect(response.status).toBe(200);
       const data = await response.json();
-      data.tickets.forEach((ticket: any) => {
+      data.tickets.forEach((ticket: unknown) => {
         expect(ticket.priority).toBe("high");
       });
     });
@@ -454,7 +455,7 @@ describe("SaaS Support Tickets API - Integration Tests", () => {
       expect(Array.isArray(data.messages)).toBe(true);
 
       // Organization users should not see internal messages
-      data.messages.forEach((msg: any) => {
+      data.messages.forEach((msg: unknown) => {
         expect(msg.is_internal).toBe(false);
       });
     });
@@ -475,7 +476,7 @@ describe("SaaS Support Tickets API - Integration Tests", () => {
 
       // Root should see internal messages
       const hasInternalMessage = data.messages.some(
-        (msg: any) => msg.is_internal === true,
+        (msg: unknown) => msg.is_internal === true,
       );
       expect(hasInternalMessage).toBe(true);
     });

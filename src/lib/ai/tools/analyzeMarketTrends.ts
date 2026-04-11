@@ -1,4 +1,5 @@
 import { z } from "zod";
+
 import type { ToolDefinition, ToolResult } from "./types";
 
 const analyzeMarketTrendsSchema = z.object({
@@ -102,7 +103,7 @@ export const marketTrendsTools: ToolDefinition[] = [
 
         sales.forEach((sale) => {
           // Filtrar por categoría si se especificó
-          const product: any = sale.products;
+          const product: unknown = sale.products;
           // @ts-ignore
           const categoryName = product?.category?.name;
           if (validated.category && categoryName !== validated.category) return;
@@ -111,7 +112,7 @@ export const marketTrendsTools: ToolDefinition[] = [
           const brandKey = "Generic"; // Brand column doesn't exist yet
           const categoryKey = categoryName || "Uncategorized";
 
-          const orderObj: any = sale.orders;
+          const orderObj: unknown = sale.orders;
           const orderDateStr = Array.isArray(orderObj)
             ? orderObj[0]?.created_at
             : orderObj?.created_at;
@@ -240,7 +241,7 @@ export const marketTrendsTools: ToolDefinition[] = [
           },
           message: `Análisis de tendencias de mercado completado.`,
         };
-      } catch (error: any) {
+      } catch (error: unknown) {
         return {
           success: false,
           error: error.message || "Failed to analyze market trends",

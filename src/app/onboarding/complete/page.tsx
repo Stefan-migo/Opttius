@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { ArrowRight, Building2, CheckCircle2, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useAuthContext } from "@/contexts/AuthContext";
+import { useEffect, useState } from "react";
+
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -11,7 +12,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { CheckCircle2, ArrowRight, Building2, Loader2 } from "lucide-react";
+import { useAuthContext } from "@/contexts/AuthContext";
 
 export default function OnboardingCompletePage() {
   const router = useRouter();
@@ -142,9 +143,9 @@ export default function OnboardingCompletePage() {
             </div>
 
             <Button
-              onClick={handleGoToAdmin}
               className="w-full bg-[var(--accent-foreground)]"
               size="lg"
+              onClick={handleGoToAdmin}
             >
               Ir al panel
               <ArrowRight className="ml-2 h-4 w-4" />

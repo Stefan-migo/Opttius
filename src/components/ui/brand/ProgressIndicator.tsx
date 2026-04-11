@@ -1,25 +1,25 @@
 "use client";
 
-import { ReactNode } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { 
-  CheckCircle, 
-  Circle, 
-  Lock, 
-  Star, 
-  Calendar,
-  BookOpen,
+import {
   Award,
-  Target 
+  BookOpen,
+  Calendar,
+  CheckCircle,
+  Circle,
+  Lock,
+  Star,
+  Target,
 } from "lucide-react";
+
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
 
 interface ProgressStep {
   id: string;
   title: string;
   description: string;
-  status: 'completed' | 'current' | 'locked' | 'available';
+  status: "completed" | "current" | "locked" | "available";
   week: number;
   completionPercentage?: number;
   dueDate?: string;
@@ -49,47 +49,48 @@ export default function ProgressIndicator({
   showDetailed = false,
   compact = false,
 }: ProgressIndicatorProps) {
-  const getStepIcon = (status: ProgressStep['status']) => {
+  const getStepIcon = (status: ProgressStep["status"]) => {
     switch (status) {
-      case 'completed':
+      case "completed":
         return <CheckCircle className="h-5 w-5 text-verde-suave" />;
-      case 'current':
+      case "current":
         return <Circle className="h-5 w-5 text-dorado animate-pulse" />;
-      case 'locked':
+      case "locked":
         return <Lock className="h-5 w-5 text-gray-400" />;
-      case 'available':
+      case "available":
         return <Circle className="h-5 w-5 text-azul-profundo" />;
       default:
         return <Circle className="h-5 w-5 text-gray-400" />;
     }
   };
 
-  const getStepBadge = (status: ProgressStep['status']) => {
+  const getStepBadge = (status: ProgressStep["status"]) => {
     switch (status) {
-      case 'completed':
+      case "completed":
         return (
-          <Badge 
+          <Badge
             className="bg-verde-suave text-white"
-            style={{ color: 'var(--admin-accent-secondary)' }}
+            style={{ color: "var(--admin-accent-secondary)" }}
           >
             Completado
           </Badge>
         );
-      case 'current':
+      case "current":
         return (
-          <Badge className="bg-dorado text-azul-profundo">
-            En Progreso
-          </Badge>
+          <Badge className="bg-dorado text-azul-profundo">En Progreso</Badge>
         );
-      case 'locked':
+      case "locked":
         return (
-          <Badge variant="secondary" className="text-gray-500">
+          <Badge className="text-gray-500" variant="secondary">
             Bloqueado
           </Badge>
         );
-      case 'available':
+      case "available":
         return (
-          <Badge variant="outline" className="border-azul-profundo text-azul-profundo">
+          <Badge
+            className="border-azul-profundo text-azul-profundo"
+            variant="outline"
+          >
             Disponible
           </Badge>
         );
@@ -97,13 +98,15 @@ export default function ProgressIndicator({
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('es-AR', {
-      month: 'short',
-      day: 'numeric'
+    return new Date(dateString).toLocaleDateString("es-AR", {
+      month: "short",
+      day: "numeric",
     });
   };
 
-  const completedSteps = steps.filter(step => step.status === 'completed').length;
+  const completedSteps = steps.filter(
+    (step) => step.status === "completed",
+  ).length;
 
   if (compact) {
     return (
@@ -112,23 +115,30 @@ export default function ProgressIndicator({
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <h4 className="font-semibold text-azul-profundo">{title}</h4>
-              <Badge variant="secondary" className="bg-dorado/20 text-azul-profundo">
+              <Badge
+                className="bg-dorado/20 text-azul-profundo"
+                variant="secondary"
+              >
                 Semana {currentWeek}/{totalWeeks}
               </Badge>
             </div>
-            
+
             <div className="space-y-2">
               <div className="flex items-center justify-between text-sm">
                 <span className="text-tierra-media">Progreso general</span>
-                <span className="font-semibold text-azul-profundo">{overallProgress}%</span>
+                <span className="font-semibold text-azul-profundo">
+                  {overallProgress}%
+                </span>
               </div>
-              <Progress value={overallProgress} className="h-2" />
+              <Progress className="h-2" value={overallProgress} />
             </div>
 
             <div className="flex items-center justify-between text-sm text-tierra-media">
               <div className="flex items-center gap-1">
                 <CheckCircle className="h-4 w-4 text-verde-suave" />
-                <span>{completedSteps} de {steps.length} completados</span>
+                <span>
+                  {completedSteps} de {steps.length} completados
+                </span>
               </div>
               <div className="flex items-center gap-1">
                 <Target className="h-4 w-4 text-dorado" />
@@ -152,7 +162,10 @@ export default function ProgressIndicator({
             )}
           </div>
           <div className="text-right">
-            <Badge variant="secondary" className="bg-dorado/20 text-azul-profundo mb-2">
+            <Badge
+              className="bg-dorado/20 text-azul-profundo mb-2"
+              variant="secondary"
+            >
               Semana {currentWeek}/{totalWeeks}
             </Badge>
             <div className="text-2xl font-bold text-azul-profundo">
@@ -172,7 +185,7 @@ export default function ProgressIndicator({
               </span>
             </div>
           </div>
-          <Progress value={overallProgress} className="h-3" />
+          <Progress className="h-3" value={overallProgress} />
         </div>
       </CardHeader>
 
@@ -181,37 +194,43 @@ export default function ProgressIndicator({
         <div className="space-y-3">
           {steps.map((step, index) => (
             <div
-              key={step.id}
               className={`flex items-start gap-3 p-4 rounded-lg transition-colors ${
-                step.status === 'current'
-                  ? 'bg-dorado/10 border border-dorado/20'
-                  : step.status === 'completed'
-                  ? 'bg-verde-suave/10 border border-verde-suave/20'
-                  : 'bg-gray-50 border border-gray-200'
+                step.status === "current"
+                  ? "bg-dorado/10 border border-dorado/20"
+                  : step.status === "completed"
+                    ? "bg-verde-suave/10 border border-verde-suave/20"
+                    : "bg-gray-50 border border-gray-200"
               }`}
+              key={step.id}
             >
               {/* Step Icon */}
-              <div className="mt-0.5">
-                {getStepIcon(step.status)}
-              </div>
+              <div className="mt-0.5">{getStepIcon(step.status)}</div>
 
               {/* Step Content */}
               <div className="flex-1 min-w-0">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
-                      <h5 className={`font-semibold ${
-                        step.status === 'locked' ? 'text-gray-500' : 'text-azul-profundo'
-                      }`}>
+                      <h5
+                        className={`font-semibold ${
+                          step.status === "locked"
+                            ? "text-gray-500"
+                            : "text-azul-profundo"
+                        }`}
+                      >
                         {step.title}
                       </h5>
-                      <Badge variant="outline" className="text-xs">
+                      <Badge className="text-xs" variant="outline">
                         Semana {step.week}
                       </Badge>
                     </div>
-                    <p className={`text-sm ${
-                      step.status === 'locked' ? 'text-gray-400' : 'text-tierra-media'
-                    }`}>
+                    <p
+                      className={`text-sm ${
+                        step.status === "locked"
+                          ? "text-gray-400"
+                          : "text-tierra-media"
+                      }`}
+                    >
                       {step.description}
                     </p>
 
@@ -232,23 +251,27 @@ export default function ProgressIndicator({
                     </div>
 
                     {/* Individual Progress */}
-                    {step.status === 'current' && step.completionPercentage !== undefined && (
-                      <div className="mt-3 space-y-1">
-                        <div className="flex items-center justify-between text-xs">
-                          <span className="text-tierra-media">Progreso del módulo</span>
-                          <span className="font-semibold text-azul-profundo">
-                            {step.completionPercentage}%
-                          </span>
+                    {step.status === "current" &&
+                      step.completionPercentage !== undefined && (
+                        <div className="mt-3 space-y-1">
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="text-tierra-media">
+                              Progreso del módulo
+                            </span>
+                            <span className="font-semibold text-azul-profundo">
+                              {step.completionPercentage}%
+                            </span>
+                          </div>
+                          <Progress
+                            className="h-1.5"
+                            value={step.completionPercentage}
+                          />
                         </div>
-                        <Progress value={step.completionPercentage} className="h-1.5" />
-                      </div>
-                    )}
+                      )}
                   </div>
 
                   {/* Status Badge */}
-                  <div className="ml-2">
-                    {getStepBadge(step.status)}
-                  </div>
+                  <div className="ml-2">{getStepBadge(step.status)}</div>
                 </div>
               </div>
             </div>
@@ -276,4 +299,4 @@ export default function ProgressIndicator({
       </CardContent>
     </Card>
   );
-} 
+}

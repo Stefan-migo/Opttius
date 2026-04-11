@@ -7,14 +7,14 @@
  * @module tests/security/phase3-security.test
  */
 
-import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
 import {
   behavioralAnalytics,
-  threatDetector,
   incidentResponse,
   phase3Security,
+  threatDetector,
 } from "@/lib/security";
-import { getRedisClient } from "@/lib/redis/client";
 
 // Mock Redis for testing
 vi.mock("@/lib/redis/client", () => ({
@@ -218,7 +218,7 @@ describe("Phase 3 Security Implementation Tests", () => {
       ];
 
       const incidents = await incidentResponse.processSecurityEvents(
-        testEvents as any,
+        testEvents as unknown,
       );
 
       expect(Array.isArray(incidents)).toBe(true);
@@ -381,7 +381,7 @@ describe("Phase 3 Security Implementation Tests", () => {
 
       // Should not throw errors
       await expect(
-        phase3Security.processSecurityEvents(malformedEvents as any),
+        phase3Security.processSecurityEvents(malformedEvents as unknown),
       ).resolves.not.toThrow();
 
       // System should remain operational

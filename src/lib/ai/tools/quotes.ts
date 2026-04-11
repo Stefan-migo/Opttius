@@ -2,9 +2,11 @@
  * AI Agent tools for quotes
  */
 import { z } from "zod";
-import type { ToolDefinition, ToolResult } from "./types";
+
 import { sendQuoteEmailToClient } from "@/lib/email/send-quote-email";
+
 import { resolveQuoteByNumber } from "./resolvers";
+import type { ToolDefinition, ToolResult } from "./types";
 
 const sendQuoteByEmailSchema = z
   .object({

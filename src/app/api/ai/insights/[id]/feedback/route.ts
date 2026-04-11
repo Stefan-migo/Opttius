@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClientFromRequest } from "@/utils/supabase/server";
-import { appLogger as logger } from "@/lib/logger";
+
 import { InsightFeedbackSchema } from "@/lib/ai/insights/schemas";
+import { rateLimitConfigs, withRateLimit } from "@/lib/api/middleware";
 import { parseAndValidateBody } from "@/lib/api/validation/zod-helpers";
-import { withRateLimit, rateLimitConfigs } from "@/lib/api/middleware";
+import { appLogger as logger } from "@/lib/logger";
+import { createClientFromRequest } from "@/utils/supabase/server";
 
 /**
  * POST /api/ai/insights/:id/feedback
@@ -89,7 +90,7 @@ export async function POST(
       });
 
       return NextResponse.json({ success: true, insight });
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error("Feedback API error", { error: error.message });
       return NextResponse.json(
         { error: "Internal server error" },

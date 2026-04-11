@@ -1,37 +1,38 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/utils/supabase/server";
-import { createServiceRoleClient } from "@/utils/supabase/server";
+
 import {
   getBranchContext,
   getFieldOperationFromRequest,
 } from "@/lib/api/branch-middleware";
-import { appLogger as logger } from "@/lib/logger";
-import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
-import { withRateLimit, rateLimitConfigs } from "@/lib/api/middleware";
 import { APIError, RateLimitError, ValidationError } from "@/lib/api/errors";
-import { processSaleSchema } from "@/lib/api/validation/zod-schemas";
-import { PAYMENT_METHOD_MAP } from "@/lib/payments/constants";
+import { rateLimitConfigs, withRateLimit } from "@/lib/api/middleware";
+import {
+  createApiErrorResponse,
+  createApiSuccessResponse,
+} from "@/lib/api/response";
 import {
   parseAndValidateBody,
   validationErrorResponse,
 } from "@/lib/api/validation/zod-helpers";
-import {
-  createApiSuccessResponse,
-  createApiErrorResponse,
-} from "@/lib/api/response";
-import { BillingFactory } from "@/lib/billing/BillingFactory";
+import { processSaleSchema } from "@/lib/api/validation/zod-schemas";
 import type { Order as BillingOrder } from "@/lib/billing/adapters/BillingAdapter";
-import { getAvailableQuantity } from "@/lib/inventory/stock-helpers";
+import { BillingFactory } from "@/lib/billing/BillingFactory";
+import { DEFAULT_LOW_STOCK_THRESHOLD } from "@/lib/inventory/constants";
 import {
   getOperativoMobileAvailableQuantity,
   reduceOperativoMobileStock,
 } from "@/lib/inventory/operativo-mobile-stock-helpers";
-import { DEFAULT_LOW_STOCK_THRESHOLD } from "@/lib/inventory/constants";
+import { getAvailableQuantity } from "@/lib/inventory/stock-helpers";
+import { appLogger as logger } from "@/lib/logger";
+import { PAYMENT_METHOD_MAP } from "@/lib/payments/constants";
+import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
+import { createClient } from "@/utils/supabase/server";
+import { createServiceRoleClient } from "@/utils/supabase/server";
 
 export const dynamic = "force-dynamic";
 export async function POST(request: NextRequest) {
   try {
-    return await (withRateLimit(rateLimitConfigs.pos) as any)(
+    return await (withRateLimit(rateLimitConfigs.pos) as unknown)(
       request,
       async () => {
         try {
@@ -67,7 +68,7 @@ export async function POST(request: NextRequest) {
           const branchContext = await getBranchContext(request, user.id);
 
           // Operativo mode: validate field operation and use its branch
-          let fieldOperationId: string | null =
+          const fieldOperationId: string | null =
             getFieldOperationFromRequest(request);
           let effectiveBranchId = branchContext.branchId;
 
@@ -487,7 +488,7 @@ export async function POST(request: NextRequest) {
           }
 
           // Get customer information if customer_id is provided
-          let customer: any = null;
+          let customer: unknown = null;
           if (customer_id) {
             const { data: customerData, error: customerError } =
               await supabaseServiceRole
@@ -517,8 +518,8 @@ export async function POST(request: NextRequest) {
           }
 
           // Validate agreement and purchase order if provided
-          let agreement: any = null;
-          let purchaseOrder: any = null;
+          let agreement: unknown = null;
+          let purchaseOrder: unknown = null;
           let copagoAmount: number | null = null;
           let institutionalAmount: number | null = null;
 
@@ -619,7 +620,7 @@ export async function POST(request: NextRequest) {
           }
 
           // Validate quote if provided
-          let quote: any = null;
+          let quote: unknown = null;
           if (quote_id) {
             const { data: quoteData, error: quoteError } =
               await supabaseServiceRole
@@ -820,7 +821,7 @@ export async function POST(request: NextRequest) {
             quantity: item.quantity,
             unit_price: item.unit_price,
             total_price: item.unit_price * item.quantity,
-            sku: (item as any).sku || undefined,
+            sku: (item as unknown).sku || undefined,
           }));
 
           // ✅ Determinar nombre del cliente para guardar en la orden
@@ -1192,13 +1193,27 @@ export async function POST(request: NextRequest) {
                 const product = productsForStockCheck.find(
                   (p) => p.id === item.product_id,
                 );
-                return product?.product_type !== "service";
+                // Include frames, accessories, AND contact_lens products (not services or temp IDs)
+                return (
+                  product?.product_type === "frame" ||
+                  product?.product_type === "accessory" ||
+                  product?.product_type === "contact_lens"
+                );
               })
               .map((item) => ({
                 product_id: item.product_id,
                 branch_id: effectiveBranchId,
                 quantity: item.quantity,
               }));
+
+            // Remove contact_lens from stockReductionsPayload - we use contact_lens_inventory instead
+            stockReductionsPayload = stockReductionsPayload.filter((item) => {
+              const product = productsForStockCheck.find(
+                (p) => p.id === item.product_id,
+              );
+              // Exclude contact_lens products - they use contact_lens_inventory
+              return product?.product_type !== "contact_lens";
+            });
 
             // Ensure frame from work order is reduced when not already in items (e.g. frame_data.frame_product_id)
             const uuidRegex =
@@ -1951,6 +1966,73 @@ export async function POST(request: NextRequest) {
               }
             }
 
+            // Reduce contact lens inventory by prescription (OD and OS)
+            if (contact_lens_family_id && contact_lens_quantity > 0) {
+              const branchId = effectiveBranchId;
+
+              // Reduce stock for OD (right eye)
+              if (contact_lens_rx_sphere_od != null) {
+                const odReduction = await supabaseServiceRole.rpc(
+                  "reduce_contact_lens_stock",
+                  {
+                    p_contact_lens_family_id: contact_lens_family_id,
+                    p_branch_id: branchId,
+                    p_sphere: contact_lens_rx_sphere_od,
+                    p_cylinder: contact_lens_rx_cylinder_od || 0,
+                    p_quantity: contact_lens_quantity,
+                  },
+                );
+
+                if (odReduction.error) {
+                  logger.error("Error reducing contact lens stock (OD)", {
+                    family_id: contact_lens_family_id,
+                    sphere: contact_lens_rx_sphere_od,
+                    cylinder: contact_lens_rx_cylinder_od,
+                    quantity: contact_lens_quantity,
+                    error: odReduction.error,
+                  });
+                } else {
+                  logger.info("Contact lens stock reduced (OD)", {
+                    family_id: contact_lens_family_id,
+                    sphere: contact_lens_rx_sphere_od,
+                    cylinder: contact_lens_rx_cylinder_od,
+                    quantity: contact_lens_quantity,
+                  });
+                }
+              }
+
+              // Reduce stock for OS (left eye)
+              if (contact_lens_rx_sphere_os != null) {
+                const osReduction = await supabaseServiceRole.rpc(
+                  "reduce_contact_lens_stock",
+                  {
+                    p_contact_lens_family_id: contact_lens_family_id,
+                    p_branch_id: branchId,
+                    p_sphere: contact_lens_rx_sphere_os,
+                    p_cylinder: contact_lens_rx_cylinder_os || 0,
+                    p_quantity: contact_lens_quantity,
+                  },
+                );
+
+                if (osReduction.error) {
+                  logger.error("Error reducing contact lens stock (OS)", {
+                    family_id: contact_lens_family_id,
+                    sphere: contact_lens_rx_sphere_os,
+                    cylinder: contact_lens_rx_cylinder_os,
+                    quantity: contact_lens_quantity,
+                    error: osReduction.error,
+                  });
+                } else {
+                  logger.info("Contact lens stock reduced (OS)", {
+                    family_id: contact_lens_family_id,
+                    sphere: contact_lens_rx_sphere_os,
+                    cylinder: contact_lens_rx_cylinder_os,
+                    quantity: contact_lens_quantity,
+                  });
+                }
+              }
+            }
+
             // Only create work order if there are lens items (actuallyRequiresWorkOrder computed above)
             if (!actuallyRequiresWorkOrder) {
               // No lens items, just return order and billing info
@@ -2070,6 +2152,8 @@ export async function POST(request: NextRequest) {
                   ? null
                   : lensInfo.lens_family_id || null, // ✅ Guardar lens_family_id
               lens_type: lensInfo.lens_type,
+              lens_sourcing_type:
+                (lensInfo as any).lens_sourcing_type || "surfaced",
               lens_material: lensInfo.lens_material,
               lens_index: lensInfo.lens_index,
               lens_treatments: lensInfo.lens_treatments,

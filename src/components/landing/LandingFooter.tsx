@@ -1,15 +1,16 @@
 "use client";
 
-import Link from "next/link";
+import { Facebook, Instagram, Linkedin } from "lucide-react";
 import Image from "next/image";
-import { Facebook, Linkedin, Instagram } from "lucide-react";
-import businessConfig from "@/config/business";
+import Link from "next/link";
+
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import businessConfig from "@/config/business";
 
 const social = businessConfig.social ?? {};
 const SOCIAL_ITEMS: Array<{
@@ -44,20 +45,20 @@ export function LandingFooter() {
   return (
     <footer className="bg-epoch-surface text-white relative overflow-hidden">
       {/* Texture overlay */}
-      <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-epoch-accent/30 to-transparent"></div>
+      <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-epoch-accent/30 to-transparent" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-64 pb-32">
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-20">
           {/* Brand Column */}
           <div className="space-y-10">
-            <Link href="/" className="group flex flex-col items-start">
+            <Link className="group flex flex-col items-start" href="/">
               <div className="relative group-hover:scale-105 transition-all duration-700">
                 <Image
-                  src="/logo-text-default.svg"
                   alt="Opttius"
-                  width={192}
-                  height={48}
                   className="h-14 w-48 opacity-90 group-hover:opacity-100 transition-opacity object-contain object-left"
+                  height={48}
+                  src="/logo-text-default.svg"
+                  width={192}
                 />
               </div>
             </Link>
@@ -71,12 +72,12 @@ export function LandingFooter() {
                 {SOCIAL_ITEMS.map(({ Icon, href, label, comingSoon }) =>
                   href && !comingSoon ? (
                     <a
-                      key={label}
-                      href={href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-white/30 hover:text-epoch-accent transition-all duration-500"
                       aria-label={label}
+                      className="text-white/30 hover:text-epoch-accent transition-all duration-500"
+                      href={href}
+                      key={label}
+                      rel="noopener noreferrer"
+                      target="_blank"
                     >
                       <Icon className="h-5 w-5 stroke-1" />
                     </a>
@@ -84,15 +85,15 @@ export function LandingFooter() {
                     <Tooltip key={label}>
                       <TooltipTrigger asChild>
                         <span
-                          className="text-white/20 cursor-not-allowed inline-flex"
                           aria-label={`${label} (próximamente)`}
+                          className="text-white/20 cursor-not-allowed inline-flex"
                         >
                           <Icon className="h-5 w-5 stroke-1" />
                         </span>
                       </TooltipTrigger>
                       <TooltipContent
-                        side="top"
                         className="bg-epoch-surface border border-white/10"
+                        side="top"
                       >
                         <p className="text-xs">Próximamente</p>
                       </TooltipContent>
@@ -118,10 +119,10 @@ export function LandingFooter() {
               ].map((item) => (
                 <li key={item.name}>
                   <Link
-                    href={item.href}
                     className="text-white/50 hover:text-white transition-all duration-300 flex items-center group"
+                    href={item.href}
                   >
-                    <span className="w-0 group-hover:w-4 h-[1px] bg-epoch-accent mr-0 group-hover:mr-4 transition-all duration-500"></span>
+                    <span className="w-0 group-hover:w-4 h-[1px] bg-epoch-accent mr-0 group-hover:mr-4 transition-all duration-500" />
                     {item.name}
                   </Link>
                 </li>
@@ -143,10 +144,10 @@ export function LandingFooter() {
               ].map((item) => (
                 <li key={item.name}>
                   <Link
-                    href={item.href}
                     className="text-white/50 hover:text-white transition-all duration-300 flex items-center group"
+                    href={item.href}
                   >
-                    <span className="w-0 group-hover:w-4 h-[1px] bg-epoch-accent mr-0 group-hover:mr-4 transition-all duration-500"></span>
+                    <span className="w-0 group-hover:w-4 h-[1px] bg-epoch-accent mr-0 group-hover:mr-4 transition-all duration-500" />
                     {item.name}
                   </Link>
                 </li>
@@ -165,8 +166,8 @@ export function LandingFooter() {
                   Email
                 </span>
                 <a
-                  href={`mailto:${businessConfig.contactEmail}`}
                   className="text-white/60 hover:text-white transition-colors"
+                  href={`mailto:${businessConfig.contactEmail}`}
                 >
                   {businessConfig.contactEmail}
                 </a>
@@ -176,10 +177,10 @@ export function LandingFooter() {
                   Teléfono
                 </span>
                 <a
-                  href={`https://wa.me/${businessConfig.contactPhone?.replace(/\D/g, "")}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
                   className="text-white/60 hover:text-white transition-colors"
+                  href={`https://wa.me/${businessConfig.contactPhone?.replace(/\D/g, "")}`}
+                  rel="noopener noreferrer"
+                  target="_blank"
                 >
                   {businessConfig.contactPhone}
                 </a>
@@ -200,7 +201,7 @@ export function LandingFooter() {
       </div>
 
       {/* Aesthetic Arch Base - subtler curve on mobile */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[120%] h-40 bg-epoch-background rounded-b-[30%] sm:rounded-b-[50%] md:rounded-b-[70%] lg:rounded-b-[100%] z-0"></div>
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[120%] h-40 bg-epoch-background rounded-b-[30%] sm:rounded-b-[50%] md:rounded-b-[70%] lg:rounded-b-[100%] z-0" />
     </footer>
   );
 }

@@ -1,4 +1,5 @@
 import { z } from "zod";
+
 import type { ToolDefinition, ToolResult } from "./types";
 
 const analyzeBusinessFlowSchema = z.object({
@@ -325,7 +326,7 @@ export const businessFlowTools: ToolDefinition[] = [
           data: { analysis },
           message: `Análisis de flujo de trabajo completado para ${totalOrders} órdenes en los últimos ${validated.days} días`,
         };
-      } catch (error: any) {
+      } catch (error: unknown) {
         return {
           success: false,
           error: error.message || "Failed to analyze business flow",

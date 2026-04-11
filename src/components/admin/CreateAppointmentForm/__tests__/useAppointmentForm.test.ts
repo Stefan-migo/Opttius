@@ -1,8 +1,10 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { renderHook, act } from "@testing-library/react";
-import { useAppointmentForm } from "../hooks/useAppointmentForm";
-import * as branchHook from "@/hooks/useBranch";
+import { act, renderHook } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
 import * as authContext from "@/contexts/AuthContext";
+import * as branchHook from "@/hooks/useBranch";
+
+import { useAppointmentForm } from "../hooks/useAppointmentForm";
 
 // Mock dependencies
 vi.mock("@/hooks/useBranch", () => ({
@@ -247,7 +249,7 @@ describe("useAppointmentForm", () => {
     const mockSelectedCustomer = { id: "customer-123", name: "John Doe" };
 
     // Mock successful API response
-    (global.fetch as any).mockResolvedValueOnce({
+    (global.fetch as unknown).mockResolvedValueOnce({
       ok: true,
       json: () => Promise.resolve({ id: "new-appointment-456" }),
     });
@@ -267,7 +269,7 @@ describe("useAppointmentForm", () => {
 
     await act(async () => {
       const success = await result.current.handleSubmit(
-        { preventDefault: vi.fn() } as any,
+        { preventDefault: vi.fn() } as unknown,
         mockSelectedCustomer,
         false, // isGuestCustomer
         {}, // guestCustomerData
@@ -297,7 +299,7 @@ describe("useAppointmentForm", () => {
     const mockSelectedCustomer = { id: "customer-123", name: "John Doe" };
 
     // Mock failed API response
-    (global.fetch as any).mockResolvedValueOnce({
+    (global.fetch as unknown).mockResolvedValueOnce({
       ok: false,
       json: () => Promise.resolve({ error: "Failed to create appointment" }),
     });
@@ -318,7 +320,7 @@ describe("useAppointmentForm", () => {
     await expect(
       act(async () => {
         await result.current.handleSubmit(
-          { preventDefault: vi.fn() } as any,
+          { preventDefault: vi.fn() } as unknown,
           mockSelectedCustomer,
           false,
           {},
@@ -340,7 +342,7 @@ describe("useAppointmentForm", () => {
       phone: "+1234567890",
     };
 
-    (global.fetch as any).mockResolvedValueOnce({
+    (global.fetch as unknown).mockResolvedValueOnce({
       ok: true,
       json: () => Promise.resolve({ id: "new-appointment-456" }),
     });
@@ -360,7 +362,7 @@ describe("useAppointmentForm", () => {
 
     await act(async () => {
       const success = await result.current.handleSubmit(
-        { preventDefault: vi.fn() } as any,
+        { preventDefault: vi.fn() } as unknown,
         null, // selectedCustomer
         true, // isGuestCustomer
         mockGuestCustomerData,
@@ -381,10 +383,10 @@ describe("useAppointmentForm", () => {
 
   it("should update duration when schedule settings load", () => {
     const { result, rerender } = renderHook(
-      ({ scheduleSettings }: { scheduleSettings: any }) =>
+      ({ scheduleSettings }: { scheduleSettings: unknown }) =>
         useAppointmentForm({ scheduleSettings }),
       {
-        initialProps: { scheduleSettings: null as any },
+        initialProps: { scheduleSettings: null as unknown },
       },
     );
 

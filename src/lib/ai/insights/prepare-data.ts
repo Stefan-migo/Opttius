@@ -5,18 +5,20 @@
  * @module lib/ai/insights/prepare-data
  */
 
+import type { SupabaseClient } from "@supabase/supabase-js";
+
+import type { BranchContext } from "@/lib/api/branch-middleware";
 import {
   addBranchFilter,
   addBranchFilterForBranchScopedTable,
 } from "@/lib/api/branch-middleware";
-import type { BranchContext } from "@/lib/api/branch-middleware";
+
 import type { InsightSection } from "./schemas";
-import type { SupabaseClient } from "@supabase/supabase-js";
 
 export interface PrepareDataResult {
   organizationName: string;
   section: InsightSection | "all";
-  data: Record<string, any>;
+  data: Record<string, unknown>;
 }
 
 /**
@@ -30,7 +32,7 @@ export async function prepareInsightData(
   section: InsightSection | null,
   branchContext: BranchContext,
 ): Promise<PrepareDataResult> {
-  const data: Record<string, any> = {};
+  const data: Record<string, unknown> = {};
 
   if (!section || section === "dashboard") {
     const now = new Date();
@@ -58,7 +60,7 @@ export async function prepareInsightData(
     const { data: orders } = await ordersQuery;
 
     const yesterdayOrders =
-      orders?.filter((o: any) => {
+      orders?.filter((o: unknown) => {
         const orderDate = new Date(o.created_at);
         return (
           orderDate >= yesterday &&
@@ -68,12 +70,12 @@ export async function prepareInsightData(
       }) || [];
 
     const yesterdaySales = yesterdayOrders.reduce(
-      (sum: number, o: any) => sum + (o.total_amount || 0),
+      (sum: number, o: unknown) => sum + (o.total_amount || 0),
       0,
     );
 
     const monthlyOrders =
-      orders?.filter((o: any) => {
+      orders?.filter((o: unknown) => {
         const orderDate = new Date(o.created_at);
         return (
           orderDate >= thirtyDaysAgo &&
@@ -82,7 +84,7 @@ export async function prepareInsightData(
       }) || [];
 
     const monthlyRevenue = monthlyOrders.reduce(
-      (sum: number, o: any) => sum + (o.total_amount || 0),
+      (sum: number, o: unknown) => sum + (o.total_amount || 0),
       0,
     );
     const monthlyAverage = monthlyRevenue / 30;
@@ -104,7 +106,7 @@ export async function prepareInsightData(
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const overdueWorkOrders =
-      workOrders?.filter((wo: any) => {
+      workOrders?.filter((wo: unknown) => {
         if (!wo.lab_estimated_delivery_date) return false;
         const deliveryDate = new Date(wo.lab_estimated_delivery_date);
         return deliveryDate < today;
@@ -156,7 +158,7 @@ export async function prepareInsightData(
       .limit(1000);
 
     const productLastSales = new Map<string, Date>();
-    orderItems?.forEach((item: any) => {
+    orderItems?.forEach((item: unknown) => {
       const productId = item.product_id;
       const saleDate = new Date(item.orders?.created_at || item.created_at);
       if (
@@ -170,7 +172,7 @@ export async function prepareInsightData(
     const now = new Date();
     const zombieProducts =
       products
-        ?.filter((p: any) => {
+        ?.filter((p: unknown) => {
           const lastSale = productLastSales.get(p.id);
           if (!lastSale) {
             const createdDate = new Date(p.created_at);
@@ -182,7 +184,7 @@ export async function prepareInsightData(
             (now.getTime() - lastSale.getTime()) / (1000 * 60 * 60 * 24);
           return daysSinceLastSale > 180 && p.inventory_quantity > 0;
         })
-        .map((p: any) => {
+        .map((p: unknown) => {
           const lastSale = productLastSales.get(p.id);
           const daysSinceLastSale = lastSale
             ? Math.floor(
@@ -206,7 +208,7 @@ export async function prepareInsightData(
 
     const lowStockProducts =
       products?.filter(
-        (p: any) =>
+        (p: unknown) =>
           (p.inventory_quantity || 0) < 5 && (p.inventory_quantity || 0) > 0,
       ).length || 0;
 
@@ -236,7 +238,7 @@ export async function prepareInsightData(
       .order("appointment_date", { ascending: false });
 
     const customerLastVisits = new Map<string, Date>();
-    appointments?.forEach((apt: any) => {
+    appointments?.forEach((apt: unknown) => {
       if (!apt.customer_id) return;
       const visitDate = new Date(apt.appointment_date);
       if (
@@ -250,7 +252,7 @@ export async function prepareInsightData(
     const now = new Date();
     const inactiveClients =
       customers
-        ?.filter((c: any) => {
+        ?.filter((c: unknown) => {
           const lastVisit = customerLastVisits.get(c.id);
           if (!lastVisit) {
             const createdDate = new Date(c.created_at);
@@ -262,7 +264,7 @@ export async function prepareInsightData(
             (now.getTime() - lastVisit.getTime()) / (1000 * 60 * 60 * 24);
           return daysSinceLastVisit > 180;
         })
-        .map((c: any) => {
+        .map((c: unknown) => {
           const lastVisit = customerLastVisits.get(c.id);
           const daysSinceLastVisit = lastVisit
             ? Math.floor(
@@ -321,7 +323,7 @@ export async function prepareInsightData(
     const { data: orders } = await ordersQuery;
 
     const currentPeriodOrders =
-      orders?.filter((o: any) => {
+      orders?.filter((o: unknown) => {
         const orderDate = new Date(o.created_at);
         return (
           orderDate >= currentPeriodStart &&
@@ -330,7 +332,7 @@ export async function prepareInsightData(
       }) || [];
 
     const previousPeriodOrders =
-      orders?.filter((o: any) => {
+      orders?.filter((o: unknown) => {
         const orderDate = new Date(o.created_at);
         return (
           orderDate >= previousPeriodStart &&
@@ -340,12 +342,12 @@ export async function prepareInsightData(
       }) || [];
 
     const currentPeriod = currentPeriodOrders.reduce(
-      (sum: number, o: any) => sum + (o.total_amount || 0),
+      (sum: number, o: unknown) => sum + (o.total_amount || 0),
       0,
     );
 
     const previousPeriod = previousPeriodOrders.reduce(
-      (sum: number, o: any) => sum + (o.total_amount || 0),
+      (sum: number, o: unknown) => sum + (o.total_amount || 0),
       0,
     );
 
@@ -361,8 +363,8 @@ export async function prepareInsightData(
       accessories: 0,
     };
 
-    currentPeriodOrders.forEach((order: any) => {
-      order.order_items?.forEach((item: any) => {
+    currentPeriodOrders.forEach((order: unknown) => {
+      order.order_items?.forEach((item: unknown) => {
         const productName = (item.product_name || "").toLowerCase();
         if (productName.includes("marco") || productName.includes("armazon")) {
           breakdown.frames += item.total_price || 0;

@@ -1,25 +1,25 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/utils/supabase/server";
-import { createServiceRoleClient } from "@/utils/supabase/server";
-import { getBranchContext, addBranchFilter } from "@/lib/api/branch-middleware";
-import { NotificationService } from "@/lib/notifications/notification-service";
-import { appLogger as logger } from "@/lib/logger";
-import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
+
+import { addBranchFilter, getBranchContext } from "@/lib/api/branch-middleware";
 import {
-  ValidationError,
   AuthenticationError,
   AuthorizationError,
+  ValidationError,
 } from "@/lib/api/errors";
 import {
-  createPaginatedResponse,
   createApiErrorResponse,
-  extractPaginationParams,
+  createPaginatedResponse,
 } from "@/lib/api/response";
-import { createWorkOrderSchema } from "@/lib/api/validation/zod-schemas";
 import {
   parseAndValidateBody,
   validationErrorResponse,
 } from "@/lib/api/validation/zod-helpers";
+import { createWorkOrderSchema } from "@/lib/api/validation/zod-schemas";
+import { appLogger as logger } from "@/lib/logger";
+import { NotificationService } from "@/lib/notifications/notification-service";
+import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
+import { createClient } from "@/utils/supabase/server";
+import { createServiceRoleClient } from "@/utils/supabase/server";
 
 export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
@@ -298,7 +298,7 @@ export async function POST(request: NextRequest) {
       branch_id: branchContext.branchId,
       customer_id: validatedBody.customer_id,
       prescription_id: validatedBody.prescription_id ?? null,
-      quote_id: (validatedBody as any).quote_id ?? null,
+      quote_id: (validatedBody as unknown).quote_id ?? null,
       frame_product_id: validatedBody.frame_product_id ?? null,
       frame_name: validatedBody.frame_name.trim(),
       frame_brand: validatedBody.frame_brand ?? null,
@@ -306,7 +306,8 @@ export async function POST(request: NextRequest) {
       frame_color: validatedBody.frame_color ?? null,
       frame_size: validatedBody.frame_size ?? null,
       frame_sku: validatedBody.frame_sku ?? null,
-      frame_serial_number: (validatedBody as any).frame_serial_number ?? null,
+      frame_serial_number:
+        (validatedBody as unknown).frame_serial_number ?? null,
       lens_type: validatedBody.lens_type.trim(),
       lens_material: validatedBody.lens_material.trim(),
       lens_index: validatedBody.lens_index ?? null,

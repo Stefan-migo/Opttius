@@ -1,6 +1,7 @@
 import { z } from "zod";
-import type { ToolDefinition, ToolExecutionContext, ToolResult } from "./types";
+
 import { resolveBranchByName } from "./resolvers";
+import type { ToolDefinition, ToolResult } from "./types";
 
 const getProductsSchema = z.object({
   search: z.string().optional(),
@@ -190,7 +191,7 @@ export const productTools: ToolDefinition[] = [
           },
           message: `Found ${count || 0} products`,
         };
-      } catch (error: any) {
+      } catch (error: unknown) {
         return {
           success: false,
           error: error.message || "Failed to get products",
@@ -271,7 +272,7 @@ export const productTools: ToolDefinition[] = [
           data: product,
           message: `Retrieved details for ${product.name}`,
         };
-      } catch (error: any) {
+      } catch (error: unknown) {
         return {
           success: false,
           error: error.message || "Failed to get product",
@@ -376,7 +377,7 @@ export const productTools: ToolDefinition[] = [
           slug = `${slug}-${Date.now()}`;
         }
 
-        const productData: any = {
+        const productData: unknown = {
           name: validated.name,
           slug: slug,
           price: validated.price,
@@ -461,7 +462,7 @@ export const productTools: ToolDefinition[] = [
           data,
           message: `Product "${validated.name}" created successfully with slug "${slug}"`,
         };
-      } catch (error: any) {
+      } catch (error: unknown) {
         return {
           success: false,
           error: error.message || "Failed to create product",
@@ -529,7 +530,7 @@ export const productTools: ToolDefinition[] = [
           data,
           message: `Product updated successfully`,
         };
-      } catch (error: any) {
+      } catch (error: unknown) {
         return {
           success: false,
           error: error.message || "Failed to update product",
@@ -586,7 +587,7 @@ export const productTools: ToolDefinition[] = [
           success: true,
           message: `Product deleted successfully`,
         };
-      } catch (error: any) {
+      } catch (error: unknown) {
         return {
           success: false,
           error: error.message || "Failed to delete product",
@@ -724,7 +725,7 @@ export const productTools: ToolDefinition[] = [
           },
           message: `Inventario actualizado a ${newQuantity} unidades en la sucursal indicada`,
         };
-      } catch (error: any) {
+      } catch (error: unknown) {
         return {
           success: false,
           error: error.message || "Failed to update inventory",
@@ -786,7 +787,7 @@ export const productTools: ToolDefinition[] = [
           },
           message: `Found ${data?.length || 0} products with low stock`,
         };
-      } catch (error: any) {
+      } catch (error: unknown) {
         return {
           success: false,
           error: error.message || "Failed to get low stock products",

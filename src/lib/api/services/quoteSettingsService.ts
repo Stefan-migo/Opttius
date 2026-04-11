@@ -1,11 +1,12 @@
 /**
  * Quote Settings Service
- * 
+ *
  * Service for managing quote settings and configurations.
  */
 
-import { ApiClient, isSuccess, unwrapData } from '../client-helpers';
-import { handleApiError } from '@/lib/services/errorService';
+import { handleApiError } from "@/lib/services/errorService";
+
+import { ApiClient, isSuccess, unwrapData } from "../client-helpers";
 
 // ============================================
 // Types
@@ -19,14 +20,16 @@ export interface QuoteSettings {
   default_expiration_days: number;
   default_margin_percentage: number;
   treatment_prices?: {
+    // Tratamientos que se aplican en laboratorio local
     anti_reflective: number;
-    blue_light_filter: number;
-    uv_protection: number;
     scratch_resistant: number;
-    anti_fog: number;
-    photochromic?: number;
-    polarized?: number;
-    tint?: number;
+    tint: number;
+    // Servicio personalizado (nombre y precio configurable)
+    custom_service?: {
+      enabled: boolean;
+      name: string;
+      price: number;
+    };
   };
   validity_days: number;
   volume_discounts?: Array<{ min_amount: number; discount_percentage: number }>;
@@ -45,10 +48,13 @@ export interface UpdateQuoteSettingsData {
   default_discount_percentage?: number;
   treatment_prices?: {
     anti_reflective?: number;
-    blue_light_filter?: number;
-    uv_protection?: number;
     scratch_resistant?: number;
-    anti_fog?: number;
+    tint?: number;
+    custom_service?: {
+      enabled: boolean;
+      name: string;
+      price: number;
+    };
   };
   validity_days?: number;
 }
@@ -65,8 +71,10 @@ class QuoteSettingsService {
    */
   async get(): Promise<QuoteSettings | null> {
     try {
-      const response = await this.client.get<QuoteSettings>('/api/admin/quote-settings');
-      
+      const response = await this.client.get<QuoteSettings>(
+        "/api/admin/quote-settings",
+      );
+
       if (isSuccess(response)) {
         return unwrapData(response);
       }
@@ -85,8 +93,11 @@ class QuoteSettingsService {
    */
   async update(data: UpdateQuoteSettingsData): Promise<QuoteSettings | null> {
     try {
-      const response = await this.client.put<QuoteSettings>('/api/admin/quote-settings', data);
-      
+      const response = await this.client.put<QuoteSettings>(
+        "/api/admin/quote-settings",
+        data,
+      );
+
       if (isSuccess(response)) {
         return unwrapData(response);
       }

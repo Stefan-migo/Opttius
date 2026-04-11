@@ -1,30 +1,31 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  AlertCircle,
+  ArrowRight,
+  CheckCircle2,
+  Clock,
+  Filter,
+  Loader2,
+  MessageSquare,
+  Plus,
+  RefreshCw,
+  Search,
+  Send,
+  User,
+  X,
+} from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import {
-  extractDataFromResponse,
-  extractPaginationFromResponse,
-} from "@/lib/api/response-helpers";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { useCallback, useEffect, useState } from "react";
+import { SubmitHandler, useForm } from "react-hook-form";
+import { toast } from "sonner";
+import type { z } from "zod";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -33,35 +34,25 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
-  Loader2,
-  MessageSquare,
-  Plus,
-  ArrowRight,
-  Filter,
-  RefreshCw,
-  CheckCircle2,
-  Clock,
-  AlertCircle,
-  XCircle,
-  Send,
-  User,
-  Package,
-  Calendar,
-  Receipt,
-  Search,
-  X,
-} from "lucide-react";
-import { toast } from "sonner";
-import Link from "next/link";
-import { useForm, SubmitHandler } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  createOpticalInternalSupportTicketSchema,
-  createOpticalInternalSupportMessageSchema,
-} from "@/lib/api/validation/zod-schemas";
-import type { z } from "zod";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import { useBranch } from "@/hooks/useBranch";
+import {
+  extractDataFromResponse,
+  extractPaginationFromResponse,
+} from "@/lib/api/response-helpers";
+import {
+  createOpticalInternalSupportMessageSchema,
+  createOpticalInternalSupportTicketSchema,
+} from "@/lib/api/validation/zod-schemas";
 import { getBranchHeader } from "@/lib/utils/branch";
 
 type TicketForm = z.infer<typeof createOpticalInternalSupportTicketSchema>;
@@ -189,7 +180,7 @@ export default function OpticalInternalSupportPage() {
     reset: resetTicket,
     watch: watchTicket,
     setValue: setTicketValue,
-  } = useForm<any>({
+  } = useForm<unknown>({
     resolver: zodResolver(createOpticalInternalSupportTicketSchema),
     defaultValues: {
       priority: "medium",
@@ -267,7 +258,7 @@ export default function OpticalInternalSupportPage() {
       const response = await fetch("/api/admin/customers?limit=100");
       if (response.ok) {
         const data = await response.json();
-        setCustomers(extractDataFromResponse<any>(data));
+        setCustomers(extractDataFromResponse<unknown>(data));
       }
     } catch (err) {
       console.error("Error loading customers:", err);
@@ -337,7 +328,7 @@ export default function OpticalInternalSupportPage() {
     }
   };
 
-  const onSubmitTicket: SubmitHandler<any> = async (data) => {
+  const onSubmitTicket: SubmitHandler<unknown> = async (data) => {
     setCreatingTicket(true);
     try {
       // Usar siempre la sucursal seleccionada; el form puede tener valor desactualizado
@@ -397,8 +388,8 @@ export default function OpticalInternalSupportPage() {
         </p>
         <div className="flex justify-start sm:justify-end">
           <Button
-            onClick={() => setShowCreateDialog(true)}
             className="rounded-xl bg-epoch-primary hover:bg-epoch-surface text-white font-display font-bold text-[10px] tracking-[0.2em] uppercase min-h-[44px] px-6 w-full sm:w-auto"
+            onClick={() => setShowCreateDialog(true)}
           >
             <Plus className="h-4 w-4 mr-2 shrink-0" />
             Crear Ticket
@@ -615,6 +606,7 @@ export default function OpticalInternalSupportPage() {
               <label className="text-xs sm:text-sm font-medium">Buscar</label>
               <div className="flex gap-2">
                 <Input
+                  className="rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20"
                   placeholder="Ticket #, asunto..."
                   value={filters.search}
                   onChange={(e) =>
@@ -624,14 +616,13 @@ export default function OpticalInternalSupportPage() {
                       page: 1,
                     }))
                   }
-                  className="rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20"
                 />
                 <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={loadTickets}
-                  title="Refrescar"
                   className="rounded-xl border-admin-border-primary/20 min-h-[44px] min-w-[44px] shrink-0"
+                  size="icon"
+                  title="Refrescar"
+                  variant="outline"
+                  onClick={loadTickets}
                 >
                   <RefreshCw className="h-4 w-4" />
                 </Button>
@@ -672,8 +663,8 @@ export default function OpticalInternalSupportPage() {
                 (!filters.category || filters.category !== "all") &&
                 !filters.search && (
                   <Button
-                    onClick={() => setShowCreateDialog(true)}
                     className="rounded-xl bg-epoch-primary hover:bg-epoch-surface text-white font-display font-bold text-[10px] tracking-[0.2em] uppercase min-h-[44px] px-6"
+                    onClick={() => setShowCreateDialog(true)}
                   >
                     <Plus className="h-4 w-4 mr-2" />
                     Crear Ticket
@@ -684,9 +675,9 @@ export default function OpticalInternalSupportPage() {
             <div className="space-y-2 sm:space-y-3">
               {tickets.map((ticket) => (
                 <Link
-                  key={ticket.id}
-                  href={`/admin/support/tickets/${ticket.id}`}
                   className="block min-h-[44px]"
+                  href={`/admin/support/tickets/${ticket.id}`}
+                  key={ticket.id}
                 >
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-3 sm:p-4 border rounded-xl hover:bg-epoch-primary/5 cursor-pointer transition-colors border-epoch-primary/10">
                     <div className="flex-1 min-w-0">
@@ -705,15 +696,15 @@ export default function OpticalInternalSupportPage() {
                           {priorityLabels[ticket.priority]}
                         </Badge>
                         <Badge
-                          variant="outline"
                           className="text-[10px] sm:text-xs px-1.5 py-0"
+                          variant="outline"
                         >
                           {categoryLabels[ticket.category]}
                         </Badge>
                         {ticket.branch && (
                           <Badge
-                            variant="outline"
                             className="text-[10px] sm:text-xs px-1.5 py-0"
+                            variant="outline"
                           >
                             {ticket.branch.name}
                           </Badge>
@@ -765,30 +756,30 @@ export default function OpticalInternalSupportPage() {
               </p>
               <div className="flex gap-2 justify-center sm:justify-end order-1 sm:order-2">
                 <Button
-                  variant="outline"
-                  size="sm"
                   className="rounded-xl border-admin-border-primary/20 min-h-[44px]"
+                  disabled={pagination.page === 1}
+                  size="sm"
+                  variant="outline"
                   onClick={() =>
                     setPagination((prev) => ({
                       ...prev,
                       page: Math.max(1, prev.page - 1),
                     }))
                   }
-                  disabled={pagination.page === 1}
                 >
                   Anterior
                 </Button>
                 <Button
-                  variant="outline"
-                  size="sm"
                   className="rounded-xl border-admin-border-primary/20 min-h-[44px]"
+                  disabled={pagination.page === pagination.totalPages}
+                  size="sm"
+                  variant="outline"
                   onClick={() =>
                     setPagination((prev) => ({
                       ...prev,
                       page: Math.min(prev.totalPages, prev.page + 1),
                     }))
                   }
-                  disabled={pagination.page === pagination.totalPages}
                 >
                   Siguiente
                 </Button>
@@ -809,8 +800,8 @@ export default function OpticalInternalSupportPage() {
             </DialogDescription>
           </DialogHeader>
           <form
-            onSubmit={handleSubmitTicket(onSubmitTicket)}
             className="space-y-4"
+            onSubmit={handleSubmitTicket(onSubmitTicket)}
           >
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
@@ -820,12 +811,12 @@ export default function OpticalInternalSupportPage() {
                 <Select
                   value={watchTicket("category")}
                   onValueChange={(value) =>
-                    setTicketValue("category", value as any)
+                    setTicketValue("category", value as unknown)
                   }
                 >
                   <SelectTrigger
-                    id="category"
                     className={`rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20 ${ticketErrors.category ? "border-red-500" : ""}`}
+                    id="category"
                   >
                     <SelectValue placeholder="Selecciona una categoría" />
                   </SelectTrigger>
@@ -851,12 +842,12 @@ export default function OpticalInternalSupportPage() {
                 <Select
                   value={watchTicket("priority")}
                   onValueChange={(value) =>
-                    setTicketValue("priority", value as any)
+                    setTicketValue("priority", value as unknown)
                   }
                 >
                   <SelectTrigger
-                    id="priority"
                     className={`rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20 ${ticketErrors.priority ? "border-red-500" : ""}`}
+                    id="priority"
                   >
                     <SelectValue placeholder="Selecciona una prioridad" />
                   </SelectTrigger>
@@ -890,10 +881,10 @@ export default function OpticalInternalSupportPage() {
                     </div>
                   </div>
                   <Button
+                    className="rounded-xl border-admin-border-primary/20"
+                    size="sm"
                     type="button"
                     variant="outline"
-                    size="sm"
-                    className="rounded-xl border-admin-border-primary/20"
                     onClick={() => {
                       setSelectedCustomerForTicket(null);
                       setTicketValue("customer_id", undefined);
@@ -909,11 +900,11 @@ export default function OpticalInternalSupportPage() {
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                   <Input
+                    className="pl-10 rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20"
                     id="customer_search"
                     placeholder="Buscar por nombre, RUT o email..."
                     value={customerSearch}
                     onChange={(e) => setCustomerSearch(e.target.value)}
-                    className="pl-10 rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20"
                   />
                   {customerSearch.length >= 2 && (
                     <div className="absolute z-50 w-full mt-1 bg-white border rounded-lg shadow-lg max-h-60 overflow-y-auto">
@@ -924,9 +915,9 @@ export default function OpticalInternalSupportPage() {
                       ) : customerSearchResults.length > 0 ? (
                         customerSearchResults.map((c) => (
                           <button
+                            className="w-full text-left p-3 hover:bg-gray-100 border-b last:border-b-0"
                             key={c.id}
                             type="button"
-                            className="w-full text-left p-3 hover:bg-gray-100 border-b last:border-b-0"
                             onClick={() => {
                               setSelectedCustomerForTicket({
                                 id: c.id,
@@ -977,8 +968,8 @@ export default function OpticalInternalSupportPage() {
               <Input
                 id="subject"
                 {...registerTicket("subject")}
-                placeholder="Resumen breve del problema"
                 className={`rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20 ${ticketErrors.subject ? "border-red-500" : ""}`}
+                placeholder="Resumen breve del problema"
               />
               {ticketErrors.subject && (
                 <p className="text-sm text-red-500">
@@ -994,9 +985,9 @@ export default function OpticalInternalSupportPage() {
               <Textarea
                 id="description"
                 {...registerTicket("description")}
+                className={`rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20 ${ticketErrors.description ? "border-red-500" : ""}`}
                 placeholder="Describe el problema en detalle..."
                 rows={6}
-                className={`rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20 ${ticketErrors.description ? "border-red-500" : ""}`}
               />
               {ticketErrors.description && (
                 <p className="text-sm text-red-500">
@@ -1011,17 +1002,17 @@ export default function OpticalInternalSupportPage() {
 
             <DialogFooter>
               <Button
+                className="rounded-xl border-admin-border-primary/20"
                 type="button"
                 variant="outline"
-                className="rounded-xl border-admin-border-primary/20"
                 onClick={() => setShowCreateDialog(false)}
               >
                 Cancelar
               </Button>
               <Button
-                type="submit"
-                disabled={creatingTicket}
                 className="rounded-xl bg-epoch-primary hover:bg-epoch-surface text-white font-display font-bold text-[10px] tracking-[0.2em] uppercase"
+                disabled={creatingTicket}
+                type="submit"
               >
                 {creatingTicket ? (
                   <>

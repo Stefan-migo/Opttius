@@ -1,10 +1,18 @@
 "use client";
 
-import { memo } from "react";
+import {
+  AlertTriangle,
+  Edit,
+  Eye,
+  Package,
+  RefreshCw,
+  Trash2,
+} from "lucide-react";
 import Link from "next/link";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { memo } from "react";
+
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -13,14 +21,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Package,
-  Eye,
-  Edit,
-  Trash2,
-  AlertTriangle,
-  RefreshCw,
-} from "lucide-react";
+
 import { Product } from "../hooks/useProducts";
 
 interface ProductTableProps {
@@ -81,10 +82,10 @@ function ProductTableComponent({
           <div className="flex items-center gap-3">
             <div className="flex items-center space-x-3 bg-white px-4 py-2 border border-admin-border-primary/10">
               <input
-                type="checkbox"
                 checked={allSelected}
-                onChange={onSelectAll}
                 className="w-4 h-4 rounded-xl border-admin-border-primary/20 accent-epoch-primary cursor-pointer"
+                type="checkbox"
+                onChange={onSelectAll}
               />
               <span className="text-[10px] font-display font-bold text-admin-text-tertiary uppercase tracking-widest">
                 Seleccionar Todos
@@ -92,11 +93,11 @@ function ProductTableComponent({
             </div>
             {onRefresh && (
               <Button
-                variant="outline"
-                size="sm"
-                onClick={onRefresh}
-                disabled={isRefreshing}
                 className="h-9 px-4 rounded-xl border-admin-border-primary/10 font-display font-bold text-[10px] tracking-widest uppercase"
+                disabled={isRefreshing}
+                size="sm"
+                variant="outline"
+                onClick={onRefresh}
               >
                 <RefreshCw
                   className={`h-4 w-4 mr-2 ${isRefreshing ? "animate-spin" : ""}`}
@@ -114,10 +115,10 @@ function ProductTableComponent({
               <TableRow className="hover:bg-transparent border-admin-border-primary/10">
                 <TableHead className="w-10 sm:w-12 text-center p-2 sm:p-4">
                   <input
-                    type="checkbox"
                     checked={allSelected}
-                    onChange={onSelectAll}
                     className="w-4 h-4 rounded-xl border-admin-border-primary/20 accent-epoch-primary"
+                    type="checkbox"
+                    onChange={onSelectAll}
                   />
                 </TableHead>
                 <TableHead className="text-[9px] sm:text-[10px] font-display font-bold text-admin-text-primary uppercase tracking-[0.2em] p-2 sm:p-4 whitespace-nowrap">
@@ -143,15 +144,15 @@ function ProductTableComponent({
             <TableBody>
               {products.map((product) => (
                 <TableRow
-                  key={product.id}
                   className="border-admin-border-primary/10 hover:bg-admin-bg-tertiary/10 transition-colors"
+                  key={product.id}
                 >
                   <TableCell className="text-center p-2 sm:p-4">
                     <input
-                      type="checkbox"
                       checked={selectedProducts.includes(product.id)}
-                      onChange={() => onSelectProduct(product.id)}
                       className="w-4 h-4 rounded-xl border-admin-border-primary/20 accent-epoch-primary"
+                      type="checkbox"
+                      onChange={() => onSelectProduct(product.id)}
                     />
                   </TableCell>
 
@@ -174,6 +175,32 @@ function ProductTableComponent({
                   </TableCell>
 
                   <TableCell className="p-2 sm:p-4">
+                    {/* Product Type Badge */}
+                    {product.product_type &&
+                      product.product_type !== "frame" && (
+                        <div className="mb-1">
+                          {product.product_type === "contact_lens" && (
+                            <span className="text-[8px] font-display font-bold uppercase tracking-wider bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded">
+                              LC
+                            </span>
+                          )}
+                          {product.product_type === "accessory" && (
+                            <span className="text-[8px] font-display font-bold uppercase tracking-wider bg-green-100 text-green-700 px-1.5 py-0.5 rounded">
+                              ACC
+                            </span>
+                          )}
+                          {product.product_type === "service" && (
+                            <span className="text-[8px] font-display font-bold uppercase tracking-wider bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded">
+                              SVC
+                            </span>
+                          )}
+                          {product.product_type === "lens" && (
+                            <span className="text-[8px] font-display font-bold uppercase tracking-wider bg-orange-100 text-orange-700 px-1.5 py-0.5 rounded">
+                              LEN
+                            </span>
+                          )}
+                        </div>
+                      )}
                     <span className="text-[10px] font-serif italic text-admin-text-tertiary uppercase tracking-wider">
                       {product.categories?.name ||
                         product.category?.name ||
@@ -216,27 +243,27 @@ function ProductTableComponent({
                     <div className="flex items-center justify-end gap-1">
                       <Link href={`/admin/products/${product.slug}`}>
                         <Button
-                          variant="ghost"
-                          size="sm"
                           className="h-8 w-8 p-0 rounded-xl hover:bg-admin-bg-tertiary text-epoch-primary"
+                          size="sm"
+                          variant="ghost"
                         >
                           <Eye className="h-4 w-4" />
                         </Button>
                       </Link>
                       <Link href={`/admin/products/edit/${product.id}`}>
                         <Button
-                          variant="ghost"
-                          size="sm"
                           className="h-8 w-8 p-0 rounded-xl hover:bg-admin-bg-tertiary text-epoch-primary"
+                          size="sm"
+                          variant="ghost"
                         >
                           <Edit className="h-4 w-4" />
                         </Button>
                       </Link>
                       <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => onDelete(product)}
                         className="h-8 w-8 p-0 rounded-xl hover:bg-admin-error/5 text-admin-error"
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => onDelete(product)}
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>

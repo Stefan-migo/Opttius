@@ -2,9 +2,9 @@
 
 import {
   Database,
-  Shield,
   FileCheck,
   Headphones,
+  Shield,
   Sparkles,
 } from "lucide-react";
 
@@ -61,8 +61,8 @@ export function SupportImplementationSection() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {items.map((item, index) => (
             <div
-              key={index}
               className="group p-6 sm:p-8 rounded-xl border border-epoch-primary/5 bg-white hover:shadow-2xl hover:-translate-y-1 transition-all duration-500 flex flex-col"
+              key={index}
             >
               <div className="mb-6 p-3 inline-block rounded-xl border border-epoch-primary/10 text-epoch-primary group-hover:bg-epoch-primary group-hover:text-white transition-all duration-500 w-fit">
                 <item.icon className="h-6 w-6 stroke-1" />

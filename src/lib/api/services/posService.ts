@@ -8,11 +8,11 @@
  * - Payment processing
  */
 
-import { ApiClient } from "../client-helpers";
-import { isSuccess, unwrapData } from "../client-helpers";
 import { handleApiError } from "@/lib/services/errorService";
 import { success } from "@/lib/services/notificationService";
 import { getBranchAndOperativoHeaders } from "@/lib/utils/branch";
+
+import { ApiClient, isError, isSuccess, unwrapData } from "../client-helpers";
 
 // ============================================
 // Types
@@ -279,8 +279,8 @@ class POSService {
       }
 
       // For 5xx/network errors: show specific message (sale may have gone through)
-      const errMsg = (response as any)?.error?.message ?? "";
-      const errCode = (response as any)?.error?.code ?? "";
+      const errMsg = isError(response) ? (response.error?.message ?? "") : "";
+      const errCode = isError(response) ? (response.error?.code ?? "") : "";
       const isServerOrNetwork =
         errCode === "NETWORK_ERROR" ||
         /internal server error|500|timeout|network error|failed to fetch/i.test(
@@ -357,7 +357,9 @@ class POSService {
   /**
    * Get billing settings
    */
-  async getBillingSettings(branchId?: string) {
+  async getBillingSettings(
+    branchId?: string,
+  ): Promise<Record<string, unknown> | null> {
     try {
       const response = await this.client.get<{
         settings: Record<string, unknown>;
@@ -367,7 +369,11 @@ class POSService {
 
       if (isSuccess(response)) {
         const data = unwrapData(response);
-        return (data as any)?.settings ?? data ?? null;
+        // Handle both wrapped {settings: {...}} and direct {...} responses
+        if (data && typeof data === "object" && "settings" in data) {
+          return (data as { settings: Record<string, unknown> }).settings;
+        }
+        return data as Record<string, unknown>;
       }
 
       handleApiError(response);

@@ -193,12 +193,12 @@ export function getRateLimitConfig(pathname: string): RateLimitConfig {
 // ============================================================================
 
 export {
-  GENERAL_RATE_LIMIT,
   AUTH_RATE_LIMIT,
-  PAYMENT_RATE_LIMIT,
-  SEARCH_RATE_LIMIT,
-  PUBLIC_RATE_LIMIT,
+  GENERAL_RATE_LIMIT,
   HIGH_VOLUME_RATE_LIMIT,
+  PAYMENT_RATE_LIMIT,
+  PUBLIC_RATE_LIMIT,
+  SEARCH_RATE_LIMIT,
 };
 
 export type { RateLimitConfig };

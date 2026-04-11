@@ -1,8 +1,9 @@
 import { z } from "zod";
+
 import {
+  completeRUTIfNeeded,
   isValidRUTFormat,
   normalizeRUT,
-  completeRUTIfNeeded,
 } from "@/lib/utils/rut";
 
 /**

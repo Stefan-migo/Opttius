@@ -1,6 +1,6 @@
-import { z } from "zod";
 import { NextRequest, NextResponse } from "next/server";
-import { ValidationError } from "@/lib/errors/comprehensive-handler";
+import { z } from "zod";
+
 import { appLogger as logger } from "@/lib/logger";
 
 /**
@@ -255,7 +255,7 @@ export function withValidation<
     context?: { params: Record<string, string | string[]> },
   ): Promise<NextResponse> => {
     try {
-      const validatedData: any = {};
+      const validatedData: unknown = {};
 
       // Validate body if schema provided
       if (schemas.body) {
@@ -314,8 +314,8 @@ export function withValidation<
  */
 function convertSearchParams(
   params: Record<string, string>,
-): Record<string, any> {
-  const converted: Record<string, any> = {};
+): Record<string, unknown> {
+  const converted: Record<string, unknown> = {};
 
   for (const [key, value] of Object.entries(params)) {
     // Try to convert to number

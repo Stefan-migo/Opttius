@@ -4,9 +4,10 @@
  * @module __tests__/integration/api/webhooks/paypal.test
  */
 
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { POST } from "@/app/api/webhooks/paypal/route";
 import { NextRequest } from "next/server";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+import { POST } from "@/app/api/webhooks/paypal/route";
 
 // Mock dependencies
 vi.mock("@/lib/payments", () => ({
@@ -129,7 +130,7 @@ describe("PayPal Webhook API", () => {
         processWebhookEvent: vi.fn(async () => {
           throw new Error("Invalid webhook data");
         }),
-      } as any);
+      } as unknown);
 
       const webhookPayload = {
         id: "test_event_id",

@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/utils/supabase/server";
-import { appLogger as logger } from "@/lib/logger";
-import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
-import { updateLensFamilySchema } from "@/lib/api/validation/zod-schemas";
+
 import {
   parseAndValidateBody,
-  validationErrorResponse,
   ValidationError,
+  validationErrorResponse,
 } from "@/lib/api/validation/zod-helpers";
+import { updateLensFamilySchema } from "@/lib/api/validation/zod-schemas";
+import { appLogger as logger } from "@/lib/logger";
+import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
+import { createClient } from "@/utils/supabase/server";
 
 export const dynamic = "force-dynamic";
 export async function GET(
@@ -168,7 +169,7 @@ export async function PUT(
     }
 
     return NextResponse.json({ family });
-  } catch (error: any) {
+  } catch (error: unknown) {
     if (error instanceof ValidationError) {
       return validationErrorResponse(error);
     } else {

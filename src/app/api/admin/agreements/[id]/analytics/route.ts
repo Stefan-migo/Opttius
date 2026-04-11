@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createServiceRoleClient } from "@/utils/supabase/server";
+
 import { appLogger as logger } from "@/lib/logger";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
+import { createServiceRoleClient } from "@/utils/supabase/server";
 import { createClient } from "@/utils/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -92,7 +93,7 @@ export async function GET(
       .reduce((s, b) => s + (b.amount || 0), 0);
 
     const uniqueCustomers = new Set(
-      (orders || []).map((o: any) => o.customer_id).filter(Boolean),
+      (orders || []).map((o: unknown) => o.customer_id).filter(Boolean),
     ).size;
 
     return NextResponse.json({

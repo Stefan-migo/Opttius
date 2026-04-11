@@ -9,7 +9,7 @@ export const businessConfig = {
   // Business Information
   name: "Opttius",
   displayName: "Opttius",
-  tagline: "Sistema de Gestión Óptica",
+  tagline: "Automatiza. Controla. Crece.",
   contactEmail: "contacto@opttius.cl",
   contactPhone: "+56926928279",
 
@@ -21,21 +21,22 @@ export const businessConfig = {
     twitter: null as string | null, // Opcional: crear cuando esté listo
   },
 
-  // Branding
+  // Branding (Sistema Epoch)
   colors: {
-    primary: "#AE0000",
-    secondary: "#B17A47",
-    accent: "#D4A574",
-    success: "#4ade80",
-    warning: "#fbbf24",
-    danger: "#ef4444",
-    info: "#60a5fa",
+    primary: "#1A2B23", // Verde profundo - Títulos, fondos oscuros
+    secondary: "#1A1A1A", // Charcoal - Fondos oscuros
+    accent: "#C5A059", // Dorado - CTAs, highlights
+    success: "#4ade80", // Verde éxito
+    warning: "#fbbf24", // Amarillo warning
+    danger: "#ef4444", // Rojo danger
+    info: "#60a5fa", // Azul info
+    background: "#F9F7F2", // Crema - Fondos claros
   },
 
   // Admin Panel
   admin: {
     title: "Opttius Admin",
-    subtitle: "Sistema de Gestión Óptica",
+    subtitle: "Automatiza. Controla. Crece.",
     logo: "/logo-opttius.svg",
   },
 

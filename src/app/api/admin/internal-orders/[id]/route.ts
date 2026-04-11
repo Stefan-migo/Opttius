@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/utils/supabase/server";
+
 import { getBranchContext } from "@/lib/api/branch-middleware";
 import { appLogger as logger } from "@/lib/logger";
+import { createClient } from "@/utils/supabase/server";
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -74,7 +75,7 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
         .eq("admin_user_id", user.id);
 
       const accessibleBranchIds =
-        userBranches.data?.map((b: any) => b.branch_id) || [];
+        userBranches.data?.map((b: unknown) => b.branch_id) || [];
 
       if (
         !accessibleBranchIds.includes(order.origin_branch_id) &&
@@ -155,7 +156,7 @@ export async function PUT(req: NextRequest, { params }: RouteParams) {
         .eq("admin_user_id", user.id);
 
       const accessibleBranchIds =
-        userBranches.data?.map((b: any) => b.branch_id) || [];
+        userBranches.data?.map((b: unknown) => b.branch_id) || [];
 
       if (
         !accessibleBranchIds.includes(existingOrder.origin_branch_id) &&
@@ -177,7 +178,7 @@ export async function PUT(req: NextRequest, { params }: RouteParams) {
     }
 
     // Prepare update data
-    const updateData: any = {};
+    const updateData: unknown = {};
 
     if (priority !== undefined) updateData.priority = priority;
     if (scheduled_date !== undefined)
@@ -209,7 +210,7 @@ export async function PUT(req: NextRequest, { params }: RouteParams) {
 
     // Add new items if provided
     if (items && Array.isArray(items) && items.length > 0) {
-      const orderItems = items.map((item: any) => ({
+      const orderItems = items.map((item: unknown) => ({
         internal_order_id: id,
         product_id: item.product_id,
         quantity: item.quantity,
@@ -318,7 +319,7 @@ export async function DELETE(req: NextRequest, { params }: RouteParams) {
         .eq("admin_user_id", user.id);
 
       const accessibleBranchIds =
-        userBranches.data?.map((b: any) => b.branch_id) || [];
+        userBranches.data?.map((b: unknown) => b.branch_id) || [];
 
       if (
         !accessibleBranchIds.includes(existingOrder.origin_branch_id) &&

@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/utils/supabase/server";
-import { createServiceRoleClient } from "@/utils/supabase/server";
+
 import { appLogger as logger } from "@/lib/logger";
 import type {
   GetAdminRoleParams,
   GetAdminRoleResult,
 } from "@/types/supabase-rpc";
+import { createClient } from "@/utils/supabase/server";
+import { createServiceRoleClient } from "@/utils/supabase/server";
 
 export const dynamic = "force-dynamic";
 
@@ -116,7 +117,7 @@ export async function POST(request: NextRequest) {
             .createSignedUrl(backupFileName, 3600);
 
           const totalRecords = Object.values(backupData.tables).reduce(
-            (sum: number, table: any) => sum + (table.record_count || 0),
+            (sum: number, table: unknown) => sum + (table.record_count || 0),
             0,
           );
 

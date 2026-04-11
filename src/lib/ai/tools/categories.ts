@@ -1,4 +1,5 @@
 import { z } from "zod";
+
 import type { ToolDefinition, ToolResult } from "./types";
 
 const getCategoriesSchema = z.object({
@@ -117,7 +118,7 @@ export const categoryTools: ToolDefinition[] = [
           },
           message: `Found ${count || 0} categories`,
         };
-      } catch (error: any) {
+      } catch (error: unknown) {
         return {
           success: false,
           error: error.message || "Failed to get categories",
@@ -195,7 +196,7 @@ export const categoryTools: ToolDefinition[] = [
           },
           message: `Retrieved category: ${category.name}`,
         };
-      } catch (error: any) {
+      } catch (error: unknown) {
         return {
           success: false,
           error: error.message || "Failed to get category",
@@ -300,7 +301,7 @@ export const categoryTools: ToolDefinition[] = [
           data,
           message: `Category "${validated.name}" created successfully`,
         };
-      } catch (error: any) {
+      } catch (error: unknown) {
         return {
           success: false,
           error: error.message || "Failed to create category",
@@ -389,7 +390,7 @@ export const categoryTools: ToolDefinition[] = [
           data,
           message: `Category updated successfully`,
         };
-      } catch (error: any) {
+      } catch (error: unknown) {
         return {
           success: false,
           error: error.message || "Failed to update category",
@@ -461,7 +462,7 @@ export const categoryTools: ToolDefinition[] = [
           success: true,
           message: `Category "${category.name}" deleted successfully`,
         };
-      } catch (error: any) {
+      } catch (error: unknown) {
         return {
           success: false,
           error: error.message || "Failed to delete category",
@@ -515,8 +516,8 @@ export const categoryTools: ToolDefinition[] = [
         }
 
         // Build tree structure
-        const categoryMap = new Map<string, any>();
-        const rootCategories: any[] = [];
+        const categoryMap = new Map<string, unknown>();
+        const rootCategories: unknown[] = [];
 
         // First pass: create map
         for (const cat of categories || []) {
@@ -541,7 +542,7 @@ export const categoryTools: ToolDefinition[] = [
           },
           message: `Retrieved ${categories?.length || 0} categories in tree structure`,
         };
-      } catch (error: any) {
+      } catch (error: unknown) {
         return {
           success: false,
           error: error.message || "Failed to get category tree",

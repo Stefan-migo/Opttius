@@ -37,7 +37,7 @@ export interface CreateNotificationParams {
   relatedEntityId?: string;
   actionUrl?: string;
   actionLabel?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   targetAdminId?: string;
   targetAdminRole?: string;
   /** Branch ID for óptica-scoped notifications; null for SaaS/broadcast. */
@@ -101,9 +101,9 @@ export class NotificationService {
             .single();
           if (entity) {
             organizationId =
-              organizationId ?? (entity as any).organization_id ?? null;
+              organizationId ?? (entity as unknown).organization_id ?? null;
             if (mapping.hasBranch) {
-              branchId = branchId ?? (entity as any).branch_id ?? null;
+              branchId = branchId ?? (entity as unknown).branch_id ?? null;
             }
           }
         }

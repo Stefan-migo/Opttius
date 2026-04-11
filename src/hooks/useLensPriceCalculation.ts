@@ -1,5 +1,4 @@
-import { useState, useCallback } from "react";
-import { toast } from "sonner";
+import { useCallback, useState } from "react";
 
 interface CalculateLensPriceParams {
   lens_family_id: string;
@@ -50,7 +49,7 @@ export function useLensPriceCalculation() {
 
         const data = await response.json();
         return data.data?.calculation || data.calculation;
-      } catch (err: any) {
+      } catch (err: unknown) {
         const errorMessage =
           err.message || "Error al calcular el precio del lente";
         setError(errorMessage);

@@ -1,20 +1,21 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import {
+  AlertCircle,
+  CheckCircle,
+  ExternalLink,
+  Loader2,
+  MessageCircle,
+} from "lucide-react";
 import { useSearchParams } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
-import {
-  MessageCircle,
-  Loader2,
-  CheckCircle,
-  AlertCircle,
-  ExternalLink,
-} from "lucide-react";
-import { toast } from "sonner";
 
 interface WhatsAppNumber {
   id: string;
@@ -139,15 +140,15 @@ export default function WhatsAppSettingsCard() {
           {status?.connected ? (
             <div className="space-y-4">
               <div className="flex items-center gap-2">
-                <Badge variant="default" className="gap-1">
+                <Badge className="gap-1" variant="default">
                   <CheckCircle className="h-3 w-3" />
                   Conectado
                 </Badge>
               </div>
               {status.numbers.map((n) => (
                 <div
-                  key={n.id}
                   className="rounded-lg border p-4 bg-admin-surface-secondary"
+                  key={n.id}
                 >
                   <p className="font-medium">
                     {n.display_phone_number || `ID: ${n.phone_number_id}`}
@@ -160,7 +161,7 @@ export default function WhatsAppSettingsCard() {
             </div>
           ) : (
             <div className="flex items-center gap-2">
-              <Badge variant="secondary" className="gap-1">
+              <Badge className="gap-1" variant="secondary">
                 <AlertCircle className="h-3 w-3" />
                 No conectado
               </Badge>
@@ -171,9 +172,9 @@ export default function WhatsAppSettingsCard() {
             {process.env.NEXT_PUBLIC_META_APP_ID && (
               <div>
                 <Button
+                  className="w-full"
                   type="button"
                   variant="outline"
-                  className="w-full"
                   onClick={() => {
                     const base =
                       typeof window !== "undefined"
@@ -202,27 +203,27 @@ export default function WhatsAppSettingsCard() {
                 </span>
               </div>
             </div>
-            <form onSubmit={handleConnect} className="space-y-4">
+            <form className="space-y-4" onSubmit={handleConnect}>
               <div className="space-y-2">
                 <Label htmlFor="waba_id">WABA ID (Business Account ID)</Label>
                 <Input
                   id="waba_id"
+                  placeholder="Ej: 123456789012345"
                   value={form.waba_id}
                   onChange={(e) =>
                     setForm((f) => ({ ...f, waba_id: e.target.value }))
                   }
-                  placeholder="Ej: 123456789012345"
                 />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="phone_number_id">Phone Number ID</Label>
                 <Input
                   id="phone_number_id"
+                  placeholder="Ej: 987654321098765"
                   value={form.phone_number_id}
                   onChange={(e) =>
                     setForm((f) => ({ ...f, phone_number_id: e.target.value }))
                   }
-                  placeholder="Ej: 987654321098765"
                 />
               </div>
               <div className="space-y-2">
@@ -231,6 +232,7 @@ export default function WhatsAppSettingsCard() {
                 </Label>
                 <Input
                   id="display_phone_number"
+                  placeholder="+56912345678"
                   value={form.display_phone_number}
                   onChange={(e) =>
                     setForm((f) => ({
@@ -238,10 +240,9 @@ export default function WhatsAppSettingsCard() {
                       display_phone_number: e.target.value,
                     }))
                   }
-                  placeholder="+56912345678"
                 />
               </div>
-              <Button type="submit" disabled={saving}>
+              <Button disabled={saving} type="submit">
                 {saving ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
                 ) : status?.connected ? (
@@ -263,10 +264,10 @@ export default function WhatsAppSettingsCard() {
           <p>
             <strong>Paso 1:</strong> Crea una app en{" "}
             <a
-              href="https://developers.facebook.com/"
-              target="_blank"
-              rel="noopener noreferrer"
               className="text-epoch-primary underline"
+              href="https://developers.facebook.com/"
+              rel="noopener noreferrer"
+              target="_blank"
             >
               Meta for Developers
             </a>{" "}

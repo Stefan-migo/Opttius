@@ -1,6 +1,7 @@
 import { z } from "zod";
-import type { ToolDefinition, ToolResult } from "./types";
+
 import { resolveOrderByNumber } from "./resolvers";
+import type { ToolDefinition, ToolResult } from "./types";
 
 const getOrdersSchema = z.object({
   status: z
@@ -128,7 +129,7 @@ export const orderTools: ToolDefinition[] = [
           },
           message: `Found ${count || 0} orders`,
         };
-      } catch (error: any) {
+      } catch (error: unknown) {
         return {
           success: false,
           error: error.message || "Failed to get orders",
@@ -222,7 +223,7 @@ export const orderTools: ToolDefinition[] = [
           data,
           message: `Retrieved order ${data.order_number}`,
         };
-      } catch (error: any) {
+      } catch (error: unknown) {
         return {
           success: false,
           error: error.message || "Failed to get order",
@@ -275,7 +276,7 @@ export const orderTools: ToolDefinition[] = [
           },
           message: `Found ${count || 0} pending orders`,
         };
-      } catch (error: any) {
+      } catch (error: unknown) {
         return {
           success: false,
           error: error.message || "Failed to get pending orders",
@@ -352,7 +353,7 @@ export const orderTools: ToolDefinition[] = [
           },
           message: `Order statistics for last ${validated.days} days`,
         };
-      } catch (error: any) {
+      } catch (error: unknown) {
         return {
           success: false,
           error: error.message || "Failed to get order stats",

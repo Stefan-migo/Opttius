@@ -2,18 +2,19 @@
  * Unit Tests for tier-validator and tier-config utilities
  */
 
-import { describe, it, expect } from "vitest";
-import { getTierUpgradeMessage } from "@/lib/saas/tier-validator";
+import { describe, expect, it } from "vitest";
+
 import {
-  isUnlimited,
   canUpgrade,
   getNextTier,
   getTierConfig,
+  isUnlimited,
 } from "@/lib/saas/tier-config";
 import {
-  TIER_FEATURE_LABELS,
   TIER_DISPLAY_NAMES,
+  TIER_FEATURE_LABELS,
 } from "@/lib/saas/tier-constants";
+import { getTierUpgradeMessage } from "@/lib/saas/tier-validator";
 
 describe("tier-config", () => {
   describe("isUnlimited", () => {

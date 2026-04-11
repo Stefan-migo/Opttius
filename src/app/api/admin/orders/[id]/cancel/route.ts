@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient, createServiceRoleClient } from "@/utils/supabase/server";
+
 import { getBranchContext } from "@/lib/api/branch-middleware";
 import { appLogger as logger } from "@/lib/logger";
 import type {
-  IsAdminParams,
-  IsAdminResult,
   GetAdminRoleParams,
   GetAdminRoleResult,
+  IsAdminParams,
+  IsAdminResult,
 } from "@/types/supabase-rpc";
+import { createClient, createServiceRoleClient } from "@/utils/supabase/server";
 
 /**
  * POST /api/admin/orders/[id]/cancel
@@ -187,7 +188,7 @@ export async function POST(
                   error: stockErr.message,
                 });
               }
-            } catch (stockEx: any) {
+            } catch (stockEx: unknown) {
               logger.warn("Stock revert exception, continuing", {
                 order_item_id: oi.id,
                 error: stockEx?.message,
@@ -247,7 +248,7 @@ export async function POST(
               credit_note_number: cnNumber,
               order_id: orderId,
               branch_id: order.branch_id,
-              organization_id: (branchRow as any)?.organization_id ?? null,
+              organization_id: (branchRow as unknown)?.organization_id ?? null,
               amount: refundAmount,
               reason,
               refund_method,
@@ -285,7 +286,7 @@ export async function POST(
             // Don't fail the whole operation - credit note was created
           }
         }
-      } catch (creditNoteErr: any) {
+      } catch (creditNoteErr: unknown) {
         logger.error("Error in credit note block", creditNoteErr);
         return NextResponse.json(
           {
@@ -333,7 +334,7 @@ export async function POST(
       credit_note_id: creditNoteId ?? undefined,
       credit_note_movement_registered: !!posSessionId,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     const errMsg = error?.message ?? String(error);
     const errStack = error?.stack;
     logger.error("Error in cancel order API", {

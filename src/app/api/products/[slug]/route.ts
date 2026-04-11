@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+
 import { createClient, createServiceRoleClient } from "@/utils/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -81,7 +82,7 @@ export async function GET(
     }
 
     return NextResponse.json({ product });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("API error:", error);
     return NextResponse.json(
       { error: "Error interno del servidor" },

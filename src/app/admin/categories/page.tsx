@@ -1,12 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { extractDataFromResponse } from "@/lib/api/response-helpers";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { AlertTriangle, Edit, Plus, Save, Tag, Trash2, X } from "lucide-react";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -15,8 +14,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Plus, Edit, Trash2, Tag, AlertTriangle, Save, X } from "lucide-react";
-import { toast } from "sonner";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { extractDataFromResponse } from "@/lib/api/response-helpers";
 
 interface Category {
   id: string;
@@ -223,13 +224,13 @@ export default function CategoriesPage() {
     return (
       <div className="space-y-6">
         <div className="animate-pulse">
-          <div className="h-8 bg-gray-200 rounded w-64 mb-2"></div>
-          <div className="h-4 bg-gray-200 rounded w-96"></div>
+          <div className="h-8 bg-gray-200 rounded w-64 mb-2" />
+          <div className="h-4 bg-gray-200 rounded w-96" />
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {[...Array(6)].map((_, i) => (
-            <div key={i} className="animate-pulse">
-              <div className="bg-gray-200 h-32 rounded-lg"></div>
+            <div className="animate-pulse" key={i}>
+              <div className="bg-gray-200 h-32 rounded-lg" />
             </div>
           ))}
         </div>
@@ -288,8 +289,8 @@ export default function CategoriesPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {categories.map((category) => (
           <Card
-            key={category.id}
             className="transition-all duration-200 bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.4)]"
+            key={category.id}
           >
             <CardHeader>
               <div className="flex items-start justify-between">
@@ -303,22 +304,22 @@ export default function CategoriesPage() {
                 </div>
                 <div className="flex gap-2">
                   <Button
-                    variant="outline"
                     size="sm"
+                    variant="outline"
                     onClick={() => openEditDialog(category)}
                   >
                     <Edit className="h-4 w-4" />
                   </Button>
                   <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => openDeleteDialog(category)}
                     disabled={category.is_default === true}
+                    size="sm"
                     title={
                       category.is_default === true
                         ? "Esta categoría por defecto no puede eliminarse"
                         : "Eliminar categoría"
                     }
+                    variant="outline"
+                    onClick={() => openDeleteDialog(category)}
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>
@@ -373,15 +374,15 @@ export default function CategoriesPage() {
             </DialogDescription>
           </DialogHeader>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form className="space-y-4" onSubmit={handleSubmit}>
             <div>
               <Label htmlFor="name">Nombre *</Label>
               <Input
+                required
                 id="name"
+                placeholder="Ej: Cuidado Facial"
                 value={formData.name}
                 onChange={(e) => handleInputChange("name", e.target.value)}
-                placeholder="Ej: Cuidado Facial"
-                required
               />
             </div>
 
@@ -389,9 +390,9 @@ export default function CategoriesPage() {
               <Label htmlFor="slug">Slug</Label>
               <Input
                 id="slug"
+                placeholder="cuidado-facial"
                 value={formData.slug}
                 onChange={(e) => handleInputChange("slug", e.target.value)}
-                placeholder="cuidado-facial"
               />
               <p className="text-xs text-gray-500 mt-1">
                 URL amigable (se genera automáticamente)
@@ -402,26 +403,26 @@ export default function CategoriesPage() {
               <Label htmlFor="description">Descripción</Label>
               <Textarea
                 id="description"
+                placeholder="Descripción opcional de la categoría"
+                rows={3}
                 value={formData.description}
                 onChange={(e) =>
                   handleInputChange("description", e.target.value)
                 }
-                placeholder="Descripción opcional de la categoría"
-                rows={3}
               />
             </div>
 
             <DialogFooter>
               <Button
+                disabled={formLoading}
                 type="button"
                 variant="outline"
                 onClick={() => setIsDialogOpen(false)}
-                disabled={formLoading}
               >
                 <X className="h-4 w-4 mr-2" />
                 Cancelar
               </Button>
-              <Button type="submit" disabled={formLoading}>
+              <Button disabled={formLoading} type="submit">
                 <Save className="h-4 w-4 mr-2" />
                 {formLoading
                   ? "Guardando..."
@@ -477,9 +478,9 @@ export default function CategoriesPage() {
               Cancelar
             </Button>
             <Button
+              disabled={categoryToDelete?.is_default === true}
               variant="destructive"
               onClick={handleDelete}
-              disabled={categoryToDelete?.is_default === true}
             >
               <Trash2 className="h-4 w-4 mr-2" />
               Eliminar Categoría

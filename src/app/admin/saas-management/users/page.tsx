@@ -1,23 +1,29 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import {
-  extractDataFromResponse,
-  extractPaginationFromResponse,
-} from "@/lib/api/response-helpers";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+  AlertTriangle,
+  ArrowLeft,
+  Building2,
+  CheckCircle2,
+  Crown,
+  Eye,
+  Loader2,
+  MapPin,
+  MoreVertical,
+  Search,
+  Shield,
+  Trash2,
+  User,
+  UserPlus,
+  XCircle,
+} from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -27,6 +33,22 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Table,
   TableBody,
   TableCell,
@@ -35,32 +57,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  Users,
-  Search,
-  Eye,
-  MoreVertical,
-  CheckCircle2,
-  XCircle,
-  Building2,
-  Shield,
-  User,
-  Crown,
-  Loader2,
-  MapPin,
-  ArrowLeft,
-  UserPlus,
-  Trash2,
-  AlertTriangle,
-} from "lucide-react";
-import Link from "next/link";
-import { toast } from "sonner";
+  extractDataFromResponse,
+  extractPaginationFromResponse,
+} from "@/lib/api/response-helpers";
 import { formatDate } from "@/lib/utils";
 
 interface User {
@@ -383,42 +382,46 @@ export default function UsersManagementPage() {
     <div className="space-y-6 p-6">
       <div className="flex items-center gap-4">
         <Button
-          variant="ghost"
           size="icon"
-          onClick={() => router.push("/admin/saas-management/dashboard")}
           title="Volver al dashboard"
+          variant="ghost"
+          className="text-white hover:bg-white/10"
+          onClick={() => router.push("/admin/saas-management/dashboard")}
         >
           <ArrowLeft className="h-5 w-5" />
         </Button>
         <div className="flex-1">
-          <h1 className="text-3xl font-display font-bold text-epoch-primary tracking-tight">
+          <h1 className="text-3xl font-display font-bold text-white tracking-tight">
             Gestión de Usuarios
           </h1>
-          <p className="text-admin-text-tertiary mt-2">
+          <p className="text-white/50 mt-2">
             Administra todos los usuarios del sistema
           </p>
         </div>
-        <Button onClick={() => setShowCreateUserDialog(true)}>
+        <Button
+          className="bg-[#C5A059] hover:bg-[#C5A059]/90"
+          onClick={() => setShowCreateUserDialog(true)}
+        >
           <UserPlus className="h-4 w-4 mr-2" />
           Nuevo usuario
         </Button>
       </div>
 
       {/* Filtros */}
-      <Card className="admin-card">
+      <Card className="bg-white/5 border-white/10">
         <CardContent className="pt-6">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/40" />
                 <Input
+                  className="pl-10 bg-white/5 border-white/10 text-white placeholder:text-white/40"
                   placeholder="Buscar por email o nombre..."
                   value={searchTerm}
                   onChange={(e) => {
                     setSearchTerm(e.target.value);
                     setCurrentPage(1);
                   }}
-                  className="pl-10"
                 />
               </div>
             </div>
@@ -426,38 +429,87 @@ export default function UsersManagementPage() {
               value={organizationFilter}
               onValueChange={setOrganizationFilter}
             >
-              <SelectTrigger className="rounded-xl w-[200px]">
+              <SelectTrigger className="rounded-xl w-[200px] bg-white/5 border-white/10 text-white">
                 <SelectValue placeholder="Filtrar por organización" />
               </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todas las organizaciones</SelectItem>
+              <SelectContent className="bg-[#0D1117] border-white/10">
+                <SelectItem
+                  value="all"
+                  className="text-white focus:bg-white/10"
+                >
+                  Todas las organizaciones
+                </SelectItem>
                 {organizations.map((org) => (
-                  <SelectItem key={org.id} value={org.id}>
+                  <SelectItem
+                    key={org.id}
+                    value={org.id}
+                    className="text-white focus:bg-white/10"
+                  >
                     {org.name}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
             <Select value={roleFilter} onValueChange={setRoleFilter}>
-              <SelectTrigger className="rounded-xl w-[180px]">
+              <SelectTrigger className="rounded-xl w-[180px] bg-white/5 border-white/10 text-white">
                 <SelectValue placeholder="Filtrar por rol" />
               </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todos los roles</SelectItem>
-                <SelectItem value="root">Root</SelectItem>
-                <SelectItem value="dev">Dev</SelectItem>
-                <SelectItem value="super_admin">Super Admin</SelectItem>
-                <SelectItem value="admin">Admin</SelectItem>
-                <SelectItem value="vendedor">Vendedor</SelectItem>
-                <SelectItem value="employee">Empleado</SelectItem>
+              <SelectContent className="bg-[#0D1117] border-white/10">
+                <SelectItem
+                  value="all"
+                  className="text-white focus:bg-white/10"
+                >
+                  Todos los roles
+                </SelectItem>
+                <SelectItem
+                  value="root"
+                  className="text-white focus:bg-white/10"
+                >
+                  Root
+                </SelectItem>
+                <SelectItem
+                  value="dev"
+                  className="text-white focus:bg-white/10"
+                >
+                  Dev
+                </SelectItem>
+                <SelectItem
+                  value="super_admin"
+                  className="text-white focus:bg-white/10"
+                >
+                  Super Admin
+                </SelectItem>
+                <SelectItem
+                  value="admin"
+                  className="text-white focus:bg-white/10"
+                >
+                  Admin
+                </SelectItem>
+                <SelectItem
+                  value="vendedor"
+                  className="text-white focus:bg-white/10"
+                >
+                  Vendedor
+                </SelectItem>
+                <SelectItem
+                  value="employee"
+                  className="text-white focus:bg-white/10"
+                >
+                  Empleado
+                </SelectItem>
               </SelectContent>
             </Select>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="rounded-xl w-[180px]">
+              <SelectTrigger className="rounded-xl w-[180px] bg-white/5 border-white/10 text-white">
                 <SelectValue placeholder="Filtrar por estado" />
               </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todos los estados</SelectItem>
+              <SelectContent className="bg-[#0D1117] border-white/10">
+                <SelectItem
+                  value="all"
+                  className="text-white focus:bg-white/10"
+                >
+                  Todos los estados
+                </SelectItem>
                 <SelectItem value="active">Activo</SelectItem>
                 <SelectItem value="inactive">Inactivo</SelectItem>
               </SelectContent>
@@ -560,7 +612,7 @@ export default function UsersManagementPage() {
                         <TableCell className="text-right">
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="sm">
+                              <Button size="sm" variant="ghost">
                                 <MoreVertical className="h-4 w-4" />
                               </Button>
                             </DropdownMenuTrigger>
@@ -618,11 +670,11 @@ export default function UsersManagementPage() {
                                 <>
                                   <DropdownMenuSeparator />
                                   <DropdownMenuItem
+                                    className="text-red-600 focus:text-red-600"
                                     onClick={() => {
                                       setUserToDelete(user);
                                       setDeleteDialogOpen(true);
                                     }}
-                                    className="text-red-600 focus:text-red-600"
                                   >
                                     <Trash2 className="h-4 w-4 mr-2" />
                                     Eliminar
@@ -646,20 +698,20 @@ export default function UsersManagementPage() {
                   </div>
                   <div className="flex gap-2">
                     <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                       disabled={currentPage === 1}
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                     >
                       Anterior
                     </Button>
                     <Button
-                      variant="outline"
+                      disabled={currentPage === totalPages}
                       size="sm"
+                      variant="outline"
                       onClick={() =>
                         setCurrentPage((p) => Math.min(totalPages, p + 1))
                       }
-                      disabled={currentPage === totalPages}
                     >
                       Siguiente
                     </Button>
@@ -702,29 +754,30 @@ export default function UsersManagementPage() {
             <div>
               <Label>Email *</Label>
               <Input
+                placeholder="usuario@ejemplo.com"
                 type="email"
                 value={createUserForm.email}
                 onChange={(e) =>
                   setCreateUserForm((f) => ({ ...f, email: e.target.value }))
                 }
-                placeholder="usuario@ejemplo.com"
               />
             </div>
             <div>
               <Label>Contraseña * (mín. 8 caracteres)</Label>
               <Input
+                placeholder="••••••••"
                 type="password"
                 value={createUserForm.password}
                 onChange={(e) =>
                   setCreateUserForm((f) => ({ ...f, password: e.target.value }))
                 }
-                placeholder="••••••••"
               />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label>Nombre</Label>
                 <Input
+                  placeholder="Nombre"
                   value={createUserForm.first_name}
                   onChange={(e) =>
                     setCreateUserForm((f) => ({
@@ -732,12 +785,12 @@ export default function UsersManagementPage() {
                       first_name: e.target.value,
                     }))
                   }
-                  placeholder="Nombre"
                 />
               </div>
               <div>
                 <Label>Apellido</Label>
                 <Input
+                  placeholder="Apellido"
                   value={createUserForm.last_name}
                   onChange={(e) =>
                     setCreateUserForm((f) => ({
@@ -745,7 +798,6 @@ export default function UsersManagementPage() {
                       last_name: e.target.value,
                     }))
                   }
-                  placeholder="Apellido"
                 />
               </div>
             </div>
@@ -834,7 +886,7 @@ export default function UsersManagementPage() {
             >
               Cancelar
             </Button>
-            <Button onClick={handleCreateUser} disabled={creatingUser}>
+            <Button disabled={creatingUser} onClick={handleCreateUser}>
               {creatingUser ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -953,19 +1005,19 @@ export default function UsersManagementPage() {
           </DialogHeader>
           <DialogFooter>
             <Button
+              disabled={deleting}
               variant="outline"
               onClick={() => {
                 setDeleteDialogOpen(false);
                 setUserToDelete(null);
               }}
-              disabled={deleting}
             >
               Cancelar
             </Button>
             <Button
+              disabled={deleting}
               variant="destructive"
               onClick={handleDeleteUser}
-              disabled={deleting}
             >
               {deleting ? (
                 <>

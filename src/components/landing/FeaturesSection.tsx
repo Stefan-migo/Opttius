@@ -1,21 +1,22 @@
 "use client";
 
-import { useState } from "react";
 import {
-  Users,
-  ShoppingCart,
-  Building2,
-  MessageSquare,
+  ArrowUpRight,
   BarChart3,
+  Briefcase,
+  Building2,
   Calendar,
   FileText,
-  Package,
-  Sparkles,
-  ArrowUpRight,
-  Briefcase,
   MapPin,
+  MessageSquare,
+  Package,
+  ShoppingCart,
+  Sparkles,
+  Users,
 } from "lucide-react";
 import Image from "next/image";
+import { useState } from "react";
+
 import { FeatureSlideDialog } from "./FeatureSlideDialog";
 
 /* Grid uniforme: 5 cols x 2 rows = 10 items. Orden por importancia percibida por el usuario. */
@@ -142,6 +143,7 @@ function FeatureCard({
 
   return (
     <div
+      className={`group relative overflow-hidden rounded-xl p-6 sm:p-8 border border-epoch-primary/5 transition-all duration-700 flex flex-col justify-between hover:shadow-2xl hover:-translate-y-1 ${feature.className} ${isComingSoon ? "opacity-90" : ""} ${hasSlides ? "cursor-pointer focus:outline-none focus:ring-2 focus:ring-epoch-accent focus:ring-offset-2" : ""}`}
       role={hasSlides ? "button" : undefined}
       tabIndex={hasSlides ? 0 : undefined}
       onClick={hasSlides ? handleClick : undefined}
@@ -155,7 +157,6 @@ function FeatureCard({
             }
           : undefined
       }
-      className={`group relative overflow-hidden rounded-xl p-6 sm:p-8 border border-epoch-primary/5 transition-all duration-700 flex flex-col justify-between hover:shadow-2xl hover:-translate-y-1 ${feature.className} ${isComingSoon ? "opacity-90" : ""} ${hasSlides ? "cursor-pointer focus:outline-none focus:ring-2 focus:ring-epoch-accent focus:ring-offset-2" : ""}`}
     >
       {isComingSoon && (
         <div className="absolute top-4 right-4 z-20">
@@ -167,10 +168,10 @@ function FeatureCard({
       {showImage && (
         <div className="absolute inset-0 z-0">
           <Image
-            src={feature.image!}
-            alt={feature.title}
             fill
+            alt={feature.title}
             className="object-cover opacity-10 grayscale group-hover:grayscale-0 group-hover:opacity-20 transition-all duration-700"
+            src={feature.image!}
             onError={() => setImageError(true)}
           />
           <div
@@ -260,7 +261,7 @@ function FeatureCard({
       </div>
 
       <div className="absolute top-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-700">
-        <div className="w-12 h-12 border-t border-r border-epoch-accent/30"></div>
+        <div className="w-12 h-12 border-t border-r border-epoch-accent/30" />
       </div>
     </div>
   );
@@ -279,7 +280,7 @@ export function FeaturesSection() {
       id="caracteristicas"
     >
       {/* Texture Overlay */}
-      <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-[0.03] pointer-events-none"></div>
+      <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-[0.03] pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="text-center mb-24 max-w-3xl mx-auto">
@@ -294,7 +295,7 @@ export function FeaturesSection() {
               resuelven
             </span>
           </h2>
-          <div className="w-24 h-[1px] bg-epoch-accent mx-auto mb-8"></div>
+          <div className="w-24 h-[1px] bg-epoch-accent mx-auto mb-8" />
           <p className="text-xl text-epoch-primary/70 font-serif italic tracking-wide">
             Cada módulo fue pensado para el flujo real de una óptica: desde la
             receta hasta la entrega.
@@ -304,9 +305,9 @@ export function FeaturesSection() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 lg:grid-rows-2 gap-4 auto-rows-[minmax(180px,auto)]">
           {features.map((feature, index) => (
             <FeatureCard
-              key={index}
               feature={feature}
               index={index}
+              key={index}
               onOpenSlides={
                 "slidesFolder" in feature
                   ? () => setSelectedFeatureIndex(index)
@@ -320,12 +321,12 @@ export function FeaturesSection() {
       {selectedFeature && "slidesFolder" in selectedFeature && (
         <FeatureSlideDialog
           open={selectedFeatureIndex !== null}
-          onOpenChange={(open) => !open && setSelectedFeatureIndex(null)}
-          title={selectedFeature.title}
+          slidesFolder={selectedFeature.slidesFolder}
           subtitle={
             "subtitle" in selectedFeature ? selectedFeature.subtitle : undefined
           }
-          slidesFolder={selectedFeature.slidesFolder}
+          title={selectedFeature.title}
+          onOpenChange={(open) => !open && setSelectedFeatureIndex(null)}
         />
       )}
     </section>

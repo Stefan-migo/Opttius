@@ -7,12 +7,13 @@
  * - Crear suscripción desde página dedicada (POST)
  */
 
-import { describe, it, expect, beforeAll, afterAll } from "vitest";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
+
 import {
-  createTestRootUser,
   cleanupRootUser,
-  makeAuthenticatedRequest,
+  createTestRootUser,
   isMultiTenancyAvailable,
+  makeAuthenticatedRequest,
   type TestUser,
 } from "../../helpers/test-setup";
 

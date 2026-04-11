@@ -1,21 +1,22 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import {
-  Loader2,
-  Clock,
   CheckCircle2,
+  Clock,
+  Download,
+  Loader2,
   MessageSquare,
   TrendingUp,
   Users,
-  Download,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { useEffect, useMemo, useState } from "react";
+
+import { EnhancedBarChart } from "@/components/admin/charts/EnhancedBarChart";
 import { EnhancedColumnChart } from "@/components/admin/charts/EnhancedColumnChart";
 import { EnhancedPieChart } from "@/components/admin/charts/EnhancedPieChart";
-import { EnhancedBarChart } from "@/components/admin/charts/EnhancedBarChart";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface SupportMetrics {
   totalTickets: number;
@@ -224,11 +225,11 @@ export function SupportMetrics() {
           <CardContent>
             {ticketsPerDayChartData.length > 0 ? (
               <EnhancedColumnChart
-                data={ticketsPerDayChartData}
-                title="Tickets creados"
                 color="#3B82F6"
+                data={ticketsPerDayChartData}
                 formatValue={(v) => v.toString()}
                 height={280}
+                title="Tickets creados"
               />
             ) : (
               <p className="text-sm text-gray-500 py-8 text-center">
@@ -245,9 +246,9 @@ export function SupportMetrics() {
           <CardContent>
             {statusPieData.length > 0 ? (
               <EnhancedPieChart
-                data={statusPieData}
                 showLegend
                 showPercentage
+                data={statusPieData}
                 formatValue={(v) => v.toString()}
                 height={280}
               />
@@ -266,9 +267,9 @@ export function SupportMetrics() {
           <CardContent>
             {priorityPieData.length > 0 ? (
               <EnhancedPieChart
-                data={priorityPieData}
                 showLegend
                 showPercentage
+                data={priorityPieData}
                 formatValue={(v) => v.toString()}
                 height={280}
               />
@@ -290,9 +291,9 @@ export function SupportMetrics() {
           <CardContent>
             {topOrgsBarData.length > 0 ? (
               <EnhancedBarChart
-                data={topOrgsBarData}
                 horizontal
                 color="#1E40AF"
+                data={topOrgsBarData}
                 formatValue={(v) => v.toString()}
                 height={280}
               />
@@ -314,7 +315,7 @@ export function SupportMetrics() {
           <CardContent>
             <div className="space-y-3">
               {Object.entries(metrics.statusCounts).map(([status, count]) => (
-                <div key={status} className="flex items-center justify-between">
+                <div className="flex items-center justify-between" key={status}>
                   <span className="text-sm font-medium capitalize">
                     {status.replace("_", " ")}
                   </span>
@@ -335,8 +336,8 @@ export function SupportMetrics() {
               {Object.entries(metrics.priorityCounts).map(
                 ([priority, count]) => (
                   <div
-                    key={priority}
                     className="flex items-center justify-between"
+                    key={priority}
                   >
                     <span className="text-sm font-medium capitalize">
                       {priority}
@@ -360,8 +361,8 @@ export function SupportMetrics() {
                 .sort(([, a], [, b]) => b - a)
                 .map(([category, count]) => (
                   <div
-                    key={category}
                     className="flex items-center justify-between"
+                    key={category}
                   >
                     <span className="text-sm font-medium capitalize">
                       {category.replace("_", " ")}
@@ -388,8 +389,8 @@ export function SupportMetrics() {
               <div className="space-y-3">
                 {metrics.topOrganizations.map((org) => (
                   <div
-                    key={org.id}
                     className="flex items-center justify-between"
+                    key={org.id}
                   >
                     <span className="text-sm font-medium truncate">
                       {org.name}

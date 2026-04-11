@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireRoot } from "@/lib/api/root-middleware";
-import { createServiceRoleClient } from "@/utils/supabase/service-role";
-import { appLogger as logger } from "@/lib/logger";
+
 import { AuthorizationError } from "@/lib/api/errors";
+import { requireRoot } from "@/lib/api/root-middleware";
 import { createSubscriptionSchema } from "@/lib/api/validation/zod-schemas";
+import { appLogger as logger } from "@/lib/logger";
+import { createServiceRoleClient } from "@/utils/supabase/service-role";
 
 /**
  * GET /api/admin/saas-management/subscriptions
@@ -66,7 +67,7 @@ export async function GET(request: NextRequest) {
       }
 
       if (orgsWithTier && orgsWithTier.length > 0) {
-        const orgIds = orgsWithTier.map((o: any) => o.id);
+        const orgIds = orgsWithTier.map((o: unknown) => o.id);
         query = query.in("organization_id", orgIds);
       } else {
         // No hay organizaciones con ese tier, retornar vacío
@@ -96,32 +97,34 @@ export async function GET(request: NextRequest) {
     }
 
     // Calcular días hasta vencimiento (para trial usar trial_ends_at, para activa usar current_period_end)
-    const subscriptionsWithDetails = (subscriptions || []).map((sub: any) => {
-      const today = new Date();
-      let daysUntilExpiry: number | null = null;
-      const isTrialing = sub.status === "trialing";
-      const endSource =
-        isTrialing && sub.trial_ends_at
-          ? sub.trial_ends_at
-          : sub.current_period_end;
-      if (endSource) {
-        const endDate = new Date(endSource);
-        const diffTime = endDate.getTime() - today.getTime();
-        daysUntilExpiry = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-      }
+    const subscriptionsWithDetails = (subscriptions || []).map(
+      (sub: unknown) => {
+        const today = new Date();
+        let daysUntilExpiry: number | null = null;
+        const isTrialing = sub.status === "trialing";
+        const endSource =
+          isTrialing && sub.trial_ends_at
+            ? sub.trial_ends_at
+            : sub.current_period_end;
+        if (endSource) {
+          const endDate = new Date(endSource);
+          const diffTime = endDate.getTime() - today.getTime();
+          daysUntilExpiry = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        }
 
-      const isExpired = daysUntilExpiry !== null && daysUntilExpiry < 0;
+        const isExpired = daysUntilExpiry !== null && daysUntilExpiry < 0;
 
-      return {
-        ...sub,
-        daysUntilExpiry,
-        isExpiringSoon:
-          daysUntilExpiry !== null &&
-          daysUntilExpiry <= 7 &&
-          daysUntilExpiry >= 0,
-        isExpired,
-      };
-    });
+        return {
+          ...sub,
+          daysUntilExpiry,
+          isExpiringSoon:
+            daysUntilExpiry !== null &&
+            daysUntilExpiry <= 7 &&
+            daysUntilExpiry >= 0,
+          isExpired,
+        };
+      },
+    );
 
     return NextResponse.json({
       subscriptions: subscriptionsWithDetails,

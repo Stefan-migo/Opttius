@@ -1,15 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/utils/supabase/server";
-import { createServiceRoleClient } from "@/utils/supabase/service-role";
+
+import { getDefaultPermissions } from "@/lib/admin/permissions";
 import { getBranchContext } from "@/lib/api/branch-middleware";
 import { appLogger as logger } from "@/lib/logger";
-import { getDefaultPermissions } from "@/lib/admin/permissions";
 import type {
   GetAdminRoleParams,
   GetAdminRoleResult,
   IsSuperAdminParams,
   IsSuperAdminResult,
 } from "@/types/supabase-rpc";
+import { createClient } from "@/utils/supabase/server";
+import { createServiceRoleClient } from "@/utils/supabase/service-role";
 
 export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
@@ -200,7 +201,7 @@ export async function GET(request: NextRequest) {
       ); // Last 30 days
 
     const activityMap =
-      activityStats?.reduce((acc: any, activity) => {
+      activityStats?.reduce((acc: unknown, activity) => {
         if (!acc[activity.admin_user_id]) {
           acc[activity.admin_user_id] = 0;
         }
@@ -216,21 +217,21 @@ export async function GET(request: NextRequest) {
       .in("id", adminIds);
 
     const profilesMap =
-      profiles?.reduce((acc: any, profile) => {
+      profiles?.reduce((acc: unknown, profile) => {
         acc[profile.id] = profile;
         return acc;
       }, {}) || {};
 
     // Enhance admin users with analytics and branch info
     const adminUsersWithStats =
-      adminUsers?.map((admin: any) => {
+      adminUsers?.map((admin: unknown) => {
         const branchAccess = admin.admin_branch_access || [];
         const isSuperAdmin = branchAccess.some(
-          (access: any) => access.branch_id === null,
+          (access: unknown) => access.branch_id === null,
         );
         const branches = branchAccess
-          .filter((access: any) => access.branch_id !== null)
-          .map((access: any) => ({
+          .filter((access: unknown) => access.branch_id !== null)
+          .map((access: unknown) => ({
             id: access.branch_id,
             name: access.branches?.name || "N/A",
             code: access.branches?.code || "N/A",

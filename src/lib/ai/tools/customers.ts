@@ -1,7 +1,9 @@
 import { z } from "zod";
-import type { ToolDefinition, ToolResult } from "./types";
+
 import { createCustomerSchema } from "@/lib/api/validation/zod-schemas";
+
 import { resolveBranchByName } from "./resolvers";
+import type { ToolDefinition, ToolResult } from "./types";
 
 const getCustomersSchema = z.object({
   search: z.string().optional(),
@@ -122,7 +124,7 @@ export const customerTools: ToolDefinition[] = [
           },
           message: `Found ${count || 0} customers`,
         };
-      } catch (error: any) {
+      } catch (error: unknown) {
         return {
           success: false,
           error: error.message || "Failed to get customers",
@@ -183,7 +185,7 @@ export const customerTools: ToolDefinition[] = [
           data,
           message: `Retrieved customer: ${data.first_name} ${data.last_name || ""}`,
         };
-      } catch (error: any) {
+      } catch (error: unknown) {
         return {
           success: false,
           error: error.message || "Failed to get customer",
@@ -269,7 +271,7 @@ export const customerTools: ToolDefinition[] = [
           data,
           message: `Customer updated successfully`,
         };
-      } catch (error: any) {
+      } catch (error: unknown) {
         return {
           success: false,
           error: error.message || "Failed to update customer",
@@ -335,7 +337,7 @@ export const customerTools: ToolDefinition[] = [
           },
           message: `Found ${data?.length || 0} orders for customer`,
         };
-      } catch (error: any) {
+      } catch (error: unknown) {
         return {
           success: false,
           error: error.message || "Failed to get customer orders",
@@ -407,7 +409,7 @@ export const customerTools: ToolDefinition[] = [
           data: stats,
           message: `Customer statistics calculated`,
         };
-      } catch (error: any) {
+      } catch (error: unknown) {
         return {
           success: false,
           error: error.message || "Failed to get customer stats",
@@ -551,7 +553,7 @@ export const customerTools: ToolDefinition[] = [
           data,
           message: `Cliente ${name} creado correctamente`,
         };
-      } catch (error: any) {
+      } catch (error: unknown) {
         return {
           success: false,
           error: error.message || "Failed to create customer",

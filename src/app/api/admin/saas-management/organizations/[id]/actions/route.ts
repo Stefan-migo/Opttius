@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireRoot } from "@/lib/api/root-middleware";
-import { createServiceRoleClient } from "@/utils/supabase/service-role";
-import { appLogger as logger } from "@/lib/logger";
+
 import { AuthorizationError } from "@/lib/api/errors";
+import { requireRoot } from "@/lib/api/root-middleware";
+import { appLogger as logger } from "@/lib/logger";
 import { recordTierChange } from "@/lib/saas/tier-change-audit";
+import { recordAuditLog, getClientInfoFromRequest } from "@/lib/saas/audit-log";
+import { createServiceRoleClient } from "@/utils/supabase/service-role";
 
 /**
  * POST /api/admin/saas-management/organizations/[id]/actions
@@ -15,7 +17,7 @@ export async function POST(
   { params }: { params: { id: string } },
 ) {
   try {
-    const { userId } = await requireRoot(request);
+    const { userId, user } = await requireRoot(request);
     const supabaseServiceRole = createServiceRoleClient();
 
     const { id } = params;
@@ -25,7 +27,7 @@ export async function POST(
     // Verificar que la organización existe
     const { data: organization } = await supabaseServiceRole
       .from("organizations")
-      .select("id, status, subscription_tier")
+      .select("id, name, status, subscription_tier")
       .eq("id", id)
       .single();
 
@@ -36,7 +38,7 @@ export async function POST(
       );
     }
 
-    const updateData: any = {};
+    const updateData: unknown = {};
 
     switch (action) {
       case "suspend":
@@ -92,6 +94,27 @@ export async function POST(
         source: "root",
       });
     }
+
+    // Record audit log
+    const { ipAddress, userAgent } = getClientInfoFromRequest(request);
+    await recordAuditLog({
+      userId,
+      userEmail: user?.email,
+      action: action as "suspend" | "activate" | "cancel" | "change_tier",
+      targetType: "organization",
+      targetId: id,
+      targetName: updatedOrg?.name || null,
+      oldValue: {
+        status: organization.status,
+        subscription_tier: organization.subscription_tier,
+      },
+      newValue: {
+        status: updatedOrg?.status,
+        subscription_tier: updatedOrg?.subscription_tier,
+      },
+      ipAddress,
+      userAgent,
+    });
 
     logger.info(`Organization action performed: ${action} on ${id}`);
 

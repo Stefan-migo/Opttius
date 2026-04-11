@@ -1,16 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { ArrowLeft, ArrowRight, Save } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { Card, CardContent, CardTitle, CardHeader } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { useState } from "react";
 import { toast } from "sonner";
-import { ArrowLeft, ArrowRight, Save, Check } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
 import {
   LensFamilyBasicForm,
   LensFamilyFormData as BasicFormData,
 } from "./LensFamilyBasicForm";
-import { LensMatrixManager, LensMatrixFormData } from "./LensMatrixManager";
+import { LensMatrixFormData, LensMatrixManager } from "./LensMatrixManager";
 
 interface FullLensFamilyData extends BasicFormData {
   matrices: LensMatrixFormData[];
@@ -91,7 +93,7 @@ export function LensFamilyWizard() {
 
       toast.success("Familia de lentes creada exitosamente");
       router.push("/admin/products?tab=lens-families");
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error(error);
       toast.error(error.message || "Error al guardar");
     } finally {
@@ -119,7 +121,7 @@ export function LensFamilyWizard() {
           className={`w-24 h-1 mx-4 ${
             step >= 2 ? "bg-primary" : "bg-gray-200"
           }`}
-        ></div>
+        />
         <div className="flex items-center">
           <div
             className={`flex items-center justify-center w-10 h-10 rounded-full border-2 ${
@@ -146,8 +148,8 @@ export function LensFamilyWizard() {
           {step === 1 && (
             <LensFamilyBasicForm
               data={data}
-              onChange={handleBasicInfoChange}
               errors={errors}
+              onChange={handleBasicInfoChange}
             />
           )}
 
@@ -163,9 +165,9 @@ export function LensFamilyWizard() {
                 </p>
               </div>
               <LensMatrixManager
+                lensType={data.lens_type}
                 matrices={data.matrices}
                 onChange={handleMatricesChange}
-                lensType={data.lens_type}
               />
             </div>
           )}
@@ -191,7 +193,7 @@ export function LensFamilyWizard() {
                 <ArrowRight className="h-4 w-4 ml-2" />
               </Button>
             ) : (
-              <Button onClick={handleSubmit} disabled={loading}>
+              <Button disabled={loading} onClick={handleSubmit}>
                 <Save className="h-4 w-4 mr-2" />
                 {loading ? "Creando..." : "Crear Familia Completa"}
               </Button>

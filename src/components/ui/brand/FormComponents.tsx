@@ -1,22 +1,21 @@
 "use client";
 
-import React, { useState } from "react";
 import { cva, type VariantProps } from "class-variance-authority";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import {
+  AlertCircle,
+  Check,
   Mail,
+  MessageSquare,
   Phone,
   User,
-  MessageSquare,
-  MapPin,
-  Star,
-  Check,
-  AlertCircle,
 } from "lucide-react";
+import React, { useState } from "react";
+
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 
 const formContainerVariants = cva("w-full max-w-2xl mx-auto space-y-6", {
   variants: {
@@ -86,7 +85,7 @@ export function FormContainer({
       {(title || subtitle || badge) && (
         <div className="mb-6 text-center">
           {badge && (
-            <Badge variant="secondary" className="mb-3">
+            <Badge className="mb-3" variant="secondary">
               {badge}
             </Badge>
           )}
@@ -147,11 +146,11 @@ export function FormField({
       return (
         <textarea
           {...baseProps}
-          rows={rows}
           className={cn(
             "flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 resize-none",
             baseProps.className,
           )}
+          rows={rows}
         />
       );
     }
@@ -178,9 +177,9 @@ export function FormField({
     return (
       <Input
         {...baseProps}
+        leftIcon={icon}
         type={type}
         variant={hasError ? "error" : hasSuccess ? "success" : "default"}
-        leftIcon={icon}
       />
     );
   };
@@ -188,7 +187,6 @@ export function FormField({
   return (
     <div className={cn("space-y-2", className)}>
       <label
-        htmlFor={fieldId}
         className={cn(
           "block text-sm font-medium transition-colors duration-200",
           hasError
@@ -198,6 +196,7 @@ export function FormField({
               : "text-foreground",
           focused && !hasError && !hasSuccess && "text-line-primary",
         )}
+        htmlFor={fieldId}
       >
         {label}
         {required && <span className="text-red-500 ml-1">*</span>}
@@ -309,9 +308,9 @@ export function ContactForm({
   if (isSubmitted) {
     return (
       <FormContainer
-        variant="elegant"
-        title="¡Mensaje Enviado!"
         subtitle="Te contactaremos pronto"
+        title="¡Mensaje Enviado!"
+        variant="elegant"
       >
         <div className="text-center py-8">
           <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -344,53 +343,51 @@ export function ContactForm({
 
   return (
     <FormContainer
-      variant="elegant"
-      title="Ponte en Contacto"
-      subtitle="Estamos aquí para ayudarte en tu camino hacia la belleza consciente"
       badge="Consulta Gratuita"
+      subtitle="Estamos aquí para ayudarte en tu camino hacia la belleza consciente"
+      title="Ponte en Contacto"
+      variant="elegant"
     >
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form className="space-y-6" onSubmit={handleSubmit}>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <FormField
+            required
+            error={errors.name}
+            icon={<User className="w-4 h-4" />}
             label="Nombre Completo"
             name="name"
-            type="text"
             placeholder="Tu nombre"
-            required
-            icon={<User className="w-4 h-4" />}
-            error={errors.name}
             success={formData.name && !errors.name ? "Perfecto" : undefined}
+            type="text"
           />
 
           <FormField
+            required
+            error={errors.email}
+            icon={<Mail className="w-4 h-4" />}
             label="Email"
             name="email"
-            type="email"
             placeholder="tu@email.com"
-            required
-            icon={<Mail className="w-4 h-4" />}
-            error={errors.email}
             success={
               formData.email && !errors.email ? "Email válido" : undefined
             }
+            type="email"
           />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <FormField
+            helper="Te llamaremos si prefieres una consulta telefónica"
+            icon={<Phone className="w-4 h-4" />}
             label="Teléfono (Opcional)"
             name="phone"
-            type="tel"
             placeholder="+54 9 11 1234-5678"
-            icon={<Phone className="w-4 h-4" />}
-            helper="Te llamaremos si prefieres una consulta telefónica"
+            type="tel"
           />
 
           <FormField
             label="Asunto"
             name="subject"
-            type="select"
-            placeholder="Selecciona un tema"
             options={[
               { value: "products", label: "Consulta sobre Productos" },
               { value: "membership", label: "Programa de Membresía" },
@@ -398,35 +395,37 @@ export function ContactForm({
               { value: "support", label: "Soporte Técnico" },
               { value: "other", label: "Otro" },
             ]}
+            placeholder="Selecciona un tema"
+            type="select"
           />
         </div>
 
         <FormField
-          label="Mensaje"
-          name="message"
-          type="textarea"
-          placeholder="Cuéntanos cómo podemos ayudarte..."
           required
-          rows={5}
           error={errors.message}
           icon={<MessageSquare className="w-4 h-4" />}
+          label="Mensaje"
+          name="message"
+          placeholder="Cuéntanos cómo podemos ayudarte..."
+          rows={5}
+          type="textarea"
         />
 
         <div className="flex flex-col sm:flex-row gap-4 pt-6">
           <Button
+            className="flex-1"
+            loading={isSubmitting}
+            size="lg"
             type="submit"
             variant="line-primary"
-            size="lg"
-            loading={isSubmitting}
-            className="flex-1"
           >
             {isSubmitting ? "Enviando..." : "Enviar Mensaje"}
           </Button>
 
           <Button
+            size="lg"
             type="button"
             variant="line-outline"
-            size="lg"
             onClick={() => {
               setFormData({
                 name: "",
@@ -466,7 +465,7 @@ export function NewsletterForm() {
 
   if (isSubscribed) {
     return (
-      <Card variant="line-subtle" className="p-6 text-center">
+      <Card className="p-6 text-center" variant="line-subtle">
         <div className="flex flex-col items-center space-y-3">
           <div className="w-12 h-12 bg-line-primary/10 rounded-full flex items-center justify-center">
             <Check className="w-6 h-6 text-line-primary" />
@@ -484,7 +483,7 @@ export function NewsletterForm() {
   }
 
   return (
-    <Card variant="line-outline" className="p-6">
+    <Card className="p-6" variant="line-outline">
       <CardHeader className="pb-4">
         <CardTitle className="text-lg">Newsletter OPTTIUS</CardTitle>
         <p className="text-sm text-muted-foreground">
@@ -492,21 +491,21 @@ export function NewsletterForm() {
         </p>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="flex gap-3">
+        <form className="flex gap-3" onSubmit={handleSubmit}>
           <Input
-            type="email"
-            placeholder="tu@email.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
             required
             className="flex-1"
+            placeholder="tu@email.com"
+            type="email"
+            value={email}
             variant="line"
+            onChange={(e) => setEmail(e.target.value)}
           />
           <Button
+            disabled={!email}
+            loading={isLoading}
             type="submit"
             variant="line-primary"
-            loading={isLoading}
-            disabled={!email}
           >
             {isLoading ? "Suscribiendo..." : "Suscribirse"}
           </Button>

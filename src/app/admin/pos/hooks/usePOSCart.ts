@@ -1,5 +1,6 @@
 import { useCallback } from "react";
-import type { POSProduct, POSCartItem } from "../types";
+
+import type { POSCartItem, POSProduct } from "../types";
 
 export interface UsePOSCartProps {
   cart: POSCartItem[];

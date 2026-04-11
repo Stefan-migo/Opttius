@@ -1,10 +1,11 @@
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
+
 import {
-  InsightSchema,
-  InsightsResponseSchema,
   InsightFeedbackSchema,
-  InsightTypeSchema,
+  InsightSchema,
   InsightSectionSchema,
+  InsightsResponseSchema,
+  InsightTypeSchema,
 } from "@/lib/ai/insights/schemas";
 
 describe("AI Insights Schemas", () => {

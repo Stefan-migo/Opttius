@@ -1,10 +1,18 @@
+import { Calendar, Clock, Loader2 } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Calendar, Clock, Loader2 } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { cn } from "@/lib/utils";
+
 import type { TimeSlot } from "./types/appointment.types";
 
 interface DateTimeSelectionProps {
@@ -58,18 +66,18 @@ export default function DateTimeSelection({
             </Label>
             <div className="relative">
               <Input
-                type="date"
-                value={date}
-                onChange={(e) => onDateChange(e.target.value)}
-                min={minDate}
-                max={maxDate}
+                required
                 className={cn(
                   "h-11 rounded-xl border-admin-border-primary/50 bg-white/50 focus:bg-white transition-all font-bold px-4",
                   lockDateTime &&
                     "opacity-60 grayscale cursor-not-allowed bg-admin-bg-tertiary",
                 )}
                 disabled={lockDateTime}
-                required
+                max={maxDate}
+                min={minDate}
+                type="date"
+                value={date}
+                onChange={(e) => onDateChange(e.target.value)}
               />
               {lockDateTime && (
                 <div className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 bg-white rounded-full flex items-center justify-center shadow-sm">
@@ -96,22 +104,22 @@ export default function DateTimeSelection({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent className="rounded-xl border-admin-border-primary shadow-premium-lg">
-                <SelectItem value="15" className="font-bold">
+                <SelectItem className="font-bold" value="15">
                   15 MINUTOS
                 </SelectItem>
-                <SelectItem value="30" className="font-bold">
+                <SelectItem className="font-bold" value="30">
                   30 MINUTOS
                 </SelectItem>
-                <SelectItem value="45" className="font-bold">
+                <SelectItem className="font-bold" value="45">
                   45 MINUTOS
                 </SelectItem>
-                <SelectItem value="60" className="font-bold">
+                <SelectItem className="font-bold" value="60">
                   1 HORA
                 </SelectItem>
-                <SelectItem value="90" className="font-bold">
+                <SelectItem className="font-bold" value="90">
                   1.5 HORAS
                 </SelectItem>
-                <SelectItem value="120" className="font-bold">
+                <SelectItem className="font-bold" value="120">
                   2 HORAS
                 </SelectItem>
               </SelectContent>
@@ -135,8 +143,8 @@ export default function DateTimeSelection({
               <div className="grid grid-cols-4 gap-2">
                 {[1, 2, 3, 4].map((i) => (
                   <div
-                    key={i}
                     className="h-10 bg-admin-bg-tertiary/30 rounded-lg animate-pulse"
+                    key={i}
                   />
                 ))}
               </div>
@@ -163,14 +171,6 @@ export default function DateTimeSelection({
 
                     return (
                       <Button
-                        key={slot.time_slot}
-                        type="button"
-                        variant="ghost"
-                        onClick={(e) => {
-                          if (lockDateTime && !isSelected) return;
-                          e.preventDefault();
-                          onTimeChange(slot.time_slot);
-                        }}
                         className={cn(
                           "h-10 rounded-xl font-black text-[10px] tracking-tighter transition-all duration-300 border flex flex-col items-center justify-center p-0",
                           isSelected
@@ -181,6 +181,14 @@ export default function DateTimeSelection({
                             "opacity-30 grayscale cursor-not-allowed",
                         )}
                         disabled={lockDateTime && !isSelected}
+                        key={slot.time_slot}
+                        type="button"
+                        variant="ghost"
+                        onClick={(e) => {
+                          if (lockDateTime && !isSelected) return;
+                          e.preventDefault();
+                          onTimeChange(slot.time_slot);
+                        }}
                       >
                         <span className="leading-none">
                           {formatTime(slot.time_slot)}

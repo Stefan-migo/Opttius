@@ -1,13 +1,15 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { MessageSquare, X } from "lucide-react";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
+
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
-import { MessageSquare, X } from "lucide-react";
-import { ChatbotContent } from "./ChatbotContent";
-import { cn } from "@/lib/utils";
 import type { InsightSection } from "@/lib/ai/insights/schemas";
+import { cn } from "@/lib/utils";
+
+import { ChatbotContent } from "./ChatbotContent";
 
 const STORAGE_KEY = "opttius-chat-expanded";
 
@@ -85,9 +87,9 @@ export default function Chatbot(
     <ChatbotContent
       className="h-full"
       currentSection={currentSection}
+      isSidebarMode={isExpanded}
       onClose={() => setIsOpen(false)}
       onExpandClick={!isExpanded ? handleExpandClick : undefined}
-      isSidebarMode={isExpanded}
     />
   );
 
@@ -99,11 +101,11 @@ export default function Chatbot(
       {useSheet ? (
         <Sheet open={isOpen} onOpenChange={setIsOpen}>
           <SheetContent
-            side="right"
             elevateZIndex
             hideDefaultClose
-            className="w-full max-w-full sm:w-[420px] p-0 flex flex-col overflow-hidden"
             aria-describedby={undefined}
+            className="w-full max-w-full sm:w-[420px] p-0 flex flex-col overflow-hidden"
+            side="right"
           >
             <SheetTitle className="sr-only">
               Asistente de Inteligencia Opttius
@@ -129,16 +131,16 @@ export default function Chatbot(
       {/* Trigger Bubble - desktop only (mobile uses bottom nav) */}
       <div className="hidden lg:flex">
         <Button
-          variant="default"
-          size="icon"
-          onClick={() => setIsOpen(!isOpen)}
           className={cn(
             "rounded-full w-14 h-14 shadow-[0_8px_30px_rgb(0,0,0,0.12)] transition-all duration-500 hover:scale-110 active:scale-95",
             isOpen
               ? "bg-slate-100 dark:bg-slate-800 text-slate-500 rotate-90 shadow-none"
               : "bg-gradient-to-tr from-primary via-primary to-primary/80 text-white",
           )}
+          size="icon"
           title="Asistente de Inteligencia Opttius"
+          variant="default"
+          onClick={() => setIsOpen(!isOpen)}
         >
           {isOpen ? (
             <X className="w-6 h-6" />

@@ -5,18 +5,20 @@
  */
 
 import {
-  MercadoPagoConfig,
-  Preference,
-  Payment,
-  MerchantOrder,
   Customer,
-  PreApprovalPlan,
+  MercadoPagoConfig,
+  MerchantOrder,
+  Payment,
   PreApproval,
+  PreApprovalPlan,
+  Preference,
 } from "mercadopago";
 import type { NextRequest } from "next/server";
-import type { IPaymentGateway, PaymentIntentResponse } from "../interfaces";
-import type { PaymentStatus, WebhookEvent } from "@/types/payment";
+
 import { appLogger as logger } from "@/lib/logger";
+import type { PaymentStatus, WebhookEvent } from "@/types/payment";
+
+import type { IPaymentGateway, PaymentIntentResponse } from "../interfaces";
 
 /** Result of fetching a merchant order for webhook processing. */
 export interface MerchantOrderInfo {
@@ -192,13 +194,25 @@ export class MercadoPagoGateway implements IPaymentGateway {
             metadata?: { user_id?: string; organization_id?: string };
           });
 
-        const orderId = typeof paymentData.external_reference === 'string' ? paymentData.external_reference : null;
-        const organizationId =
-          typeof paymentData.metadata === 'object' && paymentData.metadata && 'organization_id' in paymentData.metadata && typeof (paymentData.metadata as any).organization_id === 'string'
-            ? (paymentData.metadata as any).organization_id 
+        const orderId =
+          typeof paymentData.external_reference === "string"
+            ? paymentData.external_reference
             : null;
-        const amount = typeof paymentData.transaction_amount === 'number' ? paymentData.transaction_amount : 0;
-        const currency = typeof paymentData.currency_id === 'string' ? paymentData.currency_id : "CLP";
+        const organizationId =
+          typeof paymentData.metadata === "object" &&
+          paymentData.metadata &&
+          "organization_id" in paymentData.metadata &&
+          typeof (paymentData.metadata as unknown).organization_id === "string"
+            ? (paymentData.metadata as unknown).organization_id
+            : null;
+        const amount =
+          typeof paymentData.transaction_amount === "number"
+            ? paymentData.transaction_amount
+            : 0;
+        const currency =
+          typeof paymentData.currency_id === "string"
+            ? paymentData.currency_id
+            : "CLP";
         // We store gateway_payment_intent_id = preference_id (from createPaymentIntent).
         // MP payment response often has order.id = merchant_order id but no top-level preference_id.
         let preferenceId =
@@ -229,12 +243,22 @@ export class MercadoPagoGateway implements IPaymentGateway {
           gateway: "mercadopago",
           gatewayEventId: `${topic}-${id}`,
           type: topic ?? "payment",
-          status: this.mapStatus(typeof paymentData.status === 'string' ? paymentData.status : "pending"),
-          gatewayTransactionId: String(typeof paymentData.id === 'number' || typeof paymentData.id === 'string' ? paymentData.id : id),
+          status: this.mapStatus(
+            typeof paymentData.status === "string"
+              ? paymentData.status
+              : "pending",
+          ),
+          gatewayTransactionId: String(
+            typeof paymentData.id === "number" ||
+              typeof paymentData.id === "string"
+              ? paymentData.id
+              : id,
+          ),
           gatewayPaymentIntentId: preferenceId ?? String(id),
           amount,
-          currency: typeof currency === 'string' ? currency.toUpperCase() : "CLP",
-          orderId: typeof orderId === 'string' ? orderId : null,
+          currency:
+            typeof currency === "string" ? currency.toUpperCase() : "CLP",
+          orderId: typeof orderId === "string" ? orderId : null,
           organizationId,
           metadata: paymentData as unknown as Record<string, unknown>,
         };
@@ -447,13 +471,10 @@ export class MercadoPagoGateway implements IPaymentGateway {
       const first = results[0];
       return first?.id ? String(first.id) : null;
     } catch (error) {
-      logger.warn(
-        "Mercado Pago customer search failed",
-        {
-          error: error instanceof Error ? error.message : String(error),
-          email,
-        }
-      );
+      logger.warn("Mercado Pago customer search failed", {
+        error: error instanceof Error ? error.message : String(error),
+        email,
+      });
       return null;
     }
   }

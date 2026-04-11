@@ -2,8 +2,9 @@
  * Unit tests for MercadoPagoWebhookValidator.
  */
 
-import { describe, it, expect, beforeEach } from "vitest";
 import crypto from "crypto";
+import { beforeEach, describe, expect, it } from "vitest";
+
 import { MercadoPagoWebhookValidator } from "@/lib/payments/mercadopago/webhook-validator";
 
 describe("MercadoPagoWebhookValidator", () => {

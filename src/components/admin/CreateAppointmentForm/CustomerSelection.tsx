@@ -1,13 +1,14 @@
-import { useRef, useEffect, useState } from "react";
+import { AlertCircle, Loader2, Search, User } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Search, Loader2, User, AlertCircle } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { formatRUT } from "@/lib/utils/rut";
+
 import type { Customer, GuestCustomerData } from "./types/appointment.types";
 
 interface CustomerSelectionProps {
@@ -71,8 +72,8 @@ export default function CustomerSelection({
           {customerResults.length > 0
             ? customerResults.map((customer) => (
                 <div
-                  key={customer.id}
                   className="flex items-center gap-3 p-3 hover:bg-admin-accent-primary/5 cursor-pointer rounded-xl transition-colors group"
+                  key={customer.id}
                   onClick={() => {
                     onCustomerSelect(customer);
                     onCustomerSearchClear();
@@ -127,8 +128,8 @@ export default function CustomerSelection({
           </div>
           <Switch
             checked={!isGuestCustomer}
-            onCheckedChange={onGuestModeToggle}
             className="data-[state=checked]:bg-admin-accent-primary"
+            onCheckedChange={onGuestModeToggle}
           />
         </div>
 
@@ -151,13 +152,13 @@ export default function CustomerSelection({
                   Nombre *
                 </Label>
                 <Input
+                  required
+                  className="h-11 rounded-xl border-admin-border-primary/50 bg-white/50 focus:bg-white transition-all"
                   placeholder="Nombre"
                   value={guestCustomerData.first_name}
                   onChange={(e) =>
                     onGuestDataChange({ first_name: e.target.value })
                   }
-                  className="h-11 rounded-xl border-admin-border-primary/50 bg-white/50 focus:bg-white transition-all"
-                  required
                 />
               </div>
               <div className="space-y-2">
@@ -165,13 +166,13 @@ export default function CustomerSelection({
                   Apellido *
                 </Label>
                 <Input
+                  required
+                  className="h-11 rounded-xl border-admin-border-primary/50 bg-white/50 focus:bg-white transition-all"
                   placeholder="Apellido"
                   value={guestCustomerData.last_name}
                   onChange={(e) =>
                     onGuestDataChange({ last_name: e.target.value })
                   }
-                  className="h-11 rounded-xl border-admin-border-primary/50 bg-white/50 focus:bg-white transition-all"
-                  required
                 />
               </div>
             </div>
@@ -182,6 +183,8 @@ export default function CustomerSelection({
                   RUT *
                 </Label>
                 <Input
+                  required
+                  className="h-11 rounded-xl border-admin-border-primary/50 bg-white/50 focus:bg-white transition-all"
                   placeholder="12.345.678-9"
                   value={guestCustomerData.rut}
                   onChange={(e) => {
@@ -189,8 +192,6 @@ export default function CustomerSelection({
                     const formatted = formatRUT(value);
                     onGuestDataChange({ rut: formatted });
                   }}
-                  className="h-11 rounded-xl border-admin-border-primary/50 bg-white/50 focus:bg-white transition-all"
-                  required
                 />
               </div>
               <div className="space-y-2">
@@ -198,11 +199,11 @@ export default function CustomerSelection({
                   Teléfono
                 </Label>
                 <Input
-                  type="tel"
+                  className="h-11 rounded-xl border-admin-border-primary/50 bg-white/50 focus:bg-white transition-all"
                   placeholder="+56 9..."
+                  type="tel"
                   value={guestCustomerData.phone}
                   onChange={(e) => onGuestDataChange({ phone: e.target.value })}
-                  className="h-11 rounded-xl border-admin-border-primary/50 bg-white/50 focus:bg-white transition-all"
                 />
               </div>
             </div>
@@ -212,11 +213,11 @@ export default function CustomerSelection({
                 Email
               </Label>
               <Input
-                type="email"
+                className="h-11 rounded-xl border-admin-border-primary/50 bg-white/50 focus:bg-white transition-all"
                 placeholder="cliente@ejemplo.com"
+                type="email"
                 value={guestCustomerData.email}
                 onChange={(e) => onGuestDataChange({ email: e.target.value })}
-                className="h-11 rounded-xl border-admin-border-primary/50 bg-white/50 focus:bg-white transition-all"
               />
             </div>
           </div>
@@ -247,10 +248,10 @@ export default function CustomerSelection({
                 </div>
               </div>
               <Button
+                className="h-8 rounded-lg text-admin-accent-primary hover:bg-admin-accent-primary/10 font-bold text-[10px] uppercase tracking-widest"
+                size="sm"
                 type="button"
                 variant="ghost"
-                size="sm"
-                className="h-8 rounded-lg text-admin-accent-primary hover:bg-admin-accent-primary/10 font-bold text-[10px] uppercase tracking-widest"
                 onClick={onCustomerClear}
               >
                 Cambiar
@@ -267,10 +268,10 @@ export default function CustomerSelection({
               )}
             </div>
             <Input
+              className="h-12 pl-12 rounded-2xl border-admin-border-primary/50 bg-white/60 focus:bg-white focus:ring-2 focus:ring-admin-accent-primary/20 transition-all font-medium text-sm"
               placeholder="Buscar por Nombre, RUT o Email..."
               value={customerSearch}
               onChange={(e) => onCustomerSearchChange(e.target.value)}
-              className="h-12 pl-12 rounded-2xl border-admin-border-primary/50 bg-white/60 focus:bg-white focus:ring-2 focus:ring-admin-accent-primary/20 transition-all font-medium text-sm"
             />
 
             {typeof document !== "undefined" &&

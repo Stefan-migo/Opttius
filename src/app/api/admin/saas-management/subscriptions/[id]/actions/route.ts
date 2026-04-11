@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireRoot } from "@/lib/api/root-middleware";
-import { createServiceRoleClient } from "@/utils/supabase/service-role";
-import { appLogger as logger } from "@/lib/logger";
+
 import { AuthorizationError } from "@/lib/api/errors";
+import { requireRoot } from "@/lib/api/root-middleware";
+import { appLogger as logger } from "@/lib/logger";
+import { recordAuditLog, getClientInfoFromRequest } from "@/lib/saas/audit-log";
+import { createServiceRoleClient } from "@/utils/supabase/service-role";
 
 /**
  * POST /api/admin/saas-management/subscriptions/[id]/actions
@@ -35,7 +37,7 @@ export async function POST(
       );
     }
 
-    const updateData: any = {};
+    const updateData: unknown = {};
 
     switch (action) {
       case "cancel":
@@ -97,6 +99,22 @@ export async function POST(
         { status: 500 },
       );
     }
+
+    // Record audit log
+    const { userId, user } = await requireRoot(request);
+    const { ipAddress, userAgent } = getClientInfoFromRequest(request);
+    await recordAuditLog({
+      userId,
+      userEmail: user?.email,
+      action: action as "cancel" | "reactivate" | "extend",
+      targetType: "subscription",
+      targetId: id,
+      targetName: subscription.organization_id || null,
+      oldValue: { status: subscription.status },
+      newValue: { status: updatedSub?.status },
+      ipAddress,
+      userAgent,
+    });
 
     logger.info(`Subscription action performed: ${action} on ${id}`);
 

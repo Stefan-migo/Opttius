@@ -1,21 +1,22 @@
 import { NextRequest } from "next/server";
-import { createClient } from "@/utils/supabase/server";
+
 import {
   getBranchContext,
   getFieldOperationFromRequest,
 } from "@/lib/api/branch-middleware";
+import { APIError, RateLimitError } from "@/lib/api/errors";
+import { rateLimitConfigs, withRateLimit } from "@/lib/api/middleware";
+import {
+  createApiErrorResponse,
+  createApiSuccessResponse,
+} from "@/lib/api/response";
 import { appLogger as logger } from "@/lib/logger";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
-import { withRateLimit, rateLimitConfigs } from "@/lib/api/middleware";
-import { RateLimitError, APIError } from "@/lib/api/errors";
-import {
-  createApiSuccessResponse,
-  createApiErrorResponse,
-} from "@/lib/api/response";
+import { createClient } from "@/utils/supabase/server";
 
 export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
-  return await (withRateLimit(rateLimitConfigs.search) as any)(
+  return await (withRateLimit(rateLimitConfigs.search) as unknown)(
     request,
     async () => {
       try {
@@ -88,9 +89,9 @@ export async function GET(request: NextRequest) {
            )`
           : "id, name, price, price_includes_tax, category_id, inventory_quantity, status, featured_image, sku, barcode, product_type, frame_brand, frame_model, frame_color, frame_size";
 
-        const baseQuery: any = supabase.from("products");
-        const selectedQuery: any = baseQuery.select(selectFields);
-        let productsQuery: any = selectedQuery.eq("status", "active");
+        const baseQuery: unknown = supabase.from("products");
+        const selectedQuery: unknown = baseQuery.select(selectFields);
+        let productsQuery: unknown = selectedQuery.eq("status", "active");
 
         if (branchContext.organizationId) {
           productsQuery = productsQuery.eq(
@@ -134,13 +135,13 @@ export async function GET(request: NextRequest) {
 
           // Filter only by category - product_type has DEFAULT 'frame' so it's unreliable
           filteredProducts = (products || []).filter(
-            (product: any) =>
+            (product: unknown) =>
               marcosCategory && product.category_id === marcosCategory.id,
           );
         }
 
         // When in operativo context: only products with stock in bodega móvil
-        let mobileStockMap: Map<
+        const mobileStockMap: Map<
           string,
           { quantity: number; reserved: number }
         > = new Map();
@@ -152,13 +153,13 @@ export async function GET(request: NextRequest) {
             .gt("quantity", 0);
 
           if (mobileStock && mobileStock.length > 0) {
-            mobileStock.forEach((row: any) => {
+            mobileStock.forEach((row: unknown) => {
               mobileStockMap.set(row.product_id, {
                 quantity: row.quantity ?? 0,
                 reserved: row.reserved_quantity ?? 0,
               });
             });
-            filteredProducts = filteredProducts.filter((p: any) =>
+            filteredProducts = filteredProducts.filter((p: unknown) =>
               mobileStockMap.has(p.id),
             );
           } else {
@@ -174,7 +175,7 @@ export async function GET(request: NextRequest) {
           });
         }
 
-        const processedProducts = filteredProducts.map((product: any) => {
+        const processedProducts = filteredProducts.map((product: unknown) => {
           let processedProduct = { ...product };
 
           if (fieldOperationId && mobileStockMap.has(product.id)) {
@@ -191,7 +192,7 @@ export async function GET(request: NextRequest) {
           } else if (currentBranchId && product.product_branch_stock) {
             const branchStock = Array.isArray(product.product_branch_stock)
               ? product.product_branch_stock.find(
-                  (stock: any) => stock.branch_id === currentBranchId,
+                  (stock: unknown) => stock.branch_id === currentBranchId,
                 )
               : product.product_branch_stock.branch_id === currentBranchId
                 ? product.product_branch_stock
@@ -234,7 +235,7 @@ export async function GET(request: NextRequest) {
         logger.info("Processed search results", {
           count: processedProducts.length,
           hasBranchStock: processedProducts.some(
-            (p: any) => p.available_quantity > 0,
+            (p: unknown) => p.available_quantity > 0,
           ),
         });
 

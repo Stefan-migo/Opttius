@@ -1,14 +1,14 @@
 "use client";
 
 import React, { forwardRef } from "react";
+
 import { formatCurrency, formatDate } from "@/lib/utils";
-import Image from "next/image";
 
 interface POSReceiptProps {
-  order: any;
-  settings: any;
-  branch: any;
-  organization: any;
+  order: unknown;
+  settings: unknown;
+  branch: unknown;
+  organization: unknown;
   receiptType?: "sale" | "payment";
 }
 
@@ -25,9 +25,9 @@ export const POSReceipt = forwardRef<HTMLDivElement, POSReceiptProps>(
 
     return (
       <div
-        ref={ref}
-        id="pos-receipt-print"
         className="bg-white text-black p-4 font-mono text-[12px] leading-tight"
+        id="pos-receipt-print"
+        ref={ref}
         style={{ width: isThermal ? width : "100%", maxWidth: "100%" }}
       >
         {/* Header Section - Config from /admin/system Boletas y Facturas */}
@@ -40,9 +40,9 @@ export const POSReceipt = forwardRef<HTMLDivElement, POSReceiptProps>(
           {settings?.logo_url && (
             <div className="flex justify-center mb-4">
               <img
-                src={settings.logo_url}
                 alt="Logo"
                 className="h-16 w-auto object-contain"
+                src={settings.logo_url}
               />
             </div>
           )}
@@ -126,7 +126,7 @@ export const POSReceipt = forwardRef<HTMLDivElement, POSReceiptProps>(
               order.items ||
               order.order?.order_items ||
               []
-            )?.map((item: any, idx: number) => (
+            )?.map((item: unknown, idx: number) => (
               <tr key={idx}>
                 <td className="py-2">
                   <div className="font-bold">{item.product_name}</div>
@@ -164,8 +164,8 @@ export const POSReceipt = forwardRef<HTMLDivElement, POSReceiptProps>(
         <div className="mt-4 pt-2 border-t border-black space-y-1 text-[11px]">
           <p className="font-bold mb-1">PAGOS:</p>
           {order.order_payments && order.order_payments.length > 0 ? (
-            order.order_payments.map((payment: any, idx: number) => (
-              <div key={idx} className="flex justify-between">
+            order.order_payments.map((payment: unknown, idx: number) => (
+              <div className="flex justify-between" key={idx}>
                 <span className="capitalize">{payment.payment_method}:</span>
                 <span>{formatCurrency(payment.amount)}</span>
               </div>
@@ -189,7 +189,7 @@ export const POSReceipt = forwardRef<HTMLDivElement, POSReceiptProps>(
                 {formatCurrency(
                   Number(order.total_amount) -
                     (order.order_payments?.reduce(
-                      (acc: number, p: any) => acc + Number(p.amount),
+                      (acc: number, p: unknown) => acc + Number(p.amount),
                       0,
                     ) ||
                       Number(order.deposit_amount) ||

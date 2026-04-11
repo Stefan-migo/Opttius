@@ -5,9 +5,10 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
+
+import { appLogger as logger } from "@/lib/logger";
 import { createClient } from "@/utils/supabase/server";
 import { createServiceRoleClient } from "@/utils/supabase/server";
-import { appLogger as logger } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 

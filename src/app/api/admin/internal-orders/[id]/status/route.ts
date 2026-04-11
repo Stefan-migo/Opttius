@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/utils/supabase/server";
+
 import { getBranchContext } from "@/lib/api/branch-middleware";
 import { appLogger as logger } from "@/lib/logger";
+import { createClient } from "@/utils/supabase/server";
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -86,7 +87,7 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
         .eq("admin_user_id", user.id);
 
       const accessibleBranchIds =
-        userBranches.data?.map((b: any) => b.branch_id) || [];
+        userBranches.data?.map((b: unknown) => b.branch_id) || [];
 
       if (
         !accessibleBranchIds.includes(existingOrder.origin_branch_id) &&
@@ -123,7 +124,7 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
     }
 
     // Update status
-    const updateData: any = { status };
+    const updateData: unknown = { status };
 
     // Set delivery date if transitioning to delivered
     if (status === "delivered") {

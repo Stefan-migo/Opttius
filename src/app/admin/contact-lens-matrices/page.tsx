@@ -1,18 +1,20 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+  Edit,
+  Eye,
+  EyeOff,
+  Plus,
+  RefreshCw,
+  Search,
+  Trash2,
+} from "lucide-react";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -21,6 +23,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Pagination } from "@/components/ui/pagination";
 import {
   Select,
   SelectContent,
@@ -29,17 +34,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  Plus,
-  Edit,
-  Trash2,
-  Search,
-  RefreshCw,
-  Eye,
-  EyeOff,
-} from "lucide-react";
-import { toast } from "sonner";
-import { Badge } from "@/components/ui/badge";
-import { Pagination } from "@/components/ui/pagination";
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { formatCurrency } from "@/lib/utils";
 import type {
   ContactLensFamily,
@@ -192,7 +193,7 @@ export default function ContactLensMatricesPage() {
         : "/api/admin/contact-lens-matrices";
       const method = editingMatrix ? "PUT" : "POST";
 
-      const body: any = {
+      const body: unknown = {
         contact_lens_family_id: formData.contact_lens_family_id,
         sphere_min: parseFloat(formData.sphere_min),
         sphere_max: parseFloat(formData.sphere_max),
@@ -225,7 +226,7 @@ export default function ContactLensMatricesPage() {
       );
       handleCloseDialog();
       fetchMatrices();
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast.error(error.message || "Error al guardar matriz");
     }
   };
@@ -302,8 +303,8 @@ export default function ContactLensMatricesPage() {
             <CardTitle>Lista de Matrices</CardTitle>
             <div className="flex gap-2">
               <Button
-                variant="outline"
                 size="sm"
+                variant="outline"
                 onClick={() => setIncludeInactive(!includeInactive)}
               >
                 {includeInactive ? (
@@ -318,7 +319,7 @@ export default function ContactLensMatricesPage() {
                   </>
                 )}
               </Button>
-              <Button variant="outline" size="sm" onClick={fetchMatrices}>
+              <Button size="sm" variant="outline" onClick={fetchMatrices}>
                 <RefreshCw className="h-4 w-4" />
               </Button>
             </div>
@@ -330,10 +331,10 @@ export default function ContactLensMatricesPage() {
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
+                  className="pl-10"
                   placeholder="Buscar por familia o modalidad..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
                 />
               </div>
             </div>
@@ -427,15 +428,15 @@ export default function ContactLensMatricesPage() {
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
                           <Button
-                            variant="ghost"
                             size="sm"
+                            variant="ghost"
                             onClick={() => handleOpenDialog(matrix)}
                           >
                             <Edit className="h-4 w-4" />
                           </Button>
                           <Button
-                            variant="ghost"
                             size="sm"
+                            variant="ghost"
                             onClick={() => handleDelete(matrix.id)}
                           >
                             <Trash2 className="h-4 w-4" />
@@ -453,9 +454,9 @@ export default function ContactLensMatricesPage() {
             <div className="mt-4">
               <Pagination
                 currentPage={currentPage}
-                totalPages={totalPages}
                 itemsPerPage={itemsPerPage}
                 totalItems={filteredMatrices.length}
+                totalPages={totalPages}
                 onPageChange={setCurrentPage}
               />
             </div>
@@ -484,11 +485,11 @@ export default function ContactLensMatricesPage() {
                   <span className="text-red-500">*</span>
                 </Label>
                 <Select
+                  required
                   value={formData.contact_lens_family_id}
                   onValueChange={(value) =>
                     setFormData({ ...formData, contact_lens_family_id: value })
                   }
-                  required
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Seleccionar familia" />
@@ -516,14 +517,14 @@ export default function ContactLensMatricesPage() {
                     Esfera Mínima <span className="text-red-500">*</span>
                   </Label>
                   <Input
+                    required
                     id="sphere_min"
-                    type="number"
                     step="0.25"
+                    type="number"
                     value={formData.sphere_min}
                     onChange={(e) =>
                       setFormData({ ...formData, sphere_min: e.target.value })
                     }
-                    required
                   />
                 </div>
                 <div className="space-y-2">
@@ -531,14 +532,14 @@ export default function ContactLensMatricesPage() {
                     Esfera Máxima <span className="text-red-500">*</span>
                   </Label>
                   <Input
+                    required
                     id="sphere_max"
-                    type="number"
                     step="0.25"
+                    type="number"
                     value={formData.sphere_max}
                     onChange={(e) =>
                       setFormData({ ...formData, sphere_max: e.target.value })
                     }
-                    required
                   />
                 </div>
               </div>
@@ -548,8 +549,8 @@ export default function ContactLensMatricesPage() {
                   <Label htmlFor="cylinder_min">Cilindro Mínimo</Label>
                   <Input
                     id="cylinder_min"
-                    type="number"
                     step="0.25"
+                    type="number"
                     value={formData.cylinder_min}
                     onChange={(e) =>
                       setFormData({ ...formData, cylinder_min: e.target.value })
@@ -560,8 +561,8 @@ export default function ContactLensMatricesPage() {
                   <Label htmlFor="cylinder_max">Cilindro Máximo</Label>
                   <Input
                     id="cylinder_max"
-                    type="number"
                     step="0.25"
+                    type="number"
                     value={formData.cylinder_max}
                     onChange={(e) =>
                       setFormData({ ...formData, cylinder_max: e.target.value })
@@ -575,9 +576,9 @@ export default function ContactLensMatricesPage() {
                   <Label htmlFor="axis_min">Eje Mínimo (°)</Label>
                   <Input
                     id="axis_min"
-                    type="number"
-                    min="0"
                     max="180"
+                    min="0"
+                    type="number"
                     value={formData.axis_min}
                     onChange={(e) =>
                       setFormData({ ...formData, axis_min: e.target.value })
@@ -588,9 +589,9 @@ export default function ContactLensMatricesPage() {
                   <Label htmlFor="axis_max">Eje Máximo (°)</Label>
                   <Input
                     id="axis_max"
-                    type="number"
-                    min="0"
                     max="180"
+                    min="0"
+                    type="number"
                     value={formData.axis_max}
                     onChange={(e) =>
                       setFormData({ ...formData, axis_max: e.target.value })
@@ -604,10 +605,10 @@ export default function ContactLensMatricesPage() {
                   <Label htmlFor="addition_min">Adición Mínima</Label>
                   <Input
                     id="addition_min"
-                    type="number"
-                    step="0.25"
-                    min="0"
                     max="4"
+                    min="0"
+                    step="0.25"
+                    type="number"
                     value={formData.addition_min}
                     onChange={(e) =>
                       setFormData({ ...formData, addition_min: e.target.value })
@@ -618,10 +619,10 @@ export default function ContactLensMatricesPage() {
                   <Label htmlFor="addition_max">Adición Máxima</Label>
                   <Input
                     id="addition_max"
-                    type="number"
-                    step="0.25"
-                    min="0"
                     max="4"
+                    min="0"
+                    step="0.25"
+                    type="number"
                     value={formData.addition_max}
                     onChange={(e) =>
                       setFormData({ ...formData, addition_max: e.target.value })
@@ -637,15 +638,15 @@ export default function ContactLensMatricesPage() {
                     <span className="text-red-500">*</span>
                   </Label>
                   <Input
+                    required
                     id="base_price"
-                    type="number"
-                    step="0.01"
                     min="0"
+                    step="0.01"
+                    type="number"
                     value={formData.base_price}
                     onChange={(e) =>
                       setFormData({ ...formData, base_price: e.target.value })
                     }
-                    required
                   />
                 </div>
                 <div className="space-y-2">
@@ -653,30 +654,30 @@ export default function ContactLensMatricesPage() {
                     Costo (por caja) <span className="text-red-500">*</span>
                   </Label>
                   <Input
+                    required
                     id="cost"
-                    type="number"
-                    step="0.01"
                     min="0"
+                    step="0.01"
+                    type="number"
                     value={formData.cost}
                     onChange={(e) =>
                       setFormData({ ...formData, cost: e.target.value })
                     }
-                    required
                   />
                 </div>
               </div>
 
               <div className="flex items-center gap-2">
                 <input
-                  type="checkbox"
-                  id="is_active"
                   checked={formData.is_active}
+                  className="rounded"
+                  id="is_active"
+                  type="checkbox"
                   onChange={(e) =>
                     setFormData({ ...formData, is_active: e.target.checked })
                   }
-                  className="rounded"
                 />
-                <Label htmlFor="is_active" className="cursor-pointer">
+                <Label className="cursor-pointer" htmlFor="is_active">
                   Activa
                 </Label>
               </div>

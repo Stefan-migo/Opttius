@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireRoot } from "@/lib/api/root-middleware";
-import { createServiceRoleClient } from "@/utils/supabase/service-role";
-import { appLogger as logger } from "@/lib/logger";
+
 import { AuthorizationError } from "@/lib/api/errors";
+import { requireRoot } from "@/lib/api/root-middleware";
+import { appLogger as logger } from "@/lib/logger";
+import { createServiceRoleClient } from "@/utils/supabase/service-role";
 
 /**
  * GET /api/admin/saas-management/support/search
@@ -68,7 +69,7 @@ export async function GET(request: NextRequest) {
 
     // Obtener usuarios admin asociados a los profiles encontrados
     const profileIds = profiles?.map((p) => p.id) || [];
-    let additionalUsers: any[] = [];
+    let additionalUsers: unknown[] = [];
     if (profileIds.length > 0) {
       const { data: usersFromProfiles } = await supabaseServiceRole
         .from("admin_users")

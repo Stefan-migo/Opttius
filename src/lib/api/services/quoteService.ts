@@ -5,8 +5,9 @@
  * Provides type-safe methods for CRUD operations on quotes.
  */
 
-import { ApiClient, isSuccess, unwrapData } from "../client-helpers";
 import { handleApiError } from "@/lib/services/errorService";
+
+import { ApiClient, isSuccess, unwrapData } from "../client-helpers";
 
 // Types
 export interface Quote {

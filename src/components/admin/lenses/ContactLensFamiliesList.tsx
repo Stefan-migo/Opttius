@@ -1,8 +1,21 @@
 "use client";
+import { Edit, Eye, EyeOff, RefreshCw, Search, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import React, { useEffect, useState } from "react";
+import { toast } from "sonner";
+
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Pagination } from "@/components/ui/pagination";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -11,18 +24,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import React, { useState, useEffect } from "react";
-import { Edit, Trash2, Search, RefreshCw, Eye, EyeOff } from "lucide-react";
-import { toast } from "sonner";
-import { Badge } from "@/components/ui/badge";
-import { Pagination } from "@/components/ui/pagination";
 
 interface ContactLensFamily {
   id: string;
@@ -165,13 +166,13 @@ export default function ContactLensFamiliesList() {
             </div>
             <div className="flex flex-wrap gap-2">
               <Button
-                variant="ghost"
-                size="sm"
                 className={`rounded-xl text-[9px] font-display font-bold tracking-widest uppercase h-auto py-2 border-none ${
                   includeInactive
                     ? "bg-admin-error/10 text-admin-error"
                     : "hover:bg-admin-bg-tertiary text-admin-text-tertiary"
                 }`}
+                size="sm"
+                variant="ghost"
                 onClick={() => setIncludeInactive(!includeInactive)}
               >
                 {includeInactive ? (
@@ -187,9 +188,9 @@ export default function ContactLensFamiliesList() {
                 )}
               </Button>
               <Button
-                variant="ghost"
-                size="sm"
                 className="h-8 w-8 p-0 border-none hover:bg-admin-bg-tertiary text-epoch-primary"
+                size="sm"
+                variant="ghost"
                 onClick={fetchFamilies}
               >
                 <RefreshCw
@@ -205,10 +206,10 @@ export default function ContactLensFamiliesList() {
               <div className="relative flex-1">
                 <Search className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 h-4 w-4 text-admin-text-tertiary opacity-40" />
                 <Input
+                  className="pl-10 sm:pl-12 rounded-xl border-admin-border-primary/10 focus:border-epoch-primary focus:ring-0 bg-white p-3 sm:p-6 text-[9px] sm:text-[10px] font-display font-bold tracking-widest uppercase"
                   placeholder="Buscar por nombre, tipo o modalidad..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 sm:pl-12 rounded-xl border-admin-border-primary/10 focus:border-epoch-primary focus:ring-0 bg-white p-3 sm:p-6 text-[9px] sm:text-[10px] font-display font-bold tracking-widest uppercase"
                 />
               </div>
               <div className="w-full sm:w-48">
@@ -283,12 +284,12 @@ export default function ContactLensFamiliesList() {
                       <React.Fragment key={family.id}>
                         {showGroupHeader && (
                           <TableRow
-                            key={`group-${family.modality}-${idx}`}
                             className="bg-admin-bg-tertiary/40 hover:bg-transparent"
+                            key={`group-${family.modality}-${idx}`}
                           >
                             <TableCell
-                              colSpan={6}
                               className="p-2 sm:p-3 text-[9px] font-display font-bold text-admin-text-tertiary uppercase tracking-[0.2em]"
+                              colSpan={6}
                             >
                               {MODALITIES.find(
                                 (m) => m.value === family.modality,
@@ -304,8 +305,8 @@ export default function ContactLensFamiliesList() {
                                   {family.name}
                                 </p>
                                 <Badge
-                                  variant="outline"
                                   className="text-[8px] font-display font-bold tracking-widest uppercase border-admin-border-primary/20"
+                                  variant="outline"
                                 >
                                   {MODALITIES.find(
                                     (m) => m.value === family.modality,
@@ -354,9 +355,9 @@ export default function ContactLensFamiliesList() {
                           <TableCell className="p-3 sm:p-6 text-right">
                             <div className="flex justify-end gap-1">
                               <Button
-                                variant="ghost"
-                                size="sm"
                                 className="h-8 w-8 p-0 rounded-xl hover:bg-admin-bg-tertiary text-epoch-primary"
+                                size="sm"
+                                variant="ghost"
                                 onClick={() =>
                                   router.push(
                                     `/admin/contact-lens-families/${family.id}`,
@@ -366,9 +367,9 @@ export default function ContactLensFamiliesList() {
                                 <Edit className="h-3.5 w-3.5" />
                               </Button>
                               <Button
-                                variant="ghost"
-                                size="sm"
                                 className="h-8 w-8 p-0 rounded-xl hover:bg-admin-error/5 text-admin-error"
+                                size="sm"
+                                variant="ghost"
                                 onClick={() => handleDelete(family.id)}
                               >
                                 <Trash2 className="h-3.5 w-3.5" />
@@ -389,12 +390,12 @@ export default function ContactLensFamiliesList() {
             <div className="mt-4 px-4 sm:px-6 pb-4 sm:pb-6 overflow-x-auto min-w-0">
               <Pagination
                 currentPage={currentPage}
-                totalPages={totalPages}
                 itemsPerPage={itemsPerPage}
-                totalItems={totalFamilies}
-                onPageChange={setCurrentPage}
-                onItemsPerPageChange={setItemsPerPage}
                 itemsPerPageOptions={[10, 20, 50, 100]}
+                totalItems={totalFamilies}
+                totalPages={totalPages}
+                onItemsPerPageChange={setItemsPerPage}
+                onPageChange={setCurrentPage}
               />
             </div>
           )}

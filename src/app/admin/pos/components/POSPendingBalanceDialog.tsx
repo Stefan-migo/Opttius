@@ -1,19 +1,20 @@
 "use client";
 
+import { CheckCircle2, CreditCard, Loader2, Search } from "lucide-react";
 import { useEffect } from "react";
+
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent } from "@/components/ui/card";
-import { Search, Loader2, CheckCircle2, CreditCard } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -118,10 +119,10 @@ export function POSPendingBalanceDialog({
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-admin-text-tertiary h-5 w-5" />
             <Input
+              className="pl-10 rounded-xl"
               placeholder="Filtrar por nombre, RUT, número de orden, email..."
               value={searchTerm}
               onChange={(e) => onFilterSearch(e.target.value)}
-              className="pl-10 rounded-xl"
             />
           </div>
 
@@ -146,12 +147,12 @@ export function POSPendingBalanceDialog({
                   <TableBody>
                     {orders.map((order) => (
                       <TableRow
-                        key={order.id}
                         className={
                           selectedOrder?.id === order.id
                             ? "bg-admin-accent/10"
                             : "cursor-pointer hover:bg-muted"
                         }
+                        key={order.id}
                         onClick={() => {
                           onSelectOrder(order);
                           onPaymentAmountChange(
@@ -191,13 +192,13 @@ export function POSPendingBalanceDialog({
                         <TableCell>
                           <div className="flex items-center gap-2">
                             <Button
+                              className="rounded-xl"
                               size="sm"
                               variant={
                                 selectedOrder?.id === order.id
                                   ? "default"
                                   : "outline"
                               }
-                              className="rounded-xl"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 onSelectOrder(order);
@@ -211,9 +212,9 @@ export function POSPendingBalanceDialog({
                                 : "Seleccionar"}
                             </Button>
                             <Button
+                              className="rounded-xl"
                               size="sm"
                               variant="outline"
-                              className="rounded-xl"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 onRefundClick(order);
@@ -296,12 +297,12 @@ export function POSPendingBalanceDialog({
                         Monto a Pagar *
                       </Label>
                       <Input
-                        type="number"
+                        className="rounded-xl"
+                        max={selectedOrder.pending_amount}
                         placeholder="0"
+                        type="number"
                         value={pendingPaymentAmount}
                         onChange={(e) => onPaymentAmountChange(e.target.value)}
-                        max={selectedOrder.pending_amount}
-                        className="rounded-xl"
                       />
                       <p className="text-xs text-admin-text-secondary mt-1">
                         Máximo: {formatCurrency(selectedOrder.pending_amount)}
@@ -315,12 +316,12 @@ export function POSPendingBalanceDialog({
                           Número de referencia fiscal (opcional)
                         </Label>
                         <Input
+                          className="mt-1 rounded-xl"
                           placeholder="Ej: Nº boleta, factura o transacción"
                           value={pendingFiscalReference}
                           onChange={(e) =>
                             onFiscalReferenceChange(e.target.value)
                           }
-                          className="mt-1 rounded-xl"
                         />
                         <p className="text-xs text-admin-warning mt-1">
                           Se recomienda registrar el número para trazabilidad
@@ -345,17 +346,17 @@ export function POSPendingBalanceDialog({
         </div>
         <DialogFooter>
           <Button
+            className="rounded-xl"
             variant="outline"
             onClick={() => onOpenChange(false)}
-            className="rounded-xl"
           >
             Cerrar
           </Button>
           {selectedOrder && (
             <Button
-              onClick={onProcessPayment}
-              disabled={processingPayment || !pendingPaymentAmount}
               className="rounded-xl"
+              disabled={processingPayment || !pendingPaymentAmount}
+              onClick={onProcessPayment}
             >
               {processingPayment ? (
                 <>

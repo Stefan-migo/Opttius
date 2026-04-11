@@ -1,14 +1,14 @@
-import { BaseLLMProvider } from "./base";
 import type {
-  LLMProvider,
-  LLMMessage,
-  LLMTool,
   LLMConfig,
+  LLMMessage,
   LLMModel,
+  LLMProvider,
   LLMResponse,
   LLMStreamChunk,
+  LLMTool,
   ToolCall,
 } from "../types";
+import { BaseLLMProvider } from "./base";
 
 export class MinimaxProvider extends BaseLLMProvider {
   name: LLMProvider = "minimax";
@@ -123,22 +123,24 @@ export class MinimaxProvider extends BaseLLMProvider {
             }
 
             if (delta?.tool_calls) {
-              const toolCalls: ToolCall[] = delta.tool_calls.map((tc: any) => {
-                let args = {};
-                try {
-                  args = tc.function?.arguments
-                    ? JSON.parse(tc.function.arguments)
-                    : {};
-                } catch (e) {
-                  // If parsing fails, use empty object
-                }
+              const toolCalls: ToolCall[] = delta.tool_calls.map(
+                (tc: unknown) => {
+                  let args = {};
+                  try {
+                    args = tc.function?.arguments
+                      ? JSON.parse(tc.function.arguments)
+                      : {};
+                  } catch (e) {
+                    // If parsing fails, use empty object
+                  }
 
-                return {
-                  id: tc.id || crypto.randomUUID(),
-                  name: tc.function?.name || "",
-                  arguments: args,
-                };
-              });
+                  return {
+                    id: tc.id || crypto.randomUUID(),
+                    name: tc.function?.name || "",
+                    arguments: args,
+                  };
+                },
+              );
 
               if (toolCalls.length > 0) {
                 yield {

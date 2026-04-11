@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/utils/supabase/server";
+
 import { appLogger as logger } from "@/lib/logger";
+import { createClient } from "@/utils/supabase/server";
 
 export const dynamic = "force-dynamic";
 export async function GET(
@@ -83,7 +84,7 @@ export async function PUT(
           ? [body.cities]
           : [];
     if (body.postal_codes !== undefined)
-      (updateData as any).postal_codes = Array.isArray(body.postal_codes)
+      (updateData as unknown).postal_codes = Array.isArray(body.postal_codes)
         ? body.postal_codes
         : body.postal_codes
           ? [body.postal_codes]

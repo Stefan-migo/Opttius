@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireRoot } from "@/lib/api/root-middleware";
-import { createServiceRoleClient } from "@/utils/supabase/service-role";
-import { appLogger as logger } from "@/lib/logger";
+
 import { AuthorizationError } from "@/lib/api/errors";
+import { requireRoot } from "@/lib/api/root-middleware";
 import { updateSubscriptionSchema } from "@/lib/api/validation/zod-schemas";
+import { appLogger as logger } from "@/lib/logger";
+import { createServiceRoleClient } from "@/utils/supabase/service-role";
 
 /**
  * GET /api/admin/saas-management/subscriptions/[id]
@@ -111,7 +112,7 @@ export async function PATCH(
     }
 
     // Preparar updates
-    const updates: any = {};
+    const updates: unknown = {};
 
     if (status !== undefined) updates.status = status;
 

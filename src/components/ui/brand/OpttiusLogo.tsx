@@ -19,26 +19,26 @@ export function OpttiusIcon({
 }: LogoProps) {
   return (
     <svg
+      className={cn("h-12 w-12 drop-shadow-sm", className)}
       viewBox="0 0 121.07 121"
       xmlns="http://www.w3.org/2000/svg"
-      className={cn("h-12 w-12 drop-shadow-sm", className)}
       {...props}
     >
       <g transform="translate(0, 0.1)">
         <path
-          fill="#1A2B23"
           className="transition-colors duration-500"
           d="M56.71.1c43.63-2.48,75.39,39.63,60.73,80.94-16.26,45.81-78.43,53.95-106.43,14.23C-16.11,56.82,9.81,2.77,56.71.1Z"
+          fill="#1A2B23"
         />
         <path
-          fill="#F9F7F2"
           className="transition-colors duration-500"
           d="M55.07,31.09v10.77h3.91s.32.29.32.32v9.72s-.29.32-.32.32h-3.91v18.48c0,.6-.59,2.71-.79,3.43-2.7,9.63-11.23,15.95-21.2,16.31v-9.93c4.55-.39,8.71-2.74,10.72-6.93.36-.76,1.33-3.46,1.33-4.16v-17.21H15.53v-10.35h29.6v-10.77h9.94Z"
+          fill="#F9F7F2"
         />
         <path
-          fill="#D4AF37"
           className="transition-colors duration-500"
           d="M76,31.09v10.77h29.6v10.35h-29.6c.41,5.99-.77,12.97.53,18.8s6.04,9.34,11.74,9.71v9.72c-7.8.03-15.53-4.44-19.28-11.26-4.56-8.29-2.44-18.12-2.93-27.18-.23-.08-.46.21-.53.21h-3.49v-10.35h4.02v-10.77h9.94Z"
+          fill="#D4AF37"
         />
       </g>
     </svg>
@@ -63,9 +63,9 @@ export function OpttiusLogoText({
 
   return (
     <svg
+      className={cn("h-12 w-48 drop-shadow-sm pr-5 pl-0", className)}
       viewBox="0 0 350.25 100"
       xmlns="http://www.w3.org/2000/svg"
-      className={cn("h-12 w-48 drop-shadow-sm pr-5 pl-0", className)}
       {...props}
     >
       <g>
@@ -107,13 +107,13 @@ export function OpttiusLogoText({
 
         {/* Slogan - Pushed lower and darkened slightly for hierarchy but kept "bright" */}
         <text
-          x=".85"
-          y="88"
           className={cn(
             sloganFill,
             "transition-colors duration-500 uppercase tracking-[0.25em] font-black",
           )}
           style={{ fontSize: "16px", fontFamily: "var(--font-heading)" }}
+          x=".85"
+          y="88"
         >
           Sistema de Gestión Óptica
         </text>
@@ -139,15 +139,15 @@ export function OpttiusBrand({
     <div className={cn("flex items-center gap-4 pl-5", className)}>
       <div className="flex-shrink-0 flex items-center justify-center">
         <OpttiusIcon
-          forceLight={forceLight}
           className="h-10 w-10 md:h-11 md:w-11 transition-transform duration-500 hover:scale-110"
+          forceLight={forceLight}
         />
       </div>
       {showText && (
         <div className="flex flex-col items-start justify-center">
           <OpttiusLogoText
-            forceLight={forceLight}
             className="h-10 w-40 md:w-44"
+            forceLight={forceLight}
           />
         </div>
       )}
@@ -170,17 +170,17 @@ export function OpttiusLogoCompact({
 
   return (
     <svg
+      className={cn("h-32 w-40 drop-shadow-md", className)}
       viewBox="0 0 183 144"
       xmlns="http://www.w3.org/2000/svg"
-      className={cn("h-32 w-40 drop-shadow-md", className)}
       {...props}
     >
       <defs>
         <linearGradient
           id="vertical-icon-accent"
           x1="0%"
-          y1="0%"
           x2="100%"
+          y1="0%"
           y2="100%"
         >
           <stop
@@ -204,9 +204,9 @@ export function OpttiusLogoCompact({
             d="M80.89,0v16.35h5.94s.48.45.48.48v14.75s-.45.48-.48.48h-5.94v28.05c0,.91-.89,4.12-1.2,5.21-4.1,14.61-17.05,24.21-32.17,24.76v-15.07c6.91-.59,13.22-4.15,16.27-10.51.55-1.15,2.02-5.25,2.02-6.32v-26.13H20.89v-15.71h44.92V0h15.08Z"
           />
           <path
-            fill="url(#vertical-icon-accent)"
             className="transition-colors duration-500"
             d="M112.66,0v16.35h44.92v15.71h-44.92c.63,9.09-1.16,19.69.8,28.53,1.9,8.59,9.16,14.17,17.81,14.74v14.75c-11.83.04-23.57-6.74-29.25-17.1-6.92-12.58-3.7-27.5-4.44-41.25-.35-.12-.7.32-.8.32h-5.29v-15.71h6.1V0h15.08Z"
+            fill="url(#vertical-icon-accent)"
           />
         </g>
 

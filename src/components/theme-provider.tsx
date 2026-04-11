@@ -1,23 +1,24 @@
 "use client";
 
-import * as React from "react";
 import {
   ThemeProvider as NextThemesProvider,
   useTheme as useNextTheme,
 } from "next-themes";
 import { type ThemeProviderProps } from "next-themes/dist/types";
-import { ThemeId, themes, getTheme } from "@/config/themes";
+import * as React from "react";
+
+import { getTheme, ThemeId, themes } from "@/config/themes";
 
 export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
   return (
     <NextThemesProvider
       {...props}
-      themes={themes.map((t) => t.id)}
-      defaultTheme="light"
-      enableSystem={false}
       attribute="data-theme"
-      storageKey="theme"
+      defaultTheme="light"
       disableTransitionOnChange={false}
+      enableSystem={false}
+      storageKey="theme"
+      themes={themes.map((t) => t.id)}
     >
       <ThemeClassManager>{children}</ThemeClassManager>
     </NextThemesProvider>

@@ -1,35 +1,41 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
 import {
-  TrendingUp,
-  TrendingDown,
-  DollarSign,
-  ShoppingCart,
-  Package,
-  Users,
   AlertTriangle,
-  Plus,
   ArrowRight,
-  ArrowUpRight,
-  ArrowDownRight,
   Calendar,
   CalendarPlus,
   CheckCircle,
-  XCircle,
   Clock,
-  Activity,
-  Award,
-  Target,
-  CalendarDays,
+  DollarSign,
+  Package,
+  Receipt,
   RefreshCw,
+  ShoppingCart,
+  TrendingUp,
+  Users,
+  XCircle,
 } from "lucide-react";
-import Link from "next/link";
 import dynamic from "next/dynamic";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import {
+  Area,
+  AreaChart,
+  BarChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
+import { toast } from "sonner";
+
+import { AppointmentsList } from "@/components/admin/dashboard";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import {
   Select,
   SelectContent,
@@ -38,44 +44,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { toast } from "sonner";
-import {
-  AreaChart,
-  Area,
-  LineChart,
-  Line,
-  BarChart,
-  Bar,
-  PieChart,
-  Pie,
-  Cell,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-} from "recharts";
-import businessConfig from "@/config/business";
-import {
-  AppointmentsList,
-  QuickActionsPanel,
-} from "@/components/admin/dashboard";
 import { useBranch } from "@/hooks/useBranch";
-import { formatCurrency, formatDateTime } from "@/lib/utils";
+import { useMobileView } from "@/hooks/useMobileView";
+import { cn } from "@/lib/utils";
+import { formatCurrency } from "@/lib/utils";
 const CreateAppointmentForm = dynamic(
   () => import("@/components/admin/CreateAppointmentForm"),
   {
     loading: () => (
       <div className="flex items-center justify-center py-12">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-admin-accent-primary"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-admin-accent-primary" />
       </div>
     ),
     ssr: false,
@@ -147,12 +125,12 @@ interface DashboardData {
       converted: number;
     };
   };
-  todayAppointments: any[];
-  lowStockProducts: any[];
+  todayAppointments: unknown[];
+  lowStockProducts: unknown[];
   charts: {
-    revenueTrend: any[];
-    ordersStatus: any;
-    topProducts: any[];
+    revenueTrend: unknown[];
+    ordersStatus: unknown;
+    topProducts: unknown[];
   };
 }
 
@@ -211,6 +189,7 @@ const defaultDashboardData: DashboardData = {
 
 export default function AdminDashboard() {
   const { currentBranchId, isSuperAdmin, branches } = useBranch();
+  const { isMobile } = useMobileView();
   const isGlobalView = !currentBranchId && isSuperAdmin;
 
   const [isLoading, setIsLoading] = useState(true);
@@ -276,8 +255,8 @@ export default function AdminDashboard() {
       case "scheduled":
         return (
           <Badge
-            variant="outline"
             className="bg-transparent text-admin-info border-admin-info/30 font-bold text-[10px] uppercase tracking-wider rounded-xl"
+            variant="outline"
           >
             <Clock className="h-3 w-3 mr-1" />
             Programada
@@ -286,8 +265,8 @@ export default function AdminDashboard() {
       case "confirmed":
         return (
           <Badge
-            variant="outline"
             className="bg-transparent text-admin-success border-admin-success/30 font-bold text-[10px] uppercase tracking-wider rounded-xl"
+            variant="outline"
           >
             <CheckCircle className="h-3 w-3 mr-1" />
             Confirmada
@@ -296,8 +275,8 @@ export default function AdminDashboard() {
       case "completed":
         return (
           <Badge
-            variant="outline"
             className="bg-admin-accent-primary/10 text-admin-accent-primary border-admin-accent-primary/20 font-bold text-[10px] uppercase tracking-wider rounded-xl"
+            variant="outline"
           >
             <CheckCircle className="h-3 w-3 mr-1" />
             Completada
@@ -306,8 +285,8 @@ export default function AdminDashboard() {
       case "cancelled":
         return (
           <Badge
-            variant="outline"
             className="bg-admin-error/10 text-admin-error border-admin-error/30 font-bold text-[10px] uppercase tracking-wider rounded-xl"
+            variant="outline"
           >
             <XCircle className="h-3 w-3 mr-1" />
             Cancelada
@@ -316,8 +295,8 @@ export default function AdminDashboard() {
       case "no_show":
         return (
           <Badge
-            variant="outline"
             className="bg-transparent text-admin-text-tertiary border-admin-border-secondary font-bold text-[10px] uppercase tracking-wider rounded-xl"
+            variant="outline"
           >
             <XCircle className="h-3 w-3 mr-1" />
             No asistó
@@ -326,8 +305,8 @@ export default function AdminDashboard() {
       default:
         return (
           <Badge
-            variant="secondary"
             className="text-[10px] font-bold uppercase tracking-wider rounded-xl"
+            variant="secondary"
           >
             {status}
           </Badge>
@@ -364,8 +343,8 @@ export default function AdminDashboard() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {[...Array(4)].map((_, i) => (
             <div
-              key={i}
               className="p-8 rounded-xl border border-admin-border-primary/20 bg-admin-bg-tertiary/20"
+              key={i}
             >
               <div className="flex justify-between mb-6">
                 <Skeleton className="h-12 w-12" />
@@ -420,8 +399,8 @@ export default function AdminDashboard() {
               "Ocurrió un error inesperado al sincronizar con la central."}
           </p>
           <Button
-            onClick={() => window.location.reload()}
             className="w-full h-11 bg-admin-accent-primary hover:bg-admin-accent-secondary text-white font-bold rounded-xl transition-all shadow-lg shadow-admin-accent-primary/20"
+            onClick={() => window.location.reload()}
           >
             Sincronizar Panel
           </Button>
@@ -431,29 +410,30 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-700">
-      {/* Header */}
-      <div className="flex flex-col md:flex-col lg:flex-col xl:flex-row justify-between items-start gap-4 xl:items-end xl:gap-6 pb-4 border-b border-admin-border-primary/20">
+    <div className="space-y-6 md:space-y-8 animate-in fade-in duration-700">
+      {/* Header - Simplified for mobile, expanded for desktop */}
+      <div className="flex flex-col md:flex-col lg:flex-col xl:flex-row justify-between items-start gap-3 md:gap-4 xl:gap-6 pb-3 md:pb-4 border-b border-admin-border-primary/20">
         <div className="space-y-1">
           <h1
-            className="text-2xl md:text-3xl lg:text-4xl font-display font-bold tracking-tight text-admin-text-primary uppercase"
+            className="text-xl md:text-3xl lg:text-4xl font-display font-bold tracking-tight text-admin-text-primary uppercase"
             data-tour="dashboard-header"
           >
             Resumen Ejecutivo
           </h1>
           <p className="text-[10px] sm:text-xs font-serif italic text-admin-text-tertiary tracking-[0.15em] sm:tracking-[0.2em] uppercase">
-            Visión general del negocio • Operaciones del día
+            Visión general del negocio
           </p>
         </div>
 
-        <div className="flex items-center gap-1.5 sm:gap-2">
+        {/* Desktop-only action buttons - hidden on mobile */}
+        <div className="hidden md:flex items-center gap-1.5 sm:gap-2">
           <Button
-            variant="outline"
-            onClick={() => fetchDashboardData(true)}
+            aria-label="Actualizar"
+            className="h-9 w-9 bg-admin-bg-tertiary/50 border-admin-border-primary/30 text-admin-text-primary font-bold rounded-xl transition-all hover:shadow-md hover:border-epoch-accent/30"
             disabled={refreshing}
             size="icon"
-            className="h-9 w-9 bg-admin-bg-tertiary/50 border-admin-border-primary/30 text-admin-text-primary font-bold rounded-xl transition-all hover:shadow-md hover:border-epoch-accent/30"
-            aria-label="Actualizar"
+            variant="outline"
+            onClick={() => fetchDashboardData(true)}
           >
             <RefreshCw
               className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`}
@@ -467,23 +447,22 @@ export default function AdminDashboard() {
               </span>
             </Button>
           </Link>
-          <Link href="/admin/appointments">
-            <Button
-              variant="outline"
-              size="icon"
-              className="h-9 w-9 sm:h-10 sm:w-auto sm:px-6 bg-admin-bg-tertiary/50 border-admin-border-primary/30 text-admin-text-primary font-bold rounded-xl transition-all hover:shadow-md hover:border-admin-accent-primary/30"
-            >
-              <Calendar className="h-4 w-4" />
-              <span className="font-display tracking-widest text-xs hidden sm:inline ml-2">
-                AGENDA
-              </span>
-            </Button>
-          </Link>
+          <Button
+            className="h-9 w-9 sm:h-10 sm:w-auto sm:px-6 bg-admin-bg-tertiary/50 border-admin-border-primary/30 text-admin-text-primary font-bold rounded-xl transition-all hover:shadow-md hover:border-admin-accent-primary/30"
+            size="icon"
+            variant="outline"
+            onClick={() => setIsAppointmentModalOpen(true)}
+          >
+            <Calendar className="h-4 w-4" />
+            <span className="font-display tracking-widest text-xs hidden sm:inline ml-2">
+              AGENDA
+            </span>
+          </Button>
           <Link href="/admin/work-orders">
             <Button
-              variant="outline"
-              size="icon"
               className="h-9 w-9 sm:h-10 sm:w-auto sm:px-6 bg-admin-bg-tertiary/50 border-admin-border-primary/30 text-admin-text-primary font-bold rounded-xl transition-all hover:shadow-md hover:border-admin-accent-primary/30 relative"
+              size="icon"
+              variant="outline"
             >
               <div className="relative">
                 <Package className="h-4 w-4" />
@@ -495,6 +474,14 @@ export default function AdminDashboard() {
               </div>
               <span className="font-display tracking-widest text-xs hidden sm:inline ml-2">
                 TALLER
+              </span>
+            </Button>
+          </Link>
+          <Link href="/admin/customers/new">
+            <Button className="h-9 sm:h-10 px-3 sm:px-6 bg-epoch-accent hover:bg-epoch-accent/90 text-epoch-primary font-bold rounded-xl transition-all shadow-lg flex items-center gap-1.5 sm:gap-2 border border-epoch-primary/20">
+              <Users className="h-4 w-4" />
+              <span className="font-display tracking-widest text-[10px] sm:text-xs">
+                NUEVO CLIENTE
               </span>
             </Button>
           </Link>
@@ -532,9 +519,9 @@ export default function AdminDashboard() {
               </div>
               <Link href="/admin/products?filter=low_stock">
                 <Button
-                  variant="outline"
-                  size="sm"
                   className="h-9 font-display tracking-widest text-[10px] bg-admin-bg-tertiary/50 text-admin-error border-admin-error/30 hover:bg-admin-error hover:text-white rounded-xl transition-all"
+                  size="sm"
+                  variant="outline"
                 >
                   GESTIONAR ARCHIVO
                   <ArrowRight className="h-4 w-4 ml-2" />
@@ -545,7 +532,14 @@ export default function AdminDashboard() {
         </Card>
       )}
 
-      {/* KPI Cards */}
+      {/* Today's Appointments - Above KPIs */}
+      <AppointmentsList
+        appointments={data?.todayAppointments ?? []}
+        formatTime={formatTime}
+        getAppointmentStatusBadge={getAppointmentStatusBadge}
+      />
+
+      {/* KPI Cards - 6 Cards Simplified */}
       {(() => {
         const currentBranch = branches?.find((b) => b.id === currentBranchId);
         const statsLabel = isGlobalView
@@ -555,263 +549,171 @@ export default function AdminDashboard() {
             : "Sucursal seleccionada";
 
         return (
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-            {/* Revenue Card */}
-            <Card className="border border-admin-border-primary/20 bg-admin-bg-tertiary/50 rounded-xl shadow-none hover:shadow-md transition-shadow duration-300 group overflow-hidden">
-              <CardContent className="p-3 sm:p-8 relative">
-                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between sm:mb-6">
-                  <div className="hidden sm:flex h-12 w-12 rounded-xl bg-epoch-primary/5 border border-epoch-primary/10 items-center justify-center transition-transform group-hover:scale-110">
-                    <DollarSign className="h-6 w-6 text-epoch-primary" />
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2 md:gap-3">
+            {/* 1. Citas de Hoy - Más visible */}
+            <Card className="col-span-1 border border-admin-border-primary/20 bg-admin-bg-tertiary/50 rounded-xl shadow-none hover:shadow-md transition-shadow duration-300 group overflow-hidden">
+              <CardContent className="p-2 md:p-4 relative">
+                <div className="flex items-start justify-between mb-2 md:mb-3">
+                  <div className="h-8 w-8 md:h-10 md:w-10 rounded-lg md:rounded-xl bg-epoch-accent/10 border border-epoch-accent/20 flex items-center justify-center transition-transform group-hover:scale-110">
+                    <Calendar className="h-4 w-4 md:h-5 md:w-5 text-epoch-accent" />
                   </div>
-                  <div className="sm:hidden">
-                    <p className="text-[9px] font-display font-bold text-admin-text-tertiary uppercase tracking-[0.15em]">
-                      Rendimiento
-                    </p>
-                    <p className="text-lg font-display font-bold text-admin-text-primary tracking-tight leading-tight mt-0.5">
-                      {formatCurrency(data.kpis.revenue.current)}
-                    </p>
-                    <div
-                      className={cn(
-                        "flex items-center text-[9px] font-display font-bold gap-0.5 mt-1",
-                        data.kpis.revenue.change >= 0
-                          ? "text-epoch-primary"
-                          : "text-admin-error",
-                      )}
-                    >
-                      {data.kpis.revenue.change >= 0 ? (
-                        <>
-                          <ArrowUpRight className="h-3 w-3" />
-                          <span>+{data.kpis.revenue.change.toFixed(1)}%</span>
-                        </>
-                      ) : (
-                        <>
-                          <ArrowDownRight className="h-3 w-3" />
-                          <span>{data.kpis.revenue.change.toFixed(1)}%</span>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                  <div
-                    className={cn(
-                      "hidden sm:flex items-center text-[10px] font-display font-bold px-2 py-1 gap-1",
-                      data.kpis.revenue.change >= 0
-                        ? "text-epoch-primary"
-                        : "text-admin-error",
-                    )}
-                  >
-                    {data.kpis.revenue.change >= 0 ? (
-                      <>
-                        <ArrowUpRight className="h-3 w-3" />
-                        <span>+{data.kpis.revenue.change.toFixed(1)}%</span>
-                      </>
-                    ) : (
-                      <>
-                        <ArrowDownRight className="h-3 w-3" />
-                        <span>{data.kpis.revenue.change.toFixed(1)}%</span>
-                      </>
-                    )}
-                  </div>
-                </div>
-
-                <div className="hidden sm:block space-y-1">
-                  <p className="text-[10px] font-display font-bold text-admin-text-tertiary uppercase tracking-[0.2em]">
-                    Rendimiento Mensual
-                  </p>
-                  <p className="text-3xl font-display font-bold text-admin-text-primary tracking-tight">
-                    {formatCurrency(data.kpis.revenue.current)}
-                  </p>
-                  <div className="flex items-center gap-2 mt-4 pt-4 border-t border-admin-border-primary/5">
-                    <Activity className="h-3 w-3 text-admin-text-tertiary/40" />
-                    <span className="text-[9px] font-display font-medium text-admin-text-tertiary/60 uppercase tracking-widest">
-                      {statsLabel}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="absolute -top-4 -right-4 opacity-[0.03] group-hover:opacity-[0.06] transition-opacity pointer-events-none hidden sm:block">
-                  <DollarSign size={120} />
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Appointments Card */}
-            <Card className="border border-admin-border-primary/20 bg-admin-bg-tertiary/50 rounded-xl shadow-none hover:shadow-md transition-shadow duration-300 group overflow-hidden">
-              <CardContent className="p-3 sm:p-8 relative">
-                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between sm:mb-6">
-                  <div className="hidden sm:flex h-12 w-12 rounded-xl bg-epoch-accent/5 border border-epoch-accent/10 items-center justify-center transition-transform group-hover:scale-110">
-                    <Calendar className="h-6 w-6 text-epoch-accent" />
-                  </div>
-                  <div className="sm:hidden">
-                    <div className="flex items-center justify-between">
-                      <p className="text-[9px] font-display font-bold text-admin-text-tertiary uppercase tracking-[0.15em]">
-                        Agenda
-                      </p>
-                      <Badge
-                        variant="outline"
-                        className="bg-epoch-primary text-white border-none rounded-lg text-[8px] font-display font-bold tracking-widest px-1.5 py-0"
-                      >
-                        HOY
-                      </Badge>
-                    </div>
-                    <p className="text-lg font-display font-bold text-admin-text-primary tracking-tight leading-tight mt-0.5">
-                      {data.kpis.appointments?.today || 0}{" "}
-                      <span className="text-[10px] font-serif italic text-admin-text-tertiary">
-                        Citas
-                      </span>
-                    </p>
-                    <p className="text-[9px] text-admin-text-tertiary/60 font-display mt-0.5">
-                      {data.kpis.appointments?.confirmed || 0} confirmadas
-                    </p>
-                  </div>
-                  <Badge
-                    variant="outline"
-                    className="hidden sm:inline-flex bg-epoch-primary text-white border-none rounded-xl text-[9px] font-display font-bold tracking-widest px-2"
-                  >
+                  <Badge className="bg-epoch-primary text-white border-none rounded-lg text-[6px] md:text-[8px] font-display font-bold tracking-widest px-1 py-0">
                     HOY
                   </Badge>
                 </div>
-
-                <div className="hidden sm:block space-y-1">
-                  <p className="text-[10px] font-display font-bold text-admin-text-tertiary uppercase tracking-[0.2em]">
-                    Agenda del Día
-                  </p>
-                  <p className="text-3xl font-display font-bold text-admin-text-primary tracking-tight">
-                    {data.kpis.appointments?.today || 0}{" "}
-                    <span className="text-xs font-serif italic text-admin-text-tertiary tracking-normal normal-case">
-                      Citas
-                    </span>
-                  </p>
-                  <div className="flex items-center gap-2 mt-4 pt-4 border-t border-admin-border-primary/5">
-                    <Clock className="h-3 w-3 text-admin-text-tertiary/40" />
-                    <span className="text-[9px] font-display font-medium text-admin-text-tertiary/60 uppercase tracking-widest">
-                      {data.kpis.appointments?.confirmed || 0} Confirmadas
-                    </span>
-                  </div>
-                </div>
-
-                <div className="absolute -top-4 -right-4 opacity-[0.03] group-hover:opacity-[0.06] transition-opacity pointer-events-none hidden sm:block">
-                  <Calendar size={120} />
+                <p className="text-xl md:text-2xl font-display font-bold text-admin-text-primary tracking-tight">
+                  {data.kpis.appointments?.today || 0}
+                </p>
+                <p className="text-[8px] md:text-[9px] font-display font-bold text-admin-text-tertiary uppercase tracking-[0.15em] mt-0.5 md:mt-1">
+                  Citas
+                </p>
+                <div className="mt-2 md:mt-3 pt-2 md:pt-3 border-t border-admin-border-primary/5">
+                  <span className="text-[7px] md:text-[8px] font-display text-admin-text-tertiary/60">
+                    {data.kpis.appointments?.confirmed || 0} conf.
+                  </span>
                 </div>
               </CardContent>
             </Card>
 
-            {/* Products Card */}
-            <Card className="border border-admin-border-primary/20 bg-admin-bg-tertiary/50 rounded-xl shadow-none hover:shadow-md transition-shadow duration-300 group overflow-hidden">
-              <CardContent className="p-3 sm:p-8 relative">
-                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between sm:mb-6">
-                  <div className="hidden sm:flex h-12 w-12 rounded-xl bg-epoch-primary/5 border border-epoch-primary/10 items-center justify-center transition-transform group-hover:scale-110">
-                    <Package className="h-6 w-6 text-epoch-primary" />
+            {/* 2. Trabajos Pendientes - Badge rojo */}
+            <Card className="col-span-1 border border-admin-border-primary/20 bg-admin-bg-tertiary/50 rounded-xl shadow-none hover:shadow-md transition-shadow duration-300 group overflow-hidden">
+              <CardContent className="p-2 md:p-4 relative">
+                <div className="flex items-start justify-between mb-2 md:mb-3">
+                  <div className="h-8 w-8 md:h-10 md:w-10 rounded-lg md:rounded-xl bg-admin-error/10 border border-admin-error/20 flex items-center justify-center transition-transform group-hover:scale-110">
+                    <Package className="h-4 w-4 md:h-5 md:w-5 text-admin-error" />
                   </div>
-                  <div className="sm:hidden">
-                    <p className="text-[9px] font-display font-bold text-admin-text-tertiary uppercase tracking-[0.15em]">
-                      Inventario
-                    </p>
-                    <p className="text-lg font-display font-bold text-admin-text-primary tracking-tight leading-tight mt-0.5">
-                      {data.kpis.products.total}{" "}
-                      <span className="text-[10px] font-serif italic text-admin-text-tertiary">
-                        Uds
-                      </span>
-                    </p>
-                    <span
-                      className={cn(
-                        "text-[9px] font-display font-medium",
-                        data.kpis.products.lowStock > 0
-                          ? "text-admin-error"
-                          : "text-epoch-primary/60",
-                      )}
-                    >
-                      {data.kpis.products.lowStock > 0
-                        ? `${data.kpis.products.lowStock} alertas`
-                        : "Saludable"}
-                    </span>
+                  {(data.kpis.workOrders?.pending ?? 0) > 0 && (
+                    <Badge className="bg-admin-error text-white border-none rounded-lg text-[6px] md:text-[8px] font-display font-bold tracking-widest px-1 py-0 animate-pulse">
+                      {data.kpis.workOrders?.pending ?? 0}
+                    </Badge>
+                  )}
+                </div>
+                <p className="text-xl md:text-2xl font-display font-bold text-admin-text-primary tracking-tight">
+                  {data.kpis.workOrders?.pending || 0}
+                </p>
+                <p className="text-[8px] md:text-[9px] font-display font-bold text-admin-text-tertiary uppercase tracking-[0.15em] mt-0.5 md:mt-1">
+                  Trabajos
+                </p>
+                <div className="mt-2 md:mt-3 pt-2 md:pt-3 border-t border-admin-border-primary/5">
+                  <span className="text-[7px] md:text-[8px] font-display text-admin-text-tertiary/60">
+                    {data.kpis.workOrders?.inProgress || 0} proc.
+                  </span>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* 3. Ingresos */}
+            <Card className="col-span-1 border border-admin-border-primary/20 bg-admin-bg-tertiary/50 rounded-xl shadow-none hover:shadow-md transition-shadow duration-300 group overflow-hidden">
+              <CardContent className="p-2 md:p-4 relative">
+                <div className="flex items-start justify-between mb-2 md:mb-3">
+                  <div className="h-8 w-8 md:h-10 md:w-10 rounded-lg md:rounded-xl bg-epoch-primary/10 border border-epoch-primary/20 flex items-center justify-center transition-transform group-hover:scale-110">
+                    <DollarSign className="h-4 w-4 md:h-5 md:w-5 text-epoch-primary" />
                   </div>
-                  <div className="hidden sm:block">
-                    {data.kpis.products.lowStock > 0 && (
-                      <div className="h-2 w-2 bg-admin-error shadow-[0_0_10px_rgba(174,0,0,0.5)] animate-pulse" />
+                  <div
+                    className={cn(
+                      "text-[7px] md:text-[9px] font-display font-bold px-1 md:px-1.5 py-0.5 rounded",
+                      data.kpis.revenue.change >= 0
+                        ? "text-epoch-primary bg-epoch-primary/10"
+                        : "text-admin-error bg-admin-error/10",
                     )}
+                  >
+                    {data.kpis.revenue.change >= 0 ? "+" : ""}
+                    {data.kpis.revenue.change.toFixed(1)}%
                   </div>
                 </div>
+                <p
+                  className="text-base md:text-lg font-display font-bold text-admin-text-primary tracking-tight truncate"
+                  title={formatCurrency(data.kpis.revenue.current)}
+                >
+                  {formatCurrency(data.kpis.revenue.current)}
+                </p>
+                <p className="text-[8px] md:text-[9px] font-display font-bold text-admin-text-tertiary uppercase tracking-[0.15em] mt-0.5 md:mt-1">
+                  Ingresos
+                </p>
+                <div className="mt-2 md:mt-3 pt-2 md:pt-3 border-t border-admin-border-primary/5">
+                  <span className="text-[7px] md:text-[8px] font-display text-admin-text-tertiary/60">
+                    {revenuePeriod} días
+                  </span>
+                </div>
+              </CardContent>
+            </Card>
 
-                <div className="hidden sm:block space-y-1">
-                  <p className="text-[10px] font-display font-bold text-admin-text-tertiary uppercase tracking-[0.2em]">
-                    Inventario Activo
-                  </p>
-                  <p className="text-3xl font-display font-bold text-admin-text-primary tracking-tight">
-                    {data.kpis.products.total}{" "}
-                    <span className="text-xs font-serif italic text-admin-text-tertiary tracking-normal normal-case">
-                      Unidades
-                    </span>
-                  </p>
-                  <div className="flex items-center gap-2 mt-4 pt-4 border-t border-admin-border-primary/5">
+            {/* 4. Presupuestos Abiertos */}
+            <Card className="col-span-1 border border-admin-border-primary/20 bg-admin-bg-tertiary/50 rounded-xl shadow-none hover:shadow-md transition-shadow duration-300 group overflow-hidden">
+              <CardContent className="p-2 md:p-4 relative">
+                <div className="flex items-start justify-between mb-2 md:mb-3">
+                  <div className="h-8 w-8 md:h-10 md:w-10 rounded-lg md:rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center transition-transform group-hover:scale-110">
+                    <Receipt className="h-4 w-4 md:h-5 md:w-5 text-amber-500" />
+                  </div>
+                </div>
+                <p className="text-xl md:text-2xl font-display font-bold text-admin-text-primary tracking-tight">
+                  {data.kpis.quotes?.pending || 0}
+                </p>
+                <p className="text-[8px] md:text-[9px] font-display font-bold text-admin-text-tertiary uppercase tracking-[0.15em] mt-0.5 md:mt-1">
+                  Presupuestos
+                </p>
+                <div className="mt-2 md:mt-3 pt-2 md:pt-3 border-t border-admin-border-primary/5">
+                  <span className="text-[7px] md:text-[8px] font-display text-admin-text-tertiary/60">
+                    {data.kpis.quotes?.converted || 0} cerr.
+                  </span>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* 5. Alertas Stock */}
+            <Card className="col-span-1 border border-admin-border-primary/20 bg-admin-bg-tertiary/50 rounded-xl shadow-none hover:shadow-md transition-shadow duration-300 group overflow-hidden">
+              <CardContent className="p-2 md:p-4 relative">
+                <div className="flex items-start justify-between mb-2 md:mb-3">
+                  <div
+                    className={cn(
+                      "h-8 w-8 md:h-10 md:w-10 rounded-lg md:rounded-xl flex items-center justify-center transition-transform group-hover:scale-110",
+                      data.kpis.products.lowStock > 0
+                        ? "bg-admin-error/10 border border-admin-error/20"
+                        : "bg-epoch-primary/10 border border-epoch-primary/20",
+                    )}
+                  >
                     <AlertTriangle
                       className={cn(
-                        "h-3 w-3",
+                        "h-4 w-4 md:h-5 md:w-5",
                         data.kpis.products.lowStock > 0
                           ? "text-admin-error"
                           : "text-epoch-primary",
                       )}
                     />
-                    <span
-                      className={cn(
-                        "text-[9px] font-display font-medium uppercase tracking-widest",
-                        data.kpis.products.lowStock > 0
-                          ? "text-admin-error"
-                          : "text-epoch-primary/60",
-                      )}
-                    >
-                      {data.kpis.products.lowStock > 0
-                        ? `${data.kpis.products.lowStock} Alertas Críticas`
-                        : "Archivo Saludable"}
-                    </span>
                   </div>
                 </div>
-
-                <div className="absolute -top-4 -right-4 opacity-[0.03] group-hover:opacity-[0.06] transition-opacity pointer-events-none hidden sm:block">
-                  <Package size={120} />
+                <p className="text-xl md:text-2xl font-display font-bold text-admin-text-primary tracking-tight">
+                  {data.kpis.products.lowStock}
+                </p>
+                <p className="text-[8px] md:text-[9px] font-display font-bold text-admin-text-tertiary uppercase tracking-[0.15em] mt-0.5 md:mt-1">
+                  Stock
+                </p>
+                <div className="mt-2 md:mt-3 pt-2 md:pt-3 border-t border-admin-border-primary/5">
+                  <span className="text-[7px] md:text-[8px] font-display text-admin-text-tertiary/60">
+                    {data.kpis.products.outOfStock} sin stock
+                  </span>
                 </div>
               </CardContent>
             </Card>
 
-            {/* Customers Card */}
-            <Card className="border border-admin-border-primary/20 bg-admin-bg-tertiary/50 rounded-xl shadow-none hover:shadow-md transition-shadow duration-300 group overflow-hidden">
-              <CardContent className="p-3 sm:p-8 relative">
-                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between sm:mb-6">
-                  <div className="hidden sm:flex h-12 w-12 rounded-xl bg-epoch-accent/5 border border-epoch-accent/10 items-center justify-center transition-transform group-hover:scale-110">
-                    <Users className="h-6 w-6 text-epoch-accent" />
-                  </div>
-                  <div className="sm:hidden">
-                    <p className="text-[9px] font-display font-bold text-admin-text-tertiary uppercase tracking-[0.15em]">
-                      Clientes
-                    </p>
-                    <p className="text-lg font-display font-bold text-admin-text-primary tracking-tight leading-tight mt-0.5">
-                      {data.kpis.customers.total}
-                    </p>
-                    <span className="text-[9px] font-display font-medium text-epoch-primary">
-                      +{data.kpis.customers.new} este ciclo
-                    </span>
-                  </div>
-                  <div className="hidden sm:block bg-epoch-accent/10 p-1 text-epoch-accent">
-                    <Plus className="h-3 w-3" />
+            {/* 6. Clientes Totales */}
+            <Card className="col-span-1 border border-admin-border-primary/20 bg-admin-bg-tertiary/50 rounded-xl shadow-none hover:shadow-md transition-shadow duration-300 group overflow-hidden">
+              <CardContent className="p-2 md:p-4 relative">
+                <div className="flex items-start justify-between mb-2 md:mb-3">
+                  <div className="h-8 w-8 md:h-10 md:w-10 rounded-lg md:rounded-xl bg-epoch-accent/10 border border-epoch-accent/20 flex items-center justify-center transition-transform group-hover:scale-110">
+                    <Users className="h-4 w-4 md:h-5 md:w-5 text-epoch-accent" />
                   </div>
                 </div>
-
-                <div className="hidden sm:block space-y-1">
-                  <p className="text-[10px] font-display font-bold text-admin-text-tertiary uppercase tracking-[0.2em]">
-                    Cartera de Clientes
-                  </p>
-                  <p className="text-3xl font-display font-bold text-admin-text-primary tracking-tight">
-                    {data.kpis.customers.total}
-                  </p>
-                  <div className="flex items-center gap-2 mt-4 pt-4 border-t border-admin-border-primary/5">
-                    <TrendingUp className="h-3 w-3 text-epoch-primary/40" />
-                    <span className="text-[9px] font-display font-medium text-epoch-primary tracking-widest uppercase">
-                      +{data.kpis.customers.new} Este Ciclo
-                    </span>
-                  </div>
-                </div>
-
-                <div className="absolute -top-4 -right-4 opacity-[0.03] group-hover:opacity-[0.06] transition-opacity pointer-events-none hidden sm:block">
-                  <Users size={120} />
+                <p className="text-xl md:text-2xl font-display font-bold text-admin-text-primary tracking-tight">
+                  {data.kpis.customers.total}
+                </p>
+                <p className="text-[8px] md:text-[9px] font-display font-bold text-admin-text-tertiary uppercase tracking-[0.15em] mt-0.5 md:mt-1">
+                  Clientes
+                </p>
+                <div className="mt-2 md:mt-3 pt-2 md:pt-3 border-t border-admin-border-primary/5">
+                  <span className="text-[7px] md:text-[8px] font-display text-epoch-primary">
+                    +{data.kpis.customers.new} nuevos
+                  </span>
                 </div>
               </CardContent>
             </Card>
@@ -819,404 +721,112 @@ export default function AdminDashboard() {
         );
       })()}
 
-      {/* Quick Actions - mobile only (above charts) */}
-      <div className="lg:hidden">
-        <QuickActionsPanel
-          onNewAppointment={() => setIsAppointmentModalOpen(true)}
-        />
-      </div>
-
-      {/* Charts Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Revenue Trend Chart */}
-        <Card className="border border-admin-border-primary/20 bg-admin-border-primary/5 rounded-xl shadow-none overflow-hidden group">
-          <CardHeader className="pb-2 border-b border-admin-border-primary/10">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-xl bg-epoch-primary/5 border border-epoch-primary/10 flex items-center justify-center">
-                  <TrendingUp className="h-5 w-5 text-epoch-primary" />
-                </div>
-                <div>
-                  <CardTitle className="text-xl font-display font-bold text-admin-text-primary tracking-tight uppercase">
-                    Evolución de Ingresos
-                  </CardTitle>
-                </div>
-              </div>
-              <Select value={revenuePeriod} onValueChange={setRevenuePeriod}>
-                <SelectTrigger className="w-[140px] h-9 text-[10px] font-display font-bold uppercase tracking-widest border-admin-border-primary/30 bg-admin-bg-tertiary/50 hover:bg-admin-bg-secondary transition-colors rounded-xl">
-                  <SelectValue placeholder="Período" />
-                </SelectTrigger>
-                <SelectContent className="rounded-xl border-admin-border-primary/30">
-                  <SelectItem
-                    value="7"
-                    className="text-[10px] font-display uppercase tracking-widest"
-                  >
-                    7 días
-                  </SelectItem>
-                  <SelectItem
-                    value="30"
-                    className="text-[10px] font-display uppercase tracking-widest"
-                  >
-                    30 días
-                  </SelectItem>
-                  <SelectItem
-                    value="90"
-                    className="text-[10px] font-display uppercase tracking-widest"
-                  >
-                    3 meses
-                  </SelectItem>
-                  <SelectItem
-                    value="365"
-                    className="text-[10px] font-display uppercase tracking-widest"
-                  >
-                    12 meses
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <p className="text-[10px] font-serif italic text-admin-text-tertiary uppercase tracking-widest mt-2">
-              {revenuePeriod === "7" &&
-                "Análisis del ciclo semanal de facturación"}
-              {revenuePeriod === "30" &&
-                "Análisis del rendimiento operativo mensual"}
-              {revenuePeriod === "90" && "Proyección estratégica trimestral"}
-              {revenuePeriod === "365" &&
-                "Informe anual de crecimiento corporativo"}
-            </p>
-          </CardHeader>
-          <CardContent className="p-4 sm:p-8">
-            {data?.charts?.revenueTrend?.length > 0 ? (
-              <div className="h-[220px] sm:h-[320px] w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart
-                    id="dashboard-revenue-chart"
-                    data={data.charts.revenueTrend}
-                    margin={{ top: 10, right: 10, left: -10, bottom: 0 }}
-                  >
-                    <defs>
-                      <linearGradient
-                        id="colorRevenue"
-                        x1="0"
-                        y1="0"
-                        x2="0"
-                        y2="1"
-                      >
-                        <stop
-                          offset="5%"
-                          stopColor="var(--chart-1)"
-                          stopOpacity={0.15}
-                        />
-                        <stop
-                          offset="95%"
-                          stopColor="var(--chart-1)"
-                          stopOpacity={0}
-                        />
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid
-                      strokeDasharray="0"
-                      vertical={false}
-                      stroke="rgba(0,0,0,0.03)"
-                    />
-                    <XAxis
-                      dataKey="date"
-                      axisLine={false}
-                      tickLine={false}
-                      tick={{
-                        fontSize: 9,
-                        fontWeight: 700,
-                        fill: "var(--admin-text-tertiary)",
-                        fontFamily: "var(--font-display)",
-                      }}
-                      tickFormatter={(date) =>
-                        new Date(date)
-                          .toLocaleDateString("es-AR", {
-                            day: "numeric",
-                            month: "short",
-                          })
-                          .toUpperCase()
-                      }
-                      dy={10}
-                    />
-                    <YAxis
-                      axisLine={false}
-                      tickLine={false}
-                      tick={{
-                        fontSize: 9,
-                        fontWeight: 700,
-                        fill: "var(--admin-text-tertiary)",
-                        fontFamily: "var(--font-display)",
-                      }}
-                      tickFormatter={(value) =>
-                        `$${value >= 1000 ? (value / 1000).toFixed(0) + "k" : value}`
-                      }
-                    />
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: "var(--admin-bg-secondary)",
-                        borderRadius: "0",
-                        border: "1px solid var(--admin-accent-secondary)",
-                        boxShadow: "0 20px 40px -10px rgba(0, 0, 0, 0.4)",
-                        fontSize: "10px",
-                        fontWeight: "bold",
-                        fontFamily: "var(--font-display)",
-                        color: "var(--admin-text-primary)",
-                        padding: "12px",
-                        zIndex: 100,
-                      }}
-                      itemStyle={{
-                        color: "var(--admin-accent-secondary)",
-                        textTransform: "uppercase",
-                        letterSpacing: "0.1em",
-                      }}
-                      labelStyle={{
-                        color: "rgba(249, 247, 242, 0.5)",
-                        marginBottom: "4px",
-                        textTransform: "uppercase",
-                      }}
-                      formatter={(value: number) => [
-                        formatCurrency(value),
-                        "Ingresos",
-                      ]}
-                      labelFormatter={(date) =>
-                        new Date(date).toLocaleDateString("es-AR", {
-                          weekday: "long",
-                          day: "numeric",
-                          month: "long",
-                        })
-                      }
-                    />
-                    <Area
-                      type="monotone"
-                      dataKey="revenue"
-                      stroke="var(--chart-1)"
-                      strokeWidth={2}
-                      fillOpacity={1}
-                      fill="url(#colorRevenue)"
-                      animationDuration={2000}
-                    />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </div>
-            ) : (
-              <div className="flex flex-col items-center justify-center h-[300px] text-center space-y-4">
-                <div className="h-12 w-12 rounded-xl bg-admin-bg-tertiary border border-admin-border-primary/10 flex items-center justify-center">
-                  <BarChart className="h-6 w-6 text-admin-text-tertiary/20" />
-                </div>
-                <p className="text-[10px] font-display font-bold text-admin-text-tertiary uppercase tracking-widest">
-                  Falta de registros para el análisis operativo
-                </p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Work Orders Status Distribution */}
-        <Card className="border border-admin-border-primary/20 bg-admin-border-primary/5 rounded-xl shadow-none overflow-hidden group">
-          <CardHeader className="pb-2 border-b border-admin-border-primary/10">
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-xl bg-epoch-accent/5 border border-epoch-accent/10 flex items-center justify-center">
-                <Target className="h-5 w-5 text-epoch-accent" />
-              </div>
-              <div>
-                <CardTitle className="text-xl font-display font-bold text-admin-text-primary tracking-tight uppercase">
-                  Estado Operativo
-                </CardTitle>
-              </div>
-            </div>
-            <p className="text-[10px] font-serif italic text-admin-text-tertiary uppercase tracking-widest mt-2">
-              Distribución técnica en taller y manufactura
-            </p>
-          </CardHeader>
-          <CardContent className="p-4 sm:p-8">
-            {data.kpis.workOrders && data.kpis.workOrders.total > 0 ? (
-              <div className="h-[240px] sm:h-[320px] w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart id="dashboard-ops-chart">
-                    <Pie
-                      data={[
-                        {
-                          name: "EN PROGRESO",
-                          value: data.kpis.workOrders.inProgress,
-                        },
-                        {
-                          name: "PENDIENTES",
-                          value: data.kpis.workOrders.pending || 0,
-                        },
-                        {
-                          name: "CONCLUIDOS",
-                          value: data.kpis.workOrders.completed,
-                        },
-                      ].filter((item) => item.value > 0)}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={55}
-                      outerRadius={80}
-                      paddingAngle={8}
-                      dataKey="value"
-                      strokeWidth={0}
-                      animationBegin={200}
-                      animationDuration={2000}
-                    >
-                      {[
-                        {
-                          name: "En Progreso",
-                          value: data.kpis.workOrders.inProgress,
-                        },
-                        {
-                          name: "Pendientes",
-                          value: data.kpis.workOrders.pending || 0,
-                        },
-                        {
-                          name: "Completados",
-                          value: data.kpis.workOrders.completed,
-                        },
-                      ]
-                        .filter((item) => item.value > 0)
-                        .map((entry, index) => (
-                          <Cell
-                            key={`cell-${index}`}
-                            fill={CHART_COLORS[index % CHART_COLORS.length]}
-                            className="hover:opacity-80 transition-opacity"
-                          />
-                        ))}
-                    </Pie>
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: "var(--admin-bg-secondary)",
-                        borderRadius: "0",
-                        border: "1px solid var(--admin-accent-secondary)",
-                        boxShadow: "0 20px 40px -10px rgba(0, 0, 0, 0.4)",
-                        fontSize: "10px",
-                        fontWeight: "bold",
-                        fontFamily: "var(--font-display)",
-                        color: "var(--admin-text-primary)",
-                        padding: "12px",
-                      }}
-                      itemStyle={{
-                        color: "var(--admin-accent-secondary)",
-                        textTransform: "uppercase",
-                        letterSpacing: "0.1em",
-                      }}
-                      labelStyle={{
-                        color: "rgba(249, 247, 242, 0.5)",
-                        marginBottom: "4px",
-                        textTransform: "uppercase",
-                      }}
-                    />
-                    <Legend
-                      verticalAlign="bottom"
-                      height={36}
-                      iconType="rect"
-                      formatter={(value) => (
-                        <span className="text-[9px] font-display font-bold text-admin-text-secondary uppercase tracking-widest pl-2">
-                          {value}
-                        </span>
-                      )}
-                    />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-            ) : (
-              <div className="flex items-center justify-center gap-3 h-[80px] sm:h-[300px] text-center sm:flex-col sm:space-y-4">
-                <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-xl bg-admin-bg-tertiary border border-admin-border-primary/10 flex items-center justify-center flex-shrink-0">
-                  <PieChart className="h-5 w-5 sm:h-6 sm:w-6 text-admin-text-tertiary/20" />
-                </div>
-                <p className="text-[10px] font-display font-bold text-admin-text-tertiary uppercase tracking-widest">
-                  Sin actividad operativa en el taller
-                </p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Top Products Chart */}
-      {data?.charts?.topProducts?.length > 0 && (
-        <Card className="border border-admin-border-primary/20 bg-admin-border-primary/5 rounded-xl shadow-none overflow-hidden group">
-          <CardHeader className="pb-2 border-b border-admin-border-primary/10">
+      {/* Charts Section - Solo 1 gráfico */}
+      <Card className="border border-admin-border-primary/20 bg-admin-border-primary/5 rounded-xl shadow-none overflow-hidden group">
+        <CardHeader className="pb-2 border-b border-admin-border-primary/10">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="flex items-center gap-3">
               <div className="h-10 w-10 rounded-xl bg-epoch-primary/5 border border-epoch-primary/10 flex items-center justify-center">
-                <Award className="h-5 w-5 text-epoch-primary" />
+                <TrendingUp className="h-5 w-5 text-epoch-primary" />
               </div>
               <div>
                 <CardTitle className="text-xl font-display font-bold text-admin-text-primary tracking-tight uppercase">
-                  Best Sellers
+                  Evolución de Ingresos
                 </CardTitle>
               </div>
             </div>
-            <p className="text-[10px] font-serif italic text-admin-text-tertiary uppercase tracking-widest mt-2">
-              Excelencia en catálogo: Productos de mayor desempeño comercial
-            </p>
-          </CardHeader>
-          <CardContent className="p-4 sm:p-8">
-            {/* Mobile: list view */}
-            <div className="sm:hidden space-y-3 pt-2">
-              {data.charts.topProducts.map(
-                (
-                  product: { name: string; revenue: number; quantity: number },
-                  index: number,
-                ) => (
-                  <div key={index} className="flex items-center gap-3">
-                    <div
-                      className="h-8 w-1 rounded-full flex-shrink-0"
-                      style={{
-                        backgroundColor:
-                          CHART_COLORS[index % CHART_COLORS.length],
-                      }}
-                    />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs font-display font-bold text-admin-text-primary truncate">
-                        {product.name}
-                      </p>
-                      <p className="text-[10px] text-admin-text-tertiary">
-                        {product.quantity} vendidos
-                      </p>
-                    </div>
-                    <p className="text-sm font-display font-bold text-admin-text-primary flex-shrink-0">
-                      {formatCurrency(product.revenue)}
-                    </p>
-                  </div>
-                ),
-              )}
-            </div>
-            {/* Desktop: horizontal bar chart */}
-            <div className="hidden sm:block h-[380px] w-full pt-4">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart
-                  data={data.charts.topProducts}
-                  layout="vertical"
-                  margin={{ left: 60, right: 60, top: 20 }}
+            <Select value={revenuePeriod} onValueChange={setRevenuePeriod}>
+              <SelectTrigger className="w-[140px] h-9 text-[10px] font-display font-bold uppercase tracking-widest border-admin-border-primary/30 bg-admin-bg-tertiary/50 hover:bg-admin-bg-secondary transition-colors rounded-xl">
+                <SelectValue placeholder="Período" />
+              </SelectTrigger>
+              <SelectContent className="rounded-xl border-admin-border-primary/30">
+                <SelectItem
+                  className="text-[10px] font-display uppercase tracking-widest"
+                  value="7"
                 >
+                  7 días
+                </SelectItem>
+                <SelectItem
+                  className="text-[10px] font-display uppercase tracking-widest"
+                  value="30"
+                >
+                  30 días
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <p className="text-[10px] font-serif italic text-admin-text-tertiary uppercase tracking-widest mt-2">
+            {revenuePeriod === "7"
+              ? "Análisis del ciclo semanal de facturación"
+              : "Análisis del rendimiento operativo mensual"}
+          </p>
+        </CardHeader>
+        <CardContent className="p-3 md:p-8">
+          {data?.charts?.revenueTrend?.length > 0 ? (
+            <div className="h-[160px] md:h-[220px] lg:h-[280px] w-full">
+              <ResponsiveContainer height="100%" width="100%">
+                <AreaChart
+                  data={data.charts.revenueTrend}
+                  id="dashboard-revenue-chart"
+                  margin={{ top: 10, right: 10, left: -10, bottom: 0 }}
+                >
+                  <defs>
+                    <linearGradient
+                      id="colorRevenue"
+                      x1="0"
+                      x2="0"
+                      y1="0"
+                      y2="1"
+                    >
+                      <stop
+                        offset="5%"
+                        stopColor="var(--chart-1)"
+                        stopOpacity={0.15}
+                      />
+                      <stop
+                        offset="95%"
+                        stopColor="var(--chart-1)"
+                        stopOpacity={0}
+                      />
+                    </linearGradient>
+                  </defs>
                   <CartesianGrid
-                    strokeDasharray="0"
-                    horizontal={false}
                     stroke="rgba(0,0,0,0.03)"
+                    strokeDasharray="0"
+                    vertical={false}
                   />
                   <XAxis
-                    type="number"
                     axisLine={false}
-                    tickLine={false}
+                    dataKey="date"
+                    dy={10}
                     tick={{
                       fontSize: 9,
                       fontWeight: 700,
                       fill: "var(--admin-text-tertiary)",
                       fontFamily: "var(--font-display)",
                     }}
-                    tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`}
+                    tickFormatter={(date) =>
+                      new Date(date)
+                        .toLocaleDateString("es-AR", {
+                          day: "numeric",
+                          month: "short",
+                        })
+                        .toUpperCase()
+                    }
+                    tickLine={false}
                   />
                   <YAxis
-                    type="category"
-                    dataKey="name"
                     axisLine={false}
-                    tickLine={false}
-                    width={180}
                     tick={{
-                      fontSize: 10,
+                      fontSize: 9,
                       fontWeight: 700,
-                      fill: "var(--admin-text-primary)",
+                      fill: "var(--admin-text-tertiary)",
                       fontFamily: "var(--font-display)",
                     }}
+                    tickFormatter={(value) =>
+                      `$${value >= 1000 ? (value / 1000).toFixed(0) + "k" : value}`
+                    }
+                    tickLine={false}
                   />
                   <Tooltip
                     contentStyle={{
@@ -1231,71 +841,80 @@ export default function AdminDashboard() {
                       padding: "12px",
                       zIndex: 100,
                     }}
+                    formatter={(value: number) => [
+                      formatCurrency(value),
+                      "Ingresos",
+                    ]}
                     itemStyle={{
                       color: "var(--admin-accent-secondary)",
                       textTransform: "uppercase",
+                      letterSpacing: "0.1em",
+                    }}
+                    labelFormatter={(date) =>
+                      new Date(date).toLocaleDateString("es-AR", {
+                        weekday: "long",
+                        day: "numeric",
+                        month: "long",
+                      })
+                    }
+                    labelStyle={{
+                      color: "rgba(249, 247, 242, 0.5)",
+                      marginBottom: "4px",
+                      textTransform: "uppercase",
                     }}
                   />
-                  <Bar
+                  <Area
+                    animationDuration={2000}
                     dataKey="revenue"
-                    name="Ingresos"
-                    fill="var(--chart-1)"
-                    radius={[0, 0, 0, 0]}
-                    barSize={20}
-                    animationDuration={2500}
+                    fill="url(#colorRevenue)"
+                    fillOpacity={1}
+                    stroke="var(--chart-1)"
+                    strokeWidth={2}
+                    type="monotone"
                   />
-                </BarChart>
+                </AreaChart>
               </ResponsiveContainer>
             </div>
-          </CardContent>
-        </Card>
-      )}
+          ) : (
+            <div className="flex flex-col items-center justify-center h-[200px] text-center space-y-4">
+              <div className="h-12 w-12 rounded-xl bg-admin-bg-tertiary border border-admin-border-primary/10 flex items-center justify-center">
+                <BarChart className="h-6 w-6 text-admin-text-tertiary/20" />
+              </div>
+              <p className="text-[10px] font-display font-bold text-admin-text-tertiary uppercase tracking-widest">
+                Falta de registros para el análisis operativo
+              </p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
-      {/* Today's Appointments & Quick Actions */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <div className="hidden lg:block lg:order-2">
-          <QuickActionsPanel
-            onNewAppointment={() => setIsAppointmentModalOpen(true)}
-          />
-        </div>
-        <div className="lg:col-span-2 lg:order-1">
-          <AppointmentsList
-            appointments={data?.todayAppointments ?? []}
-            formatTime={formatTime}
-            getAppointmentStatusBadge={getAppointmentStatusBadge}
-          />
-        </div>
-      </div>
-
-      {/* Appointment Creation Modal */}
+      {/* Appointment Creation Modal - Epoch Style */}
       <Dialog
         open={isAppointmentModalOpen}
         onOpenChange={setIsAppointmentModalOpen}
       >
-        <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto rounded-xl border-2 border-admin-border-primary/20 shadow-premium-lg p-0">
-          <DialogHeader className="p-8 bg-admin-bg-tertiary border-b border-admin-border-primary/10">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="h-10 w-10 rounded-xl bg-epoch-primary flex items-center justify-center">
+        <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto rounded-2xl border-0 shadow-2xl bg-background p-0">
+          {/* Header - Light style matching appointments page */}
+          <div className="flex items-center justify-between px-6 py-4 bg-admin-bg-tertiary border-b border-admin-border-primary/10 rounded-t-2xl">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 bg-epoch-primary flex items-center justify-center rounded-lg">
                 <CalendarPlus className="h-5 w-5 text-white" />
               </div>
-              <DialogTitle className="text-2xl font-display font-bold text-admin-text-primary tracking-tight uppercase">
-                Nueva Cita Médica
+              <DialogTitle className="text-lg font-display font-bold text-admin-text-primary tracking-wide">
+                Nueva Cita
               </DialogTitle>
             </div>
-            <DialogDescription className="text-admin-text-tertiary font-serif italic text-[11px] tracking-wide">
-              Ingrese las especificaciones técnicas para la reserva de agenda
-              del paciente.
-            </DialogDescription>
-          </DialogHeader>
+          </div>
 
-          <div className="p-8 bg-admin-bg-secondary">
+          {/* Content */}
+          <div className="p-6 bg-background">
             <CreateAppointmentForm
+              onCancel={() => setIsAppointmentModalOpen(false)}
               onSuccess={() => {
                 setIsAppointmentModalOpen(false);
                 fetchDashboardData();
-                toast.success("AGENDAMIENTO COMPLETADO");
+                toast.success("Cita agendada exitosamente");
               }}
-              onCancel={() => setIsAppointmentModalOpen(false)}
             />
           </div>
         </DialogContent>

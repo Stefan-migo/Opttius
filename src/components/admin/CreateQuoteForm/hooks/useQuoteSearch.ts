@@ -1,8 +1,10 @@
-import { useState, useEffect, useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
+
 import { useBranch } from "@/hooks/useBranch";
-import { getBranchHeader } from "@/lib/utils/branch";
 import { extractDataFromResponse } from "@/lib/api/response-helpers";
-import { Customer, Prescription, Frame } from "../types/quote.types";
+import { getBranchHeader } from "@/lib/utils/branch";
+
+import { Customer, Frame, Prescription } from "../types/quote.types";
 
 export function useCustomerSearch(initialCustomerId?: string) {
   const { currentBranchId } = useBranch();

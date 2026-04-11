@@ -1,6 +1,16 @@
 "use client";
 
+import {
+  Check,
+  Copy,
+  FileCode,
+  FileJson,
+  FileSpreadsheet,
+  FileText,
+} from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
+
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -10,24 +20,15 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
-import {
-  FileJson,
-  FileText,
-  FileCode,
-  FileSpreadsheet,
-  Copy,
-  Check,
-} from "lucide-react";
-import { exportConversation, copyToClipboard } from "@/lib/utils/chatExport";
-import { toast } from "sonner";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { copyToClipboard, exportConversation } from "@/lib/utils/chatExport";
 
 interface ExportDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  session: any;
-  messages: any[];
+  session: unknown;
+  messages: unknown[];
 }
 
 export function ExportDialog({
@@ -89,13 +90,13 @@ export function ExportDialog({
 
         <RadioGroup
           value={format}
-          onValueChange={(value) => setFormat(value as any)}
+          onValueChange={(value) => setFormat(value as unknown)}
         >
           <div className="flex items-center space-x-2 p-3 rounded-lg border border-border hover:bg-muted/60 cursor-pointer transition-colors">
-            <RadioGroupItem value="json" id="json" />
+            <RadioGroupItem id="json" value="json" />
             <Label
-              htmlFor="json"
               className="flex-1 cursor-pointer flex items-center gap-2 text-foreground"
+              htmlFor="json"
             >
               <FileJson className="w-4 h-4 text-muted-foreground" />
               <div>
@@ -108,10 +109,10 @@ export function ExportDialog({
           </div>
 
           <div className="flex items-center space-x-2 p-3 rounded-lg border border-border hover:bg-muted/60 cursor-pointer transition-colors">
-            <RadioGroupItem value="markdown" id="markdown" />
+            <RadioGroupItem id="markdown" value="markdown" />
             <Label
-              htmlFor="markdown"
               className="flex-1 cursor-pointer flex items-center gap-2 text-foreground"
+              htmlFor="markdown"
             >
               <FileCode className="w-4 h-4 text-muted-foreground" />
               <div>
@@ -124,10 +125,10 @@ export function ExportDialog({
           </div>
 
           <div className="flex items-center space-x-2 p-3 rounded-lg border border-border hover:bg-muted/60 cursor-pointer transition-colors">
-            <RadioGroupItem value="txt" id="txt" />
+            <RadioGroupItem id="txt" value="txt" />
             <Label
-              htmlFor="txt"
               className="flex-1 cursor-pointer flex items-center gap-2 text-foreground"
+              htmlFor="txt"
             >
               <FileText className="w-4 h-4 text-muted-foreground" />
               <div>
@@ -140,10 +141,10 @@ export function ExportDialog({
           </div>
 
           <div className="flex items-center space-x-2 p-3 rounded-lg border border-border hover:bg-muted/60 cursor-pointer transition-colors">
-            <RadioGroupItem value="csv" id="csv" />
+            <RadioGroupItem id="csv" value="csv" />
             <Label
-              htmlFor="csv"
               className="flex-1 cursor-pointer flex items-center gap-2 text-foreground"
+              htmlFor="csv"
             >
               <FileSpreadsheet className="w-4 h-4 text-muted-foreground" />
               <div>
@@ -161,9 +162,9 @@ export function ExportDialog({
             Cancelar
           </Button>
           <Button
+            className="flex items-center gap-2"
             variant="outline"
             onClick={handleCopyToClipboard}
-            className="flex items-center gap-2"
           >
             {copied ? (
               <>

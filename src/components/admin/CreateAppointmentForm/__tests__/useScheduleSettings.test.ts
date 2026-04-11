@@ -1,8 +1,10 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { renderHook, act } from "@testing-library/react";
-import { useScheduleSettings } from "../hooks/useScheduleSettings";
-import * as branchHook from "@/hooks/useBranch";
+import { act, renderHook } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
 import * as authContext from "@/contexts/AuthContext";
+import * as branchHook from "@/hooks/useBranch";
+
+import { useScheduleSettings } from "../hooks/useScheduleSettings";
 
 // Mock dependencies
 vi.mock("@/hooks/useBranch", () => ({
@@ -107,7 +109,7 @@ describe("useScheduleSettings", () => {
       json: () => Promise.resolve({ settings: mockScheduleSettings }),
     };
 
-    (global.fetch as any).mockResolvedValueOnce(mockResponse);
+    (global.fetch as unknown).mockResolvedValueOnce(mockResponse);
 
     const { result } = renderHook(() => useScheduleSettings());
 
@@ -129,7 +131,7 @@ describe("useScheduleSettings", () => {
   });
 
   it("should handle schedule settings load errors", async () => {
-    (global.fetch as any).mockResolvedValueOnce({
+    (global.fetch as unknown).mockResolvedValueOnce({
       ok: false,
       status: 500,
       json: () => Promise.resolve({ error: "Internal server error" }),
@@ -147,7 +149,7 @@ describe("useScheduleSettings", () => {
   });
 
   it("should handle network errors", async () => {
-    (global.fetch as any).mockRejectedValueOnce(new Error("Network error"));
+    (global.fetch as unknown).mockRejectedValueOnce(new Error("Network error"));
 
     const { result } = renderHook(() => useScheduleSettings());
 
@@ -166,7 +168,7 @@ describe("useScheduleSettings", () => {
       json: () => Promise.resolve({ settings: mockScheduleSettings }),
     };
 
-    (global.fetch as any).mockResolvedValueOnce(mockResponse);
+    (global.fetch as unknown).mockResolvedValueOnce(mockResponse);
 
     const { result } = renderHook(() => useScheduleSettings());
 
@@ -199,7 +201,7 @@ describe("useScheduleSettings", () => {
       json: () => Promise.resolve({ settings: mockSettingsWithAdvance }),
     };
 
-    (global.fetch as any).mockResolvedValueOnce(mockResponse);
+    (global.fetch as unknown).mockResolvedValueOnce(mockResponse);
 
     const { result } = renderHook(() => useScheduleSettings());
 
@@ -234,7 +236,7 @@ describe("useScheduleSettings", () => {
       json: () => Promise.resolve({ settings: mockSettingsWithMaxDays }),
     };
 
-    (global.fetch as any).mockResolvedValueOnce(mockResponse);
+    (global.fetch as unknown).mockResolvedValueOnce(mockResponse);
 
     const { result } = renderHook(() => useScheduleSettings());
 
@@ -269,7 +271,7 @@ describe("useScheduleSettings", () => {
       json: () => Promise.resolve({ settings: mockSettingsWithoutHours }),
     };
 
-    (global.fetch as any).mockResolvedValueOnce(mockResponse);
+    (global.fetch as unknown).mockResolvedValueOnce(mockResponse);
 
     const { result } = renderHook(() => useScheduleSettings());
 
@@ -307,7 +309,7 @@ describe("useScheduleSettings", () => {
       json: () => Promise.resolve({ settings: mockSettingsWithoutHolidays }),
     };
 
-    (global.fetch as any).mockResolvedValueOnce(mockResponse);
+    (global.fetch as unknown).mockResolvedValueOnce(mockResponse);
 
     const { result } = renderHook(() => useScheduleSettings());
 

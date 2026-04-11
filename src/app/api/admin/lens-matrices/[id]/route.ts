@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/utils/supabase/server";
-import { appLogger as logger } from "@/lib/logger";
-import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
+
 import { ValidationError } from "@/lib/api/errors";
-import { updateLensPriceMatrixSchemaV2 } from "@/lib/api/validation/zod-schemas";
 import {
   parseAndValidateBody,
   validationErrorResponse,
 } from "@/lib/api/validation/zod-helpers";
+import { updateLensPriceMatrixSchemaV2 } from "@/lib/api/validation/zod-schemas";
+import { appLogger as logger } from "@/lib/logger";
+import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
+import { createClient } from "@/utils/supabase/server";
 
 export const dynamic = "force-dynamic";
 export async function GET(
@@ -200,7 +201,7 @@ export async function PUT(
     }
 
     return NextResponse.json({ matrix });
-  } catch (error: any) {
+  } catch (error: unknown) {
     if (error instanceof ValidationError) {
       return validationErrorResponse(error);
     } else {

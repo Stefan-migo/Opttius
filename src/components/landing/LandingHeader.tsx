@@ -1,15 +1,15 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { createPortal } from "react-dom";
+import { LayoutDashboard, Menu, X } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { Menu, X, LayoutDashboard } from "lucide-react";
-import { createClient } from "@/utils/supabase/client";
-import Image from "next/image";
-import businessConfig from "@/config/business";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
+
 import { useTheme } from "@/components/theme-provider";
+import { Button } from "@/components/ui/button";
+import { createClient } from "@/utils/supabase/client";
 
 type OrgStatus = {
   hasOrganization: boolean;
@@ -114,25 +114,25 @@ export function LandingHeader() {
       <nav className="max-w-7xl mx-auto flex justify-between items-center transition-all duration-300">
         {/* Logo - same structure as admin sidebar */}
         <Link
-          href="/"
           className="group flex items-center gap-2 sm:gap-4 pl-2 sm:pl-5"
+          href="/"
         >
           <div className="relative group-hover:scale-105 transition-all duration-700 flex-shrink-0">
             <Image
-              src="/logo-opttius.svg"
               alt="Opttius"
-              width={36}
-              height={36}
               className="h-6 w-6 sm:h-7 sm:w-7 md:h-8 md:w-8 transition-all duration-700"
+              height={36}
+              src="/logo-opttius.svg"
+              width={36}
             />
           </div>
           <div className="flex flex-col items-start justify-center">
             <Image
-              src="/OpttiusTextAlone.svg"
               alt="Opttius"
-              width={140}
-              height={36}
               className="h-5 w-24 sm:h-6 sm:w-28 md:h-7 md:w-32 transition-all duration-700 object-contain object-left"
+              height={36}
+              src="/OpttiusTextAlone.svg"
+              width={140}
             />
           </div>
         </Link>
@@ -141,12 +141,12 @@ export function LandingHeader() {
         <div className="hidden lg:flex items-center gap-10 font-serif italic text-sm tracking-wide text-white/90">
           {navigation.map((item) => (
             <button
+              className="hover:text-epoch-accent transition-colors duration-300 relative group"
               key={item.name}
               onClick={() => handleNavClick(item.href)}
-              className="hover:text-epoch-accent transition-colors duration-300 relative group"
             >
               {item.name}
-              <span className="absolute -bottom-1 left-0 w-0 h-[1px] bg-epoch-accent transition-all duration-500 group-hover:w-full"></span>
+              <span className="absolute -bottom-1 left-0 w-0 h-[1px] bg-epoch-accent transition-all duration-500 group-hover:w-full" />
             </button>
           ))}
         </div>
@@ -158,8 +158,8 @@ export function LandingHeader() {
           ) : isAuthenticated ? (
             orgStatus?.hasOrganization && !orgStatus?.isDemoMode ? (
               <Button
-                onClick={() => router.push("/admin")}
                 className="bg-transparent border border-white/30 hover:bg-white hover:text-epoch-surface text-white rounded-xl px-8 py-2 font-display text-xs tracking-widest uppercase transition-all duration-500"
+                onClick={() => router.push("/admin")}
               >
                 <LayoutDashboard className="mr-2 h-3 w-3" />
                 Dashboard
@@ -167,15 +167,15 @@ export function LandingHeader() {
             ) : (
               <div className="flex gap-4">
                 <Button
-                  onClick={() => router.push("/onboarding/create")}
                   className="bg-epoch-accent hover:bg-white text-epoch-surface rounded-xl px-8 py-2 font-display text-xs tracking-widest uppercase transition-all duration-500"
+                  onClick={() => router.push("/onboarding/create")}
                 >
                   Activar
                 </Button>
                 <Button
-                  onClick={() => router.push("/onboarding/choice")}
-                  variant="outline"
                   className="bg-transparent border-white/30 hover:border-white text-white rounded-xl px-8 py-2 font-display text-xs tracking-widest uppercase transition-all duration-500"
+                  variant="outline"
+                  onClick={() => router.push("/onboarding/choice")}
                 >
                   Demo
                 </Button>
@@ -184,22 +184,22 @@ export function LandingHeader() {
           ) : (
             <div className="flex items-center gap-8">
               <button
-                onClick={() => router.push("/login")}
                 className="text-white/80 hover:text-white font-serif italic text-sm tracking-wide transition-colors"
+                onClick={() => router.push("/login")}
               >
                 Acceso
               </button>
               <Button
-                onClick={() => router.push("/solicitar-demo")}
                 className="bg-transparent border border-white/30 hover:bg-white hover:text-epoch-surface text-white rounded-xl px-10 py-5 font-display text-xs tracking-widest uppercase transition-all duration-502 animate-in fade-in zoom-in"
+                onClick={() => router.push("/solicitar-demo")}
               >
                 Solicitar Demo
               </Button>
               {signupEnabled && (
                 <Button
-                  onClick={() => router.push("/signup")}
-                  variant="outline"
                   className="border-white/30 hover:bg-white/10 text-white rounded-xl px-6 py-5 font-display text-xs tracking-widest uppercase"
+                  variant="outline"
+                  onClick={() => router.push("/signup")}
                 >
                   Registrarse
                 </Button>
@@ -211,9 +211,9 @@ export function LandingHeader() {
         {/* Mobile menu button */}
         <div className="lg:hidden">
           <Button
-            variant="ghost"
-            size="icon"
             className="text-white hover:bg-white/10"
+            size="icon"
+            variant="ghost"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
             {mobileMenuOpen ? (
@@ -230,24 +230,24 @@ export function LandingHeader() {
         typeof document !== "undefined" &&
         createPortal(
           <div
+            aria-label="Menú de navegación"
+            aria-modal="true"
             className="fixed inset-0 top-0 left-0 right-0 bottom-0 w-full min-h-screen z-[100] bg-epoch-surface text-white animate-in slide-in-from-top duration-500 flex flex-col items-center justify-center py-12 px-6 overflow-y-auto"
             role="dialog"
-            aria-modal="true"
-            aria-label="Menú de navegación"
           >
             <button
-              onClick={() => setMobileMenuOpen(false)}
-              className="absolute top-8 right-8 text-white hover:text-epoch-accent transition-colors p-2 z-10"
               aria-label="Cerrar menú"
+              className="absolute top-8 right-8 text-white hover:text-epoch-accent transition-colors p-2 z-10"
+              onClick={() => setMobileMenuOpen(false)}
             >
               <X className="h-8 w-8" />
             </button>
             <div className="flex flex-col items-center space-y-8 font-serif italic text-xl">
               {navigation.map((item) => (
                 <button
+                  className="hover:text-epoch-accent transition-colors py-2"
                   key={item.name}
                   onClick={() => handleNavClick(item.href)}
-                  className="hover:text-epoch-accent transition-colors py-2"
                 >
                   {item.name}
                 </button>
@@ -259,11 +259,11 @@ export function LandingHeader() {
               ) : isAuthenticated ? (
                 orgStatus?.hasOrganization && !orgStatus?.isDemoMode ? (
                   <Button
+                    className="w-full bg-epoch-accent text-epoch-surface rounded-xl h-14 font-display tracking-widest uppercase hover:bg-white hover:text-epoch-surface"
                     onClick={() => {
                       router.push("/admin");
                       setMobileMenuOpen(false);
                     }}
-                    className="w-full bg-epoch-accent text-epoch-surface rounded-xl h-14 font-display tracking-widest uppercase hover:bg-white hover:text-epoch-surface"
                   >
                     <LayoutDashboard className="mr-2 h-5 w-5" />
                     Dashboard
@@ -271,21 +271,21 @@ export function LandingHeader() {
                 ) : (
                   <div className="w-full space-y-3">
                     <Button
+                      className="w-full bg-epoch-accent text-epoch-surface rounded-xl h-14 font-display tracking-widest uppercase hover:bg-white hover:text-epoch-surface"
                       onClick={() => {
                         router.push("/onboarding/create");
                         setMobileMenuOpen(false);
                       }}
-                      className="w-full bg-epoch-accent text-epoch-surface rounded-xl h-14 font-display tracking-widest uppercase hover:bg-white hover:text-epoch-surface"
                     >
                       Activar mi Óptica
                     </Button>
                     <Button
+                      className="w-full border-white/30 bg-white/10 text-white rounded-xl h-14 font-display tracking-widest uppercase hover:bg-white/20"
+                      variant="outline"
                       onClick={() => {
                         router.push("/onboarding/choice");
                         setMobileMenuOpen(false);
                       }}
-                      variant="outline"
-                      className="w-full border-white/30 bg-white/10 text-white rounded-xl h-14 font-display tracking-widest uppercase hover:bg-white/20"
                     >
                       Ver Demo
                     </Button>
@@ -294,32 +294,32 @@ export function LandingHeader() {
               ) : (
                 <div className="w-full space-y-3">
                   <Button
+                    className="w-full border-white/30 bg-white/10 text-white rounded-xl h-14 font-display tracking-widest uppercase hover:bg-white/20"
+                    variant="outline"
                     onClick={() => {
                       router.push("/login");
                       setMobileMenuOpen(false);
                     }}
-                    variant="outline"
-                    className="w-full border-white/30 bg-white/10 text-white rounded-xl h-14 font-display tracking-widest uppercase hover:bg-white/20"
                   >
                     Iniciar Sesión
                   </Button>
                   <Button
+                    className="w-full bg-epoch-accent text-epoch-surface rounded-xl h-14 font-display tracking-widest uppercase hover:bg-white hover:text-epoch-surface"
                     onClick={() => {
                       router.push("/solicitar-demo");
                       setMobileMenuOpen(false);
                     }}
-                    className="w-full bg-epoch-accent text-epoch-surface rounded-xl h-14 font-display tracking-widest uppercase hover:bg-white hover:text-epoch-surface"
                   >
                     Solicitar Demo
                   </Button>
                   {signupEnabled && (
                     <Button
+                      className="w-full border-white/30 bg-white/10 text-white rounded-xl h-14 font-display tracking-widest uppercase hover:bg-white/20"
+                      variant="outline"
                       onClick={() => {
                         router.push("/signup");
                         setMobileMenuOpen(false);
                       }}
-                      variant="outline"
-                      className="w-full border-white/30 bg-white/10 text-white rounded-xl h-14 font-display tracking-widest uppercase hover:bg-white/20"
                     >
                       Registrarse
                     </Button>

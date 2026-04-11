@@ -1,41 +1,40 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import {
+  AlertCircle,
+  BarChart3,
+  CheckCircle,
+  ExternalLink,
+  Eye,
+  Facebook,
+  Globe,
+  Image as ImageIcon,
+  Link as LinkIcon,
+  Save,
+  Search,
+  Twitter,
+} from "lucide-react";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
+  CardDescription,
   CardHeader,
   CardTitle,
-  CardDescription,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import ImageUpload from "@/components/ui/ImageUpload";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
-import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Globe,
-  Search,
-  BarChart3,
-  Save,
-  ExternalLink,
-  Eye,
-  CheckCircle,
-  AlertCircle,
-  Image as ImageIcon,
-  Twitter,
-  Facebook,
-  Link as LinkIcon,
-} from "lucide-react";
-import { toast } from "sonner";
-import ImageUpload from "@/components/ui/ImageUpload";
+import { Textarea } from "@/components/ui/textarea";
 
 export default function SEOManager() {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [config, setConfig] = useState<Record<string, any>>({});
+  const [config, setConfig] = useState<Record<string, unknown>>({});
   const [hasChanges, setHasChanges] = useState(false);
 
   useEffect(() => {
@@ -87,7 +86,7 @@ export default function SEOManager() {
     }
   };
 
-  const handleUpdate = (key: string, value: any) => {
+  const handleUpdate = (key: string, value: unknown) => {
     setConfig((prev) => ({ ...prev, [key]: value }));
     setHasChanges(true);
   };
@@ -154,13 +153,13 @@ export default function SEOManager() {
             Optimiza tu sitio para motores de búsqueda y redes sociales
           </p>
         </div>
-        <Button onClick={handleSave} disabled={saving || !hasChanges}>
+        <Button disabled={saving || !hasChanges} onClick={handleSave}>
           <Save className="h-4 w-4 mr-2" />
           {saving ? "Guardando..." : "Guardar Cambios"}
         </Button>
       </div>
 
-      <Tabs defaultValue="general" className="space-y-6">
+      <Tabs className="space-y-6" defaultValue="general">
         <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="general">General</TabsTrigger>
           <TabsTrigger value="social">Redes Sociales</TabsTrigger>
@@ -169,7 +168,7 @@ export default function SEOManager() {
         </TabsList>
 
         {/* General SEO Settings */}
-        <TabsContent value="general" className="space-y-6">
+        <TabsContent className="space-y-6" value="general">
           <Card
             className="bg-admin-bg-secondary shadow-[0_1px_3px_rgba(0,0,0,0.3)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.4)]"
             style={{ backgroundColor: "var(--admin-border-primary)" }}
@@ -205,18 +204,18 @@ export default function SEOManager() {
                   </div>
                 </div>
                 <Input
-                  id="default_title"
-                  value={config.seo_default_title || ""}
-                  onChange={(e) =>
-                    handleUpdate("seo_default_title", e.target.value)
-                  }
-                  placeholder="OPTTIUS CONSCIENTE - Productos Naturales"
                   className={
                     titleStatus.status === "error"
                       ? "border-red-500"
                       : titleStatus.status === "warning"
                         ? "border-yellow-500"
                         : ""
+                  }
+                  id="default_title"
+                  placeholder="OPTTIUS CONSCIENTE - Productos Naturales"
+                  value={config.seo_default_title || ""}
+                  onChange={(e) =>
+                    handleUpdate("seo_default_title", e.target.value)
                   }
                 />
                 <p
@@ -249,19 +248,19 @@ export default function SEOManager() {
                   </div>
                 </div>
                 <Textarea
-                  id="default_description"
-                  value={config.seo_default_description || ""}
-                  onChange={(e) =>
-                    handleUpdate("seo_default_description", e.target.value)
-                  }
-                  placeholder="Descripción de tu sitio web que aparecerá en los resultados de búsqueda..."
-                  rows={4}
                   className={
                     descriptionStatus.status === "error"
                       ? "border-red-500"
                       : descriptionStatus.status === "warning"
                         ? "border-yellow-500"
                         : ""
+                  }
+                  id="default_description"
+                  placeholder="Descripción de tu sitio web que aparecerá en los resultados de búsqueda..."
+                  rows={4}
+                  value={config.seo_default_description || ""}
+                  onChange={(e) =>
+                    handleUpdate("seo_default_description", e.target.value)
                   }
                 />
                 <p
@@ -275,6 +274,7 @@ export default function SEOManager() {
                 <Label htmlFor="default_keywords">Palabras Clave</Label>
                 <Input
                   id="default_keywords"
+                  placeholder="productos naturales, bienestar, salud, consciente"
                   value={
                     Array.isArray(config.seo_default_keywords)
                       ? config.seo_default_keywords.join(", ")
@@ -287,7 +287,6 @@ export default function SEOManager() {
                       .filter((k) => k);
                     handleUpdate("seo_default_keywords", keywords);
                   }}
-                  placeholder="productos naturales, bienestar, salud, consciente"
                 />
                 <p className="text-xs text-tierra-media">
                   Separa las palabras clave con comas. Ejemplo: productos
@@ -299,11 +298,11 @@ export default function SEOManager() {
                 <Label htmlFor="canonical_url">URL Canónica</Label>
                 <Input
                   id="canonical_url"
+                  placeholder={baseUrl}
                   value={config.seo_canonical_url || baseUrl}
                   onChange={(e) =>
                     handleUpdate("seo_canonical_url", e.target.value)
                   }
-                  placeholder={baseUrl}
                 />
                 <p className="text-xs text-tierra-media">
                   URL base del sitio (usada para URLs canónicas)
@@ -341,7 +340,7 @@ export default function SEOManager() {
         </TabsContent>
 
         {/* Social Media Settings */}
-        <TabsContent value="social" className="space-y-6">
+        <TabsContent className="space-y-6" value="social">
           <Card
             className="bg-admin-bg-secondary shadow-[0_1px_3px_rgba(0,0,0,0.3)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.4)]"
             style={{ backgroundColor: "var(--admin-border-primary)" }}
@@ -360,12 +359,12 @@ export default function SEOManager() {
                 <Label htmlFor="og_title">Título Open Graph</Label>
                 <Input
                   id="og_title"
-                  value={config.seo_og_title || config.seo_default_title || ""}
-                  onChange={(e) => handleUpdate("seo_og_title", e.target.value)}
                   placeholder={
                     config.seo_default_title ||
                     "Título para compartir en redes sociales"
                   }
+                  value={config.seo_og_title || config.seo_default_title || ""}
+                  onChange={(e) => handleUpdate("seo_og_title", e.target.value)}
                 />
                 <p className="text-xs text-tierra-media">
                   Si está vacío, se usará el título por defecto
@@ -376,6 +375,11 @@ export default function SEOManager() {
                 <Label htmlFor="og_description">Descripción Open Graph</Label>
                 <Textarea
                   id="og_description"
+                  placeholder={
+                    config.seo_default_description ||
+                    "Descripción para compartir en redes sociales"
+                  }
+                  rows={3}
                   value={
                     config.seo_og_description ||
                     config.seo_default_description ||
@@ -384,11 +388,6 @@ export default function SEOManager() {
                   onChange={(e) =>
                     handleUpdate("seo_og_description", e.target.value)
                   }
-                  placeholder={
-                    config.seo_default_description ||
-                    "Descripción para compartir en redes sociales"
-                  }
-                  rows={3}
                 />
                 <p className="text-xs text-tierra-media">
                   Si está vacío, se usará la descripción por defecto
@@ -403,10 +402,10 @@ export default function SEOManager() {
                 </p>
                 <div className="space-y-4">
                   <ImageUpload
+                    folder="seo"
+                    placeholder="Seleccionar o ingresar URL de imagen Open Graph"
                     value={config.seo_og_image_url || ""}
                     onChange={(url) => handleUpdate("seo_og_image_url", url)}
-                    placeholder="Seleccionar o ingresar URL de imagen Open Graph"
-                    folder="seo"
                   />
                   {config.seo_og_image_url && (
                     <div className="mt-2 p-3 bg-admin-bg-tertiary rounded-lg border">
@@ -425,9 +424,9 @@ export default function SEOManager() {
                 <Label htmlFor="og_type">Tipo Open Graph</Label>
                 <Input
                   id="og_type"
+                  placeholder="website"
                   value={config.seo_og_type || "website"}
                   onChange={(e) => handleUpdate("seo_og_type", e.target.value)}
-                  placeholder="website"
                 />
                 <p className="text-xs text-tierra-media">
                   Tipos comunes: website, article, product
@@ -454,11 +453,11 @@ export default function SEOManager() {
                 <Label htmlFor="twitter_handle">Twitter Handle</Label>
                 <Input
                   id="twitter_handle"
+                  placeholder="@opttius"
                   value={config.seo_twitter_handle || ""}
                   onChange={(e) =>
                     handleUpdate("seo_twitter_handle", e.target.value)
                   }
-                  placeholder="@opttius"
                 />
                 <p className="text-xs text-tierra-media">
                   Tu nombre de usuario de Twitter (incluye el @)
@@ -469,11 +468,11 @@ export default function SEOManager() {
                 <Label htmlFor="twitter_card_type">Tipo de Tarjeta</Label>
                 <Input
                   id="twitter_card_type"
+                  placeholder="summary_large_image"
                   value={config.seo_twitter_card_type || "summary_large_image"}
                   onChange={(e) =>
                     handleUpdate("seo_twitter_card_type", e.target.value)
                   }
-                  placeholder="summary_large_image"
                 />
                 <p className="text-xs text-tierra-media">
                   Tipos: summary, summary_large_image
@@ -501,9 +500,9 @@ export default function SEOManager() {
                 {config.seo_og_image_url ? (
                   <div className="w-full aspect-[1.91/1] bg-gray-200 dark:bg-gray-700 overflow-hidden">
                     <img
-                      src={fullOgImage}
                       alt="OG Preview"
                       className="w-full h-full object-cover"
+                      src={fullOgImage}
                       onError={(e) => {
                         (e.target as HTMLImageElement).style.display = "none";
                         (
@@ -542,7 +541,7 @@ export default function SEOManager() {
         </TabsContent>
 
         {/* Analytics Settings */}
-        <TabsContent value="analytics" className="space-y-6">
+        <TabsContent className="space-y-6" value="analytics">
           <Card
             className="bg-admin-bg-secondary shadow-[0_1px_3px_rgba(0,0,0,0.3)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.4)]"
             style={{ backgroundColor: "var(--admin-border-primary)" }}
@@ -561,11 +560,11 @@ export default function SEOManager() {
                 <Label htmlFor="ga_id">Google Analytics ID</Label>
                 <Input
                   id="ga_id"
+                  placeholder="G-XXXXXXXXXX"
                   value={config.seo_google_analytics_id || ""}
                   onChange={(e) =>
                     handleUpdate("seo_google_analytics_id", e.target.value)
                   }
-                  placeholder="G-XXXXXXXXXX"
                 />
                 <p className="text-xs text-tierra-media">
                   ID de Google Analytics 4 (formato: G-XXXXXXXXXX)
@@ -576,11 +575,11 @@ export default function SEOManager() {
                 <Label htmlFor="gtm_id">Google Tag Manager ID</Label>
                 <Input
                   id="gtm_id"
+                  placeholder="GTM-XXXXXXX"
                   value={config.seo_google_tag_manager_id || ""}
                   onChange={(e) =>
                     handleUpdate("seo_google_tag_manager_id", e.target.value)
                   }
-                  placeholder="GTM-XXXXXXX"
                 />
                 <p className="text-xs text-tierra-media">
                   ID de Google Tag Manager (formato: GTM-XXXXXXX)
@@ -591,11 +590,11 @@ export default function SEOManager() {
                 <Label htmlFor="fb_pixel">Facebook Pixel ID</Label>
                 <Input
                   id="fb_pixel"
+                  placeholder="123456789012345"
                   value={config.seo_facebook_pixel_id || ""}
                   onChange={(e) =>
                     handleUpdate("seo_facebook_pixel_id", e.target.value)
                   }
-                  placeholder="123456789012345"
                 />
                 <p className="text-xs text-tierra-media">
                   ID de Facebook Pixel (números solamente)
@@ -606,11 +605,11 @@ export default function SEOManager() {
                 <Label htmlFor="bing_webmaster">Bing Webmaster Tools</Label>
                 <Input
                   id="bing_webmaster"
+                  placeholder="Meta tag verification code"
                   value={config.seo_bing_webmaster_id || ""}
                   onChange={(e) =>
                     handleUpdate("seo_bing_webmaster_id", e.target.value)
                   }
-                  placeholder="Meta tag verification code"
                 />
                 <p className="text-xs text-tierra-media">
                   Código de verificación de Bing Webmaster Tools
@@ -621,7 +620,7 @@ export default function SEOManager() {
         </TabsContent>
 
         {/* Tools & Utilities */}
-        <TabsContent value="tools" className="space-y-6">
+        <TabsContent className="space-y-6" value="tools">
           <Card
             className="bg-admin-bg-secondary shadow-[0_1px_3px_rgba(0,0,0,0.3)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.4)]"
             style={{ backgroundColor: "var(--admin-border-primary)" }}
@@ -647,11 +646,11 @@ export default function SEOManager() {
                     Mapa del sitio para motores de búsqueda
                   </p>
                 </div>
-                <Button variant="outline" size="sm" asChild>
+                <Button asChild size="sm" variant="outline">
                   <a
                     href={`${baseUrl}/api/sitemap.xml`}
-                    target="_blank"
                     rel="noopener noreferrer"
+                    target="_blank"
                   >
                     <ExternalLink className="h-4 w-4 mr-2" />
                     Ver
@@ -672,11 +671,11 @@ export default function SEOManager() {
                     Instrucciones para crawlers de motores de búsqueda
                   </p>
                 </div>
-                <Button variant="outline" size="sm" asChild>
+                <Button asChild size="sm" variant="outline">
                   <a
                     href={`${baseUrl}/api/robots.txt`}
-                    target="_blank"
                     rel="noopener noreferrer"
+                    target="_blank"
                   >
                     <ExternalLink className="h-4 w-4 mr-2" />
                     Ver
@@ -707,11 +706,11 @@ export default function SEOManager() {
                     Verifica y monitorea tu sitio
                   </p>
                 </div>
-                <Button variant="outline" size="sm" asChild>
+                <Button asChild size="sm" variant="outline">
                   <a
                     href="https://search.google.com/search-console"
-                    target="_blank"
                     rel="noopener noreferrer"
+                    target="_blank"
                   >
                     <ExternalLink className="h-4 w-4 mr-2" />
                     Abrir
@@ -728,11 +727,11 @@ export default function SEOManager() {
                     Prueba cómo se ve tu sitio en Facebook
                   </p>
                 </div>
-                <Button variant="outline" size="sm" asChild>
+                <Button asChild size="sm" variant="outline">
                   <a
                     href="https://developers.facebook.com/tools/debug/"
-                    target="_blank"
                     rel="noopener noreferrer"
+                    target="_blank"
                   >
                     <ExternalLink className="h-4 w-4 mr-2" />
                     Abrir
@@ -749,11 +748,11 @@ export default function SEOManager() {
                     Prueba tus Twitter Cards
                   </p>
                 </div>
-                <Button variant="outline" size="sm" asChild>
+                <Button asChild size="sm" variant="outline">
                   <a
                     href="https://cards-dev.twitter.com/validator"
-                    target="_blank"
                     rel="noopener noreferrer"
+                    target="_blank"
                   >
                     <ExternalLink className="h-4 w-4 mr-2" />
                     Abrir
@@ -770,11 +769,11 @@ export default function SEOManager() {
                     Verifica datos estructurados
                   </p>
                 </div>
-                <Button variant="outline" size="sm" asChild>
+                <Button asChild size="sm" variant="outline">
                   <a
                     href="https://search.google.com/test/rich-results"
-                    target="_blank"
                     rel="noopener noreferrer"
+                    target="_blank"
                   >
                     <ExternalLink className="h-4 w-4 mr-2" />
                     Abrir

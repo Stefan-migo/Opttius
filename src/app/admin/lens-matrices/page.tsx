@@ -1,18 +1,21 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+  Edit,
+  Eye,
+  EyeOff,
+  Plus,
+  RefreshCw,
+  Search,
+  Trash2,
+  Upload,
+} from "lucide-react";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -21,6 +24,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Pagination } from "@/components/ui/pagination";
 import {
   Select,
   SelectContent,
@@ -29,18 +35,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  Plus,
-  Edit,
-  Trash2,
-  Search,
-  RefreshCw,
-  Eye,
-  EyeOff,
-  Upload,
-} from "lucide-react";
-import { toast } from "sonner";
-import { Badge } from "@/components/ui/badge";
-import { Pagination } from "@/components/ui/pagination";
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { formatCurrency } from "@/lib/utils/formatting";
 
 interface LensFamily {
@@ -171,8 +172,8 @@ export default function LensMatricesPage() {
         sphere_max: matrix.sphere_max.toString(),
         cylinder_min: matrix.cylinder_min.toString(),
         cylinder_max: matrix.cylinder_max.toString(),
-        addition_min: (matrix as any).addition_min?.toString() || "0",
-        addition_max: (matrix as any).addition_max?.toString() || "4.0",
+        addition_min: (matrix as unknown).addition_min?.toString() || "0",
+        addition_max: (matrix as unknown).addition_max?.toString() || "4.0",
         base_price: matrix.base_price.toString(),
         sourcing_type: matrix.sourcing_type as "stock" | "surfaced",
         cost: matrix.cost.toString(),
@@ -210,7 +211,7 @@ export default function LensMatricesPage() {
         : "/api/admin/lens-matrices";
       const method = editingMatrix ? "PUT" : "POST";
 
-      const body: any = {
+      const body: unknown = {
         lens_family_id: formData.lens_family_id,
         sphere_min: parseFloat(formData.sphere_min),
         sphere_max: parseFloat(formData.sphere_max),
@@ -242,7 +243,7 @@ export default function LensMatricesPage() {
       );
       handleCloseDialog();
       fetchMatrices();
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast.error(error.message || "Error al guardar matriz");
     }
   };
@@ -316,8 +317,8 @@ export default function LensMatricesPage() {
             <CardTitle>Lista de Matrices</CardTitle>
             <div className="flex gap-2">
               <Button
-                variant="outline"
                 size="sm"
+                variant="outline"
                 onClick={() => setIncludeInactive(!includeInactive)}
               >
                 {includeInactive ? (
@@ -332,7 +333,7 @@ export default function LensMatricesPage() {
                   </>
                 )}
               </Button>
-              <Button variant="outline" size="sm" onClick={fetchMatrices}>
+              <Button size="sm" variant="outline" onClick={fetchMatrices}>
                 <RefreshCw className="h-4 w-4" />
               </Button>
             </div>
@@ -344,10 +345,10 @@ export default function LensMatricesPage() {
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
+                  className="pl-10"
                   placeholder="Buscar por familia, tipo o material..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
                 />
               </div>
             </div>
@@ -423,9 +424,9 @@ export default function LensMatricesPage() {
                         {matrix.cylinder_min} a {matrix.cylinder_max}
                       </TableCell>
                       <TableCell>
-                        {(matrix as any).addition_min !== null &&
-                        (matrix as any).addition_min !== undefined
-                          ? `${(matrix as any).addition_min} a ${(matrix as any).addition_max || "4.0"}`
+                        {(matrix as unknown).addition_min !== null &&
+                        (matrix as unknown).addition_min !== undefined
+                          ? `${(matrix as unknown).addition_min} a ${(matrix as unknown).addition_max || "4.0"}`
                           : "0.00 a 0.00"}
                       </TableCell>
                       <TableCell>{formatCurrency(matrix.base_price)}</TableCell>
@@ -447,15 +448,15 @@ export default function LensMatricesPage() {
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
                           <Button
-                            variant="ghost"
                             size="sm"
+                            variant="ghost"
                             onClick={() => handleOpenDialog(matrix)}
                           >
                             <Edit className="h-4 w-4" />
                           </Button>
                           <Button
-                            variant="ghost"
                             size="sm"
+                            variant="ghost"
                             onClick={() => handleDelete(matrix.id)}
                           >
                             <Trash2 className="h-4 w-4" />
@@ -474,12 +475,12 @@ export default function LensMatricesPage() {
             <div className="mt-4">
               <Pagination
                 currentPage={currentPage}
-                totalPages={totalPages}
                 itemsPerPage={itemsPerPage}
-                totalItems={totalMatrices}
-                onPageChange={setCurrentPage}
-                onItemsPerPageChange={setItemsPerPage}
                 itemsPerPageOptions={[10, 20, 50, 100]}
+                totalItems={totalMatrices}
+                totalPages={totalPages}
+                onItemsPerPageChange={setItemsPerPage}
+                onPageChange={setCurrentPage}
               />
             </div>
           )}
@@ -507,18 +508,18 @@ export default function LensMatricesPage() {
               <div>
                 <Label htmlFor="lens_family_id">Familia de Lente *</Label>
                 <Select
+                  required
                   value={formData.lens_family_id}
                   onValueChange={(value) =>
                     setFormData({ ...formData, lens_family_id: value })
                   }
-                  required
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Seleccionar familia" />
                   </SelectTrigger>
                   <SelectContent>
                     {families
-                      .filter((f) => (f as any).is_active !== false)
+                      .filter((f) => (f as unknown).is_active !== false)
                       .map((family) => (
                         <SelectItem key={family.id} value={family.id}>
                           {family.name} {family.brand && `(${family.brand})`}
@@ -556,29 +557,29 @@ export default function LensMatricesPage() {
                 <div>
                   <Label htmlFor="sphere_min">Esfera Mínima *</Label>
                   <Input
+                    required
                     id="sphere_min"
-                    type="number"
+                    placeholder="-10.00"
                     step="0.25"
+                    type="number"
                     value={formData.sphere_min}
                     onChange={(e) =>
                       setFormData({ ...formData, sphere_min: e.target.value })
                     }
-                    placeholder="-10.00"
-                    required
                   />
                 </div>
                 <div>
                   <Label htmlFor="sphere_max">Esfera Máxima *</Label>
                   <Input
+                    required
                     id="sphere_max"
-                    type="number"
+                    placeholder="+6.00"
                     step="0.25"
+                    type="number"
                     value={formData.sphere_max}
                     onChange={(e) =>
                       setFormData({ ...formData, sphere_max: e.target.value })
                     }
-                    placeholder="+6.00"
-                    required
                   />
                 </div>
               </div>
@@ -587,9 +588,11 @@ export default function LensMatricesPage() {
                 <div>
                   <Label htmlFor="cylinder_min">Cilindro Mínimo *</Label>
                   <Input
+                    required
                     id="cylinder_min"
-                    type="number"
+                    placeholder="-2.00"
                     step="0.25"
+                    type="number"
                     value={formData.cylinder_min}
                     onChange={(e) =>
                       setFormData({
@@ -597,16 +600,16 @@ export default function LensMatricesPage() {
                         cylinder_min: e.target.value,
                       })
                     }
-                    placeholder="-2.00"
-                    required
                   />
                 </div>
                 <div>
                   <Label htmlFor="cylinder_max">Cilindro Máximo *</Label>
                   <Input
+                    required
                     id="cylinder_max"
-                    type="number"
+                    placeholder="0.00"
                     step="0.25"
+                    type="number"
                     value={formData.cylinder_max}
                     onChange={(e) =>
                       setFormData({
@@ -614,8 +617,6 @@ export default function LensMatricesPage() {
                         cylinder_max: e.target.value,
                       })
                     }
-                    placeholder="0.00"
-                    required
                   />
                 </div>
               </div>
@@ -639,8 +640,8 @@ export default function LensMatricesPage() {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <Label
-                      htmlFor="addition_min"
                       className="text-sm font-semibold"
+                      htmlFor="addition_min"
                     >
                       Adición Mínima (Dioptrías) *
                       <span className="text-xs text-gray-500 ml-1 font-normal">
@@ -648,11 +649,14 @@ export default function LensMatricesPage() {
                       </span>
                     </Label>
                     <Input
+                      required
+                      className="mt-2"
                       id="addition_min"
-                      type="number"
-                      step="0.25"
-                      min="0"
                       max="4"
+                      min="0"
+                      placeholder="0.00"
+                      step="0.25"
+                      type="number"
                       value={formData.addition_min}
                       onChange={(e) =>
                         setFormData({
@@ -660,9 +664,6 @@ export default function LensMatricesPage() {
                           addition_min: e.target.value,
                         })
                       }
-                      placeholder="0.00"
-                      required
-                      className="mt-2"
                     />
                     <p className="text-xs text-gray-500 mt-2">
                       <strong>Monofocales:</strong> 0.00 |{" "}
@@ -671,8 +672,8 @@ export default function LensMatricesPage() {
                   </div>
                   <div>
                     <Label
-                      htmlFor="addition_max"
                       className="text-sm font-semibold"
+                      htmlFor="addition_max"
                     >
                       Adición Máxima (Dioptrías) *
                       <span className="text-xs text-gray-500 ml-1 font-normal">
@@ -680,11 +681,14 @@ export default function LensMatricesPage() {
                       </span>
                     </Label>
                     <Input
+                      required
+                      className="mt-2"
                       id="addition_max"
-                      type="number"
-                      step="0.25"
-                      min="0"
                       max="4"
+                      min="0"
+                      placeholder="4.00"
+                      step="0.25"
+                      type="number"
                       value={formData.addition_max}
                       onChange={(e) =>
                         setFormData({
@@ -692,9 +696,6 @@ export default function LensMatricesPage() {
                           addition_max: e.target.value,
                         })
                       }
-                      placeholder="4.00"
-                      required
-                      className="mt-2"
                     />
                     <p className="text-xs text-gray-500 mt-2">
                       <strong>Monofocales:</strong> 0.00 |{" "}
@@ -707,41 +708,41 @@ export default function LensMatricesPage() {
               <div>
                 <Label htmlFor="base_price">Precio Venta *</Label>
                 <Input
+                  required
                   id="base_price"
-                  type="number"
+                  placeholder="0.00"
                   step="0.01"
+                  type="number"
                   value={formData.base_price}
                   onChange={(e) =>
                     setFormData({ ...formData, base_price: e.target.value })
                   }
-                  placeholder="0.00"
-                  required
                 />
               </div>
 
               <div>
                 <Label htmlFor="cost">Costo Compra *</Label>
                 <Input
+                  required
                   id="cost"
-                  type="number"
+                  placeholder="0.00"
                   step="0.01"
+                  type="number"
                   value={formData.cost}
                   onChange={(e) =>
                     setFormData({ ...formData, cost: e.target.value })
                   }
-                  placeholder="0.00"
-                  required
                 />
               </div>
 
               <div>
                 <Label htmlFor="sourcing_type">Tipo de Sourcing *</Label>
                 <Select
+                  required
                   value={formData.sourcing_type}
                   onValueChange={(value: "stock" | "surfaced") =>
                     setFormData({ ...formData, sourcing_type: value })
                   }
-                  required
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -759,15 +760,15 @@ export default function LensMatricesPage() {
 
               <div className="flex items-center space-x-2">
                 <input
-                  type="checkbox"
-                  id="is_active"
                   checked={formData.is_active}
+                  className="h-4 w-4 rounded border-gray-300"
+                  id="is_active"
+                  type="checkbox"
                   onChange={(e) =>
                     setFormData({ ...formData, is_active: e.target.checked })
                   }
-                  className="h-4 w-4 rounded border-gray-300"
                 />
-                <Label htmlFor="is_active" className="cursor-pointer">
+                <Label className="cursor-pointer" htmlFor="is_active">
                   Activa
                 </Label>
               </div>
@@ -1024,7 +1025,7 @@ Poly Blue Single,-10.00,6.00,-4.00,4.00,80000,50000,stock,0.00,0.00`}
                   // Show first few errors
                   const errorMessages = result.details.errors
                     .slice(0, 5)
-                    .map((err: any) => `Fila ${err.row}: ${err.error}`)
+                    .map((err: unknown) => `Fila ${err.row}: ${err.error}`)
                     .join("\n");
                   toast.error(
                     `Algunos errores:\n${errorMessages}${
@@ -1038,7 +1039,7 @@ Poly Blue Single,-10.00,6.00,-4.00,4.00,80000,50000,stock,0.00,0.00`}
 
                 setShowImportDialog(false);
                 fetchMatrices();
-              } catch (error: any) {
+              } catch (error: unknown) {
                 toast.error(error.message || "Error al importar CSV");
               }
             }}
@@ -1047,12 +1048,12 @@ Poly Blue Single,-10.00,6.00,-4.00,4.00,80000,50000,stock,0.00,0.00`}
               <div>
                 <Label htmlFor="file">Archivo CSV</Label>
                 <Input
+                  required
+                  accept=".csv"
+                  className="mt-2"
                   id="file"
                   name="file"
                   type="file"
-                  accept=".csv"
-                  required
-                  className="mt-2"
                 />
                 <p className="text-sm text-muted-foreground mt-2">
                   El archivo debe tener encabezados en la primera fila

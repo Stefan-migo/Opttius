@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createServiceRoleClient } from "@/utils/supabase/service-role";
-import { appLogger as logger } from "@/lib/logger";
-import { createPublicSaasSupportTicketSchema } from "@/lib/api/validation/zod-schemas";
+
 import { parseAndValidateBody } from "@/lib/api/validation/zod-helpers";
+import { createPublicSaasSupportTicketSchema } from "@/lib/api/validation/zod-schemas";
+import { appLogger as logger } from "@/lib/logger";
+import { createServiceRoleClient } from "@/utils/supabase/service-role";
 
 /**
  * POST /api/support/create-ticket
@@ -116,8 +117,8 @@ export async function POST(request: NextRequest) {
         ticket.subject,
         body.requester_email,
         Array.isArray(ticket.organization)
-          ? (ticket.organization[0] as any)?.name
-          : (ticket.organization as any)?.name,
+          ? (ticket.organization[0] as unknown)?.name
+          : (ticket.organization as unknown)?.name,
       );
     } catch (notifError) {
       logger.warn("Failed to create support notification", notifError);

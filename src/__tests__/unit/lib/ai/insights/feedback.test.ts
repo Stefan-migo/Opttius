@@ -1,8 +1,9 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
 import { InsightFeedbackSystem } from "@/lib/ai/insights/feedback";
 import type {
-  InsightFeedback,
   DatabaseInsight,
+  InsightFeedback,
 } from "@/lib/ai/insights/schemas";
 
 // Mock Supabase - create a proper chainable mock
@@ -26,7 +27,7 @@ describe("InsightFeedbackSystem", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockSupabase = createMockSupabase();
-    feedbackSystem = new InsightFeedbackSystem(mockSupabase as any);
+    feedbackSystem = new InsightFeedbackSystem(mockSupabase as unknown);
   });
 
   describe("collectFeedback", () => {

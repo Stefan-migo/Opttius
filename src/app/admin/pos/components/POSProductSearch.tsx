@@ -1,8 +1,10 @@
 "use client";
 
+import { Loader2, Search } from "lucide-react";
+
 import { Input } from "@/components/ui/input";
-import { Search, Loader2 } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
+
 import type { POSProduct } from "../types";
 
 interface POSProductSearchProps {
@@ -35,13 +37,13 @@ export function POSProductSearch({
       <div className="relative">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
         <Input
-          ref={inputRef as React.Ref<HTMLInputElement>}
+          autoComplete="off"
+          className="pl-10"
           placeholder={placeholder}
+          ref={inputRef as React.Ref<HTMLInputElement>}
           value={searchTerm}
           onChange={(e) => onSearchChange(e.target.value)}
           onKeyDown={onKeyDown}
-          className="pl-10"
-          autoComplete="off"
         />
       </div>
 
@@ -55,19 +57,19 @@ export function POSProductSearch({
 
           {!loading && products.length > 0 && (
             <div
-              ref={suggestionsRef as React.Ref<HTMLDivElement>}
               className="max-h-60 overflow-y-auto border rounded-lg bg-white dark:bg-gray-900 shadow-lg z-20"
+              ref={suggestionsRef as React.Ref<HTMLDivElement>}
             >
               {products.map((product, index) => (
                 <button
-                  key={product.id}
-                  type="button"
-                  onClick={() => onSelectProduct(product)}
                   className={`w-full p-3 text-left border-b last:border-b-0 flex justify-between items-center transition-colors ${
                     selectedIndex === index
                       ? "bg-blue-50 dark:bg-blue-900/30 border-blue-200"
                       : "hover:bg-gray-50 dark:hover:bg-gray-800"
                   }`}
+                  key={product.id}
+                  type="button"
+                  onClick={() => onSelectProduct(product)}
                 >
                   <div className="flex-1 min-w-0">
                     <div className="font-medium truncate">{product.name}</div>

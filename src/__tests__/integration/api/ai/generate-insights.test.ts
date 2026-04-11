@@ -9,24 +9,26 @@
  */
 
 import {
-  describe,
-  it,
-  expect,
-  beforeAll,
   afterAll,
-  vi,
+  beforeAll,
   beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
 } from "vitest";
+
+import { LLMFactory } from "@/lib/ai/factory";
+
 import {
+  cleanupTestData,
   createTestOrganization,
   createTestUser,
-  cleanupTestData,
-  makeAuthenticatedRequest,
   isMultiTenancyAvailable,
+  makeAuthenticatedRequest,
   type TestOrganization,
   type TestUser,
 } from "../../helpers/test-setup";
-import { LLMFactory } from "@/lib/ai/factory";
 
 // Mock LLMFactory
 vi.mock("@/lib/ai/factory", () => ({
@@ -40,8 +42,8 @@ let infrastructureCheck = false;
 describe("Generate Insights API - Integration Tests", () => {
   let org: TestOrganization;
   let user: TestUser;
-  let mockFactory: any;
-  let mockProvider: any;
+  let mockFactory: unknown;
+  let mockProvider: unknown;
 
   beforeAll(async () => {
     infrastructureCheck = await isMultiTenancyAvailable();
@@ -72,7 +74,7 @@ describe("Generate Insights API - Integration Tests", () => {
       }),
     };
 
-    vi.mocked(LLMFactory.getInstance).mockReturnValue(mockFactory as any);
+    vi.mocked(LLMFactory.getInstance).mockReturnValue(mockFactory as unknown);
   });
 
   afterAll(async () => {

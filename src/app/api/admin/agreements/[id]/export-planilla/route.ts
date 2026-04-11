@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createServiceRoleClient } from "@/utils/supabase/server";
+
 import { appLogger as logger } from "@/lib/logger";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
+import { createServiceRoleClient } from "@/utils/supabase/server";
 import { createClient } from "@/utils/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -37,7 +38,7 @@ export async function GET(
 
     const serviceSupabase = createServiceRoleClient();
 
-    let query = serviceSupabase
+    const query = serviceSupabase
       .from("agreement_institutional_balances")
       .select(
         `
@@ -64,7 +65,7 @@ export async function GET(
       );
     }
 
-    const rows = (balances || []).map((b: any) => {
+    const rows = (balances || []).map((b: unknown) => {
       const order = b.orders || {};
       const created = order.created_at
         ? new Date(order.created_at).toISOString().split("T")[0]
@@ -81,7 +82,9 @@ export async function GET(
     const csvHeader =
       "RUT;Nombre;Monto a descontar;Número de orden;Fecha de compra\n";
     const csvRows = rows
-      .map((r: any) => `${r.rut};${r.nombre};${r.monto};${r.orden};${r.fecha}`)
+      .map(
+        (r: unknown) => `${r.rut};${r.nombre};${r.monto};${r.orden};${r.fecha}`,
+      )
       .join("\n");
     const csv = csvHeader + csvRows;
 

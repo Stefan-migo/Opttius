@@ -1,10 +1,24 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import {
+  ArrowLeft,
+  Building2,
+  DollarSign,
+  Download,
+  Eye,
+  FileText,
+  Loader2,
+  Plus,
+  Receipt,
+  Users,
+} from "lucide-react";
+import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { useEffect, useState } from "react";
+
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -14,27 +28,14 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import {
-  ArrowLeft,
-  Building2,
-  FileText,
-  DollarSign,
-  Download,
-  Loader2,
-  Plus,
-  Users,
-  Eye,
-  Receipt,
-} from "lucide-react";
-import Link from "next/link";
-import {
-  agreementService,
   Agreement,
-  AgreementInstitutionalBalance,
   AgreementCustomer,
+  AgreementInstitutionalBalance,
   AgreementInstitutionalInvoice,
+  agreementService,
 } from "@/lib/api/services/agreementService";
 import { handleApiError } from "@/lib/services/errorService";
-import { formatDate, formatCurrency } from "@/lib/utils";
+import { formatCurrency, formatDate } from "@/lib/utils";
 
 export default function AgreementDetailPage() {
   const params = useParams();
@@ -196,7 +197,7 @@ export default function AgreementDetailPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex items-center gap-4">
           <Link href="/admin/agreements">
-            <Button variant="ghost" size="icon">
+            <Button size="icon" variant="ghost">
               <ArrowLeft className="h-4 w-4" />
             </Button>
           </Link>
@@ -332,7 +333,7 @@ export default function AgreementDetailPage() {
               pendiente(s)
             </p>
             <Link href={`/admin/agreements/${id}/institutional-balances`}>
-              <Button variant="outline" size="sm" className="mt-2">
+              <Button className="mt-2" size="sm" variant="outline">
                 Ver detalle
               </Button>
             </Link>
@@ -348,7 +349,7 @@ export default function AgreementDetailPage() {
               Facturas a institución
             </CardTitle>
             <Link href={`/admin/agreements/${id}/invoices`}>
-              <Button variant="outline" size="sm">
+              <Button size="sm" variant="outline">
                 Ver todas
               </Button>
             </Link>
@@ -367,7 +368,7 @@ export default function AgreementDetailPage() {
                   <TableHead>Fecha</TableHead>
                   <TableHead>Monto</TableHead>
                   <TableHead>Estado</TableHead>
-                  <TableHead></TableHead>
+                  <TableHead />
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -386,17 +387,17 @@ export default function AgreementDetailPage() {
                         <Link
                           href={`/admin/agreements/${id}/invoices/${inv.id}`}
                         >
-                          <Button variant="ghost" size="sm">
+                          <Button size="sm" variant="ghost">
                             <Eye className="h-4 w-4" />
                           </Button>
                         </Link>
                         {inv.pdf_url && (
                           <a
                             href={inv.pdf_url}
-                            target="_blank"
                             rel="noopener noreferrer"
+                            target="_blank"
                           >
-                            <Button variant="ghost" size="sm">
+                            <Button size="sm" variant="ghost">
                               <Download className="h-4 w-4" />
                             </Button>
                           </a>
@@ -419,7 +420,7 @@ export default function AgreementDetailPage() {
               Órdenes de compra
             </CardTitle>
             <Link href={`/admin/agreements/${id}/purchase-orders/new`}>
-              <Button variant="outline" size="sm">
+              <Button size="sm" variant="outline">
                 <Plus className="h-4 w-4 mr-2" />
                 Registrar OC
               </Button>
@@ -458,8 +459,8 @@ export default function AgreementDetailPage() {
             <p className="text-admin-text-tertiary py-4">
               No hay órdenes de compra registradas.{" "}
               <Link
-                href={`/admin/agreements/${id}/purchase-orders/new`}
                 className="text-admin-accent-primary hover:underline"
+                href={`/admin/agreements/${id}/purchase-orders/new`}
               >
                 Registrar primera OC
               </Link>
@@ -494,7 +495,7 @@ export default function AgreementDetailPage() {
                     <TableHead>Última compra</TableHead>
                     <TableHead>Total copago</TableHead>
                     <TableHead>Total institucional</TableHead>
-                    <TableHead></TableHead>
+                    <TableHead />
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -527,7 +528,7 @@ export default function AgreementDetailPage() {
                       </TableCell>
                       <TableCell>
                         <Link href={`/admin/customers/${c.customer_id}`}>
-                          <Button variant="ghost" size="sm">
+                          <Button size="sm" variant="ghost">
                             <Eye className="h-4 w-4" />
                           </Button>
                         </Link>
@@ -539,9 +540,9 @@ export default function AgreementDetailPage() {
               {customersPagination.totalPages > 1 && (
                 <div className="flex justify-center items-center gap-2 mt-4">
                   <Button
-                    variant="outline"
-                    size="sm"
                     disabled={customersPagination.page <= 1}
+                    size="sm"
+                    variant="outline"
                     onClick={() => fetchCustomers(customersPagination.page - 1)}
                   >
                     Anterior
@@ -551,11 +552,11 @@ export default function AgreementDetailPage() {
                     {customersPagination.totalPages}
                   </span>
                   <Button
-                    variant="outline"
-                    size="sm"
                     disabled={
                       customersPagination.page >= customersPagination.totalPages
                     }
+                    size="sm"
+                    variant="outline"
                     onClick={() => fetchCustomers(customersPagination.page + 1)}
                   >
                     Siguiente

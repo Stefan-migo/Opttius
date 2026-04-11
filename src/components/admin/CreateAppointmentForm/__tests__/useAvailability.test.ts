@@ -1,13 +1,15 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { renderHook, act } from "@testing-library/react";
-import { useAvailability } from "../hooks/useAvailability";
+import { act, renderHook } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import * as branchHook from "@/hooks/useBranch";
-import * as authContext from "@/contexts/AuthContext";
+import { useAvailability } from "../hooks/useAvailability";
 
 const mockBranchContext = {
   branches: [{ id: "test-branch-123", name: "Test Branch", code: "TEST001" }],
-  currentBranch: { id: "test-branch-123", name: "Test Branch", code: "TEST001" },
+  currentBranch: {
+    id: "test-branch-123",
+    name: "Test Branch",
+    code: "TEST001",
+  },
   isGlobalView: false,
   isSuperAdmin: false,
   isLoading: false,
@@ -51,7 +53,7 @@ describe("useAvailability", () => {
   beforeEach(() => {
     // The context values are already mocked at module level
     // No need to set them in beforeEach
-    
+
     // Mock fetch globally
     global.fetch = vi.fn();
 
@@ -64,7 +66,9 @@ describe("useAvailability", () => {
   });
 
   it("should initialize with default values", () => {
-    const { result } = renderHook(() => useAvailability({ scheduleSettings: mockScheduleSettings }));
+    const { result } = renderHook(() =>
+      useAvailability({ scheduleSettings: mockScheduleSettings }),
+    );
 
     expect(result.current.availableSlots).toEqual([]);
     expect(result.current.loading).toBe(false);
@@ -73,15 +77,18 @@ describe("useAvailability", () => {
   it("should fetch availability successfully", async () => {
     const mockResponse = {
       ok: true,
-      json: () => Promise.resolve({ 
-        slots: mockAvailableSlots,
-        date: "2024-01-15"
-      }),
+      json: () =>
+        Promise.resolve({
+          slots: mockAvailableSlots,
+          date: "2024-01-15",
+        }),
     };
 
-    (global.fetch as any).mockResolvedValueOnce(mockResponse);
+    (global.fetch as unknown).mockResolvedValueOnce(mockResponse);
 
-    const { result } = renderHook(() => useAvailability({ scheduleSettings: mockScheduleSettings }));
+    const { result } = renderHook(() =>
+      useAvailability({ scheduleSettings: mockScheduleSettings }),
+    );
 
     await act(async () => {
       await result.current.fetchAvailability("2024-01-15", 30);
@@ -91,18 +98,20 @@ describe("useAvailability", () => {
     expect(result.current.availableSlots).toEqual(mockAvailableSlots);
     expect(global.fetch).toHaveBeenCalledWith(
       "/api/admin/appointments/availability?date=2024-01-15&duration=30",
-      expect.any(Object)
+      expect.any(Object),
     );
   });
 
   it("should handle availability fetch errors", async () => {
-    (global.fetch as any).mockResolvedValueOnce({
+    (global.fetch as unknown).mockResolvedValueOnce({
       ok: false,
       status: 500,
       json: () => Promise.resolve({ error: "Internal server error" }),
     });
 
-    const { result } = renderHook(() => useAvailability({ scheduleSettings: mockScheduleSettings }));
+    const { result } = renderHook(() =>
+      useAvailability({ scheduleSettings: mockScheduleSettings }),
+    );
 
     await act(async () => {
       await result.current.fetchAvailability("2024-01-15", 30);
@@ -113,9 +122,11 @@ describe("useAvailability", () => {
   });
 
   it("should handle network errors", async () => {
-    (global.fetch as any).mockRejectedValueOnce(new Error("Network error"));
+    (global.fetch as unknown).mockRejectedValueOnce(new Error("Network error"));
 
-    const { result } = renderHook(() => useAvailability({ scheduleSettings: mockScheduleSettings }));
+    const { result } = renderHook(() =>
+      useAvailability({ scheduleSettings: mockScheduleSettings }),
+    );
 
     await act(async () => {
       await result.current.fetchAvailability("2024-01-15", 30);
@@ -128,12 +139,14 @@ describe("useAvailability", () => {
   it("should check if time slot is available", async () => {
     const mockResponse = {
       ok: true,
-      json: () => Promise.resolve({ slots: mockAvailableSlots })
+      json: () => Promise.resolve({ slots: mockAvailableSlots }),
     };
 
-    (global.fetch as any).mockResolvedValueOnce(mockResponse);
+    (global.fetch as unknown).mockResolvedValueOnce(mockResponse);
 
-    const { result } = renderHook(() => useAvailability({ scheduleSettings: mockScheduleSettings }));
+    const { result } = renderHook(() =>
+      useAvailability({ scheduleSettings: mockScheduleSettings }),
+    );
 
     // Fetch availability first
     await act(async () => {
@@ -151,7 +164,9 @@ describe("useAvailability", () => {
   });
 
   it("should return false for slot availability when no slots loaded", () => {
-    const { result } = renderHook(() => useAvailability({ scheduleSettings: mockScheduleSettings }));
+    const { result } = renderHook(() =>
+      useAvailability({ scheduleSettings: mockScheduleSettings }),
+    );
 
     expect(result.current.isSlotAvailable("09:00:00")).toBe(false);
     expect(result.current.isSlotAvailable("10:00:00")).toBe(false);
@@ -160,12 +175,14 @@ describe("useAvailability", () => {
   it("should clear slots and errors", async () => {
     const mockResponse = {
       ok: true,
-      json: () => Promise.resolve({ slots: mockAvailableSlots })
+      json: () => Promise.resolve({ slots: mockAvailableSlots }),
     };
 
-    (global.fetch as any).mockResolvedValueOnce(mockResponse);
+    (global.fetch as unknown).mockResolvedValueOnce(mockResponse);
 
-    const { result } = renderHook(() => useAvailability({ scheduleSettings: mockScheduleSettings }));
+    const { result } = renderHook(() =>
+      useAvailability({ scheduleSettings: mockScheduleSettings }),
+    );
 
     // Load some data first
     await act(async () => {
@@ -186,12 +203,14 @@ describe("useAvailability", () => {
   it("should set loading state during fetch", async () => {
     const mockResponse = {
       ok: true,
-      json: () => Promise.resolve({ slots: mockAvailableSlots })
+      json: () => Promise.resolve({ slots: mockAvailableSlots }),
     };
 
-    (global.fetch as any).mockResolvedValueOnce(mockResponse);
+    (global.fetch as unknown).mockResolvedValueOnce(mockResponse);
 
-    const { result } = renderHook(() => useAvailability({ scheduleSettings: mockScheduleSettings }));
+    const { result } = renderHook(() =>
+      useAvailability({ scheduleSettings: mockScheduleSettings }),
+    );
 
     // Start fetch
     let fetchPromise: Promise<void>;
@@ -213,14 +232,16 @@ describe("useAvailability", () => {
 
   it("should handle different duration values", async () => {
     const durations = [15, 30, 45, 60];
-    
+
     for (const duration of durations) {
-      (global.fetch as any).mockResolvedValueOnce({
+      (global.fetch as unknown).mockResolvedValueOnce({
         ok: true,
-        json: () => Promise.resolve({ slots: mockAvailableSlots })
+        json: () => Promise.resolve({ slots: mockAvailableSlots }),
       });
 
-      const { result } = renderHook(() => useAvailability({ scheduleSettings: mockScheduleSettings }));
+      const { result } = renderHook(() =>
+        useAvailability({ scheduleSettings: mockScheduleSettings }),
+      );
 
       await act(async () => {
         await result.current.fetchAvailability("2024-01-15", duration);
@@ -228,21 +249,23 @@ describe("useAvailability", () => {
 
       expect(global.fetch).toHaveBeenCalledWith(
         `/api/admin/appointments/availability?date=2024-01-15&duration=${duration}`,
-        expect.any(Object)
+        expect.any(Object),
       );
     }
   });
 
   it("should handle invalid date formats gracefully", async () => {
     const invalidDates = ["invalid-date", "", null, undefined];
-    
+
     for (const date of invalidDates) {
-      (global.fetch as any).mockResolvedValueOnce({
+      (global.fetch as unknown).mockResolvedValueOnce({
         ok: true,
-        json: () => Promise.resolve({ slots: mockAvailableSlots })
+        json: () => Promise.resolve({ slots: mockAvailableSlots }),
       });
 
-      const { result } = renderHook(() => useAvailability({ scheduleSettings: mockScheduleSettings }));
+      const { result } = renderHook(() =>
+        useAvailability({ scheduleSettings: mockScheduleSettings }),
+      );
 
       await act(async () => {
         // @ts-ignore - testing invalid input
@@ -258,25 +281,29 @@ describe("useAvailability", () => {
     const mockResponses = [
       {
         ok: true,
-        json: () => Promise.resolve({ 
-          slots: [{ time_slot: "09:00:00", available: true }],
-          date: "2024-01-15"
-        }),
+        json: () =>
+          Promise.resolve({
+            slots: [{ time_slot: "09:00:00", available: true }],
+            date: "2024-01-15",
+          }),
       },
       {
         ok: true,
-        json: () => Promise.resolve({ 
-          slots: [{ time_slot: "10:00:00", available: true }],
-          date: "2024-01-16"
-        }),
+        json: () =>
+          Promise.resolve({
+            slots: [{ time_slot: "10:00:00", available: true }],
+            date: "2024-01-16",
+          }),
       },
     ];
 
-    (global.fetch as any)
+    (global.fetch as unknown)
       .mockResolvedValueOnce(mockResponses[0])
       .mockResolvedValueOnce(mockResponses[1]);
 
-    const { result } = renderHook(() => useAvailability({ scheduleSettings: mockScheduleSettings }));
+    const { result } = renderHook(() =>
+      useAvailability({ scheduleSettings: mockScheduleSettings }),
+    );
 
     // Make two rapid calls
     const promise1 = act(async () => {
@@ -290,16 +317,20 @@ describe("useAvailability", () => {
     await Promise.all([promise1, promise2]);
 
     // Should have the result from the last call
-    expect(result.current.availableSlots).toEqual([{ time_slot: "10:00:00", available: true }]);
+    expect(result.current.availableSlots).toEqual([
+      { time_slot: "10:00:00", available: true },
+    ]);
   });
 
   it("should handle empty available slots response", async () => {
-    (global.fetch as any).mockResolvedValueOnce({
+    (global.fetch as unknown).mockResolvedValueOnce({
       ok: true,
       json: () => Promise.resolve({ slots: [] }),
     });
 
-    const { result } = renderHook(() => useAvailability({ scheduleSettings: mockScheduleSettings }));
+    const { result } = renderHook(() =>
+      useAvailability({ scheduleSettings: mockScheduleSettings }),
+    );
 
     await act(async () => {
       await result.current.fetchAvailability("2024-01-15", 30);

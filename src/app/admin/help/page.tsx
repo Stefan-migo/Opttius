@@ -1,30 +1,29 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  AlertCircle,
+  ArrowRight,
+  CheckCircle2,
+  Clock,
+  Filter,
+  HelpCircle,
+  Loader2,
+  MessageSquare,
+  Plus,
+  RefreshCw,
+  Send,
+} from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import {
-  extractDataFromResponse,
-  extractPaginationFromResponse,
-} from "@/lib/api/response-helpers";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { useEffect, useState } from "react";
+import { SubmitHandler, useForm } from "react-hook-form";
+import { toast } from "sonner";
+import type { z } from "zod";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -33,29 +32,24 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
-  Loader2,
-  MessageSquare,
-  Plus,
-  ArrowRight,
-  Filter,
-  RefreshCw,
-  CheckCircle2,
-  Clock,
-  AlertCircle,
-  XCircle,
-  Send,
-  HelpCircle,
-} from "lucide-react";
-import { toast } from "sonner";
-import Link from "next/link";
-import { useForm, SubmitHandler } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import {
-  createSaasSupportTicketSchema,
+  extractDataFromResponse,
+  extractPaginationFromResponse,
+} from "@/lib/api/response-helpers";
+import {
   createSaasSupportMessageSchema,
+  createSaasSupportTicketSchema,
 } from "@/lib/api/validation/zod-schemas";
-import type { z } from "zod";
 
 type TicketForm = z.infer<typeof createSaasSupportTicketSchema>;
 type MessageForm = z.infer<typeof createSaasSupportMessageSchema>;
@@ -141,7 +135,7 @@ export default function HelpPage() {
     handleSubmit: handleSubmitTicket,
     formState: { errors: ticketErrors },
     reset: resetTicket,
-  } = useForm<any>({
+  } = useForm<unknown>({
     resolver: zodResolver(createSaasSupportTicketSchema),
     defaultValues: {
       priority: "medium",
@@ -199,7 +193,7 @@ export default function HelpPage() {
     }
   };
 
-  const onSubmitTicket: SubmitHandler<any> = async (data) => {
+  const onSubmitTicket: SubmitHandler<unknown> = async (data) => {
     setCreatingTicket(true);
     try {
       const response = await fetch(
@@ -424,10 +418,10 @@ export default function HelpPage() {
                   }
                 />
                 <Button
-                  variant="outline"
                   size="icon"
-                  onClick={loadTickets}
                   title="Refrescar"
+                  variant="outline"
+                  onClick={loadTickets}
                 >
                   <RefreshCw className="h-4 w-4" />
                 </Button>
@@ -472,7 +466,7 @@ export default function HelpPage() {
           ) : (
             <div className="space-y-2">
               {tickets.map((ticket) => (
-                <Link key={ticket.id} href={`/admin/help/tickets/${ticket.id}`}>
+                <Link href={`/admin/help/tickets/${ticket.id}`} key={ticket.id}>
                   <div className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 cursor-pointer">
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
@@ -528,28 +522,28 @@ export default function HelpPage() {
               </p>
               <div className="flex gap-2">
                 <Button
-                  variant="outline"
+                  disabled={pagination.page === 1}
                   size="sm"
+                  variant="outline"
                   onClick={() =>
                     setPagination((prev) => ({
                       ...prev,
                       page: Math.max(1, prev.page - 1),
                     }))
                   }
-                  disabled={pagination.page === 1}
                 >
                   Anterior
                 </Button>
                 <Button
-                  variant="outline"
+                  disabled={pagination.page === pagination.totalPages}
                   size="sm"
+                  variant="outline"
                   onClick={() =>
                     setPagination((prev) => ({
                       ...prev,
                       page: Math.min(prev.totalPages, prev.page + 1),
                     }))
                   }
-                  disabled={pagination.page === pagination.totalPages}
                 >
                   Siguiente
                 </Button>
@@ -569,8 +563,8 @@ export default function HelpPage() {
             </DialogDescription>
           </DialogHeader>
           <form
-            onSubmit={handleSubmitTicket(onSubmitTicket)}
             className="space-y-4"
+            onSubmit={handleSubmitTicket(onSubmitTicket)}
           >
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
@@ -584,8 +578,8 @@ export default function HelpPage() {
                   }
                 >
                   <SelectTrigger
-                    id="category"
                     className={ticketErrors.category ? "border-red-500" : ""}
+                    id="category"
                   >
                     <SelectValue placeholder="Selecciona una categoría" />
                   </SelectTrigger>
@@ -615,8 +609,8 @@ export default function HelpPage() {
                   }
                 >
                   <SelectTrigger
-                    id="priority"
                     className={ticketErrors.priority ? "border-red-500" : ""}
+                    id="priority"
                   >
                     <SelectValue placeholder="Selecciona una prioridad" />
                   </SelectTrigger>
@@ -643,8 +637,8 @@ export default function HelpPage() {
               <Input
                 id="subject"
                 {...registerTicket("subject")}
-                placeholder="Resumen breve del problema"
                 className={ticketErrors.subject ? "border-red-500" : ""}
+                placeholder="Resumen breve del problema"
               />
               {ticketErrors.subject && (
                 <p className="text-sm text-red-500">
@@ -660,9 +654,9 @@ export default function HelpPage() {
               <Textarea
                 id="description"
                 {...registerTicket("description")}
+                className={ticketErrors.description ? "border-red-500" : ""}
                 placeholder="Describe tu problema o solicitud en detalle..."
                 rows={6}
-                className={ticketErrors.description ? "border-red-500" : ""}
               />
               {ticketErrors.description && (
                 <p className="text-sm text-red-500">
@@ -683,7 +677,7 @@ export default function HelpPage() {
               >
                 Cancelar
               </Button>
-              <Button type="submit" disabled={creatingTicket}>
+              <Button disabled={creatingTicket} type="submit">
                 {creatingTicket ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />

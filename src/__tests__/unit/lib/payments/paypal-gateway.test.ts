@@ -4,7 +4,8 @@
  * @module __tests__/unit/lib/payments/paypal-gateway.test
  */
 
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
 import { PayPalGateway } from "@/lib/payments/paypal/gateway";
 
 // Mock environment variables
@@ -121,7 +122,9 @@ describe("PayPalGateway", () => {
           "user_123",
           "org_123",
         ),
-      ).rejects.toThrow("PayPal error: PayPal Order Creation Error: Invalid amount");
+      ).rejects.toThrow(
+        "PayPal error: PayPal Order Creation Error: Invalid amount",
+      );
     });
 
     it("should throw error when PayPal credentials are missing", async () => {
@@ -167,7 +170,7 @@ describe("PayPalGateway", () => {
 
       const mockRequest = {
         json: vi.fn().mockResolvedValue(webhookData),
-      } as any;
+      } as unknown;
 
       const result = await gateway.processWebhookEvent(mockRequest);
 
@@ -207,7 +210,7 @@ describe("PayPalGateway", () => {
 
       const mockRequest = {
         json: vi.fn().mockResolvedValue(webhookData),
-      } as any;
+      } as unknown;
 
       const result = await gateway.processWebhookEvent(mockRequest);
 
@@ -236,7 +239,7 @@ describe("PayPalGateway", () => {
 
       const mockRequest = {
         json: vi.fn().mockResolvedValue(webhookData),
-      } as any;
+      } as unknown;
 
       const result = await gateway.processWebhookEvent(mockRequest);
 
@@ -253,7 +256,7 @@ describe("PayPalGateway", () => {
 
       const mockRequest = {
         json: vi.fn().mockResolvedValue(webhookData),
-      } as any;
+      } as unknown;
 
       await expect(gateway.processWebhookEvent(mockRequest)).rejects.toThrow(
         "PayPal Webhook: Unhandled event type or missing data",

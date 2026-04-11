@@ -1,11 +1,45 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import {
+  AlertCircle,
+  AlertTriangle,
+  ArrowLeft,
+  Ban,
+  CheckCircle2,
+  Clock,
+  Eye,
+  Loader2,
+  MoreVertical,
+  Play,
+  Plus,
+  Trash2,
+  XCircle,
+} from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -21,42 +55,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  CreditCard,
-  Eye,
-  MoreVertical,
-  CheckCircle2,
-  XCircle,
-  AlertTriangle,
-  AlertCircle,
-  Clock,
-  Loader2,
-  Building2,
-  Play,
-  Ban,
-  ArrowLeft,
-  Plus,
-  Trash2,
-} from "lucide-react";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import Link from "next/link";
-import { toast } from "sonner";
 import { formatDate } from "@/lib/utils";
 
 interface Subscription {
@@ -193,7 +191,7 @@ export default function SubscriptionsPage() {
   const handleAction = async (
     subscriptionId: string,
     action: "cancel" | "reactivate" | "extend",
-    value?: any,
+    value?: unknown,
   ) => {
     try {
       const response = await fetch(
@@ -293,7 +291,7 @@ export default function SubscriptionsPage() {
 
     if (isExpiringSoon) {
       return (
-        <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">
+        <Badge className="bg-yellow-100 text-yellow-800" variant="secondary">
           <AlertTriangle className="h-3 w-3 mr-1" />
           Por vencer
         </Badge>
@@ -361,25 +359,26 @@ export default function SubscriptionsPage() {
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div className="flex items-center gap-4">
           <Button
-            variant="ghost"
             size="icon"
-            onClick={() => router.push("/admin/saas-management/dashboard")}
             title="Volver al dashboard"
+            variant="ghost"
+            className="text-white hover:bg-white/10"
+            onClick={() => router.push("/admin/saas-management/dashboard")}
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div>
-            <h1 className="text-3xl font-display font-bold text-epoch-primary tracking-tight">
+            <h1 className="text-3xl font-display font-bold text-white tracking-tight">
               Gestión de Suscripciones
             </h1>
-            <p className="text-admin-text-tertiary mt-2">
+            <p className="text-white/50 mt-2">
               Administra todas las suscripciones del sistema
             </p>
           </div>
         </div>
         <Dialog open={createOpen} onOpenChange={setCreateOpen}>
           <DialogTrigger asChild>
-            <Button>
+            <Button className="bg-[#C5A059] hover:bg-[#C5A059]/90">
               <Plus className="h-4 w-4 mr-2" />
               Nueva suscripción
             </Button>
@@ -427,8 +426,8 @@ export default function SubscriptionsPage() {
                 <Label htmlFor="trial_days">Días de prueba (si es trial)</Label>
                 <Input
                   id="trial_days"
-                  type="number"
                   min={1}
+                  type="number"
                   value={createTrialDays}
                   onChange={(e) => setCreateTrialDays(e.target.value)}
                 />
@@ -438,7 +437,7 @@ export default function SubscriptionsPage() {
               <Button variant="outline" onClick={() => setCreateOpen(false)}>
                 Cancelar
               </Button>
-              <Button onClick={handleCreate} disabled={createLoading}>
+              <Button disabled={createLoading} onClick={handleCreate}>
                 {createLoading ? (
                   <Loader2 className="h-4 w-4 animate-spin mr-2" />
                 ) : null}
@@ -546,12 +545,12 @@ export default function SubscriptionsPage() {
                   <TableBody>
                     {subscriptions.map((sub) => (
                       <TableRow
-                        key={sub.id}
                         className={
                           sub.isExpiringSoon || sub.isExpired
                             ? "bg-yellow-50"
                             : ""
                         }
+                        key={sub.id}
                       >
                         <TableCell>
                           {sub.organization ? (
@@ -629,7 +628,7 @@ export default function SubscriptionsPage() {
                         <TableCell className="text-right">
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="sm">
+                              <Button size="sm" variant="ghost">
                                 <MoreVertical className="h-4 w-4" />
                               </Button>
                             </DropdownMenuTrigger>
@@ -665,8 +664,8 @@ export default function SubscriptionsPage() {
                               <DropdownMenuSeparator />
                               <DropdownMenuItem
                                 className="text-destructive focus:text-destructive"
-                                onClick={() => setDeleteConfirmId(sub.id)}
                                 disabled={deleteId === sub.id && deleteLoading}
+                                onClick={() => setDeleteConfirmId(sub.id)}
                               >
                                 <Trash2 className="h-4 w-4 mr-2" />
                                 Eliminar
@@ -688,20 +687,20 @@ export default function SubscriptionsPage() {
                   </div>
                   <div className="flex gap-2">
                     <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                       disabled={currentPage === 1}
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                     >
                       Anterior
                     </Button>
                     <Button
-                      variant="outline"
+                      disabled={currentPage === totalPages}
                       size="sm"
+                      variant="outline"
                       onClick={() =>
                         setCurrentPage((p) => Math.min(totalPages, p + 1))
                       }
-                      disabled={currentPage === totalPages}
                     >
                       Siguiente
                     </Button>
@@ -734,8 +733,8 @@ export default function SubscriptionsPage() {
               Volver
             </Button>
             <Button
-              variant="destructive"
               disabled={!cancelConfirmId}
+              variant="destructive"
               onClick={() =>
                 cancelConfirmId && handleAction(cancelConfirmId, "cancel")
               }
@@ -767,8 +766,8 @@ export default function SubscriptionsPage() {
               Volver
             </Button>
             <Button
-              variant="destructive"
               disabled={!deleteConfirmId || deleteLoading}
+              variant="destructive"
               onClick={() => deleteConfirmId && handleDelete(deleteConfirmId)}
             >
               {deleteLoading && deleteId === deleteConfirmId ? (

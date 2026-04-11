@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/utils/supabase/server";
+
 import { getBranchContext } from "@/lib/api/branch-middleware";
 import { appLogger as logger } from "@/lib/logger";
+import { createClient } from "@/utils/supabase/server";
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -100,7 +101,7 @@ export async function PUT(req: NextRequest, { params }: RouteParams) {
     }
 
     // Prepare update data
-    const updateData: any = {};
+    const updateData: unknown = {};
 
     if (plate_number !== undefined) updateData.plate_number = plate_number;
     if (model !== undefined) updateData.model = model;

@@ -7,11 +7,11 @@
  */
 
 export {
-  getRedisClient,
-  initializeRedis,
   closeRedis,
-  isRedisHealthy,
+  getRedisClient,
   getRedisInfo,
-  type RedisConfig,
+  initializeRedis,
+  isRedisHealthy,
   Redis,
+  type RedisConfig,
 } from "./client";

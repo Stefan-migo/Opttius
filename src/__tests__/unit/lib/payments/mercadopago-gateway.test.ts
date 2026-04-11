@@ -2,7 +2,8 @@
  * Unit tests for MercadoPagoGateway (mapStatus and behavior).
  */
 
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
+
 import { MercadoPagoGateway } from "@/lib/payments/mercadopago/gateway";
 
 describe("MercadoPagoGateway", () => {

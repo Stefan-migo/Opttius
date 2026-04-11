@@ -7,8 +7,9 @@
  * @module lib/errors/comprehensive-handler
  */
 
-import { appLogger as logger } from "@/lib/logger";
 import { randomUUID } from "crypto";
+
+import { appLogger as logger } from "@/lib/logger";
 
 // =================================================================
 // ERROR CLASSES
@@ -21,7 +22,7 @@ export class ApplicationError extends Error {
   public readonly code: string;
   public readonly statusCode: number;
   public readonly isOperational: boolean;
-  public readonly details?: Record<string, any>;
+  public readonly details?: Record<string, unknown>;
 
   constructor(
     message: string,
@@ -29,7 +30,7 @@ export class ApplicationError extends Error {
       code: string;
       statusCode?: number;
       isOperational?: boolean;
-      details?: Record<string, any>;
+      details?: Record<string, unknown>;
       cause?: Error;
     },
   ) {
@@ -42,7 +43,7 @@ export class ApplicationError extends Error {
 
     // Set cause if provided
     if (options.cause) {
-      (this as any).cause = options.cause;
+      (this as unknown).cause = options.cause;
     }
 
     // Ensure proper stack trace
@@ -56,7 +57,7 @@ export class ApplicationError extends Error {
  * Validation errors
  */
 export class ValidationError extends ApplicationError {
-  constructor(message: string, details?: Record<string, any>) {
+  constructor(message: string, details?: Record<string, unknown>) {
     super(message, {
       code: "VALIDATION_ERROR",
       statusCode: 400,
@@ -71,7 +72,7 @@ export class ValidationError extends ApplicationError {
 export class AuthenticationError extends ApplicationError {
   constructor(
     message: string = "Authentication required",
-    details?: Record<string, any>,
+    details?: Record<string, unknown>,
   ) {
     super(message, {
       code: "AUTHENTICATION_ERROR",
@@ -87,7 +88,7 @@ export class AuthenticationError extends ApplicationError {
 export class AuthorizationError extends ApplicationError {
   constructor(
     message: string = "Insufficient permissions",
-    details?: Record<string, any>,
+    details?: Record<string, unknown>,
   ) {
     super(message, {
       code: "AUTHORIZATION_ERROR",
@@ -103,7 +104,7 @@ export class AuthorizationError extends ApplicationError {
 export class NotFoundError extends ApplicationError {
   constructor(
     message: string = "Resource not found",
-    details?: Record<string, any>,
+    details?: Record<string, unknown>,
   ) {
     super(message, {
       code: "NOT_FOUND_ERROR",
@@ -117,7 +118,7 @@ export class NotFoundError extends ApplicationError {
  * Conflict errors (duplicate resources, etc.)
  */
 export class ConflictError extends ApplicationError {
-  constructor(message: string, details?: Record<string, any>) {
+  constructor(message: string, details?: Record<string, unknown>) {
     super(message, {
       code: "CONFLICT_ERROR",
       statusCode: 409,
@@ -132,7 +133,7 @@ export class ConflictError extends ApplicationError {
 export class RateLimitError extends ApplicationError {
   constructor(
     message: string = "Rate limit exceeded",
-    details?: Record<string, any>,
+    details?: Record<string, unknown>,
   ) {
     super(message, {
       code: "RATE_LIMIT_ERROR",
@@ -146,7 +147,7 @@ export class RateLimitError extends ApplicationError {
  * Payment/Billing errors
  */
 export class PaymentError extends ApplicationError {
-  constructor(message: string, details?: Record<string, any>) {
+  constructor(message: string, details?: Record<string, unknown>) {
     super(message, {
       code: "PAYMENT_ERROR",
       statusCode: 400,
@@ -159,7 +160,11 @@ export class PaymentError extends ApplicationError {
  * Database errors
  */
 export class DatabaseError extends ApplicationError {
-  constructor(message: string, details?: Record<string, any>, cause?: Error) {
+  constructor(
+    message: string,
+    details?: Record<string, unknown>,
+    cause?: Error,
+  ) {
     super(message, {
       code: "DATABASE_ERROR",
       statusCode: 500,
@@ -176,7 +181,7 @@ export class ExternalServiceError extends ApplicationError {
   constructor(
     message: string,
     serviceName: string,
-    details?: Record<string, any>,
+    details?: Record<string, unknown>,
     cause?: Error,
   ) {
     super(message, {
@@ -195,7 +200,7 @@ export class ExternalServiceError extends ApplicationError {
  * Business logic errors
  */
 export class BusinessLogicError extends ApplicationError {
-  constructor(message: string, details?: Record<string, any>) {
+  constructor(message: string, details?: Record<string, unknown>) {
     super(message, {
       code: "BUSINESS_LOGIC_ERROR",
       statusCode: 422,
@@ -215,7 +220,7 @@ interface ErrorResponse {
   error: {
     code: string;
     message: string;
-    details?: Record<string, any>;
+    details?: Record<string, unknown>;
     timestamp: string;
     requestId?: string;
   };
@@ -239,7 +244,10 @@ export function formatErrorResponse(
 /**
  * Safe error logging
  */
-export function logError(error: Error, context?: Record<string, any>): void {
+export function logError(
+  error: Error,
+  context?: Record<string, unknown>,
+): void {
   // Don't log operational errors that are already handled
   if (error instanceof ApplicationError && error.isOperational) {
     logger.warn(`Operational error: ${error.code}`, {
@@ -368,9 +376,9 @@ export function safeExecute<T>(
  * Handle Supabase database errors
  */
 export function handleDatabaseError(
-  error: any,
+  error: unknown,
   context: string,
-  details?: Record<string, any>,
+  details?: Record<string, unknown>,
 ): DatabaseError {
   const dbError = new DatabaseError(
     error.message || "Database operation failed",
@@ -389,7 +397,7 @@ export function handleDatabaseError(
 /**
  * Map PostgreSQL error codes to application errors
  */
-export function mapPostgresError(error: any): ApplicationError {
+export function mapPostgresError(error: unknown): ApplicationError {
   const code = error.code;
 
   switch (code) {
@@ -422,7 +430,7 @@ export function mapPostgresError(error: any): ApplicationError {
  * Validate required fields
  */
 export function validateRequiredFields(
-  data: Record<string, any>,
+  data: Record<string, unknown>,
   requiredFields: string[],
 ): void {
   const missingFields = requiredFields.filter(
@@ -441,7 +449,7 @@ export function validateRequiredFields(
  * Validate data types
  */
 export function validateTypes(
-  data: Record<string, any>,
+  data: Record<string, unknown>,
   typeMap: Record<string, "string" | "number" | "boolean" | "array" | "object">,
 ): void {
   const errors: string[] = [];
@@ -465,7 +473,7 @@ export function validateTypes(
 /**
  * Sanitize and validate input data
  */
-export function sanitizeInput<T extends Record<string, any>>(
+export function sanitizeInput<T extends Record<string, unknown>>(
   data: T,
   schema: {
     required?: string[];

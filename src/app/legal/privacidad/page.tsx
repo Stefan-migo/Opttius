@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+
 import { BreadcrumbStructuredData } from "@/components/seo/BreadcrumbStructuredData";
 
 export const metadata: Metadata = {

@@ -1,8 +1,10 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { Home, LogOut, Settings, User } from "lucide-react";
 import Link from "next/link";
-import { useAuthContext } from "@/contexts/AuthContext";
+import { useRouter } from "next/navigation";
+
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -11,8 +13,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { User, LogOut, Settings, Home } from "lucide-react";
+import { useAuthContext } from "@/contexts/AuthContext";
 
 export default function UserHeader() {
   const router = useRouter();
@@ -39,7 +40,7 @@ export default function UserHeader() {
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           {/* Logo/Brand */}
-          <Link href="/" className="flex items-center space-x-2">
+          <Link className="flex items-center space-x-2" href="/">
             <h1 className="text-xl font-bold">Opttius</h1>
           </Link>
 
@@ -48,7 +49,7 @@ export default function UserHeader() {
             {user ? (
               <>
                 <Link href="/">
-                  <Button variant="ghost" size="sm">
+                  <Button size="sm" variant="ghost">
                     <Home className="h-4 w-4 mr-2" />
                     Home
                   </Button>
@@ -57,19 +58,19 @@ export default function UserHeader() {
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button
-                      variant="ghost"
                       className="relative h-10 w-10 rounded-full"
+                      variant="ghost"
                     >
                       <Avatar className="h-10 w-10">
                         <AvatarImage
-                          src={profile?.avatar_url || undefined}
                           alt={user.email || "User"}
+                          src={profile?.avatar_url || undefined}
                         />
                         <AvatarFallback>{userInitials}</AvatarFallback>
                       </Avatar>
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent className="w-56" align="end" forceMount>
+                  <DropdownMenuContent forceMount align="end" className="w-56">
                     <div className="flex items-center justify-start gap-2 p-2">
                       <div className="flex flex-col space-y-1 leading-none">
                         <p className="font-medium">
@@ -84,15 +85,15 @@ export default function UserHeader() {
                     </div>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem asChild>
-                      <Link href="/profile" className="cursor-pointer">
+                      <Link className="cursor-pointer" href="/profile">
                         <User className="mr-2 h-4 w-4" />
                         <span>Profile</span>
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
                       <Link
-                        href="/profile?tab=settings"
                         className="cursor-pointer"
+                        href="/profile?tab=settings"
                       >
                         <Settings className="mr-2 h-4 w-4" />
                         <span>Settings</span>
@@ -100,8 +101,8 @@ export default function UserHeader() {
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
-                      onClick={handleSignOut}
                       className="cursor-pointer text-destructive"
+                      onClick={handleSignOut}
                     >
                       <LogOut className="mr-2 h-4 w-4" />
                       <span>Log out</span>
@@ -112,7 +113,7 @@ export default function UserHeader() {
             ) : (
               <div className="flex items-center gap-2">
                 <Link href="/login">
-                  <Button variant="ghost" size="sm">
+                  <Button size="sm" variant="ghost">
                     Log in
                   </Button>
                 </Link>

@@ -7,11 +7,12 @@
  * @module tests/security/phase2-security.test
  */
 
-import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import { getSecurityMonitor } from "@/lib/security/monitoring";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
+import { getSecurityAlerting, SecurityAlerting } from "@/lib/security/alerting";
+import { SecurityEvent } from "@/lib/security/events";
 import type { SecurityMonitor } from "@/lib/security/monitoring";
-import { SecurityAlerting, getSecurityAlerting } from "@/lib/security/alerting";
-import { SecurityEvent, SecurityAlert } from "@/lib/security/events";
+import { getSecurityMonitor } from "@/lib/security/monitoring";
 // Mock logger
 vi.mock("@/lib/logger", () => ({
   appLogger: {
@@ -179,14 +180,14 @@ describe("Phase 2 Security Implementation Tests", () => {
         const securityEvent: SecurityEvent = {
           id: `test-${event.type}`,
           timestamp: new Date().toISOString(),
-          eventType: event.type as any,
-          severity: event.expectedSeverity as any,
+          eventType: event.type as unknown,
+          severity: event.expectedSeverity as unknown,
           source: "test",
           details: {},
         };
 
         monitor.logEvent(
-          securityEvent.eventType as any,
+          securityEvent.eventType as unknown,
           securityEvent.details,
           {
             userId: securityEvent.userId,
@@ -502,7 +503,7 @@ describe("Phase 2 Security Implementation Tests", () => {
 
       // Log failed login events
       failedLogins.forEach((event) =>
-        monitor.logAuthEvent(event.eventType as any, event.details || {}, {
+        monitor.logAuthEvent(event.eventType as unknown, event.details || {}, {
           userId: event.userId,
           ipAddress: event.ipAddress,
         }),
@@ -669,7 +670,7 @@ describe("Phase 2 Security Implementation Tests", () => {
             },
           );
         } else {
-          monitor.logEvent(event.eventType as any, event.details || {}, {
+          monitor.logEvent(event.eventType as unknown, event.details || {}, {
             userId: event.userId,
             ipAddress: event.ipAddress,
           });
@@ -788,7 +789,7 @@ describe("Phase 2 Security Implementation Tests", () => {
 
       // Log all events
       const startTime = Date.now();
-      highVolumeEvents.forEach((event) => monitor.logEvent(event as any));
+      highVolumeEvents.forEach((event) => monitor.logEvent(event as unknown));
       const endTime = Date.now();
 
       // Verify performance
@@ -806,7 +807,7 @@ describe("Phase 2 Security Implementation Tests", () => {
       const alerts = Array.from({ length: 100 }, (_, i) => ({
         title: `Bulk Alert ${i}`,
         description: `Test alert #${i}`,
-        severity: ["low", "medium", "high"][i % 3] as any,
+        severity: ["low", "medium", "high"][i % 3] as unknown,
       }));
 
       const startTime = Date.now();
@@ -845,7 +846,7 @@ describe("Phase 2 Security Implementation Tests", () => {
             details: { concurrent: true },
           };
 
-          monitor.logEvent(event as any);
+          monitor.logEvent(event as unknown);
 
           await alerting.sendAlert(
             `Concurrent Alert ${i}`,

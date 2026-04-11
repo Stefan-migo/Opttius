@@ -1,32 +1,32 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/utils/supabase/server";
-import { createServiceRoleClient } from "@/utils/supabase/server";
-import { NotificationService } from "@/lib/notifications/notification-service";
+
 import {
-  getBranchContext,
   addBranchFilter,
+  getBranchContext,
   getFieldOperationFromRequest,
 } from "@/lib/api/branch-middleware";
-import { normalizeRUT } from "@/lib/utils/rut";
-import { appLogger as logger } from "@/lib/logger";
-import { EmailNotificationService } from "@/lib/email/notifications";
-import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
 import {
-  ValidationError,
   AuthenticationError,
   AuthorizationError,
+  ValidationError,
 } from "@/lib/api/errors";
 import {
-  createPaginatedResponse,
-  createApiSuccessResponse,
   createApiErrorResponse,
-  extractPaginationParams,
+  createApiSuccessResponse,
+  createPaginatedResponse,
 } from "@/lib/api/response";
-import { createQuoteSchema } from "@/lib/api/validation/zod-schemas";
 import {
   parseAndValidateBody,
   validationErrorResponse,
 } from "@/lib/api/validation/zod-helpers";
+import { createQuoteSchema } from "@/lib/api/validation/zod-schemas";
+import { EmailNotificationService } from "@/lib/email/notifications";
+import { appLogger as logger } from "@/lib/logger";
+import { NotificationService } from "@/lib/notifications/notification-service";
+import { normalizeRUT } from "@/lib/utils/rut";
+import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
+import { createClient } from "@/utils/supabase/server";
+import { createServiceRoleClient } from "@/utils/supabase/server";
 
 export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
@@ -97,10 +97,10 @@ export async function GET(request: NextRequest) {
     );
 
     // Build branch filter function
-    const applyBranchFilter = (query: any) => {
+    const applyBranchFilter = (query: unknown) => {
       // CRITICAL: Always filter by organization_id first for multi-tenancy isolation
       // Then apply branch filter if needed (skip branch when listing by customer for POS)
-      let filteredQuery: any = query;
+      let filteredQuery: unknown = query;
 
       if (userOrganizationId && !branchContext.isSuperAdmin) {
         // For POS/customer lookup: include legacy quotes with organization_id NULL
@@ -169,7 +169,7 @@ export async function GET(request: NextRequest) {
 
     // Build base query with branch filter
     let query = applyBranchFilter(
-      supabase.from("quotes").select("*", { count: "exact" }) as any,
+      supabase.from("quotes").select("*", { count: "exact" }) as unknown,
     ).order("created_at", { ascending: false });
 
     if (status !== "all") {
@@ -241,7 +241,9 @@ export async function GET(request: NextRequest) {
       // Fetch customers
       const customerIds = [
         ...new Set(
-          quotesWithRelations.map((q: any) => q.customer_id).filter(Boolean),
+          quotesWithRelations
+            .map((q: unknown) => q.customer_id)
+            .filter(Boolean),
         ),
       ];
       const { data: customers } =
@@ -256,7 +258,7 @@ export async function GET(request: NextRequest) {
       const prescriptionIds = [
         ...new Set(
           quotesWithRelations
-            .map((q: any) => q.prescription_id)
+            .map((q: unknown) => q.prescription_id)
             .filter(Boolean),
         ),
       ];
@@ -272,7 +274,7 @@ export async function GET(request: NextRequest) {
       const productIds = [
         ...new Set(
           quotesWithRelations
-            .map((q: any) => q.frame_product_id)
+            .map((q: unknown) => q.frame_product_id)
             .filter(Boolean),
         ),
       ];
@@ -285,7 +287,7 @@ export async function GET(request: NextRequest) {
           : { data: [] };
 
       // Map relations to quotes
-      quotesWithRelations = quotesWithRelations.map((quote: any) => ({
+      quotesWithRelations = quotesWithRelations.map((quote: unknown) => ({
         ...quote,
         customer: customers?.find((c) => c.id === quote.customer_id) || null,
         prescription:
@@ -669,7 +671,7 @@ export async function POST(request: NextRequest) {
       // Send email if status is 'sent'
       if (
         newQuote.status === "sent" &&
-        (newQuote.customer?.email || (newQuote as any).guest_email)
+        (newQuote.customer?.email || (newQuote as unknown).guest_email)
       ) {
         (async () => {
           try {
@@ -684,7 +686,7 @@ export async function POST(request: NextRequest) {
               {
                 customer_name: customerName,
                 customer_email:
-                  newQuote.customer?.email || (newQuote as any).guest_email,
+                  newQuote.customer?.email || (newQuote as unknown).guest_email,
                 quote_number: newQuote.quote_number,
                 total_amount: newQuote.total_amount,
                 expiration_date: newQuote.expiration_date,

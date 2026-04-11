@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient, createServiceRoleClient } from "@/utils/supabase/server";
+
 import { getBranchContext } from "@/lib/api/branch-middleware";
 import { appLogger as logger } from "@/lib/logger";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
+import { createClient, createServiceRoleClient } from "@/utils/supabase/server";
 
 /**
  * GET /api/admin/credit-notes
@@ -86,7 +87,7 @@ export async function GET(request: NextRequest) {
 
     // Fetch order numbers for credit notes that have order_id
     const orderIds = (creditNotes || [])
-      .map((cn: any) => cn.order_id)
+      .map((cn: unknown) => cn.order_id)
       .filter(Boolean);
     let orderNumbersMap: Record<string, string> = {};
     if (orderIds.length > 0) {
@@ -96,12 +97,12 @@ export async function GET(request: NextRequest) {
         .in("id", orderIds);
       if (orders) {
         orderNumbersMap = Object.fromEntries(
-          orders.map((o: any) => [o.id, o.order_number]),
+          orders.map((o: unknown) => [o.id, o.order_number]),
         );
       }
     }
 
-    const notes = (creditNotes || []).map((cn: any) => ({
+    const notes = (creditNotes || []).map((cn: unknown) => ({
       ...cn,
       order_number: cn.order_id ? orderNumbersMap[cn.order_id] || null : null,
       branch_name: cn.branches?.name || null,
@@ -115,7 +116,7 @@ export async function GET(request: NextRequest) {
         offset,
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error("Error in credit notes API:", error);
     return NextResponse.json(
       { error: "Internal server error", details: error.message },

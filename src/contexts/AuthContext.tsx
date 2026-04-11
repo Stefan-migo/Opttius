@@ -1,22 +1,23 @@
 "use client";
 
+import type { User } from "@supabase/supabase-js";
 import {
   createContext,
-  useContext,
   ReactNode,
-  useState,
+  useContext,
   useEffect,
+  useState,
 } from "react";
-import type { User } from "@supabase/supabase-js";
-import { useAuth, AuthState } from "@/hooks/useAuth";
+
+import { AuthState, useAuth } from "@/hooks/useAuth";
 import { Tables } from "@/types/database";
-import { createClient } from "@/utils/supabase/client";
 import {
-  IsAdminParams,
-  IsAdminResult,
   GetAdminRoleParams,
   GetAdminRoleResult,
+  IsAdminParams,
+  IsAdminResult,
 } from "@/types/supabase-rpc";
+import { createClient } from "@/utils/supabase/client";
 
 type Profile = Tables<"profiles">;
 
@@ -29,14 +30,14 @@ interface AuthContextType extends AuthState {
       lastName?: string;
       phone?: string;
     },
-  ) => Promise<{ data: any; error: any }>;
+  ) => Promise<{ data: unknown; error: unknown }>;
   signIn: (
     email: string,
     password: string,
-  ) => Promise<{ data: any; error: any }>;
-  signOut: () => Promise<{ error: any }>;
+  ) => Promise<{ data: unknown; error: unknown }>;
+  signOut: () => Promise<{ error: unknown }>;
   updateProfile: (updates: Partial<Profile>) => Promise<Profile>;
-  resetPassword: (email: string) => Promise<{ error: any }>;
+  resetPassword: (email: string) => Promise<{ error: unknown }>;
   refetchProfile: () => Promise<Profile | null>;
   /** Refresca isAdmin, isSuperAdmin, adminRole desde la DB. Usar tras onboarding (assign-demo, activate-real-org). */
   refetchAdminStatus: () => Promise<void>;

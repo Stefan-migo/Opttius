@@ -1,9 +1,27 @@
 "use client";
 
+import { ChevronDown, ChevronRight, Edit, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
+
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -13,32 +31,15 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Plus, Edit, Trash2, ChevronDown, ChevronRight } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { formatCurrency } from "@/lib/utils";
-import {
-  OPTICAL_MATRIX_TEMPLATE,
   getOpticalDefaultMatrices,
+  OPTICAL_MATRIX_TEMPLATE,
 } from "@/lib/lens-matrices/constants";
 import {
-  OPTICAL_MATRIX_SUGGESTION_TITLE,
   OPTICAL_MATRIX_SUGGESTION_DESCRIPTION,
   OPTICAL_MATRIX_SUGGESTION_ROWS,
+  OPTICAL_MATRIX_SUGGESTION_TITLE,
 } from "@/lib/lens-matrices/suggestion-text";
+import { formatCurrency } from "@/lib/utils";
 
 export interface LensMatrixFormData {
   id: string; // Temporary ID or DB ID
@@ -202,9 +203,9 @@ export function LensMatrixManager({
       {!readOnly && (
         <div className="border rounded-lg overflow-hidden">
           <button
+            className="w-full flex items-center justify-between p-4 text-left bg-gray-50 hover:bg-gray-100 transition-colors"
             type="button"
             onClick={() => setSuggestionOpen(!suggestionOpen)}
-            className="w-full flex items-center justify-between p-4 text-left bg-gray-50 hover:bg-gray-100 transition-colors"
           >
             <span className="font-medium text-sm text-gray-700">
               {OPTICAL_MATRIX_SUGGESTION_TITLE}
@@ -244,17 +245,17 @@ export function LensMatrixManager({
               </div>
               <div className="flex gap-2">
                 <Button
+                  size="sm"
                   type="button"
                   variant="outline"
-                  size="sm"
                   onClick={() => handleApplyTemplate("defaults")}
                 >
                   Crear Rango base + Fallback
                 </Button>
                 <Button
+                  size="sm"
                   type="button"
                   variant="outline"
-                  size="sm"
                   onClick={() => handleApplyTemplate("full")}
                 >
                   Crear plantilla completa
@@ -269,9 +270,9 @@ export function LensMatrixManager({
         <h3 className="text-lg font-medium">Matrices de Precios</h3>
         {!readOnly && (
           <Button
-            onClick={() => handleOpenDialog()}
-            variant="outline"
             size="sm"
+            variant="outline"
+            onClick={() => handleOpenDialog()}
           >
             <Plus className="h-4 w-4 mr-2" />
             Agregar Matriz
@@ -327,15 +328,15 @@ export function LensMatrixManager({
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
                         <Button
-                          variant="ghost"
                           size="sm"
+                          variant="ghost"
                           onClick={() => handleOpenDialog(matrix)}
                         >
                           <Edit className="h-4 w-4" />
                         </Button>
                         <Button
-                          variant="ghost"
                           size="sm"
+                          variant="ghost"
                           onClick={() => handleDelete(matrix.id)}
                         >
                           <Trash2 className="h-4 w-4" />
@@ -383,27 +384,27 @@ export function LensMatrixManager({
                   <div>
                     <Label htmlFor="sphere_min">Esfera Min</Label>
                     <Input
+                      required
                       id="sphere_min"
-                      type="number"
                       step="0.25"
+                      type="number"
                       value={formData.sphere_min}
                       onChange={(e) =>
                         setFormData({ ...formData, sphere_min: e.target.value })
                       }
-                      required
                     />
                   </div>
                   <div>
                     <Label htmlFor="sphere_max">Esfera Max</Label>
                     <Input
+                      required
                       id="sphere_max"
-                      type="number"
                       step="0.25"
+                      type="number"
                       value={formData.sphere_max}
                       onChange={(e) =>
                         setFormData({ ...formData, sphere_max: e.target.value })
                       }
-                      required
                     />
                   </div>
                 </div>
@@ -411,9 +412,10 @@ export function LensMatrixManager({
                   <div>
                     <Label htmlFor="cylinder_min">Cilindro Min</Label>
                     <Input
+                      required
                       id="cylinder_min"
-                      type="number"
                       step="0.25"
+                      type="number"
                       value={formData.cylinder_min}
                       onChange={(e) =>
                         setFormData({
@@ -421,15 +423,15 @@ export function LensMatrixManager({
                           cylinder_min: e.target.value,
                         })
                       }
-                      required
                     />
                   </div>
                   <div>
                     <Label htmlFor="cylinder_max">Cilindro Max</Label>
                     <Input
+                      required
                       id="cylinder_max"
-                      type="number"
                       step="0.25"
+                      type="number"
                       value={formData.cylinder_max}
                       onChange={(e) =>
                         setFormData({
@@ -437,7 +439,6 @@ export function LensMatrixManager({
                           cylinder_max: e.target.value,
                         })
                       }
-                      required
                     />
                   </div>
                 </div>
@@ -447,17 +448,19 @@ export function LensMatrixManager({
                     <div className="grid grid-cols-2 gap-2">
                       <div>
                         <Label
-                          htmlFor="addition_min"
                           className="text-purple-900"
+                          htmlFor="addition_min"
                         >
                           Adición Min
                         </Label>
                         <Input
+                          required
+                          className="bg-white"
                           id="addition_min"
-                          type="number"
-                          step="0.25"
-                          min="0"
                           max="4"
+                          min="0"
+                          step="0.25"
+                          type="number"
                           value={formData.addition_min}
                           onChange={(e) =>
                             setFormData({
@@ -465,23 +468,23 @@ export function LensMatrixManager({
                               addition_min: e.target.value,
                             })
                           }
-                          required
-                          className="bg-white"
                         />
                       </div>
                       <div>
                         <Label
-                          htmlFor="addition_max"
                           className="text-purple-900"
+                          htmlFor="addition_max"
                         >
                           Adición Max
                         </Label>
                         <Input
+                          required
+                          className="bg-white"
                           id="addition_max"
-                          type="number"
-                          step="0.25"
-                          min="0"
                           max="4"
+                          min="0"
+                          step="0.25"
+                          type="number"
                           value={formData.addition_max}
                           onChange={(e) =>
                             setFormData({
@@ -489,8 +492,6 @@ export function LensMatrixManager({
                               addition_max: e.target.value,
                             })
                           }
-                          required
-                          className="bg-white"
                         />
                       </div>
                     </div>
@@ -505,29 +506,29 @@ export function LensMatrixManager({
                 <div>
                   <Label htmlFor="base_price">Precio Venta</Label>
                   <Input
+                    required
                     id="base_price"
-                    type="number"
-                    step="0.01"
                     min="0"
+                    step="0.01"
+                    type="number"
                     value={formData.base_price}
                     onChange={(e) =>
                       setFormData({ ...formData, base_price: e.target.value })
                     }
-                    required
                   />
                 </div>
                 <div>
                   <Label htmlFor="cost">Costo Compra</Label>
                   <Input
+                    required
                     id="cost"
-                    type="number"
-                    step="0.01"
                     min="0"
+                    step="0.01"
+                    type="number"
                     value={formData.cost}
                     onChange={(e) =>
                       setFormData({ ...formData, cost: e.target.value })
                     }
-                    required
                   />
                 </div>
                 <div>
@@ -551,15 +552,15 @@ export function LensMatrixManager({
                 </div>
                 <div className="flex items-center space-x-2 pt-4">
                   <input
-                    type="checkbox"
-                    id="is_active_matrix"
                     checked={formData.is_active}
+                    className="h-4 w-4 rounded border-gray-300"
+                    id="is_active_matrix"
+                    type="checkbox"
                     onChange={(e) =>
                       setFormData({ ...formData, is_active: e.target.checked })
                     }
-                    className="h-4 w-4 rounded border-gray-300"
                   />
-                  <Label htmlFor="is_active_matrix" className="cursor-pointer">
+                  <Label className="cursor-pointer" htmlFor="is_active_matrix">
                     Matriz Activa
                   </Label>
                 </div>

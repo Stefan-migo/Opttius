@@ -1,14 +1,14 @@
-import { BaseLLMProvider } from "./base";
 import type {
-  LLMProvider,
-  LLMMessage,
-  LLMTool,
   LLMConfig,
+  LLMMessage,
   LLMModel,
+  LLMProvider,
   LLMResponse,
   LLMStreamChunk,
+  LLMTool,
   ToolCall,
 } from "../types";
+import { BaseLLMProvider } from "./base";
 
 /**
  * OpenRouter Provider
@@ -145,7 +145,10 @@ export class OpenRouterProvider extends BaseLLMProvider {
     }
 
     const baseURL = config?.baseURL || "https://openrouter.ai/api/v1";
-    const model = config?.model || "anthropic/claude-3.5-sonnet";
+    const model =
+      config?.model ||
+      process.env.OPENROUTER_DEFAULT_MODEL ||
+      "google/gemini-2.0-flash-exp";
 
     // OpenRouter-specific headers
     const headers: Record<string, string> = {
@@ -214,22 +217,24 @@ export class OpenRouterProvider extends BaseLLMProvider {
             }
 
             if (delta?.tool_calls) {
-              const toolCalls: ToolCall[] = delta.tool_calls.map((tc: any) => {
-                let args = {};
-                try {
-                  args = tc.function?.arguments
-                    ? JSON.parse(tc.function.arguments)
-                    : {};
-                } catch (e) {
-                  // If parsing fails, use empty object
-                }
+              const toolCalls: ToolCall[] = delta.tool_calls.map(
+                (tc: unknown) => {
+                  let args = {};
+                  try {
+                    args = tc.function?.arguments
+                      ? JSON.parse(tc.function.arguments)
+                      : {};
+                  } catch (e) {
+                    // If parsing fails, use empty object
+                  }
 
-                return {
-                  id: tc.id || crypto.randomUUID(),
-                  name: tc.function?.name || "",
-                  arguments: args,
-                };
-              });
+                  return {
+                    id: tc.id || crypto.randomUUID(),
+                    name: tc.function?.name || "",
+                    arguments: args,
+                  };
+                },
+              );
 
               if (toolCalls.length > 0) {
                 yield {
@@ -260,7 +265,10 @@ export class OpenRouterProvider extends BaseLLMProvider {
     }
 
     const baseURL = config?.baseURL || "https://openrouter.ai/api/v1";
-    const model = config?.model || "anthropic/claude-3.5-sonnet";
+    const model =
+      config?.model ||
+      process.env.OPENROUTER_DEFAULT_MODEL ||
+      "google/gemini-2.0-flash-exp";
 
     // OpenRouter-specific headers
     const headers: Record<string, string> = {

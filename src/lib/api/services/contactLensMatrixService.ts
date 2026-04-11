@@ -1,11 +1,12 @@
 /**
  * Contact Lens Matrix Service
- * 
+ *
  * Service for calculating contact lens prices based on prescription parameters.
  */
 
-import { ApiClient, isSuccess, unwrapData } from '../client-helpers';
-import { handleApiError } from '@/lib/services/errorService';
+import { handleApiError } from "@/lib/services/errorService";
+
+import { ApiClient, isSuccess, unwrapData } from "../client-helpers";
 
 // ============================================
 // Types
@@ -50,19 +51,20 @@ class ContactLensMatrixService {
     sphere: number,
     cylinder: number,
     axis: number | null = null,
-    addition: number | null = null
+    addition: number | null = null,
   ): Promise<ContactLensMatrixCalculationResult | null> {
     try {
-      const response = await this.client.post<ContactLensMatrixCalculationResponse>(
-        '/api/admin/contact-lens-matrices/calculate',
-        {
-          contact_lens_family_id: familyId,
-          sphere,
-          cylinder,
-          axis,
-          addition,
-        }
-      );
+      const response =
+        await this.client.post<ContactLensMatrixCalculationResponse>(
+          "/api/admin/contact-lens-matrices/calculate",
+          {
+            contact_lens_family_id: familyId,
+            sphere,
+            cylinder,
+            axis,
+            addition,
+          },
+        );
 
       if (isSuccess(response)) {
         const data = unwrapData(response);

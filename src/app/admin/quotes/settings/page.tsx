@@ -1,41 +1,42 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import {
+  AlertCircle,
+  ArrowLeft,
+  Calendar,
+  DollarSign,
+  Eye,
+  FileText,
+  Info,
+  Loader2,
+  Percent,
+  Plus,
+  Save,
+  Settings,
+  X,
+} from "lucide-react";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+
+import { BranchSelector } from "@/components/admin/BranchSelector";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
+  CardDescription,
   CardHeader,
   CardTitle,
-  CardDescription,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
-import {
-  Settings,
-  Save,
-  Loader2,
-  DollarSign,
-  Eye,
-  Percent,
-  Calendar,
-  FileText,
-  X,
-  Plus,
-  ArrowLeft,
-  Info,
-  AlertCircle,
-} from "lucide-react";
-import { toast } from "sonner";
-import Link from "next/link";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
 import { useBranch } from "@/hooks/useBranch";
-import { BranchSelector } from "@/components/admin/BranchSelector";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { QuoteSettings, quoteSettingsService } from "@/lib/api/services";
 import { formatCurrency } from "@/lib/utils";
-import { quoteSettingsService, QuoteSettings } from "@/lib/api/services";
 
 interface TreatmentPrice {
   price: number;
@@ -45,14 +46,16 @@ interface TreatmentPrice {
 // Extended QuoteSettings type for form state with additional UI-specific fields
 interface FormQuoteSettings extends Omit<QuoteSettings, "treatment_prices"> {
   treatment_prices: {
+    // Tratamientos que se aplican en laboratorio local
     anti_reflective: TreatmentPrice | number;
-    blue_light_filter: TreatmentPrice | number;
-    uv_protection: TreatmentPrice | number;
     scratch_resistant: TreatmentPrice | number;
-    anti_fog: TreatmentPrice | number;
-    photochromic?: TreatmentPrice | number;
-    polarized?: TreatmentPrice | number;
-    tint?: TreatmentPrice | number;
+    tint: TreatmentPrice | number;
+    // Servicio personalizado
+    custom_service?: {
+      enabled: boolean;
+      name: string;
+      price: number;
+    };
   };
 }
 
@@ -107,7 +110,7 @@ export default function QuoteSettingsPage() {
 
     try {
       setSaving(true);
-      await quoteSettingsService.update(settings as any);
+      await quoteSettingsService.update(settings as unknown);
 
       setHasChanges(false);
 
@@ -159,13 +162,13 @@ export default function QuoteSettingsPage() {
   >(
     key: K,
     nestedKey: NK,
-    value: any,
+    value: unknown,
   ) => {
     if (!settings) return;
     setSettings({
       ...settings,
       [key]: {
-        ...(settings[key] as any),
+        ...(settings[key] as unknown),
         [nestedKey]: value,
       },
     });
@@ -267,7 +270,7 @@ export default function QuoteSettingsPage() {
             <p className="text-admin-text-tertiary">
               Error al cargar configuración
             </p>
-            <Button onClick={fetchSettings} className="mt-4">
+            <Button className="mt-4" onClick={fetchSettings}>
               Reintentar
             </Button>
           </CardContent>
@@ -277,15 +280,16 @@ export default function QuoteSettingsPage() {
   }
 
   const treatmentLabels: Record<string, string> = {
+    // Tratamientos de laboratorio local
     anti_reflective: "Anti-reflejante",
-    blue_light_filter: "Filtro Luz Azul",
-    uv_protection: "Protección UV",
     scratch_resistant: "Anti-rayas",
-    anti_fog: "Anti-empañamiento",
-    photochromic: "Fotocromático",
-    polarized: "Polarizado",
     tint: "Tinte",
+    // Servicio personalizado
+    custom_service: "Servicio Personalizado",
   };
+
+  // Lista de treatments a mostrar (solo los que se aplican en laboratorio)
+  const TREATMENT_KEYS = ["anti_reflective", "scratch_resistant", "tint"];
 
   return (
     <div className="p-6 space-y-6 max-w-7xl mx-auto">
@@ -304,15 +308,15 @@ export default function QuoteSettingsPage() {
         <div className="flex items-center gap-2">
           {isSuperAdmin && <BranchSelector />}
           <Link href="/admin/quotes">
-            <Button variant="outline" size="sm">
+            <Button size="sm" variant="outline">
               <ArrowLeft className="h-4 w-4 mr-2" />
               Volver
             </Button>
           </Link>
           <Button
-            onClick={handleSave}
-            disabled={saving || !hasChanges}
             className="min-w-[140px]"
+            disabled={saving || !hasChanges}
+            onClick={handleSave}
           >
             {saving ? (
               <>
@@ -342,9 +346,9 @@ export default function QuoteSettingsPage() {
 
       {/* Main Content with Tabs */}
       <Tabs
+        className="space-y-6"
         value={activeTab}
         onValueChange={setActiveTab}
-        className="space-y-6"
       >
         <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="general">
@@ -366,7 +370,7 @@ export default function QuoteSettingsPage() {
         </TabsList>
 
         {/* Tab 1: General Settings */}
-        <TabsContent value="general" className="space-y-6">
+        <TabsContent className="space-y-6" value="general">
           {/* Default Values */}
           <Card>
             <CardHeader>
@@ -383,8 +387,8 @@ export default function QuoteSettingsPage() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="space-y-2">
                   <Label
-                    htmlFor="labor_cost"
                     className="text-base font-semibold"
+                    htmlFor="labor_cost"
                   >
                     Mano de Obra por Defecto
                   </Label>
@@ -393,6 +397,7 @@ export default function QuoteSettingsPage() {
                       CLP
                     </span>
                     <Input
+                      className="pl-12"
                       id="labor_cost"
                       type="number"
                       value={settings.default_labor_cost}
@@ -402,7 +407,6 @@ export default function QuoteSettingsPage() {
                           parseFloat(e.target.value) || 0,
                         )
                       }
-                      className="pl-12"
                     />
                   </div>
                   <p className="text-xs text-admin-text-tertiary">
@@ -412,8 +416,8 @@ export default function QuoteSettingsPage() {
 
                 <div className="space-y-2">
                   <Label
-                    htmlFor="tax_percentage"
                     className="text-base font-semibold"
+                    htmlFor="tax_percentage"
                   >
                     Porcentaje de IVA
                   </Label>
@@ -422,9 +426,10 @@ export default function QuoteSettingsPage() {
                       %
                     </span>
                     <Input
+                      className="pr-12"
                       id="tax_percentage"
-                      type="number"
                       step="0.1"
+                      type="number"
                       value={settings.default_tax_percentage}
                       onChange={(e) =>
                         updateSetting(
@@ -432,7 +437,6 @@ export default function QuoteSettingsPage() {
                           parseFloat(e.target.value) || 0,
                         )
                       }
-                      className="pr-12"
                     />
                   </div>
                   <p className="text-xs text-admin-text-tertiary">
@@ -442,8 +446,8 @@ export default function QuoteSettingsPage() {
 
                 <div className="space-y-2">
                   <Label
-                    htmlFor="expiration_days"
                     className="text-base font-semibold"
+                    htmlFor="expiration_days"
                   >
                     Días de Validez
                   </Label>
@@ -452,9 +456,10 @@ export default function QuoteSettingsPage() {
                       días
                     </span>
                     <Input
+                      className="pr-12"
                       id="expiration_days"
-                      type="number"
                       min="1"
+                      type="number"
                       value={settings.default_expiration_days}
                       onChange={(e) =>
                         updateSetting(
@@ -462,7 +467,6 @@ export default function QuoteSettingsPage() {
                           parseInt(e.target.value) || 30,
                         )
                       }
-                      className="pr-12"
                     />
                   </div>
                   <p className="text-xs text-admin-text-tertiary">
@@ -483,8 +487,8 @@ export default function QuoteSettingsPage() {
                   <div className="flex items-center justify-between p-4 border rounded-lg">
                     <div className="space-y-0.5">
                       <Label
-                        htmlFor="labor_cost_includes_tax"
                         className="text-sm font-medium cursor-pointer"
+                        htmlFor="labor_cost_includes_tax"
                       >
                         Mano de Obra incluye IVA
                       </Label>
@@ -493,8 +497,8 @@ export default function QuoteSettingsPage() {
                       </p>
                     </div>
                     <Switch
-                      id="labor_cost_includes_tax"
                       checked={settings.labor_cost_includes_tax ?? true}
+                      id="labor_cost_includes_tax"
                       onCheckedChange={(checked) =>
                         updateSetting("labor_cost_includes_tax", checked)
                       }
@@ -504,8 +508,8 @@ export default function QuoteSettingsPage() {
                   <div className="flex items-center justify-between p-4 border rounded-lg">
                     <div className="space-y-0.5">
                       <Label
-                        htmlFor="lens_cost_includes_tax"
                         className="text-sm font-medium cursor-pointer"
+                        htmlFor="lens_cost_includes_tax"
                       >
                         Lentes incluyen IVA
                       </Label>
@@ -514,8 +518,8 @@ export default function QuoteSettingsPage() {
                       </p>
                     </div>
                     <Switch
-                      id="lens_cost_includes_tax"
                       checked={settings.lens_cost_includes_tax ?? true}
+                      id="lens_cost_includes_tax"
                       onCheckedChange={(checked) =>
                         updateSetting("lens_cost_includes_tax", checked)
                       }
@@ -525,8 +529,8 @@ export default function QuoteSettingsPage() {
                   <div className="flex items-center justify-between p-4 border rounded-lg">
                     <div className="space-y-0.5">
                       <Label
-                        htmlFor="treatments_cost_includes_tax"
                         className="text-sm font-medium cursor-pointer"
+                        htmlFor="treatments_cost_includes_tax"
                       >
                         Tratamientos incluyen IVA
                       </Label>
@@ -535,8 +539,8 @@ export default function QuoteSettingsPage() {
                       </p>
                     </div>
                     <Switch
-                      id="treatments_cost_includes_tax"
                       checked={settings.treatments_cost_includes_tax ?? true}
+                      id="treatments_cost_includes_tax"
                       onCheckedChange={(checked) =>
                         updateSetting("treatments_cost_includes_tax", checked)
                       }
@@ -576,85 +580,192 @@ export default function QuoteSettingsPage() {
         </TabsContent>
 
         {/* Tab 2: Treatments */}
-        <TabsContent value="treatments" className="space-y-6">
+        <TabsContent className="space-y-6" value="treatments">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center">
                 <Eye className="h-5 w-5 mr-2" />
-                Precios de Tratamientos y Recubrimientos
+                Tratamientos Extra
               </CardTitle>
               <CardDescription>
-                Configura los precios de los tratamientos aplicables a los
-                lentes (en CLP)
+                Configura los precios de tratamientos adicionales que se cobran
+                por separado. Los tratamientos como Polarizado y Fotocromático
+                ya vienen incluidos en el lente.
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                {Object.entries(settings.treatment_prices).map(
-                  ([key, value]) => {
-                    const price = getTreatmentPrice(value);
-                    const enabled = getTreatmentEnabled(value);
-                    return (
-                      <div
-                        key={key}
-                        className="p-4 border rounded-lg space-y-3 hover:bg-gray-50 transition-colors"
-                      >
-                        <div className="flex items-center justify-between">
-                          <Label className="text-sm font-medium">
-                            {treatmentLabels[key] || key}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {TREATMENT_KEYS.map((key) => {
+                  const value =
+                    settings.treatment_prices?.[
+                      key as keyof typeof settings.treatment_prices
+                    ];
+                  const price = getTreatmentPrice(value);
+                  const enabled = getTreatmentEnabled(value);
+                  return (
+                    <div
+                      className="p-4 border rounded-lg space-y-3 hover:bg-gray-50 transition-colors"
+                      key={key}
+                    >
+                      <div className="flex items-center justify-between">
+                        <Label className="text-sm font-medium">
+                          {treatmentLabels[key] || key}
+                        </Label>
+                        <div className="flex items-center space-x-2">
+                          <Label
+                            className="text-xs text-admin-text-tertiary cursor-pointer"
+                            htmlFor={`enabled-${key}`}
+                          >
+                            Mostrar
                           </Label>
-                          <div className="flex items-center space-x-2">
-                            <Label
-                              htmlFor={`enabled-${key}`}
-                              className="text-xs text-admin-text-tertiary cursor-pointer"
-                            >
-                              Mostrar
-                            </Label>
-                            <Switch
-                              id={`enabled-${key}`}
-                              checked={enabled}
-                              onCheckedChange={(checked) =>
-                                updateTreatmentEnabled(key, checked)
-                              }
-                            />
-                          </div>
-                        </div>
-                        <div className="relative">
-                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-admin-text-tertiary text-sm">
-                            CLP
-                          </span>
-                          <Input
-                            type="number"
-                            value={price}
-                            onChange={(e) =>
-                              updateTreatmentPrice(
-                                key,
-                                parseFloat(e.target.value) || 0,
-                              )
+                          <Switch
+                            checked={enabled}
+                            id={`enabled-${key}`}
+                            onCheckedChange={(checked) =>
+                              updateTreatmentEnabled(key, checked)
                             }
-                            className="pl-12"
-                            disabled={!enabled}
                           />
                         </div>
-                        <p className="text-xs text-admin-text-tertiary">
-                          {formatCurrency(price)}
-                        </p>
-                        {!enabled && (
-                          <p className="text-xs text-amber-600">
-                            Oculto en formulario
-                          </p>
-                        )}
                       </div>
-                    );
-                  },
-                )}
+                      <div className="relative">
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-admin-text-tertiary text-sm">
+                          CLP
+                        </span>
+                        <Input
+                          className="pl-12"
+                          disabled={!enabled}
+                          type="number"
+                          value={price}
+                          onChange={(e) =>
+                            updateTreatmentPrice(
+                              key,
+                              parseFloat(e.target.value) || 0,
+                            )
+                          }
+                        />
+                      </div>
+                      <p className="text-xs text-admin-text-tertiary">
+                        {formatCurrency(price)}
+                      </p>
+                      {!enabled && (
+                        <p className="text-xs text-amber-600">
+                          Oculto en formulario
+                        </p>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Servicio Personalizado */}
+              <div className="mt-6 pt-6 border-t">
+                <h3 className="text-lg font-semibold mb-4 flex items-center">
+                  <Settings className="h-5 w-5 mr-2" />
+                  Servicio Personalizado
+                </h3>
+                <p className="text-sm text-admin-text-tertiary mb-4">
+                  Agrega un servicio o tratamiento personalizado con nombre y
+                  precio configurable.
+                </p>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="flex items-center space-x-2">
+                    <Switch
+                      checked={
+                        settings.treatment_prices?.custom_service?.enabled ??
+                        false
+                      }
+                      id="custom-service-enabled"
+                      onCheckedChange={(checked) => {
+                        updateNestedSetting(
+                          "treatment_prices",
+                          "custom_service" as keyof typeof settings.treatment_prices,
+                          {
+                            enabled: checked,
+                            name:
+                              settings.treatment_prices?.custom_service?.name ||
+                              "Servicio Extra",
+                            price:
+                              settings.treatment_prices?.custom_service
+                                ?.price || 0,
+                          },
+                        );
+                      }}
+                    />
+                    <Label
+                      htmlFor="custom-service-enabled"
+                      className="cursor-pointer"
+                    >
+                      Habilitar
+                    </Label>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Nombre del servicio</Label>
+                    <Input
+                      value={
+                        settings.treatment_prices?.custom_service?.name || ""
+                      }
+                      onChange={(e) => {
+                        updateNestedSetting(
+                          "treatment_prices",
+                          "custom_service" as keyof typeof settings.treatment_prices,
+                          {
+                            enabled:
+                              settings.treatment_prices?.custom_service
+                                ?.enabled ?? false,
+                            name: e.target.value,
+                            price:
+                              settings.treatment_prices?.custom_service
+                                ?.price || 0,
+                          },
+                        );
+                      }}
+                      placeholder="Ej: Tintado especial"
+                      disabled={
+                        !settings.treatment_prices?.custom_service?.enabled
+                      }
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Precio (CLP)</Label>
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-admin-text-tertiary text-sm">
+                        CLP
+                      </span>
+                      <Input
+                        className="pl-12"
+                        type="number"
+                        value={
+                          settings.treatment_prices?.custom_service?.price || 0
+                        }
+                        onChange={(e) => {
+                          updateNestedSetting(
+                            "treatment_prices",
+                            "custom_service" as keyof typeof settings.treatment_prices,
+                            {
+                              enabled:
+                                settings.treatment_prices?.custom_service
+                                  ?.enabled ?? false,
+                              name:
+                                settings.treatment_prices?.custom_service
+                                  ?.name || "Servicio Extra",
+                              price: parseFloat(e.target.value) || 0,
+                            },
+                          );
+                        }}
+                        disabled={
+                          !settings.treatment_prices?.custom_service?.enabled
+                        }
+                      />
+                    </div>
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>
         </TabsContent>
 
         {/* Tab 3: Volume Discounts */}
-        <TabsContent value="discounts" className="space-y-6">
+        <TabsContent className="space-y-6" value="discounts">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center">
@@ -688,13 +799,14 @@ export default function QuoteSettingsPage() {
                   <>
                     {settings.volume_discounts?.map((discount, index) => (
                       <div
-                        key={index}
                         className="flex items-center gap-4 p-4 border rounded-lg hover:bg-gray-50 transition-colors"
+                        key={index}
                       >
                         <div className="flex-1 grid grid-cols-2 gap-4">
                           <div>
                             <Label>Monto Mínimo (CLP)</Label>
                             <Input
+                              className="mt-1"
                               type="number"
                               value={discount.min_amount}
                               onChange={(e) =>
@@ -704,14 +816,14 @@ export default function QuoteSettingsPage() {
                                   parseFloat(e.target.value) || 0,
                                 )
                               }
-                              className="mt-1"
                             />
                           </div>
                           <div>
                             <Label>Descuento (%)</Label>
                             <Input
-                              type="number"
+                              className="mt-1"
                               step="0.1"
+                              type="number"
                               value={discount.discount_percentage}
                               onChange={(e) =>
                                 updateVolumeDiscount(
@@ -720,15 +832,14 @@ export default function QuoteSettingsPage() {
                                   parseFloat(e.target.value) || 0,
                                 )
                               }
-                              className="mt-1"
                             />
                           </div>
                         </div>
                         <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => removeVolumeDiscount(index)}
                           className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                          size="icon"
+                          variant="ghost"
+                          onClick={() => removeVolumeDiscount(index)}
                         >
                           <X className="h-4 w-4" />
                         </Button>
@@ -746,7 +857,7 @@ export default function QuoteSettingsPage() {
         </TabsContent>
 
         {/* Tab 4: Terms and Conditions */}
-        <TabsContent value="terms" className="space-y-6">
+        <TabsContent className="space-y-6" value="terms">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center">
@@ -765,13 +876,13 @@ export default function QuoteSettingsPage() {
                   Términos y Condiciones por Defecto
                 </Label>
                 <Textarea
+                  className="mt-1 font-mono text-sm"
+                  placeholder="Ingresa los términos y condiciones por defecto para los presupuestos..."
+                  rows={8}
                   value={settings.terms_and_conditions || ""}
                   onChange={(e) =>
                     updateSetting("terms_and_conditions", e.target.value)
                   }
-                  rows={8}
-                  className="mt-1 font-mono text-sm"
-                  placeholder="Ingresa los términos y condiciones por defecto para los presupuestos..."
                 />
                 <p className="text-xs text-admin-text-tertiary">
                   Este texto aparecerá en la sección de términos y condiciones
@@ -783,13 +894,13 @@ export default function QuoteSettingsPage() {
                   Plantilla de Notas
                 </Label>
                 <Textarea
+                  className="mt-1 font-mono text-sm"
+                  placeholder="Ingresa una plantilla de notas por defecto..."
+                  rows={6}
                   value={settings.notes_template || ""}
                   onChange={(e) =>
                     updateSetting("notes_template", e.target.value)
                   }
-                  rows={6}
-                  className="mt-1 font-mono text-sm"
-                  placeholder="Ingresa una plantilla de notas por defecto..."
                 />
                 <p className="text-xs text-admin-text-tertiary">
                   Esta plantilla se usará como base para las notas en los

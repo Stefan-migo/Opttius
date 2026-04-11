@@ -1,26 +1,29 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter, useParams } from "next/navigation";
+import { zodResolver } from "@hookform/resolvers/zod";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+  ArrowLeft,
+  Calendar,
+  Clock,
+  Copy,
+  Edit,
+  FileText,
+  Loader2,
+  MessageSquare,
+  Send,
+  User,
+  UserPlus,
+  XCircle,
+} from "lucide-react";
+import { useParams, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { SubmitHandler, useForm } from "react-hook-form";
+import { toast } from "sonner";
+import type { z } from "zod";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -29,33 +32,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Label } from "@/components/ui/label";
 import {
-  Loader2,
-  ArrowLeft,
-  Mail,
-  Calendar,
-  MessageSquare,
-  CheckCircle2,
-  Clock,
-  AlertCircle,
-  XCircle,
-  Send,
-  User,
-  Building2,
-  Edit,
-  UserPlus,
-  Check,
-  X,
-  FileText,
-  Copy,
-} from "lucide-react";
-import { toast } from "sonner";
-import Link from "next/link";
-import { useForm, SubmitHandler } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import { createSaasSupportMessageSchema } from "@/lib/api/validation/zod-schemas";
-import type { z } from "zod";
 
 type MessageForm = z.infer<typeof createSaasSupportMessageSchema>;
 
@@ -182,7 +168,7 @@ export default function TicketDetailPage() {
     formState: { errors },
     reset,
     setValue,
-  } = useForm<any>({
+  } = useForm<unknown>({
     resolver: zodResolver(createSaasSupportMessageSchema),
     defaultValues: {
       is_internal: false,
@@ -247,7 +233,7 @@ export default function TicketDetailPage() {
     }
   };
 
-  const onSubmitMessage: SubmitHandler<any> = async (data) => {
+  const onSubmitMessage: SubmitHandler<unknown> = async (data) => {
     setSendingMessage(true);
     try {
       const response = await fetch(
@@ -371,8 +357,8 @@ export default function TicketDetailPage() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Button
-              variant="ghost"
               size="icon"
+              variant="ghost"
               onClick={() => router.push("/admin/saas-management/support")}
             >
               <ArrowLeft className="h-5 w-5" />
@@ -383,10 +369,10 @@ export default function TicketDetailPage() {
                   Ticket #{ticket.ticket_number}
                 </h1>
                 <Button
-                  variant="ghost"
                   size="icon"
-                  onClick={copyTicketNumber}
                   title="Copiar número de ticket"
+                  variant="ghost"
+                  onClick={copyTicketNumber}
                 >
                   <Copy className="h-4 w-4" />
                 </Button>
@@ -474,7 +460,6 @@ export default function TicketDetailPage() {
                   <div className="space-y-4">
                     {messages.map((msg) => (
                       <div
-                        key={msg.id}
                         className={`p-4 rounded-lg border ${
                           msg.is_internal
                             ? "bg-yellow-50 border-yellow-200"
@@ -482,6 +467,7 @@ export default function TicketDetailPage() {
                               ? "bg-blue-50 border-blue-200"
                               : "bg-gray-50 border-gray-200"
                         }`}
+                        key={msg.id}
                       >
                         <div className="flex items-start justify-between mb-2">
                           <div className="flex items-center gap-2">
@@ -490,12 +476,12 @@ export default function TicketDetailPage() {
                               {msg.sender_name}
                             </span>
                             {msg.is_internal && (
-                              <Badge variant="outline" className="text-xs">
+                              <Badge className="text-xs" variant="outline">
                                 Interno
                               </Badge>
                             )}
                             {msg.is_from_customer && !msg.is_internal && (
-                              <Badge variant="outline" className="text-xs">
+                              <Badge className="text-xs" variant="outline">
                                 Cliente
                               </Badge>
                             )}
@@ -520,8 +506,8 @@ export default function TicketDetailPage() {
                 <div className="flex items-center justify-between">
                   <CardTitle>Responder</CardTitle>
                   <Button
-                    variant="outline"
                     size="sm"
+                    variant="outline"
                     onClick={() => setShowTemplateDialog(true)}
                   >
                     <FileText className="h-4 w-4 mr-2" />
@@ -531,17 +517,17 @@ export default function TicketDetailPage() {
               </CardHeader>
               <CardContent>
                 <form
-                  onSubmit={handleSubmit(onSubmitMessage)}
                   className="space-y-4"
+                  onSubmit={handleSubmit(onSubmitMessage)}
                 >
                   <div className="flex items-center gap-2">
                     <input
-                      type="checkbox"
                       id="is_internal"
+                      type="checkbox"
                       {...register("is_internal")}
                       className="rounded"
                     />
-                    <Label htmlFor="is_internal" className="text-sm">
+                    <Label className="text-sm" htmlFor="is_internal">
                       Mensaje interno (no visible para el cliente)
                     </Label>
                   </div>
@@ -553,9 +539,9 @@ export default function TicketDetailPage() {
                     <Textarea
                       id="message"
                       {...register("message")}
+                      className={errors.message ? "border-red-500" : ""}
                       placeholder="Escribe tu respuesta aquí..."
                       rows={6}
-                      className={errors.message ? "border-red-500" : ""}
                     />
                     {errors.message && (
                       <p className="text-sm text-red-500">
@@ -565,9 +551,9 @@ export default function TicketDetailPage() {
                   </div>
 
                   <Button
-                    type="submit"
-                    disabled={sendingMessage}
                     className="w-full"
+                    disabled={sendingMessage}
+                    type="submit"
                   >
                     {sendingMessage ? (
                       <>
@@ -595,16 +581,16 @@ export default function TicketDetailPage() {
               </CardHeader>
               <CardContent className="space-y-2">
                 <Button
-                  variant="outline"
                   className="w-full justify-start"
+                  variant="outline"
                   onClick={() => setShowStatusDialog(true)}
                 >
                   <Edit className="h-4 w-4 mr-2" />
                   Cambiar Estado/Prioridad
                 </Button>
                 <Button
-                  variant="outline"
                   className="w-full justify-start"
+                  variant="outline"
                   onClick={() => setShowAssignDialog(true)}
                 >
                   <UserPlus className="h-4 w-4 mr-2" />
@@ -714,10 +700,10 @@ export default function TicketDetailPage() {
                 <div className="space-y-2">
                   <Label>Resolución</Label>
                   <Textarea
-                    value={newResolution}
-                    onChange={(e) => setNewResolution(e.target.value)}
                     placeholder="Describe la resolución del ticket..."
                     rows={4}
+                    value={newResolution}
+                    onChange={(e) => setNewResolution(e.target.value)}
                   />
                 </div>
               )}
@@ -729,7 +715,7 @@ export default function TicketDetailPage() {
               >
                 Cancelar
               </Button>
-              <Button onClick={handleUpdateStatus} disabled={updatingTicket}>
+              <Button disabled={updatingTicket} onClick={handleUpdateStatus}>
                 {updatingTicket ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -760,13 +746,13 @@ export default function TicketDetailPage() {
               ) : (
                 templates.map((template) => (
                   <div
-                    key={template.id}
                     className="p-3 border rounded-lg hover:bg-epoch-primary/5 cursor-pointer transition-colors"
+                    key={template.id}
                     onClick={() => handleUseTemplate(template)}
                   >
                     <div className="font-medium">{template.name}</div>
                     {template.category && (
-                      <Badge variant="outline" className="mt-1">
+                      <Badge className="mt-1" variant="outline">
                         {categoryLabels[template.category] || template.category}
                       </Badge>
                     )}

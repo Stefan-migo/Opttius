@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/utils/supabase/server";
+
 import { appLogger as logger } from "@/lib/logger";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
+import { createClient } from "@/utils/supabase/server";
 
 export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
@@ -119,7 +120,7 @@ export async function DELETE(request: NextRequest) {
 
       return NextResponse.json({ success: true });
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error("Delete chat history error", { error });
     return NextResponse.json(
       { error: error.message || "Internal server error" },

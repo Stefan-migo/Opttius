@@ -1,6 +1,5 @@
-import { NextRequest, NextResponse } from "next/server";
-import { serverTelemetryCollector } from "@/lib/telemetry/collector/server-collector";
 import { createClient } from "@supabase/supabase-js";
+import { NextRequest, NextResponse } from "next/server";
 
 // Initialize Supabase client for server-side operations
 const supabase = createClient(

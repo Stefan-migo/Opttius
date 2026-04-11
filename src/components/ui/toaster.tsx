@@ -1,7 +1,7 @@
 "use client";
 
-import { Toaster as SonnerToaster } from "sonner";
 import { useEffect } from "react";
+import { Toaster as SonnerToaster } from "sonner";
 
 export function Toaster() {
   useEffect(() => {
@@ -150,11 +150,11 @@ export function Toaster() {
 
   return (
     <SonnerToaster
-      position="bottom-right"
       richColors
       closeButton={false}
-      expand={true}
       duration={4000}
+      expand={true}
+      position="bottom-right"
       toastOptions={{
         style: {
           background: "var(--background)",

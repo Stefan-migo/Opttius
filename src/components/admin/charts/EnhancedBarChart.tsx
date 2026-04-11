@@ -1,16 +1,16 @@
 "use client";
 
+import { useMemo } from "react";
 import {
-  BarChart as RechartsBarChart,
   Bar,
+  BarChart as RechartsBarChart,
+  CartesianGrid,
+  Cell,
+  ResponsiveContainer,
+  Tooltip,
   XAxis,
   YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  Cell,
 } from "recharts";
-import { useMemo } from "react";
 
 interface EnhancedBarChartProps {
   data: Array<{ label: string; value: number }>;
@@ -59,7 +59,7 @@ export function EnhancedBarChart({
     );
   }
 
-  const CustomTooltip = ({ active, payload }: any) => {
+  const CustomTooltip = ({ active, payload }: unknown) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       return (
@@ -86,51 +86,51 @@ export function EnhancedBarChart({
           </h4>
         )}
 
-        <ResponsiveContainer width="100%" height={height}>
+        <ResponsiveContainer height={height} width="100%">
           <RechartsBarChart
-            id="enhanced-bar-chart"
             data={chartData}
+            id="enhanced-bar-chart"
             layout="vertical"
             margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
           >
             <CartesianGrid
-              strokeDasharray="3 3"
-              stroke="#E5E7EB"
-              opacity={0.3}
               className="dark:opacity-20"
+              opacity={0.3}
+              stroke="#E5E7EB"
+              strokeDasharray="3 3"
             />
             <XAxis
-              type="number"
-              stroke="#6B7280"
-              fontSize={12}
-              tickLine={false}
               axisLine={false}
+              className="dark:text-gray-400"
+              fontSize={12}
+              stroke="#6B7280"
               tickFormatter={(value) => {
                 if (value >= 1000000) return `${(value / 1000000).toFixed(1)}M`;
                 if (value >= 1000) return `${(value / 1000).toFixed(1)}K`;
                 return formatValue(value);
               }}
-              className="dark:text-gray-400"
+              tickLine={false}
+              type="number"
             />
             <YAxis
-              type="category"
-              dataKey="name"
-              stroke="#6B7280"
-              fontSize={12}
-              tickLine={false}
               axisLine={false}
-              width={120}
               className="dark:text-gray-400"
+              dataKey="name"
+              fontSize={12}
+              stroke="#6B7280"
+              tickLine={false}
+              type="category"
+              width={120}
             />
             <Tooltip content={<CustomTooltip />} />
             <Bar
-              dataKey="value"
-              radius={[0, 8, 8, 0]}
               animationDuration={1000}
               animationEasing="ease-out"
+              dataKey="value"
+              radius={[0, 8, 8, 0]}
             >
               {chartData.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={entry.color} />
+                <Cell fill={entry.color} key={`cell-${index}`} />
               ))}
             </Bar>
           </RechartsBarChart>
@@ -147,51 +147,51 @@ export function EnhancedBarChart({
         </h4>
       )}
 
-      <ResponsiveContainer width="100%" height={height}>
+      <ResponsiveContainer height={height} width="100%">
         <RechartsBarChart
-          id="enhanced-bar-chart"
           data={chartData}
+          id="enhanced-bar-chart"
           margin={{ top: 20, right: 30, left: 20, bottom: 60 }}
         >
           <CartesianGrid
-            strokeDasharray="3 3"
-            stroke="#E5E7EB"
-            opacity={0.3}
             className="dark:opacity-20"
+            opacity={0.3}
+            stroke="#E5E7EB"
+            strokeDasharray="3 3"
           />
           <XAxis
-            dataKey="name"
-            stroke="#6B7280"
-            fontSize={12}
-            tickLine={false}
-            axisLine={false}
             angle={-45}
-            textAnchor="end"
+            axisLine={false}
+            className="dark:text-gray-400"
+            dataKey="name"
+            fontSize={12}
             height={80}
             interval={0}
-            className="dark:text-gray-400"
+            stroke="#6B7280"
+            textAnchor="end"
+            tickLine={false}
           />
           <YAxis
-            stroke="#6B7280"
-            fontSize={12}
-            tickLine={false}
             axisLine={false}
+            className="dark:text-gray-400"
+            fontSize={12}
+            stroke="#6B7280"
             tickFormatter={(value) => {
               if (value >= 1000000) return `${(value / 1000000).toFixed(1)}M`;
               if (value >= 1000) return `${(value / 1000).toFixed(1)}K`;
               return formatValue(value);
             }}
-            className="dark:text-gray-400"
+            tickLine={false}
           />
           <Tooltip content={<CustomTooltip />} />
           <Bar
-            dataKey="value"
-            radius={[8, 8, 0, 0]}
             animationDuration={1000}
             animationEasing="ease-out"
+            dataKey="value"
+            radius={[8, 8, 0, 0]}
           >
             {chartData.map((entry, index) => (
-              <Cell key={`cell-${index}`} fill={entry.color} />
+              <Cell fill={entry.color} key={`cell-${index}`} />
             ))}
           </Bar>
         </RechartsBarChart>

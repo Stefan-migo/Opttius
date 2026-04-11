@@ -1,13 +1,17 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
 import { Bell, CheckCheck, ChevronRight, Info, X } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
+
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Sheet,
   SheetContent,
@@ -15,19 +19,16 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { toast } from "sonner";
-import { useRouter } from "next/navigation";
-import { cn } from "@/lib/utils";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useBranch } from "@/hooks/useBranch";
 import { useRoot } from "@/hooks/useRoot";
-import { createClient } from "@/utils/supabase/client";
 import {
+  formatTimeSince,
   NOTIFICATION_ICONS,
   PRIORITY_COLORS,
-  formatTimeSince,
 } from "@/lib/notifications/constants";
+import { cn } from "@/lib/utils";
+import { createClient } from "@/utils/supabase/client";
 
 interface AdminNotification {
   id: string;
@@ -39,7 +40,7 @@ interface AdminNotification {
   related_entity_id?: string;
   action_url?: string;
   action_label?: string;
-  metadata?: any;
+  metadata?: unknown;
   is_read: boolean;
   created_at: string;
 }
@@ -187,9 +188,9 @@ export default function AdminNotificationDropdown({
 
   const triggerButton = (
     <Button
-      variant="ghost"
-      size="icon"
       className="relative group h-10 w-10 rounded-xl hover:bg-admin-accent-primary/10 transition-all duration-300 focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+      size="icon"
+      variant="ghost"
     >
       <Bell className="h-5 w-5 text-admin-text-secondary group-hover:text-admin-accent-primary transition-colors duration-300" />
       {unreadCount > 0 && (
@@ -216,11 +217,11 @@ export default function AdminNotificationDropdown({
         </div>
         {unreadCount > 0 && (
           <Button
-            variant="ghost"
-            size="sm"
-            onClick={markAllAsRead}
-            disabled={loading}
             className="h-8 px-3 text-[11px] font-bold hover:bg-admin-accent-primary/10 text-admin-accent-primary rounded-lg transition-all"
+            disabled={loading}
+            size="sm"
+            variant="ghost"
+            onClick={markAllAsRead}
           >
             <CheckCheck className="h-3.5 w-3.5 mr-1.5" />
             Marcar todo
@@ -252,13 +253,13 @@ export default function AdminNotificationDropdown({
 
               return (
                 <div
-                  key={notification.id}
                   className={cn(
                     "group p-4 transition-all duration-300 cursor-pointer relative",
                     isUnread
                       ? "bg-admin-accent-primary/[0.03]"
                       : "hover:bg-admin-bg-tertiary/50",
                   )}
+                  key={notification.id}
                   onClick={() =>
                     markAsRead(notification.id, notification.action_url)
                   }
@@ -339,9 +340,9 @@ export default function AdminNotificationDropdown({
       {notifications.length > 0 && (
         <div className="p-3 bg-admin-bg-tertiary/30 border-t border-admin-border-primary/50 shrink-0">
           <Button
-            variant="outline"
-            size="sm"
             className="w-full justify-center text-[11px] font-bold h-9 bg-admin-accent-primary hover:bg-admin-accent-secondary text-white hover:text-epoch-primary border-admin-accent-primary/50 transition-all rounded-xl"
+            size="sm"
+            variant="outline"
             onClick={() => {
               setIsOpen(false);
               router.push("/admin/notifications");
@@ -359,11 +360,11 @@ export default function AdminNotificationDropdown({
       <Sheet open={isOpen} onOpenChange={setIsOpen}>
         <SheetTrigger asChild>{triggerButton}</SheetTrigger>
         <SheetContent
-          side="bottom"
-          className="!h-[calc(100dvh-4rem-env(safe-area-inset-bottom))] !max-h-[calc(100dvh-4rem-env(safe-area-inset-bottom))] !bottom-[calc(4rem+env(safe-area-inset-bottom))] !top-auto !w-full !max-w-full !rounded-t-2xl flex flex-col p-0 bg-white border border-admin-border-primary/50 shadow-2xl shadow-black/10 overflow-hidden"
-          hideDefaultClose
           elevateZIndex
+          hideDefaultClose
           overlayExcludeBottomNav
+          className="!h-[calc(100dvh-4rem-env(safe-area-inset-bottom))] !max-h-[calc(100dvh-4rem-env(safe-area-inset-bottom))] !bottom-[calc(4rem+env(safe-area-inset-bottom))] !top-auto !w-full !max-w-full !rounded-t-2xl flex flex-col p-0 bg-white border border-admin-border-primary/50 shadow-2xl shadow-black/10 overflow-hidden"
+          side="bottom"
         >
           <SheetHeader className="flex flex-row items-center justify-between p-4 bg-admin-bg-tertiary/50 border-b border-admin-border-primary/50 shrink-0 space-y-0">
             <div>
@@ -379,22 +380,22 @@ export default function AdminNotificationDropdown({
             <div className="flex items-center gap-2">
               {unreadCount > 0 && (
                 <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={markAllAsRead}
-                  disabled={loading}
                   className="h-8 px-3 text-[11px] font-bold hover:bg-admin-accent-primary/10 text-admin-accent-primary rounded-lg"
+                  disabled={loading}
+                  size="sm"
+                  variant="ghost"
+                  onClick={markAllAsRead}
                 >
                   <CheckCheck className="h-3.5 w-3.5 mr-1.5" />
                   Marcar todo
                 </Button>
               )}
               <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setIsOpen(false)}
-                className="shrink-0"
                 aria-label="Cerrar"
+                className="shrink-0"
+                size="icon"
+                variant="ghost"
+                onClick={() => setIsOpen(false)}
               >
                 <X className="h-5 w-5" />
               </Button>
@@ -421,13 +422,13 @@ export default function AdminNotificationDropdown({
                     const isUnread = !notification.is_read;
                     return (
                       <div
-                        key={notification.id}
                         className={cn(
                           "group p-4 cursor-pointer relative",
                           isUnread
                             ? "bg-admin-accent-primary/[0.03]"
                             : "hover:bg-admin-bg-tertiary/50",
                         )}
+                        key={notification.id}
                         onClick={() =>
                           markAsRead(notification.id, notification.action_url)
                         }
@@ -489,9 +490,9 @@ export default function AdminNotificationDropdown({
             {notifications.length > 0 && (
               <div className="p-3 bg-admin-bg-tertiary/30 border-t border-admin-border-primary/50 shrink-0">
                 <Button
-                  variant="outline"
-                  size="sm"
                   className="w-full justify-center text-[11px] font-bold h-9 bg-admin-accent-primary hover:bg-admin-accent-secondary text-white border-admin-accent-primary/50 rounded-xl"
+                  size="sm"
+                  variant="outline"
                   onClick={() => {
                     setIsOpen(false);
                     router.push("/admin/notifications");

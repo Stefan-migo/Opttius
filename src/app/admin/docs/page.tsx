@@ -1,18 +1,19 @@
 "use client";
 
-import Link from "next/link";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
+  ArrowRight,
+  BarChart3,
+  Calendar,
+  FileText,
   LayoutDashboard,
-  ShoppingCart,
   Package,
   Receipt,
-  Calendar,
+  ShoppingCart,
   Users,
-  BarChart3,
-  FileText,
-  ArrowRight,
 } from "lucide-react";
+import Link from "next/link";
+
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const DOC_SECTIONS = [
   {
@@ -97,7 +98,7 @@ export default function DocsPage() {
         <CardContent className="p-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {DOC_SECTIONS.map((section) => (
-              <Link key={section.href} href={section.href}>
+              <Link href={section.href} key={section.href}>
                 <Card className="border border-admin-border-primary/20 bg-admin-bg-tertiary/50 rounded-xl shadow-none hover:shadow-md hover:border-epoch-accent/30 transition-all duration-300 group h-full">
                   <CardContent className="p-6">
                     <div className="flex items-start justify-between">

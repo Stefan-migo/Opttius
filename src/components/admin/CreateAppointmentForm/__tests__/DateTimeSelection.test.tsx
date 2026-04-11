@@ -1,5 +1,6 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
 import DateTimeSelection from "../DateTimeSelection";
 
 describe("DateTimeSelection", () => {
@@ -48,12 +49,21 @@ describe("DateTimeSelection", () => {
   it("should display selected date", () => {
     render(<DateTimeSelection {...mockProps} date="2024-01-15" />);
 
-    const dateInput = screen.getByDisplayValue("2024-01-15") as HTMLInputElement;
+    const dateInput = screen.getByDisplayValue(
+      "2024-01-15",
+    ) as HTMLInputElement;
     expect(dateInput).toBeInTheDocument();
   });
 
   it("should display selected time", () => {
-    render(<DateTimeSelection {...mockProps} date="2024-01-15" time="10:30:00" availableSlots={mockAvailableSlots} />);
+    render(
+      <DateTimeSelection
+        {...mockProps}
+        availableSlots={mockAvailableSlots}
+        date="2024-01-15"
+        time="10:30:00"
+      />,
+    );
 
     // Time is selected via buttons, not input
     expect(screen.getByText("10:30:00")).toBeInTheDocument();
@@ -76,7 +86,13 @@ describe("DateTimeSelection", () => {
   });
 
   it("should call onTimeChange when time is changed", () => {
-    render(<DateTimeSelection {...mockProps} date="2024-01-15" availableSlots={mockAvailableSlots} />);
+    render(
+      <DateTimeSelection
+        {...mockProps}
+        availableSlots={mockAvailableSlots}
+        date="2024-01-15"
+      />,
+    );
 
     // Time is changed by clicking time slot buttons
     const timeSlot = screen.getByText("09:00:00");
@@ -91,7 +107,7 @@ describe("DateTimeSelection", () => {
     // Duration is changed via Select component
     // First click the trigger to open dropdown
     fireEvent.click(screen.getByText("30 MINUTOS"));
-    
+
     // Then click the desired option
     const durationOption = screen.getByText("1 HORA");
     fireEvent.click(durationOption);
@@ -101,11 +117,11 @@ describe("DateTimeSelection", () => {
 
   it("should show available time slots", () => {
     render(
-      <DateTimeSelection 
-        {...mockProps} 
+      <DateTimeSelection
+        {...mockProps}
         availableSlots={mockAvailableSlots}
         date="2024-01-15"
-      />
+      />,
     );
 
     expect(screen.getByText("Bloques Disponibles")).toBeInTheDocument();
@@ -116,11 +132,11 @@ describe("DateTimeSelection", () => {
 
   it("should call onTimeChange when selecting an available time slot", () => {
     render(
-      <DateTimeSelection 
-        {...mockProps} 
+      <DateTimeSelection
+        {...mockProps}
         availableSlots={mockAvailableSlots}
         date="2024-01-15"
-      />
+      />,
     );
 
     const timeSlotButton = screen.getByText("09:00:00");
@@ -131,11 +147,11 @@ describe("DateTimeSelection", () => {
 
   it("should disable unavailable time slots", () => {
     render(
-      <DateTimeSelection 
-        {...mockProps} 
+      <DateTimeSelection
+        {...mockProps}
         availableSlots={mockAvailableSlots}
         date="2024-01-15"
-      />
+      />,
     );
 
     // Unavailable slots are filtered out, so they won't be in the DOM
@@ -143,22 +159,28 @@ describe("DateTimeSelection", () => {
   });
 
   it("should show loading indicator when loading availability", () => {
-    render(<DateTimeSelection {...mockProps} loadingAvailability={true} date="2024-01-15" />);
+    render(
+      <DateTimeSelection
+        {...mockProps}
+        date="2024-01-15"
+        loadingAvailability={true}
+      />,
+    );
 
     // Check that loading spinner is present
     expect(screen.getByText("Bloques Disponibles")).toBeInTheDocument();
     // Check for the animate-spin class which indicates loading
-    const spinnerElement = document.querySelector('.animate-spin');
+    const spinnerElement = document.querySelector(".animate-spin");
     expect(spinnerElement).toBeInTheDocument();
   });
 
   it("should respect date constraints", () => {
     render(
-      <DateTimeSelection 
-        {...mockProps} 
-        minDate="2024-01-01" 
-        maxDate="2024-12-31" 
-      />
+      <DateTimeSelection
+        {...mockProps}
+        maxDate="2024-12-31"
+        minDate="2024-01-01"
+      />,
     );
 
     const dateInput = screen.getByDisplayValue("") as HTMLInputElement;
@@ -170,7 +192,7 @@ describe("DateTimeSelection", () => {
     render(<DateTimeSelection {...mockProps} lockDateTime={true} />);
 
     const dateInput = screen.getByDisplayValue("") as HTMLInputElement;
-    
+
     expect(dateInput).toBeDisabled();
     // Duration select should still be present even when locked
     expect(screen.getByText("30 MINUTOS")).toBeInTheDocument();
@@ -180,7 +202,7 @@ describe("DateTimeSelection", () => {
     render(<DateTimeSelection {...mockProps} lockDateTime={false} />);
 
     const dateInput = screen.getByDisplayValue("") as HTMLInputElement;
-    
+
     expect(dateInput).not.toBeDisabled();
     // Duration select should be present and enabled
     expect(screen.getByText("30 MINUTOS")).toBeInTheDocument();
@@ -195,12 +217,12 @@ describe("DateTimeSelection", () => {
     });
 
     render(
-      <DateTimeSelection 
-        {...mockProps} 
+      <DateTimeSelection
+        {...mockProps}
         availableSlots={mockAvailableSlots}
         date="2024-01-15"
         formatTime={mockFormatTime}
-      />
+      />,
     );
 
     expect(mockFormatTime).toHaveBeenCalledWith("09:00:00");
@@ -210,25 +232,27 @@ describe("DateTimeSelection", () => {
 
   it("should show no availability message when no slots available", () => {
     render(
-      <DateTimeSelection 
-        {...mockProps} 
+      <DateTimeSelection
+        {...mockProps}
         availableSlots={[]}
         date="2024-01-15"
-      />
+      />,
     );
 
-    expect(screen.getByText("Sin disponibilidad inmediata")).toBeInTheDocument();
+    expect(
+      screen.getByText("Sin disponibilidad inmediata"),
+    ).toBeInTheDocument();
   });
 
   it("should clear time when date changes", () => {
     const mockOnDateChange = vi.fn();
     render(
-      <DateTimeSelection 
-        {...mockProps} 
-        onDateChange={mockOnDateChange}
-        time="10:30:00"
+      <DateTimeSelection
+        {...mockProps}
         date="2024-01-15"
-      />
+        time="10:30:00"
+        onDateChange={mockOnDateChange}
+      />,
     );
 
     const dateInput = screen.getByDisplayValue("2024-01-15");
@@ -241,16 +265,16 @@ describe("DateTimeSelection", () => {
   it("should clear time when duration changes", () => {
     const mockOnDurationChange = vi.fn();
     render(
-      <DateTimeSelection 
-        {...mockProps} 
-        onDurationChange={mockOnDurationChange}
+      <DateTimeSelection
+        {...mockProps}
         time="10:30:00"
-      />
+        onDurationChange={mockOnDurationChange}
+      />,
     );
 
     const durationSelect = screen.getByRole("combobox");
     fireEvent.click(durationSelect);
-    
+
     // Select the 45 minutes option
     const option45 = screen.getByText("45 MINUTOS");
     fireEvent.click(option45);
@@ -261,12 +285,12 @@ describe("DateTimeSelection", () => {
 
   it("should apply correct styling to selected time slot", () => {
     render(
-      <DateTimeSelection 
-        {...mockProps} 
+      <DateTimeSelection
+        {...mockProps}
         availableSlots={mockAvailableSlots}
         date="2024-01-15"
         time="09:00:00"
-      />
+      />,
     );
 
     const selectedSlot = screen.getByText("09:00:00").closest("button");
@@ -275,20 +299,19 @@ describe("DateTimeSelection", () => {
 
   it("should handle past date selection with error", () => {
     const mockOnDateChange = vi.fn();
-    const today = new Date().toISOString().split('T')[0];
+    const today = new Date().toISOString().split("T")[0];
     const yesterday = new Date(new Date().setDate(new Date().getDate() - 1))
       .toISOString()
-      .split('T')[0];
+      .split("T")[0];
 
     render(
-      <DateTimeSelection 
-        {...mockProps} 
-        onDateChange={mockOnDateChange}
-      />
+      <DateTimeSelection {...mockProps} onDateChange={mockOnDateChange} />,
     );
 
     // Use querySelector to get the enabled input specifically
-    const dateInput = document.querySelector('input[type="date"]:not(.opacity-60)') as HTMLInputElement;
+    const dateInput = document.querySelector(
+      'input[type="date"]:not(.opacity-60)',
+    ) as HTMLInputElement;
     fireEvent.change(dateInput, { target: { value: yesterday } });
 
     // Should not call onDateChange for past dates (handled by parent component)
@@ -300,12 +323,12 @@ describe("DateTimeSelection", () => {
 
     // Duration is handled via Select component
     fireEvent.click(screen.getByText("30 MINUTOS"));
-    
+
     // Wait for dropdown to open and get all options
     const allOptions = screen.getAllByText(/MINUTOS|HORA/);
     // Filter to only the dropdown options (there will be duplicates)
-    const uniqueOptions = [...new Set(allOptions.map(el => el.textContent))];
-    
+    const uniqueOptions = [...new Set(allOptions.map((el) => el.textContent))];
+
     expect(uniqueOptions).toContain("15 MINUTOS");
     expect(uniqueOptions).toContain("30 MINUTOS");
     expect(uniqueOptions).toContain("45 MINUTOS");
@@ -314,11 +337,11 @@ describe("DateTimeSelection", () => {
 
   it("should handle keyboard navigation for time slots", () => {
     render(
-      <DateTimeSelection 
-        {...mockProps} 
+      <DateTimeSelection
+        {...mockProps}
         availableSlots={mockAvailableSlots}
         date="2024-01-15"
-      />
+      />,
     );
 
     const firstSlot = screen.getByText("09:00:00");
@@ -329,12 +352,12 @@ describe("DateTimeSelection", () => {
 
   it("should maintain time selection when availability reloads", () => {
     const { rerender } = render(
-      <DateTimeSelection 
-        {...mockProps} 
+      <DateTimeSelection
+        {...mockProps}
         availableSlots={mockAvailableSlots}
         date="2024-01-15"
         time="09:00:00"
-      />
+      />,
     );
 
     // Selected time should remain highlighted
@@ -344,16 +367,16 @@ describe("DateTimeSelection", () => {
     // Re-render with updated slots
     const updatedSlots = [
       ...mockAvailableSlots,
-      { time_slot: "11:00:00", available: true }
+      { time_slot: "11:00:00", available: true },
     ];
-    
+
     rerender(
-      <DateTimeSelection 
-        {...mockProps} 
+      <DateTimeSelection
+        {...mockProps}
         availableSlots={updatedSlots}
         date="2024-01-15"
         time="09:00:00"
-      />
+      />,
     );
 
     // Selection should persist

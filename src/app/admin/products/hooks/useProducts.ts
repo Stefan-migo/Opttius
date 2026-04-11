@@ -1,12 +1,13 @@
 "use client";
 
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getBranchHeader } from "@/lib/utils/branch";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+
 import {
   extractDataFromResponse,
   extractPaginationFromResponse,
 } from "@/lib/api/response-helpers";
-import { toast } from "sonner";
+import { getBranchHeader } from "@/lib/utils/branch";
 
 export interface Product {
   id: string;
@@ -27,6 +28,8 @@ export interface Product {
   sku?: string;
   brand?: string;
   barcode?: string;
+  product_type?: string; // frame, lens, accessory, service, contact_lens
+  contact_lens_family_id?: string; // FK to contact_lens_families
 }
 
 interface ProductsResponse {
@@ -135,7 +138,7 @@ export function useProducts(params: FetchProductsParams) {
   });
 
   const createMutation = useMutation({
-    mutationFn: async (data: any) => {
+    mutationFn: async (data: unknown) => {
       const headers: HeadersInit = {
         "Content-Type": "application/json",
         ...getBranchHeader(params.currentBranchId),
@@ -165,7 +168,7 @@ export function useProducts(params: FetchProductsParams) {
   });
 
   const updateMutation = useMutation({
-    mutationFn: async ({ id, data }: { id: string; data: any }) => {
+    mutationFn: async ({ id, data }: { id: string; data: unknown }) => {
       const headers: HeadersInit = {
         "Content-Type": "application/json",
         ...getBranchHeader(params.currentBranchId),

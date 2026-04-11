@@ -2,14 +2,16 @@
  * AI Agent tools for appointments and schedule management
  */
 import { z } from "zod";
-import { createServiceRoleClient } from "@/utils/supabase/server";
-import type { ToolDefinition, ToolResult } from "./types";
+
 import type {
   GetAvailableTimeSlotsParams,
   GetAvailableTimeSlotsResult,
   TimeSlot,
 } from "@/types/supabase-rpc";
+import { createServiceRoleClient } from "@/utils/supabase/server";
+
 import { resolveBranchByName } from "./resolvers";
+import type { ToolDefinition, ToolResult } from "./types";
 
 const getAppointmentSlotsSchema = z.object({
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be YYYY-MM-DD"),

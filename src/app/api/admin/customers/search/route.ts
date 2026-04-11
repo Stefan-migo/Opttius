@@ -1,26 +1,27 @@
 import { NextRequest, NextResponse } from "next/server";
-import {
-  createClientFromRequest,
-  createServiceRoleClient,
-} from "@/utils/supabase/server";
-import { normalizeRUT, formatRUT } from "@/lib/utils/rut";
+
 import {
   getBranchContext,
   getFieldOperationFromRequest,
 } from "@/lib/api/branch-middleware";
-import { appLogger as logger } from "@/lib/logger";
-import { withRateLimit, rateLimitConfigs } from "@/lib/api/middleware";
 import { RateLimitError } from "@/lib/api/errors";
+import { rateLimitConfigs, withRateLimit } from "@/lib/api/middleware";
 import {
-  createApiSuccessResponse,
   createApiErrorResponse,
+  createApiSuccessResponse,
 } from "@/lib/api/response";
+import { appLogger as logger } from "@/lib/logger";
+import { formatRUT, normalizeRUT } from "@/lib/utils/rut";
+import {
+  createClientFromRequest,
+  createServiceRoleClient,
+} from "@/utils/supabase/server";
 
 export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
   const requestId = crypto.randomUUID();
   try {
-    return await (withRateLimit(rateLimitConfigs.search) as any)(
+    return await (withRateLimit(rateLimitConfigs.search) as unknown)(
       request,
       async () => {
         try {
@@ -163,8 +164,8 @@ export async function GET(request: NextRequest) {
 
           // Try multiple search approaches - PostgREST syntax can be tricky
           // Approach 1: For RUT searches, use SQL function for better partial matching
-          let customers: any[] = [];
-          let error: any = null;
+          let customers: unknown[] = [];
+          let error: unknown = null;
 
           // If this looks like a RUT search, try the SQL function first (handles partial matches better)
           // Skip RPC when filtering by operativo - RPC doesn't support field_operation_id and we'd lose the filter
@@ -212,7 +213,7 @@ export async function GET(request: NextRequest) {
 
                 const rutCustomersMap = new Map();
                 [...(rutCustomers1 || []), ...(rutCustomers2 || [])].forEach(
-                  (c: any) => {
+                  (c: unknown) => {
                     if (!rutCustomersMap.has(c.id)) {
                       rutCustomersMap.set(c.id, c);
                     }
@@ -230,7 +231,7 @@ export async function GET(request: NextRequest) {
                   count: rutCustomers.length,
                 });
               }
-            } catch (rpcError: any) {
+            } catch (rpcError: unknown) {
               logger.debug(
                 "RUT function not available or old signature, using standard search",
                 { error: rpcError.message },
@@ -273,7 +274,7 @@ export async function GET(request: NextRequest) {
 
             // Merge results, avoiding duplicates
             const existingIds = new Set(customers.map((c) => c.id));
-            standardResults.forEach((customer: any) => {
+            standardResults.forEach((customer: unknown) => {
               if (!existingIds.has(customer.id)) {
                 customers.push(customer);
                 existingIds.add(customer.id);
@@ -286,7 +287,7 @@ export async function GET(request: NextRequest) {
               logger.error("Search error with or()", error);
               throw error;
             }
-          } catch (orError: any) {
+          } catch (orError: unknown) {
             logger.warn(
               "OR query failed, trying alternative approach",
               orError,
@@ -298,39 +299,39 @@ export async function GET(request: NextRequest) {
               const normalizedPattern = `%${normalizedSearchTerm}%`;
               const formattedPattern = `%${formattedSearchTerm}%`;
 
-              const allCustomers: any[] = [];
+              const allCustomers: unknown[] = [];
 
-              const queries: Promise<any>[] = [
+              const queries: Promise<unknown>[] = [
                 buildFilteredCustomersQuery()
                   .or(
                     `first_name.ilike.${searchPattern},last_name.ilike.${searchPattern}`,
                   )
-                  .limit(20) as unknown as Promise<any>,
+                  .limit(20) as unknown as Promise<unknown>,
                 buildFilteredCustomersQuery()
                   .ilike("email", searchPattern)
-                  .limit(20) as unknown as Promise<any>,
+                  .limit(20) as unknown as Promise<unknown>,
                 buildFilteredCustomersQuery()
                   .ilike("phone", searchPattern)
-                  .limit(20) as unknown as Promise<any>,
+                  .limit(20) as unknown as Promise<unknown>,
               ];
 
               if (isRutSearch) {
                 queries.push(
                   buildFilteredCustomersQuery()
                     .ilike("rut", searchPattern)
-                    .limit(20) as unknown as Promise<any>,
+                    .limit(20) as unknown as Promise<unknown>,
                   buildFilteredCustomersQuery()
                     .ilike("rut", normalizedPattern)
-                    .limit(20) as unknown as Promise<any>,
+                    .limit(20) as unknown as Promise<unknown>,
                   buildFilteredCustomersQuery()
                     .ilike("rut", formattedPattern)
-                    .limit(20) as unknown as Promise<any>,
+                    .limit(20) as unknown as Promise<unknown>,
                 );
               } else {
                 queries.push(
                   buildFilteredCustomersQuery()
                     .ilike("rut", searchPattern)
-                    .limit(20) as unknown as Promise<any>,
+                    .limit(20) as unknown as Promise<unknown>,
                 );
               }
 
@@ -345,7 +346,7 @@ export async function GET(request: NextRequest) {
 
               // Remove duplicates by id and combine with existing customers from RUT function
               const existingIds = new Set(customers.map((c) => c.id));
-              allCustomers.forEach((customer: any) => {
+              allCustomers.forEach((customer: unknown) => {
                 if (!existingIds.has(customer.id)) {
                   customers.push(customer);
                   existingIds.add(customer.id);
@@ -357,7 +358,7 @@ export async function GET(request: NextRequest) {
               logger.debug("Found customers using fallback method", {
                 count: customers.length,
               });
-            } catch (fallbackError: any) {
+            } catch (fallbackError: unknown) {
               logger.error("Fallback search also failed", fallbackError);
               error = fallbackError;
             }

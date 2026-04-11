@@ -7,6 +7,11 @@ export type Json =
   | Json[];
 
 export type Database = {
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+  __InternalSupabase: {
+    PostgrestVersion: "14.1";
+  };
   graphql_public: {
     Tables: {
       [_ in never]: never;
@@ -291,6 +296,416 @@ export type Database = {
           },
         ];
       };
+      agreement_customers: {
+        Row: {
+          agreement_id: string;
+          created_at: string;
+          customer_id: string;
+          first_order_at: string;
+          id: string;
+          last_order_at: string;
+          order_count: number;
+          total_copago: number;
+          total_institutional: number;
+          updated_at: string;
+        };
+        Insert: {
+          agreement_id: string;
+          created_at?: string;
+          customer_id: string;
+          first_order_at: string;
+          id?: string;
+          last_order_at: string;
+          order_count?: number;
+          total_copago?: number;
+          total_institutional?: number;
+          updated_at?: string;
+        };
+        Update: {
+          agreement_id?: string;
+          created_at?: string;
+          customer_id?: string;
+          first_order_at?: string;
+          id?: string;
+          last_order_at?: string;
+          order_count?: number;
+          total_copago?: number;
+          total_institutional?: number;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "agreement_customers_agreement_id_fkey";
+            columns: ["agreement_id"];
+            isOneToOne: false;
+            referencedRelation: "agreements";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "agreement_customers_customer_id_fkey";
+            columns: ["customer_id"];
+            isOneToOne: false;
+            referencedRelation: "customers";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      agreement_institutional_balances: {
+        Row: {
+          agreement_id: string;
+          amount: number;
+          created_at: string;
+          id: string;
+          invoice_id: string | null;
+          order_id: string;
+          paid_at: string | null;
+          payment_reference: string | null;
+          purchase_order_id: string | null;
+          status: string;
+          updated_at: string;
+        };
+        Insert: {
+          agreement_id: string;
+          amount: number;
+          created_at?: string;
+          id?: string;
+          invoice_id?: string | null;
+          order_id: string;
+          paid_at?: string | null;
+          payment_reference?: string | null;
+          purchase_order_id?: string | null;
+          status?: string;
+          updated_at?: string;
+        };
+        Update: {
+          agreement_id?: string;
+          amount?: number;
+          created_at?: string;
+          id?: string;
+          invoice_id?: string | null;
+          order_id?: string;
+          paid_at?: string | null;
+          payment_reference?: string | null;
+          purchase_order_id?: string | null;
+          status?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "agreement_institutional_balances_agreement_id_fkey";
+            columns: ["agreement_id"];
+            isOneToOne: false;
+            referencedRelation: "agreements";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "agreement_institutional_balances_order_id_fkey";
+            columns: ["order_id"];
+            isOneToOne: false;
+            referencedRelation: "orders";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "agreement_institutional_balances_purchase_order_id_fkey";
+            columns: ["purchase_order_id"];
+            isOneToOne: false;
+            referencedRelation: "agreement_purchase_orders";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "fk_agreement_institutional_balances_invoice_id";
+            columns: ["invoice_id"];
+            isOneToOne: false;
+            referencedRelation: "agreement_institutional_invoices";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      agreement_institutional_invoice_balances: {
+        Row: {
+          amount: number;
+          balance_id: string;
+          id: string;
+          invoice_id: string;
+        };
+        Insert: {
+          amount: number;
+          balance_id: string;
+          id?: string;
+          invoice_id: string;
+        };
+        Update: {
+          amount?: number;
+          balance_id?: string;
+          id?: string;
+          invoice_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "agreement_institutional_invoice_balances_balance_id_fkey";
+            columns: ["balance_id"];
+            isOneToOne: true;
+            referencedRelation: "agreement_institutional_balances";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "agreement_institutional_invoice_balances_invoice_id_fkey";
+            columns: ["invoice_id"];
+            isOneToOne: false;
+            referencedRelation: "agreement_institutional_invoices";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      agreement_institutional_invoices: {
+        Row: {
+          agreement_id: string;
+          branch_id: string;
+          created_at: string;
+          currency: string | null;
+          document_type: string;
+          emitted_at: string | null;
+          emitted_by: string | null;
+          folio: string;
+          id: string;
+          institution_name: string;
+          institution_rut: string;
+          organization_id: string;
+          paid_at: string | null;
+          payment_reference: string | null;
+          pdf_url: string | null;
+          period_from: string;
+          period_to: string;
+          sii_emission_date: string | null;
+          sii_folio: string | null;
+          sii_response_data: Json | null;
+          sii_status: string | null;
+          sii_track_id: string | null;
+          status: string;
+          subtotal: number;
+          tax_amount: number;
+          total_amount: number;
+          updated_at: string;
+        };
+        Insert: {
+          agreement_id: string;
+          branch_id: string;
+          created_at?: string;
+          currency?: string | null;
+          document_type?: string;
+          emitted_at?: string | null;
+          emitted_by?: string | null;
+          folio: string;
+          id?: string;
+          institution_name: string;
+          institution_rut: string;
+          organization_id: string;
+          paid_at?: string | null;
+          payment_reference?: string | null;
+          pdf_url?: string | null;
+          period_from: string;
+          period_to: string;
+          sii_emission_date?: string | null;
+          sii_folio?: string | null;
+          sii_response_data?: Json | null;
+          sii_status?: string | null;
+          sii_track_id?: string | null;
+          status?: string;
+          subtotal: number;
+          tax_amount?: number;
+          total_amount: number;
+          updated_at?: string;
+        };
+        Update: {
+          agreement_id?: string;
+          branch_id?: string;
+          created_at?: string;
+          currency?: string | null;
+          document_type?: string;
+          emitted_at?: string | null;
+          emitted_by?: string | null;
+          folio?: string;
+          id?: string;
+          institution_name?: string;
+          institution_rut?: string;
+          organization_id?: string;
+          paid_at?: string | null;
+          payment_reference?: string | null;
+          pdf_url?: string | null;
+          period_from?: string;
+          period_to?: string;
+          sii_emission_date?: string | null;
+          sii_folio?: string | null;
+          sii_response_data?: Json | null;
+          sii_status?: string | null;
+          sii_track_id?: string | null;
+          status?: string;
+          subtotal?: number;
+          tax_amount?: number;
+          total_amount?: number;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "agreement_institutional_invoices_agreement_id_fkey";
+            columns: ["agreement_id"];
+            isOneToOne: false;
+            referencedRelation: "agreements";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "agreement_institutional_invoices_branch_id_fkey";
+            columns: ["branch_id"];
+            isOneToOne: false;
+            referencedRelation: "branches";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "agreement_institutional_invoices_organization_id_fkey";
+            columns: ["organization_id"];
+            isOneToOne: false;
+            referencedRelation: "organizations";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      agreement_purchase_orders: {
+        Row: {
+          agreement_id: string;
+          created_at: string;
+          id: string;
+          issued_at: string | null;
+          max_amount: number | null;
+          notes: string | null;
+          oc_number: string;
+          status: string;
+          updated_at: string;
+          used_amount: number;
+          valid_until: string | null;
+        };
+        Insert: {
+          agreement_id: string;
+          created_at?: string;
+          id?: string;
+          issued_at?: string | null;
+          max_amount?: number | null;
+          notes?: string | null;
+          oc_number: string;
+          status?: string;
+          updated_at?: string;
+          used_amount?: number;
+          valid_until?: string | null;
+        };
+        Update: {
+          agreement_id?: string;
+          created_at?: string;
+          id?: string;
+          issued_at?: string | null;
+          max_amount?: number | null;
+          notes?: string | null;
+          oc_number?: string;
+          status?: string;
+          updated_at?: string;
+          used_amount?: number;
+          valid_until?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "agreement_purchase_orders_agreement_id_fkey";
+            columns: ["agreement_id"];
+            isOneToOne: false;
+            referencedRelation: "agreements";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      agreements: {
+        Row: {
+          agreement_type: string;
+          billing_rules: Json | null;
+          branch_id: string | null;
+          created_at: string;
+          created_by: string | null;
+          discount_percent: number | null;
+          id: string;
+          institution_name: string;
+          institution_rut: string;
+          max_installments_by_product: Json | null;
+          name: string;
+          notes: string | null;
+          organization_id: string;
+          representative_email: string | null;
+          representative_name: string | null;
+          representative_phone: string | null;
+          status: string;
+          updated_at: string;
+          updated_by: string | null;
+          valid_from: string;
+          valid_until: string | null;
+        };
+        Insert: {
+          agreement_type: string;
+          billing_rules?: Json | null;
+          branch_id?: string | null;
+          created_at?: string;
+          created_by?: string | null;
+          discount_percent?: number | null;
+          id?: string;
+          institution_name: string;
+          institution_rut: string;
+          max_installments_by_product?: Json | null;
+          name: string;
+          notes?: string | null;
+          organization_id: string;
+          representative_email?: string | null;
+          representative_name?: string | null;
+          representative_phone?: string | null;
+          status?: string;
+          updated_at?: string;
+          updated_by?: string | null;
+          valid_from: string;
+          valid_until?: string | null;
+        };
+        Update: {
+          agreement_type?: string;
+          billing_rules?: Json | null;
+          branch_id?: string | null;
+          created_at?: string;
+          created_by?: string | null;
+          discount_percent?: number | null;
+          id?: string;
+          institution_name?: string;
+          institution_rut?: string;
+          max_installments_by_product?: Json | null;
+          name?: string;
+          notes?: string | null;
+          organization_id?: string;
+          representative_email?: string | null;
+          representative_name?: string | null;
+          representative_phone?: string | null;
+          status?: string;
+          updated_at?: string;
+          updated_by?: string | null;
+          valid_from?: string;
+          valid_until?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "agreements_branch_id_fkey";
+            columns: ["branch_id"];
+            isOneToOne: false;
+            referencedRelation: "branches";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "agreements_organization_id_fkey";
+            columns: ["organization_id"];
+            isOneToOne: false;
+            referencedRelation: "organizations";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       ai_insights: {
         Row: {
           action_label: string | null;
@@ -408,6 +823,7 @@ export type Database = {
           created_by: string | null;
           customer_id: string | null;
           duration_minutes: number | null;
+          field_operation_id: string | null;
           follow_up_date: string | null;
           follow_up_required: boolean | null;
           guest_email: string | null;
@@ -440,6 +856,7 @@ export type Database = {
           created_by?: string | null;
           customer_id?: string | null;
           duration_minutes?: number | null;
+          field_operation_id?: string | null;
           follow_up_date?: string | null;
           follow_up_required?: boolean | null;
           guest_email?: string | null;
@@ -472,6 +889,7 @@ export type Database = {
           created_by?: string | null;
           customer_id?: string | null;
           duration_minutes?: number | null;
+          field_operation_id?: string | null;
           follow_up_date?: string | null;
           follow_up_required?: boolean | null;
           guest_email?: string | null;
@@ -504,6 +922,13 @@ export type Database = {
             columns: ["customer_id"];
             isOneToOne: false;
             referencedRelation: "customers";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "appointments_field_operation_id_fkey";
+            columns: ["field_operation_id"];
+            isOneToOne: false;
+            referencedRelation: "field_operations";
             referencedColumns: ["id"];
           },
           {
@@ -668,6 +1093,7 @@ export type Database = {
           debit_card_sales: number;
           discrepancies: string | null;
           expected_cash: number;
+          field_operation_id: string | null;
           id: string;
           installments_sales: number;
           notes: string | null;
@@ -701,6 +1127,7 @@ export type Database = {
           debit_card_sales?: number;
           discrepancies?: string | null;
           expected_cash?: number;
+          field_operation_id?: string | null;
           id?: string;
           installments_sales?: number;
           notes?: string | null;
@@ -734,6 +1161,7 @@ export type Database = {
           debit_card_sales?: number;
           discrepancies?: string | null;
           expected_cash?: number;
+          field_operation_id?: string | null;
           id?: string;
           installments_sales?: number;
           notes?: string | null;
@@ -755,6 +1183,13 @@ export type Database = {
             columns: ["branch_id"];
             isOneToOne: false;
             referencedRelation: "branches";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "cash_register_closures_field_operation_id_fkey";
+            columns: ["field_operation_id"];
+            isOneToOne: false;
+            referencedRelation: "field_operations";
             referencedColumns: ["id"];
           },
           {
@@ -869,6 +1304,7 @@ export type Database = {
           message_count: number | null;
           metadata: Json | null;
           model: string;
+          organization_id: string | null;
           provider: string;
           title: string | null;
           updated_at: string;
@@ -882,6 +1318,7 @@ export type Database = {
           message_count?: number | null;
           metadata?: Json | null;
           model: string;
+          organization_id?: string | null;
           provider: string;
           title?: string | null;
           updated_at?: string;
@@ -895,12 +1332,140 @@ export type Database = {
           message_count?: number | null;
           metadata?: Json | null;
           model?: string;
+          organization_id?: string | null;
           provider?: string;
           title?: string | null;
           updated_at?: string;
           user_id?: string | null;
         };
-        Relationships: [];
+        Relationships: [
+          {
+            foreignKeyName: "chat_sessions_organization_id_fkey";
+            columns: ["organization_id"];
+            isOneToOne: false;
+            referencedRelation: "organizations";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      contact_lens_encargos: {
+        Row: {
+          addition_od: number | null;
+          addition_os: number | null;
+          axis_od: number | null;
+          axis_os: number | null;
+          branch_id: string;
+          contact_lens_family_id: string;
+          created_at: string | null;
+          customer_id: string | null;
+          cylinder_od: number | null;
+          cylinder_os: number | null;
+          delivered_at: string | null;
+          expected_delivery_date: string | null;
+          id: string;
+          notes: string | null;
+          ordered_at: string | null;
+          organization_id: string;
+          quantity_od: number | null;
+          quantity_os: number | null;
+          received_at: string | null;
+          requested_at: string | null;
+          sphere_od: number | null;
+          sphere_os: number | null;
+          status: string;
+          supplier_order_id: string | null;
+          total_price: number | null;
+          unit_price: number | null;
+          updated_at: string | null;
+        };
+        Insert: {
+          addition_od?: number | null;
+          addition_os?: number | null;
+          axis_od?: number | null;
+          axis_os?: number | null;
+          branch_id: string;
+          contact_lens_family_id: string;
+          created_at?: string | null;
+          customer_id?: string | null;
+          cylinder_od?: number | null;
+          cylinder_os?: number | null;
+          delivered_at?: string | null;
+          expected_delivery_date?: string | null;
+          id?: string;
+          notes?: string | null;
+          ordered_at?: string | null;
+          organization_id: string;
+          quantity_od?: number | null;
+          quantity_os?: number | null;
+          received_at?: string | null;
+          requested_at?: string | null;
+          sphere_od?: number | null;
+          sphere_os?: number | null;
+          status?: string;
+          supplier_order_id?: string | null;
+          total_price?: number | null;
+          unit_price?: number | null;
+          updated_at?: string | null;
+        };
+        Update: {
+          addition_od?: number | null;
+          addition_os?: number | null;
+          axis_od?: number | null;
+          axis_os?: number | null;
+          branch_id?: string;
+          contact_lens_family_id?: string;
+          created_at?: string | null;
+          customer_id?: string | null;
+          cylinder_od?: number | null;
+          cylinder_os?: number | null;
+          delivered_at?: string | null;
+          expected_delivery_date?: string | null;
+          id?: string;
+          notes?: string | null;
+          ordered_at?: string | null;
+          organization_id?: string;
+          quantity_od?: number | null;
+          quantity_os?: number | null;
+          received_at?: string | null;
+          requested_at?: string | null;
+          sphere_od?: number | null;
+          sphere_os?: number | null;
+          status?: string;
+          supplier_order_id?: string | null;
+          total_price?: number | null;
+          unit_price?: number | null;
+          updated_at?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "contact_lens_encargos_branch_id_fkey";
+            columns: ["branch_id"];
+            isOneToOne: false;
+            referencedRelation: "branches";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "contact_lens_encargos_contact_lens_family_id_fkey";
+            columns: ["contact_lens_family_id"];
+            isOneToOne: false;
+            referencedRelation: "contact_lens_families";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "contact_lens_encargos_customer_id_fkey";
+            columns: ["customer_id"];
+            isOneToOne: false;
+            referencedRelation: "customers";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "contact_lens_encargos_organization_id_fkey";
+            columns: ["organization_id"];
+            isOneToOne: false;
+            referencedRelation: "organizations";
+            referencedColumns: ["id"];
+          },
+        ];
       };
       contact_lens_families: {
         Row: {
@@ -971,6 +1536,69 @@ export type Database = {
           },
         ];
       };
+      contact_lens_inventory: {
+        Row: {
+          branch_id: string;
+          contact_lens_family_id: string;
+          created_at: string;
+          cylinder_max: number | null;
+          cylinder_min: number | null;
+          id: string;
+          is_active: boolean | null;
+          min_stock_threshold: number | null;
+          notes: string | null;
+          quantity: number;
+          sphere_max: number;
+          sphere_min: number;
+          updated_at: string;
+        };
+        Insert: {
+          branch_id: string;
+          contact_lens_family_id: string;
+          created_at?: string;
+          cylinder_max?: number | null;
+          cylinder_min?: number | null;
+          id?: string;
+          is_active?: boolean | null;
+          min_stock_threshold?: number | null;
+          notes?: string | null;
+          quantity?: number;
+          sphere_max: number;
+          sphere_min: number;
+          updated_at?: string;
+        };
+        Update: {
+          branch_id?: string;
+          contact_lens_family_id?: string;
+          created_at?: string;
+          cylinder_max?: number | null;
+          cylinder_min?: number | null;
+          id?: string;
+          is_active?: boolean | null;
+          min_stock_threshold?: number | null;
+          notes?: string | null;
+          quantity?: number;
+          sphere_max?: number;
+          sphere_min?: number;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "contact_lens_inventory_branch_id_fkey";
+            columns: ["branch_id"];
+            isOneToOne: false;
+            referencedRelation: "branches";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "contact_lens_inventory_contact_lens_family_id_fkey";
+            columns: ["contact_lens_family_id"];
+            isOneToOne: false;
+            referencedRelation: "contact_lens_families";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       contact_lens_price_matrices: {
         Row: {
           addition_max: number | null;
@@ -985,6 +1613,7 @@ export type Database = {
           cylinder_min: number | null;
           id: string;
           is_active: boolean | null;
+          name: string | null;
           organization_id: string | null;
           sphere_max: number;
           sphere_min: number;
@@ -1003,6 +1632,7 @@ export type Database = {
           cylinder_min?: number | null;
           id?: string;
           is_active?: boolean | null;
+          name?: string | null;
           organization_id?: string | null;
           sphere_max: number;
           sphere_min: number;
@@ -1021,6 +1651,7 @@ export type Database = {
           cylinder_min?: number | null;
           id?: string;
           is_active?: boolean | null;
+          name?: string | null;
           organization_id?: string | null;
           sphere_max?: number;
           sphere_min?: number;
@@ -1039,6 +1670,122 @@ export type Database = {
             columns: ["organization_id"];
             isOneToOne: false;
             referencedRelation: "organizations";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      credit_note_movements: {
+        Row: {
+          amount: number;
+          created_at: string;
+          credit_note_id: string;
+          id: string;
+          pos_session_id: string | null;
+          refund_method: string;
+        };
+        Insert: {
+          amount: number;
+          created_at?: string;
+          credit_note_id: string;
+          id?: string;
+          pos_session_id?: string | null;
+          refund_method: string;
+        };
+        Update: {
+          amount?: number;
+          created_at?: string;
+          credit_note_id?: string;
+          id?: string;
+          pos_session_id?: string | null;
+          refund_method?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "credit_note_movements_credit_note_id_fkey";
+            columns: ["credit_note_id"];
+            isOneToOne: false;
+            referencedRelation: "credit_notes";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "credit_note_movements_pos_session_id_fkey";
+            columns: ["pos_session_id"];
+            isOneToOne: false;
+            referencedRelation: "pos_sessions";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      credit_notes: {
+        Row: {
+          amount: number;
+          branch_id: string | null;
+          created_at: string;
+          created_by: string | null;
+          credit_note_number: string;
+          id: string;
+          order_id: string | null;
+          organization_id: string | null;
+          pos_session_id: string | null;
+          reason: string | null;
+          refund_method: string;
+          updated_at: string;
+        };
+        Insert: {
+          amount: number;
+          branch_id?: string | null;
+          created_at?: string;
+          created_by?: string | null;
+          credit_note_number: string;
+          id?: string;
+          order_id?: string | null;
+          organization_id?: string | null;
+          pos_session_id?: string | null;
+          reason?: string | null;
+          refund_method: string;
+          updated_at?: string;
+        };
+        Update: {
+          amount?: number;
+          branch_id?: string | null;
+          created_at?: string;
+          created_by?: string | null;
+          credit_note_number?: string;
+          id?: string;
+          order_id?: string | null;
+          organization_id?: string | null;
+          pos_session_id?: string | null;
+          reason?: string | null;
+          refund_method?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "credit_notes_branch_id_fkey";
+            columns: ["branch_id"];
+            isOneToOne: false;
+            referencedRelation: "branches";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "credit_notes_order_id_fkey";
+            columns: ["order_id"];
+            isOneToOne: false;
+            referencedRelation: "orders";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "credit_notes_organization_id_fkey";
+            columns: ["organization_id"];
+            isOneToOne: false;
+            referencedRelation: "organizations";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "credit_notes_pos_session_id_fkey";
+            columns: ["pos_session_id"];
+            isOneToOne: false;
+            referencedRelation: "pos_sessions";
             referencedColumns: ["id"];
           },
         ];
@@ -1175,6 +1922,61 @@ export type Database = {
           },
         ];
       };
+      customer_satisfaction_surveys: {
+        Row: {
+          comment: string | null;
+          created_at: string;
+          customer_id: string | null;
+          id: string;
+          organization_id: string;
+          score: number;
+          token_used: string;
+          work_order_id: string | null;
+        };
+        Insert: {
+          comment?: string | null;
+          created_at?: string;
+          customer_id?: string | null;
+          id?: string;
+          organization_id: string;
+          score: number;
+          token_used: string;
+          work_order_id?: string | null;
+        };
+        Update: {
+          comment?: string | null;
+          created_at?: string;
+          customer_id?: string | null;
+          id?: string;
+          organization_id?: string;
+          score?: number;
+          token_used?: string;
+          work_order_id?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "customer_satisfaction_surveys_customer_id_fkey";
+            columns: ["customer_id"];
+            isOneToOne: false;
+            referencedRelation: "customers";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "customer_satisfaction_surveys_organization_id_fkey";
+            columns: ["organization_id"];
+            isOneToOne: false;
+            referencedRelation: "organizations";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "customer_satisfaction_surveys_work_order_id_fkey";
+            columns: ["work_order_id"];
+            isOneToOne: false;
+            referencedRelation: "lab_work_orders";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       customers: {
         Row: {
           address_line_1: string | null;
@@ -1189,6 +1991,7 @@ export type Database = {
           email: string | null;
           emergency_contact_name: string | null;
           emergency_contact_phone: string | null;
+          field_operation_id: string | null;
           first_name: string;
           gender: string | null;
           id: string;
@@ -1225,6 +2028,7 @@ export type Database = {
           email?: string | null;
           emergency_contact_name?: string | null;
           emergency_contact_phone?: string | null;
+          field_operation_id?: string | null;
           first_name: string;
           gender?: string | null;
           id?: string;
@@ -1261,6 +2065,7 @@ export type Database = {
           email?: string | null;
           emergency_contact_name?: string | null;
           emergency_contact_phone?: string | null;
+          field_operation_id?: string | null;
           first_name?: string;
           gender?: string | null;
           id?: string;
@@ -1290,6 +2095,13 @@ export type Database = {
             columns: ["branch_id"];
             isOneToOne: false;
             referencedRelation: "branches";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "customers_field_operation_id_fkey";
+            columns: ["field_operation_id"];
+            isOneToOne: false;
+            referencedRelation: "field_operations";
             referencedColumns: ["id"];
           },
           {
@@ -1881,6 +2693,7 @@ export type Database = {
       };
       lab_work_orders: {
         Row: {
+          agreement_id: string | null;
           assigned_to: string | null;
           balance_amount: number | null;
           branch_id: string | null;
@@ -1939,6 +2752,7 @@ export type Database = {
           lens_family_id: string | null;
           lens_index: number | null;
           lens_material: string;
+          lens_sourcing_type: string | null;
           lens_tint_color: string | null;
           lens_tint_percentage: number | null;
           lens_treatments: string[];
@@ -1986,6 +2800,7 @@ export type Database = {
           work_order_number: string;
         };
         Insert: {
+          agreement_id?: string | null;
           assigned_to?: string | null;
           balance_amount?: number | null;
           branch_id?: string | null;
@@ -2044,6 +2859,7 @@ export type Database = {
           lens_family_id?: string | null;
           lens_index?: number | null;
           lens_material: string;
+          lens_sourcing_type?: string | null;
           lens_tint_color?: string | null;
           lens_tint_percentage?: number | null;
           lens_treatments?: string[];
@@ -2091,6 +2907,7 @@ export type Database = {
           work_order_number: string;
         };
         Update: {
+          agreement_id?: string | null;
           assigned_to?: string | null;
           balance_amount?: number | null;
           branch_id?: string | null;
@@ -2149,6 +2966,7 @@ export type Database = {
           lens_family_id?: string | null;
           lens_index?: number | null;
           lens_material?: string;
+          lens_sourcing_type?: string | null;
           lens_tint_color?: string | null;
           lens_tint_percentage?: number | null;
           lens_treatments?: string[];
@@ -2196,6 +3014,13 @@ export type Database = {
           work_order_number?: string;
         };
         Relationships: [
+          {
+            foreignKeyName: "lab_work_orders_agreement_id_fkey";
+            columns: ["agreement_id"];
+            isOneToOne: false;
+            referencedRelation: "agreements";
+            referencedColumns: ["id"];
+          },
           {
             foreignKeyName: "lab_work_orders_branch_id_fkey";
             columns: ["branch_id"];
@@ -2311,10 +3136,15 @@ export type Database = {
           description: string | null;
           id: string;
           is_active: boolean | null;
+          is_stock_available: boolean | null;
           lens_material: string;
           lens_type: string;
           name: string;
           organization_id: string | null;
+          stock_cylinder_max: number | null;
+          stock_cylinder_min: number | null;
+          stock_sphere_max: number | null;
+          stock_sphere_min: number | null;
           updated_at: string | null;
         };
         Insert: {
@@ -2324,10 +3154,15 @@ export type Database = {
           description?: string | null;
           id?: string;
           is_active?: boolean | null;
+          is_stock_available?: boolean | null;
           lens_material: string;
           lens_type: string;
           name: string;
           organization_id?: string | null;
+          stock_cylinder_max?: number | null;
+          stock_cylinder_min?: number | null;
+          stock_sphere_max?: number | null;
+          stock_sphere_min?: number | null;
           updated_at?: string | null;
         };
         Update: {
@@ -2337,10 +3172,15 @@ export type Database = {
           description?: string | null;
           id?: string;
           is_active?: boolean | null;
+          is_stock_available?: boolean | null;
           lens_material?: string;
           lens_type?: string;
           name?: string;
           organization_id?: string | null;
+          stock_cylinder_max?: number | null;
+          stock_cylinder_min?: number | null;
+          stock_sphere_max?: number | null;
+          stock_sphere_min?: number | null;
           updated_at?: string | null;
         };
         Relationships: [
@@ -2372,6 +3212,7 @@ export type Database = {
           id: string;
           is_active: boolean | null;
           lens_family_id: string;
+          name: string | null;
           organization_id: string | null;
           sourcing_type: string | null;
           sphere_max: number;
@@ -2389,6 +3230,7 @@ export type Database = {
           id?: string;
           is_active?: boolean | null;
           lens_family_id: string;
+          name?: string | null;
           organization_id?: string | null;
           sourcing_type?: string | null;
           sphere_max: number;
@@ -2406,6 +3248,7 @@ export type Database = {
           id?: string;
           is_active?: boolean | null;
           lens_family_id?: string;
+          name?: string | null;
           organization_id?: string | null;
           sourcing_type?: string | null;
           sphere_max?: number;
@@ -2917,12 +3760,39 @@ export type Database = {
           },
         ];
       };
+      opticas_access_tokens: {
+        Row: {
+          created_at: string;
+          created_by: string | null;
+          expires_at: string;
+          id: string;
+          label: string | null;
+          token: string;
+        };
+        Insert: {
+          created_at?: string;
+          created_by?: string | null;
+          expires_at: string;
+          id?: string;
+          label?: string | null;
+          token: string;
+        };
+        Update: {
+          created_at?: string;
+          created_by?: string | null;
+          expires_at?: string;
+          id?: string;
+          label?: string | null;
+          token?: string;
+        };
+        Relationships: [];
+      };
       order_items: {
         Row: {
           created_at: string;
           id: string;
           order_id: string;
-          product_id: string;
+          product_id: string | null;
           product_name: string;
           quantity: number;
           sku: string | null;
@@ -2936,7 +3806,7 @@ export type Database = {
           created_at?: string;
           id?: string;
           order_id: string;
-          product_id: string;
+          product_id?: string | null;
           product_name: string;
           quantity: number;
           sku?: string | null;
@@ -2950,7 +3820,7 @@ export type Database = {
           created_at?: string;
           id?: string;
           order_id?: string;
-          product_id?: string;
+          product_id?: string | null;
           product_name?: string;
           quantity?: number;
           sku?: string | null;
@@ -3047,6 +3917,7 @@ export type Database = {
       };
       orders: {
         Row: {
+          agreement_id: string | null;
           billing_address_1: string | null;
           billing_address_2: string | null;
           billing_city: string | null;
@@ -3064,6 +3935,7 @@ export type Database = {
           card_machine_brand: string | null;
           card_machine_transaction_id: string | null;
           carrier: string | null;
+          copago_amount: number | null;
           created_at: string;
           currency: string;
           customer_id: string | null;
@@ -3073,12 +3945,14 @@ export type Database = {
           discount_amount: number | null;
           document_type: string | null;
           email: string;
+          field_operation_id: string | null;
           first_installment_due_date: string | null;
           fulfillment_status: string | null;
           id: string;
           installment_amount: number | null;
           installments: number | null;
           installments_count: number | null;
+          institutional_amount: number | null;
           internal_folio: string | null;
           is_pos_sale: boolean | null;
           mercadopago_payment_id: number | null;
@@ -3099,6 +3973,7 @@ export type Database = {
           pos_location: string | null;
           pos_session_id: string | null;
           pos_terminal_id: string | null;
+          purchase_order_id: string | null;
           shipped_at: string | null;
           shipping_address_1: string | null;
           shipping_address_2: string | null;
@@ -3134,6 +4009,7 @@ export type Database = {
           user_id: string | null;
         };
         Insert: {
+          agreement_id?: string | null;
           billing_address_1?: string | null;
           billing_address_2?: string | null;
           billing_city?: string | null;
@@ -3151,6 +4027,7 @@ export type Database = {
           card_machine_brand?: string | null;
           card_machine_transaction_id?: string | null;
           carrier?: string | null;
+          copago_amount?: number | null;
           created_at?: string;
           currency?: string;
           customer_id?: string | null;
@@ -3160,12 +4037,14 @@ export type Database = {
           discount_amount?: number | null;
           document_type?: string | null;
           email: string;
+          field_operation_id?: string | null;
           first_installment_due_date?: string | null;
           fulfillment_status?: string | null;
           id?: string;
           installment_amount?: number | null;
           installments?: number | null;
           installments_count?: number | null;
+          institutional_amount?: number | null;
           internal_folio?: string | null;
           is_pos_sale?: boolean | null;
           mercadopago_payment_id?: number | null;
@@ -3186,6 +4065,7 @@ export type Database = {
           pos_location?: string | null;
           pos_session_id?: string | null;
           pos_terminal_id?: string | null;
+          purchase_order_id?: string | null;
           shipped_at?: string | null;
           shipping_address_1?: string | null;
           shipping_address_2?: string | null;
@@ -3221,6 +4101,7 @@ export type Database = {
           user_id?: string | null;
         };
         Update: {
+          agreement_id?: string | null;
           billing_address_1?: string | null;
           billing_address_2?: string | null;
           billing_city?: string | null;
@@ -3238,6 +4119,7 @@ export type Database = {
           card_machine_brand?: string | null;
           card_machine_transaction_id?: string | null;
           carrier?: string | null;
+          copago_amount?: number | null;
           created_at?: string;
           currency?: string;
           customer_id?: string | null;
@@ -3247,12 +4129,14 @@ export type Database = {
           discount_amount?: number | null;
           document_type?: string | null;
           email?: string;
+          field_operation_id?: string | null;
           first_installment_due_date?: string | null;
           fulfillment_status?: string | null;
           id?: string;
           installment_amount?: number | null;
           installments?: number | null;
           installments_count?: number | null;
+          institutional_amount?: number | null;
           internal_folio?: string | null;
           is_pos_sale?: boolean | null;
           mercadopago_payment_id?: number | null;
@@ -3273,6 +4157,7 @@ export type Database = {
           pos_location?: string | null;
           pos_session_id?: string | null;
           pos_terminal_id?: string | null;
+          purchase_order_id?: string | null;
           shipped_at?: string | null;
           shipping_address_1?: string | null;
           shipping_address_2?: string | null;
@@ -3309,6 +4194,13 @@ export type Database = {
         };
         Relationships: [
           {
+            foreignKeyName: "orders_agreement_id_fkey";
+            columns: ["agreement_id"];
+            isOneToOne: false;
+            referencedRelation: "agreements";
+            referencedColumns: ["id"];
+          },
+          {
             foreignKeyName: "orders_branch_id_fkey";
             columns: ["branch_id"];
             isOneToOne: false;
@@ -3323,6 +4215,13 @@ export type Database = {
             referencedColumns: ["id"];
           },
           {
+            foreignKeyName: "orders_field_operation_id_fkey";
+            columns: ["field_operation_id"];
+            isOneToOne: false;
+            referencedRelation: "field_operations";
+            referencedColumns: ["id"];
+          },
+          {
             foreignKeyName: "orders_organization_id_fkey";
             columns: ["organization_id"];
             isOneToOne: false;
@@ -3334,6 +4233,13 @@ export type Database = {
             columns: ["pos_session_id"];
             isOneToOne: false;
             referencedRelation: "pos_sessions";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "orders_purchase_order_id_fkey";
+            columns: ["purchase_order_id"];
+            isOneToOne: false;
+            referencedRelation: "agreement_purchase_orders";
             referencedColumns: ["id"];
           },
         ];
@@ -3640,6 +4546,45 @@ export type Database = {
           },
         ];
       };
+      pos_sale_idempotency: {
+        Row: {
+          created_at: string;
+          idempotency_key: string;
+          order_id: string;
+          response_snapshot: Json | null;
+          work_order_id: string | null;
+        };
+        Insert: {
+          created_at?: string;
+          idempotency_key: string;
+          order_id: string;
+          response_snapshot?: Json | null;
+          work_order_id?: string | null;
+        };
+        Update: {
+          created_at?: string;
+          idempotency_key?: string;
+          order_id?: string;
+          response_snapshot?: Json | null;
+          work_order_id?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "pos_sale_idempotency_order_id_fkey";
+            columns: ["order_id"];
+            isOneToOne: false;
+            referencedRelation: "orders";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "pos_sale_idempotency_work_order_id_fkey";
+            columns: ["work_order_id"];
+            isOneToOne: false;
+            referencedRelation: "lab_work_orders";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       pos_sessions: {
         Row: {
           branch_id: string | null;
@@ -3647,6 +4592,7 @@ export type Database = {
           closing_cash_amount: number | null;
           closing_time: string | null;
           created_at: string;
+          field_operation_id: string | null;
           id: string;
           location: string | null;
           notes: string | null;
@@ -3665,6 +4611,7 @@ export type Database = {
           closing_cash_amount?: number | null;
           closing_time?: string | null;
           created_at?: string;
+          field_operation_id?: string | null;
           id?: string;
           location?: string | null;
           notes?: string | null;
@@ -3683,6 +4630,7 @@ export type Database = {
           closing_cash_amount?: number | null;
           closing_time?: string | null;
           created_at?: string;
+          field_operation_id?: string | null;
           id?: string;
           location?: string | null;
           notes?: string | null;
@@ -3701,6 +4649,13 @@ export type Database = {
             columns: ["branch_id"];
             isOneToOne: false;
             referencedRelation: "branches";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "pos_sessions_field_operation_id_fkey";
+            columns: ["field_operation_id"];
+            isOneToOne: false;
+            referencedRelation: "field_operations";
             referencedColumns: ["id"];
           },
         ];
@@ -3866,6 +4821,7 @@ export type Database = {
           created_by: string | null;
           customer_id: string;
           expiration_date: string | null;
+          field_operation_id: string | null;
           frame_pd: number | null;
           height_segmentation: number | null;
           id: string;
@@ -3907,6 +4863,7 @@ export type Database = {
           created_by?: string | null;
           customer_id: string;
           expiration_date?: string | null;
+          field_operation_id?: string | null;
           frame_pd?: number | null;
           height_segmentation?: number | null;
           id?: string;
@@ -3948,6 +4905,7 @@ export type Database = {
           created_by?: string | null;
           customer_id?: string;
           expiration_date?: string | null;
+          field_operation_id?: string | null;
           frame_pd?: number | null;
           height_segmentation?: number | null;
           id?: string;
@@ -3995,6 +4953,13 @@ export type Database = {
             columns: ["customer_id"];
             isOneToOne: false;
             referencedRelation: "customers";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "prescriptions_field_operation_id_fkey";
+            columns: ["field_operation_id"];
+            isOneToOne: false;
+            referencedRelation: "field_operations";
             referencedColumns: ["id"];
           },
           {
@@ -4645,6 +5610,7 @@ export type Database = {
           treatments_cost_includes_tax: boolean | null;
           updated_at: string | null;
           updated_by: string | null;
+          use_treatments_table: boolean | null;
           volume_discounts: Json | null;
         };
         Insert: {
@@ -4667,6 +5633,7 @@ export type Database = {
           treatments_cost_includes_tax?: boolean | null;
           updated_at?: string | null;
           updated_by?: string | null;
+          use_treatments_table?: boolean | null;
           volume_discounts?: Json | null;
         };
         Update: {
@@ -4689,6 +5656,7 @@ export type Database = {
           treatments_cost_includes_tax?: boolean | null;
           updated_at?: string | null;
           updated_by?: string | null;
+          use_treatments_table?: boolean | null;
           volume_discounts?: Json | null;
         };
         Relationships: [
@@ -4740,6 +5708,7 @@ export type Database = {
           expiration_date: string | null;
           far_lens_cost: number | null;
           far_lens_family_id: string | null;
+          field_operation_id: string | null;
           frame_brand: string | null;
           frame_color: string | null;
           frame_cost: number | null;
@@ -4755,6 +5724,7 @@ export type Database = {
           lens_family_id: string | null;
           lens_index: number | null;
           lens_material: string | null;
+          lens_sourcing_type: string | null;
           lens_tint_color: string | null;
           lens_tint_percentage: number | null;
           lens_treatments: string[] | null;
@@ -4819,6 +5789,7 @@ export type Database = {
           expiration_date?: string | null;
           far_lens_cost?: number | null;
           far_lens_family_id?: string | null;
+          field_operation_id?: string | null;
           frame_brand?: string | null;
           frame_color?: string | null;
           frame_cost?: number | null;
@@ -4834,6 +5805,7 @@ export type Database = {
           lens_family_id?: string | null;
           lens_index?: number | null;
           lens_material?: string | null;
+          lens_sourcing_type?: string | null;
           lens_tint_color?: string | null;
           lens_tint_percentage?: number | null;
           lens_treatments?: string[] | null;
@@ -4898,6 +5870,7 @@ export type Database = {
           expiration_date?: string | null;
           far_lens_cost?: number | null;
           far_lens_family_id?: string | null;
+          field_operation_id?: string | null;
           frame_brand?: string | null;
           frame_color?: string | null;
           frame_cost?: number | null;
@@ -4913,6 +5886,7 @@ export type Database = {
           lens_family_id?: string | null;
           lens_index?: number | null;
           lens_material?: string | null;
+          lens_sourcing_type?: string | null;
           lens_tint_color?: string | null;
           lens_tint_percentage?: number | null;
           lens_treatments?: string[] | null;
@@ -4973,6 +5947,13 @@ export type Database = {
             columns: ["far_lens_family_id"];
             isOneToOne: false;
             referencedRelation: "lens_families";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "quotes_field_operation_id_fkey";
+            columns: ["field_operation_id"];
+            isOneToOne: false;
+            referencedRelation: "field_operations";
             referencedColumns: ["id"];
           },
           {
@@ -5777,6 +6758,61 @@ export type Database = {
           },
         ];
       };
+      survey_invitations: {
+        Row: {
+          created_at: string;
+          customer_id: string | null;
+          expires_at: string;
+          id: string;
+          organization_id: string;
+          token: string;
+          used_at: string | null;
+          work_order_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          customer_id?: string | null;
+          expires_at: string;
+          id?: string;
+          organization_id: string;
+          token: string;
+          used_at?: string | null;
+          work_order_id: string;
+        };
+        Update: {
+          created_at?: string;
+          customer_id?: string | null;
+          expires_at?: string;
+          id?: string;
+          organization_id?: string;
+          token?: string;
+          used_at?: string | null;
+          work_order_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "survey_invitations_customer_id_fkey";
+            columns: ["customer_id"];
+            isOneToOne: false;
+            referencedRelation: "customers";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "survey_invitations_organization_id_fkey";
+            columns: ["organization_id"];
+            isOneToOne: false;
+            referencedRelation: "organizations";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "survey_invitations_work_order_id_fkey";
+            columns: ["work_order_id"];
+            isOneToOne: false;
+            referencedRelation: "lab_work_orders";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       system_config: {
         Row: {
           branch_id: string | null;
@@ -6297,6 +7333,74 @@ export type Database = {
           },
         ];
       };
+      treatments: {
+        Row: {
+          applied_in: string | null;
+          category: string | null;
+          created_at: string | null;
+          default_price: number;
+          description: string | null;
+          exclusions: Json | null;
+          id: string;
+          is_active: boolean | null;
+          is_default: boolean | null;
+          lens_type_compatibility: string[] | null;
+          material_compatibility: string[] | null;
+          name: string;
+          organization_id: string;
+          price_override: Json | null;
+          treatment_key: string;
+          treatment_type: string;
+          updated_at: string | null;
+        };
+        Insert: {
+          applied_in?: string | null;
+          category?: string | null;
+          created_at?: string | null;
+          default_price: number;
+          description?: string | null;
+          exclusions?: Json | null;
+          id?: string;
+          is_active?: boolean | null;
+          is_default?: boolean | null;
+          lens_type_compatibility?: string[] | null;
+          material_compatibility?: string[] | null;
+          name: string;
+          organization_id: string;
+          price_override?: Json | null;
+          treatment_key: string;
+          treatment_type?: string;
+          updated_at?: string | null;
+        };
+        Update: {
+          applied_in?: string | null;
+          category?: string | null;
+          created_at?: string | null;
+          default_price?: number;
+          description?: string | null;
+          exclusions?: Json | null;
+          id?: string;
+          is_active?: boolean | null;
+          is_default?: boolean | null;
+          lens_type_compatibility?: string[] | null;
+          material_compatibility?: string[] | null;
+          name?: string;
+          organization_id?: string;
+          price_override?: Json | null;
+          treatment_key?: string;
+          treatment_type?: string;
+          updated_at?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "treatments_organization_id_fkey";
+            columns: ["organization_id"];
+            isOneToOne: false;
+            referencedRelation: "organizations";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       user_tour_progress: {
         Row: {
           completed_at: string | null;
@@ -6542,6 +7646,7 @@ export type Database = {
           model_number: string | null;
           name: string | null;
           optical_category: string | null;
+          organization_id: string | null;
           package_characteristics: string | null;
           photochromic: boolean | null;
           photochromic_tint_levels: Json | null;
@@ -6625,6 +7730,7 @@ export type Database = {
           model_number?: string | null;
           name?: string | null;
           optical_category?: string | null;
+          organization_id?: string | null;
           package_characteristics?: string | null;
           photochromic?: boolean | null;
           photochromic_tint_levels?: Json | null;
@@ -6708,6 +7814,7 @@ export type Database = {
           model_number?: string | null;
           name?: string | null;
           optical_category?: string | null;
+          organization_id?: string | null;
           package_characteristics?: string | null;
           photochromic?: boolean | null;
           photochromic_tint_levels?: Json | null;
@@ -6753,6 +7860,13 @@ export type Database = {
             columns: ["category_id"];
             isOneToOne: false;
             referencedRelation: "categories";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "products_organization_id_fkey";
+            columns: ["organization_id"];
+            isOneToOne: false;
+            referencedRelation: "organizations";
             referencedColumns: ["id"];
           },
         ];
@@ -6834,6 +7948,10 @@ export type Database = {
         Args: { p_order_id: string };
         Returns: number;
       };
+      calculate_treatments_total: {
+        Args: { p_lens_material?: string; p_treatment_keys: string[] };
+        Returns: number;
+      };
       can_access_branch: {
         Args: { p_branch_id?: string; user_id?: string };
         Returns: boolean;
@@ -6849,6 +7967,19 @@ export type Database = {
           p_time: string;
         };
         Returns: boolean;
+      };
+      check_contact_lens_stock: {
+        Args: {
+          p_branch_id: string;
+          p_contact_lens_family_id: string;
+          p_cylinder: number;
+          p_sphere: number;
+        };
+        Returns: {
+          available_quantity: number;
+          has_stock: boolean;
+          inventory_id: string;
+        }[];
       };
       cleanup_expired_demo_organizations: {
         Args: never;
@@ -6872,6 +8003,10 @@ export type Database = {
         Args: { product_id: string; quantity: number };
         Returns: boolean;
       };
+      delete_campaign_cascade: {
+        Args: { p_campaign_id: string };
+        Returns: undefined;
+      };
       delete_demo_request_and_org: {
         Args: { p_request_id: string };
         Returns: {
@@ -6880,10 +8015,15 @@ export type Database = {
         }[];
       };
       expire_quotes: { Args: never; Returns: number };
+      generate_agreement_institutional_invoice_folio: {
+        Args: { p_branch_id: string };
+        Returns: string;
+      };
       generate_billing_folio: {
         Args: { p_branch_id: string; p_document_type: string };
         Returns: string;
       };
+      generate_credit_note_number: { Args: never; Returns: string };
       generate_internal_order_number: {
         Args: { org_id: string };
         Returns: string;
@@ -6979,6 +8119,10 @@ export type Database = {
           unique_users: number;
         }[];
       };
+      get_treatment_price: {
+        Args: { p_lens_material?: string; p_treatment_key: string };
+        Returns: number;
+      };
       get_unread_notification_count: {
         Args: { admin_user_id?: string };
         Returns: number;
@@ -7041,6 +8185,20 @@ export type Database = {
       };
       normalize_rut_for_search: { Args: { rut_text: string }; Returns: string };
       optimize_database: { Args: never; Returns: Json };
+      process_pos_sale: {
+        Args: { p_payload: string; p_user_id: string };
+        Returns: Json;
+      };
+      reduce_contact_lens_stock: {
+        Args: {
+          p_branch_id: string;
+          p_contact_lens_family_id: string;
+          p_cylinder: number;
+          p_quantity_to_reduce?: number;
+          p_sphere: number;
+        };
+        Returns: boolean;
+      };
       reset_demo_organization: { Args: never; Returns: undefined };
       schedule_telemetry_cleanup: { Args: never; Returns: undefined };
       search_customers_by_rut: {
@@ -7156,6 +8314,14 @@ export type Database = {
         Returns: undefined;
       };
       uuid_generate_v4: { Args: never; Returns: string };
+      validate_treatment_compatibility: {
+        Args: {
+          p_lens_material?: string;
+          p_lens_type?: string;
+          p_treatment_keys: string[];
+        };
+        Returns: Json;
+      };
     };
     Enums: {
       admin_notification_priority: "low" | "medium" | "high" | "urgent";

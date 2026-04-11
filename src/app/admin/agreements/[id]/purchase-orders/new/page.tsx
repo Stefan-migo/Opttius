@@ -1,13 +1,14 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useParams, useRouter } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import Link from "next/link";
+import { useParams, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { agreementService } from "@/lib/api/services/agreementService";
 import { handleApiError } from "@/lib/services/errorService";
 import { success } from "@/lib/services/notificationService";
@@ -62,7 +63,7 @@ export default function NewPurchaseOrderPage() {
     <div className="space-y-6">
       <div className="flex items-center gap-4">
         <Link href={`/admin/agreements/${agreementId}`}>
-          <Button variant="ghost" size="icon">
+          <Button size="icon" variant="ghost">
             <ArrowLeft className="h-4 w-4" />
           </Button>
         </Link>
@@ -91,11 +92,11 @@ export default function NewPurchaseOrderPage() {
             <div>
               <Label htmlFor="ocNumber">Número de OC *</Label>
               <Input
+                required
                 id="ocNumber"
+                placeholder="OC-2025-001234"
                 value={ocNumber}
                 onChange={(e) => setOcNumber(e.target.value)}
-                placeholder="OC-2025-001234"
-                required
               />
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
@@ -122,15 +123,15 @@ export default function NewPurchaseOrderPage() {
               <Label htmlFor="maxAmount">Monto máximo (opcional)</Label>
               <Input
                 id="maxAmount"
-                type="number"
                 min={0}
+                placeholder="Sin límite"
+                type="number"
                 value={maxAmount}
                 onChange={(e) =>
                   setMaxAmount(
                     e.target.value === "" ? "" : Number(e.target.value),
                   )
                 }
-                placeholder="Sin límite"
               />
             </div>
             <div>
@@ -142,7 +143,7 @@ export default function NewPurchaseOrderPage() {
               />
             </div>
             <div className="flex gap-2">
-              <Button type="submit" disabled={loading}>
+              <Button disabled={loading} type="submit">
                 {loading ? (
                   <Loader2 className="h-4 w-4 animate-spin mr-2" />
                 ) : null}

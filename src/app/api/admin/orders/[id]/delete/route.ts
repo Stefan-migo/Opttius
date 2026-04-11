@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient, createServiceRoleClient } from "@/utils/supabase/server";
+
 import { getBranchContext } from "@/lib/api/branch-middleware";
 import { appLogger as logger } from "@/lib/logger";
 import type {
-  IsAdminParams,
-  IsAdminResult,
   GetAdminRoleParams,
   GetAdminRoleResult,
+  IsAdminParams,
+  IsAdminResult,
 } from "@/types/supabase-rpc";
+import { createClient, createServiceRoleClient } from "@/utils/supabase/server";
 
 /**
  * DELETE /api/admin/orders/[id]
@@ -154,7 +155,7 @@ export async function DELETE(
       message: "Venta eliminada correctamente",
       order_id: params.id,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error("Error in delete order API", { error });
     return NextResponse.json(
       {

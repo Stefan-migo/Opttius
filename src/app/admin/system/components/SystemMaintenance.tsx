@@ -1,29 +1,31 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import {
-  Server,
   Database,
-  Trash2,
-  RefreshCw,
-  Shield,
   Mail,
   Monitor,
+  RefreshCw,
+  Server,
+  Shield,
+  Trash2,
 } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
 import BackupManager from "./BackupManager";
 
 interface SystemMaintenanceProps {
   onMaintenanceAction: (action: string) => Promise<void>;
   maintenanceLoading: boolean;
   currentAction: string | null;
-  backups: any[];
+  backups: unknown[];
   loadingBackups: boolean;
   onRefreshBackups: () => void;
-  onCreateBackup: () => Promise<any>;
-  onRestoreBackup: (backup: any) => Promise<void>;
-  onDeleteBackup: (backup: any) => Promise<void>;
-  onViewBackupDetails: (backup: any) => Promise<void>;
+  onCreateBackup: () => Promise<unknown>;
+  onRestoreBackup: (backup: unknown) => Promise<void>;
+  onDeleteBackup: (backup: unknown) => Promise<void>;
+  onViewBackupDetails: (backup: unknown) => Promise<void>;
   restoringBackup: boolean;
   deletingBackup: boolean;
 }
@@ -111,11 +113,11 @@ export default function SystemMaintenance({
 
               return (
                 <Button
+                  className="justify-start h-auto p-3 sm:p-4 flex-col items-start rounded-xl border-epoch-primary/20 min-h-[44px] min-w-0 w-full overflow-hidden"
+                  disabled={maintenanceLoading}
                   key={action.id}
                   variant="outline"
-                  className="justify-start h-auto p-3 sm:p-4 flex-col items-start rounded-xl border-epoch-primary/20 min-h-[44px] min-w-0 w-full overflow-hidden"
                   onClick={() => onMaintenanceAction(action.id)}
-                  disabled={maintenanceLoading}
                 >
                   <div className="flex items-center space-x-2 mb-1 sm:mb-2 w-full min-w-0">
                     <Icon className="h-4 w-4 sm:h-5 sm:w-5 shrink-0" />
@@ -139,14 +141,14 @@ export default function SystemMaintenance({
       {/* Backup Manager */}
       <BackupManager
         backups={backups}
-        loading={loadingBackups}
-        onRefresh={onRefreshBackups}
-        onCreateBackup={onCreateBackup}
-        onRestoreBackup={onRestoreBackup}
-        onDeleteBackup={onDeleteBackup}
-        onViewBackupDetails={onViewBackupDetails}
-        restoring={restoringBackup}
         deleting={deletingBackup}
+        loading={loadingBackups}
+        restoring={restoringBackup}
+        onCreateBackup={onCreateBackup}
+        onDeleteBackup={onDeleteBackup}
+        onRefresh={onRefreshBackups}
+        onRestoreBackup={onRestoreBackup}
+        onViewBackupDetails={onViewBackupDetails}
       />
     </div>
   );

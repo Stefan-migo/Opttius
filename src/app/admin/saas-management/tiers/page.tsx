@@ -1,10 +1,20 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import {
+  ArrowLeft,
+  Building2,
+  CheckCircle2,
+  Crown,
+  DollarSign,
+  Edit,
+  Loader2,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -16,19 +26,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  Crown,
-  Edit,
-  Loader2,
-  Building2,
-  Users,
-  DollarSign,
-  CheckCircle2,
-  ArrowLeft,
-} from "lucide-react";
-import { toast } from "sonner";
-import {
-  TIER_FEATURE_LABELS,
   TIER_DISPLAY_NAMES,
+  TIER_FEATURE_LABELS,
 } from "@/lib/saas/tier-constants";
 
 interface Tier {
@@ -161,10 +160,10 @@ export default function TiersPage() {
     <div className="space-y-6 p-6">
       <div className="flex items-center gap-4">
         <Button
-          variant="ghost"
           size="icon"
-          onClick={() => router.push("/admin/saas-management/dashboard")}
           title="Volver al dashboard"
+          variant="ghost"
+          onClick={() => router.push("/admin/saas-management/dashboard")}
         >
           <ArrowLeft className="h-5 w-5" />
         </Button>
@@ -188,8 +187,8 @@ export default function TiersPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {tiers.map((tier) => (
             <Card
-              key={tier.id}
               className={`admin-card ${getTierColor(tier.name)}`}
+              key={tier.id}
             >
               <CardHeader>
                 <div className="flex items-center justify-between">
@@ -200,8 +199,8 @@ export default function TiersPage() {
                     ] ?? tier.name}
                   </CardTitle>
                   <Button
-                    variant="outline"
                     size="sm"
+                    variant="outline"
                     onClick={() => handleEdit(tier)}
                   >
                     <Edit className="h-4 w-4" />
@@ -249,8 +248,8 @@ export default function TiersPage() {
                     {Object.entries(tier.features || {}).map(
                       ([key, enabled]) => (
                         <div
-                          key={key}
                           className="flex items-center gap-2 text-sm"
+                          key={key}
                         >
                           {enabled ? (
                             <CheckCircle2 className="h-4 w-4 text-green-600" />
@@ -387,12 +386,12 @@ export default function TiersPage() {
               <div className="grid grid-cols-2 gap-2 mt-2">
                 {Object.keys(TIER_FEATURE_LABELS).map((key) => (
                   <label
-                    key={key}
                     className="flex items-center gap-2 cursor-pointer"
+                    key={key}
                   >
                     <input
-                      type="checkbox"
                       checked={editData.features[key] || false}
+                      type="checkbox"
                       onChange={(e) =>
                         setEditData({
                           ...editData,
@@ -425,7 +424,7 @@ export default function TiersPage() {
             >
               Cancelar
             </Button>
-            <Button onClick={handleUpdate} disabled={editing}>
+            <Button disabled={editing} onClick={handleUpdate}>
               {editing ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />

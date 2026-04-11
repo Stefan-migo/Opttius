@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, memo } from "react";
+import { memo, useMemo } from "react";
 
 interface LineChartProps {
   data: Array<{ date: string; value: number; count?: number }>;
@@ -82,7 +82,7 @@ function LineChartComponent({
           {/* Y-axis labels */}
           <div className="flex flex-col justify-between h-64 pr-3 text-xs text-tierra-media">
             {yAxisLabels.reverse().map((label, idx) => (
-              <div key={idx} className="text-right">
+              <div className="text-right" key={idx}>
                 {label.label}
               </div>
             ))}
@@ -90,19 +90,19 @@ function LineChartComponent({
 
           {/* Chart area */}
           <div className="flex-1 relative">
-            <svg width="100%" height="256" className="overflow-visible">
+            <svg className="overflow-visible" height="256" width="100%">
               {/* Grid lines */}
               {showGrid &&
                 gridLines.map((y, idx) => (
                   <line
                     key={idx}
-                    x1="0"
-                    y1={`${y}%`}
-                    x2="100%"
-                    y2={`${y}%`}
                     stroke="#E5E7EB"
-                    strokeWidth="1"
                     strokeDasharray="4 4"
+                    strokeWidth="1"
+                    x1="0"
+                    x2="100%"
+                    y1={`${y}%`}
+                    y2={`${y}%`}
                   />
                 ))}
 
@@ -111,8 +111,8 @@ function LineChartComponent({
                 <linearGradient
                   id={`gradient-${title}`}
                   x1="0%"
-                  y1="0%"
                   x2="0%"
+                  y1="0%"
                   y2="100%"
                 >
                   <stop offset="0%" stopColor={color} stopOpacity="0.3" />
@@ -133,12 +133,12 @@ function LineChartComponent({
 
               {/* Line */}
               <polyline
-                points={points.map((p) => `${p.x},${p.y}`).join(" ")}
                 fill="none"
+                points={points.map((p) => `${p.x},${p.y}`).join(" ")}
                 stroke={color}
-                strokeWidth="3"
                 strokeLinecap="round"
                 strokeLinejoin="round"
+                strokeWidth="3"
               />
 
               {/* Points */}
@@ -146,13 +146,13 @@ function LineChartComponent({
                 points.map((point, index) => (
                   <g key={index}>
                     <circle
+                      className="cursor-pointer hover:r-6 transition-all"
                       cx={`${point.x}%`}
                       cy={`${point.y}%`}
-                      r="5"
                       fill="white"
+                      r="5"
                       stroke={color}
                       strokeWidth="2"
-                      className="cursor-pointer hover:r-6 transition-all"
                     />
                     <title>
                       {point.date}: {formatValue(point.value)}

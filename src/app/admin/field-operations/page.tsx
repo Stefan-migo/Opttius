@@ -1,9 +1,21 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import {
+  Calendar,
+  ChevronLeft,
+  ChevronRight,
+  Eye,
+  MapPin,
+  Plus,
+  RefreshCw,
+} from "lucide-react";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -20,24 +32,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  MapPin,
-  Plus,
-  Eye,
-  Calendar,
-  ChevronLeft,
-  ChevronRight,
-  RefreshCw,
-} from "lucide-react";
-import { toast } from "sonner";
-import Link from "next/link";
 import { useBranch } from "@/hooks/useBranch";
-import { getBranchHeader } from "@/lib/utils/branch";
-import { formatDate } from "@/lib/utils";
 import {
   extractDataFromResponse,
   extractPaginationFromResponse,
 } from "@/lib/api/response-helpers";
+import { formatDate } from "@/lib/utils";
+import { getBranchHeader } from "@/lib/utils/branch";
 
 interface FieldOperation {
   id: string;
@@ -164,10 +165,10 @@ export default function FieldOperationsPage() {
           <div className="flex flex-col gap-4 pt-4 sm:flex-row sm:items-center sm:gap-3">
             <div className="flex-1 min-w-0">
               <Input
+                className="h-11 sm:h-10 w-full sm:max-w-sm"
                 placeholder="Buscar por nombre o ubicación..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="h-11 sm:h-10 w-full sm:max-w-sm"
               />
             </div>
             <Select
@@ -190,11 +191,11 @@ export default function FieldOperationsPage() {
               </SelectContent>
             </Select>
             <Button
-              variant="outline"
-              size="icon"
-              onClick={fetchOperations}
-              disabled={loading}
               className="h-11 w-11 min-h-[44px] shrink-0"
+              disabled={loading}
+              size="icon"
+              variant="outline"
+              onClick={fetchOperations}
             >
               <RefreshCw
                 className={`h-4 w-4 ${loading ? "animate-spin" : ""}`}
@@ -211,8 +212,8 @@ export default function FieldOperationsPage() {
             <div className="py-12 text-center text-admin-text-tertiary">
               No hay operativos.{" "}
               <Link
-                href="/admin/field-operations/new"
                 className="text-primary underline"
+                href="/admin/field-operations/new"
               >
                 Crear uno
               </Link>
@@ -234,8 +235,8 @@ export default function FieldOperationsPage() {
                   <TableBody>
                     {filteredOperations.map((op) => (
                       <TableRow
-                        key={op.id}
                         className="hover:bg-[#AE000025] transition-colors"
+                        key={op.id}
                       >
                         <TableCell className="font-medium">{op.name}</TableCell>
                         <TableCell>
@@ -251,9 +252,9 @@ export default function FieldOperationsPage() {
                         <TableCell className="text-right">
                           <Link href={`/admin/field-operations/${op.id}`}>
                             <Button
-                              variant="ghost"
-                              size="sm"
                               className="min-h-[44px]"
+                              size="sm"
+                              variant="ghost"
                             >
                               <Eye className="mr-1 h-4 w-4" />
                               Ver
@@ -270,9 +271,9 @@ export default function FieldOperationsPage() {
               <div className="md:hidden space-y-3">
                 {filteredOperations.map((op) => (
                   <Link
-                    key={op.id}
-                    href={`/admin/field-operations/${op.id}`}
                     className="block"
+                    href={`/admin/field-operations/${op.id}`}
+                    key={op.id}
                   >
                     <div className="rounded-xl border border-border bg-card p-4 active:bg-muted/50 transition-colors">
                       <div className="flex items-start justify-between gap-3">
@@ -311,11 +312,11 @@ export default function FieldOperationsPage() {
                   </p>
                   <div className="flex items-center justify-center sm:justify-end gap-2 order-1 sm:order-2">
                     <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                      disabled={currentPage <= 1}
                       className="min-h-[44px]"
+                      disabled={currentPage <= 1}
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                     >
                       <ChevronLeft className="h-4 w-4" />
                     </Button>
@@ -323,13 +324,13 @@ export default function FieldOperationsPage() {
                       Página {currentPage} de {totalPages}
                     </span>
                     <Button
-                      variant="outline"
+                      className="min-h-[44px]"
+                      disabled={currentPage >= totalPages}
                       size="sm"
+                      variant="outline"
                       onClick={() =>
                         setCurrentPage((p) => Math.min(totalPages, p + 1))
                       }
-                      disabled={currentPage >= totalPages}
-                      className="min-h-[44px]"
                     >
                       <ChevronRight className="h-4 w-4" />
                     </Button>

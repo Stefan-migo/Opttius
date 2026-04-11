@@ -1,14 +1,14 @@
-import { NextRequest, NextResponse } from "next/server";
-import { createClientFromRequest } from "@/utils/supabase/server";
-import { getBranchContext, addBranchFilter } from "@/lib/api/branch-middleware";
-import { appLogger as logger } from "@/lib/logger";
-import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
-import {
-  createApiSuccessResponse,
-  createApiErrorResponse,
-} from "@/lib/api/response";
-import { AuthenticationError, AuthorizationError } from "@/lib/api/errors";
+import { NextRequest } from "next/server";
+
 import { computeInventoryMetrics } from "@/lib/analytics/analytics-service";
+import { addBranchFilter, getBranchContext } from "@/lib/api/branch-middleware";
+import { AuthenticationError, AuthorizationError } from "@/lib/api/errors";
+import {
+  createApiErrorResponse,
+  createApiSuccessResponse,
+} from "@/lib/api/response";
+import { appLogger as logger } from "@/lib/logger";
+import { createClientFromRequest } from "@/utils/supabase/server";
 
 /**
  * Helper to get YYYY-MM-DD date string in local timezone (not UTC)
@@ -270,7 +270,7 @@ export async function GET(request: NextRequest) {
       }>,
       productIdsInCatalog,
       {
-        products: activeProducts.map((p: any) => ({
+        products: activeProducts.map((p: unknown) => ({
           id: p.id,
           name: p.name,
           slug: p.slug,

@@ -1,14 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/utils/supabase/server";
-import {
-  validateBranchAccess,
-  addBranchFilter,
-} from "@/lib/api/branch-middleware";
+
+import { validateBranchAccess } from "@/lib/api/branch-middleware";
 import { appLogger as logger } from "@/lib/logger";
 import type {
   IsSuperAdminParams,
   IsSuperAdminResult,
 } from "@/types/supabase-rpc";
+import { createClient } from "@/utils/supabase/server";
 
 export const dynamic = "force-dynamic";
 export async function GET(
@@ -47,7 +45,7 @@ export async function GET(
     }
 
     // Build queries with branch filter
-    const branchFilter = (query: any) => {
+    const branchFilter = (query: unknown) => {
       if (id === "global" && isSuperAdmin) {
         return query; // Super admin sees all
       }
@@ -131,7 +129,7 @@ export async function GET(
     const revenueData = await todayRevenue;
     const todayRevenueAmount =
       revenueData.data?.reduce(
-        (sum: number, order: any) =>
+        (sum: number, order: unknown) =>
           sum + (parseFloat(order.total_amount) || 0),
         0,
       ) || 0;
@@ -160,7 +158,7 @@ export async function GET(
     };
 
     return NextResponse.json({ stats });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error("Error in GET /api/admin/branches/[id]/stats:", {
       error,
       branchId: id,

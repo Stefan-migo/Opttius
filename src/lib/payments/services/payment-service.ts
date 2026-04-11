@@ -5,17 +5,17 @@
  */
 
 import type { SupabaseClient } from "@supabase/supabase-js";
+
+import { EmailNotificationService } from "@/lib/email/notifications";
+import { appLogger as logger } from "@/lib/logger";
+import { recordTierChange } from "@/lib/saas/tier-change-audit";
 import type {
   Payment,
   PaymentCreationAttributes,
-  PaymentStatus,
   PaymentGateway,
+  PaymentStatus,
   WebhookEvent,
 } from "@/types/payment";
-import { appLogger as logger } from "@/lib/logger";
-import { EmailNotificationService } from "@/lib/email/notifications";
-import { createServiceRoleClient } from "@/utils/supabase/server";
-import { recordTierChange } from "@/lib/saas/tier-change-audit";
 
 export class PaymentService {
   private supabase: SupabaseClient;

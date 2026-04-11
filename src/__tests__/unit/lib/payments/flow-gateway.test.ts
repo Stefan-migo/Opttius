@@ -4,9 +4,10 @@
  * @module __tests__/unit/lib/payments/flow-gateway.test
  */
 
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { FlowGateway } from "@/lib/payments/flow/gateway";
 import type { NextRequest } from "next/server";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+import { FlowGateway } from "@/lib/payments/flow/gateway";
 
 // Mock environment variables
 vi.stubEnv("FLOW_API_KEY", "test_api_key");

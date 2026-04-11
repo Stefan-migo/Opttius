@@ -1,9 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
+import { Save, Shield, X } from "lucide-react";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -12,10 +15,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Shield, Save, X } from "lucide-react";
-import { toast } from "sonner";
-import { PERMISSION_RESOURCES, ACTION_LABELS } from "@/lib/admin/permissions";
+import { Label } from "@/components/ui/label";
+import { ACTION_LABELS, PERMISSION_RESOURCES } from "@/lib/admin/permissions";
 
 interface Permissions {
   [resource: string]: string[];
@@ -130,8 +131,8 @@ export default function PermissionsEditor({
 
             return (
               <div
-                key={resource.key}
                 className="border rounded-lg p-4 space-y-3"
+                key={resource.key}
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
@@ -139,16 +140,16 @@ export default function PermissionsEditor({
                       {resource.label}
                     </Label>
                     {someSelected && (
-                      <Badge variant="outline" className="text-xs">
+                      <Badge className="text-xs" variant="outline">
                         {resourcePerms.length}{" "}
                         {resourcePerms.length === 1 ? "permiso" : "permisos"}
                       </Badge>
                     )}
                   </div>
                   <Button
+                    size="sm"
                     type="button"
                     variant="ghost"
-                    size="sm"
                     onClick={() =>
                       toggleAllForResource(resource.key, resource.actions)
                     }
@@ -159,17 +160,17 @@ export default function PermissionsEditor({
 
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                   {resource.actions.map((action) => (
-                    <div key={action} className="flex items-center space-x-2">
+                    <div className="flex items-center space-x-2" key={action}>
                       <Checkbox
-                        id={`${resource.key}-${action}`}
                         checked={hasPermission(resource.key, action)}
+                        id={`${resource.key}-${action}`}
                         onCheckedChange={() =>
                           togglePermission(resource.key, action)
                         }
                       />
                       <Label
-                        htmlFor={`${resource.key}-${action}`}
                         className="text-sm font-normal cursor-pointer"
+                        htmlFor={`${resource.key}-${action}`}
                       >
                         {ACTION_LABELS[action] || action}
                       </Label>
@@ -183,15 +184,15 @@ export default function PermissionsEditor({
 
         <DialogFooter>
           <Button
+            disabled={loading}
             type="button"
             variant="outline"
             onClick={() => onOpenChange(false)}
-            disabled={loading}
           >
             <X className="h-4 w-4 mr-2" />
             Cancelar
           </Button>
-          <Button onClick={handleSave} disabled={loading}>
+          <Button disabled={loading} onClick={handleSave}>
             <Save className="h-4 w-4 mr-2" />
             {loading ? "Guardando..." : "Guardar Permisos"}
           </Button>

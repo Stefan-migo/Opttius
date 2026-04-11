@@ -1,87 +1,87 @@
 /**
  * Embedding Provider Types
- * 
+ *
  * Defines interfaces for embedding generation providers.
  * Supports multiple providers (Google, Transformers.js) with automatic fallback.
  */
 
 export interface EmbeddingResult {
   /** The embedding vector */
-  vector: number[]
+  vector: number[];
   /** Number of dimensions in the vector */
-  dimensions: number
+  dimensions: number;
   /** Provider that generated this embedding */
-  provider: string
+  provider: string;
   /** Number of tokens in the input text */
-  tokenCount?: number
+  tokenCount?: number;
 }
 
 export interface EmbeddingBatchResult {
   /** Array of embedding results */
-  embeddings: EmbeddingResult[]
+  embeddings: EmbeddingResult[];
   /** Total tokens processed */
-  totalTokens?: number
+  totalTokens?: number;
   /** Provider that generated these embeddings */
-  provider: string
+  provider: string;
 }
 
 export interface EmbeddingProvider {
   /** Unique identifier for this provider */
-  name: string
+  name: string;
   /** Number of dimensions in the output vectors */
-  dimensions: number
+  dimensions: number;
   /** Maximum tokens per request */
-  maxTokens?: number
+  maxTokens?: number;
   /** Whether the provider is available (has valid credentials) */
-  isAvailable(): boolean
+  isAvailable(): boolean;
   /** Generate embedding for a single text */
-  embed(text: string): Promise<EmbeddingResult>
+  embed(text: string): Promise<EmbeddingResult>;
   /** Generate embeddings for multiple texts (more efficient) */
-  embedBatch(texts: string[]): Promise<EmbeddingBatchResult>
+  embedBatch(texts: string[]): Promise<EmbeddingBatchResult>;
 }
 
 export interface EmbeddingFactoryConfig {
   /** Primary provider to use */
-  primaryProvider: 'google' | 'transformers'
+  primaryProvider: "google" | "transformers";
   /** Fallback provider if primary fails */
-  fallbackProvider?: 'google' | 'transformers'
+  fallbackProvider?: "google" | "transformers";
   /** Force a specific provider (no fallback) */
-  forceProvider?: 'google' | 'transformers'
+  forceProvider?: "google" | "transformers";
   /** Enable offline mode (only use local providers) */
-  offlineMode?: boolean
+  offlineMode?: boolean;
 }
 
 export interface EmbeddingSearchOptions {
   /** Source types to search in */
-  sourceTypes?: ('chat_message' | 'product' | 'order' | 'customer')[]
+  sourceTypes?: ("chat_message" | "product" | "order" | "customer")[];
   /** Minimum similarity threshold (0-1) */
-  matchThreshold?: number
+  matchThreshold?: number;
   /** Maximum number of results */
-  matchCount?: number
+  matchCount?: number;
   /** Filter by user ID */
-  userId?: string
+  userId?: string;
 }
 
 export interface EmbeddingSearchResult {
   /** ID of the source record */
-  sourceId: string
+  sourceId: string;
   /** Type of the source (product, order, etc.) */
-  sourceType: string
+  sourceType: string;
   /** Content that was embedded */
-  content: string
+  content: string;
   /** Similarity score (0-1) */
-  similarity: number
+  similarity: number;
   /** Additional metadata */
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>;
 }
 
 // Provider-specific types
 export interface GoogleEmbeddingConfig {
-  apiKey: string
-  model?: string // Default: text-embedding-004
+  apiKey: string;
+  model?: string; // Default: text-embedding-004
 }
 
 export interface TransformersEmbeddingConfig {
-  modelName?: string // Default: Xenova/all-MiniLM-L6-v2
-  cacheDir?: string
+  modelName?: string; // Default: Xenova/all-MiniLM-L6-v2
+  cacheDir?: string;
 }

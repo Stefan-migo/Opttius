@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+
 import { createClientFromRequest } from "@/utils/supabase/server";
 
 export const dynamic = "force-dynamic";

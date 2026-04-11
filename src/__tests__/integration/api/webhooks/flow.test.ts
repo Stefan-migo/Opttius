@@ -4,9 +4,10 @@
  * @module __tests__/integration/api/webhooks/flow.test
  */
 
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { POST } from "@/app/api/webhooks/flow/route";
 import { NextRequest } from "next/server";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+import { POST } from "@/app/api/webhooks/flow/route";
 
 // Mock dependencies
 vi.mock("@/lib/payments", () => ({
@@ -78,7 +79,7 @@ describe("Flow Webhook API", () => {
           throw new Error("Invalid signature");
         }),
         validateWebhookSignature: vi.fn(async () => true),
-      } as any);
+      } as unknown);
 
       const formData = new FormData();
       formData.append("token", "test_token");
@@ -136,7 +137,7 @@ describe("Flow Webhook API", () => {
           metadata: {},
         })),
         validateWebhookSignature: mockValidateSignature,
-      } as any);
+      } as unknown);
 
       const formData = new FormData();
       formData.append("token", "test_token");

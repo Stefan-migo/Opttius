@@ -4,9 +4,10 @@
  * @module __tests__/unit/lib/payments/nowpayments-gateway.test
  */
 
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { NowPaymentsGateway } from "@/lib/payments/nowpayments/gateway";
 import { NextRequest } from "next/server";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+import { NowPaymentsGateway } from "@/lib/payments/nowpayments/gateway";
 
 // Mock environment variables
 vi.stubEnv("NOWPAYMENTS_API_KEY", "test_api_key");
@@ -94,7 +95,7 @@ describe("NowPaymentsGateway", () => {
         order_id: "order_123",
         order_description: "Test payment",
       };
-      
+
       // Calculate the correct signature
       const crypto = await import("crypto");
       const hmac = crypto.createHmac("sha512", "test_ipn_secret");

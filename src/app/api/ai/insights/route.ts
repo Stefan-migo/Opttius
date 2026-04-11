@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClientFromRequest } from "@/utils/supabase/server";
-import { appLogger as logger } from "@/lib/logger";
-import { InsightSectionSchema } from "@/lib/ai/insights/schemas";
-import { parseAndValidateQuery } from "@/lib/api/validation/zod-helpers";
 import { z } from "zod";
-import { withRateLimit, rateLimitConfigs } from "@/lib/api/middleware";
+
+import { InsightSectionSchema } from "@/lib/ai/insights/schemas";
+import { rateLimitConfigs, withRateLimit } from "@/lib/api/middleware";
+import { parseAndValidateQuery } from "@/lib/api/validation/zod-helpers";
+import { appLogger as logger } from "@/lib/logger";
+import { createClientFromRequest } from "@/utils/supabase/server";
 
 const querySchema = z.object({
   section: InsightSectionSchema,
@@ -80,11 +81,11 @@ export async function GET(request: NextRequest) {
 
         insights = [...insights].sort((a, b) => {
           const aDaily =
-            (a.metadata as any)?.type === "daily_summary" &&
-            (a.metadata as any)?.date === yesterdayStr;
+            (a.metadata as unknown)?.type === "daily_summary" &&
+            (a.metadata as unknown)?.date === yesterdayStr;
           const bDaily =
-            (b.metadata as any)?.type === "daily_summary" &&
-            (b.metadata as any)?.date === yesterdayStr;
+            (b.metadata as unknown)?.type === "daily_summary" &&
+            (b.metadata as unknown)?.date === yesterdayStr;
           if (aDaily && !bDaily) return -1;
           if (!aDaily && bDaily) return 1;
           return 0;
@@ -99,7 +100,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({
         insights: insights.slice(0, 5),
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error("Insights API error", {
         error: error.message,
         stack: error.stack,

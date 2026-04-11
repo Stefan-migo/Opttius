@@ -1,12 +1,12 @@
 "use client";
 
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 export interface SystemConfig {
   id: string;
   config_key: string;
-  config_value: any;
+  config_value: unknown;
   description?: string;
   category: string;
   is_public: boolean;
@@ -60,7 +60,7 @@ export function useSystemConfig(options?: UseSystemConfigOptions) {
       newValue,
     }: {
       configKey: string;
-      newValue: any;
+      newValue: unknown;
     }) => {
       const headers: Record<string, string> = {
         "Content-Type": "application/json",
@@ -104,7 +104,7 @@ export function useSystemConfig(options?: UseSystemConfigOptions) {
     isLoading: query.isLoading,
     error: query.error,
     refetch: query.refetch,
-    updateConfig: async (key: string, value: any) => {
+    updateConfig: async (key: string, value: unknown) => {
       await updateMutation.mutateAsync({ configKey: key, newValue: value });
     },
     isUpdating: updateMutation.isPending,

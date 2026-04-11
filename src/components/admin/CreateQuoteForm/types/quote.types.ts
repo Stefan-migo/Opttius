@@ -145,7 +145,7 @@ export interface QuoteSettings {
   default_expiration_days?: number;
   default_tax_percentage?: number;
   default_labor_cost?: number;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface SearchState<T> {

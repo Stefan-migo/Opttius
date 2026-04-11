@@ -1,19 +1,21 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+  Edit,
+  Eye,
+  EyeOff,
+  Plus,
+  RefreshCw,
+  Search,
+  Trash2,
+} from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -22,6 +24,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Pagination } from "@/components/ui/pagination";
 import {
   Select,
   SelectContent,
@@ -30,18 +35,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  Plus,
-  Edit,
-  Trash2,
-  Search,
-  RefreshCw,
-  Eye,
-  EyeOff,
-  Upload,
-} from "lucide-react";
-import { toast } from "sonner";
-import { Badge } from "@/components/ui/badge";
-import { Pagination } from "@/components/ui/pagination";
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { formatCurrency } from "@/lib/utils";
 import type {
   ContactLensFamily,
@@ -177,7 +177,7 @@ export default function ContactLensMatricesList() {
       setShowDialog(false);
       resetForm();
       fetchMatrices();
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast.error(error.message || "Error al guardar matriz");
     }
   };
@@ -276,8 +276,8 @@ export default function ContactLensMatricesList() {
           <CardTitle>Matrices de Precios de Lentes de Contacto</CardTitle>
           <div className="flex gap-2">
             <Button
-              variant="outline"
               size="sm"
+              variant="outline"
               onClick={() => setIncludeInactive(!includeInactive)}
             >
               {includeInactive ? (
@@ -292,7 +292,7 @@ export default function ContactLensMatricesList() {
                 </>
               )}
             </Button>
-            <Button variant="outline" size="sm" onClick={fetchMatrices}>
+            <Button size="sm" variant="outline" onClick={fetchMatrices}>
               <RefreshCw className="h-4 w-4" />
             </Button>
             <Button onClick={openCreateDialog}>
@@ -307,10 +307,10 @@ export default function ContactLensMatricesList() {
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
+              className="pl-10"
               placeholder="Buscar por familia, marca o rango de esfera..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
             />
           </div>
           <div className="w-full sm:w-64">
@@ -384,15 +384,15 @@ export default function ContactLensMatricesList() {
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
                           <Button
-                            variant="ghost"
                             size="sm"
+                            variant="ghost"
                             onClick={() => openEditDialog(matrix)}
                           >
                             <Edit className="h-4 w-4" />
                           </Button>
                           <Button
-                            variant="ghost"
                             size="sm"
+                            variant="ghost"
                             onClick={() => handleDelete(matrix.id)}
                           >
                             <Trash2 className="h-4 w-4" />
@@ -412,12 +412,12 @@ export default function ContactLensMatricesList() {
           <div className="mt-4">
             <Pagination
               currentPage={currentPage}
-              totalPages={totalPages}
               itemsPerPage={itemsPerPage}
-              totalItems={totalMatrices}
-              onPageChange={setCurrentPage}
-              onItemsPerPageChange={setItemsPerPage}
               itemsPerPageOptions={[10, 20, 50, 100]}
+              totalItems={totalMatrices}
+              totalPages={totalPages}
+              onItemsPerPageChange={setItemsPerPage}
+              onPageChange={setCurrentPage}
             />
           </div>
         )}
@@ -436,13 +436,14 @@ export default function ContactLensMatricesList() {
               </DialogDescription>
             </DialogHeader>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form className="space-y-4" onSubmit={handleSubmit}>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="md:col-span-2">
                   <Label htmlFor="contact_lens_family_id">
                     Familia de Lente *
                   </Label>
                   <Select
+                    required
                     value={formData.contact_lens_family_id}
                     onValueChange={(value) =>
                       setFormData({
@@ -450,7 +451,6 @@ export default function ContactLensMatricesList() {
                         contact_lens_family_id: value,
                       })
                     }
-                    required
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Seleccionar familia" />
@@ -469,34 +469,34 @@ export default function ContactLensMatricesList() {
                 <div>
                   <Label htmlFor="sphere_min">Esfera Mínima *</Label>
                   <Input
-                    type="number"
+                    required
                     step="0.25"
+                    type="number"
                     value={formData.sphere_min}
                     onChange={(e) =>
                       setFormData({ ...formData, sphere_min: e.target.value })
                     }
-                    required
                   />
                 </div>
 
                 <div>
                   <Label htmlFor="sphere_max">Esfera Máxima *</Label>
                   <Input
-                    type="number"
+                    required
                     step="0.25"
+                    type="number"
                     value={formData.sphere_max}
                     onChange={(e) =>
                       setFormData({ ...formData, sphere_max: e.target.value })
                     }
-                    required
                   />
                 </div>
 
                 <div>
                   <Label htmlFor="cylinder_min">Cilindro Mínimo</Label>
                   <Input
-                    type="number"
                     step="0.25"
+                    type="number"
                     value={formData.cylinder_min}
                     onChange={(e) =>
                       setFormData({ ...formData, cylinder_min: e.target.value })
@@ -507,8 +507,8 @@ export default function ContactLensMatricesList() {
                 <div>
                   <Label htmlFor="cylinder_max">Cilindro Máximo</Label>
                   <Input
-                    type="number"
                     step="0.25"
+                    type="number"
                     value={formData.cylinder_max}
                     onChange={(e) =>
                       setFormData({ ...formData, cylinder_max: e.target.value })
@@ -519,38 +519,38 @@ export default function ContactLensMatricesList() {
                 <div>
                   <Label htmlFor="base_price">Precio Base *</Label>
                   <Input
-                    type="number"
+                    required
                     step="0.01"
+                    type="number"
                     value={formData.base_price}
                     onChange={(e) =>
                       setFormData({ ...formData, base_price: e.target.value })
                     }
-                    required
                   />
                 </div>
 
                 <div>
                   <Label htmlFor="cost">Costo *</Label>
                   <Input
-                    type="number"
+                    required
                     step="0.01"
+                    type="number"
                     value={formData.cost}
                     onChange={(e) =>
                       setFormData({ ...formData, cost: e.target.value })
                     }
-                    required
                   />
                 </div>
 
                 <div className="flex items-center space-x-2 pt-4">
                   <input
-                    type="checkbox"
-                    id="is_active"
                     checked={formData.is_active}
+                    className="h-4 w-4"
+                    id="is_active"
+                    type="checkbox"
                     onChange={(e) =>
                       setFormData({ ...formData, is_active: e.target.checked })
                     }
-                    className="h-4 w-4"
                   />
                   <Label htmlFor="is_active">Matriz Activa</Label>
                 </div>

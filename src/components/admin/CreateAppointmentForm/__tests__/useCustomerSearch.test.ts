@@ -1,7 +1,9 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { renderHook, act } from "@testing-library/react";
-import { useCustomerSearch } from "../hooks/useCustomerSearch";
+import { act, renderHook } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
 import * as branchHook from "@/hooks/useBranch";
+
+import { useCustomerSearch } from "../hooks/useCustomerSearch";
 
 // Mock the hook properly
 vi.mock("@/hooks/useBranch", () => ({
@@ -208,7 +210,7 @@ describe("useCustomerSearch", () => {
       json: () => Promise.resolve({ customers: mockCustomers }),
     };
 
-    (global.fetch as any).mockResolvedValueOnce(mockResponse);
+    (global.fetch as unknown).mockResolvedValueOnce(mockResponse);
 
     const { result } = renderHook(() => useCustomerSearch({}));
 
@@ -230,7 +232,7 @@ describe("useCustomerSearch", () => {
   });
 
   it("should handle customer search errors gracefully", async () => {
-    (global.fetch as any).mockRejectedValueOnce(new Error("Network error"));
+    (global.fetch as unknown).mockRejectedValueOnce(new Error("Network error"));
 
     const { result } = renderHook(() => useCustomerSearch({}));
 
@@ -253,7 +255,7 @@ describe("useCustomerSearch", () => {
       json: () => Promise.resolve({ customers: mockCustomers }),
     };
 
-    (global.fetch as any).mockResolvedValueOnce(mockResponse);
+    (global.fetch as unknown).mockResolvedValueOnce(mockResponse);
 
     const { result } = renderHook(() => useCustomerSearch({}));
 
@@ -330,7 +332,7 @@ describe("useCustomerSearch", () => {
       json: () => Promise.resolve({ data: mockCustomer }),
     };
 
-    (global.fetch as any).mockResolvedValueOnce(mockResponse);
+    (global.fetch as unknown).mockResolvedValueOnce(mockResponse);
 
     const { result } = renderHook(() =>
       useCustomerSearch({ initialCustomerId: "customer-123" }),
@@ -348,7 +350,7 @@ describe("useCustomerSearch", () => {
   });
 
   it("should handle fetch customer by ID error", async () => {
-    (global.fetch as any).mockRejectedValueOnce(
+    (global.fetch as unknown).mockRejectedValueOnce(
       new Error("Customer not found"),
     );
 

@@ -3,16 +3,17 @@
  * Confirms a payment using MercadoPago Bricks token (Checkout API)
  */
 import { NextRequest, NextResponse } from "next/server";
-import { createClientFromRequest } from "@/utils/supabase/server";
-import { appLogger as logger } from "@/lib/logger";
-import { withRateLimit, rateLimitConfigs } from "@/lib/api/middleware";
+import { z } from "zod";
+
 import { ValidationError } from "@/lib/api/errors";
+import { rateLimitConfigs, withRateLimit } from "@/lib/api/middleware";
 import {
   parseAndValidateBody,
   validationErrorResponse,
 } from "@/lib/api/validation/zod-helpers";
+import { appLogger as logger } from "@/lib/logger";
 import { PaymentGatewayFactory, PaymentService } from "@/lib/payments";
-import { z } from "zod";
+import { createClientFromRequest } from "@/utils/supabase/server";
 
 const confirmPaymentSchema = z.object({
   token: z.string().min(1, "Token es requerido"),

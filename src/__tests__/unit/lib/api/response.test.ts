@@ -1,19 +1,19 @@
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
+
 import {
-  createApiSuccessResponse,
-  createApiErrorResponse,
-  createPaginatedResponse,
-  ApiResponseBuilder,
-  extractPaginationParams,
-  isSuccessResponse,
-  isErrorResponse,
-} from "@/lib/api/response";
-import {
-  APIError,
-  ValidationError,
   AuthenticationError,
   AuthorizationError,
+  ValidationError,
 } from "@/lib/api/errors";
+import {
+  ApiResponseBuilder,
+  createApiErrorResponse,
+  createApiSuccessResponse,
+  createPaginatedResponse,
+  extractPaginationParams,
+  isErrorResponse,
+  isSuccessResponse,
+} from "@/lib/api/response";
 
 describe("API Response Standardization", () => {
   describe("createApiSuccessResponse", () => {
@@ -173,13 +173,13 @@ describe("API Response Standardization", () => {
     it("should build success response", async () => {
       const builder = new ApiResponseBuilder();
       const data = { id: 1, name: "Test" };
-      
+
       const response = builder
         .setData(data)
         .setStatusCode(200)
         .setRequestId("test-id")
         .build();
-      
+
       const json = await response.json();
 
       expect(json.success).toBe(true);
@@ -191,12 +191,9 @@ describe("API Response Standardization", () => {
     it("should build error response", async () => {
       const builder = new ApiResponseBuilder();
       const error = new ValidationError("Invalid data");
-      
-      const response = builder
-        .setError(error)
-        .setRequestId("test-id")
-        .build();
-      
+
+      const response = builder.setError(error).setRequestId("test-id").build();
+
       const json = await response.json();
 
       expect(json.success).toBe(false);
@@ -206,13 +203,13 @@ describe("API Response Standardization", () => {
 
     it("should add custom metadata", async () => {
       const builder = new ApiResponseBuilder();
-      
+
       const response = builder
         .setData({ id: 1 })
         .addMeta("customKey", "customValue")
         .addMeta("anotherKey", 123)
         .build();
-      
+
       const json = await response.json();
 
       expect(json.meta?.customKey).toBe("customValue");
@@ -221,7 +218,7 @@ describe("API Response Standardization", () => {
 
     it("should include pagination metadata", async () => {
       const builder = new ApiResponseBuilder();
-      
+
       const response = builder
         .setData([{ id: 1 }])
         .setPagination({
@@ -233,7 +230,7 @@ describe("API Response Standardization", () => {
           hasPreviousPage: false,
         })
         .build();
-      
+
       const json = await response.json();
 
       expect(json.meta?.pagination).toBeDefined();

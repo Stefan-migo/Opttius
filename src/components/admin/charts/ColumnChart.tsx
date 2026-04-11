@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, memo } from "react";
+import { memo, useMemo } from "react";
 
 interface ColumnChartProps {
   data: Array<{ date: string; value: number; count?: number }>;
@@ -72,8 +72,8 @@ function ColumnChartComponent({
 
           return (
             <div
-              key={index}
               className="flex-1 flex flex-col items-center space-y-1 min-w-0"
+              key={index}
             >
               {/* Value label on top */}
               {item.value > 0 && (

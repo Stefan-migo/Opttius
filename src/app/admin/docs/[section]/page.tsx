@@ -1,11 +1,12 @@
 "use client";
 
+import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
+
 import { DocSectionContent } from "@/components/admin/docs/DocSectionContent";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 
 const VALID_SECTIONS = [
   "dashboard",
@@ -29,7 +30,7 @@ export default function DocSectionPage() {
     return (
       <div className="space-y-6">
         <Link href="/admin/docs">
-          <Button variant="ghost" size="sm" className="gap-2">
+          <Button className="gap-2" size="sm" variant="ghost">
             <ArrowLeft className="h-4 w-4" />
             Volver a Documentación
           </Button>
@@ -49,7 +50,7 @@ export default function DocSectionPage() {
   return (
     <div className="space-y-6">
       <Link href="/admin/docs">
-        <Button variant="ghost" size="sm" className="gap-2 rounded-xl">
+        <Button className="gap-2 rounded-xl" size="sm" variant="ghost">
           <ArrowLeft className="h-4 w-4" />
           Volver a Documentación
         </Button>

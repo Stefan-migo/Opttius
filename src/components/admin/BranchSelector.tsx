@@ -1,7 +1,8 @@
 "use client";
 
+import { Building2, Globe } from "lucide-react";
 import { useState } from "react";
-import { useBranch } from "@/hooks/useBranch";
+
 import {
   Select,
   SelectContent,
@@ -9,7 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Building2, Globe } from "lucide-react";
+import { useBranch } from "@/hooks/useBranch";
 import { cn } from "@/lib/utils";
 
 export function BranchSelector() {
@@ -55,15 +56,18 @@ export function BranchSelector() {
   return (
     <div className="flex items-center space-x-2">
       <Select
+        disabled={isChanging}
         value={currentValue}
         onValueChange={handleBranchChange}
-        disabled={isChanging}
       >
         <SelectTrigger
           className={cn(
-            "min-w-0 flex-shrink border-admin-border",
+            "min-w-0 flex-shrink border-border/50 bg-background/50",
             "w-[200px] md:min-w-[140px]",
             "max-md:w-10 max-md:px-2 max-md:justify-center max-md:[&>:last-child]:hidden",
+            "rounded-xl transition-all duration-200",
+            "hover:border-epoch-accent/30 hover:bg-background/80",
+            "focus:border-epoch-accent focus:ring-1 focus:ring-epoch-accent/20",
             isChanging && "opacity-50",
           )}
         >
@@ -71,12 +75,12 @@ export function BranchSelector() {
             <div className="flex items-center space-x-2">
               {isGlobalView ? (
                 <>
-                  <Globe className="h-4 w-4 flex-shrink-0" />
+                  <Globe className="h-4 w-4 flex-shrink-0 text-epoch-accent" />
                   <span className="max-md:sr-only">Vista Global</span>
                 </>
               ) : (
                 <>
-                  <Building2 className="h-4 w-4 flex-shrink-0" />
+                  <Building2 className="h-4 w-4 flex-shrink-0 text-epoch-accent" />
                   <span className="max-md:sr-only">
                     {currentBranch?.name || "Sin sucursal"}
                   </span>
@@ -85,7 +89,7 @@ export function BranchSelector() {
             </div>
           </SelectValue>
         </SelectTrigger>
-        <SelectContent>
+        <SelectContent className="rounded-xl border-border/50 bg-background/95 backdrop-blur-sm">
           {isSuperAdmin && (
             <SelectItem value="global">
               <div className="flex items-center space-x-2">
@@ -95,9 +99,13 @@ export function BranchSelector() {
             </SelectItem>
           )}
           {branches.map((branch) => (
-            <SelectItem key={branch.id} value={branch.id}>
+            <SelectItem
+              className="rounded-lg"
+              key={branch.id}
+              value={branch.id}
+            >
               <div className="flex items-center space-x-2">
-                <Building2 className="h-4 w-4" />
+                <Building2 className="h-4 w-4 text-epoch-accent" />
                 <span>{branch.name}</span>
                 {branch.is_primary && (
                   <span className="text-xs text-muted-foreground">

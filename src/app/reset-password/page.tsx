@@ -1,28 +1,29 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
-import Image from "next/image";
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import { useAuthContext } from "@/contexts/AuthContext";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent } from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
+  ArrowLeft,
+  ArrowRight,
+  CheckCircle2,
   Loader2,
   Lock,
   Mail,
-  ArrowRight,
-  ArrowLeft,
-  CheckCircle2,
   ShieldCheck,
 } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
+
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useAuthContext } from "@/contexts/AuthContext";
+import { cn } from "@/lib/utils";
 import { createClient } from "@/utils/supabase/client";
 
 const requestSchema = z.object({
@@ -146,7 +147,7 @@ export default function ResetPasswordPage() {
       setError(null);
       await resetPassword(data.email);
       setStep("sent");
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(err.message || "Error al enviar el correo de recuperación");
     }
   };
@@ -175,7 +176,7 @@ export default function ResetPasswordPage() {
       setTimeout(() => {
         router.push(isInviteFlow ? "/admin" : "/login");
       }, 3000);
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(err.message || "Error al actualizar la contraseña");
     } finally {
       setIsUpdating(false);
@@ -188,24 +189,24 @@ export default function ResetPasswordPage() {
       <div className="relative hidden lg:flex lg:w-1/2 xl:w-7/12 overflow-hidden items-center justify-center bg-epoch-surface">
         <div className="absolute inset-0 z-0">
           <Image
-            src="/images/landing/Hero.webp"
-            alt="Vintage Optics"
             fill
-            className="object-cover opacity-30 grayscale"
             priority
+            alt="Vintage Optics"
+            className="object-cover opacity-30 grayscale"
+            src="/images/landing/Hero.webp"
           />
           <div className="absolute inset-0 bg-gradient-to-tr from-epoch-primary via-epoch-primary/40 to-transparent" />
         </div>
 
         <div className="relative z-10 p-12 xl:p-20 w-full h-full flex flex-col justify-between">
-          <Link href="/" className="group flex flex-col items-start w-fit">
+          <Link className="group flex flex-col items-start w-fit" href="/">
             <div className="relative mb-1 group-hover:scale-110 transition-transform duration-500">
               <Image
-                src="/logo-text-default.svg"
                 alt="Opttius"
-                width={192}
-                height={56}
                 className="h-14 w-48 opacity-100 object-contain object-left"
+                height={56}
+                src="/logo-text-default.svg"
+                width={192}
               />
             </div>
           </Link>
@@ -218,7 +219,7 @@ export default function ResetPasswordPage() {
                 acceso seguro
               </span>
             </h2>
-            <div className="w-24 h-[1px] bg-epoch-accent mb-8"></div>
+            <div className="w-24 h-[1px] bg-epoch-accent mb-8" />
             <p className="text-lg xl:text-xl text-white/70 font-serif italic tracking-wide leading-relaxed">
               Restablece tu contraseña de forma segura y vuelve a gestionar tu
               óptica.
@@ -240,13 +241,13 @@ export default function ResetPasswordPage() {
         <div className="w-full max-w-md animate-in fade-in slide-in-from-bottom-10 duration-700 py-4 sm:py-0">
           {/* Mobile logo - visible when left panel hidden */}
           <div className="lg:hidden mb-8 flex justify-center">
-            <Link href="/" className="group">
+            <Link className="group" href="/">
               <Image
-                src="/logo-text-default.svg"
                 alt="Opttius"
-                width={160}
-                height={48}
                 className="h-12 w-40 sm:h-14 sm:w-48 opacity-100 object-contain group-hover:opacity-90 transition-opacity"
+                height={48}
+                src="/logo-text-default.svg"
+                width={160}
               />
             </Link>
           </div>
@@ -283,8 +284,8 @@ export default function ResetPasswordPage() {
             <CardContent className="p-4 sm:p-6 md:p-8 lg:p-12">
               {error && (
                 <Alert
-                  variant="destructive"
                   className="mb-6 bg-red-500/10 border-red-500/20 rounded-xl animate-in shake-in duration-500"
+                  variant="destructive"
                 >
                   <AlertDescription className="text-red-950 font-serif italic text-xs">
                     {error}
@@ -312,21 +313,21 @@ export default function ResetPasswordPage() {
 
               {!isEstablishingSession && step === "request" && (
                 <form
-                  onSubmit={requestForm.handleSubmit(onRequestSubmit)}
                   className="space-y-6"
+                  onSubmit={requestForm.handleSubmit(onRequestSubmit)}
                 >
                   <div className="space-y-3">
                     <Label
-                      htmlFor="email"
                       className="text-[10px] font-display font-bold text-epoch-primary/40 uppercase tracking-[0.3em] ml-1"
+                      htmlFor="email"
                     >
                       Email
                     </Label>
                     <div className="relative group">
                       <Input
                         id="email"
-                        type="email"
                         placeholder="admin@opttius.com"
+                        type="email"
                         {...requestForm.register("email")}
                         className={cn(
                           "h-14 min-h-[44px] rounded-xl border-epoch-primary/10 bg-epoch-background/50 pl-14 focus:bg-white transition-all font-body text-epoch-primary shadow-inner",
@@ -345,10 +346,10 @@ export default function ResetPasswordPage() {
                   </div>
 
                   <Button
-                    type="submit"
-                    size="lg"
                     className="w-full h-14 min-h-[44px] sm:h-16 rounded-xl bg-epoch-primary hover:bg-epoch-surface text-white font-display font-bold uppercase text-[10px] sm:text-xs tracking-[0.2em] sm:tracking-[0.4em] group overflow-hidden transition-all duration-500 shadow-xl"
                     disabled={authLoading}
+                    size="lg"
+                    type="submit"
                   >
                     {authLoading ? (
                       <Loader2 className="h-5 w-5 animate-spin" />
@@ -361,8 +362,8 @@ export default function ResetPasswordPage() {
                   </Button>
 
                   <Link
-                    href="/login"
                     className="flex items-center justify-center gap-2 py-3 min-h-[44px] text-[10px] font-display font-bold text-epoch-primary/60 hover:text-epoch-primary uppercase tracking-widest transition-colors"
+                    href="/login"
                   >
                     <ArrowLeft className="h-3 w-3 shrink-0" />
                     Volver al login
@@ -383,15 +384,15 @@ export default function ResetPasswordPage() {
                     </span>
                   </p>
                   <Button
-                    variant="outline"
                     className="w-full h-14 min-h-[44px] rounded-xl border-2 border-epoch-primary/20 font-display font-bold hover:bg-epoch-primary/5 hover:border-epoch-primary/30"
+                    variant="outline"
                     onClick={() => setStep("request")}
                   >
                     Intentar con otro correo
                   </Button>
                   <Link
-                    href="/login"
                     className="flex items-center justify-center gap-2 py-3 min-h-[44px] text-[10px] font-display font-bold text-epoch-accent hover:text-epoch-primary uppercase tracking-widest transition-colors"
+                    href="/login"
                   >
                     <ArrowLeft className="h-3 w-3 shrink-0" />
                     Regresar al login
@@ -401,21 +402,21 @@ export default function ResetPasswordPage() {
 
               {!isEstablishingSession && step === "update" && (
                 <form
-                  onSubmit={updateForm.handleSubmit(onUpdateSubmit)}
                   className="space-y-6"
+                  onSubmit={updateForm.handleSubmit(onUpdateSubmit)}
                 >
                   <div className="space-y-3">
                     <Label
-                      htmlFor="password"
                       className="text-[10px] font-display font-bold text-epoch-primary/40 uppercase tracking-[0.3em] ml-1"
+                      htmlFor="password"
                     >
                       {isInviteFlow ? "Contraseña" : "Nueva contraseña"}
                     </Label>
                     <div className="relative group">
                       <Input
                         id="password"
-                        type="password"
                         placeholder="••••••••"
+                        type="password"
                         {...updateForm.register("password")}
                         className={cn(
                           "h-14 min-h-[44px] rounded-xl border-epoch-primary/10 bg-epoch-background/50 pl-14 focus:bg-white transition-all font-body text-epoch-primary shadow-inner",
@@ -435,16 +436,16 @@ export default function ResetPasswordPage() {
 
                   <div className="space-y-3">
                     <Label
-                      htmlFor="confirmPassword"
                       className="text-[10px] font-display font-bold text-epoch-primary/40 uppercase tracking-[0.3em] ml-1"
+                      htmlFor="confirmPassword"
                     >
                       Confirmar contraseña
                     </Label>
                     <div className="relative group">
                       <Input
                         id="confirmPassword"
-                        type="password"
                         placeholder="••••••••"
+                        type="password"
                         {...updateForm.register("confirmPassword")}
                         className={cn(
                           "h-14 min-h-[44px] rounded-xl border-epoch-primary/10 bg-epoch-background/50 pl-14 focus:bg-white transition-all font-body text-epoch-primary shadow-inner",
@@ -463,10 +464,10 @@ export default function ResetPasswordPage() {
                   </div>
 
                   <Button
-                    type="submit"
-                    size="lg"
                     className="w-full h-14 min-h-[44px] sm:h-16 rounded-xl bg-epoch-primary hover:bg-epoch-surface text-white font-display font-bold uppercase text-xs sm:text-sm tracking-normal sm:tracking-[0.2em] px-6 overflow-hidden transition-all duration-500 shadow-xl"
                     disabled={isUpdating}
+                    size="lg"
+                    type="submit"
                   >
                     {isUpdating ? (
                       <Loader2 className="h-5 w-5 animate-spin" />

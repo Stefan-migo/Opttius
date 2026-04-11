@@ -4,8 +4,9 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/utils/supabase/server";
+
 import { validateFeature } from "@/lib/saas/tier-validator";
+import { createClient } from "@/utils/supabase/server";
 
 export const dynamic = "force-dynamic";
 

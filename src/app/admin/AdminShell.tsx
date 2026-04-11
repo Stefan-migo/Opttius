@@ -1,220 +1,265 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
-import { useRouter, usePathname } from "next/navigation";
-import { useAuthContext } from "@/contexts/AuthContext";
+import {
+  ArrowRight,
+  BarChart3,
+  Building2,
+  Calendar,
+  ChevronDown,
+  ClipboardList,
+  FileText,
+  Glasses,
+  HelpCircle,
+  LayoutDashboard,
+  Loader2,
+  LogOut,
+  LucideIcon,
+  MapPin,
+  Menu,
+  MessageSquare,
+  Package,
+  Receipt,
+  Server,
+  Settings,
+  ShoppingCart,
+  Sparkles,
+  User,
+  Users,
+  X,
+} from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
-import { cn } from "@/lib/utils";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
+
+import { AdminMobileNav } from "@/components/admin/AdminMobileNav";
+import { MobileBottomNav } from "@/components/admin/MobileBottomNav";
+import { MobileFAB } from "@/components/admin/MobileFAB";
+import AdminNotificationDropdown from "@/components/admin/AdminNotificationDropdown";
+import { BranchSelector } from "@/components/admin/BranchSelector";
+import Chatbot from "@/components/admin/Chatbot";
+import { InsightsFloatingButton } from "@/components/admin/InsightsFloatingButton";
+import { SubscriptionGuard } from "@/components/admin/SubscriptionGuard";
+import { DemoModeBanner } from "@/components/onboarding/DemoModeBanner";
+import { TourButton } from "@/components/onboarding/TourButton";
+import { TourProvider } from "@/components/onboarding/TourProvider";
+import { useTheme } from "@/components/theme-provider";
+import { ThemeSelector } from "@/components/theme-selector";
+import { Badge } from "@/components/ui/badge";
+import { OpttiusLogoCompact } from "@/components/ui/brand/OpttiusLogo";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
+  SheetClose,
   SheetContent,
   SheetTrigger,
-  SheetClose,
 } from "@/components/ui/sheet";
-import { Badge } from "@/components/ui/badge";
-import Image from "next/image";
-import { OpttiusLogoCompact } from "@/components/ui/brand/OpttiusLogo";
-import {
-  LayoutDashboard,
-  ShoppingCart,
-  Package,
-  Glasses,
-  Users,
-  BarChart3,
-  Menu,
-  LogOut,
-  Bell,
-  User,
-  ChevronRight,
-  Home,
-  MessageSquare,
-  Server,
-  Tag,
-  Receipt,
-  FileText,
-  ClipboardList,
-  Calendar,
-  Building2,
-  DollarSign,
-  Settings,
-  ArrowRight,
-  Sparkles,
-  HelpCircle,
-  Loader2,
-  X,
-  MapPin,
-} from "lucide-react";
-import AdminNotificationDropdown from "@/components/admin/AdminNotificationDropdown";
-import Chatbot from "@/components/admin/Chatbot";
-import { InsightsFloatingButton } from "@/components/admin/InsightsFloatingButton";
-import { BranchSelector } from "@/components/admin/BranchSelector";
-import { ThemeSelector } from "@/components/theme-selector";
-import { useTheme } from "@/components/theme-provider";
-import { DemoModeBanner } from "@/components/onboarding/DemoModeBanner";
-import { AdminMobileNav } from "@/components/admin/AdminMobileNav";
-import { TourProvider } from "@/components/onboarding/TourProvider";
-import { TourButton } from "@/components/onboarding/TourButton";
-import { SubscriptionGuard } from "@/components/admin/SubscriptionGuard";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import businessConfig from "@/config/business";
+import { useAuthContext } from "@/contexts/AuthContext";
 import { useBranch } from "@/hooks/useBranch";
 import { useRoot } from "@/hooks/useRoot";
+import { cn } from "@/lib/utils";
 import { getBranchHeader } from "@/lib/utils/branch";
-import businessConfig from "@/config/business";
 
 interface AdminLayoutProps {
   children: React.ReactNode;
 }
 
-// Admin navigation items - orden por flujo natural del usuario:
-// 1. Operación diaria (Dashboard, POS, Trabajos, Citas, Presupuestos)
-// 2. CRM y catálogo (Clientes, Productos, Libro de Recetas)
-// 3. Módulos especiales (Convenios, Operativos)
-// 4. Reportes (Analíticas)
-// 5. Soporte (Registro de Incidentes)
-// 6. Configuración (Administradores, Sucursales, Sistema, SaaS)
-const createNavigationItems = (
+// Navigation item type
+interface NavItem {
+  href: string;
+  label: string;
+  icon: LucideIcon;
+  description?: string;
+  badge?: string;
+  requiresFeature?: string;
+  superAdminOnly?: boolean;
+  rootOnly?: boolean;
+  adminOrSuperAdminOnly?: boolean;
+  onboardingOnly?: boolean;
+}
+
+// Navigation group type
+interface NavGroup {
+  id: string;
+  label: string;
+  icon: LucideIcon;
+  items: NavItem[];
+  defaultExpanded?: boolean;
+  collapsible?: boolean;
+}
+
+// Admin navigation groups - orden por flujo natural del usuario:
+const createNavigationGroups = (
   newWorkOrdersCount?: number,
   openTicketsCount?: number,
   isRoot?: boolean,
   tierFeatures?: Record<string, boolean>,
-) => {
+): NavGroup[] => {
   const hasFeature = (key: string) =>
     isRoot || !tierFeatures || tierFeatures[key] === true;
-  const items = [
-    // --- Operación diaria (más usados arriba) ---
+
+  const groups: NavGroup[] = [
+    // Grupo Principal - Operación diaria (más usados)
     {
-      href: "/admin",
-      label: "Dashboard",
+      id: "principal",
+      label: "Principal",
       icon: LayoutDashboard,
-      description: "Visión general y KPIs",
+      defaultExpanded: true,
+      collapsible: false,
+      items: [
+        {
+          href: "/admin",
+          label: "Dashboard",
+          icon: LayoutDashboard,
+          description: "Visión general y KPIs",
+        },
+        {
+          href: "/admin/pos",
+          label: "Punto de Venta",
+          icon: ShoppingCart,
+          description: "Sistema POS",
+        },
+        {
+          href: "/admin/work-orders",
+          label: "Trabajos",
+          icon: Glasses,
+          description: "Gestión de trabajos de laboratorio",
+          badge:
+            newWorkOrdersCount !== undefined && newWorkOrdersCount > 0
+              ? newWorkOrdersCount.toString()
+              : undefined,
+        },
+        {
+          href: "/admin/appointments",
+          label: "Citas y Agenda",
+          icon: Calendar,
+          description: "Gestión de citas y agenda",
+        },
+        {
+          href: "/admin/quotes",
+          label: "Presupuestos",
+          icon: Receipt,
+          description: "Crear y gestionar presupuestos",
+        },
+      ],
     },
+    // Grupo Gestión - CRM y catálogo
     {
-      href: "/admin/pos",
-      label: "Punto de Venta",
-      icon: ShoppingCart,
-      description: "Sistema POS",
-    },
-    {
-      href: "/admin/work-orders",
-      label: "Trabajos",
-      icon: Glasses,
-      description: "Gestión de trabajos de laboratorio",
-      badge:
-        newWorkOrdersCount !== undefined && newWorkOrdersCount > 0
-          ? newWorkOrdersCount.toString()
-          : undefined,
-    },
-    {
-      href: "/admin/appointments",
-      label: "Citas y Agenda",
-      icon: Calendar,
-      description: "Gestión de citas y agenda",
-    },
-    {
-      href: "/admin/quotes",
-      label: "Presupuestos",
-      icon: Receipt,
-      description: "Crear y gestionar presupuestos",
-    },
-    // --- CRM y catálogo ---
-    {
-      href: "/admin/customers",
-      label: "Clientes",
+      id: "gestion",
+      label: "Gestión",
       icon: Users,
-      description: "Gestión de clientes",
+      defaultExpanded: false,
+      collapsible: true,
+      items: [
+        {
+          href: "/admin/customers",
+          label: "Clientes",
+          icon: Users,
+          description: "Gestión de clientes",
+        },
+        {
+          href: "/admin/products",
+          label: "Productos",
+          icon: Package,
+          description: "Catálogo e inventario",
+        },
+        {
+          href: "/admin/prescriptions",
+          label: "Libro de Recetas",
+          icon: ClipboardList,
+          description: "Registro de recetas despachadas (Código Sanitario)",
+        },
+        // Módulos especiales (tier-gated)
+        ...(hasFeature("agreements")
+          ? [
+              {
+                href: "/admin/agreements",
+                label: "Convenios",
+                icon: FileText,
+                description:
+                  "Gestión de convenios con empresas e instituciones",
+              },
+            ]
+          : []),
+        ...(hasFeature("field_operations")
+          ? [
+              {
+                href: "/admin/field-operations",
+                label: "Operativos en Terreno",
+                icon: MapPin,
+                description: "Operativos móviles y bodega temporal",
+              },
+            ]
+          : []),
+      ],
     },
+    // Grupo Administración - Configuración y soporte
     {
-      href: "/admin/products",
-      label: "Productos",
-      icon: Package,
-      description: "Catálogo e inventario",
+      id: "administracion",
+      label: "Administración",
+      icon: Settings,
+      defaultExpanded: false,
+      collapsible: true,
+      items: [
+        {
+          href: "/admin/analytics",
+          label: "Analíticas",
+          icon: BarChart3,
+          description: "Reportes y estadísticas",
+        },
+        {
+          href: "/admin/support",
+          label: "Incidentes",
+          icon: MessageSquare,
+          description: "Registro de incidentes y problemas",
+          badge:
+            openTicketsCount !== undefined && openTicketsCount > 0
+              ? openTicketsCount.toString()
+              : undefined,
+        },
+        // Configuración
+        {
+          href: "/admin/system",
+          label: "Sistema",
+          icon: Server,
+          description: "Administración del sistema",
+        },
+        ...(isRoot
+          ? [
+              {
+                href: "/admin/saas-management",
+                label: "Gestión SaaS",
+                icon: Settings,
+                description: "Administración del SaaS",
+                rootOnly: true,
+              },
+            ]
+          : []),
+        ...(isRoot
+          ? [
+              {
+                href: "/admin/branches",
+                label: "Sucursales",
+                icon: Building2,
+                description: "Gestión de sucursales",
+                superAdminOnly: true,
+              },
+            ]
+          : []),
+        {
+          href: "/admin/admin-users",
+          label: "Administradores",
+          icon: Users,
+          description: "Gestión de usuarios admin",
+          adminOrSuperAdminOnly: true,
+        },
+      ],
     },
-    {
-      href: "/admin/prescriptions",
-      label: "Libro de Recetas",
-      icon: ClipboardList,
-      description: "Registro de recetas despachadas (Código Sanitario)",
-    },
-    // --- Módulos especiales (tier-gated) ---
-    {
-      href: "/admin/agreements",
-      label: "Convenios",
-      icon: FileText,
-      description: "Gestión de convenios con empresas e instituciones",
-      requiresFeature: "agreements",
-    },
-    {
-      href: "/admin/field-operations",
-      label: "Operativos en Terreno",
-      icon: MapPin,
-      description: "Operativos móviles y bodega temporal",
-      requiresFeature: "field_operations",
-    },
-    // --- Reportes ---
-    {
-      href: "/admin/analytics",
-      label: "Analíticas",
-      icon: BarChart3,
-      description: "Reportes y estadísticas",
-    },
-    // --- Onboarding ---
-    {
-      href: "/checkout",
-      label: "Checkout",
-      icon: DollarSign,
-      description: "Pagos con Flow / pasarelas",
-      onboardingOnly: true,
-    },
-    // --- Soporte ---
-    {
-      href: "/admin/support",
-      label: "Registro de Incidentes",
-      icon: MessageSquare,
-      description: "Registro de incidentes y problemas para análisis y mejora",
-      badge:
-        openTicketsCount !== undefined && openTicketsCount > 0
-          ? openTicketsCount.toString()
-          : undefined,
-    },
-    // --- Configuración (al final) ---
-    {
-      href: "/admin/admin-users",
-      label: "Administradores",
-      icon: Users,
-      description: "Gestión de usuarios admin",
-      adminOrSuperAdminOnly: true,
-    },
-    {
-      href: "/admin/branches",
-      label: "Sucursales",
-      icon: Building2,
-      description: "Gestión de sucursales",
-      superAdminOnly: true,
-    },
-    {
-      href: "/admin/system",
-      label: "Sistema",
-      icon: Server,
-      description: "Administración del sistema",
-    },
-    ...(isRoot
-      ? [
-          {
-            href: "/admin/saas-management",
-            label: "Gestión SaaS Opttius",
-            icon: Settings,
-            description: "Administración completa del SaaS",
-            rootOnly: true,
-          },
-        ]
-      : []),
   ];
-  return items.filter(
-    (item) =>
-      !("requiresFeature" in item) ||
-      hasFeature(item.requiresFeature as string),
-  );
+
+  return groups;
 };
 
 export function AdminShell({ children }: AdminLayoutProps) {
@@ -224,9 +269,46 @@ export function AdminShell({ children }: AdminLayoutProps) {
   const { theme } = useTheme();
   const router = useRouter();
   const pathname = usePathname();
+
+  // ✅ Detectar si es SaaS Management - si lo es, no renderizar el AdminShell
+  // El SaaS Management tiene su propio layout independiente
+  if (pathname.startsWith("/admin/saas-management")) {
+    return <>{children}</>;
+  }
+
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [chatbotOpen, setChatbotOpen] = useState(false);
   const [insightsOpen, setInsightsOpen] = useState(false);
+
+  // Cargar estado de grupos expandidos desde localStorage
+  const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>(
+    () => {
+      if (typeof window === "undefined") {
+        return { principal: true };
+      }
+      try {
+        const saved = localStorage.getItem("opttius-sidebar-groups");
+        if (saved) {
+          return { principal: true, ...JSON.parse(saved) };
+        }
+      } catch {
+        // Ignorar errores de localStorage
+      }
+      return { principal: true };
+    },
+  );
+
+  // Persistir estado de grupos en localStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem(
+        "opttius-sidebar-groups",
+        JSON.stringify(expandedGroups),
+      );
+    } catch {
+      // Ignorar errores de localStorage
+    }
+  }, [expandedGroups]);
 
   // Admin state management - using combined state to prevent race conditions
   const [adminState, setAdminState] = useState<{
@@ -541,7 +623,8 @@ export function AdminShell({ children }: AdminLayoutProps) {
                 const allTickets = ticketsData.tickets || [];
                 // Count tickets that are not resolved or closed
                 openTicketsCount = allTickets.filter(
-                  (t: any) => t.status !== "resolved" && t.status !== "closed",
+                  (t: { status?: string }) =>
+                    t.status !== "resolved" && t.status !== "closed",
                 ).length;
               } else if (ticketsResponse.status === 403) {
                 // User doesn't have access to tickets, silently ignore
@@ -672,10 +755,11 @@ export function AdminShell({ children }: AdminLayoutProps) {
           setTimeout(() => reject(new Error("Admin check timeout")), 10000),
         );
 
-        const { data, error } = (await Promise.race([
+        const raceResult = (await Promise.race([
           adminCheckPromise,
           timeoutPromise,
-        ])) as any;
+        ])) as { data: unknown; error: { message: string } | null };
+        const { data, error } = raceResult;
 
         let isAdminResult = false;
 
@@ -712,9 +796,11 @@ export function AdminShell({ children }: AdminLayoutProps) {
         } else {
           console.warn("⚠️ User is NOT admin, will redirect to login");
         }
-      } catch (error: any) {
-        if (error.message === "Admin check timeout") {
+      } catch (error: unknown) {
+        if (error instanceof Error && error.message === "Admin check timeout") {
           console.error("⏱️ Admin check timed out - assuming not admin");
+        } else if (error instanceof Error) {
+          console.error("❌ Error checking admin status:", error);
         } else {
           console.error("❌ Error checking admin status:", error);
         }
@@ -842,8 +928,8 @@ export function AdminShell({ children }: AdminLayoutProps) {
           <div className="relative group">
             <div className="absolute inset-0 bg-accent/20 rounded-xl blur-3xl animate-pulse scale-125 opacity-50 group-hover:opacity-100 transition-opacity duration-700" />
             <OpttiusLogoCompact
-              forceLight={theme === "dark"}
               className="h-28 w-36 relative z-10 transition-transform duration-700 group-hover:scale-105"
+              forceLight={theme === "dark"}
             />
           </div>
 
@@ -888,8 +974,8 @@ export function AdminShell({ children }: AdminLayoutProps) {
       <div className="min-h-screen flex items-center justify-center bg-background relative overflow-hidden">
         <div className="relative z-10 flex flex-col items-center justify-center space-y-8 animate-in fade-in duration-700">
           <OpttiusLogoCompact
-            forceLight={theme === "dark"}
             className="h-20 w-24"
+            forceLight={theme === "dark"}
           />
           <div className="p-6 bg-muted border border-border rounded-xl shadow-sm animate-pulse">
             <Loader2 className="h-10 w-10 text-accent animate-spin" />
@@ -940,39 +1026,57 @@ export function AdminShell({ children }: AdminLayoutProps) {
           {/* Mobile Header - app browser style: logo + name left, menu right */}
           <div className="lg:hidden admin-header">
             <div className="admin-header-content">
-              <div className="flex items-center gap-2 min-w-0 flex-1">
-                {organizationState.organizationLogo && (
-                  <Image
-                    src={organizationState.organizationLogo}
-                    alt="Logo"
-                    width={28}
-                    height={28}
-                    className="rounded-lg shadow-sm shrink-0"
-                  />
-                )}
-                <h1 className="admin-header-title font-display uppercase tracking-widest text-[11px] sm:text-xs truncate">
+              <div className="flex items-center gap-3 min-w-0 flex-1">
+                {/* Mobile Logo - Epoch style */}
+                <div className="relative">
+                  {organizationState.organizationLogo ? (
+                    <div className="rounded-lg border border-epoch-accent/20 overflow-hidden shrink-0">
+                      <Image
+                        alt="Logo"
+                        className="h-7 w-7 object-cover"
+                        height={28}
+                        src={organizationState.organizationLogo}
+                        width={28}
+                      />
+                    </div>
+                  ) : (
+                    <div className="h-7 w-7 rounded-lg bg-epoch-primary/10 border border-epoch-accent/20 flex items-center justify-center shrink-0">
+                      <span className="font-display text-epoch-accent font-bold text-sm">
+                        {organizationState.organizationName?.[0] ||
+                          businessConfig.name[0]}
+                      </span>
+                    </div>
+                  )}
+                </div>
+                <h1 className="admin-header-title font-display uppercase tracking-widest text-[11px] sm:text-xs truncate font-medium">
                   {organizationState.organizationName || businessConfig.name}
                 </h1>
               </div>
 
               <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
                 <SheetTrigger asChild>
-                  <Button variant="ghost" size="icon" className="shrink-0">
+                  <Button
+                    className="shrink-0 hover:bg-epoch-accent/10"
+                    size="icon"
+                    variant="ghost"
+                  >
                     <Menu className="h-5 w-5 text-[#F9F7F2]" />
                   </Button>
                 </SheetTrigger>
                 <SheetContent
-                  side="left"
-                  hideDefaultClose
                   elevateZIndex
+                  hideDefaultClose
                   className="!w-[75vw] max-w-[75vw] !p-0 !h-[100dvh] bg-admin-bg-secondary overflow-hidden flex flex-col"
+                  side="left"
                 >
                   <AdminSidebar
-                    pathname={pathname}
-                    onNavigate={() => setSidebarOpen(false)}
-                    stats={stats}
-                    organizationState={organizationState}
                     adminRole={adminRole}
+                    expandedGroups={expandedGroups}
+                    organizationState={organizationState}
+                    pathname={pathname}
+                    setExpandedGroups={setExpandedGroups}
+                    stats={stats}
+                    onNavigate={() => setSidebarOpen(false)}
                   />
                 </SheetContent>
               </Sheet>
@@ -983,11 +1087,13 @@ export function AdminShell({ children }: AdminLayoutProps) {
             {/* Desktop Sidebar - fixed left, 320px width */}
             <aside className="hidden lg:flex lg:w-80 lg:flex-shrink-0 lg:flex-col lg:fixed lg:left-0 lg:top-0 lg:bottom-0 lg:h-screen lg:overflow-hidden lg:z-40">
               <AdminSidebar
+                adminRole={adminRole}
+                expandedGroups={expandedGroups}
+                organizationState={organizationState}
                 pathname={pathname}
+                setExpandedGroups={setExpandedGroups}
                 stats={stats}
                 onChatbotClick={() => setChatbotOpen(true)}
-                organizationState={organizationState}
-                adminRole={adminRole}
               />
             </aside>
 
@@ -996,53 +1102,65 @@ export function AdminShell({ children }: AdminLayoutProps) {
               {/* Desktop Header */}
               <div className="hidden lg:block admin-header">
                 <div className="admin-header-content">
-                  <div>
-                    <div className="flex items-center gap-3">
-                      {organizationState.organizationLogo && (
-                        <Image
-                          src={organizationState.organizationLogo}
-                          alt="Logo"
-                          width={36}
-                          height={36}
-                          className="rounded-xl shadow-sm border border-admin-border-secondary/30"
-                        />
+                  {/* Logo + Org Info */}
+                  <div className="flex items-center gap-4">
+                    {/* Logo Container - Epoch style */}
+                    <div className="relative group">
+                      {organizationState.organizationLogo ? (
+                        <div className="relative overflow-hidden rounded-xl border border-epoch-accent/20 shadow-sm transition-all duration-300 group-hover:border-epoch-accent/40 group-hover:shadow-md">
+                          <Image
+                            alt="Logo"
+                            className="h-10 w-10 object-cover"
+                            height={40}
+                            src={organizationState.organizationLogo}
+                            width={40}
+                          />
+                        </div>
+                      ) : (
+                        <div className="h-10 w-10 rounded-xl bg-epoch-primary/10 border border-epoch-accent/20 flex items-center justify-center transition-all duration-300 group-hover:border-epoch-accent/40 group-hover:bg-epoch-primary/20">
+                          <span className="font-display text-epoch-accent font-bold text-lg">
+                            {organizationState.organizationName?.[0] ||
+                              businessConfig.name[0]}
+                          </span>
+                        </div>
                       )}
-                      <div>
-                        <h1 className="admin-header-title font-display text-admin-text-primary uppercase tracking-widest text-sm lg:text-base">
-                          {organizationState.organizationName ||
-                            businessConfig.displayName ||
-                            businessConfig.name}
-                        </h1>
-                        {organizationState.organizationSlogan ? (
-                          <p className="admin-header-subtitle font-serif italic text-admin-text-tertiary">
-                            {organizationState.organizationSlogan}
-                          </p>
-                        ) : (
-                          <p className="admin-header-subtitle font-serif italic text-admin-text-tertiary">
-                            {organizationState.organizationName
-                              ? "Excelencia en Gestión Óptica"
-                              : businessConfig.admin.subtitle}
-                          </p>
-                        )}
-                      </div>
+                    </div>
+
+                    {/* Org Name + Slogan */}
+                    <div className="flex flex-col">
+                      <h1 className="font-display text-foreground uppercase tracking-widest text-sm lg:text-base font-semibold">
+                        {organizationState.organizationName ||
+                          businessConfig.displayName ||
+                          businessConfig.name}
+                      </h1>
+                      <p className="font-serif italic text-muted-foreground text-xs">
+                        {organizationState.organizationSlogan ||
+                          (organizationState.organizationName
+                            ? "Excelencia en Gestión Óptica"
+                            : businessConfig.admin.subtitle)}
+                      </p>
                     </div>
                   </div>
 
-                  <div className="admin-header-actions">
+                  {/* Actions - Unified style */}
+                  <div className="admin-header-actions flex items-center gap-2">
                     <BranchSelector />
+
+                    <div className="h-6 w-px bg-border/50 mx-1" />
+
                     <ThemeSelector />
                     <AdminNotificationDropdown />
 
-                    {/* Botón "Activar tu óptica" - Solo visible en modo demo cuando showActivateBanner */}
+                    {/* Botón "Activar tu óptica" - Integrado visualmente */}
                     {organizationState.isDemoMode &&
                       organizationState.showActivateBanner && (
                         <Button
-                          onClick={() => router.push("/onboarding/create")}
-                          className="bg-admin-accent-secondary hover:bg-admin-accent-secondary/90 text-[#1A2B23] flex items-center gap-2 font-display font-bold uppercase tracking-widest text-[9px] rounded-xl shadow-lg shadow-admin-accent-secondary/10"
+                          className="bg-epoch-accent hover:bg-epoch-accent/90 text-epoch-primary flex items-center gap-2 font-display font-bold uppercase tracking-widest text-[9px] rounded-xl shadow-md shadow-epoch-accent/10 transition-all duration-200 hover:shadow-lg hover:shadow-epoch-accent/20"
                           size="sm"
+                          onClick={() => router.push("/onboarding/create")}
                         >
                           <Sparkles className="h-3.5 w-3.5" />
-                          Activar tu Óptica
+                          Activar
                           <ArrowRight className="h-3.5 w-3.5" />
                         </Button>
                       )}
@@ -1071,14 +1189,14 @@ export function AdminShell({ children }: AdminLayoutProps) {
             <Chatbot open={chatbotOpen} onOpenChange={setChatbotOpen} />
           </div>
 
-          {/* Tour Help Button - Floating */}
-          <TourButton />
-
-          {/* Mobile Bottom Nav */}
-          <AdminMobileNav
+          {/* Mobile Bottom Nav - Navegación principal con herramientas */}
+          <MobileBottomNav
             onChatbotClick={() => setChatbotOpen(true)}
             onInsightsClick={() => setInsightsOpen(true)}
           />
+
+          {/* FAB para acciones rápidas en móvil */}
+          <MobileFAB />
         </div>
       </SubscriptionGuard>
     </TourProvider>
@@ -1093,6 +1211,8 @@ function AdminSidebar({
   onChatbotClick,
   organizationState,
   adminRole,
+  expandedGroups,
+  setExpandedGroups,
 }: {
   pathname: string;
   onNavigate?: () => void;
@@ -1119,6 +1239,10 @@ function AdminSidebar({
     tierFeatures?: Record<string, boolean>;
   };
   adminRole?: string | null;
+  expandedGroups: Record<string, boolean>;
+  setExpandedGroups: React.Dispatch<
+    React.SetStateAction<Record<string, boolean>>
+  >;
 }) {
   const { isSuperAdmin } = useBranch();
   const { isRoot } = useRoot();
@@ -1140,31 +1264,31 @@ function AdminSidebar({
       <div className="admin-sidebar-header relative z-10 border-b border-admin-border-primary/10 flex-shrink-0">
         <div className="flex items-center justify-between py-4 px-4">
           <Link
-            href="/"
             className="admin-sidebar-logo group flex items-center justify-center gap-3"
+            href="/"
             onClick={onNavigate}
           >
             <Image
-              src="/logo-opttius.svg"
               alt="Opttius"
-              width={44}
-              height={44}
               className="h-10 w-10 flex-shrink-0 object-contain"
+              height={44}
+              src="/logo-opttius.svg"
+              width={44}
             />
             <Image
-              src="/logo-text-default.svg"
               alt="Opttius"
-              width={176}
-              height={40}
               className="h-9 w-36 object-contain object-left"
+              height={40}
+              src="/logo-text-default.svg"
+              width={176}
             />
           </Link>
           {onNavigate && (
             <SheetClose asChild>
               <Button
-                variant="ghost"
-                size="icon"
                 className="rounded-xl text-[#F9F7F2] hover:bg-white/10 hover:text-white shrink-0"
+                size="icon"
+                variant="ghost"
               >
                 <X className="h-5 w-5" />
               </Button>
@@ -1175,14 +1299,15 @@ function AdminSidebar({
 
       {/* Navigation */}
       <nav className="admin-sidebar-nav flex-1 min-h-0 overflow-y-auto">
-        <ul role="list" className="space-y-1">
-          {createNavigationItems(
+        <ul className="space-y-2 px-2" role="list">
+          {createNavigationGroups(
             stats.newWorkOrders,
             stats.openTickets,
             isRoot,
             organizationState?.tierFeatures,
-          )
-            .filter((item: any) => {
+          ).map((group) => {
+            // Filtrar items del grupo según permisos
+            const filteredItems = group.items.filter((item) => {
               if (item.superAdminOnly && !isSuperAdmin) return false;
               if (item.rootOnly && !isRoot) return false;
               if (
@@ -1199,63 +1324,156 @@ function AdminSidebar({
                   return false;
               }
               return true;
-            })
-            .map((item) => {
-              const isActive =
+            });
+
+            // No renderizar grupos vacíos
+            if (filteredItems.length === 0) return null;
+
+            const isExpanded =
+              expandedGroups[group.id] ?? group.defaultExpanded ?? false;
+            const hasItems = filteredItems.length > 0;
+            const hasBadge = filteredItems.some((item) => item.badge);
+
+            // Determinar si algún item del grupo está activo
+            const isGroupActive = filteredItems.some(
+              (item) =>
                 pathname === item.href ||
-                (item.href !== "/admin" && pathname.startsWith(item.href));
-              return (
-                <li key={item.href}>
-                  <Link
-                    href={item.href}
-                    onClick={onNavigate}
+                (item.href !== "/admin" && pathname.startsWith(item.href)),
+            );
+
+            return (
+              <li key={group.id}>
+                {/* Grupo Header - clickeable si es collapsible */}
+                {group.collapsible && hasItems ? (
+                  <button
                     className={cn(
-                      "admin-nav-item rounded-xl relative group overflow-hidden transition-all duration-300",
-                      isActive
-                        ? "active" // Usar la clase definida en globals.css para manejo de colores por CSS variables
-                        : "",
+                      "w-full flex items-center gap-2 px-3 py-2 rounded-xl",
+                      "text-[#F9F7F2]/70 hover:text-[#F9F7F2] hover:bg-white/5",
+                      "transition-all duration-200 text-left",
+                      isGroupActive && "text-[#F9F7F2] bg-white/5",
+                    )}
+                    onClick={() =>
+                      setExpandedGroups((prev) => ({
+                        ...prev,
+                        [group.id]: !prev[group.id],
+                      }))
+                    }
+                  >
+                    <group.icon className="h-4 w-4 shrink-0" />
+                    <span className="flex-1 text-[10px] font-display uppercase tracking-widest font-medium">
+                      {group.label}
+                    </span>
+                    {hasBadge && (
+                      <Badge
+                        className="bg-admin-accent-secondary/20 text-admin-accent-secondary rounded-lg px-1.5 py-0.5 text-[9px] font-display font-bold"
+                        variant="secondary"
+                      >
+                        {filteredItems
+                          .filter((i) => i.badge)
+                          .map((i) => i.badge)
+                          .reduce(
+                            (a, b) =>
+                              (
+                                parseInt(a || "0") + parseInt(b || "0")
+                              ).toString(),
+                            "0",
+                          )}
+                      </Badge>
+                    )}
+                    <ChevronDown
+                      className={cn(
+                        "h-3.5 w-3.5 shrink-0 transition-transform duration-200",
+                        !isExpanded && "-rotate-90",
+                      )}
+                    />
+                  </button>
+                ) : (
+                  <div
+                    className={cn(
+                      "flex items-center gap-2 px-3 py-2 rounded-xl",
+                      "text-[#F9F7F2]/50 pointer-events-none",
                     )}
                   >
-                    <div
-                      className={cn(
-                        "absolute inset-y-0 left-0 w-[2px] bg-admin-accent-secondary transition-transform duration-300",
-                        isActive
-                          ? "scale-y-100"
-                          : "scale-y-0 group-hover:scale-y-50",
-                      )}
-                    />
+                    <group.icon className="h-4 w-4 shrink-0" />
+                    <span className="flex-1 text-[10px] font-display uppercase tracking-widest font-medium">
+                      {group.label}
+                    </span>
+                  </div>
+                )}
 
-                    <item.icon
-                      className={cn(
-                        "h-5 w-5 transition-transform duration-300 group-hover:scale-110",
-                        isActive ? "text-inherit" : "text-inherit opacity-70",
-                      )}
-                    />
-
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between">
-                        <span
+                {/* Items del grupo */}
+                <ul
+                  className={cn(
+                    "mt-1 space-y-0.5 overflow-hidden transition-all duration-300",
+                    isExpanded
+                      ? "max-h-[500px] opacity-100"
+                      : "max-h-0 opacity-0",
+                  )}
+                  role="list"
+                >
+                  {filteredItems.map((item) => {
+                    const isActive =
+                      pathname === item.href ||
+                      (item.href !== "/admin" &&
+                        pathname.startsWith(item.href));
+                    return (
+                      <li key={item.href}>
+                        <Link
                           className={cn(
-                            "truncate font-display uppercase tracking-widest text-[10px]",
-                            isActive ? "font-bold" : "font-medium",
+                            "admin-nav-item rounded-xl relative group overflow-hidden transition-all duration-300 ml-2",
+                            isActive
+                              ? "active"
+                              : "text-[#F9F7F2]/70 hover:text-[#F9F7F2]",
                           )}
+                          href={item.href}
+                          onClick={onNavigate}
                         >
-                          {item.label}
-                        </span>
-                        {item.badge && (
-                          <Badge
-                            variant="secondary"
-                            className="admin-sidebar-badge bg-admin-accent-secondary text-[#1A2B23] rounded-xl px-1.5 py-0.5 text-[10px] font-display font-black leading-none shadow-[0_2px_4px_rgba(0,0,0,0.2)]"
-                          >
-                            {item.badge}
-                          </Badge>
-                        )}
-                      </div>
-                    </div>
-                  </Link>
-                </li>
-              );
-            })}
+                          <div
+                            className={cn(
+                              "absolute inset-y-0 left-0 w-[2px] bg-admin-accent-secondary transition-transform duration-300",
+                              isActive
+                                ? "scale-y-100"
+                                : "scale-y-0 group-hover:scale-y-50",
+                            )}
+                          />
+
+                          <item.icon
+                            className={cn(
+                              "h-4 w-4 transition-transform duration-300 group-hover:scale-110",
+                              isActive
+                                ? "text-inherit"
+                                : "text-inherit opacity-70",
+                            )}
+                          />
+
+                          <div className="flex-1">
+                            <div className="flex items-center justify-between">
+                              <span
+                                className={cn(
+                                  "truncate font-display uppercase tracking-widest text-[9px]",
+                                  isActive ? "font-bold" : "font-medium",
+                                )}
+                              >
+                                {item.label}
+                              </span>
+                              {item.badge && (
+                                <Badge
+                                  className="admin-sidebar-badge bg-admin-accent-secondary text-[#1A2B23] rounded-lg px-1.5 py-0.5 text-[9px] font-display font-black leading-none shadow-[0_2px_4px_rgba(0,0,0,0.2)]"
+                                  variant="secondary"
+                                >
+                                  {item.badge}
+                                </Badge>
+                              )}
+                            </div>
+                          </div>
+                        </Link>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </li>
+            );
+          })}
         </ul>
       </nav>
 
@@ -1268,9 +1486,9 @@ function AdminSidebar({
           <div className="h-9 w-9 rounded-lg bg-admin-accent-primary/10 border border-admin-accent-secondary/20 flex items-center justify-center text-admin-accent-secondary font-display font-bold text-sm relative z-10 overflow-hidden shrink-0">
             {profile?.avatar_url ? (
               <img
-                src={profile.avatar_url}
                 alt=""
                 className="w-full h-full object-cover"
+                src={profile.avatar_url}
               />
             ) : (
               profile?.first_name?.[0] || user?.email?.[0]?.toUpperCase() || "U"
@@ -1290,11 +1508,11 @@ function AdminSidebar({
                   : "Administrador"}
             </p>
           </div>
-          <Link href="/admin/profile" className="relative z-10">
+          <Link className="relative z-10" href="/admin/profile">
             <Button
-              variant="ghost"
-              size="icon-sm"
               className="rounded-lg hover:bg-white/10 text-[#F9F7F2] h-8 w-8"
+              size="icon-sm"
+              variant="ghost"
             >
               <User className="h-3.5 w-3.5" />
             </Button>
@@ -1303,21 +1521,21 @@ function AdminSidebar({
 
         {/* Action Buttons */}
         <div className="grid grid-cols-2 gap-2 relative z-10">
-          <Link href="/admin/help" className="w-full">
+          <Link className="w-full" href="/admin/help">
             <Button
-              variant="outline"
-              size="sm"
               className="w-full text-[8px] font-display uppercase tracking-widest gap-1 h-8 bg-transparent border-white/20 text-[#F9F7F2] rounded-lg"
+              size="sm"
+              variant="outline"
             >
               <HelpCircle className="h-3 w-3 text-admin-accent-secondary transition-colors" />
               Auxilio
             </Button>
           </Link>
           <Button
-            variant="outline"
-            size="sm"
-            onClick={handleSignOut}
             className="admin-logout-button w-full text-[8px] font-display uppercase tracking-widest gap-1 h-8 bg-transparent border-red-300/30 text-red-200 rounded-lg"
+            size="sm"
+            variant="outline"
+            onClick={handleSignOut}
           >
             <LogOut className="h-3 w-3 transition-colors" />
             Retiro

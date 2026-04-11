@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
+
+import { parseAndValidateBody } from "@/lib/api/validation/zod-helpers";
+import { updateOpticalInternalSupportTicketSchema } from "@/lib/api/validation/zod-schemas";
+import { appLogger as logger } from "@/lib/logger";
 import { createClient } from "@/utils/supabase/server";
 import { createServiceRoleClient } from "@/utils/supabase/service-role";
-import { appLogger as logger } from "@/lib/logger";
-import { updateOpticalInternalSupportTicketSchema } from "@/lib/api/validation/zod-schemas";
-import { parseAndValidateBody } from "@/lib/api/validation/zod-helpers";
 
 /**
  * GET /api/admin/optical-support/tickets/[id]
@@ -150,7 +151,7 @@ export async function PATCH(
     );
 
     // Preparar actualización
-    const updateData: any = {
+    const updateData: unknown = {
       updated_at: new Date().toISOString(),
     };
 
