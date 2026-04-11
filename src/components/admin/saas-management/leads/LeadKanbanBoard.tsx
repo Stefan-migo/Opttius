@@ -122,19 +122,13 @@ function LeadCard({
   const [isHovered, setIsHovered] = useState(false);
   const nextStages = getNextStages(lead.funnel_stage || "pending");
 
-  const [hydrated, setHydrated] = useState(false);
-
-  useEffect(() => {
-    setHydrated(true);
-  }, []);
-
-  const daysUntilExpiry =
-    hydrated && lead.demo_expires_at
-      ? Math.ceil(
-          (new Date(lead.demo_expires_at).getTime() - Date.now()) /
-            (1000 * 60 * 60 * 24),
-        )
-      : null;
+  // Calculate days until expiry - always available to avoid hydration mismatch
+  const daysUntilExpiry = lead.demo_expires_at
+    ? Math.ceil(
+        (new Date(lead.demo_expires_at).getTime() - Date.now()) /
+          (1000 * 60 * 60 * 24),
+      )
+    : null;
 
   const displayName = lead.full_name || lead.email;
   const displayOptica = lead.optica_name;
@@ -191,18 +185,15 @@ function LeadCard({
         <div className="flex items-center gap-1">
           <Clock className="h-3 w-3" />
           <span suppressHydrationWarning>
-            {hydrated && displayLastContact
+            {displayLastContact
               ? new Date(displayLastContact).toLocaleDateString("es-CL", {
                   day: "numeric",
                   month: "short",
                 })
-              : hydrated && !displayLastContact
-                ? "Sin contacto"
-                : "..."}
+              : "Sin contacto"}
           </span>
         </div>
-        {hydrated &&
-          daysUntilExpiry !== null &&
+        {daysUntilExpiry !== null &&
           daysUntilExpiry <= 3 &&
           daysUntilExpiry > 0 && (
             <Badge

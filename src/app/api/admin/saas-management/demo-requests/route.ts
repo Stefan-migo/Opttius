@@ -26,51 +26,10 @@ export async function GET(request: NextRequest) {
     );
     const offset = parseInt(searchParams.get("offset") || "0", 10);
 
-    // Only select fields that definitely exist in the table
-    const selectFields = [
-      "id",
-      "email",
-      "full_name",
-      "optica_name",
-      "phone",
-      "source",
-      "status",
-      "funnel_stage",
-      "created_at",
-      "reviewed_at",
-      "reviewed_by",
-      "organization_id",
-      "metadata",
-      "demo_started_at",
-      "demo_expires_at",
-      "meeting_url",
-      "meeting_scheduled_at",
-      "meeting_completed_at",
-      "offer_sent_at",
-      "offer_type",
-      "offer_details",
-      "conversion_date",
-      "lost_reason",
-      "notes",
-      "last_contact_at",
-      "last_email_sent",
-      "last_email_sent_at",
-      "login_count",
-      "last_login_at",
-      "lead_score",
-      "priority_level",
-      "score_last_calculated_at",
-      "assigned_to",
-      "next_followup_at",
-      "first_contact_at",
-      "utm_source",
-      "utm_medium",
-      "utm_campaign",
-    ].join(", ");
-
+    // Use * to avoid column errors - Supabase will handle missing columns gracefully
     let query = supabase
       .from("demo_requests")
-      .select(selectFields, { count: "exact" })
+      .select("*", { count: "exact" })
       .order("created_at", { ascending: false })
       .range(offset, offset + limit - 1);
 
