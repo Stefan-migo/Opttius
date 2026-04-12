@@ -75,6 +75,13 @@ export async function GET(request: NextRequest) {
           "lost",
         ];
         const validInputStages = stages.filter((s) => validStages.includes(s));
+
+        logger.info("Filtering by funnel_stages", {
+          inputStages: stages,
+          validInputStages,
+          queryBefore: query.toString?.() ?? "query-built",
+        });
+
         if (validInputStages.length > 0) {
           query = query.in("funnel_stage", validInputStages);
         } else {

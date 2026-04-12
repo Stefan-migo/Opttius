@@ -168,18 +168,38 @@ export default function NewUsersFlowPage() {
           : tab === "convertidos"
             ? `funnel_stages=${CONVERTED_STAGES}`
             : `funnel_stages=${LOST_STAGES}`;
+
+      const url = `/api/admin/saas-management/demo-requests?${stagesParam}&limit=100`;
+      console.log("[new-users-flow] Fetching:", url);
+
       const [reqRes, statsRes] = await Promise.all([
-        fetch(
-          `/api/admin/saas-management/demo-requests?${stagesParam}&limit=100`,
-        ),
+        fetch(url),
         fetch("/api/admin/saas-management/new-users-flow/stats"),
       ]);
+
+      console.log(
+        "[new-users-flow] Response status:",
+        reqRes.status,
+        statsRes.status,
+      );
+
       if (reqRes.ok) {
         const data = await reqRes.json();
+        console.log(
+          "[new-users-flow] Received requests:",
+          data.requests?.length ?? 0,
+          data.requests,
+        );
         setRequests(data.requests ?? []);
+      } else {
+        const errorData = await reqRes.json();
+        console.error("[new-users-flow] API error:", errorData);
+        toast.error(errorData.error || "Error al cargar solicitudes");
       }
+
       if (statsRes.ok) {
         const data = await statsRes.json();
+        console.log("[new-users-flow] Received stats:", data);
         setStats(data);
       }
     } catch (err) {
