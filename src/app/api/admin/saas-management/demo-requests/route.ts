@@ -75,13 +75,6 @@ export async function GET(request: NextRequest) {
           "lost",
         ];
         const validInputStages = stages.filter((s) => validStages.includes(s));
-
-        logger.info("Filtering by funnel_stages", {
-          inputStages: stages,
-          validInputStages,
-          queryBefore: query.toString?.() ?? "query-built",
-        });
-
         if (validInputStages.length > 0) {
           query = query.in("funnel_stage", validInputStages);
         } else {
@@ -90,23 +83,7 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    logger.info("Fetching demo requests", {
-      limit,
-      offset,
-      status,
-      funnelStage,
-      funnelStages,
-      duration: Date.now() - startTime,
-    });
-
     const { data, error, count } = await query;
-
-    logger.info("Demo requests query result", {
-      dataCount: data?.length ?? 0,
-      error: error?.message,
-      count: count ?? 0,
-      funnelStages,
-    });
 
     if (error) {
       logger.error("Error listing demo requests", {

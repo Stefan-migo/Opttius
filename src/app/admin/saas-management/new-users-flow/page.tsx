@@ -169,38 +169,24 @@ export default function NewUsersFlowPage() {
             ? `funnel_stages=${CONVERTED_STAGES}`
             : `funnel_stages=${LOST_STAGES}`;
 
-      const url = `/api/admin/saas-management/demo-requests?${stagesParam}&limit=100`;
-      console.log("[new-users-flow] Fetching:", url);
-
       const [reqRes, statsRes] = await Promise.all([
-        fetch(url),
+        fetch(
+          `/api/admin/saas-management/demo-requests?${stagesParam}&limit=100`,
+        ),
         fetch("/api/admin/saas-management/new-users-flow/stats"),
       ]);
 
-      console.log(
-        "[new-users-flow] Response status:",
-        reqRes.status,
-        statsRes.status,
-      );
-
       if (reqRes.ok) {
         const data = await reqRes.json();
-        console.log(
-          "[new-users-flow] Received requests:",
-          data.requests?.length ?? 0,
-          data.requests,
-        );
         setRequests(data.requests ?? []);
+      } else {
+        const errorData = await reqRes.json();
+        toast.error(errorData.error || "Error al cargar solicitudes");
+      }
 
-        // Debug: log the funnel_stage of each request
-        data.requests?.forEach((r: any, i: number) => {
-          console.log(`[new-users-flow] Request ${i}:`, {
-            id: r.id,
-            email: r.email,
-            funnel_stage: r.funnel_stage,
-            status: r.status,
-          });
-        });
+      if (statsRes.ok) {
+        const data = await statsRes.json();
+        setStats(data);
       }
 
       if (statsRes.ok) {
