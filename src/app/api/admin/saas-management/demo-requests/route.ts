@@ -94,6 +94,13 @@ export async function GET(request: NextRequest) {
 
     const { data, error, count } = await query;
 
+    logger.info("Demo requests query result", {
+      dataCount: data?.length ?? 0,
+      error: error?.message,
+      count: count ?? 0,
+      funnelStages,
+    });
+
     if (error) {
       logger.error("Error listing demo requests", {
         error: error.message,
