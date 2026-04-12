@@ -111,13 +111,6 @@ function getNextStages(currentStage: FunnelStage): FunnelStage[] {
   };
   return flow[currentStage] || [];
 }
-    migration: ["converted", "lost"],
-    converted: [],
-    rejected: [],
-    lost: [],
-  };
-  return flow[currentStage] || [];
-}
 
 function LeadCard({
   lead,
