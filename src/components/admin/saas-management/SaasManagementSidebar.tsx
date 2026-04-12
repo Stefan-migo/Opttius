@@ -249,21 +249,22 @@ export function SaasManagementSidebar({
     pendingDemos: 0,
   });
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>(
-    () => {
-      if (typeof window === "undefined") {
-        return { principal: true };
-      }
-      try {
-        const saved = localStorage.getItem("saas-sidebar-groups");
-        if (saved) {
-          return { principal: true, ...JSON.parse(saved) };
-        }
-      } catch {
-        // Ignorar
-      }
-      return { principal: true };
+    {
+      principal: true,
     },
   );
+
+  // Load from localStorage after mount to avoid hydration mismatch
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("saas-sidebar-groups");
+      if (saved) {
+        setExpandedGroups({ principal: true, ...JSON.parse(saved) });
+      }
+    } catch {
+      // Ignorar
+    }
+  }, []);
 
   // Persistir estado de grupos
   useEffect(() => {
