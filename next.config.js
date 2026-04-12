@@ -64,8 +64,8 @@ const nextConfig = {
     // OpenTelemetry dynamic require warning - benign dependency issue from @prisma/instrumentation
     config.ignoreWarnings = [
       {
-        // Match the exact warning pattern
-        moduleId: /@opentelemetry\/instrumentation/,
+        // Match the exact warning pattern - use 'module' instead of 'moduleId'
+        module: /@opentelemetry\/instrumentation/,
         message:
           /Critical dependency.*request of a dependency is an expression/,
       },
