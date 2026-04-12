@@ -191,10 +191,16 @@ export default function NewUsersFlowPage() {
           data.requests,
         );
         setRequests(data.requests ?? []);
-      } else {
-        const errorData = await reqRes.json();
-        console.error("[new-users-flow] API error:", errorData);
-        toast.error(errorData.error || "Error al cargar solicitudes");
+
+        // Debug: log the funnel_stage of each request
+        data.requests?.forEach((r: any, i: number) => {
+          console.log(`[new-users-flow] Request ${i}:`, {
+            id: r.id,
+            email: r.email,
+            funnel_stage: r.funnel_stage,
+            status: r.status,
+          });
+        });
       }
 
       if (statsRes.ok) {
