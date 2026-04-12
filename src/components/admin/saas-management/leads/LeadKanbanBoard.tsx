@@ -87,6 +87,8 @@ const PRIORITY_COLORS: Record<string, string> = {
 const KANBAN_COLUMNS: { stage: FunnelStage; label: string }[] = [
   { stage: "pending", label: "Pendiente" },
   { stage: "approved", label: "Demo Activa" },
+  { stage: "demo_expiring", label: "Por Vencer" },
+  { stage: "demo_expired", label: "Expirada" },
   { stage: "meeting_scheduled", label: "Reunión" },
   { stage: "post_meeting", label: "Post-reunión" },
   { stage: "negotiation", label: "Negociación" },
@@ -96,12 +98,19 @@ const KANBAN_COLUMNS: { stage: FunnelStage; label: string }[] = [
 function getNextStages(currentStage: FunnelStage): FunnelStage[] {
   const flow: Record<FunnelStage, FunnelStage[]> = {
     pending: ["approved", "rejected"],
-    approved: ["meeting_scheduled", "demo_expiring", "demo_expired"],
-    demo_expiring: ["meeting_scheduled", "demo_expired"],
+    approved: ["demo_expiring", "meeting_scheduled", "demo_expired"],
+    demo_expiring: ["demo_expired", "meeting_scheduled"],
     demo_expired: ["meeting_scheduled", "lost"],
     meeting_scheduled: ["post_meeting", "lost"],
     post_meeting: ["negotiation", "lost"],
     negotiation: ["migration", "lost"],
+    migration: ["converted", "lost"],
+    converted: [],
+    rejected: [],
+    lost: [],
+  };
+  return flow[currentStage] || [];
+}
     migration: ["converted", "lost"],
     converted: [],
     rejected: [],
