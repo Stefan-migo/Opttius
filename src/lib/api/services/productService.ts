@@ -468,10 +468,11 @@ export async function importProductsJson(
     if (isSuccess(response)) {
       // Unified endpoint returns { success, summary, results }
       // response.data may be undefined (non-standard route format)
-      const body = (response as Record<string, unknown>).data ?? response;
+      const body =
+        (response as unknown as Record<string, unknown>).data ?? response;
       return {
         success: true,
-        summary: (body as Record<string, unknown>).summary ?? {
+        summary: (body as unknown as Record<string, unknown>).summary ?? {
           total_processed: 0,
           created: 0,
           updated: 0,
@@ -479,7 +480,7 @@ export async function importProductsJson(
           errors_count: 0,
           warnings_count: 0,
         },
-        results: (body as Record<string, unknown>).results,
+        results: (body as unknown as Record<string, unknown>).results,
       } as {
         success: boolean;
         summary: {
