@@ -23,6 +23,7 @@ import {
   Settings,
   ShoppingCart,
   Sparkles,
+  Upload,
   User,
   Users,
   X,
@@ -164,6 +165,12 @@ const createNavigationGroups = (
           label: "Productos",
           icon: Package,
           description: "Catálogo e inventario",
+        },
+        {
+          href: "/admin/products/import",
+          label: "Importar",
+          icon: Upload,
+          description: "Importar productos desde archivo",
         },
         {
           href: "/admin/prescriptions",
