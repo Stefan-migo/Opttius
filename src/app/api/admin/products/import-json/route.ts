@@ -290,20 +290,28 @@ export async function POST(request: NextRequest) {
     const updated = results.filter((r) => r.action === "updated").length;
     const skipped = results.filter((r) => r.action === "skipped").length;
 
-    return NextResponse.json({
-      success: true,
-      total: products.length,
-      successful: results.length,
-      failed: errors.length,
-      summary: {
-        created,
-        updated,
-        skipped,
-        total_processed: products.length,
+    return NextResponse.json(
+      {
+        success: true,
+        total: products.length,
+        successful: results.length,
+        failed: errors.length,
+        summary: {
+          created,
+          updated,
+          skipped,
+          total_processed: products.length,
+        },
+        results,
+        errors,
       },
-      results,
-      errors,
-    });
+      {
+        headers: {
+          Sunset: "Sat, 01 Nov 2026 00:00:00 GMT",
+          Deprecation: "true",
+        },
+      },
+    );
   } catch (error) {
     logger.error("JSON import error", { error });
     return NextResponse.json(
