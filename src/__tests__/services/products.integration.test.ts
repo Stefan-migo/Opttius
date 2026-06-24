@@ -40,6 +40,9 @@ describe("ProductsService", () => {
       const mockChain = {
         select: vi.fn().mockReturnThis(),
         eq: vi.fn().mockReturnThis(),
+        neq: vi.fn().mockReturnThis(),
+        or: vi.fn().mockReturnThis(),
+        order: vi.fn().mockReturnThis(),
         range: vi.fn().mockResolvedValue({
           data: mockProducts,
           count: 1,
@@ -69,6 +72,9 @@ describe("ProductsService", () => {
       const mockChain = {
         select: vi.fn().mockReturnThis(),
         eq: vi.fn().mockReturnThis(),
+        neq: vi.fn().mockReturnThis(),
+        or: vi.fn().mockReturnThis(),
+        order: vi.fn().mockReturnThis(),
         range: vi.fn().mockResolvedValue({
           data: null,
           count: 0,
