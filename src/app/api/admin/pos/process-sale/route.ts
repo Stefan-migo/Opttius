@@ -15,7 +15,6 @@ import {
   validationErrorResponse,
 } from "@/lib/api/validation/zod-helpers";
 import { processSaleSchema } from "@/lib/api/validation/zod-schemas";
-import type { Order as BillingOrder } from "@/lib/billing/adapters/BillingAdapter";
 import { BillingFactory } from "@/lib/billing/BillingFactory";
 import { DEFAULT_LOW_STOCK_THRESHOLD } from "@/lib/inventory/constants";
 import {
@@ -26,8 +25,35 @@ import { getAvailableQuantity } from "@/lib/inventory/stock-helpers";
 import { appLogger as logger } from "@/lib/logger";
 import { PAYMENT_METHOD_MAP } from "@/lib/payments/constants";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
-import { createClient } from "@/utils/supabase/server";
-import { createServiceRoleClient } from "@/utils/supabase/server";
+import { createClient, createServiceRoleClient } from "@/utils/supabase/server";
+import {
+  extractFrameInfo,
+  extractLensInfo,
+  extractTreatmentsCost,
+  extractLaborCost,
+  computeOrderNumber,
+  computeWorkOrderDecision,
+  computeMinDepositFallback,
+  haveOnlyNonWorkOrderProducts,
+  hasLensDataForMounting,
+} from "./processSaleValidation";
+import {
+  computePaymentAmount,
+  computeDbPaymentMethod,
+  computeWorkOrderStatus,
+  computeLensCost,
+  computeCashAmount,
+  buildOrderPaymentsPayload,
+  buildStockReductionItems,
+} from "./processPaymentUtils";
+import {
+  buildOrderItems,
+  buildCustomerName,
+  buildFullOrderResponse,
+  buildWorkOrderResponse,
+  buildBillingResponse,
+  buildBillingOrder,
+} from "./processResponseBuilder";
 
 export const dynamic = "force-dynamic";
 export async function POST(request: NextRequest) {
@@ -322,170 +348,11 @@ export async function POST(request: NextRequest) {
           }
 
           // Extract frame and lens information - prefer structured data, fallback to parsing
-          let frameInfo: {
-            frame_product_id: string | null;
-            frame_name: string;
-            frame_brand: string | null;
-            frame_model: string | null;
-            frame_color: string | null;
-            frame_size: string | null;
-            frame_sku: string | null;
-            frame_cost: number;
-            customer_own_frame: boolean;
-          } = {
-            frame_product_id: null,
-            frame_name: "Marco",
-            frame_brand: null,
-            frame_model: null,
-            frame_color: null,
-            frame_size: null,
-            frame_sku: null,
-            frame_cost: 0,
-            customer_own_frame: false,
-          };
-
-          let lensInfo: {
-            lens_family_id: string | null;
-            lens_type: string;
-            lens_material: string;
-            lens_index: number | null;
-            lens_treatments: string[];
-            lens_tint_color: string | null;
-            lens_tint_percentage: number | null;
-            lens_cost: number;
-            prescription_id: string | null;
-          } = {
-            lens_family_id: null,
-            lens_type: "single_vision",
-            lens_material: "cr39",
-            lens_index: null,
-            lens_treatments: [],
-            lens_tint_color: null,
-            lens_tint_percentage: null,
-            lens_cost: 0,
-            prescription_id: null,
-          };
-
-          let treatmentsCost = 0;
-          let laborCost = 0;
-
-          // Use structured data if available (preferred method)
-          if (frame_data) {
-            frameInfo = {
-              frame_product_id: frame_data.frame_product_id || null,
-              frame_name: frame_data.frame_name || "Marco",
-              frame_brand: frame_data.frame_brand || null,
-              frame_model: frame_data.frame_model || null,
-              frame_color: frame_data.frame_color || null,
-              frame_size: frame_data.frame_size || null,
-              frame_sku: frame_data.frame_sku || null,
-              frame_cost: 0, // Will be extracted from items
-              customer_own_frame: frame_data.customer_own_frame || false,
-            };
-          }
-
-          if (lens_data) {
-            lensInfo = {
-              lens_family_id: lens_data.lens_family_id || null,
-              lens_type: lens_data.lens_type || "single_vision",
-              lens_material: lens_data.lens_material || "cr39",
-              lens_index: lens_data.lens_index || null,
-              lens_treatments: lens_data.lens_treatments || [],
-              lens_tint_color: lens_data.lens_tint_color || null,
-              lens_tint_percentage: lens_data.lens_tint_percentage || null,
-              lens_cost: 0, // Will be extracted from items
-              prescription_id: lens_data.prescription_id || null,
-            };
-          }
-
-          // Parse items to extract costs and fallback data (if structured data not available)
-          for (const item of items) {
-            const itemName = item.product_name.toLowerCase();
-            const itemId = item.product_id || "";
-
-            // Frame detection - only if not already set from structured data
-            if (
-              !frame_data &&
-              (itemId.includes("frame") ||
-                itemName.includes("marco") ||
-                itemName.includes("frame"))
-            ) {
-              frameInfo.frame_name = item.product_name;
-              frameInfo.frame_cost = item.unit_price;
-              // Try to extract frame_product_id if it's a valid UUID (not a temporary ID)
-              if (
-                item.product_id &&
-                !item.product_id.includes("frame-manual") &&
-                !item.product_id.includes("-")
-              ) {
-                frameInfo.frame_product_id = item.product_id;
-              }
-            } else if (
-              frame_data &&
-              (itemId.includes("frame") ||
-                itemName.includes("marco") ||
-                itemName.includes("frame"))
-            ) {
-              // Extract cost from items even if we have structured data
-              frameInfo.frame_cost = item.unit_price;
-            }
-
-            // Lens detection - only if not already set from structured data
-            if (
-              !lens_data &&
-              (itemId.includes("lens") ||
-                itemName.includes("lente") ||
-                itemName.includes("lens"))
-            ) {
-              lensInfo.lens_cost = item.unit_price;
-              // Try to parse lens type and material from name
-              const lensMatch = item.product_name.match(
-                /lente\s+(\w+)\s+(\w+)/i,
-              );
-              if (lensMatch) {
-                lensInfo.lens_type = lensMatch[1];
-                lensInfo.lens_material = lensMatch[2];
-              }
-            } else if (
-              lens_data &&
-              (itemId.includes("lens") ||
-                itemName.includes("lente") ||
-                itemName.includes("lens"))
-            ) {
-              // Extract cost from items even if we have structured data
-              lensInfo.lens_cost = item.unit_price;
-            }
-
-            // Treatments detection
-            if (
-              itemId.includes("treatments") ||
-              itemName.includes("tratamiento") ||
-              itemName.includes("treatment")
-            ) {
-              treatmentsCost += item.unit_price;
-              // Try to extract treatments from name (only if not in structured data)
-              if (!lens_data) {
-                const treatmentMatch = item.product_name.match(
-                  /tratamientos?:\s*(.+)/i,
-                );
-                if (treatmentMatch) {
-                  const treatments = treatmentMatch[1]
-                    .split(",")
-                    .map((t) => t.trim().toLowerCase());
-                  lensInfo.lens_treatments = treatments;
-                }
-              }
-            }
-
-            // Labor detection
-            if (
-              itemId.includes("labor") ||
-              itemName.includes("mano de obra") ||
-              itemName.includes("montaje")
-            ) {
-              laborCost += item.unit_price;
-            }
-          }
+          // ponytail: extracted to processSaleValidation.ts
+          const frameInfo = extractFrameInfo(frame_data, items);
+          const lensInfo = extractLensInfo(lens_data, items);
+          const treatmentsCost = extractTreatmentsCost(items);
+          const laborCost = extractLaborCost(items);
 
           // Get customer information if customer_id is provided
           let customer: unknown = null;
@@ -803,52 +670,28 @@ export async function POST(request: NextRequest) {
             .limit(1)
             .maybeSingle();
 
-          let orderNumber: string;
-          if (lastOrder?.order_number) {
-            const match = lastOrder.order_number.match(/-(\d+)$/);
-            const lastNum = match ? parseInt(match[1], 10) : 0;
-            orderNumber = `ORD-${dateStr}-${String(lastNum + 1).padStart(4, "0")}`;
-          } else {
-            orderNumber = `ORD-${dateStr}-0001`;
-          }
+          // ponytail: order number generation extracted to processSaleValidation.ts
+          const orderNumber = computeOrderNumber(
+            lastOrder?.order_number ?? null,
+          );
 
-          // Create order in orders table (for billing and financial tracking)
-          // Create order in orders table (for billing and financial tracking)
-          const orderItems = items.map((item, idx) => ({
-            id: `item-${idx}`,
-            product_id: item.product_id || undefined,
-            product_name: item.product_name,
-            quantity: item.quantity,
-            unit_price: item.unit_price,
-            total_price: item.unit_price * item.quantity,
-            sku: (item as unknown).sku || undefined,
-          }));
+          // ponytail: order items builder extracted to processResponseBuilder.ts
+          const orderItems = buildOrderItems(items);
 
           // ✅ Determinar nombre del cliente para guardar en la orden
-          let customerName: string | null = null;
-          let billingFirstName: string | null = null;
-          let billingLastName: string | null = null;
-
-          if (customer_id && customer) {
-            // Cliente registrado
-            customerName =
-              customer.first_name && customer.last_name
-                ? `${customer.first_name} ${customer.last_name}`.trim()
-                : customer.email || null;
-            billingFirstName = customer.first_name || null;
-            billingLastName = customer.last_name || null;
-          } else if (customer_name) {
-            // Cliente no registrado con nombre proporcionado
-            customerName = customer_name;
-            const nameParts = customer_name.split(" ");
-            billingFirstName = nameParts[0] || null;
-            billingLastName = nameParts.slice(1).join(" ") || null;
-          } else if (sii_business_name) {
-            // Empresa (SII)
-            customerName = sii_business_name;
-            billingFirstName = null;
-            billingLastName = null;
-          }
+          // ponytail: customer name resolution extracted to processResponseBuilder.ts
+          const { customerName, billingFirstName, billingLastName } =
+            buildCustomerName({
+              customer: customer as {
+                id?: string;
+                first_name?: string;
+                last_name?: string;
+                email?: string;
+              } | null,
+              customerName: customer_name,
+              siiBusinessName: sii_business_name,
+              customerId: customer_id,
+            });
 
           // Resolve organization_id so orders appear in org-scoped lists (Caja, etc.)
           let orderOrganizationId: string | null = null;
@@ -874,30 +717,21 @@ export async function POST(request: NextRequest) {
           }
 
           // Payment amount and method (needed for RPC and legacy)
-          let paymentAmount: number;
-          let dbPaymentMethod: string;
-          const amountToRegister =
-            agreement_id && copagoAmount != null
-              ? copagoAmount
-              : paymentsArray && paymentsArray.length > 0
-                ? paymentsArray.reduce((s, p) => s + p.amount, 0)
-                : deposit_amount || cash_received || total_amount;
-
-          if (agreement_id && copagoAmount != null) {
-            paymentAmount = copagoAmount;
-            dbPaymentMethod =
-              PAYMENT_METHOD_MAP[payment_method_type] || payment_method_type;
-          } else if (paymentsArray && paymentsArray.length > 0) {
-            paymentAmount = paymentsArray.reduce((s, p) => s + p.amount, 0);
-            dbPaymentMethod =
-              PAYMENT_METHOD_MAP[paymentsArray[0].method] ||
-              paymentsArray[0].method ||
-              "cash";
-          } else {
-            paymentAmount = deposit_amount || cash_received || total_amount;
-            dbPaymentMethod =
-              PAYMENT_METHOD_MAP[payment_method_type] || payment_method_type;
-          }
+          // ponytail: extracted to processPaymentUtils.ts
+          const paymentAmount = computePaymentAmount({
+            agreementId: agreement_id,
+            copagoAmount,
+            paymentsArray: paymentsArray || [],
+            depositAmount: deposit_amount,
+            cashReceived: cash_received,
+            totalAmount: total_amount,
+          });
+          const dbPaymentMethod = computeDbPaymentMethod({
+            agreementId: agreement_id,
+            copagoAmount,
+            paymentMethodType: payment_method_type,
+            paymentsArray: paymentsArray || [],
+          });
 
           const balance = total_amount - paymentAmount;
 
@@ -1025,12 +859,9 @@ export async function POST(request: NextRequest) {
             );
           }
 
-          const nonWorkOrderTypes = [
-            "accessory",
-            "sunglasses",
-            "service",
-            "lens",
-          ];
+          // ponytail: extracted to processSaleValidation.ts
+          const hasOnlyNonWorkOrderProductTypes =
+            haveOnlyNonWorkOrderProducts(productTypesInItems);
           const nonWorkOrderCategoryNames = [
             "accesorio",
             "accesorios",
@@ -1039,11 +870,6 @@ export async function POST(request: NextRequest) {
             "servicio",
             "servicios",
           ];
-          const hasOnlyNonWorkOrderProductTypes =
-            productTypesInItems.length > 0 &&
-            productTypesInItems.every(
-              (type) => !type || nonWorkOrderTypes.includes(type),
-            );
           const hasOnlyNonWorkOrderProductCategories =
             productCategories.length > 0 &&
             productCategories.every((cat) => {
@@ -1056,19 +882,19 @@ export async function POST(request: NextRequest) {
           const hasOnlyNonWorkOrderProducts =
             hasOnlyNonWorkOrderProductTypes ||
             hasOnlyNonWorkOrderProductCategories;
-          const hasLensDataForMounting =
-            (lens_data &&
-              (lens_data.lens_family_id ||
-                lens_data.lens_type ||
-                lens_data.lens_material ||
-                lens_data.prescription_id ||
-                presbyopia_solution !== "none")) ||
-            contact_lens_family_id ||
-            contact_lens_cost;
-          const actuallyRequiresWorkOrder =
-            !hasOnlyNonWorkOrderProducts &&
-            (hasTemporaryLensItems ||
-              (hasFrameInItems && hasLensDataForMounting));
+          const lensDataForMounting = hasLensDataForMounting(
+            lens_data,
+            contact_lens_family_id,
+            contact_lens_cost,
+            presbyopia_solution,
+          );
+          const actuallyRequiresWorkOrder = computeWorkOrderDecision({
+            hasTemporaryLensItems,
+            hasFrameInItems,
+            hasLensDataForMounting: lensDataForMounting,
+            customerId: customer_id,
+            hasOnlyNonWorkOrderProducts,
+          });
 
           if (actuallyRequiresWorkOrder && !customer_id) {
             return NextResponse.json(
@@ -1099,15 +925,17 @@ export async function POST(request: NextRequest) {
                 p_branch_id: effectiveBranchId,
               },
             );
-            const minDeposit = minDepositData ?? total_amount * 0.5;
-            let workOrderStatus = "ordered";
-            let workOrderPaymentStatus = "paid";
-            if (paymentAmount < minDeposit) {
-              workOrderStatus = "on_hold_payment";
-              workOrderPaymentStatus = "pending";
-            } else if (balance > 0) {
-              workOrderPaymentStatus = "partial";
-            }
+            const minDeposit =
+              minDepositData ?? computeMinDepositFallback(total_amount);
+            const {
+              status: workOrderStatus,
+              paymentStatus: workOrderPaymentStatus,
+            } = computeWorkOrderStatus(
+              paymentAmount,
+              minDeposit,
+              total_amount,
+              balance,
+            );
 
             const orderPayload = {
               order_number: orderNumber,
@@ -1145,75 +973,23 @@ export async function POST(request: NextRequest) {
               sku: (item as { sku?: string }).sku || null,
             }));
 
-            const orderPaymentsPayload =
-              agreement_id && copagoAmount != null
-                ? [
-                    {
-                      amount: copagoAmount,
-                      payment_method: dbPaymentMethod,
-                      payment_reference:
-                        fiscal_reference?.trim() || siiInvoiceNumber || null,
-                      notes: `Copago convenio - ${payment_method_type}`,
-                    },
-                  ]
-                : paymentsArray && paymentsArray.length > 0
-                  ? paymentsArray.map((p, i) => ({
-                      amount: p.amount,
-                      payment_method: PAYMENT_METHOD_MAP[p.method] || p.method,
-                      payment_reference:
-                        i === 0
-                          ? fiscal_reference?.trim() || siiInvoiceNumber || null
-                          : null,
-                      notes:
-                        paymentsArray.length > 1
-                          ? `Pago ${i + 1}/${paymentsArray.length} - ${PAYMENT_METHOD_MAP[p.method] || p.method}`
-                          : `Pago - ${PAYMENT_METHOD_MAP[p.method] || p.method}`,
-                    }))
-                  : [
-                      {
-                        amount: paymentAmount,
-                        payment_method: dbPaymentMethod,
-                        payment_reference:
-                          fiscal_reference?.trim() || siiInvoiceNumber || null,
-                        notes: `Pago inicial - Método: ${payment_method_type}`,
-                      },
-                    ];
-
-            let stockReductionsPayload = items
-              .filter(
-                (item) =>
-                  item.product_id &&
-                  !item.product_id.includes("frame-manual") &&
-                  !item.product_id.includes("lens-") &&
-                  !item.product_id.includes("treatments-") &&
-                  !item.product_id.includes("labor-") &&
-                  !item.product_id.includes("discount-"),
-              )
-              .filter((item) => {
-                const product = productsForStockCheck.find(
-                  (p) => p.id === item.product_id,
-                );
-                // Include frames, accessories, AND contact_lens products (not services or temp IDs)
-                return (
-                  product?.product_type === "frame" ||
-                  product?.product_type === "accessory" ||
-                  product?.product_type === "contact_lens"
-                );
-              })
-              .map((item) => ({
-                product_id: item.product_id,
-                branch_id: effectiveBranchId,
-                quantity: item.quantity,
-              }));
-
-            // Remove contact_lens from stockReductionsPayload - we use contact_lens_inventory instead
-            stockReductionsPayload = stockReductionsPayload.filter((item) => {
-              const product = productsForStockCheck.find(
-                (p) => p.id === item.product_id,
-              );
-              // Exclude contact_lens products - they use contact_lens_inventory
-              return product?.product_type !== "contact_lens";
+            // ponytail: extracted to processPaymentUtils.ts
+            const orderPaymentsPayload = buildOrderPaymentsPayload({
+              agreementId: agreement_id,
+              copagoAmount,
+              dbPaymentMethod,
+              paymentsArray: paymentsArray || [],
+              paymentMethodType: payment_method_type,
+              fiscalReference: fiscal_reference?.trim() || null,
+              siiInvoiceNumber,
             });
+
+            // ponytail: extracted to processPaymentUtils.ts
+            let stockReductionsPayload = buildStockReductionItems(
+              items,
+              productsForStockCheck,
+              effectiveBranchId,
+            );
 
             // Ensure frame from work order is reduced when not already in items (e.g. frame_data.frame_product_id)
             const uuidRegex =
@@ -1242,10 +1018,14 @@ export async function POST(request: NextRequest) {
               }
             }
 
-            const lensCost =
-              presbyopia_solution === "two_separate"
-                ? (far_lens_cost || 0) + (near_lens_cost || 0)
-                : contact_lens_cost || lensInfo.lens_cost || 0;
+            // ponytail: extracted to processPaymentUtils.ts
+            const lensCost = computeLensCost(
+              presbyopia_solution,
+              far_lens_cost,
+              near_lens_cost,
+              contact_lens_cost,
+              lensInfo.lens_cost,
+            );
 
             const workOrderPayload = actuallyRequiresWorkOrder
               ? {
@@ -1418,42 +1198,33 @@ export async function POST(request: NextRequest) {
                   .single();
                 ocNumber = po?.oc_number ?? null;
               }
-              const billingOrder: BillingOrder = {
-                id: orderId,
-                order_number: rpcResult.order_number || "",
-                customer_id: customer_id ?? undefined,
-                branch_id: effectiveBranchId ?? "",
-                total_amount: total_amount,
-                subtotal: subtotal,
-                tax_amount: tax_amount || 0,
-                discount_amount: 0,
+              // ponytail: billing order builder extracted to processResponseBuilder.ts
+              const billingOrder = buildBillingOrder({
+                orderId,
+                orderNumber: rpcResult.order_number || "",
+                customerId: customer_id,
+                branchId: effectiveBranchId ?? "",
+                totalAmount: total_amount,
+                subtotal,
+                taxAmount: tax_amount || 0,
                 items: orderItems,
-                customer: customer
-                  ? {
-                      id: customer.id ?? "",
-                      first_name: customer.first_name ?? undefined,
-                      last_name: customer.last_name ?? undefined,
-                      email: customer.email ?? undefined,
-                      phone: customer.phone ?? undefined,
-                      rut: customer.rut ?? undefined,
-                      business_name: undefined,
-                    }
-                  : {
-                      id: "",
-                      first_name: customer_name?.split(" ")[0] ?? undefined,
-                      last_name:
-                        customer_name?.split(" ").slice(1).join(" ") ??
-                        undefined,
-                      email: email ?? undefined,
-                      phone: undefined,
-                      rut: customer_rut ?? undefined,
-                      business_name: sii_business_name ?? undefined,
-                    },
-                created_at: fetchedOrder?.created_at,
-                oc_number: ocNumber ?? undefined,
-                purchase_order_id: purchase_order_id ?? undefined,
-                agreement_id: agreement_id ?? undefined,
-              };
+                customer: customer as {
+                  id?: string;
+                  first_name?: string;
+                  last_name?: string;
+                  email?: string;
+                  phone?: string;
+                  rut?: string;
+                } | null,
+                createdAt: fetchedOrder?.created_at,
+                ocNumber,
+                purchaseOrderId: purchase_order_id,
+                agreementId: agreement_id,
+                customerName: customer_name,
+                email,
+                customerRut: customer_rut,
+                siiBusinessName: sii_business_name,
+              });
               billingResult = await billingAdapter.emitDocument(billingOrder);
             } catch (billingError) {
               logger.error(
@@ -1462,13 +1233,13 @@ export async function POST(request: NextRequest) {
               );
             }
 
-            const cashAmount = paymentsArray?.length
-              ? paymentsArray
-                  .filter((p) => p.method === "cash")
-                  .reduce((s, p) => s + p.amount, 0)
-              : payment_method_type === "cash"
-                ? cash_received || total_amount
-                : 0;
+            // ponytail: extracted to processPaymentUtils.ts
+            const cashAmount = computeCashAmount(
+              paymentsArray || [],
+              payment_method_type,
+              cash_received,
+              total_amount,
+            );
             if (cashAmount > 0 && posSessionId) {
               await supabase.rpc("update_pos_session_cash", {
                 session_id: posSessionId,
@@ -1517,34 +1288,26 @@ export async function POST(request: NextRequest) {
                 .eq("id", quote_id);
             }
 
-            const fullOrder = {
-              ...newOrder,
-              order_items: orderItems,
-              order_payments: [
-                { amount: paymentAmount, payment_method: dbPaymentMethod },
-              ],
-              sii_invoice_number: siiInvoiceNumber,
-              customer_name: customerName,
-              billing_first_name: billingFirstName,
-              billing_last_name: billingLastName,
-            };
+            // ponytail: response builders extracted to processResponseBuilder.ts
+            const fullOrder = buildFullOrderResponse(
+              newOrder,
+              orderItems,
+              paymentAmount,
+              dbPaymentMethod,
+              siiInvoiceNumber,
+              customerName,
+              billingFirstName,
+              billingLastName,
+            );
 
             const successResponse = {
               order: fullOrder,
-              work_order: workOrderId
-                ? {
-                    id: workOrderId,
-                    work_order_number: rpcResult.work_order_number,
-                    sii_invoice_number: siiInvoiceNumber,
-                  }
-                : null,
-              billing: billingResult
-                ? {
-                    folio: billingResult.folio,
-                    pdfUrl: billingResult.pdfUrl,
-                    type: billingResult.type,
-                  }
-                : null,
+              work_order: buildWorkOrderResponse(
+                workOrderId,
+                rpcResult.work_order_number,
+                siiInvoiceNumber,
+              ),
+              billing: buildBillingResponse(billingResult),
             };
 
             if (idempotency_key) {
@@ -1782,42 +1545,33 @@ export async function POST(request: NextRequest) {
                 ocNumber = po?.oc_number ?? null;
               }
 
-              const billingOrder: BillingOrder = {
-                id: newOrder.id,
-                order_number: newOrder.order_number,
-                customer_id: customer_id ?? undefined,
-                branch_id: effectiveBranchId ?? "",
-                total_amount: total_amount,
-                subtotal: subtotal,
-                tax_amount: tax_amount || 0,
-                discount_amount: 0,
+              // ponytail: billing order builder extracted to processResponseBuilder.ts
+              const billingOrder = buildBillingOrder({
+                orderId: newOrder.id,
+                orderNumber: newOrder.order_number,
+                customerId: customer_id,
+                branchId: effectiveBranchId ?? "",
+                totalAmount: total_amount,
+                subtotal,
+                taxAmount: tax_amount || 0,
                 items: orderItems,
-                customer: customer
-                  ? {
-                      id: customer.id ?? "",
-                      first_name: customer.first_name ?? undefined,
-                      last_name: customer.last_name ?? undefined,
-                      email: customer.email ?? undefined,
-                      phone: customer.phone ?? undefined,
-                      rut: customer.rut ?? undefined,
-                      business_name: undefined,
-                    }
-                  : {
-                      id: "",
-                      first_name: customer_name?.split(" ")[0] ?? undefined,
-                      last_name:
-                        customer_name?.split(" ").slice(1).join(" ") ??
-                        undefined,
-                      email: email ?? undefined,
-                      phone: undefined,
-                      rut: customer_rut ?? undefined,
-                      business_name: sii_business_name ?? undefined,
-                    },
-                created_at: newOrder.created_at ?? new Date().toISOString(),
-                oc_number: ocNumber ?? undefined,
-                purchase_order_id: purchase_order_id ?? undefined,
-                agreement_id: agreement_id ?? undefined,
-              };
+                customer: customer as {
+                  id?: string;
+                  first_name?: string;
+                  last_name?: string;
+                  email?: string;
+                  phone?: string;
+                  rut?: string;
+                } | null,
+                createdAt: newOrder.created_at,
+                ocNumber,
+                purchaseOrderId: purchase_order_id,
+                agreementId: agreement_id,
+                customerName: customer_name,
+                email,
+                customerRut: customer_rut,
+                siiBusinessName: sii_business_name,
+              });
 
               billingResult = await billingAdapter.emitDocument(billingOrder);
               logger.info("Billing document emitted", {
@@ -2084,30 +1838,27 @@ export async function POST(request: NextRequest) {
               });
 
             const minDeposit = minDepositError
-              ? total_amount * 0.5
-              : minDepositData || total_amount * 0.5; // Default 50% if error
+              ? computeMinDepositFallback(total_amount)
+              : (minDepositData ?? computeMinDepositFallback(total_amount));
 
             // Determine work order status and payment status based on Cash-First
-            let workOrderStatus: string;
-            let workOrderPaymentStatus: string;
+            // ponytail: extracted to processPaymentUtils.ts
+            const {
+              status: workOrderStatus,
+              paymentStatus: workOrderPaymentStatus,
+            } = computeWorkOrderStatus(
+              paymentAmount,
+              minDeposit,
+              total_amount,
+              balance,
+            );
 
             if (paymentAmount < minDeposit) {
-              // Pago insuficiente: trabajo en espera (no visible en taller)
-              workOrderStatus = "on_hold_payment";
-              workOrderPaymentStatus = "pending";
               logger.info("Insufficient deposit", {
                 paid: paymentAmount,
                 required: minDeposit,
                 total: total_amount,
               });
-            } else if (balance === 0) {
-              // Pago completo: trabajo listo para procesar
-              workOrderStatus = "ordered";
-              workOrderPaymentStatus = "paid";
-            } else {
-              // Pago parcial suficiente: trabajo listo pero con saldo pendiente
-              workOrderStatus = "ordered";
-              workOrderPaymentStatus = "partial";
             }
 
             // Generate work order number
@@ -2279,13 +2030,13 @@ export async function POST(request: NextRequest) {
             // If needed, this can be implemented later
 
             // Update POS session cash amount if cash payment
-            const cashAmount = paymentsArray?.length
-              ? paymentsArray
-                  .filter((p) => p.method === "cash")
-                  .reduce((s, p) => s + p.amount, 0)
-              : payment_method_type === "cash"
-                ? cash_received || total_amount
-                : 0;
+            // ponytail: extracted to processPaymentUtils.ts
+            const cashAmount = computeCashAmount(
+              paymentsArray || [],
+              payment_method_type,
+              cash_received,
+              total_amount,
+            );
             if (cashAmount > 0 && posSessionId) {
               const { error: cashError } = await supabase.rpc(
                 "update_pos_session_cash",
@@ -2361,20 +2112,17 @@ export async function POST(request: NextRequest) {
             }
 
             // Construct full order object for frontend
-            const fullOrder = {
-              ...newOrder,
-              order_items: orderItems,
-              order_payments: [
-                {
-                  amount: paymentAmount,
-                  payment_method: dbPaymentMethod,
-                },
-              ],
-              sii_invoice_number: siiInvoiceNumber,
-              customer_name: customerName,
-              billing_first_name: billingFirstName,
-              billing_last_name: billingLastName,
-            };
+            // ponytail: response builders extracted to processResponseBuilder.ts
+            const fullOrder = buildFullOrderResponse(
+              newOrder,
+              orderItems,
+              paymentAmount,
+              dbPaymentMethod,
+              siiInvoiceNumber,
+              customerName,
+              billingFirstName,
+              billingLastName,
+            );
 
             const successResponse = {
               order: fullOrder,
@@ -2382,13 +2130,7 @@ export async function POST(request: NextRequest) {
                 ...newWorkOrder,
                 sii_invoice_number: siiInvoiceNumber,
               },
-              billing: billingResult
-                ? {
-                    folio: billingResult.folio,
-                    pdfUrl: billingResult.pdfUrl,
-                    type: billingResult.type,
-                  }
-                : null,
+              billing: buildBillingResponse(billingResult),
             };
             if (idempotency_key) {
               await supabaseServiceRole.from("pos_sale_idempotency").upsert(

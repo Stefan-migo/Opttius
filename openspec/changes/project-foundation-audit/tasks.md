@@ -87,24 +87,33 @@
 - [x] T-118: Extract print/receipt logic → `cashPrintUtils.ts` (placeholder — no print logic found in page.tsx)
 - [x] T-119: Remove re-exports, verify full suite + build (49 passed, 654 passed, build exits 0)
 
+### cash-register Phase 1d (2496 lines → <500) — Custom hook + section extraction
+
+- [x] T-119a: Extract state/effects/handlers into `useCashRegister.ts` custom hook — all useState, useEffect, handlers, computed values (825 lines, returns 45+ state + 12 handlers + 20 setters)
+- [x] T-119b: Extract Closure Summary section into `CashRegisterClosureSection.tsx` — closures table, status badges, dates, pagination (280 lines)
+- [x] T-119c: Extract Orders List section into `CashRegisterOrdersSection.tsx` — orders table, search filters, credit notes table (695 lines)
+- [x] T-119d: Extract Payment Summary section into `CashRegisterPaymentSection.tsx` — payment breakdown, movements detail, reconciliation form (532 lines)
+- [x] T-119e: Extract Actions section into `CashRegisterActionsSection.tsx` — header buttons, close dialog footer (103 lines); also `CashRegisterOrderDialog.tsx` — cancel/delete dialog (200 lines)
+- [x] T-119f: Rewire page.tsx — hook call + section renders only; page.tsx reduced from 2496 to 412 lines (verified full suite 722/181, build compiled successfully)
+
 ### process-sale/route.ts (2448 lines → <500)
 
-- [ ] T-120: Write `processSale.char.test.ts`
-- [ ] T-121: Extract validation → `processSaleValidation.ts`
-- [ ] T-122: Extract payment processing → `processPaymentUtils.ts`
-- [ ] T-123: Extract response builder → `processResponseBuilder.ts`
-- [ ] T-124: Remove re-exports, verify
+- [x] T-120: Write `processSale.char.test.ts` — 61 characterization tests covering validation, payment, and response builder boundaries
+- [x] T-121: Extract validation → `processSaleValidation.ts` (298 lines) — extractFrameInfo, extractLensInfo, extractTreatmentsCost, extractLaborCost, computeOrderNumber, computeWorkOrderDecision, computeMinDepositFallback, isNonWorkOrderItem, haveOnlyNonWorkOrderProducts, hasLensDataForMounting
+- [x] T-122: Extract payment processing → `processPaymentUtils.ts` (250 lines) — computePaymentAmount, computeDbPaymentMethod, computeWorkOrderStatus, computeLensCost, computeCashAmount, buildOrderPaymentsPayload, buildStockReductionItems
+- [x] T-123: Extract response builder → `processResponseBuilder.ts` (268 lines) — buildOrderItems, buildCustomerName, buildFullOrderResponse, buildWorkOrderResponse, buildBillingResponse, buildBillingOrder
+- [x] T-124: Inline logic replaced with imported calls, unused import removed (BillingOrder type), full suite + build pass (50 passed, 715 tests, 0 failures)
 
 ### zod-schemas consolidation
 
-- [ ] T-125: Compare `lib/api/validation/zod-schemas.ts` (2199) vs `lib/validation/zod-schemas.ts` (1764); identify duplicates vs unique schemas; consolidate into canonical `lib/api/validation/zod-schemas.ts`
-- [ ] T-126: Update all imports, delete `lib/validation/zod-schemas.ts`, verify build
+- [x] T-125: Compare `lib/api/validation/zod-schemas.ts` (2199) vs `lib/validation/zod-schemas.ts` (1764); identify duplicates vs unique schemas; consolidate into canonical `lib/api/validation/zod-schemas.ts`
+- [x] T-126: Update all imports, delete `lib/validation/zod-schemas.ts`, verify build
 
 ## Phase 2: Unify Service Layers (T-2xx)
 
 **Goal**: Single canonical services dir. Zero import cycles. All tests + build pass.
 
-- [ ] T-201: Move `lib/services/errorService.ts` → `lib/api/services/errorService.ts`
+- [x] T-201: Move `lib/services/errorService.ts` → `lib/api/services/errorService.ts`
 - [ ] T-202: Move `lib/services/notificationService.ts` → `lib/api/services/notificationService.ts`
 - [ ] T-203: Move `lib/services/products/` → `lib/api/services/products/`
 - [ ] T-204: Update all 33 `@/lib/services/*` imports to `@/lib/api/services/*` across the codebase
