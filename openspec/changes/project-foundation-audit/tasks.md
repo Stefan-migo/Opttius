@@ -119,7 +119,7 @@
 - [x] T-204: Update all 36 `@/lib/services/*` imports to `@/lib/api/services/*` across the codebase
 - [x] T-205: Delete `lib/services/` (index.ts + empty directory)
 - [x] T-206: Fix import cycle `lib/rate-limiting/index.ts ↔ lib/rate-limiting/middleware.ts` — extract shared types to `lib/rate-limiting/types.ts`
-- [ ] T-207: Fix import cycle `lib/security/index.ts ↔ lib/security/integration.ts` — extract shared dependency to `lib/security/shared.ts`
+- [x] T-207: Fix import cycle `lib/security/index.ts ↔ lib/security/integration.ts` — extract shared dependency to `lib/security/shared.ts`
 - [ ] T-208: Verify `npm run test:run` + `npm run build` exit 0
 
 ## Phase 3: Update Documentation (T-3xx)
