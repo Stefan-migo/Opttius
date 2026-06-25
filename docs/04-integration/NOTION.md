@@ -443,7 +443,8 @@ nlm source add nlm-export/ --notebook-id <notebook-id>
 - [Notion API Documentation](https://developers.notion.com/)
 - [Notion MCP Server](https://github.com/modelcontextprotocol/servers/tree/main/src/notion)
 - [Example Sync Scripts](scripts/notion/)
-- [Integration Templates](templates/notion/)
+- [Notion Database Templates](docs/04-integration/NOTION_DATABASES.md)
+- [Notion Doc Templates](docs/04-integration/NOTION_TEMPLATES.md)
 
 ---
 
