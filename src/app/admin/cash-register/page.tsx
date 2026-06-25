@@ -69,6 +69,13 @@ import {
   resolveClosureStatus,
   computeCashDifference,
 } from "./cashPaymentUtils";
+import {
+  buildClosureParams,
+  buildOrderParams,
+  buildCloseCashBody,
+  getTodayChileDate,
+  buildCreditNotesDateRange,
+} from "./cashOpsUtils";
 
 // ponytail: re-export for backward compat — remove in T-119
 export type { CashClosure, DailySummary, Movement } from "./cashRegister.types";
@@ -78,6 +85,13 @@ export {
   resolveClosureStatus,
   computeCashDifference,
 } from "./cashPaymentUtils";
+export {
+  buildClosureParams,
+  buildOrderParams,
+  buildCloseCashBody,
+  getTodayChileDate,
+  buildCreditNotesDateRange,
+} from "./cashOpsUtils";
 
 export default function CashRegisterPage() {
   const searchParams = useSearchParams();
@@ -112,13 +126,11 @@ export default function CashRegisterPage() {
   const [orders, setOrders] = useState<unknown[]>([]);
   const [loadingOrders, setLoadingOrders] = useState(false);
   const [ordersTab, setOrdersTab] = useState(false);
-  // Fecha en zona Chile (America/Santiago) para filtros
-  const getTodayLocal = () => getTodayInTimezone("America/Santiago");
   const [orderFilters, setOrderFilters] = useState(() => ({
     payment_status: "all",
     payment_method: "all",
-    date_from: getTodayLocal(),
-    date_to: getTodayLocal(),
+    date_from: getTodayChileDate(),
+    date_to: getTodayChileDate(),
   }));
   const [orderSearchTerm, setOrderSearchTerm] = useState("");
   const [orderProductFilter, setOrderProductFilter] = useState("");
@@ -131,21 +143,8 @@ export default function CashRegisterPage() {
   const [refundMethod, setRefundMethod] = useState("cash");
   const [processingOrderAction, setProcessingOrderAction] = useState(false);
 
-  // Credit notes (use wider date range to avoid timezone issues)
   const [creditNotes, setCreditNotes] = useState<unknown[]>([]);
   const [loadingCreditNotes, setLoadingCreditNotes] = useState(false);
-  const getCreditNotesDateRange = () => {
-    // Wide range (5 years back, 1 year ahead) to show all notes including "antiguas"
-    // and avoid timezone/year mismatches between client and DB
-    const to = new Date();
-    const from = new Date();
-    from.setFullYear(from.getFullYear() - 5);
-    to.setFullYear(to.getFullYear() + 1);
-    return {
-      date_from: from.toISOString().split("T")[0],
-      date_to: to.toISOString().split("T")[0],
-    };
-  };
 
   // Pagination for orders
   const [ordersCurrentPage, setOrdersCurrentPage] = useState(1);
@@ -335,23 +334,11 @@ export default function CashRegisterPage() {
     try {
       const headers: HeadersInit = { ...effectiveHeaders };
 
-      const offset = (ordersCurrentPage - 1) * ordersItemsPerPage;
-      const params = new URLSearchParams({
-        date_from: orderFilters.date_from,
-        date_to: orderFilters.date_to,
-        limit: ordersItemsPerPage.toString(),
-        offset: offset.toString(),
-      });
-
-      // Handle special cases: cancelled and refunded
-      if (orderFilters.payment_status === "cancelled") {
-        params.append("status", "cancelled");
-      } else if (orderFilters.payment_status === "refunded") {
-        params.append("payment_status", "refunded");
-      } else if (orderFilters.payment_status !== "all") {
-        params.append("payment_status", orderFilters.payment_status);
-      }
-
+      const params = buildOrderParams(
+        orderFilters,
+        ordersCurrentPage,
+        ordersItemsPerPage,
+      );
       const response = await fetch(`/api/admin/orders?${params}`, {
         headers,
       });
@@ -443,15 +430,11 @@ export default function CashRegisterPage() {
     try {
       const headers: HeadersInit = { ...effectiveHeaders };
 
-      const offset = (closuresCurrentPage - 1) * closuresItemsPerPage;
-      const params = new URLSearchParams({
-        limit: closuresItemsPerPage.toString(),
-        offset: offset.toString(),
-      });
-      if (fieldOperationIdFromUrl) {
-        params.append("field_operation_id", fieldOperationIdFromUrl);
-      }
-
+      const params = buildClosureParams(
+        closuresCurrentPage,
+        closuresItemsPerPage,
+        fieldOperationIdFromUrl ?? undefined,
+      );
       const response = await fetch(
         `/api/admin/cash-register/closures?${params}`,
         {
@@ -615,7 +598,7 @@ export default function CashRegisterPage() {
           actualCashValue - (dailySummary?.expected_cash || 0),
       });
 
-      const closeBody: Record<string, unknown> = {
+      const closeBody = buildCloseCashBody({
         closure_date: `${today}T00:00:00`,
         opening_cash_amount: openingCash,
         actual_cash: actualCashValue,
@@ -623,9 +606,8 @@ export default function CashRegisterPage() {
         card_machine_credit_total: cardMachineCredit,
         notes: notes || null,
         discrepancies: discrepancies || null,
-      };
-      if (fieldOperationIdFromUrl)
-        closeBody.field_operation_id = fieldOperationIdFromUrl;
+        field_operation_id: fieldOperationIdFromUrl ?? undefined,
+      });
 
       const response = await fetch("/api/admin/cash-register/close", {
         method: "POST",
@@ -716,7 +698,7 @@ export default function CashRegisterPage() {
     setLoadingCreditNotes(true);
     try {
       const headers = effectiveHeaders;
-      const { date_from, date_to } = getCreditNotesDateRange();
+      const { date_from, date_to } = buildCreditNotesDateRange();
       const params = new URLSearchParams({
         date_from,
         date_to,
