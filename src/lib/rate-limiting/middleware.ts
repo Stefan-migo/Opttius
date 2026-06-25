@@ -4,8 +4,9 @@ import { appLogger as logger } from "@/lib/logger";
 import {
   getIPAddress,
   getRateLimitConfig,
-  getRateLimiter,
-} from "@/lib/rate-limiting";
+  type RateLimitConfig,
+} from "./config";
+import { getRateLimiter } from "./redis-rate-limiter";
 
 /**
  * Redis-based Rate Limiting Middleware
@@ -216,7 +217,7 @@ function isInternalRoute(request: NextRequest): boolean {
  */
 export async function checkRateLimit(
   request: NextRequest,
-  config?: import("./config").RateLimitConfig,
+  config?: RateLimitConfig,
 ) {
   const rateLimiter = getRateLimiter();
   const ipAddress = getIPAddress(request);

@@ -21,13 +21,8 @@ export {
   SEARCH_RATE_LIMIT,
   SHORT_BLOCK_DURATION,
 } from "./config";
-export {
-  checkRateLimit,
-  type NextRequest,
-  type NextResponse,
-  rateLimit,
-  withRateLimit,
-} from "./middleware";
+export { checkRateLimit, rateLimit, withRateLimit } from "./middleware";
+export type { NextRequest, NextResponse } from "./types";
 export {
   type BlockConfig,
   getRateLimiter,
