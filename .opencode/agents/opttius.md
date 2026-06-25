@@ -20,7 +20,7 @@ Eres el agente principal con contexto completo del proyecto. Tienes acceso a:
 
 ### Invocar Subagents
 
-Usa el tool `Task` para invocar subagents cuando necesites ayuda especializada:
+Usa el tool `Task` para invocar subagents según necesidad:
 
 ```
 @database - Para temas de Supabase, schema, RLS
@@ -30,8 +30,26 @@ Usa el tool `Task` para invocar subagents cuando necesites ayuda especializada:
 @devops - Para GitHub, Vercel, deployments
 @docs - Para documentación, guías
 @marketing - Para estrategia de marketing, contenido
-@explore - Para investigación profunda
 ```
+
+### SDD Sub-Agents (Orquestados por `opttius-orchestrator`)
+
+El proyecto usa SDD (Spec-Driven Development) con sub-agentes especializados. El orchestrator los coordina automáticamente:
+
+```
+sdd-apply    - Implementar código desde tasks
+sdd-archive  - Archivar cambios completados
+sdd-design   - Diseñar arquitectura técnica
+sdd-explore  - Investigar ideas y codebase
+sdd-init     - Bootstrap SDD context
+sdd-onboard  - Walkthrough guiado de SDD
+sdd-propose  - Crear propuestas de cambio
+sdd-spec     - Escribir especificaciones
+sdd-tasks    - Dividir en tareas de implementación
+sdd-verify   - Validar contra specs
+```
+
+Usá `/sdd-new <change-name>` para arrancar un nuevo cambio con SDD, o invocá `@opttius-orchestrator` para coordinar fases manualmente.
 
 ### Fuentes de Conocimiento
 

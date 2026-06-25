@@ -1,0 +1,54 @@
+# openspec/config.yaml — SDD configuration for Opttius
+schema: spec-driven
+
+context: |
+  Opttius: B2B SaaS para ópticas en Chile.
+  Stack: Next.js 14 (App Router) + TypeScript 5 + React 18 + Tailwind CSS 3 + shadcn/ui.
+  Backend: Supabase (Postgres, Auth, Storage, RLS) + tRPC-style API routes.
+  State: TanStack React Query 5 + React Hook Form + Zod.
+  Auth: Supabase SSR + multi-tenant RLS (org/branch scope).
+  Payments: Mercado Pago, Stripe, Flow, PayPal, NOWPayments.
+  AI: Vercel AI SDK + OpenAI + Anthropic + Xenova Transformers (on-device).
+  Infrastructure: Vercel (hosting), Sentry (error tracking), Resend (email), ioredis (cache).
+
+rules:
+  proposal:
+    - Include rollback plan for risky changes
+    - Reference specific domain tables/functions when affecting data
+  specs:
+    - Use Given/When/Then for scenarios
+    - Use RFC 2119 keywords (MUST, SHALL, SHOULD, MAY)
+  design:
+    - Include sequence diagrams for complex flows
+    - Document architecture decisions with rationale
+    - Reference Supabase RLS policies when relevant
+  tasks:
+    - Group by phase, use hierarchical numbering
+    - Keep tasks completable in one session
+  apply:
+    - Follow existing patterns (path aliases @/, barrel exports, co-located tests)
+    tdd: true
+    test_command: "npm run test:run"
+  verify:
+    test_command: "npm run test:all"
+    build_command: "npm run build"
+    coverage_threshold: 0
+  archive:
+    - Warn before merging destructive deltas
+
+testing:
+  strict_tdd: true
+  runner: vitest
+  runner_command: "npx vitest run"
+  layers:
+    unit: { tool: vitest + testing-library, dir: src/__tests__/unit, pattern: "src/**/*.{test,spec}.{ts,tsx}" }
+    integration: { tool: vitest, dir: src/__tests__/integration, pattern: "src/**/*.{test,spec}.{ts,tsx}" }
+    e2e: { tool: playwright, dir: e2e/ }
+  coverage:
+    available: true
+    command: "npm run test:coverage"
+    provider: v8
+  quality:
+    linter: { tool: eslint, command: "npm run lint" }
+    type_checker: { tool: tsc, command: "npm run type-check" }
+    formatter: { tool: prettier, command: "npm run format" }

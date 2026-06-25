@@ -1,35 +1,57 @@
-# Agentes OpenCode - Opttius
+# Agentes OpenCode — Opttius
 
-Sistema de agentes OpenCode para el proyecto Opttius.
+Sistema de agentes para el proyecto Opttius — SaaS multi-tenant para ópticas.
 
 ## Agentes Principales (Primary)
 
-Cambia entre ellos con **TAB**:
+Cambiá entre ellos con **TAB**:
 
-| Agente      | Descripción                                         |
-| ----------- | --------------------------------------------------- |
-| **Opttius** | Agente principal con contexto completo del proyecto |
-| **Plan**    | Análisis readonly, sin edits                        |
-| **Build**   | Desarrollo activo, full tool access                 |
+| Agente              | Descripción                                                  |
+| ------------------- | ------------------------------------------------------------ |
+| **Opttius**         | Agente principal. Contexto completo del proyecto, NotebookLM, skills de dominio. |
+| **Build**           | Desarrollo activo. Full tool access para implementar features, fixes, y refactorizaciones. |
 
-## Subagentes (@)
+## Agente Orchestrator
 
-Invócalos con **@mention**:
+| Agente                           | Descripción                                                  |
+| -------------------------------- | ------------------------------------------------------------ |
+| **@opttius-orchestrator**        | SDD Orchestrator. Coordina sub-agentes, nunca hace trabajo inline. Usá `/sdd-new` para arrancar. |
 
-| Subagente      | Uso          | Descripción                          |
-| -------------- | ------------ | ------------------------------------ |
-| **@explore**   | `@explore`   | Investigación read-only del codebase |
-| **@database**  | `@database`  | Supabase, schema, RLS, migrations    |
-| **@frontend**  | `@frontend`  | UI/UX, diseño Epoch, componentes     |
-| **@backend**   | `@backend`   | APIs, business logic, servicios      |
-| **@qa**        | `@qa`        | Testing, checklists, E2E             |
-| **@devops**    | `@devops`    | GitHub, Vercel, CI/CD                |
-| **@docs**      | `@docs`      | Documentación, guías                 |
-| **@marketing** | `@marketing` | Estrategia, contenido, SEO           |
+## Subagentes de Dominio (@)
+
+Invocables con **@mention** directa:
+
+| Subagente     | Uso         | Descripción                                       |
+| ------------- | ----------- | ------------------------------------------------- |
+| **@database** | `@database` | Supabase, schema, RLS, migrations                 |
+| **@frontend** | `@frontend` | UI/UX, diseño Epoch, componentes                  |
+| **@backend**  | `@backend`  | APIs, business logic, servicios                   |
+| **@qa**       | `@qa`       | Testing, checklists, E2E                          |
+| **@devops**   | `@devops`   | GitHub, Vercel, CI/CD                             |
+| **@docs**     | `@docs`     | Documentación, guías                               |
+| **@marketing**| `@marketing`| Estrategia de marketing, contenido, SEO           |
+| **@review**   | `@review`   | Auditoría de código, PR reviews, judgment-day     |
+
+## Subagentes SDD (vía Orchestrator)
+
+Gestionados automáticamente por `@opttius-orchestrator`. No invocar directamente salvo que sepas lo que hacés.
+
+| Subagente       | Fase SDD        | Descripción                          |
+| --------------- | --------------- | ------------------------------------ |
+| `sdd-explore`   | Exploration     | Investigar ideas y codebase          |
+| `sdd-propose`   | Proposal        | Crear propuestas de cambio           |
+| `sdd-spec`      | Specification   | Escribir especificaciones detalladas |
+| `sdd-design`    | Design          | Diseñar arquitectura técnica         |
+| `sdd-tasks`     | Tasks           | Dividir en tareas implementables     |
+| `sdd-apply`     | Implementation  | Implementar código desde tasks       |
+| `sdd-verify`    | Verification    | Validar implementación contra specs  |
+| `sdd-archive`   | Archive         | Archivar cambios completados         |
+| `sdd-init`      | Init            | Bootstrap SDD context                |
+| `sdd-onboard`   | Onboarding      | Walkthrough guiado del ciclo SDD     |
 
 ## Skills Disponibles
 
-Skills de dominio para cargar con tool `skill`:
+Skills de dominio para cargar con `skill()`:
 
 ### Domain (`.opencode/skills/domain/`)
 
@@ -86,21 +108,52 @@ Skills de dominio para cargar con tool `skill`:
 | `security-audit` | OWASP audit  |
 | `code-reviewer`  | Code quality |
 
+### Skills Globales (autoritativas desde `~/.config/opencode/`)
+
+Cargables via `skill()`. No tienen copia local en el proyecto — las globales son la fuente de verdad.
+
+| Skill               | Descripción                                      |
+| ------------------- | ------------------------------------------------ |
+| `cortex-persona`    | Senior Architect persona, Ponytail minimalism    |
+| `ponytail`          | YAGNI-first code generation (plugin)             |
+| `ponytail-review`   | Over-engineering audit en diffs                  |
+| `ponytail-audit`    | Over-engineering audit full repo                 |
+| `ponytail-debt`     | Harvest shortcuts ledger                         |
+| `judgment-day`      | Adversarial dual review protocol                 |
+| `sdd-apply`         | SDD apply phase implementation                   |
+| `sdd-archive`       | SDD archive phase                                |
+| `sdd-design`        | SDD design phase                                 |
+| `sdd-explore`       | SDD explore phase                                |
+| `sdd-init`          | SDD init phase                                   |
+| `sdd-onboard`       | SDD onboarding                                   |
+| `sdd-propose`       | SDD proposal phase                               |
+| `sdd-spec`          | SDD spec phase                                   |
+| `sdd-tasks`         | SDD tasks phase                                  |
+| `sdd-verify`        | SDD verify phase                                 |
+
 ## Cómo Usar
 
 ### 1. Cambiar entre Agentes Principales
 
 ```
-Presiona TAB para ciclar entre Opttius, Plan, y Build
+Presioná TAB para alternar entre Opttius y Build.
 ```
 
-### 2. Invocar Subagente
+### 2. Invocar Subagente Directo
 
 ```
 @database help me understand the RLS policies for customers table
 ```
 
-### 3. Cargar Skill
+### 3. Usar SDD (recomendado para cambios complejos)
+
+```
+/sdd-new implementar modulo de facturacion electronica
+```
+
+El orchestrator guía el flujo: proposal → specs → design → tasks → apply → verify → archive.
+
+### 4. Cargar Skill
 
 ```javascript
 skill({ name: "database-optical-supabase" });
@@ -108,15 +161,37 @@ skill({ name: "database-optical-supabase" });
 
 ## Source of Truth
 
-Todo el conocimiento del proyecto está en **NotebookLM**:
+- **NotebookLM**: conocimiento del proyecto (Principal: `e071bebc-ce79-4b32-a040-61a6a9c331a3`, Extendido: `17302d9d-7d70-4c8d-a774-49fbfca3c09d`)
+- **Engram**: memoria persistente entre sesiones (decisiones, bugs, patrones)
+- **AGENTS.md**: fuente unificada de agentes y skills
+- **`docs/`**: documentación adicional
 
-- **Notebook Principal:** `e071bebc-ce79-4b32-a040-61a6a9c331a3`
-- **Notebook Extendido:** `17302d9d-7d70-4c8d-a774-49fbfca3c09d`
+Ver `docs/NOTEBOOKLM_CUADERNOS_GUIA.md` para cuándo usar cada notebook.
 
-Ver `docs/NOTEBOOKLM_CUADERNOS_GUIA.md` para cuándo usar cada uno.
+## Arquitectura de Agentes
+
+```
+opencode.json                   ← Config principal (agent defs, MCP, permissions)
+.opencode/agents/               ← Defs de subagentes en .md
+.opencode/skills/               ← Skills de dominio/sistema/seguridad
+.opencode/plugins/              ← Plugins (ponytail, etc.)
+AGENTS.md                       ← Documentación unificada (este archivo)
+openspec/                       ← SDD artifacts (cambios activos/completados)
+~/.config/opencode/agents/      ← Agentes globales (SDD sub-agents)
+~/.config/opencode/skills/      ← Skills globales (cortex, SDD skills)
+```
 
 ## Configuración
 
-- Agentes: `.opencode/agents/`
-- Skills: `.opencode/skills/`
+- Agentes proyecto: `.opencode/agents/`
+- Skills proyecto: `.opencode/skills/domain/` | `system/` | `security/` | `tools/`
+- Skills globales: `~/.config/opencode/skills/`
 - Config: `.opencode/opencode.json`
+- SDD changes: `openspec/changes/`
+
+## Flujo de Trabajo Típico
+
+1. **Idea o bug** → usá `/sdd-new <change-name>` para arrancar un ciclo SDD
+2. **Cambio simple** → trabajá directo con **Build** y cargá la skill relevante
+3. **Review** → invocá `@review` para auditoría de PR o judgment-day
+4. **Contexto** → consultá NotebookLM o Engram para decisiones pasadas

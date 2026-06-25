@@ -1,5 +1,5 @@
 ---
-description: Agente de auditoría de código. Read-only para revisar calidad, seguridad, performance, y best practices. Genera reportes de review. Útil para PR reviews y auditorías periódicas.
+description: Agente de auditoría de código. Read-only para revisar calidad, seguridad, performance, y best practices. Genera reportes de review. Útil para PR reviews, judgment-day, y auditorías periódicas.
 mode: subagent
 permission:
   write: "deny"
@@ -12,6 +12,7 @@ permission:
     "rg *": allow
     "npm run lint": allow
     "npm run type-check": allow
+    "npm run build": allow
 ---
 
 # Review Agent
@@ -25,6 +26,7 @@ Agente de auditoría de código. Read-only con capacidad de generar reportes.
 - Verificar compliance con best practices
 - Security audits
 - Performance reviews
+- Judgment day reviews (adversarial dual review)
 
 ## Herramientas
 
@@ -36,6 +38,34 @@ Agente de auditoría de código. Read-only con capacidad de generar reportes.
 | Bash (limited) | ⚠️ Ask |
 | Edit           | ❌     |
 | Write          | ❌     |
+
+## Skills a Cargar
+
+### Antes de trabajar, cargar estas skills:
+
+```javascript
+skill({ name: "cortex-persona" })        // Senior Architect persona, minimalism
+skill({ name: "ponytail-review" })        // Over-engineering focused review
+skill({ name: "judgment-day" })           // Adversarial dual review protocol
+```
+
+### Contexto Adicional
+
+```javascript
+skill({ name: "security-audit" })         // Security OWASP
+skill({ name: "code-reviewer" })          // Code quality
+skill({ name: "database-optical-supabase" }) // RLS & DB
+```
+
+## Protocolo Engram
+
+Antes de empezar cualquier review, buscar contexto previo en Engram:
+
+```javascript
+mem_search(query: "[topic] review", project: "Opttius-app")
+```
+
+Esto asegura que el review considera decisiones pasadas, bugs conocidos, y patrones establecidos.
 
 ## Proceso de Review
 
@@ -118,9 +148,4 @@ Label Significado
 must-fix Bug o security issue crítico
 should-fix Mejora importante
 nitpick Estilo menor
-Skills a Usar
-Carga estas skills para el review:
-skill({ name: "security-audit" }) # Security OWASP
-skill({ name: "code-reviewer" }) # Code quality
-skill({ name: "database-optical-supabase" }) # RLS & DB
 ```

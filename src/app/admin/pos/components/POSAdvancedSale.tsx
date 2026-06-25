@@ -43,7 +43,6 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
-  createCustomer,
   getPrescriptions,
   type Prescription,
 } from "@/lib/api/services/customerService";
@@ -52,7 +51,6 @@ import {
   type QuoteSettings,
   quoteSettingsService,
 } from "@/lib/api/services/quoteSettingsService";
-import { createQuote } from "@/lib/api/services/quoteService";
 import { formatCurrency } from "@/lib/utils";
 import {
   ContactLensSelector,
@@ -67,21 +65,7 @@ import type {
   POSAdvancedSaleProps,
 } from "./POSAdvancedSale.types";
 
-// Re-export types for consumers that imported from here
-export type {
-  POSProduct,
-  OrderFormData,
-  ExternalPrescriptionData,
-  Treatment,
-  POSAdvancedSaleProps,
-} from "./POSAdvancedSale.types";
-
 import {
-  DEFAULT_LENS_FAMILIES,
-  DEFAULT_TREATMENTS,
-} from "./POSAdvancedSale.constants";
-// Re-export constants for consumers that imported from here
-export {
   DEFAULT_LENS_FAMILIES,
   DEFAULT_TREATMENTS,
 } from "./POSAdvancedSale.constants";
@@ -96,32 +80,11 @@ import {
   updateTreatmentPrice as updateTreatmentPricePure,
   filterTreatmentsByLensType,
 } from "./posPricingUtils";
-// Re-export pricing utils for consumers that imported from here
-export {
-  suggestLensFamilyPure,
-  computeTreatmentsPrice,
-  computeLensPrice,
-  computeNearLensPrice,
-  computeTotalPrice,
-  computeDiscountAmount,
-  updateTreatmentPricePure,
-  filterTreatmentsByLensType,
-} from "./posPricingUtils";
 
 import { buildCartItems } from "./posCartBuilder";
 import type { CartItem } from "./posCartBuilder";
-// Re-export cart builder for consumers that imported from here
-export { buildCartItems } from "./posCartBuilder";
-export type { CartItem } from "./posCartBuilder";
 
 import {
-  handleCreateQuoteAction,
-  loadSettingsAction,
-  loadPrescriptionsAction,
-  createSearchFramesAction,
-} from "./posDataLoader";
-// Re-export data loader for consumers that imported from here
-export {
   handleCreateQuoteAction,
   loadSettingsAction,
   loadPrescriptionsAction,
