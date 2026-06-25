@@ -43,31 +43,49 @@
 
 ### POSAdvancedSale (3122 lines → <500)
 
-- [ ] T-101: Write `POSAdvancedSale.char.test.ts` — black-box coverage of all public exports (types, constants, pricing fns, cart builder, data loading)
-- [ ] T-102: Extract interfaces → `POSAdvancedSale.types.ts`, re-export, verify char test + full suite
-- [ ] T-103: Extract constants → `POSAdvancedSale.constants.ts`, re-export, verify
-- [ ] T-104: Extract pricing logic → `posPricingUtils.ts` (suggestLensFamily, lensPriceValue, totalPrice, discountAmount, updateTreatmentPrice, filteredTreatments), re-export, verify
-- [ ] T-105: Extract cart builder → `posCartBuilder.ts` (handleAddToCart pure function), re-export, verify
-- [ ] T-106: Extract data loading → `posDataLoader.ts` (loadSettings, loadPrescriptions, searchFrames, searchNearFrames, handleCreateQuote), re-export, verify
-- [ ] T-107: Remove all re-exports from `POSAdvancedSale.tsx`, delete `page.backup-refactored.tsx` (0 consumers confirmed), delete `core.ts.backup`, verify full suite
+- [x] T-101: Write `POSAdvancedSale.char.test.tsx` — black-box coverage of component rendering with mocked deps (6 char tests)
+- [x] T-102: Extract interfaces → `POSAdvancedSale.types.ts` (5 interfaces), re-export, verify char test + full suite (5 type tests)
+- [x] T-103: Extract constants → `POSAdvancedSale.constants.ts` (DEFAULT_LENS_FAMILIES, DEFAULT_TREATMENTS), re-export, verify (2 constant tests)
+- [x] T-104: Extract pricing logic → `posPricingUtils.ts` (8 pure functions: suggestLensFamily, computeLensPrice, computeNearLensPrice, computeTreatmentsPrice, computeTotalPrice, computeDiscountAmount, updateTreatmentPrice, filterTreatmentsByLensType), re-export, verify (9 pricing tests)
+- [x] T-105: Extract cart builder → `posCartBuilder.ts` (buildCartItems pure function + CartItem type + CartBuilderInput interface), re-export, verify (7 cart builder tests)
+- [x] T-106: Extract data loading → `posDataLoader.ts` (handleCreateQuoteAction, loadSettingsAction, loadPrescriptionsAction, createSearchFramesAction), re-export, verify (4 data loader tests)
+- [x] T-107: Remove all re-exports from `POSAdvancedSale.tsx`, delete `page.backup-refactored.tsx` (0 consumers confirmed), delete `core.ts.backup`, verify full suite
+
+### POSAdvancedSale Phase 1a-2 (2465 lines → <500) — State hook + 4 tab components
+
+- [x] T-107a: Extract state, effects, handlers, and computed values into `usePOSAdvancedSale.ts` custom hook — returns all state + setters + callbacks the tabs need
+- [x] T-107b: Extract Customer & Prescription tab into `POSAdvancedSaleCustomerTab.tsx` — customer info, quick customer, prescription selector, external prescription form
+- [x] T-107c: Extract Frame Selection tab into `POSAdvancedSaleFrameTab.tsx` — distance frame search, near frame search, frame results, customer own frame toggle
+- [x] T-107d: Extract Lenses & Treatments tab into `POSAdvancedSaleLensesTab.tsx` — lens type toggle, presbyopia solution, lens family, treatments grid
+- [x] T-107e: Extract Pricing & Cart tab into `POSAdvancedSalePricingTab.tsx` — price summary, discount controls, notes, add to cart button
+- [x] T-107f: Clean up POSAdvancedSale.tsx — remove all extracted JSX, keep only imports + hook call + tab switch orchestration; verify full suite + build
 
 ### CreateQuoteForm (2847 lines → <500)
 
-- [ ] T-108: Write `CreateQuoteForm.char.test.ts`
-- [ ] T-109: Extract types → `CreateQuoteForm.types.ts`
-- [ ] T-110: Extract constants → `CreateQuoteForm.constants.ts`
-- [ ] T-111: Extract lens matrix + pricing → `quotePricingUtils.ts`
-- [ ] T-112: Extract submit handler → `quoteSubmitHandler.ts`
-- [ ] T-113: Remove re-exports, verify full suite
+- [x] T-108: Write `CreateQuoteForm.char.test.ts` (42 tests covering types, constants, pricing, validation, submit)
+- [x] T-109: Extract types → `CreateQuoteForm.types.ts` (includes field operation + branch props)
+- [x] T-110: Extract constants → `CreateQuoteForm.constants.ts` (MATERIAL_INDICES, DEFAULT_QUOTE_SETTINGS, formatPrice, roundCurrency, UUID_REGEX)
+- [x] T-111: Extract lens matrix + pricing → `quotePricingUtils.ts` (calculateTotal, getTreatmentPrice, isTreatmentEnabled, buildAvailableTreatments, toggleTreatment, mapFrameToFormData, inheritFamilyProperties, shouldCalculateLensPrice, isTreatmentDisabled)
+- [x] T-112: Extract submit handler → `quoteSubmitHandler.ts` (validateQuoteForm, buildNearFramePayload, buildQuotePayload, submitQuote)
+- [x] T-113: Clean up CreateQuoteForm.tsx — removed inline types, MATERIAL_INDICES, formatPrice, roundCurrency, DEFAULT_QUOTE_SETTINGS, getTreatmentPrice, isTreatmentEnabled; updated to import from extracted modules; verified full suite (48/12/599)
+
+### CreateQuoteForm Phase 1b-2 (~2750 lines → <500) — Custom hook + section extraction
+
+- [x] T-113a: Extract state/effects/handlers into `useCreateQuoteForm.ts` custom hook — preserve `initialFieldOperationId`/`initialBranchId` support
+- [x] T-113b: Extract Customer section into `CreateQuoteFormCustomerSection.tsx`
+- [x] T-113c: Extract Frame section into `CreateQuoteFormFrameSection.tsx`
+- [x] T-113d: Extract Lens Configuration section into `CreateQuoteFormLensSection.tsx`
+- [x] T-113e: Extract Pricing summary section into `CreateQuoteFormPricingSection.tsx`
+- [x] T-113f: Rewire CreateQuoteForm.tsx — hook + section renders only; verify full suite + build
 
 ### cash-register/page.tsx (2624 lines → <500)
 
-- [ ] T-114: Write `cashRegister.char.test.ts`
-- [ ] T-115: Extract types → `cashRegister.types.ts`
-- [ ] T-116: Extract payment methods → `cashPaymentUtils.ts`
-- [ ] T-117: Extract cash operations → `cashOpsUtils.ts`
-- [ ] T-118: Extract print/receipt logic → `cashPrintUtils.ts`
-- [ ] T-119: Remove re-exports, verify
+- [x] T-114: Write `cashRegister.char.test.ts` (55 tests covering types, payment utils, cash ops utils, print placeholder)
+- [x] T-115: Extract types → `cashRegister.types.ts` (CashClosure, DailySummary, Movement)
+- [x] T-116: Extract payment methods → `cashPaymentUtils.ts` (PAYMENT_METHOD_FILTER_MAP, STATUS_BADGE_CONFIG, resolveClosureStatus, formatPaymentMethod, computeCashDifference)
+- [x] T-117: Extract cash operations → `cashOpsUtils.ts` (buildClosureParams, buildOrderParams, buildCloseCashBody, getTodayChileDate, buildCreditNotesDateRange, extractOrderCustomerName)
+- [x] T-118: Extract print/receipt logic → `cashPrintUtils.ts` (placeholder — no print logic found in page.tsx)
+- [x] T-119: Remove re-exports, verify full suite + build (49 passed, 654 passed, build exits 0)
 
 ### process-sale/route.ts (2448 lines → <500)
 
