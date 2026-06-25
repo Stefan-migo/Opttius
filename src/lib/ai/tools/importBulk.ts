@@ -194,6 +194,7 @@ export const importBulkTools: ToolDefinition[] = [
       "Execute bulk import of customers or products from an uploaded file. Requires column mapping from analyzeImportFile. Use requiresConfirmation - ask user to confirm before proceeding.",
     category: "import",
     requiresConfirmation: true,
+    minRole: "admin",
     parameters: {
       type: "object",
       properties: {

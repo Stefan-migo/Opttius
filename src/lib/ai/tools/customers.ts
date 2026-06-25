@@ -418,10 +418,12 @@ export const customerTools: ToolDefinition[] = [
     },
   },
   {
-    name: "createCustomer",
+    name: "deleteCustomer",
     description:
-      "Create a new customer. Requires at least first_name or last_name. Use current branch or pass branch_id for Super Admin.",
+      "Delete a customer from the system. This action cannot be undone.",
     category: "customers",
+    requiresConfirmation: true,
+    minRole: "admin",
     parameters: {
       type: "object",
       properties: {
