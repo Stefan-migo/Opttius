@@ -4,7 +4,7 @@
  * Service to interact with contact_lens_inventory and check stock by prescription
  */
 
-import { handleApiError } from "@/lib/services/errorService";
+import { handleApiError } from "@/lib/api/services/errorService";
 import { ApiClient, isSuccess, unwrapData } from "../client-helpers";
 
 export interface ContactLensInventory {

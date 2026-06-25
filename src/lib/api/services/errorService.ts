@@ -5,7 +5,7 @@
  * Proporciona funciones para extraer mensajes de error, manejar errores de API,
  * y mostrar notificaciones de error al usuario.
  *
- * @module lib/services/errorService
+ * @module lib/api/services/errorService
  */
 
 import { toast } from "sonner";

@@ -6,7 +6,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { createMockSupabaseClient } from "@/__mocks__/supabase";
-import { ProductsService } from "@/lib/services/products/service";
+import { ProductsService } from "@/lib/api/services/products/service";
 
 describe("ProductsService", () => {
   let productService: ProductsService;

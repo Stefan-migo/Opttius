@@ -38,7 +38,7 @@ import {
 import { useBranch } from "@/hooks/useBranch";
 import { agreementService } from "@/lib/api/services/agreementService";
 import { Customer, customerService } from "@/lib/api/services/customerService";
-import { handleApiError } from "@/lib/services/errorService";
+import { handleApiError } from "@/lib/api/services/errorService";
 
 interface CustomerStats {
   totalCustomers: number;

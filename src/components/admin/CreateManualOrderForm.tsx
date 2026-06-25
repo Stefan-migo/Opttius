@@ -22,11 +22,11 @@ import { extractDataFromResponse } from "@/lib/api/response-helpers";
 import {
   getUserFriendlyMessage,
   handleApiError,
-} from "@/lib/services/errorService";
+} from "@/lib/api/services/errorService";
 import {
   error as notifyError,
   success,
-} from "@/lib/services/notificationService";
+} from "@/lib/api/services/notificationService";
 import { getBranchHeader } from "@/lib/utils/branch";
 
 interface CreateManualOrderFormProps {

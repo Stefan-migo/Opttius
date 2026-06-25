@@ -12,11 +12,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { useBranch } from "@/hooks/useBranch";
 import { useForm } from "@/hooks/useForm";
 import { customerService } from "@/lib/api/services/customerService";
-import { handleApiError } from "@/lib/services/errorService";
+import { handleApiError } from "@/lib/api/services/errorService";
 import {
   error as notifyError,
   success,
-} from "@/lib/services/notificationService";
+} from "@/lib/api/services/notificationService";
 import { formatRUT } from "@/lib/utils/rut";
 import { customerSchema } from "@/lib/validation/formValidation";
 

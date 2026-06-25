@@ -17,7 +17,7 @@ import {
 } from "react-hook-form";
 import { z } from "zod";
 
-import { handleApiError } from "@/lib/services";
+import { handleApiError } from "@/lib/api/services";
 
 /**
  * Opciones para el hook useForm
@@ -172,7 +172,7 @@ export function useForm<
         firstError && typeof firstError === "object" && "message" in firstError
           ? String(firstError.message)
           : "Por favor corrige los errores del formulario";
-      const { error: notifyError } = await import("@/lib/services");
+      const { error: notifyError } = await import("@/lib/api/services");
       notifyError(message);
       return;
     }
@@ -193,7 +193,7 @@ export function useForm<
             ? successMessage(values)
             : successMessage;
         // Importar notificationService dinámicamente para evitar dependencia circular
-        const { success } = await import("@/lib/services");
+        const { success } = await import("@/lib/api/services");
         success(message);
       }
 

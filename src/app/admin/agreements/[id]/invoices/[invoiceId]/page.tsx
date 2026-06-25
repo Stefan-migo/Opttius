@@ -19,7 +19,7 @@ import {
   agreementService,
   AgreementInstitutionalInvoice,
 } from "@/lib/api/services/agreementService";
-import { handleApiError } from "@/lib/services/errorService";
+import { handleApiError } from "@/lib/api/services/errorService";
 import { formatCurrency, formatDate } from "@/lib/utils";
 
 export default function AgreementInvoiceDetailPage() {

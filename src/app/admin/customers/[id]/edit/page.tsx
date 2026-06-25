@@ -11,11 +11,11 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useForm } from "@/hooks/useForm";
 import { customerService } from "@/lib/api/services";
-import { handleApiError } from "@/lib/services/errorService";
+import { handleApiError } from "@/lib/api/services/errorService";
 import {
   error as notifyError,
   success,
-} from "@/lib/services/notificationService";
+} from "@/lib/api/services/notificationService";
 import { completeRUTIfNeeded, formatRUT } from "@/lib/utils/rut";
 import { customerEditSchema } from "@/lib/validation/formValidation";
 

@@ -5,7 +5,7 @@
  * Proporciona una interfaz consistente para mostrar notificaciones de éxito,
  * error, información y advertencia.
  *
- * @module lib/services/notificationService
+ * @module lib/api/services/notificationService
  */
 
 import { toast } from "sonner";

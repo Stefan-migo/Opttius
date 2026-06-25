@@ -18,8 +18,8 @@ import {
 } from "@/components/ui/select";
 import { useBranch } from "@/hooks/useBranch";
 import { agreementService } from "@/lib/api/services/agreementService";
-import { handleApiError } from "@/lib/services/errorService";
-import { success } from "@/lib/services/notificationService";
+import { handleApiError } from "@/lib/api/services/errorService";
+import { success } from "@/lib/api/services/notificationService";
 import { formatRUT, formatRUTAsYouType } from "@/lib/utils/rut";
 
 export default function NewAgreementPage() {
