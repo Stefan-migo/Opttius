@@ -102,7 +102,7 @@
 - [x] T-121: Extract validation → `processSaleValidation.ts` (298 lines) — extractFrameInfo, extractLensInfo, extractTreatmentsCost, extractLaborCost, computeOrderNumber, computeWorkOrderDecision, computeMinDepositFallback, isNonWorkOrderItem, haveOnlyNonWorkOrderProducts, hasLensDataForMounting
 - [x] T-122: Extract payment processing → `processPaymentUtils.ts` (250 lines) — computePaymentAmount, computeDbPaymentMethod, computeWorkOrderStatus, computeLensCost, computeCashAmount, buildOrderPaymentsPayload, buildStockReductionItems
 - [x] T-123: Extract response builder → `processResponseBuilder.ts` (268 lines) — buildOrderItems, buildCustomerName, buildFullOrderResponse, buildWorkOrderResponse, buildBillingResponse, buildBillingOrder
-- [x] T-124: Inline logic replaced with imported calls, unused import removed (BillingOrder type), full suite + build pass (50 passed, 715 tests, 0 failures)
+- [x] T-124: Full extraction completed — created processSaleTypes.ts (109 lines), processRpcHandler.ts (439 lines), processLegacyHandler.ts (781 lines), gutted route.ts from 2190→54 lines (thin dispatcher). Full suite + build pass (722 tests, 0 failures)
 
 ### zod-schemas consolidation
 
@@ -127,7 +127,7 @@
 **Goal**: No dead doc references. Orphaned agent dirs removed. Architecture docs current.
 
 - [ ] T-301: Delete `.agent/`, `.qoder/`, `.mcp/`, `.atl/` directories (confirmed no runtime impact, no active imports)
-- [ ] T-302: Prune stale docs from `docs/` — archive ambiguous content to `docs/_archive/` instead of deleting
+- [x] T-302: Prune stale docs from `docs/` — archive ambiguous content to `docs/_archive/` instead of deleting. NOTION.md moved back (integration active), stale `templates/notion/` reference fixed
 - [ ] T-303: Update `README.md` with current project description, stack, and architecture overview
 - [ ] T-304: Add file-level JSDoc to refactored files >300 lines per design convention (POSAdvancedSale, CreateQuoteForm, etc.)
 - [ ] T-305: Verify `npm run build` + `npm run test:run` pass (confirm no dead references)
