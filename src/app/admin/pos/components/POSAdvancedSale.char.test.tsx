@@ -210,6 +210,8 @@ import {
   computeTreatmentsPrice,
   filterTreatmentsByLensType,
 } from "./posPricingUtils";
+import { buildCartItems } from "./posCartBuilder";
+import type { CartItem } from "./posCartBuilder";
 import type {
   POSProduct,
   OrderFormData,
@@ -396,6 +398,156 @@ describe("posPricingUtils", () => {
     ];
     expect(filterTreatmentsByLensType(treatments, "contact")).toHaveLength(1);
     expect(filterTreatmentsByLensType(treatments, "vision")).toHaveLength(2);
+  });
+});
+
+describe("posCartBuilder", () => {
+  const baseInput = {
+    orderFormData: {
+      lens_family_id: null,
+      lens_family_name: null,
+      near_lens_family_id: null,
+      near_lens_family_name: null,
+      lens_type: "vision" as const,
+      lens_sourcing_type: "surfaced" as const,
+      presbyopia_solution: "single" as const,
+      treatment_ids: [],
+      labor_cost: 0,
+      frame_name: "",
+      frame_sku: "",
+      near_frame_name: "",
+      near_frame_sku: "",
+      customer_own_frame: false,
+      notes: "",
+    },
+    selectedFrame: null,
+    selectedNearFrame: null,
+    customerOwnNearFrame: false,
+    lensFamilies: [{ id: "lf-1", name: "CR-39", lens_type: "vision" }],
+    treatments: [
+      {
+        id: "t1",
+        label: "AR",
+        value: "anti_reflective",
+        cost: 5000,
+        category: "coating",
+      },
+    ],
+    currentLensPrice: 45000,
+    treatmentsPrice: 0,
+    contactLensConfig: null,
+    useExternalPrescription: false,
+    externalPrescriptionData: {
+      prescription_date: "",
+      expiration_date: "",
+      prescription_number: "",
+      issued_by: "",
+      issued_by_license: "",
+      od_sphere: "",
+      od_cylinder: "",
+      od_axis: "",
+      od_add: "",
+      os_sphere: "",
+      os_cylinder: "",
+      os_axis: "",
+      os_add: "",
+      pd: "",
+      near_pd: "",
+      frame_pd: "",
+      height_segmentation: "",
+    },
+  };
+
+  it("builds frame item when frame selected", () => {
+    const input = {
+      ...baseInput,
+      selectedFrame: { id: "f1", name: "Marco", price: 50000 },
+      orderFormData: { ...baseInput.orderFormData, lens_family_id: "lf-1" },
+    };
+    const items = buildCartItems(input);
+    expect(items).toHaveLength(2); // frame + lens
+    expect(items[0].product.name).toBe("Marco");
+    expect(items[0].metadata?.isFrame).toBe(true);
+  });
+
+  it("builds lens item when lens family selected", () => {
+    const input = {
+      ...baseInput,
+      orderFormData: {
+        ...baseInput.orderFormData,
+        lens_family_id: "lf-1",
+        lens_family_name: "CR-39",
+      },
+    };
+    const items = buildCartItems(input);
+    expect(items).toHaveLength(1);
+    expect(items[0].metadata?.isLens).toBe(true);
+    expect(items[0].unitPrice).toBe(45000);
+  });
+
+  it("builds treatment item when treatments selected", () => {
+    const input = {
+      ...baseInput,
+      orderFormData: { ...baseInput.orderFormData, treatment_ids: ["t1"] },
+      treatmentsPrice: 5000,
+    };
+    const items = buildCartItems(input);
+    expect(items).toHaveLength(1);
+    expect(items[0].metadata?.isTreatment).toBe(true);
+    expect(items[0].unitPrice).toBe(5000);
+  });
+
+  it("builds labor item when labor cost > 0", () => {
+    const input = {
+      ...baseInput,
+      orderFormData: { ...baseInput.orderFormData, labor_cost: 10000 },
+    };
+    const items = buildCartItems(input);
+    expect(items).toHaveLength(1);
+    expect(items[0].metadata?.isLabor).toBe(true);
+    expect(items[0].unitPrice).toBe(10000);
+  });
+
+  it("builds contact lens item when contact lens configured", () => {
+    const input = {
+      ...baseInput,
+      orderFormData: {
+        ...baseInput.orderFormData,
+        lens_type: "contact" as const,
+      },
+      contactLensConfig: {
+        family_id: "cl-1",
+        family_name: "Acuvue",
+        family_brand: "Johnson",
+        price: 30000,
+        prescription: {},
+        quantity: 2,
+        inStock: true,
+      },
+    };
+    const items = buildCartItems(input);
+    expect(items).toHaveLength(1);
+    expect(items[0].metadata?.isContactLens).toBe(true);
+  });
+
+  it("excludes frame when customer owns frame", () => {
+    const input = {
+      ...baseInput,
+      selectedFrame: { id: "f1", name: "Marco", price: 50000 },
+      orderFormData: {
+        ...baseInput.orderFormData,
+        customer_own_frame: true,
+        lens_family_id: "lf-1",
+      },
+    };
+    const items = buildCartItems(input);
+    expect(items).toHaveLength(1); // only lens, no frame
+    expect(items[0].metadata?.isLens).toBe(true);
+  });
+
+  it("returns empty array when no items configured", () => {
+    const items = buildCartItems(baseInput);
+    expect(items).toHaveLength(0);
   });
 });
 
