@@ -192,10 +192,12 @@ Re-crear función sin `SET search_path = 'public'` usando la definición origina
 
 #### T-020: Índices FKs en tablas core (profiles, admin_users, branches, organizations)
 
+- [x] Implemented in `supabase/migrations/20260702000001_idx_core_fk.sql`
+
 **Phase**: 1
 **Group**: indexes
 **Spec**: S-003
-**Files**: `supabase/migrations/20260702_missing_fk_indexes.sql`
+**Files**: `supabase/migrations/20260702000001_idx_core_fk.sql`
 
 **Description**:
 Crear `CREATE INDEX CONCURRENTLY IF NOT EXISTS` para FKs sin índice en:
@@ -219,10 +221,12 @@ Crear `CREATE INDEX CONCURRENTLY IF NOT EXISTS` para FKs sin índice en:
 
 #### T-021: Índices FKs en tablas CRM (customers, prescriptions, appointments)
 
+- [x] Implemented in `supabase/migrations/20260702000002_idx_crm_fk.sql`
+
 **Phase**: 1
 **Group**: indexes
 **Spec**: S-003
-**Files**: `supabase/migrations/20260702_missing_fk_indexes.sql`
+**Files**: `supabase/migrations/20260702000002_idx_crm_fk.sql`
 
 **Description**:
 Crear índices para FKs en `customers`, `prescriptions`, `appointments`, `customer_lens_purchases`, `customer_satisfaction_surveys`, `survey_invitations`.
@@ -239,10 +243,12 @@ Crear índices para FKs en `customers`, `prescriptions`, `appointments`, `custom
 
 #### T-022: Índices FKs en tablas de ventas (orders, quotes, order_items)
 
+- [x] Implemented in `supabase/migrations/20260702000003_idx_sales_fk.sql`
+
 **Phase**: 1
 **Group**: indexes
 **Spec**: S-003
-**Files**: `supabase/migrations/20260702_missing_fk_indexes.sql`
+**Files**: `supabase/migrations/20260702000003_idx_sales_fk.sql`
 
 **Description**:
 Crear índices para FKs en `orders(purchase_order_id)`, `order_items(variant_id)`, `quotes(*)` — quotes tiene 6 FKs sin índice según la lista del spec.
@@ -259,10 +265,12 @@ Crear índices para FKs en `orders(purchase_order_id)`, `order_items(variant_id)
 
 #### T-023: Índices FKs en tablas de productos (products, product_branch_stock, categories)
 
+- [x] Implemented in `supabase/migrations/20260702000004_idx_products_lenses_fk.sql`
+
 **Phase**: 1
 **Group**: indexes
 **Spec**: S-003
-**Files**: `supabase/migrations/20260702_missing_fk_indexes.sql`
+**Files**: `supabase/migrations/20260702000004_idx_products_lenses_fk.sql`
 
 **Description**:
 Crear índices para FKs en `lens_products(category_id)`, `lens_catalog_products(*)`, `cart_items(variant_id)`.
@@ -279,10 +287,12 @@ Crear índices para FKs en `lens_products(category_id)`, `lens_catalog_products(
 
 #### T-024: Índices FKs en tablas de lentes (lens*families, lens_price_matrices, contact_lens*\*)
 
+- [x] Implemented in `supabase/migrations/20260702000004_idx_products_lenses_fk.sql`
+
 **Phase**: 1
 **Group**: indexes
 **Spec**: S-003
-**Files**: `supabase/migrations/20260702_missing_fk_indexes.sql`
+**Files**: `supabase/migrations/20260702000004_idx_products_lenses_fk.sql`
 
 **Description**:
 Crear índices para FKs en `lens_price_matrices(organization_id)`, `lens_products(catalog_product_id)`, `contact_lens_encargos(created_by)`.
@@ -299,10 +309,12 @@ Crear índices para FKs en `lens_price_matrices(organization_id)`, `lens_product
 
 #### T-025: Índices FKs en work orders (lab_work_orders, status_history)
 
+- [x] Implemented in `supabase/migrations/20260702000005_idx_workorders_comm_fk.sql`
+
 **Phase**: 1
 **Group**: indexes
 **Spec**: S-003
-**Files**: `supabase/migrations/20260702_missing_fk_indexes.sql`
+**Files**: `supabase/migrations/20260702000005_idx_workorders_comm_fk.sql`
 
 **Description**:
 Crear índices para FKs en `lab_work_orders(frame_product_id, pos_order_id)`, `pos_sale_idempotency(order_id, work_order_id)`, `optical_internal_support_tickets(related_work_order_id)`.
@@ -319,10 +331,12 @@ Crear índices para FKs en `lab_work_orders(frame_product_id, pos_order_id)`, `p
 
 #### T-026: Índices FKs en comunicaciones (notifications, email, chat)
 
+- [x] Implemented in `supabase/migrations/20260702000005_idx_workorders_comm_fk.sql`
+
 **Phase**: 1
 **Group**: indexes
 **Spec**: S-003
-**Files**: `supabase/migrations/20260702_missing_fk_indexes.sql`
+**Files**: `supabase/migrations/20260702000005_idx_workorders_comm_fk.sql`
 
 **Description**:
 Crear índices para FKs en `system_email_templates(created_by)`, `memory_facts(source_session_id)`, `system_config(last_modified_by)`, `system_maintenance_log(executed_by)`.
@@ -339,10 +353,12 @@ Crear índices para FKs en `system_email_templates(created_by)`, `memory_facts(s
 
 #### T-027: Índices FKs en soporte (support_tickets, saas_support, optical_internal)
 
+- [x] Implemented in `supabase/migrations/20260702000006_idx_support_payments_fk.sql`
+
 **Phase**: 1
 **Group**: indexes
 **Spec**: S-003
-**Files**: `supabase/migrations/20260702_missing_fk_indexes.sql`
+**Files**: `supabase/migrations/20260702000006_idx_support_payments_fk.sql`
 
 **Description**:
 Crear índices para FKs en `support_tickets(category_id, order_id, resolved_by)`, `support_templates(category_id, created_by)`, `saas_support_tickets(created_by_user_id, resolved_by)`, `saas_support_messages(sender_id)`, `saas_support_templates(created_by)`, `optical_internal_support_tickets(*)`, `optical_internal_support_messages(sender_id)`.
@@ -359,10 +375,12 @@ Crear índices para FKs en `support_tickets(category_id, order_id, resolved_by)`
 
 #### T-028: Índices FKs en pagos y POS (payments, webhook_events, pos_sessions)
 
+- [x] Implemented in `supabase/migrations/20260702000006_idx_support_payments_fk.sql`
+
 **Phase**: 1
 **Group**: indexes
 **Spec**: S-003
-**Files**: `supabase/migrations/20260702_missing_fk_indexes.sql`
+**Files**: `supabase/migrations/20260702000006_idx_support_payments_fk.sql`
 
 **Description**:
 Crear índices para FKs en `credit_notes(pos_session_id)`, `pos_sale_idempotency(order_id, work_order_id)` — las ya no cubiertas en T-025.
@@ -379,10 +397,12 @@ Crear índices para FKs en `credit_notes(pos_session_id)`, `pos_sale_idempotency
 
 #### T-029: Índices FKs en convenios (agreements, agreement\_\*)
 
+- [x] Implemented in `supabase/migrations/20260702000006_idx_support_payments_fk.sql`
+
 **Phase**: 1
 **Group**: indexes
 **Spec**: S-003
-**Files**: `supabase/migrations/20260702_missing_fk_indexes.sql`
+**Files**: `supabase/migrations/20260702000006_idx_support_payments_fk.sql`
 
 **Description**:
 Crear índices para FKs en `agreement_institutional_balances(invoice_id, purchase_order_id)`, `agreement_institutional_invoices(organization_id)`.
@@ -399,10 +419,12 @@ Crear índices para FKs en `agreement_institutional_balances(invoice_id, purchas
 
 #### T-030: Índices FKs en tablas misceláneas (restantes)
 
+- [x] Implemented in `supabase/migrations/20260702000006_idx_support_payments_fk.sql`
+
 **Phase**: 1
 **Group**: indexes
 **Spec**: S-003
-**Files**: `supabase/migrations/20260702_missing_fk_indexes.sql`
+**Files**: `supabase/migrations/20260702000006_idx_support_payments_fk.sql`
 
 **Description**:
 Crear índices para FKs restantes no cubiertas en T-020–T-029: `demo_requests(*)`, `referrals(*)`, `internal_orders(*)`, `workflow_definitions(created_by)`, `workflow_executions(created_by)`, `tier_change_audit(changed_by_user_id)`, `nurture_log(*)`, `nurture_queue(*)`.
