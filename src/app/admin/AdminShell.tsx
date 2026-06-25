@@ -39,6 +39,7 @@ import { MobileFAB } from "@/components/admin/MobileFAB";
 import AdminNotificationDropdown from "@/components/admin/AdminNotificationDropdown";
 import { BranchSelector } from "@/components/admin/BranchSelector";
 import Chatbot from "@/components/admin/Chatbot";
+import { AgentBubbleContainer } from "@/components/ai/AgentBubbleContainer";
 import { InsightsFloatingButton } from "@/components/admin/InsightsFloatingButton";
 import { SubscriptionGuard } from "@/components/admin/SubscriptionGuard";
 import { DemoModeBanner } from "@/components/onboarding/DemoModeBanner";
@@ -1195,6 +1196,9 @@ export function AdminShell({ children }: AdminLayoutProps) {
             />
             <Chatbot open={chatbotOpen} onOpenChange={setChatbotOpen} />
           </div>
+
+          {/* Agent Bubble — visible across all admin routes */}
+          <AgentBubbleContainer />
 
           {/* Mobile Bottom Nav - Navegación principal con herramientas */}
           <MobileBottomNav
