@@ -77,23 +77,6 @@ import {
   buildCreditNotesDateRange,
 } from "./cashOpsUtils";
 
-// ponytail: re-export for backward compat — remove in T-119
-export type { CashClosure, DailySummary, Movement } from "./cashRegister.types";
-export {
-  PAYMENT_METHOD_FILTER_MAP,
-  STATUS_BADGE_CONFIG,
-  resolveClosureStatus,
-  computeCashDifference,
-} from "./cashPaymentUtils";
-export {
-  buildClosureParams,
-  buildOrderParams,
-  buildCloseCashBody,
-  getTodayChileDate,
-  buildCreditNotesDateRange,
-} from "./cashOpsUtils";
-export { hasPrintSupport } from "./cashPrintUtils";
-
 export default function CashRegisterPage() {
   const searchParams = useSearchParams();
   const fieldOperationIdFromUrl = searchParams.get("field_operation_id");
