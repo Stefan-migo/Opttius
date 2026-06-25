@@ -63,9 +63,21 @@ import { getBranchAndOperativoHeaders } from "@/lib/utils/branch";
 import { getTodayInTimezone } from "@/lib/utils/date-timezone";
 
 import type { CashClosure, DailySummary, Movement } from "./cashRegister.types";
+import {
+  PAYMENT_METHOD_FILTER_MAP,
+  STATUS_BADGE_CONFIG,
+  resolveClosureStatus,
+  computeCashDifference,
+} from "./cashPaymentUtils";
 
 // ponytail: re-export for backward compat — remove in T-119
 export type { CashClosure, DailySummary, Movement } from "./cashRegister.types";
+export {
+  PAYMENT_METHOD_FILTER_MAP,
+  STATUS_BADGE_CONFIG,
+  resolveClosureStatus,
+  computeCashDifference,
+} from "./cashPaymentUtils";
 
 export default function CashRegisterPage() {
   const searchParams = useSearchParams();
@@ -369,13 +381,8 @@ export default function CashRegisterPage() {
 
         // Filter by payment method (from order_payments or mp_payment_method)
         if (orderFilters.payment_method !== "all") {
-          const methodMap: Record<string, string[]> = {
-            cash: ["cash"],
-            debit: ["debit", "debit_card"],
-            credit: ["credit", "credit_card"],
-            transfer: ["transfer"],
-          };
-          const allowed = methodMap[orderFilters.payment_method] || [];
+          const allowed =
+            PAYMENT_METHOD_FILTER_MAP[orderFilters.payment_method] || [];
           filteredOrders = filteredOrders.filter((order: unknown) => {
             const payments = order.order_payments || [];
             const hasMatch = payments.some((p: unknown) =>
@@ -816,52 +823,31 @@ export default function CashRegisterPage() {
     reopenedAt?: string | null,
     posSessionId?: string | null,
   ) => {
-    const config: Record<
+    const { variant, label } = resolveClosureStatus(status, posSessionId);
+    // ponytail: static icon map aligned to STATUS_BADGE_CONFIG — icons stay in-page since they're JSX
+    const iconMap: Record<
       string,
-      { variant: unknown; label: string; icon: unknown }
+      React.ComponentType<{ className?: string }>
     > = {
-      draft: { variant: "secondary", label: "Abierta", icon: RefreshCw }, // draft = caja abierta
-      confirmed: { variant: "default", label: "Confirmado", icon: CheckCircle },
-      reviewed: { variant: "secondary", label: "Revisado", icon: Eye },
-      closed: { variant: "default", label: "Cerrada", icon: CheckCircle }, // closed = caja cerrada
-      reopened: { variant: "secondary", label: "Abierta", icon: RefreshCw },
+      draft: RefreshCw,
+      confirmed: CheckCircle,
+      reviewed: Eye,
+      closed: CheckCircle,
+      reopened: RefreshCw,
     };
-
-    // Lógica correcta:
-    // - Si está "closed", SIEMPRE mostrar "Cerrada" (independientemente de si fue reabierta en el pasado)
-    // - Si está "draft" y tiene session_id = "Abierta" (caja actualmente abierta)
-    // - Si está "draft" y NO tiene session_id = "Borrador" (no debería pasar)
-    let statusConfig;
-    if (status === "closed") {
-      // Si está cerrada, siempre mostrar "Cerrada"
-      // El hecho de que haya sido reabierta (reopenedAt) es histórico, pero si está cerrada, está cerrada
-      statusConfig = config.closed;
-    } else if (status === "draft" && posSessionId) {
-      // draft con session_id = caja abierta
-      statusConfig = config.reopened || config.draft;
-    } else {
-      statusConfig = config[status] || {
-        variant: "outline",
-        label: status,
-        icon: FileText,
-      };
-    }
-
-    const Icon = statusConfig.icon;
-
+    const Icon = iconMap[status] || FileText;
     return (
-      <Badge className="flex items-center gap-1" variant={statusConfig.variant}>
+      <Badge className="flex items-center gap-1" variant={variant}>
         <Icon className="h-3 w-3" />
-        {statusConfig.label}
+        {label}
       </Badge>
     );
   };
 
-  // Calcular diferencia solo si actualCash tiene un valor ingresado
-  const cashDifference =
-    dailySummary && actualCash !== null && actualCash !== undefined
-      ? actualCash - (dailySummary.expected_cash || 0)
-      : null;
+  const cashDifference = computeCashDifference(
+    actualCash,
+    dailySummary?.expected_cash ?? 0,
+  );
 
   if (fieldOperationIdFromUrl && loadingFieldOperation) {
     return (
