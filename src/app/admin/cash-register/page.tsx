@@ -92,6 +92,7 @@ export {
   getTodayChileDate,
   buildCreditNotesDateRange,
 } from "./cashOpsUtils";
+export { hasPrintSupport } from "./cashPrintUtils";
 
 export default function CashRegisterPage() {
   const searchParams = useSearchParams();
