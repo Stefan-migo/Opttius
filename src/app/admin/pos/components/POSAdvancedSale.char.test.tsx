@@ -198,6 +198,13 @@ vi.mock("@/components/ui/tabs", () => ({
 }));
 
 import { POSAdvancedSale } from "./POSAdvancedSale";
+import type {
+  POSProduct,
+  OrderFormData,
+  ExternalPrescriptionData,
+  Treatment,
+  POSAdvancedSaleProps,
+} from "./POSAdvancedSale.types";
 
 const defaultProps = {
   customer: null,
@@ -206,6 +213,73 @@ const defaultProps = {
   branchId: "branch-1",
   selectedQuote: null,
 };
+
+describe("POSAdvancedSale types", () => {
+  it("exports POSProduct type", () => {
+    const p: POSProduct = { id: "1", name: "test", price: 100 };
+    expect(p.id).toBe("1");
+  });
+
+  it("exports OrderFormData type", () => {
+    const d: OrderFormData = {
+      lens_family_id: null,
+      lens_family_name: null,
+      near_lens_family_id: null,
+      near_lens_family_name: null,
+      lens_type: "vision",
+      lens_sourcing_type: "surfaced",
+      presbyopia_solution: "single",
+      treatment_ids: [],
+      labor_cost: 0,
+      frame_name: "",
+      frame_sku: "",
+      near_frame_name: "",
+      near_frame_sku: "",
+      customer_own_frame: false,
+      notes: "",
+    };
+    expect(d.lens_type).toBe("vision");
+  });
+
+  it("exports ExternalPrescriptionData type", () => {
+    const e: ExternalPrescriptionData = {
+      prescription_date: "",
+      expiration_date: "",
+      prescription_number: "",
+      issued_by: "",
+      issued_by_license: "",
+      od_sphere: "",
+      od_cylinder: "",
+      od_axis: "",
+      od_add: "",
+      os_sphere: "",
+      os_cylinder: "",
+      os_axis: "",
+      os_add: "",
+      pd: "",
+      near_pd: "",
+      frame_pd: "",
+      height_segmentation: "",
+    };
+    expect(e.pd).toBe("");
+  });
+
+  it("exports Treatment type", () => {
+    const t: Treatment = {
+      id: "t1",
+      label: "Test",
+      value: "test",
+      cost: 100,
+      category: "coating",
+    };
+    expect(t.cost).toBe(100);
+  });
+
+  it("exports POSAdvancedSaleProps type", () => {
+    const p: POSAdvancedSaleProps["customer"] = null;
+    expect(p).toBeNull();
+  });
+});
 
 describe("POSAdvancedSale", () => {
   it("renders without crashing", () => {
