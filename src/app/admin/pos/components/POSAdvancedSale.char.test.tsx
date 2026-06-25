@@ -202,6 +202,14 @@ import {
   DEFAULT_LENS_FAMILIES,
   DEFAULT_TREATMENTS,
 } from "./POSAdvancedSale.constants";
+import {
+  computeLensPrice,
+  computeNearLensPrice,
+  computeTotalPrice,
+  computeDiscountAmount,
+  computeTreatmentsPrice,
+  filterTreatmentsByLensType,
+} from "./posPricingUtils";
 import type {
   POSProduct,
   OrderFormData,
@@ -282,6 +290,112 @@ describe("POSAdvancedSale types", () => {
   it("exports POSAdvancedSaleProps type", () => {
     const p: POSAdvancedSaleProps["customer"] = null;
     expect(p).toBeNull();
+  });
+});
+
+describe("posPricingUtils", () => {
+  it("computeTreatmentsPrice returns sum of selected treatments", () => {
+    const treatments = [
+      { id: "t1", label: "A", value: "a", cost: 1000, category: "coating" },
+      { id: "t2", label: "B", value: "b", cost: 2000, category: "coating" },
+    ];
+    expect(computeTreatmentsPrice(["t1", "t2"], treatments)).toBe(3000);
+    expect(computeTreatmentsPrice(["t1"], treatments)).toBe(1000);
+    expect(computeTreatmentsPrice([], treatments)).toBe(0);
+  });
+
+  it("computeLensPrice returns correct prices per solution type", () => {
+    const families = [
+      { id: "lf-1", name: "CR-39", lens_type: "vision" as const },
+      { id: "lf-contact", name: "Contact", lens_type: "contact" as const },
+    ];
+    expect(computeLensPrice("lf-1", "single", families)).toBe(45000);
+    expect(computeLensPrice("lf-1", "progressive", families)).toBe(120000);
+    expect(computeLensPrice("lf-1", "two_separate", families)).toBe(80000);
+    expect(computeLensPrice("lf-contact", "single", families)).toBe(25000);
+    expect(computeLensPrice(null, "single", families)).toBe(0);
+  });
+
+  it("computeNearLensPrice returns fixed near price", () => {
+    const families = [
+      { id: "lf-1", name: "CR-39", lens_type: "vision" as const },
+    ];
+    expect(computeNearLensPrice("lf-1", families)).toBe(35000);
+    expect(computeNearLensPrice(null, families)).toBe(0);
+  });
+
+  it("computeTotalPrice includes frame, lens, treatments, labor, discount", () => {
+    const frame = { id: "f1", name: "Frame", price: 50000 };
+    const result = computeTotalPrice(
+      frame,
+      false,
+      45000,
+      3000,
+      10000,
+      "none",
+      0,
+    );
+    expect(result).toBe(108000); // 50000 + 45000 + 3000 + 10000
+  });
+
+  it("computeTotalPrice applies percentage discount", () => {
+    const frame = { id: "f1", name: "Frame", price: 50000 };
+    const result = computeTotalPrice(
+      frame,
+      false,
+      45000,
+      3000,
+      10000,
+      "percentage",
+      10,
+    );
+    expect(result).toBe(97200); // 108000 * 0.9
+  });
+
+  it("computeTotalPrice applies fixed discount", () => {
+    const frame = { id: "f1", name: "Frame", price: 50000 };
+    const result = computeTotalPrice(frame, false, 45000, 0, 0, "fixed", 10000);
+    expect(result).toBe(85000); // 95000 - 10000
+  });
+
+  it("computeTotalPrice excludes frame when customer owns frame", () => {
+    const frame = { id: "f1", name: "Frame", price: 50000 };
+    const result = computeTotalPrice(frame, true, 45000, 0, 0, "none", 0);
+    expect(result).toBe(45000);
+  });
+
+  it("computeDiscountAmount calculates discount value", () => {
+    const frame = { id: "f1", name: "Frame", price: 50000 };
+    expect(
+      computeDiscountAmount(frame, false, 45000, 3000, 10000, "none", 0),
+    ).toBe(0);
+    expect(
+      computeDiscountAmount(frame, false, 45000, 3000, 10000, "percentage", 10),
+    ).toBe(10800);
+    expect(
+      computeDiscountAmount(frame, false, 45000, 3000, 10000, "fixed", 5000),
+    ).toBe(5000);
+  });
+
+  it("filterTreatmentsByLensType filters for contact lenses", () => {
+    const treatments = [
+      {
+        id: "t1",
+        label: "AR",
+        value: "anti_reflective",
+        cost: 100,
+        category: "coating",
+      },
+      {
+        id: "t2",
+        label: "Tint",
+        value: "tint",
+        cost: 100,
+        category: "coating",
+      },
+    ];
+    expect(filterTreatmentsByLensType(treatments, "contact")).toHaveLength(1);
+    expect(filterTreatmentsByLensType(treatments, "vision")).toHaveLength(2);
   });
 });
 

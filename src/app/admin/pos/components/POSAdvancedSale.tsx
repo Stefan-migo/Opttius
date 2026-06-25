@@ -86,6 +86,28 @@ export {
   DEFAULT_TREATMENTS,
 } from "./POSAdvancedSale.constants";
 
+import {
+  suggestLensFamily as suggestLensFamilyPure,
+  computeTreatmentsPrice,
+  computeLensPrice,
+  computeNearLensPrice,
+  computeTotalPrice,
+  computeDiscountAmount,
+  updateTreatmentPrice as updateTreatmentPricePure,
+  filterTreatmentsByLensType,
+} from "./posPricingUtils";
+// Re-export pricing utils for consumers that imported from here
+export {
+  suggestLensFamilyPure,
+  computeTreatmentsPrice,
+  computeLensPrice,
+  computeNearLensPrice,
+  computeTotalPrice,
+  computeDiscountAmount,
+  updateTreatmentPricePure,
+  filterTreatmentsByLensType,
+} from "./posPricingUtils";
+
 export function POSAdvancedSale({
   customer,
   onCustomerChange,
@@ -451,215 +473,121 @@ export function POSAdvancedSale({
 
   // Suggest lens family and presbyopia solution based on prescription (when selected)
   const suggestLensFamily = useCallback(() => {
-    if (!selectedPrescription) return;
-
-    const { od_sphere, os_sphere, od_add, os_add } = selectedPrescription;
-
-    // Check if progressive (has addition)
-    const hasAddition = (od_add && od_add > 0) || (os_add && os_add > 0);
-
-    // Check for high myopia/hyperopia in distance vision
-    const maxSphere = Math.max(
-      Math.abs(od_sphere || 0),
-      Math.abs(os_sphere || 0),
+    const suggestion = suggestLensFamilyPure(
+      selectedPrescription,
+      lensFamilies,
+      orderFormData.lens_type,
     );
+    if (!suggestion || !selectedPrescription) return;
 
-    // Calculate near vision sphere (distance sphere + addition)
-    const addValue = od_add || os_add || 0;
-    const nearSphere = (od_sphere || 0) + addValue;
-    const maxNearSphere = Math.max(
-      Math.abs(nearSphere),
-      Math.abs((os_sphere || 0) + addValue),
-    );
+    const hasAddition =
+      (selectedPrescription.od_add && selectedPrescription.od_add > 0) ||
+      (selectedPrescription.os_add && selectedPrescription.os_add > 0);
 
-    let suggestedFamily = "";
-    let suggestedNearFamily = "";
-    let suggestedSolution: "single" | "two_separate" | "progressive" = "single";
-
-    if (hasAddition) {
-      // Suggest progressive by default for prescriptions with addition
-      if (maxSphere > 4) {
-        suggestedFamily = "lf-7"; // Personalized progressive for high prescriptions
-      } else if (maxSphere > 2) {
-        suggestedFamily = "lf-6"; // Premium progressive
-      } else {
-        suggestedFamily = "lf-5"; // Standard progressive
-      }
-
-      // Also suggest near lens families for two_separate solution
-      // Near lens typically uses the same material as distance but with near addition
-      if (maxNearSphere > 4) {
-        suggestedNearFamily = "lf-3"; // High index 1.74
-      } else if (maxNearSphere > 3) {
-        suggestedNearFamily = "lf-2"; // High index 1.67
-      } else {
-        suggestedNearFamily = "lf-1"; // Standard CR-39
-      }
-    } else {
-      // Single vision suggestion (no addition)
-      if (maxSphere > 6) {
-        suggestedFamily = "lf-3"; // High index 1.74
-      } else if (maxSphere > 3) {
-        suggestedFamily = "lf-2"; // High index 1.67
-      } else {
-        suggestedFamily = "lf-1"; // Standard CR-39
-      }
-    }
-
-    // Auto-select suggested families and presbyopia solution
-    const family = lensFamilies.find((f) => f.id === suggestedFamily);
-    const nearFamily = lensFamilies.find((f) => f.id === suggestedNearFamily);
-
-    if (family && orderFormData.lens_type === family.lens_type) {
-      // Only set the solution if not already set by the user
-      const newSolution = hasAddition ? "progressive" : "single";
-
-      setOrderFormData((prev) => ({
-        ...prev,
-        lens_family_id: suggestedFamily,
-        lens_family_name: family.name,
-        // Only auto-suggest near family if user hasn't selected one
-        near_lens_family_id:
-          prev.near_lens_family_id ||
-          (hasAddition ? suggestedNearFamily : null),
-        near_lens_family_name:
-          prev.near_lens_family_name ||
-          (hasAddition && nearFamily ? nearFamily.name : null),
-        presbyopia_solution: hasAddition
-          ? newSolution
-          : prev.presbyopia_solution,
-      }));
-    }
+    setOrderFormData((prev) => ({
+      ...prev,
+      lens_family_id: suggestion.lens_family_id,
+      lens_family_name: suggestion.lens_family_name,
+      near_lens_family_id:
+        prev.near_lens_family_id || suggestion.near_lens_family_id,
+      near_lens_family_name:
+        prev.near_lens_family_name || suggestion.near_lens_family_name,
+      presbyopia_solution: hasAddition
+        ? suggestion.presbyopia_solution
+        : prev.presbyopia_solution,
+    }));
   }, [selectedPrescription, lensFamilies, orderFormData.lens_type]);
 
   // Calculate prices
-  const treatmentsPrice = orderFormData.treatment_ids.reduce((total, id) => {
-    const treatment = treatments.find((t) => t.id === id);
-    return total + (treatment?.cost || 0);
-  }, 0);
+  const treatmentsPrice = useMemo(
+    () => computeTreatmentsPrice(orderFormData.treatment_ids, treatments),
+    [orderFormData.treatment_ids, treatments],
+  );
 
   // Calculate lens price based on family and solution type
-  const lensPriceValue = useMemo(() => {
-    if (!orderFormData.lens_family_id) return 0;
-    const family = lensFamilies.find(
-      (f) => f.id === orderFormData.lens_family_id,
-    );
-    if (!family) return 0;
-
-    // Default prices based on lens type
-    if (family.lens_type === "contact") {
-      return 25000; // Contact lenses default price
-    }
-
-    // Vision lens prices based on solution type
-    switch (orderFormData.presbyopia_solution) {
-      case "progressive":
-        return 120000;
-      case "two_separate":
-        return 80000;
-      default:
-        return 45000;
-    }
-  }, [
-    orderFormData.lens_family_id,
-    orderFormData.presbyopia_solution,
-    lensFamilies,
-  ]);
+  const lensPriceValue = useMemo(
+    () =>
+      computeLensPrice(
+        orderFormData.lens_family_id,
+        orderFormData.presbyopia_solution,
+        lensFamilies,
+      ),
+    [
+      orderFormData.lens_family_id,
+      orderFormData.presbyopia_solution,
+      lensFamilies,
+    ],
+  );
 
   // Calculate near lens price for two_separate solution
-  const nearLensPriceValue = useMemo(() => {
-    if (!orderFormData.near_lens_family_id) return 0;
-    const family = lensFamilies.find(
-      (f) => f.id === orderFormData.near_lens_family_id,
-    );
-    if (!family) return 0;
-    return 35000; // Fixed near lens price
-  }, [orderFormData.near_lens_family_id, lensFamilies]);
+  const nearLensPriceValue = useMemo(
+    () => computeNearLensPrice(orderFormData.near_lens_family_id, lensFamilies),
+    [orderFormData.near_lens_family_id, lensFamilies],
+  );
 
   // Wrapper function for lens price
   const lensPrice = useCallback(() => lensPriceValue, [lensPriceValue]);
 
-  const totalPrice = useCallback(() => {
-    let total = 0;
-
-    // Add frame price
-    if (selectedFrame && !orderFormData.customer_own_frame) {
-      total += selectedFrame.price || 0;
-    }
-
-    // Add lens price
-    total += lensPrice();
-
-    // Add treatments price
-    total += treatmentsPrice;
-
-    // Add labor cost
-    total += orderFormData.labor_cost;
-
-    // Apply discount
-    if (discountType === "percentage" && discountValue > 0) {
-      total = total * (1 - discountValue / 100);
-    } else if (discountType === "fixed" && discountValue > 0) {
-      total = Math.max(0, total - discountValue);
-    }
-
-    return total;
-  }, [
-    selectedFrame,
-    orderFormData.customer_own_frame,
-    lensPrice,
-    treatmentsPrice,
-    orderFormData.labor_cost,
-    discountType,
-    discountValue,
-  ]);
+  const totalPrice = useCallback(
+    () =>
+      computeTotalPrice(
+        selectedFrame,
+        orderFormData.customer_own_frame,
+        lensPrice(),
+        treatmentsPrice,
+        orderFormData.labor_cost,
+        discountType,
+        discountValue,
+      ),
+    [
+      selectedFrame,
+      orderFormData.customer_own_frame,
+      lensPrice,
+      treatmentsPrice,
+      orderFormData.labor_cost,
+      discountType,
+      discountValue,
+    ],
+  );
 
   // Calculate discount amount for display
-  const discountAmount = useCallback(() => {
-    let subtotal = 0;
-
-    if (selectedFrame && !orderFormData.customer_own_frame) {
-      subtotal += selectedFrame.price || 0;
-    }
-    subtotal += lensPrice();
-    subtotal += treatmentsPrice;
-    subtotal += orderFormData.labor_cost;
-
-    if (discountType === "percentage" && discountValue > 0) {
-      return subtotal * (discountValue / 100);
-    } else if (discountType === "fixed" && discountValue > 0) {
-      return discountValue;
-    }
-    return 0;
-  }, [
-    selectedFrame,
-    orderFormData.customer_own_frame,
-    lensPrice,
-    treatmentsPrice,
-    orderFormData.labor_cost,
-    discountType,
-    discountValue,
-  ]);
+  const discountAmount = useCallback(
+    () =>
+      computeDiscountAmount(
+        selectedFrame,
+        orderFormData.customer_own_frame,
+        lensPrice(),
+        treatmentsPrice,
+        orderFormData.labor_cost,
+        discountType,
+        discountValue,
+      ),
+    [
+      selectedFrame,
+      orderFormData.customer_own_frame,
+      lensPrice,
+      treatmentsPrice,
+      orderFormData.labor_cost,
+      discountType,
+      discountValue,
+    ],
+  );
 
   // Update treatment price
-  const updateTreatmentPrice = (treatmentId: string, newPrice: number) => {
+  const handleUpdateTreatmentPrice = (
+    treatmentId: string,
+    newPrice: number,
+  ) => {
     setTreatments((prev) =>
-      prev.map((t) => (t.id === treatmentId ? { ...t, cost: newPrice } : t)),
+      updateTreatmentPricePure(prev, treatmentId, newPrice),
     );
   };
 
   // Filter treatments based on lens type
-  const filteredTreatments = treatments.filter((t) => {
-    if (orderFormData.lens_type === "contact") {
-      // Contact lenses only: only show coatings that make sense
-      return (
-        t.category === "coating" &&
-        !["photochromic", "polarized", "tint"].includes(t.value)
-      );
-    }
-    // Vision lenses: show all
-    return true;
-  });
+  const filteredTreatments = useMemo(
+    () => filterTreatmentsByLensType(treatments, orderFormData.lens_type),
+    [treatments, orderFormData.lens_type],
+  );
 
   // Search frames
   const searchFrames = useCallback(
@@ -2574,7 +2502,7 @@ export function POSAdvancedSale({
                                       value={treatment.cost}
                                       onChange={(e) => {
                                         e.stopPropagation();
-                                        updateTreatmentPrice(
+                                        handleUpdateTreatmentPrice(
                                           treatment.id,
                                           parseFloat(e.target.value) || 0,
                                         );
