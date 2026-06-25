@@ -1,14 +1,17 @@
-import type { LLMTool } from "../types";
+import type { AgentRole, LLMTool } from "../types";
 import { analyticsTools } from "./analytics";
 import { businessFlowTools } from "./analyzeBusinessFlow";
 import { marketTrendsTools } from "./analyzeMarketTrends";
 import { appointmentTools } from "./appointments";
 import { categoryTools } from "./categories";
+import { contextTools } from "./context";
 import { customerTools } from "./customers";
 import { customerWhatsAppTools } from "./customerWhatsApp";
 import { diagnoseSystemTools } from "./diagnoseSystem";
 import { recommendationTools } from "./generateRecommendations";
 import { importBulkTools } from "./importBulk";
+import { memoryTools } from "./memory";
+import { navigationTools } from "./navigation";
 import { inventoryTools } from "./optimizeInventory";
 import { orderTools } from "./orders";
 import { prescriptionTools } from "./prescriptions";
@@ -36,10 +39,31 @@ export const allTools: ToolDefinition[] = [
   ...inventoryTools,
   ...recommendationTools,
   ...importBulkTools,
+  ...navigationTools,
+  ...contextTools,
+  ...memoryTools,
 ];
 
-export function getAllTools(): ToolDefinition[] {
-  return allTools;
+const ROLE_HIERARCHY: Record<AgentRole, number> = {
+  vendedor: 0,
+  admin: 1,
+  dueño: 2,
+};
+
+/**
+ * Returns all tools, optionally filtered by the user's role.
+ * Tools without `minRole` are visible to everyone (default: vendedor).
+ * When `role` is undefined, returns all tools (backward-compatible).
+ */
+export function getAllTools(role?: AgentRole): ToolDefinition[] {
+  if (!role) return allTools;
+
+  const userLevel = ROLE_HIERARCHY[role] ?? 0;
+
+  return allTools.filter((tool) => {
+    if (!tool.minRole) return true; // no restriction — everyone can use
+    return ROLE_HIERARCHY[tool.minRole] <= userLevel;
+  });
 }
 
 export function getToolsByCategory(category: string): ToolDefinition[] {
