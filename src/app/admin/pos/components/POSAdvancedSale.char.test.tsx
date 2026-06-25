@@ -212,6 +212,11 @@ import {
 } from "./posPricingUtils";
 import { buildCartItems } from "./posCartBuilder";
 import type { CartItem } from "./posCartBuilder";
+import {
+  createSearchFramesAction,
+  loadSettingsAction,
+  loadPrescriptionsAction,
+} from "./posDataLoader";
 import type {
   POSProduct,
   OrderFormData,
@@ -548,6 +553,94 @@ describe("posCartBuilder", () => {
   it("returns empty array when no items configured", () => {
     const items = buildCartItems(baseInput);
     expect(items).toHaveLength(0);
+  });
+});
+
+describe("posDataLoader", () => {
+  it("loadSettingsAction calls callbacks with settings data", async () => {
+    const mockSettings = {
+      id: "s1",
+      treatment_prices: {
+        anti_reflective: 20000,
+        scratch_resistant: 18000,
+      } as any,
+      default_labor_cost: 15000,
+      default_discount_percentage: 0,
+      default_tax_percentage: 0,
+      default_expiration_days: 30,
+      default_margin_percentage: 0,
+      validity_days: 30,
+      currency: "CLP",
+    };
+    const onSettingsLoaded = vi.fn();
+    const onUpdateTreatments = vi.fn();
+    const onSetLaborCost = vi.fn();
+
+    await loadSettingsAction(
+      { get: () => Promise.resolve(mockSettings) },
+      onSettingsLoaded,
+      onUpdateTreatments,
+      onSetLaborCost,
+    );
+
+    expect(onSettingsLoaded).toHaveBeenCalledWith(mockSettings);
+    expect(onUpdateTreatments).toHaveBeenCalled();
+    expect(onSetLaborCost).toHaveBeenCalledWith(15000);
+  });
+
+  it("loadPrescriptionsAction loads and finds current prescription", async () => {
+    const prescriptions = [
+      { id: "p1", is_current: true, prescription_date: "2024-01-01" },
+      { id: "p2", is_current: false, prescription_date: "2023-01-01" },
+    ];
+    const onPrescriptionsLoaded = vi.fn();
+    const onCurrentPrescriptionFound = vi.fn();
+    const onSetLoading = vi.fn();
+
+    await loadPrescriptionsAction(
+      "cust-1",
+      () => Promise.resolve(prescriptions as any),
+      onPrescriptionsLoaded,
+      onCurrentPrescriptionFound,
+      onSetLoading,
+    );
+
+    expect(onSetLoading).toHaveBeenCalledWith(true);
+    expect(onPrescriptionsLoaded).toHaveBeenCalledWith(prescriptions);
+    expect(onCurrentPrescriptionFound).toHaveBeenCalledWith(prescriptions[0]);
+    expect(onSetLoading).toHaveBeenCalledWith(false);
+  });
+
+  it("createSearchFramesAction returns a search function", () => {
+    const setResults = vi.fn();
+    const setLoading = vi.fn();
+    const searchProductsFn = vi.fn();
+
+    const searchFn = createSearchFramesAction(
+      "branch-1",
+      setResults,
+      setLoading,
+      searchProductsFn,
+    );
+
+    expect(typeof searchFn).toBe("function");
+  });
+
+  it("loadPrescriptionsAction clears prescriptions when no customer", async () => {
+    const onPrescriptionsLoaded = vi.fn();
+    const onCurrentPrescriptionFound = vi.fn();
+    const onSetLoading = vi.fn();
+
+    await loadPrescriptionsAction(
+      undefined,
+      () => Promise.resolve([] as any),
+      onPrescriptionsLoaded,
+      onCurrentPrescriptionFound,
+      onSetLoading,
+    );
+
+    expect(onPrescriptionsLoaded).toHaveBeenCalledWith([]);
+    expect(onCurrentPrescriptionFound).not.toHaveBeenCalled();
   });
 });
 

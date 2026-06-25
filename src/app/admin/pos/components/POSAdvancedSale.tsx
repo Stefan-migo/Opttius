@@ -114,6 +114,20 @@ import type { CartItem } from "./posCartBuilder";
 export { buildCartItems } from "./posCartBuilder";
 export type { CartItem } from "./posCartBuilder";
 
+import {
+  handleCreateQuoteAction,
+  loadSettingsAction,
+  loadPrescriptionsAction,
+  createSearchFramesAction,
+} from "./posDataLoader";
+// Re-export data loader for consumers that imported from here
+export {
+  handleCreateQuoteAction,
+  loadSettingsAction,
+  loadPrescriptionsAction,
+  createSearchFramesAction,
+} from "./posDataLoader";
+
 export function POSAdvancedSale({
   customer,
   onCustomerChange,
@@ -225,236 +239,47 @@ export function POSAdvancedSale({
 
   // Handle create quote from sale form
   const handleCreateQuote = async () => {
-    // Check if we have either a registered customer or quick customer data
-    const isQuickCustomer =
-      !customer && (quickCustomerName || quickCustomerRUT);
-
-    if (!customer && !isQuickCustomer) {
-      toast.error("Selecciona un cliente primero");
-      return;
-    }
-
-    setCreatingQuote(true);
-    try {
-      let customerId = customer?.id;
-
-      // Validate branch exists before creating customer
-      if (!branchId) {
-        toast.error("Selecciona una sucursal primero");
-        setCreatingQuote(false);
-        return;
-      }
-
-      // If quick customer, create the user first
-      if (isQuickCustomer) {
-        // Validate that we have at least a name
-        const trimmedName = (quickCustomerName || "").trim();
-        if (!trimmedName) {
-          toast.error("El nombre del cliente es requerido");
-          setCreatingQuote(false);
-          return;
-        }
-
-        try {
-          // Parse name into first_name and last_name
-          const nameParts = trimmedName.split(" ");
-          const firstName = nameParts[0];
-          const lastName =
-            nameParts.length > 1 ? nameParts.slice(1).join(" ") : null;
-
-          const newCustomer = await createCustomer({
-            first_name: firstName,
-            last_name: lastName || undefined,
-            email: quickCustomerEmail?.trim() || undefined,
-            phone: quickCustomerPhone?.trim() || undefined,
-            rut: quickCustomerRUT?.trim() || undefined,
-            branch_id: branchId ?? undefined,
-          });
-
-          customerId = newCustomer.id;
-          toast.success("Cliente creado exitosamente");
-        } catch (error) {
-          console.error("Error creating customer:", error);
-          toast.error("Error al crear el cliente");
-          setCreatingQuote(false);
-          return;
-        }
-      }
-
-      // Validate branch exists before creating quote
-      if (!branchId) {
-        toast.error("Selecciona una sucursal primero");
-        setCreatingQuote(false);
-        return;
-      }
-
-      const quoteData = {
-        customer_id: customerId!,
-        status: "draft" as const,
-        subtotal: totalPrice(),
-        tax_amount: 0,
-        discount_amount: discountAmount(),
-        total_amount: totalPrice() - discountAmount(),
-        currency: "CLP",
-        notes: orderFormData.notes || undefined,
-        branch_id: branchId,
-        // Prescription
-        prescription_id: selectedPrescription?.id || null,
-        // Frame
-        frame_product_id: selectedFrame?.id || null,
-        customer_own_frame: orderFormData.customer_own_frame,
-        frame_name: orderFormData.frame_name || selectedFrame?.name || null,
-        frame_brand: selectedFrame?.brand || null,
-        frame_model: selectedFrame?.name || null,
-        frame_sku: orderFormData.frame_sku || selectedFrame?.sku || null,
-        frame_price: selectedFrame?.price || 0,
-        // Lens
-        lens_family_id: orderFormData.lens_family_id,
-        lens_family_name: orderFormData.lens_family_name,
-        lens_type: orderFormData.lens_type,
-        lens_treatments: orderFormData.treatment_ids,
-        treatments_cost: treatmentsPrice,
-        labor_cost: orderFormData.labor_cost,
-        // Presbyopia solution - map "single" to "bifocal"
-        presbyopia_solution:
-          orderFormData.presbyopia_solution === "single"
-            ? ("bifocal" as const)
-            : orderFormData.presbyopia_solution === "two_separate"
-              ? ("two_separate" as const)
-              : ("progressive" as const),
-        far_lens_family_id: orderFormData.lens_family_id,
-        near_lens_family_id: orderFormData.near_lens_family_id,
-        far_lens_cost:
-          orderFormData.presbyopia_solution === "two_separate"
-            ? 45000
-            : lensPrice(),
-        near_lens_cost:
-          orderFormData.presbyopia_solution === "two_separate"
-            ? 35000
-            : (undefined as number | undefined),
-        // Near frame (for two_separate)
-        near_frame_product_id: selectedNearFrame?.id || null,
-        near_frame_name:
-          orderFormData.near_frame_name || selectedNearFrame?.name || null,
-        near_frame_brand: selectedNearFrame?.brand || null,
-        near_frame_model: selectedNearFrame?.name || null,
-        near_frame_sku:
-          orderFormData.near_frame_sku || selectedNearFrame?.sku || null,
-        near_frame_price: selectedNearFrame?.price || 0,
-        customer_own_near_frame: customerOwnNearFrame,
-      };
-
-      const quote = await createQuote(quoteData);
-      toast.success(
-        isQuickCustomer
-          ? "Cliente y presupuesto creados exitosamente"
-          : "Presupuesto creado exitosamente",
-      );
-
-      // Open print dialog (simplified - in production would open a print view)
-      window.open(`/admin/quotes/${quote.id}/print`, "_blank");
-    } catch (error) {
-      console.error("Error creating quote:", error);
-      // Log more details for debugging
-      if (error instanceof Response) {
-        error
-          .json()
-          .then((err) => {
-            console.error("API Error details:", err);
-            toast.error(err.error || "Error al crear el presupuesto");
-          })
-          .catch(() => {
-            toast.error("Error al crear el presupuesto");
-          });
-      } else if (error instanceof Error) {
-        toast.error(error.message || "Error al crear el presupuesto");
-      } else {
-        toast.error("Error al crear el presupuesto");
-      }
-    } finally {
-      setCreatingQuote(false);
-    }
+    await handleCreateQuoteAction(
+      {
+        customer,
+        quickCustomerName,
+        quickCustomerRUT,
+        quickCustomerEmail,
+        quickCustomerPhone,
+        branchId,
+        selectedPrescription,
+        selectedFrame,
+        selectedNearFrame,
+        orderFormData,
+        customerOwnNearFrame,
+        lensPrice,
+        treatmentsPrice,
+        totalPrice,
+        discountAmount,
+      },
+      { setCreatingQuote, onCustomerChange },
+    );
   };
 
   // Load quote settings on mount
   useEffect(() => {
-    const loadSettings = async () => {
-      // Load settings
-      const settings = await quoteSettingsService.get();
-
-      if (settings) {
-        setQuoteSettings(settings);
-
-        // Update treatments with settings prices
-        if (settings.treatment_prices) {
-          const tp = settings.treatment_prices;
-
-          setTreatments((prev) => {
-            let updated = prev.map((t) => {
-              const tpValue = tp[t.value as keyof typeof tp];
-              const price =
-                typeof tpValue === "number"
-                  ? tpValue
-                  : (tpValue as { price?: number })?.price;
-              return price !== undefined && price > 0
-                ? { ...t, cost: price }
-                : t;
-            });
-
-            // Agregar custom_service si está habilitado
-            if (tp.custom_service?.enabled) {
-              updated.push({
-                id: "t-custom",
-                label: tp.custom_service.name || "Servicio Extra",
-                value: "custom_service",
-                cost: tp.custom_service.price || 0,
-                category: "coating",
-                editable: true,
-              });
-            }
-
-            return updated;
-          });
-        }
-      }
-
-      // Set default labor cost
-      if (settings?.default_labor_cost && settings.default_labor_cost > 0) {
-        setOrderFormData((prev) => ({
-          ...prev,
-          labor_cost: settings.default_labor_cost,
-        }));
-      }
-    };
-    loadSettings();
+    loadSettingsAction(
+      quoteSettingsService,
+      setQuoteSettings,
+      setTreatments,
+      (cost) => setOrderFormData((prev) => ({ ...prev, labor_cost: cost })),
+    );
   }, []);
 
   // Load prescriptions when customer changes
   useEffect(() => {
-    const loadPrescriptions = async () => {
-      if (!customer?.id) {
-        setPrescriptions([]);
-        setSelectedPrescription(null);
-        return;
-      }
-
-      setLoadingPrescriptions(true);
-      try {
-        const data = await getPrescriptions(customer.id);
-        setPrescriptions(data || []);
-        // Auto-select current prescription if available
-        const current = data?.find((p) => p.is_current);
-        if (current) {
-          setSelectedPrescription(current);
-        }
-      } catch (error) {
-        console.error("Error loading prescriptions:", error);
-        setPrescriptions([]);
-      } finally {
-        setLoadingPrescriptions(false);
-      }
-    };
-    loadPrescriptions();
+    loadPrescriptionsAction(
+      customer?.id,
+      getPrescriptions,
+      setPrescriptions,
+      setSelectedPrescription,
+      setLoadingPrescriptions,
+    );
   }, [customer?.id]);
 
   // Load quote data when selectedQuote changes
@@ -597,41 +422,12 @@ export function POSAdvancedSale({
 
   // Search frames
   const searchFrames = useCallback(
-    async (search: string) => {
-      if (!branchId || search.length < 2) {
-        setFrameResults([]);
-        return;
-      }
-
-      setFrameLoading(true);
-      try {
-        const products = await searchProducts(search, branchId, "frame");
-
-        // Filter for frames (products with product_type = "frame" or category containing "marco")
-        const frames = products.filter(
-          (p) =>
-            p.product_type === "frame" ||
-            p.name.toLowerCase().includes("marco") ||
-            p.name.toLowerCase().includes("armazón") ||
-            p.name.toLowerCase().includes("anteojo"),
-        );
-
-        setFrameResults(frames);
-      } catch (error) {
-        console.error("Error creating quote:", error);
-        // Log more details for debugging
-        const err = error as { error?: string; message?: string };
-        if (err.error) {
-          toast.error(err.error);
-        } else if (err.message) {
-          toast.error(err.message);
-        } else {
-          toast.error("Error al crear el presupuesto - revisa la consola");
-        }
-      } finally {
-        setFrameLoading(false);
-      }
-    },
+    createSearchFramesAction(
+      branchId,
+      setFrameResults,
+      setFrameLoading,
+      searchProducts,
+    ),
     [branchId],
   );
 
@@ -646,33 +442,12 @@ export function POSAdvancedSale({
 
   // Search near frames (for two_separate solution)
   const searchNearFrames = useCallback(
-    async (search: string) => {
-      if (!branchId || search.length < 2) {
-        setNearFrameResults([]);
-        return;
-      }
-
-      setNearFrameLoading(true);
-      try {
-        const products = await searchProducts(search, branchId, "frame");
-
-        // Filter for frames
-        const frames = products.filter(
-          (p) =>
-            p.product_type === "frame" ||
-            p.name.toLowerCase().includes("marco") ||
-            p.name.toLowerCase().includes("armazón") ||
-            p.name.toLowerCase().includes("anteojo"),
-        );
-
-        setNearFrameResults(frames);
-      } catch (error) {
-        console.error("Error searching near frames:", error);
-        setNearFrameResults([]);
-      } finally {
-        setNearFrameLoading(false);
-      }
-    },
+    createSearchFramesAction(
+      branchId,
+      setNearFrameResults,
+      setNearFrameLoading,
+      searchProducts,
+    ),
     [branchId],
   );
 
