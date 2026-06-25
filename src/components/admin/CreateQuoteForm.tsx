@@ -1,3 +1,9 @@
+/**
+ * CreateQuoteForm — Complete Quote Creation Form
+ *
+ * Handles optical quote creation with customer, frame, lens, and pricing sections.
+ * State managed via useCreateQuoteForm hook; rendering delegated to 4 section components.
+ */
 "use client";
 
 import type { CreateQuoteFormProps } from "./CreateQuoteForm/CreateQuoteForm.types";

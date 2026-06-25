@@ -1,3 +1,9 @@
+/**
+ * Cash Register — Daily Cash Closure Management Page
+ *
+ * Handles cash closure operations, order listing, payment summaries, and actions.
+ * State managed via useCashRegister hook; rendering delegated to 4 section components.
+ */
 "use client";
 
 import { Calendar, DollarSign, RefreshCw } from "lucide-react";

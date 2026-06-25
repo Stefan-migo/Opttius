@@ -1,3 +1,9 @@
+/**
+ * Process Sale API Route — Thin Dispatcher
+ *
+ * Delegates to processSaleHandler for full business logic (validation, payment, response).
+ * Kept minimal per extraction pattern: route.ts handles rate limiting + dispatch only.
+ */
 import { NextRequest, NextResponse } from "next/server";
 import { APIError, RateLimitError } from "@/lib/api/errors";
 import { createApiErrorResponse } from "@/lib/api/response";
