@@ -114,7 +114,7 @@
 **Goal**: Single canonical services dir. Zero import cycles. All tests + build pass.
 
 - [x] T-201: Move `lib/services/errorService.ts` → `lib/api/services/errorService.ts`
-- [ ] T-202: Move `lib/services/notificationService.ts` → `lib/api/services/notificationService.ts`
+- [x] T-202: Move `lib/services/notificationService.ts` → `lib/api/services/notificationService.ts`
 - [ ] T-203: Move `lib/services/products/` → `lib/api/services/products/`
 - [ ] T-204: Update all 33 `@/lib/services/*` imports to `@/lib/api/services/*` across the codebase
 - [ ] T-205: Delete `lib/services/` (index.ts + empty directory)
