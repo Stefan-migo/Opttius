@@ -1,16 +1,5 @@
 /**
- * Products Service Index
- * Export all Products service functionality
+ * Re-export from canonical location
+ * @module lib/services/products/index
  */
-
-export { ProductsService } from "./service";
-export type {
-  ProductInsert,
-  ProductListParams,
-  ProductListResponse,
-  ProductRow,
-  ProductServiceContext,
-  ProductStockInfo,
-  ProductUpdate,
-  ProductWithRelations,
-} from "./types";
+export * from "@/lib/api/services/products/index";

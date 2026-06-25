@@ -115,7 +115,7 @@
 
 - [x] T-201: Move `lib/services/errorService.ts` → `lib/api/services/errorService.ts`
 - [x] T-202: Move `lib/services/notificationService.ts` → `lib/api/services/notificationService.ts`
-- [ ] T-203: Move `lib/services/products/` → `lib/api/services/products/`
+- [x] T-203: Move `lib/services/products/` → `lib/api/services/products/`
 - [ ] T-204: Update all 33 `@/lib/services/*` imports to `@/lib/api/services/*` across the codebase
 - [ ] T-205: Delete `lib/services/` (index.ts + empty directory)
 - [ ] T-206: Fix import cycle `lib/rate-limiting/index.ts ↔ lib/rate-limiting/middleware.ts` — extract shared types to `lib/rate-limiting/types.ts`
