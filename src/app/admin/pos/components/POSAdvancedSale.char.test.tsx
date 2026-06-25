@@ -198,6 +198,10 @@ vi.mock("@/components/ui/tabs", () => ({
 }));
 
 import { POSAdvancedSale } from "./POSAdvancedSale";
+import {
+  DEFAULT_LENS_FAMILIES,
+  DEFAULT_TREATMENTS,
+} from "./POSAdvancedSale.constants";
 import type {
   POSProduct,
   OrderFormData,
@@ -278,6 +282,25 @@ describe("POSAdvancedSale types", () => {
   it("exports POSAdvancedSaleProps type", () => {
     const p: POSAdvancedSaleProps["customer"] = null;
     expect(p).toBeNull();
+  });
+});
+
+describe("POSAdvancedSale constants", () => {
+  it("exports DEFAULT_LENS_FAMILIES with correct values", () => {
+    expect(DEFAULT_LENS_FAMILIES).toHaveLength(11);
+    expect(DEFAULT_LENS_FAMILIES[0].name).toBe("Lente Standard CR-39");
+    expect(DEFAULT_LENS_FAMILIES[0].lens_type).toBe("vision");
+    expect(
+      DEFAULT_LENS_FAMILIES.find((f) => f.id === "lf-contact-1")?.lens_type,
+    ).toBe("contact");
+  });
+
+  it("exports DEFAULT_TREATMENTS with correct values", () => {
+    expect(DEFAULT_TREATMENTS).toHaveLength(3);
+    expect(DEFAULT_TREATMENTS[0].label).toBe("Anti-reflejante");
+    expect(DEFAULT_TREATMENTS[0].cost).toBe(15000);
+    expect(DEFAULT_TREATMENTS[1].label).toBe("Anti-rayas");
+    expect(DEFAULT_TREATMENTS[2].label).toBe("Tinte");
   });
 });
 
