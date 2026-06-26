@@ -1,3 +1,4 @@
+// @deprecated Migrate to agent_conversations/agent_messages after database-reformation.
 /**
  * Memory tools for the AI Agent.
  *

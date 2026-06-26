@@ -71,6 +71,22 @@ export function getAIConfig(): AIConfig {
         defaultModel: process.env.MINIMAX_DEFAULT_MODEL || "minimax-m2.1",
         enabled: !!process.env.MINIMAX_API_KEY,
       },
+      nvidia: {
+        apiKey: process.env.NVIDIA_API_KEY,
+        baseURL:
+          process.env.NVIDIA_BASE_URL || "https://integrate.api.nvidia.com/v1",
+        defaultModel:
+          process.env.NVIDIA_DEFAULT_MODEL || "moonshotai/kimi-k2.5",
+        enabled: !!process.env.NVIDIA_API_KEY,
+      },
+      opencodezen: {
+        apiKey: process.env.OPENCODEZEN_API_KEY,
+        baseURL:
+          process.env.OPENCODEZEN_BASE_URL || "https://opencode.ai/zen/v1",
+        defaultModel:
+          process.env.OPENCODEZEN_DEFAULT_MODEL || "minimax-m2.5-free",
+        enabled: !!process.env.OPENCODEZEN_API_KEY,
+      },
     },
   };
 }

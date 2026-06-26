@@ -4,7 +4,7 @@ import { Sparkles } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 
-import { SmartContextWidget } from "@/components/ai/SmartContextWidget";
+import { AgentBubbleContainer } from "@/components/ai/AgentBubbleContainer";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import type { InsightSection } from "@/lib/ai/insights/schemas";
@@ -39,8 +39,6 @@ export function InsightsFloatingButton({
     : setInternalOpen;
 
   // When uncontrolled and no section, don't render (desktop floating bubble)
-  // When controlled (mobile nav), always render using dashboard as fallback
-  const effectiveSection = section ?? "dashboard";
   if (!isControlled && section == null) return null;
 
   return (
@@ -66,11 +64,7 @@ export function InsightsFloatingButton({
         side="right"
       >
         <div className="flex-1 overflow-hidden min-h-0">
-          <SmartContextWidget
-            section={effectiveSection}
-            variant="embedded"
-            onClose={() => setOpen(false)}
-          />
+          <AgentBubbleContainer />
         </div>
       </SheetContent>
     </Sheet>

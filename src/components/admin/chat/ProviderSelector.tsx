@@ -54,6 +54,8 @@ export function ProviderSelector({
     openrouter: "OpenRouter",
     kilocode: "Kilocode",
     minimax: "Minimax",
+    nvidia: "NVIDIA",
+    opencodezen: "OpenCodeZen",
     custom: "Custom",
   };
 

@@ -7,7 +7,6 @@ import {
   Calculator,
   CheckCircle,
   DollarSign,
-  Edit,
   Eye,
   Factory,
   FileText,
@@ -21,8 +20,7 @@ import {
   XCircle,
 } from "lucide-react";
 import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 import { PrescriptionFullDisplay } from "@/components/admin/PrescriptionFullDisplay";
@@ -36,323 +34,50 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Textarea } from "@/components/ui/textarea";
 import { getLensTypeLabel } from "@/lib/lens-type-labels";
 import { formatCurrency, formatDate } from "@/lib/utils";
 
-interface WorkOrder {
-  id: string;
-  work_order_number: string;
-  work_order_date: string;
-  customer: {
-    id: string;
-    first_name?: string;
-    last_name?: string;
-    email?: string;
-    phone?: string;
-  };
-  prescription?: unknown;
-  quote?: unknown;
-  frame_product?: unknown;
-  frame_name: string;
-  frame_brand?: string;
-  frame_model?: string;
-  frame_color?: string;
-  frame_size?: string;
-  frame_sku?: string;
-  frame_serial_number?: string;
-  lens_type: string;
-  lens_material: string;
-  lens_index?: number;
-  lens_treatments?: string[];
-  lens_tint_color?: string;
-  lens_tint_percentage?: number;
-  lab_name?: string;
-  lab_contact?: string;
-  lab_order_number?: string;
-  lab_estimated_delivery_date?: string;
-  status: string;
-  ordered_at?: string;
-  sent_to_lab_at?: string;
-  lab_started_at?: string;
-  lab_completed_at?: string;
-  received_from_lab_at?: string;
-  mounted_at?: string;
-  quality_checked_at?: string;
-  ready_at?: string;
-  delivered_at?: string;
-  cancelled_at?: string;
-  frame_cost: number;
-  lens_cost: number;
-  treatments_cost: number;
-  labor_cost: number;
-  lab_cost: number;
-  subtotal: number;
-  tax_amount: number;
-  discount_amount: number;
-  total_amount: number;
-  currency: string;
-  payment_status: string;
-  payment_method?: string;
-  deposit_amount: number;
-  balance_amount: number;
-  internal_notes?: string;
-  customer_notes?: string;
-  lab_notes?: string;
-  quality_notes?: string;
-  cancellation_reason?: string;
-  assigned_staff?: {
-    id: string;
-    first_name?: string;
-    last_name?: string;
-  };
-  pos_order_id?: string;
-  created_at: string;
-  presbyopia_solution?: string | null;
-  far_lens_family_id?: string | null;
-  near_lens_family_id?: string | null;
-  far_lens_cost?: number | null;
-  near_lens_cost?: number | null;
-  lens_family?: { id: string; name: string } | null;
-  far_lens_family?: { id: string; name: string } | null;
-  near_lens_family?: { id: string; name: string } | null;
-}
-
-interface StatusHistory {
-  id: string;
-  from_status: string;
-  to_status: string;
-  changed_at: string;
-  notes?: string;
-  changed_by_user?: {
-    first_name?: string;
-    last_name?: string;
-  };
-}
+import { useWorkOrder } from "@/hooks/useWorkOrder";
+import { WorkOrderStatusBadge } from "@/components/admin/WorkOrderStatusBadge";
+import { StatusManagementCard } from "@/components/admin/StatusManagementCard";
+import { DeliveryDialog } from "@/components/admin/DeliveryDialog";
+import { LabDeliveryCard } from "@/components/admin/LabDeliveryCard";
 
 export default function WorkOrderDetailPage() {
   const router = useRouter();
-  const params = useParams();
-  const workOrderId = params.id as string;
 
-  const [workOrder, setWorkOrder] = useState<WorkOrder | null>(null);
-  const [statusHistory, setStatusHistory] = useState<StatusHistory[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [updatingStatus, setUpdatingStatus] = useState(false);
-  const [showStatusDialog, setShowStatusDialog] = useState(false);
-  const [newStatus, setNewStatus] = useState("");
-  const [statusDialogOpenedFromTimeline, setStatusDialogOpenedFromTimeline] =
-    useState(false);
-  const [statusNotes, setStatusNotes] = useState("");
-  const [labInfo, setLabInfo] = useState({
-    lab_name: "",
-    lab_contact: "",
-    lab_order_number: "",
-    lab_estimated_delivery_date: "",
-  });
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [deleting, setDeleting] = useState(false);
-  const [deliveryDialogOpen, setDeliveryDialogOpen] = useState(false);
-  const [delivering, setDelivering] = useState(false);
-  const [deliveryError, setDeliveryError] = useState<{
-    requiresPayment: boolean;
-    balance?: number;
-    orderId?: string;
-    message?: string;
-  } | null>(null);
-  const [orgName, setOrgName] = useState<string>("Opttius");
-
-  useEffect(() => {
-    if (workOrderId) {
-      fetchWorkOrder();
-    }
-  }, [workOrderId]);
-
-  useEffect(() => {
-    fetch("/api/admin/organizations/current")
-      .then((r) => (r.ok ? r.json() : null))
-      .then((data) => {
-        if (data?.organization?.name) setOrgName(data.organization.name);
-      })
-      .catch(() => {});
-  }, []);
-
-  const fetchWorkOrder = async () => {
-    try {
-      setLoading(true);
-      const response = await fetch(`/api/admin/work-orders/${workOrderId}`);
-      if (!response.ok) {
-        throw new Error("Failed to fetch work order");
-      }
-
-      const data = await response.json();
-      setWorkOrder(data.workOrder);
-      setStatusHistory(data.statusHistory || []);
-
-      // Set lab info if available
-      if (data.workOrder) {
-        setLabInfo({
-          lab_name: data.workOrder.lab_name || "",
-          lab_contact: data.workOrder.lab_contact || "",
-          lab_order_number: data.workOrder.lab_order_number || "",
-          lab_estimated_delivery_date:
-            data.workOrder.lab_estimated_delivery_date || "",
-        });
-      }
-    } catch (error) {
-      console.error("Error fetching work order:", error);
-      toast.error("Error al cargar el trabajo");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleStatusUpdate = async () => {
-    if (!workOrder || !newStatus) return;
-
-    // If trying to deliver, use the deliver endpoint instead
-    if (newStatus === "delivered") {
-      setShowStatusDialog(false);
-      setDeliveryDialogOpen(true);
-      return;
-    }
-
-    setUpdatingStatus(true);
-    try {
-      const updateData: unknown = {
-        status: newStatus,
-        notes: statusNotes,
-      };
-
-      // Add lab info if sending to lab
-      if (newStatus === "sent_to_lab") {
-        updateData.lab_name = labInfo.lab_name;
-        updateData.lab_contact = labInfo.lab_contact;
-        updateData.lab_order_number = labInfo.lab_order_number;
-        updateData.lab_estimated_delivery_date =
-          labInfo.lab_estimated_delivery_date;
-      }
-
-      const response = await fetch(
-        `/api/admin/work-orders/${workOrderId}/status`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(updateData),
-        },
-      );
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || "Error al actualizar estado");
-      }
-
-      toast.success("Estado actualizado exitosamente");
-      setShowStatusDialog(false);
-      setNewStatus("");
-      setStatusNotes("");
-      fetchWorkOrder();
-    } catch (error: unknown) {
-      console.error("Error updating status:", error);
-      toast.error(error.message || "Error al actualizar estado");
-    } finally {
-      setUpdatingStatus(false);
-    }
-  };
-
-  const handleDeliver = async () => {
-    if (!workOrder) return;
-
-    setDelivering(true);
-    setDeliveryError(null);
-    try {
-      const response = await fetch(
-        `/api/admin/work-orders/${workOrderId}/deliver`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-        },
-      );
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        // Check if it's a payment requirement error
-        if (data.requiresPayment) {
-          setDeliveryError({
-            requiresPayment: true,
-            balance: data.balance,
-            orderId: data.orderId,
-            message: data.message,
-          });
-          setDelivering(false);
-          return;
-        }
-        throw new Error(
-          data.error || data.message || "Error al entregar trabajo",
-        );
-      }
-
-      // Success - even if workOrder is null (backend will handle refresh)
-      toast.success(data.message || "Trabajo entregado exitosamente");
-      setDeliveryDialogOpen(false);
-      setDeliveryError(null);
-
-      // Refresh work order data
-      if (data.workOrder) {
-        setWorkOrder(data.workOrder);
-      } else {
-        // Backend couldn't fetch updated data, but delivery was successful
-        // Refresh manually
-        await fetchWorkOrder();
-      }
-    } catch (error: unknown) {
-      console.error("Error delivering work order:", error);
-      toast.error(error.message || "Error al entregar trabajo");
-    } finally {
-      setDelivering(false);
-    }
-  };
-
-  const handleDelete = async () => {
-    if (!workOrder) return;
-
-    setDeleting(true);
-    try {
-      const response = await fetch(`/api/admin/work-orders/${workOrderId}`, {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ allowDelivered: true }),
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || "Error al eliminar trabajo");
-      }
-
-      toast.success("Trabajo eliminado exitosamente");
-      router.push("/admin/work-orders");
-    } catch (error: unknown) {
-      console.error("Error deleting work order:", error);
-      toast.error(error.message || "Error al eliminar trabajo");
-      setDeleteDialogOpen(false);
-    } finally {
-      setDeleting(false);
-    }
-  };
+  const {
+    workOrder,
+    statusHistory,
+    loading,
+    updatingStatus,
+    showStatusDialog,
+    newStatus,
+    statusDialogOpenedFromTimeline,
+    statusNotes,
+    labInfo,
+    deleteDialogOpen,
+    deleting,
+    deliveryDialogOpen,
+    delivering,
+    deliveryError,
+    setShowStatusDialog,
+    setNewStatus,
+    setStatusDialogOpenedFromTimeline,
+    setStatusNotes,
+    setLabInfo,
+    setDeleteDialogOpen,
+    setDeliveryDialogOpen,
+    setDeliveryError,
+    handleStatusUpdate,
+    handleDeliver,
+    handleDelete,
+    handlePrint,
+    getAllStatuses,
+    getStatusLabel,
+  } = useWorkOrder();
 
   const getStatusBadge = (status: string) => {
     const config: Record<
@@ -449,221 +174,6 @@ export default function WorkOrderDetailPage() {
     );
   };
 
-  // Get all available statuses (removed lab-specific statuses)
-  const getAllStatuses = (): Array<{ value: string; label: string }> => {
-    return [
-      { value: "quote", label: "Presupuesto" },
-      { value: "ordered", label: "Ordenado" },
-      { value: "sent_to_lab", label: "Enviado al Lab" },
-      { value: "received_from_lab", label: "Recibido del Lab" },
-      { value: "mounted", label: "Montado" },
-      { value: "quality_check", label: "Control de Calidad" },
-      { value: "ready_for_pickup", label: "Listo para Retiro" },
-      { value: "delivered", label: "Entregado" },
-      { value: "cancelled", label: "Cancelado" },
-      { value: "returned", label: "Devuelto" },
-    ];
-  };
-
-  const getStatusLabel = (status: string): string => {
-    const labels: Record<string, string> = {
-      quote: "Presupuesto",
-      ordered: "Ordenado",
-      sent_to_lab: "Enviado al Lab",
-      received_from_lab: "Recibido del Lab",
-      mounted: "Montado",
-      quality_check: "Control de Calidad",
-      ready_for_pickup: "Listo para Retiro",
-      delivered: "Entregado",
-      cancelled: "Cancelado",
-      returned: "Devuelto",
-    };
-
-    return labels[status] || status;
-  };
-
-  const handlePrint = useCallback(() => {
-    if (!workOrder) return;
-
-    const printWindow = window.open("", "_blank");
-    if (!printWindow) {
-      toast.error("Por favor, permite ventanas emergentes para imprimir");
-      return;
-    }
-
-    const customerName =
-      workOrder.customer?.first_name && workOrder.customer?.last_name
-        ? `${workOrder.customer.first_name} ${workOrder.customer.last_name}`
-        : "Sin nombre";
-
-    const statusLabels: Record<string, string> = {
-      quote: "Presupuesto",
-      ordered: "Ordenado",
-      sent_to_lab: "Enviado al Lab",
-      received_from_lab: "Recibido del Lab",
-      mounted: "Montado",
-      quality_check: "Control de Calidad",
-      ready_for_pickup: "Listo para Retiro",
-      delivered: "Entregado",
-      cancelled: "Cancelado",
-      returned: "Devuelto",
-    };
-
-    const rx = (v: number | null | undefined) =>
-      v !== null && v !== undefined ? `${v > 0 ? "+" : ""}${v}` : "-";
-
-    const p = workOrder.prescription;
-    const rxSection = p
-      ? `
-      <div class="section">
-        <h2>Receta (Para Laboratorio)</h2>
-        <div class="rx-grid">
-          <div>
-            <strong>OD:</strong> Esf ${rx(p.od_sphere)} | Cil ${rx(p.od_cylinder)} | Eje ${p.od_axis ?? "-"}° | Add ${p.od_add ?? "-"} | PD ${p.od_pd ?? "-"} mm${p.od_near_pd != null ? ` | PD Cerca ${p.od_near_pd} mm` : ""}${(p.od_prism ?? p.prism_od) != null ? ` | Prisma ${p.od_prism ?? p.prism_od}` : ""}${p.od_base != null ? ` | Base ${p.od_base}` : ""}
-          </div>
-          <div>
-            <strong>OS:</strong> Esf ${rx(p.os_sphere)} | Cil ${rx(p.os_cylinder)} | Eje ${p.os_axis ?? "-"}° | Add ${p.os_add ?? "-"} | PD ${p.os_pd ?? "-"} mm${p.os_near_pd != null ? ` | PD Cerca ${p.os_near_pd} mm` : ""}${(p.os_prism ?? p.prism_os) != null ? ` | Prisma ${p.os_prism ?? p.prism_os}` : ""}${p.os_base != null ? ` | Base ${p.os_base}` : ""}
-          </div>
-        </div>
-        ${
-          p.frame_pd != null || p.height_segmentation != null || p.issued_by
-            ? `
-        <div class="rx-extra mt-2">
-          ${p.frame_pd != null ? `<span>DP Marco: ${p.frame_pd} mm</span>` : ""}
-          ${p.height_segmentation != null ? `<span>Altura Segmento: ${p.height_segmentation} mm</span>` : ""}
-          ${p.issued_by ? `<span>Prescrito por: ${p.issued_by}${p.issued_by_license ? ` (${p.issued_by_license})` : ""}</span>` : ""}
-        </div>
-        `
-            : ""
-        }
-        ${p.notes ? `<p class="mt-2"><em>Notas:</em> ${String(p.notes).replace(/\n/g, "<br>")}</p>` : ""}
-      </div>
-    `
-      : "";
-
-    const labSection = workOrder.lab_name
-      ? `
-      <div class="section">
-        <h2>Laboratorio</h2>
-        <p><strong>${workOrder.lab_name}</strong></p>
-        ${workOrder.lab_order_number ? `<p>Orden Lab: ${workOrder.lab_order_number}</p>` : ""}
-      </div>
-    `
-      : "";
-
-    const notesSection =
-      workOrder.internal_notes || workOrder.lab_notes
-        ? `
-      <div class="section">
-        <h2>Notas</h2>
-        ${workOrder.internal_notes ? `<p>${String(workOrder.internal_notes).replace(/\n/g, "<br>")}</p>` : ""}
-        ${workOrder.lab_notes ? `<p><em>Lab:</em> ${String(workOrder.lab_notes).replace(/\n/g, "<br>")}</p>` : ""}
-      </div>
-    `
-        : "";
-
-    const treatmentsList =
-      workOrder.lens_treatments && workOrder.lens_treatments.length > 0
-        ? workOrder.lens_treatments.join(", ")
-        : "Ninguno";
-
-    const printContent = `
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <title>Orden de Trabajo ${workOrder.work_order_number}</title>
-          <style>
-            body { font-family: Arial, sans-serif; max-width: 210mm; margin: 0 auto; padding: 20px; color: #333; }
-            .header { text-align: center; border-bottom: 2px solid #333; padding-bottom: 16px; margin-bottom: 24px; }
-            .header h1 { margin: 0; font-size: 20px; }
-            .meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-            .badge { display: inline-block; padding: 4px 8px; background: #e5e7eb; border-radius: 4px; font-size: 12px; margin-right: 8px; }
-            .section { margin-bottom: 20px; padding: 12px; background: #f9fafb; border-radius: 6px; border: 1px solid #e5e7eb; }
-            .section h2 { margin: 0 0 12px 0; font-size: 14px; color: #6b7280; text-transform: uppercase; }
-            .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-            .rx-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 12px; }
-            .total-row { font-weight: bold; font-size: 18px; border-top: 2px solid #333; padding-top: 12px; margin-top: 12px; }
-            .footer { margin-top: 24px; text-align: center; font-size: 11px; color: #6b7280; }
-          </style>
-        </head>
-        <body>
-          <div class="header">
-            <h1>${orgName}</h1>
-            <p style="margin: 8px 0 0 0; font-size: 14px;">Orden de Trabajo #${workOrder.work_order_number}</p>
-          </div>
-
-          <div class="meta">
-            <span>${formatDate(workOrder.work_order_date, { format: "long", locale: "es-CL" })}</span>
-            <span>
-              <span class="badge">${statusLabels[workOrder.status] || workOrder.status}</span>
-              <span class="badge">Pago: ${workOrder.payment_status}</span>
-            </span>
-          </div>
-
-          <div class="section">
-            <h2>Cliente</h2>
-            <p><strong>${customerName}</strong></p>
-            ${workOrder.customer?.email ? `<p>${workOrder.customer.email}</p>` : ""}
-            ${workOrder.customer?.phone ? `<p>${workOrder.customer.phone}</p>` : ""}
-          </div>
-
-          <div class="info-grid">
-            <div class="section">
-              <h2>Marco</h2>
-              <p><strong>${workOrder.frame_name}</strong></p>
-              ${workOrder.frame_brand ? `<p>Marca: ${workOrder.frame_brand}</p>` : ""}
-              ${workOrder.frame_model ? `<p>Modelo: ${workOrder.frame_model}</p>` : ""}
-              ${workOrder.frame_serial_number ? `<p>Serie: ${workOrder.frame_serial_number}</p>` : ""}
-            </div>
-            <div class="section">
-              <h2>Lente</h2>
-              <p><strong>${workOrder.lens_type}</strong></p>
-              <p>Material: ${workOrder.lens_material}</p>
-              ${workOrder.lens_index ? `<p>Índice: ${workOrder.lens_index}</p>` : ""}
-              <p>Tratamientos: ${treatmentsList}</p>
-            </div>
-          </div>
-
-          ${rxSection}
-          ${labSection}
-          ${notesSection}
-
-          <div class="section">
-            <h2>Total</h2>
-            <div class="total-row">${formatCurrency(workOrder.total_amount)}</div>
-            ${
-              workOrder.deposit_amount && workOrder.deposit_amount > 0
-                ? `
-              <p>Depósito: ${formatCurrency(workOrder.deposit_amount)}</p>
-              ${
-                workOrder.balance_amount !== undefined &&
-                workOrder.balance_amount > 0
-                  ? `
-                <p style="color: #ea580c; font-weight: 600;">Saldo Pendiente: ${formatCurrency(workOrder.balance_amount)}</p>
-              `
-                  : ""
-              }
-            `
-                : ""
-            }
-          </div>
-
-          <div class="footer">
-            Documento generado el ${formatDate(new Date(), { locale: "es-CL" })}
-          </div>
-        </body>
-      </html>
-    `;
-
-    printWindow.document.write(printContent);
-    printWindow.document.close();
-
-    setTimeout(() => {
-      printWindow.print();
-      printWindow.onafterprint = () => printWindow.close();
-    }, 250);
-  }, [workOrder, orgName]);
-
   const getPaymentStatusBadge = (status: string) => {
     const config: Record<string, { variant: unknown; label: string }> = {
       pending: { variant: "outline", label: "Pendiente" },
@@ -753,190 +263,27 @@ export default function WorkOrderDetailPage() {
         {/* Row 3: Badge + Actions */}
         <div className="flex flex-wrap items-center gap-2">
           <div className="relative inline-block">
-            <Badge className="bg-green-500 hover:bg-green-600 text-white border-green-600 font-semibold flex items-center gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 shadow-md text-xs sm:text-sm">
-              {(() => {
-                const statusConfig: Record<
-                  string,
-                  { label: string; icon: unknown }
-                > = {
-                  quote: { label: "Presupuesto", icon: FileText },
-                  ordered: { label: "Ordenado", icon: Package },
-                  sent_to_lab: { label: "Enviado al Lab", icon: Send },
-                  received_from_lab: { label: "Recibido", icon: Truck },
-                  mounted: { label: "Montado", icon: Package },
-                  quality_check: {
-                    label: "Control Calidad",
-                    icon: CheckCircle,
-                  },
-                  ready_for_pickup: {
-                    label: "Listo para Retiro",
-                    icon: CheckCircle,
-                  },
-                  delivered: { label: "Entregado", icon: CheckCircle },
-                  cancelled: { label: "Cancelado", icon: XCircle },
-                  returned: { label: "Devuelto", icon: AlertCircle },
-                };
-                const config = statusConfig[workOrder.status] || {
-                  label: workOrder.status,
-                  icon: Package,
-                };
-                const Icon = config.icon;
-                return (
-                  <>
-                    <Icon className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
-                    <span>{config.label}</span>
-                    <span className="hidden sm:inline ml-1.5 text-xs bg-green-600 px-2 py-0.5 rounded-full font-bold border border-green-700">
-                      ACTUAL
-                    </span>
-                  </>
-                );
-              })()}
-            </Badge>
+            <WorkOrderStatusBadge status={workOrder.status} />
           </div>
-          <Dialog
-            open={showStatusDialog}
-            onOpenChange={(open) => {
-              setShowStatusDialog(open);
-              if (!open) setStatusDialogOpenedFromTimeline(false);
-            }}
-          >
-            {availableStatuses.length > 0 && (
-              <DialogTrigger asChild>
-                <Button
-                  aria-label="Cambiar estado"
-                  className="h-9 min-w-0 sm:w-auto sm:px-3 gap-1.5"
-                  size="sm"
-                  variant="outline"
-                  onClick={() => setStatusDialogOpenedFromTimeline(false)}
-                >
-                  <Edit className="h-4 w-4 shrink-0" />
-                  <span className="text-xs sm:text-sm whitespace-nowrap">
-                    <span className="sm:hidden">Cambiar</span>
-                    <span className="hidden sm:inline">Cambiar Estado</span>
-                  </span>
-                </Button>
-              </DialogTrigger>
-            )}
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Cambiar Estado del Trabajo</DialogTitle>
-                <DialogDescription>
-                  Selecciona el nuevo estado del trabajo. Puedes cambiar a
-                  cualquier estado disponible.
-                </DialogDescription>
-              </DialogHeader>
-              <div className="space-y-4">
-                <div>
-                  <Label>Nuevo Estado</Label>
-                  <Select value={newStatus} onValueChange={setNewStatus}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecciona el nuevo estado" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {statusOptions.map((status) => (
-                        <SelectItem key={status.value} value={status.value}>
-                          {status.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {newStatus === "sent_to_lab" && (
-                  <div className="space-y-4 border-t pt-4">
-                    <div>
-                      <Label>Nombre del Laboratorio *</Label>
-                      <Input
-                        placeholder="Ej: Laboratorio Óptico Central"
-                        value={labInfo.lab_name}
-                        onChange={(e) =>
-                          setLabInfo((prev) => ({
-                            ...prev,
-                            lab_name: e.target.value,
-                          }))
-                        }
-                      />
-                    </div>
-                    <div>
-                      <Label>Contacto del Laboratorio</Label>
-                      <Input
-                        placeholder="Teléfono o email"
-                        value={labInfo.lab_contact}
-                        onChange={(e) =>
-                          setLabInfo((prev) => ({
-                            ...prev,
-                            lab_contact: e.target.value,
-                          }))
-                        }
-                      />
-                    </div>
-                    <div>
-                      <Label>Número de Orden del Lab</Label>
-                      <Input
-                        placeholder="Número asignado por el laboratorio"
-                        value={labInfo.lab_order_number}
-                        onChange={(e) =>
-                          setLabInfo((prev) => ({
-                            ...prev,
-                            lab_order_number: e.target.value,
-                          }))
-                        }
-                      />
-                    </div>
-                    <div>
-                      <Label>Fecha Estimada de Entrega</Label>
-                      <Input
-                        type="date"
-                        value={labInfo.lab_estimated_delivery_date}
-                        onChange={(e) =>
-                          setLabInfo((prev) => ({
-                            ...prev,
-                            lab_estimated_delivery_date: e.target.value,
-                          }))
-                        }
-                      />
-                    </div>
-                  </div>
-                )}
-
-                <div>
-                  <Label>Notas (opcional)</Label>
-                  <Textarea
-                    placeholder="Notas sobre el cambio de estado..."
-                    rows={3}
-                    value={statusNotes}
-                    onChange={(e) => setStatusNotes(e.target.value)}
-                  />
-                </div>
-
-                <div className="flex justify-end gap-2">
-                  <Button
-                    variant="outline"
-                    onClick={() => setShowStatusDialog(false)}
-                  >
-                    Cancelar
-                  </Button>
-                  <Button
-                    disabled={
-                      updatingStatus ||
-                      !newStatus ||
-                      (newStatus === "sent_to_lab" && !labInfo.lab_name)
-                    }
-                    onClick={handleStatusUpdate}
-                  >
-                    {updatingStatus ? (
-                      <>
-                        <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                        Actualizando...
-                      </>
-                    ) : (
-                      "Actualizar Estado"
-                    )}
-                  </Button>
-                </div>
-              </div>
-            </DialogContent>
-          </Dialog>
+          <StatusManagementCard
+            workOrder={workOrder}
+            showStatusDialog={showStatusDialog}
+            setShowStatusDialog={setShowStatusDialog}
+            newStatus={newStatus}
+            setNewStatus={setNewStatus}
+            statusDialogOpenedFromTimeline={statusDialogOpenedFromTimeline}
+            setStatusDialogOpenedFromTimeline={
+              setStatusDialogOpenedFromTimeline
+            }
+            statusNotes={statusNotes}
+            setStatusNotes={setStatusNotes}
+            labInfo={labInfo}
+            setLabInfo={setLabInfo}
+            updatingStatus={updatingStatus}
+            availableStatuses={availableStatuses}
+            statusOptions={statusOptions}
+            handleStatusUpdate={handleStatusUpdate}
+          />
           <Button
             aria-label="Imprimir"
             className="h-9 w-9 sm:w-auto sm:px-3"
@@ -1397,11 +744,13 @@ export default function WorkOrderDetailPage() {
                     {workOrder.lens_treatments &&
                       workOrder.lens_treatments.length > 0 && (
                         <div className="flex flex-wrap gap-1 mt-1">
-                          {workOrder.lens_treatments.map((treatment, idx) => (
-                            <Badge key={idx} variant="outline">
-                              {treatment}
-                            </Badge>
-                          ))}
+                          {workOrder.lens_treatments.map(
+                            (treatment: string, idx: number) => (
+                              <Badge key={idx} variant="outline">
+                                {treatment}
+                              </Badge>
+                            ),
+                          )}
                         </div>
                       )}
                   </div>
@@ -1411,46 +760,7 @@ export default function WorkOrderDetailPage() {
           </Card>
 
           {/* Lab Information */}
-          {workOrder.lab_name && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Factory className="h-5 w-5 mr-2" />
-                  Información del Laboratorio
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                <div>
-                  <p className="text-sm text-admin-text-tertiary">Nombre</p>
-                  <p className="font-medium">{workOrder.lab_name}</p>
-                </div>
-                {workOrder.lab_contact && (
-                  <div>
-                    <p className="text-sm text-admin-text-tertiary">Contacto</p>
-                    <p className="font-medium">{workOrder.lab_contact}</p>
-                  </div>
-                )}
-                {workOrder.lab_order_number && (
-                  <div>
-                    <p className="text-sm text-admin-text-tertiary">
-                      Número de Orden
-                    </p>
-                    <p className="font-medium">{workOrder.lab_order_number}</p>
-                  </div>
-                )}
-                {workOrder.lab_estimated_delivery_date && (
-                  <div>
-                    <p className="text-sm text-admin-text-tertiary">
-                      Fecha Estimada
-                    </p>
-                    <p className="font-medium">
-                      {formatDate(workOrder.lab_estimated_delivery_date)}
-                    </p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          )}
+          <LabDeliveryCard workOrder={workOrder} />
         </TabsContent>
 
         {/* Details Tab */}
@@ -1665,46 +975,7 @@ export default function WorkOrderDetailPage() {
           </Card>
 
           {/* Lab Information */}
-          {workOrder.lab_name && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Factory className="h-5 w-5 mr-2" />
-                  Información del Laboratorio
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                <div>
-                  <p className="text-sm text-admin-text-tertiary">Nombre</p>
-                  <p className="font-medium">{workOrder.lab_name}</p>
-                </div>
-                {workOrder.lab_contact && (
-                  <div>
-                    <p className="text-sm text-admin-text-tertiary">Contacto</p>
-                    <p className="font-medium">{workOrder.lab_contact}</p>
-                  </div>
-                )}
-                {workOrder.lab_order_number && (
-                  <div>
-                    <p className="text-sm text-admin-text-tertiary">
-                      Número de Orden del Lab
-                    </p>
-                    <p className="font-medium">{workOrder.lab_order_number}</p>
-                  </div>
-                )}
-                {workOrder.lab_estimated_delivery_date && (
-                  <div>
-                    <p className="text-sm text-admin-text-tertiary">
-                      Fecha Estimada de Entrega
-                    </p>
-                    <p className="font-medium">
-                      {formatDate(workOrder.lab_estimated_delivery_date)}
-                    </p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          )}
+          <LabDeliveryCard workOrder={workOrder} />
 
           {/* Notes */}
           <Card>
@@ -2031,114 +1302,15 @@ export default function WorkOrderDetailPage() {
       </Dialog>
 
       {/* Delivery Dialog with Balance Check */}
-      <Dialog open={deliveryDialogOpen} onOpenChange={setDeliveryDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Truck className="h-5 w-5" />
-              Entregar Trabajo
-            </DialogTitle>
-            <DialogDescription>
-              {deliveryError?.requiresPayment ? (
-                <div className="space-y-4">
-                  <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                    <div className="flex items-start gap-3">
-                      <AlertCircle className="h-5 w-5 text-red-600 mt-0.5" />
-                      <div className="flex-1">
-                        <p className="font-semibold text-red-800 mb-2">
-                          Saldo Pendiente Detectado
-                        </p>
-                        <p className="text-red-700 mb-3">
-                          {deliveryError.message}
-                        </p>
-                        <div className="bg-white rounded p-3 border border-red-200">
-                          <p className="text-sm text-red-600 font-medium mb-1">
-                            Saldo Pendiente:
-                          </p>
-                          <p className="text-2xl font-bold text-red-700">
-                            {formatCurrency(deliveryError.balance || 0)}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <p className="text-sm text-gray-600">
-                    El cliente debe pagar el saldo pendiente antes de poder
-                    entregar el trabajo.
-                  </p>
-                </div>
-              ) : (
-                <div>
-                  <p className="mb-4">
-                    ¿Está seguro de que desea marcar este trabajo como
-                    entregado?
-                  </p>
-                  {workOrder && workOrder.pos_order_id && (
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                      <p className="text-sm text-blue-800">
-                        El sistema verificará automáticamente que no haya saldo
-                        pendiente antes de permitir la entrega.
-                      </p>
-                    </div>
-                  )}
-                </div>
-              )}
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button
-              disabled={delivering}
-              variant="outline"
-              onClick={() => {
-                setDeliveryDialogOpen(false);
-                setDeliveryError(null);
-              }}
-            >
-              Cancelar
-            </Button>
-            {deliveryError?.requiresPayment ? (
-              <Button
-                onClick={() => {
-                  setDeliveryDialogOpen(false);
-                  setDeliveryError(null);
-                  // Redirect to POS to collect payment
-                  if (deliveryError.orderId) {
-                    router.push(
-                      `/admin/pos?orderId=${deliveryError.orderId}&collectPayment=true`,
-                    );
-                  } else {
-                    toast.info(
-                      "Redirigiendo al POS para cobrar el saldo pendiente...",
-                    );
-                    router.push("/admin/pos");
-                  }
-                }}
-              >
-                <DollarSign className="h-4 w-4 mr-2" />
-                Cobrar Saldo Pendiente
-              </Button>
-            ) : (
-              <Button
-                className="bg-green-600 hover:bg-green-700"
-                disabled={delivering}
-                onClick={handleDeliver}
-              >
-                {delivering ? (
-                  <>
-                    <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                    Entregando...
-                  </>
-                ) : (
-                  <>
-                    <CheckCircle className="h-4 w-4 mr-2" />
-                    Confirmar Entrega
-                  </>
-                )}
-              </Button>
-            )}
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <DeliveryDialog
+        deliveryDialogOpen={deliveryDialogOpen}
+        setDeliveryDialogOpen={setDeliveryDialogOpen}
+        deliveryError={deliveryError}
+        setDeliveryError={setDeliveryError}
+        delivering={delivering}
+        workOrder={workOrder}
+        handleDeliver={handleDeliver}
+      />
     </div>
   );
 }

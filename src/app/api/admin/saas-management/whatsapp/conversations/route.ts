@@ -1,3 +1,4 @@
+// @deprecated Migrate to agent_conversations/agent_messages after database-reformation.
 /**
  * GET /api/admin/saas-management/whatsapp/conversations
  * Lista sesiones WhatsApp (root solo)

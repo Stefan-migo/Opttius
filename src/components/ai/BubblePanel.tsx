@@ -23,14 +23,16 @@ interface BubblePanelProps {
   onClose: () => void;
   onToggleDock: () => void;
   onAction?: (action: string, params?: Record<string, unknown>) => void;
+  onPreferences?: () => void;
+  onAttach?: (file: { name: string; content: string }) => void;
   suggestions?: Suggestion[];
   inputDisabled?: boolean;
 }
 
 /**
  * Agent Bubble expanded panel. Two visual modes:
- * - `floating`: 380px overlay panel, max-h-[600px]
- * - `docked`: fixed side panel 400px, full viewport height
+ * - `floating`: 480px overlay panel, max-h-[720px]
+ * - `docked`: fixed side panel 460px, full viewport height
  */
 export function BubblePanel({
   state,
@@ -42,6 +44,8 @@ export function BubblePanel({
   onClose,
   onToggleDock,
   onAction,
+  onPreferences,
+  onAttach,
   suggestions,
   inputDisabled = false,
 }: BubblePanelProps) {
@@ -52,8 +56,8 @@ export function BubblePanel({
       className={cn(
         "flex flex-col overflow-hidden rounded-xl bg-white shadow-2xl transition-all duration-300",
         isDocked
-          ? "fixed right-0 top-0 z-40 h-full w-[400px] rounded-none border-l border-gray-200"
-          : "fixed bottom-24 right-6 z-50 w-[380px] max-h-[600px]",
+          ? "fixed right-0 top-0 z-40 h-full w-[460px] rounded-none border-l border-gray-200"
+          : "fixed bottom-24 right-6 z-50 w-[480px] max-h-[720px]",
       )}
     >
       <BubbleHeader
@@ -61,6 +65,7 @@ export function BubblePanel({
         title={title}
         onClose={onClose}
         onToggleDock={onToggleDock}
+        onPreferences={onPreferences}
       />
 
       <BubbleMessages messages={messages} onAction={onAction} />
@@ -74,6 +79,7 @@ export function BubblePanel({
         value={inputValue}
         onChange={onInputChange}
         onSend={onSend}
+        onAttach={onAttach}
         disabled={inputDisabled}
         placeholder={
           state === "repose"

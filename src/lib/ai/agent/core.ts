@@ -1,3 +1,4 @@
+// @deprecated Migrate to agent_conversations/agent_messages after database-reformation.
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { LLMFactory } from "../factory";
@@ -10,11 +11,13 @@ import type { OrganizationalMemory } from "../memory/organizational";
 import { convertToolsToLLMTools, getAllTools } from "../tools";
 import type { ToolExecutionContext } from "../tools/types";
 import type {
+  Block,
   LLMMessage,
   LLMProvider,
   LLMStreamChunk,
   ToolCall,
 } from "../types";
+import type { AgentScreenContext } from "../types";
 import { logAIUsage } from "../usage-logger";
 import { getAgentConfig } from "./config";
 import { ToolExecutor } from "./tool-executor";
@@ -24,6 +27,7 @@ export interface AgentConfig {
   maxSteps?: number;
   temperature?: number;
   maxTokens?: number;
+  timeout?: number; // LLM call timeout in ms (Phase 4)
   enableToolCalling?: boolean;
   enabledTools?: string[];
   requireConfirmationForDestructiveActions?: boolean;
@@ -551,6 +555,7 @@ INSTRUCCIONES:
           model: this.model || result.config.model,
           temperature: config.temperature,
           maxTokens: config.maxTokens,
+          timeout: this.customConfig?.timeout ?? 30000,
         };
       } catch (error: unknown) {
         yield {
@@ -755,7 +760,10 @@ INSTRUCCIONES:
           }
 
           for (const toolCall of collectedToolCalls) {
-            try {
+            // ponytail: the original try-catch is now handled internally by the retry loop below.
+            // Errors are caught and reported via lastError, so the outer try-catch is replaced
+            // by a plain block — any unexpected error hits the stream-level catch at stepCount.
+            {
               // Validate tool call name
               if (!toolCall.name || !toolCall.name.trim()) {
                 const errorMsg = `Error: Nombre de herramienta inválido o vacío`;
@@ -821,37 +829,63 @@ INSTRUCCIONES:
                 );
               }
 
-              const result = await executor.executeTool(
-                toolName,
-                toolCall.arguments,
-              );
+              // ponytail: simple retry-once — exponential backoff if retries > 1 needed
+              let lastError: string | undefined;
+              for (let attempt = 0; attempt < 2; attempt++) {
+                try {
+                  const result = await executor.executeTool(
+                    toolName,
+                    toolCall.arguments,
+                  );
 
-              const toolResultMessage = result.success
-                ? JSON.stringify(result.data || result.message || "Success")
-                : `Error: ${result.error || "Unknown error"}`;
+                  if (result.success) {
+                    this.messages.push({
+                      role: "tool",
+                      content: JSON.stringify(
+                        result.data || result.message || "Success",
+                      ),
+                      toolCallId: toolCall.id,
+                      name: toolName,
+                    });
+                    console.log(
+                      `[Agent] Tool ${toolName} completed successfully`,
+                    );
+                    break; // success — exit retry loop
+                  }
 
-              this.messages.push({
-                role: "tool",
-                content: toolResultMessage,
-                toolCallId: toolCall.id,
-                name: toolName,
-              });
+                  lastError = result.error || "Unknown error";
+                  console.error(
+                    `[Agent] Tool ${toolName} failed (attempt ${attempt + 1}):`,
+                    lastError,
+                  );
 
-              if (result.success) {
-                // Tool success - LLM receives result via messages, no user-facing yield
-                console.log(`[Agent] Tool ${toolName} completed successfully`);
-              } else {
-                // Tool error - LLM receives it via messages, can include in final response
-                console.error(`[Agent] Tool ${toolName} failed:`, result.error);
+                  if (attempt === 0) {
+                    // Retry once
+                    console.log(`[Agent] Retrying tool ${toolName}...`);
+                    continue;
+                  }
+                } catch (innerError: unknown) {
+                  lastError =
+                    (innerError as Error).message || "Error desconocido";
+                  console.error(
+                    `[Agent] Tool ${toolName} threw (attempt ${attempt + 1}):`,
+                    lastError,
+                  );
+
+                  if (attempt === 0) {
+                    continue; // Retry once
+                  }
+                  break;
+                }
               }
-            } catch (toolError: unknown) {
-              const toolName =
-                toolCall.name?.trim() || "herramienta desconocida";
-              const errorMsg = `Error ejecutando ${toolName}: ${toolError.message}`;
-              console.error("[Agent] Tool execution error:", errorMsg);
+
+              // After all attempts: push tool result or error message
+              const finalMsg = lastError
+                ? `Error ejecutando ${toolName}: ${lastError}`
+                : `Ejecutado: ${toolName}`;
               this.messages.push({
                 role: "tool",
-                content: errorMsg,
+                content: finalMsg,
                 toolCallId: toolCall.id,
                 name: toolName,
               });
@@ -899,6 +933,110 @@ INSTRUCCIONES:
       }
     }
     return fullResponse;
+  }
+
+  /**
+   * Build a screen-context string from AgentScreenContext for Layer 3 injection.
+   */
+  private screenContextToPrompt(ctx: AgentScreenContext): string {
+    const parts: string[] = ["## Contexto de Pantalla"];
+    if (ctx.route) parts.push(`- Ruta actual: ${ctx.route}`);
+    if (ctx.section) parts.push(`- Sección: ${ctx.section}`);
+    if (ctx.branchName) parts.push(`- Sucursal activa: ${ctx.branchName}`);
+    else if (ctx.branchId) parts.push(`- Sucursal ID: ${ctx.branchId}`);
+    return parts.join("\n");
+  }
+
+  /**
+   * streamChatStructured — wraps streamChat() and post-processes the response into Block[].
+   *
+   * Accepts an optional screenContext injected into Layer 3 of the prompt.
+   * Tool calls in the stream are converted to loading → action/success blocks.
+   * Returns an AsyncGenerator that yields { blocks, done } for SSE consumption.
+   *
+   * Does NOT modify the existing streamChat() method.
+   */
+  async *streamChatStructured(
+    userMessage: string,
+    screenContext?: AgentScreenContext,
+  ): AsyncGenerator<{
+    blocks?: Block[];
+    sessionId?: string;
+    toolCalls?: ToolCall[];
+    done: boolean;
+  }> {
+    // 1. If screenContext provided, inject into Layer 3 of the system prompt
+    if (screenContext) {
+      const ctxText = this.screenContextToPrompt(screenContext);
+      if (this.messages.length > 0 && this.messages[0]?.role === "system") {
+        this.messages[0].content += `\n\n${ctxText}`;
+      }
+    }
+
+    // 2. Call existing streamChat and collect output
+    // ponytail: collects full response then post-processes — incremental yield
+    // would need LLM prompt changes to emit blocks during generation.
+    let fullContent = "";
+    const seenToolCalls = new Map<string, ToolCall>();
+
+    for await (const chunk of this.streamChat(userMessage)) {
+      if (chunk.content) {
+        fullContent += chunk.content;
+      }
+      if (chunk.toolCalls) {
+        for (const tc of chunk.toolCalls) {
+          if (tc.name && !seenToolCalls.has(tc.id)) {
+            seenToolCalls.set(tc.id, tc);
+          }
+        }
+      }
+      if (chunk.done) {
+        // 3. Post-process: tool_calls → loading/action/success blocks
+        const toolBlocks: Block[] = [];
+        for (const tc of seenToolCalls.values()) {
+          toolBlocks.push({
+            type: "loading",
+            label: `Ejecutando ${tc.name}...`,
+          });
+          // ponytail: success blocks when tool results are reported; currently
+          // tool results are fed back to LLM, not surfaced as blocks.
+          // Add success block parsing from tool results if needed.
+        }
+
+        // 4. Parse text content into text blocks (split by double-newline for readability)
+        const textBlocks: Block[] = [];
+        if (fullContent.trim()) {
+          // Split non-tool text responses
+          const segments = fullContent.trim().split(/\n\n+/);
+          for (const seg of segments) {
+            const trimmed = seg.trim();
+            if (trimmed) {
+              textBlocks.push({ type: "text", content: trimmed });
+            }
+          }
+        }
+
+        const allBlocks = [...toolBlocks, ...textBlocks];
+
+        yield {
+          blocks:
+            allBlocks.length > 0
+              ? allBlocks
+              : [{ type: "text", content: fullContent || "Procesado." }],
+          sessionId: this.sessionId,
+          toolCalls:
+            seenToolCalls.size > 0
+              ? Array.from(seenToolCalls.values())
+              : undefined,
+          done: false,
+        };
+
+        yield {
+          sessionId: this.sessionId,
+          done: true,
+        };
+      }
+    }
   }
 
   getMessages(): LLMMessage[] {

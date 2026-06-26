@@ -6,32 +6,32 @@ interface BubbleInputProps {
   value: string;
   onChange: (value: string) => void;
   onSend: () => void;
+  onAttach?: (file: { name: string; content: string }) => void;
   disabled?: boolean;
   placeholder?: string;
 }
 
 /**
- * Auto-resizing textarea with a send button.
- * Disabled when `value` is empty or `disabled` is true.
+ * Auto-resizing textarea with a send button and file attach button.
  */
 export function BubbleInput({
   value,
   onChange,
   onSend,
+  onAttach,
   disabled = false,
   placeholder = "Escribe un mensaje...",
 }: BubbleInputProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    // Send on Enter (without Shift)
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       if (value.trim() && !disabled) onSend();
     }
   };
 
-  // Auto-resize: reset height then set to scrollHeight (capped at ~4 lines)
   const handleChange = (val: string) => {
     onChange(val);
     if (textareaRef.current) {
@@ -40,8 +40,56 @@ export function BubbleInput({
     }
   };
 
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !onAttach) return;
+
+    try {
+      const text = await file.text();
+      onAttach({ name: file.name, content: text });
+    } catch {
+      // ignore binary files
+    }
+
+    // Reset so the same file can be re-selected
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
   return (
     <div className="flex items-end gap-2 border-t border-gray-100 p-3">
+      {/* Attach file button */}
+      {onAttach && (
+        <>
+          <button
+            type="button"
+            aria-label="Adjuntar archivo"
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600"
+            onClick={() => fileInputRef.current?.click()}
+          >
+            <svg
+              className="h-5 w-5"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"
+              />
+            </svg>
+          </button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".txt,.csv,.json,.md,.log,.env"
+            className="hidden"
+            onChange={handleFileSelect}
+          />
+        </>
+      )}
+
       <textarea
         ref={textareaRef}
         value={value}

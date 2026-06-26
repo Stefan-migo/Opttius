@@ -6,6 +6,8 @@ export type LLMProvider =
   | "openrouter"
   | "kilocode"
   | "minimax"
+  | "nvidia"
+  | "opencodezen"
   | "custom";
 
 export interface LLMModel {

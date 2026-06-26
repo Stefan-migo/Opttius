@@ -1,3 +1,4 @@
+// @deprecated Migrate to agent_conversations/agent_messages after database-reformation.
 import { NextRequest, NextResponse } from "next/server";
 
 import { createAgent } from "@/lib/ai/agent/core";

@@ -1,31 +1,53 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
+import { AgentContextProvider } from "@/components/ai/AgentContextProvider";
 import { AgentBubble } from "@/components/ai/AgentBubble";
 
-// Mock next/navigation useRouter
+// Mock next/navigation
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: vi.fn(), back: vi.fn() }),
   usePathname: () => "/admin/dashboard",
 }));
 
+// Mock AuthContext used by AgentContextProvider
+vi.mock("@/contexts/AuthContext", () => ({
+  useAuthContext: () => ({
+    user: { id: "test-user-id" },
+    adminRole: "admin",
+  }),
+}));
+
+// Mock useBranch hook
+vi.mock("@/hooks/useBranch", () => ({
+  useBranch: () => ({
+    currentBranchId: "branch-1",
+    currentBranchName: "Sucursal Centro",
+  }),
+}));
+
 // jsdom doesn't implement scrollIntoView
 Element.prototype.scrollIntoView = vi.fn();
 
+function renderWithProvider() {
+  return render(
+    <AgentContextProvider>
+      <AgentBubble />
+    </AgentContextProvider>,
+  );
+}
+
 describe("AgentBubble state machine", () => {
   it("starts in collapsed state (floating button visible)", () => {
-    render(<AgentBubble />);
-    // The floating button has aria-label "Abrir agente"
+    renderWithProvider();
     expect(screen.getByLabelText("Abrir agente")).toBeInTheDocument();
   });
 
   it("transitions to repose on click", () => {
-    render(<AgentBubble />);
+    renderWithProvider();
     fireEvent.click(screen.getByLabelText("Abrir agente"));
 
-    // Panel should be visible with the contextual greeting
     expect(screen.getByText(/Agente Opttius/)).toBeInTheDocument();
-    // Input placeholder indicates repose (the state-specific placeholder)
     expect(
       screen.getByPlaceholderText(
         "Haz una pregunta o selecciona una opción...",
@@ -34,7 +56,7 @@ describe("AgentBubble state machine", () => {
   });
 
   it("transitions to conversation when user sends a message", () => {
-    render(<AgentBubble />);
+    renderWithProvider();
     fireEvent.click(screen.getByLabelText("Abrir agente"));
 
     const input = screen.getByPlaceholderText(
@@ -43,31 +65,22 @@ describe("AgentBubble state machine", () => {
     fireEvent.change(input, { target: { value: "Hola" } });
     fireEvent.click(screen.getByLabelText("Enviar mensaje"));
 
-    // The user message appears as a text block
     expect(screen.getByText("Hola")).toBeInTheDocument();
-    // Input placeholder should now be the conversation one
     expect(
       screen.getByPlaceholderText("Escribe un mensaje..."),
     ).toBeInTheDocument();
   });
 
   it("transitions back to collapsed on close", () => {
-    render(<AgentBubble />);
+    renderWithProvider();
     fireEvent.click(screen.getByLabelText("Abrir agente"));
-
-    // Click close button
     fireEvent.click(screen.getByLabelText("Cerrar agente"));
-
-    // Should be back to collapsed
     expect(screen.getByLabelText("Abrir agente")).toBeInTheDocument();
   });
 
   it("shows badge when notification state has count", () => {
-    // Render with notification state via initial badge — using state override
-    // We test via the BubbleFloatingButton which is the collapsed state
-    render(<AgentBubble />);
-
-    // Collapsed should NOT have a visible badge (badgeCount starts at 0)
+    renderWithProvider();
+    // Collapsed should have badge with count 0 (hidden via opacity-0)
     const badge = screen.getByText("0");
     expect(badge.className).toContain("opacity-0");
   });

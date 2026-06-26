@@ -19,3 +19,17 @@ export function AgentBubbleContainer() {
     </AgentContextProvider>
   );
 }
+
+/**
+ * @deprecated Shim for code that dynamically imported SmartContextWidget.
+ * Props are accepted for interface compatibility but ignored —
+ * AgentBubble is always rendered in the admin layout.
+ * Remove after database-reformation.
+ */
+export function SmartContextWidget(_props: {
+  section?: string;
+  variant?: string;
+  onClose?: () => void;
+}) {
+  return <AgentBubbleContainer />;
+}

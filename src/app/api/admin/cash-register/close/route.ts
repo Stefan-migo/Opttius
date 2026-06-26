@@ -8,6 +8,18 @@ import {
 import { appLogger as logger } from "@/lib/logger";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
 import { createClient, createServiceRoleClient } from "@/utils/supabase/server";
+import {
+  aggregatePayments,
+  coerceAmount,
+} from "@/lib/cash-register/payment-aggregator";
+import type {
+  PaymentSummary,
+  PaymentAggregatorInput,
+  OrderPaymentRow,
+  CreditNoteMovementRow,
+} from "@/lib/cash-register/payment-aggregator";
+import { buildClosurePayload } from "@/lib/cash-register/closure-builder";
+import type { ClosurePayloadParams } from "@/lib/cash-register/closure-builder";
 
 /**
  * GET /api/admin/cash-register/close
@@ -170,7 +182,7 @@ export async function GET(request: NextRequest) {
     // IMPORTANT: Initialize sessionPayments BEFORE using it in the summary calculation
     // ✅ CORREGIDO: Buscar sesión más reciente (open o la última del día si fue reabierta)
     let openingCash = 0;
-    let sessionPayments: unknown[] = [];
+    let sessionPayments: PaymentAggregatorInput["sessionPayments"] = [];
     let sessionId: string | null = null;
 
     if (effectiveBranchId) {
@@ -217,7 +229,7 @@ export async function GET(request: NextRequest) {
       }
 
       if (posSession) {
-        openingCash = Number(posSession.opening_cash_amount) || 0;
+        openingCash = coerceAmount(posSession.opening_cash_amount);
         sessionId = posSession.id;
 
         // Get all payments from this session (incluso si está "closed")
@@ -246,7 +258,7 @@ export async function GET(request: NextRequest) {
         // Subtract refunds from payment totals (handled below with sessionPayments)
         sessionPayments = [
           ...sessionPayments,
-          ...(creditNoteMovements || []).map((cnm: unknown) => ({
+          ...(creditNoteMovements || []).map((cnm: CreditNoteMovementRow) => ({
             amount: Number(cnm.amount) || 0, // negative
             payment_method: cnm.refund_method,
           })),
@@ -277,107 +289,79 @@ export async function GET(request: NextRequest) {
     };
 
     // Process each order (for totals, subtotals, taxes) - exclude cancelled
-    (orders || []).forEach((order: unknown) => {
+    (orders || []).forEach((order) => {
       if (order.status === "cancelled") return;
-      summary.total_sales += Number(order.total_amount) || 0;
-      summary.total_subtotal += Number(order.subtotal) || 0;
-      summary.total_tax += Number(order.tax_amount) || 0;
-      summary.total_discounts += Number(order.discount_amount) || 0;
+      summary.total_sales += coerceAmount(order.total_amount);
+      summary.total_subtotal += coerceAmount(order.subtotal);
+      summary.total_tax += coerceAmount(order.tax_amount);
+      summary.total_discounts += coerceAmount(order.discount_amount);
     });
 
-    // Calculate payment method totals from session payments if available
-    // Also track cash inflows vs outflows for clearer reconciliation
+    // Track cash inflows vs outflows for clearer reconciliation
     let cash_inflows = 0;
     let cash_outflows = 0;
+
+    // Aggregate payment method totals using extracted pure function
+    let paymentSummary: PaymentSummary;
     if (sessionPayments.length > 0) {
-      sessionPayments.forEach((payment: unknown) => {
-        const amount = Number(payment.amount) || 0;
+      // Track cash inflows/outflows before aggregation
+      sessionPayments.forEach((payment) => {
+        const amount = coerceAmount(payment.amount);
         if (payment.payment_method === "cash") {
           if (amount >= 0) cash_inflows += amount;
           else cash_outflows += Math.abs(amount);
         }
-        switch (payment.payment_method) {
-          case "cash":
-            summary.cash_sales += amount;
-            break;
-          case "debit":
-            summary.debit_card_sales += amount;
-            break;
-          case "credit":
-            summary.credit_card_sales += amount;
-            break;
-          case "transfer":
-            summary.transfer_sales += amount;
-            break;
-          case "installments":
-            summary.installments_sales += amount;
-            break;
-          default:
-            summary.other_payment_sales += amount;
-        }
+      });
+
+      paymentSummary = aggregatePayments({
+        sessionPayments,
+        orders: [],
       });
     } else if (orders && orders.length > 0) {
       // Fallback: Get payments from order_payments table (more accurate than mp_payment_method)
-      const orderIds = orders.map((o: unknown) => o.id);
+      const orderIds = orders.map((o) => o.id);
       const { data: orderPayments } = await supabaseServiceRole
         .from("order_payments")
         .select("amount, payment_method")
         .in("order_id", orderIds);
 
       if (orderPayments && orderPayments.length > 0) {
-        // Use order_payments (most accurate)
-        orderPayments.forEach((payment: unknown) => {
-          const amount = Number(payment.amount) || 0;
-          const method = payment.payment_method;
-
-          switch (method) {
-            case "cash":
-              summary.cash_sales += amount;
-              break;
-            case "debit":
-              summary.debit_card_sales += amount;
-              break;
-            case "credit":
-              summary.credit_card_sales += amount;
-              break;
-            case "transfer":
-              summary.transfer_sales += amount;
-              break;
-            case "installments":
-              summary.installments_sales += amount;
-              break;
-            default:
-              summary.other_payment_sales += amount;
-          }
+        paymentSummary = aggregatePayments({
+          sessionPayments: [],
+          orders: [],
+          orderPayments: orderPayments as OrderPaymentRow[],
         });
       } else {
         // Final fallback: Use mp_payment_method from orders (normalized values)
-        (orders || []).forEach((order: unknown) => {
-          const paymentMethod = order.mp_payment_method || "cash";
-          switch (paymentMethod) {
-            case "cash":
-              summary.cash_sales += Number(order.total_amount) || 0;
-              break;
-            case "debit":
-            case "debit_card":
-              summary.debit_card_sales += Number(order.total_amount) || 0;
-              break;
-            case "credit":
-            case "credit_card":
-              summary.credit_card_sales += Number(order.total_amount) || 0;
-              break;
-            case "transfer":
-              summary.transfer_sales += Number(order.total_amount) || 0;
-              break;
-            case "installments":
-              summary.installments_sales += Number(order.total_amount) || 0;
-              break;
-            default:
-              summary.other_payment_sales += Number(order.total_amount) || 0;
-          }
+        paymentSummary = aggregatePayments({
+          sessionPayments: [],
+          orders: orders.map((o) => ({
+            id: o.id,
+            total_amount: coerceAmount(o.total_amount),
+            mp_payment_method: o.mp_payment_method,
+            status: o.status,
+          })),
         });
       }
+    } else {
+      paymentSummary = {
+        cash_sales: 0,
+        debit_card_sales: 0,
+        credit_card_sales: 0,
+        transfer_sales: 0,
+        installments_sales: 0,
+        other_payment_sales: 0,
+        source: "no_payments" as const,
+      };
     }
+
+    // Apply payment summary to the main summary
+    summary.cash_sales = paymentSummary.cash_sales;
+    summary.debit_card_sales = paymentSummary.debit_card_sales;
+    summary.credit_card_sales = paymentSummary.credit_card_sales;
+    summary.transfer_sales = paymentSummary.transfer_sales;
+    summary.installments_sales = paymentSummary.installments_sales;
+    summary.other_payment_sales = paymentSummary.other_payment_sales;
 
     // Calculate expected cash (ONLY cash sales + opening cash, NOT transfers)
     // Transfers are bank transfers, not physical cash
@@ -660,7 +644,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Get ALL payments from the session (including payments for older orders)
-    let sessionPayments: unknown[] = [];
+    let sessionPayments: PaymentAggregatorInput["sessionPayments"] = [];
     if (sessionIdForClosure) {
       const { data: payments, error: paymentsError } = await supabaseServiceRole
         .from("order_payments")
@@ -698,7 +682,7 @@ export async function POST(request: NextRequest) {
 
         sessionPayments = [
           ...sessionPayments,
-          ...(creditNoteMovements || []).map((cnm: unknown) => ({
+          ...(creditNoteMovements || []).map((cnm: CreditNoteMovementRow) => ({
             amount: Number(cnm.amount) || 0,
             payment_method: cnm.refund_method,
           })),
@@ -712,121 +696,73 @@ export async function POST(request: NextRequest) {
     let totalTax = 0;
     let totalDiscounts = 0;
 
-    (orders || []).forEach((order: unknown) => {
+    (orders || []).forEach((order) => {
       if (order.status === "cancelled") return;
-      totalSales += Number(order.total_amount) || 0;
-      totalSubtotal += Number(order.subtotal) || 0;
-      totalTax += Number(order.tax_amount) || 0;
-      totalDiscounts += Number(order.discount_amount) || 0;
+      totalSales += coerceAmount(order.total_amount);
+      totalSubtotal += coerceAmount(order.subtotal);
+      totalTax += coerceAmount(order.tax_amount);
+      totalDiscounts += coerceAmount(order.discount_amount);
     });
 
     // Calculate payment method totals from SESSION PAYMENTS (more accurate)
     // This includes payments for orders created today AND payments for older orders made during this session
-    let cashSales = 0;
-    let debitCardSales = 0;
-    let creditCardSales = 0;
-    let transferSales = 0;
-    let installmentsSales = 0;
-    let otherPaymentSales = 0;
-
-    sessionPayments.forEach((payment: unknown) => {
-      const amount = Number(payment.amount) || 0;
-      const method = payment.payment_method;
-
-      switch (method) {
-        case "cash":
-          cashSales += amount;
-          break;
-        case "debit":
-          debitCardSales += amount;
-          break;
-        case "credit":
-          creditCardSales += amount;
-          break;
-        case "transfer":
-          transferSales += amount;
-          break;
-        case "check":
-          otherPaymentSales += amount;
-          break;
-        default:
-          otherPaymentSales += amount;
-      }
-    });
-
-    // If no session payments found, fall back to order_payments or order-based calculation
-    if (sessionPayments.length === 0 && orders && orders.length > 0) {
+    let paymentResult: PaymentSummary;
+    if (sessionPayments.length > 0) {
+      paymentResult = aggregatePayments({
+        sessionPayments,
+        orders: [],
+      });
+    } else if (orders && orders.length > 0) {
+      // Fall back to order_payments or order-based calculation
       logger.warn("No session payments found, fetching from order_payments", {
         sessionId: sessionIdForClosure,
       });
 
-      // Try to get payments from order_payments table (more accurate)
-      const orderIds = orders.map((o: unknown) => o.id);
+      const orderIds = orders.map((o) => o.id);
       const { data: orderPayments } = await supabaseServiceRole
         .from("order_payments")
         .select("amount, payment_method")
         .in("order_id", orderIds);
 
       if (orderPayments && orderPayments.length > 0) {
-        // Use order_payments (most accurate - uses normalized payment_method values)
-        orderPayments.forEach((payment: unknown) => {
-          const amount = Number(payment.amount) || 0;
-          const method = payment.payment_method;
-
-          switch (method) {
-            case "cash":
-              cashSales += amount;
-              break;
-            case "debit":
-              debitCardSales += amount;
-              break;
-            case "credit":
-              creditCardSales += amount;
-              break;
-            case "transfer":
-              transferSales += amount;
-              break;
-            case "installments":
-              installmentsSales += amount;
-              break;
-            default:
-              otherPaymentSales += amount;
-          }
+        paymentResult = aggregatePayments({
+          sessionPayments: [],
+          orders: [],
+          orderPayments: orderPayments as OrderPaymentRow[],
         });
       } else {
-        // Final fallback: Use mp_payment_method from orders (normalized values)
         logger.warn(
           "No order_payments found, using mp_payment_method from orders",
-          {
-            orderIds,
-          },
+          { orderIds },
         );
-        (orders || []).forEach((order: unknown) => {
-          const paymentMethod = order.mp_payment_method || "cash";
-          switch (paymentMethod) {
-            case "cash":
-              cashSales += Number(order.total_amount) || 0;
-              break;
-            case "debit":
-            case "debit_card":
-              debitCardSales += Number(order.total_amount) || 0;
-              break;
-            case "credit":
-            case "credit_card":
-              creditCardSales += Number(order.total_amount) || 0;
-              break;
-            case "transfer":
-              transferSales += Number(order.total_amount) || 0;
-              break;
-            case "installments":
-              installmentsSales += Number(order.total_amount) || 0;
-              break;
-            default:
-              otherPaymentSales += Number(order.total_amount) || 0;
-          }
+        paymentResult = aggregatePayments({
+          sessionPayments: [],
+          orders: orders.map((o) => ({
+            id: o.id,
+            total_amount: coerceAmount(o.total_amount),
+            mp_payment_method: o.mp_payment_method,
+            status: o.status,
+          })),
         });
       }
+    } else {
+      paymentResult = {
+        cash_sales: 0,
+        debit_card_sales: 0,
+        credit_card_sales: 0,
+        transfer_sales: 0,
+        installments_sales: 0,
+        other_payment_sales: 0,
+        source: "no_payments" as const,
+      };
     }
+
+    const cashSales = paymentResult.cash_sales;
+    const debitCardSales = paymentResult.debit_card_sales;
+    const creditCardSales = paymentResult.credit_card_sales;
+    const transferSales = paymentResult.transfer_sales;
+    const installmentsSales = paymentResult.installments_sales;
+    const otherPaymentSales = paymentResult.other_payment_sales;
 
     // Calculate expected cash (ONLY cash sales + opening cash, NOT transfers)
     // Transfers are bank transfers, not physical cash - they should NOT be in the cash register
@@ -961,8 +897,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Log closure data before insert/update
-    const closureData: Record<string, unknown> = {
+    // Build closure payload using extracted builder
+    const closureParams: ClosurePayloadParams = {
       branch_id: effectiveBranchId,
       closure_date: dateStr,
       closed_by: user.id,
@@ -978,6 +914,7 @@ export async function POST(request: NextRequest) {
       debit_card_sales: debitCardSales,
       credit_card_sales: creditCardSales,
       installments_sales: installmentsSales,
+      // PRESERVED: merge transfer_sales into other_payment_sales (POST-only behavior)
       other_payment_sales: otherPaymentSales + transferSales,
       expected_cash: expectedCash,
       actual_cash:
@@ -1007,8 +944,8 @@ export async function POST(request: NextRequest) {
       discrepancies: discrepancies || null,
       status: "closed",
       opened_at: openedAt.toISOString(),
-      updated_at: new Date().toISOString(),
     };
+    const closureData = buildClosurePayload(closureParams);
 
     logger.info("Preparing to create/update closure", {
       existingClosure: existingClosure

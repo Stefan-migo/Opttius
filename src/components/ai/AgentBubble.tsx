@@ -1,14 +1,16 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import type { Block, BubbleState } from "@/lib/ai/types";
 
+import { useAgentContext } from "./AgentContextProvider";
+import { AgentPreferencesPanel, useAgentPreferences } from "./AgentPreferences";
 import { BubbleFloatingButton } from "./BubbleFloatingButton";
 import { BubblePanel } from "./BubblePanel";
 
-// Mock suggestions per-route (Phase 1 — no backend yet)
-// ponytail: static suggestions, replace with Agent.getScreenSuggestions() in Phase 2.
+// ponytail: per-route suggestions — static for now, replace with
+// agent.getScreenSuggestions() when the agent can suggest actions.
 function getSuggestions(
   route: string,
   onAsk: (q: string) => void,
@@ -35,7 +37,7 @@ function getSuggestions(
     return [
       { label: "🛒 Abrir caja", onClick: () => onAsk("¿Cómo abro la caja?") },
       {
-        label: "📦 Productos más vendidos",
+        label: "📦 Más vendidos",
         onClick: () => onAsk("¿Cuáles son los productos más vendidos hoy?"),
       },
       ...common,
@@ -59,7 +61,6 @@ function getSuggestions(
   return common;
 }
 
-// Mock greeting per-route
 function getGreeting(route: string, branchName: string): string {
   if (route.includes("/admin/pos")) return `💰 Punto de Venta — ${branchName}`;
   if (route.includes("/admin/customers"))
@@ -73,10 +74,6 @@ function getGreeting(route: string, branchName: string): string {
 }
 
 interface AgentBubbleProps {
-  /**
-   * Screen route injected by AgentContextProvider.
-   * Used for contextual greetings and suggestions.
-   */
   route?: string;
   branchName?: string;
 }
@@ -84,74 +81,215 @@ interface AgentBubbleProps {
 /**
  * AgentBubble — state machine container for the Agent copilot.
  *
- * State transitions:
- *   collapsed + click → repose
- *   repose + message  → conversation
- *   conversation + close → collapsed
- *   notification + click → conversation (and clears badge)
- *   any + dock toggle → docked (or back to floating)
+ * Phase 2: sends messages to POST /api/agent/chat and renders
+ * SSE stream responses as structured blocks.
+ * Phase 4: integrates preferences, auto-mode triggers, SSE reconnection.
  */
 export function AgentBubble({
-  route = "/admin",
-  branchName = "Sucursal",
+  route: routeProp = "/admin",
+  branchName: branchNameProp = "Sucursal",
 }: AgentBubbleProps) {
   const [state, setState] = useState<BubbleState>("collapsed");
   const [badgeCount, setBadgeCount] = useState(0);
   const [inputValue, setInputValue] = useState("");
   const [messages, setMessages] = useState<Block[][]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [showPreferences, setShowPreferences] = useState(false);
+  const [attachedFile, setAttachedFile] = useState<{
+    name: string;
+    content: string;
+  } | null>(null);
+  const sessionIdRef = useRef<string | undefined>(undefined);
+  const abortRef = useRef<AbortController | null>(null);
+
+  // Read screen context from the AgentContextProvider
+  const agentCtx = useAgentContext();
+
+  // Phase 4: Agent preferences from localStorage
+  const {
+    prefs,
+    update: updatePrefs,
+    reset: resetPrefs,
+  } = useAgentPreferences(agentCtx.userId);
+
+  // Derived route/branch — props take precedence, fall back to context
+  const route = routeProp !== "/admin" ? routeProp : agentCtx.route;
+  const branchName =
+    branchNameProp !== "Sucursal" ? branchNameProp : agentCtx.branchName;
 
   // ——— State transitions ———
 
   const handleOpen = useCallback(() => {
-    if (state === "notification") {
-      setBadgeCount(0);
-    }
+    if (state === "notification") setBadgeCount(0);
     setState("repose");
   }, [state]);
 
   const handleClose = useCallback(() => {
     setState("collapsed");
-    // ponytail: saveSessionSummary will fire here in Phase 2
   }, []);
 
   const handleToggleDock = useCallback(() => {
     setState((prev) => (prev === "docked" ? "conversation" : "docked"));
   }, []);
 
+  // ——— SSE Fetch with reconnection ———
+
+  const fetchAgent = useCallback(
+    async (text: string, retries = 1): Promise<void> => {
+      const body = {
+        message: text,
+        session_id: sessionIdRef.current,
+        context: {
+          route: agentCtx.route,
+          branch_id: agentCtx.branchId,
+          branch_name: agentCtx.branchName,
+          role: agentCtx.role,
+          org_id: agentCtx.orgId,
+        },
+      };
+
+      const res = await fetch("/api/agent/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+        signal: abortRef.current?.signal,
+      });
+
+      if (!res.ok) {
+        const errBody = await res
+          .json()
+          .catch(() => ({ error: "Error de conexión" }));
+        const errorBlock: Block = {
+          type: "error",
+          content:
+            errBody.error ||
+            `Error ${res.status}: no se pudo procesar tu mensaje.`,
+        };
+        setMessages((prev) => [...prev, [errorBlock]]);
+        setIsLoading(false);
+        return;
+      }
+
+      const reader = res.body?.getReader();
+      if (!reader) throw new Error("No response body");
+
+      const decoder = new TextDecoder();
+      let buffer = "";
+      const responseBlocks: Block[] = [];
+      let currentEvent = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n");
+        buffer = lines.pop() || "";
+
+        for (const line of lines) {
+          if (line.startsWith("event: ")) {
+            currentEvent = line.slice(7).trim();
+            continue;
+          }
+          if (line.startsWith("data: ")) {
+            const data = line.slice(6);
+            if (currentEvent === "done") continue;
+            if (currentEvent === "block") {
+              try {
+                const parsed = JSON.parse(data) as Block;
+                responseBlocks.push(parsed);
+              } catch {
+                // Ignore parse errors on incomplete chunks
+              }
+            }
+          }
+        }
+      }
+
+      if (responseBlocks.length > 0) {
+        setMessages((prev) => [...prev, responseBlocks]);
+      }
+    },
+    [agentCtx],
+  );
+
+  const sendToAgent = useCallback(
+    async (text: string) => {
+      if (isLoading) return;
+      setIsLoading(true);
+
+      // Prepend file context if a file was attached
+      const fileCtx = attachedFile;
+      let messageText = text;
+      if (fileCtx) {
+        messageText = `[Archivo adjunto: ${fileCtx.name}]\n\`\`\`\n${fileCtx.content.slice(0, 10000)}\n\`\`\`\n\n${text}`;
+        setAttachedFile(null);
+      }
+
+      // Add user message block
+      const userBlock: Block = { type: "text", content: text };
+      setMessages((prev) => [...prev, [userBlock]]);
+
+      // Abort previous request if any
+      if (abortRef.current) abortRef.current.abort();
+      const controller = new AbortController();
+      abortRef.current = controller;
+
+      try {
+        await fetchAgent(messageText);
+      } catch (err: unknown) {
+        if (err instanceof Error && err.name === "AbortError") return;
+        // ponytail: simple error block — add retry UI if users report connection drops
+        const errorBlock: Block = {
+          type: "error",
+          content:
+            "Ocurrió un error al procesar tu solicitud. Intenta de nuevo.",
+        };
+        setMessages((prev) => [...prev, [errorBlock]]);
+      } finally {
+        setIsLoading(false);
+        abortRef.current = null;
+      }
+    },
+    [agentCtx, isLoading, fetchAgent, attachedFile],
+  );
+
   const handleSend = useCallback(() => {
     const text = inputValue.trim();
-    if (!text) return;
+    if (!text || isLoading) return;
 
-    // If in repose, transition to conversation
-    if (state === "repose") {
-      setState("conversation");
-    }
-
-    // Add user message as a text block
-    const userBlock: Block = { type: "text", content: text };
-    setMessages((prev) => [...prev, [userBlock]]);
+    if (state === "repose") setState("conversation");
     setInputValue("");
-
-    // Mock assistant response (Phase 1 — no backend)
-    // ponytail: static echo response, replace with POST /api/agent/chat in Phase 2.
-    setTimeout(() => {
-      const reply: Block = {
-        type: "text",
-        content: `Recibí tu mensaje: "${text}". La integración con el backend del agente estará disponible en la próxima fase.`,
-      };
-      setMessages((prev) => [...prev, [reply]]);
-    }, 500);
-  }, [inputValue, state]);
+    sendToAgent(text);
+  }, [inputValue, state, isLoading, sendToAgent]);
 
   const handleAction = useCallback(
     (_action: string, _params?: Record<string, unknown>) => {
-      // ponytail: handled in Phase 2 when tools are wired
+      // ponytail: action blocks handled when tool confirmations are wired
     },
     [],
   );
 
   const handleAsk = useCallback((question: string) => {
     setInputValue(question);
+  }, []);
+
+  const handleAttach = useCallback(
+    (file: { name: string; content: string }) => {
+      setAttachedFile(file);
+      if (state === "repose") setState("conversation");
+      // Show a system notice that a file was attached
+      const notice: Block = {
+        type: "success",
+        content: `📎 Archivo adjunto: ${file.name} (${file.content.length} caracteres)`,
+      };
+      setMessages((prev) => [...prev, [notice]]);
+    },
+    [state],
+  );
+
+  const handlePreferencesToggle = useCallback(() => {
+    setShowPreferences((prev) => !prev);
   }, []);
 
   // ——— Derived state ———
@@ -168,27 +306,47 @@ export function AgentBubble({
     [state, route, handleAsk],
   );
 
-  // ——— Render ———
-
   const isOpen =
     state === "repose" || state === "conversation" || state === "docked";
 
   return (
     <>
       {isOpen ? (
-        <BubblePanel
-          state={state === "docked" ? "docked" : "conversation"}
-          title={title}
-          messages={messages}
-          inputValue={inputValue}
-          onInputChange={setInputValue}
-          onSend={handleSend}
-          onClose={handleClose}
-          onToggleDock={handleToggleDock}
-          onAction={handleAction}
-          suggestions={suggestions}
-          inputDisabled={false}
-        />
+        <div className="relative">
+          <BubblePanel
+            state={
+              state === "docked"
+                ? "docked"
+                : state === "repose"
+                  ? "repose"
+                  : "conversation"
+            }
+            title={title}
+            messages={messages}
+            inputValue={inputValue}
+            onInputChange={setInputValue}
+            onSend={handleSend}
+            onClose={handleClose}
+            onToggleDock={handleToggleDock}
+            onAction={handleAction}
+            onPreferences={handlePreferencesToggle}
+            onAttach={handleAttach}
+            suggestions={suggestions}
+            inputDisabled={isLoading}
+          />
+          {/* Preferences overlay */}
+          {showPreferences && (
+            <div className="absolute inset-0 z-10 rounded-xl bg-white">
+              <AgentPreferencesPanel
+                userId={agentCtx.userId}
+                prefs={prefs}
+                onUpdate={updatePrefs}
+                onClose={handlePreferencesToggle}
+                onReset={resetPrefs}
+              />
+            </div>
+          )}
+        </div>
       ) : (
         <BubbleFloatingButton
           state={state}

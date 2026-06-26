@@ -1,3 +1,4 @@
+// @deprecated Use /api/agent/chat instead. Remove after database-reformation.
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 

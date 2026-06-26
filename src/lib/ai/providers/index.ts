@@ -4,6 +4,8 @@ import { DeepSeekProvider } from "./deepseek";
 import { GoogleProvider } from "./google";
 import { KilocodeProvider } from "./kilocode";
 import { MinimaxProvider } from "./minimax";
+import { NvidiaProvider } from "./nvidia";
+import { OpenCodeZenProvider } from "./opencodezen";
 import { OpenAIProvider } from "./openai";
 import { OpenRouterProvider } from "./openrouter";
 
@@ -15,6 +17,8 @@ export const providers: Record<LLMProvider, () => LLMProviderInterface> = {
   openrouter: () => new OpenRouterProvider(),
   kilocode: () => new KilocodeProvider(),
   minimax: () => new MinimaxProvider(),
+  nvidia: () => new NvidiaProvider(),
+  opencodezen: () => new OpenCodeZenProvider(),
   custom: () => {
     throw new Error("Custom provider not implemented");
   },
