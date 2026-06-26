@@ -544,6 +544,7 @@ export const productTools: ToolDefinition[] = [
       "Delete a product from the catalog. This action cannot be undone.",
     category: "products",
     requiresConfirmation: true,
+    minRole: "admin",
     parameters: {
       type: "object",
       properties: {

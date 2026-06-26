@@ -5,7 +5,7 @@
  * Provides type-safe methods for CRUD operations on customers.
  */
 
-import { handleApiError } from "@/lib/services/errorService";
+import { handleApiError } from "@/lib/api/services/errorService";
 import { getBranchAndOperativoHeaders } from "@/lib/utils/branch";
 
 import { ApiClient, isSuccess, unwrapData } from "../client-helpers";

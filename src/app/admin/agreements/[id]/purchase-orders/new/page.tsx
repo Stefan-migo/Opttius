@@ -10,8 +10,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { agreementService } from "@/lib/api/services/agreementService";
-import { handleApiError } from "@/lib/services/errorService";
-import { success } from "@/lib/services/notificationService";
+import { handleApiError } from "@/lib/api/services/errorService";
+import { success } from "@/lib/api/services/notificationService";
 
 export default function NewPurchaseOrderPage() {
   const params = useParams();

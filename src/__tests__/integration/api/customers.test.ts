@@ -23,10 +23,10 @@ import {
   type TestUser,
 } from "../helpers/test-setup";
 
-// Check infrastructure availability - will be set in beforeAll
-let infrastructureCheck = false;
+// Sync check at module level before any describe blocks
+const hasSupabaseInfra = !!process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-describe("Customers API - Integration Tests", () => {
+describe.skipIf(!hasSupabaseInfra)("Customers API - Integration Tests", () => {
   let orgA: TestOrganization;
   let orgB: TestOrganization;
   let userA: TestUser;

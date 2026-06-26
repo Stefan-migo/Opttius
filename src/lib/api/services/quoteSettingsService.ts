@@ -4,7 +4,7 @@
  * Service for managing quote settings and configurations.
  */
 
-import { handleApiError } from "@/lib/services/errorService";
+import { handleApiError } from "@/lib/api/services/errorService";
 
 import { ApiClient, isSuccess, unwrapData } from "../client-helpers";
 

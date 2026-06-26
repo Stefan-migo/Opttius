@@ -6,6 +6,8 @@ export type LLMProvider =
   | "openrouter"
   | "kilocode"
   | "minimax"
+  | "nvidia"
+  | "opencodezen"
   | "custom";
 
 export interface LLMModel {
@@ -89,3 +91,102 @@ export interface LLMProviderInterface {
   getAvailableModels(): LLMModel[];
   validateConfig(config: LLMConfig): boolean;
 }
+
+// ─── Agent Harness Types (Phase 1 — Agent Bubble UI) ────────────────────────
+
+/** Bubble visual state machine states */
+export type BubbleState =
+  | "collapsed"
+  | "repose"
+  | "conversation"
+  | "notification"
+  | "docked";
+
+/** Agent context collected from the current screen */
+export interface AgentContext {
+  route: string;
+  branchId: string | null;
+  branchName: string;
+  role: string;
+  orgId: string;
+  userId: string;
+}
+
+/** Screen context metadata sent with every agent request */
+export interface AgentScreenContext {
+  route: string;
+  section?: string;
+  branchId: string | null;
+  branchName?: string;
+  role: string;
+  orgId: string;
+}
+
+/** Preview action item */
+export interface BlockAction {
+  label: string;
+  variant: "primary" | "danger" | "ghost";
+  action: string;
+  params?: Record<string, unknown>;
+}
+
+// ─── Block Types ─────────────────────────────────────────────────────────────
+
+export interface TextBlock {
+  type: "text";
+  content: string;
+}
+
+export interface PreviewBlock {
+  type: "preview";
+  entity: string;
+  id: string;
+  title: string;
+  subtitle?: string;
+  actions?: BlockAction[];
+}
+
+export interface ActionBlock {
+  type: "action";
+  label: string;
+  variant: "primary" | "danger" | "ghost";
+  action: string;
+  params?: Record<string, unknown>;
+}
+
+export interface NavigationBlock {
+  type: "navigation";
+  label: string;
+  path: string;
+}
+
+export interface LoadingBlock {
+  type: "loading";
+  label: string;
+}
+
+export interface ErrorBlock {
+  type: "error";
+  content: string;
+}
+
+export interface SuccessBlock {
+  type: "success";
+  content: string;
+}
+
+/** Union discriminated by `type` — the only block shape the frontend can render */
+export type Block =
+  | TextBlock
+  | PreviewBlock
+  | ActionBlock
+  | NavigationBlock
+  | LoadingBlock
+  | ErrorBlock
+  | SuccessBlock;
+
+/** Tool type category for tool registry */
+export type ToolType = "db" | "navigation" | "context" | "memory";
+
+/** Agent roles for tool filtering */
+export type AgentRole = "vendedor" | "admin" | "dueño";

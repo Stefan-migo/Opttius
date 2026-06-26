@@ -1,6 +1,8 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { z } from "zod";
 
+import type { AgentRole, ToolType } from "../types";
+
 export interface ToolExecutionContext {
   userId: string;
   organizationId: string;
@@ -48,4 +50,8 @@ export interface ToolDefinition {
   category?: string;
   /** Optional Zod schema for validating tool parameters before execution */
   zodSchema?: z.ZodTypeAny;
+  /** Tool type category for registry filtering */
+  type?: ToolType;
+  /** Minimum role required to use this tool. Defaults to "vendedor" when unset. */
+  minRole?: AgentRole;
 }

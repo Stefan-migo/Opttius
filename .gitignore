@@ -65,6 +65,11 @@ next-env.d.ts
 # OS
 Thumbs.db
 
+# SDD + Cortex generated artifacts
+/.atl/
+
 
 # Users
 users.md
+# Local AI runtime state
+.atl/

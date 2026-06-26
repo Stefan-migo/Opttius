@@ -190,3 +190,6 @@ export {
   updateAgreementStatus,
   updatePurchaseOrder,
 } from "./agreementService";
+
+// Error Service
+export { handleApiError } from "./errorService";

@@ -1,3 +1,4 @@
+// @deprecated Use AgentBubble + Agent chat instead. Remove after database-reformation.
 "use client";
 
 import {

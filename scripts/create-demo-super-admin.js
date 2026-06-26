@@ -27,9 +27,10 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey, {
   }
 });
 
+// IMPORTANT: These UUIDs must match supabase/seed.sql
 const DEMO_ORG_ID = '00000000-0000-0000-0000-000000000001';
-const DEMO_BRANCH_ID = '00000000-0000-0000-0000-000000000002';
-const DEMO_BRANCH_2_ID = '00000000-0000-0000-0000-000000000003';
+const DEMO_BRANCH_ID = '00000000-0000-0000-0000-000000000031';  // Casa Matriz
+const DEMO_BRANCH_2_ID = '00000000-0000-0000-0000-000000000032';  // Sucursal Providencia
 
 async function createDemoSuperAdmin() {
   const email = process.env.DEMO_ADMIN_EMAIL;
@@ -143,7 +144,7 @@ async function createDemoSuperAdmin() {
       .upsert({
         id: userId,
         email: email,
-        role: 'admin', // Sistema simplificado usa solo 'admin'
+        role: 'super_admin', // Coincide con seed.sql y permisos reales
         organization_id: DEMO_ORG_ID, // Asignar a organización demo
         is_active: true,
         permissions: {
@@ -165,7 +166,7 @@ async function createDemoSuperAdmin() {
       throw new Error(`Failed to create admin_users entry: ${adminError.message}`);
     }
     console.log('✅ Admin user created/updated');
-    console.log('   Role: admin (full access)');
+    console.log('   Role: super_admin (full access)');
     console.log('   Organization ID:', DEMO_ORG_ID);
     console.log('   Is Active: true');
 
@@ -285,8 +286,8 @@ async function createDemoSuperAdmin() {
     console.log('Credentials:');
     console.log('  Email:', email);
     console.log('  Password:', password);
-    console.log('  Role: admin (full access)');
-    console.log('  Organization: Óptica Demo Global (Demo Mode)');
+  console.log('  Role: super_admin (full access)');
+  console.log('  Organization: Óptica Demo Global (Demo Mode)');
     console.log('  Branches: Casa Matriz, Sucursal Providencia');
     console.log('');
     console.log('You can now login at: http://localhost:3000/login');

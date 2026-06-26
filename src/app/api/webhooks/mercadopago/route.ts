@@ -9,6 +9,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { appLogger as logger } from "@/lib/logger";
 import { MercadoPagoGateway } from "@/lib/payments/mercadopago/gateway";
+import { parseWebhookBody } from "@/lib/payments/mercadopago/webhook-parser";
 import { MercadoPagoWebhookValidator } from "@/lib/payments/mercadopago/webhook-validator";
 import { PaymentService } from "@/lib/payments/services/payment-service";
 import { createServiceRoleClient } from "@/utils/supabase/server";
@@ -21,45 +22,18 @@ async function processWebhook(request: NextRequest): Promise<NextResponse> {
 
   try {
     const searchParams = request.nextUrl.searchParams;
-    let dataId = searchParams.get("data.id") ?? searchParams.get("id") ?? null;
-    let topicFromBody: string | null = null;
     let bodyParsed: Record<string, unknown> | null = null;
 
     if (request.method === "POST") {
       try {
         bodyParsed = (await request.json()) as Record<string, unknown>;
-        if (bodyParsed && typeof bodyParsed === "object") {
-          if (!dataId) {
-            const data = bodyParsed.data;
-            if (data != null && typeof data === "object" && "id" in data)
-              dataId = String((data as { id: unknown }).id);
-            else if (typeof data === "string") dataId = data;
-            else if (
-              typeof bodyParsed.id === "string" ||
-              typeof bodyParsed.id === "number"
-            )
-              dataId = String(bodyParsed.id);
-            else if (
-              typeof bodyParsed.api_id === "string" ||
-              typeof bodyParsed.api_id === "number"
-            )
-              dataId = String(bodyParsed.api_id);
-          }
-          topicFromBody =
-            (typeof bodyParsed.type === "string" ? bodyParsed.type : null) ??
-            (typeof bodyParsed.action === "string"
-              ? bodyParsed.action
-              : null) ??
-            null;
-        }
       } catch {
         // body not JSON or empty
       }
     }
 
-    const topic =
-      topicFromBody ?? searchParams.get("topic") ?? (dataId ? "payment" : null);
-    const id = dataId ?? searchParams.get("id") ?? null;
+    const { eventId, topic } = parseWebhookBody(bodyParsed, searchParams);
+    const id = eventId;
 
     if (!id) {
       logger.warn("Mercado Pago Webhook: missing id in query and body", {

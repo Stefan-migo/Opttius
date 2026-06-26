@@ -23,6 +23,7 @@ import {
   Settings,
   ShoppingCart,
   Sparkles,
+  Upload,
   User,
   Users,
   X,
@@ -37,8 +38,7 @@ import { MobileBottomNav } from "@/components/admin/MobileBottomNav";
 import { MobileFAB } from "@/components/admin/MobileFAB";
 import AdminNotificationDropdown from "@/components/admin/AdminNotificationDropdown";
 import { BranchSelector } from "@/components/admin/BranchSelector";
-import Chatbot from "@/components/admin/Chatbot";
-import { InsightsFloatingButton } from "@/components/admin/InsightsFloatingButton";
+import { AgentBubbleContainer } from "@/components/ai/AgentBubbleContainer";
 import { SubscriptionGuard } from "@/components/admin/SubscriptionGuard";
 import { DemoModeBanner } from "@/components/onboarding/DemoModeBanner";
 import { TourButton } from "@/components/onboarding/TourButton";
@@ -164,6 +164,12 @@ const createNavigationGroups = (
           label: "Productos",
           icon: Package,
           description: "Catálogo e inventario",
+        },
+        {
+          href: "/admin/products/import",
+          label: "Importar",
+          icon: Upload,
+          description: "Importar productos desde archivo",
         },
         {
           href: "/admin/prescriptions",
@@ -1180,14 +1186,8 @@ export function AdminShell({ children }: AdminLayoutProps) {
             </div>
           </div>
 
-          {/* Insights + Chatbot - Floating (desktop only; mobile uses bottom nav) */}
-          <div className="hidden lg:flex fixed bottom-6 right-6 z-[100] flex-col items-end gap-3">
-            <InsightsFloatingButton
-              open={insightsOpen}
-              onOpenChange={setInsightsOpen}
-            />
-            <Chatbot open={chatbotOpen} onOpenChange={setChatbotOpen} />
-          </div>
+          {/* Agent Bubble — visible across all admin routes */}
+          <AgentBubbleContainer />
 
           {/* Mobile Bottom Nav - Navegación principal con herramientas */}
           <MobileBottomNav

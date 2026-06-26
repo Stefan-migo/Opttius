@@ -1,3 +1,4 @@
+// @deprecated Migrate to agent_conversations/agent_messages after database-reformation.
 /**
  * Session Manager: getOrCreateWhatsAppSession(wa_id, org_id)
  * Crea o recupera chat_sessions para conversaciones WhatsApp

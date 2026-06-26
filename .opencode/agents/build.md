@@ -65,6 +65,14 @@ npm run build     # Build production
 npm run test      # Tests
 ```
 
+## Skills de Sistema
+
+Siempre cargar antes de trabajar:
+
+```
+skill({ name: "cortex-persona" })         # Senior Architect persona, minimalism
+```
+
 ## Skills de Dominio
 
 Carga la skill relevante antes de trabajar:

@@ -44,16 +44,13 @@ function getMPClient(): {
 } {
   const sandboxMode = process.env.MERCADOPAGO_SANDBOX_MODE === "true";
   const accessToken = sandboxMode
-    ? process.env.MP_ACCESS_TOKEN_SANDBOX ||
-      process.env.MERCADOPAGO_ACCESS_TOKEN_SANDBOX ||
-      process.env.MP_ACCESS_TOKEN ||
-      process.env.MERCADOPAGO_ACCESS_TOKEN
+    ? process.env.MP_ACCESS_TOKEN_SANDBOX || process.env.MP_ACCESS_TOKEN
     : process.env.MP_ACCESS_TOKEN || process.env.MERCADOPAGO_ACCESS_TOKEN;
   if (!accessToken) {
     throw new Error(
       sandboxMode
-        ? "Mercado Pago sandbox requires one of: MP_ACCESS_TOKEN_SANDBOX, MERCADOPAGO_ACCESS_TOKEN_SANDBOX, MP_ACCESS_TOKEN, or MERCADOPAGO_ACCESS_TOKEN in .env.local"
-        : "Mercado Pago requires MP_ACCESS_TOKEN or MERCADOPAGO_ACCESS_TOKEN in .env.local",
+        ? "Mercado Pago sandbox requires MP_ACCESS_TOKEN_SANDBOX (or MP_ACCESS_TOKEN) in .env.local"
+        : "Mercado Pago requires MP_ACCESS_TOKEN (or MERCADOPAGO_ACCESS_TOKEN legacy) in .env.local",
     );
   }
   const config = new MercadoPagoConfig({ accessToken });

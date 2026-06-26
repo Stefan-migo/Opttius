@@ -6,7 +6,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { createMockSupabaseClient } from "@/__mocks__/supabase";
-import { ProductsService } from "@/lib/services/products/service";
+import { ProductsService } from "@/lib/api/services/products/service";
 
 describe("ProductsService", () => {
   let productService: ProductsService;
@@ -40,6 +40,9 @@ describe("ProductsService", () => {
       const mockChain = {
         select: vi.fn().mockReturnThis(),
         eq: vi.fn().mockReturnThis(),
+        neq: vi.fn().mockReturnThis(),
+        or: vi.fn().mockReturnThis(),
+        order: vi.fn().mockReturnThis(),
         range: vi.fn().mockResolvedValue({
           data: mockProducts,
           count: 1,
@@ -69,6 +72,9 @@ describe("ProductsService", () => {
       const mockChain = {
         select: vi.fn().mockReturnThis(),
         eq: vi.fn().mockReturnThis(),
+        neq: vi.fn().mockReturnThis(),
+        or: vi.fn().mockReturnThis(),
+        order: vi.fn().mockReturnThis(),
         range: vi.fn().mockResolvedValue({
           data: null,
           count: 0,

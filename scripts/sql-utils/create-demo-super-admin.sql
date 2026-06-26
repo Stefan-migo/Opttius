@@ -12,8 +12,9 @@
 
 DO $$
 DECLARE
+  -- Must match supabase/seed.sql UUIDs
   demo_org_id UUID := '00000000-0000-0000-0000-000000000001'::uuid;
-  demo_branch_id UUID := '00000000-0000-0000-0000-000000000002'::uuid;
+  demo_branch_id UUID := '00000000-0000-0000-0000-000000000031'::uuid;  -- Casa Matriz
   demo_admin_email TEXT := 'REPLACE_WITH_DEMO_ADMIN_EMAIL';
   demo_admin_password TEXT := 'REPLACE_WITH_DEMO_ADMIN_PASSWORD';
   user_id UUID;

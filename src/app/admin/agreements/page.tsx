@@ -35,7 +35,7 @@ import {
   AgreementListParams,
   agreementService,
 } from "@/lib/api/services/agreementService";
-import { handleApiError } from "@/lib/services/errorService";
+import { handleApiError } from "@/lib/api/services/errorService";
 import { formatDate } from "@/lib/utils";
 
 export default function AgreementsPage() {

@@ -8,8 +8,8 @@
  * - Payment processing
  */
 
-import { handleApiError } from "@/lib/services/errorService";
-import { success } from "@/lib/services/notificationService";
+import { handleApiError } from "@/lib/api/services/errorService";
+import { success } from "@/lib/api/services/notificationService";
 import { getBranchAndOperativoHeaders } from "@/lib/utils/branch";
 
 import { ApiClient, isError, isSuccess, unwrapData } from "../client-helpers";
@@ -288,7 +288,7 @@ class POSService {
         );
       if (isServerOrNetwork) {
         const { error: showError } = await import(
-          "@/lib/services/notificationService"
+          "@/lib/api/services/notificationService"
         );
         showError(
           "La venta puede haberse procesado. Revise en Caja u Órdenes antes de reintentar.",
@@ -304,7 +304,7 @@ class POSService {
       const isServerOrNetwork = /network|timeout|failed to fetch/i.test(errMsg);
       if (isServerOrNetwork) {
         const { error: showError } = await import(
-          "@/lib/services/notificationService"
+          "@/lib/api/services/notificationService"
         );
         showError(
           "La venta puede haberse procesado. Revise en Caja u Órdenes antes de reintentar.",

@@ -5,7 +5,7 @@
  * Provides type-safe methods for CRUD and management of B2B agreements.
  */
 
-import { handleApiError } from "@/lib/services/errorService";
+import { handleApiError } from "@/lib/api/services/errorService";
 
 import {
   ApiClient,

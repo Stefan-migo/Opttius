@@ -404,6 +404,7 @@ export const categoryTools: ToolDefinition[] = [
       "Delete a category. Products in this category will have their category_id set to null. This action cannot be undone.",
     category: "categories",
     requiresConfirmation: true,
+    minRole: "admin",
     parameters: {
       type: "object",
       properties: {
