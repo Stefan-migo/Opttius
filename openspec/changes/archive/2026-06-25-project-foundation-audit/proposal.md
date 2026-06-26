@@ -38,34 +38,34 @@ None.
 
 Incremental per-phase with characterization tests as safety net before each refactor. Each phase produces a complete, shippable state — no partial refactors left in-flight.
 
-| Phase | Strategy | Safety |
-|-------|----------|--------|
-| 0 | Fix test env, update snapshots, isolate integration tests | Green CI baseline |
-| 1 | Extract cohesive modules from megafiles, one file at a time | Characterization test before each extraction |
-| 2 | Consolidate service directories, deduplicate, fix cycles | Extract+rename, run full suite |
-| 3 | Delete stale docs, update architecture diagrams, prune orphaned dirs | Manual review |
-| 4 | Add engram save triggers, tune SDD config | Built on Phase 0-3 completion |
+| Phase | Strategy                                                             | Safety                                       |
+| ----- | -------------------------------------------------------------------- | -------------------------------------------- |
+| 0     | Fix test env, update snapshots, isolate integration tests            | Green CI baseline                            |
+| 1     | Extract cohesive modules from megafiles, one file at a time          | Characterization test before each extraction |
+| 2     | Consolidate service directories, deduplicate, fix cycles             | Extract+rename, run full suite               |
+| 3     | Delete stale docs, update architecture diagrams, prune orphaned dirs | Manual review                                |
+| 4     | Add engram save triggers, tune SDD config                            | Built on Phase 0-3 completion                |
 
 ## Affected Areas
 
-| Area | Impact | Description |
-|------|--------|-------------|
-| `src/app/(pos)/` | Modified | Megafile extraction (Phase 1) |
-| `src/lib/services/` | Modified | Consolidation with `lib/api/services/` (Phase 2) |
-| `src/lib/api/services/` | Modified | Consolidation target (Phase 2) |
-| `src/__tests__/` | Modified | Test fixes + characterization tests (Phase 0,1) |
-| `docs/`, `brain/`, `*.md` | Modified | Doc pruning + updates (Phase 3) |
-| `.agent/`, `.qoder/`, `.mcp/` | Removed | Orphaned agent-era dirs (Phase 4) |
+| Area                          | Impact   | Description                                      |
+| ----------------------------- | -------- | ------------------------------------------------ |
+| `src/app/(pos)/`              | Modified | Megafile extraction (Phase 1)                    |
+| `src/lib/services/`           | Modified | Consolidation with `lib/api/services/` (Phase 2) |
+| `src/lib/api/services/`       | Modified | Consolidation target (Phase 2)                   |
+| `src/__tests__/`              | Modified | Test fixes + characterization tests (Phase 0,1)  |
+| `docs/`, `brain/`, `*.md`     | Modified | Doc pruning + updates (Phase 3)                  |
+| `.agent/`, `.qoder/`, `.mcp/` | Removed  | Orphaned agent-era dirs (Phase 4)                |
 
 ## Risks
 
-| Risk | Likelihood | Mitigation |
-|------|------------|------------|
-| Megafile extraction breaks POS checkout | Medium | Characterization tests before each extraction + manual POS smoke test |
-| Test fixes introduce false positives | Low | Only fix env/snapshot/import issues, never change test logic |
-| Service consolidation creates merge conflicts | Low | Do in dedicated branch, coordinate with any parallel work |
-| Documentation drift continues post-update | Medium | Enforce engram save triggers for architecture decisions (Phase 4) |
-| Scope creep into feature work | Medium | Phase gates — each phase must ship before next starts |
+| Risk                                          | Likelihood | Mitigation                                                            |
+| --------------------------------------------- | ---------- | --------------------------------------------------------------------- |
+| Megafile extraction breaks POS checkout       | Medium     | Characterization tests before each extraction + manual POS smoke test |
+| Test fixes introduce false positives          | Low        | Only fix env/snapshot/import issues, never change test logic          |
+| Service consolidation creates merge conflicts | Low        | Do in dedicated branch, coordinate with any parallel work             |
+| Documentation drift continues post-update     | Medium     | Enforce engram save triggers for architecture decisions (Phase 4)     |
+| Scope creep into feature work                 | Medium     | Phase gates — each phase must ship before next starts                 |
 
 ## Rollback Plan
 

@@ -4,13 +4,13 @@
 
 Incremental 5-phase codebase restructuring. No behavior changes. Each phase ships independently as its own PR with characterization test guard.
 
-| Phase | Strategy | Safety Gate |
-|-------|----------|-------------|
-| 0 | Fix 96 failing tests (env, imports, snapshots) | `npm run test:run` passes 100% |
-| 1 | Extract cohesive modules from megafiles one boundary at a time | Characterization test before extraction + full suite after |
-| 2 | Consolidate dual service dirs, deduplicate, break import cycles | All existing tests pass, `npm run build` passes |
-| 3 | Prune stale docs, update architecture docs, remove orphaned agent dirs | Manual review |
-| 4 | Tune SDD config, establish engram capture discipline | >=5 architecture memory entries |
+| Phase | Strategy                                                               | Safety Gate                                                |
+| ----- | ---------------------------------------------------------------------- | ---------------------------------------------------------- |
+| 0     | Fix 96 failing tests (env, imports, snapshots)                         | `npm run test:run` passes 100%                             |
+| 1     | Extract cohesive modules from megafiles one boundary at a time         | Characterization test before extraction + full suite after |
+| 2     | Consolidate dual service dirs, deduplicate, break import cycles        | All existing tests pass, `npm run build` passes            |
+| 3     | Prune stale docs, update architecture docs, remove orphaned agent dirs | Manual review                                              |
+| 4     | Tune SDD config, establish engram capture discipline                   | >=5 architecture memory entries                            |
 
 ## Architecture Decisions
 
@@ -42,12 +42,12 @@ Incremental 5-phase codebase restructuring. No behavior changes. Each phase ship
 
 ### Failure categories (from exploration)
 
-| Category | Files | Fix |
-|----------|-------|-----|
-| Missing env vars | `integration/api/*.test.ts` | Wrap `describe` in `isMultiTenancyAvailable()` guard, log instructions for local Supabase setup |
-| Stale snapshots | Snapshot `.snap` files | `npx vitest run --update` |
-| Import path errors | ~5 test files with wrong relative imports | Fix imports to match actual module locations |
-| AI provider config | `unit/lib/ai/providers/openrouter.test.ts` | Guard or mock; depends on optional API key |
+| Category           | Files                                      | Fix                                                                                             |
+| ------------------ | ------------------------------------------ | ----------------------------------------------------------------------------------------------- |
+| Missing env vars   | `integration/api/*.test.ts`                | Wrap `describe` in `isMultiTenancyAvailable()` guard, log instructions for local Supabase setup |
+| Stale snapshots    | Snapshot `.snap` files                     | `npx vitest run --update`                                                                       |
+| Import path errors | ~5 test files with wrong relative imports  | Fix imports to match actual module locations                                                    |
+| AI provider config | `unit/lib/ai/providers/openrouter.test.ts` | Guard or mock; depends on optional API key                                                      |
 
 ### Test config design
 
@@ -62,6 +62,7 @@ src/__tests__/
 ```
 
 The guard pattern:
+
 ```typescript
 // Add to each integration describe block
 const isAvailable = await isMultiTenancyAvailable();
@@ -88,6 +89,7 @@ describe.runIf(isAvailable)("Payments API", ...);
 ### Concrete example: POSAdvancedSale (3122 lines)
 
 Current structure (one file):
+
 ```
 POSAdvancedSale.tsx
  ├── 5 interfaces (POSProduct, OrderFormData, ExternalPrescriptionData, Treatment, POSAdvancedSaleProps)
@@ -148,12 +150,12 @@ posDataLoader.ts              ← Data loading hooks (~300 lines)
 
 ### Next megafile targets (after POSAdvancedSale)
 
-| Rank | File | Lines | Strategy |
-|------|------|-------|----------|
-| 2 | `CreateQuoteForm.tsx` | 2847 | Extract: types → constants → lens matrix → pricing → submit handler |
-| 3 | `cash-register/page.tsx` | 2624 | Extract: types → payment methods → cash operations → print logic |
-| 4 | `process-sale/route.ts` | 2448 | API route — extract: validation → payment processing → response builder |
-| 5 | `zod-schemas.ts` (lib/api) | 2199 | Investigate overlap with `lib/validation/zod-schemas.ts` (1764 lines), deduplicate |
+| Rank | File                       | Lines | Strategy                                                                           |
+| ---- | -------------------------- | ----- | ---------------------------------------------------------------------------------- |
+| 2    | `CreateQuoteForm.tsx`      | 2847  | Extract: types → constants → lens matrix → pricing → submit handler                |
+| 3    | `cash-register/page.tsx`   | 2624  | Extract: types → payment methods → cash operations → print logic                   |
+| 4    | `process-sale/route.ts`    | 2448  | API route — extract: validation → payment processing → response builder            |
+| 5    | `zod-schemas.ts` (lib/api) | 2199  | Investigate overlap with `lib/validation/zod-schemas.ts` (1764 lines), deduplicate |
 
 ### Other cleanup opportunities
 
@@ -195,9 +197,11 @@ lib/api/services/    (14 files, canonical)     lib/services/    (4 files)
 ### Import cycles
 
 2 detected in exploration. Fix pattern:
+
 ```
 A ←→ B  →  extract shared dependency C
 ```
+
 Both A and B import from C instead of from each other. C is the commonly-needed subset.
 
 ## Phase 3: Documentation Architecture
@@ -220,6 +224,7 @@ CONTRIBUTING.md           ← KEEP — update if exists
 ### README convention per module
 
 Files >300 lines SHOULD have a file-level JSDoc comment:
+
 ```typescript
 /**
  * POSAdvancedSale — "Venta Óptica" / "Crear Orden Completa" form.
@@ -242,29 +247,30 @@ Files >300 lines SHOULD have a file-level JSDoc comment:
 
 ### Orphaned directory cleanup
 
-| Dir | Action | Rationale |
-|-----|--------|-----------|
-| `.agent/` | Delete | Gentle AI protocol — replaced by `.opencode/` |
-| `.qoder/` | Delete | Cline/Cody-era plans, repowiki, skills — agent tool moved on |
-| `.mcp/` | Delete | Claude Desktop config — belongs in local `~/.config/`, not in repo |
-| `.atl/` | Delete | Gentle AI skill registry index — registry now lives in `.opencode/skills/` |
-| `brain/` | Keep | Obsidian team wiki — actively maintained knowledge base |
+| Dir       | Action | Rationale                                                                  |
+| --------- | ------ | -------------------------------------------------------------------------- |
+| `.agent/` | Delete | Gentle AI protocol — replaced by `.opencode/`                              |
+| `.qoder/` | Delete | Cline/Cody-era plans, repowiki, skills — agent tool moved on               |
+| `.mcp/`   | Delete | Claude Desktop config — belongs in local `~/.config/`, not in repo         |
+| `.atl/`   | Delete | Gentle AI skill registry index — registry now lives in `.opencode/skills/` |
+| `brain/`  | Keep   | Obsidian team wiki — actively maintained knowledge base                    |
 
 ### Engram save triggers
 
 Establish these rules for architecture decision capture:
 
-| Trigger | When to call `mem_save` |
-|---------|------------------------|
-| Service extraction | After each extraction, log what was moved and why |
-| Import cycle fix | After each cycle resolution, document the cycle + fix |
-| Test category fixed | After each failure category is resolved, log the fix pattern |
-| Phase complete | At end of each phase, summary of files changed + verification results |
-| Directory deleted | Before deleting, archive the decision and confirm no runtime impact |
+| Trigger             | When to call `mem_save`                                               |
+| ------------------- | --------------------------------------------------------------------- |
+| Service extraction  | After each extraction, log what was moved and why                     |
+| Import cycle fix    | After each cycle resolution, document the cycle + fix                 |
+| Test category fixed | After each failure category is resolved, log the fix pattern          |
+| Phase complete      | At end of each phase, summary of files changed + verification results |
+| Directory deleted   | Before deleting, archive the decision and confirm no runtime impact   |
 
 ### SDD config tuning
 
 Current `openspec/config.yaml` is already well-configured. Recommendation:
+
 - `rules.apply.tdd: true` — already set ✓
 - `testing.strict_tdd: true` — already set ✓
 - Add `rules.archive: - "Warn before merging destructive deltas"` for dir deletions
@@ -301,44 +307,45 @@ Verify: npm run test:run + npm run build
 
 ## File Changes (complete)
 
-| Phase | File | Action | Description |
-|-------|------|--------|-------------|
-| 0 | `src/__tests__/integration/api/payments.test.ts` | Modify | Add `describe.runIf()` env guard |
-| 0 | `src/__tests__/integration/api/*.test.ts` | Modify | Add env-var guards to all integration tests |
-| 0 | `src/__tests__/unit/lib/ai/providers/openrouter.test.ts` | Modify | Guard or mock AI provider key |
-| 0 | (snapshot files) | Update | `--update` flag, no manual changes |
-| 1 | `src/app/admin/pos/components/POSAdvancedSale.types.ts` | Create | Extracted interfaces |
-| 1 | `src/app/admin/pos/components/POSAdvancedSale.constants.ts` | Create | Extracted default values |
-| 1 | `src/app/admin/pos/components/posPricingUtils.ts` | Create | Extracted pricing logic |
-| 1 | `src/app/admin/pos/components/posCartBuilder.ts` | Create | Extracted cart composition |
-| 1 | `src/app/admin/pos/components/posDataLoader.ts` | Create | Extracted data loading hooks |
-| 1 | `src/app/admin/pos/components/POSAdvancedSale.tsx` | Modify | Remove extracted code, keep re-exports + JSX |
-| 1 | `src/app/admin/pos/page.backup-refactored.tsx` | Delete | Stale backup |
-| 1 | `src/lib/ai/agent/core.ts.backup` | Delete | Stale backup |
-| 1 | `src/app/admin/pos/components/POSAdvancedSale.char.test.ts` | Create | Characterization test |
-| 2 | (imports across codebase) | Modify | Update `@/lib/services/*` → `@/lib/api/services/*` |
-| 2 | `src/lib/services/*` (4 files) | Move | Move to `lib/api/services/` |
-| 2 | `src/lib/services/` | Delete | Empty directory |
-| 3 | `.agent/` directory (2 files) | Delete | Orphaned agent era |
-| 3 | `.qoder/` directory | Delete | Orphaned agent era |
-| 3 | `.mcp/` directory | Delete | Orphaned agent era |
-| 3 | `.atl/` directory | Delete | Orphaned agent era |
-| 3 | `README.md` | Modify | Update project description |
-| 4 | `openspec/config.yaml` | Modify | Tune archive rules |
-| — | `.env.test.example` | Create | Document integration test requirements |
+| Phase | File                                                        | Action | Description                                        |
+| ----- | ----------------------------------------------------------- | ------ | -------------------------------------------------- |
+| 0     | `src/__tests__/integration/api/payments.test.ts`            | Modify | Add `describe.runIf()` env guard                   |
+| 0     | `src/__tests__/integration/api/*.test.ts`                   | Modify | Add env-var guards to all integration tests        |
+| 0     | `src/__tests__/unit/lib/ai/providers/openrouter.test.ts`    | Modify | Guard or mock AI provider key                      |
+| 0     | (snapshot files)                                            | Update | `--update` flag, no manual changes                 |
+| 1     | `src/app/admin/pos/components/POSAdvancedSale.types.ts`     | Create | Extracted interfaces                               |
+| 1     | `src/app/admin/pos/components/POSAdvancedSale.constants.ts` | Create | Extracted default values                           |
+| 1     | `src/app/admin/pos/components/posPricingUtils.ts`           | Create | Extracted pricing logic                            |
+| 1     | `src/app/admin/pos/components/posCartBuilder.ts`            | Create | Extracted cart composition                         |
+| 1     | `src/app/admin/pos/components/posDataLoader.ts`             | Create | Extracted data loading hooks                       |
+| 1     | `src/app/admin/pos/components/POSAdvancedSale.tsx`          | Modify | Remove extracted code, keep re-exports + JSX       |
+| 1     | `src/app/admin/pos/page.backup-refactored.tsx`              | Delete | Stale backup                                       |
+| 1     | `src/lib/ai/agent/core.ts.backup`                           | Delete | Stale backup                                       |
+| 1     | `src/app/admin/pos/components/POSAdvancedSale.char.test.ts` | Create | Characterization test                              |
+| 2     | (imports across codebase)                                   | Modify | Update `@/lib/services/*` → `@/lib/api/services/*` |
+| 2     | `src/lib/services/*` (4 files)                              | Move   | Move to `lib/api/services/`                        |
+| 2     | `src/lib/services/`                                         | Delete | Empty directory                                    |
+| 3     | `.agent/` directory (2 files)                               | Delete | Orphaned agent era                                 |
+| 3     | `.qoder/` directory                                         | Delete | Orphaned agent era                                 |
+| 3     | `.mcp/` directory                                           | Delete | Orphaned agent era                                 |
+| 3     | `.atl/` directory                                           | Delete | Orphaned agent era                                 |
+| 3     | `README.md`                                                 | Modify | Update project description                         |
+| 4     | `openspec/config.yaml`                                      | Modify | Tune archive rules                                 |
+| —     | `.env.test.example`                                         | Create | Document integration test requirements             |
 
 ## Testing Strategy
 
-| Layer | What | Approach |
-|-------|------|----------|
-| Characterization | Each extracted megafile boundary | Black-box `*.char.test.ts` — call public API, assert known outputs |
-| Unit | Fixed test failures | Only fix env/import/snapshot, never change test logic |
-| Full suite | Regression after each extraction | `npm run test:run` must pass (all phases) |
-| Build | Import correctness after service move | `npm run build` must pass (Phase 2 gate) |
+| Layer            | What                                  | Approach                                                           |
+| ---------------- | ------------------------------------- | ------------------------------------------------------------------ |
+| Characterization | Each extracted megafile boundary      | Black-box `*.char.test.ts` — call public API, assert known outputs |
+| Unit             | Fixed test failures                   | Only fix env/import/snapshot, never change test logic              |
+| Full suite       | Regression after each extraction      | `npm run test:run` must pass (all phases)                          |
+| Build            | Import correctness after service move | `npm run build` must pass (Phase 2 gate)                           |
 
 ## Migration / Rollout
 
 Per-phase PRs, each independently revertible:
+
 - **Phase 0 PR**: revert → tests go back to 96 failures, prod untouched.
 - **Phase 1 PR**: revert → original megafile is preserved until extraction complete. Re-exports mean consumers never break.
 - **Phase 2 PR**: revert → old imports still compile (TypeScript), old files recoverable from git.

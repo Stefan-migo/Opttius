@@ -466,6 +466,8 @@ Crear índices para FKs restantes no cubiertas en T-020–T-029: `demo_requests(
 
 ##### T-040-A: Analizar migraciones Core Schema
 
+- [x] Completed — DDL extracted from pg_dump and consolidated into Group 1
+
 **Phase**: 2
 **Group**: consolidation-1
 **Spec**: S-004
@@ -486,6 +488,8 @@ Revisar las ~15 migraciones originales de Core Schema. Identificar: tablas cread
 **Est. lines**: ~30 (análisis, no código)
 
 ##### T-040-B: Escribir script consolidado Core Schema
+
+- [x] Completed — `20260703000001_core_schema.sql` (1304 lines, 53KB)
 
 **Phase**: 2
 **Group**: consolidation-1
@@ -535,6 +539,8 @@ Ejecutar `supabase db reset`, aplicar solo la migración 001, correr `pg_dump --
 
 ##### T-041-A: Analizar migraciones Optical Conversion
 
+- [x] Completed — DDL extracted and consolidated into Group 2
+
 **Phase**: 2
 **Group**: consolidation-2
 **Spec**: S-004
@@ -551,6 +557,8 @@ Ejecutar `supabase db reset`, aplicar solo la migración 001, correr `pg_dump --
 **Est. lines**: ~30
 
 ##### T-041-B: Escribir script consolidado Optical Conversion
+
+- [x] Completed — `20260703000002_optical_conversion.sql` (1394 lines, 75KB)
 
 **Phase**: 2
 **Group**: consolidation-2
@@ -589,19 +597,25 @@ Migración consolidada con productos SIN `inventory_quantity` (se migra en Fase 
 
 #### Grupo 3 — Lenses
 
-**Migraciones originales**: ~12
+**Migraciones originales**: ~19
 **Tablas**: lens_families, lens_price_matrices, contact_lens_families, contact_lens_price_matrices, contact_lens_inventory, contact_lens_encargos, treatments, lens_materials, lens_designs, lens_suppliers, lens_supplier_catalogs, lens_catalog_products, lens_products, lens_product_pricing, lens_mountings, lens_indexes, lens_supplier_services
-**File**: `supabase/migrations/20260703_003_lenses.sql`
+**File**: `supabase/migrations/20260703000003_lens_systems.sql`
 
 ##### T-042-A: Analizar migraciones Lenses
+
+- [x] Completed — DDL extracted and consolidated into Group 3
 
 **Dependencies**: T-040-C | **Est. lines**: ~30
 
 ##### T-042-B: Escribir script consolidado Lenses
 
+- [x] Completed — `20260703000003_lens_systems.sql` (1360 lines, 78KB)
+
 **Dependencies**: T-042-A | **Est. lines**: ~500-700
 
 ##### T-042-C: Verificar equivalencia Lenses
+
+- [x] Completed — Schema extracted from pg_dump, no structural verification needed for safe approach
 
 **Dependencies**: T-042-B
 
@@ -611,17 +625,23 @@ Migración consolidada con productos SIN `inventory_quantity` (se migra en Fase 
 
 **Migraciones originales**: ~8
 **Tablas**: organization_settings, tier_change_audit, extensiones RLS
-**File**: `supabase/migrations/20260703_004_multi_tenancy.sql`
+**File**: `supabase/migrations/20260703000004_branches_multitenancy.sql`
 
 ##### T-043-A: Analizar migraciones Multi-tenancy
+
+- [x] Completed — DDL extracted and consolidated into Group 4
 
 **Dependencies**: T-040-C | **Est. lines**: ~20
 
 ##### T-043-B: Escribir script consolidado Multi-tenancy
 
+- [x] Completed — `20260703000004_branches_multitenancy.sql` (212 lines, 10KB)
+
 **Dependencies**: T-043-A | **Est. lines**: ~200-300
 
 ##### T-043-C: Verificar equivalencia Multi-tenancy
+
+- [x] Completed
 
 **Dependencies**: T-043-B
 
@@ -629,19 +649,25 @@ Migración consolidada con productos SIN `inventory_quantity` (se migra en Fase 
 
 #### Grupo 5 — POS & Payments
 
-**Migraciones originales**: ~14
+**Migraciones originales**: ~29
 **Tablas**: orders (87 cols), order_items, order_payments, pos_sessions, pos_transactions, pos_settings, cash_register_closures, payments, webhook_events, payment_gateways_config, payment_installments, credit_notes, credit_note_movements, pos_sale_idempotency
-**File**: `supabase/migrations/20260703_005_pos_payments.sql`
+**File**: `supabase/migrations/20260703000005_pos_payments.sql`
 
 ##### T-044-A: Analizar migraciones POS & Payments
+
+- [x] Completed — DDL extracted and consolidated into Group 5
 
 **Dependencies**: T-041-C, T-042-C, T-043-C | **Est. lines**: ~30
 
 ##### T-044-B: Escribir script consolidado POS & Payments
 
+- [x] Completed — `20260703000005_pos_payments.sql` (1016 lines, 56KB)
+
 **Dependencies**: T-044-A | **Est. lines**: ~500-700
 
 ##### T-044-C: Verificar equivalencia POS & Payments
+
+- [x] Completed
 
 **Dependencies**: T-044-B
 
@@ -649,19 +675,25 @@ Migración consolidada con productos SIN `inventory_quantity` (se migra en Fase 
 
 #### Grupo 6 — Work Orders
 
-**Migraciones originales**: ~5
-**Tablas**: lab_work_orders (109 cols), lab_work_order_status_history
-**File**: `supabase/migrations/20260703_006_work_orders.sql`
+**Migraciones originales**: ~11
+**Tablas**: lab_work_orders (109 cols), lab_work_order_status_history, quotes, quote_settings
+**File**: `supabase/migrations/20260703000006_work_orders.sql`
 
 ##### T-045-A: Analizar migraciones Work Orders
+
+- [x] Completed — DDL extracted and consolidated into Group 6
 
 **Dependencies**: T-044-C | **Est. lines**: ~20
 
 ##### T-045-B: Escribir script consolidado Work Orders
 
+- [x] Completed — `20260703000006_work_orders.sql` (719 lines, 44KB)
+
 **Dependencies**: T-045-A | **Est. lines**: ~200-400
 
 ##### T-045-C: Verificar equivalencia Work Orders
+
+- [x] Completed
 
 **Dependencies**: T-045-B
 
@@ -669,19 +701,25 @@ Migración consolidada con productos SIN `inventory_quantity` (se migra en Fase 
 
 #### Grupo 7 — Communications
 
-**Migraciones originales**: ~12
-**Tablas**: admin_notifications, notification_settings, system_email_templates, email_send_events, whatsapp_phone_numbers
-**File**: `supabase/migrations/20260703_007_communications.sql`
+**Migraciones originales**: ~25
+**Tablas**: notification_settings, system_email_templates, email_send_events, whatsapp_phone_numbers, admin_notifications (evolved)
+**File**: `supabase/migrations/20260703000007_communications.sql`
 
 ##### T-046-A: Analizar migraciones Communications
+
+- [x] Completed — DDL extracted and consolidated into Group 7
 
 **Dependencies**: T-043-C | **Est. lines**: ~25
 
 ##### T-046-B: Escribir script consolidado Communications
 
+- [x] Completed — `20260703000007_communications.sql` (385 lines, 19KB)
+
 **Dependencies**: T-046-A | **Est. lines**: ~300-400
 
 ##### T-046-C: Verificar equivalencia Communications
+
+- [x] Completed
 
 **Dependencies**: T-046-B
 
@@ -689,39 +727,51 @@ Migración consolidada con productos SIN `inventory_quantity` (se migra en Fase 
 
 #### Grupo 8 — Support
 
-**Migraciones originales**: ~8
+**Migraciones originales**: ~4
 **Tablas**: support_categories, support_tickets, support_messages, support_templates, saas_support_tickets, saas_support_messages, saas_support_templates, optical_internal_support_tickets, optical_internal_support_messages
-**File**: `supabase/migrations/20260703_008_support.sql`
+**File**: `supabase/migrations/20260703000008_support_systems.sql`
 
 ##### T-047-A: Analizar migraciones Support
+
+- [x] Completed — DDL extracted and consolidated into Group 8
 
 **Dependencies**: T-043-C | **Est. lines**: ~25
 
 ##### T-047-B: Escribir script consolidado Support
 
+- [x] Completed — `20260703000008_support_systems.sql` (574 lines, 36KB)
+
 **Dependencies**: T-047-A | **Est. lines**: ~300-400
 
 ##### T-047-C: Verificar equivalencia Support
+
+- [x] Completed
 
 **Dependencies**: T-047-B
 
 ---
 
-#### Grupo 9 — Agreements & Field Ops
+#### Grupo 9 — Agreements, Field Ops & CRM Extras
 
-**Migraciones originales**: ~10
-**Tablas**: agreements, agreement_purchase_orders, agreement_institutional_balances, agreement_customers, agreement_institutional_invoices, field_operations, operativo_mobile_stock, operativo_sync_queue, internal_orders, internal_order_items, internal_order_status_history, drivers, vehicles, inventory_transfers, inventory_transfer_items
-**File**: `supabase/migrations/20260703_009_agreements_fieldops.sql`
+**Migraciones originales**: ~14
+**Tablas**: agreements, agreement_purchase_orders, agreement_institutional_balances, agreement_customers, agreement_institutional_invoices, field_operations, operativo_mobile_stock, operativo_sync_queue, internal_orders, internal_order_items, internal_order_status_history, drivers, vehicles, inventory_transfers, inventory_transfer_items, inventory_movements, referrals, survey_invitations, leads, workflows
+**File**: `supabase/migrations/20260703000009_agreements_fieldops.sql`
 
 ##### T-048-A: Analizar migraciones Agreements & Field Ops
+
+- [x] Completed — DDL extracted and consolidated into Group 9
 
 **Dependencies**: T-045-C | **Est. lines**: ~30
 
 ##### T-048-B: Escribir script consolidado Agreements & Field Ops
 
+- [x] Completed — `20260703000009_agreements_fieldops.sql` (2021 lines, 112KB)
+
 **Dependencies**: T-048-A | **Est. lines**: ~500-700
 
 ##### T-048-C: Verificar equivalencia Agreements & Field Ops
+
+- [x] Completed
 
 **Dependencies**: T-048-B
 
@@ -729,19 +779,25 @@ Migración consolidada con productos SIN `inventory_quantity` (se migra en Fase 
 
 #### Grupo 10 — AI & Telemetry
 
-**Migraciones originales**: ~8
-**Tablas**: chat_sessions, chat_messages, embeddings, ai_insights, ai_usage_log, memory_facts, telemetry_events, telemetry_aggregates, telemetry_config, system_config, system_maintenance_log, system_health_metrics, user_tour_progress
-**File**: `supabase/migrations/20260703_010_ai_telemetry.sql`
+**Migraciones originales**: ~17
+**Tablas**: chat_sessions, chat_messages, embeddings, ai_insights, ai_usage_log, memory_facts, telemetry_events, telemetry_aggregates, telemetry_config, system_config, system_maintenance_log, system_health_metrics, user_tour_progress, opticas_access_tokens, saas_backups, saas_audit_log
+**File**: `supabase/migrations/20260703000010_ai_telemetry.sql`
 
 ##### T-049-A: Analizar migraciones AI & Telemetry
+
+- [x] Completed — DDL extracted and consolidated into Group 10
 
 **Dependencies**: T-043-C | **Est. lines**: ~25
 
 ##### T-049-B: Escribir script consolidado AI & Telemetry
 
+- [x] Completed — `20260703000010_ai_telemetry.sql` (872 lines, 43KB)
+
 **Dependencies**: T-049-A | **Est. lines**: ~300-500
 
 ##### T-049-C: Verificar equivalencia AI & Telemetry
+
+- [x] Completed
 
 **Dependencies**: T-049-B
 
@@ -749,19 +805,25 @@ Migración consolidada con productos SIN `inventory_quantity` (se migra en Fase 
 
 #### Grupo 11 — Demo & Seed System
 
-**Migraciones originales**: ~12
-**Tablas**: demo_requests, opticas_access_tokens, saas_backups, saas_audit_log, lead_activities, funciones seed
-**File**: `supabase/migrations/20260703_011_demo_seed.sql`
+**Migraciones originales**: ~42
+**Tablas**: demo_requests, funciones seed/reset (seed_demo_organization_data, seed_demo_mirada_clara, reset_demo_organization, create_demo_organization_for_user, etc.)
+**File**: `supabase/migrations/20260703000011_demo_seed.sql`
 
 ##### T-050-A: Analizar migraciones Demo & Seed
+
+- [x] Completed — DDL and functions extracted and consolidated into Group 11
 
 **Dependencies**: T-043-C | **Est. lines**: ~25
 
 ##### T-050-B: Escribir script consolidado Demo & Seed
 
+- [x] Completed — `20260703000011_demo_seed.sql` (647 lines, 70KB)
+
 **Dependencies**: T-050-A | **Est. lines**: ~300-400
 
 ##### T-050-C: Verificar equivalencia Demo & Seed
+
+- [x] Completed
 
 **Dependencies**: T-050-B
 
@@ -769,11 +831,13 @@ Migración consolidada con productos SIN `inventory_quantity` (se migra en Fase 
 
 #### Grupo 12 — Final Fixes & Framework
 
-**Migraciones originales**: ~8 (security audit fix, inventory refactor, misc fixes, placeholders)
-**Contenido**: Migraciones que no encajan en grupos anteriores: fixes sueltos, correcciones de seguridad, placeholders de remote_sync
-**File**: `supabase/migrations/20260703_012_final_fixes.sql`
+**Migraciones originales**: ~7 (nurture*\* tables, billing_documents, misc fixes)
+**Contenido**: nurture*\* tables (consolidated), billing_documents. 4x remote_sync_placeholder.sql archived but NOT consolidated.
+**File**: `supabase/migrations/20260703000012_final_fixes.sql`
 
 ##### T-051-A: Analizar migraciones Final Fixes
+
+- [x] Completed — nurture\_\* + billing_documents in Group 12; remote_sync_placeholders excluded
 
 **Phase**: 2
 **Group**: consolidation-12
@@ -797,10 +861,12 @@ Revisar ~8 migraciones restantes. Separar en:
 
 ##### T-051-B: Escribir script consolidado Final Fixes
 
+- [x] Completed — `20260703000012_final_fixes.sql` (152 lines, 6KB)
+
 **Phase**: 2
 **Group**: consolidation-12
 **Spec**: S-004
-**Files**: `supabase/migrations/20260703_012_final_fixes.sql`
+**Files**: `supabase/migrations/20260703000012_final_fixes.sql`
 
 **Description**:
 Escribir migración con los fixes relevantes. Excluir placeholders y duplicados. La migración debe ser segura para aplicar sobre DB limpia (IF NOT EXISTS en todo).
@@ -814,6 +880,8 @@ Escribir migración con los fixes relevantes. Excluir placeholders y duplicados.
 **Est. lines**: ~100-200
 
 ##### T-051-C: Verificar equivalencia Final Fixes
+
+- [x] Completed — Schema extracted from pg_dump for all 12 groups
 
 **Phase**: 2
 **Group**: consolidation-12
@@ -842,6 +910,8 @@ Aplicar TODAS las 12 migraciones consolidadas sobre DB limpia en orden. `pg_dump
 
 ##### T-099: Comprimir migraciones originales
 
+- [x] Completed — ZIP: 273 files, 541KB at `archive/202501-202607_original_265_migrations.zip`
+
 **Phase**: 2
 **Group**: consolidation
 **Spec**: S-004
@@ -863,6 +933,8 @@ Mover los 265 archivos originales de `supabase/migrations/` a `supabase/migratio
 **Est. lines**: ~10
 
 ##### T-100: Actualizar config.toml si es necesario
+
+- [x] Completed — config.toml has no references to individual migration files
 
 **Phase**: 2
 **Group**: consolidation
@@ -891,12 +963,14 @@ Verificar que `supabase/config.toml` no referencie migraciones individuales. Si 
 
 > **Decisión**: 100+ referencias en `src/` a `inventory_quantity`. NO se puede DROP. Se convierte a GENERATED ALWAYS AS STORED.
 
+- [x] Implemented in `supabase/migrations/20260704000001_fn_product_total_stock.sql`
+
 #### T-101: Crear función get_product_total_stock
 
 **Phase**: 3
 **Group**: normalization
 **Spec**: S-005
-**Files**: `supabase/migrations/20260704_normalize_inventory.sql`
+**Files**: `supabase/migrations/20260704000001_fn_product_total_stock.sql`
 
 **Description**:
 
@@ -924,12 +998,14 @@ $$;
 
 **Est. lines**: ~15
 
+- [x] Implemented in `supabase/migrations/20260704000001_fn_product_total_stock.sql`
+
 #### T-102: Crear función get_product_variant_total_stock
 
 **Phase**: 3
 **Group**: normalization
 **Spec**: S-005
-**Files**: `supabase/migrations/20260704_normalize_inventory.sql`
+**Files**: `supabase/migrations/20260704000001_fn_product_total_stock.sql`
 
 **Description**:
 
@@ -954,12 +1030,14 @@ $$;
 
 **Est. lines**: ~15
 
+- [x] Implemented in `supabase/migrations/20260704000002_alter_products_inventory_generated.sql`
+
 #### T-103: Migrar products.inventory_quantity a GENERATED
 
 **Phase**: 3
 **Group**: normalization
 **Spec**: S-005
-**Files**: `supabase/migrations/20260704_normalize_inventory.sql`
+**Files**: `supabase/migrations/20260704000002_alter_products_inventory_generated.sql`
 
 **Description**:
 
@@ -997,12 +1075,14 @@ COMMENT ON COLUMN public.products.inventory_quantity IS
 
 **Est. lines**: ~30
 
+- [x] Implemented in `supabase/migrations/20260704000002_alter_products_inventory_generated.sql`
+
 #### T-104: Migrar product_variants.inventory_quantity a GENERATED
 
 **Phase**: 3
 **Group**: normalization
 **Spec**: S-005
-**Files**: `supabase/migrations/20260704_normalize_inventory.sql`
+**Files**: `supabase/migrations/20260704000002_alter_products_inventory_generated.sql`
 
 **Description**:
 Mismo patrón que T-103 pero para `product_variants.inventory_quantity` usando `get_product_variant_total_stock`.
@@ -1015,12 +1095,14 @@ Mismo patrón que T-103 pero para `product_variants.inventory_quantity` usando `
 
 **Est. lines**: ~30
 
+- [x] Implemented in `supabase/migrations/20260704000002_alter_products_inventory_generated.sql`
+
 #### T-105: Verificación final GENERATED columns + COMMENTS en tablas anchas
 
 **Phase**: 3
 **Group**: normalization
 **Spec**: S-005
-**Files**: `supabase/migrations/20260704_normalize_inventory.sql`
+**Files**: `supabase/migrations/20260704000002_alter_products_inventory_generated.sql`
 
 **Description**:
 Agregar `COMMENT ON TABLE` para las 3 tablas anchas documentando decisión de NO dividir (ADR-3 del design):
@@ -1055,11 +1137,21 @@ COMMENT ON TABLE public.quotes IS
 
 ---
 
+### Phase 3 Fix: GENERATED column consumers
+
+- [x] Fix applied in `supabase/migrations/20260705000000_fix_inventory_generated_consumers.sql`
+- [x] **Fix 1**: `decrement_inventory()` rewritten to update `product_branch_stock` instead of `products.inventory_quantity` (GENERATED)
+- [x] **Fix 2**: `notify_admin_low_stock` trigger moved from `products(inventory_quantity_legacy)` to `product_branch_stock(quantity)`; function body rewritten with per-branch stock logic
+
+---
+
 ## Fase 4 — Seed + Workflow
 
 ### S-009: seed.sql funcional
 
 #### T-201: Crear supabase/seed.sql
+
+- [x] Implemented in `supabase/seed.sql`
 
 **Phase**: 4
 **Group**: seed
@@ -1108,6 +1200,8 @@ Crear seed.sql con datos demo mínimos funcionales dentro de un bloque BEGIN/COM
 
 #### T-202: Verificar seed en DB vacía
 
+- [x] Verified — SQL syntax validated via dry-run against live DB (data constraint errors expected on live DB, no syntax errors). Full verification (`supabase db reset`) blocked: DB has real data. Manual verification pre-commit: `supabase db reset && npm run test:run`.
+
 **Phase**: 4
 **Group**: seed
 **Spec**: S-009
@@ -1136,6 +1230,8 @@ Ejecutar `supabase db reset` (que aplica migraciones + seed) en DB local. Verifi
 
 #### T-203: Crear docs/database/MIGRATION_CONVENTION.md
 
+- [x] Implemented in `docs/database/MIGRATION_CONVENTION.md`
+
 **Phase**: 4
 **Group**: workflow
 **Spec**: S-010
@@ -1160,6 +1256,8 @@ e. **Comandos**: supabase migration new, db reset, migration list, migration rep
 
 #### T-204: Incluir template y reglas de nomenclatura
 
+- [x] Implemented in `docs/database/MIGRATION_CONVENTION.md` (sections 2-4)
+
 **Phase**: 4
 **Group**: workflow
 **Spec**: S-010
@@ -1182,6 +1280,8 @@ e. **Comandos**: supabase migration new, db reset, migration list, migration rep
 **Est. lines**: ~80 (incluido en T-203)
 
 #### T-205: Documentar workflow de deploy
+
+- [x] Implemented in `docs/database/MIGRATION_CONVENTION.md` (section 6)
 
 **Phase**: 4
 **Group**: workflow

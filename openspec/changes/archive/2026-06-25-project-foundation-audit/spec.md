@@ -114,12 +114,12 @@ Engineering workflow changes MUST NOT affect application runtime.
 
 ## Quality Gates Summary
 
-| Phase | Gate | Measure |
-|-------|------|---------|
-| 0 | Green CI | `npm run test:run` exits 0 |
-| 1 | Characterization tests | Written before each extraction, pass before+after |
-| 1 | Megafile size | Top 6 below 500 lines each |
-| 2 | Import cycles | Zero cycles (`madge --circular`), all tests pass |
-| 3 | Doc references | No dead code references in docs/ |
-| 4 | Build + tests | `npm run build` and `npm run test:run` pass |
-| Cross | No regressions | `npm run build` passes at every phase exit state |
+| Phase | Gate                   | Measure                                           |
+| ----- | ---------------------- | ------------------------------------------------- |
+| 0     | Green CI               | `npm run test:run` exits 0                        |
+| 1     | Characterization tests | Written before each extraction, pass before+after |
+| 1     | Megafile size          | Top 6 below 500 lines each                        |
+| 2     | Import cycles          | Zero cycles (`madge --circular`), all tests pass  |
+| 3     | Doc references         | No dead code references in docs/                  |
+| 4     | Build + tests          | `npm run build` and `npm run test:run` pass       |
+| Cross | No regressions         | `npm run build` passes at every phase exit state  |
