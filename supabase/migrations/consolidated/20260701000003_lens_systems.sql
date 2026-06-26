@@ -507,6 +507,12 @@ BEGIN
     RETURN 0;
   END IF;
 
+  FOREACH v_treatment_key IN ARRAY p_treatment_keys
+  LOOP
+    v_total := v_total + public.get_treatment_price(v_treatment_key, p_lens_material);
+  END LOOP;
+
+  RETURN v_total;
 END;
 $$;
 
@@ -543,66 +549,6 @@ BEGIN
 END;
 $$;
 
-CREATE OR REPLACE FUNCTION public.check_contact_lens_stock(p_contact_lens_family_id uuid, p_branch_id uuid, p_sphere numeric, p_cylinder numeric) RETURNS TABLE(has_stock boolean, available_quantity integer, inventory_id uuid)
-    LANGUAGE plpgsql
-    AS $$
-DECLARE
-  v_quantity INTEGER;
-  v_inventory_id UUID;
-BEGIN
-  -- Find inventory entry that covers the requested prescription
-  SELECT cli.quantity, cli.id INTO v_quantity, v_inventory_id
-  FROM contact_lens_inventory cli
-  WHERE cli.contact_lens_family_id = p_contact_lens_family_id
-    AND cli.branch_id = p_branch_id
-    AND cli.is_active = TRUE
-    AND cli.quantity > 0
-    AND p_sphere >= cli.sphere_min
-    AND p_sphere <= cli.sphere_max
-    AND p_cylinder >= cli.cylinder_min
-    AND p_cylinder <= cli.cylinder_max
-  LIMIT 1;
-
-  RETURN QUERY SELECT 
-    CASE WHEN v_quantity > 0 THEN TRUE ELSE FALSE END,
-    COALESCE(v_quantity, 0),
-    v_inventory_id;
-END;
-$$;
-
-CREATE OR REPLACE FUNCTION public.create_lens_family_full(p_family_data jsonb, p_matrices_data jsonb) RETURNS jsonb
-    LANGUAGE plpgsql SECURITY DEFINER
-    SET search_path TO 'public'
-    AS $$
-DECLARE
-  v_family_id uuid;
-  v_matrices jsonb;
-  v_lens_type text;
-  v_addition_min decimal := 0;
-  v_addition_max decimal := 4.0;
-BEGIN
-  -- Insert Lens Family
-  INSERT INTO public.lens_families (
-    name,
-    brand,
-    lens_type,
-    lens_material,
-    description,
-    is_active,
-    organization_id
-  ) VALUES (
-    (p_family_data->>'name')::text,
-    (p_family_data->>'brand')::text,
-    (p_family_data->>'lens_type')::text,
-    (p_family_data->>'lens_material')::text,
-    (p_family_data->>'description')::text,
-    COALESCE((p_family_data->>'is_active')::boolean, true),
-    (p_family_data->>'organization_id')::uuid
-  ) RETURNING id, lens_type INTO v_family_id, v_lens_type;
-
-END;
-$$;
-
 CREATE OR REPLACE FUNCTION public.create_lens_product_full(p_product_data jsonb, p_pricing_data jsonb DEFAULT NULL::jsonb) RETURNS uuid
     LANGUAGE plpgsql SECURITY DEFINER
     SET search_path TO 'public'
@@ -616,6 +562,14 @@ BEGIN
   FROM jsonb_populate_record(NULL::public.lens_products, p_product_data)
   RETURNING id INTO v_product_id;
 
+  -- Insert pricing data if provided
+  IF p_pricing_data IS NOT NULL AND jsonb_array_length(COALESCE(p_pricing_data, '[]'::jsonb)) > 0 THEN
+    INSERT INTO public.lens_product_pricing (lens_product_id, lens_family_id, base_price, cost, is_active)
+    SELECT v_product_id, (x->>'lens_family_id')::uuid, (x->>'base_price')::decimal, (x->>'cost')::decimal, true
+    FROM jsonb_array_elements(p_pricing_data) AS x;
+  END IF;
+
+  RETURN v_product_id;
 END;
 $$;
 
@@ -663,6 +617,18 @@ BEGIN
   FROM treatments
   WHERE treatment_key = p_treatment_key AND is_active = true;
 
+  IF v_treatment IS NULL THEN
+    RETURN 0;
+  END IF;
+
+  -- Verificar si hay override por material
+  IF v_treatment.price_override IS NOT NULL THEN
+    IF v_treatment.price_override->>p_lens_material IS NOT NULL THEN
+      RETURN (v_treatment.price_override->>p_lens_material)::DECIMAL(10,2);
+    END IF;
+  END IF;
+
+  RETURN v_treatment.default_price;
 END;
 $$;
 
@@ -672,40 +638,6 @@ CREATE OR REPLACE FUNCTION public.is_prescription_in_stock_range(p_sphere numeri
 BEGIN
     RETURN (p_sphere >= p_stock_sphere_min AND p_sphere <= p_stock_sphere_max
             AND p_cylinder >= p_stock_cylinder_min AND p_cylinder <= p_stock_cylinder_max);
-END;
-$$;
-
-CREATE OR REPLACE FUNCTION public.reduce_contact_lens_stock(p_contact_lens_family_id uuid, p_branch_id uuid, p_sphere numeric, p_cylinder numeric, p_quantity_to_reduce integer DEFAULT 1) RETURNS boolean
-    LANGUAGE plpgsql
-    AS $$
-DECLARE
-  v_inventory_id UUID;
-  v_current_quantity INTEGER;
-BEGIN
-  -- Find and lock the inventory entry
-  SELECT cli.id, cli.quantity INTO v_inventory_id, v_current_quantity
-  FROM contact_lens_inventory cli
-  WHERE cli.contact_lens_family_id = p_contact_lens_family_id
-    AND cli.branch_id = p_branch_id
-    AND cli.is_active = TRUE
-    AND p_sphere >= cli.sphere_min
-    AND p_sphere <= cli.sphere_max
-    AND p_cylinder >= cli.cylinder_min
-    AND p_cylinder <= cli.cylinder_max
-  FOR UPDATE SKIP LOCKED
-  LIMIT 1;
-
-  IF v_inventory_id IS NULL OR v_current_quantity < p_quantity_to_reduce THEN
-    RETURN FALSE;
-  END IF;
-
-  -- Reduce the quantity
-  UPDATE contact_lens_inventory
-  SET quantity = quantity - p_quantity_to_reduce,
-      updated_at = NOW()
-  WHERE id = v_inventory_id;
-
-  RETURN TRUE;
 END;
 $$;
 
@@ -730,11 +662,67 @@ BEGIN
     );
   END IF;
 
--- ========================================
--- Tables
--- ========================================
+  -- Por cada tratamiento seleccionado
+  FOREACH v_treatment_key IN ARRAY p_treatment_keys
+  LOOP
+    -- Obtener datos del tratamiento
+    SELECT * INTO v_treatment
+    FROM treatments
+    WHERE treatment_key = v_treatment_key AND is_active = true;
 
--- Table: contact_lens_encargos
+    IF v_treatment IS NULL THEN
+      CONTINUE;
+    END IF;
+
+    -- 1. Validar incompatibilidades con otros tratamientos
+    IF v_treatment.exclusions->>'excludes' IS NOT NULL THEN
+      FOR v_excluded_treatment IN SELECT jsonb_array_elements_text((v_treatment.exclusions->>'excludes')::jsonb)
+      LOOP
+        IF v_excluded_treatment = ANY(p_treatment_keys) THEN
+          v_valid := false;
+          v_conflicts := v_conflicts || jsonb_build_array(
+            jsonb_build_object(
+              'treatment', v_treatment_key,
+              'conflicts_with', v_excluded_treatment,
+              'message', 'El tratamiento ' || v_treatment.name || ' es incompatible con ' || v_excluded_treatment
+            )
+          );
+        END IF;
+      END LOOP;
+    END IF;
+
+    -- 2. Validar incompatibilidad con material
+    IF v_treatment.exclusions->>'incompatible_with_material' IS NOT NULL AND v_treatment.exclusions->>'incompatible_with_material' != '' THEN
+      IF p_lens_material = ANY(SELECT jsonb_array_elements_text((v_treatment.exclusions->>'incompatible_with_material')::jsonb)) THEN
+        v_valid := false;
+        v_conflicts := v_conflicts || jsonb_build_array(
+          jsonb_build_object(
+            'treatment', v_treatment_key,
+            'conflicts_with_material', p_lens_material,
+            'message', 'El tratamiento ' || v_treatment.name || ' no es compatible con material ' || p_lens_material
+          )
+        );
+      END IF;
+    END IF;
+
+    -- 3. Validar compatibilidad con tipo de lente
+    IF v_treatment.lens_type_compatibility IS NOT NULL THEN
+      IF p_lens_type != 'ALL' AND NOT (p_lens_type = ANY(v_treatment.lens_type_compatibility)) THEN
+        v_warnings := v_warnings || jsonb_build_array(
+          jsonb_build_object(
+            'treatment', v_treatment_key,
+            'warning', 'El tratamiento ' || v_treatment.name || ' puede no ser compatible con lentes ' || p_lens_type
+          )
+        );
+      END IF;
+    END IF;
+  END LOOP;
+
+  RETURN jsonb_build_object(
+    'valid', v_valid,
+    'conflicts', v_conflicts,
+    'warnings', v_warnings
+  );
 END;
 $$;
 

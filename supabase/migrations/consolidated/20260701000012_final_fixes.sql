@@ -103,30 +103,6 @@ ALTER TABLE public.nurture_log
     ADD CONSTRAINT nurture_log_queue_id_fkey FOREIGN KEY (queue_id) REFERENCES public.nurture_queue(id) ON DELETE SET NULL;
 
 -- ========================================
--- Policies
--- ========================================
-
-CREATE POLICY service_role_only_nurture_campaigns ON public.nurture_campaigns USING ((auth.role() = 'service_role'::text));
-
-CREATE POLICY service_role_only_nurture_campaign_emails ON public.nurture_campaign_emails USING ((auth.role() = 'service_role'::text));
-
-CREATE POLICY service_role_only_nurture_queue ON public.nurture_queue USING ((auth.role() = 'service_role'::text));
-
-CREATE POLICY service_role_only_nurture_log ON public.nurture_log USING ((auth.role() = 'service_role'::text));
-
--- ========================================
--- Row Level Security
--- ========================================
-
-ALTER TABLE public.nurture_campaigns ENABLE ROW LEVEL SECURITY;
-
-ALTER TABLE public.nurture_campaign_emails ENABLE ROW LEVEL SECURITY;
-
-ALTER TABLE public.nurture_queue ENABLE ROW LEVEL SECURITY;
-
-ALTER TABLE public.nurture_log ENABLE ROW LEVEL SECURITY;
-
--- ========================================
 -- Indexes
 -- ========================================
 

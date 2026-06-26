@@ -424,32 +424,6 @@ BEGIN
 END;
 $$;
 
-CREATE OR REPLACE FUNCTION public.process_pos_sale(p_payload text, p_user_id uuid) RETURNS jsonb
-    LANGUAGE plpgsql SECURITY DEFINER
-    SET search_path TO 'public'
-    AS $_$
-DECLARE
-  v_payload JSONB;
-  v_order_id UUID;
-  v_order_number TEXT;
-  v_work_order_id UUID;
-  v_work_order_number TEXT;
-  v_order JSONB;
-  v_item JSONB;
-  v_payment JSONB;
-  v_stock JSONB;
-  v_work_order JSONB;
-  v_pos_tx JSONB;
-  v_branch_id UUID;
-  v_pos_session_id UUID;
-  v_wo_num TEXT;
-  v_product_id UUID;
-BEGIN
-  v_payload := p_payload::jsonb;
-
-END;
-$$;
-
 CREATE OR REPLACE FUNCTION public.update_pos_session_cash(session_id uuid, cash_amount numeric) RETURNS boolean
     LANGUAGE plpgsql SECURITY DEFINER
     SET search_path TO 'public'
