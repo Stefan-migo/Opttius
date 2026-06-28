@@ -1,11 +1,21 @@
-#!/usr/bin/env sh
-. "$(dirname -- "$0")/_/husky.sh"
-
 # Run lint-staged to check and fix staged files
 # This will:
 # - Run ESLint on staged .ts/.tsx files
 # - Format files with Prettier
 npx lint-staged
+
+# Secret detection — prevent committing credentials
+# Install: scoop install gitleaks  |  brew install gitleaks  |  https://github.com/gitleaks/gitleaks
+if command -v gitleaks >/dev/null 2>&1; then
+  gitleaks git --pre-commit --verbose 2>/dev/null || {
+    echo "⚠️  gitleaks detected secrets in staged changes. Aborting commit."
+    echo "   Review the findings above, then run: gitleaks git --pre-commit --verbose"
+    exit 1
+  }
+elif [ -z "$CI" ]; then
+  echo "ℹ️  gitleaks not installed — skipping secret detection."
+  echo "   Install it to prevent credential leaks: scoop install gitleaks"
+fi
 
 # Note: Type checking is done in CI/CD or manually with 'npm run type-check'
 # We don't run it in pre-commit to avoid blocking commits for pre-existing errors

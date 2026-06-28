@@ -92,7 +92,6 @@
     "@supabase/ssr": "^0.6.1",
     "@supabase/supabase-js": "^2.52.0",
     "@tanstack/react-query": "^5.90.19",
-    "@types/uuid": "^10.0.0",
     "@xenova/transformers": "^2.17.2",
     "ai": "^3.0.0",
     "axios": "^1.13.4",
@@ -148,11 +147,11 @@
     "eslint-plugin-security": "^3.0.1",
     "eslint-plugin-simple-import-sort": "^12.1.1",
     "eslint-plugin-unused-imports": "^4.3.0",
+    "eslint-import-resolver-typescript": "^4.3.2",
     "husky": "^9.1.7",
     "ignore-loader": "^0.1.2",
     "jsdom": "^27.4.0",
     "lint-staged": "^16.2.7",
-    "pg": "^8.17.2",
     "postcss": "^8.0.0",
     "prettier": "^3.0.0",
     "prettier-plugin-tailwindcss": "^0.5.0",
@@ -164,7 +163,6 @@
     "webpack-bundle-analyzer": "^5.2.0"
   },
   "overrides": {
-    "framer-motion": "$framer-motion",
     "glob": "^10.5.0",
     "minimatch": "^9.0.9"
   },
