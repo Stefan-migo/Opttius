@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { BackupService } from "@/lib/backup-service";
 import { appLogger as logger } from "@/lib/logger";
-import { createServiceRoleClient } from "@/lib/supabase";
+import { createServiceRoleClient } from "@/utils/supabase/server";
 
 /**
  * GET /api/cron/backups

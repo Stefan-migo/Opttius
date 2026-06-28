@@ -6,7 +6,7 @@ import type { InsightSection } from "@/lib/ai/insights/schemas";
 import { createOrganizationalMemory } from "@/lib/ai/memory/organizational";
 import type { BranchContext } from "@/lib/api/branch-middleware";
 import { appLogger as logger } from "@/lib/logger";
-import { createServiceRoleClient } from "@/lib/supabase";
+import { createServiceRoleClient } from "@/utils/supabase/server";
 
 /**
  * GET /api/cron/generate-insights

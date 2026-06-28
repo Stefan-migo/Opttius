@@ -5,7 +5,7 @@ import path from "path";
 import { promisify } from "util";
 
 import { appLogger as logger } from "@/lib/logger";
-import { createServiceRoleClient } from "@/lib/supabase";
+import { createServiceRoleClient } from "@/utils/supabase/server";
 
 const execAsync = promisify(exec);
 

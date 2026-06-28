@@ -1,6 +1,6 @@
 {
   "extends": ["next/core-web-vitals", "plugin:@typescript-eslint/recommended"],
-  "plugins": ["security", "unused-imports", "simple-import-sort"],
+  "plugins": ["security", "unused-imports", "simple-import-sort", "import"],
   "rules": {
     "@typescript-eslint/no-explicit-any": "warn",
     "@typescript-eslint/no-unused-vars": "off",
@@ -14,6 +14,15 @@
     ],
     "@typescript-eslint/prefer-readonly": "off",
     "@typescript-eslint/no-non-null-assertion": "warn",
+
+    // Naming conventions (Era 1 — warn, escalate to error in Era 2)
+    "@typescript-eslint/naming-convention": [
+      "warn",
+      { "selector": "interface", "format": ["PascalCase"] },
+      { "selector": "typeAlias", "format": ["PascalCase"] },
+      { "selector": "class", "format": ["PascalCase"] },
+      { "selector": "enum", "format": ["PascalCase"] }
+    ],
     "react/no-unescaped-entities": "error",
     "security/detect-object-injection": "warn",
     "security/detect-non-literal-regexp": "warn",
@@ -21,14 +30,8 @@
     "security/detect-eval-with-expression": "error",
 
     // Refactoring-focused rules
-    "max-lines": [
-      "warn",
-      { "max": 300, "skipBlankLines": true, "skipComments": true }
-    ],
-    "max-lines-per-function": [
-      "warn",
-      { "max": 50, "skipBlankLines": true, "skipComments": true }
-    ],
+    "max-lines": ["error", { "max": 300, "skipBlankLines": true, "skipComments": true }],
+    "max-lines-per-function": ["warn", { "max": 50, "skipBlankLines": true, "skipComments": true }],
     "complexity": ["warn", 10],
     "max-depth": ["warn", 4],
     "max-params": ["warn", 4],
@@ -48,6 +51,10 @@
       }
     ],
 
+    // Import plugin (Era 1 — warn, escalate to error in Era 2)
+    "import/no-cycle": "warn",
+    "import/no-duplicates": "warn",
+
     // React best practices
     "react/jsx-no-useless-fragment": "warn",
     "react/self-closing-comp": "warn",
@@ -59,5 +66,12 @@
         "ignoreCase": true
       }
     ]
+  },
+  "settings": {
+    "import/resolver": {
+      "typescript": {
+        "alwaysTryTypes": true
+      }
+    }
   }
 }

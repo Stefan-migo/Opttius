@@ -12,7 +12,7 @@ import {
   createApiSuccessResponse,
 } from "@/lib/api/response";
 import { appLogger as logger } from "@/lib/logger";
-import { createServiceRoleClient } from "@/lib/supabase";
+import { createServiceRoleClient } from "@/utils/supabase/server";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
 import { createClient } from "@/utils/supabase/server";
 
