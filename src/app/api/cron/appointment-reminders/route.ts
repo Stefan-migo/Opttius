@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { EmailNotificationService } from "@/lib/email/notifications";
+import { sendAppointmentReminder } from "@/lib/email/notifications";
 import { appLogger as logger } from "@/lib/logger";
 import { sendAppointmentReminderWhatsApp } from "@/lib/whatsapp/notifications-b2b";
 import { createServiceRoleClient } from "@/utils/supabase/server";
@@ -101,7 +101,7 @@ export async function GET(request: NextRequest) {
         branch_name: branch?.name || "Nuestra Óptica",
       };
 
-      const result = await EmailNotificationService.sendAppointmentReminder(
+      const result = await sendAppointmentReminder(
         appointmentData,
         apt.organization_id as string | undefined,
       );

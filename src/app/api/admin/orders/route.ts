@@ -14,7 +14,7 @@ import {
   createApiErrorResponse,
   createPaginatedResponse,
 } from "@/lib/api/response";
-import { EmailNotificationService } from "@/lib/email/notifications";
+import { sendOrderConfirmation } from "@/lib/email/notifications";
 import { appLogger as logger } from "@/lib/logger";
 import { getLocalDateBoundsUTC } from "@/lib/utils/date-timezone";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
@@ -683,7 +683,7 @@ export async function POST(request: NextRequest) {
                   organization_id: (newOrder as unknown).organization_id,
                 };
 
-                await EmailNotificationService.sendOrderConfirmation(
+                await sendOrderConfirmation(
                   emailOrder as unknown,
                 );
               } catch (err) {

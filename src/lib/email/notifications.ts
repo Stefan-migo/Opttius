@@ -1372,3 +1372,27 @@ Este mensaje fue enviado desde el formulario de contacto de la web.
     });
   }
 }
+
+// Re-export individual functions from the new domain structure.
+// After PR #3 deletes this file, imports of @/lib/email/notifications
+// will resolve to ./notifications/index.ts (the barrel) transparently.
+export {
+  sendOrderConfirmation,
+  sendShippingNotification,
+  sendDeliveryConfirmation,
+  sendAppointmentConfirmation,
+  sendAppointmentReminder,
+  sendQuoteSent,
+  sendWorkOrderReady,
+  sendPrescriptionReady,
+  sendPaymentSuccess,
+  sendPaymentFailed,
+  sendAccountWelcome,
+  sendPasswordReset,
+  sendSaaSNotification,
+  sendMembershipWelcome,
+  sendMembershipReminder,
+  sendLowStockAlert,
+  sendMarketingEmail,
+  sendContactFormNotification,
+} from "./notifications/index";

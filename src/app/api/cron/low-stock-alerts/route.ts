@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { EmailNotificationService } from "@/lib/email/notifications";
+import { sendLowStockAlert } from "@/lib/email/notifications";
 import { appLogger as logger } from "@/lib/logger";
 import { sendLowStockAlertWhatsApp } from "@/lib/whatsapp/notifications-b2b";
 import { createServiceRoleClient } from "@/utils/supabase/server";
@@ -171,7 +171,7 @@ export async function GET(request: NextRequest) {
 
       if (recipientEmails.length === 0) continue;
 
-      const result = await EmailNotificationService.sendLowStockAlert(
+      const result = await sendLowStockAlert(
         recipientEmails,
         products,
         org.id,

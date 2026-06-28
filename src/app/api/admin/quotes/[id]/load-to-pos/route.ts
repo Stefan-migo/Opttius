@@ -3,8 +3,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { addBranchFilter, getBranchContext } from "@/lib/api/branch-middleware";
 import { appLogger as logger } from "@/lib/logger";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
-import { createClient } from "@/utils/supabase/server";
-import { createServiceRoleClient } from "@/utils/supabase/server";
+import { createClient , createServiceRoleClient } from "@/utils/supabase/server";
+
 
 /**
  * Endpoint para cargar un presupuesto al POS

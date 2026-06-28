@@ -6,7 +6,7 @@
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-import { EmailNotificationService } from "@/lib/email/notifications";
+import { sendSaaSNotification } from "@/lib/email/notifications";
 import { appLogger as logger } from "@/lib/logger";
 import { recordTierChange } from "@/lib/saas/tier-change-audit";
 import type {
@@ -439,7 +439,7 @@ export class PaymentService {
           .single();
 
         if (ownerData?.email) {
-          await EmailNotificationService.sendSaaSNotification(
+          await sendSaaSNotification(
             "saas_subscription_success",
             ownerData.email,
             {

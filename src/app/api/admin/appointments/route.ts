@@ -15,13 +15,12 @@ import {
   validationErrorResponse,
 } from "@/lib/api/validation/zod-helpers";
 import { createAppointmentSchema } from "@/lib/api/validation/zod-schemas";
-import { EmailNotificationService } from "@/lib/email/notifications";
+import { sendAppointmentConfirmation } from "@/lib/email/notifications";
 import { appLogger as logger } from "@/lib/logger";
 import { NotificationService } from "@/lib/notifications/notification-service";
 import { formatRUT } from "@/lib/utils/rut";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
-import { createClient } from "@/utils/supabase/server";
-import { createServiceRoleClient } from "@/utils/supabase/server";
+import { createClient , createServiceRoleClient } from "@/utils/supabase/server";
 
 export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
@@ -712,7 +711,7 @@ export async function POST(request: NextRequest) {
                 professionalName = `${staff.first_name} ${staff.last_name}`;
             }
 
-            await EmailNotificationService.sendAppointmentConfirmation(
+            await sendAppointmentConfirmation(
               {
                 customer_name: customerName,
                 customer_email: customerEmail,

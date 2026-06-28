@@ -787,8 +787,8 @@ export async function POST(request: NextRequest) {
             const customerEmail = validatedBody.email;
             if (customerEmail) {
               import("@/lib/email/notifications")
-                .then(({ EmailNotificationService }) =>
-                  EmailNotificationService.sendAccountWelcome(
+                .then(({ sendAccountWelcome }) =>
+                  sendAccountWelcome(
                     customerName,
                     customerEmail,
                     userOrganizationId,

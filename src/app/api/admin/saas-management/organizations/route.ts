@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { AuthorizationError } from "@/lib/api/errors";
 import { requireRoot } from "@/lib/api/root-middleware";
 import { createOrganizationSchema } from "@/lib/api/validation/zod-schemas";
-import { EmailNotificationService } from "@/lib/email/notifications";
+import { sendSaaSNotification } from "@/lib/email/notifications";
 import { appLogger as logger } from "@/lib/logger";
 import { createServiceRoleClient } from "@/utils/supabase/service-role";
 
@@ -270,7 +270,7 @@ export async function POST(request: NextRequest) {
           .single();
 
         if (ownerProfile?.email) {
-          await EmailNotificationService.sendSaaSNotification(
+          await sendSaaSNotification(
             "saas_welcome",
             ownerProfile.email,
             {

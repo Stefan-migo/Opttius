@@ -4,8 +4,7 @@ import { getBranchContext } from "@/lib/api/branch-middleware";
 import { rateLimitConfigs, withRateLimit } from "@/lib/api/middleware";
 import { appLogger as logger } from "@/lib/logger";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
-import { createClient } from "@/utils/supabase/server";
-import { createServiceRoleClient } from "@/utils/supabase/server";
+import { createClient , createServiceRoleClient } from "@/utils/supabase/server";
 
 export const dynamic = "force-dynamic";
 export async function GET(

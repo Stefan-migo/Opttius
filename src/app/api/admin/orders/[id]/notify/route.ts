@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { EmailNotificationService } from "@/lib/email/notifications";
+import { sendOrderConfirmation } from "@/lib/email/notifications";
 import { appLogger as logger } from "@/lib/logger";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
 import { createClient } from "@/utils/supabase/server";
@@ -95,7 +95,7 @@ export async function POST(
 
     // Send email notification
     const result =
-      await EmailNotificationService.sendOrderConfirmation(emailOrder);
+      await sendOrderConfirmation(emailOrder);
 
     if (!result.success) {
       logger.error("Error sending email", result.error);

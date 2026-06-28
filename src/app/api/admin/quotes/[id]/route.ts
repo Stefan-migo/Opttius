@@ -6,11 +6,11 @@ import {
   createApiErrorResponse,
   createApiSuccessResponse,
 } from "@/lib/api/response";
-import { EmailNotificationService } from "@/lib/email/notifications";
+import { sendQuoteSent } from "@/lib/email/notifications";
 import { appLogger as logger } from "@/lib/logger";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
-import { createClient } from "@/utils/supabase/server";
-import { createServiceRoleClient } from "@/utils/supabase/server";
+import { createClient , createServiceRoleClient } from "@/utils/supabase/server";
+
 
 export const dynamic = "force-dynamic";
 export async function GET(
@@ -612,7 +612,7 @@ export async function PUT(
             .eq("id", updatedQuote.branch_id)
             .single();
 
-          await EmailNotificationService.sendQuoteSent(
+          await sendQuoteSent(
             {
               customer_name:
                 `${updatedQuote.customer?.first_name || ""} ${updatedQuote.customer?.last_name || ""}`.trim() ||

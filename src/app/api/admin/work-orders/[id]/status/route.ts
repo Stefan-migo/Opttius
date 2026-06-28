@@ -1,14 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { validateBranchAccess } from "@/lib/api/branch-middleware";
-import { EmailNotificationService } from "@/lib/email/notifications";
+import { sendWorkOrderReady } from "@/lib/email/notifications";
 import { sendDeliveryCompletionEmail } from "@/lib/email/send-delivery-completion-email";
 import { appLogger as logger } from "@/lib/logger";
 import { NotificationService } from "@/lib/notifications/notification-service";
 import { sendWorkOrderReadyWhatsApp } from "@/lib/whatsapp/notifications-b2b";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
-import { createClient } from "@/utils/supabase/server";
-import { createServiceRoleClient } from "@/utils/supabase/server";
+import { createClient , createServiceRoleClient } from "@/utils/supabase/server";
 
 export const dynamic = "force-dynamic";
 export async function PUT(
@@ -241,7 +240,7 @@ export async function PUT(
 
               const organizationId = adminUser?.organization_id;
 
-              await EmailNotificationService.sendWorkOrderReady(
+              await sendWorkOrderReady(
                 {
                   customer_name:
                     `${customer?.first_name || ""} ${customer?.last_name || ""}`.trim() ||

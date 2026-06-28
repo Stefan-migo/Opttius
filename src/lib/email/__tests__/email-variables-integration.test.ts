@@ -65,7 +65,7 @@ describe("EmailNotificationService - variable correctness", () => {
 
   describe("sendOrderConfirmation", () => {
     it("passes correct variables from order data", async () => {
-      const { EmailNotificationService } = await import(
+      const { sendOrderConfirmation } = await import(
         "@/lib/email/notifications"
       );
 
@@ -91,8 +91,7 @@ describe("EmailNotificationService - variable correctness", () => {
         organization_id: "org-1",
       };
 
-      const result =
-        await EmailNotificationService.sendOrderConfirmation(order);
+      const result = await sendOrderConfirmation(order);
       expect(result.success).toBe(true);
 
       const vars = capturedVariables[capturedVariables.length - 1];
@@ -109,7 +108,7 @@ describe("EmailNotificationService - variable correctness", () => {
 
   describe("sendLowStockAlert", () => {
     it("passes correct variables for low stock products", async () => {
-      const { EmailNotificationService } = await import(
+      const { sendLowStockAlert } = await import(
         "@/lib/email/notifications"
       );
 
@@ -118,7 +117,7 @@ describe("EmailNotificationService - variable correctness", () => {
         { name: "Marco B", current_stock: 0, min_stock: 3 },
       ];
 
-      const result = await EmailNotificationService.sendLowStockAlert(
+      const result = await sendLowStockAlert(
         ["admin@test.com"],
         products,
         "org-1",
@@ -136,7 +135,7 @@ describe("EmailNotificationService - variable correctness", () => {
 
   describe("sendPaymentSuccess", () => {
     it("passes correct variables including transaction_id", async () => {
-      const { EmailNotificationService } = await import(
+      const { sendPaymentSuccess } = await import(
         "@/lib/email/notifications"
       );
 
@@ -154,7 +153,7 @@ describe("EmailNotificationService - variable correctness", () => {
         organization_id: "org-1",
       };
 
-      const result = await EmailNotificationService.sendPaymentSuccess(
+      const result = await sendPaymentSuccess(
         order,
         "MP-TXN-12345",
       );
@@ -169,11 +168,11 @@ describe("EmailNotificationService - variable correctness", () => {
 
   describe("sendPasswordReset", () => {
     it("passes reset_link and reset_url", async () => {
-      const { EmailNotificationService } = await import(
+      const { sendPasswordReset } = await import(
         "@/lib/email/notifications"
       );
 
-      const result = await EmailNotificationService.sendPasswordReset(
+      const result = await sendPasswordReset(
         "user@test.com",
         "https://app.test/reset?token=abc123",
         "Usuario Test",
@@ -189,11 +188,11 @@ describe("EmailNotificationService - variable correctness", () => {
 
   describe("sendMembershipWelcome", () => {
     it("passes membership_tier, access_url, membership_start_date", async () => {
-      const { EmailNotificationService } = await import(
+      const { sendMembershipWelcome } = await import(
         "@/lib/email/notifications"
       );
 
-      const result = await EmailNotificationService.sendMembershipWelcome(
+      const result = await sendMembershipWelcome(
         "Cliente",
         "cliente@test.com",
         "Plan Premium",
@@ -211,11 +210,11 @@ describe("EmailNotificationService - variable correctness", () => {
 
   describe("sendMembershipReminder", () => {
     it("passes days_remaining and renewal_url", async () => {
-      const { EmailNotificationService } = await import(
+      const { sendMembershipReminder } = await import(
         "@/lib/email/notifications"
       );
 
-      const result = await EmailNotificationService.sendMembershipReminder(
+      const result = await sendMembershipReminder(
         "Cliente",
         "cliente@test.com",
         "Plan Básico",
