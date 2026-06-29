@@ -54,6 +54,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { extractDataFromResponse } from "@/lib/api/response-helpers";
 import { formatDate } from "@/lib/utils";
 
+import OrgBasicInfo from "./components/OrgBasicInfo";
+import OrgDetailHeader from "./components/OrgDetailHeader";
+import OrgSubscriptionInfo from "./components/OrgSubscriptionInfo";
+import OrgActivityLog from "./components/OrgActivityLog";
+
 interface OrganizationDetails {
   id: string;
   name: string;
@@ -583,137 +588,23 @@ export default function OrganizationDetailsPage() {
 
   return (
     <div className="space-y-6 p-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Link href="/admin/saas-management/organizations">
-            <Button size="sm" variant="ghost">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Volver
-            </Button>
-          </Link>
-          <div>
-            <div className="flex items-center gap-3">
-              <h1 className="text-3xl font-display font-bold text-epoch-primary tracking-tight">
-                {organization.name}
-              </h1>
-              {getStatusBadge(organization.status)}
-              {getTierBadge(organization.subscription_tier)}
-            </div>
-            <p className="text-admin-text-tertiary mt-1">{organization.slug}</p>
-          </div>
-        </div>
-        <div className="flex gap-2">
-          {organization.status === "active" ? (
-            <Button variant="outline" onClick={() => handleAction("suspend")}>
-              <Pause className="h-4 w-4 mr-2" />
-              Suspender
-            </Button>
-          ) : (
-            <Button variant="outline" onClick={() => handleAction("activate")}>
-              <Play className="h-4 w-4 mr-2" />
-              Activar
-            </Button>
-          )}
-          <Button onClick={() => setShowEditDialog(true)}>
-            <Edit className="h-4 w-4 mr-2" />
-            Editar
-          </Button>
-          <Button
-            variant="destructive"
-            onClick={() => setDeleteDialogOpen(true)}
-          >
-            <Trash2 className="h-4 w-4 mr-2" />
-            Eliminar
-          </Button>
-        </div>
-      </div>
+      {/* ponytail: extracted to OrgDetailHeader */}
+      <OrgDetailHeader
+        name={organization.name}
+        slug={organization.slug}
+        status={organization.status}
+        subscriptionTier={organization.subscription_tier}
+        onAction={handleAction}
+        onEdit={() => setShowEditDialog(true)}
+        onDelete={() => setDeleteDialogOpen(true)}
+      />
 
-      {/* Estadísticas principales */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-        <Card className="admin-card">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Usuarios Activos
-            </CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {organization.stats.activeUsers}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              de {organization.stats.totalUsers} totales
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card className="admin-card">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Sucursales</CardTitle>
-            <MapPin className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {organization.stats.branches}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="admin-card">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Órdenes</CardTitle>
-            <ShoppingCart className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {organization.stats.orders}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="admin-card">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Productos</CardTitle>
-            <Package className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {organization.stats.products}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="admin-card">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Suscripción</CardTitle>
-            <Crown className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-sm font-medium">
-              {organization.subscriptions?.[0]?.status || "Sin suscripción"}
-            </div>
-            {organization.subscriptions?.[0]?.current_period_end && (
-              <p className="text-xs text-muted-foreground">
-                Vence:{" "}
-                {formatDate(organization.subscriptions[0].current_period_end)}
-              </p>
-            )}
-            <Button
-              className="mt-2"
-              size="sm"
-              variant="outline"
-              onClick={() =>
-                router.push(
-                  `/admin/saas-management/subscriptions?organization_id=${orgId}`,
-                )
-              }
-            >
-              Gestionar suscripciones
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
+      {/* ponytail: extracted to OrgSubscriptionInfo */}
+      <OrgSubscriptionInfo
+        stats={organization.stats}
+        subscriptions={organization.subscriptions}
+        orgId={orgId}
+      />
 
       {/* Tabs para gestión detallada */}
       <Tabs
@@ -739,112 +630,17 @@ export default function OrganizationDetailsPage() {
         {/* Tab: Resumen */}
         <TabsContent className="space-y-6" value="overview">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Información general */}
-            <Card className="admin-card">
-              <CardHeader>
-                <CardTitle>Información General</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <label className="text-sm font-medium text-gray-500">
-                    Nombre
-                  </label>
-                  <p className="text-base">{organization.name}</p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-gray-500">
-                    Slug
-                  </label>
-                  <p className="text-base">{organization.slug}</p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-gray-500">
-                    Owner
-                  </label>
-                  {organization.owner ? (
-                    <div>
-                      <p className="text-base">
-                        {organization.owner.first_name}{" "}
-                        {organization.owner.last_name}
-                      </p>
-                      <p className="text-sm text-gray-500">
-                        {organization.owner.email}
-                      </p>
-                      {organization.owner.phone && (
-                        <p className="text-sm text-gray-500">
-                          {organization.owner.phone}
-                        </p>
-                      )}
-                    </div>
-                  ) : (
-                    <p className="text-base text-gray-400">
-                      Sin owner asignado
-                    </p>
-                  )}
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-gray-500">
-                    Creada
-                  </label>
-                  <p className="text-base">
-                    {formatDate(organization.created_at)}
-                  </p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-gray-500">
-                    Última actualización
-                  </label>
-                  <p className="text-base">
-                    {formatDate(organization.updated_at)}
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
+            {/* ponytail: extracted to OrgBasicInfo */}
+            <OrgBasicInfo
+              name={organization.name}
+              slug={organization.slug}
+              owner={organization.owner || null}
+              createdAt={organization.created_at}
+              updatedAt={organization.updated_at}
+            />
 
-            {/* Usuarios recientes */}
-            <Card className="admin-card">
-              <CardHeader>
-                <CardTitle>Usuarios Recientes</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {organization.recentUsers &&
-                organization.recentUsers.length > 0 ? (
-                  <div className="space-y-2">
-                    {organization.recentUsers.map((user) => (
-                      <div
-                        className="flex items-center justify-between p-3 border rounded-lg"
-                        key={user.id}
-                      >
-                        <div>
-                          <p className="font-medium">
-                            {user.profiles?.first_name}{" "}
-                            {user.profiles?.last_name}
-                          </p>
-                          <p className="text-sm text-gray-500">{user.email}</p>
-                          <div className="flex items-center gap-2 mt-1">
-                            <Badge variant="outline">{user.role}</Badge>
-                            {user.is_active ? (
-                              <Badge variant="default">Activo</Badge>
-                            ) : (
-                              <Badge variant="secondary">Inactivo</Badge>
-                            )}
-                          </div>
-                        </div>
-                        {user.last_login && (
-                          <div className="text-sm text-gray-500">
-                            Último acceso: {formatDate(user.last_login)}
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-gray-500 text-center py-4">
-                    No hay usuarios registrados
-                  </p>
-                )}
-              </CardContent>
-            </Card>
+            {/* ponytail: extracted to OrgActivityLog */}
+            <OrgActivityLog recentUsers={organization.recentUsers} />
           </div>
         </TabsContent>
 
