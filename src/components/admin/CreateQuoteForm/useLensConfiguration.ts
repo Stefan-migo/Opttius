@@ -17,7 +17,7 @@ import {
   getNearSphere,
   hasAddition,
   type PresbyopiaSolution,
-} from "@/lib/lenses/presbyopia-helpers";
+} from "@/lib/presbyopia-helpers";
 import { toast } from "sonner";
 
 import { MATERIAL_INDICES } from "./CreateQuoteForm.constants";

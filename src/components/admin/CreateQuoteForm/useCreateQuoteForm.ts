@@ -11,7 +11,7 @@ import { toast } from "sonner";
 
 import { useBranch } from "@/hooks/useBranch";
 import { quoteSettingsService } from "@/lib/api/services";
-import { type PresbyopiaSolution } from "@/lib/lenses/presbyopia-helpers";
+import { type PresbyopiaSolution } from "@/lib/presbyopia-helpers";
 
 import { DEFAULT_QUOTE_SETTINGS } from "./CreateQuoteForm.constants";
 import type {
