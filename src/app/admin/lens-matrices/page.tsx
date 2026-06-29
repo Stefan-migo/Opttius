@@ -4,17 +4,17 @@ import {
   Edit,
   Eye,
   EyeOff,
-  Plus,
   RefreshCw,
-  Search,
   Trash2,
-  Upload,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+
+import { LensMatrixFilters } from "./_components/LensMatrixFilters";
+import { LensMatrixHeader } from "./_components/LensMatrixHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
@@ -292,85 +292,23 @@ export default function LensMatricesPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          <h1 className="text-3xl font-bold">Matrices de Precios de Lentes</h1>
-          <p className="text-muted-foreground mt-1">
-            Gestiona las matrices de precios para calcular costos de lentes
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={() => setShowImportDialog(true)}>
-            <Upload className="h-4 w-4 mr-2" />
-            Importar CSV
-          </Button>
-          <Button onClick={() => handleOpenDialog()}>
-            <Plus className="h-4 w-4 mr-2" />
-            Nueva Matriz
-          </Button>
-        </div>
-      </div>
+      <LensMatrixHeader
+        onNew={() => handleOpenDialog()}
+        onImport={() => setShowImportDialog(true)}
+      />
 
       <Card>
-        <CardHeader>
-          <div className="flex justify-between items-center">
-            <CardTitle>Lista de Matrices</CardTitle>
-            <div className="flex gap-2">
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => setIncludeInactive(!includeInactive)}
-              >
-                {includeInactive ? (
-                  <>
-                    <EyeOff className="h-4 w-4 mr-2" />
-                    Ocultar Inactivas
-                  </>
-                ) : (
-                  <>
-                    <Eye className="h-4 w-4 mr-2" />
-                    Mostrar Inactivas
-                  </>
-                )}
-              </Button>
-              <Button size="sm" variant="outline" onClick={fetchMatrices}>
-                <RefreshCw className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-        </CardHeader>
         <CardContent>
-          <div className="mb-4 flex gap-4">
-            <div className="flex-1">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  className="pl-10"
-                  placeholder="Buscar por familia, tipo o material..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </div>
-            </div>
-            <div className="w-64">
-              <Select
-                value={selectedFamilyId}
-                onValueChange={setSelectedFamilyId}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Filtrar por familia" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todas las familias</SelectItem>
-                  {families.map((family) => (
-                    <SelectItem key={family.id} value={family.id}>
-                      {family.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
+          <LensMatrixFilters
+            searchTerm={searchTerm}
+            selectedFamilyId={selectedFamilyId}
+            includeInactive={includeInactive}
+            families={families}
+            onSearchChange={setSearchTerm}
+            onFamilyChange={setSelectedFamilyId}
+            onToggleInactive={() => setIncludeInactive(!includeInactive)}
+            onRefresh={fetchMatrices}
+          />
 
           {loading ? (
             <div className="text-center py-8">Cargando...</div>
