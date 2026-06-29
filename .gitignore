@@ -73,3 +73,6 @@ Thumbs.db
 users.md
 # Local AI runtime state
 .atl/
+
+# Graphify cache (auto-generated, repo-agnostic)
+graphify-out/cache/
