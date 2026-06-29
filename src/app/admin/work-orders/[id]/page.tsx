@@ -11,16 +11,16 @@ import {
   Factory,
   FileText,
   Package,
-  Printer,
   RefreshCw,
   Send,
-  Trash2,
   Truck,
   User,
   XCircle,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+
+import { WorkOrderHeader } from "./_components/WorkOrderHeader";
 import { toast } from "sonner";
 
 import { PrescriptionFullDisplay } from "@/components/admin/PrescriptionFullDisplay";
@@ -239,73 +239,14 @@ export default function WorkOrderDetailPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header - multi-row on mobile */}
-      <div className="flex flex-col gap-2 sm:gap-3">
-        {/* Row 1: Back + Title */}
-        <div className="flex items-center gap-2">
-          <Button
-            aria-label="Volver"
-            className="h-9 w-9 shrink-0"
-            size="icon"
-            variant="outline"
-            onClick={() => router.back()}
-          >
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-epoch-primary truncate min-w-0">
-            {workOrder.work_order_number}
-          </h1>
-        </div>
-        {/* Row 2: Subtitle */}
-        <p className="text-xs sm:text-sm text-admin-text-tertiary">
-          Trabajo para {customerName}
-        </p>
-        {/* Row 3: Badge + Actions */}
-        <div className="flex flex-wrap items-center gap-2">
-          <div className="relative inline-block">
-            <WorkOrderStatusBadge status={workOrder.status} />
-          </div>
-          <StatusManagementCard
-            workOrder={workOrder}
-            showStatusDialog={showStatusDialog}
-            setShowStatusDialog={setShowStatusDialog}
-            newStatus={newStatus}
-            setNewStatus={setNewStatus}
-            statusDialogOpenedFromTimeline={statusDialogOpenedFromTimeline}
-            setStatusDialogOpenedFromTimeline={
-              setStatusDialogOpenedFromTimeline
-            }
-            statusNotes={statusNotes}
-            setStatusNotes={setStatusNotes}
-            labInfo={labInfo}
-            setLabInfo={setLabInfo}
-            updatingStatus={updatingStatus}
-            availableStatuses={availableStatuses}
-            statusOptions={statusOptions}
-            handleStatusUpdate={handleStatusUpdate}
-          />
-          <Button
-            aria-label="Imprimir"
-            className="h-9 w-9 sm:w-auto sm:px-3"
-            size="sm"
-            variant="outline"
-            onClick={handlePrint}
-          >
-            <Printer className="h-4 w-4 sm:mr-2 shrink-0" />
-            <span className="hidden lg:inline">Imprimir</span>
-          </Button>
-          <Button
-            aria-label="Eliminar"
-            className="h-9 w-9 sm:w-auto sm:px-3 text-red-600 hover:text-red-700 hover:bg-red-50"
-            size="sm"
-            variant="outline"
-            onClick={() => setDeleteDialogOpen(true)}
-          >
-            <Trash2 className="h-4 w-4 sm:mr-2 shrink-0" />
-            <span className="hidden lg:inline">Eliminar</span>
-          </Button>
-        </div>
-      </div>
+      <WorkOrderHeader
+        workOrderNumber={workOrder.work_order_number}
+        customerName={customerName}
+        workOrder={workOrder}
+        onBack={() => router.back()}
+        onPrint={handlePrint}
+        onDelete={() => setDeleteDialogOpen(true)}
+      />
 
       {/* Status Timeline */}
       <Card>
