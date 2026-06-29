@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { sendAppointmentFollowUpReminder } from "@/lib/email/templates/optica";
 import { appLogger as logger } from "@/lib/logger";
-import { createServiceRoleClient } from "@/utils/supabase/server";
+import { createCronClient } from "@/utils/supabase/cron";
 
 /**
  * GET /api/cron/appointment-follow-up-reminders
@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const supabase = createServiceRoleClient();
+    const supabase = createCronClient();
 
     const in7Days = new Date();
     in7Days.setDate(in7Days.getDate() + 7);

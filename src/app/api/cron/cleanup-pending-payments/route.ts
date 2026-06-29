@@ -8,7 +8,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { sendSaaSPaymentFailed } from "@/lib/email/templates/saas";
 import { appLogger as logger } from "@/lib/logger";
-import { createServiceRoleClient } from "@/utils/supabase/server";
+import { createCronClient } from "@/utils/supabase/cron";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const supabase = createServiceRoleClient();
+    const supabase = createCronClient();
     const cutoff = new Date();
     cutoff.setHours(cutoff.getHours() - 24);
     const cutoffIso = cutoff.toISOString();

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { appLogger as logger } from "@/lib/logger";
-import { createServiceRoleClient } from "@/utils/supabase/server";
+import { createCronClient } from "@/utils/supabase/cron";
 
 /**
  * GET /api/cron/cleanup-expired-demos
@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const supabase = createServiceRoleClient();
+  const supabase = createCronClient();
 
   try {
     const { data: deleted, error } = await supabase.rpc(

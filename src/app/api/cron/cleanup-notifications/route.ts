@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { appLogger as logger } from "@/lib/logger";
-import { createServiceRoleClient } from "@/utils/supabase/server";
+import { createCronClient } from "@/utils/supabase/cron";
 
 /**
  * GET /api/cron/cleanup-notifications
@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const supabase = createServiceRoleClient();
+    const supabase = createCronClient();
     const { error } = await supabase.rpc("cleanup_old_notifications");
 
     if (error) {

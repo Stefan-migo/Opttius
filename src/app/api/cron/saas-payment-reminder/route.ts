@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { sendSaaSPaymentReminder } from "@/lib/email/templates/saas";
 import { appLogger as logger } from "@/lib/logger";
-import { createServiceRoleClient } from "@/utils/supabase/server";
+import { createCronClient } from "@/utils/supabase/cron";
 
 /**
  * GET /api/cron/saas-payment-reminder
@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const supabase = createServiceRoleClient();
+    const supabase = createCronClient();
 
     const { data: subscriptions, error: subError } = await supabase
       .from("subscriptions")

@@ -6,7 +6,7 @@ import type { InsightSection } from "@/lib/ai/insights/schemas";
 import { createOrganizationalMemory } from "@/lib/ai/memory/organizational";
 import type { BranchContext } from "@/lib/api/branch-middleware";
 import { appLogger as logger } from "@/lib/logger";
-import { createServiceRoleClient } from "@/utils/supabase/server";
+import { createCronClient } from "@/utils/supabase/cron";
 
 /**
  * GET /api/cron/generate-insights
@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const supabase = createServiceRoleClient();
+    const supabase = createCronClient();
     const searchParams = request.nextUrl.searchParams;
     const sectionParam = searchParams.get("section") as InsightSection | null;
 

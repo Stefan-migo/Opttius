@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { BackupService } from "@/lib/backup-service";
 import { appLogger as logger } from "@/lib/logger";
-import { createServiceRoleClient } from "@/utils/supabase/server";
+import { createCronClient } from "@/utils/supabase/cron";
 
 /**
  * GET /api/cron/backups
@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const supabase = createServiceRoleClient();
+  const supabase = createCronClient();
   const startTime = Date.now();
   const results = {
     success: 0,

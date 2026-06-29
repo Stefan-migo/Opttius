@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { sendSaaSTrialEnding } from "@/lib/email/templates/saas";
 import { appLogger as logger } from "@/lib/logger";
-import { createServiceRoleClient } from "@/utils/supabase/server";
+import { createCronClient } from "@/utils/supabase/cron";
 
 const DAYS_BEFORE = parseInt(
   process.env.SAAS_TRIAL_ENDING_DAYS_BEFORE || "3",
@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const supabase = createServiceRoleClient();
+    const supabase = createCronClient();
 
     const now = new Date();
     const todayStart = new Date(

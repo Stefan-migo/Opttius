@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { sendDemoExpiringEmail } from "@/lib/email/templates/saas";
 import { appLogger as logger } from "@/lib/logger";
-import { createServiceRoleClient } from "@/utils/supabase/service-role";
+import { createCronClient } from "@/utils/supabase/cron";
 
 /**
  * GET /api/cron/demo-expiring
@@ -15,7 +15,7 @@ import { createServiceRoleClient } from "@/utils/supabase/service-role";
 export const dynamic = "force-dynamic";
 
 async function getDefaultMeetingUrl(
-  supabase: ReturnType<typeof createServiceRoleClient>,
+  supabase: ReturnType<typeof createCronClient>,
 ): Promise<string> {
   const { data } = await supabase
     .from("system_config")
@@ -43,7 +43,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const supabase = createServiceRoleClient();
+    const supabase = createCronClient();
     const now = new Date();
     const expiringEnd = new Date(now);
     expiringEnd.setDate(expiringEnd.getDate() + 2);

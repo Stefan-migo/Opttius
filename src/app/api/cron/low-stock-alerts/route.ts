@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { sendLowStockAlert } from "@/lib/email/notifications";
 import { appLogger as logger } from "@/lib/logger";
 import { sendLowStockAlertWhatsApp } from "@/lib/whatsapp/notifications-b2b";
-import { createServiceRoleClient } from "@/utils/supabase/server";
+import { createCronClient } from "@/utils/supabase/cron";
 
 /**
  * GET /api/cron/low-stock-alerts
@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const supabase = createServiceRoleClient();
+    const supabase = createCronClient();
 
     const { data: orgs } = await supabase
       .from("organizations")

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { sendDemoPostMeetingFollowupEmail } from "@/lib/email/templates/saas";
 import { appLogger as logger } from "@/lib/logger";
-import { createServiceRoleClient } from "@/utils/supabase/service-role";
+import { createCronClient } from "@/utils/supabase/cron";
 
 /**
  * GET /api/cron/demo-post-meeting
@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const supabase = createServiceRoleClient();
+    const supabase = createCronClient();
     const threeDaysAgo = new Date();
     threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
 

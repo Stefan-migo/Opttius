@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { sendAppointmentReminder2h } from "@/lib/email/templates/optica";
 import { appLogger as logger } from "@/lib/logger";
 import { sendAppointmentReminderWhatsApp } from "@/lib/whatsapp/notifications-b2b";
-import { createServiceRoleClient } from "@/utils/supabase/server";
+import { createCronClient } from "@/utils/supabase/cron";
 
 /**
  * GET /api/cron/appointment-reminders-2h
@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const supabase = createServiceRoleClient();
+    const supabase = createCronClient();
 
     const now = new Date();
     const in2h = new Date(now.getTime() + 2 * 60 * 60 * 1000);
