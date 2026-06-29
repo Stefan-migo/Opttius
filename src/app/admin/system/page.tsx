@@ -4,7 +4,6 @@ import {
   AlertTriangle,
   Bell,
   CheckCircle,
-  Clock,
   Database,
   FileText,
   Mail,
@@ -29,7 +28,6 @@ import EmailTemplatesManager from "@/components/admin/EmailTemplatesManager";
 import NotificationSettings from "@/components/admin/NotificationSettings";
 import SurveysConfig from "@/components/admin/SurveysConfig";
 import WhatsAppSettingsCard from "@/components/admin/WhatsAppSettingsCard";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -43,6 +41,8 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useBranch } from "@/hooks/useBranch";
 
+import { SystemHeader } from "./_components/SystemHeader";
+import { SystemHealthCards } from "./_components/SystemHealthCards";
 import FormOptionsConfig from "./components/FormOptionsConfig";
 import SystemConfig from "./components/SystemConfig";
 import SystemHealth from "./components/SystemHealth";
@@ -285,31 +285,6 @@ export default function SystemAdministrationPage() {
     toast.success("Descarga iniciada");
   };
 
-  const getHealthStatusBadge = (status: string) => {
-    const config: Record<
-      string,
-      { variant: unknown; label: string; icon: unknown }
-    > = {
-      healthy: { variant: "default", label: "Saludable", icon: CheckCircle },
-      warning: {
-        variant: "secondary",
-        label: "Advertencias",
-        icon: AlertTriangle,
-      },
-      critical: { variant: "destructive", label: "Crítico", icon: XCircle },
-    };
-
-    const statusConfig = config[status] || config["healthy"];
-    const Icon = statusConfig.icon;
-
-    return (
-      <Badge className="flex items-center gap-1" variant={statusConfig.variant}>
-        <Icon className="h-3 w-3" />
-        {statusConfig.label}
-      </Badge>
-    );
-  };
-
   const loading = configsLoading || healthLoading;
   const error = null; // Errors are handled in hooks
 
@@ -373,103 +348,9 @@ export default function SystemAdministrationPage() {
 
   return (
     <div className="space-y-4 sm:space-y-6 p-4 sm:p-6 bg-epoch-background min-h-screen">
-      {/* Header - reorganizado en filas */}
-      <div className="flex flex-col gap-4 sm:gap-6">
-        <h1
-          className="text-xl sm:text-2xl md:text-3xl font-display font-bold text-epoch-primary tracking-tight"
-          data-tour="system-header"
-        >
-          Administración del Sistema
-        </h1>
-        <p className="text-sm sm:text-base text-epoch-primary/80 max-w-2xl">
-          Configuración, monitoreo y mantenimiento del sistema de gestión óptica
-        </p>
-        <div className="flex justify-start sm:justify-end">
-          <Button
-            className="rounded-xl border-epoch-primary/20 min-h-[44px] w-full sm:w-auto"
-            disabled={refreshing}
-            variant="outline"
-            onClick={() => refreshHealth()}
-          >
-            <RefreshCw
-              className={`h-4 w-4 mr-2 shrink-0 ${refreshing ? "animate-spin" : ""}`}
-            />
-            Actualizar Estado
-          </Button>
-        </div>
-      </div>
+      <SystemHeader refreshing={refreshing} onRefresh={refreshHealth} />
 
-      {/* System Health Overview - optimizado para móvil: stack vertical en móvil */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-        <Card className="rounded-xl border border-border overflow-hidden">
-          <CardContent className="p-4 sm:p-6">
-            <div className="flex items-center justify-between gap-3">
-              <div className="min-w-0 flex-1">
-                <p className="text-[10px] sm:text-xs font-medium text-epoch-primary/70 uppercase tracking-wider mb-1">
-                  Estado
-                </p>
-                <div className="flex items-center gap-2 min-w-0">
-                  {healthStatus && getHealthStatusBadge(healthStatus.status)}
-                </div>
-              </div>
-              <Monitor className="h-8 w-8 sm:h-10 sm:w-10 text-epoch-primary/40 shrink-0" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="rounded-xl border border-border overflow-hidden">
-          <CardContent className="p-4 sm:p-6">
-            <div className="flex items-center justify-between gap-3">
-              <div className="min-w-0 flex-1">
-                <p className="text-[10px] sm:text-xs font-medium text-epoch-primary/70 uppercase tracking-wider mb-1">
-                  Advertencias
-                </p>
-                <p className="text-xl sm:text-2xl font-bold text-yellow-600 tabular-nums">
-                  {healthStatus?.warnings ?? 0}
-                </p>
-              </div>
-              <AlertTriangle className="h-8 w-8 sm:h-10 sm:w-10 text-yellow-500/80 shrink-0" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="rounded-xl border border-border overflow-hidden">
-          <CardContent className="p-4 sm:p-6">
-            <div className="flex items-center justify-between gap-3">
-              <div className="min-w-0 flex-1">
-                <p className="text-[10px] sm:text-xs font-medium text-epoch-primary/70 uppercase tracking-wider mb-1">
-                  Críticos
-                </p>
-                <p className="text-xl sm:text-2xl font-bold text-red-600 tabular-nums">
-                  {healthStatus?.criticals ?? 0}
-                </p>
-              </div>
-              <XCircle className="h-8 w-8 sm:h-10 sm:w-10 text-red-500/80 shrink-0" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="rounded-xl border border-border overflow-hidden">
-          <CardContent className="p-4 sm:p-6">
-            <div className="flex items-center justify-between gap-3">
-              <div className="min-w-0 flex-1">
-                <p className="text-[10px] sm:text-xs font-medium text-epoch-primary/70 uppercase tracking-wider mb-1">
-                  Última Verificación
-                </p>
-                <p className="text-sm sm:text-base font-medium text-epoch-primary break-words">
-                  {healthStatus?.last_check
-                    ? new Date(healthStatus.last_check).toLocaleTimeString(
-                        "es-AR",
-                        { hour: "2-digit", minute: "2-digit" },
-                      )
-                    : "N/A"}
-                </p>
-              </div>
-              <Clock className="h-8 w-8 sm:h-10 sm:w-10 text-epoch-primary/40 shrink-0" />
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      <SystemHealthCards healthStatus={healthStatus} />
 
       {/* Main Content Tabs - scroll horizontal para móvil */}
       <Tabs
