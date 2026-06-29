@@ -3,7 +3,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   ArrowRight,
-  Award,
   Bell,
   Building2,
   CreditCard,
@@ -15,7 +14,6 @@ import {
   MapPin,
   Save,
   Settings,
-  Sparkles,
   User,
   X,
   XCircle,
@@ -30,6 +28,9 @@ import { SubscriptionManagementSection } from "@/components/admin/SubscriptionMa
 import AvatarUpload from "@/components/ui/AvatarUpload";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+
+import { ProfileHeaderCard } from "./_components/ProfileHeaderCard";
+import { ProfilePasswordSection } from "./_components/ProfilePasswordSection";
 import {
   Card,
   CardContent,
@@ -350,79 +351,16 @@ export function ProfilePageContent({
       </div>
 
       <div className="max-w-6xl mx-auto relative z-10">
-        <div className="mb-6 sm:mb-8 md:mb-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
-          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold font-display text-slate-900 dark:text-white mb-1 sm:mb-2 tracking-tight">
-            {title}
-          </h1>
-          <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400 font-medium font-body">
-            {subtitle}
-          </p>
-        </div>
-
-        <Card
-          className="mb-6 sm:mb-8 md:mb-10 overflow-hidden border-white/20 dark:border-slate-800/50 shadow-2xl animate-in zoom-in-95 duration-500 bg-[var(--admin-bg-tertiary)] backdrop-blur-xl"
-          rounded="lg"
-          variant="glass"
-        >
-          <CardContent className="p-4 sm:p-6 md:p-8 lg:p-10">
-            <div className="flex flex-col md:flex-row items-center md:items-start gap-6 sm:gap-8 md:gap-10">
-              <div className="relative group shrink-0 flex flex-col items-center">
-                <div className="absolute inset-0 bg-primary/20 rounded-full blur-2xl group-hover:bg-primary/30 transition-all duration-500 scale-75 pointer-events-none" />
-                <div className="relative z-10">
-                  <AvatarUpload
-                    currentAvatarUrl={profile?.avatar_url || undefined}
-                    isEditing={true}
-                    size="lg"
-                    onUploadSuccess={handleAvatarUpload}
-                  />
-                </div>
-              </div>
-
-              <div className="flex-1 min-w-0 text-center md:text-left space-y-3 sm:space-y-4">
-                <div>
-                  <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center justify-center md:justify-start gap-2 sm:gap-3 mb-1">
-                    <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-slate-900 dark:text-white tracking-tight break-words">
-                      {profile?.first_name && profile?.last_name
-                        ? `${profile.first_name} ${profile.last_name}`
-                        : user.email?.split("@")[0]}
-                    </h2>
-                    {showRoleBadge && (
-                      <Badge
-                        className="w-fit mx-auto md:mx-0 bg-green-500/10 text-green-600 border-none px-2 sm:px-3 py-1 font-bold text-[9px] sm:text-[10px] uppercase"
-                        variant="healty"
-                      >
-                        {adminData?.adminCheck?.role || "ADMINISTRADOR"}
-                      </Badge>
-                    )}
-                  </div>
-                  <p className="text-sm sm:text-base md:text-lg text-slate-500 dark:text-slate-400 font-medium truncate max-w-full">
-                    {user.email}
-                  </p>
-                </div>
-
-                <div className="flex flex-wrap gap-2 sm:gap-3 justify-center md:justify-start">
-                  {profile?.is_member && (
-                    <Badge className="gap-1.5 sm:gap-2 bg-primary/10 text-primary border-primary/20 hover:bg-primary/20 px-3 sm:px-4 py-1.5 rounded-full transition-all">
-                      <Sparkles className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
-                      <span className="font-bold tracking-wide text-[9px] sm:text-[10px] uppercase">
-                        MIEMBRO GOLD
-                      </span>
-                    </Badge>
-                  )}
-                  <Badge
-                    className="gap-1.5 sm:gap-2 border-slate-200 dark:border-slate-700 bg-white/50 dark:bg-slate-800/50 px-3 sm:px-4 py-1.5 rounded-full transition-all"
-                    variant="outline"
-                  >
-                    <Award className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0 text-amber-500" />
-                    <span className="text-slate-600 dark:text-slate-400 text-[9px] sm:text-[10px] font-bold uppercase">
-                      Desde {memberSince}
-                    </span>
-                  </Badge>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        <ProfileHeaderCard
+          title={title}
+          subtitle={subtitle}
+          profile={profile}
+          user={user}
+          showRoleBadge={showRoleBadge}
+          adminData={adminData}
+          memberSince={memberSince}
+          onAvatarUpload={handleAvatarUpload}
+        />
 
         <Tabs
           className="space-y-6 sm:space-y-8"
@@ -1078,181 +1016,21 @@ export function ProfilePageContent({
             className="space-y-8 animate-in fade-in slide-in-from-top-2 duration-500"
             value="settings"
           >
-            <Card
-              className="border-0 shadow-2xl overflow-hidden"
-              variant="elevated"
-            >
-              <CardHeader
-                className="bg-[var(--admin-bg-tertiary)] p-4 sm:p-6"
-                padding="lg"
-              >
-                <CardTitle className="flex items-center gap-2 sm:gap-3 text-base sm:text-lg md:text-xl font-bold font-cormorant tracking-tight">
-                  <div className="p-1.5 sm:p-2 bg-primary/10 rounded-lg sm:rounded-xl">
-                    <Lock className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
-                  </div>
-                  Seguridad de la Cuenta
-                </CardTitle>
-                <CardDescription className="text-[var(--accent-foreground)] text-sm">
-                  Administra tu contraseña y métodos de acceso. Se requiere tu
-                  contraseña actual para realizar el cambio.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="p-4 sm:p-6" padding="lg">
-                {!isChangingPassword ? (
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-4 sm:p-6 bg-[var(--admin-bg-primary)] rounded-xl sm:rounded-2xl border border-dashed border-[var(--admin-border-secondary)]">
-                    <div>
-                      <h4 className="font-bold text-slate-900 dark:text-white">
-                        Contraseña
-                      </h4>
-                      <p className="text-sm text-slate-500 tracking-widest mt-1">
-                        ••••••••••••••••
-                      </p>
-                    </div>
-                    <Button
-                      className="border-2 font-bold min-h-[44px] w-full sm:w-auto"
-                      variant="outline"
-                      onClick={() => setIsChangingPassword(true)}
-                    >
-                      Cambiar Contraseña
-                    </Button>
-                  </div>
-                ) : (
-                  <form
-                    className="space-y-6 max-w-xl"
-                    onSubmit={passwordForm.handleSubmit(handlePasswordChange)}
-                  >
-                    <div className="space-y-3">
-                      <Label
-                        className="text-sm font-bold"
-                        htmlFor="currentPassword"
-                      >
-                        Contraseña Actual
-                      </Label>
-                      <div className="relative">
-                        <Input
-                          id="currentPassword"
-                          type={showCurrentPassword ? "text" : "password"}
-                          {...passwordForm.register("currentPassword")}
-                          className="h-12 pr-12 rounded-2xl border-slate-200 dark:border-slate-800 transition-all focus:ring-4 focus:ring-primary/10"
-                          disabled={isLoading}
-                        />
-                        <Button
-                          className="absolute right-2 top-1/2 -translate-y-1/2 hover:bg-transparent"
-                          size="icon"
-                          type="button"
-                          variant="ghost"
-                          onClick={() =>
-                            setShowCurrentPassword(!showCurrentPassword)
-                          }
-                        >
-                          {showCurrentPassword ? (
-                            <EyeOff className="h-4 w-4 text-slate-400" />
-                          ) : (
-                            <Eye className="h-4 w-4 text-slate-400" />
-                          )}
-                        </Button>
-                      </div>
-                    </div>
-                    <div className="grid gap-4 sm:gap-6 grid-cols-1 md:grid-cols-2">
-                      <div className="space-y-3">
-                        <Label
-                          className="text-sm font-bold"
-                          htmlFor="newPassword"
-                        >
-                          Nueva Contraseña
-                        </Label>
-                        <div className="relative">
-                          <Input
-                            id="newPassword"
-                            type={showNewPassword ? "text" : "password"}
-                            {...passwordForm.register("newPassword")}
-                            className="h-12 pr-12 rounded-2xl border-slate-200 dark:border-slate-800 transition-all focus:ring-4 focus:ring-primary/10"
-                            disabled={isLoading}
-                          />
-                          <Button
-                            className="absolute right-2 top-1/2 -translate-y-1/2 hover:bg-transparent"
-                            size="icon"
-                            type="button"
-                            variant="ghost"
-                            onClick={() => setShowNewPassword(!showNewPassword)}
-                          >
-                            {showNewPassword ? (
-                              <EyeOff className="h-4 w-4 text-slate-400" />
-                            ) : (
-                              <Eye className="h-4 w-4 text-slate-400" />
-                            )}
-                          </Button>
-                        </div>
-                        {passwordForm.formState.errors.newPassword && (
-                          <p className="text-xs font-medium text-red-500">
-                            {passwordForm.formState.errors.newPassword.message}
-                          </p>
-                        )}
-                      </div>
-                      <div className="space-y-3">
-                        <Label
-                          className="text-sm font-bold"
-                          htmlFor="confirmPassword"
-                        >
-                          Confirmar Nueva
-                        </Label>
-                        <div className="relative">
-                          <Input
-                            id="confirmPassword"
-                            type={showConfirmPassword ? "text" : "password"}
-                            {...passwordForm.register("confirmPassword")}
-                            className="h-12 pr-12 rounded-2xl border-slate-200 dark:border-slate-800 transition-all focus:ring-4 focus:ring-primary/10"
-                            disabled={isLoading}
-                          />
-                          <Button
-                            className="absolute right-2 top-1/2 -translate-y-1/2 hover:bg-transparent"
-                            size="icon"
-                            type="button"
-                            variant="ghost"
-                            onClick={() =>
-                              setShowConfirmPassword(!showConfirmPassword)
-                            }
-                          >
-                            {showConfirmPassword ? (
-                              <EyeOff className="h-4 w-4 text-slate-400" />
-                            ) : (
-                              <Eye className="h-4 w-4 text-slate-400" />
-                            )}
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4">
-                      <Button
-                        shimmer
-                        className="flex-1 h-12 min-h-[44px] shadow-xl shadow-primary/20"
-                        disabled={isLoading}
-                        type="submit"
-                      >
-                        {isLoading ? (
-                          <Loader2 className="h-5 w-5 animate-spin shrink-0" />
-                        ) : (
-                          <Save className="h-5 w-5 mr-2 shrink-0" />
-                        )}
-                        Actualizar Ahora
-                      </Button>
-                      <Button
-                        className="flex-1 h-12 min-h-[44px] border-2"
-                        disabled={isLoading}
-                        type="button"
-                        variant="outline"
-                        onClick={() => {
-                          setIsChangingPassword(false);
-                          passwordForm.reset();
-                        }}
-                      >
-                        Cancelar
-                      </Button>
-                    </div>
-                  </form>
-                )}
-              </CardContent>
-            </Card>
+            <ProfilePasswordSection
+              isChangingPassword={isChangingPassword}
+              isLoading={isLoading}
+              passwordForm={passwordForm}
+              onToggleChange={() => setIsChangingPassword(true)}
+              onCancel={() => {
+                setIsChangingPassword(false);
+                passwordForm.reset({
+                  currentPassword: "",
+                  newPassword: "",
+                  confirmPassword: "",
+                });
+              }}
+              onSubmit={passwordForm.handleSubmit(handlePasswordChange)}
+            />
 
             <Card
               className="border-0 shadow-2xl overflow-hidden"
