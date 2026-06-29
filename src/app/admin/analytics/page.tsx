@@ -6,23 +6,15 @@ import {
   ArrowDownRight,
   ArrowUpRight,
   BarChart3,
-  Calendar,
-  CheckCircle,
-  Clock,
-  DollarSign,
   Headphones,
   LineChart as LineChartIcon,
   Package,
   PieChart as PieChartIcon,
   Receipt,
   RefreshCw,
-  ShoppingCart,
   Target,
   TrendingUp,
-  User,
-  Users,
   Wrench,
-  XCircle,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 
@@ -35,13 +27,6 @@ import { MetricTooltip } from "@/components/admin/MetricTooltip";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
   Table,
   TableBody,
   TableCell,
@@ -52,6 +37,9 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useBranch } from "@/hooks/useBranch";
 import { getBranchHeader } from "@/lib/utils/branch";
+
+import { AnalyticsHeader } from "./_components/AnalyticsHeader";
+import { AnalyticsKPICards } from "./_components/AnalyticsKPICards";
 
 interface AnalyticsData {
   kpis: {
@@ -338,324 +326,26 @@ export default function AnalyticsPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="space-y-4">
-        <h1
-          className="text-2xl sm:text-3xl font-bold text-epoch-primary"
-          data-tour="analytics-header"
-        >
-          Analíticas y Reportes
-        </h1>
-        <p className="text-sm text-admin-text-tertiary">
-          {isGlobalView
+      <AnalyticsHeader
+        title="Analíticas y Reportes"
+        description={
+          isGlobalView
             ? `Métricas y análisis - Todas las sucursales - Últimos ${analytics.period.days} días`
-            : `Métricas y análisis - Últimos ${analytics.period.days} días`}
-        </p>
-        <div className="flex flex-wrap items-center gap-2">
-          <Select value={period} onValueChange={setPeriod}>
-            <SelectTrigger className="w-full sm:w-[150px] min-h-[44px]">
-              <SelectValue placeholder="Período" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="7">Últimos 7 días</SelectItem>
-              <SelectItem value="30">Últimos 30 días</SelectItem>
-              <SelectItem value="90">Últimos 90 días</SelectItem>
-              <SelectItem value="365">Último año</SelectItem>
-            </SelectContent>
-          </Select>
-          <Button
-            className="min-h-[44px] flex-1 sm:flex-initial"
-            disabled={refreshing}
-            variant="outline"
-            onClick={fetchAnalytics}
-          >
-            <RefreshCw
-              className={`h-4 w-4 mr-2 ${refreshing ? "animate-spin" : ""}`}
-            />
-            Actualizar
-          </Button>
-        </div>
-      </div>
+            : `Métricas y análisis - Últimos ${analytics.period.days} días`
+        }
+        period={period}
+        refreshing={refreshing}
+        onPeriodChange={setPeriod}
+        onRefresh={fetchAnalytics}
+      />
 
-      {/* Main KPI Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
-        <Card
-          className="bg-admin-bg-tertiary border border-admin-border-primary shadow-lg hover:shadow-xl transition-all duration-300"
-          rounded="none"
-        >
-          <CardContent className="p-4 sm:p-6">
-            <div className="flex items-center justify-between mb-2 sm:mb-3">
-              <div className="flex items-center gap-1 sm:gap-1.5 min-w-0">
-                <p className="text-[10px] sm:text-xs font-semibold text-green-700 dark:text-green-300 uppercase tracking-wide truncate">
-                  Ingresos Totales
-                </p>
-                <MetricTooltip metricKey="totalRevenue" />
-              </div>
-              <div className="p-1.5 sm:p-2 bg-green-200 dark:bg-green-800 rounded-lg shrink-0">
-                <DollarSign className="h-4 w-4 sm:h-5 sm:w-5 text-green-700 dark:text-green-300" />
-              </div>
-            </div>
-            <div className="space-y-1 sm:space-y-2">
-              <p className="text-lg sm:text-2xl lg:text-3xl font-bold text-green-800 dark:text-green-200">
-                {formatPrice(analytics.kpis.totalRevenue)}
-              </p>
-              <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
-                {getGrowthIcon(analytics.kpis.revenueGrowth)}
-                <span
-                  className={`text-xs sm:text-sm font-semibold ${getGrowthColor(analytics.kpis.revenueGrowth)}`}
-                >
-                  {formatPercentage(analytics.kpis.revenueGrowth)}
-                </span>
-                <span className="text-[10px] sm:text-xs text-green-600 dark:text-green-400">
-                  vs período anterior
-                </span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card
-          className="bg-admin-bg-tertiary border border-admin-border-primary shadow-lg hover:shadow-xl transition-all duration-300"
-          rounded="none"
-        >
-          <CardContent className="p-4 sm:p-6">
-            <div className="flex items-center justify-between mb-2 sm:mb-3">
-              <div className="flex items-center gap-1 sm:gap-1.5 min-w-0">
-                <p className="text-[10px] sm:text-xs font-semibold text-blue-700 dark:text-blue-300 uppercase tracking-wide truncate">
-                  Trabajos Lab.
-                </p>
-                <MetricTooltip metricKey="workOrdersTotal" />
-              </div>
-              <div className="p-1.5 sm:p-2 bg-blue-200 dark:bg-blue-800 rounded-lg shrink-0">
-                <Wrench className="h-4 w-4 sm:h-5 sm:w-5 text-blue-700 dark:text-blue-300" />
-              </div>
-            </div>
-            <div className="space-y-1 sm:space-y-2">
-              <p className="text-lg sm:text-2xl lg:text-3xl font-bold text-blue-800 dark:text-blue-200">
-                {analytics.workOrders.total}
-              </p>
-              <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
-                <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4 text-green-600 dark:text-green-400 shrink-0" />
-                <p className="text-xs sm:text-sm font-medium text-blue-600 dark:text-blue-400">
-                  {analytics.workOrders.completed} completados
-                </p>
-                {analytics.workOrders.pending > 0 && (
-                  <>
-                    <Clock className="h-3 w-3 sm:h-4 sm:w-4 text-orange-600 dark:text-orange-400 shrink-0" />
-                    <p className="text-xs sm:text-sm text-orange-600 dark:text-orange-400">
-                      {analytics.workOrders.pending} pendientes
-                    </p>
-                  </>
-                )}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card
-          className="bg-admin-bg-tertiary border border-admin-border-primary shadow-lg hover:shadow-xl transition-all duration-300"
-          rounded="none"
-        >
-          <CardContent className="p-4 sm:p-6">
-            <div className="flex items-center justify-between mb-2 sm:mb-3">
-              <div className="flex items-center gap-1 sm:gap-1.5 min-w-0">
-                <p className="text-[10px] sm:text-xs font-semibold text-amber-700 dark:text-amber-300 uppercase tracking-wide truncate">
-                  Presupuestos
-                </p>
-                <MetricTooltip metricKey="quoteConversionRate" />
-              </div>
-              <div className="p-1.5 sm:p-2 bg-amber-200 dark:bg-amber-800 rounded-lg shrink-0">
-                <Receipt className="h-4 w-4 sm:h-5 sm:w-5 text-amber-700 dark:text-amber-300" />
-              </div>
-            </div>
-            <div className="space-y-1 sm:space-y-2">
-              <p className="text-lg sm:text-2xl lg:text-3xl font-bold text-amber-800 dark:text-amber-200">
-                {analytics.quotes.total}
-              </p>
-              <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
-                <Target className="h-3 w-3 sm:h-4 sm:w-4 text-amber-600 dark:text-amber-400 shrink-0" />
-                <p className="text-xs sm:text-sm font-medium text-amber-600 dark:text-amber-400">
-                  {analytics.kpis.quoteConversionRate.toFixed(1)}% conversión
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card
-          className="bg-admin-bg-tertiary border border-admin-border-primary shadow-lg hover:shadow-xl transition-all duration-300"
-          rounded="none"
-        >
-          <CardContent className="p-4 sm:p-6">
-            <div className="flex items-center justify-between mb-2 sm:mb-3">
-              <div className="flex items-center gap-1 sm:gap-1.5 min-w-0">
-                <p className="text-[10px] sm:text-xs font-semibold text-purple-700 dark:text-purple-300 uppercase tracking-wide truncate">
-                  Citas
-                </p>
-                <MetricTooltip metricKey="appointmentsTotal" />
-              </div>
-              <div className="p-1.5 sm:p-2 bg-purple-200 dark:bg-purple-800 rounded-lg shrink-0">
-                <Calendar className="h-4 w-4 sm:h-5 sm:w-5 text-purple-700 dark:text-purple-300" />
-              </div>
-            </div>
-            <div className="space-y-1 sm:space-y-2">
-              <p className="text-lg sm:text-2xl lg:text-3xl font-bold text-purple-800 dark:text-purple-200">
-                {analytics.appointments.total}
-              </p>
-              <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
-                <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4 text-green-600 dark:text-green-400 shrink-0" />
-                <p className="text-xs sm:text-sm font-medium text-purple-600 dark:text-purple-400">
-                  {analytics.kpis.appointmentCompletionRate.toFixed(1)}%
-                  completadas
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Secondary KPI Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6">
-        <Card
-          className="bg-admin-bg-tertiary border border-admin-border-primary shadow-md hover:shadow-lg transition-all duration-300"
-          rounded="none"
-        >
-          <CardContent className="p-4 sm:p-5">
-            <div className="flex items-start justify-between gap-2">
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-1 mb-1 sm:mb-2">
-                  <p className="text-[10px] sm:text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide truncate">
-                    Ventas POS
-                  </p>
-                  <MetricTooltip metricKey="totalOrders" />
-                </div>
-                <p className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-gray-100 mb-1">
-                  {formatPrice(analytics.kpis.posRevenue)}
-                </p>
-                <div className="flex items-center gap-1 mt-1 sm:mt-2">
-                  <ShoppingCart className="h-3 w-3 text-gray-400 shrink-0" />
-                  <p className="text-[10px] sm:text-xs text-gray-600 dark:text-gray-400 truncate">
-                    {analytics.kpis.posTransactionCount ??
-                      analytics.kpis.totalOrders}{" "}
-                    trans.
-                  </p>
-                </div>
-              </div>
-              <div className="p-1.5 sm:p-2 bg-green-100 dark:bg-green-900/30 rounded-lg shrink-0">
-                <ShoppingCart className="h-4 w-4 sm:h-5 sm:w-5 text-green-600 dark:text-green-400" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card
-          className="bg-admin-bg-tertiary border border-admin-border-primary shadow-md hover:shadow-lg transition-all duration-300"
-          rounded="none"
-        >
-          <CardContent className="p-4 sm:p-5">
-            <div className="flex items-start justify-between gap-2">
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-1 mb-1 sm:mb-2">
-                  <p className="text-[10px] sm:text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide truncate">
-                    Ingresos Trabajos
-                  </p>
-                  <MetricTooltip metricKey="workOrdersTotal" />
-                </div>
-                <p className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-gray-100 mb-1">
-                  {formatPrice(analytics.kpis.workOrdersRevenue)}
-                </p>
-                <div className="flex items-center gap-1 mt-1 sm:mt-2">
-                  <Clock className="h-3 w-3 text-gray-400 shrink-0" />
-                  <p className="text-[10px] sm:text-xs text-gray-600 dark:text-gray-400 truncate">
-                    {analytics.kpis.avgDeliveryDays} días entrega
-                  </p>
-                </div>
-              </div>
-              <div className="p-1.5 sm:p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg shrink-0">
-                <Wrench className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600 dark:text-blue-400" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card
-          className="bg-admin-bg-tertiary border border-admin-border-primary shadow-md hover:shadow-lg transition-all duration-300"
-          rounded="none"
-        >
-          <CardContent className="p-4 sm:p-5">
-            <div className="flex items-start justify-between gap-2">
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-1 mb-1 sm:mb-2">
-                  <p className="text-[10px] sm:text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide truncate">
-                    Clientes
-                  </p>
-                  <MetricTooltip metricKey="totalCustomers" />
-                </div>
-                <p className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-gray-100 mb-1">
-                  {analytics.kpis.totalCustomers}
-                </p>
-                <div className="flex items-center gap-1 mt-1 sm:mt-2">
-                  <User className="h-3 w-3 text-green-500 shrink-0" />
-                  <p className="text-[10px] sm:text-xs text-gray-600 dark:text-gray-400 truncate">
-                    {analytics.kpis.newCustomers} nuevos
-                  </p>
-                </div>
-              </div>
-              <div className="p-1.5 sm:p-2 bg-amber-100 dark:bg-amber-900/30 rounded-lg shrink-0">
-                <Users className="h-4 w-4 sm:h-5 sm:w-5 text-amber-600 dark:text-amber-400" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card
-          className="bg-admin-bg-tertiary border border-admin-border-primary shadow-md hover:shadow-lg transition-all duration-300"
-          rounded="none"
-        >
-          <CardContent className="p-4 sm:p-5">
-            <div className="flex items-start justify-between gap-2">
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-1 mb-1 sm:mb-2">
-                  <p className="text-[10px] sm:text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide truncate">
-                    Productos
-                  </p>
-                  <MetricTooltip metricKey="topProducts" />
-                </div>
-                <p className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-gray-100 mb-1">
-                  {analytics.products.total}
-                </p>
-                <div className="flex items-center gap-1 sm:gap-2 mt-1 sm:mt-2 flex-wrap">
-                  {analytics.products.lowStock > 0 && (
-                    <>
-                      <AlertTriangle className="h-3 w-3 text-orange-500 shrink-0" />
-                      <p className="text-[10px] sm:text-xs text-orange-600 dark:text-orange-400">
-                        {analytics.products.lowStock} bajo stock
-                      </p>
-                    </>
-                  )}
-                  {analytics.products.outOfStock > 0 && (
-                    <>
-                      <XCircle className="h-3 w-3 text-red-500 shrink-0" />
-                      <p className="text-[10px] sm:text-xs text-red-600 dark:text-red-400">
-                        {analytics.products.outOfStock} sin stock
-                      </p>
-                    </>
-                  )}
-                  {analytics.products.lowStock === 0 &&
-                    analytics.products.outOfStock === 0 && (
-                      <p className="text-[10px] sm:text-xs text-gray-600 dark:text-gray-400">
-                        Stock saludable
-                      </p>
-                    )}
-                </div>
-              </div>
-              <div className="p-1.5 sm:p-2 bg-red-100 dark:bg-red-900/30 rounded-lg shrink-0">
-                <Package className="h-4 w-4 sm:h-5 sm:w-5 text-red-600 dark:text-red-400" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      <AnalyticsKPICards
+        kpis={analytics.kpis}
+        workOrders={analytics.workOrders}
+        quotes={analytics.quotes}
+        appointments={analytics.appointments}
+        products={analytics.products}
+      />
 
       {/* Analytics Tabs */}
       <Tabs className="space-y-6" defaultValue="overview">
