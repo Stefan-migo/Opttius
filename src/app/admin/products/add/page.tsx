@@ -1,44 +1,29 @@
 "use client";
 
-import { AlertTriangle, ArrowLeft, Save, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 
 import { useCategories } from "@/app/admin/products/hooks/useCategories";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import ImageUpload from "@/components/ui/ImageUpload";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import RichTextEditor from "@/components/ui/RichTextEditor";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { useBranch } from "@/hooks/useBranch";
 import { useProtectedForm } from "@/hooks/useFormProtection";
 import { useProductOptions } from "@/hooks/useProductOptions";
 import { productService } from "@/lib/api/services";
+
+import { AddProductBasicInfo } from "./_components/AddProductBasicInfo";
+import { AddProductFrameSpecs } from "./_components/AddProductFrameSpecs";
+import { AddProductImagesSection } from "./_components/AddProductImagesSection";
+import { AddProductInventorySection } from "./_components/AddProductInventorySection";
+import { AddProductLensSpecs } from "./_components/AddProductLensSpecs";
+import { AddProductPricingSection } from "./_components/AddProductPricingSection";
+import { ProductAddHeader } from "./_components/ProductAddHeader";
+import { AddProductWarrantySection } from "./_components/AddProductWarrantySection";
 
 export default function AddProductPage() {
   const router = useRouter();
   const { currentBranchId, isSuperAdmin, branches } = useBranch();
   const [loading, setLoading] = useState(false);
   const { categories } = useCategories();
-  const [showPublishAlert, setShowPublishAlert] = useState(false);
   const { options: productOptions, loading: optionsLoading } =
     useProductOptions();
 
@@ -569,963 +554,102 @@ export default function AddProductPage() {
 
   return (
     <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8 max-w-4xl">
-      <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4 mb-4 sm:mb-6">
-        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-admin-text-primary">
-            Agregar Producto
-          </h1>
-          {hasChanges && (
-            <span className="px-2 py-1 text-[10px] sm:text-xs bg-amber-100 text-amber-800 rounded-full border border-amber-200">
-              Cambios sin guardar
-            </span>
-          )}
-        </div>
-        <Button
-          className="h-10 w-10 sm:h-auto sm:w-auto sm:px-4 shrink-0"
-          variant="outline"
-          onClick={() => router.back()}
-        >
-          <ArrowLeft className="h-4 w-4 sm:mr-2" />
-          <span className="hidden sm:inline">Volver</span>
-        </Button>
-      </div>
+      <ProductAddHeader
+        hasChanges={hasChanges}
+        saving={loading}
+        onSave={handleSubmit}
+      />
 
-      {/* Product Form */}
       <form className="space-y-4 sm:space-y-6" onSubmit={handleSubmit}>
-        {/* Product Type & Category - MOVED TO FIRST POSITION */}
-        <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.4)]">
-          <CardHeader className="px-4 sm:px-6 py-4 sm:py-6">
-            <CardTitle className="text-sm sm:text-base">
-              Tipo de Producto
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4 px-4 sm:px-6 pb-4 sm:pb-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="product_type">Tipo de Producto *</Label>
-                <Select
-                  value={formData.product_type}
-                  onValueChange={(value) =>
-                    handleInputChange("product_type", value)
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleccionar tipo" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {productTypes.map((type) => (
-                      <SelectItem key={type.value} value={type.value}>
-                        {type.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label htmlFor="category">Categoría General</Label>
-                <Select
-                  value={formData.category_id}
-                  onValueChange={(value) =>
-                    handleInputChange("category_id", value)
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleccionar categoría" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {categories.map((category) => (
-                      <SelectItem key={category.id} value={category.id}>
-                        {category.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        <AddProductBasicInfo
+          productType={formData.product_type}
+          categoryId={formData.category_id}
+          status={formData.status}
+          name={formData.name}
+          slug={formData.slug}
+          shortDescription={formData.short_description}
+          brand={formData.brand}
+          manufacturer={formData.manufacturer}
+          modelNumber={formData.model_number}
+          sku={formData.sku}
+          barcode={formData.barcode}
+          categories={categories}
+          productTypes={productTypes}
+          onFieldChange={handleInputChange}
+        />
 
-        <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.4)]">
-          <CardHeader className="px-4 sm:px-6 py-4 sm:py-6">
-            <CardTitle className="text-sm sm:text-base">
-              Información Básica
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4 px-4 sm:px-6 pb-4 sm:pb-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="name">Nombre del Producto *</Label>
-                <Input
-                  required
-                  className="border-black/20"
-                  id="name"
-                  placeholder="Ej: Ray-Ban RB2140 Wayfarer"
-                  value={formData.name}
-                  onChange={(e) => handleInputChange("name", e.target.value)}
-                />
-              </div>
-              <div>
-                <Label htmlFor="slug">URL (slug)</Label>
-                <Input
-                  className="border-black/20"
-                  id="slug"
-                  placeholder="Se genera automáticamente"
-                  value={formData.slug}
-                  onChange={(e) => handleInputChange("slug", e.target.value)}
-                />
-              </div>
-            </div>
+        <AddProductPricingSection
+          price={formData.price}
+          priceIncludesTax={formData.price_includes_tax}
+          onFieldChange={handleInputChange}
+        />
 
-            <div>
-              <Label htmlFor="short_description">Descripción</Label>
-              <RichTextEditor
-                placeholder="Descripción del producto"
-                rows={3}
-                value={formData.short_description}
-                onChange={(value) =>
-                  handleInputChange("short_description", value)
-                }
-              />
-            </div>
-          </CardContent>
-        </Card>
+        <AddProductInventorySection
+          stockQuantity={formData.stock_quantity}
+          lowStockThreshold={formData.low_stock_threshold}
+          currentBranchId={currentBranchId}
+          onFieldChange={handleInputChange}
+        />
 
-        <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.4)]">
-          <CardHeader>
-            <CardTitle>Precios e Inventario</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="price">Precio *</Label>
-                <Input
-                  required
-                  className="border-black/20"
-                  id="price"
-                  placeholder="0.00"
-                  step="0.01"
-                  type="number"
-                  value={formData.price}
-                  onChange={(e) => handleInputChange("price", e.target.value)}
-                />
-              </div>
-              <div>
-                <Label htmlFor="stock_quantity">
-                  Cantidad en Stock (Sucursal Actual)
-                </Label>
-                <Input
-                  className="border-black/20"
-                  id="stock_quantity"
-                  min="0"
-                  placeholder="0"
-                  type="number"
-                  value={formData.stock_quantity}
-                  onChange={(e) =>
-                    handleInputChange("stock_quantity", e.target.value)
-                  }
-                />
-                <p className="text-xs text-muted-foreground mt-1">
-                  Stock inicial para esta sucursal. Puede agregar más stock
-                  después de crear el producto.
-                </p>
-              </div>
-              <div>
-                <Label htmlFor="low_stock_threshold">
-                  Umbral de Stock Bajo
-                </Label>
-                <Input
-                  className="border-black/20"
-                  id="low_stock_threshold"
-                  min="0"
-                  placeholder="5"
-                  type="number"
-                  value={formData.low_stock_threshold}
-                  onChange={(e) =>
-                    handleInputChange("low_stock_threshold", e.target.value)
-                  }
-                />
-                <p className="text-xs text-muted-foreground mt-1">
-                  Alerta cuando el stock disponible sea menor o igual a este
-                  valor.
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center space-x-2">
-              <input
-                checked={formData.price_includes_tax}
-                className="h-4 w-4 rounded border-gray-300 text-epoch-primary focus:ring-epoch-primary"
-                id="price_includes_tax"
-                type="checkbox"
-                onChange={(e) =>
-                  handleInputChange("price_includes_tax", e.target.checked)
-                }
-              />
-              <Label
-                className="text-sm font-normal cursor-pointer"
-                htmlFor="price_includes_tax"
-              >
-                El precio ya incluye IVA
-              </Label>
-            </div>
-          </CardContent>
-        </Card>
+        <AddProductImagesSection
+          featuredImage={formData.featured_image}
+          onFieldChange={handleInputChange}
+        />
 
-        {/* Brand & Model Information - Hidden for services */}
-        {formData.product_type !== "service" && (
-          <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.4)]">
-            <CardHeader>
-              <CardTitle>Marca y Modelo</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <Label htmlFor="brand">Marca</Label>
-                  <Input
-                    className="border-black/20"
-                    id="brand"
-                    placeholder="Ej: Ray-Ban"
-                    value={formData.brand}
-                    onChange={(e) => handleInputChange("brand", e.target.value)}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="manufacturer">Fabricante</Label>
-                  <Input
-                    className="border-black/20"
-                    id="manufacturer"
-                    placeholder="Ej: Luxottica"
-                    value={formData.manufacturer}
-                    onChange={(e) =>
-                      handleInputChange("manufacturer", e.target.value)
-                    }
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="model_number">Número de Modelo</Label>
-                  <Input
-                    className="border-black/20"
-                    id="model_number"
-                    placeholder="Ej: RB2140"
-                    value={formData.model_number}
-                    onChange={(e) =>
-                      handleInputChange("model_number", e.target.value)
-                    }
-                  />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* SKU and Barcode - Available for all product types */}
-        <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.4)]">
-          <CardHeader>
-            <CardTitle>Códigos de Identificación</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="sku">SKU</Label>
-                <Input
-                  className="border-black/20"
-                  id="sku"
-                  placeholder="Código SKU"
-                  value={formData.sku}
-                  onChange={(e) => handleInputChange("sku", e.target.value)}
-                />
-              </div>
-              <div>
-                <Label htmlFor="barcode">Código de Barras</Label>
-                <Input
-                  className="border-black/20"
-                  id="barcode"
-                  placeholder="Código de barras"
-                  value={formData.barcode}
-                  onChange={(e) => handleInputChange("barcode", e.target.value)}
-                />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.4)]">
-          <CardHeader>
-            <CardTitle>Imagen del Producto</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div>
-              <Label htmlFor="featured_image">Imagen del Producto</Label>
-              <ImageUpload
-                placeholder="Seleccionar imagen del producto"
-                value={formData.featured_image}
-                onChange={(url) => handleInputChange("featured_image", url)}
-              />
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Frame Specifications - Only show if product_type is 'frame' */}
         {formData.product_type === "frame" && (
-          <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.4)]">
-            <CardHeader>
-              <CardTitle>Especificaciones del Armazón</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label>Tipo de Armazón</Label>
-                  <Select
-                    value={formData.frame_type}
-                    onValueChange={(value) =>
-                      handleInputChange("frame_type", value)
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleccionar tipo" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {frameTypes.map((type) => (
-                        <SelectItem key={type.value} value={type.value}>
-                          {type.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label>Material del Armazón</Label>
-                  <Select
-                    value={formData.frame_material}
-                    onValueChange={(value) =>
-                      handleInputChange("frame_material", value)
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleccionar material" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {frameMaterials.map((material) => (
-                        <SelectItem key={material.value} value={material.value}>
-                          {material.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label>Forma del Armazón</Label>
-                  <Select
-                    value={formData.frame_shape}
-                    onValueChange={(value) =>
-                      handleInputChange("frame_shape", value)
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleccionar forma" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {frameShapes.map((shape) => (
-                        <SelectItem key={shape.value} value={shape.value}>
-                          {shape.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label>Género</Label>
-                  <Select
-                    value={formData.frame_gender}
-                    onValueChange={(value) =>
-                      handleInputChange("frame_gender", value)
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleccionar género" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {frameGenders.map((gender) => (
-                        <SelectItem key={gender.value} value={gender.value}>
-                          {gender.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label>Tamaño</Label>
-                  <Select
-                    value={formData.frame_size}
-                    onValueChange={(value) =>
-                      handleInputChange("frame_size", value)
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleccionar tamaño" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {frameSizes.map((size) => (
-                        <SelectItem key={size.value} value={size.value}>
-                          {size.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label>Color Principal</Label>
-                  <Input
-                    className="border-black/20"
-                    placeholder="Ej: Negro"
-                    value={formData.frame_color}
-                    onChange={(e) =>
-                      handleInputChange("frame_color", e.target.value)
-                    }
-                  />
-                </div>
-              </div>
-
-              {/* Frame Measurements */}
-              <div>
-                <Label className="mb-2 block">Medidas del Armazón (mm)</Label>
-                <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-                  <div>
-                    <Label className="text-xs">Ancho de Lente</Label>
-                    <Input
-                      className="border-black/20"
-                      placeholder="52"
-                      type="number"
-                      value={formData.frame_measurements.lens_width}
-                      onChange={(e) =>
-                        updateFrameMeasurement("lens_width", e.target.value)
-                      }
-                    />
-                  </div>
-                  <div>
-                    <Label className="text-xs">Puente</Label>
-                    <Input
-                      className="border-black/20"
-                      placeholder="18"
-                      type="number"
-                      value={formData.frame_measurements.bridge_width}
-                      onChange={(e) =>
-                        updateFrameMeasurement("bridge_width", e.target.value)
-                      }
-                    />
-                  </div>
-                  <div>
-                    <Label className="text-xs">Largo de Varilla</Label>
-                    <Input
-                      className="border-black/20"
-                      placeholder="140"
-                      type="number"
-                      value={formData.frame_measurements.temple_length}
-                      onChange={(e) =>
-                        updateFrameMeasurement("temple_length", e.target.value)
-                      }
-                    />
-                  </div>
-                  <div>
-                    <Label className="text-xs">Alto de Lente</Label>
-                    <Input
-                      className="border-black/20"
-                      placeholder="40"
-                      type="number"
-                      value={formData.frame_measurements.lens_height}
-                      onChange={(e) =>
-                        updateFrameMeasurement("lens_height", e.target.value)
-                      }
-                    />
-                  </div>
-                  <div>
-                    <Label className="text-xs">Ancho Total</Label>
-                    <Input
-                      className="border-black/20"
-                      placeholder="140"
-                      type="number"
-                      value={formData.frame_measurements.total_width}
-                      onChange={(e) =>
-                        updateFrameMeasurement("total_width", e.target.value)
-                      }
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Frame Features */}
-              <div>
-                <Label>Características del Armazón</Label>
-                <div className="flex flex-wrap gap-2 mt-2">
-                  {formData.frame_features.map((feature) => (
-                    <Badge
-                      className="flex items-center gap-1"
-                      key={feature}
-                      variant="secondary"
-                    >
-                      {feature.replace(/_/g, " ")}
-                      <X
-                        className="h-3 w-3 cursor-pointer"
-                        onClick={() =>
-                          removeFromArray("frame_features", feature)
-                        }
-                      />
-                    </Badge>
-                  ))}
-                </div>
-                <Select
-                  onValueChange={(value) => addToArray("frame_features", value)}
-                >
-                  <SelectTrigger className="mt-2">
-                    <SelectValue placeholder="Agregar característica" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {frameFeatures
-                      .filter((f) => !formData.frame_features.includes(f))
-                      .map((feature) => (
-                        <SelectItem key={feature} value={feature}>
-                          {feature.replace(/_/g, " ")}
-                        </SelectItem>
-                      ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </CardContent>
-          </Card>
+          <AddProductFrameSpecs
+            frameType={formData.frame_type}
+            frameMaterial={formData.frame_material}
+            frameShape={formData.frame_shape}
+            frameGender={formData.frame_gender}
+            frameSize={formData.frame_size}
+            frameColor={formData.frame_color}
+            frameMeasurements={formData.frame_measurements}
+            frameFeatures={formData.frame_features}
+            frameTypes={frameTypes}
+            frameMaterials={frameMaterials}
+            frameShapes={frameShapes}
+            frameGenders={frameGenders}
+            frameSizes={frameSizes}
+            frameFeaturesOptions={frameFeatures}
+            onFieldChange={handleInputChange}
+            onAddToArray={addToArray}
+            onRemoveFromArray={removeFromArray}
+            onUpdateFrameMeasurement={updateFrameMeasurement}
+          />
         )}
 
-        {/* Lens Specifications - Only show if product_type is 'lens' */}
         {formData.product_type === "lens" && (
-          <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.4)]">
-            <CardHeader>
-              <CardTitle>Especificaciones del Lente</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label>Tipo de Lente</Label>
-                  <Select
-                    value={formData.lens_type}
-                    onValueChange={(value) =>
-                      handleInputChange("lens_type", value)
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleccionar tipo" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {lensTypes.map((type) => (
-                        <SelectItem key={type.value} value={type.value}>
-                          {type.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label>Material del Lente</Label>
-                  <Select
-                    value={formData.lens_material}
-                    onValueChange={(value) =>
-                      handleInputChange("lens_material", value)
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleccionar material" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {lensMaterials.map((material) => (
-                        <SelectItem key={material.value} value={material.value}>
-                          {material.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label>Índice de Refracción</Label>
-                  <Input
-                    className="border-black/20"
-                    placeholder="Ej: 1.67"
-                    step="0.01"
-                    type="number"
-                    value={formData.lens_index}
-                    onChange={(e) =>
-                      handleInputChange("lens_index", e.target.value)
-                    }
-                  />
-                </div>
-                <div>
-                  <Label>Protección UV</Label>
-                  <Select
-                    value={formData.uv_protection}
-                    onValueChange={(value) =>
-                      handleInputChange("uv_protection", value)
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleccionar nivel" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {uvProtectionLevels.map((level) => (
-                        <SelectItem key={level.value} value={level.value}>
-                          {level.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="flex items-center space-x-2">
-                  <input
-                    checked={formData.blue_light_filter}
-                    className="rounded"
-                    id="blue_light_filter"
-                    type="checkbox"
-                    onChange={(e) =>
-                      handleInputChange("blue_light_filter", e.target.checked)
-                    }
-                  />
-                  <Label htmlFor="blue_light_filter">Filtro de Luz Azul</Label>
-                </div>
-                {formData.blue_light_filter && (
-                  <div>
-                    <Label>Porcentaje de Filtro (%)</Label>
-                    <Input
-                      className="border-black/20"
-                      max="100"
-                      min="0"
-                      placeholder="Ej: 40"
-                      type="number"
-                      value={formData.blue_light_filter_percentage}
-                      onChange={(e) =>
-                        handleInputChange(
-                          "blue_light_filter_percentage",
-                          e.target.value,
-                        )
-                      }
-                    />
-                  </div>
-                )}
-                <div className="flex items-center space-x-2">
-                  <input
-                    checked={formData.photochromic}
-                    className="rounded"
-                    id="photochromic"
-                    type="checkbox"
-                    onChange={(e) =>
-                      handleInputChange("photochromic", e.target.checked)
-                    }
-                  />
-                  <Label htmlFor="photochromic">
-                    Fotocromático (Transitions)
-                  </Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <input
-                    checked={formData.prescription_available}
-                    className="rounded"
-                    id="prescription_available"
-                    type="checkbox"
-                    onChange={(e) =>
-                      handleInputChange(
-                        "prescription_available",
-                        e.target.checked,
-                      )
-                    }
-                  />
-                  <Label htmlFor="prescription_available">
-                    Disponible con Receta
-                  </Label>
-                </div>
-              </div>
-
-              {/* Lens Coatings */}
-              <div>
-                <Label>Tratamientos y Recubrimientos</Label>
-                <div className="flex flex-wrap gap-2 mt-2">
-                  {formData.lens_coatings.map((coating) => (
-                    <Badge
-                      className="flex items-center gap-1"
-                      key={coating}
-                      variant="secondary"
-                    >
-                      {coating.replace(/_/g, " ")}
-                      <X
-                        className="h-3 w-3 cursor-pointer"
-                        onClick={() =>
-                          removeFromArray("lens_coatings", coating)
-                        }
-                      />
-                    </Badge>
-                  ))}
-                </div>
-                <Select
-                  onValueChange={(value) => addToArray("lens_coatings", value)}
-                >
-                  <SelectTrigger className="mt-2">
-                    <SelectValue placeholder="Agregar tratamiento" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {lensCoatings
-                      .filter((c) => !formData.lens_coatings.includes(c))
-                      .map((coating) => (
-                        <SelectItem key={coating} value={coating}>
-                          {coating.replace(/_/g, " ")}
-                        </SelectItem>
-                      ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Prescription Range */}
-              {formData.prescription_available && (
-                <div>
-                  <Label className="mb-2 block">
-                    Rango de Receta Soportado
-                  </Label>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                    <div>
-                      <Label className="text-xs">SPH Mínimo</Label>
-                      <Input
-                        className="border-black/20"
-                        placeholder="-10.00"
-                        step="0.25"
-                        type="number"
-                        value={formData.prescription_range.sph_min}
-                        onChange={(e) =>
-                          updatePrescriptionRange("sph_min", e.target.value)
-                        }
-                      />
-                    </div>
-                    <div>
-                      <Label className="text-xs">SPH Máximo</Label>
-                      <Input
-                        className="border-black/20"
-                        placeholder="+6.00"
-                        step="0.25"
-                        type="number"
-                        value={formData.prescription_range.sph_max}
-                        onChange={(e) =>
-                          updatePrescriptionRange("sph_max", e.target.value)
-                        }
-                      />
-                    </div>
-                    <div>
-                      <Label className="text-xs">CIL Mínimo</Label>
-                      <Input
-                        className="border-black/20"
-                        placeholder="-4.00"
-                        step="0.25"
-                        type="number"
-                        value={formData.prescription_range.cyl_min}
-                        onChange={(e) =>
-                          updatePrescriptionRange("cyl_min", e.target.value)
-                        }
-                      />
-                    </div>
-                    <div>
-                      <Label className="text-xs">CIL Máximo</Label>
-                      <Input
-                        className="border-black/20"
-                        placeholder="+4.00"
-                        step="0.25"
-                        type="number"
-                        value={formData.prescription_range.cyl_max}
-                        onChange={(e) =>
-                          updatePrescriptionRange("cyl_max", e.target.value)
-                        }
-                      />
-                    </div>
-                    <div>
-                      <Label className="text-xs">ADD Mínimo</Label>
-                      <Input
-                        className="border-black/20"
-                        placeholder="0.00"
-                        step="0.25"
-                        type="number"
-                        value={formData.prescription_range.add_min}
-                        onChange={(e) =>
-                          updatePrescriptionRange("add_min", e.target.value)
-                        }
-                      />
-                    </div>
-                    <div>
-                      <Label className="text-xs">ADD Máximo</Label>
-                      <Input
-                        className="border-black/20"
-                        placeholder="+4.00"
-                        step="0.25"
-                        type="number"
-                        value={formData.prescription_range.add_max}
-                        onChange={(e) =>
-                          updatePrescriptionRange("add_max", e.target.value)
-                        }
-                      />
-                    </div>
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+          <AddProductLensSpecs
+            lensType={formData.lens_type}
+            lensMaterial={formData.lens_material}
+            lensIndex={formData.lens_index}
+            uvProtection={formData.uv_protection}
+            blueLightFilter={formData.blue_light_filter}
+            blueLightFilterPercentage={formData.blue_light_filter_percentage}
+            photochromic={formData.photochromic}
+            prescriptionAvailable={formData.prescription_available}
+            lensCoatings={formData.lens_coatings}
+            prescriptionRange={formData.prescription_range}
+            lensTypes={lensTypes}
+            lensMaterials={lensMaterials}
+            uvProtectionLevels={uvProtectionLevels}
+            lensCoatingOptions={lensCoatings}
+            onFieldChange={handleInputChange}
+            onAddToArray={addToArray}
+            onRemoveFromArray={removeFromArray}
+            onUpdatePrescriptionRange={updatePrescriptionRange}
+          />
         )}
 
-        {/* Warranty & Additional Info */}
-        <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.4)]">
-          <CardHeader>
-            <CardTitle>Garantía e Información Adicional</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="warranty_months">Garantía (meses)</Label>
-                <Input
-                  className="border-black/20"
-                  id="warranty_months"
-                  placeholder="Ej: 12"
-                  type="number"
-                  value={formData.warranty_months}
-                  onChange={(e) =>
-                    handleInputChange("warranty_months", e.target.value)
-                  }
-                />
-              </div>
-              <div className="flex items-center space-x-2">
-                <input
-                  checked={formData.requires_prescription}
-                  className="rounded"
-                  id="requires_prescription"
-                  type="checkbox"
-                  onChange={(e) =>
-                    handleInputChange("requires_prescription", e.target.checked)
-                  }
-                />
-                <Label htmlFor="requires_prescription">Requiere Receta</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <input
-                  checked={formData.is_customizable}
-                  className="rounded"
-                  id="is_customizable"
-                  type="checkbox"
-                  onChange={(e) =>
-                    handleInputChange("is_customizable", e.target.checked)
-                  }
-                />
-                <Label htmlFor="is_customizable">Personalizable</Label>
-              </div>
-            </div>
-            <div>
-              <Label htmlFor="warranty_details">Detalles de Garantía</Label>
-              <RichTextEditor
-                placeholder="Detalles de la garantía, condiciones, etc."
-                rows={3}
-                value={formData.warranty_details}
-                onChange={(value) =>
-                  handleInputChange("warranty_details", value)
-                }
-              />
-            </div>
-          </CardContent>
-        </Card>
-
-        <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-4">
-          <Button
-            className="w-full sm:w-auto"
-            type="button"
-            variant="outline"
-            onClick={() => router.back()}
-          >
-            Cancelar
-          </Button>
-          <Button
-            className="flex items-center justify-center gap-2 w-full sm:w-auto"
-            disabled={loading}
-            type="button"
-            variant="secondary"
-            onClick={() => handleSubmit(undefined, "draft")}
-          >
-            <Save className="h-4 w-4" />
-            {loading ? "Guardando..." : "Borrador"}
-          </Button>
-          <Button
-            className="flex items-center justify-center gap-2 w-full sm:w-auto"
-            disabled={loading}
-            type="button"
-            onClick={() => setShowPublishAlert(true)}
-          >
-            <Save className="h-4 w-4" />
-            {loading ? "Guardando..." : "Guardar Producto"}
-          </Button>
-        </div>
+        <AddProductWarrantySection
+          warrantyMonths={formData.warranty_months}
+          requiresPrescription={formData.requires_prescription}
+          isCustomizable={formData.is_customizable}
+          warrantyDetails={formData.warranty_details}
+          onFieldChange={handleInputChange}
+        />
       </form>
-
-      {/* Publish Alert Dialog */}
-      <Dialog open={showPublishAlert} onOpenChange={setShowPublishAlert}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-amber-600" />
-              Confirmar Publicación
-            </DialogTitle>
-            <DialogDescription>
-              <div className="space-y-3">
-                <p>
-                  <strong>
-                    ¿Estás seguro de que deseas publicar este producto?
-                  </strong>
-                </p>
-                <p>
-                  Al hacer clic en &quot;Publicar&quot;, el producto será
-                  publicado inmediatamente y estará visible para los clientes.
-                </p>
-                <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
-                  <p className="text-amber-800 font-medium">
-                    ⚠️ Recomendación de Seguridad:
-                  </p>
-                  <p className="text-amber-700 text-sm mt-1">
-                    Te recomendamos guardar primero como &quot;Borrador&quot;
-                    para revisar todos los detalles, especialmente los precios,
-                    antes de publicar el producto.
-                  </p>
-                </div>
-                <p className="text-sm text-gray-600">
-                  ¿Has verificado que todos los precios y detalles son
-                  correctos?
-                </p>
-              </div>
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button
-              disabled={loading}
-              variant="outline"
-              onClick={() => setShowPublishAlert(false)}
-            >
-              Cancelar
-            </Button>
-            <Button
-              className="text-white"
-              disabled={loading}
-              style={{ backgroundColor: "var(--admin-accent-tertiary)" }}
-              variant="secondary"
-              onClick={() => handleSubmit(undefined, "draft")}
-            >
-              Guardar como Borrador
-            </Button>
-            <Button
-              disabled={loading}
-              onClick={() => {
-                setShowPublishAlert(false);
-                handleSubmit(undefined, "active");
-              }}
-            >
-              {loading ? "Publicando..." : "Sí, Publicar Producto"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
