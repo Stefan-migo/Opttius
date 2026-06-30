@@ -181,6 +181,46 @@ describe("FlowGateway", () => {
       expect(result.type).toBe("payment_status");
     });
 
+    describe("mandatory signature verification (production)", () => {
+      it("should throw when signature is missing in production", async () => {
+        vi.stubEnv("NODE_ENV", "production");
+
+        const formData = new FormData();
+        formData.append("token", "test_token");
+        formData.append("status", "2");
+        formData.append("commerceOrder", "order_123");
+        formData.append("amount", "10000");
+        // No "s" field — signature missing
+
+        const request = new Request("http://localhost:3000/api/webhooks/flow", {
+          method: "POST",
+          body: formData,
+        }) as unknown as NextRequest;
+
+        await expect(gateway.processWebhookEvent(request)).rejects.toThrow(
+          "Flow Webhook: Missing signature",
+        );
+      });
+
+      it("should warn and proceed when signature is missing in development", async () => {
+        vi.stubEnv("NODE_ENV", "development");
+
+        const formData = new FormData();
+        formData.append("token", "test_token");
+        formData.append("status", "2");
+        formData.append("commerceOrder", "order_123");
+
+        const request = new Request("http://localhost:3000/api/webhooks/flow", {
+          method: "POST",
+          body: formData,
+        }) as unknown as NextRequest;
+
+        const result = await gateway.processWebhookEvent(request);
+        expect(result.status).toBe("pending");
+        expect(result.gatewayEventId).toBe("test_token");
+      });
+    });
+
     it("should handle missing required fields", async () => {
       // Create a proper NextRequest with FormData missing required fields
       const formData = new FormData();
