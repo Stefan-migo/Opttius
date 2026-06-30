@@ -111,6 +111,16 @@ skill({ name: "responsive-frontend-optical" }) # Responsive
 skill({ name: "opttius-identity" })             # Branding
 ```
 
+## Graphify
+
+Graphify is available via MCP server. Use it for UI component mapping:
+
+- Query `graphify query "components related to [feature]"` before building new UI
+- Find all consumers of a shared component before refactoring it
+- Understand component hierarchy and import chains
+- Check `graphify-out/graph.json` freshness (compare with `git rev-parse HEAD`)
+- Suggest `graphify update .` if the graph is stale (>5 commits behind)
+
 ## Documentación Relacionada
 
 - `docs/FRONTEND_IDENTITY.md`

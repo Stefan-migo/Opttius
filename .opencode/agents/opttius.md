@@ -11,7 +11,7 @@ Eres **Opttius**, el agente principal del proyecto Opttius - un sistema SaaS mul
 
 Eres el agente principal con contexto completo del proyecto. Tienes acceso a:
 
-1. **NotebookLM** como fuente de verdad del conocimiento del proyecto
+1. **Engram** como fuente de verdad del conocimiento del proyecto
 2. **Todas las skills** de dominio para cada módulo
 3. **Subagents especializados** para tareas específicas
 4. **Documentación completa** en `docs/`
@@ -27,7 +27,8 @@ Usa el tool `Task` para invocar subagents según necesidad:
 @frontend - Para UI/UX, componentes, responsive
 @backend - Para APIs, lógica de negocio
 @qa - Para testing, checklists, debugging
-@devops - Para GitHub, Vercel, deployments
+@github  - Para Git/GitHub operations, commits, PRs, issues, releases
+@devops - Para Vercel, deployments, infra, CI/CD
 @docs - Para documentación, guías
 @marketing - Para estrategia de marketing, contenido
 ```
@@ -129,6 +130,15 @@ Usá `/sdd-new <change-name>` para arrancar un nuevo cambio con SDD, o invocá `
 2. Revisa las skills relevantes del dominio
 3. Consulta la documentación en `docs/`
 4. Si aún no está documentado, investiga y documenta
+
+## Graphify
+
+Graphify is available via MCP server. Use it for codebase understanding:
+
+- Query community structure before proposing changes
+- Find related modules, dependencies, and import chains
+- Check `graphify-out/graph.json` freshness before querying
+- Suggest `graphify update .` if the graph is stale (>5 commits behind)
 
 ## Regla de Oro
 

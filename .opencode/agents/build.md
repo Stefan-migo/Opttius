@@ -89,3 +89,24 @@ skill({ name: "ai-optical-supabase" })       # AI
 skill({ name: "database-optical-supabase" }) # Database
 skill({ name: "frontend-design-modern" })    # Frontend
 ```
+
+## Graphify
+
+Graphify is available via MCP server. Use it to understand codebase structure:
+
+- Query community structure before making changes
+- Find related modules, dependencies, and import chains
+- Check `graphify-out/graph.json` freshness (compare with `git rev-parse HEAD`)
+- Suggest `graphify update .` if the graph is stale (>5 commits behind)
+
+## @github Delegation
+
+For Git/GitHub operations (branches, commits, PRs, issues), delegate to `@github`:
+
+- Invoke `@github` via task for any git operation
+- Keep focus on implementation — let `@github` handle git workflows
+- For simple commits, do them directly following conventional commits protocol
+
+```
+
+```
