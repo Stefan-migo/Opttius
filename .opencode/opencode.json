@@ -147,6 +147,27 @@
         "read": true,
         "write": true
       }
+    },
+    "github": {
+      "description": "Git and GitHub operations specialist. Branching, commits, PRs, issues, releases, git safety, and code review.",
+      "hidden": true,
+      "mode": "subagent",
+      "permission": {
+        "bash": {
+          "*": "ask",
+          "git status*": "allow",
+          "git log*": "allow",
+          "git diff*": "allow",
+          "git commit *": "allow",
+          "git push": "allow",
+          "git push origin *": "allow",
+          "git checkout -b *": "allow",
+          "git stash *": "allow",
+          "git branch *": "allow",
+          "gh *": "allow",
+          "npm run *": "allow"
+        }
+      }
     }
   },
   "mcp": {
@@ -162,11 +183,7 @@
       "_description": "Graphify — knowledge graph queries via MCP"
     },
     "engram": {
-      "command": [
-        "engram",
-        "mcp",
-        "--tools=agent"
-      ],
+      "command": ["engram", "mcp", "--tools=agent"],
       "type": "local"
     }
   },

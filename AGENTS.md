@@ -6,48 +6,49 @@ Sistema de agentes para el proyecto Opttius — SaaS multi-tenant para ópticas.
 
 Cambiá entre ellos con **TAB**:
 
-| Agente              | Descripción                                                  |
-| ------------------- | ------------------------------------------------------------ |
-| **Opttius**         | Agente principal. Contexto completo del proyecto, NotebookLM, skills de dominio. |
-| **Build**           | Desarrollo activo. Full tool access para implementar features, fixes, y refactorizaciones. |
+| Agente      | Descripción                                                                                |
+| ----------- | ------------------------------------------------------------------------------------------ |
+| **Opttius** | Agente principal. Contexto completo del proyecto, NotebookLM, skills de dominio.           |
+| **Build**   | Desarrollo activo. Full tool access para implementar features, fixes, y refactorizaciones. |
 
 ## Agente Orchestrator
 
-| Agente                           | Descripción                                                  |
-| -------------------------------- | ------------------------------------------------------------ |
-| **@opttius-orchestrator**        | SDD Orchestrator. Coordina sub-agentes, nunca hace trabajo inline. Usá `/sdd-new` para arrancar. |
+| Agente                    | Descripción                                                                                      |
+| ------------------------- | ------------------------------------------------------------------------------------------------ |
+| **@opttius-orchestrator** | SDD Orchestrator. Coordina sub-agentes, nunca hace trabajo inline. Usá `/sdd-new` para arrancar. |
 
 ## Subagentes de Dominio (@)
 
 Invocables con **@mention** directa:
 
-| Subagente     | Uso         | Descripción                                       |
-| ------------- | ----------- | ------------------------------------------------- |
-| **@database** | `@database` | Supabase, schema, RLS, migrations                 |
-| **@frontend** | `@frontend` | UI/UX, diseño Epoch, componentes                  |
-| **@backend**  | `@backend`  | APIs, business logic, servicios                   |
-| **@qa**       | `@qa`       | Testing, checklists, E2E                          |
-| **@devops**   | `@devops`   | GitHub, Vercel, CI/CD                             |
-| **@docs**     | `@docs`     | Documentación, guías                               |
-| **@marketing**| `@marketing`| Estrategia de marketing, contenido, SEO           |
-| **@review**   | `@review`   | Auditoría de código, PR reviews, judgment-day     |
+| Subagente      | Uso          | Descripción                                                                   |
+| -------------- | ------------ | ----------------------------------------------------------------------------- |
+| **@database**  | `@database`  | Supabase, schema, RLS, migrations                                             |
+| **@frontend**  | `@frontend`  | UI/UX, diseño Epoch, componentes                                              |
+| **@backend**   | `@backend`   | APIs, business logic, servicios                                               |
+| **@qa**        | `@qa`        | Testing, checklists, E2E                                                      |
+| **@devops**    | `@devops`    | Infra, Vercel, CI/CD, deployments                                             |
+| **@github**    | `@github`    | Git/GitHub operations: branches, commits, issues, PRs, releases, CI debugging |
+| **@docs**      | `@docs`      | Documentación, guías                                                          |
+| **@marketing** | `@marketing` | Estrategia de marketing, contenido, SEO                                       |
+| **@review**    | `@review`    | Auditoría de código, PR reviews, judgment-day                                 |
 
 ## Subagentes SDD (vía Orchestrator)
 
 Gestionados automáticamente por `@opttius-orchestrator`. No invocar directamente salvo que sepas lo que hacés.
 
-| Subagente       | Fase SDD        | Descripción                          |
-| --------------- | --------------- | ------------------------------------ |
-| `sdd-explore`   | Exploration     | Investigar ideas y codebase          |
-| `sdd-propose`   | Proposal        | Crear propuestas de cambio           |
-| `sdd-spec`      | Specification   | Escribir especificaciones detalladas |
-| `sdd-design`    | Design          | Diseñar arquitectura técnica         |
-| `sdd-tasks`     | Tasks           | Dividir en tareas implementables     |
-| `sdd-apply`     | Implementation  | Implementar código desde tasks       |
-| `sdd-verify`    | Verification    | Validar implementación contra specs  |
-| `sdd-archive`   | Archive         | Archivar cambios completados         |
-| `sdd-init`      | Init            | Bootstrap SDD context                |
-| `sdd-onboard`   | Onboarding      | Walkthrough guiado del ciclo SDD     |
+| Subagente     | Fase SDD       | Descripción                          |
+| ------------- | -------------- | ------------------------------------ |
+| `sdd-explore` | Exploration    | Investigar ideas y codebase          |
+| `sdd-propose` | Proposal       | Crear propuestas de cambio           |
+| `sdd-spec`    | Specification  | Escribir especificaciones detalladas |
+| `sdd-design`  | Design         | Diseñar arquitectura técnica         |
+| `sdd-tasks`   | Tasks          | Dividir en tareas implementables     |
+| `sdd-apply`   | Implementation | Implementar código desde tasks       |
+| `sdd-verify`  | Verification   | Validar implementación contra specs  |
+| `sdd-archive` | Archive        | Archivar cambios completados         |
+| `sdd-init`    | Init           | Bootstrap SDD context                |
+| `sdd-onboard` | Onboarding     | Walkthrough guiado del ciclo SDD     |
 
 ## Skills Disponibles
 
@@ -95,11 +96,11 @@ Skills de dominio para cargar con `skill()`:
 
 ### Tools (`.opencode/skills/tools/`)
 
-| Skill       | Descripción        |
-| ----------- | ------------------ |
-| `nlm-skill` | NotebookLM CLI     |
-| `notion`    | Notion integration |
-| `github`    | GitHub workflows   |
+| Skill       | Descripción                                                                |
+| ----------- | -------------------------------------------------------------------------- |
+| `nlm-skill` | NotebookLM CLI                                                             |
+| `notion`    | Notion integration                                                         |
+| `github`    | Git/GitHub operations, git safety, conventional commits, PR/issue workflow |
 
 ### Security (`.opencode/skills/security/`)
 
@@ -112,24 +113,24 @@ Skills de dominio para cargar con `skill()`:
 
 Cargables via `skill()`. No tienen copia local en el proyecto — las globales son la fuente de verdad.
 
-| Skill               | Descripción                                      |
-| ------------------- | ------------------------------------------------ |
-| `cortex-persona`    | Senior Architect persona, Ponytail minimalism    |
-| `ponytail`          | YAGNI-first code generation (plugin)             |
-| `ponytail-review`   | Over-engineering audit en diffs                  |
-| `ponytail-audit`    | Over-engineering audit full repo                 |
-| `ponytail-debt`     | Harvest shortcuts ledger                         |
-| `judgment-day`      | Adversarial dual review protocol                 |
-| `sdd-apply`         | SDD apply phase implementation                   |
-| `sdd-archive`       | SDD archive phase                                |
-| `sdd-design`        | SDD design phase                                 |
-| `sdd-explore`       | SDD explore phase                                |
-| `sdd-init`          | SDD init phase                                   |
-| `sdd-onboard`       | SDD onboarding                                   |
-| `sdd-propose`       | SDD proposal phase                               |
-| `sdd-spec`          | SDD spec phase                                   |
-| `sdd-tasks`         | SDD tasks phase                                  |
-| `sdd-verify`        | SDD verify phase                                 |
+| Skill             | Descripción                                   |
+| ----------------- | --------------------------------------------- |
+| `cortex-persona`  | Senior Architect persona, Ponytail minimalism |
+| `ponytail`        | YAGNI-first code generation (plugin)          |
+| `ponytail-review` | Over-engineering audit en diffs               |
+| `ponytail-audit`  | Over-engineering audit full repo              |
+| `ponytail-debt`   | Harvest shortcuts ledger                      |
+| `judgment-day`    | Adversarial dual review protocol              |
+| `sdd-apply`       | SDD apply phase implementation                |
+| `sdd-archive`     | SDD archive phase                             |
+| `sdd-design`      | SDD design phase                              |
+| `sdd-explore`     | SDD explore phase                             |
+| `sdd-init`        | SDD init phase                                |
+| `sdd-onboard`     | SDD onboarding                                |
+| `sdd-propose`     | SDD proposal phase                            |
+| `sdd-spec`        | SDD spec phase                                |
+| `sdd-tasks`       | SDD tasks phase                               |
+| `sdd-verify`      | SDD verify phase                              |
 
 ## Cómo Usar
 
@@ -161,12 +162,9 @@ skill({ name: "database-optical-supabase" });
 
 ## Source of Truth
 
-- **NotebookLM**: conocimiento del proyecto (Principal: `e071bebc-ce79-4b32-a040-61a6a9c331a3`, Extendido: `17302d9d-7d70-4c8d-a774-49fbfca3c09d`)
 - **Engram**: memoria persistente entre sesiones (decisiones, bugs, patrones)
 - **AGENTS.md**: fuente unificada de agentes y skills
 - **`docs/`**: documentación adicional
-
-Ver `docs/NOTEBOOKLM_CUADERNOS_GUIA.md` para cuándo usar cada notebook.
 
 ## Arquitectura de Agentes
 
@@ -194,4 +192,3 @@ openspec/                       ← SDD artifacts (cambios activos/completados)
 1. **Idea o bug** → usá `/sdd-new <change-name>` para arrancar un ciclo SDD
 2. **Cambio simple** → trabajá directo con **Build** y cargá la skill relevante
 3. **Review** → invocá `@review` para auditoría de PR o judgment-day
-4. **Contexto** → consultá NotebookLM o Engram para decisiones pasadas

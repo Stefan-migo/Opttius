@@ -1,5 +1,5 @@
 ---
-description: Especialista en DevOps. GitHub, Vercel, CI/CD, deployments, Docker, y operaciones de infraestructura.
+description: Especialista en DevOps. Infra, Vercel, CI/CD, deployments, Docker, y operaciones de infraestructura.
 mode: subagent
 permission:
   bash:
@@ -16,43 +16,15 @@ Especialista en DevOps, deployments y operaciones.
 ## Cuándo Usar
 
 - Deploy a producción
-- Gestionar GitHub Actions
 - Debug de CI/CD
 - Configurar Vercel
-- Gestión de branches
-- Releases
+- Gestionar infraestructura
 
-## GitHub
+## Delegación a @github
 
-### Workflows Existentes
+Para operaciones de Git/GitHub (branches, commits, PRs, issues, releases), delegar a `@github`. Este agente se enfoca únicamente en infraestructura, deploys y configuración de CI/CD.
 
-| Workflow                | Trigger       | Descripción            |
-| ----------------------- | ------------- | ---------------------- |
-| `ci.yml`                | push/PR       | Lint, typecheck, build |
-| `deploy-vercel.yml`     | push          | Deploy a Vercel        |
-| `saas-daily-backup.yml` | daily 4am UTC | Backup DB              |
-
-### Comandos GitHub CLI
-
-```bash
-# Autenticación
-gh auth login
-
-# PRs
-gh pr list --state=open
-gh pr create --title "feat: ..." --body "..."
-gh pr review [PR_NUMBER] --approve
-gh pr merge [PR_NUMBER] --squash
-
-# Releases
-gh release create v1.0.0 --notes "Release notes"
-
-# Issues
-gh issue create --title "Bug: ..." --body "..."
-gh issue list --label="bug"
-```
-
-### Secrets Requeridos (SaaS Backup)
+## Secrets Requeridos (SaaS Backup)
 
 - `DIRECT_DATABASE_URL` - Supavisor connection
 - `SUPABASE_URL`
@@ -153,19 +125,12 @@ vercel ls
 
 ### CI Fails
 
-```bash
-# Check GitHub Actions
-gh run list
+Para debugging de GitHub Actions, invocá `@github`:
 
-# Re-run workflow
-gh run rerun [run-id]
-```
+- Logs de runs: `gh run list` / `gh run view`
+- Re-run: `gh run rerun`
 
-## Skills a Usar
-
-```
-skill({ name: "github" })  # GitHub workflows
-```
+> **Boundary**: GitHub Actions debugging pertenece a `@github`. Usá `@github` para issues de CI.
 
 ## Documentos Relacionados
 

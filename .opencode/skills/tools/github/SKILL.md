@@ -1,169 +1,172 @@
 ---
 name: github
-description: Expert guide for managing GitHub repositories, workflows, pull requests, issues, releases, and CI/CD pipelines for Opttius. Use when managing GitHub Actions, creating release workflows, reviewing PRs, automating tasks via GitHub API, or coordinating team contributions.
+description: Expert guide for Git, GitHub operations, and git safety for Opttius. Branches, commits, PRs, issues, releases, conventional commits, GitHub Actions debugging.
 ---
 
-# GitHub Integration for Opttius
+# GitHub Skill
 
-Expert guide for GitHub workflows, PRs, issues, and automation.
+Agentic Git and GitHub operations for Opttius.
 
-## Cuándo Usar Este Skill
+## When to Use
 
-- Revisar y crear GitHub Actions workflows
-- Gestionar pull requests y code reviews
-- Crear y gestionar releases
-- Coordinar issues y milestones
-- Automatizar tareas via GitHub API
+- Create and manage branches with safety guards
+- Commit using conventional commits
+- Create, review, and merge pull requests
+- Manage issues, milestones, and releases
+- Debug GitHub Actions failures
+- Enforce git safety protocol
 
-## Estructura del Repositorio
+## Git Safety Protocol (CORE)
 
-```
-.github/
-├── workflows/
-│   ├── ci.yml           # CI principal
-│   ├── deploy-vercel.yml # Deploy a Vercel
-│   ├── saas-backup.yml  # Backup diario DB
-│   └── sync-notebooklm.yml
-├── ISSUE_TEMPLATE/
-├── PULL_REQUEST_TEMPLATE.md
-└── README.md
-```
+### Dirty WD Guard
 
-## Workflows Existentes
+Before `checkout`, `rebase`, `reset`, or `branch -D`, run `git status --porcelain`:
 
-### CI Pipeline
+- Clean → proceed
+- Dirty + branch switch → `git stash push -m "auto-stash: <reason>"`, proceed, then notify user to `git stash pop` after confirming the switch
+- Dirty + destructive op (`rebase`, `reset --hard`, `branch -D`) → refuse, show dirty files, suggest `git stash` or `git commit` first
 
-```yaml
-name: CI
-on: [push, pull_request]
-jobs:
-  lint:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-      - run: npm ci
-      - run: npm run lint
-      - run: npm run type-check
-      - run: npm run build
-```
+### Branch Creation Protocol
 
-### Vercel Deployment
-
-```yaml
-name: Deploy to Vercel
-on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
-```
-
-### SaaS Backup (GitHub Actions)
-
-Ubicación: `.github/workflows/saas-daily-backup.yml`
-
-Secrets requeridos:
-
-- `DIRECT_DATABASE_URL` - Conexión Supabase via Supavisor
-- `SUPABASE_URL` - URL del proyecto
-- `SUPABASE_SERVICE_ROLE_KEY` - Service role key
-- `CRON_SECRET` - Secreto para endpoint de backup
-
-## Issues y Labels
-
-### Labels Principales
-
-| Label              | Color  | Uso                        |
-| ------------------ | ------ | -------------------------- |
-| `bug`              | red    | Bugs reportados            |
-| `enhancement`      | green  | Nuevas features            |
-| `documentation`    | blue   | Docs a actualizar          |
-| `priority:high`    | orange | Alta prioridad             |
-| `good first issue` | purple | Para nuevos contribuidores |
-
-### Templates de Issue
-
-```markdown
-## Descripción
-
-[Descripción clara del problema]
-
-## Pasos para Reproducir
-
-1.
-2.
-3.
-
-## Comportamiento Esperado
-
-[Qué debería pasar]
-
-## Comportamiento Actual
-
-[Qué pasa actualmente]
-
-## Screenshots/Logs
-
-[Si aplica]
-```
-
-## Pull Requests
-
-### PR Checklist
-
-- [ ] Tests agregados/actualizados
-- [ ] Lint pasa
-- [ ] Typecheck pasa
-- [ ] Build succeed
-- [ ] Documentación actualizada
-- [ ] Labels asignados
-
-### Merge Strategy
-
-Usar **Squash and Merge** para mantener historial limpio.
-
-## GitHub CLI
+Every branch MUST be pushed immediately after creation:
 
 ```bash
-# Autenticación
-gh auth login
+git checkout -b <branch>
+git push -u origin <branch>    # non-negotiable
+```
 
-# Listar PRs
-gh pr list --state=open --repo=Stefan-migo/Opttius
+Rationale: prevents local-only branches that get lost on WD reset, machine failure, or context switch.
 
-# Revisar PR
-gh pr review [PR_NUMBER] --approve
+### Pre-Flight Checklist (destructive ops)
 
-# Crear PR
-gh pr create --title "feat: nueva funcionalidad" --body "Descripción"
+Before `git push --force`, `git rebase`, `git reset --hard`, `git branch -D`:
 
-# Ver status
-gh pr status
+- [ ] Working directory clean? (else stash or commit)
+- [ ] Branch pushed to remote? (`git push -u origin` if not)
+- [ ] All commits follow conventional commits?
+- [ ] User confirmed the operation? (show command + risk, get explicit yes)
 
-# Gestionar releases
+## Global Skills Integration
+
+Load on demand by trigger:
+
+| Trigger                 | Skill                                  |
+| ----------------------- | -------------------------------------- |
+| Creating/opening a PR   | `skill({ name: "branch-pr" })`         |
+| Splitting a large PR    | `skill({ name: "chained-pr" })`        |
+| Planning commits        | `skill({ name: "work-unit-commits" })` |
+| Creating an issue       | `skill({ name: "issue-creation" })`    |
+| Writing review comments | `skill({ name: "comment-writer" })`    |
+
+## Graphify Integration
+
+Query Graphify for codebase context before git operations affecting multiple modules:
+
+| Context                    | Action                                              |
+| -------------------------- | --------------------------------------------------- |
+| Before PR/issue creation   | `graphify query "<question>"` for codebase context  |
+| After structural changes   | Suggest `graphify update` after apply phase         |
+| Before proposing refactors | Query dependency graph: `graphify path "[X]" "[Y]"` |
+| SDD explore phase          | `graphify query "relationship between X and Y"`     |
+| SDD design phase           | `graphify query "all consumers of module X"`        |
+| SDD verify phase           | `graphify query "files affected by change Z"`       |
+
+**Freshness check**: Before querying, run `git rev-parse HEAD` and compare with the stored graph commit. If they differ, the graph is stale — suggest `graphify update` before querying.
+
+## Conventional Commits
+
+```
+type(scope): description
+```
+
+Types: `feat`, `fix`, `refactor`, `docs`, `test`, `chore`, `ci`, `perf`, `style`, `build`, `revert`.
+Add `!` after type+scope for breaking changes: `feat!(scope): description`.
+
+Examples:
+
+```
+feat(quotes): add payment plan support
+fix(pos): correct tax calculation on discounts
+docs(api): update endpoint examples
+refactor(db): extract shared RLS function
+```
+
+## Branch Naming
+
+```
+^(feat|fix|refactor|docs|test|chore|ci|perf|style|build|revert)/[a-z0-9._-]+$
+```
+
+Format: `type/description` — lowercase, no spaces, only `a-z0-9._-`.
+
+Examples: `feat/user-login`, `fix/zsh-glob-error`, `refactor/extract-auth`.
+
+## PR Workflow
+
+1. Must link an approved issue (`Closes #N`, `Fixes #N`, `Resolves #N`)
+2. Must have exactly one `type:*` label
+3. Squash-merge default for clean history
+4. Automated checks must pass (CI, lint, typecheck)
+
+## SDD Phase Integration
+
+The @github sub-agent is used at specific SDD phases:
+
+| Phase       | @github Involvement                                                         |
+| ----------- | --------------------------------------------------------------------------- |
+| **Explore** | Not directly involved                                                       |
+| **Propose** | Not directly involved                                                       |
+| **Design**  | Review branching strategy for the change                                    |
+| **Tasks**   | Validate task breakdown matches commit planning (work-unit-commits)         |
+| **Apply**   | Branch creation, frequent commits, push, intermediate PRs for review slices |
+| **Verify**  | Ensure all commits are pushed, PR is ready for review                       |
+| **Archive** | Create final PR from completed tasks, manage merge, cleanup branches        |
+
+## GitHub CLI Commands
+
+```bash
+# PRs
+gh pr list --state=open
+gh pr create --title "type(scope): description" --body "Closes #N"
+gh pr review <PR> --approve
+gh pr merge <PR> --squash
+
+# Issues
+gh issue create --title "Bug: ..." --body "..."
+gh issue list --label bug
+
+# Releases
 gh release create v1.0.0 --notes "Release notes"
+
+# Actions
+gh run list
+gh run rerun <run-id>
+gh run view <run-id> --log
 ```
 
-## Automatización con GitHub API
-
-### Crear Issue desde Script
+## GitHub Actions Debugging
 
 ```bash
-curl -X POST \
-  -H "Authorization: token $GITHUB_TOKEN" \
-  -d '{
-    "title": "Bug: descripción del bug",
-    "body": "Detalles del bug",
-    "labels": ["bug"]
-  }' \
-  https://api.github.com/repos/Stefan-migo/Opttius/issues
+# List recent workflow runs
+gh run list --limit 5
+
+# View logs for a failed run
+gh run view <run-id> --log | grep -i error
+
+# Re-run a failed job
+gh run rerun <run-id>
+
+# Check workflow file before committing
+# GitHub validates on push — verify YAML syntax locally first
 ```
 
-## Documentación Relacionada
+## Boundary vs @devops
 
-- `docs/VERCEL_DEPLOYMENT_2026-02.md` - Configuración de deploy
-- `.github/workflows/` - Workflows existentes
-- `AGENTS.md` - Contexto del proyecto
+| Area                              | Handled By             |
+| --------------------------------- | ---------------------- |
+| Git operations, branches, commits | `@github` (this skill) |
+| PRs, issues, releases             | `@github` (this skill) |
+| GitHub Actions debugging          | `@github` (this skill) |
+| CI/CD pipeline configuration      | `@devops`              |
+| Vercel / Supabase deployments     | `@devops`              |
+| Code review                       | `@github` + `@review`  |
