@@ -127,6 +127,16 @@ npm run test:api      # API tests
 npm run test:integration # Integration tests
 ```
 
+## Graphify
+
+Graphify is available via MCP server. Use it to understand module relationships:
+
+- Query `graphify query "relationship between [module A] and [module B]"` before API changes
+- Find all consumers of a module before refactoring endpoints
+- Discover which services depend on a given API
+- Check `graphify-out/graph.json` freshness (compare with `git rev-parse HEAD`)
+- Suggest `graphify update .` if the graph is stale (>5 commits behind)
+
 ## Documentación Relacionada
 
 - `docs/API_IMPLEMENTATION_STATUS.md`

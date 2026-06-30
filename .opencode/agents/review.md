@@ -44,17 +44,17 @@ Agente de auditoría de código. Read-only con capacidad de generar reportes.
 ### Antes de trabajar, cargar estas skills:
 
 ```javascript
-skill({ name: "cortex-persona" })        // Senior Architect persona, minimalism
-skill({ name: "ponytail-review" })        // Over-engineering focused review
-skill({ name: "judgment-day" })           // Adversarial dual review protocol
+skill({ name: "cortex-persona" }); // Senior Architect persona, minimalism
+skill({ name: "ponytail-review" }); // Over-engineering focused review
+skill({ name: "judgment-day" }); // Adversarial dual review protocol
 ```
 
 ### Contexto Adicional
 
 ```javascript
-skill({ name: "security-audit" })         // Security OWASP
-skill({ name: "code-reviewer" })          // Code quality
-skill({ name: "database-optical-supabase" }) // RLS & DB
+skill({ name: "security-audit" }); // Security OWASP
+skill({ name: "code-reviewer" }); // Code quality
+skill({ name: "database-optical-supabase" }); // RLS & DB
 ```
 
 ## Protocolo Engram
@@ -148,4 +148,19 @@ Label Significado
 must-fix Bug o security issue crítico
 should-fix Mejora importante
 nitpick Estilo menor
+```
+
+## Graphify
+
+Graphify is available via MCP server. Use it for impact analysis before reviews:
+
+- Query `graphify query "files affected by change [scope]"` to understand review breadth
+- Find all consumers of a modified module before approving changes
+- Detect cross-module impact that might not be obvious from the diff alone
+- Check `graphify-out/graph.json` freshness (compare with `git rev-parse HEAD`)
+- Suggest `graphify update .` if the graph is stale (>5 commits behind)
+- Especially useful during judgment-day adversarial reviews to catch hidden dependencies
+
+```
+
 ```
