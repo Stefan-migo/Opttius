@@ -1,6 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { NextRequest } from "next/server";
 
+import { appLogger as logger } from "@/lib/logger";
 import { createClient } from "@/utils/supabase/server";
 
 export interface BranchContext {
@@ -80,7 +81,7 @@ export async function getBranchContext(
   try {
     supabase = supabaseClient || (await createClient());
   } catch (clientError: unknown) {
-    console.error(
+    logger.error(
       "Error creating Supabase client in getBranchContext:",
       clientError,
     );
@@ -117,7 +118,7 @@ export async function getBranchContext(
       },
     );
     if (superAdminError) {
-      console.error("Error checking super admin status:", superAdminError);
+      logger.error("Error checking super admin status:", superAdminError);
     } else {
       isSuperAdmin = superAdminData || false;
     }
@@ -134,7 +135,7 @@ export async function getBranchContext(
       }
     }
   } catch (err) {
-    console.error("Exception checking super admin status:", err);
+    logger.error("Exception checking super admin status:", err);
     // Continue with isSuperAdmin = false
   }
 
@@ -149,7 +150,7 @@ export async function getBranchContext(
     );
 
     if (branchesError) {
-      console.error("Error fetching user branches:", branchesError);
+      logger.error("Error fetching user branches:", branchesError);
       // Return default values if error occurs
       return {
         branchId: null,
@@ -162,7 +163,7 @@ export async function getBranchContext(
 
     branches = branchesData || [];
   } catch (err) {
-    console.error("Exception fetching user branches:", err);
+    logger.error("Exception fetching user branches:", err);
     // Return default values if exception occurs
     return {
       branchId: null,

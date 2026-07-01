@@ -1,3 +1,5 @@
+import { appLogger as logger } from "@/lib/logger";
+
 /**
  * POS Service - Centralized API operations for Point of Sale
  *
@@ -170,7 +172,7 @@ class POSService {
       handleApiError(response);
       return null;
     } catch (error) {
-      console.error("Error fetching cash status:", error);
+      logger.error("Error fetching cash status:", error);
       handleApiError(error);
       return null;
     }
@@ -208,7 +210,7 @@ class POSService {
       handleApiError(response);
       return [];
     } catch (error) {
-      console.error("Error fetching pending balance orders:", error);
+      logger.error("Error fetching pending balance orders:", error);
       handleApiError(error);
       return [];
     }
@@ -241,7 +243,7 @@ class POSService {
         response.error?.message || "Error processing payment";
       throw new Error(errorMessage);
     } catch (error) {
-      console.error("Error processing pending payment:", error);
+      logger.error("Error processing pending payment:", error);
       throw error;
     }
   }
@@ -299,7 +301,7 @@ class POSService {
       handleApiError(response);
       return null;
     } catch (error) {
-      console.error("Error processing sale:", error);
+      logger.error("Error processing sale:", error);
       const errMsg = error instanceof Error ? error.message : String(error);
       const isServerOrNetwork = /network|timeout|failed to fetch/i.test(errMsg);
       if (isServerOrNetwork) {
@@ -348,7 +350,7 @@ class POSService {
       handleApiError(response);
       return null;
     } catch (error) {
-      console.error("Error processing refund:", error);
+      logger.error("Error processing refund:", error);
       handleApiError(error);
       return null;
     }
@@ -379,7 +381,7 @@ class POSService {
       handleApiError(response);
       return null;
     } catch (error) {
-      console.error("Error fetching billing settings:", error);
+      logger.error("Error fetching billing settings:", error);
       handleApiError(error);
       return null;
     }
@@ -404,7 +406,7 @@ class POSService {
       handleApiError(response);
       return null;
     } catch (error) {
-      console.error("Error fetching current organization:", error);
+      logger.error("Error fetching current organization:", error);
       handleApiError(error);
       return null;
     }

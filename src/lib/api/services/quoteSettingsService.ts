@@ -4,6 +4,7 @@
  * Service for managing quote settings and configurations.
  */
 
+import { appLogger as logger } from "@/lib/logger";
 import { handleApiError } from "@/lib/api/services/errorService";
 
 import { ApiClient, isSuccess, unwrapData } from "../client-helpers";
@@ -82,7 +83,7 @@ class QuoteSettingsService {
       handleApiError(response);
       return null;
     } catch (error) {
-      console.error("Error fetching quote settings:", error);
+      logger.error("Error fetching quote settings:", error);
       handleApiError(error);
       return null;
     }
@@ -105,7 +106,7 @@ class QuoteSettingsService {
       handleApiError(response);
       return null;
     } catch (error) {
-      console.error("Error updating quote settings:", error);
+      logger.error("Error updating quote settings:", error);
       handleApiError(error);
       return null;
     }

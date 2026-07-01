@@ -1,3 +1,4 @@
+import { appLogger as logger } from "@/lib/logger";
 import { NextResponse } from "next/server";
 
 // Re-export all utilities from the comprehensive error handler.
@@ -125,7 +126,7 @@ export function createErrorResponse(
   };
 
   // Log error for monitoring
-  console.error("API Error:", {
+  logger.error("API Error:", {
     message: error.message,
     code,
     statusCode,

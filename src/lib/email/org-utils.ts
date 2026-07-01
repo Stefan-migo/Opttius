@@ -4,6 +4,7 @@
  * - Reply-To: metadata.support_email || system_config.contact_email
  */
 
+import { appLogger as logger } from "@/lib/logger";
 import { createServiceRoleClient } from "@/utils/supabase/server";
 
 export interface OrgInfoForEmail {
@@ -78,7 +79,7 @@ export async function getOrganizationInfoWithFallbacks(
       resolvedDisplayName,
     };
   } catch (error) {
-    console.error("Error fetching organization info for email:", error);
+    logger.error("Error fetching organization info for email:", error);
     return null;
   }
 }

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import { appLogger as logger } from "@/lib/logger";
 import { createClientFromRequest } from "@/utils/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -39,7 +40,7 @@ export async function GET(request: NextRequest) {
 
     if (error && error.code !== "PGRST116") {
       // PGRST116 = no rows returned (esto es normal)
-      console.error("Error fetching tour progress:", error);
+      logger.error("Error fetching tour progress:", error);
       return NextResponse.json(
         { error: "Failed to fetch tour progress" },
         { status: 500 },
@@ -58,7 +59,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(progress);
   } catch (error) {
-    console.error("Tour progress error:", error);
+    logger.error("Tour progress error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },
@@ -154,7 +155,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (error) {
-      console.error("Error updating tour progress:", error);
+      logger.error("Error updating tour progress:", error);
       return NextResponse.json(
         { error: "Failed to update tour progress", details: error.message },
         { status: 500 },
@@ -163,7 +164,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(data);
   } catch (error) {
-    console.error("Tour action error:", error);
+    logger.error("Tour action error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },

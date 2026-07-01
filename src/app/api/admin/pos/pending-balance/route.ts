@@ -94,7 +94,7 @@ export async function GET(request: NextRequest) {
     const { data: orders, error: ordersError } = await query;
 
     if (ordersError) {
-      console.error("[PENDING-BALANCE-API] Supabase error:", {
+      logger.error("[PENDING-BALANCE-API] Supabase error:", {
         message: ordersError.message,
         code: ordersError.code,
         details: ordersError,
@@ -163,7 +163,7 @@ export async function GET(request: NextRequest) {
           return false;
         });
       } catch (filterError) {
-        console.error("[PENDING-BALANCE-API] Filter error:", filterError);
+        logger.error("[PENDING-BALANCE-API] Filter error:", filterError);
         throw filterError;
       }
     }
@@ -204,7 +204,7 @@ export async function GET(request: NextRequest) {
         };
       });
     } catch (mapError) {
-      console.error("[PENDING-BALANCE-API] Map error:", mapError);
+      logger.error("[PENDING-BALANCE-API] Map error:", mapError);
       throw mapError;
     }
 
@@ -215,7 +215,7 @@ export async function GET(request: NextRequest) {
 
     return createApiSuccessResponse(ordersWithBalance);
   } catch (error: unknown) {
-    console.error("[PENDING-BALANCE-API] Catch block error:", {
+    logger.error("[PENDING-BALANCE-API] Catch block error:", {
       message: error.message,
       stack: error.stack,
       name: error.name,

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import { appLogger as logger } from "@/lib/logger";
 import { createClientFromRequest } from "@/utils/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -49,7 +50,7 @@ export async function POST(
       .maybeSingle();
 
     if (fetchError && fetchError.code !== "PGRST116") {
-      console.error("Error fetching tour progress:", fetchError);
+      logger.error("Error fetching tour progress:", fetchError);
       return NextResponse.json(
         { error: "Failed to fetch tour progress" },
         { status: 500 },
@@ -81,7 +82,7 @@ export async function POST(
       .single();
 
     if (error) {
-      console.error("Error updating step:", error);
+      logger.error("Error updating step:", error);
       return NextResponse.json(
         { error: "Failed to update step", details: error.message },
         { status: 500 },
@@ -90,7 +91,7 @@ export async function POST(
 
     return NextResponse.json(updatedProgress);
   } catch (error) {
-    console.error("Step completion error:", error);
+    logger.error("Step completion error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },

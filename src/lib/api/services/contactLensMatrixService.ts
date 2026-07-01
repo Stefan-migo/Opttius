@@ -4,6 +4,7 @@
  * Service for calculating contact lens prices based on prescription parameters.
  */
 
+import { appLogger as logger } from "@/lib/logger";
 import { handleApiError } from "@/lib/api/services/errorService";
 
 import { ApiClient, isSuccess, unwrapData } from "../client-helpers";
@@ -74,7 +75,7 @@ class ContactLensMatrixService {
       handleApiError(response);
       return null;
     } catch (error) {
-      console.error("Error calculating contact lens price:", error);
+      logger.error("Error calculating contact lens price:", error);
       handleApiError(error);
       return null;
     }

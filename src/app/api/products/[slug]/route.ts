@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import { appLogger as logger } from "@/lib/logger";
 import { createClient, createServiceRoleClient } from "@/utils/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -74,7 +75,7 @@ export async function GET(
     }
 
     if (error || !product) {
-      console.error("Error fetching product by slug:", error);
+      logger.error("Error fetching product by slug:", error);
       return NextResponse.json(
         { error: "Producto no encontrado" },
         { status: 404 },
@@ -83,7 +84,7 @@ export async function GET(
 
     return NextResponse.json({ product });
   } catch (error: unknown) {
-    console.error("API error:", error);
+    logger.error("API error:", error);
     return NextResponse.json(
       { error: "Error interno del servidor" },
       { status: 500 },

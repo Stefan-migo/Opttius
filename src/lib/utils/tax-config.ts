@@ -1,3 +1,5 @@
+import { appLogger as logger } from "@/lib/logger";
+
 /**
  * Tax configuration utilities
  * Handles fetching and managing tax percentage from system configuration
@@ -17,7 +19,7 @@ export async function getTaxPercentage(
     const response = await fetch("/api/admin/system/config?category=ecommerce");
 
     if (!response.ok) {
-      console.warn(
+      logger.warn(
         "Failed to fetch tax percentage from system_config, using fallback:",
         fallback,
       );
@@ -46,7 +48,7 @@ export async function getTaxPercentage(
     // If not found or invalid, use fallback
     return fallback;
   } catch (error) {
-    console.error("Error fetching tax percentage:", error);
+    logger.error("Error fetching tax percentage:", error);
     return fallback;
   }
 }
@@ -69,7 +71,7 @@ export async function getTaxPercentageServer(
       .maybeSingle();
 
     if (error || !taxConfig) {
-      console.warn(
+      logger.warn(
         "Tax percentage not found in system_config, using fallback:",
         fallback,
       );
@@ -96,7 +98,7 @@ export async function getTaxPercentageServer(
 
     return fallback;
   } catch (error) {
-    console.error("Error fetching tax percentage from server:", error);
+    logger.error("Error fetching tax percentage from server:", error);
     return fallback;
   }
 }

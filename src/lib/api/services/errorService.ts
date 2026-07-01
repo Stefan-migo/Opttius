@@ -8,6 +8,7 @@
  * @module lib/api/services/errorService
  */
 
+import { appLogger as logger } from "@/lib/logger";
 import { toast } from "sonner";
 
 /**
@@ -205,7 +206,7 @@ export function handleApiError(
   const standardError = createStandardError(error, context);
 
   // Log del error para debugging
-  console.error(`[${context}] Error:`, error);
+  logger.error(`[${context}] Error:`, error);
 
   // Mostrar notificación toast si está habilitado
   if (showToast) {

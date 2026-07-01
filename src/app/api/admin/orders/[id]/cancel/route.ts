@@ -341,7 +341,7 @@ export async function POST(
       message: errMsg,
       stack: errStack,
     });
-    console.error("[cancel] Unhandled error:", errMsg, errStack);
+    logger.error("[cancel] Unhandled error:", { message: errMsg, stack: errStack });
     return NextResponse.json(
       {
         error: "Internal server error",

@@ -4,6 +4,7 @@
  * Service for managing contact lens families and their configurations.
  */
 
+import { appLogger as logger } from "@/lib/logger";
 import { handleApiError } from "@/lib/api/services/errorService";
 
 import { ApiClient, isSuccess, unwrapData } from "../client-helpers";
@@ -67,7 +68,7 @@ class ContactLensFamilyService {
       handleApiError(response);
       return [];
     } catch (error) {
-      console.error("Error fetching contact lens families:", error);
+      logger.error("Error fetching contact lens families:", error);
       handleApiError(error);
       return [];
     }
@@ -89,7 +90,7 @@ class ContactLensFamilyService {
       handleApiError(response);
       return null;
     } catch (error) {
-      console.error("Error fetching contact lens family:", error);
+      logger.error("Error fetching contact lens family:", error);
       handleApiError(error);
       return null;
     }

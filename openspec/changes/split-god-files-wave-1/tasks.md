@@ -63,5 +63,5 @@ Chain strategy: stacked-to-main
 - [x] 5.2 Create `src/app/admin/_hooks/useOrganizationState.ts` — extract organization state + `checkOrganization` useEffect (~130 lines)
 - [x] 5.3 Create `src/app/admin/_hooks/useAdminStats.ts` — extract stats state + fetch useEffect (~90 lines)
 - [x] 5.4 Create `src/app/admin/_hooks/useAdminCheck.ts` — extract admin check + redirect logic, keep `signOutInProgress`/`redirectInProgress` refs intact (~160 lines)
-- [x] 5.5 Modify `AdminShell.tsx` — replace extracted blocks with hook imports, keep layout JSX + loading/redirect screens (1031 → 368 lines, -663 lines)
+- [x] 5.5 Modify `AdminShell.tsx` — replace extracted blocks with hook imports, keep layout JSX + loading/redirect screens (1031 → 294 lines, -737 lines)
 - [x] 5.6 Verify: `npm test -- --run` passes — 88 files, 1423 tests, 0 failures. New approval tests pass: admin-navigation (8), useAdminCheck (8), useOrganizationState (6), useAdminStats (3)

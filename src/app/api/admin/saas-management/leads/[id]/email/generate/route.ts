@@ -229,24 +229,24 @@ Genera el email:`;
           },
         );
       } catch (genError: unknown) {
-        // Log to console directly to ensure we capture the error
-        console.error("=== PROVIDER ERROR DIRECT LOG ===");
-        console.error("Error:", genError);
-        console.error("Error type:", typeof genError);
-        console.error(
+        // Log error details
+        logger.error("=== PROVIDER ERROR DIRECT LOG ===");
+        logger.error("Error:", genError);
+        logger.error("Error type:", typeof genError);
+        logger.error(
           "Error message:",
           genError && typeof genError === "object" && "message" in genError
             ? (genError as { message: string }).message
             : String(genError),
         );
-        console.error(
+        logger.error(
           "Error stack:",
           genError && typeof genError === "object" && "stack" in genError
             ? (genError as { stack: string }).stack
             : undefined,
         );
-        console.error("Full error object:", genError);
-        console.error("=================================");
+        logger.error("Full error object:", genError);
+        logger.error("=================================");
 
         // Log detailed error from the provider - capture all details
         const errorDetails = {

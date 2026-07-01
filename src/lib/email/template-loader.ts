@@ -1,4 +1,5 @@
 import { createClient } from "@/utils/supabase/server";
+import { appLogger as logger } from "@/lib/logger";
 import { createServiceRoleClient } from "@/utils/supabase/server";
 
 export interface EmailTemplate {
@@ -65,7 +66,7 @@ export async function loadEmailTemplate(
     });
 
     if (error || !templates || templates.length === 0) {
-      console.warn(`⚠️ No active template found for type: ${type}`);
+      logger.warn(`No active template found for type: ${type}`);
       return null;
     }
 
@@ -85,7 +86,7 @@ export async function loadEmailTemplate(
       is_active: template.is_active,
     };
   } catch (error) {
-    console.error(`Error loading email template for type ${type}:`, error);
+    logger.error(`Error loading email template for type ${type}:`, error);
     return null;
   }
 }
@@ -116,7 +117,7 @@ export async function incrementTemplateUsage(
       })
       .eq("id", templateId);
   } catch (error) {
-    console.error("Error incrementing template usage:", error);
+    logger.error("Error incrementing template usage:", error);
     // Don't fail email sending if usage tracking fails
   }
 }
