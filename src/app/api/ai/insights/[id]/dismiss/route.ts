@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { rateLimitConfigs, withRateLimit } from "@/lib/api/middleware";
+import { rateLimitConfigs, withRateLimit } from "@/lib/rate-limiting";
 import { appLogger as logger } from "@/lib/logger";
 import { createClientFromRequest } from "@/utils/supabase/server";
 

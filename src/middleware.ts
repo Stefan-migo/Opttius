@@ -3,6 +3,8 @@ import { createClient } from "@supabase/supabase-js";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
+import { CSRF_EXEMPT_PREFIXES, validateCsrfOrigin } from "@/lib/api/csrf";
+
 /**
  * Middleware: Refresca la sesión de Supabase y protege rutas /admin
  *
@@ -75,6 +77,20 @@ export async function middleware(request: NextRequest) {
   }
 
   const shouldExclude = excludedPaths.some((path) => pathname.startsWith(path));
+
+  // CSRF check — antes de la llamada costosa a Supabase getUser()
+  if (!["GET", "HEAD", "OPTIONS"].includes(request.method)) {
+    const isExempt = CSRF_EXEMPT_PREFIXES.some((p) => pathname.startsWith(p));
+    if (!isExempt) {
+      const { valid } = validateCsrfOrigin(request.headers);
+      if (!valid) {
+        return NextResponse.json(
+          { error: "CSRF validation failed" },
+          { status: 403 },
+        );
+      }
+    }
+  }
 
   // Crear response y cliente Supabase para refrescar sesión
   let response = NextResponse.next({ request });
