@@ -1,5 +1,10 @@
 import { NextResponse } from "next/server";
 
+// Re-export all utilities from the comprehensive error handler.
+// Local definitions (below) silently override re-exports with the same name,
+// so backward compatibility is fully maintained.
+export * from "@/lib/errors/comprehensive-handler";
+
 // Custom error classes for different types of API errors
 export class APIError extends Error {
   public statusCode: number;
