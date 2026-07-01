@@ -6,13 +6,10 @@ import {
   Building2,
   CheckCircle2,
   Crown,
-  Edit,
   Loader2,
   MapPin,
-  Package,
   Pause,
   Play,
-  Plus,
   ShoppingCart,
   Trash2,
   Users,
@@ -25,7 +22,7 @@ import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -42,22 +39,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { extractDataFromResponse } from "@/lib/api/response-helpers";
 import { formatDate } from "@/lib/utils";
 
 import OrgBasicInfo from "../components/OrgBasicInfo";
 import OrgDetailHeader from "../components/OrgDetailHeader";
 import OrgSubscriptionInfo from "../components/OrgSubscriptionInfo";
 import OrgActivityLog from "../components/OrgActivityLog";
+import OrgBranchesTab from "./OrgBranchesTab";
+import OrgUsersTab from "./OrgUsersTab";
 
 interface OrganizationDetails {
   id: string;
@@ -102,13 +92,6 @@ interface OrganizationDetails {
       last_name?: string;
     };
   }>;
-  branches?: Array<{
-    id: string;
-    name: string;
-    code: string;
-    address_line_1?: string;
-    city?: string;
-  }>;
 }
 
 export default function OrganizationDetailsContent() {
@@ -116,9 +99,8 @@ export default function OrganizationDetailsContent() {
   const router = useRouter();
   const orgId = params.id as string;
 
-  const [organization, setOrganization] = useState<OrganizationDetails | null>(
-    null,
-  );
+  const [organization, setOrganization] =
+    useState<OrganizationDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showEditDialog, setShowEditDialog] = useState(false);
@@ -133,47 +115,8 @@ export default function OrganizationDetailsContent() {
   const [deleting, setDeleting] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
 
-  // Branches CRUD
-  const [branches, setBranches] = useState<Array<unknown>>([]);
-  const [showBranchDialog, setShowBranchDialog] = useState(false);
-  const [editingBranch, setEditingBranch] = useState<unknown>(null);
-  const [branchFormData, setBranchFormData] = useState({
-    name: "",
-    code: "",
-    address_line_1: "",
-    city: "",
-    phone: "",
-    email: "",
-    is_active: true,
-  });
-
-  // Delete confirmations (Dialog instead of window.confirm)
-  const [deleteBranchConfirmId, setDeleteBranchConfirmId] = useState<
-    string | null
-  >(null);
-  const [deleteUserConfirmId, setDeleteUserConfirmId] = useState<string | null>(
-    null,
-  );
-
-  // Users CRUD
-  const [users, setUsers] = useState<Array<unknown>>([]);
-  const [showUserDialog, setShowUserDialog] = useState(false);
-  const [editingUser, setEditingUser] = useState<unknown>(null);
-  const [userFormData, setUserFormData] = useState({
-    email: "",
-    password: "",
-    first_name: "",
-    last_name: "",
-    role: "admin",
-    branch_id: "",
-  });
-
   useEffect(() => {
     fetchOrganizationDetails();
-    if (orgId) {
-      fetchBranches();
-      fetchUsers();
-    }
   }, [orgId]);
 
   const fetchOrganizationDetails = async () => {
@@ -287,230 +230,6 @@ export default function OrganizationDetailsContent() {
     }
   };
 
-  // Branches functions
-  const fetchBranches = async () => {
-    try {
-      const response = await fetch(
-        `/api/admin/saas-management/organizations/${orgId}/branches`,
-      );
-      if (!response.ok) throw new Error("Error al cargar sucursales");
-      const data = await response.json();
-      setBranches(data.branches || []);
-    } catch (err) {
-      toast.error("Error al cargar sucursales");
-    }
-  };
-
-  const handleCreateBranch = async () => {
-    try {
-      const response = await fetch(
-        `/api/admin/saas-management/organizations/${orgId}/branches`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(branchFormData),
-        },
-      );
-
-      const data = await response.json();
-      if (!response.ok)
-        throw new Error(data.error || "Error al crear sucursal");
-
-      toast.success("Sucursal creada exitosamente");
-      setShowBranchDialog(false);
-      setBranchFormData({
-        name: "",
-        code: "",
-        address_line_1: "",
-        city: "",
-        phone: "",
-        email: "",
-        is_active: true,
-      });
-      fetchBranches();
-      fetchOrganizationDetails();
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Error desconocido");
-    }
-  };
-
-  const handleUpdateBranch = async () => {
-    if (!editingBranch) return;
-    try {
-      const response = await fetch(
-        `/api/admin/saas-management/organizations/${orgId}/branches/${editingBranch.id}`,
-        {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(branchFormData),
-        },
-      );
-
-      const data = await response.json();
-      if (!response.ok)
-        throw new Error(data.error || "Error al actualizar sucursal");
-
-      toast.success("Sucursal actualizada exitosamente");
-      setShowBranchDialog(false);
-      setEditingBranch(null);
-      setBranchFormData({
-        name: "",
-        code: "",
-        address_line_1: "",
-        city: "",
-        phone: "",
-        email: "",
-        is_active: true,
-      });
-      fetchBranches();
-      fetchOrganizationDetails();
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Error desconocido");
-    }
-  };
-
-  const handleDeleteBranchClick = (branchId: string) => {
-    setDeleteBranchConfirmId(branchId);
-  };
-
-  const handleDeleteBranchConfirm = async () => {
-    if (!deleteBranchConfirmId) return;
-
-    try {
-      const response = await fetch(
-        `/api/admin/saas-management/organizations/${orgId}/branches/${deleteBranchConfirmId}`,
-        {
-          method: "DELETE",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ confirm: true }),
-        },
-      );
-
-      const data = await response.json();
-      if (!response.ok)
-        throw new Error(data.error || "Error al eliminar sucursal");
-
-      toast.success("Sucursal eliminada exitosamente");
-      setDeleteBranchConfirmId(null);
-      fetchBranches();
-      fetchOrganizationDetails();
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Error desconocido");
-    }
-  };
-
-  // Users functions
-  const fetchUsers = async () => {
-    try {
-      const response = await fetch(
-        `/api/admin/saas-management/organizations/${orgId}/users`,
-      );
-      if (!response.ok) throw new Error("Error al cargar usuarios");
-      const data = await response.json();
-      setUsers(extractDataFromResponse(data));
-    } catch (err) {
-      toast.error("Error al cargar usuarios");
-    }
-  };
-
-  const handleCreateUser = async () => {
-    try {
-      const response = await fetch(
-        `/api/admin/saas-management/organizations/${orgId}/users`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(userFormData),
-        },
-      );
-
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error || "Error al crear usuario");
-
-      toast.success("Usuario creado exitosamente");
-      setShowUserDialog(false);
-      setUserFormData({
-        email: "",
-        password: "",
-        first_name: "",
-        last_name: "",
-        role: "admin",
-        branch_id: "",
-      });
-      fetchUsers();
-      fetchOrganizationDetails();
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Error desconocido");
-    }
-  };
-
-  const handleUpdateUser = async () => {
-    if (!editingUser) return;
-    try {
-      const response = await fetch(
-        `/api/admin/saas-management/users/${editingUser.id}`,
-        {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            role: userFormData.role,
-            is_active: editingUser.is_active,
-          }),
-        },
-      );
-
-      const data = await response.json();
-      if (!response.ok)
-        throw new Error(data.error || "Error al actualizar usuario");
-
-      toast.success("Usuario actualizado exitosamente");
-      setShowUserDialog(false);
-      setEditingUser(null);
-      setUserFormData({
-        email: "",
-        password: "",
-        first_name: "",
-        last_name: "",
-        role: "admin",
-        branch_id: "",
-      });
-      fetchUsers();
-      fetchOrganizationDetails();
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Error desconocido");
-    }
-  };
-
-  const handleDeleteUserClick = (userId: string) => {
-    setDeleteUserConfirmId(userId);
-  };
-
-  const handleDeleteUserConfirm = async () => {
-    if (!deleteUserConfirmId) return;
-
-    try {
-      const response = await fetch(
-        `/api/admin/saas-management/users/${deleteUserConfirmId}`,
-        {
-          method: "DELETE",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ confirm: true }),
-        },
-      );
-
-      const data = await response.json();
-      if (!response.ok)
-        throw new Error(data.error || "Error al eliminar usuario");
-
-      toast.success("Usuario eliminado exitosamente");
-      setDeleteUserConfirmId(null);
-      fetchUsers();
-      fetchOrganizationDetails();
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Error desconocido");
-    }
-  };
-
   const getStatusBadge = (status: string) => {
     const variants: Record<string, "default" | "secondary" | "destructive"> = {
       active: "default",
@@ -588,7 +307,6 @@ export default function OrganizationDetailsContent() {
 
   return (
     <div className="space-y-6 p-6">
-      {/* ponytail: extracted to OrgDetailHeader */}
       <OrgDetailHeader
         name={organization.name}
         slug={organization.slug}
@@ -599,7 +317,6 @@ export default function OrganizationDetailsContent() {
         onDelete={() => setDeleteDialogOpen(true)}
       />
 
-      {/* ponytail: extracted to OrgSubscriptionInfo */}
       <OrgSubscriptionInfo
         stats={organization.stats}
         subscriptions={organization.subscriptions}
@@ -619,18 +336,17 @@ export default function OrganizationDetailsContent() {
           </TabsTrigger>
           <TabsTrigger value="branches">
             <MapPin className="h-4 w-4 mr-2" />
-            Sucursales ({branches.length})
+            Sucursales ({organization.stats.branches})
           </TabsTrigger>
           <TabsTrigger value="users">
             <Users className="h-4 w-4 mr-2" />
-            Usuarios ({users.length})
+            Usuarios ({organization.stats.totalUsers})
           </TabsTrigger>
         </TabsList>
 
         {/* Tab: Resumen */}
         <TabsContent className="space-y-6" value="overview">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* ponytail: extracted to OrgBasicInfo */}
             <OrgBasicInfo
               name={organization.name}
               slug={organization.slug}
@@ -639,480 +355,26 @@ export default function OrganizationDetailsContent() {
               updatedAt={organization.updated_at}
             />
 
-            {/* ponytail: extracted to OrgActivityLog */}
             <OrgActivityLog recentUsers={organization.recentUsers} />
           </div>
         </TabsContent>
 
         {/* Tab: Sucursales */}
         <TabsContent className="space-y-6" value="branches">
-          <Card className="admin-card">
-            <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle>Sucursales</CardTitle>
-              <Button
-                onClick={() => {
-                  setEditingBranch(null);
-                  setBranchFormData({
-                    name: "",
-                    code: "",
-                    address_line_1: "",
-                    city: "",
-                    phone: "",
-                    email: "",
-                    is_active: true,
-                  });
-                  setShowBranchDialog(true);
-                }}
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Nueva Sucursal
-              </Button>
-            </CardHeader>
-            <CardContent>
-              {branches.length === 0 ? (
-                <p className="text-gray-500 text-center py-4">
-                  No hay sucursales registradas
-                </p>
-              ) : (
-                <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Nombre</TableHead>
-                        <TableHead>Código</TableHead>
-                        <TableHead>Dirección</TableHead>
-                        <TableHead>Teléfono</TableHead>
-                        <TableHead>Estado</TableHead>
-                        <TableHead className="text-right">Acciones</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {branches.map((branch) => (
-                        <TableRow key={branch.id}>
-                          <TableCell className="font-medium">
-                            {branch.name}
-                          </TableCell>
-                          <TableCell>{branch.code}</TableCell>
-                          <TableCell>
-                            {branch.address_line_1 && branch.city
-                              ? `${branch.address_line_1}, ${branch.city}`
-                              : "-"}
-                          </TableCell>
-                          <TableCell>{branch.phone || "-"}</TableCell>
-                          <TableCell>
-                            {branch.is_active ? (
-                              <Badge variant="default">Activa</Badge>
-                            ) : (
-                              <Badge variant="secondary">Inactiva</Badge>
-                            )}
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <div className="flex justify-end gap-2">
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                onClick={() => {
-                                  setEditingBranch(branch);
-                                  setBranchFormData({
-                                    name: branch.name,
-                                    code: branch.code,
-                                    address_line_1: branch.address_line_1 || "",
-                                    city: branch.city || "",
-                                    phone: branch.phone || "",
-                                    email: branch.email || "",
-                                    is_active: branch.is_active,
-                                  });
-                                  setShowBranchDialog(true);
-                                }}
-                              >
-                                <Edit className="h-4 w-4" />
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                onClick={() =>
-                                  handleDeleteBranchClick(branch.id)
-                                }
-                              >
-                                <Trash2 className="h-4 w-4 text-red-600" />
-                              </Button>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+          <OrgBranchesTab
+            orgId={orgId}
+            onOrgUpdate={fetchOrganizationDetails}
+          />
         </TabsContent>
 
         {/* Tab: Usuarios */}
         <TabsContent className="space-y-6" value="users">
-          <Card className="admin-card">
-            <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle>Usuarios</CardTitle>
-              <Button
-                onClick={() => {
-                  setEditingUser(null);
-                  setUserFormData({
-                    email: "",
-                    password: "",
-                    first_name: "",
-                    last_name: "",
-                    role: "admin",
-                    branch_id: "",
-                  });
-                  setShowUserDialog(true);
-                }}
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Nuevo Usuario
-              </Button>
-            </CardHeader>
-            <CardContent>
-              {users.length === 0 ? (
-                <p className="text-gray-500 text-center py-4">
-                  No hay usuarios registrados
-                </p>
-              ) : (
-                <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Nombre</TableHead>
-                        <TableHead>Email</TableHead>
-                        <TableHead>Rol</TableHead>
-                        <TableHead>Estado</TableHead>
-                        <TableHead className="text-right">Acciones</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {users.map((user) => (
-                        <TableRow key={user.id}>
-                          <TableCell className="font-medium">
-                            {user.profiles?.first_name}{" "}
-                            {user.profiles?.last_name}
-                          </TableCell>
-                          <TableCell>{user.email}</TableCell>
-                          <TableCell>
-                            <Badge variant="outline">{user.role}</Badge>
-                          </TableCell>
-                          <TableCell>
-                            {user.is_active ? (
-                              <Badge variant="default">Activo</Badge>
-                            ) : (
-                              <Badge variant="secondary">Inactivo</Badge>
-                            )}
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <div className="flex justify-end gap-2">
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                onClick={() => {
-                                  setEditingUser(user);
-                                  setUserFormData({
-                                    email: user.email,
-                                    password: "",
-                                    first_name: user.profiles?.first_name || "",
-                                    last_name: user.profiles?.last_name || "",
-                                    role: user.role,
-                                    branch_id: "",
-                                  });
-                                  setShowUserDialog(true);
-                                }}
-                              >
-                                <Edit className="h-4 w-4" />
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                onClick={() => handleDeleteUserClick(user.id)}
-                              >
-                                <Trash2 className="h-4 w-4 text-red-600" />
-                              </Button>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+          <OrgUsersTab
+            orgId={orgId}
+            onOrgUpdate={fetchOrganizationDetails}
+          />
         </TabsContent>
       </Tabs>
-
-      {/* Dialog de creación/edición de sucursal */}
-      <Dialog open={showBranchDialog} onOpenChange={setShowBranchDialog}>
-        <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>
-              {editingBranch ? "Editar Sucursal" : "Nueva Sucursal"}
-            </DialogTitle>
-            <DialogDescription>
-              {editingBranch
-                ? "Modifica los datos de la sucursal"
-                : "Completa los datos para crear una nueva sucursal"}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="text-sm font-medium">Nombre *</label>
-                <Input
-                  placeholder="Ej: Sucursal Centro"
-                  value={branchFormData.name}
-                  onChange={(e) =>
-                    setBranchFormData({
-                      ...branchFormData,
-                      name: e.target.value,
-                    })
-                  }
-                />
-              </div>
-              <div>
-                <label className="text-sm font-medium">Código</label>
-                <Input
-                  placeholder="Se genera automáticamente si se deja vacío"
-                  value={branchFormData.code}
-                  onChange={(e) =>
-                    setBranchFormData({
-                      ...branchFormData,
-                      code: e.target.value,
-                    })
-                  }
-                />
-              </div>
-            </div>
-            <div>
-              <label className="text-sm font-medium">Dirección</label>
-              <Input
-                placeholder="Dirección línea 1"
-                value={branchFormData.address_line_1}
-                onChange={(e) =>
-                  setBranchFormData({
-                    ...branchFormData,
-                    address_line_1: e.target.value,
-                  })
-                }
-              />
-            </div>
-            <div>
-              <label className="text-sm font-medium">Ciudad</label>
-              <Input
-                placeholder="Ciudad"
-                value={branchFormData.city}
-                onChange={(e) =>
-                  setBranchFormData({ ...branchFormData, city: e.target.value })
-                }
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="text-sm font-medium">Teléfono</label>
-                <Input
-                  placeholder="Teléfono"
-                  value={branchFormData.phone}
-                  onChange={(e) =>
-                    setBranchFormData({
-                      ...branchFormData,
-                      phone: e.target.value,
-                    })
-                  }
-                />
-              </div>
-              <div>
-                <label className="text-sm font-medium">Email</label>
-                <Input
-                  placeholder="Email"
-                  type="email"
-                  value={branchFormData.email}
-                  onChange={(e) =>
-                    setBranchFormData({
-                      ...branchFormData,
-                      email: e.target.value,
-                    })
-                  }
-                />
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <input
-                checked={branchFormData.is_active}
-                className="rounded"
-                id="branch-active"
-                type="checkbox"
-                onChange={(e) =>
-                  setBranchFormData({
-                    ...branchFormData,
-                    is_active: e.target.checked,
-                  })
-                }
-              />
-              <label className="text-sm font-medium" htmlFor="branch-active">
-                Sucursal activa
-              </label>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => {
-                setShowBranchDialog(false);
-                setEditingBranch(null);
-              }}
-            >
-              Cancelar
-            </Button>
-            <Button
-              onClick={editingBranch ? handleUpdateBranch : handleCreateBranch}
-            >
-              {editingBranch ? "Guardar Cambios" : "Crear Sucursal"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Dialog de creación/edición de usuario */}
-      <Dialog open={showUserDialog} onOpenChange={setShowUserDialog}>
-        <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>
-              {editingUser ? "Editar Usuario" : "Nuevo Usuario"}
-            </DialogTitle>
-            <DialogDescription>
-              {editingUser
-                ? "Modifica los datos del usuario"
-                : "Completa los datos para crear un nuevo usuario"}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="text-sm font-medium">Nombre</label>
-                <Input
-                  placeholder="Nombre"
-                  value={userFormData.first_name}
-                  onChange={(e) =>
-                    setUserFormData({
-                      ...userFormData,
-                      first_name: e.target.value,
-                    })
-                  }
-                />
-              </div>
-              <div>
-                <label className="text-sm font-medium">Apellido</label>
-                <Input
-                  placeholder="Apellido"
-                  value={userFormData.last_name}
-                  onChange={(e) =>
-                    setUserFormData({
-                      ...userFormData,
-                      last_name: e.target.value,
-                    })
-                  }
-                />
-              </div>
-            </div>
-            <div>
-              <label className="text-sm font-medium">Email *</label>
-              <Input
-                disabled={!!editingUser}
-                placeholder="email@ejemplo.com"
-                type="email"
-                value={userFormData.email}
-                onChange={(e) =>
-                  setUserFormData({ ...userFormData, email: e.target.value })
-                }
-              />
-            </div>
-            {!editingUser && (
-              <div>
-                <label className="text-sm font-medium">Contraseña *</label>
-                <Input
-                  placeholder="Mínimo 8 caracteres"
-                  type="password"
-                  value={userFormData.password}
-                  onChange={(e) =>
-                    setUserFormData({
-                      ...userFormData,
-                      password: e.target.value,
-                    })
-                  }
-                />
-              </div>
-            )}
-            <div>
-              <label className="text-sm font-medium">Rol</label>
-              <Select
-                value={userFormData.role}
-                onValueChange={(value) =>
-                  setUserFormData({ ...userFormData, role: value })
-                }
-              >
-                <SelectTrigger className="rounded-xl">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="super_admin">Super Admin</SelectItem>
-                  <SelectItem value="admin">Admin</SelectItem>
-                  <SelectItem value="employee">Empleado</SelectItem>
-                  <SelectItem value="vendedor">Vendedor</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            {!editingUser && (
-              <div>
-                <label className="text-sm font-medium">
-                  Sucursal (Opcional)
-                </label>
-                <Select
-                  value={userFormData.branch_id || "__none__"}
-                  onValueChange={(value) =>
-                    setUserFormData({
-                      ...userFormData,
-                      branch_id: value === "__none__" ? "" : value,
-                    })
-                  }
-                >
-                  <SelectTrigger className="rounded-xl">
-                    <SelectValue placeholder="Seleccionar sucursal" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="__none__">
-                      Sin sucursal específica
-                    </SelectItem>
-                    {branches.map((branch) => (
-                      <SelectItem key={branch.id} value={branch.id}>
-                        {branch.name} ({branch.code})
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
-          </div>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => {
-                setShowUserDialog(false);
-                setEditingUser(null);
-              }}
-            >
-              Cancelar
-            </Button>
-            <Button onClick={editingUser ? handleUpdateUser : handleCreateUser}>
-              {editingUser ? "Guardar Cambios" : "Crear Usuario"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
 
       {/* Dialog de edición */}
       <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
@@ -1249,7 +511,8 @@ export default function OrganizationDetailsContent() {
                         </li>
                         <li>Todos los clientes</li>
                         <li>
-                          Todas las órdenes ({organization?.stats?.orders || 0})
+                          Todas las órdenes (
+                          {organization?.stats?.orders || 0})
                         </li>
                         <li>Todos los presupuestos</li>
                         <li>Todos los trabajos de laboratorio</li>
@@ -1291,66 +554,6 @@ export default function OrganizationDetailsContent() {
                   Sí, Eliminar Permanentemente
                 </>
               )}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Delete Branch Confirmation Dialog */}
-      <Dialog
-        open={deleteBranchConfirmId !== null}
-        onOpenChange={(open) => !open && setDeleteBranchConfirmId(null)}
-      >
-        <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-red-500" />
-              Eliminar sucursal
-            </DialogTitle>
-            <DialogDescription>
-              ¿Estás seguro de eliminar esta sucursal? Esta acción eliminará
-              todos los datos relacionados.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setDeleteBranchConfirmId(null)}
-            >
-              Cancelar
-            </Button>
-            <Button variant="destructive" onClick={handleDeleteBranchConfirm}>
-              Eliminar
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Delete User Confirmation Dialog */}
-      <Dialog
-        open={deleteUserConfirmId !== null}
-        onOpenChange={(open) => !open && setDeleteUserConfirmId(null)}
-      >
-        <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-red-500" />
-              Eliminar usuario
-            </DialogTitle>
-            <DialogDescription>
-              ¿Estás seguro de eliminar este usuario? Esta acción no se puede
-              deshacer.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setDeleteUserConfirmId(null)}
-            >
-              Cancelar
-            </Button>
-            <Button variant="destructive" onClick={handleDeleteUserConfirm}>
-              Eliminar
             </Button>
           </DialogFooter>
         </DialogContent>
