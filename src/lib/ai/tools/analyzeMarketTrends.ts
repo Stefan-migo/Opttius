@@ -103,8 +103,10 @@ export const marketTrendsTools: ToolDefinition[] = [
 
         sales.forEach((sale) => {
           // Filtrar por categoría si se especificó
-          const product: unknown = sale.products;
-          // @ts-ignore
+          const product = sale.products as {
+            category?: { name?: string };
+            id?: string;
+          };
           const categoryName = product?.category?.name;
           if (validated.category && categoryName !== validated.category) return;
 

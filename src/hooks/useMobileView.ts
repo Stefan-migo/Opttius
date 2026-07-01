@@ -52,8 +52,8 @@ export function useMobileView() {
       return (
         "ontouchstart" in window ||
         navigator.maxTouchPoints > 0 ||
-        // @ts-expect-error - msMaxTouchPoints es una propiedad legacy pero válida
-        navigator.msMaxTouchPoints > 0
+        (navigator as Navigator & { msMaxTouchPoints?: number })
+          .msMaxTouchPoints > 0
       );
     };
 

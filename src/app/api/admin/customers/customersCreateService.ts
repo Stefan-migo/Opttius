@@ -29,9 +29,7 @@ export async function handleCreateCustomer(
 ) {
   logger.info("Customers API POST called (create new customer)");
 
-  const { client: rawClient, getUser } = await createClientFromRequest(request);
-  // ponytail: client typed as unknown by createClientFromRequest — use any to match inline pattern
-  const supabase = rawClient as unknown;
+  const { client: supabase, getUser } = await createClientFromRequest(request);
 
   const user = (await getUser()).data?.user as { id: string } | undefined;
   if (!user) {

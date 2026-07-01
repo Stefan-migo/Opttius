@@ -1,7 +1,10 @@
 import { createServerClient } from "@supabase/ssr";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
 import type { NextRequest } from "next/server";
+
+import type { Database } from "@/types/supabase";
 
 export async function createClient() {
   const cookieStore = await cookies();
@@ -38,8 +41,10 @@ export async function createClient() {
  *   - client: Supabase client instance
  *   - getUser: Helper function that handles both cookie and Bearer token authentication
  */
-export async function createClientFromRequest(request?: NextRequest): Promise<{
-  client: unknown; // Flexible type for test compatibility
+export async function createClientFromRequest<T = Database>(
+  request?: NextRequest,
+): Promise<{
+  client: SupabaseClient<T>;
   getUser: () => Promise<{ data: { user: unknown } | null; error: unknown }>;
 }> {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
