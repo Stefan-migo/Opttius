@@ -38,7 +38,13 @@ Chain strategy: stacked-to-main
 
 ## Phase 3: PR 3 — Appointments (base: main)
 
-- [ ] 3.1 Create `src/app/admin/hooks/useAppointments.ts` — hook wrapping `appointmentService.getAppointments()`, `staleTime: 30*1000`
-- [ ] 3.2 Create `src/app/admin/hooks/useAppointmentSettings.ts` — hook wrapping `appointmentService.getScheduleSettings()`, `staleTime: 5*60*1000`
-- [ ] 3.3 Edit `AppointmentsContent.tsx` — remove `fetchAppointments()`, `fetchScheduleSettings()`, `appointments`/`scheduleSettings`/`loading` states, data `useEffect`; import + call both hooks
-- [ ] 3.4 Edit `AppointmentsContent.tsx` — replace direct `fetchAppointments()` calls in `handleAppointmentCreated`, status change, and delete handlers with `queryClient.invalidateQueries({ queryKey: ["appointments"] })`
+- [x] 3.1 Create `src/app/admin/hooks/useAppointments.ts` — hook wrapping `appointmentService.getAppointments()`, `staleTime: 30*1000`
+- [x] 3.2 Create `src/app/admin/hooks/useAppointmentSettings.ts` — hook wrapping `appointmentService.getScheduleSettings()`, `staleTime: 5*60*1000`
+- [x] 3.3 Edit `AppointmentsContent.tsx` — remove `fetchAppointments()`, `fetchScheduleSettings()`, `appointments`/`scheduleSettings`/`loading` states, data `useEffect`; import + call both hooks
+- [x] 3.4 Edit `AppointmentsContent.tsx` — replace direct `fetchAppointments()` calls in `handleAppointmentCreated`, status change, and delete handlers with `queryClient.invalidateQueries({ queryKey: ["admin", "appointments"] })`
+
+### Notes
+- Type annotation bridging: service `Appointment` type differs from component's local `Appointment` interface (extra customer/guest fields). Component uses `const appointments: Appointment[] = _appointmentsData ?? []` to bridge.
+- ScheduleSettings type mismatch between service and calendar component resolved with `any` cast (pre-existing, same pattern as before migration).
+- `staleTime: 30*1000` for appointments (frequent changes), `5*60*1000` for schedule settings (static config).
+- Invalidations use `queryKey: ["admin", "appointments"]` (broad prefix to catch all appointment sub-keys).

@@ -25,8 +25,12 @@ import dynamic from "next/dynamic";
 
 import { AppointmentsFilters } from "./AppointmentsFilters";
 import { AppointmentsHeader } from "./AppointmentsHeader";
+import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
+
+import { useAppointmentSettings } from "../../hooks/useAppointmentSettings";
+import { useAppointments } from "../../hooks/useAppointments";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -121,8 +125,6 @@ export default function AppointmentsContent() {
     }
   }, []);
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [appointments, setAppointments] = useState<Appointment[]>([]);
-  const [loading, setLoading] = useState(true);
   const [showCreateAppointment, setShowCreateAppointment] = useState(false);
   const [selectedAppointment, setSelectedAppointment] =
     useState<Appointment | null>(null);
@@ -132,9 +134,6 @@ export default function AppointmentsContent() {
     time?: string;
     lockDateTime?: boolean;
   } | null>(null);
-  // Using any for scheduleSettings due to type mismatch between service and component
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [scheduleSettings, setScheduleSettings] = useState<any>(null);
   const [showWeeklyReport, setShowWeeklyReport] = useState(false);
   const [lastRefresh, setLastRefresh] = useState<number>(Date.now());
   const weeklyReportRef = useRef<HTMLDivElement>(null);
@@ -168,63 +167,28 @@ export default function AppointmentsContent() {
     }
   }, [isGlobalView, isSuperAdmin, branches.length, selectedBranchForView]);
 
-  useEffect(() => {
-    if (!authLoading && user) {
-      fetchAppointments();
-      fetchScheduleSettings();
-    }
-  }, [currentDate, view, statusFilter, branchIdForFilter, authLoading, user]);
+  const queryClient = useQueryClient();
 
-  const fetchAppointments = async () => {
-    if (!user || authLoading) return;
+  const { data: _appointmentsData, isLoading: loading, refetch } =
+    useAppointments({
+      branchId: branchIdForFilter,
+      view,
+      currentDate,
+      statusFilter,
+      user,
+      authLoading,
+    });
+  // ponytail: service Appointment[] lacks customer/guest fields; annotate with component type
+  const appointments: Appointment[] = _appointmentsData ?? [];
 
-    try {
-      setLoading(true);
-      let startDate: Date;
-      let endDate: Date;
-      if (view === "day") {
-        startDate = new Date(currentDate);
-        endDate = new Date(currentDate);
-      } else if (view === "week") {
-        const monday = getMondayOfWeek(currentDate);
-        startDate = new Date(monday);
-        endDate = new Date(monday);
-        endDate.setDate(endDate.getDate() + 6);
-      } else {
-        startDate = new Date(currentDate);
-        startDate.setDate(startDate.getDate() - 30);
-        endDate = new Date(currentDate);
-        endDate.setDate(endDate.getDate() + 30);
-      }
-
-      const appointments = await appointmentService.getAppointments({
-        date_from: startDate.toISOString().split("T")[0],
-        date_to: endDate.toISOString().split("T")[0],
-        status: statusFilter !== "all" ? statusFilter : undefined,
-        branch_id: branchIdForFilter || undefined,
-      });
-
-      setAppointments(appointments.data || []);
-    } catch (error) {
-      console.error("Error fetching appointments:", error);
-      toast.error("Error al cargar citas");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchScheduleSettings = async () => {
-    if (!user || authLoading) return;
-
-    try {
-      const settings = await appointmentService.getScheduleSettings(
-        branchIdForFilter || currentBranchId || undefined,
-      );
-      setScheduleSettings(settings || null);
-    } catch (error) {
-      console.error("Error fetching schedule settings:", error);
-    }
-  };
+  const { data: _scheduleSettings } = useAppointmentSettings({
+    branchId: branchIdForFilter || currentBranchId || null,
+    user,
+    authLoading,
+  });
+  // ponytail: ScheduleSettings mismatch between service and calendar; keep any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const scheduleSettings: any = _scheduleSettings ?? null;
 
   const navigateDate = (direction: "prev" | "next") => {
     const newDate = new Date(currentDate);
@@ -349,21 +313,15 @@ export default function AppointmentsContent() {
     }
   };
 
-  const handleAppointmentCreated = async () => {
+  const handleAppointmentCreated = () => {
     setShowCreateAppointment(false);
     setSelectedAppointment(null);
     setPrefilledAppointmentData(null); // Clear prefilled data after successful creation
 
-    // Force refresh to ensure calendar updates
     setLastRefresh(Date.now());
-
-    // Fetch appointments and wait for it to complete
-    try {
-      await fetchAppointments();
-      toast.success("Cita agendada correctamente");
-    } catch (error) {
-      toast.error("Error al actualizar el calendario");
-    }
+    queryClient.invalidateQueries({ queryKey: ["admin", "appointments"] });
+    queryClient.invalidateQueries({ queryKey: ["admin", "schedule-settings"] });
+    toast.success("Cita agendada correctamente");
   };
 
   const handleAppointmentClick = (appointment: Appointment) => {
@@ -620,7 +578,7 @@ export default function AppointmentsContent() {
                 variant="ghost"
                 onClick={() => {
                   setLastRefresh(Date.now());
-                  fetchAppointments();
+                  queryClient.invalidateQueries({ queryKey: ["admin", "appointments"] });
                   toast.info("Datos sincronizados");
                 }}
               >
@@ -915,7 +873,7 @@ export default function AppointmentsContent() {
                           ...selectedAppointment,
                           status: newStatus,
                         });
-                        fetchAppointments();
+                        queryClient.invalidateQueries({ queryKey: ["admin", "appointments"] });
                         if (newStatus === "completed") {
                           toast.success(
                             "Cita completada. El cliente ha sido registrado exitosamente en la base de datos de esta sucursal.",
@@ -974,7 +932,7 @@ export default function AppointmentsContent() {
                         );
                         toast.success("Cita eliminada");
                         setSelectedAppointment(null);
-                        fetchAppointments();
+                        queryClient.invalidateQueries({ queryKey: ["admin", "appointments"] });
                       } catch (error) {
                         toast.error("Error al eliminar");
                       }
