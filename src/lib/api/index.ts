@@ -49,7 +49,6 @@ export {
   requireRole,
   withCORS,
   withRequestId,
-  withSecurityHeaders,
 } from "./middleware";
 
 // Branch middleware
