@@ -9,7 +9,7 @@ import {
   AuthorizationError,
   RateLimitError,
 } from "@/lib/api/errors";
-import { rateLimitConfigs, withRateLimit } from "@/lib/api/middleware";
+import { rateLimitConfigs, withRateLimit } from "@/lib/rate-limiting";
 import {
   createApiErrorResponse,
   createPaginatedResponse,
