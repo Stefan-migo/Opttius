@@ -4,7 +4,7 @@ import { z } from "zod";
 import { generateInsights } from "@/lib/ai/insights/generator";
 import { InsightSectionSchema } from "@/lib/ai/insights/schemas";
 import { createOrganizationalMemory } from "@/lib/ai/memory/organizational";
-import { rateLimitConfigs, withRateLimit } from "@/lib/api/middleware";
+import { rateLimitConfigs, withRateLimit } from "@/lib/rate-limiting";
 import {
   parseAndValidateBody,
   parseAndValidateQuery,

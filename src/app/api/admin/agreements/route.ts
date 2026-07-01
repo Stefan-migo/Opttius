@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { getBranchContext } from "@/lib/api/branch-middleware";
 import { ValidationError } from "@/lib/api/errors";
-import { rateLimitConfigs, withRateLimit } from "@/lib/api/middleware";
+import { rateLimitConfigs, withRateLimit } from "@/lib/rate-limiting";
 import {
   createApiErrorResponse,
   createApiSuccessResponse,
