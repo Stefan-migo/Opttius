@@ -34,7 +34,7 @@ Chain strategy: stacked-to-main
 
 ## Phase 3: Analytics API Rewrite (PR 3)
 
-- [ ] 3.1 Rewrite `src/app/api/admin/analytics/dashboard/route.ts` — replace daily trend loop and status aggregations with MV queries. Keep `unstable_cache`, payment methods, top products, support tickets, customer metrics. Keep response shape.
+- [x] 3.1 Rewrite `src/app/api/admin/analytics/dashboard/route.ts` — replace daily trend loop and status aggregations with MV queries. Keep `unstable_cache`, payment methods, top products, support tickets, customer metrics. Keep response shape.
 
 ## Phase 4: Verification
 
