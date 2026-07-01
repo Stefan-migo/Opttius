@@ -264,13 +264,5 @@ describe("PayPalGateway", () => {
     });
   });
 
-  // Note: PayPal gateway currently doesn't implement validateWebhookSignature
-  // This would need to be added for production use according to PayPal documentation
-  describe.skip("validateWebhookSignature", () => {
-    // Placeholder for future implementation
-    // PayPal webhook signature verification should be added for production
-    // (PAYPAL_WEBHOOK_ID and certificate validation). See PayPal docs.
-    it.todo("should validate webhook signature correctly");
-    it.todo("should reject invalid signatures");
-  });
+  // validateWebhookSignature tests moved to paypal-gateway-validate.test.ts
 });

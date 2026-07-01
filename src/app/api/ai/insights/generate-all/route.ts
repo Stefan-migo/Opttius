@@ -5,7 +5,7 @@ import { prepareInsightData } from "@/lib/ai/insights/prepare-data";
 import type { InsightSection } from "@/lib/ai/insights/schemas";
 import { createOrganizationalMemory } from "@/lib/ai/memory/organizational";
 import { getBranchContext } from "@/lib/api/branch-middleware";
-import { rateLimitConfigs, withRateLimit } from "@/lib/api/middleware";
+import { rateLimitConfigs, withRateLimit } from "@/lib/rate-limiting";
 import { appLogger as logger } from "@/lib/logger";
 import { createClientFromRequest } from "@/utils/supabase/server";
 
