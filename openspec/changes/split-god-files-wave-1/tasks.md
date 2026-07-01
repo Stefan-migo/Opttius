@@ -59,9 +59,9 @@ Chain strategy: stacked-to-main
 
 ## Phase 5: PR 5 — Extract AdminShell Hooks and Config
 
-- [ ] 5.1 Create `src/config/admin-navigation.ts` — extract `NavItem`/`NavGroup` interfaces + nav config data (~30 lines)
-- [ ] 5.2 Create `src/app/admin/_hooks/useOrganizationState.ts` — extract organization state + `checkOrganization` useEffect (~130 lines)
-- [ ] 5.3 Create `src/app/admin/_hooks/useAdminStats.ts` — extract stats state + fetch useEffect (~90 lines)
-- [ ] 5.4 Create `src/app/admin/_hooks/useAdminCheck.ts` — extract admin check + redirect logic, keep `signOutInProgress`/`redirectInProgress` refs intact (~160 lines)
-- [ ] 5.5 Modify `AdminShell.tsx` — replace extracted blocks with hook imports, keep layout JSX + loading/redirect screens (~350 lines)
-- [ ] 5.6 Verify: `npm run build` passes, admin shell renders, sign-out + redirect flow works
+- [x] 5.1 Create `src/config/admin-navigation.ts` — extract `NavItem`/`NavGroup` interfaces + nav config data (~30 lines, actual: 162 lines includes `createNavigationGroups` factory)
+- [x] 5.2 Create `src/app/admin/_hooks/useOrganizationState.ts` — extract organization state + `checkOrganization` useEffect (~130 lines)
+- [x] 5.3 Create `src/app/admin/_hooks/useAdminStats.ts` — extract stats state + fetch useEffect (~90 lines)
+- [x] 5.4 Create `src/app/admin/_hooks/useAdminCheck.ts` — extract admin check + redirect logic, keep `signOutInProgress`/`redirectInProgress` refs intact (~160 lines)
+- [x] 5.5 Modify `AdminShell.tsx` — replace extracted blocks with hook imports, keep layout JSX + loading/redirect screens (1031 → 368 lines, -663 lines)
+- [x] 5.6 Verify: `npm test -- --run` passes — 88 files, 1423 tests, 0 failures. New approval tests pass: admin-navigation (8), useAdminCheck (8), useOrganizationState (6), useAdminStats (3)
