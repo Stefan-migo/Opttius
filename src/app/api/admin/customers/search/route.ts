@@ -5,7 +5,7 @@ import {
   getFieldOperationFromRequest,
 } from "@/lib/api/branch-middleware";
 import { RateLimitError } from "@/lib/api/errors";
-import { rateLimitConfigs, withRateLimit } from "@/lib/api/middleware";
+import { rateLimitConfigs, withRateLimit } from "@/lib/rate-limiting";
 import {
   createApiErrorResponse,
   createApiSuccessResponse,

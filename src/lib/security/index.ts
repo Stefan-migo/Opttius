@@ -7,7 +7,6 @@
  */
 
 export type { SecurityAlerting } from "./alerting";
-export { getSecurityAlerting } from "./shared";
 export * from "./events";
 export {
   type NextRequest,
@@ -16,9 +15,9 @@ export {
   securityMiddleware,
   withAuthSecurity,
   withDataSecurity,
-  withRateLimitSecurity,
 } from "./integration";
 export type { SecurityMonitor } from "./monitoring";
+export { getSecurityAlerting } from "./shared";
 export { getSecurityMonitor } from "./shared";
 
 // Phase 3 Advanced Security Components

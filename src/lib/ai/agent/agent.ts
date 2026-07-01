@@ -2,14 +2,9 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { LLMFactory } from "../factory";
-import {
-  getKnowledgeBase,
-  type KnowledgeContext,
-} from "../knowledge/base/knowledge-manager";
 import type { MemoryManager } from "../memory";
 import type { OrganizationalMemory } from "../memory/organizational";
 import { convertToolsToLLMTools, getAllTools } from "../tools";
-import type { ToolExecutionContext } from "../tools/types";
 import type {
   AgentScreenContext,  Block,
   LLMMessage,
@@ -18,7 +13,9 @@ import type {
   ToolCall } from "../types";
 import { logAIUsage } from "../usage-logger";
 import { getAgentConfig } from "./config";
-import { ToolExecutor } from "./tool-executor";
+import { ToolExecutor, createToolExecutor } from "./tool-executor";
+import { getKnowledgeBaseContext as getKnowledgeBaseContextFn } from "./knowledge-context";
+import { initializeMemoryManager as initMemoryManager, initializeOrganizationalMemory as initOrgMemory } from "./memory-init";
 import type { AgentConfig } from "./core";
 
 export interface AgentOptions {
@@ -92,34 +89,8 @@ export default class Agent {
     if (this.memoryManager) {
       return this.memoryManager;
     }
-
-    try {
-      const { createServiceRoleClient } = await import(
-        "@/utils/supabase/server"
-      );
-      const { createMemoryManager } = await import("../memory");
-
-      const supabase = createServiceRoleClient();
-
-      this.memoryManager = createMemoryManager(
-        {
-          userId: this.userId,
-          sessionId: this.sessionId,
-          supabase,
-        },
-        {
-          enableSemanticSearch: true,
-          enableLongTermMemory: true,
-          semanticSearchCount: 5,
-          maxContextLength: 3000,
-        },
-      );
-
-      return this.memoryManager;
-    } catch (error) {
-      console.error("Failed to initialize memory manager:", error);
-      return null;
-    }
+    this.memoryManager = await initMemoryManager(this.userId, this.sessionId);
+    return this.memoryManager;
   }
 
   /**
@@ -129,30 +100,8 @@ export default class Agent {
     if (this.organizationalMemory) {
       return this.organizationalMemory;
     }
-
-    try {
-      const { createServiceRoleClient } = await import(
-        "@/utils/supabase/server"
-      );
-      const { createOrganizationalMemory } = await import(
-        "../memory/organizational"
-      );
-
-      const supabase = createServiceRoleClient();
-
-      // Use the resolved organization ID
-      const organizationId = this.organizationId;
-
-      this.organizationalMemory = createOrganizationalMemory(
-        organizationId,
-        supabase,
-      );
-
-      return this.organizationalMemory;
-    } catch (error) {
-      console.error("Failed to initialize organizational memory:", error);
-      return null;
-    }
+    this.organizationalMemory = await initOrgMemory(this.organizationId);
+    return this.organizationalMemory;
   }
 
   /**
@@ -168,51 +117,14 @@ export default class Agent {
 
   private async initializeToolExecutor() {
     if (!this.toolExecutor) {
-      const { createServiceRoleClient } = await import(
-        "@/utils/supabase/server"
-      );
-      const supabase = createServiceRoleClient();
-
-      // Try to resolve organizationId from profile to be sure
-      let resolvedOrgId = this.organizationId;
-      if (this.userId) {
-        try {
-          const { data: profile } = await supabase
-            .from("profiles")
-            .select("organization_id")
-            .eq("id", this.userId)
-            .single();
-
-          if (profile?.organization_id) {
-            resolvedOrgId = profile.organization_id;
-          }
-        } catch (e) {
-          console.error("Failed to resolve organization ID from profile:", e);
-        }
-      }
-
-      let currency = "USD";
-      try {
-        const orgMemory = await this.initializeOrganizationalMemory();
-        if (orgMemory) {
-          const orgContext = await orgMemory.getContextForAgent();
-          currency = orgContext.organization.currency;
-        }
-      } catch (e) {
-        console.error("Failed to fetch currency for tool executor:", e);
-      }
-
-      const context: ToolExecutionContext = {
+      this.toolExecutor = await createToolExecutor({
         userId: this.userId,
-        organizationId: resolvedOrgId,
-        supabase,
-        currency,
-        userData: this.userData,
+        organizationId: this.organizationId,
         currentBranchId: this.currentBranchId,
+        userData: this.userData,
         skipAdminActivityLog: this.skipAdminActivityLog,
         customerId: this.customerId,
-      };
-      this.toolExecutor = new ToolExecutor(context);
+      });
     }
     return this.toolExecutor;
   }
@@ -370,138 +282,12 @@ INSTRUCCIONES:
    * Get relevant knowledge base context for the current conversation
    */
   private async getKnowledgeBaseContext(): Promise<string | null> {
-    try {
-      const knowledgeBase = getKnowledgeBase();
-
-      // Get the last user message to understand context
-      const lastUserMessage = this.messages
-        .slice()
-        .reverse()
-        .find((msg) => msg.role === "user");
-
-      if (!lastUserMessage) return null;
-
-      // Create knowledge context based on user role and recent conversation
-      const knowledgeContext: KnowledgeContext = {
-        userId: this.userId,
-        organizationId: this.organizationId,
-        userRole: this.userData?.role,
-        recentActions: this.extractRecentActions(),
-      };
-
-      // Search for relevant knowledge
-      const results = await knowledgeBase.searchKnowledge(
-        lastUserMessage.content,
-        knowledgeContext,
-      );
-
-      if (results.length === 0) return null;
-
-      // Format the most relevant knowledge into context
-      const topResult = results[0];
-      const contextSections = [
-        `=== SYSTEM KNOWLEDGE ===`,
-        `Relevant Documentation: ${topResult.document.title}`,
-        `Category: ${topResult.document.category}`,
-        `Confidence: ${(topResult.similarity * 100).toFixed(1)}%`,
-        ``,
-        `Key Information:`,
-        this.extractKeyInformation(topResult.document.content),
-        `========================`,
-      ];
-
-      console.log(
-        `Knowledge base context injected for query: "${lastUserMessage.content}"`,
-      );
-      console.log(
-        `Top result: ${topResult.document.title} (${(topResult.similarity * 100).toFixed(1)}% confidence)`,
-      );
-
-      return contextSections.join("\n");
-    } catch (error) {
-      console.error("Failed to get knowledge base context:", error);
-      return null;
-    }
-  }
-
-  /**
-   * Extract recent actions from conversation history
-   */
-  private extractRecentActions(): string[] {
-    const actions: string[] = [];
-    const recentMessages = this.messages.slice(-10); // Last 10 messages
-
-    for (const message of recentMessages) {
-      if (message.role === "user") {
-        // Extract action verbs and key terms
-        const actionWords = [
-          "create",
-          "add",
-          "delete",
-          "update",
-          "configure",
-          "setup",
-          "install",
-          "activate",
-          "deactivate",
-          "enable",
-          "disable",
-          "schedule",
-          "cancel",
-          "modify",
-          "change",
-          "adjust",
-        ];
-
-        const messageLower = message.content.toLowerCase();
-        for (const action of actionWords) {
-          if (messageLower.includes(action)) {
-            actions.push(action);
-          }
-        }
-      }
-    }
-
-    return [...new Set(actions)]; // Remove duplicates
-  }
-
-  /**
-   * Extract key information from document content
-   */
-  private extractKeyInformation(content: string): string {
-    // Extract key sections (Overview, Steps, Configuration, etc.)
-    const keySections = [
-      "## Overview",
-      "## Key Workflows",
-      "## Configuration Options",
-      "## Troubleshooting",
-      "## Steps:",
-      "**Steps:**",
-    ];
-
-    let extracted = "";
-
-    for (const section of keySections) {
-      const sectionIndex = content.indexOf(section);
-      if (sectionIndex !== -1) {
-        // Extract the section content (up to next ## header or end)
-        const sectionContent = content.substring(sectionIndex);
-        const nextHeader = sectionContent.indexOf("\n## ", 3);
-        const relevantContent =
-          nextHeader !== -1
-            ? sectionContent.substring(0, nextHeader)
-            : sectionContent.substring(0, 500); // Limit length
-
-        extracted += `${relevantContent}\n\n`;
-      }
-    }
-
-    // If no specific sections found, return first part of content
-    if (!extracted) {
-      extracted = content.substring(0, 300) + "...";
-    }
-
-    return extracted.trim();
+    return getKnowledgeBaseContextFn(
+      this.messages,
+      this.userId,
+      this.organizationId,
+      this.userData,
+    );
   }
 
   /**

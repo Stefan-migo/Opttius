@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { appLogger as logger } from "@/lib/logger";
+
 import {
   getIPAddress,
   getRateLimitConfig,
@@ -18,26 +19,12 @@ import { getRateLimiter } from "./redis-rate-limiter";
  */
 
 /**
- * Rate limiting middleware for Next.js API routes
+ * Internal Redis-based rate limiter (two-arg version).
+ * Kept for backward compat with `checkRateLimit` / `rateLimit` in this file.
  *
- * Automatically applies rate limiting based on endpoint category.
- * Blocks requests that exceed rate limits and adds appropriate headers.
- *
- * @param request - NextRequest object
- * @param handler - Original route handler
- * @returns NextResponse with rate limiting applied
- *
- * @example
- * ```typescript
- * export async function GET(request: NextRequest) {
- *   return withRateLimit(request, async () => {
- *     // Your route logic here
- *     return NextResponse.json({ data: 'success' });
- *   });
- * }
- * ```
+ * @internal
  */
-export async function withRateLimit(
+async function withRateLimitInternal(
   request: NextRequest,
   handler: () => Promise<NextResponse>,
 ): Promise<NextResponse> {
@@ -165,7 +152,7 @@ export function rateLimit(
   handler: (request: NextRequest) => Promise<NextResponse>,
 ): (request: NextRequest) => Promise<NextResponse> {
   return async (request: NextRequest) => {
-    return withRateLimit(request, () => handler(request));
+    return withRateLimitInternal(request, () => handler(request));
   };
 }
 
@@ -235,6 +222,9 @@ export async function checkRateLimit(
     isBlocked: () => rateLimiter.isIPBlocked(ipAddress),
   };
 }
+
+// Re-export the unified withRateLimit from index.ts
+export { withRateLimit } from "./index";
 
 // Export types
 export type { NextRequest, NextResponse };
