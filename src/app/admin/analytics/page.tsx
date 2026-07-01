@@ -1,10 +1,15 @@
-import { createClient } from "@/utils/supabase/server";
-import AnalyticsContent from "./_components/AnalyticsContent";
+import dynamic from "next/dynamic";
+import { Suspense } from "react";
 
-export const dynamic = "force-dynamic";
+const AnalyticsContent = dynamic(
+  () => import("./_components/AnalyticsContent"),
+  { ssr: false },
+);
 
-export default async function AnalyticsPage() {
-  const supabase = await createClient();
-  await supabase.auth.getUser();
-  return <AnalyticsContent />;
+export default function AnalyticsPage() {
+  return (
+    <Suspense fallback={<div>Cargando...</div>}>
+      <AnalyticsContent />
+    </Suspense>
+  );
 }

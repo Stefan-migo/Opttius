@@ -44,6 +44,7 @@ Chain strategy: stacked-to-main
 - [x] 3.4 Edit `AppointmentsContent.tsx` — replace direct `fetchAppointments()` calls in `handleAppointmentCreated`, status change, and delete handlers with `queryClient.invalidateQueries({ queryKey: ["admin", "appointments"] })`
 
 ### Notes
+
 - Type annotation bridging: service `Appointment` type differs from component's local `Appointment` interface (extra customer/guest fields). Component uses `const appointments: Appointment[] = _appointmentsData ?? []` to bridge.
 - ScheduleSettings type mismatch between service and calendar component resolved with `any` cast (pre-existing, same pattern as before migration).
 - `staleTime: 30*1000` for appointments (frequent changes), `5*60*1000` for schedule settings (static config).
