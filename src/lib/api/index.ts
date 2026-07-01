@@ -45,11 +45,9 @@ export {
   isHealthCheck,
   logAdminActivity,
   logRequest,
-  rateLimitConfigs,
   requireAuth,
   requireRole,
   withCORS,
-  withRateLimit,
   withRequestId,
   withSecurityHeaders,
 } from "./middleware";

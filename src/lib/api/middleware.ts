@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { appLogger as logger } from "@/lib/logger";
-import { createServiceRoleClient } from "@/utils/supabase/server";
 import type {
   GetAdminRoleParams,
   GetAdminRoleResult,
@@ -9,174 +8,9 @@ import type {
   IsAdminResult,
   LogAdminActivityParams,
 } from "@/types/supabase-rpc";
+import { createServiceRoleClient } from "@/utils/supabase/server";
 
-import {
-  AuthenticationError,
-  AuthorizationError,
-  RateLimitError,
-} from "./errors";
-
-// Rate limiting store (in production, use Redis or similar)
-const rateLimitStore = new Map<string, { count: number; resetTime: number }>();
-
-// Rate limit configuration
-interface RateLimitConfig {
-  windowMs: number; // Time window in milliseconds
-  maxRequests: number; // Maximum requests per window
-  keyGenerator?: (request: NextRequest) => string; // Custom key generator
-  skipSuccessfulRequests?: boolean; // Don't count successful requests
-  skipFailedRequests?: boolean; // Don't count failed requests
-}
-
-// Default rate limit configurations
-export const rateLimitConfigs = {
-  // General API endpoints
-  general: {
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    maxRequests: 100,
-  },
-
-  // Authentication endpoints (more restrictive)
-  auth: {
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    maxRequests: 5,
-  },
-
-  // Contact form (prevent spam)
-  contact: {
-    windowMs: 60 * 60 * 1000, // 1 hour
-    maxRequests: 3,
-  },
-
-  // Payment endpoints (very restrictive)
-  payment: {
-    windowMs: 5 * 60 * 1000, // 5 minutes
-    maxRequests: 10,
-  },
-
-  // Search endpoints (prevent abuse)
-  search: {
-    windowMs: 60 * 1000, // 1 minute
-    maxRequests: 30,
-  },
-
-  // Modification endpoints (POST/PUT/DELETE)
-  modification: {
-    windowMs: 60 * 1000, // 1 minute
-    maxRequests: 50,
-  },
-
-  // POS endpoints (sales processing)
-  pos: {
-    windowMs: 5 * 60 * 1000, // 5 minutes
-    maxRequests: 20,
-  },
-
-  // Agreements (convenios)
-  agreements: {
-    windowMs: 60 * 1000, // 1 minute
-    maxRequests: 30,
-  },
-};
-
-// Rate limiting middleware
-export function withRateLimit(
-  config: RateLimitConfig,
-): (
-  request: NextRequest,
-  handler: () => Promise<NextResponse>,
-) => Promise<NextResponse> {
-  return async (
-    request: NextRequest,
-    handler: () => Promise<NextResponse>,
-  ): Promise<NextResponse> => {
-    const key = config.keyGenerator
-      ? config.keyGenerator(request)
-      : getClientIdentifier(request);
-
-    const now = Date.now();
-    const windowStart = now - config.windowMs;
-
-    // Clean up old entries
-    for (const [k, v] of rateLimitStore.entries()) {
-      if (v.resetTime < now) {
-        rateLimitStore.delete(k);
-      }
-    }
-
-    // Get current count for this key
-    const current = rateLimitStore.get(key);
-
-    if (!current || current.resetTime < now) {
-      // First request in window or window expired
-      rateLimitStore.set(key, {
-        count: 1,
-        resetTime: now + config.windowMs,
-      });
-    } else if (current.count >= config.maxRequests) {
-      // Rate limit exceeded
-      throw new RateLimitError(
-        `Rate limit exceeded. Try again in ${Math.ceil((current.resetTime - now) / 1000)} seconds.`,
-      );
-    } else {
-      // Increment count
-      current.count++;
-      rateLimitStore.set(key, current);
-    }
-
-    try {
-      const response = await handler();
-
-      // Add rate limit headers
-      response.headers.set("X-RateLimit-Limit", config.maxRequests.toString());
-      response.headers.set(
-        "X-RateLimit-Remaining",
-        Math.max(0, config.maxRequests - (current?.count || 1)).toString(),
-      );
-      response.headers.set(
-        "X-RateLimit-Reset",
-        ((current?.resetTime || now + config.windowMs) / 1000).toString(),
-      );
-
-      return response;
-    } catch (error) {
-      // If handler throws an error, ensure we return a proper JSON response
-      if (error instanceof RateLimitError) {
-        throw error; // Let rate limit errors bubble up
-      }
-
-      // Log unexpected errors
-      if (error instanceof Error) {
-        logger.error("Error in rate-limited handler", error);
-      } else {
-        logger.error("Error in rate-limited handler", new Error(String(error)));
-      }
-
-      // Return proper error response
-      return NextResponse.json(
-        {
-          error:
-            error instanceof Error ? error.message : "Internal server error",
-        },
-        { status: 500 },
-      );
-    }
-  };
-}
-
-// Get client identifier for rate limiting
-function getClientIdentifier(request: NextRequest): string {
-  // Try to get real IP from headers (for reverse proxies)
-  const xForwardedFor = request.headers.get("x-forwarded-for");
-  const xRealIp = request.headers.get("x-real-ip");
-  const clientIp =
-    xForwardedFor?.split(",")[0] || xRealIp || request.ip || "unknown";
-
-  // For authenticated requests, also include user agent for more specificity
-  const userAgent = request.headers.get("user-agent") || "unknown";
-
-  return `${clientIp}:${userAgent.substring(0, 50)}`;
-}
+import { AuthenticationError, AuthorizationError } from "./errors";
 
 // Authentication middleware
 export async function requireAuth(request: NextRequest): Promise<{
@@ -436,6 +270,16 @@ export function withCORS(
   response.headers.set("Access-Control-Max-Age", "86400"); // 24 hours
 
   return response;
+}
+
+// Get client identifier for request logging
+function getClientIdentifier(request: NextRequest): string {
+  const xForwardedFor = request.headers.get("x-forwarded-for");
+  const xRealIp = request.headers.get("x-real-ip");
+  const clientIp =
+    xForwardedFor?.split(",")[0] || xRealIp || request.ip || "unknown";
+  const userAgent = request.headers.get("user-agent") || "unknown";
+  return `${clientIp}:${userAgent.substring(0, 50)}`;
 }
 
 // Request logging middleware
