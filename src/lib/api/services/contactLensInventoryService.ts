@@ -4,6 +4,7 @@
  * Service to interact with contact_lens_inventory and check stock by prescription
  */
 
+import { appLogger as logger } from "@/lib/logger";
 import { handleApiError } from "@/lib/api/services/errorService";
 import { ApiClient, isSuccess, unwrapData } from "../client-helpers";
 
@@ -50,7 +51,7 @@ class ContactLensInventoryService {
 
       return [];
     } catch (error) {
-      console.error("Error fetching inventory:", error);
+      logger.error("Error fetching inventory:", error);
       return [];
     }
   }
@@ -97,7 +98,7 @@ class ContactLensInventoryService {
         message: "Graduación no disponible en stock",
       };
     } catch (error) {
-      console.error("Error checking stock:", error);
+      logger.error("Error checking stock:", error);
       // Return default - allow sale to proceed if check fails
       return {
         available: true,
@@ -133,7 +134,7 @@ class ContactLensInventoryService {
 
       return null;
     } catch (error) {
-      console.error("Error creating inventory:", error);
+      logger.error("Error creating inventory:", error);
       return null;
     }
   }

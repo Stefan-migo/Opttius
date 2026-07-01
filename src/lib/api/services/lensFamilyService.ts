@@ -4,6 +4,7 @@
  * Service for managing lens families and their configurations.
  */
 
+import { appLogger as logger } from "@/lib/logger";
 import { handleApiError } from "@/lib/api/services/errorService";
 
 import { ApiClient, isSuccess, unwrapData } from "../client-helpers";
@@ -62,7 +63,7 @@ class LensFamilyService {
       handleApiError(response);
       return [];
     } catch (error) {
-      console.error("Error fetching lens families:", error);
+      logger.error("Error fetching lens families:", error);
       handleApiError(error);
       return [];
     }
@@ -84,7 +85,7 @@ class LensFamilyService {
       handleApiError(response);
       return null;
     } catch (error) {
-      console.error("Error fetching lens family:", error);
+      logger.error("Error fetching lens family:", error);
       handleApiError(error);
       return null;
     }

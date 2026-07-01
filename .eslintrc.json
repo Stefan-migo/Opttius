@@ -23,6 +23,7 @@
       { "selector": "class", "format": ["PascalCase"] },
       { "selector": "enum", "format": ["PascalCase"] }
     ],
+    "no-console": "warn",
     "react/no-unescaped-entities": "error",
     "security/detect-object-injection": "warn",
     "security/detect-non-literal-regexp": "warn",

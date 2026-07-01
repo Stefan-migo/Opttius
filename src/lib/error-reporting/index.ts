@@ -1,3 +1,5 @@
+import { appLogger as logger } from "@/lib/logger";
+
 /**
  * Error Reporting System Index
  * Exports all error reporting functionality
@@ -9,11 +11,11 @@ export * from "./core";
 export const SentryIntegration = {
   enabled: false,
   initialize: () => {
-    console.warn(
+    logger.warn(
       "Sentry integration not available - install @sentry/nextjs to enable",
     );
   },
   captureException: (error: Error) => {
-    console.warn("Sentry not available:", error.message);
+    logger.warn("Sentry not available:", error.message);
   },
 };

@@ -1,6 +1,8 @@
 import { createClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
 
+import { appLogger as logger } from "@/lib/logger";
+
 // Initialize Supabase client for server-side operations
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -31,7 +33,7 @@ export async function GET(request: NextRequest) {
       .limit(1000); // Limit for performance
 
     if (error) {
-      console.error("Failed to fetch telemetry events:", error);
+      logger.error("Failed to fetch telemetry events:", error);
       throw new Error("Database query failed");
     }
 
@@ -40,7 +42,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(dashboardData);
   } catch (error) {
-    console.error("Dashboard data error:", error);
+    logger.error("Dashboard data error:", error);
     return NextResponse.json(
       { error: "Failed to load dashboard data" },
       { status: 500 },

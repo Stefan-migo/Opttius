@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { profileUpdateSchema } from "@/lib/api/validation/profile-schemas";
 import { getProfileErrorMessage } from "@/lib/profile/error-messages";
+import { appLogger as logger } from "@/lib/logger";
 import { createClient } from "@/utils/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -66,7 +67,7 @@ export async function PATCH(request: NextRequest) {
 
     return NextResponse.json(data);
   } catch (err) {
-    console.error("Profile PATCH error:", err);
+    logger.error("Profile PATCH error:", err);
     return NextResponse.json(
       { error: "Error interno al actualizar el perfil" },
       { status: 500 },

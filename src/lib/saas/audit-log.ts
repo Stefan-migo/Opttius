@@ -7,6 +7,7 @@
  * @module lib/saas/audit-log
  */
 
+import { appLogger as logger } from "@/lib/logger";
 import { createServiceRoleClient } from "@/utils/supabase/server";
 
 export type AuditAction =
@@ -64,7 +65,7 @@ export async function recordAuditLog(entry: AuditLogEntry): Promise<void> {
 
   if (error) {
     // Log but don't throw - audit logging should be non-blocking
-    console.error("Failed to record audit log:", error);
+    logger.error("Failed to record audit log:", error);
   }
 }
 

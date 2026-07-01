@@ -1,9 +1,10 @@
+import { appLogger as logger } from "@/lib/logger";
 import { Resend } from "resend";
 
 // Gracefully handle missing API key for development
 if (!process.env.RESEND_API_KEY) {
-  console.warn(
-    "⚠️  RESEND_API_KEY not configured. Email notifications will be disabled.",
+  logger.warn(
+    "RESEND_API_KEY not configured. Email notifications will be disabled.",
   );
 }
 
@@ -62,7 +63,7 @@ export async function sendEmail(data: {
 }) {
   // Check if Resend is configured
   if (!resend) {
-    console.warn("⚠️  Resend not configured, skipping email send");
+    logger.warn("Resend not configured, skipping email send");
     return { success: false, error: "Resend not configured" };
   }
 
@@ -83,10 +84,10 @@ export async function sendEmail(data: {
       reply_to: data.replyTo || emailConfig.replyTo,
     });
 
-    console.log("Email sent successfully:", result.data?.id);
+    logger.info("Email sent successfully:", result.data?.id);
     return { success: true, id: result.data?.id };
   } catch (error) {
-    console.error("Failed to send email:", error);
+    logger.error("Failed to send email:", error);
     return {
       success: false,
       error: error instanceof Error ? error.message : "Unknown error",

@@ -1,3 +1,4 @@
+import { appLogger as logger } from "@/lib/logger";
 import { createServiceRoleClient } from "@/utils/supabase/server";
 
 export type NotificationType =
@@ -126,7 +127,7 @@ export class NotificationService {
       );
 
       if (settingsError) {
-        console.error("Error checking notification settings:", settingsError);
+        logger.error("Error checking notification settings:", settingsError);
         // Continue anyway - default to enabled
       }
 
@@ -134,7 +135,7 @@ export class NotificationService {
         ? settingsRows[0]
         : settingsRows;
       if (settingsData && settingsData.enabled === false) {
-        console.log(
+        logger.info(
           `Notification type ${params.type} is disabled, skipping...`,
         );
         return { success: true };
@@ -163,13 +164,13 @@ export class NotificationService {
         });
 
       if (insertError) {
-        console.error("Error creating notification:", insertError);
+        logger.error("Error creating notification:", insertError);
         return { success: false, error: insertError.message };
       }
 
       return { success: true };
     } catch (error) {
-      console.error("Error in NotificationService.createNotification:", error);
+      logger.error("Error in NotificationService.createNotification:", error);
       return {
         success: false,
         error: error instanceof Error ? error.message : "Unknown error",

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import { appLogger as logger } from "@/lib/logger";
 import { createClient, createServiceRoleClient } from "@/utils/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -18,7 +19,7 @@ export async function GET(
       .single();
 
     if (error) {
-      console.error("Error fetching category:", error);
+      logger.error("Error fetching category:", error);
       return NextResponse.json(
         { error: "Category not found" },
         { status: 404 },
@@ -27,7 +28,7 @@ export async function GET(
 
     return NextResponse.json({ category });
   } catch (error: unknown) {
-    console.error("API error:", error);
+    logger.error("API error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },
@@ -138,7 +139,7 @@ export async function PUT(
     }
 
     if (error) {
-      console.error("Error updating category:", error);
+      logger.error("Error updating category:", error);
       return NextResponse.json(
         { error: error.message || "Failed to update category" },
         { status: 500 },
@@ -147,7 +148,7 @@ export async function PUT(
 
     return NextResponse.json({ category: data });
   } catch (error: unknown) {
-    console.error("API error:", error);
+    logger.error("API error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },
@@ -256,7 +257,7 @@ export async function DELETE(
         );
       }
 
-      console.error("Error deleting category:", error);
+      logger.error("Error deleting category:", error);
       return NextResponse.json(
         { error: error.message || "Failed to delete category" },
         { status: 500 },
@@ -265,7 +266,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true });
   } catch (error: unknown) {
-    console.error("API error:", error);
+    logger.error("API error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },

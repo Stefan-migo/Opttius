@@ -1,3 +1,5 @@
+import { appLogger as logger } from "@/lib/logger";
+
 interface ChatSession {
   id: string;
   title: string | null;
@@ -197,7 +199,7 @@ export async function copyToClipboard(
     await navigator.clipboard.writeText(content);
     return true;
   } catch (error) {
-    console.error("Failed to copy to clipboard:", error);
+    logger.error("Failed to copy to clipboard:", error);
     // Fallback for older browsers
     try {
       const textArea = document.createElement("textarea");
@@ -212,7 +214,7 @@ export async function copyToClipboard(
       document.body.removeChild(textArea);
       return successful;
     } catch (fallbackError) {
-      console.error("Fallback copy failed:", fallbackError);
+      logger.error("Fallback copy failed:", fallbackError);
       return false;
     }
   }

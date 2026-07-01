@@ -1,6 +1,8 @@
 import { createClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
 
+import { appLogger as logger } from "@/lib/logger";
+
 // Initialize Supabase client for server-side operations
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -63,8 +65,8 @@ export async function POST(request: NextRequest) {
           .select();
 
         if (error) {
-          console.error("Failed to store telemetry event:", error);
-          console.error("Event data:", JSON.stringify(dbEvent, null, 2));
+          logger.error("Failed to store telemetry event:", error);
+          logger.error("Event data:", JSON.stringify(dbEvent, null, 2));
           // Continue with other events even if one fails
           continue;
         }
@@ -73,7 +75,7 @@ export async function POST(request: NextRequest) {
           storedEvents.push(data[0]);
         }
       } catch (eventError) {
-        console.error("Error processing individual event:", eventError);
+        logger.error("Error processing individual event:", eventError);
         // Continue processing other events
       }
     }
@@ -88,7 +90,7 @@ export async function POST(request: NextRequest) {
       totalReceived: events.length,
     });
   } catch (error) {
-    console.error("Telemetry processing error:", error);
+    logger.error("Telemetry processing error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },
