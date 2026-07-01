@@ -1,10 +1,15 @@
-import { createClient } from "@/utils/supabase/server";
-import AppointmentsContent from "./_components/AppointmentsContent";
+import dynamic from "next/dynamic";
+import { Suspense } from "react";
 
-export const dynamic = "force-dynamic";
+const AppointmentsContent = dynamic(
+  () => import("./_components/AppointmentsContent"),
+  { ssr: false },
+);
 
-export default async function AppointmentsPage() {
-  const supabase = await createClient();
-  await supabase.auth.getUser();
-  return <AppointmentsContent />;
+export default function AppointmentsPage() {
+  return (
+    <Suspense fallback={<div>Cargando...</div>}>
+      <AppointmentsContent />
+    </Suspense>
+  );
 }

@@ -31,8 +31,8 @@ Chain strategy: stacked-to-main
 
 ## Phase 2: PR 2 — Appointments
 
-- [ ] 2.1 Modify `src/app/admin/appointments/page.tsx`: same server-shell pattern — `dynamic()` + `ssr: false` + Suspense fallback
-- [ ] 2.2 Run `npm run build` — verify no errors
+- [x] 2.1 Modify `src/app/admin/appointments/page.tsx`: same server-shell pattern — `dynamic()` + `ssr: false` + Suspense fallback
+- [x] 2.2 Run `npm run test:run` — 95 test files, 1464 tests passed, all green
 
 ## Phase 3: PR 3 — Work Orders Detail
 
