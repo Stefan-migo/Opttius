@@ -11,6 +11,16 @@ import type { PaymentStatus, WebhookEvent } from "@/types/payment";
 
 import type { IPaymentGateway, PaymentIntentResponse } from "../interfaces";
 
+// ponytail: PayPal verify-webhook-signature API handles cert_url server-side,
+// no cert fetching needed. Keep this Map if we ever need local cert pinning.
+export interface PayPalWebhookHeaders {
+  "paypal-auth-algo": string;
+  "paypal-cert-url": string;
+  "paypal-transmission-id": string;
+  "paypal-transmission-sig": string;
+  "paypal-transmission-time": string;
+}
+
 function getPayPalBaseUrl(): string {
   const base = process.env.PAYPAL_API_BASE_URL;
   if (!base) {
@@ -208,6 +218,57 @@ export class PayPalGateway implements IPaymentGateway {
       { eventType: event.event_type, eventId: event.id },
     );
     throw new Error("PayPal Webhook: Unhandled event type or missing data");
+  }
+
+  async validateWebhookSignature(
+    headers: PayPalWebhookHeaders,
+    body: string,
+  ): Promise<boolean> {
+    if (!process.env.PAYPAL_WEBHOOK_ID) {
+      logger.warn("PAYPAL_WEBHOOK_ID not configured, rejecting webhook");
+      return false;
+    }
+
+    try {
+      const accessToken = await getPayPalAccessToken();
+      const response = await fetch(
+        `${getPayPalBaseUrl()}/v1/notifications/verify-webhook-signature`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+          },
+          body: JSON.stringify({
+            auth_algo: headers["paypal-auth-algo"],
+            cert_url: headers["paypal-cert-url"],
+            transmission_id: headers["paypal-transmission-id"],
+            transmission_sig: headers["paypal-transmission-sig"],
+            transmission_time: headers["paypal-transmission-time"],
+            webhook_id: process.env.PAYPAL_WEBHOOK_ID,
+            webhook_event: JSON.parse(body),
+          }),
+        },
+      );
+
+      if (!response.ok) {
+        logger.error("PayPal webhook verification API error", undefined, {
+          status: response.status,
+        });
+        return false;
+      }
+
+      const result = (await response.json()) as {
+        verification_status?: string;
+      };
+      return result.verification_status === "SUCCESS";
+    } catch (error) {
+      logger.error(
+        "PayPal webhook signature verification failed",
+        error instanceof Error ? error : new Error(String(error)),
+      );
+      return false; // ponytail: fail-closed — reject on any API error
+    }
   }
 
   mapStatus(paypalStatus: string): PaymentStatus {

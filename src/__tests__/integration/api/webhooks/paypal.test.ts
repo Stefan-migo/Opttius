@@ -9,34 +9,43 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { POST } from "@/app/api/webhooks/paypal/route";
 
-// Mock dependencies
-vi.mock("@/lib/payments", () => ({
-  PaymentGatewayFactory: {
-    getGateway: vi.fn(() => ({
-      processWebhookEvent: vi.fn(async (request) => {
-        const eventData = await request.json();
-        return {
-          gateway: "paypal",
-          gatewayEventId: eventData.id,
-          type: eventData.event_type,
-          status: eventData.event_type.includes("COMPLETED")
-            ? "succeeded"
-            : "failed",
-          gatewayTransactionId: eventData.resource?.id,
-          gatewayPaymentIntentId: eventData.resource?.id,
-          amount: parseFloat(eventData.resource?.amount?.value || "0"),
-          currency: eventData.resource?.amount?.currency_code || "USD",
-          orderId: eventData.resource?.custom_id || null,
-          organizationId: null,
-          metadata: eventData,
-        };
-      }),
-    })),
-  },
-  PaymentService: vi.fn(() => ({
-    updatePaymentFromWebhook: vi.fn(async () => ({ success: true })),
-  })),
+// Use vi.hoisted to define mocks before vi.mock factories run (vitest auto-hoisting)
+const {
+  mockValidateWebhookSignature,
+  mockProcessWebhookEvent,
+  mockRecordWebhookEvent,
+  mockGetPaymentByGatewayPaymentIntentId,
+  mockUpdatePaymentStatus,
+  mockMarkWebhookEventAsProcessed,
+  mockFulfillOrder,
+} = vi.hoisted(() => ({
+  mockValidateWebhookSignature: vi.fn(),
+  mockProcessWebhookEvent: vi.fn(),
+  mockRecordWebhookEvent: vi.fn(),
+  mockGetPaymentByGatewayPaymentIntentId: vi.fn(),
+  mockUpdatePaymentStatus: vi.fn(),
+  mockMarkWebhookEventAsProcessed: vi.fn(),
+  mockFulfillOrder: vi.fn(),
 }));
+
+vi.mock("@/lib/payments/paypal/gateway", () => {
+  class MockPayPalGateway {
+    validateWebhookSignature = mockValidateWebhookSignature;
+    processWebhookEvent = mockProcessWebhookEvent;
+  }
+  return { PayPalGateway: MockPayPalGateway };
+});
+
+vi.mock("@/lib/payments/services/payment-service", () => {
+  class MockPaymentService {
+    recordWebhookEvent = mockRecordWebhookEvent;
+    getPaymentByGatewayPaymentIntentId = mockGetPaymentByGatewayPaymentIntentId;
+    updatePaymentStatus = mockUpdatePaymentStatus;
+    markWebhookEventAsProcessed = mockMarkWebhookEventAsProcessed;
+    fulfillOrder = mockFulfillOrder;
+  }
+  return { PaymentService: MockPaymentService };
+});
 
 vi.mock("@/lib/logger", () => ({
   appLogger: {
@@ -46,25 +55,60 @@ vi.mock("@/lib/logger", () => ({
   },
 }));
 
-// ponytail: skipped — route behavior changed (returns 500 on graceful errors); fix in Phase 1
-describe.skip("PayPal Webhook API", () => {
+vi.mock("@/utils/supabase/server", () => ({
+  createServiceRoleClient: vi.fn(() => ({})),
+}));
+
+function makeValidHeaders(): Record<string, string> {
+  return {
+    "content-type": "application/json",
+    "paypal-auth-algo": "SHA256withRSA",
+    "paypal-cert-url": "https://api.paypal.com/v1/notifications/certs/CERT-123",
+    "paypal-transmission-id": "test_transmission_id",
+    "paypal-transmission-sig": "test_signature",
+    "paypal-transmission-time": "2026-02-07T10:00:00Z",
+  };
+}
+
+describe("PayPal Webhook API", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+
+    // Default: signature valid, process succeeds
+    mockValidateWebhookSignature.mockResolvedValue(true);
+    mockProcessWebhookEvent.mockResolvedValue({
+      gateway: "paypal",
+      gatewayEventId: "test_event_id",
+      type: "PAYMENT.CAPTURE.COMPLETED",
+      status: "succeeded",
+      gatewayTransactionId: "test_capture_id",
+      gatewayPaymentIntentId: "test_capture_id",
+      amount: 100,
+      currency: "USD",
+      orderId: "order_123",
+      organizationId: null,
+      metadata: { id: "test_event_id" },
+    });
+    mockRecordWebhookEvent.mockResolvedValue(false);
+    mockGetPaymentByGatewayPaymentIntentId.mockResolvedValue({
+      id: "payment_123",
+      order_id: "order_123",
+    });
+    mockUpdatePaymentStatus.mockResolvedValue(undefined);
+    mockMarkWebhookEventAsProcessed.mockResolvedValue(undefined);
+    mockFulfillOrder.mockResolvedValue(undefined);
   });
 
   describe("POST /api/webhooks/paypal", () => {
-    it("should process a successful payment webhook", async () => {
+    it("should process a successful payment webhook with valid signature", async () => {
       const webhookPayload = {
         id: "test_event_id",
         event_type: "PAYMENT.CAPTURE.COMPLETED",
         resource: {
           id: "test_capture_id",
           status: "COMPLETED",
-          amount: {
-            value: "100.00",
-            currency_code: "USD",
-          },
-          custom_id: "order_123",
+          amount: { value: "100.00", currency_code: "USD" },
+          purchase_units: [{ reference_id: "order_123" }],
         },
       };
 
@@ -73,15 +117,7 @@ describe.skip("PayPal Webhook API", () => {
         {
           method: "POST",
           body: JSON.stringify(webhookPayload),
-          headers: {
-            "content-type": "application/json",
-            "paypal-auth-algo": "SHA256withRSA",
-            "paypal-cert-url":
-              "https://api.paypal.com/v1/notifications/certs/CERT-123",
-            "paypal-transmission-id": "test_transmission_id",
-            "paypal-transmission-sig": "test_signature",
-            "paypal-transmission-time": "2026-02-07T10:00:00Z",
-          },
+          headers: makeValidHeaders(),
         },
       );
 
@@ -89,21 +125,117 @@ describe.skip("PayPal Webhook API", () => {
       const data = await response.json();
 
       expect(response.status).toBe(200);
-      expect(data).toEqual({ status: "ok" });
+      expect(data).toEqual({ received: true });
+      expect(mockValidateWebhookSignature).toHaveBeenCalledTimes(1);
+    });
+
+    it("should return 401 when signature is invalid", async () => {
+      mockValidateWebhookSignature.mockResolvedValue(false);
+
+      const webhookPayload = {
+        id: "test_event_id",
+        event_type: "PAYMENT.CAPTURE.COMPLETED",
+        resource: {
+          id: "test_capture_id",
+          status: "COMPLETED",
+          amount: { value: "100.00", currency_code: "USD" },
+        },
+      };
+
+      const request = new NextRequest(
+        "http://localhost:3000/api/webhooks/paypal",
+        {
+          method: "POST",
+          body: JSON.stringify(webhookPayload),
+          headers: makeValidHeaders(),
+        },
+      );
+
+      const response = await POST(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(401);
+      expect(data).toEqual({ error: "Invalid signature" });
+      expect(mockProcessWebhookEvent).not.toHaveBeenCalled();
+    });
+
+    it("should return 401 when PayPal signature headers are missing", async () => {
+      const webhookPayload = {
+        id: "test_event_id",
+        event_type: "PAYMENT.CAPTURE.COMPLETED",
+        resource: {
+          id: "test_capture_id",
+          status: "COMPLETED",
+          amount: { value: "100.00", currency_code: "USD" },
+        },
+      };
+
+      const request = new NextRequest(
+        "http://localhost:3000/api/webhooks/paypal",
+        {
+          method: "POST",
+          body: JSON.stringify(webhookPayload),
+          headers: { "content-type": "application/json" },
+        },
+      );
+
+      const response = await POST(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(401);
+      expect(data).toEqual({ error: "Invalid signature" });
+    });
+
+    it("should return 401 when validateWebhookSignature API fails", async () => {
+      mockValidateWebhookSignature.mockResolvedValue(false);
+
+      const webhookPayload = {
+        id: "test_event_id",
+        event_type: "PAYMENT.CAPTURE.COMPLETED",
+        resource: {
+          id: "test_capture_id",
+          status: "COMPLETED",
+          amount: { value: "100.00", currency_code: "USD" },
+        },
+      };
+
+      const request = new NextRequest(
+        "http://localhost:3000/api/webhooks/paypal",
+        {
+          method: "POST",
+          body: JSON.stringify(webhookPayload),
+          headers: makeValidHeaders(),
+        },
+      );
+
+      const response = await POST(request);
+      expect(response.status).toBe(401);
+      expect(mockProcessWebhookEvent).not.toHaveBeenCalled();
     });
 
     it("should process a failed payment webhook", async () => {
+      mockProcessWebhookEvent.mockResolvedValue({
+        gateway: "paypal",
+        gatewayEventId: "test_event_id",
+        type: "PAYMENT.CAPTURE.DECLINED",
+        status: "failed",
+        gatewayTransactionId: "test_capture_id",
+        gatewayPaymentIntentId: "test_capture_id",
+        amount: 100,
+        currency: "USD",
+        orderId: "order_123",
+        organizationId: null,
+        metadata: { id: "test_event_id" },
+      });
+
       const webhookPayload = {
         id: "test_event_id",
         event_type: "PAYMENT.CAPTURE.DECLINED",
         resource: {
           id: "test_capture_id",
           status: "DECLINED",
-          amount: {
-            value: "100.00",
-            currency_code: "USD",
-          },
-          custom_id: "order_123",
+          amount: { value: "100.00", currency_code: "USD" },
+          purchase_units: [{ reference_id: "order_123" }],
         },
       };
 
@@ -112,31 +244,24 @@ describe.skip("PayPal Webhook API", () => {
         {
           method: "POST",
           body: JSON.stringify(webhookPayload),
-          headers: {
-            "content-type": "application/json",
-          },
+          headers: makeValidHeaders(),
         },
       );
 
       const response = await POST(request);
-      const data = await response.json();
-
       expect(response.status).toBe(200);
-      expect(data.status).toBe("ok");
+      expect(mockValidateWebhookSignature).toHaveBeenCalledTimes(1);
     });
 
     it("should handle webhook processing errors gracefully", async () => {
-      const { PaymentGatewayFactory } = await import("@/lib/payments");
-      vi.mocked(PaymentGatewayFactory.getGateway).mockReturnValue({
-        processWebhookEvent: vi.fn(async () => {
-          throw new Error("Invalid webhook data");
-        }),
-      } as unknown);
+      mockProcessWebhookEvent.mockRejectedValue(
+        new Error("Invalid webhook data"),
+      );
 
       const webhookPayload = {
         id: "test_event_id",
         event_type: "PAYMENT.CAPTURE.COMPLETED",
-        resource: null, // Invalid data
+        resource: null,
       };
 
       const request = new NextRequest(
@@ -144,50 +269,29 @@ describe.skip("PayPal Webhook API", () => {
         {
           method: "POST",
           body: JSON.stringify(webhookPayload),
-          headers: {
-            "content-type": "application/json",
-          },
+          headers: makeValidHeaders(),
         },
       );
 
       const response = await POST(request);
       const data = await response.json();
 
-      expect(response.status).toBe(200); // Still return 200 to prevent retries
-      expect(data.status).toBe("error");
-      expect(data.message).toBeDefined();
-    });
-
-    it("should return 400 for invalid JSON payload", async () => {
-      const request = new NextRequest(
-        "http://localhost:3000/api/webhooks/paypal",
-        {
-          method: "POST",
-          body: "invalid json",
-          headers: {
-            "content-type": "application/json",
-          },
-        },
-      );
-
-      const response = await POST(request);
-      const data = await response.json();
-
-      expect(response.status).toBe(500); // PayPal route returns 500 for JSON parse errors
+      expect(response.status).toBe(500);
       expect(data.error).toBeDefined();
     });
 
     it("should handle missing event type", async () => {
+      mockProcessWebhookEvent.mockRejectedValue(
+        new Error("PayPal Webhook: Unhandled event type or missing data"),
+      );
+
       const webhookPayload = {
         id: "test_event_id",
-        // missing event_type
         resource: {
           id: "test_capture_id",
           status: "COMPLETED",
-          amount: {
-            value: "100.00",
-            currency_code: "USD",
-          },
+          amount: { value: "100.00", currency_code: "USD" },
+          purchase_units: [{ reference_id: "order_123" }],
         },
       };
 
@@ -196,17 +300,12 @@ describe.skip("PayPal Webhook API", () => {
         {
           method: "POST",
           body: JSON.stringify(webhookPayload),
-          headers: {
-            "content-type": "application/json",
-          },
+          headers: makeValidHeaders(),
         },
       );
 
       const response = await POST(request);
-      const data = await response.json();
-
-      expect(response.status).toBe(200);
-      expect(data.status).toBe("error");
+      expect(response.status).toBe(500);
     });
   });
 });
