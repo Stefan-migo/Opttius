@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 
 import { computeInventoryMetrics } from "@/lib/analytics/analytics-service";
+import { type MvKpiRow, computeDashboardKpis } from "@/lib/analytics/compute-dashboard-kpis";
 import { addBranchFilter, getBranchContext } from "@/lib/api/branch-middleware";
 import { AuthenticationError, AuthorizationError } from "@/lib/api/errors";
 import {
@@ -10,9 +11,6 @@ import {
 import { appLogger as logger } from "@/lib/logger";
 import { createClientFromRequest } from "@/utils/supabase/server";
 
-/**
- * Helper to get YYYY-MM-DD date string in local timezone (not UTC)
- */
 export const dynamic = "force-dynamic";
 
 function getLocalDateString(date: Date): string {
@@ -34,11 +32,10 @@ export async function GET(request: NextRequest) {
     const user = userData?.user;
 
     if (userError || !user) {
-      // Silently return 401 - this is expected when user is not authenticated
       return createApiErrorResponse(new AuthenticationError("Unauthorized"));
     }
 
-    // Check admin authorization using service role to bypass any context/RLS issues
+    // Check admin authorization using service role
     const { createServiceRoleClient } = await import("@/utils/supabase/server");
     const serviceSupabase = createServiceRoleClient();
 
@@ -72,8 +69,8 @@ export async function GET(request: NextRequest) {
       isSuperAdmin: branchContext.isSuperAdmin,
     });
 
-    // Build branch filter function (Vision Global scoped to user's organization)
-    const applyBranchFilter = (
+    // Build branch filter function
+    const applyBranchFilterFn = (
       query: Parameters<typeof addBranchFilter>[0],
     ) => {
       return addBranchFilter(
@@ -84,8 +81,22 @@ export async function GET(request: NextRequest) {
       );
     };
 
-    // In global view, orders may have organization_id null (legacy) but branch_id set.
-    // Fetch org branch IDs so we include orders by org_id OR by branch_id in org.
+    // Date ranges
+    const now = new Date();
+    const todayStr = getLocalDateString(now);
+    const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0);
+    const trendStart = new Date(
+      now.getTime() - periodDays * 24 * 60 * 60 * 1000,
+    );
+    // MV range covers both current trend period and month-over-month comparison
+    const mvStartDate =
+      startOfLastMonth < trendStart ? startOfLastMonth : trendStart;
+    const mvStartStr = getLocalDateString(mvStartDate);
+
+    // In global view, fetch org branch IDs for legacy data queries
     let orgBranchIds: string[] = [];
     if (
       branchContext.isSuperAdmin &&
@@ -99,58 +110,32 @@ export async function GET(request: NextRequest) {
       orgBranchIds = (branches || []).map((b: { id: string }) => b.id);
     }
 
-    // Orders query: in global view include orders by organization_id OR by branch in org
-    const ordersBaseQuery = supabase
-      .from("orders")
-      .select(
-        `
-        *,
-        order_items (
-          product_id,
-          quantity,
-          unit_price,
-          total_price,
-          product_name
-        )
-      `,
-      )
-      .order("created_at", { ascending: false });
+    // Build scoped filter for legacy tables (appointments, etc.)
+    const buildLegacyScope = (query: unknown) => {
+      if (
+        branchContext.isSuperAdmin &&
+        !branchContext.branchId &&
+        branchContext.organizationId &&
+        orgBranchIds.length > 0
+      ) {
+        return query.or(
+          `organization_id.eq.${branchContext.organizationId},branch_id.in.(${orgBranchIds.join(",")})`,
+        );
+      }
+      if (branchContext.branchId) {
+        return query.eq("branch_id", branchContext.branchId);
+      }
+      return applyBranchFilterFn(query);
+    };
 
-    let ordersQuery;
-    if (
-      branchContext.isSuperAdmin &&
-      !branchContext.branchId &&
-      branchContext.organizationId &&
-      orgBranchIds.length > 0
-    ) {
-      ordersQuery = ordersBaseQuery.or(
-        `organization_id.eq.${branchContext.organizationId},branch_id.in.(${orgBranchIds.join(",")})`,
-      );
-    } else {
-      ordersQuery = applyBranchFilter(ordersBaseQuery);
-    }
-
-    // Products query: include products of the branch OR global products (branch_id IS NULL)
-    // This ensures that when a branch is selected, we still see products that aren't tied to any specific branch
+    // Products query
     const productsBaseQuery = supabase
       .from("products")
       .select("*")
       .eq("status", "active");
-    let productsQuery;
+    let productsQuery: unknown;
 
-    if (branchContext.isSuperAdmin && !branchContext.branchId) {
-      // Global View: filtering by organization_id is enough
-      if (branchContext.organizationId) {
-        productsQuery = productsBaseQuery.eq(
-          "organization_id",
-          branchContext.organizationId,
-        );
-      } else {
-        productsQuery = applyBranchFilter(productsBaseQuery);
-      }
-    } else if (branchContext.branchId) {
-      // Branch View: show ALL products of the organization (shared catalog across branches)
-      // Stock is per-branch via product_branch_stock - Providencia uses same products as Casa Matriz
+    if (branchContext.branchId) {
       let orgId = branchContext.organizationId;
       if (!orgId) {
         const { data: branchData } = await supabase
@@ -164,22 +149,16 @@ export async function GET(request: NextRequest) {
         "organization_id",
         orgId || "00000000-0000-0000-0000-000000000000",
       );
+    } else if (branchContext.isSuperAdmin && branchContext.organizationId) {
+      productsQuery = productsBaseQuery.eq(
+        "organization_id",
+        branchContext.organizationId,
+      );
     } else {
-      productsQuery = applyBranchFilter(productsBaseQuery);
+      productsQuery = applyBranchFilterFn(productsBaseQuery);
     }
 
-    // Cash register closures for revenue (demo has 12 months of closures)
-    let closuresQuery = supabase
-      .from("cash_register_closures")
-      .select("branch_id, closure_date, total_sales, total_transactions")
-      .in("status", ["confirmed", "closed"]);
-    if (branchContext.branchId) {
-      closuresQuery = closuresQuery.eq("branch_id", branchContext.branchId);
-    } else if (orgBranchIds.length > 0) {
-      closuresQuery = closuresQuery.in("branch_id", orgBranchIds);
-    }
-
-    // product_branch_stock for inventory metrics (replaces deprecated products.inventory_quantity)
+    // Product branch stock for inventory metrics
     let productBranchStockQuery = supabase
       .from("product_branch_stock")
       .select("product_id, branch_id, quantity, low_stock_threshold");
@@ -194,29 +173,62 @@ export async function GET(request: NextRequest) {
         orgBranchIds,
       );
     } else {
-      // No branch context - return empty
       productBranchStockQuery = productBranchStockQuery.limit(0);
     }
 
+    // === MV Query — replaces full order/work_order/quotes/closure fetches ===
+    let mvQuery = supabase
+      .from("mv_daily_kpis")
+      .select("*")
+      .gte("day", mvStartStr)
+      .lte("day", todayStr);
+
+    if (branchContext.organizationId) {
+      mvQuery = mvQuery.eq("organization_id", branchContext.organizationId);
+    }
+    if (branchContext.branchId) {
+      mvQuery = mvQuery.eq("branch_id", branchContext.branchId);
+    }
+
+    // === Lightweight order status aggregation ===
+    // Replaces in-memory filtering of full orders list
+    const ordersAggQuery = supabase
+      .from("orders")
+      .select("status, created_at, total_amount, payment_status")
+      .gte("created_at", startOfLastMonth.toISOString());
+
+    const ordersAggScoped = buildLegacyScope(ordersAggQuery);
+
+    // === Lightweight quotes query ===
+    // Replaces in-memory filtering of full quotes list
+    const quotesQuery = supabase
+      .from("quotes")
+      .select("id, status, converted_to_work_order_id");
+
+    const quotesScoped = buildLegacyScope(quotesQuery);
+
+    // === Run parallel queries ===
     const [
       productsResult,
-      ordersResult,
+      mvResult,
       customersResult,
-      closuresResult,
       productBranchStockResult,
+      ordersAggResult,
+      quotesAggResult,
     ] = await Promise.all([
       productsQuery,
-      ordersQuery,
-      applyBranchFilter(supabase.from("customers").select("*")),
-      closuresQuery,
+      mvQuery,
+      applyBranchFilterFn(supabase.from("customers").select("*")),
       productBranchStockQuery,
+      ordersAggScoped,
+      quotesScoped,
     ]);
 
     if (productsResult.error) {
       logger.error("Error fetching products", productsResult.error);
     }
-    if (ordersResult.error) {
-      logger.error("Error fetching orders", ordersResult.error);
+    if (mvResult.error) {
+      logger.error("Error fetching MV KPIs", mvResult.error);
     }
     if (customersResult.error) {
       logger.error("Error fetching customers", customersResult.error);
@@ -224,38 +236,17 @@ export async function GET(request: NextRequest) {
 
     const products = productsResult.data || [];
     const productBranchStock = productBranchStockResult?.data || [];
-    const orders = ordersResult.data || [];
-    const customers = customersResult.data || []; // Now from customers table, not profiles
-    const closures = closuresResult?.data || [];
+    const customers = customersResult.data || [];
+    const ordersLight = ordersAggResult.data || [];
+    const quotesLight = quotesAggResult.data || [];
+    // ponytail: MV rows are typed as MvKpiRow — Supabase returns matching shape
+    const mvRows = (mvResult.data || []) as unknown as MvKpiRow[];
 
-    // We no longer strictly filter products by branch_id in post-processing
-    // because we want to include global products (branch_id IS NULL).
-    // The query above already handles the correct filtering.
-    const filteredProducts = products;
+    // === Compute KPIs from MV ===
+    const mvKpis = computeDashboardKpis(mvRows, now);
 
-    logger.info("Dashboard - Products fetched", {
-      total: products.length,
-      filtered: filteredProducts.length,
-      branchId: branchContext.branchId,
-      isGlobalView: branchContext.isGlobalView,
-      sampleProducts: filteredProducts
-        .slice(0, 3)
-        .map((p: { id: string; name: string; branch_id: string | null }) => ({
-          id: p.id,
-          name: p.name,
-          branch_id: p.branch_id,
-        })),
-    });
-
-    // Calculate date ranges
-    const now = new Date();
-    const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-    const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-    const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0);
-
-    // === PRODUCTS METRICS (from product_branch_stock via analytics-service) ===
-    const activeProducts = filteredProducts.filter(
+    // === Products metrics (from product_branch_stock) ===
+    const activeProducts = products.filter(
       (p: { status: string }) => p.status === "active",
     );
     const productIdsInCatalog = new Set<string>(
@@ -271,9 +262,9 @@ export async function GET(request: NextRequest) {
       productIdsInCatalog,
       {
         products: activeProducts.map((p: unknown) => ({
-          id: p.id,
-          name: p.name,
-          slug: p.slug,
+          id: (p as { id: string }).id,
+          name: (p as { name: string }).name,
+          slug: (p as { slug: string }).slug,
         })),
         maxLowStockList: 5,
       },
@@ -281,99 +272,62 @@ export async function GET(request: NextRequest) {
     const lowStockProducts = inventoryMetrics.lowStockProductsList ?? [];
     const outOfStockProducts = inventoryMetrics.outOfStock;
 
-    // === ORDERS METRICS ===
-    const pendingOrders = orders.filter(
+    // === Orders status breakdown (from lightweight aggregation) ===
+    const pendingOrders = ordersLight.filter(
       (o: { status: string }) => o.status === "pending",
     ).length;
-    const processingOrders = orders.filter(
+    const processingOrders = ordersLight.filter(
       (o: { status: string }) => o.status === "processing",
     ).length;
-    const completedOrders = orders.filter(
+    const completedOrders = ordersLight.filter(
       (o: { status: string }) => o.status === "completed",
     ).length;
-    const failedOrders = orders.filter(
+    const failedOrders = ordersLight.filter(
       (o: { status: string }) => o.status === "failed",
     ).length;
+    const shippedOrders = ordersLight.filter(
+      (o: { status: string }) => o.status === "shipped",
+    ).length;
 
-    // === REVENUE METRICS ===
-    // Prefer cash_register_closures when available (demo has 12 months of closures)
-    const currentMonthClosures = closures.filter(
-      (c: { closure_date: string }) => {
-        const d = new Date(c.closure_date);
-        return d >= startOfMonth && d <= now;
-      },
+    // Orders status distribution chart (last 30 days)
+    const last30DayOrders = ordersLight.filter(
+      (o: { created_at: string }) => new Date(o.created_at) >= thirtyDaysAgo,
     );
-    const lastMonthClosures = closures.filter((c: { closure_date: string }) => {
-      const d = new Date(c.closure_date);
-      return d >= startOfLastMonth && d <= endOfLastMonth;
-    });
-    const closuresCurrentRevenue = currentMonthClosures.reduce(
-      (sum: number, c: { total_sales?: number | null }) =>
-        sum + (c.total_sales || 0),
-      0,
-    );
-    const closuresLastRevenue = lastMonthClosures.reduce(
-      (sum: number, c: { total_sales?: number | null }) =>
-        sum + (c.total_sales || 0),
-      0,
-    );
+    const statusDistribution = {
+      pending: last30DayOrders.filter(
+        (o: { status: string }) => o.status === "pending",
+      ).length,
+      processing: last30DayOrders.filter(
+        (o: { status: string }) => o.status === "processing",
+      ).length,
+      completed: last30DayOrders.filter(
+        (o: { status: string }) => o.status === "completed",
+      ).length,
+      failed: last30DayOrders.filter(
+        (o: { status: string }) => o.status === "failed",
+      ).length,
+      shipped: last30DayOrders.filter(
+        (o: { status: string }) => o.status === "shipped",
+      ).length,
+    };
 
-    // Use closures when they have data, otherwise fall back to orders
-    const currentMonthOrders = orders.filter(
-      (o: { created_at: string; status: string; payment_status?: string }) => {
-        const orderDate = new Date(o.created_at);
-        return (
-          orderDate >= startOfMonth &&
-          (o.status === "completed" || o.payment_status === "paid")
-        );
-      },
-    );
-    const ordersCurrentRevenue = currentMonthOrders.reduce(
-      (sum: number, o: { total_amount?: number | null }) =>
-        sum + (o.total_amount || 0),
-      0,
-    );
-    const lastMonthOrders = orders.filter(
-      (o: { created_at: string; status: string; payment_status?: string }) => {
-        const orderDate = new Date(o.created_at);
-        return (
-          orderDate >= startOfLastMonth &&
-          orderDate <= endOfLastMonth &&
-          (o.status === "completed" || o.payment_status === "paid")
-        );
-      },
-    );
-    const ordersLastRevenue = lastMonthOrders.reduce(
-      (sum: number, o: { total_amount?: number | null }) =>
-        sum + (o.total_amount || 0),
-      0,
-    );
-
-    const currentMonthRevenue =
-      closuresCurrentRevenue > 0
-        ? closuresCurrentRevenue
-        : ordersCurrentRevenue;
-    const lastMonthRevenue =
-      closuresLastRevenue > 0 ? closuresLastRevenue : ordersLastRevenue;
-
-    // Calculate revenue change
-    const revenueChange =
-      lastMonthRevenue > 0
-        ? ((currentMonthRevenue - lastMonthRevenue) / lastMonthRevenue) * 100
-        : 0;
-
-    // === CUSTOMERS METRICS ===
+    // === Customers metrics ===
     const newCustomers = customers.filter(
       (c: { created_at: string }) => new Date(c.created_at) >= thirtyDaysAgo,
     ).length;
     const returningCustomers = customers.length - newCustomers;
 
-    // === APPOINTMENTS METRICS (Optical Shop) ===
-    const today = new Date();
-    const todayStr = getLocalDateString(today);
+    // === Quotes breakdown ===
+    const pendingQuotes = quotesLight.filter(
+      (q: { status: string; converted_to_work_order_id?: string | null }) =>
+        ["draft", "sent"].includes(q.status) && !q.converted_to_work_order_id,
+    ).length;
+    const convertedQuotes = quotesLight.filter(
+      (q: { status: string; converted_to_work_order_id?: string | null }) =>
+        q.status === "accepted" || q.converted_to_work_order_id,
+    ).length;
 
-    // Filter appointments by organization AND branch (if selected)
-    // Use or for global view to support legacy data where organization_id might be null but branch_id is in org
+    // === Today's appointments count ===
     let appointmentsQuery;
 
     if (
@@ -382,43 +336,36 @@ export async function GET(request: NextRequest) {
       branchContext.organizationId &&
       orgBranchIds.length > 0
     ) {
-      // Global View: include by organization_id OR by branch in org (legacy)
       appointmentsQuery = supabase
         .from("appointments")
         .select("*")
+        .eq("appointment_date", todayStr)
         .or(
           `organization_id.eq.${branchContext.organizationId},branch_id.in.(${orgBranchIds.join(",")})`,
         );
     } else if (branchContext.branchId) {
-      // Branch View: branch_id = current OR branch_id IS NULL (global appointments)
-      // We don't strictly filter by organization_id here to stay resilient to null-org legacy data
-      // but the branch_id isolation is provided by the branchId filter
       appointmentsQuery = supabase
         .from("appointments")
         .select("*")
+        .eq("appointment_date", todayStr)
         .or(`branch_id.eq.${branchContext.branchId},branch_id.is.null`);
     } else {
-      appointmentsQuery = applyBranchFilter(
-        supabase.from("appointments").select("*"),
+      appointmentsQuery = applyBranchFilterFn(
+        supabase
+          .from("appointments")
+          .select("*")
+          .eq("appointment_date", todayStr),
       );
     }
 
     const { data: appointmentsData, error: appointmentsError } =
-      await appointmentsQuery.eq("appointment_date", todayStr);
+      await appointmentsQuery;
 
     if (appointmentsError) {
       logger.error("Error fetching appointments", appointmentsError);
     }
 
     const appointments = appointmentsData || [];
-
-    logger.info("Dashboard - Appointments fetched", {
-      count: appointments.length,
-      today: todayStr,
-      orgId: branchContext.organizationId,
-      branchId: branchContext.branchId,
-      isSuperAdmin: branchContext.isSuperAdmin,
-    });
 
     const todayAppointments = appointments.length;
     const scheduledAppointments = appointments.filter(
@@ -432,51 +379,7 @@ export async function GET(request: NextRequest) {
         a.status === "scheduled" || a.status === "pending",
     ).length;
 
-    // === WORK ORDERS METRICS (Optical Shop) ===
-    const { data: workOrdersData } = await applyBranchFilter(
-      supabase.from("lab_work_orders").select("*"),
-    );
-
-    const workOrders = workOrdersData || [];
-    // Trabajos en progreso: enviados al lab, en lab, listos en lab, recibidos, montados, control calidad
-    const inProgressWorkOrders = workOrders.filter((wo: { status: string }) =>
-      [
-        "sent_to_lab",
-        "in_progress_lab",
-        "ready_at_lab",
-        "received_from_lab",
-        "mounted",
-        "quality_check",
-      ].includes(wo.status),
-    ).length;
-    // Trabajos nuevos/pendientes: ordenados (recién creados, no enviados aún)
-    const pendingWorkOrders = workOrders.filter(
-      (wo: { status: string }) =>
-        wo.status === "ordered" || wo.status === "quote",
-    ).length;
-    // Trabajos completados: entregados
-    const completedWorkOrders = workOrders.filter(
-      (wo: { status: string }) => wo.status === "delivered",
-    ).length;
-
-    // === QUOTES METRICS (Optical Shop) ===
-    const { data: quotesData } = await applyBranchFilter(
-      supabase.from("quotes").select("*"),
-    );
-
-    const quotes = quotesData || [];
-    // Presupuestos pendientes: borrador, enviado (esperando respuesta)
-    const pendingQuotes = quotes.filter(
-      (q: { status: string; converted_to_work_order_id?: string | null }) =>
-        ["draft", "sent"].includes(q.status) && !q.converted_to_work_order_id,
-    ).length;
-    // Presupuestos convertidos: aceptados o convertidos a trabajo
-    const convertedQuotes = quotes.filter(
-      (q: { status: string; converted_to_work_order_id?: string | null }) =>
-        q.status === "accepted" || q.converted_to_work_order_id,
-    ).length;
-
-    // === TODAY'S APPOINTMENTS LIST ===
+    // === Today's appointments list ===
     let todayAppointmentsListQuery;
     if (
       branchContext.isSuperAdmin &&
@@ -498,7 +401,7 @@ export async function GET(request: NextRequest) {
         .eq("appointment_date", todayStr)
         .or(`branch_id.eq.${branchContext.branchId},branch_id.is.null`);
     } else {
-      todayAppointmentsListQuery = applyBranchFilter(
+      todayAppointmentsListQuery = applyBranchFilterFn(
         supabase
           .from("appointments")
           .select("*")
@@ -510,7 +413,7 @@ export async function GET(request: NextRequest) {
       .order("appointment_time", { ascending: true })
       .limit(10);
 
-    // Fetch customer data manually
+    // Fetch customer names for the appointment list
     const customerIds = [
       ...new Set(
         (todayAppointmentsData || [])
@@ -518,7 +421,7 @@ export async function GET(request: NextRequest) {
           .filter(Boolean),
       ),
     ];
-    const { data: customersData } =
+    const { data: customersForAppts } =
       customerIds.length > 0
         ? await supabase
             .from("customers")
@@ -536,7 +439,7 @@ export async function GET(request: NextRequest) {
         duration_minutes: number | null;
         notes?: string | null;
       }) => {
-        const customer = customersData?.find(
+        const customer = customersForAppts?.find(
           (c: { id: string }) => c.id === apt.customer_id,
         );
         return {
@@ -556,133 +459,53 @@ export async function GET(request: NextRequest) {
       },
     );
 
-    // === REVENUE TREND (configurable period: 7, 30, 90, 365 days) ===
-    // Granularity: 7-30 days = daily, 90 days = ~3-day buckets, 365 = monthly
-    const bucketCount =
-      periodDays <= 30 ? periodDays : periodDays <= 90 ? 30 : 12;
-    const bucketSize = Math.ceil(periodDays / bucketCount);
-    const revenueTrend: Array<{
-      date: string;
-      revenue: number;
-      orders: number;
-    }> = [];
-
-    for (let b = 0; b < bucketCount; b++) {
-      const bucketStart = new Date(now);
-      bucketStart.setDate(bucketStart.getDate() - periodDays + b * bucketSize);
-      bucketStart.setHours(0, 0, 0, 0);
-      const bucketEnd = new Date(bucketStart);
-      bucketEnd.setDate(bucketEnd.getDate() + bucketSize);
-
-      let bucketRevenue = 0;
-      let bucketOrders = 0;
-
-      // From closures (preferred when available)
-      const bucketClosures = closures.filter((c: { closure_date: string }) => {
-        const d = new Date(c.closure_date);
-        return d >= bucketStart && d < bucketEnd;
-      });
-      bucketRevenue = bucketClosures.reduce(
-        (s: number, c: { total_sales?: number | null }) =>
-          s + (c.total_sales || 0),
-        0,
-      );
-      bucketOrders = bucketClosures.reduce(
-        (s: number, c: { total_transactions?: number | null }) =>
-          s + (c.total_transactions || 0),
-        0,
-      );
-
-      // From orders (when closures have no data for this bucket)
-      if (bucketRevenue === 0) {
-        const bucketOrderList = orders.filter(
-          (o: {
-            created_at: string;
-            status: string;
-            payment_status?: string;
-          }) => {
-            const orderDate = new Date(o.created_at);
-            return (
-              orderDate >= bucketStart &&
-              orderDate < bucketEnd &&
-              (o.status === "completed" || o.payment_status === "paid")
-            );
-          },
-        );
-        bucketRevenue = bucketOrderList.reduce(
-          (s: number, o: { total_amount?: number | null }) =>
-            s + (o.total_amount || 0),
-          0,
-        );
-        bucketOrders = bucketOrderList.length;
-      }
-
-      revenueTrend.push({
-        date: getLocalDateString(bucketStart),
-        revenue: bucketRevenue,
-        orders: bucketOrders,
-      });
-    }
-
-    const last7Days = revenueTrend;
-
-    // === ORDERS STATUS DISTRIBUTION (Last 30 days) ===
-    const last30DaysOrders = orders.filter(
-      (o: { created_at: string }) => new Date(o.created_at) >= thirtyDaysAgo,
-    );
-
-    const statusDistribution = {
-      pending: last30DaysOrders.filter(
-        (o: { status: string }) => o.status === "pending",
-      ).length,
-      processing: last30DaysOrders.filter(
-        (o: { status: string }) => o.status === "processing",
-      ).length,
-      completed: last30DaysOrders.filter(
-        (o: { status: string }) => o.status === "completed",
-      ).length,
-      failed: last30DaysOrders.filter(
-        (o: { status: string }) => o.status === "failed",
-      ).length,
-      shipped: last30DaysOrders.filter(
-        (o: { status: string }) => o.status === "shipped",
-      ).length,
-    };
-
-    // === TOP PRODUCTS (by revenue) ===
-    const productRevenue = new Map();
-
-    orders
-      .filter(
-        (o: { status: string; payment_status?: string }) =>
-          o.status === "completed" || o.payment_status === "paid",
+    // === Top products (by revenue) ===
+    // ponytail: period-scoped orders query for top products replaces full fetch
+    const topProductsQuery = supabase
+      .from("orders")
+      .select(
+        `
+        order_items (
+          product_name,
+          total_price,
+          quantity
+        )
+      `,
       )
-      .forEach(
-        (order: {
-          order_items?: Array<{
+      .or("status.eq.completed,payment_status.eq.paid")
+      .gte("created_at", startOfLastMonth.toISOString());
+
+    const topProductsScoped = buildLegacyScope(topProductsQuery);
+
+    const { data: topProductsData } = await topProductsScoped;
+
+    const productRevenue = new Map();
+    (topProductsData || []).forEach(
+      (order: {
+        order_items?: Array<{
+          product_name: string;
+          total_price: number | null;
+          quantity: number | null;
+        }>;
+      }) => {
+        order.order_items?.forEach(
+          (item: {
             product_name: string;
             total_price: number | null;
             quantity: number | null;
-          }>;
-        }) => {
-          order.order_items?.forEach(
-            (item: {
-              product_name: string;
-              total_price: number | null;
-              quantity: number | null;
-            }) => {
-              const current = productRevenue.get(item.product_name) || {
-                revenue: 0,
-                quantity: 0,
-              };
-              productRevenue.set(item.product_name, {
-                revenue: current.revenue + (item.total_price || 0),
-                quantity: current.quantity + (item.quantity || 0),
-              });
-            },
-          );
-        },
-      );
+          }) => {
+            const current = productRevenue.get(item.product_name) || {
+              revenue: 0,
+              quantity: 0,
+            };
+            productRevenue.set(item.product_name, {
+              revenue: current.revenue + (item.total_price || 0),
+              quantity: current.quantity + (item.quantity || 0),
+            });
+          },
+        );
+      },
+    );
 
     const topProducts = Array.from(productRevenue.entries())
       .map(([name, data]) => ({ name, ...data }))
@@ -704,18 +527,13 @@ export async function GET(request: NextRequest) {
           outOfStock: outOfStockProducts,
         },
         orders: {
-          total: orders.length,
+          total: mvKpis.orders.total,
           pending: pendingOrders,
           processing: processingOrders,
           completed: completedOrders,
           failed: failedOrders,
         },
-        revenue: {
-          current: currentMonthRevenue,
-          previous: lastMonthRevenue,
-          change: revenueChange,
-          currency: "CLP",
-        },
+        revenue: mvKpis.revenue,
         customers: {
           total: customers.length,
           new: newCustomers,
@@ -727,14 +545,9 @@ export async function GET(request: NextRequest) {
           confirmed: confirmedAppointments,
           pending: pendingAppointments,
         },
-        workOrders: {
-          total: workOrders.length,
-          inProgress: inProgressWorkOrders,
-          pending: pendingWorkOrders,
-          completed: completedWorkOrders,
-        },
+        workOrders: mvKpis.workOrders,
         quotes: {
-          total: quotes.length,
+          total: mvKpis.quotes.total,
           pending: pendingQuotes,
           converted: convertedQuotes,
         },
@@ -742,7 +555,7 @@ export async function GET(request: NextRequest) {
       todayAppointments: todayAppointmentsList,
       lowStockProducts,
       charts: {
-        revenueTrend: last7Days,
+        revenueTrend: mvKpis.charts.revenueTrend,
         ordersStatus: statusDistribution,
         topProducts,
       },

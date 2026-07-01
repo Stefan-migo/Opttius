@@ -30,7 +30,7 @@ Chain strategy: stacked-to-main
 
 ## Phase 2: Dashboard API Rewrite (PR 2)
 
-- [ ] 2.1 Rewrite `src/app/api/admin/dashboard/route.ts` — replace in-memory aggregation loops with MV queries. Keep direct LIMIT queries for today's appointments, low stock, top products, customer count. Keep auth, branch context, response shape.
+- [x] 2.1 Rewrite `src/app/api/admin/dashboard/route.ts` — replace in-memory aggregation loops with MV queries. Keep direct LIMIT queries for today's appointments, low stock, top products, customer count. Keep auth, branch context, response shape.
 
 ## Phase 3: Analytics API Rewrite (PR 3)
 
