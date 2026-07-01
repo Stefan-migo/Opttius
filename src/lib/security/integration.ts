@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { getClientIdentifier } from "@/lib/rate-limiting/config";
+
 import { getSecurityAlerting, getSecurityMonitor } from "./shared";
 
 /**
@@ -66,48 +67,6 @@ export function withAuthSecurity(
           userAgent,
         },
       );
-
-      throw error;
-    }
-  };
-}
-
-/**
- * Middleware for rate limiting security monitoring
- *
- * Integrates with rate limiting to log security events for violations
- */
-export function withRateLimitSecurity(
-  handler: (request: NextRequest) => Promise<NextResponse>,
-  endpointCategory: string = "general",
-): (request: NextRequest) => Promise<NextResponse> {
-  return async (request: NextRequest) => {
-    const securityMonitor = getSecurityMonitor();
-    const clientIp = getClientIdentifier(request);
-
-    try {
-      const response = await handler(request);
-      return response;
-    } catch (error) {
-      // Check if this is a rate limit error
-      if (
-        error instanceof Error &&
-        error.message.includes("Rate limit exceeded")
-      ) {
-        securityMonitor.logRateLimitEvent(
-          "rate_limit.exceeded",
-          {
-            endpoint: request.nextUrl.pathname,
-            requestCount: 1, // Would need actual count tracking
-            limit: 100, // Default value, would come from actual config
-            windowMs: 15 * 60 * 1000, // Default 15 minutes
-          },
-          {
-            ipAddress: clientIp,
-            requestId: request.headers.get("X-Request-ID") || undefined,
-          },
-        );
-      }
 
       throw error;
     }
