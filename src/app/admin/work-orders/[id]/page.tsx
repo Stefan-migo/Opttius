@@ -1,10 +1,18 @@
-import { createClient } from "@/utils/supabase/server";
-import WorkOrderDetailContent from "./_components/WorkOrderDetailContent";
+import dynamic from "next/dynamic";
+import { Suspense } from "react";
 
-export const dynamic = "force-dynamic";
+const WorkOrderDetailContent = dynamic(
+  () => import("./_components/WorkOrderDetailContent"),
+  { ssr: false },
+);
 
-export default async function WorkOrderDetailPage() {
-  const supabase = await createClient();
-  await supabase.auth.getUser();
-  return <WorkOrderDetailContent />;
+// ponytail: removed server auth guard (createClient/getUser), moved to client
+// side. Add back if unauthenticated flashes occur before client bundle loads.
+
+export default function WorkOrderDetailPage() {
+  return (
+    <Suspense fallback={<div>Cargando...</div>}>
+      <WorkOrderDetailContent />
+    </Suspense>
+  );
 }

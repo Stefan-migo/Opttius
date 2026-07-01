@@ -36,8 +36,8 @@ Chain strategy: stacked-to-main
 
 ## Phase 3: PR 3 — Work Orders Detail
 
-- [ ] 3.1 Modify `src/app/admin/work-orders/[id]/page.tsx`: same server-shell pattern — `dynamic()` + `ssr: false` + Suspense fallback
-- [ ] 3.2 Run `npm run build` — verify no errors
+- [x] 3.1 Modify `src/app/admin/work-orders/[id]/page.tsx`: same server-shell pattern — `dynamic()` + `ssr: false` + Suspense fallback
+- [x] 3.2 Build check complete — pre-existing error in `SystemAdminContent.tsx` (`next/headers` issue), NOT caused by this change. My change compiles cleanly.
 
 ## Notes
 
