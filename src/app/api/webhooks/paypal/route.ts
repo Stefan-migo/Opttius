@@ -1,24 +1,78 @@
 /**
  * POST /api/webhooks/paypal
  * Recibe eventos de PayPal (CHECKOUT.ORDER.COMPLETED, PAYMENT.CAPTURE.COMPLETED).
+ * Valida firma del webhook via PayPal REST API antes de procesar.
  * Sin rate limiting. Idempotencia con webhook_events.
- * En producción se debe validar la firma del webhook (PAYPAL_WEBHOOK_ID).
  */
 
 import { NextRequest, NextResponse } from "next/server";
 
 import { appLogger as logger } from "@/lib/logger";
-import { PayPalGateway } from "@/lib/payments/paypal/gateway";
+import {
+  PayPalGateway,
+  type PayPalWebhookHeaders,
+} from "@/lib/payments/paypal/gateway";
 import { PaymentService } from "@/lib/payments/services/payment-service";
 import { createServiceRoleClient } from "@/utils/supabase/server";
 
 export const dynamic = "force-dynamic";
+
+/**
+ * Extract PayPal signature headers from request.
+ * Returns null if any required header is missing.
+ */
+function extractPayPalHeaders(
+  request: NextRequest,
+): PayPalWebhookHeaders | null {
+  const authAlgo = request.headers.get("paypal-auth-algo");
+  const certUrl = request.headers.get("paypal-cert-url");
+  const transmissionId = request.headers.get("paypal-transmission-id");
+  const transmissionSig = request.headers.get("paypal-transmission-sig");
+  const transmissionTime = request.headers.get("paypal-transmission-time");
+
+  if (!authAlgo || !certUrl || !transmissionId || !transmissionSig || !transmissionTime) {
+    return null;
+  }
+
+  return {
+    "paypal-auth-algo": authAlgo,
+    "paypal-cert-url": certUrl,
+    "paypal-transmission-id": transmissionId,
+    "paypal-transmission-sig": transmissionSig,
+    "paypal-transmission-time": transmissionTime,
+  };
+}
+
 export async function POST(request: NextRequest) {
   const supabase = createServiceRoleClient();
   const paypalGateway = new PayPalGateway();
   const paymentService = new PaymentService(supabase);
 
   try {
+    // Read raw body for signature verification, then let processWebhookEvent parse JSON
+    const rawBody = await request.clone().text();
+
+    const headers = extractPayPalHeaders(request);
+    if (!headers) {
+      logger.warn("PayPal Webhook: missing signature headers");
+      return NextResponse.json(
+        { error: "Invalid signature" },
+        { status: 401 },
+      );
+    }
+
+    const isValid = await paypalGateway.validateWebhookSignature(
+      headers,
+      rawBody,
+    );
+    if (!isValid) {
+      logger.warn("PayPal Webhook: signature validation failed");
+      return NextResponse.json(
+        { error: "Invalid signature" },
+        { status: 401 },
+      );
+    }
+
     const webhookEvent = await paypalGateway.processWebhookEvent(request);
     logger.info("PayPal Webhook Event processed", {
       gatewayEventId: webhookEvent.gatewayEventId,

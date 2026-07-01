@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { Webhook } from "svix";
 
 import { appLogger as logger } from "@/lib/logger";
 import { createServiceRoleClient } from "@/utils/supabase/server";
@@ -35,7 +36,49 @@ interface ResendWebhookPayload {
 export const dynamic = "force-dynamic";
 export async function POST(request: NextRequest) {
   try {
-    const body = (await request.json()) as ResendWebhookPayload;
+    // Read raw body ONCE — used for both signature verification and JSON parsing
+    const rawBody = await request.text();
+    const secret = process.env.RESEND_WEBHOOK_SECRET;
+
+    if (!secret) {
+      // ponytail: dev-only skip; in production, missing secret means misconfiguration
+      if (process.env.NODE_ENV === "production") {
+        logger.error("Resend webhook: RESEND_WEBHOOK_SECRET not configured");
+        return NextResponse.json({ error: "Not configured" }, { status: 401 });
+      }
+      logger.warn(
+        "Resend webhook: RESEND_WEBHOOK_SECRET not set, skipping verification in dev",
+      );
+    } else {
+      const svixId = request.headers.get("svix-id");
+      const svixTimestamp = request.headers.get("svix-timestamp");
+      const svixSignature = request.headers.get("svix-signature");
+
+      if (!svixId || !svixTimestamp || !svixSignature) {
+        logger.warn("Resend webhook: missing Svix headers");
+        return NextResponse.json(
+          { error: "Missing Svix headers" },
+          { status: 401 },
+        );
+      }
+
+      const wh = new Webhook(secret);
+      try {
+        wh.verify(rawBody, {
+          "svix-id": svixId,
+          "svix-timestamp": svixTimestamp,
+          "svix-signature": svixSignature,
+        });
+      } catch {
+        logger.warn("Resend webhook: invalid signature");
+        return NextResponse.json(
+          { error: "Invalid signature" },
+          { status: 401 },
+        );
+      }
+    }
+
+    const body = JSON.parse(rawBody) as ResendWebhookPayload;
 
     const eventType = body.type;
     if (

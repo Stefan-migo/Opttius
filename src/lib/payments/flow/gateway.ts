@@ -151,9 +151,17 @@ export class FlowGateway implements IPaymentGateway {
       throw new Error("Flow Webhook: missing required fields");
     }
 
-    // Verificar firma si está presente (Flow puede enviar firma en el callback)
+    // Verificar firma — obligatoria en producción
     const signature = formData.get("s")?.toString();
-    if (signature) {
+    if (!signature) {
+      if (process.env.NODE_ENV === "production") {
+        logger.warn("Flow Webhook: missing signature in production, rejecting");
+        throw new Error("Flow Webhook: Missing signature in production");
+      }
+      logger.warn(
+        "Flow Webhook: signature missing, skipping verification in development",
+      );
+    } else {
       const { secretKey } = getFlowConfig();
       const params: Record<string, string> = {};
       for (const [key, value] of formData.entries()) {
