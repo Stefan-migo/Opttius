@@ -16,7 +16,7 @@ import {
   TrendingUp,
   Wrench,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import { EnhancedAreaChart } from "@/components/admin/charts/EnhancedAreaChart";
 import { EnhancedBarChart } from "@/components/admin/charts/EnhancedBarChart";
@@ -36,8 +36,8 @@ import {
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useBranch } from "@/hooks/useBranch";
-import { getBranchHeader } from "@/lib/utils/branch";
 
+import { useAnalytics } from "../../hooks/useAnalytics";
 import { AnalyticsHeader } from "./AnalyticsHeader";
 import { AnalyticsKPICards } from "./AnalyticsKPICards";
 
@@ -135,11 +135,7 @@ export default function AnalyticsContent() {
     branches,
     isLoading: branchLoading,
   } = useBranch();
-  const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [period, setPeriod] = useState("30");
-  const [refreshing, setRefreshing] = useState(false);
 
   // Chart type selectors - Changed defaults from "area" to "column"
   const [salesChartType, setSalesChartType] = useState<"column" | "line">(
@@ -154,38 +150,14 @@ export default function AnalyticsContent() {
 
   const isGlobalView = !currentBranchId && isSuperAdmin;
 
-  useEffect(() => {
-    fetchAnalytics();
-  }, [period, currentBranchId]);
-
-  const fetchAnalytics = async () => {
-    try {
-      setLoading(true);
-      setRefreshing(true);
-
-      const headers: HeadersInit = {
-        ...getBranchHeader(currentBranchId),
-      };
-
-      const response = await fetch(
-        `/api/admin/analytics/dashboard?period=${period}`,
-        { headers },
-      );
-      if (!response.ok) {
-        throw new Error("Failed to fetch analytics");
-      }
-
-      const data = await response.json();
-      setAnalytics(data.data?.analytics ?? data.analytics ?? null);
-      setError(null);
-    } catch (err) {
-      console.error("Error fetching analytics:", err);
-      setError(err instanceof Error ? err.message : "Unknown error occurred");
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  };
+  const {
+    data,
+    isLoading,
+    error,
+    refetch,
+    isRefetching,
+  } = useAnalytics({ branchId: currentBranchId, period });
+  const analytics = data as AnalyticsData;
 
   const formatPrice = (amount: number) =>
     new Intl.NumberFormat("es-CL", {
@@ -272,7 +244,7 @@ export default function AnalyticsContent() {
     return labels[status] || status;
   };
 
-  if (loading && !analytics) {
+  if (isLoading && !analytics) {
     return (
       <div className="space-y-6">
         <div className="space-y-4">
@@ -315,9 +287,9 @@ export default function AnalyticsContent() {
               Error al cargar analíticas
             </h3>
             <p className="text-admin-text-tertiary mb-4">
-              {error || "No se pudieron cargar los datos"}
+              {error?.message || "No se pudieron cargar los datos"}
             </p>
-            <Button onClick={fetchAnalytics}>Reintentar</Button>
+            <Button onClick={refetch}>Reintentar</Button>
           </CardContent>
         </Card>
       </div>
@@ -334,9 +306,9 @@ export default function AnalyticsContent() {
             : `Métricas y análisis - Últimos ${analytics.period.days} días`
         }
         period={period}
-        refreshing={refreshing}
+        refreshing={isRefetching}
         onPeriodChange={setPeriod}
-        onRefresh={fetchAnalytics}
+        onRefresh={refetch}
       />
 
       <AnalyticsKPICards

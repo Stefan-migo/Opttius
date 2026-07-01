@@ -32,9 +32,9 @@ Chain strategy: stacked-to-main
 
 ## Phase 2: PR 2 — Analytics (base: main)
 
-- [ ] 2.1 Create `src/app/admin/hooks/useAnalytics.ts` — hook fetching `/api/admin/analytics/dashboard?period=X`, `staleTime: 5*60*1000`
-- [ ] 2.2 Edit `AnalyticsContent.tsx` — remove `fetchAnalytics()`, `analytics`/`loading`/`error`/`refreshing` states, data `useEffect`; import + call `useAnalytics()`
-- [ ] 2.3 Edit `AnalyticsContent.tsx` — replace `fetchAnalytics` in `onRefresh` with `refetch()`, `refreshing` with `isRefetching`; `setPeriod` triggers cache refresh via queryKey
+- [x] 2.1 Create `src/app/admin/hooks/useAnalytics.ts` — hook fetching `/api/admin/analytics/dashboard?period=X`, `staleTime: 5*60*1000`
+- [x] 2.2 Edit `AnalyticsContent.tsx` — remove `fetchAnalytics()`, `analytics`/`loading`/`error`/`refreshing` states, data `useEffect`; import + call `useAnalytics()`
+- [x] 2.3 Edit `AnalyticsContent.tsx` — replace `fetchAnalytics` in `onRefresh` with `refetch()`, `refreshing` with `isRefetching`; `setPeriod` triggers cache refresh via queryKey
 
 ## Phase 3: PR 3 — Appointments (base: main)
 
