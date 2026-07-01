@@ -1,5 +1,6 @@
 "use client";
 
+import { useQueryClient } from "@tanstack/react-query";
 import {
   AlertTriangle,
   CalendarPlus,
@@ -8,22 +9,24 @@ import {
   XCircle,
 } from "lucide-react";
 import dynamic from "next/dynamic";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 
+import { AppointmentsList } from "@/components/admin/dashboard";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useBranch } from "@/hooks/useBranch";
+import { useMobileView } from "@/hooks/useMobileView";
+
+import { useDashboard } from "../hooks/useDashboard";
 import DashboardAlerts from "./DashboardAlerts";
 import DashboardCharts from "./DashboardCharts";
 import DashboardHeader from "./DashboardHeader";
 import DashboardKPICards from "./DashboardKPICards";
 import type { DashboardData } from "./types";
-import { AppointmentsList } from "@/components/admin/dashboard";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import { Skeleton } from "@/components/ui/skeleton";
-import { useBranch } from "@/hooks/useBranch";
-import { useMobileView } from "@/hooks/useMobileView";
 
 const CreateAppointmentForm = dynamic(
   () => import("@/components/admin/CreateAppointmentForm"),
@@ -37,122 +40,24 @@ const CreateAppointmentForm = dynamic(
   },
 );
 
-
-const defaultDashboardData: DashboardData = {
-  kpis: {
-    revenue: {
-      current: 0,
-      previous: 0,
-      change: 0,
-      currency: "CLP",
-    },
-    orders: {
-      total: 0,
-      pending: 0,
-      processing: 0,
-      completed: 0,
-      failed: 0,
-    },
-    products: {
-      total: 0,
-      lowStock: 0,
-      outOfStock: 0,
-    },
-    customers: {
-      total: 0,
-      new: 0,
-      returning: 0,
-    },
-    appointments: {
-      today: 0,
-      scheduled: 0,
-      confirmed: 0,
-      pending: 0,
-    },
-    workOrders: {
-      new: 0,
-      total: 0,
-      inProgress: 0,
-      pending: 0,
-      completed: 0,
-    },
-    quotes: {
-      total: 0,
-      pending: 0,
-      converted: 0,
-    },
-  },
-  todayAppointments: [],
-  lowStockProducts: [],
-  charts: {
-    revenueTrend: [],
-    ordersStatus: {},
-    topProducts: [],
-  },
-};
-
 export default function AdminDashboardContent() {
   const { currentBranchId, isSuperAdmin, branches } = useBranch();
   const { isMobile } = useMobileView();
   const isGlobalView = !currentBranchId && isSuperAdmin;
 
-  const [isLoading, setIsLoading] = useState(true);
-  const [data, setData] = useState<DashboardData>(defaultDashboardData);
-  const [error, setError] = useState<string | null>(null);
   const [isAppointmentModalOpen, setIsAppointmentModalOpen] = useState(false);
   const [revenuePeriod, setRevenuePeriod] = useState<string>("7");
-  const [refreshing, setRefreshing] = useState(false);
+
+  const queryClient = useQueryClient();
+
+  const { data, isLoading, error, refetch, isRefetching } = useDashboard({
+    branchId: currentBranchId,
+    isGlobalView,
+    isSuperAdmin,
+    period: revenuePeriod,
+  });
+
   const pendingWorkOrders = data?.kpis?.workOrders?.pending ?? 0;
-
-  const fetchDashboardData = async (isManualRefresh = false) => {
-    try {
-      if (isManualRefresh) {
-        setRefreshing(true);
-      } else {
-        setIsLoading(true);
-      }
-
-      const headers: HeadersInit = {
-        "Content-Type": "application/json",
-      };
-
-      if (currentBranchId) {
-        headers["x-branch-id"] = currentBranchId;
-      } else if (isGlobalView && isSuperAdmin) {
-        headers["x-branch-id"] = "global";
-      }
-
-      const params = new URLSearchParams({ period: revenuePeriod });
-      const response = await fetch(
-        `/api/admin/dashboard?${params.toString()}`,
-        { headers },
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch dashboard data");
-      }
-
-      const result = await response.json();
-      if (result.success) {
-        setData(result.data);
-        setError(null);
-      } else {
-        throw new Error(
-          result.error?.message || "Failed to fetch dashboard data",
-        );
-      }
-    } catch (err) {
-      console.error("Error fetching dashboard data:", err);
-      setError("Error al cargar los datos del dashboard");
-    } finally {
-      setIsLoading(false);
-      setRefreshing(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchDashboardData();
-  }, [currentBranchId, isGlobalView, revenuePeriod]);
 
   const getAppointmentStatusBadge = (status: string) => {
     switch (status) {
@@ -224,7 +129,7 @@ export default function AdminDashboardContent() {
     return `${hours}:${minutes}`;
   };
 
-  if (isLoading) {
+  if (isLoading && !data) {
     return (
       <div className="space-y-8 animate-in fade-in duration-500">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 pb-4 border-b border-admin-border-primary/20">
@@ -295,7 +200,7 @@ export default function AdminDashboardContent() {
             Disculpe las molestias
           </h2>
           <p className="text-admin-text-tertiary mb-6 leading-relaxed">
-            {error ||
+            {error?.message ||
               "Ocurrió un error inesperado al sincronizar con la central."}
           </p>
           <Button
@@ -312,30 +217,39 @@ export default function AdminDashboardContent() {
   return (
     <div className="space-y-6 md:space-y-8 animate-in fade-in duration-700">
       <DashboardHeader
-        refreshing={refreshing}
         pendingWorkOrders={pendingWorkOrders}
-        onRefresh={() => fetchDashboardData(true)}
+        refreshing={isRefetching}
         onOpenAppointment={() => setIsAppointmentModalOpen(true)}
+        onRefresh={() => refetch()}
       />
 
       <DashboardAlerts lowStockProducts={data?.lowStockProducts ?? []} />
 
       <AppointmentsList
-        appointments={(data?.todayAppointments ?? []) as { id: string; customer_name: string; appointment_time: string; appointment_type: string | null; status: string; duration_minutes: number }[]}
+        appointments={
+          (data?.todayAppointments ?? []) as {
+            id: string;
+            customer_name: string;
+            appointment_time: string;
+            appointment_type: string | null;
+            status: string;
+            duration_minutes: number;
+          }[]
+        }
         formatTime={formatTime}
         getAppointmentStatusBadge={getAppointmentStatusBadge}
       />
 
       <DashboardKPICards
-        data={data}
-        revenuePeriod={revenuePeriod}
         branches={branches}
         currentBranchId={currentBranchId}
+        data={data as DashboardData}
         isGlobalView={isGlobalView}
+        revenuePeriod={revenuePeriod}
       />
 
       <DashboardCharts
-        data={data}
+        data={data as DashboardData}
         revenuePeriod={revenuePeriod}
         onRevenuePeriodChange={setRevenuePeriod}
       />
@@ -361,7 +275,9 @@ export default function AdminDashboardContent() {
               onCancel={() => setIsAppointmentModalOpen(false)}
               onSuccess={() => {
                 setIsAppointmentModalOpen(false);
-                fetchDashboardData();
+                queryClient.invalidateQueries({
+                  queryKey: ["admin", "dashboard"],
+                });
                 toast.success("Cita agendada exitosamente");
               }}
             />
