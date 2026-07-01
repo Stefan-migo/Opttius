@@ -62,9 +62,7 @@ export async function handleGetCustomers(
   const { page, limit } = extractPaginationParams(request.url);
   const offset = (page - 1) * limit;
 
-  const { client: rawClient, getUser } = await createClientFromRequest(request);
-  // ponytail: client typed as unknown by createClientFromRequest — use any to match inline pattern
-  const supabase = rawClient as unknown;
+  const { client: supabase, getUser } = await createClientFromRequest(request);
   const user = (await getUser()).data?.user as
     | { id: string; email?: string }
     | undefined;

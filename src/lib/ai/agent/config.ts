@@ -165,8 +165,8 @@ CANAL WHATSAPP - CLIENTE:
   default: "",
 };
 
-// @ts-ignore
-SYSTEM_PROMPTS.default = SYSTEM_PROMPTS.optic_expert;
+(SYSTEM_PROMPTS as Record<string, string>).default =
+  SYSTEM_PROMPTS.optic_expert;
 
 export interface AgentConfig {
   systemPrompt: string;
