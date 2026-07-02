@@ -10,7 +10,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { appLogger as logger } from "@/lib/logger";
 import { PaymentGatewayFactory } from "@/lib/payments";
 import { PaymentService } from "@/lib/payments/services/payment-service";
-import { createServiceRoleClient } from "@/utils/supabase/server";
+import { createWebhookClient } from "@/utils/supabase/webhook";
 
 /**
  * POST /api/webhooks/nowpayments
@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
     });
 
     // Update payment status in database
-    const supabase = createServiceRoleClient();
+    const supabase = createWebhookClient();
     const paymentService = new PaymentService(supabase);
     await paymentService.updatePaymentFromWebhook(webhookEvent);
 

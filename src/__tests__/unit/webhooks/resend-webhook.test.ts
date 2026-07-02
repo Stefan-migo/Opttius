@@ -19,9 +19,9 @@ vi.mock("svix", () => ({
   Webhook: mockWebhookImpl,
 }));
 
-// Mock supabase service role client
-vi.mock("@/utils/supabase/server", () => ({
-  createServiceRoleClient: vi.fn(() => ({
+// Mock supabase webhook client
+vi.mock("@/utils/supabase/webhook", () => ({
+  createWebhookClient: vi.fn(() => ({
     from: vi.fn(() => ({
       insert: vi.fn(() => Promise.resolve({ error: null })),
     })),

@@ -9,11 +9,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { appLogger as logger } from "@/lib/logger";
 import { FlowGateway } from "@/lib/payments/flow/gateway";
 import { PaymentService } from "@/lib/payments/services/payment-service";
-import { createServiceRoleClient } from "@/utils/supabase/server";
+import { createWebhookClient } from "@/utils/supabase/webhook";
 
 export const dynamic = "force-dynamic";
 export async function POST(request: NextRequest) {
-  const supabase = createServiceRoleClient();
+  const supabase = createWebhookClient();
   const flowGateway = new FlowGateway();
   const paymentService = new PaymentService(supabase);
 

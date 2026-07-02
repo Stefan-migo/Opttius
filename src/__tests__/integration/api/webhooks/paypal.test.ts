@@ -55,8 +55,8 @@ vi.mock("@/lib/logger", () => ({
   },
 }));
 
-vi.mock("@/utils/supabase/server", () => ({
-  createServiceRoleClient: vi.fn(() => ({})),
+vi.mock("@/utils/supabase/webhook", () => ({
+  createWebhookClient: vi.fn(() => ({})),
 }));
 
 function makeValidHeaders(): Record<string, string> {

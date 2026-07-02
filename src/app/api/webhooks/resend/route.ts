@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { Webhook } from "svix";
 
 import { appLogger as logger } from "@/lib/logger";
-import { createServiceRoleClient } from "@/utils/supabase/server";
+import { createWebhookClient } from "@/utils/supabase/webhook";
 
 const ALLOWED_EVENTS = [
   "email.sent",
@@ -99,7 +99,7 @@ export async function POST(request: NextRequest) {
     const subject = data.subject || null;
     const templateId = data.template_id || null;
 
-    const supabase = createServiceRoleClient();
+    const supabase = createWebhookClient();
     const { error } = await supabase.from("email_send_events").insert({
       email_id: emailId,
       event_type: eventType,

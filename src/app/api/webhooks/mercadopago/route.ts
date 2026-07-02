@@ -12,10 +12,10 @@ import { MercadoPagoGateway } from "@/lib/payments/mercadopago/gateway";
 import { parseWebhookBody } from "@/lib/payments/mercadopago/webhook-parser";
 import { MercadoPagoWebhookValidator } from "@/lib/payments/mercadopago/webhook-validator";
 import { PaymentService } from "@/lib/payments/services/payment-service";
-import { createServiceRoleClient } from "@/utils/supabase/server";
+import { createWebhookClient } from "@/utils/supabase/webhook";
 
 async function processWebhook(request: NextRequest): Promise<NextResponse> {
-  const supabase = createServiceRoleClient();
+  const supabase = createWebhookClient();
   const mpGateway = new MercadoPagoGateway();
   const paymentService = new PaymentService(supabase);
   const validator = new MercadoPagoWebhookValidator();

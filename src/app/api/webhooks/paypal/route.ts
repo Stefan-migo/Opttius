@@ -13,7 +13,7 @@ import {
   type PayPalWebhookHeaders,
 } from "@/lib/payments/paypal/gateway";
 import { PaymentService } from "@/lib/payments/services/payment-service";
-import { createServiceRoleClient } from "@/utils/supabase/server";
+import { createWebhookClient } from "@/utils/supabase/webhook";
 
 export const dynamic = "force-dynamic";
 
@@ -44,7 +44,7 @@ function extractPayPalHeaders(
 }
 
 export async function POST(request: NextRequest) {
-  const supabase = createServiceRoleClient();
+  const supabase = createWebhookClient();
   const paypalGateway = new PayPalGateway();
   const paymentService = new PaymentService(supabase);
 
