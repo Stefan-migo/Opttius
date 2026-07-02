@@ -2,6 +2,7 @@ import "./globals.css";
 
 import type { Metadata } from "next";
 import { Cormorant_Garamond, Inter } from "next/font/google";
+import { headers } from "next/headers";
 
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { LandingStructuredData } from "@/components/landing/LandingStructuredData";
@@ -89,8 +90,11 @@ export default async function RootLayout({
     data: { user: serverUser },
   } = await supabase.auth.getUser();
 
+  // Nonce from middleware CSP — enables inline script execution
+  const nonce = (await headers()).get("x-nonce") ?? "";
+
   return (
-    <html suppressHydrationWarning lang="es">
+    <html suppressHydrationWarning lang="es" nonce={nonce}>
       <body
         className={`${inter.variable} ${cormorantGaramond.variable} font-sans antialiased`}
       >
