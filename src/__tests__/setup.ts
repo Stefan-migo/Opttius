@@ -25,6 +25,22 @@ Object.defineProperty(window, "localStorage", {
   value: localStorageMock,
 });
 
+// Mock IntersectionObserver
+class MockIntersectionObserver {
+  readonly root: Element | null = null;
+  readonly rootMargin: string = "0px";
+  readonly thresholds: ReadonlyArray<number> = [0];
+  observe = vi.fn();
+  unobserve = vi.fn();
+  disconnect = vi.fn();
+  takeRecords = vi.fn(() => []);
+}
+Object.defineProperty(global, "IntersectionObserver", {
+  value: MockIntersectionObserver,
+  writable: true,
+  configurable: true,
+});
+
 // Mock fetch
 global.fetch = vi.fn();
 

@@ -1,9 +1,6 @@
 "use client";
 
-import { motion, Transition } from "framer-motion";
-import { useEffect, useMemo, useRef, useState } from "react";
-
-type EasingFunction = (t: number) => number;
+import { useEffect, useMemo, useRef } from "react";
 
 type BlurTextProps = {
   text?: string;
@@ -13,29 +10,10 @@ type BlurTextProps = {
   direction?: "top" | "bottom";
   threshold?: number;
   rootMargin?: string;
-  animationFrom?: Record<string, string | number>;
-  animationTo?: Array<Record<string, string | number>>;
-  easing?: EasingFunction;
   onAnimationComplete?: () => void;
   stepDuration?: number;
   as?: keyof JSX.IntrinsicElements;
   style?: React.CSSProperties;
-};
-
-const buildKeyframes = (
-  from: Record<string, string | number>,
-  steps: Array<Record<string, string | number>>,
-): Record<string, Array<string | number>> => {
-  const keys = new Set<string>([
-    ...Object.keys(from),
-    ...steps.flatMap((s) => Object.keys(s)),
-  ]);
-
-  const keyframes: Record<string, Array<string | number>> = {};
-  keys.forEach((k) => {
-    keyframes[k] = [from[k], ...steps.map((s) => s[k])];
-  });
-  return keyframes;
 };
 
 const BlurText: React.FC<BlurTextProps> = ({
@@ -46,24 +24,22 @@ const BlurText: React.FC<BlurTextProps> = ({
   direction = "top",
   threshold = 0.1,
   rootMargin = "0px",
-  animationFrom,
-  animationTo,
-  easing = (t) => t,
   onAnimationComplete,
   stepDuration = 0.35,
   as = "p",
   style,
 }) => {
   const elements = animateBy === "words" ? text.split(" ") : text.split("");
-  const [inView, setInView] = useState(false);
   const ref = useRef<HTMLElement>(null);
+  const animateRef = useRef(false);
 
   useEffect(() => {
     if (!ref.current) return;
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          setInView(true);
+          animateRef.current = true;
+          ref.current?.classList.add("blur-text--animate");
           observer.unobserve(ref.current as Element);
         }
       },
@@ -73,80 +49,57 @@ const BlurText: React.FC<BlurTextProps> = ({
     return () => observer.disconnect();
   }, [threshold, rootMargin]);
 
-  const defaultFrom = useMemo(
-    () =>
-      direction === "top"
-        ? { filter: "blur(10px)", opacity: 0, y: -50 }
-        : { filter: "blur(10px)", opacity: 0, y: 50 },
-    [direction],
-  );
+  const tagName = as as keyof JSX.IntrinsicElements;
+  const Component = tagName;
 
-  const defaultTo = useMemo(
-    () => [
-      {
-        filter: "blur(5px)",
-        opacity: 0.5,
-        y: direction === "top" ? 5 : -5,
-      },
-      { filter: "blur(0px)", opacity: 1, y: 0 },
-    ],
-    [direction],
-  );
-
-  const fromSnapshot = animationFrom ?? defaultFrom;
-  const toSnapshots = animationTo ?? defaultTo;
-
-  const stepCount = toSnapshots.length + 1;
-  const totalDuration = stepDuration * (stepCount - 1);
-  const times = Array.from({ length: stepCount }, (_, i) =>
-    stepCount === 1 ? 0 : i / (stepCount - 1),
-  );
-
-  const Component = motion.create(as as unknown);
+  const totalDuration = stepDuration * 2;
 
   return (
-    <Component
-      className={`blur-text ${className} flex flex-wrap justify-center text-center`}
-      ref={ref}
-      style={style}
-    >
-      {elements.map((segment, index) => {
-        const animateKeyframes = buildKeyframes(fromSnapshot, toSnapshots);
-
-        const spanTransition: Transition = {
-          duration: totalDuration,
-          times,
-          delay: (index * delay) / 1000,
-          ease: easing,
-        };
-
-        return (
-          <motion.span
-            animate={inView ? animateKeyframes : fromSnapshot}
-            initial={fromSnapshot}
+    <>
+      <style>{`
+        @keyframes blurReveal-top {
+          0%   { filter: blur(10px); opacity: 0; transform: translateY(-50px); }
+          50%  { filter: blur(5px);  opacity: 0.5; transform: translateY(5px); }
+          100% { filter: blur(0px);  opacity: 1; transform: translateY(0); }
+        }
+        @keyframes blurReveal-bottom {
+          0%   { filter: blur(10px); opacity: 0; transform: translateY(50px); }
+          50%  { filter: blur(5px);  opacity: 0.5; transform: translateY(-5px); }
+          100% { filter: blur(0px);  opacity: 1; transform: translateY(0); }
+        }
+        .blur-text--animate > span {
+          animation: blurReveal-${direction} ${totalDuration}s linear both;
+        }
+      `}</style>
+      <Component
+        className={`blur-text ${className} flex flex-wrap justify-center text-center`}
+        ref={ref}
+        style={style}
+      >
+        {elements.map((segment, index) => (
+          <span
             key={index}
+            onAnimationEnd={
+              index === elements.length - 1 ? onAnimationComplete : undefined
+            }
             style={{
               display: "inline-block",
               willChange: "transform, filter, opacity",
-              // Inherit font styles from parent
               fontFamily: style?.fontFamily || "inherit",
               fontWeight: style?.fontWeight || "inherit",
               fontStyle: style?.fontStyle || "inherit",
               fontSize: "inherit",
               lineHeight: "inherit",
               letterSpacing: "inherit",
+              animationDelay: `${(index * delay) / 1000}s`,
             }}
-            transition={spanTransition}
-            onAnimationComplete={
-              index === elements.length - 1 ? onAnimationComplete : undefined
-            }
           >
             {segment === " " ? "\u00A0" : segment}
             {animateBy === "words" && index < elements.length - 1 && "\u00A0"}
-          </motion.span>
-        );
-      })}
-    </Component>
+          </span>
+        ))}
+      </Component>
+    </>
   );
 };
 
