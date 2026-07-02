@@ -23,7 +23,13 @@ import { useMobileView } from "@/hooks/useMobileView";
 
 import { useDashboard } from "../hooks/useDashboard";
 import DashboardAlerts from "./DashboardAlerts";
-import DashboardCharts from "./DashboardCharts";
+const DashboardCharts = dynamic(
+  () => import("./DashboardCharts"),
+  {
+    loading: () => <Skeleton className="h-[380px] w-full rounded-xl" />,
+    ssr: false,
+  },
+);
 import DashboardHeader from "./DashboardHeader";
 import DashboardKPICards from "./DashboardKPICards";
 import type { DashboardData } from "./types";

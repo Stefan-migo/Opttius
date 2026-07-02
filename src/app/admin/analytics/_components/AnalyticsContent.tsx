@@ -16,16 +16,63 @@ import {
   TrendingUp,
   Wrench,
 } from "lucide-react";
+import dynamic from "next/dynamic";
 import { useState } from "react";
 
-import { EnhancedAreaChart } from "@/components/admin/charts/EnhancedAreaChart";
-import { EnhancedBarChart } from "@/components/admin/charts/EnhancedBarChart";
-import { EnhancedColumnChart } from "@/components/admin/charts/EnhancedColumnChart";
-import { EnhancedLineChart } from "@/components/admin/charts/EnhancedLineChart";
-import { EnhancedPieChart } from "@/components/admin/charts/EnhancedPieChart";
+const EnhancedAreaChart = dynamic(
+  () =>
+    import("@/components/admin/charts/EnhancedAreaChart").then(
+      (m) => m.EnhancedAreaChart,
+    ),
+  {
+    loading: () => <Skeleton className="h-[300px] w-full rounded-xl" />,
+    ssr: false,
+  },
+);
+const EnhancedBarChart = dynamic(
+  () =>
+    import("@/components/admin/charts/EnhancedBarChart").then(
+      (m) => m.EnhancedBarChart,
+    ),
+  {
+    loading: () => <Skeleton className="h-[300px] w-full rounded-xl" />,
+    ssr: false,
+  },
+);
+const EnhancedColumnChart = dynamic(
+  () =>
+    import("@/components/admin/charts/EnhancedColumnChart").then(
+      (m) => m.EnhancedColumnChart,
+    ),
+  {
+    loading: () => <Skeleton className="h-[300px] w-full rounded-xl" />,
+    ssr: false,
+  },
+);
+const EnhancedLineChart = dynamic(
+  () =>
+    import("@/components/admin/charts/EnhancedLineChart").then(
+      (m) => m.EnhancedLineChart,
+    ),
+  {
+    loading: () => <Skeleton className="h-[300px] w-full rounded-xl" />,
+    ssr: false,
+  },
+);
+const EnhancedPieChart = dynamic(
+  () =>
+    import("@/components/admin/charts/EnhancedPieChart").then(
+      (m) => m.EnhancedPieChart,
+    ),
+  {
+    loading: () => <Skeleton className="h-[300px] w-full rounded-xl" />,
+    ssr: false,
+  },
+);
 import { MetricTooltip } from "@/components/admin/MetricTooltip";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
   TableBody,

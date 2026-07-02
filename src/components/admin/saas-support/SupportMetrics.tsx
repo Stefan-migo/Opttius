@@ -11,12 +11,42 @@ import {
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
-import { EnhancedBarChart } from "@/components/admin/charts/EnhancedBarChart";
-import { EnhancedColumnChart } from "@/components/admin/charts/EnhancedColumnChart";
-import { EnhancedPieChart } from "@/components/admin/charts/EnhancedPieChart";
+import dynamic from "next/dynamic";
+
+const EnhancedBarChart = dynamic(
+  () =>
+    import("@/components/admin/charts/EnhancedBarChart").then(
+      (m) => m.EnhancedBarChart,
+    ),
+  {
+    loading: () => <Skeleton className="h-[300px] w-full rounded-xl" />,
+    ssr: false,
+  },
+);
+const EnhancedColumnChart = dynamic(
+  () =>
+    import("@/components/admin/charts/EnhancedColumnChart").then(
+      (m) => m.EnhancedColumnChart,
+    ),
+  {
+    loading: () => <Skeleton className="h-[300px] w-full rounded-xl" />,
+    ssr: false,
+  },
+);
+const EnhancedPieChart = dynamic(
+  () =>
+    import("@/components/admin/charts/EnhancedPieChart").then(
+      (m) => m.EnhancedPieChart,
+    ),
+  {
+    loading: () => <Skeleton className="h-[300px] w-full rounded-xl" />,
+    ssr: false,
+  },
+);
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface SupportMetrics {
   totalTickets: number;
