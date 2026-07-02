@@ -10,10 +10,6 @@ vi.mock("../resolvers", () => ({
   ),
 }));
 
-vi.mock("@/utils/supabase/server", () => ({
-  createServiceRoleClient: vi.fn(),
-}));
-
 describe("appointmentTools", () => {
   let mockSupabase: ReturnType<typeof createMockSupabase>;
 
@@ -217,10 +213,10 @@ describe("appointmentTools", () => {
     const tool = appointmentTools.find((t) => t.name === "rescheduleAppointment")!;
 
     it("reschedules when slot is available", async () => {
-      const { createServiceRoleClient } = await import("@/utils/supabase/server");
-      vi.mocked(createServiceRoleClient).mockReturnValue({
-        rpc: vi.fn().mockResolvedValue({ data: [{ time_slot: "14:00", available: true }], error: null }),
-      } as never);
+      mockSupabase.rpc.mockResolvedValue({
+        data: [{ time_slot: "14:00", available: true }],
+        error: null,
+      });
 
       mockSupabase.from
         .mockReturnValueOnce(
@@ -270,16 +266,13 @@ describe("appointmentTools", () => {
     });
 
     it("fails when slot unavailable", async () => {
-      const { createServiceRoleClient } = await import("@/utils/supabase/server");
-      vi.mocked(createServiceRoleClient).mockReturnValue({
-        rpc: vi.fn().mockResolvedValue({
-          data: [
-            { time_slot: "09:00", available: true },
-            { time_slot: "10:00", available: true },
-          ],
-          error: null,
-        }),
-      } as never);
+      mockSupabase.rpc.mockResolvedValue({
+        data: [
+          { time_slot: "09:00", available: true },
+          { time_slot: "10:00", available: true },
+        ],
+        error: null,
+      });
 
       mockSupabase.from.mockReturnValue(
         createMockBuilder({

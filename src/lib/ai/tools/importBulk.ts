@@ -1,7 +1,5 @@
 import { z } from "zod";
 
-import { createServiceRoleClient } from "@/utils/supabase/server";
-
 import { parseImportFile } from "../utils/file-parser";
 import { resolveBranchByName } from "./resolvers";
 import type { ToolDefinition, ToolResult } from "./types";
@@ -78,9 +76,9 @@ export const importBulkTools: ToolDefinition[] = [
     execute: async (params, context): Promise<ToolResult> => {
       try {
         const validated = analyzeImportFileSchema.parse(params);
-        const serviceSupabase = createServiceRoleClient();
+        const { supabase } = context;
 
-        const buffer = await downloadFile(validated.fileId, serviceSupabase);
+        const buffer = await downloadFile(validated.fileId, supabase);
         const ext = validated.fileId.includes(".xlsx")
           ? "xlsx"
           : validated.fileId.includes(".xls")
@@ -230,7 +228,6 @@ export const importBulkTools: ToolDefinition[] = [
           userData,
           currency,
         } = context;
-        const serviceSupabase = createServiceRoleClient();
 
         if (!organizationId) {
           return {
@@ -274,7 +271,7 @@ export const importBulkTools: ToolDefinition[] = [
           };
         }
 
-        const buffer = await downloadFile(validated.fileId, serviceSupabase);
+        const buffer = await downloadFile(validated.fileId, supabase);
         const ext = validated.fileId.includes(".xlsx")
           ? "xlsx"
           : validated.fileId.includes(".xls")
@@ -354,7 +351,7 @@ export const importBulkTools: ToolDefinition[] = [
                 mapped.name?.split(" ").slice(1).join(" ") ||
                 "Sin apellido";
 
-              const { error } = await serviceSupabase.from("customers").insert({
+              const { error } = await supabase.from("customers").insert({
                 branch_id: branchIdToUse,
                 organization_id: organizationId,
                 first_name: firstName,
@@ -406,7 +403,7 @@ export const importBulkTools: ToolDefinition[] = [
                   .replace(/[^a-z0-9]+/g, "-")
                   .replace(/(^-|-$)/g, "") || `product-${Date.now()}`;
 
-              const { data: insertedProduct, error } = await serviceSupabase
+              const { data: insertedProduct, error } = await supabase
                 .from("products")
                 .insert({
                   organization_id: organizationId,
@@ -431,7 +428,7 @@ export const importBulkTools: ToolDefinition[] = [
                 const qty = parseInt(mapped.inventory_quantity || "0", 10) || 0;
                 if (branchIdToUse && insertedProduct?.id) {
                   const now = new Date().toISOString();
-                  await serviceSupabase.from("product_branch_stock").upsert(
+                  await supabase.from("product_branch_stock").upsert(
                     {
                       product_id: insertedProduct.id,
                       branch_id: branchIdToUse,

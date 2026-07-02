@@ -8,7 +8,6 @@ import type {
   GetAvailableTimeSlotsResult,
   TimeSlot,
 } from "@/types/supabase-rpc";
-import { createServiceRoleClient } from "@/utils/supabase/server";
 
 import { resolveBranchByName } from "./resolvers";
 import type { ToolDefinition, ToolResult } from "./types";
@@ -635,8 +634,7 @@ export const appointmentTools: ToolDefinition[] = [
         const duration = appointment.duration_minutes ?? 30;
         const branchId = appointment.branch_id;
 
-        const serviceSupabase = createServiceRoleClient();
-        const { data: slots } = (await serviceSupabase.rpc(
+        const { data: slots } = (await supabase.rpc(
           "get_available_time_slots",
           {
             p_date: validated.appointmentDate,

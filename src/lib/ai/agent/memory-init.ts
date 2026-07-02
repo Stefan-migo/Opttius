@@ -1,4 +1,6 @@
 // @deprecated Migrate to agent_conversations/agent_messages after database-reformation.
+import type { SupabaseClient } from "@supabase/supabase-js";
+
 import type { MemoryManager } from "../memory";
 import type { OrganizationalMemory } from "../memory/organizational";
 
@@ -8,20 +10,20 @@ import type { OrganizationalMemory } from "../memory/organizational";
 export async function initializeMemoryManager(
   userId: string,
   sessionId?: string,
+  supabase?: SupabaseClient,
 ): Promise<MemoryManager | null> {
   try {
-    const { createServiceRoleClient } = await import(
-      "@/utils/supabase/server"
-    );
     const { createMemoryManager } = await import("../memory");
 
-    const supabase = createServiceRoleClient();
+    // ponytail: fallback to service_role if no auth'd client provided — drop when all callers pass one
+    const client: SupabaseClient =
+      supabase ?? (await import("@/utils/supabase/server")).createServiceRoleClient();
 
     return createMemoryManager(
       {
         userId,
         sessionId,
-        supabase,
+        supabase: client,
       },
       {
         enableSemanticSearch: true,
@@ -41,21 +43,18 @@ export async function initializeMemoryManager(
  */
 export async function initializeOrganizationalMemory(
   organizationId: string,
+  supabase?: SupabaseClient,
 ): Promise<OrganizationalMemory | null> {
   try {
-    const { createServiceRoleClient } = await import(
-      "@/utils/supabase/server"
-    );
     const { createOrganizationalMemory } = await import(
       "../memory/organizational"
     );
 
-    const supabase = createServiceRoleClient();
+    // ponytail: same fallback pattern
+    const client: SupabaseClient =
+      supabase ?? (await import("@/utils/supabase/server")).createServiceRoleClient();
 
-    return createOrganizationalMemory(
-      organizationId,
-      supabase,
-    );
+    return createOrganizationalMemory(organizationId, client);
   } catch (error) {
     console.error("Failed to initialize organizational memory:", error);
     return null;

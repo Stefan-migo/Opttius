@@ -1,3 +1,5 @@
+import type { SupabaseClient } from "@supabase/supabase-js";
+
 import { logAdminActivity } from "@/lib/api/middleware";
 
 import { getToolByName } from "../tools";
@@ -101,6 +103,8 @@ export interface CreateToolExecutorOptions {
   userData?: { role?: string; isSuperAdmin?: boolean; name?: string };
   skipAdminActivityLog?: boolean;
   customerId?: string | null;
+  /** Authenticated supabase client. If provided, service_role creation is skipped. */
+  supabase?: SupabaseClient;
 }
 
 /**
@@ -110,10 +114,9 @@ export interface CreateToolExecutorOptions {
 export async function createToolExecutor(
   options: CreateToolExecutorOptions,
 ): Promise<ToolExecutor> {
-  const { createServiceRoleClient } = await import(
-    "@/utils/supabase/server"
-  );
-  const supabase = createServiceRoleClient();
+  // ponytail: fallback to service_role if no auth'd client provided
+  const supabase: SupabaseClient =
+    options.supabase ?? (await import("@/utils/supabase/server")).createServiceRoleClient();
 
   // Try to resolve organizationId from profile to be sure
   let resolvedOrgId = options.organizationId;

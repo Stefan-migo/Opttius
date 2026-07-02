@@ -97,16 +97,11 @@ export async function POST(request: NextRequest) {
         const session =
           sessionResult as import("@/lib/ai/agent/session").AgentSession;
 
-        // 5. Execute memory loop (parallel)
-        const { createServiceRoleClient } = await import(
-          "@/utils/supabase/server"
-        );
-        const serviceSupabase = createServiceRoleClient();
-
+        // 5. Execute memory loop (parallel) — using auth'd supabase from line 35
         const memoryContext = await executeMemoryLoop({
           message: session.message,
           orgId: session.context.orgId,
-          supabase: serviceSupabase,
+          supabase,
         });
 
         // 6. Filter tools by role + build prompt

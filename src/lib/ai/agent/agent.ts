@@ -89,7 +89,7 @@ export default class Agent {
     if (this.memoryManager) {
       return this.memoryManager;
     }
-    this.memoryManager = await initMemoryManager(this.userId, this.sessionId);
+    this.memoryManager = await initMemoryManager(this.userId, this.sessionId, this.supabaseForUsageLog);
     return this.memoryManager;
   }
 
@@ -100,7 +100,7 @@ export default class Agent {
     if (this.organizationalMemory) {
       return this.organizationalMemory;
     }
-    this.organizationalMemory = await initOrgMemory(this.organizationId);
+    this.organizationalMemory = await initOrgMemory(this.organizationId, this.supabaseForUsageLog);
     return this.organizationalMemory;
   }
 
@@ -124,6 +124,7 @@ export default class Agent {
         userData: this.userData,
         skipAdminActivityLog: this.skipAdminActivityLog,
         customerId: this.customerId,
+        supabase: this.supabaseForUsageLog,
       });
     }
     return this.toolExecutor;
@@ -138,10 +139,8 @@ export default class Agent {
     limit: number = 50,
   ): Promise<void> {
     try {
-      const { createServiceRoleClient } = await import(
-        "@/utils/supabase/server"
-      );
-      const supabase = createServiceRoleClient();
+      const supabase = this.supabaseForUsageLog;
+      if (!supabase) return;
 
       const { data: messages, error } = await supabase
         .from("chat_messages")
