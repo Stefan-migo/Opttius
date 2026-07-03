@@ -10,9 +10,8 @@ GRANT USAGE ON SCHEMA public TO cron_role;
 GRANT SELECT ON ALL TABLES IN SCHEMA public TO cron_role;
 
 -- Tables cron jobs need to INSERT into
-GRANT INSERT ON notifications TO cron_role;
-GRANT INSERT ON email_logs TO cron_role;
-GRANT INSERT ON appointment_reminders TO cron_role;
+GRANT INSERT ON admin_notifications TO cron_role;
+GRANT INSERT ON email_send_events TO cron_role;
 
 -- Future tables — cron_role gets SELECT by default
 ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO cron_role;
