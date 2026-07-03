@@ -10,6 +10,16 @@ export default defineConfig({
     setupFiles: ["./src/__tests__/setup.ts"],
     include: ["src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}"],
     exclude: ["node_modules", ".next", "dist"],
+    pool: "forks",
+    maxWorkers: 3,
+    poolOptions: {
+      forks: {
+        singleFork: false,
+      },
+    },
+    environmentMatchGlobs: [
+      ["src/__tests__/unit/**", "node"],
+    ],
     coverage: {
       provider: "v8",
       reporter: ["text", "json", "html", "lcov"],
@@ -21,6 +31,12 @@ export default defineConfig({
         "**/mockData/**",
         "**/types/**",
       ],
+      thresholds: {
+        lines: 50,
+        branches: 40,
+        functions: 45,
+        statements: 50,
+      },
     },
   },
   resolve: {
