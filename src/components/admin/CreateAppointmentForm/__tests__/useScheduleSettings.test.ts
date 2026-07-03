@@ -17,27 +17,20 @@ vi.mock("@/contexts/AuthContext", () => ({
 const mockUseBranch = vi.mocked(branchHook.useBranch);
 const mockUseAuthContext = vi.mocked(authContext.useAuthContext);
 
-// ponytail: skipped — hook behavior changed (settings format, date calc); fix in Phase 1
-describe.skip("useScheduleSettings", () => {
+describe("useScheduleSettings", () => {
   const mockScheduleSettings = {
     id: "settings-123",
+    organization_id: "org-123",
     branch_id: "branch-456",
+    working_days: ["monday", "tuesday", "wednesday", "thursday", "friday"],
+    start_time: "09:00",
+    end_time: "18:00",
+    slot_duration_minutes: 30,
     default_appointment_duration: 30,
     min_advance_booking_hours: 2,
     max_advance_booking_days: 30,
-    working_hours: {
-      monday: { open: "09:00", close: "18:00", is_working_day: true },
-      tuesday: { open: "09:00", close: "18:00", is_working_day: true },
-      wednesday: { open: "09:00", close: "18:00", is_working_day: true },
-      thursday: { open: "09:00", close: "18:00", is_working_day: true },
-      friday: { open: "09:00", close: "18:00", is_working_day: true },
-      saturday: { open: "10:00", close: "14:00", is_working_day: true },
-      sunday: { open: null, close: null, is_working_day: false },
-    },
-    holidays: [
-      { date: "2024-01-01", name: "New Year's Day" },
-      { date: "2024-12-25", name: "Christmas Day" },
-    ],
+    created_at: "2024-01-01T00:00:00Z",
+    updated_at: "2024-01-01T00:00:00Z",
   };
 
   beforeEach(() => {
@@ -63,7 +56,7 @@ describe.skip("useScheduleSettings", () => {
     });
 
     mockUseAuthContext.mockReturnValue({
-      user: null,
+      user: { id: "test-user" },
       profile: null,
       session: null,
       loading: false,
@@ -210,20 +203,13 @@ describe.skip("useScheduleSettings", () => {
       await result.current.loadSettings();
     });
 
-    const minDate = result.current.getMinDate();
-    const expectedMinDate = new Date();
-    expectedMinDate.setHours(expectedMinDate.getHours() + 24);
+    // Compare date strings directly to avoid timezone parsing issues
+    const resultDateStr = result.current.getMinDate();
+    const expectedDate = new Date();
+    expectedDate.setHours(expectedDate.getHours() + 24);
+    const expectedDateStr = expectedDate.toISOString().split("T")[0];
 
-    // Compare dates - account for timezone differences
-    // The hook uses setHours which can cross date boundaries
-    const resultDate = new Date(minDate);
-    const expectedDate = new Date(expectedMinDate);
-
-    // Allow for 1-day difference due to timezone/hour boundary crossing
-    const dayDifference = Math.abs(
-      resultDate.getDate() - expectedDate.getDate(),
-    );
-    expect(dayDifference).toBeLessThanOrEqual(1);
+    expect(resultDateStr).toBe(expectedDateStr);
   });
 
   it("should get maximum date (today + max advance days)", async () => {
@@ -245,31 +231,24 @@ describe.skip("useScheduleSettings", () => {
       await result.current.loadSettings();
     });
 
-    const maxDate = result.current.getMaxDate();
-    const expectedMaxDate = new Date();
-    expectedMaxDate.setDate(expectedMaxDate.getDate() + 60);
+    // Compare date strings directly to avoid timezone parsing issues
+    const resultDateStr = result.current.getMaxDate();
+    const expectedDate = new Date();
+    expectedDate.setDate(expectedDate.getDate() + 60);
+    const expectedDateStr = expectedDate.toISOString().split("T")[0];
 
-    // Compare dates - account for timezone differences
-    // The hook uses setDate which should be more predictable
-    const resultDate = new Date(maxDate);
-    const expectedDate = new Date(expectedMaxDate);
-
-    // Allow for 1-day difference due to timezone boundary crossing
-    const dayDifference = Math.abs(
-      resultDate.getDate() - expectedDate.getDate(),
-    );
-    expect(dayDifference).toBeLessThanOrEqual(1);
+    expect(resultDateStr).toBe(expectedDateStr);
   });
 
-  it("should handle settings without working hours data", async () => {
-    const mockSettingsWithoutHours = {
+  it("should handle settings with empty working days", async () => {
+    const mockSettingsWithoutDays = {
       ...mockScheduleSettings,
       working_days: [],
     };
 
     const mockResponse = {
       ok: true,
-      json: () => Promise.resolve({ settings: mockSettingsWithoutHours }),
+      json: () => Promise.resolve({ settings: mockSettingsWithoutDays }),
     };
 
     (global.fetch as unknown).mockResolvedValueOnce(mockResponse);
@@ -277,7 +256,7 @@ describe.skip("useScheduleSettings", () => {
     const { result } = renderHook(() => useScheduleSettings());
 
     await act(async () => {
-      await Promise.resolve(); // Wait for useEffect
+      await result.current.loadSettings();
     });
 
     // Should still calculate dates correctly
@@ -299,15 +278,15 @@ describe.skip("useScheduleSettings", () => {
     expect(new Date(maxDate)).toBeInstanceOf(Date);
   });
 
-  it("should handle settings with missing holiday data", async () => {
-    const mockSettingsWithoutHolidays = {
+  it("should handle settings without min advance hours", async () => {
+    const mockSettingsNoMin = {
       ...mockScheduleSettings,
-      holidays: null,
+      min_advance_booking_hours: 0, // will trigger fallback to 2
     };
 
     const mockResponse = {
       ok: true,
-      json: () => Promise.resolve({ settings: mockSettingsWithoutHolidays }),
+      json: () => Promise.resolve({ settings: mockSettingsNoMin }),
     };
 
     (global.fetch as unknown).mockResolvedValueOnce(mockResponse);

@@ -182,13 +182,13 @@ describe("AI Insights Schemas", () => {
       expect(() => InsightsResponseSchema.parse(validResponse)).not.toThrow();
     });
 
-    // ponytail: skipped — schema relaxed to allow empty insights; fix in Phase 1
-    it.skip("should require at least one insight", () => {
-      const invalidResponse = {
+    it("should allow empty insights", () => {
+      const response = {
         insights: [],
       };
 
-      expect(() => InsightsResponseSchema.parse(invalidResponse)).toThrow();
+      const result = InsightsResponseSchema.parse(response);
+      expect(result.insights).toEqual([]);
     });
 
     it("should validate all insights in array", () => {

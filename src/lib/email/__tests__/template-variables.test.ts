@@ -64,15 +64,14 @@ describe("replaceTemplateVariables", () => {
 // 2. getDefaultVariables
 // =============================================================================
 
-// ponytail: skipped — function field names changed (company_name → organization_name); fix in Phase 1
-describe.skip("getDefaultVariables", () => {
+describe("getDefaultVariables", () => {
   it("returns default values when no organization", () => {
     const vars = getDefaultVariables();
     expect(vars.organization_name).toBe("Opttius");
     expect(vars.support_email).toBe("soporte@opttius.cl");
     expect(vars.contact_email).toBe("contacto@opttius.cl");
     expect(vars.website_url).toBeDefined();
-    expect(vars.company_name).toBe("Opttius");
+    expect(vars.login_url).toBe(`${vars.website_url}/login`);
   });
 
   it("returns org values when organization provided", () => {
@@ -83,7 +82,7 @@ describe.skip("getDefaultVariables", () => {
     expect(vars.organization_name).toBe("Óptica Los Andes");
     expect(vars.support_email).toBe("soporte@losandes.cl");
     expect(vars.contact_email).toBe("soporte@losandes.cl");
-    expect(vars.company_name).toBe("Óptica Los Andes");
+    expect(vars.organization_email).toBe("soporte@losandes.cl");
   });
 
   it("includes all required keys for templates", () => {
@@ -93,7 +92,7 @@ describe.skip("getDefaultVariables", () => {
       "organization_email",
       "organization_support_email",
       "website_url",
-      "company_name",
+      "login_url",
       "support_email",
       "contact_email",
     ];

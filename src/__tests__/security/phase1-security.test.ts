@@ -163,10 +163,13 @@ describe("Phase 1 Security Implementation Tests", () => {
       expect(() => commonSchemas.pagination.parse({ limit: 101 })).toThrow();
     });
 
-    it("should provide middleware validation wrappers", () => {
-      // Test skipped due to NextRequest mock complexity
-      // Actual implementation works correctly in real usage
-      expect(true).toBe(true);
+    it("should validate via safeParse for non-throwing usage", () => {
+      // safeParse is the foundation middleware wrappers use internally
+      const valid = commonSchemas.pagination.safeParse({ page: 2, limit: 20 });
+      expect(valid.success).toBe(true);
+
+      const invalid = commonSchemas.pagination.safeParse({ page: 0 });
+      expect(invalid.success).toBe(false);
     });
   });
 
@@ -214,8 +217,7 @@ describe("Phase 1 Security Implementation Tests", () => {
     });
   });
 
-  // ponytail: skipped — isRateLimited now returns object not boolean; fix in Phase 1
-  describe.skip("Rate Limiting System", () => {
+  describe("Rate Limiting System", () => {
     let rateLimiter: RedisRateLimiter;
 
     beforeEach(() => {
@@ -259,7 +261,7 @@ describe("Phase 1 Security Implementation Tests", () => {
 
       // Next request should be blocked
       const result = await rateLimiter.isRateLimited(clientId, config);
-      expect(result).toBe(true); // Rate limiting should block the request
+      expect(result.limited).toBe(true);
     });
 
     it("should differentiate between clients", async () => {
@@ -299,16 +301,20 @@ describe("Phase 1 Security Implementation Tests", () => {
     });
 
     it("should handle Redis errors gracefully", async () => {
-      // Mock Redis failure
-      vi.mocked(getRedisClient).mockImplementationOnce(
-        () =>
-          ({
-            incr: vi.fn().mockRejectedValue(new Error("Redis unavailable")),
-            expire: vi.fn().mockRejectedValue(new Error("Redis unavailable")),
-          }) as unknown,
-      );
+      // Mock Redis failure — create rateLimiter after mock setup so it gets the error client
+      const mockErrorClient = {
+        zremrangebyscore: vi.fn().mockRejectedValue(new Error("Redis unavailable")),
+        zadd: vi.fn().mockRejectedValue(new Error("Redis unavailable")),
+        pexpire: vi.fn().mockRejectedValue(new Error("Redis unavailable")),
+        zcard: vi.fn().mockRejectedValue(new Error("Redis unavailable")),
+        incr: vi.fn().mockRejectedValue(new Error("Redis unavailable")),
+        expire: vi.fn().mockRejectedValue(new Error("Redis unavailable")),
+      };
 
-      const result = await rateLimiter.isRateLimited("test-client-error", {
+      vi.mocked(getRedisClient).mockImplementationOnce(() => mockErrorClient as unknown);
+
+      const limiter = new RedisRateLimiter();
+      const result = await limiter.isRateLimited("test-client-error", {
         limit: 5,
         windowMs: 60000,
       });
@@ -447,11 +453,19 @@ describe("Phase 1 Security Implementation Tests", () => {
         callCount++;
         if (callCount <= 2) {
           return {
+            zremrangebyscore: vi.fn().mockRejectedValue(new Error("Temporary failure")),
+            zadd: vi.fn().mockRejectedValue(new Error("Temporary failure")),
+            pexpire: vi.fn().mockRejectedValue(new Error("Temporary failure")),
+            zcard: vi.fn().mockRejectedValue(new Error("Temporary failure")),
             incr: vi.fn().mockRejectedValue(new Error("Temporary failure")),
             expire: vi.fn().mockRejectedValue(new Error("Temporary failure")),
           } as unknown;
         }
         return {
+          zremrangebyscore: vi.fn().mockResolvedValue(0),
+          zadd: vi.fn().mockResolvedValue(1),
+          pexpire: vi.fn().mockResolvedValue(1),
+          zcard: vi.fn().mockResolvedValue(1),
           incr: vi.fn().mockResolvedValue(1),
           expire: vi.fn().mockResolvedValue("OK"),
           ttl: vi.fn().mockResolvedValue(300),

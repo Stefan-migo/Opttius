@@ -44,14 +44,26 @@ vi.mock("@/lib/logger", () => ({
   },
 }));
 
+// ponytail: route imports from subpaths not covered by @/lib/payments mock
+vi.mock("@/lib/payments/services/payment-service", () => ({
+  PaymentService: vi.fn(function () {
+    return {
+      updatePaymentFromWebhook: vi.fn(async () => ({ success: true })),
+    };
+  }),
+}));
+
+vi.mock("@/utils/supabase/webhook", () => ({
+  createWebhookClient: vi.fn(() => ({})),
+}));
+
 describe("NOWPayments Webhook API", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
   describe("POST /api/webhooks/nowpayments", () => {
-    // ponytail: skipped — route crashes on valid webhook; fix in Phase 1
-    it.skip("should process a valid webhook successfully", async () => {
+    it("should process a valid webhook successfully", async () => {
       const webhookPayload = {
         payment_id: "payment_123",
         invoice_id: "invoice_123",

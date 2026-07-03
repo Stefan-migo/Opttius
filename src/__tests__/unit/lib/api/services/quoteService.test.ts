@@ -60,9 +60,6 @@ import {
   acceptQuote,
   rejectQuote,
   convertQuoteToOrder,
-  addQuoteItem,
-  updateQuoteItem,
-  removeQuoteItem,
 } from "@/lib/api/services/quoteService";
 
 const mockQuote = {
@@ -366,63 +363,6 @@ describe("quoteService", () => {
     });
   });
 
-  describe("addQuoteItem", () => {
-    it("adds item and returns it", async () => {
-      getMockClient().post.mockResolvedValue({
-        success: true,
-        data: mockQuoteItem,
-      });
-
-      const result = await addQuoteItem("qte-001", {
-        product_name: "Lentes Ópticos",
-        quantity: 1,
-        unit_price: 150000,
-        total_price: 150000,
-      });
-
-      expect(result.id).toBe("qi-001");
-      expect(getMockClient().post).toHaveBeenCalledWith(
-        "/api/admin/quotes/qte-001/items",
-        expect.any(Object),
-      );
-    });
-  });
-
-  describe("updateQuoteItem", () => {
-    it("updates and returns the item", async () => {
-      getMockClient().put.mockResolvedValue({
-        success: true,
-        data: { ...mockQuoteItem, quantity: 2, total_price: 300000 },
-      });
-
-      const result = await updateQuoteItem("qte-001", "qi-001", {
-        quantity: 2,
-      });
-
-      expect(result.quantity).toBe(2);
-      expect(getMockClient().put).toHaveBeenCalledWith(
-        "/api/admin/quotes/qte-001/items/qi-001",
-        { quantity: 2 },
-      );
-    });
-  });
-
-  describe("removeQuoteItem", () => {
-    it("removes item successfully", async () => {
-      getMockClient().delete.mockResolvedValue({
-        success: true,
-        data: null,
-      });
-
-      await expect(
-        removeQuoteItem("qte-001", "qi-001"),
-      ).resolves.toBeUndefined();
-      expect(getMockClient().delete).toHaveBeenCalledWith(
-        "/api/admin/quotes/qte-001/items/qi-001",
-      );
-    });
-  });
-
   describe("service object", () => {
     it("exposes all methods on quoteService", () => {
       expect(quoteService.getQuotes).toBe(getQuotes);
@@ -434,9 +374,6 @@ describe("quoteService", () => {
       expect(quoteService.acceptQuote).toBe(acceptQuote);
       expect(quoteService.rejectQuote).toBe(rejectQuote);
       expect(quoteService.convertQuoteToOrder).toBe(convertQuoteToOrder);
-      expect(quoteService.addQuoteItem).toBe(addQuoteItem);
-      expect(quoteService.updateQuoteItem).toBe(updateQuoteItem);
-      expect(quoteService.removeQuoteItem).toBe(removeQuoteItem);
     });
   });
 });

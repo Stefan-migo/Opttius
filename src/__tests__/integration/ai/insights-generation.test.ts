@@ -51,8 +51,7 @@ describe("Insights Generation Integration", () => {
   });
 
   describe("successful insight generation", () => {
-    // ponytail: skipped because generateInsights output format changed; fix in Phase 1
-    it.skip("should generate insights without maturity adaptation", async () => {
+    it("should generate insights without maturity adaptation", async () => {
       const mockLLMResponse = {
         insights: [
           {
@@ -88,8 +87,8 @@ describe("Insights Generation Integration", () => {
       });
 
       expect(insights).toHaveLength(2);
-      expect(insights[0]).toEqual(mockLLMResponse.insights[0]);
-      expect(insights[1]).toEqual(mockLLMResponse.insights[1]);
+      expect(insights[0]).toEqual({ ...mockLLMResponse.insights[0], metadata: {} });
+      expect(insights[1]).toEqual({ ...mockLLMResponse.insights[1], metadata: {} });
     });
 
     it("should generate insights with maturity adaptation", async () => {

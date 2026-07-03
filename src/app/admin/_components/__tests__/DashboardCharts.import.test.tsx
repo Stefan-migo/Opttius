@@ -5,5 +5,5 @@ describe("DashboardCharts module", () => {
     const mod = await import("../DashboardCharts");
     expect(mod.default).toBeDefined();
     expect(typeof mod.default).toBe("function");
-  }, 30000);
+  }, 10000);
 });

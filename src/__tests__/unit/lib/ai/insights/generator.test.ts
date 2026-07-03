@@ -240,8 +240,7 @@ describe("Insight Generator", () => {
       expect(insight?.type).toBe("warning");
     });
 
-    // ponytail: skipped — generator no longer throws on empty insights; fix in Phase 1
-    it.skip("should throw error if no insights generated (schema requires at least one)", async () => {
+    it("should return null when no insights generated", async () => {
       const mockLLMResponse = {
         content: JSON.stringify({
           insights: [],
@@ -250,13 +249,13 @@ describe("Insight Generator", () => {
 
       mockProvider.generateText.mockResolvedValue(mockLLMResponse);
 
-      await expect(
-        generateSingleInsight({
-          section: "dashboard",
-          data: {},
-          organizationName: "Test Organization",
-        }),
-      ).rejects.toThrow();
+      const result = await generateSingleInsight({
+        section: "dashboard",
+        data: {},
+        organizationName: "Test Organization",
+      });
+
+      expect(result).toBeNull();
     });
   });
 });

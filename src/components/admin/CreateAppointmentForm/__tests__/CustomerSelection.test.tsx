@@ -9,8 +9,7 @@ vi.mock("@/lib/utils/rut", () => ({
   formatRUT: vi.fn().mockImplementation((rut) => rut),
 }));
 
-// ponytail: skipped — component rendering changed; fix in Phase 1
-describe.skip("CustomerSelection", () => {
+describe("CustomerSelection", () => {
   const mockProps = {
     isGuestCustomer: false,
     selectedCustomer: null,
@@ -42,6 +41,12 @@ describe.skip("CustomerSelection", () => {
   };
 
   beforeEach(() => {
+    // Mock getBoundingClientRect so portal-based dropdown renders in jsdom
+    Element.prototype.getBoundingClientRect = vi.fn(() => ({
+      width: 500, height: 100, top: 200, left: 100,
+      bottom: 300, right: 600, x: 100, y: 200,
+      toJSON: () => ({}),
+    }));
     vi.clearAllMocks();
   });
 

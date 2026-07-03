@@ -74,6 +74,23 @@ describe("useAvailability", () => {
     expect(result.current.loading).toBe(false);
   });
 
+  it("should handle empty available slots response", async () => {
+    (global.fetch as unknown).mockResolvedValueOnce({
+      ok: true,
+      json: () => Promise.resolve({ slots: [] }),
+    });
+
+    const { result } = renderHook(() =>
+      useAvailability({ scheduleSettings: mockScheduleSettings }),
+    );
+
+    await act(async () => {
+      await result.current.fetchAvailability("2024-01-15", 30);
+    });
+
+    expect(result.current.availableSlots).toEqual([]);
+  });
+
   it("should fetch availability successfully", async () => {
     const mockResponse = {
       ok: true,
@@ -322,22 +339,4 @@ describe("useAvailability", () => {
     ]);
   });
 
-  // ponytail: skipped — hook crashes on null; fix in Phase 1
-  it.skip("should handle empty available slots response", async () => {
-    (global.fetch as unknown).mockResolvedValueOnce({
-      ok: true,
-      json: () => Promise.resolve({ slots: [] }),
-    });
-
-    const { result } = renderHook(() =>
-      useAvailability({ scheduleSettings: mockScheduleSettings }),
-    );
-
-    await act(async () => {
-      await result.current.fetchAvailability("2024-01-15", 30);
-    });
-
-    expect(result.current.availableSlots).toEqual([]);
-    // No error property in the hook return type
-  });
 });

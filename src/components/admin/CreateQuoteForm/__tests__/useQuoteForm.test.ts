@@ -29,8 +29,7 @@ describe("useQuoteForm", () => {
     vi.restoreAllMocks();
   });
 
-  // ponytail: skipped — hook formData has extra field customer_own_near_frame; fix in Phase 1
-  it.skip("should initialize with default form data", () => {
+  it("should initialize with default form data", () => {
     const { result } = renderHook(() => useQuoteForm());
 
     expect(result.current.formData).toEqual({
@@ -93,6 +92,7 @@ describe("useQuoteForm", () => {
       near_frame_price: 0,
       near_frame_price_includes_tax: false,
       near_frame_cost: 0,
+      customer_own_near_frame: false,
     });
 
     expect(result.current.loading).toBe(false);
