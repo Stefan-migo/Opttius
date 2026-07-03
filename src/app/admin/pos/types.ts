@@ -70,32 +70,4 @@ export type POSPaymentMethod =
   | "transfer"
   | "agreement";
 
-// ============================================
-// Backward Compatibility Aliases (deprecated)
-// Use POS* prefixed types above
-// ============================================
 
-/**
- * @deprecated Use POSProduct instead
- */
-export type Product = POSProduct;
-
-/**
- * @deprecated Use POSCartItem instead
- */
-export type CartItem = POSCartItem;
-
-/**
- * @deprecated Use POSCustomer instead
- */
-export type Customer = POSCustomer;
-
-/**
- * @deprecated Use POSQuote instead
- */
-export type Quote = POSQuote;
-
-/**
- * @deprecated Use POSPaymentMethod instead
- */
-export type PaymentMethod = POSPaymentMethod;

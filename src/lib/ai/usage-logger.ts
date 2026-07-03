@@ -72,7 +72,6 @@ export async function logTokenUsage(
 
   try {
     // 1. Persist per-message token_count in chat_messages.metadata
-    // @deprecated Migrate to agent_messages after database-reformation
     const { error: msgError } = await supabase
       .from("chat_messages")
       .update({ metadata: { token_count: tokenCount } })
@@ -87,7 +86,6 @@ export async function logTokenUsage(
     }
 
     // 2. Accumulate in chat_sessions.metadata.token_count
-    // @deprecated Migrate to agent_conversations after database-reformation
     const { data: session } = await supabase
       .from("chat_sessions")
       .select("metadata")

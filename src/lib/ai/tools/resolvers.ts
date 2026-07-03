@@ -80,40 +80,6 @@ export async function resolveOpticalTicketByNumber(
 }
 
 /**
- * @deprecated Use resolveOpticalTicketByNumber for optical_internal_support_tickets.
- * Legacy: resolve support_tickets (B2B SaaS) by ticket_number.
- */
-export async function resolveTicketByNumber(
-  supabase: SupabaseClient,
-  ticketNumber: string,
-  organizationId?: string | null,
-): Promise<string | null> {
-  const num = ticketNumber.trim();
-  if (!num) return null;
-
-  let query = supabase
-    .from("support_tickets")
-    .select("id")
-    .ilike("ticket_number", num)
-    .limit(1);
-
-  if (organizationId) {
-    const { data: branches } = await supabase
-      .from("branches")
-      .select("id")
-      .eq("organization_id", organizationId);
-    const branchIds = branches?.map((b) => b.id) || [];
-    if (branchIds.length > 0) {
-      query = query.in("branch_id", branchIds);
-    }
-  }
-
-  const { data, error } = await query.maybeSingle();
-  if (error || !data) return null;
-  return data.id;
-}
-
-/**
  * Resolve prescription by prescription_number. Returns prescription UUID or null.
  */
 export async function resolvePrescriptionByNumber(

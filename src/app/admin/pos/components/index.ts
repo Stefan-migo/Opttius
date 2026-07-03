@@ -32,11 +32,3 @@ export type {
   POSPaymentMethod,
 } from "../types";
 
-// Backward compatibility aliases
-export type {
-  Product,
-  CartItem,
-  Customer,
-  Quote,
-  PaymentMethod,
-} from "../types";

@@ -335,66 +335,6 @@ export async function convertQuoteToOrder(
   }
 }
 
-/**
- * Add an item to a quote
- * @deprecated The quote model is flat (no quote_items table). Use updateQuote to modify quote fields. Endpoint /quotes/[id]/items does not exist.
- */
-export async function addQuoteItem(
-  quoteId: string,
-  item: Omit<QuoteItem, "id" | "quote_id">,
-): Promise<QuoteItem> {
-  try {
-    const response = await client.post<QuoteItem>(
-      `/api/admin/quotes/${quoteId}/items`,
-      item,
-    );
-    return unwrapData(response);
-  } catch (error) {
-    handleApiError(error, "addQuoteItem");
-    throw error;
-  }
-}
-
-/**
- * Update a quote item
- * @deprecated The quote model is flat (no quote_items table). Use updateQuote to modify quote fields. Endpoint /quotes/[id]/items does not exist.
- */
-export async function updateQuoteItem(
-  quoteId: string,
-  itemId: string,
-  item: Partial<Omit<QuoteItem, "id" | "quote_id">>,
-): Promise<QuoteItem> {
-  try {
-    const response = await client.put<QuoteItem>(
-      `/api/admin/quotes/${quoteId}/items/${itemId}`,
-      item,
-    );
-    return unwrapData(response);
-  } catch (error) {
-    handleApiError(error, "updateQuoteItem");
-    throw error;
-  }
-}
-
-/**
- * Remove a quote item
- * @deprecated The quote model is flat (no quote_items table). Use updateQuote to modify quote fields. Endpoint /quotes/[id]/items does not exist.
- */
-export async function removeQuoteItem(
-  quoteId: string,
-  itemId: string,
-): Promise<void> {
-  try {
-    const response = await client.delete(
-      `/api/admin/quotes/${quoteId}/items/${itemId}`,
-    );
-    unwrapData(response);
-  } catch (error) {
-    handleApiError(error, "removeQuoteItem");
-    throw error;
-  }
-}
-
 // Export service object for convenience
 export const quoteService = {
   getQuotes,
@@ -406,7 +346,4 @@ export const quoteService = {
   acceptQuote,
   rejectQuote,
   convertQuoteToOrder,
-  addQuoteItem,
-  updateQuoteItem,
-  removeQuoteItem,
 };

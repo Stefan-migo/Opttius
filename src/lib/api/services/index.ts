@@ -87,7 +87,6 @@ export type {
 } from "./quoteService";
 export {
   acceptQuote,
-  addQuoteItem,
   convertQuoteToOrder,
   createQuote,
   deleteQuote,
@@ -95,10 +94,8 @@ export {
   getQuotes,
   quoteService,
   rejectQuote,
-  removeQuoteItem,
   sendQuote,
   updateQuote,
-  updateQuoteItem,
 } from "./quoteService";
 
 // Order Service

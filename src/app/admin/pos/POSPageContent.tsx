@@ -37,7 +37,7 @@ import { formatCurrency } from "@/lib/utils";
 
 import { usePOS, usePOSKeyboardShortcuts } from "./hooks";
 import type { SaleMode } from "./components";
-import type { Product } from "./types";
+import type { POSProduct } from "./types";
 
 export function POSPageContent() {
   const searchParams = useSearchParams();
@@ -382,7 +382,7 @@ export function POSPageContent() {
                 id: item.product_id,
                 name: item.product_name,
                 price: item.unit_price,
-              } as Product);
+              } as POSProduct);
             },
           );
 
@@ -541,7 +541,7 @@ export function POSPageContent() {
                 }}
                 onAddToCart={(items) => {
                   items.forEach((item) => {
-                    addToCart(item.product as Product);
+                    addToCart(item.product as POSProduct);
                   });
                 }}
                 branchId={branchId}

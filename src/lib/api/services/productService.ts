@@ -436,73 +436,6 @@ export async function bulkProductOperations(
 }
 
 /**
- * Import products from JSON
- *
- * @deprecated This function is maintained for backward compatibility.
- * Use `importProductsFile` for file-based imports (CSV/XLSX).
- * The `/api/admin/products/import-json` endpoint has been unified into
- * `/api/admin/products/import` which handles file upload and JSON body.
- * Removal of the deprecated route planned: Nov 2026.
- */
-export async function importProductsJson(
-  products: Partial<Product>[],
-  options?: { updateExisting?: boolean },
-): Promise<{
-  success: boolean;
-  summary: {
-    total_processed: number;
-    created: number;
-    updated: number;
-    skipped: number;
-    errors_count: number;
-    warnings_count: number;
-  };
-  results?: unknown;
-}> {
-  try {
-    const response = await client.post("/api/admin/products/import", {
-      products,
-      ...options,
-    });
-
-    if (isSuccess(response)) {
-      // Unified endpoint returns { success, summary, results }
-      // response.data may be undefined (non-standard route format)
-      const body =
-        (response as unknown as Record<string, unknown>).data ?? response;
-      return {
-        success: true,
-        summary: (body as unknown as Record<string, unknown>).summary ?? {
-          total_processed: 0,
-          created: 0,
-          updated: 0,
-          skipped: 0,
-          errors_count: 0,
-          warnings_count: 0,
-        },
-        results: (body as unknown as Record<string, unknown>).results,
-      } as {
-        success: boolean;
-        summary: {
-          total_processed: number;
-          created: number;
-          updated: number;
-          skipped: number;
-          errors_count: number;
-          warnings_count: number;
-        };
-        results?: unknown;
-      };
-    }
-
-    throw new Error(response.error?.message || "Failed to import products");
-  } catch (error) {
-    handleApiError(error, "importProductsJson");
-    throw error;
-  }
-}
-
-/**
  * Get product by slug (public API)
  */
 export async function getProductBySlug(slug: string): Promise<Product> {
@@ -586,7 +519,6 @@ export const productService = {
   searchProducts,
   updateProductStock,
   bulkProducts,
-  importProductsJson,
   importProductsFile,
   exportProducts,
 };
