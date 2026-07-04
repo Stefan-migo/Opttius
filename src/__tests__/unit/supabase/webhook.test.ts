@@ -42,4 +42,27 @@ describe("createWebhookClient", () => {
 
     vi.unstubAllEnvs();
   });
+
+  it("passes empty URL when NEXT_PUBLIC_SUPABASE_URL is not set", () => {
+    vi.stubEnv("SUPABASE_WEBHOOK_KEY", "test-webhook-jwt");
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "");
+
+    createWebhookClient();
+
+    expect(createClient).toHaveBeenCalledWith(
+      "",
+      "test-webhook-jwt",
+      expect.any(Object),
+    );
+
+    vi.unstubAllEnvs();
+  });
+
+  it("throws when SUPABASE_WEBHOOK_KEY is not present in env at all", () => {
+    delete process.env.SUPABASE_WEBHOOK_KEY;
+
+    expect(() => createWebhookClient()).toThrow(
+      "SUPABASE_WEBHOOK_KEY is not configured",
+    );
+  });
 });
