@@ -1,30 +1,32 @@
 "use client";
 
 import {
-  Activity,
-  AlertCircle,
   ArrowRight,
-  Calendar,
   CalendarDays,
-  CheckCircle,
   Clock,
-  Eye,
   FileText,
-  Package,
-  Plus,
-  RefreshCw,
   Settings,
   Trash2,
-  Truck,
   User,
-  Wrench,
-  XCircle,
 } from "lucide-react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 
 import { AppointmentsFilters } from "./AppointmentsFilters";
 import { AppointmentsHeader } from "./AppointmentsHeader";
+import { AppointmentsSidebar } from "./AppointmentsSidebar";
+import {
+  Appointment,
+  getMondayOfWeek,
+  getAppointmentTypeIcon,
+  getAppointmentTypeLabel,
+  getStatusBadge,
+  getWeeklyReportData,
+  goToToday,
+  handlePrintWeeklyReport,
+  handleSlotClick,
+  navigateDate,
+} from "./appointmentsUtils";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
@@ -32,9 +34,8 @@ import { toast } from "sonner";
 import { useAppointmentSettings } from "../../hooks/useAppointmentSettings";
 import { useAppointments } from "../../hooks/useAppointments";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Select,
   SelectContent,
@@ -45,6 +46,15 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { useBranch } from "@/hooks/useBranch";
 import { cn } from "@/lib/utils";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { useAuthContext } from "@/contexts/AuthContext";
+import { appointmentService } from "@/lib/api/services";
 
 // Lazy load large components to reduce initial bundle size
 const AppointmentCalendar = dynamic(
@@ -76,43 +86,6 @@ const CreateAppointmentForm = dynamic(
     ssr: false,
   },
 );
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { useAuthContext } from "@/contexts/AuthContext";
-import { appointmentService } from "@/lib/api/services";
-
-interface Appointment {
-  id: string;
-  appointment_date: string;
-  appointment_time: string;
-  duration_minutes: number;
-  appointment_type: string;
-  status: string;
-  customer?: {
-    id: string;
-    first_name?: string;
-    last_name?: string;
-    email?: string;
-    phone?: string;
-  } | null;
-  guest_first_name?: string;
-  guest_last_name?: string;
-  guest_rut?: string;
-  guest_email?: string;
-  guest_phone?: string;
-  assigned_staff?: {
-    id: string;
-    first_name?: string;
-    last_name?: string;
-  };
-  notes?: string;
-  reason?: string;
-}
 
 export default function AppointmentsContent() {
   const { user, loading: authLoading } = useAuthContext();
@@ -190,133 +163,14 @@ export default function AppointmentsContent() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const scheduleSettings: any = _scheduleSettings ?? null;
 
-  const navigateDate = (direction: "prev" | "next") => {
-    const newDate = new Date(currentDate);
-    if (view === "day") {
-      newDate.setDate(newDate.getDate() + (direction === "next" ? 1 : -1));
-      setCurrentDate(newDate);
-    } else if (view === "week") {
-      const monday = getMondayOfWeek(currentDate);
-      monday.setDate(monday.getDate() + (direction === "next" ? 7 : -7));
-      setCurrentDate(monday);
-    } else {
-      newDate.setMonth(newDate.getMonth() + (direction === "next" ? 1 : -1));
-      setCurrentDate(newDate);
-    }
-  };
-
-  const goToToday = () => {
-    setCurrentDate(new Date());
-  };
-
-  // Semana determinada por el lunes (ISO 8601)
-  const getMondayOfWeek = (date: Date) => {
-    const d = new Date(date);
-    const day = d.getDay();
-    const diff = (day + 6) % 7;
-    d.setDate(d.getDate() - diff);
-    return d;
-  };
-
+  // Derived value
   const weekLabelDate =
     view === "week" ? getMondayOfWeek(currentDate) : currentDate;
-
-  const getAppointmentTypeIcon = (type: string): typeof Calendar => {
-    const icons: Record<string, typeof Calendar> = {
-      eye_exam: Eye,
-      consultation: User,
-      fitting: Package,
-      delivery: Truck,
-      repair: Wrench,
-      follow_up: RefreshCw,
-      emergency: AlertCircle,
-      other: Calendar,
-    };
-    return icons[type] || Calendar;
-  };
-
-  const getAppointmentTypeLabel = (type: string) => {
-    const labels: Record<string, string> = {
-      eye_exam: "Examen de la Vista",
-      consultation: "Consulta",
-      fitting: "Ajuste",
-      delivery: "Entrega",
-      repair: "Reparación",
-      follow_up: "Seguimiento",
-      emergency: "Emergencia",
-      other: "Otro",
-    };
-    return labels[type] || type;
-  };
-
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case "scheduled":
-        return (
-          <Badge
-            className="bg-admin-bg-tertiary/50 text-admin-info border-admin-info/30 font-bold text-[10px] uppercase tracking-wider"
-            variant="outline"
-          >
-            <Clock className="h-3 w-3 mr-1" />
-            Programada
-          </Badge>
-        );
-      case "confirmed":
-        return (
-          <Badge
-            className="bg-admin-bg-tertiary/50 text-admin-success border-admin-success/30 font-bold text-[10px] uppercase tracking-wider"
-            variant="outline"
-          >
-            <CheckCircle className="h-3 w-3 mr-1" />
-            Confirmada
-          </Badge>
-        );
-      case "completed":
-        return (
-          <Badge
-            className="bg-admin-bg-tertiary/50 text-admin-accent-secondary border-admin-accent-secondary/30 font-bold text-[10px] uppercase tracking-wider"
-            variant="outline"
-          >
-            <CheckCircle className="h-3 w-3 mr-1" />
-            Completada
-          </Badge>
-        );
-      case "cancelled":
-        return (
-          <Badge
-            className="bg-admin-error/10 text-admin-error border-admin-error/30 font-bold text-[10px] uppercase tracking-wider"
-            variant="outline"
-          >
-            <XCircle className="h-3 w-3 mr-1" />
-            Cancelada
-          </Badge>
-        );
-      case "no_show":
-        return (
-          <Badge
-            className="bg-admin-bg-tertiary/50 text-admin-text-tertiary border-admin-border-secondary font-bold text-[10px] uppercase tracking-wider"
-            variant="outline"
-          >
-            <XCircle className="h-3 w-3 mr-1" />
-            No asistó
-          </Badge>
-        );
-      default:
-        return (
-          <Badge
-            className="text-[10px] font-bold uppercase tracking-wider"
-            variant="secondary"
-          >
-            {status}
-          </Badge>
-        );
-    }
-  };
 
   const handleAppointmentCreated = () => {
     setShowCreateAppointment(false);
     setSelectedAppointment(null);
-    setPrefilledAppointmentData(null); // Clear prefilled data after successful creation
+    setPrefilledAppointmentData(null);
 
     setLastRefresh(Date.now());
     queryClient.invalidateQueries({ queryKey: ["admin", "appointments"] });
@@ -326,130 +180,8 @@ export default function AppointmentsContent() {
 
   const handleAppointmentClick = (appointment: Appointment) => {
     setSelectedAppointment(appointment);
-    setPrefilledAppointmentData(null); // Clear prefilled data when viewing existing appointment
-    setShowCreateAppointment(false); // Close create form if open
-  };
-
-  const getWeekRange = (date: Date) => {
-    const d = new Date(date);
-    const day = d.getDay();
-    const diff = d.getDate() - day + (day === 0 ? -6 : 1);
-    const monday = new Date(d);
-    monday.setDate(diff);
-    const sunday = new Date(monday);
-    sunday.setDate(monday.getDate() + 6);
-    return { start: monday, end: sunday };
-  };
-
-  const getWeeklyReportData = () => {
-    const { start, end } = getWeekRange(currentDate);
-    const startStr = start.toISOString().split("T")[0];
-    const endStr = end.toISOString().split("T")[0];
-    const weekAppointments = appointments.filter((a) => {
-      const d = a.appointment_date;
-      return d >= startStr && d <= endStr;
-    });
-    const byDay: Record<string, Appointment[]> = {};
-    const days = [
-      "Lunes",
-      "Martes",
-      "Miércoles",
-      "Jueves",
-      "Viernes",
-      "Sábado",
-      "Domingo",
-    ];
-    for (let i = 0; i < 7; i++) {
-      const d = new Date(start);
-      d.setDate(start.getDate() + i);
-      const dateStr = d.toISOString().split("T")[0];
-      byDay[days[i]] = weekAppointments
-        .filter((a) => a.appointment_date === dateStr)
-        .sort((a, b) => a.appointment_time.localeCompare(b.appointment_time));
-    }
-    const byStatus = {
-      scheduled: weekAppointments.filter((a) => a.status === "scheduled")
-        .length,
-      confirmed: weekAppointments.filter((a) => a.status === "confirmed")
-        .length,
-      completed: weekAppointments.filter((a) => a.status === "completed")
-        .length,
-      cancelled: weekAppointments.filter((a) => a.status === "cancelled")
-        .length,
-      no_show: weekAppointments.filter((a) => a.status === "no_show").length,
-    };
-    return {
-      start,
-      end,
-      startStr,
-      endStr,
-      appointments: weekAppointments,
-      byDay,
-      byStatus,
-    };
-  };
-
-  const handleSlotClick = (date: Date, time: string) => {
-    // Open create appointment form with pre-filled date and time
-    setSelectedAppointment(null);
-    // Format time correctly (HH:MM)
-    const timeFormatted = time.length >= 5 ? time.substring(0, 5) : time;
-    setPrefilledAppointmentData({
-      date: date.toISOString().split("T")[0],
-      time: timeFormatted,
-      lockDateTime: true, // Lock date and time when opened from slot
-    });
-    setShowCreateAppointment(true);
-  };
-
-  const handlePrintWeeklyReport = () => {
-    const el = weeklyReportRef.current;
-    // Try new window first (direct from user gesture to avoid popup blocking)
-    const printWindow = window.open("", "_blank");
-    if (!printWindow || !el) {
-      // Fallback: use in-page print with CSS visibility
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => window.print());
-      });
-      return;
-    }
-    const clone = el.cloneNode(true) as HTMLElement;
-    clone.querySelectorAll("[data-print-hide]").forEach((n) => n.remove());
-    printWindow.document.write(`
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <meta charset="utf-8">
-          <title>Reporte Semanal de Citas</title>
-          <style>
-            body { font-family: system-ui, sans-serif; padding: 1rem; color: #333; }
-            .grid { display: grid; gap: 0.75rem; }
-            .grid-cols-5 { grid-template-columns: repeat(5, 1fr); }
-            .grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
-            .p-4 { padding: 1rem; }
-            .rounded-xl { border-radius: 0.75rem; }
-            .border { border: 1px solid #e5e7eb; }
-            .text-xs { font-size: 0.75rem; }
-            .text-sm { font-size: 0.875rem; }
-            .text-2xl { font-size: 1.5rem; }
-            .font-bold { font-weight: 700; }
-            .space-y-4 > * + * { margin-top: 1rem; }
-            .divide-y > * + * { border-top: 1px solid #e5e7eb; }
-            [class*="print:hidden"] { display: none !important; }
-          </style>
-        </head>
-        <body>${clone.innerHTML}</body>
-      </html>
-    `);
-    printWindow.document.close();
-    printWindow.onload = () => {
-      // Delay print to ensure layout is ready
-      setTimeout(() => {
-        printWindow.focus();
-        printWindow.print();
-        printWindow.close();
-      }, 100);
-    };
+    setPrefilledAppointmentData(null);
+    setShowCreateAppointment(false);
   };
 
   return (
@@ -473,129 +205,31 @@ export default function AppointmentsContent() {
         branches={branches}
         onViewChange={(v) => setView(v)}
         onStatusFilterChange={setStatusFilter}
-        onNavigatePrev={() => navigateDate("prev")}
-        onNavigateNext={() => navigateDate("next")}
-        onGoToToday={goToToday}
+        onNavigatePrev={() =>
+          navigateDate(currentDate, view, "prev", setCurrentDate)
+        }
+        onNavigateNext={() =>
+          navigateDate(currentDate, view, "next", setCurrentDate)
+        }
+        onGoToToday={() => goToToday(setCurrentDate)}
         onBranchChange={(v) => setSelectedBranchForView(v)}
       />
 
       {/* Main Agenda Grid */}
       <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
         {/* Sidebar Mini-Dashboard */}
-        <div className="space-y-6 xl:col-span-1">
-          <Card className="border-none bg-admin-bg-tertiary shadow-soft overflow-hidden">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-bold text-admin-text-primary uppercase tracking-widest flex items-center gap-2">
-                <Activity className="h-4 w-4 text-admin-accent-primary" />
-                Resumen de Hoy
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-4 space-y-4">
-              <div className="grid grid-cols-2 gap-3">
-                <div className="bg-admin-info/5 p-3 rounded-xl border border-admin-info/10">
-                  <p className="text-[9px] font-bold text-admin-info uppercase">
-                    Total Citas
-                  </p>
-                  <p className="text-xl font-black text-admin-info">
-                    {appointments.length}
-                  </p>
-                </div>
-                <div className="bg-admin-success/5 p-3 rounded-xl border border-admin-success/10">
-                  <p className="text-[9px] font-bold text-admin-success uppercase">
-                    Confirmadas
-                  </p>
-                  <p className="text-xl font-black text-admin-success">
-                    {
-                      appointments.filter((a) => a.status === "confirmed")
-                        .length
-                    }
-                  </p>
-                </div>
-              </div>
-
-              <div className="space-y-3 pt-2">
-                <p className="text-[10px] font-bold text-admin-text-tertiary uppercase tracking-widest px-1">
-                  Próximos Bloques
-                </p>
-                <div className="space-y-2">
-                  {appointments
-                    .filter(
-                      (a) =>
-                        new Date(
-                          a.appointment_date + "T12:00:00",
-                        ).toDateString() === new Date().toDateString(),
-                    )
-                    .sort((a, b) =>
-                      a.appointment_time.localeCompare(b.appointment_time),
-                    )
-                    .slice(0, 3)
-                    .map((apt) => (
-                      <div
-                        className="flex items-center gap-3 p-2 rounded-lg bg-admin-bg-tertiary/20 border border-admin-border-primary/30 hover:bg-white transition-all cursor-pointer"
-                        key={apt.id}
-                        onClick={() => handleAppointmentClick(apt)}
-                      >
-                        <div className="h-8 w-8 bg-white rounded-lg flex items-center justify-center text-[10px] font-black shadow-sm text-admin-accent-primary">
-                          {apt.appointment_time.substring(0, 5)}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-xs font-bold text-admin-text-primary truncate">
-                            {apt.customer
-                              ? `${apt.customer.first_name} ${apt.customer.last_name}`
-                              : `${apt.guest_first_name} ${apt.guest_last_name}`}
-                          </p>
-                          <p className="text-[9px] text-admin-text-tertiary truncate uppercase">
-                            {getAppointmentTypeLabel(apt.appointment_type)}
-                          </p>
-                        </div>
-                      </div>
-                    ))}
-                  {appointments.filter(
-                    (a) =>
-                      new Date(
-                        a.appointment_date + "T12:00:00",
-                      ).toDateString() === new Date().toDateString(),
-                  ).length === 0 && (
-                    <p className="text-[10px] text-admin-text-tertiary italic p-4 text-center">
-                      No hay citas para hoy
-                    </p>
-                  )}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-none bg-admin-bg-tertiary shadow-soft overflow-hidden">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-bold text-admin-text-primary uppercase tracking-widest flex items-center gap-2">
-                <Settings className="h-4 w-4 text-admin-info" />
-                Herramientas
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-4 space-y-2">
-              <Button
-                className="w-full justify-start text-xs font-bold text-admin-text-secondary hover:text-admin-accent-primary hover:bg-admin-accent-primary/5 rounded-lg h-9"
-                variant="ghost"
-                onClick={() => {
-                  setLastRefresh(Date.now());
-                  queryClient.invalidateQueries({ queryKey: ["admin", "appointments"] });
-                  toast.info("Datos sincronizados");
-                }}
-              >
-                <RefreshCw className="h-3.5 w-3.5 mr-2" />
-                Sincronizar Datos
-              </Button>
-              <Button
-                className="w-full justify-start text-xs font-bold text-admin-text-secondary hover:text-admin-accent-primary hover:bg-admin-accent-primary/5 rounded-lg h-9"
-                variant="ghost"
-                onClick={() => setShowWeeklyReport(true)}
-              >
-                <FileText className="h-3.5 w-3.5 mr-2" />
-                Reporte Semanal
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
+        <AppointmentsSidebar
+          appointments={appointments}
+          onAppointmentClick={handleAppointmentClick}
+          onRefresh={() => {
+            setLastRefresh(Date.now());
+            queryClient.invalidateQueries({
+              queryKey: ["admin", "appointments"],
+            });
+            toast.info("Datos sincronizados");
+          }}
+          onShowWeeklyReport={() => setShowWeeklyReport(true)}
+        />
 
         {/* Calendar View - Main Area */}
         <Card
@@ -642,7 +276,15 @@ export default function AppointmentsContent() {
                   view={view}
                   onAppointmentClick={handleAppointmentClick}
                   onDateChange={setCurrentDate}
-                  onSlotClick={handleSlotClick}
+                  onSlotClick={(date, time) =>
+                    handleSlotClick(
+                      date,
+                      time,
+                      setSelectedAppointment,
+                      setPrefilledAppointmentData,
+                      setShowCreateAppointment,
+                    )
+                  }
                 />
               </div>
             )}
@@ -663,7 +305,9 @@ export default function AppointmentsContent() {
                   <CalendarDays className="h-5 w-5 text-white" />
                 </div>
                 <DialogTitle className="text-xl sm:text-2xl font-display font-bold text-admin-text-primary tracking-tight uppercase">
-                  {selectedAppointment ? "Expediente de cita" : "Reservar cita"}
+                  {selectedAppointment
+                    ? "Expediente de cita"
+                    : "Reservar cita"}
                 </DialogTitle>
               </div>
               <DialogDescription className="text-[11px] font-serif italic text-admin-text-tertiary tracking-wide pl-13">
@@ -809,7 +453,9 @@ export default function AppointmentsContent() {
                       const Icon = getAppointmentTypeIcon(
                         selectedAppointment.appointment_type,
                       );
-                      return <Icon className="h-3.5 w-3.5 text-admin-info" />;
+                      return (
+                        <Icon className="h-3.5 w-3.5 text-admin-info" />
+                      );
                     })()}
                     <span>
                       {getAppointmentTypeLabel(
@@ -841,7 +487,6 @@ export default function AppointmentsContent() {
                   <Select
                     value={selectedAppointment.status}
                     onValueChange={async (newStatus) => {
-                      // Validate that newStatus is a valid appointment status
                       const validStatuses = [
                         "scheduled",
                         "confirmed",
@@ -873,7 +518,9 @@ export default function AppointmentsContent() {
                           ...selectedAppointment,
                           status: newStatus,
                         });
-                        queryClient.invalidateQueries({ queryKey: ["admin", "appointments"] });
+                        queryClient.invalidateQueries({
+                          queryKey: ["admin", "appointments"],
+                        });
                         if (newStatus === "completed") {
                           toast.success(
                             "Cita completada. El cliente ha sido registrado exitosamente en la base de datos de esta sucursal.",
@@ -925,14 +572,19 @@ export default function AppointmentsContent() {
                     variant="ghost"
                     onClick={async (e) => {
                       e.stopPropagation();
-                      if (!confirm("¿Eliminar cita permanentemente?")) return;
+                      if (
+                        !confirm("¿Eliminar cita permanentemente?")
+                      )
+                        return;
                       try {
                         await appointmentService.deleteAppointment(
                           selectedAppointment.id,
                         );
                         toast.success("Cita eliminada");
                         setSelectedAppointment(null);
-                        queryClient.invalidateQueries({ queryKey: ["admin", "appointments"] });
+                        queryClient.invalidateQueries({
+                          queryKey: ["admin", "appointments"],
+                        });
                       } catch (error) {
                         toast.error("Error al eliminar");
                       }
@@ -944,7 +596,8 @@ export default function AppointmentsContent() {
               </div>
 
               {/* Notes & Reason */}
-              {(selectedAppointment.reason || selectedAppointment.notes) && (
+              {(selectedAppointment.reason ||
+                selectedAppointment.notes) && (
                 <div className="bg-admin-bg-tertiary/10 p-5 rounded-2xl space-y-4">
                   {selectedAppointment.reason && (
                     <div className="space-y-1">
@@ -1016,7 +669,10 @@ export default function AppointmentsContent() {
                     </DialogTitle>
                     <DialogDescription className="text-xs font-medium text-admin-text-tertiary uppercase tracking-widest mt-1">
                       {(() => {
-                        const data = getWeeklyReportData();
+                        const data = getWeeklyReportData(
+                          currentDate,
+                          appointments,
+                        );
                         return `${data.start.toLocaleDateString("es-CL", {
                           day: "numeric",
                           month: "short",
@@ -1035,7 +691,7 @@ export default function AppointmentsContent() {
                   className="gap-2"
                   size="sm"
                   variant="outline"
-                  onClick={handlePrintWeeklyReport}
+                  onClick={() => handlePrintWeeklyReport(weeklyReportRef)}
                 >
                   <FileText className="h-4 w-4" />
                   Imprimir
@@ -1051,7 +707,7 @@ export default function AppointmentsContent() {
             </div>
 
             {(() => {
-              const data = getWeeklyReportData();
+              const data = getWeeklyReportData(currentDate, appointments);
               return (
                 <>
                   {/* Summary Cards */}
