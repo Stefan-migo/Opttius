@@ -259,7 +259,6 @@ export default function WorkOrderDetailContent() {
           />
         </TabsContent>
 
-        {/* Details Tab */}
         <TabsContent className="space-y-6" value="details">
           <WorkOrderDetailsTab workOrder={workOrder} />
         </TabsContent>
