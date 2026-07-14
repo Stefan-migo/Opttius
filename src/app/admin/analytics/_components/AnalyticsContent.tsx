@@ -12,12 +12,9 @@ import { useAnalytics } from "../../hooks/useAnalytics";
 import { AnalyticsHeader } from "./AnalyticsHeader";
 import { AnalyticsKPICards } from "./AnalyticsKPICards";
 import { AnalyticsOverviewTab } from "./AnalyticsOverviewTab";
-import { AnalyticsWorkOrdersTab } from "./AnalyticsWorkOrdersTab";
-import { AnalyticsQuotesTab } from "./AnalyticsQuotesTab";
-import { AnalyticsSalesTab } from "./AnalyticsSalesTab";
-import { AnalyticsProductsTab } from "./AnalyticsProductsTab";
-import { AnalyticsSupportTab } from "./AnalyticsSupportTab";
 import type { AnalyticsData } from "./analyticsUtils";
+
+
 
 export default function AnalyticsContent() {
   const {
@@ -170,7 +167,7 @@ export default function AnalyticsContent() {
           </TabsList>
         </div>
 
-        <TabsContent className="space-y-4 sm:space-y-6" value="overview">
+                <TabsContent className="space-y-4 sm:space-y-6" value="overview">
           <AnalyticsOverviewTab
             trends={analytics.trends}
             workOrders={analytics.workOrders}
@@ -182,7 +179,7 @@ export default function AnalyticsContent() {
           />
         </TabsContent>
 
-        <TabsContent className="space-y-4 sm:space-y-6" value="work-orders">
+                <TabsContent className="space-y-4 sm:space-y-6" value="work-orders">
           <AnalyticsWorkOrdersTab
             workOrders={analytics.workOrders}
             avgDeliveryDays={analytics.kpis.avgDeliveryDays}
@@ -190,7 +187,7 @@ export default function AnalyticsContent() {
           />
         </TabsContent>
 
-        <TabsContent className="space-y-4 sm:space-y-6" value="quotes">
+                <TabsContent className="space-y-4 sm:space-y-6" value="quotes">
           <AnalyticsQuotesTab
             quotes={analytics.quotes}
             avgQuoteValue={analytics.kpis.avgQuoteValue}
