@@ -1,22 +1,15 @@
 "use client";
 
 import {
-  Eye,
-  FileText,
-  Plus,
   RefreshCw,
-  ShoppingCart,
   Trash2,
-  Truck,
 } from "lucide-react";
 import dynamic from "next/dynamic";
-import Link from "next/link";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import AddCustomerForm from "@/components/admin/AddCustomerForm";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -27,15 +20,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useBranch } from "@/hooks/useBranch";
 import { posService, type Quote, quoteService } from "@/lib/api/services";
@@ -43,10 +27,8 @@ import {
   type Customer,
   customerService,
 } from "@/lib/api/services/customerService";
-import { formatPrice } from "@/lib/utils";
 import { getBranchHeader } from "@/lib/utils/branch";
 import { getBranchAndOperativoHeaders } from "@/lib/utils/branch";
-import { formatRUT } from "@/lib/utils/rut";
 
 import FieldOpHeader from "./FieldOpHeader";
 import FieldOpStatsCards from "./FieldOpStatsCards";
@@ -54,6 +36,8 @@ import FieldOpSummarySection from "./FieldOpSummarySection";
 import FieldOpPatientRegistrations from "./FieldOpPatientRegistrations";
 import FieldOpInventorySection from "./FieldOpInventorySection";
 import FieldOpWorkOrdersSection from "./FieldOpWorkOrdersSection";
+import { FieldOpQuotesTab } from "./FieldOpQuotesTab";
+import { FieldOpDeliveryTab } from "./FieldOpDeliveryTab";
 
 const CreateQuoteForm = dynamic(
   () => import("@/components/admin/CreateQuoteForm"),
@@ -548,126 +532,13 @@ export default function FieldOpDetailContent() {
         </TabsContent>
 
         <TabsContent className="space-y-4 mt-4 sm:mt-6" value="presupuestos">
-          <div className="rounded-xl border border-admin-border-primary/30 bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)] overflow-hidden">
-            <div className="p-4 sm:p-6 border-b border-admin-border-primary/20 flex items-center justify-between">
-              <h3 className="flex items-center gap-2 text-admin-text-primary font-semibold">
-                <FileText className="h-5 w-5 shrink-0" />
-                Presupuestos del operativo
-              </h3>
-              <Button
-                className="min-h-[44px] bg-admin-accent-primary hover:bg-admin-accent-secondary text-[#1A2B23]"
-                size="sm"
-                onClick={() => setShowCreateQuote(true)}
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Nuevo presupuesto
-              </Button>
-            </div>
-            <div className="overflow-x-auto">
-              {quotesLoading ? (
-                <div className="p-8 flex justify-center">
-                  <RefreshCw className="h-6 w-6 animate-spin text-admin-text-tertiary" />
-                </div>
-              ) : quotes.length === 0 ? (
-                <p className="p-6 text-admin-text-tertiary text-sm">
-                  No hay presupuestos vinculados a este operativo. Cree uno
-                  desde el botón arriba.
-                </p>
-              ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="text-admin-text-tertiary font-semibold">
-                        Nº
-                      </TableHead>
-                      <TableHead className="text-admin-text-tertiary font-semibold">
-                        Cliente
-                      </TableHead>
-                      <TableHead className="text-admin-text-tertiary font-semibold">
-                        RUT
-                      </TableHead>
-                      <TableHead className="text-admin-text-tertiary font-semibold">
-                        Teléfono / Email
-                      </TableHead>
-                      <TableHead className="text-admin-text-tertiary font-semibold">
-                        Estado
-                      </TableHead>
-                      <TableHead className="text-admin-text-tertiary font-semibold text-right">
-                        Total
-                      </TableHead>
-                      <TableHead className="text-admin-text-tertiary font-semibold">
-                        Acciones
-                      </TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {quotes.map((q) => (
-                      <TableRow className="hover:bg-[#AE000025]" key={q.id}>
-                        <TableCell className="font-medium text-admin-text-primary font-mono text-sm">
-                          {q.quote_number || "—"}
-                        </TableCell>
-                        <TableCell className="text-admin-text-primary">
-                          {q.customer
-                            ? [q.customer.first_name, q.customer.last_name]
-                                .filter(Boolean)
-                                .join(" ") || "—"
-                            : "—"}
-                        </TableCell>
-                        <TableCell className="text-admin-text-tertiary font-mono text-sm">
-                          {q.customer?.rut ? formatRUT(q.customer.rut) : "—"}
-                        </TableCell>
-                        <TableCell className="text-admin-text-tertiary text-sm">
-                          {q.customer?.phone || q.customer?.email || "—"}
-                        </TableCell>
-                        <TableCell>
-                          <Badge className="text-xs" variant="outline">
-                            {q.status}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-right text-admin-text-primary">
-                          {formatPrice(q.total_amount ?? 0)}
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <Link
-                              className="inline-flex items-center gap-1 text-admin-accent-primary hover:underline text-sm font-medium"
-                              href={`/admin/quotes/${q.id}`}
-                            >
-                              <Eye className="h-4 w-4" />
-                              Ver
-                            </Link>
-                            {q.status !== "accepted" &&
-                              !q.converted_to_work_order_id && (
-                                <Link
-                                  className="inline-flex items-center gap-1 text-green-600 hover:text-green-700 text-sm font-medium"
-                                  href={`/admin/pos?quoteId=${q.id}&field_operation_id=${id}`}
-                                  title="Cargar al POS del operativo"
-                                >
-                                  <ShoppingCart className="h-4 w-4" />
-                                  Cargar al POS
-                                </Link>
-                              )}
-                            <button
-                              className="inline-flex items-center gap-1 text-admin-text-tertiary hover:text-red-500 text-sm disabled:opacity-50"
-                              disabled={
-                                q.status === "accepted" ||
-                                !!q.converted_to_work_order_id
-                              }
-                              title="Eliminar"
-                              type="button"
-                              onClick={() => handleDeleteQuoteClick(q.id)}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              )}
-            </div>
-          </div>
+          <FieldOpQuotesTab
+            quotes={quotes}
+            quotesLoading={quotesLoading}
+            fieldOperationId={id}
+            onCreateQuote={() => setShowCreateQuote(true)}
+            onDeleteQuote={handleDeleteQuoteClick}
+          />
         </TabsContent>
 
         <TabsContent className="space-y-4 mt-4 sm:mt-6" value="stock">
@@ -687,92 +558,17 @@ export default function FieldOpDetailContent() {
         </TabsContent>
 
         <TabsContent className="space-y-4 mt-4 sm:mt-6" value="entrega">
-          <div className="rounded-xl border border-admin-border-primary/30 bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)] p-4 sm:p-6">
-            <h3 className="flex items-center gap-2 text-admin-text-primary font-semibold mb-4">
-              <Truck className="h-5 w-5 shrink-0" />
-              Entrega en empresa
-            </h3>
-            {readyForPickupOrders.length === 0 ? (
-              <p className="text-admin-text-tertiary text-sm">
-                No hay trabajos listos para retiro (ready_for_pickup). Los
-                trabajos aparecerán aquí cuando estén listos para entrega.
-              </p>
-            ) : (
-              <div className="space-y-4">
-                <div>
-                  <Label className="text-admin-text-primary text-sm">
-                    Trabajos a entregar
-                  </Label>
-                  <div className="mt-2 space-y-2 max-h-48 overflow-y-auto border border-admin-border-primary/20 rounded-lg p-2">
-                    {readyForPickupOrders.map((wo) => (
-                      <label
-                        className="flex items-center gap-3 p-2 rounded-lg hover:bg-[#AE000010] cursor-pointer"
-                        key={wo.id}
-                      >
-                        <input
-                          checked={deliverSelectedIds.has(wo.id)}
-                          className="rounded"
-                          type="checkbox"
-                          onChange={(e) => {
-                            setDeliverSelectedIds((prev) => {
-                              const next = new Set(prev);
-                              if (e.target.checked) next.add(wo.id);
-                              else next.delete(wo.id);
-                              return next;
-                            });
-                          }}
-                        />
-                        <span className="text-admin-text-primary text-sm">
-                          {wo.work_order_number} —{" "}
-                          {wo.customer
-                            ? `${wo.customer.first_name || ""} ${wo.customer.last_name || ""}`.trim() ||
-                              "—"
-                            : "—"}{" "}
-                          ({formatPrice(wo.total_amount)})
-                        </span>
-                      </label>
-                    ))}
-                  </div>
-                </div>
-                <div>
-                  <Label className="text-admin-text-primary text-sm">
-                    Nombre del receptor *
-                  </Label>
-                  <Input
-                    className="mt-1 h-11 min-h-[44px] border-admin-border-primary/30"
-                    placeholder="Ej: Juan Pérez"
-                    value={deliverRecipient}
-                    onChange={(e) => setDeliverRecipient(e.target.value)}
-                  />
-                </div>
-                <div>
-                  <Label className="text-admin-text-primary text-sm">
-                    Notas (opcional)
-                  </Label>
-                  <Input
-                    className="mt-1 h-11 min-h-[44px] border-admin-border-primary/30"
-                    placeholder="Observaciones de la entrega"
-                    value={deliverNotes}
-                    onChange={(e) => setDeliverNotes(e.target.value)}
-                  />
-                </div>
-                <Button
-                  className="min-h-[44px] rounded-xl bg-admin-accent-primary hover:bg-admin-accent-secondary text-[#1A2B23]"
-                  disabled={
-                    deliverLoading ||
-                    deliverSelectedIds.size === 0 ||
-                    !deliverRecipient.trim()
-                  }
-                  onClick={handleDeliver}
-                >
-                  {deliverLoading ? (
-                    <RefreshCw className="h-4 w-4 animate-spin mr-2" />
-                  ) : null}
-                  Registrar entrega
-                </Button>
-              </div>
-            )}
-          </div>
+          <FieldOpDeliveryTab
+            readyForPickupOrders={readyForPickupOrders}
+            deliverSelectedIds={deliverSelectedIds}
+            deliverRecipient={deliverRecipient}
+            deliverNotes={deliverNotes}
+            deliverLoading={deliverLoading}
+            onDeliverSelectedIdsChange={setDeliverSelectedIds}
+            onDeliverRecipientChange={setDeliverRecipient}
+            onDeliverNotesChange={setDeliverNotes}
+            onDeliver={handleDeliver}
+          />
         </TabsContent>
       </Tabs>
 

@@ -1,10 +1,9 @@
 "use client";
 
-import { Code, Eye, FileText, Save, Sparkles, X } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { Save, Sparkles, X } from "lucide-react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -14,22 +13,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { Textarea } from "@/components/ui/textarea";
-import { getVariablesForEditor } from "@/lib/email/ai-template-variables";
 import {
   getDefaultVariables,
   replaceTemplateVariables,
 } from "@/lib/email/template-utils";
+
+import { EmailTemplateEditorAiDialog } from "./EmailTemplateEditorAiDialog";
+import { EmailTemplateEditorBasicInfo } from "./EmailTemplateEditorBasicInfo";
+import { EmailTemplateEditorContent } from "./EmailTemplateEditorContent";
 
 interface EmailTemplate {
   id: string;
@@ -163,7 +156,6 @@ export default function EmailTemplateEditor({
   const [loading, setLoading] = useState(false);
   const [showPreview, setShowPreview] = useState(true);
   const [showAiAssistDialog, setShowAiAssistDialog] = useState(false);
-  const [aiPrompt, setAiPrompt] = useState("");
   const [aiLoading, setAiLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -172,7 +164,6 @@ export default function EmailTemplateEditor({
     content: "",
     is_active: true,
   });
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     if (template) {
@@ -251,11 +242,7 @@ export default function EmailTemplateEditor({
     }
   };
 
-  const handleAiAssist = async () => {
-    if (!aiPrompt.trim()) {
-      toast.error("Describe lo que quieres que genere la IA");
-      return;
-    }
+  const handleAiAssist = async (prompt: string) => {
     try {
       setAiLoading(true);
       const res = await fetch("/api/admin/email-templates/ai-assist", {
@@ -264,7 +251,7 @@ export default function EmailTemplateEditor({
         body: JSON.stringify({
           type: formData.type,
           organizationId: organizationId || null,
-          userPrompt: aiPrompt.trim(),
+          userPrompt: prompt,
         }),
       });
       const data = await res.json();
@@ -278,7 +265,6 @@ export default function EmailTemplateEditor({
           content: data.content || prev.content,
         }));
         setShowAiAssistDialog(false);
-        setAiPrompt("");
         toast.success("Plantilla generada. Puedes editarla antes de guardar.");
       } else {
         toast.error(data.error || "No se pudo generar la plantilla");
@@ -289,27 +275,6 @@ export default function EmailTemplateEditor({
       );
     } finally {
       setAiLoading(false);
-    }
-  };
-
-  const insertVariable = (variable: string) => {
-    const textarea = textareaRef.current;
-    if (textarea) {
-      const start = textarea.selectionStart;
-      const end = textarea.selectionEnd;
-      const text = textarea.value;
-      const before = text.substring(0, start);
-      const after = text.substring(end);
-      const newText = before + `{{${variable}}}` + after;
-      setFormData({ ...formData, content: newText });
-
-      setTimeout(() => {
-        textarea.focus();
-        textarea.setSelectionRange(
-          start + variable.length + 4,
-          start + variable.length + 4,
-        );
-      }, 0);
     }
   };
 
@@ -379,296 +344,34 @@ export default function EmailTemplateEditor({
           </DialogHeader>
 
           <form className="space-y-4" onSubmit={handleSubmit}>
-            {/* Basic Info */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="name">Nombre de la Plantilla *</Label>
-                <Input
-                  required
-                  id="name"
-                  placeholder="Ej: Confirmación de Pedido"
-                  value={formData.name}
-                  onChange={(e) =>
-                    setFormData({ ...formData, name: e.target.value })
-                  }
-                />
-              </div>
+            <EmailTemplateEditorBasicInfo
+              mode={mode}
+              formData={{ name: formData.name, type: formData.type }}
+              isSystem={!!template?.is_system}
+              onChange={(field, value) =>
+                setFormData((prev) => ({ ...prev, [field]: value }))
+              }
+            />
 
-              <div className="space-y-2">
-                <Label htmlFor="type">Tipo *</Label>
-                <p className="text-xs text-muted-foreground">
-                  Los tipos con trigger automático se envían cuando ocurre el
-                  evento correspondiente. &quot;Personalizado&quot; y
-                  &quot;Marketing&quot; requieren envío manual.
-                </p>
-                <Select
-                  disabled={!!template?.is_system}
-                  value={formData.type}
-                  onValueChange={(value) =>
-                    setFormData({ ...formData, type: value })
-                  }
-                >
-                  <SelectTrigger id="type">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {mode === "saas" ? (
-                      <>
-                        <SelectItem value="saas_welcome">
-                          Bienvenida SaaS
-                        </SelectItem>
-                        <SelectItem value="saas_trial_ending">
-                          Fin de Prueba
-                        </SelectItem>
-                        <SelectItem value="saas_subscription_success">
-                          Suscripción Exitosa
-                        </SelectItem>
-                        <SelectItem value="saas_payment_failed">
-                          Pago Fallido SaaS
-                        </SelectItem>
-                        <SelectItem value="saas_payment_reminder">
-                          Recordatorio Pago
-                        </SelectItem>
-                        <SelectItem value="saas_security_alert">
-                          Alerta de Seguridad
-                        </SelectItem>
-                        <SelectItem value="saas_onboarding">
-                          Onboarding
-                        </SelectItem>
-                        <SelectItem value="saas_maintenance">
-                          Mantenimiento Programado
-                        </SelectItem>
-                        <SelectItem value="saas_support_ticket_created">
-                          Ticket Creado
-                        </SelectItem>
-                        <SelectItem value="saas_support_new_response">
-                          Nueva Respuesta
-                        </SelectItem>
-                        <SelectItem value="saas_support_ticket_assigned">
-                          Ticket Asignado
-                        </SelectItem>
-                        <SelectItem value="saas_support_ticket_resolved">
-                          Ticket Resuelto
-                        </SelectItem>
-                        <SelectItem value="marketing">Marketing</SelectItem>
-                        <SelectItem value="custom">Personalizado</SelectItem>
-                      </>
-                    ) : (
-                      <>
-                        <SelectItem value="order_confirmation">
-                          Confirmación de Pedido
-                        </SelectItem>
-                        <SelectItem value="order_shipped">
-                          Pedido Enviado
-                        </SelectItem>
-                        <SelectItem value="order_delivered">
-                          Pedido Entregado
-                        </SelectItem>
-                        <SelectItem value="password_reset">
-                          Restablecer Contraseña
-                        </SelectItem>
-                        <SelectItem value="account_welcome">
-                          Bienvenida
-                        </SelectItem>
-                        <SelectItem value="appointment_confirmation">
-                          Confirmación de Cita
-                        </SelectItem>
-                        <SelectItem value="appointment_reminder">
-                          Recordatorio de Cita (24h)
-                        </SelectItem>
-                        <SelectItem value="appointment_reminder_2h">
-                          Recordatorio de Cita (2h)
-                        </SelectItem>
-                        <SelectItem value="appointment_cancelation">
-                          Cancelación de Cita
-                        </SelectItem>
-                        <SelectItem value="appointment_rescheduled">
-                          Cita Reprogramada
-                        </SelectItem>
-                        <SelectItem value="appointment_follow_up_reminder">
-                          Recordatorio de Control
-                        </SelectItem>
-                        <SelectItem value="prescription_expiring">
-                          Receta por Vencer
-                        </SelectItem>
-                        <SelectItem value="quote_sent">
-                          Presupuesto Enviado
-                        </SelectItem>
-                        <SelectItem value="quote_expiring">
-                          Presupuesto Por Expirar
-                        </SelectItem>
-                        <SelectItem value="work_order_ready">
-                          Lentes Listo para Retiro
-                        </SelectItem>
-                        <SelectItem value="work_order_delivered">
-                          Entrega Completada + Encuesta
-                        </SelectItem>
-                        <SelectItem value="payment_success">
-                          Pago Exitoso
-                        </SelectItem>
-                        <SelectItem value="payment_failed">
-                          Pago Fallido
-                        </SelectItem>
-                        <SelectItem value="low_stock_alert">
-                          Alerta de Stock Bajo
-                        </SelectItem>
-                        <SelectItem value="marketing">Marketing</SelectItem>
-                        <SelectItem value="custom">Personalizado</SelectItem>
-                      </>
-                    )}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            {/* Subject */}
-            <div className="space-y-2">
-              <Label htmlFor="subject">Asunto *</Label>
-              <Input
-                required
-                id="subject"
-                placeholder="Ej: Confirmación de tu pedido {{order_number}}"
-                value={formData.subject}
-                onChange={(e) =>
-                  setFormData({ ...formData, subject: e.target.value })
-                }
-              />
-              <p className="text-xs text-muted-foreground">
-                Puedes usar variables como {"{{customer_name}}"},{" "}
-                {"{{order_number}}"}, etc.
-              </p>
-            </div>
-
-            {/* Content Editor */}
-            <div className="space-y-2">
-              <div className="flex justify-between items-center">
-                <Label>Contenido HTML del Email *</Label>
-                <div className="flex gap-2">
-                  <Button
-                    size="sm"
-                    type="button"
-                    variant="outline"
-                    onClick={() => setShowPreview(!showPreview)}
-                  >
-                    <Eye className="h-4 w-4 mr-2" />
-                    {showPreview ? "Ocultar" : "Mostrar"} Vista Previa
-                  </Button>
-                </div>
-              </div>
-
-              <div
-                className={`grid gap-4 ${showPreview ? "grid-cols-2" : "grid-cols-1"}`}
-              >
-                {/* Editor Section */}
-                <div className="space-y-2">
-                  <div className="border rounded-lg p-2 bg-muted/50">
-                    <div className="flex gap-2 mb-2 flex-wrap">
-                      <Select
-                        onValueChange={(v) =>
-                          applyTemplate(v as keyof typeof emailTemplates)
-                        }
-                      >
-                        <SelectTrigger className="w-[200px]">
-                          <SelectValue placeholder="Aplicar plantilla" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="simple">
-                            <div className="flex items-center gap-2">
-                              <FileText className="h-4 w-4" />
-                              {emailTemplates.simple.name}
-                            </div>
-                          </SelectItem>
-                          <SelectItem value="modern">
-                            <div className="flex items-center gap-2">
-                              <Sparkles className="h-4 w-4" />
-                              {emailTemplates.modern.name}
-                            </div>
-                          </SelectItem>
-                          <SelectItem value="minimal">
-                            <div className="flex items-center gap-2">
-                              <Code className="h-4 w-4" />
-                              {emailTemplates.minimal.name}
-                            </div>
-                          </SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <Button
-                        className="gap-2"
-                        size="sm"
-                        type="button"
-                        variant="outline"
-                        onClick={() => setShowAiAssistDialog(true)}
-                      >
-                        <Sparkles className="h-4 w-4" />
-                        Asistir con IA
-                      </Button>
-                    </div>
-                    <Textarea
-                      required
-                      className="font-mono text-sm"
-                      id="content"
-                      placeholder="<html><body>...</body></html>"
-                      ref={textareaRef}
-                      rows={20}
-                      value={formData.content}
-                      onChange={(e) =>
-                        setFormData({ ...formData, content: e.target.value })
-                      }
-                    />
-                  </div>
-
-                  {/* Variables Panel */}
-                  <div className="border rounded-lg p-3 bg-muted/30">
-                    <Label className="text-sm font-semibold mb-2 block">
-                      Variables Disponibles
-                    </Label>
-                    <div className="flex flex-wrap gap-2 max-h-32 overflow-y-auto">
-                      {getVariablesForEditor(formData.type).map((varItem) => (
-                        <Badge
-                          className="cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors"
-                          key={varItem.key}
-                          title={varItem.description}
-                          variant="outline"
-                          onClick={() => insertVariable(varItem.key)}
-                        >
-                          {varItem.label}
-                        </Badge>
-                      ))}
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-2">
-                      Haz clic en una variable para insertarla en el contenido
-                      HTML
-                    </p>
-                  </div>
-                </div>
-
-                {/* Preview Section */}
-                {showPreview && (
-                  <div className="space-y-2">
-                    <Label>Vista Previa en Tiempo Real</Label>
-                    <div className="border rounded-lg p-4 bg-white max-h-[600px] overflow-y-auto">
-                      <div className="mb-4 pb-4 border-b">
-                        <p className="text-sm font-semibold text-muted-foreground mb-1">
-                          Asunto:
-                        </p>
-                        <p className="text-base font-medium">
-                          {getPreviewSubject()}
-                        </p>
-                      </div>
-                      <div
-                        className="email-preview [&_img]:max-w-full [&_img]:h-auto [&_table]:w-full [&_table]:border-collapse [&_a]:text-[#8B4513] [&_a]:underline"
-                        dangerouslySetInnerHTML={{ __html: getPreviewHtml() }}
-                        style={{
-                          fontFamily: "Arial, sans-serif",
-                          lineHeight: "1.6",
-                          maxWidth: "100%",
-                        }}
-                      />
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
+            <EmailTemplateEditorContent
+              formType={formData.type}
+              subject={formData.subject}
+              content={formData.content}
+              showPreview={showPreview}
+              onSubjectChange={(value) =>
+                setFormData((prev) => ({ ...prev, subject: value }))
+              }
+              onContentChange={(value) =>
+                setFormData((prev) => ({ ...prev, content: value }))
+              }
+              onTogglePreview={() => setShowPreview(!showPreview)}
+              onTemplateApply={(key) =>
+                applyTemplate(key as keyof typeof emailTemplates)
+              }
+              onAiAssist={() => setShowAiAssistDialog(true)}
+              getPreviewSubject={getPreviewSubject}
+              getPreviewHtml={getPreviewHtml}
+            />
 
             {/* Active Toggle */}
             <div className="flex items-center justify-between">
@@ -706,43 +409,12 @@ export default function EmailTemplateEditor({
         </DialogContent>
       </Dialog>
 
-      <Dialog open={showAiAssistDialog} onOpenChange={setShowAiAssistDialog}>
-        <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-lg">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Sparkles className="h-5 w-5" />
-              Asistir con IA
-            </DialogTitle>
-            <DialogDescription>
-              Describe lo que quieres que genere la IA (ej. &quot;Plantilla de
-              bienvenida para clientes nuevos&quot;). Usará el tipo de plantilla
-              actual y las variables disponibles.
-            </DialogDescription>
-          </DialogHeader>
-          <Textarea
-            className="resize-none"
-            placeholder="Ej: Plantilla de bienvenida cálida para clientes nuevos que acaban de registrarse..."
-            rows={4}
-            value={aiPrompt}
-            onChange={(e) => setAiPrompt(e.target.value)}
-          />
-          <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => {
-                setShowAiAssistDialog(false);
-                setAiPrompt("");
-              }}
-            >
-              Cancelar
-            </Button>
-            <Button disabled={aiLoading} type="button" onClick={handleAiAssist}>
-              {aiLoading ? "Generando..." : "Generar"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <EmailTemplateEditorAiDialog
+        open={showAiAssistDialog}
+        loading={aiLoading}
+        onOpenChange={setShowAiAssistDialog}
+        onGenerate={handleAiAssist}
+      />
     </>
   );
 }

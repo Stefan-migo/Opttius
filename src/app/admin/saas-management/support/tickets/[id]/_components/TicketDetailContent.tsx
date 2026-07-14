@@ -3,15 +3,9 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   ArrowLeft,
-  Calendar,
-  Clock,
   Copy,
   Edit,
-  FileText,
   Loader2,
-  MessageSquare,
-  Send,
-  User,
   UserPlus,
   XCircle,
 } from "lucide-react";
@@ -24,24 +18,14 @@ import type { z } from "zod";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
 import { createSaasSupportMessageSchema } from "@/lib/api/validation/zod-schemas";
+
+import { TicketInfoPanel } from "./TicketInfoPanel";
+import { TicketMessageForm } from "./TicketMessageForm";
+import { TicketMessagesList } from "./TicketMessagesList";
+import { TicketStatusDialog } from "./TicketStatusDialog";
+import { TicketTemplateDialog } from "./TicketTemplateDialog";
 
 type MessageForm = z.infer<typeof createSaasSupportMessageSchema>;
 
@@ -54,11 +38,7 @@ interface TicketMessage {
   is_internal: boolean;
   created_at: string;
   message_type: string;
-  sender?: {
-    id: string;
-    email: string;
-    role: string;
-  } | null;
+  sender?: { id: string; email: string; role: string } | null;
 }
 
 interface Ticket {
@@ -82,21 +62,9 @@ interface Ticket {
   requester_email: string;
   requester_name: string | null;
   requester_role: string | null;
-  organization?: {
-    id: string;
-    name: string;
-    slug: string;
-  } | null;
-  assigned_to_user?: {
-    id: string;
-    email: string;
-    role: string;
-  } | null;
-  created_by_user?: {
-    id: string;
-    email: string;
-    role: string;
-  } | null;
+  organization?: { id: string; name: string; slug: string } | null;
+  assigned_to_user?: { id: string; email: string; role: string } | null;
+  created_by_user?: { id: string; email: string; role: string } | null;
 }
 
 interface Template {
@@ -155,20 +123,12 @@ export default function TicketDetailContent() {
   const [showAssignDialog, setShowAssignDialog] = useState(false);
   const [showStatusDialog, setShowStatusDialog] = useState(false);
   const [showTemplateDialog, setShowTemplateDialog] = useState(false);
-  const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(
-    null,
-  );
   const [newStatus, setNewStatus] = useState("");
   const [newPriority, setNewPriority] = useState("");
   const [newResolution, setNewResolution] = useState("");
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    reset,
-    setValue,
-  } = useForm<unknown>({
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { register, handleSubmit, formState: { errors }, reset, setValue } = useForm<any>({
     resolver: zodResolver(createSaasSupportMessageSchema),
     defaultValues: {
       is_internal: false,
@@ -302,7 +262,6 @@ export default function TicketDetailContent() {
   };
 
   const handleUseTemplate = (template: Template) => {
-    setSelectedTemplate(template);
     setValue("message", template.content);
     setShowTemplateDialog(false);
   };
@@ -442,134 +401,15 @@ export default function TicketDetailContent() {
               </CardContent>
             </Card>
 
-            {/* Messages */}
-            <Card className="rounded-xl border border-border">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <MessageSquare className="h-5 w-5" />
-                  Conversación ({messages.length})
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {messages.length === 0 ? (
-                  <div className="text-center py-8 text-gray-500">
-                    <MessageSquare className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-                    <p>No hay mensajes aún</p>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {messages.map((msg) => (
-                      <div
-                        className={`p-4 rounded-lg border ${
-                          msg.is_internal
-                            ? "bg-yellow-50 border-yellow-200"
-                            : msg.is_from_customer
-                              ? "bg-blue-50 border-blue-200"
-                              : "bg-gray-50 border-gray-200"
-                        }`}
-                        key={msg.id}
-                      >
-                        <div className="flex items-start justify-between mb-2">
-                          <div className="flex items-center gap-2">
-                            <User className="h-4 w-4 text-gray-500" />
-                            <span className="font-medium text-sm">
-                              {msg.sender_name}
-                            </span>
-                            {msg.is_internal && (
-                              <Badge className="text-xs" variant="outline">
-                                Interno
-                              </Badge>
-                            )}
-                            {msg.is_from_customer && !msg.is_internal && (
-                              <Badge className="text-xs" variant="outline">
-                                Cliente
-                              </Badge>
-                            )}
-                          </div>
-                          <span className="text-xs text-gray-500">
-                            {new Date(msg.created_at).toLocaleString("es-CL")}
-                          </span>
-                        </div>
-                        <p className="text-gray-900 whitespace-pre-wrap">
-                          {msg.message}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+            <TicketMessagesList messages={messages} />
 
-            {/* Add Message Form */}
-            <Card className="rounded-xl border border-border">
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle>Responder</CardTitle>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => setShowTemplateDialog(true)}
-                  >
-                    <FileText className="h-4 w-4 mr-2" />
-                    Usar Template
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <form
-                  className="space-y-4"
-                  onSubmit={handleSubmit(onSubmitMessage)}
-                >
-                  <div className="flex items-center gap-2">
-                    <input
-                      id="is_internal"
-                      type="checkbox"
-                      {...register("is_internal")}
-                      className="rounded"
-                    />
-                    <Label className="text-sm" htmlFor="is_internal">
-                      Mensaje interno (no visible para el cliente)
-                    </Label>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="message">
-                      Mensaje <span className="text-red-500">*</span>
-                    </Label>
-                    <Textarea
-                      id="message"
-                      {...register("message")}
-                      className={errors.message ? "border-red-500" : ""}
-                      placeholder="Escribe tu respuesta aquí..."
-                      rows={6}
-                    />
-                    {errors.message && (
-                      <p className="text-sm text-red-500">
-                        {String(errors.message.message)}
-                      </p>
-                    )}
-                  </div>
-
-                  <Button
-                    className="w-full"
-                    disabled={sendingMessage}
-                    type="submit"
-                  >
-                    {sendingMessage ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Enviando...
-                      </>
-                    ) : (
-                      <>
-                        <Send className="mr-2 h-4 w-4" />
-                        Enviar Mensaje
-                      </>
-                    )}
-                  </Button>
-                </form>
-              </CardContent>
-            </Card>
+            <TicketMessageForm
+              register={register}
+              errors={errors}
+              sendingMessage={sendingMessage}
+              onSubmit={handleSubmit(onSubmitMessage)}
+              onUseTemplate={() => setShowTemplateDialog(true)}
+            />
           </div>
 
           {/* Sidebar */}
@@ -599,177 +439,31 @@ export default function TicketDetailContent() {
               </CardContent>
             </Card>
 
-            {/* Ticket Info */}
-            <Card className="rounded-xl border border-border">
-              <CardHeader>
-                <CardTitle className="text-lg">Información</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-start gap-3">
-                  <Calendar className="h-5 w-5 text-gray-400 mt-0.5" />
-                  <div>
-                    <Label className="text-xs text-gray-500">Creado</Label>
-                    <p className="text-sm font-medium">
-                      {new Date(ticket.created_at).toLocaleString("es-CL")}
-                    </p>
-                  </div>
-                </div>
-
-                {ticket.first_response_at && (
-                  <div className="flex items-start gap-3">
-                    <Clock className="h-5 w-5 text-gray-400 mt-0.5" />
-                    <div>
-                      <Label className="text-xs text-gray-500">
-                        Primera Respuesta
-                      </Label>
-                      <p className="text-sm font-medium">
-                        {new Date(ticket.first_response_at).toLocaleString(
-                          "es-CL",
-                        )}
-                      </p>
-                      {ticket.response_time_minutes && (
-                        <p className="text-xs text-gray-500 mt-1">
-                          {Math.floor(ticket.response_time_minutes / 60)}h{" "}
-                          {ticket.response_time_minutes % 60}m
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                )}
-
-                {ticket.assigned_to_user && (
-                  <div className="flex items-start gap-3">
-                    <User className="h-5 w-5 text-gray-400 mt-0.5" />
-                    <div>
-                      <Label className="text-xs text-gray-500">
-                        Asignado a
-                      </Label>
-                      <p className="text-sm font-medium">
-                        {ticket.assigned_to_user.email}
-                      </p>
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+            <TicketInfoPanel ticket={ticket} />
           </div>
         </div>
 
-        {/* Status Dialog */}
-        <Dialog open={showStatusDialog} onOpenChange={setShowStatusDialog}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Cambiar Estado y Prioridad</DialogTitle>
-              <DialogDescription>
-                Actualiza el estado y prioridad del ticket
-              </DialogDescription>
-            </DialogHeader>
-            <div className="space-y-4 py-4">
-              <div className="space-y-2">
-                <Label>Estado</Label>
-                <Select value={newStatus} onValueChange={setNewStatus}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {Object.entries(statusLabels).map(([value, label]) => (
-                      <SelectItem key={value} value={value}>
-                        {label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+        <TicketStatusDialog
+          open={showStatusDialog}
+          onOpenChange={setShowStatusDialog}
+          status={newStatus}
+          priority={newPriority}
+          resolution={newResolution}
+          updating={updatingTicket}
+          statusLabels={statusLabels}
+          onStatusChange={setNewStatus}
+          onPriorityChange={setNewPriority}
+          onResolutionChange={setNewResolution}
+          onSave={handleUpdateStatus}
+        />
 
-              <div className="space-y-2">
-                <Label>Prioridad</Label>
-                <Select value={newPriority} onValueChange={setNewPriority}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="low">Baja</SelectItem>
-                    <SelectItem value="medium">Media</SelectItem>
-                    <SelectItem value="high">Alta</SelectItem>
-                    <SelectItem value="urgent">Urgente</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {(newStatus === "resolved" || newStatus === "closed") && (
-                <div className="space-y-2">
-                  <Label>Resolución</Label>
-                  <Textarea
-                    placeholder="Describe la resolución del ticket..."
-                    rows={4}
-                    value={newResolution}
-                    onChange={(e) => setNewResolution(e.target.value)}
-                  />
-                </div>
-              )}
-            </div>
-            <DialogFooter>
-              <Button
-                variant="outline"
-                onClick={() => setShowStatusDialog(false)}
-              >
-                Cancelar
-              </Button>
-              <Button disabled={updatingTicket} onClick={handleUpdateStatus}>
-                {updatingTicket ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Actualizando...
-                  </>
-                ) : (
-                  "Actualizar"
-                )}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-
-        {/* Template Dialog */}
-        <Dialog open={showTemplateDialog} onOpenChange={setShowTemplateDialog}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Seleccionar Template</DialogTitle>
-              <DialogDescription>
-                Elige un template para usar en tu respuesta
-              </DialogDescription>
-            </DialogHeader>
-            <div className="space-y-2 max-h-96 overflow-y-auto py-4">
-              {templates.length === 0 ? (
-                <p className="text-sm text-gray-500 text-center py-4">
-                  No hay templates disponibles
-                </p>
-              ) : (
-                templates.map((template) => (
-                  <div
-                    className="p-3 border rounded-lg hover:bg-epoch-primary/5 cursor-pointer transition-colors"
-                    key={template.id}
-                    onClick={() => handleUseTemplate(template)}
-                  >
-                    <div className="font-medium">{template.name}</div>
-                    {template.category && (
-                      <Badge className="mt-1" variant="outline">
-                        {categoryLabels[template.category] || template.category}
-                      </Badge>
-                    )}
-                  </div>
-                ))
-              )}
-            </div>
-            <DialogFooter>
-              <Button
-                variant="outline"
-                onClick={() => setShowTemplateDialog(false)}
-              >
-                Cancelar
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+        <TicketTemplateDialog
+          open={showTemplateDialog}
+          onOpenChange={setShowTemplateDialog}
+          templates={templates}
+          onSelect={(template) => handleUseTemplate(template as any)}
+          categoryLabels={categoryLabels}
+        />
       </div>
     </div>
   );

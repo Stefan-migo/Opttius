@@ -10,26 +10,7 @@ import { useState, useEffect, useMemo } from "react";
 import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import {
   contactLensFamilyService,
   type ContactLensFamily,
@@ -41,6 +22,11 @@ import {
 import { contactLensInventoryService } from "@/lib/api/services/contactLensInventoryService";
 import { contactLensEncargoService } from "@/lib/api/services/contactLensEncargoService";
 import { formatCurrency } from "@/lib/utils";
+
+import { ContactLensEncargoDialog } from "./ContactLensEncargoDialog";
+import { ContactLensFamilySelector } from "./ContactLensFamilySelector";
+import { ContactLensPrescriptionSection } from "./ContactLensPrescriptionSection";
+import { ContactLensPriceStock } from "./ContactLensPriceStock";
 
 // Tipos para la graduación de LC
 interface ContactLensPrescription {
@@ -135,7 +121,6 @@ export function ContactLensSelector({
 
   // Dialog
   const [showEncargoDialog, setShowEncargoDialog] = useState(false);
-  const [encargoNotes, setEncargoNotes] = useState("");
   const [submittingEncargo, setSubmittingEncargo] = useState(false);
 
   // Cargar familias al montar
@@ -275,12 +260,11 @@ export function ContactLensSelector({
   }, [selectedFamilyId, priceResult?.price, quantity]); // Dependencias mínimas
 
   // Handler crear encargo
-  const handleCreateEncargo = async () => {
+  const handleCreateEncargo = async (notes: string) => {
     if (!selectedFamily) return;
 
     setSubmittingEncargo(true);
     try {
-      // Build customer name from customer object
       const customerName = customer
         ? `${customer.first_name || ""} ${customer.last_name || ""}`.trim() ||
           customer.name ||
@@ -311,12 +295,11 @@ export function ContactLensSelector({
         quantity,
         estimated_price: priceResult?.price,
         cost: priceResult?.cost,
-        notes: encargoNotes || undefined,
+        notes: notes || undefined,
       });
 
       toast.success("Encargo solicitado correctamente");
       setShowEncargoDialog(false);
-      setEncargoNotes("");
     } catch (err) {
       console.error("Error creating encargo:", err);
       toast.error("Error al crear encargo");
@@ -357,349 +340,33 @@ export function ContactLensSelector({
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
-        {/* 1. Familia */}
-        <div>
-          <Label>Marca y Familia</Label>
-          <Select
-            value={selectedFamilyId}
-            onValueChange={handleFamilySelect}
-            disabled={loadingFamilies}
-          >
-            <SelectTrigger>
-              <SelectValue
-                placeholder={
-                  loadingFamilies ? "Cargando..." : "Selecciona una familia"
-                }
-              />
-            </SelectTrigger>
-            <SelectContent>
-              {families.length === 0 ? (
-                <div className="p-4 text-center text-muted-foreground">
-                  No hay familias disponibles
-                </div>
-              ) : (
-                families.map((family) => (
-                  <SelectItem key={family.id} value={family.id}>
-                    <div className="flex flex-col">
-                      <span className="font-medium">{family.name}</span>
-                      <span className="text-xs text-muted-foreground">
-                        {family.brand || "Sin marca"} • {family.modality}
-                      </span>
-                    </div>
-                  </SelectItem>
-                ))
-              )}
-            </SelectContent>
-          </Select>
-        </div>
+        <ContactLensFamilySelector
+          families={families}
+          selectedFamilyId={selectedFamilyId}
+          loadingFamilies={loadingFamilies}
+          selectedFamily={selectedFamily}
+          onSelect={handleFamilySelect}
+        />
 
-        {/* Info familia */}
         {selectedFamily && (
-          <div className="p-3 bg-muted/50 rounded-lg space-y-2">
-            <div className="flex flex-wrap gap-2">
-              <Badge variant="outline">{selectedFamily.modality}</Badge>
-              <Badge variant="outline">{selectedFamily.use_type}</Badge>
-              <Badge variant="outline">{selectedFamily.packaging}</Badge>
-            </div>
-            {selectedFamily.description && (
-              <p className="text-sm text-muted-foreground">
-                {selectedFamily.description}
-              </p>
-            )}
-          </div>
+          <ContactLensPrescriptionSection
+            prescription={prescription}
+            manualPrescription={manualPrescription}
+            sphereOptions={sphereOptions}
+            cylinderOptions={cylinderOptions}
+            onManualChange={(p) => setManualPrescription(p)}
+          />
         )}
 
-        {/* 2. Graduación */}
         {selectedFamily && (
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <Label>Graduación</Label>
-              {!prescription && (
-                <span className="text-xs text-muted-foreground">
-                  Ingrese la graduación manualmente
-                </span>
-              )}
-            </div>
-
-            {prescription ? (
-              <div className="grid grid-cols-2 gap-4">
-                <div className="p-3 border rounded-lg">
-                  <div className="font-medium text-sm mb-2 text-center">
-                    Ojo Derecho (OD)
-                  </div>
-                  <div className="grid grid-cols-2 gap-2 text-sm">
-                    <div>
-                      <span className="text-muted-foreground">Esfera:</span>{" "}
-                      <span className="font-medium">
-                        {prescription.sphere_od >= 0 ? "+" : ""}
-                        {prescription.sphere_od.toFixed(2)}
-                      </span>
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground">Cilindro:</span>{" "}
-                      <span className="font-medium">
-                        {prescription.cylinder_od >= 0 ? "+" : ""}
-                        {prescription.cylinder_od.toFixed(2)}
-                      </span>
-                    </div>
-                    {prescription.axis_od && (
-                      <div>
-                        <span className="text-muted-foreground">Eje:</span>{" "}
-                        <span className="font-medium">
-                          {prescription.axis_od}°
-                        </span>
-                      </div>
-                    )}
-                    {prescription.add_od && (
-                      <div>
-                        <span className="text-muted-foreground">Adición:</span>{" "}
-                        <span className="font-medium">
-                          +{prescription.add_od.toFixed(2)}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-                <div className="p-3 border rounded-lg">
-                  <div className="font-medium text-sm mb-2 text-center">
-                    Ojo Izquierdo (OS)
-                  </div>
-                  <div className="grid grid-cols-2 gap-2 text-sm">
-                    <div>
-                      <span className="text-muted-foreground">Esfera:</span>{" "}
-                      <span className="font-medium">
-                        {prescription.sphere_os >= 0 ? "+" : ""}
-                        {prescription.sphere_os.toFixed(2)}
-                      </span>
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground">Cilindro:</span>{" "}
-                      <span className="font-medium">
-                        {prescription.cylinder_os >= 0 ? "+" : ""}
-                        {prescription.cylinder_os.toFixed(2)}
-                      </span>
-                    </div>
-                    {prescription.axis_os && (
-                      <div>
-                        <span className="text-muted-foreground">Eje:</span>{" "}
-                        <span className="font-medium">
-                          {prescription.axis_os}°
-                        </span>
-                      </div>
-                    )}
-                    {prescription.add_os && (
-                      <div>
-                        <span className="text-muted-foreground">Adición:</span>{" "}
-                        <span className="font-medium">
-                          +{prescription.add_os.toFixed(2)}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <div className="text-sm font-medium text-center">OD</div>
-                  <div className="grid grid-cols-2 gap-2">
-                    <div>
-                      <Label className="text-xs">Esfera</Label>
-                      <Select
-                        value={manualPrescription.sphere_od.toString()}
-                        onValueChange={(v) =>
-                          setManualPrescription((p) => ({
-                            ...p,
-                            sphere_od: parseFloat(v),
-                          }))
-                        }
-                      >
-                        <SelectTrigger className="h-8">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent className="max-h-40">
-                          {sphereOptions.map((s) => (
-                            <SelectItem key={s} value={s.toString()}>
-                              {s >= 0 ? "+" : ""}
-                              {s.toFixed(2)}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div>
-                      <Label className="text-xs">Cilindro</Label>
-                      <Select
-                        value={manualPrescription.cylinder_od.toString()}
-                        onValueChange={(v) =>
-                          setManualPrescription((p) => ({
-                            ...p,
-                            cylinder_od: parseFloat(v),
-                          }))
-                        }
-                      >
-                        <SelectTrigger className="h-8">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent className="max-h-40">
-                          {cylinderOptions.map((c) => (
-                            <SelectItem key={c} value={c.toString()}>
-                              {c >= 0 ? "+" : ""}
-                              {c.toFixed(2)}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <div className="text-sm font-medium text-center">OS</div>
-                  <div className="grid grid-cols-2 gap-2">
-                    <div>
-                      <Label className="text-xs">Esfera</Label>
-                      <Select
-                        value={manualPrescription.sphere_os.toString()}
-                        onValueChange={(v) =>
-                          setManualPrescription((p) => ({
-                            ...p,
-                            sphere_os: parseFloat(v),
-                          }))
-                        }
-                      >
-                        <SelectTrigger className="h-8">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent className="max-h-40">
-                          {sphereOptions.map((s) => (
-                            <SelectItem key={s} value={s.toString()}>
-                              {s >= 0 ? "+" : ""}
-                              {s.toFixed(2)}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div>
-                      <Label className="text-xs">Cilindro</Label>
-                      <Select
-                        value={manualPrescription.cylinder_os.toString()}
-                        onValueChange={(v) =>
-                          setManualPrescription((p) => ({
-                            ...p,
-                            cylinder_os: parseFloat(v),
-                          }))
-                        }
-                      >
-                        <SelectTrigger className="h-8">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent className="max-h-40">
-                          {cylinderOptions.map((c) => (
-                            <SelectItem key={c} value={c.toString()}>
-                              {c >= 0 ? "+" : ""}
-                              {c.toFixed(2)}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* 3. Precio y Stock */}
-        {selectedFamily && (
-          <div className="space-y-4">
-            <Separator />
-
-            {/* Cantidad */}
-            <div>
-              <Label>Cantidad (cajas)</Label>
-              <div className="flex gap-2 mt-1">
-                {[1, 2, 3, 4, 5].map((q) => (
-                  <Button
-                    key={q}
-                    size="sm"
-                    variant={quantity === q ? "default" : "outline"}
-                    onClick={() => setQuantity(q)}
-                  >
-                    {q}
-                  </Button>
-                ))}
-              </div>
-            </div>
-
-            {/* Precio */}
-            {priceResult && (
-              <div className="p-4 bg-muted rounded-lg">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-muted-foreground">
-                    Precio por caja:
-                  </span>
-                  <span className="font-semibold">
-                    {formatCurrency(priceResult.price)}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="font-medium">
-                    Total ({quantity} caja{quantity > 1 ? "s" : ""}):
-                  </span>
-                  <span className="text-xl font-bold text-primary">
-                    {formatCurrency(priceResult.price * quantity)}
-                  </span>
-                </div>
-              </div>
-            )}
-
-            {loadingPrice && (
-              <div className="text-center text-muted-foreground">
-                Calculando precio...
-              </div>
-            )}
-
-            {/* Stock */}
-            <div
-              className={`p-3 rounded-lg ${stockInfo.inStock ? "bg-green-50 border border-green-200" : "bg-amber-50 border border-amber-200"}`}
-            >
-              <div className="flex items-center gap-2">
-                {stockInfo.inStock ? (
-                  <>
-                    <div className="w-3 h-3 rounded-full bg-green-500" />
-                    <span className="font-medium text-green-700">
-                      ✅ Disponible
-                    </span>
-                    <span className="text-sm text-green-600">
-                      ({stockInfo.availableQuantity} cajas)
-                    </span>
-                  </>
-                ) : (
-                  <>
-                    <div className="w-3 h-3 rounded-full bg-amber-500" />
-                    <span className="font-medium text-amber-700">
-                      ⚠️ Sin stock
-                    </span>
-                    <span className="text-sm text-amber-600">(2-3 días)</span>
-                  </>
-                )}
-              </div>
-              {!stockInfo.inStock && (
-                <div className="mt-2">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="w-full"
-                    onClick={() => setShowEncargoDialog(true)}
-                  >
-                    Solicitar encargo
-                  </Button>
-                </div>
-              )}
-            </div>
-          </div>
+          <ContactLensPriceStock
+            priceResult={priceResult}
+            stockInfo={stockInfo}
+            quantity={quantity}
+            loadingPrice={loadingPrice}
+            onQuantityChange={setQuantity}
+            onRequestEncargo={() => setShowEncargoDialog(true)}
+          />
         )}
 
         {/* Resumen */}
@@ -722,48 +389,14 @@ export function ContactLensSelector({
           </div>
         )}
 
-        {/* Dialog encargo */}
-        <Dialog open={showEncargoDialog} onOpenChange={setShowEncargoDialog}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Solicitar Encargo</DialogTitle>
-              <DialogDescription>
-                Crear orden de compra para este producto
-              </DialogDescription>
-            </DialogHeader>
-            <div className="space-y-4">
-              <div className="p-3 bg-muted rounded-lg">
-                <div className="font-medium">{selectedFamily?.name}</div>
-                <div className="text-sm text-muted-foreground">
-                  {selectedFamily?.brand}
-                </div>
-                <div className="text-sm mt-1">Cantidad: {quantity} caja(s)</div>
-              </div>
-              <div>
-                <Label>Notas adicionales</Label>
-                <Input
-                  value={encargoNotes}
-                  onChange={(e) => setEncargoNotes(e.target.value)}
-                  placeholder="Instrucciones..."
-                />
-              </div>
-            </div>
-            <DialogFooter>
-              <Button
-                variant="outline"
-                onClick={() => setShowEncargoDialog(false)}
-              >
-                Cancelar
-              </Button>
-              <Button
-                onClick={handleCreateEncargo}
-                disabled={submittingEncargo}
-              >
-                {submittingEncargo ? "Enviando..." : "Confirmar"}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+        <ContactLensEncargoDialog
+          open={showEncargoDialog}
+          family={selectedFamily}
+          quantity={quantity}
+          submitting={submittingEncargo}
+          onOpenChange={setShowEncargoDialog}
+          onConfirm={handleCreateEncargo}
+        />
       </CardContent>
     </Card>
   );

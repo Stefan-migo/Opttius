@@ -7,15 +7,6 @@ import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -34,7 +25,10 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
+import { EmailTemplateDeleteDialog } from "./EmailTemplateDeleteDialog";
 import EmailTemplateEditor from "./EmailTemplateEditor";
+import { EmailTemplatePreviewDialog } from "./EmailTemplatePreviewDialog";
+import { EmailTemplateTestDialog } from "./EmailTemplateTestDialog";
 
 interface EmailTemplate {
   id: string;
@@ -118,7 +112,6 @@ export default function EmailTemplatesManager({
   const [selectedTemplate, setSelectedTemplate] =
     useState<EmailTemplate | null>(null);
   const [testing, setTesting] = useState<string | null>(null);
-  const [testEmail, setTestEmail] = useState("");
   const [createInitialType, setCreateInitialType] = useState<
     string | undefined
   >();
@@ -234,24 +227,18 @@ export default function EmailTemplatesManager({
 
   const handleTestEmail = (template: EmailTemplate) => {
     setSelectedTemplate(template);
-    setTestEmail("");
     setShowTestDialog(true);
   };
 
-  const confirmTestEmail = async () => {
-    if (!selectedTemplate || !testEmail) {
-      toast.error("Por favor ingresa un email válido");
-      return;
-    }
-
+  const confirmTestEmailWith = async (templateId: string, email: string) => {
     try {
-      setTesting(selectedTemplate.id);
+      setTesting(templateId);
       const response = await fetch(
-        `${templatesApiBase}/${selectedTemplate.id}/test`,
+        `${templatesApiBase}/${templateId}/test`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ testEmail }),
+          body: JSON.stringify({ testEmail: email }),
         },
       );
 
@@ -259,7 +246,6 @@ export default function EmailTemplatesManager({
       if (data.success) {
         toast.success(data.message || "Email de prueba enviado");
         setShowTestDialog(false);
-        setTestEmail("");
       } else {
         toast.error(data.error || "Error al enviar email de prueba");
       }
@@ -647,131 +633,34 @@ export default function EmailTemplatesManager({
 
       {/* Preview Dialog */}
       {showPreviewDialog && selectedTemplate && (
-        <Dialog open={showPreviewDialog} onOpenChange={setShowPreviewDialog}>
-          <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-3xl max-h-[80vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>{selectedTemplate.name}</DialogTitle>
-              <DialogDescription>
-                Vista previa de la plantilla
-              </DialogDescription>
-            </DialogHeader>
-            <div className="space-y-4">
-              <div>
-                <Label>Asunto:</Label>
-                <p className="font-medium">{selectedTemplate.subject}</p>
-              </div>
-              <div>
-                <Label>Contenido:</Label>
-                <div
-                  className="border rounded-lg p-4 bg-admin-bg-primary"
-                  dangerouslySetInnerHTML={{ __html: selectedTemplate.content }}
-                />
-              </div>
-            </div>
-            <DialogFooter>
-              <Button
-                variant="outline"
-                onClick={() => setShowPreviewDialog(false)}
-              >
-                Cerrar
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+        <EmailTemplatePreviewDialog
+          open={showPreviewDialog}
+          template={selectedTemplate}
+          onOpenChange={setShowPreviewDialog}
+        />
       )}
 
       {/* Delete Confirmation Dialog */}
-      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Eliminar plantilla</DialogTitle>
-            <DialogDescription>
-              ¿Estás seguro de que deseas eliminar la plantilla &quot;
-              {templateToDelete?.name}&quot;? Esta acción no se puede deshacer.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button
-              disabled={deleting}
-              variant="outline"
-              onClick={() => {
-                setShowDeleteDialog(false);
-                setTemplateToDelete(null);
-              }}
-            >
-              Cancelar
-            </Button>
-            <Button
-              disabled={deleting}
-              variant="destructive"
-              onClick={confirmDelete}
-            >
-              {deleting ? "Eliminando..." : "Eliminar"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <EmailTemplateDeleteDialog
+        open={showDeleteDialog}
+        template={templateToDelete}
+        deleting={deleting}
+        onOpenChange={(open) => {
+          setShowDeleteDialog(open);
+          if (!open) setTemplateToDelete(null);
+        }}
+        onConfirm={confirmDelete}
+      />
 
       {/* Test Email Dialog */}
       {showTestDialog && selectedTemplate && (
-        <Dialog open={showTestDialog} onOpenChange={setShowTestDialog}>
-          <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-md">
-            <DialogHeader>
-              <DialogTitle className="flex items-center gap-2">
-                <Send className="h-5 w-5" />
-                Enviar Email de Prueba
-              </DialogTitle>
-              <DialogDescription>
-                Envía un email de prueba de la plantilla &quot;
-                {selectedTemplate.name}&quot; a una dirección de correo.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="test-email">Email de destino *</Label>
-                <Input
-                  required
-                  id="test-email"
-                  placeholder="ejemplo@email.com"
-                  type="email"
-                  value={testEmail}
-                  onChange={(e) => setTestEmail(e.target.value)}
-                />
-                <p className="text-xs text-muted-foreground">
-                  El email se enviará con variables de ejemplo reemplazadas.
-                </p>
-              </div>
-            </div>
-            <DialogFooter>
-              <Button
-                disabled={testing === selectedTemplate.id}
-                variant="outline"
-                onClick={() => {
-                  setShowTestDialog(false);
-                  setTestEmail("");
-                }}
-              >
-                Cancelar
-              </Button>
-              <Button
-                disabled={!testEmail || testing === selectedTemplate.id}
-                onClick={confirmTestEmail}
-              >
-                {testing === selectedTemplate.id ? (
-                  <>
-                    <Send className="h-4 w-4 mr-2 animate-spin" />
-                    Enviando...
-                  </>
-                ) : (
-                  <>
-                    <Send className="h-4 w-4 mr-2" />
-                    Enviar Prueba
-                  </>
-                )}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+        <EmailTemplateTestDialog
+          open={showTestDialog}
+          template={selectedTemplate}
+          testing={testing}
+          onOpenChange={setShowTestDialog}
+          onSend={(id, email) => confirmTestEmailWith(id, email)}
+        />
       )}
     </div>
   );

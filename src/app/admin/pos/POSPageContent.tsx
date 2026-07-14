@@ -25,15 +25,8 @@ import { POSPendingBalanceDialog } from "./components/POSPendingBalanceDialog";
 import { POSRefundDialog } from "./components/POSRefundDialog";
 import { POSSaleToggle } from "./components/POSSaleToggle";
 import { POSAdvancedSale } from "./components/POSAdvancedSale";
-import { Button } from "@/components/ui/button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { POMPaymentSection } from "./components/POMPaymentSection";
 import { useBranch } from "@/hooks/useBranch";
-import { formatCurrency } from "@/lib/utils";
 
 import { usePOS, usePOSKeyboardShortcuts } from "./hooks";
 import type { SaleMode } from "./components";
@@ -338,9 +331,6 @@ export function POSPageContent() {
     [total],
   );
 
-  // Quick action buttons - only 10000 and 20000
-  const quickCashAmounts = [10000, 20000];
-
   // Handle quote loading
   const handleLoadQuote = useCallback(
     async (quoteInput: string) => {
@@ -578,149 +568,17 @@ export function POSPageContent() {
             />
           </div>
 
-          {/* Payment Section */}
-          <div className="border-t p-4 space-y-4 flex-shrink-0">
-            {/* Quick Cash Buttons (only show for cash payment) */}
-            {paymentMethod === "cash" && (
-              <div className="space-y-2">
-                <p className="text-xs text-muted-foreground">Monto rápido:</p>
-                <div className="flex flex-wrap gap-1">
-                  {quickCashAmounts.map((amount) => (
-                    <Button
-                      key={amount}
-                      variant="outline"
-                      size="sm"
-                      className="text-xs"
-                      onClick={() => handleQuickCash(amount)}
-                    >
-                      ${amount.toLocaleString("es-CL")}
-                    </Button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Cash Input */}
-            {paymentMethod === "cash" && (
-              <div className="space-y-2">
-                <label className="text-sm text-muted-foreground">
-                  Efectivo recibido:
-                </label>
-                <input
-                  type="number"
-                  className="w-full p-2 border rounded-lg text-lg font-semibold"
-                  value={cashReceived || ""}
-                  onChange={(e) => setCashReceived(Number(e.target.value) || 0)}
-                  placeholder="$0"
-                />
-                {cashReceived > 0 && (
-                  <div className="flex justify-between text-sm text-green-600">
-                    <span>Vuelto:</span>
-                    <span className="font-semibold">
-                      {formatCurrency(change)}
-                    </span>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Payment Method Selector with Tooltips */}
-            <div className="space-y-2">
-              <p className="text-sm text-muted-foreground">Método de pago:</p>
-              <TooltipProvider>
-                <div className="flex gap-2">
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        variant={
-                          paymentMethod === "cash" ? "default" : "outline"
-                        }
-                        size="sm"
-                        onClick={() => setPaymentMethod("cash")}
-                        className="flex-1"
-                      >
-                        Efectivo
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Presiona F1</p>
-                    </TooltipContent>
-                  </Tooltip>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        variant={
-                          paymentMethod === "debit_card" ? "default" : "outline"
-                        }
-                        size="sm"
-                        onClick={() => setPaymentMethod("debit_card")}
-                        className="flex-1"
-                      >
-                        Débito
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Presiona F2</p>
-                    </TooltipContent>
-                  </Tooltip>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        variant={
-                          paymentMethod === "credit_card"
-                            ? "default"
-                            : "outline"
-                        }
-                        size="sm"
-                        onClick={() => setPaymentMethod("credit_card")}
-                        className="flex-1"
-                      >
-                        Crédito
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Presiona F3</p>
-                    </TooltipContent>
-                  </Tooltip>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        variant={
-                          paymentMethod === "transfer" ? "default" : "outline"
-                        }
-                        size="sm"
-                        onClick={() => setPaymentMethod("transfer")}
-                        className="flex-1"
-                      >
-                        Transf.
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Presiona F4</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </div>
-              </TooltipProvider>
-            </div>
-
-            {/* Complete Sale Button */}
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    className="w-full text-lg py-6"
-                    disabled={cart.length === 0}
-                    onClick={() => setShowPaymentDialog(true)}
-                  >
-                    Cobrar {formatCurrency(total)}
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Ctrl + Enter</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          </div>
+          <POMPaymentSection
+            paymentMethod={paymentMethod}
+            cashReceived={cashReceived}
+            cartLength={cart.length}
+            total={total}
+            change={change}
+            onPaymentMethodChange={(v) => setPaymentMethod(v as Parameters<typeof setPaymentMethod>[0])}
+            onCashReceivedChange={setCashReceived}
+            onQuickCash={handleQuickCash}
+            onOpenPaymentDialog={() => setShowPaymentDialog(true)}
+          />
         </div>
       </div>
 

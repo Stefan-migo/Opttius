@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  AlertCircle,
   AlertTriangle,
   ArrowLeft,
   Ban,
@@ -56,6 +55,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { formatDate } from "@/lib/utils";
+
+import { SubscriptionsDialogs } from "./SubscriptionsDialogs";
 
 interface Subscription {
   id: string;
@@ -712,72 +713,16 @@ export default function SubscriptionsContent() {
         </CardContent>
       </Card>
 
-      {/* Diálogo de confirmación: cancelar suscripción (toast del programa) */}
-      <Dialog
-        open={cancelConfirmId !== null}
-        onOpenChange={(open) => !open && setCancelConfirmId(null)}
-      >
-        <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-md">
-          <DialogHeader>
-            <div className="mx-auto bg-red-100 dark:bg-red-500/20 p-4 rounded-3xl w-fit mb-4">
-              <AlertCircle className="h-10 w-10 text-red-600 dark:text-red-500" />
-            </div>
-            <DialogTitle>¿Cancelar suscripción?</DialogTitle>
-            <DialogDescription>
-              La organización mantendrá el acceso hasta el final del periodo
-              actual. Después la suscripción quedará cancelada.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setCancelConfirmId(null)}>
-              Volver
-            </Button>
-            <Button
-              disabled={!cancelConfirmId}
-              variant="destructive"
-              onClick={() =>
-                cancelConfirmId && handleAction(cancelConfirmId, "cancel")
-              }
-            >
-              Confirmar cancelación
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Diálogo de confirmación: eliminar suscripción (toast del programa) */}
-      <Dialog
-        open={deleteConfirmId !== null}
-        onOpenChange={(open) => !open && setDeleteConfirmId(null)}
-      >
-        <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-md">
-          <DialogHeader>
-            <div className="mx-auto bg-red-100 dark:bg-red-500/20 p-4 rounded-3xl w-fit mb-4">
-              <AlertCircle className="h-10 w-10 text-red-600 dark:text-red-500" />
-            </div>
-            <DialogTitle>¿Eliminar esta suscripción?</DialogTitle>
-            <DialogDescription>
-              Esta acción no se puede deshacer. Se eliminará el registro de
-              suscripción.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setDeleteConfirmId(null)}>
-              Volver
-            </Button>
-            <Button
-              disabled={!deleteConfirmId || deleteLoading}
-              variant="destructive"
-              onClick={() => deleteConfirmId && handleDelete(deleteConfirmId)}
-            >
-              {deleteLoading && deleteId === deleteConfirmId ? (
-                <Loader2 className="h-4 w-4 animate-spin mr-2" />
-              ) : null}
-              Eliminar
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <SubscriptionsDialogs
+        cancelConfirmId={cancelConfirmId}
+        deleteConfirmId={deleteConfirmId}
+        deleteId={deleteId}
+        deleteLoading={deleteLoading}
+        onCancelConfirmIdChange={setCancelConfirmId}
+        onCancel={(id) => handleAction(id, "cancel")}
+        onDeleteConfirmIdChange={setDeleteConfirmId}
+        onDelete={handleDelete}
+      />
     </div>
   );
 }

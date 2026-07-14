@@ -9,7 +9,6 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -18,7 +17,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
 import { User, X } from "lucide-react";
 
 import type { Prescription } from "@/lib/api/services/customerService";
@@ -27,6 +25,9 @@ import type {
   OrderFormData,
   POSAdvancedSaleProps,
 } from "./POSAdvancedSale.types";
+
+import { ExternalPrescriptionForm } from "./ExternalPrescriptionForm";
+import { PresbyopiaSolutionSelector } from "./PresbyopiaSolutionSelector";
 
 export interface POSAdvancedSaleCustomerTabProps {
   customer: POSAdvancedSaleProps["customer"];
@@ -71,6 +72,10 @@ export function POSAdvancedSaleCustomerTab({
   suggestLensFamily,
   onNextTab,
 }: POSAdvancedSaleCustomerTabProps) {
+  const hasPrescriptionAddition =
+    (selectedPrescription?.od_add ?? 0) > 0 ||
+    (selectedPrescription?.os_add ?? 0) > 0;
+
   return (
     <Card>
       <CardHeader className="pb-3">
@@ -83,13 +88,11 @@ export function POSAdvancedSaleCustomerTab({
           {customer ? (
             <div className="mt-1 p-3 border rounded-lg bg-muted/50 space-y-2">
               <div className="space-y-1">
-                {/* Build display name from available fields */}
                 <div className="font-medium">
                   {customer.first_name && customer.last_name
                     ? `${customer.first_name} ${customer.last_name}`.trim()
                     : customer.name || customer.business_name || "Sin nombre"}
                 </div>
-                {/* Show email separately if available */}
                 {customer.email && (
                   <div className="text-sm text-muted-foreground">
                     Email: {customer.email}
@@ -118,7 +121,7 @@ export function POSAdvancedSaleCustomerTab({
           )}
         </div>
 
-        {/* Quick Customer Info - Show when no registered customer but quick customer data exists */}
+        {/* Quick Customer Info */}
         {!customer && (quickCustomerName || quickCustomerRUT) && (
           <div className="mt-2 p-3 border border-blue-200 rounded-lg bg-blue-50 dark:bg-blue-900/20">
             <div className="flex items-center gap-2 mb-2">
@@ -154,8 +157,7 @@ export function POSAdvancedSaleCustomerTab({
               )}
             </div>
             <div className="mt-2 text-xs text-blue-600 dark:text-blue-400">
-              Datos del cliente no registrado. Complete la receta externa para
-              crear la venta.
+              Datos del cliente no registrado. Complete la receta externa para crear la venta.
             </div>
           </div>
         )}
@@ -180,7 +182,6 @@ export function POSAdvancedSaleCustomerTab({
               </Button>
             </div>
 
-            {/* Customer Prescriptions */}
             {!useExternalPrescription && (
               <div>
                 <Label>Seleccionar Receta</Label>
@@ -196,10 +197,7 @@ export function POSAdvancedSaleCustomerTab({
                         (p) => p.id === value,
                       );
                       setSelectedPrescription(prescription || null);
-                      if (prescription) {
-                        // Auto-suggest lens family based on prescription
-                        suggestLensFamily();
-                      }
+                      if (prescription) suggestLensFamily();
                     }}
                   >
                     <SelectTrigger className="mt-1">
@@ -213,18 +211,13 @@ export function POSAdvancedSaleCustomerTab({
                               {rx.prescription_number ||
                                 `Receta ${rx.id.slice(0, 8)}`}
                               {rx.is_current && (
-                                <Badge
-                                  className="ml-2 text-xs"
-                                  variant="secondary"
-                                >
+                                <Badge className="ml-2 text-xs" variant="secondary">
                                   Actual
                                 </Badge>
                               )}
                             </span>
                             <span className="text-xs text-muted-foreground">
-                              {new Date(
-                                rx.prescription_date,
-                              ).toLocaleDateString("es-CL")}
+                              {new Date(rx.prescription_date).toLocaleDateString("es-CL")}
                             </span>
                           </div>
                         </SelectItem>
@@ -237,7 +230,6 @@ export function POSAdvancedSaleCustomerTab({
                   </div>
                 )}
 
-                {/* Show selected prescription values in OD/OI format */}
                 {selectedPrescription && (
                   <div className="mt-3 p-3 border rounded-lg bg-muted/30">
                     <div className="flex justify-between items-center mb-2">
@@ -278,7 +270,6 @@ export function POSAdvancedSaleCustomerTab({
                         </div>
                       </div>
                     </div>
-                    {/* DP - Show as single binocular value */}
                     {(selectedPrescription?.pd_distance ||
                       selectedPrescription?.od_pd ||
                       selectedPrescription?.os_pd) && (
@@ -287,15 +278,11 @@ export function POSAdvancedSaleCustomerTab({
                           Distancia Pupilar (DP):
                         </div>
                         <div className="flex gap-4 mt-1">
-                          {/* Distance PD - Show as single binocular value */}
                           {(selectedPrescription?.od_pd ||
                             selectedPrescription?.pd_distance) && (
                             <div>
-                              <span className="text-muted-foreground">
-                                Lejos:
-                              </span>{" "}
+                              <span className="text-muted-foreground">Lejos:</span>{" "}
                               <span className="font-medium">
-                                {/* Calculate binocular PD from monocular values */}
                                 {selectedPrescription?.pd_distance
                                   ? `${selectedPrescription.pd_distance}mm`
                                   : selectedPrescription?.od_pd &&
@@ -307,12 +294,9 @@ export function POSAdvancedSaleCustomerTab({
                               </span>
                             </div>
                           )}
-                          {/* Near PD - Show as single binocular value */}
                           {selectedPrescription?.pd_near && (
                             <div>
-                              <span className="text-muted-foreground">
-                                Cerca:
-                              </span>{" "}
+                              <span className="text-muted-foreground">Cerca:</span>{" "}
                               <span className="font-medium">
                                 {selectedPrescription?.pd_near}mm
                               </span>
@@ -324,383 +308,36 @@ export function POSAdvancedSaleCustomerTab({
                   </div>
                 )}
 
-                {/* Presbyopia Solution Selector - Show when prescription has addition */}
-                {selectedPrescription &&
-                  ((selectedPrescription.od_add &&
-                    selectedPrescription.od_add > 0) ||
-                    (selectedPrescription.os_add &&
-                      selectedPrescription.os_add > 0)) && (
-                    <div className="mt-4 p-3 border border-amber-200 rounded-lg bg-amber-50 dark:bg-amber-900/20">
-                      <Label className="text-amber-700 dark:text-amber-300 font-medium block mb-2">
-                        Solución de Presbicia
-                      </Label>
-                      <p className="text-xs text-amber-600 dark:text-amber-400 mb-3">
-                        Esta receta tiene adición. Selecciona cómo quieres
-                        fabricar los lentes:
-                      </p>
-                      <div className="space-y-2">
-                        {/* 1. Progressive */}
-                        <div
-                          className={`p-3 border rounded-lg cursor-pointer transition-colors ${
-                            orderFormData.presbyopia_solution === "progressive"
-                              ? "border-primary bg-primary/5"
-                              : "hover:border-muted-foreground"
-                          }`}
-                          onClick={() =>
-                            setOrderFormData((prev) => ({
-                              ...prev,
-                              presbyopia_solution: "progressive",
-                            }))
-                          }
-                        >
-                          <div className="font-medium">Lente Progresivo</div>
-                          <div className="text-xs text-muted-foreground">
-                            Un solo lente con graduación progresiva (lejos +
-                            cerca)
-                          </div>
-                        </div>
-                        {/* 2. Bifocal */}
-                        <div
-                          className={`p-3 border rounded-lg cursor-pointer transition-colors ${
-                            orderFormData.presbyopia_solution === "single"
-                              ? "border-primary bg-primary/5"
-                              : "hover:border-muted-foreground"
-                          }`}
-                          onClick={() =>
-                            setOrderFormData((prev) => ({
-                              ...prev,
-                              presbyopia_solution: "single",
-                            }))
-                          }
-                        >
-                          <div className="font-medium">Lentes Bifocales</div>
-                          <div className="text-xs text-muted-foreground">
-                            Dos graduaciones en un mismo lente (lejos y cerca)
-                          </div>
-                        </div>
-                        {/* 3. Two Separate */}
-                        <div
-                          className={`p-3 border rounded-lg cursor-pointer transition-colors ${
-                            orderFormData.presbyopia_solution === "two_separate"
-                              ? "border-primary bg-primary/5"
-                              : "hover:border-muted-foreground"
-                          }`}
-                          onClick={() =>
-                            setOrderFormData((prev) => ({
-                              ...prev,
-                              presbyopia_solution: "two_separate",
-                            }))
-                          }
-                        >
-                          <div className="font-medium">
-                            Dos Lentes Separados
-                          </div>
-                          <div className="text-xs text-muted-foreground">
-                            Un lente para lejos y otro para cerca
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
+                {hasPrescriptionAddition && (
+                  <PresbyopiaSolutionSelector
+                    value={orderFormData.presbyopia_solution}
+                    onChange={(value) =>
+                      setOrderFormData((prev) => ({
+                        ...prev,
+                        presbyopia_solution: value as "single" | "two_separate" | "progressive",
+                      }))
+                    }
+                  />
+                )}
               </div>
             )}
           </div>
         )}
 
-        {/* External Prescription Form - Show when: enabled OR has quick customer data without registered customer */}
+        {/* External Prescription Form */}
         {(useExternalPrescription ||
           (!customer && (quickCustomerName || quickCustomerRUT))) && (
-          <div className="space-y-4">
-            <Separator />
-            <h4 className="font-medium">Datos de Receta Externa</h4>
-
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <Label>Fecha Receta</Label>
-                <Input
-                  type="date"
-                  value={externalPrescriptionData.prescription_date}
-                  onChange={(e) =>
-                    setExternalPrescriptionData((prev) => ({
-                      ...prev,
-                      prescription_date: e.target.value,
-                    }))
-                  }
-                />
-              </div>
-              <div>
-                <Label>Fecha Vencimiento</Label>
-                <Input
-                  type="date"
-                  value={externalPrescriptionData.expiration_date}
-                  onChange={(e) =>
-                    setExternalPrescriptionData((prev) => ({
-                      ...prev,
-                      expiration_date: e.target.value,
-                    }))
-                  }
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <Label>Doctor/Optometrista</Label>
-                <Input
-                  placeholder="Nombre del profesional"
-                  value={externalPrescriptionData.issued_by}
-                  onChange={(e) =>
-                    setExternalPrescriptionData((prev) => ({
-                      ...prev,
-                      issued_by: e.target.value,
-                    }))
-                  }
-                />
-              </div>
-              <div>
-                <Label>Licencia</Label>
-                <Input
-                  placeholder="N° de licencia"
-                  value={externalPrescriptionData.issued_by_license}
-                  onChange={(e) =>
-                    setExternalPrescriptionData((prev) => ({
-                      ...prev,
-                      issued_by_license: e.target.value,
-                    }))
-                  }
-                />
-              </div>
-            </div>
-
-            {/* OD Values */}
-            <div className="p-3 border rounded-lg bg-muted/30">
-              <h5 className="font-medium mb-2">Ojo Derecho (OD)</h5>
-              <div className="grid grid-cols-4 gap-2">
-                <div>
-                  <Label className="text-xs">Esfera</Label>
-                  <Input
-                    placeholder="-2.00"
-                    value={externalPrescriptionData.od_sphere}
-                    onChange={(e) =>
-                      setExternalPrescriptionData((prev) => ({
-                        ...prev,
-                        od_sphere: e.target.value,
-                      }))
-                    }
-                  />
-                </div>
-                <div>
-                  <Label className="text-xs">Cilindro</Label>
-                  <Input
-                    placeholder="-0.50"
-                    value={externalPrescriptionData.od_cylinder}
-                    onChange={(e) =>
-                      setExternalPrescriptionData((prev) => ({
-                        ...prev,
-                        od_cylinder: e.target.value,
-                      }))
-                    }
-                  />
-                </div>
-                <div>
-                  <Label className="text-xs">Eje</Label>
-                  <Input
-                    placeholder="180"
-                    value={externalPrescriptionData.od_axis}
-                    onChange={(e) =>
-                      setExternalPrescriptionData((prev) => ({
-                        ...prev,
-                        od_axis: e.target.value,
-                      }))
-                    }
-                  />
-                </div>
-                <div>
-                  <Label className="text-xs">Adición</Label>
-                  <Input
-                    placeholder="+2.50"
-                    value={externalPrescriptionData.od_add}
-                    onChange={(e) =>
-                      setExternalPrescriptionData((prev) => ({
-                        ...prev,
-                        od_add: e.target.value,
-                      }))
-                    }
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* OS Values */}
-            <div className="p-3 border rounded-lg bg-muted/30">
-              <h5 className="font-medium mb-2">Ojo Izquierdo (OI)</h5>
-              <div className="grid grid-cols-4 gap-2">
-                <div>
-                  <Label className="text-xs">Esfera</Label>
-                  <Input
-                    placeholder="-2.00"
-                    value={externalPrescriptionData.os_sphere}
-                    onChange={(e) =>
-                      setExternalPrescriptionData((prev) => ({
-                        ...prev,
-                        os_sphere: e.target.value,
-                      }))
-                    }
-                  />
-                </div>
-                <div>
-                  <Label className="text-xs">Cilindro</Label>
-                  <Input
-                    placeholder="-0.50"
-                    value={externalPrescriptionData.os_cylinder}
-                    onChange={(e) =>
-                      setExternalPrescriptionData((prev) => ({
-                        ...prev,
-                        os_cylinder: e.target.value,
-                      }))
-                    }
-                  />
-                </div>
-                <div>
-                  <Label className="text-xs">Eje</Label>
-                  <Input
-                    placeholder="180"
-                    value={externalPrescriptionData.os_axis}
-                    onChange={(e) =>
-                      setExternalPrescriptionData((prev) => ({
-                        ...prev,
-                        os_axis: e.target.value,
-                      }))
-                    }
-                  />
-                </div>
-                <div>
-                  <Label className="text-xs">Adición</Label>
-                  <Input
-                    placeholder="+2.50"
-                    value={externalPrescriptionData.os_add}
-                    onChange={(e) =>
-                      setExternalPrescriptionData((prev) => ({
-                        ...prev,
-                        os_add: e.target.value,
-                      }))
-                    }
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* PD - Distancia Pupilar Binocular */}
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <Label>DP Lejos (Binocular)</Label>
-                <Input
-                  placeholder="63"
-                  value={externalPrescriptionData.pd}
-                  onChange={(e) =>
-                    setExternalPrescriptionData((prev) => ({
-                      ...prev,
-                      pd: e.target.value,
-                    }))
-                  }
-                />
-                <p className="text-xs text-muted-foreground mt-1">
-                  Distancia pupilar total (OD + OI)
-                </p>
-              </div>
-              <div>
-                <Label>DP Cerca (Binocular)</Label>
-                <Input
-                  placeholder="60"
-                  value={externalPrescriptionData.near_pd}
-                  onChange={(e) =>
-                    setExternalPrescriptionData((prev) => ({
-                      ...prev,
-                      near_pd: e.target.value,
-                    }))
-                  }
-                />
-                <p className="text-xs text-muted-foreground mt-1">
-                  Distancia pupilar para visión cercana
-                </p>
-              </div>
-            </div>
-
-            {/* Presbyopia Solution Selector - Show when external prescription has addition */}
-            {(externalPrescriptionData.od_add &&
-              externalPrescriptionData.od_add.trim() !== "") ||
-            (externalPrescriptionData.os_add &&
-              externalPrescriptionData.os_add.trim() !== "") ? (
-              <div className="mt-4 p-3 border border-amber-200 rounded-lg bg-amber-50 dark:bg-amber-900/20">
-                <Label className="text-amber-700 dark:text-amber-300 font-medium block mb-2">
-                  Solución de Presbicia
-                </Label>
-                <p className="text-xs text-amber-600 dark:text-amber-400 mb-3">
-                  Esta receta tiene adición. Selecciona cómo quieres fabricar
-                  los lentes:
-                </p>
-                <div className="space-y-2">
-                  {/* 1. Progressive */}
-                  <div
-                    className={`p-3 border rounded-lg cursor-pointer transition-colors ${
-                      orderFormData.presbyopia_solution === "progressive"
-                        ? "border-primary bg-primary/5"
-                        : "hover:border-muted-foreground"
-                    }`}
-                    onClick={() =>
-                      setOrderFormData((prev) => ({
-                        ...prev,
-                        presbyopia_solution: "progressive",
-                      }))
-                    }
-                  >
-                    <div className="font-medium">Lente Progresivo</div>
-                    <div className="text-xs text-muted-foreground">
-                      Un solo lente con graduación progresiva (lejos + cerca)
-                    </div>
-                  </div>
-                  {/* 2. Bifocal */}
-                  <div
-                    className={`p-3 border rounded-lg cursor-pointer transition-colors ${
-                      orderFormData.presbyopia_solution === "single"
-                        ? "border-primary bg-primary/5"
-                        : "hover:border-muted-foreground"
-                    }`}
-                    onClick={() =>
-                      setOrderFormData((prev) => ({
-                        ...prev,
-                        presbyopia_solution: "single",
-                      }))
-                    }
-                  >
-                    <div className="font-medium">Lentes Bifocales</div>
-                    <div className="text-xs text-muted-foreground">
-                      Un solo lente (para lejos o cerca, según necesidad)
-                    </div>
-                  </div>
-                  {/* 3. Two Separate */}
-                  <div
-                    className={`p-3 border rounded-lg cursor-pointer transition-colors ${
-                      orderFormData.presbyopia_solution === "two_separate"
-                        ? "border-primary bg-primary/5"
-                        : "hover:border-muted-foreground"
-                    }`}
-                    onClick={() =>
-                      setOrderFormData((prev) => ({
-                        ...prev,
-                        presbyopia_solution: "two_separate",
-                      }))
-                    }
-                  >
-                    <div className="font-medium">Dos Lentes Separados</div>
-                    <div className="text-xs text-muted-foreground">
-                      Un lente para lejos y otro para cerca
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ) : null}
-          </div>
+          <ExternalPrescriptionForm
+            data={externalPrescriptionData}
+            onChange={setExternalPrescriptionData}
+            presbyopiaValue={orderFormData.presbyopia_solution}
+            onPresbyopiaChange={(value) =>
+              setOrderFormData((prev) => ({
+                ...prev,
+                presbyopia_solution: value as "single" | "two_separate" | "progressive",
+              }))
+            }
+          />
         )}
 
         {/* Next Button */}

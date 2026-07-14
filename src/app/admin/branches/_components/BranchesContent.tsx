@@ -27,21 +27,8 @@ import {
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -51,6 +38,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useBranch } from "@/hooks/useBranch";
+
+import { BranchFormDialog } from "./BranchFormDialog";
+import { BranchDeleteDialog } from "./BranchDeleteDialog";
 
 interface Branch {
   id: string;
@@ -283,273 +273,14 @@ export default function BranchesContent() {
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-2xl max-h-[90vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle>
-                  {selectedBranch ? "Editar Sucursal" : "Nueva Sucursal"}
-                </DialogTitle>
-                <DialogDescription>
-                  {selectedBranch
-                    ? "Modifica la información de la sucursal"
-                    : "Completa los datos para crear una nueva sucursal"}
-                </DialogDescription>
-              </DialogHeader>
-              <form onSubmit={handleSubmit}>
-                <div className="grid gap-4 py-4">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label
-                        className="text-xs sm:text-sm text-epoch-primary/80"
-                        htmlFor="name"
-                      >
-                        Nombre <span className="text-destructive">*</span>
-                      </Label>
-                      <Input
-                        required
-                        className="rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20 min-h-[44px]"
-                        id="name"
-                        placeholder="Ej: Sucursal Centro"
-                        value={formData.name}
-                        onChange={(e) =>
-                          setFormData({ ...formData, name: e.target.value })
-                        }
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label
-                        className="text-xs sm:text-sm text-epoch-primary/80"
-                        htmlFor="code"
-                      >
-                        Código <span className="text-destructive">*</span>
-                      </Label>
-                      <Input
-                        required
-                        className="rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20 min-h-[44px]"
-                        disabled={!!selectedBranch}
-                        id="code"
-                        placeholder="Ej: SUC-001"
-                        value={formData.code}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            code: e.target.value.toUpperCase(),
-                          })
-                        }
-                      />
-                      {selectedBranch && (
-                        <p className="text-xs text-epoch-primary/70">
-                          El código no se puede modificar
-                        </p>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label
-                      className="text-xs sm:text-sm text-epoch-primary/80"
-                      htmlFor="address_line_1"
-                    >
-                      Dirección Línea 1
-                    </Label>
-                    <Input
-                      className="rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20 min-h-[44px]"
-                      id="address_line_1"
-                      placeholder="Calle y número"
-                      value={formData.address_line_1}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          address_line_1: e.target.value,
-                        })
-                      }
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label
-                      className="text-xs sm:text-sm text-epoch-primary/80"
-                      htmlFor="address_line_2"
-                    >
-                      Dirección Línea 2
-                    </Label>
-                    <Input
-                      className="rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20 min-h-[44px]"
-                      id="address_line_2"
-                      placeholder="Depto, oficina, etc."
-                      value={formData.address_line_2}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          address_line_2: e.target.value,
-                        })
-                      }
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <div className="space-y-2">
-                      <Label
-                        className="text-xs sm:text-sm text-epoch-primary/80"
-                        htmlFor="city"
-                      >
-                        Ciudad
-                      </Label>
-                      <Input
-                        className="rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20 min-h-[44px]"
-                        id="city"
-                        placeholder="Ciudad"
-                        value={formData.city}
-                        onChange={(e) =>
-                          setFormData({ ...formData, city: e.target.value })
-                        }
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label
-                        className="text-xs sm:text-sm text-epoch-primary/80"
-                        htmlFor="state"
-                      >
-                        Región/Estado
-                      </Label>
-                      <Input
-                        className="rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20 min-h-[44px]"
-                        id="state"
-                        placeholder="Región"
-                        value={formData.state}
-                        onChange={(e) =>
-                          setFormData({ ...formData, state: e.target.value })
-                        }
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label
-                        className="text-xs sm:text-sm text-epoch-primary/80"
-                        htmlFor="postal_code"
-                      >
-                        Código Postal
-                      </Label>
-                      <Input
-                        className="rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20 min-h-[44px]"
-                        id="postal_code"
-                        placeholder="Código postal"
-                        value={formData.postal_code}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            postal_code: e.target.value,
-                          })
-                        }
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label
-                      className="text-xs sm:text-sm text-epoch-primary/80"
-                      htmlFor="country"
-                    >
-                      País
-                    </Label>
-                    <Input
-                      className="rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20 min-h-[44px]"
-                      id="country"
-                      placeholder="País"
-                      value={formData.country}
-                      onChange={(e) =>
-                        setFormData({ ...formData, country: e.target.value })
-                      }
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label
-                        className="text-xs sm:text-sm text-epoch-primary/80"
-                        htmlFor="phone"
-                      >
-                        Teléfono
-                      </Label>
-                      <Input
-                        className="rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20 min-h-[44px]"
-                        id="phone"
-                        placeholder="+56 9 1234 5678"
-                        value={formData.phone}
-                        onChange={(e) =>
-                          setFormData({ ...formData, phone: e.target.value })
-                        }
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label
-                        className="text-xs sm:text-sm text-epoch-primary/80"
-                        htmlFor="email"
-                      >
-                        Email
-                      </Label>
-                      <Input
-                        className="rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20 min-h-[44px]"
-                        id="email"
-                        placeholder="sucursal@ejemplo.com"
-                        type="email"
-                        value={formData.email}
-                        onChange={(e) =>
-                          setFormData({ ...formData, email: e.target.value })
-                        }
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label
-                      className="text-xs sm:text-sm text-epoch-primary/80"
-                      htmlFor="is_active"
-                    >
-                      Estado
-                    </Label>
-                    <Select
-                      value={formData.is_active ? "active" : "inactive"}
-                      onValueChange={(value) =>
-                        setFormData({
-                          ...formData,
-                          is_active: value === "active",
-                        })
-                      }
-                    >
-                      <SelectTrigger className="rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20 min-h-[44px]">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="active">Activa</SelectItem>
-                        <SelectItem value="inactive">Inactiva</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-                <DialogFooter className="flex-col sm:flex-row gap-2">
-                  <Button
-                    className="rounded-xl border-epoch-primary/20 w-full sm:w-auto min-h-[44px]"
-                    disabled={isSubmitting}
-                    type="button"
-                    variant="outline"
-                    onClick={handleCloseDialog}
-                  >
-                    Cancelar
-                  </Button>
-                  <Button
-                    className="rounded-xl bg-epoch-primary hover:bg-epoch-surface text-white w-full sm:w-auto min-h-[44px]"
-                    disabled={isSubmitting}
-                    type="submit"
-                  >
-                    {isSubmitting ? (
-                      <>
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        Guardando...
-                      </>
-                    ) : (
-                      "Guardar"
-                    )}
-                  </Button>
-                </DialogFooter>
-              </form>
+              <BranchFormDialog
+                isEditing={!!selectedBranch}
+                formData={formData}
+                isSubmitting={isSubmitting}
+                onFormDataChange={setFormData}
+                onSubmit={handleSubmit}
+                onCancel={handleCloseDialog}
+              />
             </DialogContent>
           </Dialog>
         </div>
@@ -705,54 +436,17 @@ export default function BranchesContent() {
         </CardContent>
       </Card>
 
-      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-lg max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="text-epoch-primary">
-              ¿Eliminar sucursal?
-            </DialogTitle>
-            <DialogDescription className="text-epoch-primary/80">
-              Esta acción no se puede deshacer. Se eliminará la sucursal{" "}
-              <strong>{selectedBranch?.name}</strong> y todos sus datos
-              asociados.
-              {selectedBranch?.code === "MAIN" && (
-                <div className="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded">
-                  <strong>Advertencia:</strong> No se puede eliminar la sucursal
-                  principal.
-                </div>
-              )}
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter className="flex-col sm:flex-row gap-2">
-            <Button
-              className="rounded-xl border-epoch-primary/20 w-full sm:w-auto min-h-[44px]"
-              disabled={isSubmitting}
-              variant="outline"
-              onClick={() => {
-                setIsDeleteDialogOpen(false);
-                setSelectedBranch(null);
-              }}
-            >
-              Cancelar
-            </Button>
-            <Button
-              className="rounded-xl w-full sm:w-auto min-h-[44px]"
-              disabled={isSubmitting || selectedBranch?.code === "MAIN"}
-              variant="destructive"
-              onClick={handleDelete}
-            >
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Eliminando...
-                </>
-              ) : (
-                "Eliminar"
-              )}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <BranchDeleteDialog
+        open={isDeleteDialogOpen}
+        branchName={selectedBranch?.name || ""}
+        branchCode={selectedBranch?.code || ""}
+        isSubmitting={isSubmitting}
+        onOpenChange={(open) => {
+          setIsDeleteDialogOpen(open);
+          if (!open) setSelectedBranch(null);
+        }}
+        onDelete={handleDelete}
+      />
     </div>
   );
 }

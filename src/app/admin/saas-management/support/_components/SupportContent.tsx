@@ -1,39 +1,20 @@
 "use client";
 
-import {
-  ArrowLeft,
-  ArrowRight,
-  Building2,
-  CheckCircle2,
-  Filter,
-  Loader2,
-  MessageSquare,
-  RefreshCw,
-  Search,
-  User,
-  XCircle,
-} from "lucide-react";
-import Link from "next/link";
+import { ArrowLeft, MessageSquare, Search } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import { SupportMetrics } from "@/components/admin/saas-support/SupportMetrics";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   extractDataFromResponse,
   extractPaginationFromResponse,
 } from "@/lib/api/response-helpers";
+
+import { SupportSearchResults } from "./SupportSearchResults";
+import { SupportTicketFilters } from "./SupportTicketFilters";
+import { SupportTicketList } from "./SupportTicketList";
 
 interface SearchResult {
   organizations: Array<{
@@ -49,15 +30,8 @@ interface SearchResult {
     role: string;
     is_active: boolean;
     organization_id?: string;
-    organization?: {
-      id: string;
-      name: string;
-      slug: string;
-    };
-    profiles?: {
-      first_name?: string;
-      last_name?: string;
-    };
+    organization?: { id: string; name: string; slug: string };
+    profiles?: { first_name?: string; last_name?: string };
   }>;
 }
 
@@ -69,16 +43,8 @@ interface Ticket {
   priority: string;
   status: string;
   created_at: string;
-  organization?: {
-    id: string;
-    name: string;
-    slug: string;
-  } | null;
-  assigned_to_user?: {
-    id: string;
-    email: string;
-    role: string;
-  } | null;
+  organization?: { id: string; name: string; slug: string } | null;
+  assigned_to_user?: { id: string; email: string; role: string } | null;
 }
 
 const statusLabels: Record<string, string> = {
@@ -159,7 +125,6 @@ export default function SupportContent() {
         limit: pagination.limit.toString(),
       });
 
-      // Solo agregar filtros si no son "all"
       if (filters.status && filters.status !== "all") {
         params.append("status", filters.status);
       }
@@ -232,27 +197,6 @@ export default function SupportContent() {
     }
   };
 
-  const getStatusBadge = (status: string) => {
-    const variants: Record<string, "default" | "secondary" | "destructive"> = {
-      active: "default",
-      suspended: "secondary",
-      cancelled: "destructive",
-    };
-
-    const Icon = status === "active" ? CheckCircle2 : XCircle;
-
-    return (
-      <Badge variant={variants[status] || "default"}>
-        <Icon className="h-3 w-3 mr-1" />
-        {status === "active"
-          ? "Activa"
-          : status === "suspended"
-            ? "Suspendida"
-            : "Cancelada"}
-      </Badge>
-    );
-  };
-
   return (
     <div className="space-y-6 p-6 bg-[#0D1117] min-h-screen">
       <div className="flex items-center gap-4">
@@ -305,406 +249,42 @@ export default function SupportContent() {
       {/* Tickets Tab */}
       {activeTab === "tickets" && (
         <div className="space-y-6">
-          {/* Filters */}
-          <Card className="admin-card">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 font-display text-epoch-primary">
-                <Filter className="h-5 w-5 text-epoch-accent" />
-                Filtros
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Estado</label>
-                  <Select
-                    value={filters.status}
-                    onValueChange={(value) =>
-                      setFilters((prev) => ({
-                        ...prev,
-                        status: value,
-                        page: 1,
-                      }))
-                    }
-                  >
-                    <SelectTrigger className="rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20">
-                      <SelectValue placeholder="Todos los estados" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Todos los estados</SelectItem>
-                      {Object.entries(statusLabels).map(([value, label]) => (
-                        <SelectItem key={value} value={value}>
-                          {label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+          <SupportTicketFilters
+            filters={filters}
+            onFilterChange={(updates) =>
+              setFilters((prev) => ({ ...prev, ...updates, page: 1 }))
+            }
+            onRefresh={loadTickets}
+            statusLabels={statusLabels}
+            categoryLabels={categoryLabels}
+          />
 
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Prioridad</label>
-                  <Select
-                    value={filters.priority}
-                    onValueChange={(value) =>
-                      setFilters((prev) => ({
-                        ...prev,
-                        priority: value,
-                        page: 1,
-                      }))
-                    }
-                  >
-                    <SelectTrigger className="rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20">
-                      <SelectValue placeholder="Todas las prioridades" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Todas las prioridades</SelectItem>
-                      <SelectItem value="low">Baja</SelectItem>
-                      <SelectItem value="medium">Media</SelectItem>
-                      <SelectItem value="high">Alta</SelectItem>
-                      <SelectItem value="urgent">Urgente</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Categoría</label>
-                  <Select
-                    value={filters.category}
-                    onValueChange={(value) =>
-                      setFilters((prev) => ({
-                        ...prev,
-                        category: value,
-                        page: 1,
-                      }))
-                    }
-                  >
-                    <SelectTrigger className="rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20">
-                      <SelectValue placeholder="Todas las categorías" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Todas las categorías</SelectItem>
-                      {Object.entries(categoryLabels).map(([value, label]) => (
-                        <SelectItem key={value} value={value}>
-                          {label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Buscar</label>
-                  <div className="flex gap-2">
-                    <Input
-                      className="rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20"
-                      placeholder="Ticket #, asunto, email..."
-                      value={filters.search}
-                      onChange={(e) =>
-                        setFilters((prev) => ({
-                          ...prev,
-                          search: e.target.value,
-                          page: 1,
-                        }))
-                      }
-                    />
-                    <Button
-                      className="rounded-xl border-admin-border-primary/20"
-                      size="icon"
-                      title="Refrescar"
-                      variant="outline"
-                      onClick={loadTickets}
-                    >
-                      <RefreshCw className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Tickets List */}
-          <Card className="admin-card">
-            <CardHeader>
-              <CardTitle className="font-display text-epoch-primary">
-                Tickets ({pagination.total})
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {loadingTickets ? (
-                <div className="flex items-center justify-center py-12">
-                  <Loader2 className="h-8 w-8 animate-spin text-epoch-primary" />
-                </div>
-              ) : tickets.length === 0 ? (
-                <div className="text-center py-12 text-epoch-primary/70">
-                  <MessageSquare className="h-12 w-12 mx-auto mb-4 text-epoch-accent" />
-                  <p>No hay tickets que coincidan con los filtros</p>
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  {tickets.map((ticket) => (
-                    <Link
-                      href={`/admin/saas-management/support/tickets/${ticket.id}`}
-                      key={ticket.id}
-                    >
-                      <div className="flex items-center justify-between p-4 border rounded-xl hover:bg-epoch-primary/5 cursor-pointer transition-colors">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="font-mono font-semibold text-sm">
-                              {ticket.ticket_number}
-                            </span>
-                            <Badge className={statusColors[ticket.status]}>
-                              {statusLabels[ticket.status]}
-                            </Badge>
-                            <Badge className={priorityColors[ticket.priority]}>
-                              {ticket.priority}
-                            </Badge>
-                            <Badge variant="outline">
-                              {categoryLabels[ticket.category]}
-                            </Badge>
-                          </div>
-                          <h3 className="font-medium text-epoch-primary">
-                            {ticket.subject}
-                          </h3>
-                          <div className="flex items-center gap-4 mt-2 text-sm text-epoch-primary/70">
-                            {ticket.organization && (
-                              <span className="flex items-center gap-1">
-                                <Building2 className="h-4 w-4" />
-                                {ticket.organization.name}
-                              </span>
-                            )}
-                            {ticket.assigned_to_user && (
-                              <span className="flex items-center gap-1">
-                                <User className="h-4 w-4" />
-                                {ticket.assigned_to_user.email}
-                              </span>
-                            )}
-                            <span>
-                              {new Date(ticket.created_at).toLocaleDateString(
-                                "es-CL",
-                              )}
-                            </span>
-                          </div>
-                        </div>
-                        <ArrowRight className="h-5 w-5 text-epoch-accent" />
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              )}
-
-              {/* Pagination */}
-              {pagination.totalPages > 1 && (
-                <div className="flex items-center justify-between mt-6 pt-4 border-t">
-                  <p className="text-sm text-epoch-primary/80">
-                    Página {pagination.page} de {pagination.totalPages}
-                  </p>
-                  <div className="flex gap-2">
-                    <Button
-                      className="rounded-xl border-admin-border-primary/20"
-                      disabled={pagination.page === 1}
-                      size="sm"
-                      variant="outline"
-                      onClick={() =>
-                        setPagination((prev) => ({
-                          ...prev,
-                          page: Math.max(1, prev.page - 1),
-                        }))
-                      }
-                    >
-                      Anterior
-                    </Button>
-                    <Button
-                      className="rounded-xl border-admin-border-primary/20"
-                      disabled={pagination.page === pagination.totalPages}
-                      size="sm"
-                      variant="outline"
-                      onClick={() =>
-                        setPagination((prev) => ({
-                          ...prev,
-                          page: Math.min(prev.totalPages, prev.page + 1),
-                        }))
-                      }
-                    >
-                      Siguiente
-                    </Button>
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+          <SupportTicketList
+            tickets={tickets}
+            loading={loadingTickets}
+            total={pagination.total}
+            page={pagination.page}
+            totalPages={pagination.totalPages}
+            onPageChange={(page) =>
+              setPagination((prev) => ({ ...prev, page }))
+            }
+            statusLabels={statusLabels}
+            statusColors={statusColors}
+            priorityColors={priorityColors}
+            categoryLabels={categoryLabels}
+          />
         </div>
       )}
 
       {/* Search Tab */}
       {activeTab === "search" && (
-        <div className="space-y-6">
-          {/* Búsqueda */}
-          <Card className="admin-card">
-            <CardContent className="pt-6">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-epoch-accent" />
-                <Input
-                  className="pl-10 rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20"
-                  placeholder="Buscar por nombre, slug, email..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-              </div>
-              {searching && (
-                <div className="flex items-center gap-2 mt-4 text-sm text-epoch-primary/80">
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  Buscando...
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Resultados */}
-          {hasSearched && !searching && (
-            <div className="space-y-6">
-              {/* Organizaciones */}
-              {searchResults.organizations.length > 0 && (
-                <Card className="admin-card">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2 font-display text-epoch-primary">
-                      <Building2 className="h-5 w-5 text-epoch-accent" />
-                      Organizaciones ({searchResults.organizations.length})
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3">
-                      {searchResults.organizations.map((org) => (
-                        <div
-                          className="flex items-center justify-between p-4 border rounded-xl hover:bg-epoch-primary/5 transition-colors"
-                          key={org.id}
-                        >
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2">
-                              <h3 className="font-medium text-epoch-primary">
-                                {org.name}
-                              </h3>
-                              {getStatusBadge(org.status)}
-                              <Badge variant="outline">
-                                {org.subscription_tier}
-                              </Badge>
-                            </div>
-                            <p className="text-sm text-epoch-primary/70 mt-1">
-                              {org.slug}
-                            </p>
-                          </div>
-                          <Link
-                            href={`/admin/saas-management/organizations/${org.id}`}
-                          >
-                            <Button
-                              className="rounded-xl border-admin-border-primary/20"
-                              size="sm"
-                              variant="outline"
-                            >
-                              Ver detalles
-                              <ArrowRight className="h-4 w-4 ml-2" />
-                            </Button>
-                          </Link>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-
-              {/* Usuarios */}
-              {searchResults.users.length > 0 && (
-                <Card className="admin-card">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2 font-display text-epoch-primary">
-                      <User className="h-5 w-5 text-epoch-accent" />
-                      Usuarios ({searchResults.users.length})
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3">
-                      {searchResults.users.map((user) => (
-                        <div
-                          className="flex items-center justify-between p-4 border rounded-xl hover:bg-epoch-primary/5 transition-colors"
-                          key={user.id}
-                        >
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2">
-                              <h3 className="font-medium text-epoch-primary">
-                                {user.profiles?.first_name}{" "}
-                                {user.profiles?.last_name}
-                              </h3>
-                              <Badge variant="outline">{user.role}</Badge>
-                              {user.is_active ? (
-                                <Badge variant="default">
-                                  <CheckCircle2 className="h-3 w-3 mr-1" />
-                                  Activo
-                                </Badge>
-                              ) : (
-                                <Badge variant="secondary">
-                                  <XCircle className="h-3 w-3 mr-1" />
-                                  Inactivo
-                                </Badge>
-                              )}
-                            </div>
-                            <p className="text-sm text-epoch-primary/70 mt-1">
-                              {user.email}
-                            </p>
-                            {user.organization && (
-                              <p className="text-xs text-epoch-primary/60 mt-1">
-                                Organización: {user.organization.name}
-                              </p>
-                            )}
-                          </div>
-                          <Link
-                            href={`/admin/saas-management/users/${user.id}`}
-                          >
-                            <Button
-                              className="rounded-xl border-admin-border-primary/20"
-                              size="sm"
-                              variant="outline"
-                            >
-                              Ver detalles
-                              <ArrowRight className="h-4 w-4 ml-2" />
-                            </Button>
-                          </Link>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-
-              {/* Sin resultados */}
-              {searchResults.organizations.length === 0 &&
-                searchResults.users.length === 0 && (
-                  <Card className="admin-card">
-                    <CardContent className="pt-6">
-                      <div className="text-center py-8 text-epoch-primary/70">
-                        No se encontraron resultados para "{searchQuery}"
-                      </div>
-                    </CardContent>
-                  </Card>
-                )}
-            </div>
-          )}
-
-          {/* Instrucciones iniciales */}
-          {!hasSearched && (
-            <Card className="admin-card">
-              <CardContent className="pt-6">
-                <div className="text-center py-8 text-epoch-primary/70">
-                  <Search className="h-12 w-12 mx-auto mb-4 text-epoch-accent" />
-                  <p className="text-lg font-medium mb-2">
-                    Busca organizaciones o usuarios
-                  </p>
-                  <p className="text-sm">
-                    Ingresa al menos 2 caracteres para comenzar la búsqueda
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-        </div>
+        <SupportSearchResults
+          searchQuery={searchQuery}
+          onSearchQueryChange={setSearchQuery}
+          searchResults={searchResults}
+          searching={searching}
+          hasSearched={hasSearched}
+        />
       )}
     </div>
   );

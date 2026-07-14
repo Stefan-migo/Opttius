@@ -9,32 +9,16 @@ import {
   Link2,
   Pencil,
   RefreshCw,
-  Search,
   Trash2,
   User,
 } from "lucide-react";
-import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 
-import {
-  type PrescriptionDisplayData,
-  PrescriptionFullDisplay,
-} from "@/components/admin/PrescriptionFullDisplay";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Table,
   TableBody,
@@ -53,17 +37,8 @@ import { formatDate } from "@/lib/utils";
 import { getBranchHeader } from "@/lib/utils/branch";
 import { formatRUT } from "@/lib/utils/rut";
 
-const CreatePrescriptionForm = dynamic(
-  () => import("@/components/admin/CreatePrescriptionForm"),
-  {
-    loading: () => (
-      <div className="flex items-center justify-center py-8">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-admin-text-primary" />
-      </div>
-    ),
-    ssr: false,
-  },
-);
+import { PrescriptionFilters } from "./PrescriptionFilters";
+import { PrescriptionDialogs } from "./PrescriptionDialogs";
 
 interface PrescriptionWithRelations {
   id: string;
@@ -255,6 +230,13 @@ export default function PrescriptionsContent() {
     (p.od_add != null && p.od_add !== 0) ||
     (p.os_add != null && p.os_add !== 0);
 
+  const handleEditFromView = () => {
+    setViewPrescription(null);
+    if (viewPrescription) {
+      setEditPrescription(viewPrescription);
+    }
+  };
+
   const handleDelete = async () => {
     if (!deletePrescription) return;
     setDeleting(true);
@@ -315,80 +297,19 @@ export default function PrescriptionsContent() {
         </div>
       </div>
 
-      {/* Filters - stacked on mobile, grid on desktop */}
-      <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)]">
-        <CardContent className="p-4 sm:p-5 md:p-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
-            <div className="lg:col-span-2">
-              <Label className="text-[10px] sm:text-xs mb-1 block">
-                Buscar
-              </Label>
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-admin-text-tertiary" />
-                <Input
-                  className="pl-10 min-h-[44px] sm:min-h-0 h-11 sm:h-10 text-base sm:text-sm"
-                  placeholder="Nombre, RUT o email..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </div>
-            </div>
-            <div>
-              <Label className="text-[10px] sm:text-xs mb-1 block">RUT</Label>
-              <Input
-                className="min-h-[44px] sm:min-h-0 h-11 sm:h-10"
-                placeholder="12.345.678-9"
-                value={rutFilter}
-                onChange={(e) => setRutFilter(e.target.value)}
-              />
-            </div>
-            <div>
-              <Label className="text-[10px] sm:text-xs mb-1 block">
-                Profesional
-              </Label>
-              <Input
-                className="min-h-[44px] sm:min-h-0 h-11 sm:h-10"
-                placeholder="Oftalmólogo..."
-                value={issuedBy}
-                onChange={(e) => setIssuedBy(e.target.value)}
-              />
-            </div>
-            <div className="flex gap-2 items-end">
-              <Button
-                className="flex-1 min-h-[44px] sm:min-h-0 h-11 sm:h-10"
-                onClick={fetchPrescriptions}
-              >
-                <RefreshCw className="h-4 w-4 sm:mr-2 shrink-0" />
-                <span className="hidden sm:inline">Buscar</span>
-              </Button>
-            </div>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mt-4">
-            <div>
-              <Label className="text-[10px] sm:text-xs mb-1 block">
-                Fecha desde
-              </Label>
-              <Input
-                className="min-h-[44px] sm:min-h-0 h-11 sm:h-10"
-                type="date"
-                value={dateFrom}
-                onChange={(e) => setDateFrom(e.target.value)}
-              />
-            </div>
-            <div>
-              <Label className="text-[10px] sm:text-xs mb-1 block">
-                Fecha hasta
-              </Label>
-              <Input
-                className="min-h-[44px] sm:min-h-0 h-11 sm:h-10"
-                type="date"
-                value={dateTo}
-                onChange={(e) => setDateTo(e.target.value)}
-              />
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      <PrescriptionFilters
+        searchTerm={searchTerm}
+        rutFilter={rutFilter}
+        dateFrom={dateFrom}
+        dateTo={dateTo}
+        issuedBy={issuedBy}
+        onSearchTermChange={setSearchTerm}
+        onRutFilterChange={setRutFilter}
+        onDateFromChange={setDateFrom}
+        onDateToChange={setDateTo}
+        onIssuedByChange={setIssuedBy}
+        onSearch={fetchPrescriptions}
+      />
 
       {/* List / Table Card */}
       <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)]">
@@ -673,129 +594,18 @@ export default function PrescriptionsContent() {
         </CardContent>
       </Card>
 
-      {/* Ver receta */}
-      <Dialog
-        open={!!viewPrescription}
-        onOpenChange={(open) => !open && setViewPrescription(null)}
-      >
-        <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Receta</DialogTitle>
-            <DialogDescription>
-              {viewPrescription?.customer &&
-                `${viewPrescription.customer.first_name || ""} ${viewPrescription.customer.last_name || ""}`.trim()}
-              {viewPrescription?.prescription_number &&
-                ` · ${viewPrescription.prescription_number}`}
-            </DialogDescription>
-          </DialogHeader>
-          {viewPrescription && (
-            <PrescriptionFullDisplay
-              prescription={viewPrescription as PrescriptionDisplayData}
-              showCard={false}
-              subtitle={
-                <span className="text-sm text-admin-text-tertiary">
-                  {formatDate(viewPrescription.prescription_date)}
-                  {viewPrescription.issued_by &&
-                    ` · ${viewPrescription.issued_by}`}
-                </span>
-              }
-            />
-          )}
-          <DialogFooter className="flex-col-reverse sm:flex-row gap-2">
-            <Button
-              className="w-full sm:w-auto min-h-[44px] sm:min-h-0"
-              variant="outline"
-              onClick={() => setViewPrescription(null)}
-            >
-              Cerrar
-            </Button>
-            {viewPrescription && (
-              <Button
-                className="w-full sm:w-auto min-h-[44px] sm:min-h-0"
-                onClick={() => {
-                  setViewPrescription(null);
-                  setEditPrescription(viewPrescription);
-                }}
-              >
-                <Pencil className="h-4 w-4 mr-2" />
-                Modificar
-              </Button>
-            )}
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Modificar receta */}
-      <Dialog
-        open={!!editPrescription}
-        onOpenChange={(open) => !open && setEditPrescription(null)}
-      >
-        <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Modificar receta</DialogTitle>
-            <DialogDescription>
-              {editPrescription?.customer &&
-                `${editPrescription.customer.first_name || ""} ${editPrescription.customer.last_name || ""}`.trim()}
-            </DialogDescription>
-          </DialogHeader>
-          {editPrescription && (
-            <CreatePrescriptionForm
-              customerId={editPrescription.customer_id}
-              initialData={editPrescription}
-              onCancel={() => setEditPrescription(null)}
-              onSuccess={() => {
-                setEditPrescription(null);
-                fetchPrescriptions();
-              }}
-            />
-          )}
-        </DialogContent>
-      </Dialog>
-
-      {/* Eliminar receta */}
-      <Dialog
-        open={!!deletePrescription}
-        onOpenChange={(open) =>
-          !open && !deleting && setDeletePrescription(null)
-        }
-      >
-        <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Eliminar receta</DialogTitle>
-            <DialogDescription>
-              ¿Está seguro de eliminar esta receta?
-              {deletePrescription?.customer && (
-                <span className="block mt-2 font-medium">
-                  {deletePrescription.customer.first_name || ""}{" "}
-                  {deletePrescription.customer.last_name || ""} ·{" "}
-                  {formatDate(deletePrescription.prescription_date)}
-                </span>
-              )}
-              <span className="block mt-2 text-destructive text-sm">
-                Esta acción no se puede deshacer.
-              </span>
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter className="flex-col-reverse sm:flex-row gap-2">
-            <Button
-              className="w-full sm:w-auto min-h-[44px] sm:min-h-0"
-              disabled={deleting}
-              variant="outline"
-              onClick={() => setDeletePrescription(null)}
-            >
-              Cancelar
-            </Button>
-            <Button
-              className="w-full sm:w-auto min-h-[44px] sm:min-h-0"
-              disabled={deleting}
-              variant="destructive"
-              onClick={handleDelete}
-            >
-              {deleting ? "Eliminando..." : "Eliminar"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <PrescriptionDialogs
+        viewPrescription={viewPrescription}
+        editPrescription={editPrescription}
+        deletePrescription={deletePrescription}
+        deleting={deleting}
+        onViewPrescriptionChange={setViewPrescription}
+        onEditPrescriptionChange={setEditPrescription}
+        onDeletePrescriptionChange={setDeletePrescription}
+        onEditFromView={handleEditFromView}
+        onDelete={handleDelete}
+        onFetchPrescriptions={fetchPrescriptions}
+      />
     </div>
   );
 }
