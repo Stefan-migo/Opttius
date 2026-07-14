@@ -76,3 +76,7 @@ users.md
 
 # Graphify cache (auto-generated, repo-agnostic)
 graphify-out/cache/
+
+# Dev/temp scratch files
+test-debug.ts
+supabase/.temp/

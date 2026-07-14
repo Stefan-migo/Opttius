@@ -88,8 +88,6 @@ import { useAnalytics } from "../../hooks/useAnalytics";
 import { AnalyticsHeader } from "./AnalyticsHeader";
 import { AnalyticsKPICards } from "./AnalyticsKPICards";
 import { AnalyticsOverviewTab } from "./AnalyticsOverviewTab";
-import { AnalyticsWorkOrdersTab } from "./AnalyticsWorkOrdersTab";
-import { AnalyticsQuotesTab } from "./AnalyticsQuotesTab";
 import type { AnalyticsData } from "./analyticsUtils";
 
 
