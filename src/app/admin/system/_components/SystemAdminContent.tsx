@@ -8,14 +8,11 @@ import {
   FileText,
   Mail,
   MessageCircle,
-  Monitor,
   Receipt,
   RefreshCw,
   RotateCcw,
-  Shield,
   Star,
   Trash2,
-  Users,
   XCircle,
 } from "lucide-react";
 import dynamic from "next/dynamic";
@@ -41,6 +38,8 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useBranch } from "@/hooks/useBranch";
 
+import { SecurityAuditDialog } from "./_dialogs/SecurityAuditDialog";
+import { SystemStatusDialog } from "./_dialogs/SystemStatusDialog";
 import { SystemHeader } from "./SystemHeader";
 import { SystemHealthCards } from "./SystemHealthCards";
 import FormOptionsConfig from "../components/FormOptionsConfig";
@@ -551,251 +550,18 @@ export default function SystemAdminContent() {
         </TabsContent>
       </Tabs>
 
-      {/* Security Audit Results Dialog */}
-      <Dialog
-        open={showSecurityAuditDialog}
-        onOpenChange={setShowSecurityAuditDialog}
-      >
-        <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-2xl">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Shield className="h-5 w-5" />
-              Resultados de Auditoría de Seguridad
-            </DialogTitle>
-            <DialogDescription>
-              La auditoría revisa: administradores inactivos, cantidad mínima de
-              admins activos y otras políticas de seguridad.
-            </DialogDescription>
-          </DialogHeader>
 
-          <div className="space-y-4">
-            {securityAuditResults && securityAuditResults.issues_count > 0 ? (
-              <>
-                <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
-                  <div className="flex items-center gap-2 mb-2">
-                    <AlertTriangle className="h-5 w-5 text-yellow-600" />
-                    <span className="font-semibold text-yellow-800 dark:text-yellow-300">
-                      Se encontraron {securityAuditResults.issues_count}{" "}
-                      {securityAuditResults.issues_count === 1
-                        ? "problema"
-                        : "problemas"}
-                    </span>
-                  </div>
-                </div>
+      <SecurityAuditDialog
+        showSecurityAuditDialog={showSecurityAuditDialog}
+        setShowSecurityAuditDialog={setShowSecurityAuditDialog}
+        securityAuditResults={securityAuditResults}
+      />
 
-                <div className="space-y-2">
-                  <h4 className="font-medium text-sm">Problemas Detectados:</h4>
-                  <ul className="list-disc list-inside space-y-1">
-                    {securityAuditResults.issues.map((issue, index) => (
-                      <li
-                        className="text-sm text-admin-text-tertiary pl-2"
-                        key={index}
-                      >
-                        {issue}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </>
-            ) : (
-              <div className="p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
-                <div className="flex items-center gap-2">
-                  <CheckCircle className="h-5 w-5 text-green-600" />
-                  <span className="font-semibold text-green-800 dark:text-green-300">
-                    No se encontraron problemas de seguridad
-                  </span>
-                </div>
-                <p className="text-sm text-green-700 dark:text-green-400 mt-2">
-                  El sistema está configurado correctamente desde el punto de
-                  vista de seguridad.
-                </p>
-              </div>
-            )}
-          </div>
-
-          <DialogFooter>
-            <Button onClick={() => setShowSecurityAuditDialog(false)}>
-              Cerrar
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* System Status Report Dialog */}
-      <Dialog
-        open={showSystemStatusDialog}
-        onOpenChange={setShowSystemStatusDialog}
-      >
-        <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-3xl max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Monitor className="h-5 w-5" />
-              Reporte de Estado del Sistema
-            </DialogTitle>
-            <DialogDescription>
-              Información completa del estado actual del sistema
-            </DialogDescription>
-          </DialogHeader>
-
-          {systemStatusReport && (
-            <div className="space-y-6">
-              {/* Summary Cards */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <Card className="bg-admin-bg-tertiary">
-                  <CardContent className="p-4">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Monitor className="h-4 w-4 text-epoch-primary" />
-                      <span className="text-xs text-admin-text-tertiary">
-                        Usuarios Totales
-                      </span>
-                    </div>
-                    <p className="text-2xl font-bold">
-                      {systemStatusReport.total_users || 0}
-                    </p>
-                  </CardContent>
-                </Card>
-
-                <Card className="bg-admin-bg-tertiary">
-                  <CardContent className="p-4">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Shield className="h-4 w-4 text-admin-success" />
-                      <span className="text-xs text-admin-text-tertiary">
-                        Admins Activos
-                      </span>
-                    </div>
-                    <p className="text-2xl font-bold">
-                      {systemStatusReport.active_admins || 0}
-                    </p>
-                  </CardContent>
-                </Card>
-
-                <Card className="bg-admin-bg-tertiary">
-                  <CardContent className="p-4">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Database className="h-4 w-4 text-admin-accent-tertiary" />
-                      <span className="text-xs text-admin-text-tertiary">
-                        Productos
-                      </span>
-                    </div>
-                    <p className="text-2xl font-bold">
-                      {systemStatusReport.total_products || 0}
-                    </p>
-                  </CardContent>
-                </Card>
-
-                <Card className="bg-admin-bg-tertiary">
-                  <CardContent className="p-4">
-                    <div className="flex items-center gap-2 mb-2">
-                      <AlertTriangle className="h-4 w-4 text-yellow-500" />
-                      <span className="text-xs text-admin-text-tertiary">
-                        Actividad 24h
-                      </span>
-                    </div>
-                    <p className="text-2xl font-bold">
-                      {systemStatusReport.activity_24h || 0}
-                    </p>
-                  </CardContent>
-                </Card>
-                {systemStatusReport.total_orders != null && (
-                  <Card className="bg-admin-bg-tertiary">
-                    <CardContent className="p-4">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Receipt className="h-4 w-4 text-epoch-primary" />
-                        <span className="text-xs text-admin-text-tertiary">
-                          Órdenes
-                        </span>
-                      </div>
-                      <p className="text-2xl font-bold">
-                        {systemStatusReport.total_orders}
-                      </p>
-                    </CardContent>
-                  </Card>
-                )}
-                {systemStatusReport.total_customers != null && (
-                  <Card className="bg-admin-bg-tertiary">
-                    <CardContent className="p-4">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Users className="h-4 w-4 text-admin-success" />
-                        <span className="text-xs text-admin-text-tertiary">
-                          Clientes
-                        </span>
-                      </div>
-                      <p className="text-2xl font-bold">
-                        {systemStatusReport.total_customers}
-                      </p>
-                    </CardContent>
-                  </Card>
-                )}
-              </div>
-
-              {/* Detailed Information */}
-              <Card className="bg-admin-bg-tertiary">
-                <CardContent className="p-4">
-                  <div className="space-y-3 text-sm">
-                    <div className="flex justify-between">
-                      <span className="text-admin-text-tertiary">
-                        Fecha del Reporte:
-                      </span>
-                      <span className="font-medium">
-                        {systemStatusReport.timestamp
-                          ? new Date(
-                              systemStatusReport.timestamp,
-                            ).toLocaleString("es-AR", {
-                              day: "2-digit",
-                              month: "2-digit",
-                              year: "numeric",
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            })
-                          : "N/A"}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-admin-text-tertiary">
-                        Usuarios Registrados:
-                      </span>
-                      <span className="font-medium">
-                        {systemStatusReport.total_users || 0}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-admin-text-tertiary">
-                        Administradores Activos:
-                      </span>
-                      <span className="font-medium">
-                        {systemStatusReport.active_admins || 0}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-admin-text-tertiary">
-                        Productos en Sistema:
-                      </span>
-                      <span className="font-medium">
-                        {systemStatusReport.total_products || 0}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-admin-text-tertiary">
-                        Actividad Admin (últimas 24h):
-                      </span>
-                      <span className="font-medium">
-                        {systemStatusReport.activity_24h || 0} acciones
-                      </span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          )}
-
-          <DialogFooter>
-            <Button onClick={() => setShowSystemStatusDialog(false)}>
-              Cerrar
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
+      <SystemStatusDialog
+        showSystemStatusDialog={showSystemStatusDialog}
+        setShowSystemStatusDialog={setShowSystemStatusDialog}
+        systemStatusReport={systemStatusReport}
+      />
       {/* Backup Results Dialog */}
       <Dialog open={showBackupDialog} onOpenChange={setShowBackupDialog}>
         <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-2xl max-h-[90vh] overflow-y-auto p-4 sm:p-6">
