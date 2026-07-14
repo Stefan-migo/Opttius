@@ -340,202 +340,23 @@ export default function AnalyticsContent() {
           />
         </TabsContent>
 
-        <TabsContent className="space-y-4 sm:space-y-6" value="work-orders">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-            {/* Work Orders Metrics */}
-            <Card
-              className="bg-admin-bg-tertiary border border-admin-border-primary shadow-soft hover:shadow-medium transition-all duration-300"
-              rounded="none"
-            >
-              <CardHeader className="p-4 sm:p-6">
-                <CardTitle className="flex items-center text-base sm:text-lg">
-                  <Target className="h-4 w-4 sm:h-5 sm:w-5 mr-2 shrink-0" />
-                  Métricas de Trabajos
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4 p-4 sm:p-6 pt-0">
-                <div className="grid grid-cols-2 gap-3 sm:gap-4">
-                  <div className="text-center p-3 sm:p-4 bg-epoch-primary/10 rounded-lg border border-epoch-primary/20">
-                    <p className="text-lg sm:text-2xl font-bold text-epoch-primary">
-                      {analytics.workOrders.total}
-                    </p>
-                    <p className="text-xs sm:text-sm text-admin-text-tertiary">
-                      Total Trabajos
-                    </p>
-                  </div>
-                  <div className="text-center p-3 sm:p-4 bg-orange-50 rounded-lg border border-orange-200">
-                    <p className="text-lg sm:text-2xl font-bold text-orange-600">
-                      {analytics.workOrders.pending}
-                    </p>
-                    <p className="text-xs sm:text-sm text-admin-text-tertiary">
-                      Pendientes
-                    </p>
-                  </div>
-                  <div className="text-center p-3 sm:p-4 bg-green-50 rounded-lg border border-green-200">
-                    <p className="text-lg sm:text-2xl font-bold text-green-600">
-                      {analytics.workOrders.completed}
-                    </p>
-                    <p className="text-xs sm:text-sm text-admin-text-tertiary">
-                      Completados
-                    </p>
-                  </div>
-                  <div className="text-center p-3 sm:p-4 bg-blue-50 rounded-lg border border-blue-200">
-                    <p className="text-lg sm:text-2xl font-bold text-blue-600">
-                      {analytics.kpis.avgDeliveryDays}
-                    </p>
-                    <p className="text-xs sm:text-sm text-admin-text-tertiary">
-                      Días Promedio
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Work Orders Trend */}
-            <Card
-              className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)]"
-              rounded="none"
-            >
-              <CardHeader className="p-4 sm:p-6">
-                <CardTitle className="flex items-center text-base sm:text-lg">
-                  <LineChartIcon className="h-4 w-4 sm:h-5 sm:w-5 mr-2 shrink-0" />
-                  Tendencia de Trabajos
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-4 sm:p-6 pt-0">
-                <EnhancedAreaChart
-                  color="#1A2B23"
-                  data={analytics.trends.workOrders}
-                  formatValue={(val) => Math.round(val).toString()}
-                  height={250}
-                  showGrid={true}
-                  title="Trabajos Creados por Día"
-                />
-              </CardContent>
-            </Card>
-          </div>
+                <TabsContent className="space-y-4 sm:space-y-6" value="work-orders">
+          <AnalyticsWorkOrdersTab
+            workOrders={analytics.workOrders}
+            avgDeliveryDays={analytics.kpis.avgDeliveryDays}
+            workOrdersTrend={analytics.trends.workOrders}
+          />
         </TabsContent>
 
-        <TabsContent className="space-y-4 sm:space-y-6" value="quotes">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-            {/* Quotes Metrics */}
-            <Card
-              className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)]"
-              rounded="none"
-            >
-              <CardHeader className="p-4 sm:p-6">
-                <CardTitle className="flex items-center text-base sm:text-lg">
-                  <Target className="h-4 w-4 sm:h-5 sm:w-5 mr-2 shrink-0" />
-                  Métricas de Presupuestos
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4 p-4 sm:p-6 pt-0">
-                <div className="grid grid-cols-2 gap-3 sm:gap-4">
-                  <div className="text-center p-3 sm:p-4 bg-epoch-accent/10 rounded-lg border border-epoch-accent/20">
-                    <p className="text-lg sm:text-2xl font-bold text-epoch-accent">
-                      {analytics.quotes.total}
-                    </p>
-                    <p className="text-xs sm:text-sm text-admin-text-tertiary">
-                      Total
-                    </p>
-                  </div>
-                  <div className="text-center p-3 sm:p-4 bg-green-50 rounded-lg border border-green-200">
-                    <p className="text-lg sm:text-2xl font-bold text-green-600">
-                      {analytics.quotes.accepted + analytics.quotes.converted}
-                    </p>
-                    <p className="text-xs sm:text-sm text-admin-text-tertiary">
-                      Aceptados
-                    </p>
-                  </div>
-                  <div className="text-center p-3 sm:p-4 bg-red-50 rounded-lg border border-red-200">
-                    <p className="text-lg sm:text-2xl font-bold text-red-600">
-                      {analytics.quotes.rejected}
-                    </p>
-                    <p className="text-xs sm:text-sm text-admin-text-tertiary">
-                      Rechazados
-                    </p>
-                  </div>
-                  <div className="text-center p-3 sm:p-4 bg-blue-50 rounded-lg border border-blue-200">
-                    <p className="text-lg sm:text-2xl font-bold text-blue-600">
-                      {analytics.kpis.quoteConversionRate.toFixed(1)}%
-                    </p>
-                    <p className="text-xs sm:text-sm text-admin-text-tertiary">
-                      Tasa Conversión
-                    </p>
-                  </div>
-                </div>
-                <div className="mt-4 p-3 sm:p-4 bg-gray-50 rounded-lg">
-                  <p className="text-xs sm:text-sm text-admin-text-tertiary mb-2">
-                    Valor Promedio
-                  </p>
-                  <p className="text-lg sm:text-xl font-bold text-epoch-primary">
-                    {formatPrice(analytics.kpis.avgQuoteValue)}
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Quotes Trend */}
-            <Card
-              className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)]"
-              rounded="none"
-            >
-              <CardHeader className="p-4 sm:p-6">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                  <div className="flex items-center gap-2 min-w-0">
-                    <Receipt className="h-4 w-4 sm:h-5 sm:w-5 shrink-0" />
-                    <CardTitle className="text-base sm:text-lg truncate">
-                      Tendencia de Presupuestos
-                    </CardTitle>
-                  </div>
-                  <div className="flex gap-1 shrink-0">
-                    <Button
-                      className="h-8 sm:h-7 px-2 sm:px-3 text-xs min-h-[44px] sm:min-h-0"
-                      size="sm"
-                      variant={
-                        quotesChartType === "column" ? "default" : "outline"
-                      }
-                      onClick={() => setQuotesChartType("column")}
-                    >
-                      <BarChart3 className="h-3 w-3 mr-1" />
-                      Barras
-                    </Button>
-                    <Button
-                      className="h-8 sm:h-7 px-2 sm:px-3 text-xs min-h-[44px] sm:min-h-0"
-                      size="sm"
-                      variant={
-                        quotesChartType === "line" ? "default" : "outline"
-                      }
-                      onClick={() => setQuotesChartType("line")}
-                    >
-                      <LineChartIcon className="h-3 w-3 mr-1" />
-                      Líneas
-                    </Button>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="p-4 sm:p-6 pt-0">
-                {quotesChartType === "column" ? (
-                  <EnhancedColumnChart
-                    color="#C5A059"
-                    data={analytics.trends.quotes}
-                    formatValue={(val) => Math.round(val).toString()}
-                    height={250}
-                    title="Presupuestos por Período"
-                  />
-                ) : (
-                  <EnhancedLineChart
-                    color="#C5A059"
-                    data={analytics.trends.quotes}
-                    formatValue={(val) => Math.round(val).toString()}
-                    height={250}
-                    showGrid={true}
-                    title="Presupuestos Creados por Día"
-                  />
-                )}
-              </CardContent>
-            </Card>
-          </div>
+                <TabsContent className="space-y-4 sm:space-y-6" value="quotes">
+          <AnalyticsQuotesTab
+            quotes={analytics.quotes}
+            avgQuoteValue={analytics.kpis.avgQuoteValue}
+            quoteConversionRate={analytics.kpis.quoteConversionRate}
+            quotesTrend={analytics.trends.quotes}
+            quotesChartType={quotesChartType}
+            onQuotesChartTypeChange={setQuotesChartType}
+          />
         </TabsContent>
 
         <TabsContent className="space-y-4 sm:space-y-6" value="sales">
