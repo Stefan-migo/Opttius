@@ -263,12 +263,10 @@ export default function WorkOrderDetailContent() {
           <WorkOrderDetailsTab workOrder={workOrder} />
         </TabsContent>
 
-        {/* Pricing Tab */}
         <TabsContent className="space-y-6" value="pricing">
           <WorkOrderPricingTab workOrder={workOrder} />
         </TabsContent>
 
-        {/* History Tab */}
         <TabsContent className="space-y-6" value="history">
           <WorkOrderHistoryTab
             statusHistory={statusHistory}
