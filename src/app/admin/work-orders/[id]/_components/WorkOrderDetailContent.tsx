@@ -3,53 +3,34 @@
 import {
   AlertCircle,
   ArrowLeft,
-  ArrowRight,
-  Calculator,
   CheckCircle,
-  DollarSign,
-  Eye,
   Factory,
   FileText,
   Package,
-  RefreshCw,
   Send,
   Truck,
-  User,
   XCircle,
 } from "lucide-react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { WorkOrderTimeline } from "./WorkOrderTimeline";
 import { WorkOrderOverviewTab } from "./WorkOrderOverviewTab";
-import { WorkOrderDetailsTab } from "./WorkOrderDetailsTab";
-import { WorkOrderPricingTab } from "./WorkOrderPricingTab";
-import { WorkOrderHistoryTab } from "./WorkOrderHistoryTab";
 
 import { WorkOrderHeader } from "./WorkOrderHeader";
-import { toast } from "sonner";
+import { WorkOrderHistoryTab } from "./WorkOrderHistoryTab";
+import { WorkOrderOverviewTab } from "./WorkOrderOverviewTab";
+import { WorkOrderPricingTab } from "./WorkOrderPricingTab";
+import { WorkOrderTimeline } from "./WorkOrderTimeline";
+import { WorkOrderDeleteDialog } from "./WorkOrderDeleteDialog";
+import { WorkOrderDetailsTab } from "./WorkOrderDetailsTab";
 
-import { PrescriptionFullDisplay } from "@/components/admin/PrescriptionFullDisplay";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { getLensTypeLabel } from "@/lib/lens-type-labels";
-import { formatCurrency, formatDate } from "@/lib/utils";
 
 import { useWorkOrder } from "@/hooks/useWorkOrder";
-import { WorkOrderStatusBadge } from "@/components/admin/WorkOrderStatusBadge";
-import { StatusManagementCard } from "@/components/admin/StatusManagementCard";
 import { DeliveryDialog } from "@/components/admin/DeliveryDialog";
-import { LabDeliveryCard } from "@/components/admin/LabDeliveryCard";
 
+/* Orchestrator — delegates to sub-components for individual sections */
 export default function WorkOrderDetailContent() {
   const router = useRouter();
 
@@ -296,48 +277,13 @@ export default function WorkOrderDetailContent() {
       </Tabs>
 
       {/* Delete Confirmation Dialog */}
-      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>¿Eliminar trabajo?</DialogTitle>
-            <DialogDescription>
-              Esta acción no se puede deshacer. El trabajo será eliminado
-              permanentemente de la base de datos.
-              {workOrder?.quote && (
-                <span className="block mt-2 text-orange-600 font-medium">
-                  ⚠️ El presupuesto relacionado también será eliminado.
-                </span>
-              )}
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button
-              disabled={deleting}
-              variant="outline"
-              onClick={() => setDeleteDialogOpen(false)}
-            >
-              Cancelar
-            </Button>
-            <Button
-              disabled={deleting}
-              variant="destructive"
-              onClick={handleDelete}
-            >
-              {deleting ? (
-                <>
-                  <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                  Eliminando...
-                </>
-              ) : (
-                <>
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  Eliminar
-                </>
-              )}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <WorkOrderDeleteDialog
+        deleteDialogOpen={deleteDialogOpen}
+        setDeleteDialogOpen={setDeleteDialogOpen}
+        handleDelete={handleDelete}
+        deleting={deleting}
+        workOrder={workOrder}
+      />
 
       {/* Delivery Dialog with Balance Check */}
       <DeliveryDialog
