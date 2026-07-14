@@ -3,51 +3,34 @@
 import {
   AlertCircle,
   ArrowLeft,
-  ArrowRight,
-  Calculator,
   CheckCircle,
-  DollarSign,
-  Eye,
   Factory,
   FileText,
   Package,
-  RefreshCw,
   Send,
   Truck,
-  User,
   XCircle,
 } from "lucide-react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { WorkOrderTimeline } from "./WorkOrderTimeline";
 import { WorkOrderOverviewTab } from "./WorkOrderOverviewTab";
-import { WorkOrderDetailsTab } from "./WorkOrderDetailsTab";
 
 import { WorkOrderHeader } from "./WorkOrderHeader";
-import { toast } from "sonner";
+import { WorkOrderHistoryTab } from "./WorkOrderHistoryTab";
+import { WorkOrderOverviewTab } from "./WorkOrderOverviewTab";
+import { WorkOrderPricingTab } from "./WorkOrderPricingTab";
+import { WorkOrderTimeline } from "./WorkOrderTimeline";
+import { WorkOrderDeleteDialog } from "./WorkOrderDeleteDialog";
+import { WorkOrderDetailsTab } from "./WorkOrderDetailsTab";
 
-import { PrescriptionFullDisplay } from "@/components/admin/PrescriptionFullDisplay";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { getLensTypeLabel } from "@/lib/lens-type-labels";
-import { formatCurrency, formatDate } from "@/lib/utils";
 
 import { useWorkOrder } from "@/hooks/useWorkOrder";
-import { WorkOrderStatusBadge } from "@/components/admin/WorkOrderStatusBadge";
-import { StatusManagementCard } from "@/components/admin/StatusManagementCard";
 import { DeliveryDialog } from "@/components/admin/DeliveryDialog";
-import { LabDeliveryCard } from "@/components/admin/LabDeliveryCard";
 
+/* Orchestrator — delegates to sub-components for individual sections */
 export default function WorkOrderDetailContent() {
   const router = useRouter();
 
@@ -282,268 +265,27 @@ export default function WorkOrderDetailContent() {
 
         {/* Pricing Tab */}
         <TabsContent className="space-y-6" value="pricing">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <DollarSign className="h-5 w-5 mr-2" />
-                Desglose de Precios
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <div className="flex justify-between">
-                  <span className="text-admin-text-tertiary">
-                    Costo de Marco:
-                  </span>
-                  <span className="font-medium">
-                    {formatCurrency(workOrder.frame_cost)}
-                  </span>
-                </div>
-                {workOrder.presbyopia_solution === "two_separate" ? (
-                  <>
-                    <div className="flex justify-between">
-                      <span className="text-admin-text-tertiary">
-                        Costo Lente Lejos (
-                        {workOrder.far_lens_family?.name || "Lejos"}):
-                      </span>
-                      <span className="font-medium">
-                        {formatCurrency(workOrder.far_lens_cost ?? 0)}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-admin-text-tertiary">
-                        Costo Lente Cerca (
-                        {workOrder.near_lens_family?.name || "Cerca"}):
-                      </span>
-                      <span className="font-medium">
-                        {formatCurrency(workOrder.near_lens_cost ?? 0)}
-                      </span>
-                    </div>
-                  </>
-                ) : (
-                  <div className="flex justify-between">
-                    <span className="text-admin-text-tertiary">
-                      Costo de Lente:
-                    </span>
-                    <span className="font-medium">
-                      {formatCurrency(workOrder.lens_cost)}
-                    </span>
-                  </div>
-                )}
-                <div className="flex justify-between">
-                  <span className="text-admin-text-tertiary">
-                    Costo de Tratamientos:
-                  </span>
-                  <span className="font-medium">
-                    {formatCurrency(workOrder.treatments_cost)}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-admin-text-tertiary">
-                    Costo de Mano de Obra:
-                  </span>
-                  <span className="font-medium">
-                    {formatCurrency(workOrder.labor_cost)}
-                  </span>
-                </div>
-                {workOrder.lab_cost > 0 && (
-                  <div className="flex justify-between">
-                    <span className="text-admin-text-tertiary">
-                      Costo del Laboratorio:
-                    </span>
-                    <span className="font-medium">
-                      {formatCurrency(workOrder.lab_cost)}
-                    </span>
-                  </div>
-                )}
-                <div className="border-t pt-2 flex justify-between">
-                  <span className="font-medium">Subtotal:</span>
-                  <span className="font-medium">
-                    {formatCurrency(workOrder.subtotal)}
-                  </span>
-                </div>
-                {workOrder.discount_amount > 0 && (
-                  <div className="flex justify-between text-red-500">
-                    <span>Descuento:</span>
-                    <span className="font-medium">
-                      -{formatCurrency(workOrder.discount_amount)}
-                    </span>
-                  </div>
-                )}
-                <div className="flex justify-between">
-                  <span className="text-admin-text-tertiary">IVA (19%):</span>
-                  <span className="font-medium">
-                    {formatCurrency(workOrder.tax_amount)}
-                  </span>
-                </div>
-                <div className="border-t pt-2 flex justify-between text-lg font-bold">
-                  <span>Total:</span>
-                  <span className="text-admin-success">
-                    {formatCurrency(workOrder.total_amount)}
-                  </span>
-                </div>
-                {workOrder.deposit_amount > 0 && (
-                  <>
-                    <div className="border-t pt-2 flex justify-between">
-                      <span className="text-admin-text-tertiary">
-                        Seña/Depósito:
-                      </span>
-                      <span className="font-medium">
-                        {formatCurrency(workOrder.deposit_amount)}
-                      </span>
-                    </div>
-                    <div className="flex justify-between text-lg font-semibold">
-                      <span>Saldo Pendiente:</span>
-                      <span className="text-orange-600">
-                        {formatCurrency(workOrder.balance_amount)}
-                      </span>
-                    </div>
-                  </>
-                )}
-              </div>
-            </CardContent>
-          </Card>
+          <WorkOrderPricingTab workOrder={workOrder} />
         </TabsContent>
 
         {/* History Tab */}
         <TabsContent className="space-y-6" value="history">
-          <Card>
-            <CardHeader>
-              <CardTitle>Historial de Estados</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {statusHistory.length === 0 ? (
-                <div className="text-center py-8 text-admin-text-tertiary">
-                  No hay historial de cambios de estado
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {statusHistory.map((entry, index) => {
-                    const isCurrentStatus =
-                      index === 0 && entry.to_status === workOrder.status;
-
-                    return (
-                      <div
-                        className={`flex items-start space-x-4 pb-4 border-b last:border-0 ${
-                          isCurrentStatus
-                            ? "bg-green-50 p-4 rounded-lg border-green-200"
-                            : "bg-gray-50 p-3 rounded-lg border-gray-200"
-                        }`}
-                        key={entry.id}
-                      >
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <Badge
-                              className={
-                                isCurrentStatus
-                                  ? "bg-gray-200 border-gray-300 text-gray-600"
-                                  : "bg-gray-100 border-gray-200 text-gray-500"
-                              }
-                              variant="outline"
-                            >
-                              {getStatusLabel(entry.from_status || "Inicial")}
-                            </Badge>
-                            <ArrowRight
-                              className={`h-4 w-4 ${isCurrentStatus ? "text-green-600" : "text-gray-400"}`}
-                            />
-                            <Badge
-                              className={
-                                isCurrentStatus
-                                  ? "bg-green-500 text-white border-green-600 font-semibold"
-                                  : "bg-gray-300 text-gray-600 border-gray-400"
-                              }
-                            >
-                              {getStatusLabel(entry.to_status)}
-                              {isCurrentStatus && (
-                                <span className="ml-2 text-xs bg-green-600 px-1.5 py-0.5 rounded">
-                                  ACTUAL
-                                </span>
-                              )}
-                            </Badge>
-                          </div>
-                          <p
-                            className={`text-sm mt-2 ${isCurrentStatus ? "text-green-700 font-medium" : "text-gray-500"}`}
-                          >
-                            {new Date(entry.changed_at).toLocaleString(
-                              "es-CL",
-                              {
-                                year: "numeric",
-                                month: "long",
-                                day: "numeric",
-                                hour: "2-digit",
-                                minute: "2-digit",
-                              },
-                            )}
-                          </p>
-                          {entry.changed_by_user && (
-                            <p
-                              className={`text-sm mt-1 ${isCurrentStatus ? "text-green-600" : "text-gray-500"}`}
-                            >
-                              Por: {entry.changed_by_user.first_name}{" "}
-                              {entry.changed_by_user.last_name}
-                            </p>
-                          )}
-                          {entry.notes && (
-                            <p
-                              className={`text-sm mt-2 ${isCurrentStatus ? "text-green-800" : "text-gray-600"}`}
-                            >
-                              {entry.notes}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </CardContent>
-          </Card>
+          <WorkOrderHistoryTab
+            statusHistory={statusHistory}
+            currentStatus={workOrder.status}
+            getStatusLabel={getStatusLabel}
+          />
         </TabsContent>
       </Tabs>
 
       {/* Delete Confirmation Dialog */}
-      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>¿Eliminar trabajo?</DialogTitle>
-            <DialogDescription>
-              Esta acción no se puede deshacer. El trabajo será eliminado
-              permanentemente de la base de datos.
-              {workOrder?.quote && (
-                <span className="block mt-2 text-orange-600 font-medium">
-                  ⚠️ El presupuesto relacionado también será eliminado.
-                </span>
-              )}
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button
-              disabled={deleting}
-              variant="outline"
-              onClick={() => setDeleteDialogOpen(false)}
-            >
-              Cancelar
-            </Button>
-            <Button
-              disabled={deleting}
-              variant="destructive"
-              onClick={handleDelete}
-            >
-              {deleting ? (
-                <>
-                  <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                  Eliminando...
-                </>
-              ) : (
-                <>
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  Eliminar
-                </>
-              )}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <WorkOrderDeleteDialog
+        deleteDialogOpen={deleteDialogOpen}
+        setDeleteDialogOpen={setDeleteDialogOpen}
+        handleDelete={handleDelete}
+        deleting={deleting}
+        workOrder={workOrder}
+      />
 
       {/* Delivery Dialog with Balance Check */}
       <DeliveryDialog
