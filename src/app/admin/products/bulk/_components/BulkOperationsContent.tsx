@@ -2,23 +2,20 @@
 
 import { useQueryClient } from "@tanstack/react-query";
 import {
-  AlertTriangle,
   ArrowLeft,
   Download,
   Edit,
-  Eye,
-  Package,
   RefreshCw,
   Trash2,
   Upload,
 } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -37,38 +34,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { useBranch } from "@/hooks/useBranch";
 import { extractDataFromResponse } from "@/lib/api/response-helpers";
 import type { Product } from "@/lib/api/services";
 import { productService } from "@/lib/api/services";
-import { formatCurrency, formatDate } from "@/lib/utils";
 
 import { BulkOperationForm } from "./BulkOperationForm";
-
-interface ImportResult {
-  success: boolean;
-  summary: {
-    total_processed: number;
-    created: number;
-    updated: number;
-    skipped: number;
-    errors_count: number;
-  };
-  results?: {
-    errors: string[];
-  };
-}
+import { ImportProductsDialog } from "./ImportProductsDialog";
+import { ProductsTable } from "./ProductsTable";
 
 export default function BulkOperationsContent() {
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const { currentBranchId, isSuperAdmin } = useBranch();
   const queryClient = useQueryClient();
 
@@ -88,10 +63,6 @@ export default function BulkOperationsContent() {
   const [bulkUpdates, setBulkUpdates] = useState<Record<string, unknown>>({});
   const [showBulkDialog, setShowBulkDialog] = useState(false);
   const [showImportDialog, setShowImportDialog] = useState(false);
-  const [importMode, setImportMode] = useState<"create" | "update" | "skip">(
-    "create",
-  );
-  const [importResults, setImportResults] = useState<ImportResult | null>(null);
   const [isDeleteDialog, setIsDeleteDialog] = useState(false);
 
   useEffect(() => {
@@ -229,42 +200,6 @@ export default function BulkOperationsContent() {
     }
   };
 
-  const handleImport = async (file: File) => {
-    if (!file) return;
-
-    try {
-      setProcessing(true);
-
-      const result = await productService.importProductsFile(file, importMode);
-      setImportResults(result);
-
-      if (result.success) {
-        toast.success(
-          `Importación completada: ${result.summary.created} creados, ${result.summary.updated} actualizados`,
-        );
-        fetchProducts();
-      } else {
-        toast.error("Error en la importación");
-      }
-    } catch (error) {
-      console.error("Error importing products:", error);
-      toast.error("Error al importar productos");
-    } finally {
-      setProcessing(false);
-    }
-  };
-
-  const getStatusBadge = (status: string) => {
-    const config: Record<string, { variant: "default" | "secondary" | "outline" | "destructive"; label: string }> = {
-      active: { variant: "default", label: "Activo" },
-      draft: { variant: "secondary", label: "Borrador" },
-      archived: { variant: "outline", label: "Archivado" },
-    };
-
-    const statusConfig = config[status] || config["draft"];
-    return <Badge variant={statusConfig.variant}>{statusConfig.label}</Badge>;
-  };
-
   if (loading) {
     return (
       <div className="space-y-6">
@@ -309,113 +244,21 @@ export default function BulkOperationsContent() {
             Exportar CSV
           </Button>
 
-          <Dialog open={showImportDialog} onOpenChange={setShowImportDialog}>
-            <DialogTrigger asChild>
-              <Button variant="outline">
-                <Upload className="h-4 w-4 mr-2" />
-                Importar CSV
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-2xl">
-              <DialogHeader>
-                <DialogTitle>Importar Productos desde CSV</DialogTitle>
-                <DialogDescription>
-                  Sube un archivo CSV para importar productos masivamente
-                </DialogDescription>
-              </DialogHeader>
-
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="import_mode">Modo de Importación</Label>
-                  <Select
-                    value={importMode}
-                    onValueChange={(value) =>
-                      setImportMode(value as "create" | "update" | "skip")
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="create">
-                        Crear - Solo productos nuevos
-                      </SelectItem>
-                      <SelectItem value="update">
-                        Actualizar - Solo productos existentes
-                      </SelectItem>
-                      <SelectItem value="upsert">
-                        Crear/Actualizar - Ambos
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <Label htmlFor="csv_file">Archivo CSV</Label>
-                  <Input
-                    accept=".csv"
-                    ref={fileInputRef}
-                    type="file"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) {
-                        handleImport(file);
-                      }
-                    }}
-                  />
-                  <p className="text-sm text-tierra-media mt-1">
-                    Formatos soportados: nombre, descripción, precio, stock,
-                    estado, categoría, etc.
-                  </p>
-                </div>
-
-                {importResults && (
-                  <div className="mt-4 p-4 border rounded-lg">
-                    <h4 className="font-medium mb-2">
-                      Resultados de Importación
-                    </h4>
-                    <div className="grid grid-cols-2 gap-4 text-sm">
-                      <div>
-                        Procesados: {importResults.summary.total_processed}
-                      </div>
-                      <div>Creados: {importResults.summary.created}</div>
-                      <div>Actualizados: {importResults.summary.updated}</div>
-                      <div>Omitidos: {importResults.summary.skipped}</div>
-                    </div>
-
-                    {importResults.results?.errors &&
-                      importResults.results.errors.length > 0 && (
-                        <div className="mt-2">
-                          <h5 className="font-medium text-red-600">Errores:</h5>
-                          <ul className="text-sm text-red-600 list-disc list-inside">
-                            {importResults.results?.errors
-                              .slice(0, 5)
-                              .map((error, index) => (
-                                <li key={index}>{error}</li>
-                              ))}
-                            {importResults.results?.errors.length > 5 && (
-                              <li>
-                                ... y {importResults.results.errors.length - 5}{" "}
-                                más
-                              </li>
-                            )}
-                          </ul>
-                        </div>
-                      )}
-                  </div>
-                )}
-              </div>
-
-              <DialogFooter>
-                <Button
-                  variant="outline"
-                  onClick={() => setShowImportDialog(false)}
-                >
-                  Cerrar
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+          <Button
+            variant="outline"
+            onClick={() => setShowImportDialog(true)}
+          >
+            <Upload className="h-4 w-4 mr-2" />
+            Importar CSV
+          </Button>
+          <ImportProductsDialog
+            open={showImportDialog}
+            onOpenChange={setShowImportDialog}
+            onImportComplete={() => {
+              setShowImportDialog(false);
+              fetchProducts();
+            }}
+          />
         </div>
       </div>
 
@@ -624,143 +467,12 @@ export default function BulkOperationsContent() {
         </CardContent>
       </Card>
 
-      {/* Products Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center justify-between">
-            <div className="flex items-center">
-              <Package className="h-5 w-5 mr-2" />
-              Productos ({products.length})
-            </div>
-            <div className="flex items-center space-x-2">
-              <input
-                checked={
-                  selectedProducts.length === products.length &&
-                  products.length > 0
-                }
-                className="rounded border-gray-300"
-                type="checkbox"
-                onChange={handleSelectAll}
-              />
-              <span className="text-sm text-tierra-media">
-                Seleccionar todos
-              </span>
-            </div>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-12">
-                    <input
-                      checked={
-                        selectedProducts.length === products.length &&
-                        products.length > 0
-                      }
-                      className="rounded border-gray-300"
-                      type="checkbox"
-                      onChange={handleSelectAll}
-                    />
-                  </TableHead>
-                  <TableHead>Producto</TableHead>
-                  <TableHead>Categoría</TableHead>
-                  <TableHead>Precio</TableHead>
-                  <TableHead>Stock</TableHead>
-                  <TableHead>Estado</TableHead>
-                  <TableHead>Fecha</TableHead>
-                  <TableHead>Acciones</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {products.map((product) => (
-                  <TableRow key={product.id}>
-                    <TableCell>
-                      <input
-                        checked={selectedProducts.includes(product.id)}
-                        className="rounded border-gray-300"
-                        type="checkbox"
-                        onChange={() => handleSelectProduct(product.id)}
-                      />
-                    </TableCell>
-
-                    <TableCell>
-                      <div>
-                        <div className="font-medium">{product.name}</div>
-                        <div className="text-sm text-tierra-media">
-                          {product.slug}
-                        </div>
-                        {product.is_featured && (
-                          <Badge className="text-xs" variant="outline">
-                            Destacado
-                          </Badge>
-                        )}
-                      </div>
-                    </TableCell>
-
-                    <TableCell>
-                      {product.category ? (
-                        <Badge variant="outline">{product.category.name}</Badge>
-                      ) : (
-                        <span className="text-tierra-media">Sin categoría</span>
-                      )}
-                    </TableCell>
-
-                    <TableCell className="font-medium">
-                      {formatCurrency(product.price)}
-                    </TableCell>
-
-                    <TableCell>
-                      <div className="flex items-center space-x-2">
-                        <span>{product.inventory_quantity}</span>
-                        {(product.inventory_quantity ?? 0) <= 5 && (
-                          <AlertTriangle className="h-4 w-4 text-red-500" />
-                        )}
-                      </div>
-                    </TableCell>
-
-                    <TableCell>
-                      {getStatusBadge(product.status ?? "")}
-                    </TableCell>
-
-                    <TableCell className="text-sm text-tierra-media">
-                      {formatDate(product.created_at, { locale: "es-AR" })}
-                    </TableCell>
-
-                    <TableCell>
-                      <div className="flex space-x-2">
-                        <Link href={`/admin/products/${product.id}`}>
-                          <Button size="sm" variant="outline">
-                            <Eye className="h-3 w-3" />
-                          </Button>
-                        </Link>
-                        <Link href={`/admin/products/edit/${product.id}`}>
-                          <Button size="sm" variant="outline">
-                            <Edit className="h-3 w-3" />
-                          </Button>
-                        </Link>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-
-          {products.length === 0 && (
-            <div className="text-center py-12">
-              <Package className="h-12 w-12 text-tierra-media mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-azul-profundo mb-2">
-                No se encontraron productos
-              </h3>
-              <p className="text-tierra-media">
-                Ajusta los filtros o agrega nuevos productos.
-              </p>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+      <ProductsTable
+        products={products}
+        selectedProducts={selectedProducts}
+        onSelectProduct={handleSelectProduct}
+        onSelectAll={handleSelectAll}
+      />
     </div>
   );
 }
