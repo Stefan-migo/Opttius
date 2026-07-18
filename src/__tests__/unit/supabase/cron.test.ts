@@ -41,4 +41,22 @@ describe("createCronClient", () => {
 
     vi.unstubAllEnvs();
   });
+
+  it("falls back to empty URL when NEXT_PUBLIC_SUPABASE_URL is not set", () => {
+    vi.stubEnv("SUPABASE_SERVICE_ROLE_KEY", "test-service-role-key");
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "");
+
+    const client = createCronClient();
+
+    expect(client).toEqual({ cron: true });
+    expect(createClient).toHaveBeenCalledWith(
+      "",
+      "test-service-role-key",
+      {
+        auth: { autoRefreshToken: false, persistSession: false },
+      },
+    );
+
+    vi.unstubAllEnvs();
+  });
 });

@@ -64,6 +64,26 @@ describe("createClient (server)", () => {
     vi.unstubAllEnvs();
   });
 
+  it("falls back to empty strings when env vars are not set", async () => {
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "");
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY", "");
+    const client = await createSvrClient();
+
+    expect(client).toEqual({ server: true });
+    expect(createServerClient).toHaveBeenCalledWith(
+      "",
+      "",
+      expect.objectContaining({
+        cookies: expect.objectContaining({
+          getAll: expect.any(Function),
+          setAll: expect.any(Function),
+        }),
+      }),
+    );
+
+    vi.unstubAllEnvs();
+  });
+
   it("catches setAll errors from Server Components", async () => {
     vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "https://test.supabase.co");
     vi.stubEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY", "test-anon-key");
@@ -175,6 +195,32 @@ describe("createClientFromRequest", () => {
 
     expect(createServerClient).toHaveBeenCalled();
     expect(createSupabaseClient).not.toHaveBeenCalled();
+
+    vi.unstubAllEnvs();
+  });
+
+  it("getUser in cookie fallback path works", async () => {
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "https://test.supabase.co");
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY", "test-anon-key");
+
+    const mockGetUser = vi.fn().mockResolvedValue({
+      data: { user: { id: "1" } },
+      error: null,
+    });
+    (createServerClient as unknown as import("vitest").Mock).mockReturnValue({
+      auth: { getUser: mockGetUser },
+    });
+
+    const result = await createClientFromRequest();
+
+    expect(createServerClient).toHaveBeenCalled();
+
+    const userResult = await result.getUser();
+    expect(mockGetUser).toHaveBeenCalledWith();
+    expect(userResult).toEqual({
+      data: { user: { id: "1" } },
+      error: null,
+    });
 
     vi.unstubAllEnvs();
   });

@@ -268,6 +268,14 @@ describe("createWorkOrderSchema", () => {
     if (result.success) expect(result.data.far_lens_cost).toBeNull();
   });
 
+  it("rejects far_lens_cost boolean (preprocessor fallthrough)", () => {
+    const result = createWorkOrderSchema.safeParse({
+      ...validWorkOrder,
+      far_lens_cost: true,
+    });
+    expect(result.success).toBe(false);
+  });
+
   // ponytail: schema has .min(1) BEFORE .trim(), so "   " passes
   // then gets trimmed to "". Would need ".trim().min(1)" to reject whitespace-only.
   it("accepts frame_name with only whitespace (schema order: min before trim)", () => {

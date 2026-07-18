@@ -273,6 +273,14 @@ describe("createQuoteSchema", () => {
     if (result.success) expect(result.data.far_lens_cost).toBeNull();
   });
 
+  it("rejects far_lens_cost boolean (preprocessor fallthrough)", () => {
+    const result = createQuoteSchema.safeParse({
+      ...validQuote,
+      far_lens_cost: true,
+    });
+    expect(result.success).toBe(false);
+  });
+
   it("coerces contact_lens_quantity null to 1", () => {
     const result = createQuoteSchema.safeParse({
       ...validQuote,
