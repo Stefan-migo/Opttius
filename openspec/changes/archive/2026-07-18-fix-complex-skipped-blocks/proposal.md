@@ -7,11 +7,13 @@ Fix 3 test blocks that were skipped during earlier phases due to complexity — 
 ## Scope
 
 ### In Scope
+
 - Block 1 — `analytics_tools.test.ts`: Clean mock setup per tool, add `organizationId` to context
 - Block 2 — `phase2-security.test.ts`: Extract helpers, fix `logEvent` signatures (3-arg), dynamic severity assertions, remove magic numbers
 - Block 3 — `flow.test.ts`: Rewrite mocks following `paypal.test.ts` pattern, fix route path assertions
 
 ### Out of Scope
+
 - Other 67 skipped tests across the suite
 - Fauna media test files
 - Adding new test coverage beyond these 3 files
@@ -20,9 +22,11 @@ Fix 3 test blocks that were skipped during earlier phases due to complexity — 
 ## Capabilities
 
 ### New Capabilities
+
 None — test-only change, no new spec-level capabilities.
 
 ### Modified Capabilities
+
 None — no requirements change at the spec level.
 
 ## Approach
@@ -33,18 +37,18 @@ None — no requirements change at the spec level.
 
 ## Affected Areas
 
-| Area | Impact | Description |
-|------|--------|-------------|
-| `src/__tests__/unit/lib/ai/tools/analytics_tools.test.ts` | Modified | Fix mock setup, add org ID |
-| `src/__tests__/security/phase2-security.test.ts` | Modified | Extract helpers, fix assertions |
-| `src/__tests__/integration/api/webhooks/flow.test.ts` | Modified | Rewrite mocks, fix route asserts |
+| Area                                                      | Impact   | Description                      |
+| --------------------------------------------------------- | -------- | -------------------------------- |
+| `src/__tests__/unit/lib/ai/tools/analytics_tools.test.ts` | Modified | Fix mock setup, add org ID       |
+| `src/__tests__/security/phase2-security.test.ts`          | Modified | Extract helpers, fix assertions  |
+| `src/__tests__/integration/api/webhooks/flow.test.ts`     | Modified | Rewrite mocks, fix route asserts |
 
 ## Risks
 
-| Risk | Likelihood | Mitigation |
-|------|------------|------------|
-| False positives (tests pass but assert wrong thing) | Low | Review assertions match actual behavior |
-| Flow webhook route shape changed since skip | Low | Read actual route handlers before fixing |
+| Risk                                                | Likelihood | Mitigation                               |
+| --------------------------------------------------- | ---------- | ---------------------------------------- |
+| False positives (tests pass but assert wrong thing) | Low        | Review assertions match actual behavior  |
+| Flow webhook route shape changed since skip         | Low        | Read actual route handlers before fixing |
 
 ## Rollback Plan
 
