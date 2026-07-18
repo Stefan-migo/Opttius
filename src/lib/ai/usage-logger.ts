@@ -9,7 +9,6 @@
  * @module lib/ai/usage-logger
  */
 
-// @deprecated Migrate to agent_conversations/agent_messages after database-reformation.
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { appLogger as logger } from "@/lib/logger";

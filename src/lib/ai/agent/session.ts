@@ -1,4 +1,3 @@
-// @deprecated Migrate to agent_conversations/agent_messages after database-reformation.
 /**
  * AgentSession builder — pure function that constructs an AgentSession
  * from the incoming request body.
