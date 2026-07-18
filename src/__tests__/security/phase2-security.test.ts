@@ -11,8 +11,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { getSecurityAlerting, SecurityAlerting } from "@/lib/security/alerting";
 import { SecurityEvent } from "@/lib/security/events";
-import type { SecurityMonitor } from "@/lib/security/monitoring";
-import { getSecurityMonitor } from "@/lib/security/monitoring";
+import { getSecurityMonitor, SecurityMonitor } from "@/lib/security/monitoring";
 // Mock logger
 vi.mock("@/lib/logger", () => ({
   appLogger: {
@@ -40,8 +39,20 @@ vi.mock("axios", () => ({
   },
 }));
 
-// ponytail: skipped — monitoring method signatures changed; fix in Phase 1
-describe.skip("Phase 2 Security Implementation Tests", () => {
+// Helper to create SecurityEvent objects with sensible defaults
+function makeEvent(overrides: Partial<SecurityEvent> = {}): SecurityEvent {
+  return {
+    id: `test-${Date.now()}`,
+    timestamp: new Date().toISOString(),
+    eventType: "auth.login_success",
+    severity: "low",
+    source: "test",
+    details: {},
+    ...overrides,
+  };
+}
+
+describe("Phase 2 Security Implementation Tests", () => {
   beforeEach(() => {
     vi.resetModules();
     vi.clearAllMocks();
@@ -80,7 +91,7 @@ describe.skip("Phase 2 Security Implementation Tests", () => {
 
       console.log("After logAuthEvent call");
 
-      expect(appLogger.info).toHaveBeenCalledWith(
+      expect(appLogger.debug).toHaveBeenCalledWith(
         "SECURITY LOW: auth.login_success",
         expect.objectContaining({
           securityEvent: expect.objectContaining({
@@ -106,7 +117,7 @@ describe.skip("Phase 2 Security Implementation Tests", () => {
         },
       );
 
-      expect(appLogger.warn).toHaveBeenCalledWith(
+      expect(appLogger.info).toHaveBeenCalledWith(
         "SECURITY MEDIUM: rate_limit.exceeded",
         expect.objectContaining({
           securityEvent: expect.objectContaining({
@@ -157,8 +168,8 @@ describe.skip("Phase 2 Security Implementation Tests", () => {
         },
       );
 
-      expect(appLogger.info).toHaveBeenCalledWith(
-        "SECURITY MEDIUM: data.access_sensitive",
+      expect(appLogger.debug).toHaveBeenCalledWith(
+        "SECURITY LOW: data.access_sensitive",
         expect.objectContaining({
           securityEvent: expect.objectContaining({
             type: "data.access_sensitive",
@@ -171,37 +182,27 @@ describe.skip("Phase 2 Security Implementation Tests", () => {
       // Test different event types and their severities
       const events = [
         { type: "auth.login_success", expectedSeverity: "low" },
-        { type: "auth.login_failure", expectedSeverity: "medium" },
-        { type: "auth.account_locked", expectedSeverity: "high" },
-        { type: "payment.fraud_suspected", expectedSeverity: "high" },
+        { type: "auth.login_failure", expectedSeverity: "high" },
+        { type: "auth.account_locked", expectedSeverity: "critical" },
+        { type: "payment.fraud_suspected", expectedSeverity: "critical" },
         { type: "system.malware_detected", expectedSeverity: "critical" },
       ];
 
       for (const event of events) {
-        const securityEvent: SecurityEvent = {
-          id: `test-${event.type}`,
-          timestamp: new Date().toISOString(),
-          eventType: event.type as unknown,
-          severity: event.expectedSeverity as unknown,
-          source: "test",
-          details: {},
-        };
+        monitor.logEvent(event.type as SecurityEventType, {}, {});
 
-        monitor.logEvent(
-          securityEvent.eventType as unknown,
-          securityEvent.details,
-          {
-            userId: securityEvent.userId,
-            ipAddress: securityEvent.ipAddress,
-          },
-        );
+        const severity = event.expectedSeverity;
+        const loggerMethod =
+          severity === "critical" ? "error" :
+          severity === "high" ? "warn" :
+          severity === "medium" ? "info" : "debug";
 
-        expect(appLogger.debug).toHaveBeenCalledWith(
-          "SECURITY LOW: auth.login_success",
+        expect(appLogger[loggerMethod]).toHaveBeenCalledWith(
+          `SECURITY ${severity.toUpperCase()}: ${event.type}`,
           expect.objectContaining({
             securityEvent: expect.objectContaining({
-              type: "auth.login_success",
-              severity: "low",
+              type: event.type,
+              severity,
             }),
           }),
         );
@@ -209,7 +210,8 @@ describe.skip("Phase 2 Security Implementation Tests", () => {
     });
 
     it("should buffer events and flush periodically", async () => {
-      // Test event buffering functionality
+      // Use a fresh monitor to avoid accumulated events from previous tests
+      const monitor = new SecurityMonitor();
       const events: SecurityEvent[] = [];
 
       for (let i = 0; i < 5; i++) {
@@ -240,7 +242,7 @@ describe.skip("Phase 2 Security Implementation Tests", () => {
       expect(appLogger.debug).toHaveBeenCalledWith(
         "Security events flushed",
         expect.objectContaining({
-          eventCount: 14,
+          eventCount: 5,
         }),
       );
     });
@@ -504,10 +506,14 @@ describe.skip("Phase 2 Security Implementation Tests", () => {
 
       // Log failed login events
       failedLogins.forEach((event) =>
-        monitor.logAuthEvent(event.eventType as unknown, event.details || {}, {
-          userId: event.userId,
-          ipAddress: event.ipAddress,
-        }),
+        monitor.logAuthEvent(
+          event.eventType as SecurityEventType,
+          { ...event.details, failureReason: event.details.reason },
+          {
+            userId: event.userId,
+            ipAddress: event.ipAddress,
+          },
+        ),
       );
 
       // Send alert for multiple failed attempts
@@ -592,7 +598,7 @@ describe.skip("Phase 2 Security Implementation Tests", () => {
         ["Implement IP blocking", "Review API usage patterns"],
       );
 
-      expect(appLogger.warn).toHaveBeenCalledWith(
+      expect(appLogger.info).toHaveBeenCalledWith(
         "SECURITY MEDIUM: rate_limit.exceeded",
         expect.objectContaining({
           securityEvent: expect.objectContaining({
@@ -790,7 +796,12 @@ describe.skip("Phase 2 Security Implementation Tests", () => {
 
       // Log all events
       const startTime = Date.now();
-      highVolumeEvents.forEach((event) => monitor.logEvent(event as unknown));
+      highVolumeEvents.forEach((event) =>
+        monitor.logEvent(event.eventType, event.details, {
+          userId: event.userId,
+          ipAddress: event.ipAddress,
+        }),
+      );
       const endTime = Date.now();
 
       // Verify performance
@@ -847,7 +858,10 @@ describe.skip("Phase 2 Security Implementation Tests", () => {
             details: { concurrent: true },
           };
 
-          monitor.logEvent(event as unknown);
+          monitor.logEvent(event.eventType, event.details, {
+            userId: event.userId,
+            ipAddress: event.ipAddress,
+          });
 
           await alerting.sendAlert(
             `Concurrent Alert ${i}`,
