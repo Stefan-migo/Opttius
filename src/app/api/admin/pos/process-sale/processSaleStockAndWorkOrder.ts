@@ -5,9 +5,10 @@
  */
 
 import { NextResponse } from "next/server";
-import { createServiceRoleClient } from "@/utils/supabase/server";
-import { createApiErrorResponse } from "@/lib/api/response";
+
 import { APIError } from "@/lib/api/errors";
+import { createApiErrorResponse } from "@/lib/api/response";
+import { createClient } from "@/utils/supabase/server";
 
 export interface StockAndWorkOrderParams {
   validatedBody: Record<string, unknown>;
@@ -25,7 +26,7 @@ export async function handleStockAndWorkOrder(
   params: StockAndWorkOrderParams,
 ): Promise<StockAndWorkOrderResult | NextResponse> {
   const { validatedBody, effectiveBranchId, fieldOperationId, productsForStockCheck } = params;
-  const supabaseServiceRole = createServiceRoleClient();
+  const supabase = await createClient();
 
   const {
     items,
@@ -62,8 +63,8 @@ export async function handleStockAndWorkOrder(
         if ((product as Record<string, unknown> | undefined)?.product_type === "service") continue;
 
         const availableQty = useMobileStock
-          ? await getOperativoMobileAvailableQuantity(pid, fieldOperationId!, supabaseServiceRole)
-          : await getAvailableQuantity(pid, effectiveBranchId!, supabaseServiceRole);
+          ? await getOperativoMobileAvailableQuantity(pid, fieldOperationId!, supabase)
+          : await getAvailableQuantity(pid, effectiveBranchId!, supabase);
 
         if (availableQty < (item.quantity as number)) {
           const productName = (product as Record<string, unknown> | undefined)?.name || pid;
@@ -101,7 +102,7 @@ export async function handleStockAndWorkOrder(
         !id.includes("discount-"),
     );
   if (productIds.length > 0) {
-    const { data: products } = await supabaseServiceRole
+    const { data: products } = await supabase
       .from("products")
       .select("id, product_type, category_id, categories:category_id(name)")
       .in("id", productIds);

@@ -8,7 +8,6 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { appLogger as logger } from "@/lib/logger";
 import { createClient } from "@/utils/supabase/server";
-import { createServiceRoleClient } from "@/utils/supabase/server";
 
 export const dynamic = "force-dynamic";
 
@@ -171,8 +170,7 @@ export async function GET(request: NextRequest) {
     const phoneNumberId = firstPhone.id;
     const displayPhone = firstPhone.display_phone_number ?? null;
 
-    const supabaseService = createServiceRoleClient();
-    const { data: existing } = await supabaseService
+    const { data: existing } = await supabase
       .from("whatsapp_phone_numbers")
       .select("id")
       .eq("organization_id", adminUser.organization_id)
@@ -187,7 +185,7 @@ export async function GET(request: NextRequest) {
     };
 
     if (existing) {
-      const { error: updateError } = await supabaseService
+      const { error: updateError } = await supabase
         .from("whatsapp_phone_numbers")
         .update(payload)
         .eq("id", existing.id);
@@ -199,7 +197,7 @@ export async function GET(request: NextRequest) {
         );
       }
     } else {
-      const { error: insertError } = await supabaseService
+      const { error: insertError } = await supabase
         .from("whatsapp_phone_numbers")
         .insert(payload);
 

@@ -7,7 +7,7 @@ import { NextResponse } from "next/server";
 
 import { appLogger as logger } from "@/lib/logger";
 import { PaymentGatewayFactory } from "@/lib/payments";
-import { createClient, createServiceRoleClient } from "@/utils/supabase/server";
+import { createClient } from "@/utils/supabase/server";
 
 function getBackUrl(): string {
   const base =
@@ -27,8 +27,7 @@ export async function GET() {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const serviceSupabase = createServiceRoleClient();
-  const { data: tiers, error } = await serviceSupabase
+  const { data: tiers, error } = await supabase
     .from("subscription_tiers")
     .select("name, price_monthly, gateway_plan_id")
     .order("price_monthly", { ascending: true });
@@ -85,7 +84,7 @@ export async function GET() {
           backUrl,
         );
         planId = created.id;
-        await serviceSupabase
+        await supabase
           .from("subscription_tiers")
           .update({ gateway_plan_id: planId })
           .eq("name", tier.name);

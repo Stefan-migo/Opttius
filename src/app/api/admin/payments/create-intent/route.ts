@@ -7,7 +7,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { ValidationError } from "@/lib/api/errors";
-import { rateLimitConfigs, withRateLimit } from "@/lib/rate-limiting";
 import {
   parseAndValidateBody,
   validationErrorResponse,
@@ -16,6 +15,7 @@ import { createPaymentIntentSchema } from "@/lib/api/validation/zod-schemas";
 import { appLogger as logger } from "@/lib/logger";
 import type { PaymentGatewayType } from "@/lib/payments";
 import { PaymentGatewayFactory, PaymentService } from "@/lib/payments";
+import { rateLimitConfigs, withRateLimit } from "@/lib/rate-limiting";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
 import { createClientFromRequest } from "@/utils/supabase/server";
 

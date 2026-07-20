@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
 import { appLogger as logger } from "@/lib/logger";
-import { createClient, createServiceRoleClient } from "@/utils/supabase/server";
+import { createClient } from "@/utils/supabase/server";
 
 const SURVEY_CONFIG_KEYS = [
   "survey_enabled",
@@ -43,8 +43,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const serviceSupabase = createServiceRoleClient();
-    const { data: rows, error } = await serviceSupabase
+    const { data: rows, error } = await supabase
       .from("system_config")
       .select("config_key, config_value")
       .eq("organization_id", orgId)
@@ -98,7 +97,6 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    const serviceSupabase = createServiceRoleClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();
@@ -107,7 +105,7 @@ export async function PUT(request: NextRequest) {
     for (const [key, value] of Object.entries(parsed.data)) {
       if (value === undefined) continue;
 
-      const { data: existing } = await serviceSupabase
+      const { data: existing } = await supabase
         .from("system_config")
         .select("id")
         .eq("config_key", key)
@@ -126,12 +124,12 @@ export async function PUT(request: NextRequest) {
       };
 
       if (existing) {
-        await serviceSupabase
+        await supabase
           .from("system_config")
           .update(payload)
           .eq("id", existing.id);
       } else {
-        await serviceSupabase.from("system_config").insert(payload);
+        await supabase.from("system_config").insert(payload);
       }
     }
 

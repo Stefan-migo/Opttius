@@ -11,7 +11,7 @@ import {
 import { pendingBalancePaySchema } from "@/lib/api/validation/zod-schemas";
 import { appLogger as logger } from "@/lib/logger";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
-import { createClient, createServiceRoleClient } from "@/utils/supabase/server";
+import { createClient } from "@/utils/supabase/server";
 
 /**
  * POST /api/admin/pos/pending-balance/pay
@@ -21,7 +21,6 @@ export const dynamic = "force-dynamic";
 export async function POST(request: NextRequest) {
   try {
     const supabase = await createClient();
-    const supabaseServiceRole = createServiceRoleClient();
 
     // Check admin authorization
     const {
@@ -64,7 +63,7 @@ export async function POST(request: NextRequest) {
     } = body;
 
     // Get order with branch filter
-    let orderQuery = supabaseServiceRole
+    let orderQuery = supabase
       .from("orders")
       .select(
         `
@@ -108,7 +107,7 @@ export async function POST(request: NextRequest) {
     // Get current POS session for this branch (simplified to find ANY open session)
     let posSessionId = null;
     if (branchContext.branchId) {
-      const { data: openSession } = await supabaseServiceRole
+      const { data: openSession } = await supabase
         .from("pos_sessions")
         .select("id")
         .eq("branch_id", branchContext.branchId)
@@ -123,7 +122,7 @@ export async function POST(request: NextRequest) {
     } else if (branchContext.isSuperAdmin) {
       // For super admin in global view, try to find any open session
       // This is a fallback and might not be accurate if multiple branches have open sessions
-      const { data: activeSession } = await supabaseServiceRole
+      const { data: activeSession } = await supabase
         .from("pos_sessions")
         .select("id")
         .eq("status", "open")
@@ -137,7 +136,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Create payment record
-    const { data: payment, error: paymentError } = await supabaseServiceRole
+    const { data: payment, error: paymentError } = await supabase
       .from("order_payments")
       .insert({
         order_id: order_id,
@@ -176,7 +175,7 @@ export async function POST(request: NextRequest) {
       newPaymentStatus = "partial";
     }
 
-    const { error: updateOrderError } = await supabaseServiceRole
+    const { error: updateOrderError } = await supabase
       .from("orders")
       .update({
         payment_status: newPaymentStatus,
@@ -190,7 +189,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Update associated work orders if exists (work_orders have pos_order_id that references orders)
-    const { data: workOrders } = await supabaseServiceRole
+    const { data: workOrders } = await supabase
       .from("lab_work_orders")
       .select(
         "id, status, total_amount, deposit_amount, balance_amount, payment_status",
@@ -221,7 +220,7 @@ export async function POST(request: NextRequest) {
           updateData.status = "delivered";
         }
 
-        const { error: updateWorkOrderError } = await supabaseServiceRole
+        const { error: updateWorkOrderError } = await supabase
           .from("lab_work_orders")
           .update(updateData)
           .eq("id", workOrder.id);

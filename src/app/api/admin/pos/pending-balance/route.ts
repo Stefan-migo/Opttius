@@ -4,7 +4,7 @@ import { getBranchContext } from "@/lib/api/branch-middleware";
 import { createApiSuccessResponse } from "@/lib/api/response";
 import { appLogger as logger } from "@/lib/logger";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
-import { createClient, createServiceRoleClient } from "@/utils/supabase/server";
+import { createClient } from "@/utils/supabase/server";
 
 /**
  * GET /api/admin/pos/pending-balance
@@ -14,7 +14,6 @@ export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
   try {
     const supabase = await createClient();
-    const supabaseServiceRole = createServiceRoleClient();
 
     // Check admin authorization
     const {
@@ -53,7 +52,7 @@ export async function GET(request: NextRequest) {
     // Query for orders with pending balance (payment_status = 'partial' or 'on_hold_payment')
     // Exclude cancelled/refunded orders (they should not appear after devolution)
     // NOTE: We don't include customers/work_orders relationships here because they may not exist
-    let query = supabaseServiceRole
+    let query = supabase
       .from("orders")
       .select(
         `
@@ -116,10 +115,11 @@ export async function GET(request: NextRequest) {
     const customerMapByEmail = new Map();
     const { data: customersByEmail } =
       uniqueEmails.length > 0
-        ? await supabaseServiceRole
+        ? await supabase
             .from("customers")
             .select("id, email, first_name, last_name, rut")
             .in("email", uniqueEmails)
+            .returns<{ id: string; email: string; first_name: string | null; last_name: string | null; rut: string | null }[]>()
         : { data: null };
 
     (customersByEmail || []).forEach((customer: unknown) => {
@@ -215,19 +215,20 @@ export async function GET(request: NextRequest) {
 
     return createApiSuccessResponse(ordersWithBalance);
   } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Unknown error";
     logger.error("[PENDING-BALANCE-API] Catch block error:", {
-      message: error.message,
-      stack: error.stack,
-      name: error.name,
+      message,
+      stack: error instanceof Error ? error.stack : undefined,
+      name: error instanceof Error ? error.name : undefined,
     });
     logger.error("Error in pending balance API", {
-      error: error.message,
-      stack: error.stack,
+      error: message,
+      stack: error instanceof Error ? error.stack : undefined,
     });
     return NextResponse.json(
       {
         error: "Internal server error",
-        details: error.message,
+        details: message,
       },
       { status: 500 },
     );

@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { getBranchContext } from "@/lib/api/branch-middleware";
-import { rateLimitConfigs, withRateLimit } from "@/lib/rate-limiting";
 import { appLogger as logger } from "@/lib/logger";
+import { rateLimitConfigs, withRateLimit } from "@/lib/rate-limiting";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
-import { createClient , createServiceRoleClient } from "@/utils/supabase/server";
+import { createClient } from "@/utils/supabase/server";
 
 export const dynamic = "force-dynamic";
 export async function GET(
@@ -17,7 +17,6 @@ export async function GET(
       async () => {
         const { id } = await params;
         const supabase = await createClient();
-        const supabaseServiceRole = createServiceRoleClient();
 
         // Check admin authorization
         const {
@@ -45,7 +44,7 @@ export async function GET(
         const branchContext = await getBranchContext(request, user.id);
 
         // Verify order exists and belongs to branch (if applicable)
-        const orderQuery = supabaseServiceRole
+        const orderQuery = supabase
           .from("orders")
           .select("id, branch_id")
           .eq("id", id)
@@ -74,7 +73,7 @@ export async function GET(
 
         // Get payments for this order
         const { data: payments, error: paymentsError } =
-          await supabaseServiceRole
+          await supabase
             .from("order_payments")
             .select("*")
             .eq("order_id", id)

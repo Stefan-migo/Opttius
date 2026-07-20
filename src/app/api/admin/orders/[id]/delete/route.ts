@@ -8,7 +8,7 @@ import type {
   IsAdminParams,
   IsAdminResult,
 } from "@/types/supabase-rpc";
-import { createClient, createServiceRoleClient } from "@/utils/supabase/server";
+import { createClient } from "@/utils/supabase/server";
 
 /**
  * DELETE /api/admin/orders/[id]
@@ -21,7 +21,6 @@ export async function DELETE(
 ) {
   try {
     const supabase = await createClient();
-    const supabaseServiceRole = createServiceRoleClient();
 
     // Check admin authorization
     const {
@@ -64,7 +63,7 @@ export async function DELETE(
     const branchContext = await getBranchContext(request, user.id);
 
     // Get order to verify it's cancelled
-    const { data: order, error: orderError } = await supabaseServiceRole
+    const { data: order, error: orderError } = await supabase
       .from("orders")
       .select("*")
       .eq("id", params.id)
@@ -99,7 +98,7 @@ export async function DELETE(
     }
 
     // Delete order items first (foreign key constraint)
-    const { error: deleteItemsError } = await supabaseServiceRole
+    const { error: deleteItemsError } = await supabase
       .from("order_items")
       .delete()
       .eq("order_id", params.id);
@@ -116,7 +115,7 @@ export async function DELETE(
     }
 
     // Delete order payments
-    const { error: deletePaymentsError } = await supabaseServiceRole
+    const { error: deletePaymentsError } = await supabase
       .from("order_payments")
       .delete()
       .eq("order_id", params.id);
@@ -127,7 +126,7 @@ export async function DELETE(
     }
 
     // Delete order
-    const { error: deleteError } = await supabaseServiceRole
+    const { error: deleteError } = await supabase
       .from("orders")
       .delete()
       .eq("id", params.id);

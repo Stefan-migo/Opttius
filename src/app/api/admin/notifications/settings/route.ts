@@ -3,7 +3,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { appLogger as logger } from "@/lib/logger";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
 import { createClient } from "@/utils/supabase/server";
-import { createServiceRoleClient } from "@/utils/supabase/server";
 
 const ALL_NOTIFICATION_TYPES = [
   "quote_new",
@@ -58,24 +57,22 @@ export async function GET(request: NextRequest) {
     const organizationId = url.searchParams.get("organization_id") || undefined;
     const branchId = url.searchParams.get("branch_id") || undefined;
 
-    const supabaseServiceRole = createServiceRoleClient();
-
     const queries = [
-      supabaseServiceRole
+      supabase
         .from("notification_settings")
         .select("*")
         .is("organization_id", null)
         .is("branch_id", null),
       ...(organizationId
         ? [
-            supabaseServiceRole
+            supabase
               .from("notification_settings")
               .select("*")
               .eq("organization_id", organizationId)
               .is("branch_id", null),
             ...(branchId
               ? [
-                  supabaseServiceRole
+                  supabase
                     .from("notification_settings")
                     .select("*")
                     .eq("organization_id", organizationId)
@@ -203,7 +200,6 @@ export async function GET(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   try {
     const supabase = await createClient();
-    const supabaseServiceRole = createServiceRoleClient();
 
     // Check admin authorization
     const {
@@ -245,7 +241,7 @@ export async function PUT(request: NextRequest) {
     const orgId = organization_id || null;
     const brId = branch_id || null;
 
-    let query = supabaseServiceRole
+    let query = supabase
       .from("notification_settings")
       .select("*")
       .eq("notification_type", notification_type);
@@ -277,7 +273,7 @@ export async function PUT(request: NextRequest) {
 
     let result;
     if (existing) {
-      const { data, error } = await supabaseServiceRole
+      const { data, error } = await supabase
         .from("notification_settings")
         .update(payload)
         .eq("id", existing.id)
@@ -285,7 +281,7 @@ export async function PUT(request: NextRequest) {
         .single();
       result = { data, error };
     } else {
-      const { data, error } = await supabaseServiceRole
+      const { data, error } = await supabase
         .from("notification_settings")
         .insert({ ...payload, created_at: new Date().toISOString() })
         .select()
@@ -320,7 +316,6 @@ export async function PUT(request: NextRequest) {
 export async function PATCH(request: NextRequest) {
   try {
     const supabase = await createClient();
-    const supabaseServiceRole = createServiceRoleClient();
 
     // Check admin authorization
     const {
@@ -367,7 +362,7 @@ export async function PATCH(request: NextRequest) {
         continue;
       }
 
-      let query = supabaseServiceRole
+      let query = supabase
         .from("notification_settings")
         .select("*")
         .eq("notification_type", notification_type);
@@ -396,7 +391,7 @@ export async function PATCH(request: NextRequest) {
       let error;
 
       if (existing) {
-        const res = await supabaseServiceRole
+        const res = await supabase
           .from("notification_settings")
           .update(payload)
           .eq("id", existing.id)
@@ -405,7 +400,7 @@ export async function PATCH(request: NextRequest) {
         data = res.data;
         error = res.error;
       } else {
-        const res = await supabaseServiceRole
+        const res = await supabase
           .from("notification_settings")
           .insert({
             notification_type,

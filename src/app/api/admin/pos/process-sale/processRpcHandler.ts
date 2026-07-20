@@ -5,6 +5,7 @@
  * Uses the transactional process_pos_sale RPC for branch-mode sales.
  */
 import { NextResponse } from "next/server";
+
 import { APIError } from "@/lib/api/errors";
 import {
   createApiErrorResponse,
@@ -12,26 +13,27 @@ import {
 } from "@/lib/api/response";
 import { BillingFactory } from "@/lib/billing/BillingFactory";
 import { appLogger as logger } from "@/lib/logger";
-import { computeMinDepositFallback } from "./processSaleValidation";
+
 import {
-  computeWorkOrderStatus,
-  computeLensCost,
-  computeCashAmount,
   buildOrderPaymentsPayload,
   buildStockReductionItems,
+  computeCashAmount,
+  computeLensCost,
+  computeWorkOrderStatus,
 } from "./processPaymentUtils";
 import {
+  buildBillingOrder,
+  buildBillingResponse,
   buildFullOrderResponse,
   buildWorkOrderResponse,
-  buildBillingResponse,
-  buildBillingOrder,
 } from "./processResponseBuilder";
 import type { ProcessSaleContext } from "./processSaleTypes";
+import { computeMinDepositFallback } from "./processSaleValidation";
 
 export async function handleRpcPath(
   ctx: ProcessSaleContext,
 ): Promise<NextResponse> {
-  const { data: minDepositData } = await ctx.supabaseServiceRole.rpc(
+  const { data: minDepositData } = await ctx.supabase.rpc(
     "get_min_deposit",
     {
       p_order_total: ctx.total_amount,
@@ -223,7 +225,7 @@ export async function handleRpcPath(
   };
 
   const { data: rpcResult, error: rpcError } =
-    await ctx.supabaseServiceRole.rpc("process_pos_sale", {
+    await ctx.supabase.rpc("process_pos_sale", {
       p_payload: JSON.stringify(rpcPayload),
       p_user_id: ctx.user.id,
     });
@@ -255,7 +257,7 @@ export async function handleRpcPath(
     );
   }
 
-  const { data: fetchedOrder } = await ctx.supabaseServiceRole
+  const { data: fetchedOrder } = await ctx.supabase
     .from("orders")
     .select("*")
     .eq("id", orderId)
@@ -276,7 +278,7 @@ export async function handleRpcPath(
     ctx.institutionalAmount != null &&
     ctx.institutionalAmount > 0
   ) {
-    await ctx.supabaseServiceRole
+    await ctx.supabase
       .from("agreement_institutional_balances")
       .insert({
         agreement_id: ctx.agreement_id,
@@ -286,7 +288,7 @@ export async function handleRpcPath(
         status: "pending",
       });
     if (ctx.purchase_order_id) {
-      await ctx.supabaseServiceRole
+      await ctx.supabase
         .from("agreement_purchase_orders")
         .update({
           used_amount:
@@ -305,7 +307,7 @@ export async function handleRpcPath(
     const billingAdapter = BillingFactory.createAdapter(billingConfig);
     let ocNumber: string | null = null;
     if (ctx.purchase_order_id && ctx.purchaseOrder) {
-      const { data: po } = await ctx.supabaseServiceRole
+      const { data: po } = await ctx.supabase
         .from("agreement_purchase_orders")
         .select("oc_number")
         .eq("id", ctx.purchase_order_id)
@@ -388,7 +390,7 @@ export async function handleRpcPath(
   }
 
   if (ctx.quote_id && ctx.quote) {
-    await ctx.supabaseServiceRole
+    await ctx.supabase
       .from("quotes")
       .update({
         status: "accepted",
@@ -422,7 +424,7 @@ export async function handleRpcPath(
   };
 
   if (ctx.idempotency_key) {
-    await ctx.supabaseServiceRole.from("pos_sale_idempotency").upsert(
+    await ctx.supabase.from("pos_sale_idempotency").upsert(
       {
         idempotency_key: ctx.idempotency_key,
         order_id: orderId,

@@ -6,15 +6,14 @@
  */
 
 import { NextResponse } from "next/server";
-import { createServiceRoleClient } from "@/utils/supabase/server";
-import { createApiErrorResponse } from "@/lib/api/response";
-import { APIError } from "@/lib/api/errors";
+
+import type { SupabaseClient } from "@supabase/supabase-js";
+
+import { buildCustomerName,buildOrderItems } from "./processResponseBuilder";
 import { computeOrderNumber } from "./processSaleValidation";
-import { buildOrderItems, buildCustomerName } from "./processResponseBuilder";
-import type { ProcessSaleContext } from "./processSaleTypes";
 
 export interface BusinessLookupParams {
-  supabaseServiceRole: ReturnType<typeof createServiceRoleClient>;
+  supabase: SupabaseClient;
   validatedBody: Record<string, unknown>;
   effectiveBranchId: string | null;
   user: { id: string };
@@ -44,7 +43,7 @@ export interface BusinessLookupResult {
 export async function handleBusinessLookups(
   params: BusinessLookupParams,
 ): Promise<BusinessLookupResult | NextResponse> {
-  const { supabaseServiceRole, validatedBody, effectiveBranchId, user } = params;
+  const { supabase, validatedBody, effectiveBranchId, user } = params;
 
   const {
     email,
@@ -79,7 +78,7 @@ export async function handleBusinessLookups(
   // Customer lookup
   let customer: Record<string, unknown> | null = null;
   if (customer_id) {
-    const { data: customerData } = await supabaseServiceRole
+    const { data: customerData } = await supabase
       .from("customers")
       .select("id, first_name, last_name, email, phone, rut")
       .eq("id", customer_id as string)
@@ -106,7 +105,7 @@ export async function handleBusinessLookups(
   let institutionalAmount: number | null = null;
 
   if (agreement_id) {
-    const { data: agreementData } = await supabaseServiceRole
+    const { data: agreementData } = await supabase
       .from("agreements")
       .select("id, status, valid_from, valid_until, billing_rules")
       .eq("id", agreement_id as string)
@@ -136,7 +135,7 @@ export async function handleBusinessLookups(
       ) as NextResponse;
     }
 
-    const { data: poData } = await supabaseServiceRole
+    const { data: poData } = await supabase
       .from("agreement_purchase_orders")
       .select("id, status, max_amount, used_amount")
       .eq("id", purchase_order_id as string)
@@ -173,7 +172,7 @@ export async function handleBusinessLookups(
   // Quote validation
   let quote: Record<string, unknown> | null = null;
   if (quote_id) {
-    const { data: quoteData } = await supabaseServiceRole
+    const { data: quoteData } = await supabase
       .from("quotes")
       .select("id, status, converted_to_work_order_id, customer_id")
       .eq("id", quote_id as string)
@@ -191,7 +190,7 @@ export async function handleBusinessLookups(
   const lensInfoRecord = lensInfo as any;
   let lensFamily: Record<string, unknown> | null = null;
   if (lensInfoRecord.lens_family_id) {
-    const { data: family } = await supabaseServiceRole
+    const { data: family } = await supabase
       .from("lens_families")
       .select("id, name, lens_type, lens_material, is_active")
       .eq("id", lensInfoRecord.lens_family_id as string)
@@ -213,7 +212,7 @@ export async function handleBusinessLookups(
 
   // Prescription validation
   if (lensInfoRecord.prescription_id) {
-    const { data: prescription } = await supabaseServiceRole
+    const { data: prescription } = await supabase
       .from("prescriptions")
       .select("id, customer_id, od_sphere, od_cylinder, os_sphere, os_cylinder")
       .eq("id", lensInfoRecord.prescription_id as string)
@@ -241,7 +240,7 @@ export async function handleBusinessLookups(
           ? prescRecord.od_cylinder || 0
           : prescRecord.os_cylinder || 0;
 
-      const { data: priceMatrix } = await supabaseServiceRole.rpc(
+      const { data: priceMatrix } = await supabase.rpc(
         "calculate_lens_price",
         { p_lens_family_id: lensInfoRecord.lens_family_id, p_sphere: sphere, p_cylinder: cylinder || 0 },
       );
@@ -258,7 +257,7 @@ export async function handleBusinessLookups(
 
   // Order number
   const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, "");
-  const { data: lastOrder } = await supabaseServiceRole
+  const { data: lastOrder } = await supabase
     .from("orders")
     .select("order_number")
     .like("order_number", `ORD-${dateStr}-%`)
@@ -281,7 +280,7 @@ export async function handleBusinessLookups(
   // Organization ID resolution
   let orderOrganizationId: string | null = null;
   if (effectiveBranchId) {
-    const { data: branchRow } = await supabaseServiceRole
+    const { data: branchRow } = await supabase
       .from("branches")
       .select("organization_id")
       .eq("id", effectiveBranchId)
@@ -289,7 +288,7 @@ export async function handleBusinessLookups(
     orderOrganizationId = (branchRow as Record<string, unknown> | null)?.organization_id as string | null;
   }
   if (!orderOrganizationId) {
-    const { data: adminRow } = await supabaseServiceRole
+    const { data: adminRow } = await supabase
       .from("admin_users")
       .select("organization_id")
       .eq("id", user.id)
@@ -312,7 +311,7 @@ export async function handleBusinessLookups(
 
   let productsForStockCheck: Array<Record<string, unknown>> = [];
   if (productIdsForStock.length > 0) {
-    const { data: products } = await supabaseServiceRole
+    const { data: products } = await supabase
       .from("products")
       .select("id, name, product_type")
       .in("id", productIdsForStock);

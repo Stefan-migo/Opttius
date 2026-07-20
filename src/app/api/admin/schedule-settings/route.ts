@@ -5,7 +5,6 @@ import { createApiSuccessResponse } from "@/lib/api/response";
 import { appLogger as logger } from "@/lib/logger";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
 import { createClient } from "@/utils/supabase/server";
-import { createServiceRoleClient } from "@/utils/supabase/server";
 
 export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
@@ -147,7 +146,6 @@ export async function GET(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   try {
     const supabase = await createClient();
-    const supabaseServiceRole = createServiceRoleClient();
 
     // Check admin authorization
     const {
@@ -185,7 +183,7 @@ export async function PUT(request: NextRequest) {
 
     // Check if settings exist for this branch/org
     // Use service role to bypass RLS, so MUST filter by organization_id
-    let existingQuery = supabaseServiceRole
+    let existingQuery = supabase
       .from("schedule_settings")
       .select("id")
       .eq("organization_id", branchContext.organizationId);
@@ -233,7 +231,7 @@ export async function PUT(request: NextRequest) {
     // 1. Update or Insert the specific record
     if (existingSettings) {
       // Update existing
-      const { data, error } = await supabaseServiceRole
+      const { data, error } = await supabase
         .from("schedule_settings")
         .update({
           ...updateData,
@@ -260,7 +258,7 @@ export async function PUT(request: NextRequest) {
       result = data;
     } else {
       // Insert new
-      const { data, error } = await supabaseServiceRole
+      const { data, error } = await supabase
         .from("schedule_settings")
         .insert({
           ...updateData,
@@ -299,7 +297,7 @@ export async function PUT(request: NextRequest) {
 
       if (branches && branches.length > 0) {
         for (const branch of branches) {
-          await supabaseServiceRole.from("schedule_settings").upsert(
+          await supabase.from("schedule_settings").upsert(
             {
               organization_id: branchContext.organizationId,
               branch_id: branch.id,

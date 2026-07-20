@@ -7,8 +7,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { getBranchContext, getFieldOperationFromRequest } from "@/lib/api/branch-middleware";
-import { appLogger as logger } from "@/lib/logger";
-import { createClient, createServiceRoleClient } from "@/utils/supabase/server";
+import { createClient } from "@/utils/supabase/server";
 
 export interface AuthSessionResult {
   user: { id: string; email?: string };
@@ -89,8 +88,6 @@ export async function handleAuthSession(
     ) as NextResponse;
   }
 
-  const supabaseServiceRole = createServiceRoleClient();
-
   // SII invoice number
   const sii_invoice_type = validatedBody.sii_invoice_type as string | undefined;
   let siiInvoiceNumber: string | null = null;
@@ -106,7 +103,7 @@ export async function handleAuthSession(
   let posSessionId: string | null = null;
   if (!branchContext.isSuperAdmin && effectiveBranchId) {
     const todayStart = new Date().toISOString().slice(0, 10);
-    let sessionQuery = supabaseServiceRole
+    let sessionQuery = supabase
       .from("pos_sessions")
       .select("id")
       .eq("branch_id", effectiveBranchId)

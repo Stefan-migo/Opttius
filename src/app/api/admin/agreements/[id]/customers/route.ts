@@ -8,7 +8,6 @@ import { extractPaginationParams } from "@/lib/api/response";
 import { appLogger as logger } from "@/lib/logger";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
 import { createClient } from "@/utils/supabase/server";
-import { createServiceRoleClient } from "@/utils/supabase/server";
 
 export const dynamic = "force-dynamic";
 
@@ -54,8 +53,6 @@ export async function GET(
     const { page, limit } = extractPaginationParams(request.url);
     const offset = (page - 1) * limit;
 
-    const serviceSupabase = createServiceRoleClient();
-
     let items: Array<{
       customer_id: string;
       first_name: string | null;
@@ -72,7 +69,7 @@ export async function GET(
 
     try {
       // Get total count (table may not exist if migration not run)
-      const { count, error: countError } = await serviceSupabase
+      const { count, error: countError } = await supabase
         .from("agreement_customers")
         .select("*", { count: "exact", head: true })
         .eq("agreement_id", agreementId);
@@ -88,7 +85,7 @@ export async function GET(
       total = count ?? 0;
 
       // Get agreement_customers
-      const { data: acRows, error: acError } = await serviceSupabase
+      const { data: acRows, error: acError } = await supabase
         .from("agreement_customers")
         .select(
           "customer_id, order_count, last_order_at, total_copago, total_institutional",
@@ -119,7 +116,7 @@ export async function GET(
         }
       > = {};
       if (customerIds.length > 0) {
-        const { data: customers } = await serviceSupabase
+        const { data: customers } = await supabase
           .from("customers")
           .select("id, first_name, last_name, email, phone, rut")
           .in("id", customerIds);

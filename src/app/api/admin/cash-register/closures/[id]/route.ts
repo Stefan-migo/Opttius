@@ -6,7 +6,7 @@ import {
 } from "@/lib/api/branch-middleware";
 import { appLogger as logger } from "@/lib/logger";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
-import { createClient, createServiceRoleClient } from "@/utils/supabase/server";
+import { createClient } from "@/utils/supabase/server";
 
 /**
  * GET /api/admin/cash-register/closures/[id]
@@ -20,7 +20,6 @@ export async function GET(
   const { id } = await params;
   try {
     const supabase = await createClient();
-    const supabaseServiceRole = createServiceRoleClient();
 
     // Check admin authorization
     const {
@@ -42,7 +41,7 @@ export async function GET(
     }
 
     // Get closure
-    const { data: closure, error } = await supabaseServiceRole
+    const { data: closure, error } = await supabase
       .from("cash_register_closures")
       .select(
         `
@@ -51,7 +50,7 @@ export async function GET(
       `,
       )
       .eq("id", id)
-      .single();
+      .single<Record<string, unknown>>();
 
     if (error || !closure) {
       return NextResponse.json(
@@ -65,11 +64,11 @@ export async function GET(
     // Fetch user profile separately
     let closedByUser = null;
     if (closure.closed_by) {
-      const { data: profile } = await supabaseServiceRole
+      const { data: profile } = await supabase
         .from("profiles")
         .select("id, first_name, last_name")
         .eq("id", closure.closed_by)
-        .single();
+        .single<{ id: string; first_name: string | null; last_name: string | null }>();
 
       closedByUser = profile;
     }
@@ -94,7 +93,7 @@ export async function GET(
 
     // Get orders for this closure date
     const dateStr = closure.closure_date;
-    const ordersQuery = supabaseServiceRole
+    const ordersQuery = supabase
       .from("orders")
       .select(
         `
@@ -106,7 +105,8 @@ export async function GET(
       .eq("branch_id", closure.branch_id)
       .gte("created_at", `${dateStr}T00:00:00`)
       .lt("created_at", `${dateStr}T23:59:59`)
-      .order("created_at", { ascending: false });
+      .order("created_at", { ascending: false })
+      .returns<Record<string, unknown>[]>();
 
     const { data: orders } = await ordersQuery;
 
@@ -115,6 +115,7 @@ export async function GET(
       orders: orders || [],
     });
   } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Unknown error";
     logger.error("Error fetching cash register closure:", {
       error,
       closureId: id,
@@ -122,7 +123,7 @@ export async function GET(
     return NextResponse.json(
       {
         error: "Internal server error",
-        details: error.message,
+        details: message,
       },
       { status: 500 },
     );
@@ -140,7 +141,6 @@ export async function PUT(
   const { id } = await params;
   try {
     const supabase = await createClient();
-    const supabaseServiceRole = createServiceRoleClient();
 
     // Check admin authorization
     const {
@@ -164,11 +164,11 @@ export async function PUT(
     const body = await request.json();
 
     // Get existing closure
-    const { data: existingClosure } = await supabaseServiceRole
+    const { data: existingClosure } = await supabase
       .from("cash_register_closures")
       .select("branch_id, status")
       .eq("id", id)
-      .single();
+      .single<{ branch_id: string; status: string }>();
 
     if (!existingClosure) {
       return NextResponse.json(
@@ -262,7 +262,7 @@ export async function PUT(
 
     // Update closure
     const { data: updatedClosure, error: updateError } =
-      await supabaseServiceRole
+      await supabase
         .from("cash_register_closures")
         .update(updateData)
         .eq("id", id)
@@ -272,7 +272,7 @@ export async function PUT(
         branch:branches(id, name, code)
       `,
         )
-        .single();
+        .single<Record<string, unknown>>();
 
     if (updateError) {
       logger.error("Error updating closure:", {
@@ -291,11 +291,11 @@ export async function PUT(
     // Fetch user profile separately
     let closedByUser = null;
     if (updatedClosure.closed_by) {
-      const { data: profile } = await supabaseServiceRole
+      const { data: profile } = await supabase
         .from("profiles")
         .select("id, first_name, last_name")
         .eq("id", updatedClosure.closed_by)
-        .single();
+        .single<{ id: string; first_name: string | null; last_name: string | null }>();
 
       closedByUser = profile;
     }
@@ -310,6 +310,7 @@ export async function PUT(
       closure: closureWithUser,
     });
   } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Unknown error";
     logger.error("Error updating cash register closure:", {
       error,
       closureId: id,
@@ -317,7 +318,7 @@ export async function PUT(
     return NextResponse.json(
       {
         error: "Internal server error",
-        details: error.message,
+        details: message,
       },
       { status: 500 },
     );

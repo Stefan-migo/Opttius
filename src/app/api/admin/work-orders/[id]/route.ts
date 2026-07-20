@@ -6,7 +6,7 @@ import {
 } from "@/lib/api/branch-middleware";
 import { appLogger as logger } from "@/lib/logger";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
-import { createClient , createServiceRoleClient } from "@/utils/supabase/server";
+import { createClient } from "@/utils/supabase/server";
 
 
 export const dynamic = "force-dynamic";
@@ -37,10 +37,9 @@ export async function GET(
     }
 
     const { id } = await params;
-    const supabaseServiceRole = createServiceRoleClient();
 
-    // Use service role client to bypass RLS policies for admin access
-    const { data: workOrder, error } = await supabaseServiceRole
+    // Use auth client with RLS policies for admin access
+    const { data: workOrder, error } = await supabase
       .from("lab_work_orders")
       .select(
         `
@@ -83,7 +82,7 @@ export async function GET(
 
     // Get status history using service role client
     // Note: changed_by references auth.users, not profiles, so we can't join directly
-    const { data: statusHistory } = await supabaseServiceRole
+    const { data: statusHistory } = await supabase
       .from("lab_work_order_status_history")
       .select("*")
       .eq("work_order_id", id)
@@ -108,7 +107,6 @@ export async function PUT(
 ) {
   try {
     const supabase = await createClient();
-    const supabaseServiceRole = createServiceRoleClient();
 
     // Check admin authorization
     const {
@@ -136,7 +134,7 @@ export async function PUT(
     const branchContext = await getBranchContext(request, user.id);
 
     // First, check if work order exists and get its branch_id
-    const { data: existingWorkOrder } = await supabaseServiceRole
+    const { data: existingWorkOrder } = await supabase
       .from("lab_work_orders")
       .select("branch_id")
       .eq("id", id)
@@ -259,7 +257,7 @@ export async function PUT(
     if (body.lab_contact_person !== undefined)
       updateData.lab_contact_person = body.lab_contact_person;
 
-    const { data: updatedWorkOrder, error } = await supabaseServiceRole
+    const { data: updatedWorkOrder, error } = await supabase
       .from("lab_work_orders")
       .update(updateData)
       .eq("id", id)
@@ -299,7 +297,6 @@ export async function DELETE(
 ) {
   try {
     const supabase = await createClient();
-    const supabaseServiceRole = createServiceRoleClient();
 
     // Check admin authorization
     const {
@@ -335,7 +332,7 @@ export async function DELETE(
     }
 
     // First, check if the work order exists and get quote_id if it exists
-    const { data: workOrder, error: fetchError } = await supabaseServiceRole
+    const { data: workOrder, error: fetchError } = await supabase
       .from("lab_work_orders")
       .select("id, status, payment_status, quote_id, branch_id")
       .eq("id", id)
@@ -387,7 +384,7 @@ export async function DELETE(
     const quoteId = workOrder.quote_id;
 
     // Delete the work order (this will cascade delete status history due to ON DELETE CASCADE)
-    const { error: deleteError } = await supabaseServiceRole
+    const { error: deleteError } = await supabase
       .from("lab_work_orders")
       .delete()
       .eq("id", id);
@@ -402,7 +399,7 @@ export async function DELETE(
 
     // If the work order was converted from a quote, delete the quote as well
     if (quoteId) {
-      const { error: quoteDeleteError } = await supabaseServiceRole
+      const { error: quoteDeleteError } = await supabase
         .from("quotes")
         .delete()
         .eq("id", quoteId);

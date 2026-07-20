@@ -18,7 +18,6 @@ import { updateFieldOperationSchema } from "@/lib/api/validation/zod-schemas";
 import { appLogger as logger } from "@/lib/logger";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
 import { createClient } from "@/utils/supabase/server";
-import { createServiceRoleClient } from "@/utils/supabase/server";
 
 export const dynamic = "force-dynamic";
 
@@ -30,7 +29,6 @@ export async function GET(
 
   try {
     const supabase = await createClient();
-    const supabaseServiceRole = createServiceRoleClient();
 
     const {
       data: { user },
@@ -49,7 +47,7 @@ export async function GET(
 
     const { id } = await params;
 
-    const { data: operation, error: opError } = await supabaseServiceRole
+    const { data: operation, error: opError } = await supabase
       .from("field_operations")
       .select("*")
       .eq("id", id)
@@ -70,7 +68,7 @@ export async function GET(
       );
     }
 
-    const { data: mobileStock } = await supabaseServiceRole
+    const { data: mobileStock } = await supabase
       .from("operativo_mobile_stock")
       .select(
         `
@@ -110,7 +108,6 @@ export async function PUT(
 
   try {
     const supabase = await createClient();
-    const supabaseServiceRole = createServiceRoleClient();
 
     const {
       data: { user },
@@ -129,7 +126,7 @@ export async function PUT(
 
     const { id } = await params;
 
-    const { data: existing } = await supabaseServiceRole
+    const { data: existing } = await supabase
       .from("field_operations")
       .select("id, branch_id, organization_id")
       .eq("id", id)
@@ -175,7 +172,7 @@ export async function PUT(
 
     // Auto-return remaining mobile stock when status changes to completed
     if (validatedBody.status === "completed") {
-      const { data: mobileStockRows } = await supabaseServiceRole
+      const { data: mobileStockRows } = await supabase
         .from("operativo_mobile_stock")
         .select("id, product_id, quantity")
         .eq("field_operation_id", id);
@@ -185,7 +182,7 @@ export async function PUT(
         for (const row of mobileStockRows) {
           const qty = row.quantity ?? 0;
           if (qty <= 0) continue;
-          const { error: stockError } = await supabaseServiceRole.rpc(
+          const { error: stockError } = await supabase.rpc(
             "update_product_stock",
             {
               p_product_id: row.product_id,
@@ -205,7 +202,7 @@ export async function PUT(
               requestId,
             });
           } else {
-            await supabaseServiceRole
+            await supabase
               .from("operativo_mobile_stock")
               .delete()
               .eq("id", row.id);
@@ -230,7 +227,7 @@ export async function PUT(
           : new Date(validatedBody.scheduled_date).toISOString().slice(0, 10);
     }
 
-    const { data: updated, error: updateError } = await supabaseServiceRole
+    const { data: updated, error: updateError } = await supabase
       .from("field_operations")
       .update(updateData)
       .eq("id", id)

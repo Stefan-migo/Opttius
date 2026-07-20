@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { appLogger as logger } from "@/lib/logger";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
-import { createServiceRoleClient } from "@/utils/supabase/server";
 import { createClient } from "@/utils/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -36,9 +35,7 @@ export async function GET(
     const fromDate = searchParams.get("from");
     const toDate = searchParams.get("to");
 
-    const serviceSupabase = createServiceRoleClient();
-
-    const query = serviceSupabase
+    const query = supabase
       .from("agreement_institutional_balances")
       .select(
         `

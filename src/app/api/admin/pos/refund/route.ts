@@ -10,7 +10,6 @@ import {
 import { appLogger as logger } from "@/lib/logger";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
 import { createClient } from "@/utils/supabase/server";
-import { createServiceRoleClient } from "@/utils/supabase/server";
 
 const refundSchema = z.object({
   order_id: z.string().uuid(),
@@ -35,7 +34,6 @@ export async function POST(request: NextRequest) {
     logger.info("POS Refund API called");
 
     const supabase = await createClient();
-    const supabaseServiceRole = createServiceRoleClient();
 
     const {
       data: { user },
@@ -80,7 +78,7 @@ export async function POST(request: NextRequest) {
       parseResult.data;
 
     // Fetch order and validate
-    const { data: order, error: orderError } = await supabaseServiceRole
+    const { data: order, error: orderError } = await supabase
       .from("orders")
       .select("id, branch_id, organization_id, status, total_amount")
       .eq("id", order_id)
@@ -116,7 +114,7 @@ export async function POST(request: NextRequest) {
 
     // Fetch order items to validate and get product_id
     const orderItemIds = items.map((i) => i.order_item_id);
-    const { data: orderItems, error: itemsError } = await supabaseServiceRole
+    const { data: orderItems, error: itemsError } = await supabase
       .from("order_items")
       .select("id, product_id, quantity, unit_price, total_price, product_name")
       .eq("order_id", order_id)
@@ -159,7 +157,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Get total_paid from order_payments (cap refund at what client actually paid)
-    const { data: payments } = await supabaseServiceRole
+    const { data: payments } = await supabase
       .from("order_payments")
       .select("amount")
       .eq("order_id", order_id);
@@ -170,7 +168,7 @@ export async function POST(request: NextRequest) {
     const orderTotal = Number(order.total_amount) || 0;
 
     // Get active pos_session for branch (optional - for pos_transactions)
-    const { data: session } = await supabaseServiceRole
+    const { data: session } = await supabase
       .from("pos_sessions")
       .select("id")
       .eq("branch_id", branchId)
@@ -186,7 +184,7 @@ export async function POST(request: NextRequest) {
       const oi = itemMap.get(refItem.order_item_id);
       if (!oi?.product_id) continue;
 
-      const { error: stockError } = await supabaseServiceRole.rpc(
+      const { error: stockError } = await supabase.rpc(
         "update_product_stock",
         {
           p_product_id: oi.product_id,
@@ -238,7 +236,7 @@ export async function POST(request: NextRequest) {
     let creditNoteId: string | null = null;
     if (posSessionId && refundAmount > 0) {
       const { data: cnNumberRaw, error: cnNumError } =
-        await supabaseServiceRole.rpc("generate_credit_note_number");
+        await supabase.rpc("generate_credit_note_number");
       const cnNumber =
         typeof cnNumberRaw === "string"
           ? cnNumberRaw
@@ -246,13 +244,13 @@ export async function POST(request: NextRequest) {
             ? cnNumberRaw[0]
             : cnNumberRaw;
       if (!cnNumError && cnNumber && typeof cnNumber === "string") {
-        const { data: branchRow } = await supabaseServiceRole
+        const { data: branchRow } = await supabase
           .from("branches")
           .select("organization_id")
           .eq("id", branchId)
           .single();
         const { data: newCreditNote, error: cnError } =
-          await supabaseServiceRole
+          await supabase
             .from("credit_notes")
             .insert({
               credit_note_number: cnNumber,
@@ -269,7 +267,7 @@ export async function POST(request: NextRequest) {
             .single();
         if (!cnError && newCreditNote) {
           creditNoteId = newCreditNote.id;
-          await supabaseServiceRole.from("credit_note_movements").insert({
+          await supabase.from("credit_note_movements").insert({
             credit_note_id: creditNoteId,
             pos_session_id: posSessionId,
             amount: -refundAmount,
@@ -280,7 +278,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Update order status to cancelled/refunded (removes from pending balance)
-    await supabaseServiceRole
+    await supabase
       .from("orders")
       .update({
         status: "cancelled",
@@ -291,7 +289,7 @@ export async function POST(request: NextRequest) {
       .eq("id", order_id);
 
     // Create pos_transaction for refund (legacy/traceability)
-    const { error: txError } = await supabaseServiceRole
+    const { error: txError } = await supabase
       .from("pos_transactions")
       .insert({
         order_id,

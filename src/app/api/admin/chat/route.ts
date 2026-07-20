@@ -152,11 +152,8 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    const { createServiceRoleClient } = await import("@/utils/supabase/server");
-    const serviceSupabase = createServiceRoleClient();
-
     if (currentSessionId) {
-      await serviceSupabase.from("chat_messages").insert({
+      await supabase.from("chat_messages").insert({
         session_id: currentSessionId,
         role: "user",
         content: message,
@@ -179,7 +176,7 @@ export async function POST(request: NextRequest) {
 
           try {
             // Get organization details for specialized personality
-            const { data: orgData } = await serviceSupabase
+            const { data: orgData } = await supabase
               .from("organizations")
               .select("name")
               .eq("id", adminUser?.organization_id)
@@ -189,7 +186,7 @@ export async function POST(request: NextRequest) {
             let branchName = "";
             let branchContext = "";
             if (currentBranchId && currentBranchId !== "global") {
-              const { data: branchData } = await serviceSupabase
+              const { data: branchData } = await supabase
                 .from("branches")
                 .select("name")
                 .eq("id", currentBranchId)
@@ -245,7 +242,7 @@ export async function POST(request: NextRequest) {
               currentBranchId &&
               currentBranchId !== "global"
             ) {
-              const { data: branchRow } = await serviceSupabase
+              const { data: branchRow } = await supabase
                 .from("branches")
                 .select("organization_id")
                 .eq("id", currentBranchId)
@@ -311,7 +308,7 @@ export async function POST(request: NextRequest) {
                   sessionId: currentSessionId,
                 });
                 if (currentSessionId && providerContent) {
-                  await serviceSupabase.from("chat_messages").insert({
+                  await supabase.from("chat_messages").insert({
                     session_id: currentSessionId,
                     role: "assistant",
                     content: providerContent,

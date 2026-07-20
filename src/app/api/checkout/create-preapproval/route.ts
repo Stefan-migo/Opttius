@@ -7,16 +7,15 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
 import { ValidationError } from "@/lib/api/errors";
-import { rateLimitConfigs, withRateLimit } from "@/lib/rate-limiting";
 import {
   parseAndValidateBody,
   validationErrorResponse,
 } from "@/lib/api/validation/zod-helpers";
 import { appLogger as logger } from "@/lib/logger";
 import { PaymentGatewayFactory } from "@/lib/payments";
+import { rateLimitConfigs, withRateLimit } from "@/lib/rate-limiting";
 import {
   createClientFromRequest,
-  createServiceRoleClient,
 } from "@/utils/supabase/server";
 
 const createPreapprovalSchema = z.object({
@@ -82,8 +81,7 @@ export async function POST(request: NextRequest) {
 
       const { tier, payerEmail, cardTokenId } = body;
 
-      const serviceSupabase = createServiceRoleClient();
-      const { data: tierRow, error: tierError } = await serviceSupabase
+      const { data: tierRow, error: tierError } = await supabase
         .from("subscription_tiers")
         .select("name, price_monthly, gateway_plan_id")
         .eq("name", tier)
@@ -134,7 +132,7 @@ export async function POST(request: NextRequest) {
       const periodEnd = new Date(now);
       periodEnd.setMonth(periodEnd.getMonth() + 1);
 
-      const { data: existing } = await serviceSupabase
+      const { data: existing } = await supabase
         .from("subscriptions")
         .select("id")
         .eq("organization_id", orgId)
@@ -143,7 +141,7 @@ export async function POST(request: NextRequest) {
         .maybeSingle();
 
       if (existing) {
-        await serviceSupabase
+        await supabase
           .from("subscriptions")
           .update({
             status: "active",
@@ -157,7 +155,7 @@ export async function POST(request: NextRequest) {
           })
           .eq("id", existing.id);
       } else {
-        await serviceSupabase.from("subscriptions").insert({
+        await supabase.from("subscriptions").insert({
           organization_id: orgId,
           gateway: "mercadopago",
           status: "active",
@@ -167,7 +165,7 @@ export async function POST(request: NextRequest) {
         });
       }
 
-      await serviceSupabase
+      await supabase
         .from("organizations")
         .update({
           subscription_tier: tier,

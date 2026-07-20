@@ -37,7 +37,6 @@ export interface LensInfo {
 
 export interface ProcessSaleContext {
   supabase: SupabaseClient;
-  supabaseServiceRole: SupabaseClient;
   user: User;
   effectiveBranchId: string | null;
   fieldOperationId: string | null;

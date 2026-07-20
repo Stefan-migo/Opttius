@@ -6,13 +6,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
 import { ValidationError } from "@/lib/api/errors";
-import { rateLimitConfigs, withRateLimit } from "@/lib/rate-limiting";
 import {
   parseAndValidateBody,
   validationErrorResponse,
 } from "@/lib/api/validation/zod-helpers";
 import { appLogger as logger } from "@/lib/logger";
 import { PaymentGatewayFactory, PaymentService } from "@/lib/payments";
+import { rateLimitConfigs, withRateLimit } from "@/lib/rate-limiting";
 import { createClientFromRequest } from "@/utils/supabase/server";
 
 const createCheckoutIntentSchema = z.object({

@@ -3,7 +3,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { appLogger as logger } from "@/lib/logger";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
 import { createClient } from "@/utils/supabase/server";
-import { createServiceRoleClient } from "@/utils/supabase/server";
 
 export const dynamic = "force-dynamic";
 export async function POST(request: NextRequest) {
@@ -99,35 +98,12 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // Try with regular client first, fallback to service role if RLS fails
+    // Try with regular client
     let { data: session, error } = await supabase
       .from("chat_sessions")
       .insert(insertData)
       .select()
       .single();
-
-    // If RLS fails, try with service role client
-    if (
-      error &&
-      (error.code === "42501" ||
-        (error.message &&
-          typeof error.message === "string" &&
-          (error.message.includes("permission") ||
-            error.message.includes("policy"))))
-    ) {
-      logger.warn("RLS error detected, trying with service role client", {
-        error: error.code,
-      });
-      const serviceSupabase = createServiceRoleClient();
-      const serviceResult = await serviceSupabase
-        .from("chat_sessions")
-        .insert(insertData)
-        .select()
-        .single();
-
-      session = serviceResult.data;
-      error = serviceResult.error;
-    }
 
     if (error) {
       logger.error("Database error creating session", { error, insertData });

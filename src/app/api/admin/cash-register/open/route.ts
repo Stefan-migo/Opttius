@@ -6,12 +6,11 @@ import {
   getFieldOperationFromRequest,
   validateBranchAccess,
 } from "@/lib/api/branch-middleware";
-import { rateLimitConfigs, withRateLimit } from "@/lib/rate-limiting";
 import { createApiSuccessResponse } from "@/lib/api/response";
 import { appLogger as logger } from "@/lib/logger";
+import { rateLimitConfigs, withRateLimit } from "@/lib/rate-limiting";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
 import { createClient } from "@/utils/supabase/server";
-import { createServiceRoleClient } from "@/utils/supabase/server";
 
 const openCashRegisterSchema = z.object({
   opening_cash_amount: z.number().min(0).default(0),
@@ -25,7 +24,6 @@ export async function POST(request: NextRequest) {
       request,
       async () => {
         const supabase = await createClient();
-        const supabaseServiceRole = createServiceRoleClient();
 
         // Check admin authorization
         const {
@@ -67,7 +65,7 @@ export async function POST(request: NextRequest) {
         // Operativo mode: resolve branch from field_operations
         if (fieldOperationId) {
           const { data: fieldOp, error: fieldOpError } =
-            await supabaseServiceRole
+            await supabase
               .from("field_operations")
               .select("id, branch_id")
               .eq("id", fieldOperationId)
@@ -109,7 +107,7 @@ export async function POST(request: NextRequest) {
         const validatedData = openCashRegisterSchema.parse(body);
 
         // Build session query: branch + optional field_operation_id
-        let sessionQuery = supabaseServiceRole
+        let sessionQuery = supabase
           .from("pos_sessions")
           .select("id, status, opening_time")
           .eq("branch_id", effectiveBranchId!)
@@ -150,7 +148,7 @@ export async function POST(request: NextRequest) {
         }
 
         const todayStr = new Date().toISOString().split("T")[0];
-        let closureQuery = supabaseServiceRole
+        let closureQuery = supabase
           .from("cash_register_closures")
           .select("id, status")
           .eq("branch_id", effectiveBranchId!)
@@ -199,7 +197,7 @@ export async function POST(request: NextRequest) {
         }
 
         const { data: newSession, error: sessionError } =
-          await supabaseServiceRole
+          await supabase
             .from("pos_sessions")
             .insert(insertData)
             .select()
@@ -251,7 +249,6 @@ export async function GET(request: NextRequest) {
       request,
       async () => {
         const supabase = await createClient();
-        const supabaseServiceRole = createServiceRoleClient();
 
         // Check admin authorization
         const {
@@ -284,7 +281,7 @@ export async function GET(request: NextRequest) {
         // Operativo mode: resolve branch from field_operations
         if (fieldOperationId) {
           const { data: fieldOp, error: fieldOpError } =
-            await supabaseServiceRole
+            await supabase
               .from("field_operations")
               .select("id, branch_id")
               .eq("id", fieldOperationId)
@@ -319,7 +316,7 @@ export async function GET(request: NextRequest) {
         }
 
         // Check if there's an open session (branch or operativo)
-        let sessionQuery = supabaseServiceRole
+        let sessionQuery = supabase
           .from("pos_sessions")
           .select(
             "id, status, opening_time, opening_cash_amount, branch_id, field_operation_id",

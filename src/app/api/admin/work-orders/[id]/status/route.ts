@@ -7,7 +7,7 @@ import { appLogger as logger } from "@/lib/logger";
 import { NotificationService } from "@/lib/notifications/notification-service";
 import { sendWorkOrderReadyWhatsApp } from "@/lib/whatsapp/notifications-b2b";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
-import { createClient , createServiceRoleClient } from "@/utils/supabase/server";
+import { createClient } from "@/utils/supabase/server";
 
 export const dynamic = "force-dynamic";
 export async function PUT(
@@ -16,7 +16,6 @@ export async function PUT(
 ) {
   try {
     const supabase = await createClient();
-    const supabaseServiceRole = createServiceRoleClient();
 
     // Check admin authorization
     const {
@@ -49,7 +48,7 @@ export async function PUT(
     }
 
     // Get old status and branch_id before update
-    const { data: workOrderBeforeUpdate } = await supabaseServiceRole
+    const { data: workOrderBeforeUpdate } = await supabase
       .from("lab_work_orders")
       .select("status, work_order_number, branch_id")
       .eq("id", id)
@@ -80,7 +79,7 @@ export async function PUT(
     const workOrderNumber = workOrderBeforeUpdate.work_order_number || "";
 
     // Update work order status using the function
-    const { error: statusError } = await supabaseServiceRole.rpc(
+    const { error: statusError } = await supabase.rpc(
       "update_work_order_status",
       {
         p_work_order_id: id,
@@ -130,7 +129,7 @@ export async function PUT(
       if (additionalData.lab_contact_person)
         updateData.lab_contact_person = additionalData.lab_contact_person;
 
-      const { error: updateError } = await supabaseServiceRole
+      const { error: updateError } = await supabase
         .from("lab_work_orders")
         .update(updateData)
         .eq("id", id);
@@ -143,7 +142,7 @@ export async function PUT(
 
     // Fetch updated work order
     const { data: updatedWorkOrder, error: fetchError } =
-      await supabaseServiceRole
+      await supabase
         .from("lab_work_orders")
         .select(
           `
@@ -194,7 +193,7 @@ export async function PUT(
         let orgId = (updatedWorkOrder as { organization_id?: string })
           .organization_id;
         if (!orgId && updatedWorkOrder.branch_id) {
-          const { data: branch } = await supabaseServiceRole
+          const { data: branch } = await supabase
             .from("branches")
             .select("organization_id")
             .eq("id", updatedWorkOrder.branch_id)
@@ -232,7 +231,7 @@ export async function PUT(
               customer?.email || (updatedWorkOrder as unknown).email;
 
             if (hasEmail) {
-              const { data: adminUser } = await supabaseServiceRole
+              const { data: adminUser } = await supabase
                 .from("admin_users")
                 .select("organization_id")
                 .eq("id", user.id)
@@ -257,7 +256,7 @@ export async function PUT(
               customer?.phone &&
               customer?.preferred_contact_method === "whatsapp"
             ) {
-              const { data: branch } = await supabaseServiceRole
+              const { data: branch } = await supabase
                 .from("branches")
                 .select("name")
                 .eq("id", updatedWorkOrder.branch_id)

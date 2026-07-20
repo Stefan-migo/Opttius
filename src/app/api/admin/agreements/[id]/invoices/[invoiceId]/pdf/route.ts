@@ -7,7 +7,7 @@ import {
 } from "@/lib/billing/pdf-generator";
 import { appLogger as logger } from "@/lib/logger";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
-import { createClient, createServiceRoleClient } from "@/utils/supabase/server";
+import { createClient } from "@/utils/supabase/server";
 
 export const dynamic = "force-dynamic";
 
@@ -36,8 +36,7 @@ export async function GET(
       );
     }
 
-    const serviceSupabase = createServiceRoleClient();
-    const { data: invoice, error: invError } = await serviceSupabase
+    const { data: invoice, error: invError } = await supabase
       .from("agreement_institutional_invoices")
       .select("*")
       .eq("id", invoiceId)
@@ -51,7 +50,7 @@ export async function GET(
       );
     }
 
-    const { data: invoiceBalances } = await serviceSupabase
+    const { data: invoiceBalances } = await supabase
       .from("agreement_institutional_invoice_balances")
       .select(
         `
@@ -87,7 +86,7 @@ export async function GET(
       },
     );
 
-    const { data: org } = await serviceSupabase
+    const { data: org } = await supabase
       .from("organizations")
       .select("name")
       .eq("id", invoice.organization_id)

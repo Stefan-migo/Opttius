@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { appLogger as logger } from "@/lib/logger";
-import { createClient, createServiceRoleClient } from "@/utils/supabase/server";
+import { createClient } from "@/utils/supabase/server";
 
 export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
@@ -40,8 +40,8 @@ export async function GET(request: NextRequest) {
       adminUser.role === "dev" ||
       adminUser.role === "super_admin";
 
-    // Use service role to bypass RLS - auth already verified, ensures inactive templates are visible
-    const dbClient = createServiceRoleClient();
+    // Auth already verified — RLS scopes access
+    const dbClient = supabase;
 
     // Build the query for system email templates
     let query = dbClient.from("system_email_templates").select(`

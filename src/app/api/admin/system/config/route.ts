@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { appLogger as logger } from "@/lib/logger";
 import {
-  getSystemConfigs,
   createSystemConfig,
+  getSystemConfigs,
   updateSystemConfigs,
 } from "@/lib/api/services/systemConfigService";
+import { appLogger as logger } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 
