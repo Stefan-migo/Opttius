@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 
 import { computeInventoryMetrics } from "@/lib/analytics/analytics-service";
-import { type MvKpiRow, computeDashboardKpis } from "@/lib/analytics/compute-dashboard-kpis";
+import { computeDashboardKpis,type MvKpiRow } from "@/lib/analytics/compute-dashboard-kpis";
 import { addBranchFilter, getBranchContext } from "@/lib/api/branch-middleware";
 import { AuthenticationError, AuthorizationError } from "@/lib/api/errors";
 import {
@@ -35,11 +35,8 @@ export async function GET(request: NextRequest) {
       return createApiErrorResponse(new AuthenticationError("Unauthorized"));
     }
 
-    // Check admin authorization using service role
-    const { createServiceRoleClient } = await import("@/utils/supabase/server");
-    const serviceSupabase = createServiceRoleClient();
-
-    const { data: isAdmin } = await serviceSupabase.rpc("is_admin", {
+    // Check admin authorization using auth client
+    const { data: isAdmin } = await supabase.rpc("is_admin", {
       user_id: user.id,
     });
 

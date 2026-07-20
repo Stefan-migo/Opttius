@@ -10,13 +10,11 @@ import type {
   TimeSlot,
 } from "@/types/supabase-rpc";
 import { createClient } from "@/utils/supabase/server";
-import { createServiceRoleClient } from "@/utils/supabase/server";
 
 export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
   try {
     const supabase = await createClient();
-    const supabaseServiceRole = createServiceRoleClient();
 
     // Check admin authorization
     const {
@@ -60,7 +58,7 @@ export async function GET(request: NextRequest) {
       branchId: branchContext.branchId,
     });
 
-    const { data: slots, error } = (await supabaseServiceRole.rpc(
+    const { data: slots, error } = (await supabase.rpc(
       "get_available_time_slots",
       {
         p_date: date,

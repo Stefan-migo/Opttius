@@ -1,18 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { appLogger as logger } from "@/lib/logger";
-import { createServiceRoleClient } from "@/utils/supabase/server";
-
-const supabase = createServiceRoleClient();
+import { createClient } from "@/utils/supabase/server";
 
 // GET - Fetch options for a specific field key
-export const dynamic = "force-dynamic";
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ fieldKey: string }> },
 ) {
   const { fieldKey } = await params;
   try {
+    const supabase = await createClient();
     const { searchParams } = new URL(request.url);
     const includeInactive = searchParams.get("include_inactive") === "true";
 

@@ -7,7 +7,6 @@ import { appLogger as logger } from "@/lib/logger";
 import { formatRUT } from "@/lib/utils/rut";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
 import { createClient } from "@/utils/supabase/server";
-import { createServiceRoleClient } from "@/utils/supabase/server";
 
 export const dynamic = "force-dynamic";
 
@@ -57,7 +56,6 @@ export async function GET(request: NextRequest) {
     logger.info("Prescriptions export API GET called", { requestId });
 
     const supabase = await createClient();
-    const supabaseServiceRole = createServiceRoleClient();
 
     const {
       data: { user },
@@ -120,7 +118,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    let query = supabaseServiceRole
+    let query = supabase
       .from("prescriptions")
       .select("*")
       .order("prescription_date", { ascending: false })
@@ -189,7 +187,7 @@ export async function GET(request: NextRequest) {
     ];
     const { data: customers } =
       customerIds.length > 0
-        ? await supabaseServiceRole
+        ? await supabase
             .from("customers")
             .select("id, first_name, last_name, rut")
             .in("id", customerIds)
@@ -202,7 +200,7 @@ export async function GET(request: NextRequest) {
     ];
     const { data: branches } =
       branchIds.length > 0
-        ? await supabaseServiceRole
+        ? await supabase
             .from("branches")
             .select("id, name")
             .in("id", branchIds)
