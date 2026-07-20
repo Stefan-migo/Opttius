@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { AuthorizationError } from "@/lib/api/errors";
 import { requireRoot } from "@/lib/api/root-middleware";
 import { appLogger as logger } from "@/lib/logger";
-import { createServiceRoleClient } from "@/utils/supabase/service-role";
+import { createRootAdminClient } from "@/utils/supabase/root-admin";
 
 /**
  * POST /api/admin/saas-management/organizations/bulk-actions
@@ -13,7 +13,7 @@ export const dynamic = "force-dynamic";
 export async function POST(request: NextRequest) {
   try {
     await requireRoot(request);
-    const supabaseServiceRole = createServiceRoleClient();
+    const supabaseServiceRole = createRootAdminClient();
 
     const body = await request.json();
     const { action, organization_ids, value } = body;

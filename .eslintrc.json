@@ -53,6 +53,24 @@
     // React best practices
     "react/jsx-no-useless-fragment": "warn",
     "react/self-closing-comp": "warn",
+    // SDD: saas-management-sr-assessment — block old service-role imports in saas-management routes
+    "no-restricted-imports": [
+      "error",
+      {
+        "paths": [
+          {
+            "name": "@/utils/supabase/service-role",
+            "message": "Use @/utils/supabase/root-admin in saas-management routes"
+          }
+        ],
+        "patterns": [
+          {
+            "group": ["@/utils/supabase/service-role"],
+            "message": "Use @/utils/supabase/root-admin in saas-management routes"
+          }
+        ]
+      }
+    ],
     "react/jsx-sort-props": [
       "warn",
       {

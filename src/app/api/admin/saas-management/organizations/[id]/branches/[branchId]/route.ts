@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { AuthorizationError } from "@/lib/api/errors";
 import { requireRoot } from "@/lib/api/root-middleware";
 import { appLogger as logger } from "@/lib/logger";
-import { createServiceRoleClient } from "@/utils/supabase/service-role";
+import { createRootAdminClient } from "@/utils/supabase/root-admin";
 
 /**
  * PATCH /api/admin/saas-management/organizations/[id]/branches/[branchId]
@@ -16,7 +16,7 @@ export async function PATCH(
 ) {
   try {
     await requireRoot(request);
-    const supabaseServiceRole = createServiceRoleClient();
+    const supabaseServiceRole = createRootAdminClient();
 
     const { id: organizationId, branchId } = params;
     const body = await request.json();
@@ -102,7 +102,7 @@ export async function DELETE(
 ) {
   try {
     await requireRoot(request);
-    const supabaseServiceRole = createServiceRoleClient();
+    const supabaseServiceRole = createRootAdminClient();
 
     const { id: organizationId, branchId } = params;
 

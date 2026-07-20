@@ -4,7 +4,7 @@ import { AuthorizationError } from "@/lib/api/errors";
 import { requireRoot } from "@/lib/api/root-middleware";
 import { appLogger as logger } from "@/lib/logger";
 import { SaasBackupService } from "@/lib/saas-backup-service";
-import { createClient } from "@/utils/supabase/server";
+import { createRootAdminClient } from "@/utils/supabase/root-admin";
 
 /**
  * GET /api/admin/saas-management/backups
@@ -56,7 +56,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const { userId } = await requireRoot(request);
-    const supabase = await createClient();
+    const supabase = createRootAdminClient();
 
     logger.info("Solicitud de backup completo SaaS iniciada por", {
       userId,

@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { AuthorizationError } from "@/lib/api/errors";
 import { requireRoot } from "@/lib/api/root-middleware";
 import { appLogger as logger } from "@/lib/logger";
-import { createServiceRoleClient } from "@/utils/supabase/service-role";
+import { createRootAdminClient } from "@/utils/supabase/root-admin";
 
 /**
  * GET /api/admin/saas-management/organizations/[id]/subscriptions
@@ -16,7 +16,7 @@ export async function GET(
 ) {
   try {
     await requireRoot(request);
-    const supabaseServiceRole = createServiceRoleClient();
+    const supabaseServiceRole = createRootAdminClient();
 
     const { id: organizationId } = params;
 
@@ -72,7 +72,7 @@ export async function POST(
 ) {
   try {
     await requireRoot(request);
-    const supabaseServiceRole = createServiceRoleClient();
+    const supabaseServiceRole = createRootAdminClient();
 
     const { id: organizationId } = params;
     const body = await request.json();
