@@ -4,6 +4,8 @@
  * - Reply-To: metadata.support_email || system_config.contact_email
  */
 
+import type { SupabaseClient } from "@supabase/supabase-js";
+
 import { appLogger as logger } from "@/lib/logger";
 import { createServiceRoleClient } from "@/utils/supabase/server";
 
@@ -20,12 +22,13 @@ const DEFAULT_REPLY_TO = "contacto@opttius.cl";
 
 export async function getOrganizationInfoWithFallbacks(
   organizationId?: string,
+  supabase?: SupabaseClient,
 ): Promise<OrgInfoForEmail | null> {
   if (!organizationId) return null;
 
   try {
-    const supabase = createServiceRoleClient();
-    const { data: org } = await supabase
+    const client = supabase ?? createServiceRoleClient();
+    const { data: org } = await client
       .from("organizations")
       .select("name, metadata")
       .eq("id", organizationId)
@@ -40,7 +43,7 @@ export async function getOrganizationInfoWithFallbacks(
     let contactEmailFromConfig = "";
     if (!metaSupportEmail?.trim()) {
       // Fetch contact_email from system_config: org-level first, then global
-      const { data: orgConfig } = await supabase
+      const { data: orgConfig } = await client
         .from("system_config")
         .select("config_value")
         .eq("config_key", "contact_email")
@@ -49,7 +52,7 @@ export async function getOrganizationInfoWithFallbacks(
 
       const { data: globalConfig } = orgConfig
         ? { data: null }
-        : await supabase
+        : await client
             .from("system_config")
             .select("config_value")
             .eq("config_key", "contact_email")

@@ -2,6 +2,8 @@
  * Service to send quote by email to a client.
  * Used by the quotes send API route and the AI agent sendQuoteByEmail tool.
  */
+import type { SupabaseClient } from "@supabase/supabase-js";
+
 import businessConfig from "@/config/business";
 import { sendEmail } from "@/lib/email/client";
 import { createServiceRoleClient } from "@/utils/supabase/server";
@@ -20,14 +22,15 @@ export async function sendQuoteEmailToClient(
   quoteId: string,
   email: string,
   context: SendQuoteEmailContext,
+  supabase?: SupabaseClient,
 ): Promise<SendQuoteEmailResult> {
   if (!email || !email.includes("@")) {
     return { success: false, error: "Email válido requerido" };
   }
 
-  const supabase = createServiceRoleClient();
+  const client = supabase ?? createServiceRoleClient();
 
-  const { data: quoteData, error: quoteError } = await supabase
+  const { data: quoteData, error: quoteError } = await client
     .from("quotes")
     .select("*")
     .eq("id", quoteId)
@@ -46,7 +49,7 @@ export async function sendQuoteEmailToClient(
     preferred_contact_method?: string;
   } | null = null;
   if (quoteData.customer_id) {
-    const { data } = await supabase
+    const { data } = await client
       .from("customers")
       .select(
         "id, first_name, last_name, email, phone, preferred_contact_method",
@@ -58,7 +61,7 @@ export async function sendQuoteEmailToClient(
 
   let prescription: Record<string, unknown> | null = null;
   if (quoteData.prescription_id) {
-    const { data } = await supabase
+    const { data } = await client
       .from("prescriptions")
       .select("*")
       .eq("id", quoteData.prescription_id)
@@ -184,7 +187,7 @@ Válido hasta: ${quote.expiration_date ? new Date(quote.expiration_date).toLocal
     };
   }
 
-  await supabase
+  await client
     .from("quotes")
     .update({
       status: "sent",

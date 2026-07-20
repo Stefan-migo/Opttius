@@ -5,6 +5,8 @@
  * Genera folios internos y PDFs simples sin conexión al SII.
  */
 
+import type { SupabaseClient } from "@supabase/supabase-js";
+
 import { appLogger as logger } from "@/lib/logger";
 import { createServiceRoleClient } from "@/utils/supabase/server";
 
@@ -16,7 +18,11 @@ import {
 } from "./BillingAdapter";
 
 export class InternalBilling implements BillingAdapter {
-  private supabase = createServiceRoleClient();
+  private supabase: SupabaseClient;
+
+  constructor(supabase?: SupabaseClient) {
+    this.supabase = supabase ?? createServiceRoleClient();
+  }
 
   /**
    * Emite un documento interno (ticket/comprobante) o boleta/factura

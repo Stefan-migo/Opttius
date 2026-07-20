@@ -1,3 +1,4 @@
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { createServiceRoleClient } from "@/utils/supabase/server";
 
 import { sendEmail } from "../client";
@@ -12,6 +13,7 @@ export async function sendMarketingEmail(
   recipients: string[],
   templateId: string,
   variables: Record<string, string>,
+  supabase?: SupabaseClient,
 ): Promise<{
   success: boolean;
   results: Array<{
@@ -23,8 +25,8 @@ export async function sendMarketingEmail(
   errors: Array<{ email: string; error: string }>;
 }> {
   try {
-    const supabase = createServiceRoleClient();
-    const { data: template, error } = await supabase
+    const client = supabase ?? createServiceRoleClient();
+    const { data: template, error } = await client
       .from("system_email_templates")
       .select("*")
       .eq("id", templateId)
