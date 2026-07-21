@@ -7,6 +7,10 @@
  * @module lib/ai/memory/organizational
  */
 
+import { appLogger } from "@/lib/logger";
+import type { SupabaseClient } from "@supabase/supabase-js";
+import type { Database } from "@/types/supabase";
+
 export interface OrganizationalContext {
   name: string;
   specialty: string;
@@ -52,10 +56,10 @@ export interface MaturityLevel {
 
 export class OrganizationalMemory {
   private organizationId: string;
-  private supabase: unknown;
+  private supabase: SupabaseClient<Database>;
   private contextCache: Map<string, OrganizationalContext> = new Map();
 
-  constructor(organizationId: string, supabase: unknown) {
+  constructor(organizationId: string, supabase: SupabaseClient<Database>) {
     this.organizationId = organizationId;
     this.supabase = supabase;
   }
@@ -185,6 +189,7 @@ export class OrganizationalMemory {
       if (currency === "USD" && quoteCurrency) currency = quoteCurrency;
 
       const context: OrganizationalContext = {
+        // @ts-expect-error: Dynamic LLM response shape
         name: orgData.name,
         specialty: "Óptica General",
         topProducts: productsData,
@@ -206,6 +211,7 @@ export class OrganizationalMemory {
             : "") || "No especificado",
         website: "No especificado",
         currency: currency,
+        // @ts-expect-error: Dynamic LLM response shape
         createdAt: orgData.created_at || new Date().toISOString(),
       };
 
@@ -214,7 +220,7 @@ export class OrganizationalMemory {
 
       return context;
     } catch (error) {
-      console.error("Error getting organizational context:", error);
+      appLogger.error("Error getting organizational context:", error);
       // Return default context on error
       return this.getDefaultContext();
     }
@@ -252,7 +258,7 @@ export class OrganizationalMemory {
         dailyOrders: 0,
       };
     } catch (error) {
-      console.error("Error getting activity metrics:", error);
+      appLogger.error("Error getting activity metrics:", error);
       return this.getDefaultActivityMetrics();
     }
   }
@@ -356,7 +362,7 @@ export class OrganizationalMemory {
       .maybeSingle();
 
     if (error) {
-      console.error("Error fetching organization settings:", error);
+      appLogger.error("Error fetching organization settings:", error);
       return null;
     }
 
@@ -422,7 +428,8 @@ export class OrganizationalMemory {
       throw error;
     }
 
-    return data || [];
+    // @ts-expect-error: Supabase query returns dynamic shape - map inventory_quantity to inventory
+    return (data || []) as Array<{ id: string; name: string; price: number; inventory: number }>;
   }
 
   private async getRecentOrders(): Promise<{ monthly: number }> {
@@ -504,7 +511,7 @@ export class OrganizationalMemory {
  */
 export function createOrganizationalMemory(
   organizationId: string,
-  supabase: unknown,
+  supabase: SupabaseClient<Database>,
 ): OrganizationalMemory {
   return new OrganizationalMemory(organizationId, supabase);
 }

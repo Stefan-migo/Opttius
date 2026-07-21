@@ -6,12 +6,11 @@
  */
 
 import { NextResponse } from "next/server";
-import { createServiceRoleClient } from "@/utils/supabase/server";
-import { createApiErrorResponse } from "@/lib/api/response";
-import { APIError } from "@/lib/api/errors";
+
+import { createServiceRoleClient } from "@/lib/supabase/server";
+
+import { buildCustomerName,buildOrderItems } from "./processResponseBuilder";
 import { computeOrderNumber } from "./processSaleValidation";
-import { buildOrderItems, buildCustomerName } from "./processResponseBuilder";
-import type { ProcessSaleContext } from "./processSaleTypes";
 
 export interface BusinessLookupParams {
   supabaseServiceRole: ReturnType<typeof createServiceRoleClient>;
@@ -269,7 +268,7 @@ export async function handleBusinessLookups(
     (lastOrder as Record<string, unknown> | null)?.order_number as string | null,
   );
 
-  const orderItems = buildOrderItems(itemsArr as any) as unknown as Array<Record<string, unknown>>;
+  const orderItems = buildOrderItems(itemsArr as any) as Array<Record<string, unknown>>;
 
   const { customerName, billingFirstName, billingLastName } = buildCustomerName({
     customer: customer as Record<string, unknown> | null,
@@ -327,14 +326,14 @@ export async function handleBusinessLookups(
     institutionalAmount,
     quote,
     lensFamily,
-    lensInfo: lensInfoRecord,
+    lensInfo: lensInfoRecord as Record<string, unknown>,
     orderNumber,
     orderItems,
     customerName,
     billingFirstName,
     billingLastName,
     orderOrganizationId,
-    frameInfo: frameInfo as any,
+    frameInfo: frameInfo as Record<string, unknown>,
     treatmentsCost,
     laborCost,
     productsForStockCheck,

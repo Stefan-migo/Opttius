@@ -76,7 +76,7 @@ export const customerWhatsAppTools: ToolDefinition[] = [
           };
         }
 
-        const formatted = appointments.map((a) => {
+        const formatted = (appointments as any[]).map((a: any) => {
           const branch = a.branch as { name?: string } | null;
           return {
             date: a.appointment_date,
@@ -156,7 +156,7 @@ export const customerWhatsAppTools: ToolDefinition[] = [
           };
         }
 
-        const formatted = quotes.map((q) => ({
+        const formatted = (quotes as any[]).map((q: any) => ({
           number: q.quote_number,
           status: q.status,
           total: q.total_amount,
@@ -233,7 +233,7 @@ export const customerWhatsAppTools: ToolDefinition[] = [
           };
         }
 
-        const formatted = orders.map((o) => {
+        const formatted = (orders as any[]).map((o: any) => {
           const branch = o.branch as { name?: string } | null;
           return {
             number: o.work_order_number,
@@ -294,7 +294,7 @@ export const customerWhatsAppTools: ToolDefinition[] = [
       try {
         const { supabase, organizationId } = context;
 
-        const { data: appointment, error: fetchError } = await supabase
+        const { data: appointment, error: fetchError }: any = await supabase
           .from("appointments")
           .select(
             "id, customer_id, status, appointment_date, appointment_time, branch:branches(name)",

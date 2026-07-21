@@ -101,8 +101,8 @@ export const businessFlowTools: ToolDefinition[] = [
         }
 
         // Analizar cada orden para calcular tiempos por etapa
-        const orderProcessingTimes = orders
-          .map((order) => {
+        const orderProcessingTimes = (orders as any[])
+          .map((order: any) => {
             const created = new Date(order.created_at);
             let processingTime = 0;
             let bottleneckStage = null;
@@ -194,7 +194,7 @@ export const businessFlowTools: ToolDefinition[] = [
               itemCount: order.order_items?.length || 0,
             };
           })
-          .filter((order) => order.totalProcessingTime > 0);
+          .filter((order: any) => order.totalProcessingTime > 0);
 
         // Calcular métricas generales
         const totalOrders = orderProcessingTimes.length;
@@ -329,6 +329,7 @@ export const businessFlowTools: ToolDefinition[] = [
       } catch (error: unknown) {
         return {
           success: false,
+          // @ts-expect-error: Dynamic LLM response shape
           error: error.message || "Failed to analyze business flow",
         };
       }

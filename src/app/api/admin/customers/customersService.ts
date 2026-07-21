@@ -29,7 +29,7 @@ import {
 } from "@/lib/api/validation/zod-schemas";
 import { appLogger as logger } from "@/lib/logger";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
-import { createClientFromRequest } from "@/utils/supabase/server";
+import { createClientFromRequest } from "@/lib/supabase/server";
 
 export async function handleGetCustomers(
   request: NextRequest,
@@ -78,7 +78,7 @@ export async function handleGetCustomers(
   let effectiveBranchId = branchContext.branchId;
 
   if (fieldOperationId) {
-    const { createServiceRoleClient } = await import("@/utils/supabase/server");
+    const { createServiceRoleClient } = await import("@/lib/supabase/server");
     const serviceSupabase = createServiceRoleClient();
     const { data: fieldOp } = await serviceSupabase
       .from("field_operations")
@@ -100,7 +100,7 @@ export async function handleGetCustomers(
     adminUser as { organization_id: string | null } | null
   )?.organization_id;
 
-  const applyBranchFilter = (query: unknown) => {
+  const applyBranchFilter = (query: any) => {
     if (userOrganizationId) {
       query = query.eq("organization_id", userOrganizationId);
       if (effectiveBranchId) query = query.eq("branch_id", effectiveBranchId);
@@ -186,7 +186,7 @@ export async function handleGetCustomers(
   > = {};
 
   if (customerIds.length > 0) {
-    const { createServiceRoleClient } = await import("@/utils/supabase/server");
+    const { createServiceRoleClient } = await import("@/lib/supabase/server");
     const serviceSupabase = createServiceRoleClient();
 
     const { data: ordersById } = await serviceSupabase
@@ -295,7 +295,7 @@ export async function handleCustomersAnalytics(
   _requestId: string,
 ) {
   const { client: rawClient, getUser } = await createClientFromRequest(request);
-  const supabase = rawClient as unknown;
+  const supabase = rawClient as any;
   const user = (await getUser()).data?.user as { id: string } | undefined;
   if (!user) throw new AuthenticationError("Unauthorized");
 
@@ -306,7 +306,7 @@ export async function handleCustomersAnalytics(
 
   const branchContext = await getBranchContext(request, user.id, supabase);
 
-  const applyBranchFilter = (query: unknown) => {
+  const applyBranchFilter = (query: any) => {
     return addBranchFilter(
       query,
       branchContext.branchId,
