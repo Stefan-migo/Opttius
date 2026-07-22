@@ -1,3 +1,13 @@
+/**
+ * Security Monitoring System
+ *
+ * Centralized security event collection, classification, and monitoring system.
+ * Provides structured logging of security events with automatic severity classification
+ * and integration with existing application logging.
+ *
+ * @module lib/security/monitoring
+ */
+
 import { appLogger as logger } from "@/lib/logger";
 
 import {
@@ -8,17 +18,8 @@ import {
   SecurityEventType,
   SecurityMonitoringConfig,
   SecuritySeverity,
-} from "./events";
-
-/**
- * Security Monitoring System
- *
- * Centralized security event collection, classification, and monitoring system.
- * Provides structured logging of security events with automatic severity classification
- * and integration with existing application logging.
- *
- * @module lib/security/monitoring
- */
+} from "../events";
+import { checkImmediateAlerts, logToAppLogger } from "./helpers";
 
 export class SecurityMonitor {
   private config: SecurityMonitoringConfig;
@@ -33,10 +34,6 @@ export class SecurityMonitor {
 
   /**
    * Log a security event
-   *
-   * @param eventType - Type of security event
-   * @param details - Event details and context
-   * @param options - Additional event options
    */
   logEvent(
     eventType: SecurityEventType,
@@ -67,14 +64,9 @@ export class SecurityMonitor {
       organizationId: options.organizationId,
     };
 
-    // Add to buffer for batch processing
     this.eventBuffer.push(event);
-
-    // Log to application logger
-    this.logToAppLogger(event);
-
-    // Check for immediate alert conditions
-    this.checkImmediateAlerts(event);
+    logToAppLogger(event);
+    checkImmediateAlerts(event);
 
     return event;
   }
@@ -103,10 +95,7 @@ export class SecurityMonitor {
       requestId?: string;
     } = {},
   ): SecurityEvent {
-    return this.logEvent(eventType, details, {
-      ...options,
-      source: "auth",
-    });
+    return this.logEvent(eventType, details, { ...options, source: "auth" });
   }
 
   /**
@@ -165,7 +154,7 @@ export class SecurityMonitor {
     return this.logEvent(eventType, details, {
       ...options,
       source: "payments",
-      severity: "high", // Payment events are typically high severity
+      severity: "high",
     });
   }
 
@@ -225,21 +214,17 @@ export class SecurityMonitor {
       severity?: SecuritySeverity;
       eventType?: SecurityEventType;
       userId?: string;
-      timeframe?: number; // milliseconds
+      timeframe?: number;
     },
   ): SecurityEvent[] {
-    let events = [...this.eventBuffer].reverse(); // Most recent first
-
+    let events = [...this.eventBuffer].reverse();
     if (filter) {
-      if (filter.severity) {
+      if (filter.severity)
         events = events.filter((e) => e.severity === filter.severity);
-      }
-      if (filter.eventType) {
+      if (filter.eventType)
         events = events.filter((e) => e.eventType === filter.eventType);
-      }
-      if (filter.userId) {
+      if (filter.userId)
         events = events.filter((e) => e.userId === filter.userId);
-      }
       if (filter.timeframe) {
         const cutoffTime = Date.now() - filter.timeframe;
         events = events.filter(
@@ -247,7 +232,6 @@ export class SecurityMonitor {
         );
       }
     }
-
     return events.slice(0, limit);
   }
 
@@ -286,29 +270,19 @@ export class SecurityMonitor {
       stats.eventsByType[event.eventType] =
         (stats.eventsByType[event.eventType] || 0) + 1;
     }
-
     return stats;
   }
 
   /**
    * Flush event buffer to persistent storage
-   * In production, this would save to database or external logging system
    */
   async flushEvents(): Promise<void> {
     if (this.eventBuffer.length === 0) return;
-
     try {
-      // In a real implementation, this would:
-      // 1. Save events to database
-      // 2. Send to external logging system (ELK, Splunk, etc.)
-      // 3. Archive old events based on retention policy
-
       logger.debug("Security events flushed", {
         eventCount: this.eventBuffer.length,
         retentionDays: this.config.retentionDays,
       });
-
-      // Clear buffer after successful flush
       this.eventBuffer = [];
     } catch (error) {
       logger.error("Failed to flush security events", error);
@@ -322,12 +296,10 @@ export class SecurityMonitor {
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - this.config.retentionDays);
     const cutoffTimestamp = cutoffDate.getTime();
-
     const initialLength = this.eventBuffer.length;
     this.eventBuffer = this.eventBuffer.filter(
       (event) => new Date(event.timestamp).getTime() > cutoffTimestamp,
     );
-
     if (initialLength > this.eventBuffer.length) {
       logger.info("Cleaned up old security events", {
         removedCount: initialLength - this.eventBuffer.length,
@@ -352,7 +324,6 @@ export class SecurityMonitor {
       clearInterval(this.flushTimer);
       this.flushTimer = null;
     }
-
     await this.flushEvents();
     logger.info("Security monitoring system shut down");
   }
@@ -362,103 +333,6 @@ export class SecurityMonitor {
   // ============================================================================
 
   /**
-   * Log security event to application logger
-   */
-  private logToAppLogger(event: SecurityEvent): void {
-    const logData = {
-      securityEvent: {
-        id: event.id,
-        type: event.eventType,
-        severity: event.severity,
-        source: event.source,
-        userId: event.userId,
-        ipAddress: event.ipAddress,
-        userAgent: event.userAgent,
-        correlationId: event.correlationId,
-        requestId: event.requestId,
-        organizationId: event.organizationId,
-        details: event.details,
-      },
-    };
-
-    switch (event.severity) {
-      case "critical":
-        logger.error(`SECURITY CRITICAL: ${event.eventType}`, logData);
-        break;
-      case "high":
-        logger.warn(`SECURITY HIGH: ${event.eventType}`, logData);
-        break;
-      case "medium":
-        logger.info(`SECURITY MEDIUM: ${event.eventType}`, logData);
-        break;
-      case "low":
-        logger.debug(`SECURITY LOW: ${event.eventType}`, logData);
-        break;
-    }
-  }
-
-  /**
-   * Check for events that require immediate alerts
-   */
-  private checkImmediateAlerts(event: SecurityEvent): void {
-    // Critical events always trigger immediate attention
-    if (event.severity === "critical") {
-      this.triggerImmediateAlert(event);
-      return;
-    }
-
-    // High severity authentication failures
-    if (
-      event.eventType === "auth.login_failure" &&
-      event.details.attemptCount > 5
-    ) {
-      this.triggerImmediateAlert(
-        event,
-        "Multiple failed login attempts detected",
-      );
-      return;
-    }
-
-    // Rate limit blocking
-    if (event.eventType === "rate_limit.ip_blocked") {
-      this.triggerImmediateAlert(
-        event,
-        "IP address blocked due to rate limiting",
-      );
-      return;
-    }
-
-    // Payment fraud
-    if (event.eventType === "payment.fraud_suspected") {
-      this.triggerImmediateAlert(event, "Potential payment fraud detected");
-      return;
-    }
-  }
-
-  /**
-   * Trigger immediate alert for critical events
-   */
-  private triggerImmediateAlert(
-    event: SecurityEvent,
-    customMessage?: string,
-  ): void {
-    const message = customMessage || `Security alert: ${event.eventType}`;
-
-    logger.warn(`IMMEDIATE SECURITY ALERT: ${message}`, {
-      eventId: event.id,
-      eventType: event.eventType,
-      severity: event.severity,
-      userId: event.userId,
-      ipAddress: event.ipAddress,
-    });
-
-    // In a real implementation, this would:
-    // 1. Send to alerting system
-    // 2. Notify security team
-    // 3. Trigger incident response procedures
-  }
-
-  /**
    * Start automatic buffer flushing process
    */
   private startBufferFlushProcess(): void {
@@ -466,7 +340,6 @@ export class SecurityMonitor {
       this.flushEvents().catch((err) => {
         logger.error("Error during security event flush", err);
       });
-
       this.cleanupOldEvents();
     }, this.BUFFER_FLUSH_INTERVAL);
   }
@@ -481,7 +354,3 @@ export function getSecurityMonitor(): SecurityMonitor {
   }
   return securityMonitor;
 }
-
-// Export types
-// SecurityMonitor is already available as a class export
-// export type { SecurityMonitor };
