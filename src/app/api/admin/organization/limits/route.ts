@@ -6,11 +6,11 @@
 
 import { NextRequest, NextResponse } from "next/server";
 
-import { appLogger as logger } from "@/lib/logger";
 import { requireAuth } from "@/lib/api/middleware";
+import { appLogger as logger } from "@/lib/logger";
 import { getTierConfig, SubscriptionTier } from "@/lib/saas/tier-config";
 import { validateTierLimit } from "@/lib/saas/tier-validator";
-import { createServiceRoleClient } from "@/utils/supabase/server";
+import { createClient } from "@/utils/supabase/server";
 
 export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
     const { userId } = await requireAuth(request);
 
     // Get user's organization
-    const supabase = createServiceRoleClient();
+    const supabase = await createClient();
     const { data: adminUser, error: adminError } = await supabase
       .from("admin_users")
       .select("organization_id")

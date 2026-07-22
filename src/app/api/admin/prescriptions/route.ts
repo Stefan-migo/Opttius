@@ -19,7 +19,6 @@ import { appLogger as logger } from "@/lib/logger";
 import { normalizeRUT } from "@/lib/utils/rut";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
 import { createClient } from "@/utils/supabase/server";
-import { createServiceRoleClient } from "@/utils/supabase/server";
 
 export const dynamic = "force-dynamic";
 
@@ -30,7 +29,6 @@ export async function GET(request: NextRequest) {
     logger.info("Prescriptions API GET called", { requestId });
 
     const supabase = await createClient();
-    const supabaseServiceRole = createServiceRoleClient();
 
     // Check admin authorization
     const {
@@ -97,7 +95,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Build base query
-    let query = supabaseServiceRole
+    let query = supabase
       .from("prescriptions")
       .select("*", { count: "exact" })
       .order("prescription_date", { ascending: false });
@@ -122,7 +120,7 @@ export async function GET(request: NextRequest) {
         adminUser?.organization_id || branchContext.organizationId;
 
       if (userOrganizationId) {
-        let customersQuery = supabaseServiceRole
+        let customersQuery = supabase
           .from("customers")
           .select("id, rut, first_name, last_name, email")
           .eq("organization_id", userOrganizationId)
@@ -131,7 +129,7 @@ export async function GET(request: NextRequest) {
         if (effectiveBranchId) {
           customersQuery = customersQuery.eq("branch_id", effectiveBranchId);
         } else if (branchContext.isSuperAdmin && branchContext.organizationId) {
-          const { data: branches } = await supabaseServiceRole
+          const { data: branches } = await supabase
             .from("branches")
             .select("id")
             .eq("organization_id", branchContext.organizationId);
@@ -224,7 +222,7 @@ export async function GET(request: NextRequest) {
 
       const { data: customers } =
         customerIds.length > 0
-          ? await supabaseServiceRole
+          ? await supabase
               .from("customers")
               .select("id, first_name, last_name, rut, email")
               .in("id", customerIds)
@@ -236,7 +234,7 @@ export async function GET(request: NextRequest) {
 
       const { data: workOrders } =
         prescriptionIds.length > 0
-          ? await supabaseServiceRole
+          ? await supabase
               .from("lab_work_orders")
               .select("prescription_id")
               .in("prescription_id", prescriptionIds)

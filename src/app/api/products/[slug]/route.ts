@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { appLogger as logger } from "@/lib/logger";
-import { createClient, createServiceRoleClient } from "@/utils/supabase/server";
+import { createClient } from "@/utils/supabase/server";
 
 export const dynamic = "force-dynamic";
 export async function GET(
@@ -15,7 +15,7 @@ export async function GET(
     const supabase = await createClient();
 
     // Fetch product by slug - only active products
-    let { data: product, error } = await supabase
+    const { data: product, error } = await supabase
       .from("products")
       .select(
         `
@@ -40,39 +40,6 @@ export async function GET(
       .eq("slug", slug)
       .eq("status", "active")
       .single();
-
-    // If RLS blocks access, try with service role client for public products
-    if (error && error.code === "42501") {
-      const serviceSupabase = createServiceRoleClient();
-      const result = await serviceSupabase
-        .from("products")
-        .select(
-          `
-          *,
-          categories:category_id (
-            id,
-            name,
-            slug
-          ),
-          product_variants (
-            id,
-            title,
-            price,
-            inventory_quantity,
-            option1,
-            option2,
-            option3,
-            is_default
-          )
-        `,
-        )
-        .eq("slug", slug)
-        .eq("status", "active")
-        .single();
-
-      product = result.data;
-      error = result.error;
-    }
 
     if (error || !product) {
       logger.error("Error fetching product by slug:", error);

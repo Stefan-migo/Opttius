@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { appLogger as logger } from "@/lib/logger";
-import { createClient, createServiceRoleClient } from "@/utils/supabase/server";
+import { createClient } from "@/utils/supabase/server";
 
 export const dynamic = "force-dynamic";
 
@@ -38,13 +38,11 @@ export async function GET(request: NextRequest) {
     );
     const offset = (page - 1) * limit;
 
-    const serviceSupabase = createServiceRoleClient();
-
     // Metrics: last 30 days
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-    const { data: metricsRows } = await serviceSupabase
+    const { data: metricsRows } = await supabase
       .from("customer_satisfaction_surveys")
       .select("score")
       .eq("organization_id", orgId)
@@ -65,7 +63,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Paginated responses (use FK hints for relations)
-    const { data: responses, error } = await serviceSupabase
+    const { data: responses, error } = await supabase
       .from("customer_satisfaction_surveys")
       .select(
         `
@@ -90,7 +88,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Total count
-    const { count } = await serviceSupabase
+    const { count } = await supabase
       .from("customer_satisfaction_surveys")
       .select("id", { count: "exact", head: true })
       .eq("organization_id", orgId);
