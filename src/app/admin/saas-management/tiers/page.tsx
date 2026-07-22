@@ -10,151 +10,33 @@ import {
   Loader2,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   TIER_DISPLAY_NAMES,
   TIER_FEATURE_LABELS,
 } from "@/lib/saas/tier-constants";
 
-interface Tier {
-  id: string;
-  name: string;
-  price_monthly: number;
-  max_branches?: number;
-  max_users?: number;
-  max_customers?: number;
-  max_products?: number;
-  features: Record<string, boolean>;
-  stats?: {
-    totalOrganizations: number;
-    activeOrganizations: number;
-    estimatedMonthlyRevenue: number;
-  };
-}
+import { TierEditDialog } from "./_components/TierEditDialog";
+import { formatPrice, getTierColor } from "./_components/tierHelpers";
+import { useTiersPage } from "./_components/useTiersPage";
 
 export default function TiersPage() {
   const router = useRouter();
-  const [tiers, setTiers] = useState<Tier[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [showEditDialog, setShowEditDialog] = useState(false);
-  const [selectedTier, setSelectedTier] = useState<Tier | null>(null);
-  const [editing, setEditing] = useState(false);
-  const [editData, setEditData] = useState({
-    price_monthly: 0,
-    max_branches: 0,
-    max_users: 0,
-    max_customers: 0,
-    max_products: 0,
-    features: {} as Record<string, boolean>,
-  });
-
-  useEffect(() => {
-    fetchTiers();
-  }, []);
-
-  const fetchTiers = async () => {
-    try {
-      setLoading(true);
-      const response = await fetch("/api/admin/saas-management/tiers");
-
-      if (!response.ok) {
-        throw new Error("Error al cargar tiers");
-      }
-
-      const data = await response.json();
-      setTiers(data.tiers || []);
-      setError(null);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Error desconocido");
-      toast.error("Error al cargar tiers");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleEdit = (tier: Tier) => {
-    setSelectedTier(tier);
-    setEditData({
-      price_monthly: tier.price_monthly,
-      max_branches: tier.max_branches || 0,
-      max_users: tier.max_users || 0,
-      max_customers: tier.max_customers || 0,
-      max_products: tier.max_products || 0,
-      features: tier.features || {},
-    });
-    setShowEditDialog(true);
-  };
-
-  const handleUpdate = async () => {
-    if (!selectedTier) return;
-
-    setEditing(true);
-    try {
-      // 0 or empty = unlimited -> send null (DB stores NULL for unlimited)
-      const toLimitPayload = (v: number) => (v === 0 ? null : v);
-      const payload = {
-        name: selectedTier.name,
-        price_monthly: editData.price_monthly,
-        max_branches: toLimitPayload(editData.max_branches),
-        max_users: toLimitPayload(editData.max_users),
-        max_customers: toLimitPayload(editData.max_customers),
-        max_products: toLimitPayload(editData.max_products),
-        features: editData.features,
-      };
-
-      const response = await fetch("/api/admin/saas-management/tiers", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Error al actualizar tier");
-      }
-
-      toast.success("Tier actualizado exitosamente");
-      setShowEditDialog(false);
-      setSelectedTier(null);
-      fetchTiers();
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Error desconocido");
-    } finally {
-      setEditing(false);
-    }
-  };
-
-  const formatPrice = (value: number) => {
-    return new Intl.NumberFormat("es-CL", {
-      style: "currency",
-      currency: "CLP",
-    }).format(value);
-  };
-
-  const getTierColor = (name: string) => {
-    const colors: Record<string, string> = {
-      basic: "bg-gray-100 text-gray-800 border-gray-300",
-      pro: "bg-blue-100 text-blue-800 border-blue-300",
-      premium: "bg-purple-100 text-purple-800 border-purple-300",
-    };
-    return colors[name] || colors.basic;
-  };
+  const {
+    tiers,
+    loading,
+    error,
+    showEditDialog,
+    selectedTier,
+    editing,
+    editData,
+    setShowEditDialog,
+    setEditData,
+    handleEdit,
+    handleUpdate,
+  } = useTiersPage();
 
   return (
     <div className="space-y-6 p-6">
@@ -297,146 +179,24 @@ export default function TiersPage() {
         </div>
       )}
 
-      {/* Dialog de edición */}
-      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
-        <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>
-              Editar Tier:{" "}
-              {selectedTier
-                ? (TIER_DISPLAY_NAMES[
-                    selectedTier.name as keyof typeof TIER_DISPLAY_NAMES
-                  ] ?? selectedTier.name)
-                : ""}
-            </DialogTitle>
-            <DialogDescription>
-              Modifica los límites y características del tier
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <Label>Precio Mensual (CLP)</Label>
-              <Input
-                type="number"
-                value={editData.price_monthly}
-                onChange={(e) =>
-                  setEditData({
-                    ...editData,
-                    price_monthly: parseFloat(e.target.value) || 0,
-                  })
-                }
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label>Máx. Sucursales (0 o vacío = ilimitado)</Label>
-                <Input
-                  type="number"
-                  value={editData.max_branches}
-                  onChange={(e) =>
-                    setEditData({
-                      ...editData,
-                      max_branches: parseInt(e.target.value) || 0,
-                    })
-                  }
-                />
-              </div>
-              <div>
-                <Label>Máx. Usuarios (0 o vacío = ilimitado)</Label>
-                <Input
-                  type="number"
-                  value={editData.max_users}
-                  onChange={(e) =>
-                    setEditData({
-                      ...editData,
-                      max_users: parseInt(e.target.value) || 0,
-                    })
-                  }
-                />
-              </div>
-              <div>
-                <Label>Máx. Clientes (0 o vacío = ilimitado)</Label>
-                <Input
-                  type="number"
-                  value={editData.max_customers}
-                  onChange={(e) =>
-                    setEditData({
-                      ...editData,
-                      max_customers: parseInt(e.target.value) || 0,
-                    })
-                  }
-                />
-              </div>
-              <div>
-                <Label>Máx. Productos (0 o vacío = ilimitado)</Label>
-                <Input
-                  type="number"
-                  value={editData.max_products}
-                  onChange={(e) =>
-                    setEditData({
-                      ...editData,
-                      max_products: parseInt(e.target.value) || 0,
-                    })
-                  }
-                />
-              </div>
-            </div>
-            <div>
-              <Label>Features</Label>
-              <div className="grid grid-cols-2 gap-2 mt-2">
-                {Object.keys(TIER_FEATURE_LABELS).map((key) => (
-                  <label
-                    className="flex items-center gap-2 cursor-pointer"
-                    key={key}
-                  >
-                    <input
-                      checked={editData.features[key] || false}
-                      type="checkbox"
-                      onChange={(e) =>
-                        setEditData({
-                          ...editData,
-                          features: {
-                            ...editData.features,
-                            [key]: e.target.checked,
-                          },
-                        })
-                      }
-                    />
-                    <span className="text-sm">
-                      {
-                        TIER_FEATURE_LABELS[
-                          key as keyof typeof TIER_FEATURE_LABELS
-                        ]
-                      }
-                    </span>
-                  </label>
-                ))}
-              </div>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => {
-                setShowEditDialog(false);
-                setSelectedTier(null);
-              }}
-            >
-              Cancelar
-            </Button>
-            <Button disabled={editing} onClick={handleUpdate}>
-              {editing ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Guardando...
-                </>
-              ) : (
-                "Guardar"
-              )}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <TierEditDialog
+        editData={editData}
+        open={showEditDialog}
+        saving={editing}
+        tierName={
+          selectedTier
+            ? (TIER_DISPLAY_NAMES[
+                selectedTier.name as keyof typeof TIER_DISPLAY_NAMES
+              ] ?? selectedTier.name)
+            : ""
+        }
+        onEditDataChange={(data) => setEditData((d) => ({ ...d, ...data }))}
+        onOpenChange={(open) => {
+          setShowEditDialog(open);
+          if (!open) setSelectedTier(null);
+        }}
+        onSave={handleUpdate}
+      />
     </div>
   );
 }
