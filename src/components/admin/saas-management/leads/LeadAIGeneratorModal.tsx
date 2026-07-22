@@ -13,17 +13,11 @@ import {
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 
+import { GENERATION_TYPES } from "./leadGeneratorConstants";
+import type { LeadAIGeneratorLead } from "./types";
+
 export interface LeadAIGeneratorModalProps {
-  lead: {
-    id: string;
-    email: string;
-    full_name?: string | null;
-    optica_name?: string | null;
-    funnel_stage?: string | null;
-    lead_score?: number;
-    priority_level?: string;
-    notes?: string | null;
-  } | null;
+  lead: LeadAIGeneratorLead | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onGenerate: (
@@ -32,39 +26,6 @@ export interface LeadAIGeneratorModalProps {
   ) => Promise<{ subject: string; body: string }>;
   onSend: (leadId: string, subject: string, body: string) => Promise<void>;
 }
-
-const GENERATION_TYPES = [
-  {
-    id: "followup",
-    label: "Follow-up",
-    description: "Email de seguimiento después de contacto inicial",
-    icon: "📬",
-  },
-  {
-    id: "proposal",
-    label: "Propuesta comercial",
-    description: "Envío de propuesta o cotización",
-    icon: "📄",
-  },
-  {
-    id: "case_study",
-    label: "Caso de éxito",
-    description: "Compartir caso de éxito relevante",
-    icon: "⭐",
-  },
-  {
-    id: "reactivation",
-    label: "Reactivación",
-    description: "Reconectar con lead sin actividad",
-    icon: "🔄",
-  },
-  {
-    id: "custom",
-    label: "Personalizado",
-    description: "Generar email con instrucciones específicas",
-    icon: "✏️",
-  },
-];
 
 export function LeadAIGeneratorModal({
   lead,
@@ -83,11 +44,9 @@ export function LeadAIGeneratorModal({
 
   const handleGenerate = async () => {
     if (!lead) return;
-
     setGenerating(true);
     try {
       let prompt = "";
-
       switch (selectedType) {
         case "followup":
           prompt = `Genera un email de seguimiento profesional para un lead llamado "${lead.full_name || "Cliente"}" de la óptica "${lead.optica_name || "una óptica"}" que está en la etapa "${lead.funnel_stage || "pendiente"}" del funnel de ventas. El lead tiene un score de ${lead.lead_score || 0}. El tono debe ser profesional pero cercano.`;
@@ -108,11 +67,10 @@ export function LeadAIGeneratorModal({
           toast.error("Por favor selecciona un tipo de generación");
           return;
       }
-
       const result = await onGenerate(lead.id, prompt);
       setGeneratedSubject(result.subject);
       setGeneratedBody(result.body);
-    } catch (error) {
+    } catch {
       toast.error("Error al generar email");
     } finally {
       setGenerating(false);
@@ -121,13 +79,12 @@ export function LeadAIGeneratorModal({
 
   const handleSend = async () => {
     if (!lead || !generatedSubject.trim() || !generatedBody.trim()) return;
-
     setSending(true);
     try {
       await onSend(lead.id, generatedSubject, generatedBody);
       onOpenChange(false);
       resetForm();
-    } catch (error) {
+    } catch {
       toast.error("Error al enviar email");
     } finally {
       setSending(false);
@@ -160,7 +117,6 @@ export function LeadAIGeneratorModal({
         </DialogHeader>
 
         <div className="space-y-4">
-          {/* Lead Info */}
           <div className="flex items-center gap-3 p-3 bg-white/5 rounded-lg border border-white/10">
             <div className="flex-1">
               <p className="text-sm font-medium text-white">
@@ -171,18 +127,17 @@ export function LeadAIGeneratorModal({
               </p>
             </div>
             {lead.priority_level && (
-              <Badge variant="outline" className="text-white border-white/30">
+              <Badge className="text-white border-white/30" variant="outline">
                 {lead.priority_level}
               </Badge>
             )}
             {lead.lead_score !== undefined && lead.lead_score > 0 && (
-              <Badge variant="outline" className="text-white border-white/30">
+              <Badge className="text-white border-white/30" variant="outline">
                 Score: {lead.lead_score}
               </Badge>
             )}
           </div>
 
-          {/* Generation Type Selection */}
           {!generatedSubject && (
             <>
               <div>
@@ -192,12 +147,12 @@ export function LeadAIGeneratorModal({
                 <div className="grid grid-cols-2 gap-2">
                   {GENERATION_TYPES.map((type) => (
                     <button
-                      key={type.id}
                       className={`p-3 rounded-lg border text-left transition-colors ${
                         selectedType === type.id
                           ? "border-amber-500 bg-amber-500/10"
                           : "border-white/10 hover:border-white/20"
                       }`}
+                      key={type.id}
                       onClick={() => {
                         setSelectedType(type.id);
                         setShowCustomPrompt(type.id === "custom");
@@ -217,7 +172,6 @@ export function LeadAIGeneratorModal({
                 </div>
               </div>
 
-              {/* Custom Prompt Input */}
               {showCustomPrompt && (
                 <div>
                   <label className="text-sm font-medium text-white/70 mb-1 block">
@@ -232,7 +186,6 @@ export function LeadAIGeneratorModal({
                 </div>
               )}
 
-              {/* Generate Button */}
               <div className="flex justify-end">
                 <Button
                   disabled={
@@ -244,13 +197,11 @@ export function LeadAIGeneratorModal({
                 >
                   {generating ? (
                     <>
-                      <span className="animate-spin mr-2">⏳</span>
-                      Generando...
+                      <span className="animate-spin mr-2">⏳</span>Generando...
                     </>
                   ) : (
                     <>
-                      <span className="mr-2">🤖</span>
-                      Generar con IA
+                      <span className="mr-2">🤖</span>Generar con IA
                     </>
                   )}
                 </Button>
@@ -258,7 +209,6 @@ export function LeadAIGeneratorModal({
             </>
           )}
 
-          {/* Generated Result */}
           {generatedSubject && (
             <div className="space-y-4">
               <div className="p-3 bg-emerald-500/10 border border-emerald-500/30 rounded-lg">
