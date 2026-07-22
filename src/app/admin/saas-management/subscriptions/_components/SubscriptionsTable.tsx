@@ -1,28 +1,9 @@
 "use client";
 
-import {
-  AlertTriangle,
-  Ban,
-  CheckCircle2,
-  Clock,
-  Eye,
-  Loader2,
-  MoreVertical,
-  Play,
-  Trash2,
-  XCircle,
-} from "lucide-react";
+import { Loader2 } from "lucide-react";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import {
   Table,
   TableBody,
@@ -32,6 +13,12 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { formatDate } from "@/lib/utils";
+
+import {
+  getStatusBadge,
+  getTierBadge,
+  SubscriptionActionMenu,
+} from "./SubscriptionStatusBadge";
 
 interface Subscription {
   id: string;
@@ -68,85 +55,6 @@ interface SubscriptionsTableProps {
   onCancelClick: (id: string) => void;
   onReactivate: (id: string) => void;
   onDeleteClick: (id: string) => void;
-}
-
-function getStatusBadge(
-  status: string,
-  isExpiringSoon?: boolean,
-  isExpired?: boolean,
-) {
-  if (isExpired) {
-    return (
-      <Badge variant="destructive">
-        <XCircle className="h-3 w-3 mr-1" />
-        Vencida
-      </Badge>
-    );
-  }
-
-  if (isExpiringSoon) {
-    return (
-      <Badge className="bg-yellow-100 text-yellow-800" variant="secondary">
-        <AlertTriangle className="h-3 w-3 mr-1" />
-        Por vencer
-      </Badge>
-    );
-  }
-
-  const variants: Record<string, "default" | "secondary" | "destructive"> = {
-    active: "default",
-    trialing: "secondary",
-    past_due: "destructive",
-    cancelled: "destructive",
-    incomplete: "secondary",
-  };
-
-  const icons: Record<string, typeof CheckCircle2> = {
-    active: CheckCircle2,
-    trialing: Clock,
-    past_due: AlertTriangle,
-    cancelled: XCircle,
-    incomplete: Clock,
-  };
-
-  const Icon = icons[status] || CheckCircle2;
-
-  return (
-    <Badge variant={variants[status] || "default"}>
-      <Icon className="h-3 w-3 mr-1" />
-      {status === "active"
-        ? "Activa"
-        : status === "trialing"
-          ? "Trial"
-          : status === "past_due"
-            ? "Vencida"
-            : status === "cancelled"
-              ? "Cancelada"
-              : status === "incomplete"
-                ? "Incompleta"
-                : status}
-    </Badge>
-  );
-}
-
-function getTierBadge(tier: string) {
-  const colors: Record<string, string> = {
-    basic: "bg-gray-100 text-gray-800",
-    pro: "bg-blue-100 text-blue-800",
-    premium: "bg-purple-100 text-purple-800",
-  };
-
-  return (
-    <Badge className={colors[tier] || colors.basic}>
-      {tier === "basic"
-        ? "Básico"
-        : tier === "pro"
-          ? "Pro"
-          : tier === "premium"
-            ? "Premium"
-            : tier}
-    </Badge>
-  );
 }
 
 export function SubscriptionsTable({
@@ -232,8 +140,7 @@ export function SubscriptionsTable({
                         )}
                       </TableCell>
                       <TableCell>
-                        {sub.current_period_start &&
-                        sub.current_period_end ? (
+                        {sub.current_period_start && sub.current_period_end ? (
                           <div className="text-sm">
                             <div>{formatDate(sub.current_period_start)}</div>
                             <div className="text-gray-500">
@@ -277,45 +184,21 @@ export function SubscriptionsTable({
                         )}
                       </TableCell>
                       <TableCell className="text-right">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button size="sm" variant="ghost">
-                              <MoreVertical className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem
-                              onClick={() => onViewDetails(sub.id)}
-                            >
-                              <Eye className="h-4 w-4 mr-2" />
-                              Ver detalles
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            {sub.status === "cancelled" ? (
-                              <DropdownMenuItem
-                                onClick={() => onReactivate(sub.id)}
-                              >
-                                <Play className="h-4 w-4 mr-2" />
-                                Reactivar
-                              </DropdownMenuItem>
-                            ) : (
-                              <DropdownMenuItem
-                                onClick={() => onCancelClick(sub.id)}
-                              >
-                                <Ban className="h-4 w-4 mr-2" />
-                                Cancelar
-                              </DropdownMenuItem>
-                            )}
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem
-                              className="text-destructive focus:text-destructive"
-                              onClick={() => onDeleteClick(sub.id)}
-                            >
-                              <Trash2 className="h-4 w-4 mr-2" />
-                              Eliminar
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                        <SubscriptionActionMenu
+                          status={sub.status}
+                          onCancel={
+                            sub.status !== "cancelled"
+                              ? () => onCancelClick(sub.id)
+                              : undefined
+                          }
+                          onDelete={() => onDeleteClick(sub.id)}
+                          onReactivate={
+                            sub.status === "cancelled"
+                              ? () => onReactivate(sub.id)
+                              : undefined
+                          }
+                          onView={() => onViewDetails(sub.id)}
+                        />
                       </TableCell>
                     </TableRow>
                   ))}
