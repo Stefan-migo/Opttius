@@ -12,42 +12,17 @@
 
 import { appLogger as logger } from "@/lib/logger";
 
-import { behavioralAnalytics } from "./behavioral-analytics";
-import { incidentResponse } from "./incident-response";
-import { threatDetector } from "./threat-detection";
+import { behavioralAnalytics } from "../behavioral-analytics";
+import { incidentResponse } from "../incident-response";
+import { threatDetector } from "../threat-detection";
+import {
+  checkGDPRCompliance,
+  checkPCIDSSCompliance,
+  checkSOC2Controls,
+} from "./compliance";
+import type { SecurityMetrics, SecurityOrchestrationConfig } from "./types";
 
-// Types for Phase 3 security orchestration
-export interface SecurityOrchestrationConfig {
-  behavioralAnalytics: {
-    enabled: boolean;
-    anomalyThreshold: number;
-    baselinePeriodDays: number;
-  };
-  threatDetection: {
-    enabled: boolean;
-    intelFeeds: string[];
-    mlModels: string[];
-  };
-  incidentResponse: {
-    enabled: boolean;
-    autoContainment: boolean;
-    notificationChannels: string[];
-  };
-  zeroTrust: {
-    enabled: boolean;
-    verificationMethods: string[];
-    trustScoring: boolean;
-  };
-}
-
-export interface SecurityMetrics {
-  activeIncidents: number;
-  threatDetections: number;
-  anomalyEvents: number;
-  responseTimeAvg: number;
-  falsePositiveRate: number;
-  complianceScore: number;
-}
+export type { SecurityMetrics, SecurityOrchestrationConfig } from "./types";
 
 /**
  * Phase 3 Security Orchestration System
@@ -106,26 +81,6 @@ export class Phase3SecurityOrchestrator {
       logger.info("Initializing Phase 3 Security Components", {
         config: this.config,
       });
-
-      // Initialize behavioral analytics
-      if (this.config.behavioralAnalytics.enabled) {
-        logger.info("Behavioral analytics enabled");
-        // System is already initialized via singleton
-      }
-
-      // Initialize threat detection
-      if (this.config.threatDetection.enabled) {
-        logger.info("Threat detection enabled");
-        // System is already initialized via singleton
-      }
-
-      // Initialize incident response
-      if (this.config.incidentResponse.enabled) {
-        logger.info("Incident response enabled");
-        // System is already initialized via singleton
-      }
-
-      logger.info("Phase 3 Security Orchestration initialized successfully");
     } catch (error) {
       logger.error("Failed to initialize Phase 3 security", {
         error: error instanceof Error ? error.message : "Unknown error",
@@ -139,32 +94,18 @@ export class Phase3SecurityOrchestrator {
    */
   async processSecurityEvents(events: unknown[]): Promise<void> {
     const startTime = Date.now();
-
     try {
-      // 1. Behavioral Analysis
       if (this.config.behavioralAnalytics.enabled) {
         await this.processBehavioralAnalysis(events);
       }
-
-      // 2. Threat Detection
       if (this.config.threatDetection.enabled) {
         await this.processThreatDetection(events);
       }
-
-      // 3. Incident Response
       if (this.config.incidentResponse.enabled) {
         await this.processIncidentResponse(events);
       }
-
-      // Update metrics
       const processingTime = Date.now() - startTime;
       this.updateMetrics(events.length, processingTime);
-
-      logger.debug("Phase 3 security processing completed", {
-        eventCount: events.length,
-        processingTimeMs: processingTime,
-        metrics: this.metrics,
-      });
     } catch (error) {
       logger.error("Error in Phase 3 security processing", {
         error: error instanceof Error ? error.message : "Unknown error",
@@ -173,42 +114,38 @@ export class Phase3SecurityOrchestrator {
     }
   }
 
-  /**
-   * Process behavioral analysis
-   */
   private async processBehavioralAnalysis(events: unknown[]): Promise<void> {
-    for (const event of events) {
+    for (const event of events as Array<Record<string, unknown>>) {
       if (event.userId && event.actionType) {
         await behavioralAnalytics.recordUserAction({
-          userId: event.userId,
-          actionType: event.actionType,
-          timestamp: new Date(event.timestamp || Date.now()),
-          ipAddress: event.ipAddress,
-          userAgent: event.userAgent,
-          resourceId: event.resourceId,
-          metadata: event.metadata,
+          userId: event.userId as string,
+          actionType: event.actionType as string,
+          timestamp: new Date((event.timestamp as number) || Date.now()),
+          ipAddress: event.ipAddress as string | undefined,
+          userAgent: event.userAgent as string | undefined,
+          resourceId: event.resourceId as string | undefined,
+          metadata: event.metadata as Record<string, unknown> | undefined,
         });
         this.metrics.anomalyEvents++;
       }
     }
   }
 
-  /**
-   * Process threat detection
-   */
   private async processThreatDetection(events: unknown[]): Promise<void> {
-    const threats = await threatDetector.analyzeUserBehavior(
-      "system", // placeholder userId
-      events.map((event) => ({
-        userId: event.userId || "unknown",
-        actionType: event.actionType || "generic",
-        timestamp: new Date(event.timestamp || Date.now()),
-        ipAddress: event.ipAddress,
-        userAgent: event.userAgent,
-        resourceId: event.resourceId,
-      })),
+    const userActions = (events as Array<Record<string, unknown>>).map(
+      (event) => ({
+        userId: (event.userId as string) || "unknown",
+        actionType: (event.actionType as string) || "generic",
+        timestamp: new Date((event.timestamp as number) || Date.now()),
+        ipAddress: event.ipAddress as string | undefined,
+        userAgent: event.userAgent as string | undefined,
+        resourceId: event.resourceId as string | undefined,
+      }),
     );
-
+    const threats = await threatDetector.analyzeUserBehavior(
+      "system",
+      userActions,
+    );
     if (threats.length > 0) {
       this.metrics.threatDetections += threats.length;
       logger.warn("Threats detected in Phase 3 processing", {
@@ -218,24 +155,23 @@ export class Phase3SecurityOrchestrator {
     }
   }
 
-  /**
-   * Process incident response
-   */
   private async processIncidentResponse(events: unknown[]): Promise<void> {
-    const incidents = await incidentResponse.processSecurityEvents(
-      events.map((event) => ({
-        id: event.id || `evt_${Date.now()}`,
-        timestamp: event.timestamp || new Date().toISOString(),
-        eventType: event.eventType || "generic_event",
-        severity: event.severity || "medium",
-        source: event.source || "phase3-orchestrator",
-        userId: event.userId,
-        ipAddress: event.ipAddress,
-        userAgent: event.userAgent,
-        details: event.details || {},
-      })),
+    const securityEvents = (events as Array<Record<string, unknown>>).map(
+      (event) => ({
+        id: (event.id as string) || `evt_${Date.now()}`,
+        timestamp: (event.timestamp as string) || new Date().toISOString(),
+        eventType: (event.eventType as string) || "generic_event",
+        severity: (event.severity as string) || "medium",
+        source: (event.source as string) || "phase3-orchestrator",
+        userId: event.userId as string,
+        ipAddress: event.ipAddress as string,
+        userAgent: event.userAgent as string,
+        details: (event.details as Record<string, unknown>) || {},
+      }),
     );
-
+    const incidents = await incidentResponse.processSecurityEvents(
+      securityEvents as unknown,
+    );
     if (incidents.length > 0) {
       this.metrics.activeIncidents += incidents.length;
       logger.warn("Incidents created from security events", {
@@ -245,23 +181,15 @@ export class Phase3SecurityOrchestrator {
     }
   }
 
-  /**
-   * Update security metrics
-   */
   private updateMetrics(eventCount: number, processingTime: number): void {
-    // Update average response time
     const totalTime =
       this.metrics.responseTimeAvg * this.metrics.threatDetections +
       processingTime;
     this.metrics.responseTimeAvg =
       totalTime / (this.metrics.threatDetections + 1);
-
-    // Update compliance score (placeholder calculation)
     this.metrics.complianceScore = Math.min(
       100,
-      50 + // Base score
-        this.metrics.threatDetections * 2 + // Security awareness bonus
-        this.metrics.anomalyEvents * 0.5, // Behavioral monitoring bonus
+      50 + this.metrics.threatDetections * 2 + this.metrics.anomalyEvents * 0.5,
     );
   }
 
@@ -283,10 +211,7 @@ export class Phase3SecurityOrchestrator {
       metrics: { ...this.metrics },
       uptime: Date.now() - this.startTime.getTime(),
       components: {
-        behavioralAnalytics: {
-          status: "operational",
-          baselines: "active",
-        },
+        behavioralAnalytics: { status: "operational", baselines: "active" },
         threatDetection: threatDetector.getStatus(),
         incidentResponse: {
           activeIncidents: incidentResponse.getActiveIncidents().length,
@@ -309,10 +234,8 @@ export class Phase3SecurityOrchestrator {
     const findings: string[] = [];
     const recommendations: string[] = [];
 
-    // Check SOC 2 readiness
-    const soc2Controls = await this.checkSOC2Controls();
+    const soc2Controls = await checkSOC2Controls();
     const soc2Ready = soc2Controls.score >= 80;
-
     if (!soc2Ready) {
       findings.push(
         `SOC 2 compliance score: ${soc2Controls.score}% (target: 80%)`,
@@ -322,17 +245,13 @@ export class Phase3SecurityOrchestrator {
       );
     }
 
-    // Check PCI DSS compliance
-    const pciCompliant = await this.checkPCIDSSCompliance();
-
+    const pciCompliant = await checkPCIDSSCompliance();
     if (!pciCompliant) {
       findings.push("PCI DSS compliance gaps detected");
       recommendations.push("Review payment processing security controls");
     }
 
-    // Check GDPR compliance
-    const gdprCompliant = await this.checkGDPRCompliance();
-
+    const gdprCompliant = await checkGDPRCompliance();
     if (!gdprCompliant) {
       findings.push("GDPR compliance gaps detected");
       recommendations.push("Implement data subject rights mechanisms");
@@ -345,50 +264,6 @@ export class Phase3SecurityOrchestrator {
       findings,
       recommendations,
     };
-  }
-
-  /**
-   * SOC 2 controls assessment
-   */
-  private async checkSOC2Controls(): Promise<{
-    score: number;
-    details: unknown;
-  }> {
-    // Placeholder implementation - in production, this would check actual controls
-    const controls = {
-      accessControl: 90,
-      auditLogging: 85,
-      riskAssessment: 75,
-      monitoring: 88,
-      incidentResponse: 82,
-    };
-
-    const score =
-      Object.values(controls).reduce((sum, val) => sum + val, 0) /
-      Object.keys(controls).length;
-
-    return {
-      score: Math.round(score),
-      details: controls,
-    };
-  }
-
-  /**
-   * PCI DSS compliance check
-   */
-  private async checkPCIDSSCompliance(): Promise<boolean> {
-    // Placeholder implementation
-    // In production, check actual PCI DSS requirements
-    return true; // Assuming current implementation meets basic requirements
-  }
-
-  /**
-   * GDPR compliance check
-   */
-  private async checkGDPRCompliance(): Promise<boolean> {
-    // Placeholder implementation
-    // In production, check actual GDPR requirements
-    return true; // Assuming current implementation meets basic requirements
   }
 
   /**
@@ -410,9 +285,9 @@ Generated: ${new Date().toISOString()}
 - Average Response Time: ${status.metrics.responseTimeAvg.toFixed(2)}ms
 
 ## Component Status
-- Behavioral Analytics: ${status.components.behavioralAnalytics.status}
-- Threat Detection: ${status.components.threatDetection.threatFeeds} feeds active
-- Incident Response: ${status.components.incidentResponse.activeIncidents} active incidents
+- Behavioral Analytics: ${(status.components.behavioralAnalytics as Record<string, unknown>)?.status}
+- Threat Detection: ${(status.components.threatDetection as Record<string, unknown>)?.threatFeeds} feeds active
+- Incident Response: ${(status.components.incidentResponse as Record<string, unknown>)?.activeIncidents} active incidents
 
 ## Compliance Status
 - SOC 2 Ready: ${compliance.soc2Ready ? "✅" : "❌"} (${compliance.soc2Ready ? "Ready" : "Needs work"})
