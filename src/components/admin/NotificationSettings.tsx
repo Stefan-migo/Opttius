@@ -10,8 +10,11 @@ import {
   Save,
   XCircle,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+
 import { toast } from "sonner";
+
+import { useNotificationSettings } from "@/components/admin/_hooks/useNotificationSettings";
+import { NotificationGroupCard } from "@/components/admin/_components/NotificationGroupCard";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -70,152 +73,11 @@ export default function NotificationSettings({
   onConfigScopeChange,
   hasMultipleBranches = false,
 }: NotificationSettingsProps) {
-  const [settings, setSettings] = useState<NotificationSetting[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [hasChanges, setHasChanges] = useState(false);
-  const [tableNotFound, setTableNotFound] = useState(false);
-  const [migrationSQL, setMigrationSQL] = useState<string | null>(null);
-  const [loadingSQL, setLoadingSQL] = useState(false);
-
-  useEffect(() => {
-    fetchSettings();
-  }, [branchId, organizationId]);
-
-  const fetchSettings = async () => {
-    try {
-      setLoading(true);
-      const params = new URLSearchParams();
-      if (organizationId) params.set("organization_id", organizationId);
-      if (branchId) params.set("branch_id", branchId);
-      const url = `/api/admin/notifications/settings${params.toString() ? `?${params}` : ""}`;
-      const response = await fetch(url);
-      const data = await response.json();
-
-      if (!response.ok) {
-        // Check if the error is about table not existing
-        if (data.message && data.message.includes("does not exist")) {
-          setTableNotFound(true);
-          toast.error(
-            "La tabla de configuración de notificaciones no existe. Por favor, ejecuta la migración de base de datos.",
-            {
-              duration: 8000,
-            },
-          );
-          setSettings([]);
-          return;
-        }
-        throw new Error(data.error || "Error al cargar configuración");
-      }
-
-      setTableNotFound(false);
-
-      setSettings(data.settings || []);
-      setHasChanges(false);
-    } catch (error) {
-      console.error("Error fetching notification settings:", error);
-      toast.error("Error al cargar la configuración de notificaciones");
-      setSettings([]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const updateSetting = (type: string, field: string, value: unknown) => {
-    setSettings((prev) => {
-      const updated = prev.map((setting) => {
-        if (setting.notification_type === type) {
-          return { ...setting, [field]: value };
-        }
-        return setting;
-      });
-      setHasChanges(true);
-      return updated;
-    });
-  };
-
-  const saveSettings = async () => {
-    try {
-      setSaving(true);
-
-      const updates = settings.map((setting) => ({
-        notification_type: setting.notification_type,
-        enabled: setting.enabled,
-        priority: setting.priority,
-        notify_all_admins: setting.notify_all_admins,
-        notify_specific_roles: setting.notify_specific_roles,
-      }));
-
-      const response = await fetch("/api/admin/notifications/settings", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          updates,
-          organization_id: organizationId || null,
-          branch_id: branchId || null,
-        }),
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || "Error al guardar configuración");
-      }
-
-      toast.success("Configuración guardada exitosamente");
-      setHasChanges(false);
-      fetchSettings();
-    } catch (error) {
-      console.error("Error saving notification settings:", error);
-      toast.error(
-        error instanceof Error
-          ? error.message
-          : "Error al guardar configuración",
-      );
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const toggleAll = (enabled: boolean) => {
-    setSettings((prev) => prev.map((s) => ({ ...s, enabled })));
-    setHasChanges(true);
-  };
-
-  const fetchMigrationSQL = async () => {
-    try {
-      setLoadingSQL(true);
-      const response = await fetch("/api/admin/system/migrate-notifications", {
-        method: "POST",
-      });
-      const data = await response.json();
-
-      if (response.ok && data.sql) {
-        setMigrationSQL(data.sql);
-      } else {
-        toast.error("Error al cargar la migración SQL");
-      }
-    } catch (error) {
-      console.error("Error fetching migration SQL:", error);
-      toast.error("Error al cargar la migración SQL");
-    } finally {
-      setLoadingSQL(false);
-    }
-  };
-
-  const copySQLToClipboard = async () => {
-    if (!migrationSQL) {
-      await fetchMigrationSQL();
-      return;
-    }
-
-    try {
-      await navigator.clipboard.writeText(migrationSQL);
-      toast.success("SQL copiado al portapapeles");
-    } catch (error) {
-      console.error("Error copying to clipboard:", error);
-      toast.error("Error al copiar al portapapeles");
-    }
-  };
+  const {
+    settings, loading, saving, hasChanges, tableNotFound,
+    migrationSQL, loadingSQL, fetchMigrationSQL, copySQLToClipboard,
+    fetchSettings, updateSetting, saveSettings, toggleAll,
+  } = useNotificationSettings({ branchId, organizationId });
 
   if (loading) {
     return (
