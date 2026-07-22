@@ -1,13 +1,9 @@
-/**
- * POST /api/admin/saas-management/leads/[id]/email/generate
- * Genera un email personalizado usando IA
- */
 import { NextRequest, NextResponse } from "next/server";
 
-import { requireRoot } from "@/lib/api/root-middleware";
-import { appLogger as logger } from "@/lib/logger";
 import { LLMFactory } from "@/lib/ai/factory";
 import type { LLMConfig } from "@/lib/ai/types";
+import { requireRoot } from "@/lib/api/root-middleware";
+import { appLogger as logger } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 
@@ -15,30 +11,15 @@ interface RouteParams {
   params: Promise<{ id: string }>;
 }
 
-const LEAD_EMAIL_SYSTEM_PROMPT = `Eres un asistente de ventas profesional especializado en ópticas. Tu tarea es generar emails personalizados y profesionales para leads potenciales.
-
-Contexto:
-- Estás ayudando a Opttius, un software de gestión para ópticas
-- El target son dueño de ópticas, óptometristas y profesionales del área visual
-- El tono debe ser: profesional, cercano, eficiente
-- Evita: jerga técnica excesiva, tono muy agresivo, promesas exageradas
-
-Instrucciones:
-1. Analiza la información del lead proporcionada
-2. Genera un subject line atractivo y claro
-3. Genera un cuerpo de email que:
-   - Sea breve (máximo 150 palabras)
-   - Tackle el problema del cliente
-   - Incluya un call-to-action claro
-   - Use formato básico (párrafos cortos)
-4. Personaliza según la etapa del funnel
-5. El email debe ser en español chileno,自然的
-
-Responde en formato JSON con:
-{
-  "subject": "asunto del email",
-  "body": "cuerpo del email en español"
-}`;
+const LEAD_EMAIL_SYSTEM_PROMPT = [
+  "Eres un asistente de ventas profesional especializado en ópticas.",
+  "Contexto: Opttius software de gestión para ópticas. Target: dueños, óptometristas.",
+  "Tono: profesional, cercano, eficiente. Evita jerga excesiva, tono agresivo.",
+  "Instrucciones: analiza lead, genera subject atractivo, cuerpo breve (<150 palabras)",
+  "con problema, CTA claro, formato básico. Personaliza por etapa del funnel.",
+  "Idioma: español chileno natural.",
+  'Responde JSON: { "subject": "...", "body": "..." }',
+].join(" ");
 
 export async function POST(request: NextRequest, { params }: RouteParams) {
   const startTime = Date.now();
@@ -112,103 +93,28 @@ Genera el email:`;
       // Try kilocode first
       let provider, config;
 
+      const orConfig: Partial<LLMConfig> = { model: "minimax/minimax-m2.5:free", maxTokens: 500, temperature: 0.7 };
       try {
-        const result = await factory.createProviderWithFallback("kilocode", {
-          maxTokens: 500,
-          temperature: 0.7,
-        });
-        provider = result.provider;
-        config = result.config;
-        logger.info("Using kilocode provider", { model: config.model });
-      } catch (kilocodeInitError) {
-        logger.warn("Kilocode init failed, trying openrouter", {
-          error:
-            kilocodeInitError instanceof Error
-              ? kilocodeInitError.message
-              : String(kilocodeInitError),
-        });
-        // Try openrouter instead
-        const orConfig: Partial<LLMConfig> = {
-          model: "minimax/minimax-m2.5:free",
-          maxTokens: 500,
-          temperature: 0.7,
-        };
-        const result = await factory.createProviderWithFallback(
-          "openrouter",
-          orConfig,
-        );
-        provider = result.provider;
-        config = result.config;
-        logger.info("Using openrouter fallback", { model: config.model });
+        const result = await factory.createProviderWithFallback("kilocode", { maxTokens: 500, temperature: 0.7 });
+        provider = result.provider; config = result.config;
+      } catch {
+        logger.warn("Kilocode init failed, trying openrouter");
+        const result = await factory.createProviderWithFallback("openrouter", orConfig);
+        provider = result.provider; config = result.config;
       }
 
-      logger.info("Provider created, config:", {
-        leadId: id,
-        provider: config.provider,
-        model: config.model,
-      });
-
-      logger.info("Generating text with AI", { leadId: id });
+      const userMsg = { role: "user" as const, content: `Información del lead:\n${leadContext}\n\nSolicitud:\n${prompt}` };
+      const genOpts = { maxTokens: 500, temperature: 0.7 };
 
       let response;
       try {
-        response = await provider.generateText(
-          [
-            { role: "system", content: LEAD_EMAIL_SYSTEM_PROMPT },
-            {
-              role: "user",
-              content: `Información del lead:\n${leadContext}\n\nSolicitud:\n${prompt}`,
-            },
-          ],
-          undefined,
-          {
-            maxTokens: 500,
-            temperature: 0.7,
-          },
-        );
+        response = await provider.generateText([{ role: "system", content: LEAD_EMAIL_SYSTEM_PROMPT }, userMsg], undefined, genOpts);
       } catch (genError) {
-        // If kilocode fails at generateText, try openrouter as fallback
         if (config.provider === "kilocode") {
-          logger.warn(
-            "Kilocode generateText failed, trying openrouter fallback",
-            {
-              error:
-                genError instanceof Error ? genError.message : String(genError),
-            },
-          );
-
-          // Try openrouter as fallback
-          const orConfig: Partial<LLMConfig> = {
-            model: "minimax/minimax-m2.5:free",
-            maxTokens: 500,
-            temperature: 0.7,
-          };
-          const orResult = await factory.createProviderWithFallback(
-            "openrouter",
-            orConfig,
-          );
-          provider = orResult.provider;
-          config = orResult.config;
-
-          logger.info("Using openrouter fallback after kilocode failure", {
-            model: config.model,
-          });
-
-          // Retry with openrouter
-          response = await provider.generateText(
-            [
-              { role: "system", content: LEAD_EMAIL_SYSTEM_PROMPT },
-              {
-                role: "user",
-                content: `Información del lead:\n${leadContext}\n\nSolicitud:\n${prompt}`,
-              },
-            ],
-            undefined,
-            {
-              maxTokens: 500,
-              temperature: 0.7,
-            },
-          );
+          logger.warn("Kilocode generateText failed, trying openrouter fallback");
+          const orResult = await factory.createProviderWithFallback("openrouter", orConfig);
+          provider = orResult.provider; config = orResult.config;
+          response = await provider.generateText([{ role: "system", content: LEAD_EMAIL_SYSTEM_PROMPT }, userMsg], undefined, genOpts);
         } else {
           throw genError;
         }
@@ -229,51 +135,10 @@ Genera el email:`;
           },
         );
       } catch (genError: unknown) {
-        // Log error details
-        logger.error("=== PROVIDER ERROR DIRECT LOG ===");
-        logger.error("Error:", genError);
-        logger.error("Error type:", typeof genError);
-        logger.error(
-          "Error message:",
-          genError && typeof genError === "object" && "message" in genError
-            ? (genError as { message: string }).message
-            : String(genError),
-        );
-        logger.error(
-          "Error stack:",
-          genError && typeof genError === "object" && "stack" in genError
-            ? (genError as { stack: string }).stack
-            : undefined,
-        );
-        logger.error("Full error object:", genError);
-        logger.error("=================================");
-
-        // Log detailed error from the provider - capture all details
-        const errorDetails = {
-          message:
-            genError && typeof genError === "object" && "message" in genError
-              ? (genError as { message: string }).message
-              : String(genError),
-          name:
-            genError && typeof genError === "object" && "name" in genError
-              ? (genError as { name: string }).name
-              : "Unknown",
-          stack:
-            genError && typeof genError === "object" && "stack" in genError
-              ? (genError as { stack: string }).stack
-              : undefined,
-        };
-
-        logger.error("Provider generateText failed", {
-          errorMessage: errorDetails.message,
-          errorName: errorDetails.name,
-          errorStack: errorDetails.stack,
-          provider: config.provider,
-          model: config.model,
-          leadId: id,
-        });
-
-        throw new Error(`AI generation failed: ${errorDetails.message}`);
+        const msg = genError && typeof genError === "object" && "message" in genError
+          ? (genError as { message: string }).message : String(genError);
+        logger.error("Provider generateText failed", { error: msg, provider: config.provider, model: config.model, leadId: id });
+        throw new Error("AI generation failed: " + msg);
       }
 
       logger.info("AI response received", {
@@ -282,31 +147,18 @@ Genera el email:`;
         hasToolCalls: !!response.toolCalls,
       });
 
-      // Parse the response
-      const content = response.content;
-
-      // Try to extract JSON from response
       let parsed: { subject: string; body: string };
       try {
-        // Try direct JSON parse first
-        parsed = JSON.parse(content);
+        parsed = JSON.parse(response.content);
       } catch {
-        // Try to extract JSON from markdown code blocks
-        const jsonMatch = content.match(/```(?:json)?\s*([\s\S]*?)```/);
-        if (jsonMatch) {
-          parsed = JSON.parse(jsonMatch[1]);
-        } else {
-          // Try to find JSON-like structure
-          const match = content.match(/\{[\s\S]*\}/);
-          if (match) {
-            parsed = JSON.parse(match[0]);
-          } else {
-            // Fallback: create structured response from plain text
-            const lines = content.split("\n").filter((l: string) => l.trim());
-            parsed = {
-              subject: lines[0]?.replace(/^#+\s*/, "") || "Seguimiento",
-              body: lines.slice(1).join("\n").trim() || content,
-            };
+        const jsonMatch = response.content.match(/```(?:json)?\s*([\s\S]*?)```/);
+        if (jsonMatch) { parsed = JSON.parse(jsonMatch[1]); }
+        else {
+          const match = response.content.match(/\{[\s\S]*\}/);
+          if (match) { parsed = JSON.parse(match[0]); }
+          else {
+            const lines = response.content.split("\n").filter((l: string) => l.trim());
+            parsed = { subject: lines[0]?.replace(/^#+\s*/, "") || "Seguimiento", body: lines.slice(1).join("\n").trim() || response.content };
           }
         }
       }

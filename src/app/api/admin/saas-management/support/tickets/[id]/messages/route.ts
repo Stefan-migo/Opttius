@@ -6,10 +6,6 @@ import { appLogger as logger } from "@/lib/logger";
 import { createClient } from "@/utils/supabase/server";
 import { createServiceRoleClient } from "@/utils/supabase/service-role";
 
-/**
- * GET /api/admin/saas-management/support/tickets/[id]/messages
- * Obtener mensajes de un ticket
- */
 export const dynamic = "force-dynamic";
 export async function GET(
   request: NextRequest,
@@ -29,7 +25,6 @@ export async function GET(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Verificar si es root/dev o pertenece a la organización del ticket
     const { data: adminUser } = await supabaseServiceRole
       .from("admin_users")
       .select("id, role, organization_id")
@@ -38,7 +33,6 @@ export async function GET(
 
     const isRoot = adminUser?.role === "root" || adminUser?.role === "dev";
 
-    // Obtener ticket para verificar permisos
     const { data: ticket, error: ticketError } = await supabaseServiceRole
       .from("saas_support_tickets")
       .select("*")
@@ -49,12 +43,10 @@ export async function GET(
       return NextResponse.json({ error: "Ticket not found" }, { status: 404 });
     }
 
-    // Verificar permisos
     if (!isRoot && ticket.organization_id !== adminUser?.organization_id) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    // Obtener mensajes
     let query = supabaseServiceRole
       .from("saas_support_messages")
       .select(
@@ -94,10 +86,6 @@ export async function GET(
   }
 }
 
-/**
- * POST /api/admin/saas-management/support/tickets/[id]/messages
- * Crear nuevo mensaje en un ticket
- */
 export async function POST(
   request: NextRequest,
   { params }: { params: { id: string } },

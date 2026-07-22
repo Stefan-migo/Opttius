@@ -6,10 +6,6 @@ import { updateSaasUserSchema } from "@/lib/api/validation/zod-schemas";
 import { appLogger as logger } from "@/lib/logger";
 import { createRootAdminClient } from "@/utils/supabase/root-admin";
 
-/**
- * GET /api/admin/saas-management/users/[id]
- * Obtener detalles completos de un usuario
- */
 export const dynamic = "force-dynamic";
 export async function GET(
   request: NextRequest,
@@ -21,7 +17,6 @@ export async function GET(
 
     const { id } = params;
 
-    // Obtener usuario (sin relaciones complejas)
     const { data: user, error } = await supabaseServiceRole
       .from("admin_users")
       .select("*")
@@ -36,49 +31,26 @@ export async function GET(
       );
     }
 
-    // Obtener organización si existe
-    let organization = null;
-    if (user.organization_id) {
-      const { data: org } = await supabaseServiceRole
-        .from("organizations")
-        .select("id, name, slug, subscription_tier, status")
-        .eq("id", user.organization_id)
-        .maybeSingle();
-      organization = org;
-    }
+    const [organization, profile, branchAccess] = await Promise.all([
+      user.organization_id
+        ? supabaseServiceRole.from("organizations").select("id, name, slug, subscription_tier, status").eq("id", user.organization_id).maybeSingle().then(r => r.data)
+        : null,
+      supabaseServiceRole.from("profiles").select("id, email, first_name, last_name, phone, created_at").eq("id", user.id).maybeSingle().then(r => r.data),
+      supabaseServiceRole.from("admin_branch_access").select("id, branch_id, role, is_primary").eq("admin_user_id", id).then(r => r.data),
+    ]);
 
-    // Obtener perfil
-    const { data: profile } = await supabaseServiceRole
-      .from("profiles")
-      .select("id, email, first_name, last_name, phone, created_at")
-      .eq("id", user.id)
-      .maybeSingle();
-
-    // Obtener acceso a sucursales
-    const { data: branchAccess } = await supabaseServiceRole
-      .from("admin_branch_access")
-      .select("id, branch_id, role, is_primary")
-      .eq("admin_user_id", id);
-
-    // Enriquecer con información de sucursales
     const enrichedBranchAccess = await Promise.all(
       (branchAccess || []).map(async (access: unknown) => {
-        if (access.branch_id) {
-          const { data: branch } = await supabaseServiceRole
-            .from("branches")
-            .select("id, name, code, organization_id")
-            .eq("id", access.branch_id)
-            .maybeSingle();
-          return {
-            ...access,
-            branches: branch,
-          };
-        }
-        return access;
+        if (!access.branch_id) return access;
+        const { data: branch } = await supabaseServiceRole
+          .from("branches")
+          .select("id, name, code, organization_id")
+          .eq("id", access.branch_id)
+          .maybeSingle();
+        return { ...access, branches: branch };
       }),
     );
 
-    // Obtener actividad reciente
     const { data: recentActivity } = await supabaseServiceRole
       .from("admin_activity_log")
       .select("*")
@@ -107,10 +79,6 @@ export async function GET(
   }
 }
 
-/**
- * PATCH /api/admin/saas-management/users/[id]
- * Actualizar usuario (cambiar organización, rol, estado, etc.)
- */
 export async function PATCH(
   request: NextRequest,
   { params }: { params: { id: string } },
@@ -205,10 +173,6 @@ export async function PATCH(
   }
 }
 
-/**
- * DELETE /api/admin/saas-management/users/[id]
- * Eliminar usuario completamente (elimina auth.users, admin_users, profiles, etc.)
- */
 export async function DELETE(
   request: NextRequest,
   { params }: { params: { id: string } },

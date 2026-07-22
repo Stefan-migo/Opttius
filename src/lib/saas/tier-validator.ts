@@ -1,12 +1,3 @@
-/**
- * Tier Validator for SaaS Multi-Tenancy
- *
- * Validates tier limits before allowing actions (create branch, add user, etc.)
- * Uses subscription_tiers table as primary source of truth; falls back to tier-config if DB fails.
- *
- * @module tier-validator
- */
-
 import { createServiceRoleClient } from "@/utils/supabase/server";
 
 import { recordTierChange } from "./tier-change-audit";
@@ -28,26 +19,14 @@ export interface TierValidationResult {
   tier: SubscriptionTier;
 }
 
-/** Default features when DB has partial data */
 const DEFAULT_FEATURES: Record<TierFeature, boolean> = {
-  pos: true,
-  appointments: true,
-  quotes: true,
-  work_orders: true,
-  prescriptions: true,
-  custom_branding: true,
-  chat_ia: false,
-  advanced_analytics: false,
-  field_operations: false,
-  agreements: false,
-  whatsapp: false,
-  api_access: false,
+  pos: true, appointments: true, quotes: true, work_orders: true,
+  prescriptions: true, custom_branding: true, chat_ia: false,
+  advanced_analytics: false, field_operations: false, agreements: false,
+  whatsapp: false, api_access: false,
 };
 
-/**
- * Get tier configuration from subscription_tiers table (primary source of truth).
- * Returns null if tier not found or DB error. Caller should fallback to tier-config.
- */
+/** Get tier config from DB, fallback to tier-config on error */
 export async function getTierConfigFromDb(
   tierName: string,
 ): Promise<TierLimits | null> {
@@ -87,9 +66,6 @@ export async function getTierConfigFromDb(
   };
 }
 
-/**
- * Get tier config: DB first, fallback to tier-config for resilience.
- */
 async function getTierConfigForValidation(
   tier: SubscriptionTier,
 ): Promise<TierLimits> {
@@ -98,9 +74,6 @@ async function getTierConfigForValidation(
   return getTierConfig(tier);
 }
 
-/**
- * Get effective organization tier. Applies scheduled downgrade if due (lazy application).
- */
 async function getOrganizationTier(
   organizationId: string,
 ): Promise<SubscriptionTier | null> {
@@ -155,9 +128,6 @@ async function getOrganizationTier(
   return (data.subscription_tier || "basic") as SubscriptionTier;
 }
 
-/**
- * Get current count for a limit type
- */
 async function getCurrentCount(
   organizationId: string,
   limitType: TierLimitType,
@@ -199,9 +169,6 @@ async function getCurrentCount(
   }
 }
 
-/**
- * Validate tier limit for an action
- */
 export async function validateTierLimit(
   organizationId: string,
   limitType: TierLimitType,
@@ -257,9 +224,6 @@ export async function validateTierLimit(
   };
 }
 
-/**
- * Get all tier features for an organization (for UI filtering)
- */
 export async function getOrganizationFeatures(
   organizationId: string,
 ): Promise<Record<string, boolean>> {
@@ -271,9 +235,6 @@ export async function getOrganizationFeatures(
   return { ...tierConfig.features };
 }
 
-/**
- * Check if a feature is enabled for an organization
- */
 export async function validateFeature(
   organizationId: string,
   feature: string,
@@ -289,9 +250,6 @@ export async function validateFeature(
   );
 }
 
-/**
- * Get upgrade message for a limit
- */
 export function getTierUpgradeMessage(
   tier: SubscriptionTier,
   limitType: TierLimitType,
