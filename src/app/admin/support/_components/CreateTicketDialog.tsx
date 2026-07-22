@@ -1,8 +1,8 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2, Search, Send, X } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { Loader2, Send } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import type { z } from "zod";
 
@@ -26,8 +26,8 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { createOpticalInternalSupportTicketSchema } from "@/lib/api/validation/zod-schemas";
-import { getBranchHeader } from "@/lib/utils/branch";
 
+import { CustomerSearchField } from "./CustomerSearchField";
 import { categoryLabels, priorityLabels } from "./supportConstants";
 
 type TicketForm = z.infer<typeof createOpticalInternalSupportTicketSchema>;
@@ -50,24 +50,12 @@ export function CreateTicketDialog({
   onSubmit,
 }: CreateTicketDialogProps) {
   const [creatingTicket, setCreatingTicket] = useState(false);
-  // Customer search
-  const [customerSearch, setCustomerSearch] = useState("");
-  const [customerSearchResults, setCustomerSearchResults] = useState<
-    Array<{
-      id: string;
-      first_name?: string;
-      last_name?: string;
-      email: string;
-      rut?: string;
-    }>
-  >([]);
-  const [selectedCustomerForTicket, setSelectedCustomerForTicket] = useState<{
+  const [selectedCustomer, setSelectedCustomer] = useState<{
     id: string;
     first_name?: string;
     last_name?: string;
     email: string;
   } | null>(null);
-  const [loadingCustomerSearch, setLoadingCustomerSearch] = useState(false);
 
   const {
     register,
@@ -77,7 +65,7 @@ export function CreateTicketDialog({
     watch,
     setValue,
   } = useForm<TicketForm>({
-    resolver: zodResolver(createOpticalInternalSupportTicketSchema) as any,
+    resolver: zodResolver(createOpticalInternalSupportTicketSchema) as unknown,
     defaultValues: {
       priority: "medium",
       category: "other",
@@ -85,56 +73,33 @@ export function CreateTicketDialog({
     },
   });
 
-  // Reset customer search when dialog closes; sync branch when opening
   useEffect(() => {
     if (!open) {
-      setCustomerSearch("");
-      setCustomerSearchResults([]);
-      setSelectedCustomerForTicket(null);
+      setSelectedCustomer(null);
     } else if (currentBranchId && !isGlobalView) {
       setValue("branch_id", currentBranchId);
     }
   }, [open, currentBranchId, isGlobalView, setValue]);
 
-  // Debounced customer search
-  const searchCustomersForTicket = useCallback(
-    async (query: string) => {
-      if (query.length < 2) {
-        setCustomerSearchResults([]);
-        return;
-      }
-      try {
-        setLoadingCustomerSearch(true);
-        const params = new URLSearchParams({ q: query });
-        if (currentBranchId) params.set("branch_id", currentBranchId);
-        const headers = getBranchHeader(currentBranchId || null);
-        const response = await fetch(
-          `/api/admin/customers/search?${params.toString()}`,
-          { headers },
-        );
-        if (response.ok) {
-          const res = await response.json();
-          const list =
-            res?.data ?? res?.customers ?? (Array.isArray(res) ? res : []);
-          setCustomerSearchResults(
-            Array.isArray(list) ? list.slice(0, 15) : [],
-          );
-        } else {
-          setCustomerSearchResults([]);
-        }
-      } catch {
-        setCustomerSearchResults([]);
-      } finally {
-        setLoadingCustomerSearch(false);
-      }
-    },
-    [currentBranchId],
-  );
-
-  useEffect(() => {
-    const t = setTimeout(() => searchCustomersForTicket(customerSearch), 300);
-    return () => clearTimeout(t);
-  }, [customerSearch, searchCustomersForTicket]);
+  const handleCustomerChange = (
+    customer: {
+      id: string;
+      first_name?: string;
+      last_name?: string;
+      email: string;
+    } | null,
+  ) => {
+    setSelectedCustomer(customer);
+    setValue("customer_id", customer?.id || undefined);
+    setValue(
+      "customer_name",
+      customer
+        ? [customer.first_name, customer.last_name].filter(Boolean).join(" ") ||
+            undefined
+        : undefined,
+    );
+    setValue("customer_email", customer?.email || undefined);
+  };
 
   const handleFormSubmit = handleSubmit(async (data) => {
     setCreatingTicket(true);
@@ -143,7 +108,10 @@ export function CreateTicketDialog({
         isSuperAdmin && isGlobalView
           ? data.branch_id
           : currentBranchId || data.branch_id;
-      await onSubmit({ ...data, branch_id: branchId || undefined } as TicketForm);
+      await onSubmit({
+        ...data,
+        branch_id: branchId || undefined,
+      } as TicketForm);
       reset();
     } finally {
       setCreatingTicket(false);
@@ -156,8 +124,8 @@ export function CreateTicketDialog({
         <DialogHeader>
           <DialogTitle>Registrar Incidente</DialogTitle>
           <DialogDescription>
-            Registra un incidente o problema relacionado con un cliente
-            (lente, entrega, pago, etc.) para análisis y mejora del servicio
+            Registra un incidente o problema relacionado con un cliente (lente,
+            entrega, pago, etc.) para análisis y mejora del servicio
           </DialogDescription>
         </DialogHeader>
         <form className="space-y-4" onSubmit={handleFormSubmit}>
@@ -168,8 +136,8 @@ export function CreateTicketDialog({
               </Label>
               <Select
                 value={watch("category")}
-                onValueChange={(value) =>
-                  setValue("category", value as TicketForm["category"])
+                onValueChange={(v) =>
+                  setValue("category", v as TicketForm["category"])
                 }
               >
                 <SelectTrigger
@@ -192,15 +160,14 @@ export function CreateTicketDialog({
                 </p>
               )}
             </div>
-
             <div className="space-y-2">
               <Label htmlFor="priority">
                 Prioridad <span className="text-red-500">*</span>
               </Label>
               <Select
                 value={watch("priority")}
-                onValueChange={(value) =>
-                  setValue("priority", value as TicketForm["priority"])
+                onValueChange={(v) =>
+                  setValue("priority", v as TicketForm["priority"])
                 }
               >
                 <SelectTrigger
@@ -227,95 +194,14 @@ export function CreateTicketDialog({
 
           <div className="space-y-2">
             <Label htmlFor="customer_search">Cliente (opcional)</Label>
-            {selectedCustomerForTicket ? (
-              <div className="flex items-center justify-between p-3 border rounded-xl bg-epoch-background">
-                <div>
-                  <div className="font-medium">
-                    {selectedCustomerForTicket.first_name}{" "}
-                    {selectedCustomerForTicket.last_name}
-                  </div>
-                  <div className="text-sm text-gray-600">
-                    {selectedCustomerForTicket.email}
-                  </div>
-                </div>
-                <Button
-                  className="rounded-xl border-admin-border-primary/20"
-                  size="sm"
-                  type="button"
-                  variant="outline"
-                  onClick={() => {
-                    setSelectedCustomerForTicket(null);
-                    setValue("customer_id", undefined);
-                    setValue("customer_name", undefined);
-                    setValue("customer_email", undefined);
-                  }}
-                >
-                  <X className="h-4 w-4 mr-1" />
-                  Cambiar
-                </Button>
-              </div>
-            ) : (
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                <Input
-                  className="pl-10 rounded-xl focus:border-epoch-primary focus:ring-epoch-primary/20"
-                  id="customer_search"
-                  placeholder="Buscar por nombre, RUT o email..."
-                  value={customerSearch}
-                  onChange={(e) => setCustomerSearch(e.target.value)}
-                />
-                {customerSearch.length >= 2 && (
-                  <div className="absolute z-50 w-full mt-1 bg-white border rounded-lg shadow-lg max-h-60 overflow-y-auto">
-                    {loadingCustomerSearch ? (
-                      <div className="p-4 text-center">
-                        <Loader2 className="h-4 w-4 animate-spin mx-auto" />
-                      </div>
-                    ) : customerSearchResults.length > 0 ? (
-                      customerSearchResults.map((c) => (
-                        <button
-                          className="w-full text-left p-3 hover:bg-gray-100 border-b last:border-b-0"
-                          key={c.id}
-                          type="button"
-                          onClick={() => {
-                            setSelectedCustomerForTicket({
-                              id: c.id,
-                              first_name: c.first_name,
-                              last_name: c.last_name,
-                              email: c.email,
-                            });
-                            setValue("customer_id", c.id);
-                            setValue(
-                              "customer_name",
-                              [c.first_name, c.last_name]
-                                .filter(Boolean)
-                                .join(" ") || undefined,
-                            );
-                            setValue("customer_email", c.email);
-                            setCustomerSearch("");
-                            setCustomerSearchResults([]);
-                          }}
-                        >
-                          <div className="font-medium">
-                            {c.first_name} {c.last_name}
-                          </div>
-                          <div className="text-sm text-gray-600">
-                            {c.email}
-                            {c.rut ? ` • RUT: ${c.rut}` : ""}
-                          </div>
-                        </button>
-                      ))
-                    ) : (
-                      <div className="p-4 text-center text-gray-500 text-sm">
-                        No se encontraron clientes
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-            )}
+            <CustomerSearchField
+              currentBranchId={currentBranchId}
+              value={selectedCustomer}
+              onChange={handleCustomerChange}
+            />
             <p className="text-xs text-gray-500">
-              Busca por nombre, RUT o email. Si el problema está relacionado
-              con un cliente específico.
+              Busca por nombre, RUT o email. Si el problema está relacionado con
+              un cliente específico.
             </p>
           </div>
 
@@ -353,8 +239,8 @@ export function CreateTicketDialog({
               </p>
             )}
             <p className="text-xs text-gray-500">
-              Mínimo 10 caracteres. Describe el problema y cómo se resolvió o
-              se está resolviendo.
+              Mínimo 10 caracteres. Describe el problema y cómo se resolvió o se
+              está resolviendo.
             </p>
           </div>
 
@@ -374,13 +260,11 @@ export function CreateTicketDialog({
             >
               {creatingTicket ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Creando...
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Creando...
                 </>
               ) : (
                 <>
-                  <Send className="mr-2 h-4 w-4" />
-                  Crear Ticket
+                  <Send className="mr-2 h-4 w-4" /> Crear Ticket
                 </>
               )}
             </Button>
