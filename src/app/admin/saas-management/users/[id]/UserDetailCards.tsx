@@ -1,0 +1,339 @@
+"use client";
+
+import {
+  Activity,
+  Building2,
+  Calendar,
+  CheckCircle2,
+  Crown,
+  Mail,
+  MapPin,
+  Phone,
+  Shield,
+  User,
+  XCircle,
+} from "lucide-react";
+import Link from "next/link";
+
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { formatDate } from "@/lib/utils";
+
+interface UserDetails {
+  id: string;
+  email: string;
+  role: string;
+  is_active: boolean;
+  organization_id?: string;
+  created_at: string;
+  updated_at: string;
+  last_login?: string;
+  profiles?: {
+    id: string;
+    email: string;
+    first_name?: string;
+    last_name?: string;
+    phone?: string;
+    created_at: string;
+  };
+  organization?: {
+    id: string;
+    name: string;
+    slug: string;
+    subscription_tier: string;
+    status: string;
+  };
+  admin_branch_access?: Array<{
+    id: string;
+    branch_id: string | null;
+    role?: string;
+    is_primary?: boolean;
+    branches?: {
+      id: string;
+      name: string;
+      code: string;
+      organization_id: string;
+    };
+  }>;
+  recentActivity?: Array<{
+    id: string;
+    action: string;
+    resource_type: string;
+    resource_id: string;
+    created_at: string;
+  }>;
+}
+
+function getRoleBadge(role: string) {
+  const colors: Record<string, string> = {
+    root: "bg-red-100 text-red-800",
+    dev: "bg-orange-100 text-orange-800",
+    super_admin: "bg-purple-100 text-purple-800",
+    admin: "bg-blue-100 text-blue-800",
+    employee: "bg-gray-100 text-gray-800",
+    vendedor: "bg-green-100 text-green-800",
+  };
+  const icons: Record<string, typeof Shield> = {
+    root: Shield,
+    dev: Shield,
+    super_admin: Crown,
+    admin: User,
+    employee: User,
+    vendedor: User,
+  };
+  const Icon = icons[role] || User;
+  return (
+    <Badge className={colors[role] || colors.admin}>
+      <Icon className="h-3 w-3 mr-1" />
+      {role === "root"
+        ? "Root"
+        : role === "dev"
+          ? "Dev"
+          : role === "super_admin"
+            ? "Super Admin"
+            : role === "admin"
+              ? "Admin"
+              : role === "vendedor"
+                ? "Vendedor"
+                : role === "employee"
+                  ? "Empleado"
+                  : role}
+    </Badge>
+  );
+}
+
+export function UserPersonalCard({ user }: { user: UserDetails }) {
+  const fullName = user.profiles
+    ? `${user.profiles.first_name || ""} ${user.profiles.last_name || ""}`.trim() ||
+      user.email
+    : user.email;
+  return (
+    <Card className="admin-card">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-3">
+          <User className="h-5 w-5" />
+          Información Personal
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="text-sm font-medium text-gray-500">Nombre</label>
+            <p className="text-lg font-semibold">{fullName}</p>
+          </div>
+          <div>
+            <label className="text-sm font-medium text-gray-500">Email</label>
+            <p className="text-lg flex items-center gap-2">
+              <Mail className="h-4 w-4" />
+              {user.email}
+            </p>
+          </div>
+          {user.profiles?.phone && (
+            <div>
+              <label className="text-sm font-medium text-gray-500">
+                Teléfono
+              </label>
+              <p className="text-lg flex items-center gap-2">
+                <Phone className="h-4 w-4" />
+                {user.profiles.phone}
+              </p>
+            </div>
+          )}
+          <div>
+            <label className="text-sm font-medium text-gray-500">Rol</label>
+            <div className="mt-1">{getRoleBadge(user.role)}</div>
+          </div>
+          <div>
+            <label className="text-sm font-medium text-gray-500">Estado</label>
+            <div className="mt-1">
+              {user.is_active ? (
+                <Badge className="bg-green-100 text-green-800">
+                  <CheckCircle2 className="h-3 w-3 mr-1" />
+                  Activo
+                </Badge>
+              ) : (
+                <Badge className="bg-red-100 text-red-800">
+                  <XCircle className="h-3 w-3 mr-1" />
+                  Inactivo
+                </Badge>
+              )}
+            </div>
+          </div>
+          {user.last_login && (
+            <div>
+              <label className="text-sm font-medium text-gray-500">
+                Último acceso
+              </label>
+              <p className="text-lg flex items-center gap-2">
+                <Calendar className="h-4 w-4" />
+                {formatDate(user.last_login)}
+              </p>
+            </div>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+export function UserOrgCard({ user }: { user: UserDetails }) {
+  if (!user.organization) return null;
+  return (
+    <Card className="admin-card">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-3">
+          <Building2 className="h-5 w-5" />
+          Organización
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-lg font-semibold">{user.organization.name}</p>
+            <p className="text-sm text-gray-500">
+              Slug: {user.organization.slug}
+            </p>
+            <div className="flex gap-2 mt-2">
+              <Badge>{user.organization.subscription_tier}</Badge>
+              <Badge
+                variant={
+                  user.organization.status === "active"
+                    ? "default"
+                    : "secondary"
+                }
+              >
+                {user.organization.status}
+              </Badge>
+            </div>
+          </div>
+          <Link
+            href={`/admin/saas-management/organizations/${user.organization.id}`}
+          >
+            <Button size="sm" variant="outline">
+              Ver organización
+            </Button>
+          </Link>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+export function UserBranchesCard({ user }: { user: UserDetails }) {
+  const isSuperAdmin = user.admin_branch_access?.some(
+    (a) => a.branch_id === null,
+  );
+  const branches =
+    user.admin_branch_access
+      ?.filter((a) => a.branch_id !== null)
+      .map((a) => a.branches)
+      .filter(Boolean) || [];
+  return (
+    <Card className="admin-card">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-3">
+          <MapPin className="h-5 w-5" />
+          Acceso a Sucursales
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        {isSuperAdmin ? (
+          <div className="flex items-center gap-2">
+            <Crown className="h-5 w-5 text-purple-600" />
+            <span className="font-semibold">
+              Super Admin - Acceso a todas las sucursales
+            </span>
+          </div>
+        ) : branches.length > 0 ? (
+          <div className="space-y-2">
+            {branches.map((b) => (
+              <div
+                className="flex items-center justify-between p-3 border rounded-lg"
+                key={b?.id}
+              >
+                <div>
+                  <p className="font-semibold">{b?.name}</p>
+                  <p className="text-sm text-gray-500">Código: {b?.code}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-gray-500">
+            No tiene acceso a sucursales específicas
+          </p>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+export function UserActivityCard({ user }: { user: UserDetails }) {
+  if (!user.recentActivity || user.recentActivity.length === 0) return null;
+  return (
+    <Card className="admin-card">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-3">
+          <Activity className="h-5 w-5" />
+          Actividad Reciente
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-2">
+          {user.recentActivity.slice(0, 10).map((a) => (
+            <div
+              className="flex items-center justify-between p-3 border rounded-lg"
+              key={a.id}
+            >
+              <div>
+                <p className="font-semibold">{a.action}</p>
+                <p className="text-sm text-gray-500">
+                  {a.resource_type} - {a.resource_id}
+                </p>
+              </div>
+              <p className="text-sm text-gray-500">
+                {formatDate(a.created_at)}
+              </p>
+            </div>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+export function UserSystemInfoCard({ user }: { user: UserDetails }) {
+  return (
+    <Card className="admin-card">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-3">
+          <Shield className="h-5 w-5" />
+          Información del Sistema
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="text-sm font-medium text-gray-500">
+              Fecha de creación
+            </label>
+            <p className="text-lg">{formatDate(user.created_at)}</p>
+          </div>
+          <div>
+            <label className="text-sm font-medium text-gray-500">
+              Última actualización
+            </label>
+            <p className="text-lg">{formatDate(user.updated_at)}</p>
+          </div>
+          <div>
+            <label className="text-sm font-medium text-gray-500">
+              ID del Usuario
+            </label>
+            <p className="text-sm font-mono text-gray-600">{user.id}</p>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
