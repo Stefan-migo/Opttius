@@ -1,33 +1,15 @@
 "use client";
 
-import {
-  AlertCircle,
-  Building2,
-  CheckCircle,
-  Eye,
-  Loader2,
-  Package,
-  RefreshCw,
-  Truck,
-  User,
-  Wrench,
-} from "lucide-react";
+import { CheckCircle, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 // Hooks
 import { useBranch } from "@/hooks/useBranch";
 
 import AppointmentDetails from "./AppointmentDetails";
+import BranchSelectorForm from "./BranchSelector";
 // Components (will be created next)
 import CustomerSelection from "./CustomerSelection";
 import DateTimeSelection from "./DateTimeSelection";
@@ -36,21 +18,8 @@ import { useAvailability } from "./hooks/useAvailability";
 import { useCustomerSearch } from "./hooks/useCustomerSearch";
 import { useScheduleSettings } from "./hooks/useScheduleSettings";
 // Types
-import type {
-  AppointmentType,
-  CreateAppointmentFormProps,
-} from "./types/appointment.types";
-
-const appointmentTypes: AppointmentType[] = [
-  { value: "eye_exam", label: "Examen de la Vista", icon: Eye },
-  { value: "consultation", label: "Consulta", icon: User },
-  { value: "fitting", label: "Ajuste de Lentes", icon: Package },
-  { value: "delivery", label: "Entrega de Lentes", icon: Truck },
-  { value: "repair", label: "Reparación", icon: Wrench },
-  { value: "follow_up", label: "Seguimiento", icon: RefreshCw },
-  { value: "emergency", label: "Emergencia", icon: AlertCircle },
-  { value: "other", label: "Otro", icon: CheckCircle },
-];
+import type { CreateAppointmentFormProps } from "./types/appointment.types";
+import { APPOINTMENT_TYPES } from "./types/appointment.types";
 
 export default function CreateAppointmentForm({
   onSuccess,
@@ -163,11 +132,6 @@ export default function CreateAppointmentForm({
     }
   };
 
-  const formatTime = (time: string) => {
-    const [hours, minutes] = time.split(":");
-    return `${hours}:${minutes}`;
-  };
-
   const canSubmit =
     !appointmentFormHook.saving &&
     !!appointmentFormHook.formData.appointment_time &&
@@ -175,40 +139,13 @@ export default function CreateAppointmentForm({
 
   return (
     <form className="space-y-8 pb-4" onSubmit={handleSubmit}>
-      {/* Branch selector for super_admin - required to create appointment */}
       {isSuperAdmin && (
-        <div className="space-y-2">
-          <Label className="text-[10px] font-bold text-admin-text-tertiary uppercase tracking-widest">
-            Sucursal
-          </Label>
-          <Select
-            value={formBranchId ?? ""}
-            onValueChange={(v) => setFormBranchId(v || null)}
-          >
-            <SelectTrigger className="h-11 rounded-xl border-admin-border-primary/30 font-display font-bold text-[10px] tracking-widest uppercase">
-              <div className="flex items-center gap-2">
-                <Building2 className="h-4 w-4 text-epoch-primary" />
-                <SelectValue placeholder="Seleccione sucursal" />
-              </div>
-            </SelectTrigger>
-            <SelectContent className="rounded-xl border-admin-border-primary/20">
-              {branches.map((b) => (
-                <SelectItem
-                  className="font-display font-medium text-[10px] tracking-widest uppercase"
-                  key={b.id}
-                  value={b.id}
-                >
-                  {b.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          {!effectiveBranchForForm && (
-            <p className="text-[10px] text-admin-error font-medium">
-              Debe seleccionar una sucursal para crear la cita
-            </p>
-          )}
-        </div>
+        <BranchSelectorForm
+          branches={branches}
+          effectiveBranchForForm={effectiveBranchForForm}
+          formBranchId={formBranchId}
+          onBranchChange={(v) => setFormBranchId(v || null)}
+        />
       )}
 
       {/* Customer Selection */}
@@ -235,7 +172,10 @@ export default function CreateAppointmentForm({
         availableSlots={availabilityHook.availableSlots}
         date={appointmentFormHook.formData.appointment_date}
         duration={appointmentFormHook.formData.duration_minutes}
-        formatTime={formatTime}
+        formatTime={(time: string) => {
+          const [h, m] = time.split(":");
+          return `${h}:${m}`;
+        }}
         isSlotAvailable={availabilityHook.isSlotAvailable}
         loadingAvailability={availabilityHook.loading}
         lockDateTime={lockDateTime}
@@ -281,7 +221,7 @@ export default function CreateAppointmentForm({
       {/* Appointment Details */}
       <AppointmentDetails
         appointmentType={appointmentFormHook.formData.appointment_type}
-        appointmentTypes={appointmentTypes}
+        appointmentTypes={APPOINTMENT_TYPES}
         followUpDate={appointmentFormHook.formData.follow_up_date}
         followUpRequired={appointmentFormHook.formData.follow_up_required}
         notes={appointmentFormHook.formData.notes}

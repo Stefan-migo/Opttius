@@ -1,13 +1,22 @@
 "use client";
 
-import { CalendarDays } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
 import dynamic from "next/dynamic";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
+import { Card, CardContent } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useAuthContext } from "@/contexts/AuthContext";
+import { useBranch } from "@/hooks/useBranch";
+import { cn } from "@/lib/utils";
+
+import { useAppointments } from "../../hooks/useAppointments";
+import { useAppointmentSettings } from "../../hooks/useAppointmentSettings";
 import { AppointmentDetailDialog } from "./AppointmentDetailDialog";
 import { AppointmentsFilters } from "./AppointmentsFilters";
 import { AppointmentsHeader } from "./AppointmentsHeader";
 import { AppointmentsSidebar } from "./AppointmentsSidebar";
-import { AppointmentWeeklyReportDialog } from "./AppointmentWeeklyReportDialog";
 import {
   Appointment,
   getMondayOfWeek,
@@ -15,26 +24,8 @@ import {
   handleSlotClick,
   navigateDate,
 } from "./appointmentsUtils";
-import { useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
-import { toast } from "sonner";
-
-import { useAppointmentSettings } from "../../hooks/useAppointmentSettings";
-import { useAppointments } from "../../hooks/useAppointments";
-
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
-import { useBranch } from "@/hooks/useBranch";
-import { cn } from "@/lib/utils";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { useAuthContext } from "@/contexts/AuthContext";
+import { AppointmentWeeklyReportDialog } from "./AppointmentWeeklyReportDialog";
+import { CreateAppointmentDialog } from "./CreateAppointmentDialog";
 
 // Lazy load large components to reduce initial bundle size
 const AppointmentCalendar = dynamic(
@@ -45,21 +36,6 @@ const AppointmentCalendar = dynamic(
         <div className="text-center space-y-4">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-epoch-primary mx-auto" />
           <p className="text-admin-text-tertiary">Cargando calendario...</p>
-        </div>
-      </div>
-    ),
-    ssr: false,
-  },
-);
-
-const CreateAppointmentForm = dynamic(
-  () => import("@/components/admin/CreateAppointmentForm"),
-  {
-    loading: () => (
-      <div className="flex items-center justify-center py-12">
-        <div className="text-center space-y-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-epoch-primary mx-auto" />
-          <p className="text-admin-text-tertiary">Cargando formulario...</p>
         </div>
       </div>
     ),
@@ -121,15 +97,18 @@ export default function AppointmentsContent() {
 
   const queryClient = useQueryClient();
 
-  const { data: _appointmentsData, isLoading: loading, refetch } =
-    useAppointments({
-      branchId: branchIdForFilter,
-      view,
-      currentDate,
-      statusFilter,
-      user,
-      authLoading,
-    });
+  const {
+    data: _appointmentsData,
+    isLoading: loading,
+    refetch,
+  } = useAppointments({
+    branchId: branchIdForFilter,
+    view,
+    currentDate,
+    statusFilter,
+    user,
+    authLoading,
+  });
   // ponytail: service Appointment[] lacks customer/guest fields; annotate with component type
   const appointments: Appointment[] = _appointmentsData ?? [];
 
@@ -174,24 +153,24 @@ export default function AppointmentsContent() {
       />
 
       <AppointmentsFilters
-        view={view}
-        statusFilter={statusFilter}
+        branches={branches}
         currentDate={currentDate}
-        weekLabelDate={weekLabelDate}
         isGlobalView={isGlobalView}
         isSuperAdmin={isSuperAdmin}
         selectedBranchForView={selectedBranchForView}
-        branches={branches}
-        onViewChange={(v) => setView(v)}
-        onStatusFilterChange={setStatusFilter}
-        onNavigatePrev={() =>
-          navigateDate(currentDate, view, "prev", setCurrentDate)
-        }
+        statusFilter={statusFilter}
+        view={view}
+        weekLabelDate={weekLabelDate}
+        onBranchChange={(v) => setSelectedBranchForView(v)}
+        onGoToToday={() => goToToday(setCurrentDate)}
         onNavigateNext={() =>
           navigateDate(currentDate, view, "next", setCurrentDate)
         }
-        onGoToToday={() => goToToday(setCurrentDate)}
-        onBranchChange={(v) => setSelectedBranchForView(v)}
+        onNavigatePrev={() =>
+          navigateDate(currentDate, view, "prev", setCurrentDate)
+        }
+        onStatusFilterChange={setStatusFilter}
+        onViewChange={(v) => setView(v)}
       />
 
       {/* Main Agenda Grid */}
@@ -271,71 +250,38 @@ export default function AppointmentsContent() {
         </Card>
       </div>
 
-      {/* Create/Edit Appointment Dialog */}
-      <Dialog
+      <CreateAppointmentDialog
+        isGlobalView={isGlobalView}
         open={showCreateAppointment}
+        prefilledAppointmentData={prefilledAppointmentData}
+        selectedAppointment={selectedAppointment}
+        selectedBranchForView={selectedBranchForView}
+        onCancel={() => {
+          setShowCreateAppointment(false);
+          setSelectedAppointment(null);
+          setPrefilledAppointmentData(null);
+        }}
         onOpenChange={setShowCreateAppointment}
-      >
-        <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-2xl max-h-[90vh] overflow-hidden border-2 border-admin-border-primary/20 bg-white shadow-premium-xl rounded-xl p-0 flex flex-col">
-          <div className="p-0 flex flex-col min-h-0 flex-1 overflow-hidden">
-            <DialogHeader className="p-4 sm:p-6 md:p-8 bg-admin-bg-tertiary border-b border-admin-border-primary/10 shrink-0">
-              <div className="flex items-center gap-3 mb-2">
-                <div className="h-10 w-10 bg-epoch-primary flex items-center justify-center">
-                  <CalendarDays className="h-5 w-5 text-white" />
-                </div>
-                <DialogTitle className="text-xl sm:text-2xl font-display font-bold text-admin-text-primary tracking-tight uppercase">
-                  {selectedAppointment
-                    ? "Expediente de cita"
-                    : "Reservar cita"}
-                </DialogTitle>
-              </div>
-              <DialogDescription className="text-[11px] font-serif italic text-admin-text-tertiary tracking-wide pl-13">
-                {selectedAppointment
-                  ? "Modifique los parámetros técnicos de la sesión seleccionada en el archivo maestro."
-                  : "Ingrese las especificaciones para agendar una nueva consulta en el ciclo óptico."}
-              </DialogDescription>
-            </DialogHeader>
-            <div className="p-4 sm:p-6 md:p-8 flex-1 min-h-0 flex flex-col overflow-hidden">
-              <CreateAppointmentForm
-                effectiveBranchId={
-                  isGlobalView && selectedBranchForView
-                    ? selectedBranchForView
-                    : undefined
-                }
-                initialCustomerId={undefined}
-                initialData={
-                  selectedAppointment || prefilledAppointmentData || undefined
-                }
-                lockDateTime={prefilledAppointmentData?.lockDateTime || false}
-                onCancel={() => {
-                  setShowCreateAppointment(false);
-                  setSelectedAppointment(null);
-                  setPrefilledAppointmentData(null);
-                }}
-                onSuccess={handleAppointmentCreated}
-              />
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+        onSuccess={handleAppointmentCreated}
+      />
 
       {/* Appointment Detail Dialog */}
       {selectedAppointment && !showCreateAppointment && (
         <AppointmentDetailDialog
           appointment={selectedAppointment}
           open={!!selectedAppointment}
-          onOpenChange={() => setSelectedAppointment(null)}
-          onEdit={() => setShowCreateAppointment(true)}
           onAppointmentChange={(updated) => setSelectedAppointment(updated)}
+          onEdit={() => setShowCreateAppointment(true)}
+          onOpenChange={() => setSelectedAppointment(null)}
         />
       )}
 
       {/* Weekly Report Dialog */}
       <AppointmentWeeklyReportDialog
+        appointments={appointments}
+        currentDate={currentDate}
         open={showWeeklyReport}
         onOpenChange={setShowWeeklyReport}
-        currentDate={currentDate}
-        appointments={appointments}
       />
     </div>
   );
