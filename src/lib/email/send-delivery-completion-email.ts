@@ -6,6 +6,8 @@
 
 import { randomUUID } from "crypto";
 
+import type { SupabaseClient } from "@supabase/supabase-js";
+
 import { appLogger as logger } from "@/lib/logger";
 import { createServiceRoleClient } from "@/utils/supabase/server";
 
@@ -43,6 +45,7 @@ export interface DeliveryCompletionParams {
  */
 export async function sendDeliveryCompletionEmail(
   params: DeliveryCompletionParams,
+  supabase?: SupabaseClient,
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const {
@@ -62,10 +65,10 @@ export async function sendDeliveryCompletionEmail(
       return { success: false, error: "No customer email" };
     }
 
-    const supabase = createServiceRoleClient();
+    const client = supabase ?? createServiceRoleClient();
 
     // Check survey_enabled for org
-    const { data: surveyConfig } = await supabase
+    const { data: surveyConfig } = await client
       .from("system_config")
       .select("config_value")
       .eq("config_key", "survey_enabled")
@@ -102,7 +105,7 @@ export async function sendDeliveryCompletionEmail(
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + 30);
 
-    const { error: invError } = await supabase
+    const { error: invError } = await client
       .from("survey_invitations")
       .insert({
         token,
@@ -131,6 +134,8 @@ export async function sendDeliveryCompletionEmail(
       "work_order_delivered",
       true,
       organizationId,
+      undefined,
+      client,
     );
 
     if (!template) {
@@ -140,7 +145,7 @@ export async function sendDeliveryCompletionEmail(
       return { success: false, error: "Template not found" };
     }
 
-    const orgInfo = await getOrganizationInfoWithFallbacks(organizationId);
+    const orgInfo = await getOrganizationInfoWithFallbacks(organizationId, client);
     const variables = {
       ...getDefaultVariables({
         name: orgInfo?.name ?? undefined,
@@ -174,7 +179,7 @@ export async function sendDeliveryCompletionEmail(
     });
 
     if (result.success) {
-      await incrementTemplateUsage(template.id);
+      await incrementTemplateUsage(template.id, client);
     }
 
     return result;

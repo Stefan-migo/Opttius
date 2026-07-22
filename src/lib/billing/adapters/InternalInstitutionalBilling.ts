@@ -5,6 +5,8 @@
  * Usa folio secuencial FAC-INST-XXXXXX por sucursal.
  */
 
+import type { SupabaseClient } from "@supabase/supabase-js";
+
 import { appLogger as logger } from "@/lib/logger";
 import { createServiceRoleClient } from "@/utils/supabase/server";
 
@@ -17,7 +19,11 @@ import type {
 export class InternalInstitutionalBilling
   implements InstitutionalInvoiceAdapter
 {
-  private supabase = createServiceRoleClient();
+  private supabase: SupabaseClient;
+
+  constructor(supabase?: SupabaseClient) {
+    this.supabase = supabase ?? createServiceRoleClient();
+  }
 
   async emitInvoice(
     invoice: InstitutionalInvoice,

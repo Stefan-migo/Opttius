@@ -1,6 +1,7 @@
 /**
  * SaaS subscription email templates — welcome, trial, payments
  */
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { createServiceRoleClient } from "@/utils/supabase/server";
 
 import { sendEmail } from "../client";
@@ -18,10 +19,10 @@ function htmlToText(html: string): string {
     .trim();
 }
 
-async function getOrganizationInfo(organizationId: string) {
+async function getOrganizationInfo(organizationId: string, supabase?: SupabaseClient) {
   try {
-    const supabase = createServiceRoleClient();
-    const { data: org } = await supabase
+    const client = supabase ?? createServiceRoleClient();
+    const { data: org } = await client
       .from("organizations")
       .select("name, metadata")
       .eq("id", organizationId)
@@ -86,6 +87,7 @@ export interface SaaSPaymentData {
 
 export async function sendSaaSWelcome(
   user: SaaSUserData,
+  supabase?: SupabaseClient,
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const template = await loadEmailTemplate("saas_welcome", true);
@@ -135,6 +137,7 @@ export async function sendSaaSWelcome(
 
 export async function sendSaaSTrialEnding(
   data: SaaSTrialData,
+  supabase?: SupabaseClient,
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const variables = {
@@ -197,9 +200,10 @@ export async function sendSaaSTrialEnding(
 
 export async function sendSaaSSubscriptionSuccess(
   data: SaaSSubscriptionData,
+  supabase?: SupabaseClient,
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const orgInfo = await getOrganizationInfo(data.organization_id);
+    const orgInfo = await getOrganizationInfo(data.organization_id, supabase);
 
     const variables = {
       ...getDefaultVariables(),
@@ -264,6 +268,7 @@ export async function sendSaaSSubscriptionSuccess(
 
 export async function sendSaaSPaymentFailed(
   data: SaaSPaymentData,
+  supabase?: SupabaseClient,
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const template = await loadEmailTemplate("saas_payment_failed", true);
@@ -319,6 +324,7 @@ export async function sendSaaSPaymentFailed(
 
 export async function sendSaaSPaymentReminder(
   data: SaaSPaymentData,
+  supabase?: SupabaseClient,
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const template = await loadEmailTemplate("saas_payment_reminder", true);

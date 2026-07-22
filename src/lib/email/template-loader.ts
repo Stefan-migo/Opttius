@@ -1,5 +1,7 @@
-import { createClient } from "@/utils/supabase/server";
+import type { SupabaseClient } from "@supabase/supabase-js";
+
 import { appLogger as logger } from "@/lib/logger";
+import { createClient } from "@/utils/supabase/server";
 import { createServiceRoleClient } from "@/utils/supabase/server";
 
 export interface EmailTemplate {
@@ -22,11 +24,12 @@ export async function loadEmailTemplate(
   useServiceRole: boolean = false,
   organizationId?: string,
   category?: "saas" | "organization",
+  supabaseOverride?: SupabaseClient,
 ): Promise<EmailTemplate | null> {
   try {
-    const supabase = useServiceRole
+    const supabase = supabaseOverride ?? (useServiceRole
       ? createServiceRoleClient()
-      : await createClient();
+      : await createClient());
 
     // Strategy: Org override (is_active=false) = disabled for that org. Otherwise: org-specific first, then system default.
     if (organizationId) {
@@ -97,19 +100,20 @@ export async function loadEmailTemplate(
  */
 export async function incrementTemplateUsage(
   templateId: string,
+  supabase?: SupabaseClient,
 ): Promise<void> {
   try {
-    const supabase = createServiceRoleClient();
+    const client = supabase ?? createServiceRoleClient();
 
     // Get current usage count
-    const { data: template } = await supabase
+    const { data: template } = await client
       .from("system_email_templates")
       .select("usage_count")
       .eq("id", templateId)
       .single();
 
     // Update usage count and last_used_at
-    await supabase
+    await client
       .from("system_email_templates")
       .update({
         usage_count: (template?.usage_count || 0) + 1,

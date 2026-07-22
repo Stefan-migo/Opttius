@@ -2,10 +2,12 @@
  * System Config Service
  * Business logic layer for system configuration operations
  */
-import { createClient, createServiceRoleClient } from "@/utils/supabase/server";
-import { appLogger as logger } from "@/lib/logger";
+import type { SupabaseClient } from "@supabase/supabase-js";
+
 import { mergeConfigsByScope } from "@/lib/admin/system-config-utils";
 import { createConfigValueSchema } from "@/lib/api/validation/zod-schemas";
+import { appLogger as logger } from "@/lib/logger";
+import { createClient, createServiceRoleClient } from "@/utils/supabase/server";
 
 interface ConfigRow {
   config_key: string;
@@ -80,13 +82,16 @@ async function getAdminAuth(
   };
 }
 
-export async function getSystemConfigs(params: {
-  category: string;
-  publicOnly: boolean;
-  branchId: string | null;
-}): Promise<{ configs: ConfigRow[] }> {
+export async function getSystemConfigs(
+  params: {
+    category: string;
+    publicOnly: boolean;
+    branchId: string | null;
+  },
+  authClient?: SupabaseClient,
+): Promise<{ configs: ConfigRow[] }> {
   const { category, publicOnly, branchId } = params;
-  const supabase = await createClient();
+  const supabase = authClient ?? await createClient();
   const { user, orgId, isSuperAdmin } = await getAdminAuth(supabase);
 
   const hasServiceRole = !!process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -272,8 +277,11 @@ async function resolveScope(
   return { targetOrgId: orgId, targetBranchId: branchId || null };
 }
 
-export async function createSystemConfig(body: Record<string, unknown>): Promise<{ config: Record<string, unknown> }> {
-  const supabase = await createClient();
+export async function createSystemConfig(
+  body: Record<string, unknown>,
+  authClient?: SupabaseClient,
+): Promise<{ config: Record<string, unknown> }> {
+  const supabase = authClient ?? await createClient();
   const { user, orgId, isSuperAdmin } = await getAdminAuth(supabase);
   const branchId = (body.branch_id as string | null) ?? null;
 
@@ -358,8 +366,9 @@ export async function createSystemConfig(body: Record<string, unknown>): Promise
 export async function updateSystemConfigs(
   body: Record<string, unknown>,
   branchIdFromHeaders: string | null,
+  authClient?: SupabaseClient,
 ): Promise<{ results: Array<Record<string, unknown>> }> {
-  const supabase = await createClient();
+  const supabase = authClient ?? await createClient();
   const { user, orgId, isSuperAdmin } = await getAdminAuth(supabase);
   const updates = body.updates as Array<Record<string, unknown>> | undefined;
   const branchId = body.branch_id as string | null ?? branchIdFromHeaders;
