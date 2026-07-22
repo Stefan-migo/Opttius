@@ -2,9 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
 import { getBranchContext } from "@/lib/api/branch-middleware";
-import { rateLimitConfigs, withRateLimit } from "@/lib/rate-limiting";
 import { createApiSuccessResponse } from "@/lib/api/response";
 import { appLogger as logger } from "@/lib/logger";
+import { rateLimitConfigs, withRateLimit } from "@/lib/rate-limiting";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
 import { createClient } from "@/utils/supabase/server";
 

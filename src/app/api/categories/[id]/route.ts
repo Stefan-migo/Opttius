@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { appLogger as logger } from "@/lib/logger";
-import { createClient, createServiceRoleClient } from "@/utils/supabase/server";
+import { createClient } from "@/utils/supabase/server";
 
 export const dynamic = "force-dynamic";
 export async function GET(
@@ -124,20 +124,6 @@ export async function PUT(
     data = result.data;
     error = result.error;
 
-    // If RLS error, try with service role
-    if (error && error.code === "42501") {
-      const serviceSupabase = createServiceRoleClient();
-      const serviceResult = await serviceSupabase
-        .from("categories")
-        .update(categoryData)
-        .eq("id", id)
-        .select()
-        .single();
-
-      data = serviceResult.data;
-      error = serviceResult.error;
-    }
-
     if (error) {
       logger.error("Error updating category:", error);
       return NextResponse.json(
@@ -230,17 +216,6 @@ export async function DELETE(
     const result = await supabase.from("categories").delete().eq("id", id);
 
     error = result.error;
-
-    // If RLS error, try with service role
-    if (error && error.code === "42501") {
-      const serviceSupabase = createServiceRoleClient();
-      const serviceResult = await serviceSupabase
-        .from("categories")
-        .delete()
-        .eq("id", id);
-
-      error = serviceResult.error;
-    }
 
     if (error) {
       // Check if error is from trigger (default category protection)

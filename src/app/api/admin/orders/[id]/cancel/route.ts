@@ -8,7 +8,7 @@ import type {
   IsAdminParams,
   IsAdminResult,
 } from "@/types/supabase-rpc";
-import { createClient, createServiceRoleClient } from "@/utils/supabase/server";
+import { createClient } from "@/utils/supabase/server";
 
 /**
  * POST /api/admin/orders/[id]/cancel
@@ -22,7 +22,6 @@ export async function POST(
   try {
     const { id: orderId } = await params;
     const supabase = await createClient();
-    const supabaseServiceRole = createServiceRoleClient();
 
     // Check admin authorization
     const {
@@ -96,7 +95,7 @@ export async function POST(
     }
 
     // Get order
-    const { data: order, error: orderError } = await supabaseServiceRole
+    const { data: order, error: orderError } = await supabase
       .from("orders")
       .select("*")
       .eq("id", orderId)
@@ -121,7 +120,7 @@ export async function POST(
 
     // Require open cash register (caja) to cancel orders and create credit notes
     if (order.branch_id) {
-      const { data: openSession } = await supabaseServiceRole
+      const { data: openSession } = await supabase
         .from("pos_sessions")
         .select("id")
         .eq("branch_id", order.branch_id)
@@ -147,7 +146,7 @@ export async function POST(
     if (order.branch_id) {
       try {
         // Get total_paid from order_payments (for partial payments, refund only what was paid)
-        const { data: payments } = await supabaseServiceRole
+        const { data: payments } = await supabase
           .from("order_payments")
           .select("amount")
           .eq("order_id", orderId);
@@ -161,14 +160,14 @@ export async function POST(
             : Number(order.total_amount);
 
         // Revert stock for order items with product_id
-        const { data: orderItems } = await supabaseServiceRole
+        const { data: orderItems } = await supabase
           .from("order_items")
           .select("id, product_id, quantity")
           .eq("order_id", orderId);
         for (const oi of orderItems || []) {
           if (oi.product_id && order.branch_id) {
             try {
-              const { error: stockErr } = await supabaseServiceRole.rpc(
+              const { error: stockErr } = await supabase.rpc(
                 "update_product_stock",
                 {
                   p_product_id: oi.product_id,
@@ -198,7 +197,7 @@ export async function POST(
         }
 
         // Get open POS session for this branch
-        const { data: openSession } = await supabaseServiceRole
+        const { data: openSession } = await supabase
           .from("pos_sessions")
           .select("id")
           .eq("branch_id", order.branch_id)
@@ -211,7 +210,7 @@ export async function POST(
 
         // Generate credit note number
         const { data: cnNumberRaw, error: cnNumError } =
-          await supabaseServiceRole.rpc("generate_credit_note_number");
+          await supabase.rpc("generate_credit_note_number");
 
         const cnNumber =
           typeof cnNumberRaw === "string"
@@ -235,14 +234,14 @@ export async function POST(
         }
 
         // Get organization_id from branch
-        const { data: branchRow } = await supabaseServiceRole
+        const { data: branchRow } = await supabase
           .from("branches")
           .select("organization_id")
           .eq("id", order.branch_id)
           .single();
 
         const { data: newCreditNote, error: cnError } =
-          await supabaseServiceRole
+          await supabase
             .from("credit_notes")
             .insert({
               credit_note_number: cnNumber,
@@ -272,7 +271,7 @@ export async function POST(
 
         // Create movement only if we have a session (caja abierta)
         if (posSessionId && creditNoteId) {
-          const { error: movError } = await supabaseServiceRole
+          const { error: movError } = await supabase
             .from("credit_note_movements")
             .insert({
               credit_note_id: creditNoteId,
@@ -299,7 +298,7 @@ export async function POST(
     }
 
     // Update order status to cancelled
-    const { error: updateError } = await supabaseServiceRole
+    const { error: updateError } = await supabase
       .from("orders")
       .update({
         status: "cancelled",

@@ -16,7 +16,6 @@ import { sendDeliveryCompletionEmail } from "@/lib/email/send-delivery-completio
 import { appLogger as logger } from "@/lib/logger";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
 import { createClient } from "@/utils/supabase/server";
-import { createServiceRoleClient } from "@/utils/supabase/server";
 
 export const dynamic = "force-dynamic";
 
@@ -28,7 +27,6 @@ export async function POST(
 
   try {
     const supabase = await createClient();
-    const supabaseServiceRole = createServiceRoleClient();
 
     const {
       data: { user },
@@ -47,7 +45,7 @@ export async function POST(
 
     const { id: fieldOperationId } = await params;
 
-    const { data: operation, error: opError } = await supabaseServiceRole
+    const { data: operation, error: opError } = await supabase
       .from("field_operations")
       .select("id, branch_id")
       .eq("id", fieldOperationId)
@@ -89,7 +87,7 @@ export async function POST(
     const failed: { id: string; error: string }[] = [];
 
     for (const workOrderId of validatedBody.work_order_ids) {
-      const { data: wo } = await supabaseServiceRole
+      const { data: wo } = await supabase
         .from("lab_work_orders")
         .select("id, field_operation_id, status, pos_order_id")
         .eq("id", workOrderId)
@@ -109,7 +107,7 @@ export async function POST(
       }
 
       if (wo.pos_order_id) {
-        const { data: balance } = await supabaseServiceRole.rpc(
+        const { data: balance } = await supabase.rpc(
           "calculate_order_balance",
           { p_order_id: wo.pos_order_id },
         );
@@ -122,7 +120,7 @@ export async function POST(
         }
       }
 
-      const { error: statusError } = await supabaseServiceRole.rpc(
+      const { error: statusError } = await supabase.rpc(
         "update_work_order_status",
         {
           p_work_order_id: workOrderId,
@@ -140,7 +138,7 @@ export async function POST(
         continue;
       }
 
-      await supabaseServiceRole
+      await supabase
         .from("lab_work_orders")
         .update({
           operativo_delivered_at: deliveredAt,
@@ -156,7 +154,7 @@ export async function POST(
     for (const workOrderId of updated) {
       (async () => {
         try {
-          const { data: wo } = await supabaseServiceRole
+          const { data: wo } = await supabase
             .from("lab_work_orders")
             .select(
               `
@@ -175,7 +173,7 @@ export async function POST(
 
           let orgId = (wo as { organization_id?: string }).organization_id;
           if (!orgId && wo.branch_id) {
-            const { data: branch } = await supabaseServiceRole
+            const { data: branch } = await supabase
               .from("branches")
               .select("organization_id")
               .eq("id", wo.branch_id)

@@ -7,9 +7,9 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
+
 import { ValidationError } from "@/lib/api/errors";
 import {
-  createApiErrorResponse,
   createApiSuccessResponse,
 } from "@/lib/api/response";
 import {
@@ -18,16 +18,17 @@ import {
 } from "@/lib/api/validation/zod-helpers";
 import { processSaleSchema } from "@/lib/api/validation/zod-schemas";
 import { appLogger as logger } from "@/lib/logger";
-import { createServiceRoleClient } from "@/utils/supabase/server";
+import { createClient } from "@/utils/supabase/server";
+
 import { handleAuthSession } from "./processAuthSession";
-import { handleBusinessLookups } from "./processSaleBusinessLookups";
-import { handleStockAndWorkOrder } from "./processSaleStockAndWorkOrder";
+import { handleLegacyPath } from "./processLegacyHandler";
 import {
-  computePaymentAmount,
   computeDbPaymentMethod,
+  computePaymentAmount,
 } from "./processPaymentUtils";
 import { handleRpcPath } from "./processRpcHandler";
-import { handleLegacyPath } from "./processLegacyHandler";
+import { handleBusinessLookups } from "./processSaleBusinessLookups";
+import { handleStockAndWorkOrder } from "./processSaleStockAndWorkOrder";
 import type { ProcessSaleContext } from "./processSaleTypes";
 
 export async function handleProcessSale(
@@ -56,12 +57,12 @@ export async function handleProcessSale(
     siiInvoiceNumber,
   } = authResult;
 
-  const supabaseServiceRole = createServiceRoleClient();
+  const supabase = await createClient();
 
   // Idempotency check
   const idempotency_key = validatedBody.idempotency_key as string | undefined;
   if (idempotency_key) {
-    const { data: existing } = await supabaseServiceRole
+    const { data: existing } = await supabase
       .from("pos_sale_idempotency")
       .select("response_snapshot")
       .eq("idempotency_key", idempotency_key)
@@ -75,7 +76,7 @@ export async function handleProcessSale(
 
   // 2. Business lookups
   const lookupResult = await handleBusinessLookups({
-    supabaseServiceRole,
+    supabase,
     validatedBody,
     effectiveBranchId,
     user,
@@ -176,7 +177,7 @@ export async function handleProcessSale(
   const { createClient: createServerClient } = await import("@/utils/supabase/server");
   const ctx: ProcessSaleContext = {
     supabase: await createServerClient(),
-    supabaseServiceRole,
+    supabase,
     user: user as any,
     effectiveBranchId,
     fieldOperationId,

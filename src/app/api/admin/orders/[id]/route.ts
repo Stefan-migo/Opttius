@@ -6,7 +6,6 @@ import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
 import {
   createClient,
   createClientFromRequest,
-  createServiceRoleClient,
 } from "@/utils/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -125,10 +124,8 @@ export async function PATCH(
     // Send email notifications based on status changes
     if (status && status !== currentOrder?.status) {
       try {
-        const supabaseAdmin = createServiceRoleClient();
-
         // Get full order details for email
-        const { data: fullOrder } = await supabaseAdmin
+        const { data: fullOrder } = await supabase
           .from("orders")
           .select(
             `

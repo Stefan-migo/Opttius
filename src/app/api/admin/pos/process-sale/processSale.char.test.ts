@@ -11,18 +11,17 @@
 import { describe, expect, it } from "vitest";
 
 // ─── processSaleValidation (T-121) ───────────────────────────────────────────
-
 import {
-  extractFrameInfo,
-  extractLensInfo,
-  extractTreatmentsCost,
-  extractLaborCost,
+  computeMinDepositFallback,
   computeOrderNumber,
   computeWorkOrderDecision,
-  computeMinDepositFallback,
-  isNonWorkOrderItem,
-  haveOnlyNonWorkOrderProducts,
+  extractFrameInfo,
+  extractLaborCost,
+  extractLensInfo,
+  extractTreatmentsCost,
   hasLensDataForMounting,
+  haveOnlyNonWorkOrderProducts,
+  isNonWorkOrderItem,
 } from "./processSaleValidation";
 
 describe("processSaleValidation", () => {
@@ -327,13 +326,13 @@ describe("processSaleValidation", () => {
 // ─── processPaymentUtils (T-122) ─────────────────────────────────────────────
 
 import {
-  computePaymentAmount,
-  computeDbPaymentMethod,
-  computeWorkOrderStatus,
-  computeLensCost,
-  computeCashAmount,
   buildOrderPaymentsPayload,
   buildStockReductionItems,
+  computeCashAmount,
+  computeDbPaymentMethod,
+  computeLensCost,
+  computePaymentAmount,
+  computeWorkOrderStatus,
 } from "./processPaymentUtils";
 
 describe("processPaymentUtils", () => {
@@ -570,12 +569,12 @@ describe("processPaymentUtils", () => {
 // ─── processResponseBuilder (T-123) ──────────────────────────────────────────
 
 import {
-  buildOrderItems,
+  buildBillingOrder,
+  buildBillingResponse,
   buildCustomerName,
   buildFullOrderResponse,
+  buildOrderItems,
   buildWorkOrderResponse,
-  buildBillingResponse,
-  buildBillingOrder,
 } from "./processResponseBuilder";
 
 describe("processResponseBuilder", () => {

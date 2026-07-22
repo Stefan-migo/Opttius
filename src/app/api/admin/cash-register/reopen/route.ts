@@ -8,7 +8,7 @@ import type {
   IsAdminParams,
   IsAdminResult,
 } from "@/types/supabase-rpc";
-import { createClient, createServiceRoleClient } from "@/utils/supabase/server";
+import { createClient } from "@/utils/supabase/server";
 
 /**
  * POST /api/admin/cash-register/reopen
@@ -18,7 +18,6 @@ export const dynamic = "force-dynamic";
 export async function POST(request: NextRequest) {
   try {
     const supabase = await createClient();
-    const supabaseServiceRole = createServiceRoleClient();
 
     // Check admin authorization
     const {
@@ -74,7 +73,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Get the session to check its branch and operativo
-    const { data: session, error: sessionError } = await supabaseServiceRole
+    const { data: session, error: sessionError } = await supabase
       .from("pos_sessions")
       .select(
         "id, branch_id, field_operation_id, status, reopen_count, opening_time",
@@ -109,7 +108,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if there's already an open session for this branch (and operativo if applicable)
-    let openSessionsQuery = supabaseServiceRole
+    let openSessionsQuery = supabase
       .from("pos_sessions")
       .select("id, opening_time")
       .eq("branch_id", session.branch_id)
@@ -154,7 +153,7 @@ export async function POST(request: NextRequest) {
     // Get the closure associated with this session (fallback by branch/date)
     let closure = null;
     const { data: closureBySession, error: closureError } =
-      await supabaseServiceRole
+      await supabase
         .from("cash_register_closures")
         .select("id, status, reopen_count, pos_session_id")
         .eq("pos_session_id", session_id)
@@ -164,7 +163,7 @@ export async function POST(request: NextRequest) {
       closure = closureBySession;
     } else if (session.opening_time) {
       const sessionDateStr = session.opening_time.split("T")[0];
-      let closureByDateQuery = supabaseServiceRole
+      let closureByDateQuery = supabase
         .from("cash_register_closures")
         .select("id, status, reopen_count, pos_session_id")
         .eq("branch_id", session.branch_id)
@@ -189,7 +188,7 @@ export async function POST(request: NextRequest) {
     // Update pos_session to reopen
     const reopenCount = (session.reopen_count || 0) + 1;
     const { data: updatedSession, error: updateError } =
-      await supabaseServiceRole
+      await supabase
         .from("pos_sessions")
         .update({
           status: "open",
@@ -216,7 +215,7 @@ export async function POST(request: NextRequest) {
     // Update closure if it exists - change status to 'draft' to allow modifications
     if (closure) {
       const closureReopenCount = (closure.reopen_count || 0) + 1;
-      const { error: closureUpdateError } = await supabaseServiceRole
+      const { error: closureUpdateError } = await supabase
         .from("cash_register_closures")
         .update({
           status: "draft", // Change to draft so it can be modified and closed again

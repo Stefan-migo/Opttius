@@ -5,10 +5,12 @@
  * Kept minimal per extraction pattern: route.ts handles rate limiting + dispatch only.
  */
 import { NextRequest, NextResponse } from "next/server";
+
 import { APIError, RateLimitError } from "@/lib/api/errors";
 import { createApiErrorResponse } from "@/lib/api/response";
-import { rateLimitConfigs, withRateLimit } from "@/lib/rate-limiting";
 import { appLogger as logger } from "@/lib/logger";
+import { rateLimitConfigs, withRateLimit } from "@/lib/rate-limiting";
+
 import { handleProcessSale } from "./processSaleHandler";
 
 export const dynamic = "force-dynamic";

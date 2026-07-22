@@ -17,7 +17,6 @@ import { appLogger as logger } from "@/lib/logger";
 import { validateFeature } from "@/lib/saas/tier-validator";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
 import { createClient } from "@/utils/supabase/server";
-import { createServiceRoleClient } from "@/utils/supabase/server";
 
 export const dynamic = "force-dynamic";
 
@@ -112,7 +111,6 @@ export async function POST(request: NextRequest) {
 
   try {
     const supabase = await createClient();
-    const supabaseServiceRole = createServiceRoleClient();
 
     const {
       data: { user },
@@ -159,7 +157,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { data: branch } = await supabaseServiceRole
+    const { data: branch } = await supabase
       .from("branches")
       .select("organization_id")
       .eq("id", branchId)
@@ -191,7 +189,7 @@ export async function POST(request: NextRequest) {
         ? validatedBody.scheduled_date.toISOString().slice(0, 10)
         : new Date(validatedBody.scheduled_date).toISOString().slice(0, 10);
 
-    const { data: newOperation, error: insertError } = await supabaseServiceRole
+    const { data: newOperation, error: insertError } = await supabase
       .from("field_operations")
       .insert({
         name: validatedBody.name,

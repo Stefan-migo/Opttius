@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getBranchContext } from "@/lib/api/branch-middleware";
 import { appLogger as logger } from "@/lib/logger";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
-import { createClient, createServiceRoleClient } from "@/utils/supabase/server";
+import { createClient } from "@/utils/supabase/server";
 
 /**
  * GET /api/admin/credit-notes
@@ -13,7 +13,6 @@ export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
   try {
     const supabase = await createClient();
-    const supabaseServiceRole = createServiceRoleClient();
 
     const {
       data: { user },
@@ -41,7 +40,7 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get("limit") || "50");
     const offset = parseInt(searchParams.get("offset") || "0");
 
-    let query = supabaseServiceRole
+    let query = supabase
       .from("credit_notes")
       .select(
         `
@@ -91,7 +90,7 @@ export async function GET(request: NextRequest) {
       .filter(Boolean);
     let orderNumbersMap: Record<string, string> = {};
     if (orderIds.length > 0) {
-      const { data: orders } = await supabaseServiceRole
+      const { data: orders } = await supabase
         .from("orders")
         .select("id, order_number")
         .in("id", orderIds);

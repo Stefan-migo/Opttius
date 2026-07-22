@@ -10,7 +10,6 @@ import type {
   IsSuperAdminResult,
 } from "@/types/supabase-rpc";
 import { createClient } from "@/utils/supabase/server";
-import { createServiceRoleClient } from "@/utils/supabase/service-role";
 
 export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
@@ -91,11 +90,7 @@ export async function GET(request: NextRequest) {
     // CRITICAL: Use organization_id from currentAdminUser as fallback
     const effectiveOrgId = userOrgId || currentAdminUser?.organization_id;
 
-    // Usar service role para la consulta de lista y relación admin_branch_access:
-    // RLS en admin_branch_access solo permite ver la propia fila (o todas si super_admin),
-    // por lo que con createClient() la relación venía vacía para otros usuarios.
-    const supabaseServiceRole = createServiceRoleClient();
-    let query = supabaseServiceRole.from("admin_users").select(
+    let query = supabase.from("admin_users").select(
       `
         id,
         email,
@@ -157,7 +152,7 @@ export async function GET(request: NextRequest) {
     if (search.trim()) {
       const searchPattern = `%${search.trim()}%`;
       const { data: matchingProfiles, error: profileSearchError } =
-        await supabaseServiceRole
+        await supabase
           .from("profiles")
           .select("id")
           .or(

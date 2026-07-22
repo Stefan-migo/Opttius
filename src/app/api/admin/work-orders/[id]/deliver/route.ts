@@ -10,7 +10,7 @@ import { sendDeliveryCompletionEmail } from "@/lib/email/send-delivery-completio
 import { appLogger as logger } from "@/lib/logger";
 import { NotificationService } from "@/lib/notifications/notification-service";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
-import { createClient , createServiceRoleClient } from "@/utils/supabase/server";
+import { createClient } from "@/utils/supabase/server";
 
 export const dynamic = "force-dynamic";
 export async function POST(
@@ -19,7 +19,6 @@ export async function POST(
 ) {
   try {
     const supabase = await createClient();
-    const supabaseServiceRole = createServiceRoleClient();
 
     // Check admin authorization
     const {
@@ -43,7 +42,7 @@ export async function POST(
     const { id } = await params;
 
     // 1. Get work order by id (no branch filter - same pattern as GET [id])
-    const { data: workOrder, error: workOrderError } = await supabaseServiceRole
+    const { data: workOrder, error: workOrderError } = await supabase
       .from("lab_work_orders")
       .select("*")
       .eq("id", id)
@@ -72,7 +71,7 @@ export async function POST(
       // Still allow delivery but log warning
     } else {
       // 4. Get associated order
-      const { data: order, error: orderError } = await supabaseServiceRole
+      const { data: order, error: orderError } = await supabase
         .from("orders")
         .select("id, total_amount, order_number")
         .eq("id", workOrder.pos_order_id)
@@ -88,7 +87,7 @@ export async function POST(
 
       // 5. Calculate order balance
       const { data: balance, error: balanceError } =
-        await supabaseServiceRole.rpc("calculate_order_balance", {
+        await supabase.rpc("calculate_order_balance", {
           p_order_id: order.id,
         });
 
@@ -119,7 +118,7 @@ export async function POST(
 
     // 7. If balance is $0 (or no order), allow delivery
     // Update work order status to 'delivered'
-    const { error: updateError } = await supabaseServiceRole.rpc(
+    const { error: updateError } = await supabase.rpc(
       "update_work_order_status",
       {
         p_work_order_id: id,
@@ -139,7 +138,7 @@ export async function POST(
 
     // 8. Fetch updated work order
     const { data: updatedWorkOrder, error: fetchError } =
-      await supabaseServiceRole
+      await supabase
         .from("lab_work_orders")
         .select(
           `
@@ -185,7 +184,7 @@ export async function POST(
       let orgId = (updatedWorkOrder as { organization_id?: string })
         .organization_id;
       if (!orgId && updatedWorkOrder.branch_id) {
-        const { data: branch } = await supabaseServiceRole
+        const { data: branch } = await supabase
           .from("branches")
           .select("organization_id")
           .eq("id", updatedWorkOrder.branch_id)

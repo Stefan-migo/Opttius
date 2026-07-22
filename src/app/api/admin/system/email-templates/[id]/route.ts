@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { appLogger as logger } from "@/lib/logger";
-import { createClient, createServiceRoleClient } from "@/utils/supabase/server";
+import { createClient } from "@/utils/supabase/server";
 
 export const dynamic = "force-dynamic";
 export async function GET(
@@ -121,9 +121,8 @@ export async function PUT(
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 
-    // Fetch template with service role (RLS may hide inactive templates from user client)
-    const dbClient = createServiceRoleClient();
-    const { data: existingTemplate } = await dbClient
+    // Fetch template with auth client (RLS scopes access)
+    const { data: existingTemplate } = await supabase
       .from("system_email_templates")
       .select(
         "organization_id, is_system, type, name, subject, content, variables",
@@ -273,8 +272,8 @@ export async function PUT(
         ? variables
         : JSON.parse(variables || "[]");
 
-    // Use service role for update - auth already verified, bypasses RLS
-    const { data: template, error } = await dbClient
+    // Auth already verified — RLS scopes access
+    const { data: template, error } = await supabase
       .from("system_email_templates")
       .update(updateData)
       .eq("id", params.id)

@@ -1,18 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { appLogger as logger } from "@/lib/logger";
-import { createServiceRoleClient } from "@/utils/supabase/server";
-
-const supabase = createServiceRoleClient();
+import { createClient } from "@/utils/supabase/server";
 
 // GET - Fetch all option fields with their values
 export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
   try {
+    const supabase = await createClient();
     const { searchParams } = new URL(request.url);
     const fieldKey = searchParams.get("field_key");
     const category = searchParams.get("category");
-    const formType = searchParams.get("form_type"); // product|customer|prescription|quote|appointment|pos|global
+    const formType = searchParams.get("form_type");
     const includeInactive = searchParams.get("include_inactive") === "true";
 
     let query = supabase
@@ -75,6 +74,7 @@ export async function GET(request: NextRequest) {
 // POST - Create a new option field or value
 export async function POST(request: NextRequest) {
   try {
+    const supabase = await createClient();
     const body = await request.json();
     const { type, fieldData, valueData } = body;
 
@@ -127,6 +127,7 @@ export async function POST(request: NextRequest) {
 // PUT - Update an option field or value
 export async function PUT(request: NextRequest) {
   try {
+    const supabase = await createClient();
     const body = await request.json();
     const { type, id, data } = body;
 
@@ -179,6 +180,7 @@ export async function PUT(request: NextRequest) {
 // DELETE - Delete an option field or value
 export async function DELETE(request: NextRequest) {
   try {
+    const supabase = await createClient();
     const { searchParams } = new URL(request.url);
     const type = searchParams.get("type");
     const id = searchParams.get("id");

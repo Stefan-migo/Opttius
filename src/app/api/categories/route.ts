@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { appLogger as logger } from "@/lib/logger";
-import { createClient, createServiceRoleClient } from "@/utils/supabase/server";
+import { createClient } from "@/utils/supabase/server";
 
 export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
@@ -15,23 +15,6 @@ export async function GET(request: NextRequest) {
       .eq("is_active", true)
       .order("sort_order", { ascending: true })
       .order("name", { ascending: true });
-
-    // If RLS blocks access or returns empty, try with service role for global categories
-    if (
-      (error && error.code === "42501") ||
-      (!error && (!categories || categories.length === 0))
-    ) {
-      const serviceSupabase = createServiceRoleClient();
-      const result = await serviceSupabase
-        .from("categories")
-        .select("*")
-        .eq("is_active", true)
-        .order("sort_order", { ascending: true })
-        .order("name", { ascending: true });
-
-      categories = result.data;
-      error = result.error;
-    }
 
     if (error) {
       logger.error("Error fetching categories:", error);
@@ -131,19 +114,6 @@ export async function POST(request: NextRequest) {
 
     data = result.data;
     error = result.error;
-
-    // If RLS error, try with service role
-    if (error && error.code === "42501") {
-      const serviceSupabase = createServiceRoleClient();
-      const serviceResult = await serviceSupabase
-        .from("categories")
-        .insert([categoryData])
-        .select()
-        .single();
-
-      data = serviceResult.data;
-      error = serviceResult.error;
-    }
 
     if (error) {
       logger.error("Error creating category:", error);

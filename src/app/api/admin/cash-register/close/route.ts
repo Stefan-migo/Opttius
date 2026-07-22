@@ -1,22 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { appLogger as logger } from "@/lib/logger";
 import { buildClosurePayload } from "@/lib/cash-register/closure-builder";
-import type { PaymentAggregatorInput } from "@/lib/cash-register/payment-aggregator";
 import {
-  getClosureContext,
-  getOpenSession,
-  alignDateWithSession,
-  getClosureOrders,
-  getSessionPayments,
   aggregateClosurePayments,
-  calculateCashInflowsOutflows,
-  getPreviousClosure,
-  calculateOrderTotals,
-  resolveGetSession,
+  alignDateWithSession,
   buildClosureInput,
+  calculateCashInflowsOutflows,
+  calculateOrderTotals,
+  getClosureContext,
+  getClosureOrders,
+  getOpenSession,
+  getPreviousClosure,
+  getSessionPayments,
   handleClosureError,
+  resolveGetSession,
 } from "@/lib/cash-register/closure-service";
+import type { PaymentAggregatorInput } from "@/lib/cash-register/payment-aggregator";
+import { appLogger as logger } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 

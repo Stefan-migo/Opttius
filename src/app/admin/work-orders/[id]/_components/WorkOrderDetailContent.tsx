@@ -12,23 +12,20 @@ import {
   XCircle,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { WorkOrderTimeline } from "./WorkOrderTimeline";
-import { WorkOrderOverviewTab } from "./WorkOrderOverviewTab";
 
+import { DeliveryDialog } from "@/components/admin/DeliveryDialog";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useWorkOrder } from "@/hooks/useWorkOrder";
+
+import { WorkOrderDeleteDialog } from "./WorkOrderDeleteDialog";
+import { WorkOrderDetailsTab } from "./WorkOrderDetailsTab";
 import { WorkOrderHeader } from "./WorkOrderHeader";
 import { WorkOrderHistoryTab } from "./WorkOrderHistoryTab";
 import { WorkOrderOverviewTab } from "./WorkOrderOverviewTab";
 import { WorkOrderPricingTab } from "./WorkOrderPricingTab";
 import { WorkOrderTimeline } from "./WorkOrderTimeline";
-import { WorkOrderDeleteDialog } from "./WorkOrderDeleteDialog";
-import { WorkOrderDetailsTab } from "./WorkOrderDetailsTab";
-
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-
-import { useWorkOrder } from "@/hooks/useWorkOrder";
-import { DeliveryDialog } from "@/components/admin/DeliveryDialog";
 
 /* Orchestrator — delegates to sub-components for individual sections */
 export default function WorkOrderDetailContent() {
@@ -68,7 +65,7 @@ export default function WorkOrderDetailContent() {
   const getStatusBadge = (status: string) => {
     const config: Record<
       string,
-      { variant: unknown; label: string; icon: unknown; color: string }
+      { variant: unknown; label: string; icon: React.ElementType; color: string }
     > = {
       quote: {
         variant: "outline",

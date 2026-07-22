@@ -5,7 +5,6 @@ import { wrapInModernLayout } from "@/lib/email/layout";
 import { replaceTemplateVariables } from "@/lib/email/template-utils";
 import { appLogger as logger } from "@/lib/logger";
 import { createClient } from "@/utils/supabase/server";
-import { createServiceRoleClient } from "@/utils/supabase/server";
 
 export const dynamic = "force-dynamic";
 
@@ -98,8 +97,7 @@ export async function POST(
     let organizationColor = "#1A2B23";
 
     if (template.organization_id) {
-      const serviceRole = createServiceRoleClient();
-      const { data: org } = await serviceRole
+      const { data: org } = await supabase
         .from("organizations")
         .select("name, metadata")
         .eq("id", template.organization_id)

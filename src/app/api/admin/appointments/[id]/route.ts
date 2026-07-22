@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { appLogger as logger } from "@/lib/logger";
 import {
+  deleteAppointment,
   getAppointment,
   updateAppointment,
-  deleteAppointment,
 } from "@/lib/api/services/appointmentDetailService";
+import { appLogger as logger } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 

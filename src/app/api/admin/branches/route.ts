@@ -132,28 +132,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: true });
     }
 
-    // Check if user is super admin for branch creation (RPC or role in admin_users)
-    // Use service role to read role so RLS cannot block the check
-    const { createServiceRoleClient } = await import("@/utils/supabase/server");
-    const serviceSupabase = createServiceRoleClient();
-    let canCreateBranch = false;
+    // Check if user is super admin for branch creation
     const { data: isSuperAdminRPC } = await supabase.rpc("is_super_admin", {
       user_id: user.id,
     });
-    if (isSuperAdminRPC) {
-      canCreateBranch = true;
-    } else {
-      const { data: adminUser } = await serviceSupabase
-        .from("admin_users")
-        .select("role")
-        .eq("id", user.id)
-        .single();
-      const role = (adminUser as { role?: string } | null)?.role;
-      if (role === "super_admin" || role === "root" || role === "dev") {
-        canCreateBranch = true;
-      }
-    }
-    if (!canCreateBranch) {
+    if (!isSuperAdminRPC) {
       return NextResponse.json(
         { error: "Only super admins can create branches" },
         { status: 403 },

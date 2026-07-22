@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { getBranchContext } from "@/lib/api/branch-middleware";
 import { ValidationError } from "@/lib/api/errors";
-import { rateLimitConfigs, withRateLimit } from "@/lib/rate-limiting";
 import {
   createApiErrorResponse,
   createApiSuccessResponse,
@@ -18,6 +17,7 @@ import {
   createAgreementSchema,
 } from "@/lib/api/validation/zod-schemas";
 import { appLogger as logger } from "@/lib/logger";
+import { rateLimitConfigs, withRateLimit } from "@/lib/rate-limiting";
 import { validateFeature } from "@/lib/saas/tier-validator";
 import { normalizeRUT } from "@/lib/utils/rut";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";

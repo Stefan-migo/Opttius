@@ -3,7 +3,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { createApiSuccessResponse } from "@/lib/api/response";
 import { appLogger as logger } from "@/lib/logger";
 import { createClient } from "@/utils/supabase/server";
-import { createServiceRoleClient } from "@/utils/supabase/service-role";
 
 /**
  * GET /api/admin/organizations/current
@@ -13,7 +12,6 @@ export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
   try {
     const supabase = await createClient();
-    const supabaseServiceRole = createServiceRoleClient();
 
     const {
       data: { user },
@@ -25,7 +23,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Obtener organization_id del usuario
-    const { data: adminUser } = await supabaseServiceRole
+    const { data: adminUser } = await supabase
       .from("admin_users")
       .select("organization_id")
       .eq("id", user.id)
@@ -39,7 +37,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Obtener información completa de la organización
-    const { data: organization, error: orgError } = await supabaseServiceRole
+    const { data: organization, error: orgError } = await supabase
       .from("organizations")
       .select(
         "id, name, slug, logo_url, slogan, subscription_tier, status, metadata",
@@ -73,7 +71,6 @@ export async function GET(request: NextRequest) {
 export async function PATCH(request: NextRequest) {
   try {
     const supabase = await createClient();
-    const supabaseServiceRole = createServiceRoleClient();
 
     const {
       data: { user },
@@ -96,7 +93,7 @@ export async function PATCH(request: NextRequest) {
     }
 
     // Obtener organization_id del usuario
-    const { data: adminUser } = await supabaseServiceRole
+    const { data: adminUser } = await supabase
       .from("admin_users")
       .select("organization_id")
       .eq("id", user.id)
@@ -118,7 +115,7 @@ export async function PATCH(request: NextRequest) {
     if (logo_url !== undefined) updates.logo_url = logo_url;
     if (slogan !== undefined) updates.slogan = slogan;
     if (metadata !== undefined) {
-      const { data: currentOrg } = await supabaseServiceRole
+      const { data: currentOrg } = await supabase
         .from("organizations")
         .select("metadata")
         .eq("id", adminUser.organization_id)
@@ -136,7 +133,7 @@ export async function PATCH(request: NextRequest) {
     }
 
     // Actualizar organización
-    const { data: updatedOrg, error: updateError } = await supabaseServiceRole
+    const { data: updatedOrg, error: updateError } = await supabase
       .from("organizations")
       .update(updates)
       .eq("id", adminUser.organization_id)

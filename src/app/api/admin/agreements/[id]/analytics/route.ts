@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { appLogger as logger } from "@/lib/logger";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
-import { createServiceRoleClient } from "@/utils/supabase/server";
 import { createClient } from "@/utils/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -45,13 +44,11 @@ export async function GET(
       );
     }
 
-    const serviceSupabase = createServiceRoleClient();
-
     const searchParams = request.nextUrl.searchParams;
     const fromDate = searchParams.get("from");
     const toDate = searchParams.get("to");
 
-    let ordersQuery = serviceSupabase
+    let ordersQuery = supabase
       .from("orders")
       .select(
         "id, customer_id, total_amount, copago_amount, institutional_amount, created_at",
@@ -80,7 +77,7 @@ export async function GET(
       0,
     );
 
-    const { data: balances } = await serviceSupabase
+    const { data: balances } = await supabase
       .from("agreement_institutional_balances")
       .select("amount, status")
       .eq("agreement_id", agreementId);

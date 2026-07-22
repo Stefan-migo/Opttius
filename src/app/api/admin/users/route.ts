@@ -1,16 +1,17 @@
 import { NextRequest } from "next/server";
 
-import { asyncHandler, AuthenticationError } from "@/lib/api/errors";
+import { AuthenticationError } from "@/lib/api/errors";
 import {
   createApiErrorResponse,
   createApiSuccessResponse,
+  withApiResponse,
 } from "@/lib/api/response";
 import { appLogger as logger } from "@/lib/logger";
 import { createClient } from "@/utils/supabase/server";
 
 export const dynamic = "force-dynamic";
 
-export const GET = asyncHandler(async (request: NextRequest) => {
+export const GET = withApiResponse(async (request: NextRequest) => {
   const supabase = await createClient();
 
   // Check if user is authenticated

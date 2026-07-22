@@ -7,7 +7,7 @@ import {
 } from "@/lib/api/branch-middleware";
 import { appLogger as logger } from "@/lib/logger";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
-import { createClient, createServiceRoleClient } from "@/utils/supabase/server";
+import { createClient } from "@/utils/supabase/server";
 
 /**
  * GET /api/admin/cash-register/closures
@@ -17,7 +17,6 @@ export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
   try {
     const supabase = await createClient();
-    const supabaseServiceRole = createServiceRoleClient();
 
     // Check admin authorization
     const {
@@ -46,11 +45,11 @@ export async function GET(request: NextRequest) {
 
     let effectiveBranchId = branchContext.branchId;
     if (fieldOperationId) {
-      const { data: fieldOp } = await supabaseServiceRole
+      const { data: fieldOp } = await supabase
         .from("field_operations")
         .select("id, branch_id")
         .eq("id", fieldOperationId)
-        .single();
+        .single<{ id: string; branch_id: string }>();
       if (!fieldOp) {
         return NextResponse.json({
           closures: [],
@@ -75,7 +74,7 @@ export async function GET(request: NextRequest) {
     const endDate = searchParams.get("end_date");
 
     // Build query
-    let query = supabaseServiceRole
+    let query = supabase
       .from("cash_register_closures")
       .select(
         `
@@ -140,11 +139,11 @@ export async function GET(request: NextRequest) {
     const closuresWithUsers = await Promise.all(
       (closures || []).map(async (closure: unknown) => {
         if (closure.closed_by) {
-          const { data: profile } = await supabaseServiceRole
+          const { data: profile } = await supabase
             .from("profiles")
             .select("id, first_name, last_name")
             .eq("id", closure.closed_by)
-            .single();
+            .single<{ id: string; first_name: string | null; last_name: string | null }>();
 
           return {
             ...closure,

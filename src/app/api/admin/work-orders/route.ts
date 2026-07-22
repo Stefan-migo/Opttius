@@ -18,7 +18,7 @@ import { createWorkOrderSchema } from "@/lib/api/validation/zod-schemas";
 import { appLogger as logger } from "@/lib/logger";
 import { NotificationService } from "@/lib/notifications/notification-service";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
-import { createClient , createServiceRoleClient } from "@/utils/supabase/server";
+import { createClient, createServiceRoleClient } from "@/utils/supabase/server";
 
 
 export const dynamic = "force-dynamic";
@@ -216,10 +216,9 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = await createClient();
-    const supabaseServiceRole = createServiceRoleClient();
+        const supabase = await createClient();
 
-    // Check admin authorization
+        // Check admin authorization
     const {
       data: { user },
       error: userError,
@@ -265,9 +264,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Generate work order number
+    // Generate work order number (needs service_role for global sequence)
+    const serviceSupabase = createServiceRoleClient();
     const { data: workOrderNumber, error: workOrderNumberError } =
-      await supabaseServiceRole.rpc("generate_work_order_number");
+      await serviceSupabase.rpc("generate_work_order_number");
 
     if (workOrderNumberError || !workOrderNumber) {
       logger.error("Error generating work order number", workOrderNumberError);
@@ -280,7 +280,7 @@ export async function POST(request: NextRequest) {
     // Get prescription snapshot if prescription_id is provided
     let prescriptionSnapshot = null;
     if (validatedBody.prescription_id) {
-      const { data: prescription } = await supabaseServiceRole
+      const { data: prescription } = await supabase
         .from("prescriptions")
         .select("*")
         .eq("id", validatedBody.prescription_id)
@@ -386,7 +386,7 @@ export async function POST(request: NextRequest) {
 
     // Create work order
     const { data: newWorkOrder, error: workOrderError } =
-      await supabaseServiceRole
+      await supabase
         .from("lab_work_orders")
         .insert(insertData)
         .select(
@@ -416,7 +416,7 @@ export async function POST(request: NextRequest) {
 
     // If status is not 'quote', update status dates
     if (validatedBody.status && validatedBody.status !== "quote") {
-      await supabaseServiceRole.rpc("update_work_order_status", {
+      await supabase.rpc("update_work_order_status", {
         p_work_order_id: newWorkOrder.id,
         p_new_status: validatedBody.status,
         p_changed_by: user.id,

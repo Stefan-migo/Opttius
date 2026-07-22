@@ -5,6 +5,7 @@
  * Uses sequential inserts for operativo/mobile-stock sales.
  */
 import { NextResponse } from "next/server";
+
 import {
   createApiErrorResponse,
   createApiSuccessResponse,
@@ -12,26 +13,26 @@ import {
 import { BillingFactory } from "@/lib/billing/BillingFactory";
 import { appLogger as logger } from "@/lib/logger";
 import { PAYMENT_METHOD_MAP } from "@/lib/payments/constants";
-import { computeMinDepositFallback } from "./processSaleValidation";
+
 import {
-  computeWorkOrderStatus,
-  computeLensCost,
   computeCashAmount,
+  computeWorkOrderStatus,
 } from "./processPaymentUtils";
 import {
-  buildFullOrderResponse,
-  buildBillingResponse,
   buildBillingOrder,
+  buildBillingResponse,
+  buildFullOrderResponse,
 } from "./processResponseBuilder";
-import { reduceStock, reduceContactLensStock } from "./processStockReduction";
 import type { ProcessSaleContext } from "./processSaleTypes";
+import { computeMinDepositFallback } from "./processSaleValidation";
+import { reduceContactLensStock,reduceStock } from "./processStockReduction";
 
 export async function handleLegacyPath(
   ctx: ProcessSaleContext,
 ): Promise<NextResponse> {
   // Legacy path: sequential inserts (operativos with mobile stock)
   const { data: newOrderData, error: orderError } =
-    await ctx.supabaseServiceRole
+    await ctx.supabase
       .from("orders")
       .insert({
         order_number: ctx.orderNumber,
@@ -83,7 +84,7 @@ export async function handleLegacyPath(
 
   // Insert order_items for persistence
   if (ctx.orderItems.length > 0) {
-    const { error: itemsError } = await ctx.supabaseServiceRole
+    const { error: itemsError } = await ctx.supabase
       .from("order_items")
       .insert(
         ctx.orderItems.map((item: Record<string, unknown>) => ({
@@ -104,7 +105,7 @@ export async function handleLegacyPath(
 
   // Register payment(s) in order_payments
   if (ctx.agreement_id && ctx.copagoAmount != null) {
-    const { error: paymentError } = await ctx.supabaseServiceRole
+    const { error: paymentError } = await ctx.supabase
       .from("order_payments")
       .insert({
         order_id: newOrder.id,
@@ -121,7 +122,7 @@ export async function handleLegacyPath(
     }
 
     if (ctx.institutionalAmount != null && ctx.institutionalAmount > 0) {
-      const { error: balanceErr } = await ctx.supabaseServiceRole
+      const { error: balanceErr } = await ctx.supabase
         .from("agreement_institutional_balances")
         .insert({
           agreement_id: ctx.agreement_id,
@@ -135,7 +136,7 @@ export async function handleLegacyPath(
       }
 
       if (ctx.purchase_order_id) {
-        await ctx.supabaseServiceRole
+        await ctx.supabase
           .from("agreement_purchase_orders")
           .update({
             used_amount:
@@ -151,7 +152,7 @@ export async function handleLegacyPath(
       const dbMethod =
         PAYMENT_METHOD_MAP[p.method as keyof typeof PAYMENT_METHOD_MAP] ||
         p.method;
-      const { error: payErr } = await ctx.supabaseServiceRole
+      const { error: payErr } = await ctx.supabase
         .from("order_payments")
         .insert({
           order_id: newOrder.id,
@@ -173,7 +174,7 @@ export async function handleLegacyPath(
       }
     }
   } else {
-    const { error: paymentError } = await ctx.supabaseServiceRole
+    const { error: paymentError } = await ctx.supabase
       .from("order_payments")
       .insert({
         order_id: newOrder.id,
@@ -192,7 +193,7 @@ export async function handleLegacyPath(
 
   // Create POS transaction
   if (ctx.posSessionId) {
-    const { error: txError } = await ctx.supabaseServiceRole
+    const { error: txError } = await ctx.supabase
       .from("pos_transactions")
       .insert({
         order_id: newOrder.id,
@@ -212,7 +213,7 @@ export async function handleLegacyPath(
   }
 
   // Update order's mp_payment_method
-  const { error: updatePaymentMethodError } = await ctx.supabaseServiceRole
+  const { error: updatePaymentMethodError } = await ctx.supabase
     .from("orders")
     .update({ mp_payment_method: ctx.dbPaymentMethod })
     .eq("id", newOrder.id);
@@ -223,7 +224,7 @@ export async function handleLegacyPath(
 
   // Calculate order balance
   const { data: balanceData, error: balanceError } =
-    await ctx.supabaseServiceRole.rpc("calculate_order_balance", {
+    await ctx.supabase.rpc("calculate_order_balance", {
       p_order_id: newOrder.id as string,
     });
 
@@ -241,7 +242,7 @@ export async function handleLegacyPath(
 
     let ocNumber: string | null = null;
     if (ctx.purchase_order_id && ctx.purchaseOrder) {
-      const { data: po } = await ctx.supabaseServiceRole
+      const { data: po } = await ctx.supabase
         .from("agreement_purchase_orders")
         .select("oc_number")
         .eq("id", ctx.purchase_order_id)
@@ -319,7 +320,7 @@ export async function handleLegacyPath(
         : null,
     };
     if (ctx.idempotency_key) {
-      await ctx.supabaseServiceRole.from("pos_sale_idempotency").upsert(
+      await ctx.supabase.from("pos_sale_idempotency").upsert(
         {
           idempotency_key: ctx.idempotency_key,
           order_id: newOrder.id,
@@ -333,7 +334,7 @@ export async function handleLegacyPath(
   }
 
   // Cash-First Logic: Determine work order status based on payment
-  const { data: minDepositData } = await ctx.supabaseServiceRole.rpc(
+  const { data: minDepositData } = await ctx.supabase.rpc(
     "get_min_deposit",
     {
       p_order_total: ctx.total_amount,
@@ -361,11 +362,11 @@ export async function handleLegacyPath(
 
   // Generate work order number
   const { data: workOrderNumber, error: workOrderNumberError } =
-    await ctx.supabaseServiceRole.rpc("generate_work_order_number");
+    await ctx.supabase.rpc("generate_work_order_number");
 
   if (workOrderNumberError || !workOrderNumber) {
     logger.error("Error generating work order number", workOrderNumberError);
-    await ctx.supabaseServiceRole.from("orders").delete().eq("id", newOrder.id);
+    await ctx.supabase.from("orders").delete().eq("id", newOrder.id);
     return NextResponse.json(
       { error: "Failed to generate work order number" },
       { status: 500 },
@@ -470,7 +471,7 @@ export async function handleLegacyPath(
   };
 
   const { data: newWorkOrder, error: workOrderError } =
-    await ctx.supabaseServiceRole
+    await ctx.supabase
       .from("lab_work_orders")
       .insert(workOrderData)
       .select()
@@ -491,7 +492,7 @@ export async function handleLegacyPath(
 
   // Update status dates
   if (workOrderData.status && workOrderData.status !== "quote") {
-    await ctx.supabaseServiceRole.rpc("update_work_order_status", {
+    await ctx.supabase.rpc("update_work_order_status", {
       p_work_order_id: (newWorkOrder as Record<string, unknown>).id,
       p_new_status: workOrderData.status as string,
       p_changed_by: ctx.user.id,
@@ -554,7 +555,7 @@ export async function handleLegacyPath(
   // Update quote status
   if (ctx.quote_id && ctx.quote) {
     const woId = (newWorkOrder as Record<string, unknown> | null)?.id || null;
-    const { error: quoteUpdateError } = await ctx.supabaseServiceRole
+    const { error: quoteUpdateError } = await ctx.supabase
       .from("quotes")
       .update({
         status: "accepted",
@@ -596,7 +597,7 @@ export async function handleLegacyPath(
   };
 
   if (ctx.idempotency_key) {
-    await ctx.supabaseServiceRole.from("pos_sale_idempotency").upsert(
+    await ctx.supabase.from("pos_sale_idempotency").upsert(
       {
         idempotency_key: ctx.idempotency_key,
         order_id: newOrder.id,

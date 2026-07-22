@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getBranchContext } from "@/lib/api/branch-middleware";
 import { appLogger as logger } from "@/lib/logger";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
-import { createClient, createServiceRoleClient } from "@/utils/supabase/server";
+import { createClient } from "@/utils/supabase/server";
 
 /**
  * GET /api/admin/cash-register/session-movements
@@ -13,7 +13,6 @@ export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
   try {
     const supabase = await createClient();
-    const supabaseServiceRole = createServiceRoleClient();
 
     // Check admin authorization
     const {
@@ -50,11 +49,11 @@ export async function GET(request: NextRequest) {
 
     // Verify session belongs to user's branch (if not super admin)
     if (!branchContext.isSuperAdmin && branchContext.branchId) {
-      const { data: session } = await supabaseServiceRole
+      const { data: session } = await supabase
         .from("pos_sessions")
         .select("branch_id")
         .eq("id", sessionId)
-        .single();
+        .single<{ branch_id: string }>();
 
       if (!session || session.branch_id !== branchContext.branchId) {
         return NextResponse.json(
@@ -65,7 +64,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Get all payments for this session with order information
-    const { data: payments, error: paymentsError } = await supabaseServiceRole
+    const { data: payments, error: paymentsError } = await supabase
       .from("order_payments")
       .select(
         `
@@ -105,7 +104,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Get credit note movements (refunds) for this session
-    const { data: creditNoteMovements } = await supabaseServiceRole
+    const { data: creditNoteMovements } = await supabase
       .from("credit_note_movements")
       .select(
         `
@@ -121,20 +120,22 @@ export async function GET(request: NextRequest) {
       `,
       )
       .eq("pos_session_id", sessionId)
-      .order("created_at", { ascending: true });
+      .order("created_at", { ascending: true })
+      .returns<{ id: string; amount: number; refund_method: string; created_at: string; credit_notes: { id: string; credit_note_number: string; order_id: string } | null }[]>();
 
     // Fetch order details for credit notes that have order_id
     const orderIds = (creditNoteMovements || [])
       .map((cnm: unknown) => cnm.credit_notes?.order_id)
       .filter(Boolean);
-    let ordersMap: Record<string, unknown> = {};
+    let ordersMap: Record<string, any> = {};
     if (orderIds.length > 0) {
-      const { data: orders } = await supabaseServiceRole
+      const { data: orders } = await supabase
         .from("orders")
         .select(
           "id, order_number, billing_first_name, billing_last_name, sii_business_name, sii_rut, email",
         )
-        .in("id", orderIds);
+        .in("id", orderIds)
+        .returns<{ id: string; order_number: string; billing_first_name: string | null; billing_last_name: string | null; sii_business_name: string | null; sii_rut: string | null; email: string | null }[]>();
       if (orders) {
         ordersMap = Object.fromEntries(orders.map((o: unknown) => [o.id, o]));
       }
@@ -253,9 +254,10 @@ export async function GET(request: NextRequest) {
       total_amount: movements.reduce((sum, m) => sum + m.amount, 0),
     });
   } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Unknown error";
     logger.error("Error in session movements API:", error);
     return NextResponse.json(
-      { error: "Internal server error", details: error.message },
+      { error: "Internal server error", details: message },
       { status: 500 },
     );
   }

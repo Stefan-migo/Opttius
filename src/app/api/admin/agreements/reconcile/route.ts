@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { ValidationError } from "@/lib/api/errors";
-import { rateLimitConfigs, withRateLimit } from "@/lib/rate-limiting";
 import {
   createApiErrorResponse,
   createApiSuccessResponse,
@@ -14,8 +13,9 @@ import { reconcileSchema } from "@/lib/api/validation/zod-schemas";
 import type { InstitutionalInvoice } from "@/lib/billing/adapters/InstitutionalInvoiceAdapter";
 import { InternalInstitutionalBilling } from "@/lib/billing/adapters/InternalInstitutionalBilling";
 import { appLogger as logger } from "@/lib/logger";
+import { rateLimitConfigs, withRateLimit } from "@/lib/rate-limiting";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
-import { createClient, createServiceRoleClient } from "@/utils/supabase/server";
+import { createClient } from "@/utils/supabase/server";
 
 export const dynamic = "force-dynamic";
 
@@ -78,8 +78,7 @@ export async function POST(request: NextRequest) {
 
         if (body.emit_invoice && updated && updated.length > 0) {
           try {
-            const serviceSupabase = createServiceRoleClient();
-            const { data: balancesWithDetails } = await serviceSupabase
+            const { data: balancesWithDetails } = await supabase
               .from("agreement_institutional_balances")
               .select(
                 `
@@ -106,7 +105,7 @@ export async function POST(request: NextRequest) {
               const first = balancesWithDetails[0] as unknown;
               const agreementId = first.agreement_id;
 
-              const { data: agreement } = await serviceSupabase
+              const { data: agreement } = await supabase
                 .from("agreements")
                 .select(
                   "institution_rut, institution_name, organization_id, branch_id",

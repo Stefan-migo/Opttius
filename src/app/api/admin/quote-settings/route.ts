@@ -8,7 +8,7 @@ import {
 } from "@/lib/api/response";
 import { appLogger as logger } from "@/lib/logger";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
-import { createClient, createServiceRoleClient } from "@/utils/supabase/server";
+import { createClient } from "@/utils/supabase/server";
 
 export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
@@ -123,7 +123,6 @@ export async function GET(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   try {
     const supabase = await createClient();
-    const supabaseServiceRole = createServiceRoleClient();
 
     // Check admin authorization
     const {
@@ -157,8 +156,7 @@ export async function PUT(request: NextRequest) {
     }
 
     // Check if settings exist for this branch/org
-    // Important: filter by organization_id because we use service role (bypasses RLS)
-    let existingQuery = supabaseServiceRole
+    let existingQuery = supabase
       .from("quote_settings")
       .select("id")
       .eq("organization_id", branchContext.organizationId);
@@ -212,26 +210,7 @@ export async function PUT(request: NextRequest) {
     // 1. Update/Insert the specific record found (Global or Branch)
     if (existingSettings) {
       // Update existing
-      const { data, error } = await supabaseServiceRole
-        .from("quote_settings")
-        .update({
-          ...updateData,
-          organization_id: branchContext.organizationId,
-        })
-        .eq("id", existingSettings.id)
-        .select()
-        .single();
-
-      if (error) {
-        logger.error("Error updating quote settings", error);
-        return createApiErrorResponse(
-          new Error(`Error al actualizar configuración: ${error.message}`),
-        );
-      }
-      result = data;
-    } else {
-      // Insert new
-      const { data, error } = await supabaseServiceRole
+      const { data, error } = await supabase
         .from("quote_settings")
         .insert({
           ...updateData,
@@ -265,7 +244,7 @@ export async function PUT(request: NextRequest) {
         for (const branch of branches) {
           // Sync using upsert on branch_id which has idx_quote_settings_branch_unique
           // Although we could use manual check+insert/update here too for consistency
-          await supabaseServiceRole.from("quote_settings").upsert(
+          await supabase.from("quote_settings").upsert(
             {
               organization_id: branchContext.organizationId,
               branch_id: branch.id,
