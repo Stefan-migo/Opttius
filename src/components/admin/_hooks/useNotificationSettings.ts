@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-
 import { toast } from "sonner";
 
 interface NotificationSetting {
@@ -51,7 +50,10 @@ export function useNotificationSettings({
       if (!response.ok) {
         if (data.message?.includes("does not exist")) {
           setTableNotFound(true);
-          toast.error("La tabla de configuración de notificaciones no existe. Por favor, ejecuta la migración de base de datos.", { duration: 8000 });
+          toast.error(
+            "La tabla de configuración de notificaciones no existe. Por favor, ejecuta la migración de base de datos.",
+            { duration: 8000 },
+          );
           setSettings([]);
           return;
         }
@@ -69,18 +71,21 @@ export function useNotificationSettings({
     }
   };
 
-  const updateSetting = useCallback((type: string, field: string, value: unknown) => {
-    setSettings((prev) => {
-      const updated = prev.map((setting) => {
-        if (setting.notification_type === type) {
-          return { ...setting, [field]: value };
-        }
-        return setting;
+  const updateSetting = useCallback(
+    (type: string, field: string, value: unknown) => {
+      setSettings((prev) => {
+        const updated = prev.map((setting) => {
+          if (setting.notification_type === type) {
+            return { ...setting, [field]: value };
+          }
+          return setting;
+        });
+        setHasChanges(true);
+        return updated;
       });
-      setHasChanges(true);
-      return updated;
-    });
-  }, []);
+    },
+    [],
+  );
 
   const saveSettings = async () => {
     try {
@@ -96,7 +101,11 @@ export function useNotificationSettings({
       const response = await fetch("/api/admin/notifications/settings", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ updates, organization_id: organizationId, branch_id: branchId }),
+        body: JSON.stringify({
+          updates,
+          organization_id: organizationId,
+          branch_id: branchId,
+        }),
       });
 
       if (!response.ok) {
@@ -150,9 +159,19 @@ export function useNotificationSettings({
   };
 
   return {
-    settings, loading, saving, hasChanges, tableNotFound,
-    migrationSQL, loadingSQL, fetchMigrationSQL, copySQLToClipboard,
-    fetchSettings, updateSetting, saveSettings, toggleAll,
+    settings,
+    loading,
+    saving,
+    hasChanges,
+    tableNotFound,
+    migrationSQL,
+    loadingSQL,
+    fetchMigrationSQL,
+    copySQLToClipboard,
+    fetchSettings,
+    updateSetting,
+    saveSettings,
+    toggleAll,
     setTableNotFound,
   };
 }
