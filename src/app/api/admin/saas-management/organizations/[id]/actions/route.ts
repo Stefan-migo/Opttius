@@ -5,7 +5,7 @@ import { requireRoot } from "@/lib/api/root-middleware";
 import { appLogger as logger } from "@/lib/logger";
 import { recordTierChange } from "@/lib/saas/tier-change-audit";
 import { recordAuditLog, getClientInfoFromRequest } from "@/lib/saas/audit-log";
-import { createServiceRoleClient } from "@/utils/supabase/service-role";
+import { createRootAdminClient } from "@/utils/supabase/root-admin";
 
 /**
  * POST /api/admin/saas-management/organizations/[id]/actions
@@ -18,7 +18,7 @@ export async function POST(
 ) {
   try {
     const { userId, user } = await requireRoot(request);
-    const supabaseServiceRole = createServiceRoleClient();
+    const supabaseServiceRole = createRootAdminClient();
 
     const { id } = params;
     const body = await request.json();

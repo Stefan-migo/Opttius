@@ -6,6 +6,7 @@
  */
 
 import { SemanticMemory } from "./semantic";
+import { appLogger } from "@/lib/logger";
 import type {
   EmbeddingRecord,
   IndexingOptions,
@@ -53,7 +54,7 @@ export class MemoryIndexer {
       }
 
       result.totalRecords = products.length;
-      console.log(`Indexing ${products.length} products...`);
+      appLogger.info(`Indexing ${products.length} products...`);
 
       // Process in batches
       for (let i = 0; i < products.length; i += batchSize) {
@@ -104,7 +105,7 @@ export class MemoryIndexer {
         }
       }
 
-      console.log(`Products indexed: ${result.indexed}/${result.totalRecords}`);
+      appLogger.info(`Products indexed: ${result.indexed}/${result.totalRecords}`);
       return result;
     } catch (error: unknown) {
       result.errors.push(`Indexing failed: ${error.message}`);
@@ -142,7 +143,7 @@ export class MemoryIndexer {
       }
 
       result.totalRecords = customers.length;
-      console.log(`Indexing ${customers.length} customers...`);
+      appLogger.info(`Indexing ${customers.length} customers...`);
 
       for (let i = 0; i < customers.length; i += batchSize) {
         const batch = customers.slice(i, i + batchSize);
@@ -187,7 +188,7 @@ export class MemoryIndexer {
         }
       }
 
-      console.log(
+      appLogger.info(
         `Customers indexed: ${result.indexed}/${result.totalRecords}`,
       );
       return result;
@@ -228,7 +229,7 @@ export class MemoryIndexer {
       }
 
       result.totalRecords = orders.length;
-      console.log(`Indexing ${orders.length} orders...`);
+      appLogger.info(`Indexing ${orders.length} orders...`);
 
       for (let i = 0; i < orders.length; i += batchSize) {
         const batch = orders.slice(i, i + batchSize);
@@ -274,7 +275,7 @@ export class MemoryIndexer {
         }
       }
 
-      console.log(`Orders indexed: ${result.indexed}/${result.totalRecords}`);
+      appLogger.info(`Orders indexed: ${result.indexed}/${result.totalRecords}`);
       return result;
     } catch (error: unknown) {
       result.errors.push(`Indexing failed: ${error.message}`);
@@ -312,7 +313,7 @@ export class MemoryIndexer {
 
       result.totalRecords = messages.length;
 
-      const records: EmbeddingRecord[] = messages.map((msg: unknown) => ({
+      const records: EmbeddingRecord[] = messages.map((msg: any) => ({
         sourceType: "chat_message",
         sourceId: msg.id,
         content: msg.content || "",
@@ -409,7 +410,7 @@ export class MemoryIndexer {
         }
       }
 
-      console.log(
+      appLogger.info(
         `Categories indexed: ${result.indexed}/${result.totalRecords}`,
       );
       return result;
@@ -425,7 +426,7 @@ export class MemoryIndexer {
   async indexAll(
     options: IndexingOptions = {},
   ): Promise<Record<string, IndexingResult>> {
-    console.log("Starting full index...");
+    appLogger.info("Starting full index...");
 
     const results: Record<string, IndexingResult> = {};
 
@@ -434,7 +435,7 @@ export class MemoryIndexer {
     results.customers = await this.indexCustomers(options);
     results.orders = await this.indexOrders(options);
 
-    console.log("Full index complete:", {
+    appLogger.info("Full index complete:", {
       products: `${results.products.indexed}/${results.products.totalRecords}`,
       categories: `${results.categories.indexed}/${results.categories.totalRecords}`,
       customers: `${results.customers.indexed}/${results.customers.totalRecords}`,
@@ -446,7 +447,7 @@ export class MemoryIndexer {
 
   // Helper methods to build content strings
 
-  private buildProductContent(product: unknown): string {
+  private buildProductContent(product: any): string {
     const parts = [
       `Producto: ${product.name}`,
       product.description && `Descripción: ${product.description}`,
@@ -460,7 +461,7 @@ export class MemoryIndexer {
     return parts.join(". ");
   }
 
-  private buildCustomerContent(customer: unknown): string {
+  private buildCustomerContent(customer: any): string {
     const name =
       `${customer.first_name || ""} ${customer.last_name || ""}`.trim();
     const parts = [
@@ -475,7 +476,7 @@ export class MemoryIndexer {
     return parts.join(". ");
   }
 
-  private buildOrderContent(order: unknown): string {
+  private buildOrderContent(order: any): string {
     const customerName = order.customers
       ? `${order.customers.first_name || ""} ${order.customers.last_name || ""}`.trim()
       : "Cliente desconocido";

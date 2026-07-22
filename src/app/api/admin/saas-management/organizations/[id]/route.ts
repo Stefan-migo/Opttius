@@ -4,7 +4,7 @@ import { AuthorizationError } from "@/lib/api/errors";
 import { requireRoot } from "@/lib/api/root-middleware";
 import { updateOrganizationSchema } from "@/lib/api/validation/zod-schemas";
 import { appLogger as logger } from "@/lib/logger";
-import { createServiceRoleClient } from "@/utils/supabase/service-role";
+import { createRootAdminClient } from "@/utils/supabase/root-admin";
 
 /**
  * GET /api/admin/saas-management/organizations/[id]
@@ -17,7 +17,7 @@ export async function GET(
 ) {
   try {
     await requireRoot(request);
-    const supabaseServiceRole = createServiceRoleClient();
+    const supabaseServiceRole = createRootAdminClient();
 
     const { id } = params;
 
@@ -159,7 +159,7 @@ export async function PATCH(
 ) {
   try {
     await requireRoot(request);
-    const supabaseServiceRole = createServiceRoleClient();
+    const supabaseServiceRole = createRootAdminClient();
 
     const { id } = params;
     const body = await request.json();
@@ -264,7 +264,7 @@ export async function DELETE(
 ) {
   try {
     await requireRoot(request);
-    const supabaseServiceRole = createServiceRoleClient();
+    const supabaseServiceRole = createRootAdminClient();
 
     const { id } = params;
 

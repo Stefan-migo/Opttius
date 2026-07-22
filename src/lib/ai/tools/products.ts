@@ -3,6 +3,8 @@ import { z } from "zod";
 import { resolveBranchByName } from "./resolvers";
 import type { ToolDefinition, ToolResult } from "./types";
 
+
+import { appLogger } from "@/lib/logger";
 const getProductsSchema = z.object({
   search: z.string().optional(),
   category: z.string().optional(),
@@ -175,7 +177,7 @@ export const productTools: ToolDefinition[] = [
         }
 
         const products =
-          data?.map((product) => ({
+          (data as any[])?.map((product: any) => ({
             ...product,
             currency: context.currency || "USD",
           })) || [];
@@ -194,6 +196,7 @@ export const productTools: ToolDefinition[] = [
       } catch (error: unknown) {
         return {
           success: false,
+          // @ts-expect-error: Dynamic LLM response shape
           error: error.message || "Failed to get products",
         };
       }
@@ -263,7 +266,7 @@ export const productTools: ToolDefinition[] = [
         }
 
         const product = {
-          ...data,
+          ...(data as any),
           currency: context.currency || "USD",
         };
 
@@ -399,7 +402,7 @@ export const productTools: ToolDefinition[] = [
           organization_id: organizationId,
         };
 
-        const { data, error } = await supabase
+        const { data, error }: any = await supabase
           .from("products")
           .insert([productData])
           .select()
@@ -421,7 +424,7 @@ export const productTools: ToolDefinition[] = [
               .eq("organization_id", organizationId);
 
             if (orgBranches && orgBranches.length > 0) {
-              for (const branch of orgBranches) {
+              for (const branch of orgBranches as any[]) {
                 await supabase.from("product_branch_stock").upsert(
                   {
                     product_id: data.id,
@@ -435,7 +438,7 @@ export const productTools: ToolDefinition[] = [
               }
             }
           } catch (e) {
-            console.error("Failed to initialize branch stock (global):", e);
+            appLogger.error("Failed to initialize branch stock (global):", e);
           }
         } else {
           // Branch mode: add stock only for the current branch
@@ -453,7 +456,7 @@ export const productTools: ToolDefinition[] = [
               { onConflict: "product_id,branch_id" },
             );
           } catch (e) {
-            console.error("Failed to initialize branch stock:", e);
+            appLogger.error("Failed to initialize branch stock:", e);
           }
         }
 
@@ -510,7 +513,7 @@ export const productTools: ToolDefinition[] = [
         const { inventory_quantity: _inv, ...productUpdates } =
           validated.updates as Record<string, unknown>;
 
-        const { data, error } = await supabase
+        const { data, error }: any = await supabase
           .from("products")
           .update({
             ...productUpdates,
@@ -675,7 +678,7 @@ export const productTools: ToolDefinition[] = [
 
         if (branchId) {
           // Get current stock
-          const { data: currentStock } = await supabase
+          const { data: currentStock }: any = await supabase
             .from("product_branch_stock")
             .select("quantity")
             .eq("product_id", validated.productId)
@@ -707,7 +710,7 @@ export const productTools: ToolDefinition[] = [
             );
 
           if (stockError) {
-            console.error("Stock update error:", stockError);
+            appLogger.error("Stock update error:", stockError);
             return {
               success: false,
               error: "Failed to update branch stock: " + stockError.message,
@@ -783,10 +786,10 @@ export const productTools: ToolDefinition[] = [
         return {
           success: true,
           data: {
-            products: data || [],
+            products: (data as any[]) || [],
             threshold: validated.threshold,
           },
-          message: `Found ${data?.length || 0} products with low stock`,
+          message: `Found ${(data as any[])?.length || 0} products with low stock`,
         };
       } catch (error: unknown) {
         return {

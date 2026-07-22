@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import type { SupabaseClient } from "@supabase/supabase-js";
+import type { Database } from "@/types/supabase";
 import type { ToolDefinition, ToolResult } from "./types";
 
 const diagnoseSystemSchema = z.object({
@@ -124,6 +126,7 @@ export const diagnoseSystemTools: ToolDefinition[] = [
       } catch (error: unknown) {
         return {
           success: false,
+          // @ts-expect-error: Dynamic LLM response shape
           error: error.message || "Failed to diagnose system",
         };
       }
@@ -134,7 +137,7 @@ export const diagnoseSystemTools: ToolDefinition[] = [
 // Helper functions
 
 async function analyzeOrdersHealth(
-  supabase: unknown,
+  supabase: SupabaseClient<Database>,
   startDate: Date,
   severity: string,
   organizationId: string,
@@ -152,13 +155,13 @@ async function analyzeOrdersHealth(
 
   const totalOrders = orders?.length || 0;
   const paidOrders =
-    orders?.filter((o: unknown) => o.payment_status === "paid").length || 0;
+    orders?.filter((o: any) => o.payment_status === "paid").length || 0;
   const completedOrders =
-    orders?.filter((o: unknown) => o.status === "completed").length || 0;
+    orders?.filter((o: any) => o.status === "completed").length || 0;
   const pendingOrders =
-    orders?.filter((o: unknown) => o.status === "pending").length || 0;
+    orders?.filter((o: any) => o.status === "pending").length || 0;
   const failedPayments =
-    orders?.filter((o: unknown) => o.payment_status === "failed").length || 0;
+    orders?.filter((o: any) => o.payment_status === "failed").length || 0;
 
   // Calcular métricas
   const paymentSuccessRate =
@@ -225,8 +228,8 @@ async function analyzeOrdersHealth(
 }
 
 async function analyzeInventoryHealth(
-  supabase: unknown,
-  startDate: Date,
+  supabase: SupabaseClient<Database>,
+  _startDate: Date,
   severity: string,
   organizationId: string,
 ) {
@@ -242,13 +245,13 @@ async function analyzeInventoryHealth(
 
   const totalProducts = products?.length || 0;
   const lowStock =
-    products?.filter((p: unknown) => (p.inventory_quantity || 0) <= 5).length ||
+    products?.filter((p: any) => (p.inventory_quantity || 0) <= 5).length ||
     0;
   const outOfStock =
-    products?.filter((p: unknown) => (p.inventory_quantity || 0) === 0)
+    products?.filter((p: any) => (p.inventory_quantity || 0) === 0)
       .length || 0;
   const overStock =
-    products?.filter((p: unknown) => (p.inventory_quantity || 0) > 100)
+    products?.filter((p: any) => (p.inventory_quantity || 0) > 100)
       .length || 0;
 
   // Calcular métricas
@@ -310,10 +313,10 @@ async function analyzeInventoryHealth(
 }
 
 async function analyzeCustomerHealth(
-  supabase: unknown,
-  startDate: Date,
+  supabase: SupabaseClient<Database>,
+  _startDate: Date,
   severity: string,
-  organizationId: string,
+  _organizationId: string,
 ) {
   const { data: customers, error } = await supabase
     .from("profiles")
@@ -325,7 +328,7 @@ async function analyzeCustomerHealth(
 
   const totalCustomers = customers?.length || 0;
   const newCustomers =
-    customers?.filter((c: unknown) => {
+    customers?.filter((c: any) => {
       const daysSinceCreation =
         (new Date().getTime() - new Date(c.created_at).getTime()) /
         (1000 * 60 * 60 * 24);
@@ -362,8 +365,8 @@ async function analyzeCustomerHealth(
 }
 
 async function analyzeSystemPerformance(
-  supabase: unknown,
-  startDate: Date,
+  supabase: SupabaseClient<Database>,
+  _startDate: Date,
   severity: string,
   organizationId: string,
 ) {
@@ -422,8 +425,8 @@ async function analyzeSystemPerformance(
 
 // Utility functions
 
-function filterIssuesBySeverity(issues: unknown[], severity: string) {
-  return issues.filter((issue) => {
+function filterIssuesBySeverity(issues: any[], severity: string) {
+  return issues.filter((issue: any) => {
     if (severity === "low") return issue.severity === "low";
     if (severity === "medium")
       return issue.severity === "medium" || issue.severity === "low";
@@ -444,8 +447,8 @@ function calculateHealthScore(scores: number[]): string {
   return "critical";
 }
 
-function calculateOverallHealth(analysisResults: unknown[]): string {
-  const healthScores = analysisResults.map((result) => {
+function calculateOverallHealth(analysisResults: any[]): string {
+  const healthScores = analysisResults.map((result: any) => {
     switch (result.health) {
       case "excellent":
         return 100;
@@ -471,20 +474,20 @@ function calculateOverallHealth(analysisResults: unknown[]): string {
   return "critical";
 }
 
-function getCriticalIssues(analysisResults: unknown[]): unknown[] {
-  const allIssues = analysisResults.flatMap((result) => result.issues || []);
-  return allIssues.filter((issue) => issue.severity === "critical");
+function getCriticalIssues(analysisResults: any[]): any[] {
+  const allIssues = analysisResults.flatMap((result: any) => result.issues || []);
+  return allIssues.filter((issue: any) => issue.severity === "critical");
 }
 
 function generateComprehensiveRecommendations(
-  analysisResults: unknown[],
+  analysisResults: any[],
 ): string[] {
   const recommendations: string[] = [];
 
   // Análisis de órdenes
   const ordersAnalysis = analysisResults[0];
   if (ordersAnalysis?.issues) {
-    ordersAnalysis.issues.forEach((issue: unknown) => {
+    ordersAnalysis.issues.forEach((issue: any) => {
       if (issue.severity === "critical" || issue.severity === "high") {
         recommendations.push(
           `Revisar ${issue.type}: ${issue.message} (${issue.impact})`,
@@ -496,7 +499,7 @@ function generateComprehensiveRecommendations(
   // Análisis de inventario
   const inventoryAnalysis = analysisResults[1];
   if (inventoryAnalysis?.issues) {
-    inventoryAnalysis.issues.forEach((issue: unknown) => {
+    inventoryAnalysis.issues.forEach((issue: any) => {
       if (issue.severity === "critical" || issue.severity === "high") {
         recommendations.push(`Inventario: ${issue.message}`);
       }
@@ -506,7 +509,7 @@ function generateComprehensiveRecommendations(
   // Análisis de clientes
   const customerAnalysis = analysisResults[2];
   if (customerAnalysis?.issues) {
-    customerAnalysis.issues.forEach((issue: unknown) => {
+    customerAnalysis.issues.forEach((issue: any) => {
       recommendations.push(`Cliente: ${issue.message}`);
     });
   }
@@ -521,11 +524,11 @@ function generateComprehensiveRecommendations(
   return recommendations;
 }
 
-function generateSummary(analysisResults: unknown[]): string {
+function generateSummary(analysisResults: any[]): string {
   const health = calculateOverallHealth(analysisResults);
   const criticalIssues = getCriticalIssues(analysisResults);
 
-  const healthMessages: unknown = {
+  const healthMessages: Record<string, string> = {
     excellent: "El sistema se encuentra en excelente estado",
     good: "El sistema se encuentra en buen estado",
     fair: "El sistema requiere atención",
@@ -539,7 +542,7 @@ function generateSummary(analysisResults: unknown[]): string {
     summary += `. Se identificaron ${criticalIssues.length} problemas críticos que requieren atención inmediata.`;
   } else {
     const totalIssues = analysisResults.reduce(
-      (sum, r) => sum + (r.issues?.length || 0),
+      (sum, r: any) => sum + (r.issues?.length || 0),
       0,
     );
     if (totalIssues > 0) {

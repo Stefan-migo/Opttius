@@ -5,7 +5,7 @@ import { requireRoot } from "@/lib/api/root-middleware";
 import { createOrganizationSchema } from "@/lib/api/validation/zod-schemas";
 import { sendSaaSNotification } from "@/lib/email/notifications";
 import { appLogger as logger } from "@/lib/logger";
-import { createServiceRoleClient } from "@/utils/supabase/service-role";
+import { createRootAdminClient } from "@/utils/supabase/root-admin";
 
 /**
  * GET /api/admin/saas-management/organizations
@@ -15,7 +15,7 @@ export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
   try {
     await requireRoot(request);
-    const supabaseServiceRole = createServiceRoleClient();
+    const supabaseServiceRole = createRootAdminClient();
 
     const { searchParams } = new URL(request.url);
     const tier = searchParams.get("tier");
@@ -176,7 +176,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     await requireRoot(request);
-    const supabaseServiceRole = createServiceRoleClient();
+    const supabaseServiceRole = createRootAdminClient();
 
     const body = await request.json();
     const parseResult = createOrganizationSchema.safeParse(body);

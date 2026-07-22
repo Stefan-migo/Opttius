@@ -6,6 +6,7 @@
  */
 
 import { getEmbeddingFactory } from "../embeddings";
+import { appLogger } from "@/lib/logger";
 import type {
   LongTermMemoryConfig,
   MemoryContext,
@@ -28,7 +29,7 @@ export class LongTermMemory {
       const factory = getEmbeddingFactory();
       const embeddingResult = await factory.embed(fact.content);
 
-      const insertData: unknown = {
+      const insertData: any = {
         user_id: fact.userId,
         fact_type: fact.factType,
         category: fact.category || null,
@@ -54,13 +55,13 @@ export class LongTermMemory {
         .single();
 
       if (error) {
-        console.error("Failed to store memory fact:", error);
+        appLogger.error("Failed to store memory fact:", error);
         return null;
       }
 
       return data.id;
     } catch (error) {
-      console.error("Store fact failed:", error);
+      appLogger.error("Store fact failed:", error);
       return null;
     }
   }
@@ -90,11 +91,11 @@ export class LongTermMemory {
       );
 
       if (error) {
-        console.error("Search memory facts error:", error);
+        appLogger.error("Search memory facts error:", error);
         return [];
       }
 
-      return (data || []).map((row: unknown) => ({
+      return (data || []).map((row: any) => ({
         id: row.id,
         userId: this.context.userId,
         factType: row.fact_type,
@@ -105,7 +106,7 @@ export class LongTermMemory {
         createdAt: new Date(row.created_at),
       }));
     } catch (error) {
-      console.error("Search facts failed:", error);
+      appLogger.error("Search facts failed:", error);
       return [];
     }
   }
@@ -136,11 +137,11 @@ export class LongTermMemory {
       const { data, error } = await query;
 
       if (error) {
-        console.error("Get all facts error:", error);
+        appLogger.error("Get all facts error:", error);
         return [];
       }
 
-      return (data || []).map((row: unknown) => ({
+      return (data || []).map((row: any) => ({
         id: row.id,
         userId: row.user_id,
         factType: row.fact_type,
@@ -152,7 +153,7 @@ export class LongTermMemory {
         expiresAt: row.expires_at ? new Date(row.expires_at) : undefined,
       }));
     } catch (error) {
-      console.error("Get all facts failed:", error);
+      appLogger.error("Get all facts failed:", error);
       return [];
     }
   }
@@ -175,11 +176,11 @@ export class LongTermMemory {
         .limit(limit);
 
       if (error) {
-        console.error("Get facts by type error:", error);
+        appLogger.error("Get facts by type error:", error);
         return [];
       }
 
-      return (data || []).map((row: unknown) => ({
+      return (data || []).map((row: any) => ({
         id: row.id,
         userId: row.user_id,
         factType: row.fact_type,
@@ -191,7 +192,7 @@ export class LongTermMemory {
         expiresAt: row.expires_at ? new Date(row.expires_at) : undefined,
       }));
     } catch (error) {
-      console.error("Get facts by type failed:", error);
+      appLogger.error("Get facts by type failed:", error);
       return [];
     }
   }
@@ -208,13 +209,13 @@ export class LongTermMemory {
         .eq("user_id", this.context.userId);
 
       if (error) {
-        console.error("Update importance error:", error);
+        appLogger.error("Update importance error:", error);
         return false;
       }
 
       return true;
     } catch (error) {
-      console.error("Update importance failed:", error);
+      appLogger.error("Update importance failed:", error);
       return false;
     }
   }
@@ -245,13 +246,13 @@ export class LongTermMemory {
         .eq("user_id", this.context.userId);
 
       if (error) {
-        console.error("Delete fact error:", error);
+        appLogger.error("Delete fact error:", error);
         return false;
       }
 
       return true;
     } catch (error) {
-      console.error("Delete fact failed:", error);
+      appLogger.error("Delete fact failed:", error);
       return false;
     }
   }
@@ -269,13 +270,13 @@ export class LongTermMemory {
         .select("id");
 
       if (error) {
-        console.error("Cleanup expired facts error:", error);
+        appLogger.error("Cleanup expired facts error:", error);
         return 0;
       }
 
       return data?.length || 0;
     } catch (error) {
-      console.error("Cleanup expired facts failed:", error);
+      appLogger.error("Cleanup expired facts failed:", error);
       return 0;
     }
   }

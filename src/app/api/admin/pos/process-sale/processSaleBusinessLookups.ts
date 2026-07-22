@@ -268,7 +268,7 @@ export async function handleBusinessLookups(
     (lastOrder as Record<string, unknown> | null)?.order_number as string | null,
   );
 
-  const orderItems = buildOrderItems(itemsArr as any) as unknown as Array<Record<string, unknown>>;
+  const orderItems = buildOrderItems(itemsArr as any) as Array<Record<string, unknown>>;
 
   const { customerName, billingFirstName, billingLastName } = buildCustomerName({
     customer: customer as Record<string, unknown> | null,
@@ -326,14 +326,14 @@ export async function handleBusinessLookups(
     institutionalAmount,
     quote,
     lensFamily,
-    lensInfo: lensInfoRecord,
+    lensInfo: lensInfoRecord as Record<string, unknown>,
     orderNumber,
     orderItems,
     customerName,
     billingFirstName,
     billingLastName,
     orderOrganizationId,
-    frameInfo: frameInfo as any,
+    frameInfo: frameInfo as Record<string, unknown>,
     treatmentsCost,
     laborCost,
     productsForStockCheck,
