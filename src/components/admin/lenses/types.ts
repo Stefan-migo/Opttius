@@ -33,6 +33,21 @@ export const LENS_TYPES = [
   { value: "sports", label: "Deportivo" },
 ];
 
+export interface LensMatrixFormData {
+  id: string;
+  name?: string | null;
+  sphere_min: number;
+  sphere_max: number;
+  cylinder_min: number;
+  cylinder_max: number;
+  addition_min: number;
+  addition_max: number;
+  base_price: number;
+  cost: number;
+  sourcing_type: "stock" | "surfaced";
+  is_active: boolean;
+}
+
 export const LENS_MATERIALS = [
   { value: "cr39", label: "CR-39" },
   { value: "polycarbonate", label: "Policarbonato" },
