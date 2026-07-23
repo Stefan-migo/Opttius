@@ -25,8 +25,14 @@
     "security/detect-eval-with-expression": "error",
 
     // Refactoring-focused rules
-    "max-lines": ["error", { "max": 300, "skipBlankLines": true, "skipComments": true }],
-    "max-lines-per-function": ["warn", { "max": 50, "skipBlankLines": true, "skipComments": true }],
+    "max-lines": [
+      "error",
+      { "max": 300, "skipBlankLines": true, "skipComments": true }
+    ],
+    "max-lines-per-function": [
+      "warn",
+      { "max": 50, "skipBlankLines": true, "skipComments": true }
+    ],
     "complexity": ["warn", 10],
     "max-depth": ["warn", 4],
     "max-params": ["warn", 4],
@@ -54,6 +60,7 @@
     "react/jsx-no-useless-fragment": "warn",
     "react/self-closing-comp": "warn",
     // SDD: saas-management-sr-assessment — block old service-role imports in saas-management routes
+    // SDD: fix-supabase-typed-clients — block direct supabase imports outside wrapper files
     "no-restricted-imports": [
       "error",
       {
@@ -61,6 +68,14 @@
           {
             "name": "@/utils/supabase/service-role",
             "message": "Use @/utils/supabase/root-admin in saas-management routes"
+          },
+          {
+            "name": "@supabase/ssr",
+            "message": "Use @/lib/supabase/client or @/lib/supabase/server instead"
+          },
+          {
+            "name": "@supabase/supabase-js",
+            "message": "Use @/lib/supabase/* wrappers instead"
           }
         ],
         "patterns": [
@@ -80,6 +95,18 @@
       }
     ]
   },
+  "overrides": [
+    {
+      "files": [
+        "src/lib/supabase/*.ts",
+        "src/utils/supabase/*.ts",
+        "src/middleware.ts"
+      ],
+      "rules": {
+        "no-restricted-imports": "off"
+      }
+    }
+  ],
   "settings": {
     "import/resolver": {
       "typescript": {
