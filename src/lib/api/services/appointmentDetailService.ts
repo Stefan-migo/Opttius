@@ -7,10 +7,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { sendAppointmentCancellation, sendAppointmentRescheduled } from "@/lib/email/templates/optica";
 import { appLogger as logger } from "@/lib/logger";
 import { NotificationService } from "@/lib/notifications/notification-service";
+import type { Database, SupabaseClient } from "@/types/supabase";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
 import { createClient, createServiceRoleClient } from "@/utils/supabase/server";
 
-async function getAdminAuth(supabase: unknown) {
+async function getAdminAuth(supabase: SupabaseClient<Database>) {
   const { data: { user }, error: userError } = await supabase.auth.getUser();
   if (userError || !user) return null;
   const { data: isAdmin } = (await supabase.rpc("is_admin", { user_id: user.id } as IsAdminParams)) as { data: IsAdminResult | null };
@@ -18,7 +19,7 @@ async function getAdminAuth(supabase: unknown) {
   return user;
 }
 
-async function fetchRelations(supabase: unknown, supabaseServiceRole: unknown, appointment: unknown) {
+async function fetchRelations(supabase: SupabaseClient<Database>, supabaseServiceRole: unknown, appointment: unknown) {
   const relations: Record<string, unknown> = { ...appointment };
   if (appointment.customer_id) {
     const { data: customer } = await supabase.from("customers").select("id, first_name, last_name, email, phone").eq("id", appointment.customer_id).single() as unknown;
