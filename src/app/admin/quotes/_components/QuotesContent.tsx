@@ -1,75 +1,36 @@
 "use client";
 
-import {
-  CheckCircle,
-  ChevronLeft,
-  ChevronRight,
-  Clock,
-  Eye,
-  FileText,
-  Plus,
-  RefreshCw,
-  Search,
-  Send,
-  Settings,
-  ShoppingCart,
-  Trash2,
-  XCircle,
-} from "lucide-react";
+import { FileText, Plus, RefreshCw, Search, Settings } from "lucide-react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useBranch } from "@/hooks/useBranch";
 
-// Lazy load CreateQuoteForm to reduce initial bundle size
-const CreateQuoteForm = dynamic(
-  () => import("@/components/admin/CreateQuoteForm"),
-  {
-    loading: () => (
-      <div className="flex items-center justify-center py-12">
-        <div className="text-center space-y-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-epoch-primary mx-auto" />
-          <p className="text-admin-text-tertiary">Cargando formulario...</p>
-        </div>
+const CreateQuoteForm = dynamic(() => import("@/components/admin/CreateQuoteForm"), {
+  loading: () => (
+    <div className="flex items-center justify-center py-12">
+      <div className="text-center space-y-4">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-epoch-primary mx-auto" />
+        <p className="text-admin-text-tertiary">Cargando formulario...</p>
       </div>
-    ),
-    ssr: false,
-  },
-);
+    </div>
+  ),
+  ssr: false,
+});
 
-import { Quote, quoteService } from "@/lib/api/services";
-import type { UpdateQuoteData } from "@/lib/api/services/quoteService";
-import { formatCurrency, formatDate } from "@/lib/utils";
+import { quoteService } from "@/lib/api/services";
+import type { Quote, UpdateQuoteData } from "@/lib/api/services/quoteService";
+
+import { DeleteQuoteDialog } from "./_components/DeleteQuoteDialog";
+import { QuotesTable } from "./_components/QuotesTable";
 
 export default function QuotesContent() {
   const searchParams = useSearchParams();
@@ -150,41 +111,6 @@ export default function QuotesContent() {
     }
   };
 
-  const getStatusBadge = (status: string, isConverted: boolean = false) => {
-    // Always show the current status (which should be 'accepted' when converted)
-    const displayStatus = status;
-
-    const config: Record<
-      string,
-      { variant: unknown; label: string; icon: unknown }
-    > = {
-      draft: { variant: "outline", label: "Borrador", icon: FileText },
-      sent: { variant: "secondary", label: "Enviado", icon: Send },
-      accepted: { variant: "default", label: "Aceptado", icon: CheckCircle },
-      rejected: { variant: "destructive", label: "Rechazado", icon: XCircle },
-      expired: { variant: "outline", label: "Expirado", icon: Clock },
-      converted_to_work: {
-        variant: "default",
-        label: "Convertido",
-        icon: RefreshCw,
-      },
-    };
-
-    const statusConfig = config[displayStatus] || {
-      variant: "outline",
-      label: displayStatus,
-      icon: FileText,
-    };
-    const Icon = statusConfig.icon;
-
-    return (
-      <Badge className="flex items-center gap-1" variant={statusConfig.variant}>
-        <Icon className="h-3 w-3" />
-        {statusConfig.label}
-      </Badge>
-    );
-  };
-
   const filteredQuotes = quotes.filter((quote) => {
     if (searchTerm) {
       const searchLower = searchTerm.toLowerCase();
@@ -223,7 +149,7 @@ export default function QuotesContent() {
       fetchQuotes();
     } catch (error: unknown) {
       console.error("Error deleting quote:", error);
-      toast.error(error.message || "Error al eliminar presupuesto");
+      toast.error(error instanceof Error ? error.message : "Error al eliminar presupuesto");
     } finally {
       setDeleting(false);
     }
@@ -351,267 +277,24 @@ export default function QuotesContent() {
               )}
             </div>
           ) : (
-            <>
-              <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Número</TableHead>
-                      <TableHead>Cliente</TableHead>
-                      <TableHead>Marco</TableHead>
-                      <TableHead>Lente</TableHead>
-                      <TableHead>Total</TableHead>
-                      <TableHead>Estado</TableHead>
-                      <TableHead>Convertido</TableHead>
-                      <TableHead>Fecha</TableHead>
-                      <TableHead>Acciones</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredQuotes.map((quote) => (
-                      <TableRow key={quote.id}>
-                        <TableCell className="font-medium">
-                          {quote.quote_number}
-                        </TableCell>
-                        <TableCell>
-                          <div>
-                            <div className="font-medium">
-                              {quote.customer?.first_name || ""}{" "}
-                              {quote.customer?.last_name || ""}
-                            </div>
-                            <div className="text-sm text-admin-text-tertiary">
-                              {quote.customer?.email}
-                            </div>
-                          </div>
-                        </TableCell>
-                        <TableCell>{quote.frame_name || "-"}</TableCell>
-                        <TableCell>
-                          <div>
-                            <div className="font-medium">
-                              {quote.lens_type || "-"}
-                            </div>
-                            <div className="text-sm text-admin-text-tertiary">
-                              {quote.lens_material || ""}
-                            </div>
-                          </div>
-                        </TableCell>
-                        <TableCell className="font-semibold text-admin-success">
-                          {formatCurrency(quote.total_amount)}
-                        </TableCell>
-                        <TableCell>
-                          {(() => {
-                            const isConverted =
-                              quote.status === "accepted" &&
-                              !!quote.converted_to_work_order_id;
-                            // Always show the current status (which should be 'accepted' when converted)
-                            const displayStatus = quote.status;
-
-                            return (
-                              <Select
-                                disabled={isConverted}
-                                value={displayStatus}
-                                onValueChange={async (value) => {
-                                  const newStatus = value as
-                                    | "draft"
-                                    | "sent"
-                                    | "accepted"
-                                    | "rejected"
-                                    | "expired"
-                                    | "converted_to_work";
-                                  if (isConverted) {
-                                    toast.error(
-                                      "No se puede cambiar el estado de un presupuesto convertido",
-                                    );
-                                    return;
-                                  }
-
-                                  try {
-                                    await quoteService.updateQuote(quote.id, {
-                                      status:
-                                        newStatus as UpdateQuoteData["status"],
-                                    });
-
-                                    // Update local state
-                                    setQuotes((prev) =>
-                                      prev.map((q) =>
-                                        q.id === quote.id
-                                          ? {
-                                              ...q,
-                                              status:
-                                                newStatus as Quote["status"],
-                                            }
-                                          : q,
-                                      ),
-                                    );
-                                    toast.success("Estado actualizado");
-                                  } catch (error) {
-                                    console.error(
-                                      "Error updating status:",
-                                      error,
-                                    );
-                                    const errorMessage =
-                                      error instanceof Error
-                                        ? error.message
-                                        : "Error al actualizar estado";
-                                    toast.error(errorMessage);
-                                  }
-                                }}
-                              >
-                                <SelectTrigger className="w-auto border-0 p-0 h-auto bg-transparent hover:bg-transparent focus:ring-0 focus:ring-offset-0 shadow-none [&>svg]:hidden [&_svg]:hidden [&_[data-radix-select-icon]]:hidden">
-                                  <SelectValue asChild>
-                                    <div
-                                      className={`cursor-pointer ${isConverted ? "cursor-not-allowed opacity-75" : ""}`}
-                                    >
-                                      {getStatusBadge(
-                                        displayStatus,
-                                        isConverted,
-                                      )}
-                                    </div>
-                                  </SelectValue>
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="draft">
-                                    <div className="flex items-center gap-2">
-                                      <FileText className="h-3 w-3" />
-                                      Borrador
-                                    </div>
-                                  </SelectItem>
-                                  <SelectItem value="sent">
-                                    <div className="flex items-center gap-2">
-                                      <Send className="h-3 w-3" />
-                                      Enviado
-                                    </div>
-                                  </SelectItem>
-                                  <SelectItem value="accepted">
-                                    <div className="flex items-center gap-2">
-                                      <CheckCircle className="h-3 w-3" />
-                                      Aceptado
-                                    </div>
-                                  </SelectItem>
-                                  <SelectItem value="rejected">
-                                    <div className="flex items-center gap-2">
-                                      <XCircle className="h-3 w-3" />
-                                      Rechazado
-                                    </div>
-                                  </SelectItem>
-                                  <SelectItem value="expired">
-                                    <div className="flex items-center gap-2">
-                                      <Clock className="h-3 w-3" />
-                                      Expirado
-                                    </div>
-                                  </SelectItem>
-                                </SelectContent>
-                              </Select>
-                            );
-                          })()}
-                        </TableCell>
-                        <TableCell>
-                          {quote.converted_to_work_order_id ? (
-                            <Badge
-                              className="flex items-center gap-1 bg-green-600"
-                              variant="default"
-                            >
-                              <RefreshCw className="h-3 w-3" />
-                              Convertido
-                            </Badge>
-                          ) : (
-                            <span className="text-admin-text-tertiary text-sm">
-                              -
-                            </span>
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          <div>
-                            <div>{formatDate(quote.quote_date)}</div>
-                            {quote.expiration_date && (
-                              <div
-                                className={`text-xs ${
-                                  new Date(quote.expiration_date) < new Date()
-                                    ? "text-red-500"
-                                    : "text-admin-text-tertiary"
-                                }`}
-                              >
-                                Exp: {formatDate(quote.expiration_date)}
-                              </div>
-                            )}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            <Link href={`/admin/quotes/${quote.id}`}>
-                              <Button size="sm" variant="outline">
-                                <Eye className="h-4 w-4 mr-1" />
-                                Ver
-                              </Button>
-                            </Link>
-                            {quote.status !== "accepted" &&
-                              !quote.converted_to_work_order_id && (
-                                <Link
-                                  href={
-                                    fieldOperationIdFromUrl
-                                      ? `/admin/pos?quoteId=${quote.id}&field_operation_id=${fieldOperationIdFromUrl}`
-                                      : `/admin/pos?quoteId=${quote.id}`
-                                  }
-                                >
-                                  <Button
-                                    className="text-green-600 hover:text-green-700 hover:bg-green-50"
-                                    size="sm"
-                                    variant="outline"
-                                  >
-                                    <ShoppingCart className="h-4 w-4 mr-1" />
-                                    Cargar al POS
-                                  </Button>
-                                </Link>
-                              )}
-                            <Button
-                              className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                              disabled={
-                                quote.status === "accepted" ||
-                                !!quote.converted_to_work_order_id
-                              }
-                              size="sm"
-                              variant="outline"
-                              onClick={() => handleDeleteClick(quote.id)}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-
-              {/* Pagination */}
-              {totalPages > 1 && (
-                <div className="flex items-center justify-between mt-4">
-                  <div className="text-sm text-admin-text-tertiary">
-                    Página {currentPage} de {totalPages}
-                  </div>
-                  <div className="flex gap-2">
-                    <Button
-                      disabled={currentPage === 1}
-                      size="sm"
-                      variant="outline"
-                      onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                    >
-                      <ChevronLeft className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      disabled={currentPage === totalPages}
-                      size="sm"
-                      variant="outline"
-                      onClick={() =>
-                        setCurrentPage((p) => Math.min(totalPages, p + 1))
-                      }
-                    >
-                      <ChevronRight className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              )}
-            </>
+            <QuotesTable
+              currentPage={currentPage}
+              fieldOperationIdFromUrl={fieldOperationIdFromUrl}
+              filteredQuotes={filteredQuotes}
+              totalPages={totalPages}
+              totalQuotes={totalQuotes}
+              onDeleteClick={handleDeleteClick}
+              onPageChange={setCurrentPage}
+              onStatusChange={async (quoteId, newStatus) => {
+                try {
+                  await quoteService.updateQuote(quoteId, { status: newStatus as UpdateQuoteData["status"] });
+                  setQuotes((prev) => prev.map((q) => q.id === quoteId ? { ...q, status: newStatus as Quote["status"] } : q));
+                  toast.success("Estado actualizado");
+                } catch (error) {
+                  toast.error(error instanceof Error ? error.message : "Error al actualizar estado");
+                }
+              }}
+            />
           )}
         </CardContent>
       </Card>
@@ -634,47 +317,12 @@ export default function QuotesContent() {
         </DialogContent>
       </Dialog>
 
-      {/* Delete Confirmation Dialog */}
-      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>¿Eliminar presupuesto?</DialogTitle>
-            <DialogDescription>
-              Esta acción no se puede deshacer. El presupuesto será eliminado
-              permanentemente.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button
-              disabled={deleting}
-              variant="outline"
-              onClick={() => {
-                setDeleteDialogOpen(false);
-                setQuoteToDelete(null);
-              }}
-            >
-              Cancelar
-            </Button>
-            <Button
-              disabled={deleting}
-              variant="destructive"
-              onClick={handleDeleteConfirm}
-            >
-              {deleting ? (
-                <>
-                  <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                  Eliminando...
-                </>
-              ) : (
-                <>
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  Eliminar
-                </>
-              )}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <DeleteQuoteDialog
+        deleting={deleting}
+        open={deleteDialogOpen}
+        onConfirm={handleDeleteConfirm}
+        onOpenChange={(open) => { setDeleteDialogOpen(open); if (!open) setQuoteToDelete(null); }}
+      />
     </div>
   );
 }
