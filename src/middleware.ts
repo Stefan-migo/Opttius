@@ -4,6 +4,7 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
 import { CSRF_EXEMPT_PREFIXES, validateCsrfOrigin } from "@/lib/api/csrf";
+import type { Database } from "@/types/supabase";
 
 // ponytail: crypto.randomUUID() ~0.01ms per call, well under 1ms budget
 export function buildCspPolicy(
@@ -84,7 +85,7 @@ export async function middleware(request: NextRequest) {
 
     if (providedToken) {
       try {
-        const supabase = createClient(
+        const supabase = createClient<Database>(
           process.env.NEXT_PUBLIC_SUPABASE_URL!,
           process.env.SUPABASE_SERVICE_ROLE_KEY!,
           { auth: { autoRefreshToken: false, persistSession: false } },
@@ -153,7 +154,7 @@ export async function middleware(request: NextRequest) {
   // Crear response y cliente Supabase para refrescar sesión
   let response = NextResponse.next({ request });
 
-  const supabase = createServerClient(
+  const supabase = createServerClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
