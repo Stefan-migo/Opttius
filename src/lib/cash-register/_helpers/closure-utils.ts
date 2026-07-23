@@ -9,7 +9,7 @@ import { coerceAmount } from "@/lib/cash-register/payment-aggregator";
 import type { PaymentAggregatorInput } from "@/lib/cash-register/payment-aggregator";
 import type { ClosurePayloadParams } from "@/lib/cash-register/closure-builder";
 
-import type { ClosureInputRaw, OrderTotals } from "./closure-types";
+import type { ClosureContext, ClosureInputRaw, OrderTotals } from "./closure-types";
 
 // ─── Date Alignment ─────────────────────────────────────────────────────────
 
@@ -65,6 +65,90 @@ export function calculateOrderTotals(orders: any[]): OrderTotals {
 }
 
 // ─── Closure Payload Input Builder ─────────────────────────────────────────
+
+// ─── Previous Closure Lookup ────────────────────────────────────────────────
+
+export async function getPreviousClosure(
+  ctx: ClosureContext,
+  dateStr: string,
+): Promise<any | null> {
+  if (!ctx.effectiveBranchId) return null;
+
+  let closureQuery = ctx.supabaseServiceRole
+    .from("cash_register_closures")
+    .select("*")
+    .eq("branch_id", ctx.effectiveBranchId)
+    .eq("closure_date", dateStr);
+
+  if (ctx.fieldOperationId) {
+    closureQuery = closureQuery.eq("field_operation_id", ctx.fieldOperationId);
+  } else {
+    closureQuery = closureQuery.is("field_operation_id", null);
+  }
+
+  const { data: existingClosure } = await closureQuery.maybeSingle();
+
+  if (
+    existingClosure &&
+    (existingClosure.status === "draft" || existingClosure.reopened_at)
+  ) {
+    return existingClosure;
+  }
+
+  return null;
+}
+
+// ─── GET Session Fallback ──────────────────────────────────────────────────
+
+export async function resolveGetSession(
+  ctx: ClosureContext,
+  dateStr: string,
+): Promise<{ sessionId: string | null }> {
+  if (!ctx.effectiveBranchId) return { sessionId: null };
+
+  // Try open session for this date first
+  let openQuery = ctx.supabaseServiceRole
+    .from("pos_sessions")
+    .select("id, opening_cash_amount, status, reopen_count")
+    .eq("branch_id", ctx.effectiveBranchId)
+    .eq("status", "open")
+    .gte("opening_time", `${dateStr}T00:00:00`)
+    .lt("opening_time", `${dateStr}T23:59:59`);
+
+  if (ctx.fieldOperationId) {
+    openQuery = openQuery.eq("field_operation_id", ctx.fieldOperationId);
+  } else {
+    openQuery = openQuery.is("field_operation_id", null);
+  }
+
+  const { data: openPosSession } = await openQuery
+    .order("opening_time", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (openPosSession) return { sessionId: openPosSession.id };
+
+  // Fallback: any session for this date (even closed — reopened cases)
+  let fallbackQuery = ctx.supabaseServiceRole
+    .from("pos_sessions")
+    .select("id, opening_cash_amount, status, reopen_count")
+    .eq("branch_id", ctx.effectiveBranchId)
+    .gte("opening_time", `${dateStr}T00:00:00`)
+    .lt("opening_time", `${dateStr}T23:59:59`);
+
+  if (ctx.fieldOperationId) {
+    fallbackQuery = fallbackQuery.eq("field_operation_id", ctx.fieldOperationId);
+  } else {
+    fallbackQuery = fallbackQuery.is("field_operation_id", null);
+  }
+
+  const { data: lastSession } = await fallbackQuery
+    .order("opening_time", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  return { sessionId: lastSession?.id || null };
+}
 
 export function buildClosureInput(raw: ClosureInputRaw): ClosurePayloadParams {
   return {
