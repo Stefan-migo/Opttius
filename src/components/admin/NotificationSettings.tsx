@@ -11,11 +11,7 @@ import {
   XCircle,
 } from "lucide-react";
 
-import { toast } from "sonner";
-
 import { useNotificationSettings } from "@/components/admin/_hooks/useNotificationSettings";
-import { NotificationGroupCard } from "@/components/admin/_components/NotificationGroupCard";
-
 import { Button } from "@/components/ui/button";
 import {
   Card,
