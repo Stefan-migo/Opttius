@@ -9,7 +9,7 @@ import type { Database } from "@/types/supabase";
 export async function createClient() {
   const cookieStore = await cookies();
 
-  return createServerClient(
+  return createServerClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL || "",
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "",
     {
@@ -56,17 +56,21 @@ export async function createClientFromRequest<T = Database>(
     if (authHeader?.startsWith("Bearer ")) {
       const token = authHeader.substring(7);
       // Create client with token in global headers for RLS
-      const client = createSupabaseClient(supabaseUrl, supabaseAnonKey, {
-        global: {
-          headers: {
-            Authorization: `Bearer ${token}`,
+      const client = createSupabaseClient<Database>(
+        supabaseUrl,
+        supabaseAnonKey,
+        {
+          global: {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          },
+          auth: {
+            autoRefreshToken: false,
+            persistSession: false,
           },
         },
-        auth: {
-          autoRefreshToken: false,
-          persistSession: false,
-        },
-      });
+      );
 
       // Return client with custom getUser that uses the token
       return {
@@ -96,7 +100,7 @@ export function createServiceRoleClient() {
   if (!serviceRoleKey) {
     throw new Error("SUPABASE_SERVICE_ROLE_KEY is not configured");
   }
-  return createSupabaseClient(
+  return createSupabaseClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL || "",
     serviceRoleKey,
     {
