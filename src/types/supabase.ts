@@ -4,3 +4,4 @@ export type { Database, Json } from "./supabase.generated";
 
 // Domain helper types — maintained manually alongside domain splits
 export * from "./supabase-helpers";
+export type { SupabaseClient } from "@supabase/supabase-js";

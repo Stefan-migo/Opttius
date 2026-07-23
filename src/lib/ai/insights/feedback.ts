@@ -1,12 +1,13 @@
 
 import { appLogger } from '@/lib/logger';
+import type { Database, SupabaseClient } from '@/types/supabase';
 
 import { DatabaseInsight, InsightFeedback, InsightSection } from "./schemas";
 
 export class InsightFeedbackSystem {
-  private supabase: unknown;
+  private supabase: SupabaseClient<Database>;
 
-  constructor(supabase: unknown) {
+  constructor(supabase: SupabaseClient<Database>) {
     this.supabase = supabase;
   }
 
