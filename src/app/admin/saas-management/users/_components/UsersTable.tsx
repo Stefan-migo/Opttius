@@ -3,14 +3,11 @@
 import {
   Building2,
   CheckCircle2,
-  Crown,
   Eye,
   Loader2,
   MapPin,
   MoreVertical,
-  Shield,
   Trash2,
-  User,
   XCircle,
 } from "lucide-react";
 
@@ -34,23 +31,8 @@ import {
 } from "@/components/ui/table";
 import { formatDate } from "@/lib/utils";
 
-interface User {
-  id: string;
-  email: string;
-  role: string;
-  is_active: boolean;
-  organization_id?: string;
-  is_super_admin?: boolean;
-  branches?: Array<{ id: string; name: string; code: string }>;
-  organization?: {
-    id: string;
-    name: string;
-    slug: string;
-  };
-  fullName?: string;
-  last_login?: string;
-  created_at: string;
-}
+import type { User } from "./types";
+import { getActiveBadge, getRoleBadge } from "./userBadgeHelpers";
 
 interface UsersTableProps {
   users: User[];
@@ -66,47 +48,6 @@ interface UsersTableProps {
   onChangeOrgClick: (user: User) => void;
   onResetPassword: (userId: string) => void;
   onDeleteClick: (user: User) => void;
-}
-
-function getRoleBadge(role: string) {
-  const colors: Record<string, string> = {
-    root: "bg-red-100 text-red-800",
-    dev: "bg-orange-100 text-orange-800",
-    super_admin: "bg-purple-100 text-purple-800",
-    admin: "bg-blue-100 text-blue-800",
-    employee: "bg-gray-100 text-gray-800",
-    vendedor: "bg-green-100 text-green-800",
-  };
-
-  const icons: Record<string, typeof Shield> = {
-    root: Shield,
-    dev: Shield,
-    super_admin: Crown,
-    admin: User,
-    employee: User,
-    vendedor: User,
-  };
-
-  const Icon = icons[role] || User;
-
-  return (
-    <Badge className={colors[role] || colors.admin}>
-      <Icon className="h-3 w-3 mr-1" />
-      {role === "root"
-        ? "Root"
-        : role === "dev"
-          ? "Dev"
-          : role === "super_admin"
-            ? "Super Admin"
-            : role === "admin"
-              ? "Admin"
-              : role === "vendedor"
-                ? "Vendedor"
-                : role === "employee"
-                  ? "Empleado"
-                  : role}
-    </Badge>
-  );
 }
 
 export function UsersTable({
@@ -197,19 +138,7 @@ export function UsersTable({
                           <span className="text-gray-400">-</span>
                         )}
                       </TableCell>
-                      <TableCell>
-                        {user.is_active ? (
-                          <Badge variant="default">
-                            <CheckCircle2 className="h-3 w-3 mr-1" />
-                            Activo
-                          </Badge>
-                        ) : (
-                          <Badge variant="secondary">
-                            <XCircle className="h-3 w-3 mr-1" />
-                            Inactivo
-                          </Badge>
-                        )}
-                      </TableCell>
+                      <TableCell>{getActiveBadge(user.is_active)}</TableCell>
                       <TableCell className="text-sm text-gray-500">
                         {user.last_login
                           ? formatDate(user.last_login)
@@ -287,9 +216,7 @@ export function UsersTable({
                     disabled={currentPage === 1}
                     size="sm"
                     variant="outline"
-                    onClick={() =>
-                      onPageChange(Math.max(1, currentPage - 1))
-                    }
+                    onClick={() => onPageChange(Math.max(1, currentPage - 1))}
                   >
                     Anterior
                   </Button>

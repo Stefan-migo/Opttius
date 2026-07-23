@@ -1,74 +1,21 @@
 "use client";
 
-import {
-  AlertCircle,
-  AlertTriangle,
-  ArrowLeft,
-  Building2,
-  Calendar,
-  CheckCircle2,
-  Clock,
-  CreditCard,
-  DollarSign,
-  Loader2,
-  Pencil,
-  Save,
-  Trash2,
-  XCircle,
-} from "lucide-react";
-import Link from "next/link";
+import { ArrowLeft, Loader2, Pencil, Trash2 } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { formatDate } from "@/lib/utils";
+import { Card, CardContent } from "@/components/ui/card";
 
-interface SubscriptionDetails {
-  id: string;
-  organization_id: string;
-  status: string;
-  trial_ends_at?: string | null;
-  current_period_start?: string;
-  current_period_end?: string;
-  cancel_at?: string;
-  canceled_at?: string;
-  gateway_subscription_id?: string;
-  gateway_customer_id?: string;
-  created_at: string;
-  updated_at: string;
-  organization?: {
-    id: string;
-    name: string;
-    slug: string;
-    subscription_tier: string;
-    status: string;
-    owner_id?: string;
-    created_at: string;
-  };
-  daysUntilExpiry?: number;
-  isExpiringSoon?: boolean;
-  isExpired?: boolean;
-}
+import {
+  SubscriptionDeleteDialog,
+  SubscriptionEditForm,
+} from "./SubscriptionDialogs";
+import {
+  SubscriptionDetails,
+  SubscriptionInfoCards,
+} from "./SubscriptionInfoCards";
 
 export default function SubscriptionDetailsContent() {
   const params = useParams();
@@ -205,55 +152,6 @@ export default function SubscriptionDetailsContent() {
     }
   };
 
-  const getStatusBadge = (
-    status: string,
-    isExpiringSoon?: boolean,
-    isExpired?: boolean,
-  ) => {
-    const variants: Record<string, "default" | "secondary" | "destructive"> = {
-      active: "default",
-      trialing: "secondary",
-      past_due: "destructive",
-      cancelled: "destructive",
-      incomplete: "secondary",
-    };
-
-    const icons: Record<string, typeof CheckCircle2> = {
-      active: CheckCircle2,
-      trialing: Clock,
-      past_due: AlertTriangle,
-      cancelled: XCircle,
-      incomplete: Clock,
-    };
-
-    const Icon = icons[status] || CheckCircle2;
-    const variant = variants[status] || "default";
-
-    let className = "";
-    if (isExpired) {
-      className = "bg-red-100 text-red-800";
-    } else if (isExpiringSoon) {
-      className = "bg-yellow-100 text-yellow-800";
-    }
-
-    return (
-      <Badge className={className} variant={variant}>
-        <Icon className="h-3 w-3 mr-1" />
-        {status === "active"
-          ? "Activa"
-          : status === "trialing"
-            ? "Trial"
-            : status === "past_due"
-              ? "Vencida"
-              : status === "cancelled"
-                ? "Cancelada"
-                : status === "incomplete"
-                  ? "Incompleta"
-                  : status}
-      </Badge>
-    );
-  };
-
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -343,317 +241,27 @@ export default function SubscriptionDetailsContent() {
         </div>
       </div>
 
-      {/* Información Principal */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-3">
-            <CreditCard className="h-5 w-5" />
-            Información de la Suscripción
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="text-sm font-medium text-gray-500">
-                Estado
-              </label>
-              <div className="mt-1">
-                {getStatusBadge(
-                  subscription.status,
-                  subscription.isExpiringSoon,
-                  subscription.isExpired,
-                )}
-              </div>
-            </div>
-            {subscription.daysUntilExpiry !== null && (
-              <div>
-                <label className="text-sm font-medium text-gray-500">
-                  Días hasta vencimiento
-                </label>
-                <p
-                  className={`text-lg font-semibold ${
-                    subscription.isExpired
-                      ? "text-red-600"
-                      : subscription.isExpiringSoon
-                        ? "text-yellow-600"
-                        : ""
-                  }`}
-                >
-                  {subscription.daysUntilExpiry != null &&
-                  subscription.daysUntilExpiry < 0
-                    ? `Vencida hace ${Math.abs(subscription.daysUntilExpiry)} días`
-                    : subscription.daysUntilExpiry != null
-                      ? `${subscription.daysUntilExpiry} días`
-                      : "N/A"}
-                </p>
-              </div>
-            )}
-            {subscription.current_period_start && (
-              <div>
-                <label className="text-sm font-medium text-gray-500">
-                  Inicio del período
-                </label>
-                <p className="text-lg flex items-center gap-2">
-                  <Calendar className="h-4 w-4" />
-                  {formatDate(subscription.current_period_start)}
-                </p>
-              </div>
-            )}
-            {subscription.current_period_end && (
-              <div>
-                <label className="text-sm font-medium text-gray-500">
-                  Fin del período
-                </label>
-                <p className="text-lg flex items-center gap-2">
-                  <Calendar className="h-4 w-4" />
-                  {formatDate(subscription.current_period_end)}
-                </p>
-              </div>
-            )}
-            {subscription.cancel_at && (
-              <div>
-                <label className="text-sm font-medium text-gray-500">
-                  Cancelación programada
-                </label>
-                <p className="text-lg flex items-center gap-2">
-                  <Calendar className="h-4 w-4" />
-                  {formatDate(subscription.cancel_at)}
-                </p>
-              </div>
-            )}
-            {subscription.canceled_at && (
-              <div>
-                <label className="text-sm font-medium text-gray-500">
-                  Fecha de cancelación
-                </label>
-                <p className="text-lg flex items-center gap-2">
-                  <Calendar className="h-4 w-4" />
-                  {formatDate(subscription.canceled_at)}
-                </p>
-              </div>
-            )}
-            {subscription.trial_ends_at && (
-              <div>
-                <label className="text-sm font-medium text-gray-500">
-                  Fin del período de prueba
-                </label>
-                <p className="text-lg flex items-center gap-2">
-                  <Calendar className="h-4 w-4" />
-                  {formatDate(subscription.trial_ends_at)}
-                </p>
-              </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+      <SubscriptionInfoCards subscription={subscription} />
 
-      {/* Editar suscripción */}
       {editing && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Pencil className="h-5 w-5" />
-              Editar suscripción
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Estado</Label>
-                <Select value={editStatus} onValueChange={setEditStatus}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="active">Activa</SelectItem>
-                    <SelectItem value="trialing">Trial</SelectItem>
-                    <SelectItem value="past_due">Vencida</SelectItem>
-                    <SelectItem value="incomplete">Incompleta</SelectItem>
-                    <SelectItem value="cancelled">Cancelada</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="period_end">Fin del período (YYYY-MM-DD)</Label>
-                <Input
-                  id="period_end"
-                  type="date"
-                  value={editPeriodEnd}
-                  onChange={(e) => setEditPeriodEnd(e.target.value)}
-                />
-              </div>
-              <div className="space-y-2 md:col-span-2">
-                <Label htmlFor="trial_ends">
-                  Fin del trial (fecha y hora, opcional)
-                </Label>
-                <Input
-                  id="trial_ends"
-                  type="datetime-local"
-                  value={editTrialEndsAt}
-                  onChange={(e) => setEditTrialEndsAt(e.target.value)}
-                />
-              </div>
-            </div>
-            <Button disabled={saveLoading} onClick={handleSaveEdit}>
-              {saveLoading ? (
-                <Loader2 className="h-4 w-4 animate-spin mr-2" />
-              ) : (
-                <Save className="h-4 w-4 mr-2" />
-              )}
-              Guardar cambios
-            </Button>
-          </CardContent>
-        </Card>
+        <SubscriptionEditForm
+          editPeriodEnd={editPeriodEnd}
+          editStatus={editStatus}
+          editTrialEndsAt={editTrialEndsAt}
+          saveLoading={saveLoading}
+          onEditPeriodEndChange={setEditPeriodEnd}
+          onEditStatusChange={setEditStatus}
+          onEditTrialEndsAtChange={setEditTrialEndsAt}
+          onSave={handleSaveEdit}
+        />
       )}
 
-      {/* Información de Stripe */}
-      {(subscription.gateway_subscription_id ||
-        subscription.gateway_customer_id) && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-3">
-              <DollarSign className="h-5 w-5" />
-              Información de Stripe
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {subscription.gateway_subscription_id && (
-                <div>
-                  <label className="text-sm font-medium text-gray-500">
-                    ID de Suscripción Stripe
-                  </label>
-                  <p className="text-sm font-mono text-gray-600">
-                    {subscription.gateway_subscription_id}
-                  </p>
-                </div>
-              )}
-              {subscription.gateway_customer_id && (
-                <div>
-                  <label className="text-sm font-medium text-gray-500">
-                    ID de Cliente
-                  </label>
-                  <p className="text-sm font-mono text-gray-600">
-                    {subscription.gateway_customer_id}
-                  </p>
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Organización */}
-      {subscription.organization && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-3">
-              <Building2 className="h-5 w-5" />
-              Organización
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-lg font-semibold">
-                  {subscription.organization.name}
-                </p>
-                <p className="text-sm text-gray-500">
-                  Slug: {subscription.organization.slug}
-                </p>
-                <div className="flex gap-2 mt-2">
-                  <Badge>{subscription.organization.subscription_tier}</Badge>
-                  <Badge
-                    variant={
-                      subscription.organization.status === "active"
-                        ? "default"
-                        : "secondary"
-                    }
-                  >
-                    {subscription.organization.status}
-                  </Badge>
-                </div>
-              </div>
-              <Link
-                href={`/admin/saas-management/organizations/${subscription.organization.id}`}
-              >
-                <Button size="sm" variant="outline">
-                  Ver organización
-                </Button>
-              </Link>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Información del Sistema */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-3">
-            <Clock className="h-5 w-5" />
-            Información del Sistema
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="text-sm font-medium text-gray-500">
-                Fecha de creación
-              </label>
-              <p className="text-lg">{formatDate(subscription.created_at)}</p>
-            </div>
-            <div>
-              <label className="text-sm font-medium text-gray-500">
-                Última actualización
-              </label>
-              <p className="text-lg">{formatDate(subscription.updated_at)}</p>
-            </div>
-            <div>
-              <label className="text-sm font-medium text-gray-500">
-                ID de la Suscripción
-              </label>
-              <p className="text-sm font-mono text-gray-600">
-                {subscription.id}
-              </p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <div className="mx-auto bg-red-100 dark:bg-red-500/20 p-4 rounded-3xl w-fit mb-4">
-              <AlertCircle className="h-10 w-10 text-red-600 dark:text-red-500" />
-            </div>
-            <DialogTitle>¿Eliminar esta suscripción?</DialogTitle>
-            <DialogDescription>
-              Esta acción no se puede deshacer. Se eliminará el registro de
-              suscripción.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setShowDeleteConfirm(false)}
-            >
-              Volver
-            </Button>
-            <Button
-              disabled={deleteLoading}
-              variant="destructive"
-              onClick={handleDelete}
-            >
-              {deleteLoading ? (
-                <Loader2 className="h-4 w-4 animate-spin mr-2" />
-              ) : (
-                <Trash2 className="h-4 w-4 mr-2" />
-              )}
-              Eliminar
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <SubscriptionDeleteDialog
+        deleteLoading={deleteLoading}
+        open={showDeleteConfirm}
+        onDelete={handleDelete}
+        onOpenChange={setShowDeleteConfirm}
+      />
     </div>
   );
 }

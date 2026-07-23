@@ -1,6 +1,5 @@
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
 import {
   ArrowLeft,
   Copy,
@@ -9,71 +8,19 @@ import {
   UserPlus,
   XCircle,
 } from "lucide-react";
-import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import { SubmitHandler, useForm } from "react-hook-form";
-import { toast } from "sonner";
-import type { z } from "zod";
+import { useRouter } from "next/navigation";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { createSaasSupportMessageSchema } from "@/lib/api/validation/zod-schemas";
 
 import { TicketInfoPanel } from "./TicketInfoPanel";
 import { TicketMessageForm } from "./TicketMessageForm";
 import { TicketMessagesList } from "./TicketMessagesList";
 import { TicketStatusDialog } from "./TicketStatusDialog";
 import { TicketTemplateDialog } from "./TicketTemplateDialog";
-
-type MessageForm = z.infer<typeof createSaasSupportMessageSchema>;
-
-interface TicketMessage {
-  id: string;
-  message: string;
-  sender_name: string;
-  sender_email: string;
-  is_from_customer: boolean;
-  is_internal: boolean;
-  created_at: string;
-  message_type: string;
-  sender?: { id: string; email: string; role: string } | null;
-}
-
-interface Ticket {
-  id: string;
-  ticket_number: string;
-  subject: string;
-  description: string;
-  category: string;
-  priority: string;
-  status: string;
-  created_at: string;
-  updated_at: string;
-  first_response_at: string | null;
-  last_response_at: string | null;
-  response_time_minutes: number | null;
-  resolution_time_minutes: number | null;
-  resolution: string | null;
-  assigned_to: string | null;
-  assigned_at: string | null;
-  resolved_at: string | null;
-  requester_email: string;
-  requester_name: string | null;
-  requester_role: string | null;
-  organization?: { id: string; name: string; slug: string } | null;
-  assigned_to_user?: { id: string; email: string; role: string } | null;
-  created_by_user?: { id: string; email: string; role: string } | null;
-}
-
-interface Template {
-  id: string;
-  name: string;
-  subject: string | null;
-  content: string;
-  category: string | null;
-}
+import { useTicketDetail } from "./useTicketDetail";
 
 const statusLabels: Record<string, string> = {
   open: "Abierto",
@@ -111,167 +58,33 @@ const categoryLabels: Record<string, string> = {
 
 export default function TicketDetailContent() {
   const router = useRouter();
-  const params = useParams();
-  const ticketId = params.id as string;
-
-  const [ticket, setTicket] = useState<Ticket | null>(null);
-  const [messages, setMessages] = useState<TicketMessage[]>([]);
-  const [templates, setTemplates] = useState<Template[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [sendingMessage, setSendingMessage] = useState(false);
-  const [updatingTicket, setUpdatingTicket] = useState(false);
-  const [showAssignDialog, setShowAssignDialog] = useState(false);
-  const [showStatusDialog, setShowStatusDialog] = useState(false);
-  const [showTemplateDialog, setShowTemplateDialog] = useState(false);
-  const [newStatus, setNewStatus] = useState("");
-  const [newPriority, setNewPriority] = useState("");
-  const [newResolution, setNewResolution] = useState("");
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { register, handleSubmit, formState: { errors }, reset, setValue } = useForm<any>({
-    resolver: zodResolver(createSaasSupportMessageSchema),
-    defaultValues: {
-      is_internal: false,
-      message_type: "message",
-    },
-  });
-
-  useEffect(() => {
-    fetchTicket();
-    fetchMessages();
-    fetchTemplates();
-  }, [ticketId]);
-
-  const fetchTicket = async () => {
-    try {
-      const response = await fetch(
-        `/api/admin/saas-management/support/tickets/${ticketId}`,
-      );
-
-      if (!response.ok) {
-        throw new Error("Error al cargar el ticket");
-      }
-
-      const data = await response.json();
-      setTicket(data.ticket);
-      setNewStatus(data.ticket.status);
-      setNewPriority(data.ticket.priority);
-    } catch (err) {
-      toast.error("Error al cargar el ticket");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchMessages = async () => {
-    try {
-      const response = await fetch(
-        `/api/admin/saas-management/support/tickets/${ticketId}/messages`,
-      );
-
-      if (response.ok) {
-        const data = await response.json();
-        setMessages(data.messages || []);
-      }
-    } catch (err) {
-      console.error("Error fetching messages:", err);
-    }
-  };
-
-  const fetchTemplates = async () => {
-    try {
-      const response = await fetch(
-        `/api/admin/saas-management/support/templates?is_active=true`,
-      );
-
-      if (response.ok) {
-        const data = await response.json();
-        setTemplates(data.templates || []);
-      }
-    } catch (err) {
-      console.error("Error fetching templates:", err);
-    }
-  };
-
-  const onSubmitMessage: SubmitHandler<unknown> = async (data) => {
-    setSendingMessage(true);
-    try {
-      const response = await fetch(
-        `/api/admin/saas-management/support/tickets/${ticketId}/messages`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data),
-        },
-      );
-
-      if (!response.ok) {
-        const result = await response.json();
-        throw new Error(result.error || "Error al enviar mensaje");
-      }
-
-      toast.success("Mensaje enviado exitosamente");
-      reset();
-      fetchMessages();
-      fetchTicket();
-    } catch (err) {
-      toast.error(
-        err instanceof Error ? err.message : "Error al enviar mensaje",
-      );
-    } finally {
-      setSendingMessage(false);
-    }
-  };
-
-  const handleUpdateStatus = async () => {
-    setUpdatingTicket(true);
-    try {
-      const updates: Record<string, unknown> = {
-        status: newStatus,
-        priority: newPriority,
-      };
-
-      if (newStatus === "resolved" || newStatus === "closed") {
-        updates.resolution = newResolution || null;
-      }
-
-      const response = await fetch(
-        `/api/admin/saas-management/support/tickets/${ticketId}`,
-        {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(updates),
-        },
-      );
-
-      if (!response.ok) {
-        const result = await response.json();
-        throw new Error(result.error || "Error al actualizar ticket");
-      }
-
-      toast.success("Ticket actualizado exitosamente");
-      setShowStatusDialog(false);
-      fetchTicket();
-    } catch (err) {
-      toast.error(
-        err instanceof Error ? err.message : "Error al actualizar ticket",
-      );
-    } finally {
-      setUpdatingTicket(false);
-    }
-  };
-
-  const handleUseTemplate = (template: Template) => {
-    setValue("message", template.content);
-    setShowTemplateDialog(false);
-  };
-
-  const copyTicketNumber = () => {
-    if (ticket?.ticket_number) {
-      navigator.clipboard.writeText(ticket.ticket_number);
-      toast.success("Número de ticket copiado");
-    }
-  };
+  const {
+    ticket,
+    messages,
+    templates,
+    loading,
+    sendingMessage,
+    updatingTicket,
+    showAssignDialog,
+    showStatusDialog,
+    showTemplateDialog,
+    newStatus,
+    newPriority,
+    newResolution,
+    register,
+    errors,
+    handleSubmit,
+    setShowAssignDialog,
+    setShowStatusDialog,
+    setShowTemplateDialog,
+    setNewStatus,
+    setNewPriority,
+    setNewResolution,
+    onSubmitMessage,
+    handleUpdateStatus,
+    handleUseTemplate,
+    copyTicketNumber,
+  } = useTicketDetail();
 
   if (loading) {
     return (
@@ -353,7 +166,6 @@ export default function TicketDetailContent() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Ticket Details */}
             <Card className="rounded-xl border border-border">
               <CardHeader>
                 <CardTitle>Detalles del Ticket</CardTitle>
@@ -404,8 +216,8 @@ export default function TicketDetailContent() {
             <TicketMessagesList messages={messages} />
 
             <TicketMessageForm
-              register={register}
               errors={errors}
+              register={register}
               sendingMessage={sendingMessage}
               onSubmit={handleSubmit(onSubmitMessage)}
               onUseTemplate={() => setShowTemplateDialog(true)}
@@ -414,7 +226,6 @@ export default function TicketDetailContent() {
 
           {/* Sidebar */}
           <div className="space-y-6">
-            {/* Quick Actions */}
             <Card className="rounded-xl border border-border">
               <CardHeader>
                 <CardTitle className="text-lg">Acciones Rápidas</CardTitle>
@@ -445,24 +256,24 @@ export default function TicketDetailContent() {
 
         <TicketStatusDialog
           open={showStatusDialog}
-          onOpenChange={setShowStatusDialog}
-          status={newStatus}
           priority={newPriority}
           resolution={newResolution}
-          updating={updatingTicket}
+          status={newStatus}
           statusLabels={statusLabels}
-          onStatusChange={setNewStatus}
+          updating={updatingTicket}
+          onOpenChange={setShowStatusDialog}
           onPriorityChange={setNewPriority}
           onResolutionChange={setNewResolution}
           onSave={handleUpdateStatus}
+          onStatusChange={setNewStatus}
         />
 
         <TicketTemplateDialog
-          open={showTemplateDialog}
-          onOpenChange={setShowTemplateDialog}
-          templates={templates}
-          onSelect={(template) => handleUseTemplate(template as any)}
           categoryLabels={categoryLabels}
+          open={showTemplateDialog}
+          templates={templates}
+          onOpenChange={setShowTemplateDialog}
+          onSelect={(template) => handleUseTemplate(template as unknown)}
         />
       </div>
     </div>
