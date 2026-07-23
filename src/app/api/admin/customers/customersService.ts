@@ -18,7 +18,6 @@ import {
 } from "@/lib/api/errors";
 import {
   createApiErrorResponse,
-  createApiSuccessResponse,
   createPaginatedResponse,
   extractPaginationParams,
 } from "@/lib/api/response";
@@ -28,8 +27,8 @@ import {
   searchCustomerSchema,
 } from "@/lib/api/validation/zod-schemas";
 import { appLogger as logger } from "@/lib/logger";
-import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
 import { createClientFromRequest } from "@/lib/supabase/server";
+import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
 
 export async function handleGetCustomers(
   request: NextRequest,
@@ -100,7 +99,7 @@ export async function handleGetCustomers(
     adminUser as { organization_id: string | null } | null
   )?.organization_id;
 
-  const applyBranchFilter = (query: any) => {
+  const applyBranchFilter = (query: unknown) => {
     if (userOrganizationId) {
       query = query.eq("organization_id", userOrganizationId);
       if (effectiveBranchId) query = query.eq("branch_id", effectiveBranchId);
@@ -290,57 +289,4 @@ export async function handleGetCustomers(
   );
 }
 
-export async function handleCustomersAnalytics(
-  request: NextRequest,
-  _requestId: string,
-) {
-  const { client: rawClient, getUser } = await createClientFromRequest(request);
-  const supabase = rawClient as any;
-  const user = (await getUser()).data?.user as { id: string } | undefined;
-  if (!user) throw new AuthenticationError("Unauthorized");
-
-  const { data: isAdminResult } = (await supabase.rpc("is_admin", {
-    user_id: user.id,
-  } as IsAdminParams)) as { data: IsAdminResult | null };
-  if (!isAdminResult) throw new AuthorizationError("Admin access required");
-
-  const branchContext = await getBranchContext(request, user.id, supabase);
-
-  const applyBranchFilter = (query: any) => {
-    return addBranchFilter(
-      query,
-      branchContext.branchId,
-      branchContext.isSuperAdmin,
-      branchContext.organizationId,
-    );
-  };
-
-  const { count: totalCount } = await applyBranchFilter(
-    supabase.from("customers").select("*", { count: "exact", head: true }),
-  );
-
-  const { count: activeCount } = await applyBranchFilter(
-    supabase
-      .from("customers")
-      .select("*", { count: "exact", head: true })
-      .eq("is_active", true),
-  );
-
-  const { count: recentCount } = await applyBranchFilter(
-    supabase
-      .from("customers")
-      .select("*", { count: "exact", head: true })
-      .gte(
-        "created_at",
-        new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
-      ),
-  );
-
-  return createApiSuccessResponse({
-    summary: {
-      totalCustomers: totalCount || 0,
-      activeCustomers: activeCount || totalCount || 0,
-      newCustomersThisMonth: recentCount || 0,
-    },
-  });
-}
+export { handleCustomersAnalytics } from "./customersAnalyticsService";
