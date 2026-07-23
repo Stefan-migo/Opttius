@@ -10,12 +10,6 @@ import { appLogger as logger } from "@/lib/logger";
 import { createClient } from "@/utils/supabase/server";
 import { createServiceRoleClient } from "@/utils/supabase/service-role";
 
-/**
- * GET /api/admin/saas-management/support/tickets
- * Listar tickets de soporte SaaS con filtros
- * - Root/dev: puede ver todos los tickets
- * - Organizaciones: solo pueden ver sus propios tickets
- */
 export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
   try {
@@ -125,45 +119,18 @@ export async function GET(request: NextRequest) {
     // Enriquecer tickets con información relacionada
     const enrichedTickets = await Promise.all(
       (tickets || []).map(async (ticket: unknown) => {
-        // Obtener organización
-        let organization = null;
-        if (ticket.organization_id) {
-          const { data: org } = await supabaseServiceRole
-            .from("organizations")
-            .select("id, name, slug")
-            .eq("id", ticket.organization_id)
-            .maybeSingle();
-          organization = org;
-        }
-
-        // Obtener usuario creador
-        let created_by_user = null;
-        if (ticket.created_by_user_id) {
-          const { data: creator } = await supabaseServiceRole
-            .from("admin_users")
-            .select("id, email, role")
-            .eq("id", ticket.created_by_user_id)
-            .maybeSingle();
-          created_by_user = creator;
-        }
-
-        // Obtener usuario asignado
-        let assigned_to_user = null;
-        if (ticket.assigned_to) {
-          const { data: assigned } = await supabaseServiceRole
-            .from("admin_users")
-            .select("id, email, role")
-            .eq("id", ticket.assigned_to)
-            .maybeSingle();
-          assigned_to_user = assigned;
-        }
-
-        return {
-          ...ticket,
-          organization: organization || null,
-          created_by_user: created_by_user || null,
-          assigned_to_user: assigned_to_user || null,
-        };
+        const [org, creator, assigned] = await Promise.all([
+          ticket.organization_id
+            ? supabaseServiceRole.from("organizations").select("id, name, slug").eq("id", ticket.organization_id).maybeSingle().then(r => r.data)
+            : null,
+          ticket.created_by_user_id
+            ? supabaseServiceRole.from("admin_users").select("id, email, role").eq("id", ticket.created_by_user_id).maybeSingle().then(r => r.data)
+            : null,
+          ticket.assigned_to
+            ? supabaseServiceRole.from("admin_users").select("id, email, role").eq("id", ticket.assigned_to).maybeSingle().then(r => r.data)
+            : null,
+        ]);
+        return { ...ticket, organization: org, created_by_user: creator, assigned_to_user: assigned };
       }),
     );
 
@@ -192,10 +159,6 @@ export async function GET(request: NextRequest) {
   }
 }
 
-/**
- * POST /api/admin/saas-management/support/tickets
- * Crear nuevo ticket de soporte SaaS (desde organización autenticada)
- */
 export async function POST(request: NextRequest) {
   try {
     const supabase = await createClient();

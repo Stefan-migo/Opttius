@@ -56,6 +56,28 @@ export interface AppointmentType {
   icon: React.ComponentType<{ className?: string }>;
 }
 
+import {
+  AlertCircle,
+  CheckCircle,
+  Eye,
+  Package,
+  RefreshCw,
+  Truck,
+  User,
+  Wrench,
+} from "lucide-react";
+
+export const APPOINTMENT_TYPES: AppointmentType[] = [
+  { value: "eye_exam", label: "Examen de la Vista", icon: Eye },
+  { value: "consultation", label: "Consulta", icon: User },
+  { value: "fitting", label: "Ajuste de Lentes", icon: Package },
+  { value: "delivery", label: "Entrega de Lentes", icon: Truck },
+  { value: "repair", label: "Reparación", icon: Wrench },
+  { value: "follow_up", label: "Seguimiento", icon: RefreshCw },
+  { value: "emergency", label: "Emergencia", icon: AlertCircle },
+  { value: "other", label: "Otro", icon: CheckCircle },
+];
+
 export interface CreateAppointmentFormProps {
   onSuccess: () => void;
   onCancel: () => void;
