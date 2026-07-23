@@ -1,4 +1,6 @@
-export async function handleClearMemory(supabase: unknown) {
+import type { Database, SupabaseClient } from "@/types/supabase";
+
+export async function handleClearMemory(supabase: SupabaseClient<Database>) {
   const memoryBefore = process.memoryUsage();
   const memoryBeforeMB = {
     heapUsed: (memoryBefore.heapUsed / 1024 / 1024).toFixed(2),

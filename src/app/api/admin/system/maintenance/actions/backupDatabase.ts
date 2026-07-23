@@ -1,7 +1,8 @@
 import { appLogger as logger } from "@/lib/logger";
+import type { Database, SupabaseClient } from "@/types/supabase";
 import { createServiceRoleClient } from "@/utils/supabase/server";
 
-export async function handleBackupDatabase(userOrganizationId: string, userEmail: string, branchId?: string, supabase?: unknown) {
+export async function handleBackupDatabase(userOrganizationId: string, userEmail: string, branchId?: string, supabase?: SupabaseClient<Database>) {
   const { BackupService } = await import("@/lib/backup-service");
   logger.info("Iniciando backup de base de datos", { organizationId: userOrganizationId, userEmail });
 

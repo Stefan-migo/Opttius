@@ -1,5 +1,6 @@
+import type { Database, SupabaseClient } from "@/types/supabase";
 
-export async function handleTestEmail(userEmail: string, supabase: unknown) {
+export async function handleTestEmail(userEmail: string, supabase: SupabaseClient<Database>) {
   if (!userEmail) return { error: "Email del usuario no disponible" };
 
   const { sendEmail } = await import("@/lib/email/client");
