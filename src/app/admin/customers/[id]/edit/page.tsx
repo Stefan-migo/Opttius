@@ -1,14 +1,12 @@
 "use client";
 
-import { AlertTriangle, ArrowLeft, MapPin, Save, User } from "lucide-react";
+import { AlertTriangle, ArrowLeft, Save } from "lucide-react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import FormField, { FormFieldActionsExtended } from "@/components/ui/FormField";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent } from "@/components/ui/card";
+import { FormFieldActionsExtended } from "@/components/ui/FormField";
 import { useForm } from "@/hooks/useForm";
 import { customerService } from "@/lib/api/services";
 import { handleApiError } from "@/lib/api/services/errorService";
@@ -19,7 +17,8 @@ import {
 import { completeRUTIfNeeded, formatRUT } from "@/lib/utils/rut";
 import { customerEditSchema } from "@/lib/validation/formValidation";
 
-// Extended Customer interface with all form fields
+import { CustomerEditForm } from "./_components/CustomerEditForm";
+
 interface FormCustomerData {
   first_name: string;
   last_name: string;
@@ -87,8 +86,6 @@ export default function CustomerEditPage() {
       setLoading(true);
       const customerData = await customerService.getCustomer(customerId);
 
-      // Map customer data to form data
-      // Normalizar RUT: completar DV si falta y formatear para consistencia
       const rawRut = (customerData.rut || "").trim();
       const normalizedRut = rawRut
         ? formatRUT(completeRUTIfNeeded(rawRut) || rawRut)
@@ -203,7 +200,6 @@ export default function CustomerEditPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
           <Button size="sm" variant="outline" onClick={() => router.back()}>
@@ -227,7 +223,6 @@ export default function CustomerEditPage() {
         />
       </div>
 
-      {/* Form Error */}
       {form.formError && (
         <Card className="border-red-200 bg-admin-bg-tertiary">
           <CardContent className="p-4">
@@ -236,211 +231,14 @@ export default function CustomerEditPage() {
         </Card>
       )}
 
-      {/* Form */}
-      <form className="space-y-6" onSubmit={form.handleSubmit}>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Personal Information */}
-          <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)]">
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <User className="h-5 w-5 mr-2" />
-                Información Personal
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <FormField
-                  required
-                  error={form.errors.first_name?.message}
-                  label="Nombre"
-                >
-                  <Input
-                    aria-invalid={!!form.errors.first_name}
-                    id="first_name"
-                    placeholder="Nombre"
-                    value={form.values.first_name}
-                    onChange={(e) =>
-                      form.setValue("first_name", e.target.value)
-                    }
-                  />
-                </FormField>
-
-                <FormField
-                  required
-                  error={form.errors.last_name?.message}
-                  label="Apellido"
-                >
-                  <Input
-                    aria-invalid={!!form.errors.last_name}
-                    id="last_name"
-                    placeholder="Apellido"
-                    value={form.values.last_name}
-                    onChange={(e) => form.setValue("last_name", e.target.value)}
-                  />
-                </FormField>
-              </div>
-
-              <FormField
-                description="Opcional"
-                error={form.errors.email?.message}
-                label="Email"
-              >
-                <Input
-                  aria-invalid={!!form.errors.email}
-                  id="email"
-                  placeholder="email@ejemplo.com"
-                  type="email"
-                  value={form.values.email}
-                  onChange={(e) => form.setValue("email", e.target.value)}
-                />
-              </FormField>
-
-              <FormField
-                description="Opcional"
-                error={form.errors.phone?.message}
-                label="Teléfono"
-              >
-                <Input
-                  aria-invalid={!!form.errors.phone}
-                  id="phone"
-                  placeholder="+54 9 11 1234-5678"
-                  value={form.values.phone}
-                  onChange={(e) => form.setValue("phone", e.target.value)}
-                />
-              </FormField>
-
-              <FormField
-                description="Rol Único Tributario (opcional)"
-                error={form.errors.rut?.message}
-                label="RUT"
-              >
-                <Input
-                  aria-invalid={!!form.errors.rut}
-                  id="rut"
-                  placeholder="12.345.678-9 o 123456789"
-                  value={form.values.rut}
-                  onBlur={(e) => handleRUTBlur(e.target.value)}
-                  onChange={(e) => handleRUTChange(e.target.value)}
-                />
-              </FormField>
-            </CardContent>
-          </Card>
-
-          {/* Address Information */}
-          <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)]">
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <MapPin className="h-5 w-5 mr-2" />
-                Dirección
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <FormField
-                error={form.errors.address_line_1?.message}
-                label="Dirección"
-              >
-                <Input
-                  aria-invalid={!!form.errors.address_line_1}
-                  id="address_line_1"
-                  placeholder="Calle y número"
-                  value={form.values.address_line_1}
-                  onChange={(e) =>
-                    form.setValue("address_line_1", e.target.value)
-                  }
-                />
-              </FormField>
-
-              <FormField
-                description="Opcional - Departamento, piso, etc."
-                error={form.errors.address_line_2?.message}
-                label="Dirección 2"
-              >
-                <Input
-                  aria-invalid={!!form.errors.address_line_2}
-                  id="address_line_2"
-                  placeholder="Departamento, piso, etc."
-                  value={form.values.address_line_2}
-                  onChange={(e) =>
-                    form.setValue("address_line_2", e.target.value)
-                  }
-                />
-              </FormField>
-
-              <div className="grid grid-cols-2 gap-4">
-                <FormField error={form.errors.city?.message} label="Ciudad">
-                  <Input
-                    aria-invalid={!!form.errors.city}
-                    id="city"
-                    placeholder="Ciudad"
-                    value={form.values.city}
-                    onChange={(e) => form.setValue("city", e.target.value)}
-                  />
-                </FormField>
-
-                <FormField error={form.errors.state?.message} label="Provincia">
-                  <Input
-                    aria-invalid={!!form.errors.state}
-                    id="state"
-                    placeholder="Provincia"
-                    value={form.values.state}
-                    onChange={(e) => form.setValue("state", e.target.value)}
-                  />
-                </FormField>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <FormField
-                  error={form.errors.postal_code?.message}
-                  label="Código Postal"
-                >
-                  <Input
-                    aria-invalid={!!form.errors.postal_code}
-                    id="postal_code"
-                    placeholder="1234"
-                    value={form.values.postal_code}
-                    onChange={(e) =>
-                      form.setValue("postal_code", e.target.value)
-                    }
-                  />
-                </FormField>
-
-                <FormField error={form.errors.country?.message} label="País">
-                  <Input
-                    aria-invalid={!!form.errors.country}
-                    id="country"
-                    placeholder="País"
-                    value={form.values.country}
-                    onChange={(e) => form.setValue("country", e.target.value)}
-                  />
-                </FormField>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Additional Notes */}
-          <Card className="bg-admin-bg-tertiary shadow-[0_1px_3px_rgba(0,0,0,0.3)]">
-            <CardHeader>
-              <CardTitle>Notas Adicionales</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <FormField
-                description="Notas sobre el cliente"
-                error={form.errors.notes?.message}
-                label="Notas"
-              >
-                <Textarea
-                  aria-invalid={!!form.errors.notes}
-                  className="min-h-[100px]"
-                  id="notes"
-                  placeholder="Notas sobre el cliente..."
-                  value={form.values.notes}
-                  onChange={(e) => form.setValue("notes", e.target.value)}
-                />
-              </FormField>
-            </CardContent>
-          </Card>
-        </div>
-      </form>
+      <CustomerEditForm
+        values={form.values}
+        errors={form.errors}
+        setValue={form.setValue}
+        handleSubmit={form.handleSubmit}
+        handleRUTChange={handleRUTChange}
+        handleRUTBlur={handleRUTBlur}
+      />
     </div>
   );
 }
