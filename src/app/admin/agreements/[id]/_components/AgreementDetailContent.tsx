@@ -5,15 +5,12 @@ import {
   Building2,
   DollarSign,
   Download,
-  Eye,
   FileText,
   Loader2,
   Plus,
-  Receipt,
-  Users,
 } from "lucide-react";
 import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
@@ -27,19 +24,22 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
+import type {
   Agreement,
   AgreementCustomer,
   AgreementInstitutionalBalance,
   AgreementInstitutionalInvoice,
-  agreementService,
 } from "@/lib/api/services/agreementService";
+import { agreementService } from "@/lib/api/services/agreementService";
 import { handleApiError } from "@/lib/api/services/errorService";
 import { formatCurrency, formatDate } from "@/lib/utils";
 
+import { AgreementAnalyticsCards } from "./_components/AgreementAnalyticsCards";
+import { AgreementCustomersCard } from "./_components/AgreementCustomersCard";
+import { AgreementInvoicesCard } from "./_components/AgreementInvoicesCard";
+
 export default function AgreementDetailContent() {
   const params = useParams();
-  const router = useRouter();
   const id = params.id as string;
 
   const [agreement, setAgreement] = useState<Agreement | null>(null);
@@ -81,31 +81,26 @@ export default function AgreementDetailContent() {
       setAgreement(data);
       setError(null);
     } catch (err) {
-      const errorObj = handleApiError(err, "Convenio");
-      setError(errorObj?.message || "Error al cargar convenio");
+      const e = handleApiError(err, "Convenio");
+      setError(e?.message || "Error al cargar convenio");
     } finally {
       setLoading(false);
     }
   };
-
   const fetchBalances = async () => {
     try {
-      const data = await agreementService.getInstitutionalBalances(id);
-      setBalances(data);
+      setBalances(await agreementService.getInstitutionalBalances(id));
     } catch {
       setBalances([]);
     }
   };
-
   const fetchAnalytics = async () => {
     try {
-      const data = await agreementService.getAgreementAnalytics(id);
-      setAnalytics(data);
+      setAnalytics(await agreementService.getAgreementAnalytics(id));
     } catch {
       setAnalytics(null);
     }
   };
-
   const fetchInvoices = async () => {
     try {
       const { data } = await agreementService.getAgreementInvoices(id, {
@@ -116,8 +111,7 @@ export default function AgreementDetailContent() {
       setInvoices([]);
     }
   };
-
-  const fetchCustomers = async (page: number = 1) => {
+  const fetchCustomers = async (page = 1) => {
     try {
       const { data, pagination } = await agreementService.getAgreementCustomers(
         id,
@@ -134,9 +128,8 @@ export default function AgreementDetailContent() {
     }
   };
 
-  const handleExportPlanilla = () => {
+  const handleExportPlanilla = () =>
     window.open(`/api/admin/agreements/${id}/export-planilla`, "_blank");
-  };
 
   const getStatusBadge = (status: string) => {
     const config: Record<
@@ -155,34 +148,26 @@ export default function AgreementDetailContent() {
     return <Badge variant={c.variant}>{c.label}</Badge>;
   };
 
-  const getTypeLabel = (type: string) => {
-    const labels: Record<string, string> = {
-      empresa: "Empresa",
-      sindicato: "Sindicato",
-      mutual: "Mutual",
-    };
-    return labels[type] || type;
-  };
+  const getTypeLabel = (type: string) =>
+    ({ empresa: "Empresa", sindicato: "Sindicato", mutual: "Mutual" })[type] ||
+    type;
 
   const pendingTotal = balances
     .filter((b) => b.status === "pending")
     .reduce((s, b) => s + b.amount, 0);
 
-  if (loading && !agreement) {
+  if (loading && !agreement)
     return (
       <div className="flex items-center justify-center py-24">
         <Loader2 className="h-12 w-12 animate-spin text-admin-accent-primary" />
       </div>
     );
-  }
-
-  if (error || !agreement) {
+  if (error || !agreement)
     return (
       <div className="space-y-6">
         <Link href="/admin/agreements">
           <Button variant="ghost">
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Volver
+            <ArrowLeft className="h-4 w-4 mr-2" /> Volver
           </Button>
         </Link>
         <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-4 text-destructive">
@@ -190,7 +175,6 @@ export default function AgreementDetailContent() {
         </div>
       </div>
     );
-  }
 
   return (
     <div className="space-y-6">
@@ -225,58 +209,7 @@ export default function AgreementDetailContent() {
         </div>
       </div>
 
-      {analytics && (
-        <div className="grid gap-4 grid-cols-2 md:grid-cols-4">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-admin-text-tertiary">
-                Órdenes
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-2xl font-bold text-admin-text-primary">
-                {analytics.total_orders}
-              </p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-admin-text-tertiary">
-                Clientes únicos
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-2xl font-bold text-admin-text-primary">
-                {analytics.unique_customers ?? "-"}
-              </p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-admin-text-tertiary">
-                Ventas totales
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-2xl font-bold text-admin-success">
-                {formatCurrency(analytics.total_sales)}
-              </p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-admin-text-tertiary">
-                Eficiencia cobranza
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-2xl font-bold text-admin-accent-primary">
-                {analytics.collection_efficiency}%
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-      )}
+      <AgreementAnalyticsCards analytics={analytics} />
 
       <div className="grid gap-4 md:grid-cols-2">
         <Card>
@@ -341,76 +274,7 @@ export default function AgreementDetailContent() {
         </Card>
       </div>
 
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center gap-2">
-              <Receipt className="h-5 w-5" />
-              Facturas a institución
-            </CardTitle>
-            <Link href={`/admin/agreements/${id}/invoices`}>
-              <Button size="sm" variant="outline">
-                Ver todas
-              </Button>
-            </Link>
-          </div>
-        </CardHeader>
-        <CardContent>
-          {invoices.length === 0 ? (
-            <p className="text-admin-text-tertiary py-4">
-              No hay facturas emitidas aún.
-            </p>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Folio</TableHead>
-                  <TableHead>Fecha</TableHead>
-                  <TableHead>Monto</TableHead>
-                  <TableHead>Estado</TableHead>
-                  <TableHead />
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {invoices.map((inv) => (
-                  <TableRow key={inv.id}>
-                    <TableCell className="font-medium">{inv.folio}</TableCell>
-                    <TableCell className="text-admin-text-tertiary">
-                      {formatDate(inv.emitted_at ?? inv.created_at)}
-                    </TableCell>
-                    <TableCell>{formatCurrency(inv.total_amount)}</TableCell>
-                    <TableCell>
-                      <Badge variant="outline">{inv.status}</Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex gap-1">
-                        <Link
-                          href={`/admin/agreements/${id}/invoices/${inv.id}`}
-                        >
-                          <Button size="sm" variant="ghost">
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                        </Link>
-                        {inv.pdf_url && (
-                          <a
-                            href={inv.pdf_url}
-                            rel="noopener noreferrer"
-                            target="_blank"
-                          >
-                            <Button size="sm" variant="ghost">
-                              <Download className="h-4 w-4" />
-                            </Button>
-                          </a>
-                        )}
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
-        </CardContent>
-      </Card>
+      <AgreementInvoicesCard id={id} invoices={invoices} />
 
       <Card>
         <CardHeader>
@@ -469,104 +333,12 @@ export default function AgreementDetailContent() {
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Users className="h-5 w-5" />
-            Clientes del convenio
-          </CardTitle>
-          <p className="text-sm text-admin-text-tertiary">
-            Clientes que han comprado bajo este convenio
-          </p>
-        </CardHeader>
-        <CardContent>
-          {customers.length === 0 ? (
-            <p className="text-admin-text-tertiary py-4">
-              Aún no hay clientes que hayan comprado bajo este convenio.
-            </p>
-          ) : (
-            <>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Cliente</TableHead>
-                    <TableHead>RUT</TableHead>
-                    <TableHead>Órdenes</TableHead>
-                    <TableHead>Última compra</TableHead>
-                    <TableHead>Total copago</TableHead>
-                    <TableHead>Total institucional</TableHead>
-                    <TableHead />
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {customers.map((c) => (
-                    <TableRow key={c.customer_id}>
-                      <TableCell>
-                        <div>
-                          <div className="font-medium">
-                            {[c.first_name, c.last_name]
-                              .filter(Boolean)
-                              .join(" ") || "Sin nombre"}
-                          </div>
-                          {c.email && (
-                            <div className="text-sm text-admin-text-tertiary">
-                              {c.email}
-                            </div>
-                          )}
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-admin-text-tertiary">
-                        {c.rut || "-"}
-                      </TableCell>
-                      <TableCell>{c.order_count}</TableCell>
-                      <TableCell className="text-admin-text-tertiary">
-                        {formatDate(c.last_order_at)}
-                      </TableCell>
-                      <TableCell>{formatCurrency(c.total_copago)}</TableCell>
-                      <TableCell>
-                        {formatCurrency(c.total_institutional)}
-                      </TableCell>
-                      <TableCell>
-                        <Link href={`/admin/customers/${c.customer_id}`}>
-                          <Button size="sm" variant="ghost">
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                        </Link>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-              {customersPagination.totalPages > 1 && (
-                <div className="flex justify-center items-center gap-2 mt-4">
-                  <Button
-                    disabled={customersPagination.page <= 1}
-                    size="sm"
-                    variant="outline"
-                    onClick={() => fetchCustomers(customersPagination.page - 1)}
-                  >
-                    Anterior
-                  </Button>
-                  <span className="text-sm text-admin-text-tertiary">
-                    Página {customersPagination.page} de{" "}
-                    {customersPagination.totalPages}
-                  </span>
-                  <Button
-                    disabled={
-                      customersPagination.page >= customersPagination.totalPages
-                    }
-                    size="sm"
-                    variant="outline"
-                    onClick={() => fetchCustomers(customersPagination.page + 1)}
-                  >
-                    Siguiente
-                  </Button>
-                </div>
-              )}
-            </>
-          )}
-        </CardContent>
-      </Card>
+      <AgreementCustomersCard
+        customers={customers}
+        page={customersPagination.page}
+        totalPages={customersPagination.totalPages}
+        onPageChange={fetchCustomers}
+      />
     </div>
   );
 }
