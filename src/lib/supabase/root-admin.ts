@@ -8,12 +8,16 @@
 
 import { createClient } from "@supabase/supabase-js";
 
+import type { Database } from "@/types/supabase";
+
 export function createRootAdminClient() {
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!serviceRoleKey) {
-    throw new Error("SUPABASE_SERVICE_ROLE_KEY is not configured for root admin client");
+    throw new Error(
+      "SUPABASE_SERVICE_ROLE_KEY is not configured for root admin client",
+    );
   }
-  return createClient(
+  return createClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL || "",
     serviceRoleKey,
     {
