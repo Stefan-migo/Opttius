@@ -26,14 +26,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+
+import { CreateBackupDialog, DeleteBackupDialog } from "./_components/BackupDialogs";
 
 interface BackupFile {
   id: string;
@@ -309,73 +303,18 @@ export default function SaasBackupsPage() {
         </Card>
       </div>
 
-      {/* Create Backup Confirmation Dialog */}
-      <Dialog
+      <CreateBackupDialog
+        isGenerating={isGenerating}
         open={createBackupConfirmOpen}
+        onConfirm={handleCreateBackup}
         onOpenChange={setCreateBackupConfirmOpen}
-      >
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Database className="h-5 w-5" />
-              Generar backup integral
-            </DialogTitle>
-            <DialogDescription>
-              ¿Confirmar generación de backup integral? Este proceso captura el
-              100% de la base de datos y podría tomar unos segundos dependiendo
-              del volumen de datos.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setCreateBackupConfirmOpen(false)}
-            >
-              Cancelar
-            </Button>
-            <Button disabled={isGenerating} onClick={handleCreateBackup}>
-              {isGenerating ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Generando...
-                </>
-              ) : (
-                "Confirmar"
-              )}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      />
 
-      {/* Delete Backup Confirmation Dialog */}
-      <Dialog
+      <DeleteBackupDialog
         open={deleteBackupConfirmFileName !== null}
+        onConfirm={handleDeleteBackup}
         onOpenChange={(open) => !open && setDeleteBackupConfirmFileName(null)}
-      >
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-red-500" />
-              Eliminar backup
-            </DialogTitle>
-            <DialogDescription>
-              ¿Estás seguro de eliminar este backup? Esta acción es
-              irreversible.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setDeleteBackupConfirmFileName(null)}
-            >
-              Cancelar
-            </Button>
-            <Button variant="destructive" onClick={handleDeleteBackup}>
-              Eliminar
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      />
     </div>
   );
 }

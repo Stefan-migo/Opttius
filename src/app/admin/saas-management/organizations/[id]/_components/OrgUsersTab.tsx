@@ -1,28 +1,12 @@
 "use client";
 
-import { AlertTriangle, Edit, Loader2, Plus, Trash2 } from "lucide-react";
+import { Edit, Plus, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -32,6 +16,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { extractDataFromResponse } from "@/lib/api/response-helpers";
+
+import { OrgUserDeleteDialog,OrgUserDialog } from "./OrgUserDialog";
 
 interface OrgUsersTabProps {
   orgId: string;
@@ -281,172 +267,24 @@ export default function OrgUsersTab({ orgId, onOrgUpdate }: OrgUsersTabProps) {
         </CardContent>
       </Card>
 
-      {/* User create/edit dialog */}
-      <Dialog open={showUserDialog} onOpenChange={setShowUserDialog}>
-        <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>
-              {editingUser ? "Editar Usuario" : "Nuevo Usuario"}
-            </DialogTitle>
-            <DialogDescription>
-              {editingUser
-                ? "Modifica los datos del usuario"
-                : "Completa los datos para crear un nuevo usuario"}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="text-sm font-medium">Nombre</label>
-                <Input
-                  placeholder="Nombre"
-                  value={userFormData.first_name}
-                  onChange={(e) =>
-                    setUserFormData({
-                      ...userFormData,
-                      first_name: e.target.value,
-                    })
-                  }
-                />
-              </div>
-              <div>
-                <label className="text-sm font-medium">Apellido</label>
-                <Input
-                  placeholder="Apellido"
-                  value={userFormData.last_name}
-                  onChange={(e) =>
-                    setUserFormData({
-                      ...userFormData,
-                      last_name: e.target.value,
-                    })
-                  }
-                />
-              </div>
-            </div>
-            <div>
-              <label className="text-sm font-medium">Email *</label>
-              <Input
-                disabled={!!editingUser}
-                placeholder="email@ejemplo.com"
-                type="email"
-                value={userFormData.email}
-                onChange={(e) =>
-                  setUserFormData({ ...userFormData, email: e.target.value })
-                }
-              />
-            </div>
-            {!editingUser && (
-              <div>
-                <label className="text-sm font-medium">Contraseña *</label>
-                <Input
-                  placeholder="Mínimo 8 caracteres"
-                  type="password"
-                  value={userFormData.password}
-                  onChange={(e) =>
-                    setUserFormData({
-                      ...userFormData,
-                      password: e.target.value,
-                    })
-                  }
-                />
-              </div>
-            )}
-            <div>
-              <label className="text-sm font-medium">Rol</label>
-              <Select
-                value={userFormData.role}
-                onValueChange={(value) =>
-                  setUserFormData({ ...userFormData, role: value })
-                }
-              >
-                <SelectTrigger className="rounded-xl">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="super_admin">Super Admin</SelectItem>
-                  <SelectItem value="admin">Admin</SelectItem>
-                  <SelectItem value="employee">Empleado</SelectItem>
-                  <SelectItem value="vendedor">Vendedor</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            {!editingUser && (
-              <div>
-                <label className="text-sm font-medium">
-                  Sucursal (Opcional)
-                </label>
-                <Select
-                  value={userFormData.branch_id || "__none__"}
-                  onValueChange={(value) =>
-                    setUserFormData({
-                      ...userFormData,
-                      branch_id: value === "__none__" ? "" : value,
-                    })
-                  }
-                >
-                  <SelectTrigger className="rounded-xl">
-                    <SelectValue placeholder="Seleccionar sucursal" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="__none__">
-                      Sin sucursal específica
-                    </SelectItem>
-                    {branches.map((branch) => (
-                      <SelectItem key={branch.id} value={branch.id}>
-                        {branch.name} ({branch.code})
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
-          </div>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => {
-                setShowUserDialog(false);
-                setEditingUser(null);
-              }}
-            >
-              Cancelar
-            </Button>
-            <Button onClick={editingUser ? handleUpdateUser : handleCreateUser}>
-              {editingUser ? "Guardar Cambios" : "Crear Usuario"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <OrgUserDialog
+        branches={branches as Array<{ id: string; name: string; code: string }>}
+        editingUser={editingUser}
+        open={showUserDialog}
+        userFormData={userFormData}
+        onFormChange={(data) => setUserFormData((f) => ({ ...f, ...data }))}
+        onOpenChange={(open) => {
+          setShowUserDialog(open);
+          if (!open) setEditingUser(null);
+        }}
+        onSave={editingUser ? handleUpdateUser : handleCreateUser}
+      />
 
-      {/* Delete User Confirmation Dialog */}
-      <Dialog
+      <OrgUserDeleteDialog
         open={deleteUserConfirmId !== null}
+        onConfirm={handleDeleteUserConfirm}
         onOpenChange={(open) => !open && setDeleteUserConfirmId(null)}
-      >
-        <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-red-500" />
-              Eliminar usuario
-            </DialogTitle>
-            <DialogDescription>
-              ¿Estás seguro de eliminar este usuario? Esta acción no se puede
-              deshacer.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setDeleteUserConfirmId(null)}
-            >
-              Cancelar
-            </Button>
-            <Button variant="destructive" onClick={handleDeleteUserConfirm}>
-              Eliminar
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      />
     </>
   );
 }
