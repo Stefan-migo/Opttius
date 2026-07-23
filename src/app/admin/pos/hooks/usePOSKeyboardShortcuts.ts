@@ -5,7 +5,8 @@
 
 import { useCallback, useEffect } from "react";
 
-import type { POSPaymentMethod } from "../types";
+
+
 
 interface UsePOSKeyboardShortcutsProps {
   // Payment method actions
@@ -270,34 +271,4 @@ export function usePOSKeyboardShortcuts({
   };
 }
 
-// Payment method to shortcut mapping
-export function getPaymentMethodShortcut(method: POSPaymentMethod): string {
-  switch (method) {
-    case "cash":
-      return "F1";
-    case "debit_card":
-      return "F2";
-    case "credit_card":
-      return "F2";
-    case "transfer":
-      return "F3";
-    default:
-      return "";
-  }
-}
 
-// Shortcut to payment method mapping
-export function getShortcutPaymentMethod(
-  shortcut: string,
-): POSPaymentMethod | null {
-  switch (shortcut) {
-    case "F1":
-      return "cash";
-    case "F2":
-      return "debit_card";
-    case "F3":
-      return "transfer";
-    default:
-      return null;
-  }
-}
