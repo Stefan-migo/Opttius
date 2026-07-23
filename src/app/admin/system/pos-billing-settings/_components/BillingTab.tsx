@@ -1,38 +1,18 @@
 "use client";
 
-import {
-  Building2,
-  Copy,
-  FileText,
-  Loader2,
-  Printer,
-  Save,
-  Sparkles,
-  Thermometer,
-} from "lucide-react";
+import { Copy, FileText, Loader2, Save, Sparkles } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import ImageUpload from "@/components/ui/ImageUpload";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { TabsContent } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
-import { formatRUT, formatRUTAsYouType } from "@/lib/utils/rut";
+
+import { BillingBusinessInfoCard } from "./BillingBusinessInfoCard";
+import { BillingPrinterConfig } from "./BillingPrinterConfig";
 
 interface BillingSettings {
   id?: string;
@@ -73,98 +53,7 @@ export default function BillingTab({
   return (
     <TabsContent className="space-y-6" value="billing">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Business Information */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Building2 className="h-5 w-5" />
-              Información de la Empresa
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <Label>Nombre de la Empresa *</Label>
-              <Input
-                placeholder="Ej: Óptica Central"
-                value={billingSettings.business_name}
-                onChange={(e) =>
-                  setBillingSettings({
-                    ...billingSettings,
-                    business_name: e.target.value,
-                  })
-                }
-              />
-            </div>
-            <div>
-              <Label>RUT de la Empresa *</Label>
-              <Input
-                className="font-mono"
-                placeholder="Ej: 76.123.456-7 o 761234567"
-                value={billingSettings.business_rut}
-                onBlur={(e) => {
-                  const val = e.target.value.trim();
-                  if (val) {
-                    const formatted = formatRUT(val);
-                    if (formatted) {
-                      setBillingSettings({
-                        ...billingSettings,
-                        business_rut: formatted,
-                      });
-                    }
-                  }
-                }}
-                onChange={(e) => {
-                  const val = e.target.value;
-                  const formatted = formatRUTAsYouType(val);
-                  setBillingSettings({
-                    ...billingSettings,
-                    business_rut: formatted,
-                  });
-                }}
-              />
-            </div>
-            <div>
-              <Label>Dirección</Label>
-              <Input
-                placeholder="Dirección completa"
-                value={billingSettings.business_address || ""}
-                onChange={(e) =>
-                  setBillingSettings({
-                    ...billingSettings,
-                    business_address: e.target.value,
-                  })
-                }
-              />
-            </div>
-            <div>
-              <Label>Teléfono</Label>
-              <Input
-                placeholder="+56 9 1234 5678"
-                value={billingSettings.business_phone || ""}
-                onChange={(e) =>
-                  setBillingSettings({
-                    ...billingSettings,
-                    business_phone: e.target.value,
-                  })
-                }
-              />
-            </div>
-            <div>
-              <Label>Email</Label>
-              <Input
-                placeholder="contacto@empresa.cl"
-                type="email"
-                value={billingSettings.business_email || ""}
-                onChange={(e) =>
-                  setBillingSettings({
-                    ...billingSettings,
-                    business_email: e.target.value,
-                  })
-                }
-              />
-            </div>
-          </CardContent>
-        </Card>
+        <BillingBusinessInfoCard settings={billingSettings} onChange={setBillingSettings} />
 
         {/* Document Customization */}
         <Card>
@@ -309,87 +198,11 @@ export default function BillingTab({
         </Card>
       </div>
 
-      {/* Printer Configuration */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Printer className="h-5 w-5" />
-            Configuración de Impresora
-          </CardTitle>
-          <CardDescription>
-            Configura el formato de impresión para boletas y facturas
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label>Tipo de Impresora</Label>
-              <Select
-                value={billingSettings.printer_type || "thermal"}
-                onValueChange={handlePrinterTypeChange}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="thermal">
-                    <div className="flex items-center gap-2">
-                      <Thermometer className="h-4 w-4" />
-                      Impresora Térmica (80mm)
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="a4">Papel A4 (210x297mm)</SelectItem>
-                  <SelectItem value="letter">
-                    Papel Letter (216x279mm)
-                  </SelectItem>
-                  <SelectItem value="custom">Personalizado</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            {billingSettings.printer_type === "custom" && (
-              <>
-                <div>
-                  <Label>Ancho (mm)</Label>
-                  <Input
-                    max="500"
-                    min="50"
-                    type="number"
-                    value={billingSettings.printer_width_mm || 80}
-                    onChange={(e) =>
-                      setBillingSettings({
-                        ...billingSettings,
-                        printer_width_mm: parseFloat(e.target.value) || 80,
-                      })
-                    }
-                  />
-                </div>
-                <div>
-                  <Label>Alto (mm)</Label>
-                  <Input
-                    max="1000"
-                    min="50"
-                    type="number"
-                    value={billingSettings.printer_height_mm || 297}
-                    onChange={(e) =>
-                      setBillingSettings({
-                        ...billingSettings,
-                        printer_height_mm:
-                          parseFloat(e.target.value) || 297,
-                      })
-                    }
-                  />
-                </div>
-              </>
-            )}
-          </div>
-          {billingSettings.printer_type !== "custom" && (
-            <div className="text-sm text-admin-text-tertiary">
-              Tamaño: {billingSettings.printer_width_mm}mm x{" "}
-              {billingSettings.printer_height_mm}mm
-            </div>
-          )}
-        </CardContent>
-      </Card>
+      <BillingPrinterConfig
+        settings={billingSettings}
+        onChange={setBillingSettings}
+        onPrinterTypeChange={handlePrinterTypeChange}
+      />
 
       <div className="flex justify-end">
         <Button disabled={saving} onClick={handleSaveBilling}>

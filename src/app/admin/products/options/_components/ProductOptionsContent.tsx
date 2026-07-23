@@ -1,52 +1,17 @@
 "use client";
 
-import {
-  ArrowLeft,
-  Edit2,
-  Eye,
-  EyeOff,
-  GripVertical,
-  Plus,
-  Trash2,
-} from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 
-interface OptionField {
-  id: string;
-  field_key: string;
-  field_label: string;
-  field_category: string;
-  is_array: boolean;
-  is_active: boolean;
-  display_order: number;
-  values?: OptionValue[];
-}
-
-interface OptionValue {
-  id: string;
-  field_id: string;
-  value: string;
-  label: string;
-  display_order: number;
-  is_active: boolean;
-  is_default: boolean;
-}
+import { AddOptionValueDialog } from "./_components/AddOptionValueDialog";
+import { EditOptionValueDialog } from "./_components/EditOptionValueDialog";
+import { OptionFieldCard } from "./_components/OptionFieldCard";
+import type { OptionField, OptionValue } from "./types";
 
 export default function ProductOptionsContent() {
   const router = useRouter();
@@ -292,102 +257,14 @@ export default function ProductOptionsContent() {
                 </p>
               ) : (
                 category.fields.map((field) => (
-                  <div className="border rounded-lg p-3 sm:p-4" key={field.id}>
-                    <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-start gap-3 mb-3">
-                      <div>
-                        <h3 className="font-semibold text-lg">
-                          {field.field_label}
-                        </h3>
-                        <p className="text-sm text-gray-500">
-                          Campo:{" "}
-                          <code className="bg-gray-100 px-1 rounded">
-                            {field.field_key}
-                          </code>
-                          {field.is_array && (
-                            <Badge className="ml-2" variant="secondary">
-                              Múltiples valores
-                            </Badge>
-                          )}
-                        </p>
-                      </div>
-                      <Button
-                        className="flex items-center gap-2"
-                        size="sm"
-                        onClick={() => openAddDialog(field)}
-                      >
-                        <Plus className="h-4 w-4" />
-                        Agregar Opción
-                      </Button>
-                    </div>
-
-                    <div className="space-y-2">
-                      {field.values && field.values.length > 0 ? (
-                        field.values.map((value) => (
-                          <div
-                            className={`flex items-center justify-between p-2 rounded border ${
-                              !value.is_active
-                                ? "bg-gray-50 opacity-60"
-                                : "bg-white"
-                            }`}
-                            key={value.id}
-                          >
-                            <div className="flex items-center gap-3 flex-1">
-                              <GripVertical className="h-4 w-4 text-gray-400" />
-                              <span className="font-medium">{value.label}</span>
-                              <code className="text-xs bg-gray-100 px-1 rounded text-gray-600">
-                                {value.value}
-                              </code>
-                              {value.is_default && (
-                                <Badge className="text-xs" variant="default">
-                                  Por defecto
-                                </Badge>
-                              )}
-                              {!value.is_active && (
-                                <Badge className="text-xs" variant="secondary">
-                                  Inactivo
-                                </Badge>
-                              )}
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <Button
-                                size="sm"
-                                title={
-                                  value.is_active ? "Desactivar" : "Activar"
-                                }
-                                variant="ghost"
-                                onClick={() => handleToggleValueActive(value)}
-                              >
-                                {value.is_active ? (
-                                  <Eye className="h-4 w-4" />
-                                ) : (
-                                  <EyeOff className="h-4 w-4" />
-                                )}
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                onClick={() => openEditDialog(value)}
-                              >
-                                <Edit2 className="h-4 w-4" />
-                              </Button>
-                              <Button
-                                className="text-red-600 hover:text-red-700"
-                                size="sm"
-                                variant="ghost"
-                                onClick={() => handleDeleteValue(value)}
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          </div>
-                        ))
-                      ) : (
-                        <p className="text-gray-500 text-sm py-2">
-                          No hay opciones configuradas
-                        </p>
-                      )}
-                    </div>
-                  </div>
+                  <OptionFieldCard
+                    field={field}
+                    key={field.id}
+                    onAddValue={openAddDialog}
+                    onDeleteValue={handleDeleteValue}
+                    onEditValue={openEditDialog}
+                    onToggleValue={handleToggleValueActive}
+                  />
                 ))
               )}
             </CardContent>
@@ -395,134 +272,22 @@ export default function ProductOptionsContent() {
         ))}
       </div>
 
-      {/* Add Value Dialog */}
-      <Dialog open={showAddValueDialog} onOpenChange={setShowAddValueDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Agregar Nueva Opción</DialogTitle>
-            <DialogDescription>
-              Agrega una nueva opción para: {selectedField?.field_label}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="new_value">Valor</Label>
-              <p className="text-xs text-gray-500 mb-1">
-                Código interno utilizado por el sistema
-              </p>
-              <Input
-                id="new_value"
-                placeholder="Ej: nuevo_tipo"
-                value={newValue.value}
-                onChange={(e) =>
-                  setNewValue({
-                    ...newValue,
-                    value: e.target.value.toLowerCase().replace(/\s+/g, "_"),
-                  })
-                }
-              />
-              <p className="text-xs text-gray-500 mt-1">
-                Se convertirá automáticamente a formato snake_case
-              </p>
-            </div>
-            <div>
-              <Label htmlFor="new_label">Etiqueta (mostrar)</Label>
-              <Input
-                id="new_label"
-                placeholder="Ej: Nuevo Tipo"
-                value={newValue.label}
-                onChange={(e) =>
-                  setNewValue({ ...newValue, label: e.target.value })
-                }
-              />
-            </div>
-            <div className="flex items-center space-x-2">
-              <input
-                checked={newValue.is_default}
-                className="rounded"
-                id="is_default"
-                type="checkbox"
-                onChange={(e) =>
-                  setNewValue({ ...newValue, is_default: e.target.checked })
-                }
-              />
-              <Label htmlFor="is_default">Marcar como opción por defecto</Label>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setShowAddValueDialog(false)}
-            >
-              Cancelar
-            </Button>
-            <Button onClick={handleAddValue}>Agregar</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Edit Value Dialog */}
-      <Dialog open={showEditValueDialog} onOpenChange={setShowEditValueDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Editar Opción</DialogTitle>
-            <DialogDescription>
-              Edita la opción: {editingValue?.label}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="edit_value">Valor</Label>
-              <p className="text-xs text-gray-500 mb-1">
-                Código interno utilizado por el sistema
-              </p>
-              <Input
-                disabled
-                className="bg-gray-100"
-                id="edit_value"
-                value={newValue.value}
-              />
-              <p className="text-xs text-gray-500 mt-1">
-                El valor no se puede modificar
-              </p>
-            </div>
-            <div>
-              <Label htmlFor="edit_label">Etiqueta (mostrar)</Label>
-              <Input
-                id="edit_label"
-                placeholder="Ej: Nuevo Tipo"
-                value={newValue.label}
-                onChange={(e) =>
-                  setNewValue({ ...newValue, label: e.target.value })
-                }
-              />
-            </div>
-            <div className="flex items-center space-x-2">
-              <input
-                checked={newValue.is_default}
-                className="rounded"
-                id="edit_is_default"
-                type="checkbox"
-                onChange={(e) =>
-                  setNewValue({ ...newValue, is_default: e.target.checked })
-                }
-              />
-              <Label htmlFor="edit_is_default">
-                Marcar como opción por defecto
-              </Label>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setShowEditValueDialog(false)}
-            >
-              Cancelar
-            </Button>
-            <Button onClick={handleEditValue}>Guardar Cambios</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <AddOptionValueDialog
+        newValue={newValue}
+        open={showAddValueDialog}
+        selectedField={selectedField}
+        onAdd={handleAddValue}
+        onNewValueChange={setNewValue}
+        onOpenChange={setShowAddValueDialog}
+      />
+      <EditOptionValueDialog
+        editingValue={editingValue}
+        newValue={newValue}
+        open={showEditValueDialog}
+        onNewValueChange={setNewValue}
+        onOpenChange={setShowEditValueDialog}
+        onSave={handleEditValue}
+      />
     </div>
   );
 }

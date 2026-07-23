@@ -6,6 +6,8 @@ import { appLogger as logger } from "@/lib/logger";
 import type { IsAdminParams, IsAdminResult } from "@/types/supabase-rpc";
 import { createClient } from "@/utils/supabase/server";
 
+import { DEFAULT_SCHEDULE_SETTINGS } from "./_helpers/defaultSettings";
+
 export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
   try {
@@ -71,66 +73,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Return default settings if none exist
-    const defaultSettings = {
-      slot_duration_minutes: 15,
-      default_appointment_duration: 30,
-      buffer_time_minutes: 0,
-      working_hours: {
-        monday: {
-          enabled: true,
-          start_time: "09:00",
-          end_time: "18:00",
-          lunch_start: null,
-          lunch_end: null,
-        },
-        tuesday: {
-          enabled: true,
-          start_time: "09:00",
-          end_time: "18:00",
-          lunch_start: null,
-          lunch_end: null,
-        },
-        wednesday: {
-          enabled: true,
-          start_time: "09:00",
-          end_time: "18:00",
-          lunch_start: null,
-          lunch_end: null,
-        },
-        thursday: {
-          enabled: true,
-          start_time: "09:00",
-          end_time: "18:00",
-          lunch_start: null,
-          lunch_end: null,
-        },
-        friday: {
-          enabled: true,
-          start_time: "09:00",
-          end_time: "18:00",
-          lunch_start: null,
-          lunch_end: null,
-        },
-        saturday: {
-          enabled: false,
-          start_time: "09:00",
-          end_time: "13:00",
-          lunch_start: null,
-          lunch_end: null,
-        },
-        sunday: {
-          enabled: false,
-          start_time: "09:00",
-          end_time: "13:00",
-          lunch_start: null,
-          lunch_end: null,
-        },
-      },
-      blocked_dates: [],
-      min_advance_booking_hours: 2,
-      max_advance_booking_days: 90,
-      staff_specific_settings: {},
-    };
+    const defaultSettings = DEFAULT_SCHEDULE_SETTINGS;
 
     const settingsToReturn = settings ?? defaultSettings;
     return createApiSuccessResponse(settingsToReturn);

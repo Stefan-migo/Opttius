@@ -1,21 +1,12 @@
 "use client";
 
-import { AlertTriangle, Edit, Plus, Trash2 } from "lucide-react";
+import { Edit, Plus, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -24,6 +15,18 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+
+import { OrgBranchDeleteDialog,OrgBranchDialog } from "./OrgBranchDialog";
+
+interface BranchFormData {
+  name: string;
+  code: string;
+  address_line_1: string;
+  city: string;
+  phone: string;
+  email: string;
+  is_active: boolean;
+}
 
 interface OrgBranchesTabProps {
   orgId: string;
@@ -269,166 +272,23 @@ export default function OrgBranchesTab({
         </CardContent>
       </Card>
 
-      {/* Branch create/edit dialog */}
-      <Dialog open={showBranchDialog} onOpenChange={setShowBranchDialog}>
-        <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>
-              {editingBranch ? "Editar Sucursal" : "Nueva Sucursal"}
-            </DialogTitle>
-            <DialogDescription>
-              {editingBranch
-                ? "Modifica los datos de la sucursal"
-                : "Completa los datos para crear una nueva sucursal"}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="text-sm font-medium">Nombre *</label>
-                <Input
-                  placeholder="Ej: Sucursal Centro"
-                  value={branchFormData.name}
-                  onChange={(e) =>
-                    setBranchFormData({
-                      ...branchFormData,
-                      name: e.target.value,
-                    })
-                  }
-                />
-              </div>
-              <div>
-                <label className="text-sm font-medium">Código</label>
-                <Input
-                  placeholder="Se genera automáticamente si se deja vacío"
-                  value={branchFormData.code}
-                  onChange={(e) =>
-                    setBranchFormData({
-                      ...branchFormData,
-                      code: e.target.value,
-                    })
-                  }
-                />
-              </div>
-            </div>
-            <div>
-              <label className="text-sm font-medium">Dirección</label>
-              <Input
-                placeholder="Dirección línea 1"
-                value={branchFormData.address_line_1}
-                onChange={(e) =>
-                  setBranchFormData({
-                    ...branchFormData,
-                    address_line_1: e.target.value,
-                  })
-                }
-              />
-            </div>
-            <div>
-              <label className="text-sm font-medium">Ciudad</label>
-              <Input
-                placeholder="Ciudad"
-                value={branchFormData.city}
-                onChange={(e) =>
-                  setBranchFormData({ ...branchFormData, city: e.target.value })
-                }
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="text-sm font-medium">Teléfono</label>
-                <Input
-                  placeholder="Teléfono"
-                  value={branchFormData.phone}
-                  onChange={(e) =>
-                    setBranchFormData({
-                      ...branchFormData,
-                      phone: e.target.value,
-                    })
-                  }
-                />
-              </div>
-              <div>
-                <label className="text-sm font-medium">Email</label>
-                <Input
-                  placeholder="Email"
-                  type="email"
-                  value={branchFormData.email}
-                  onChange={(e) =>
-                    setBranchFormData({
-                      ...branchFormData,
-                      email: e.target.value,
-                    })
-                  }
-                />
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <input
-                checked={branchFormData.is_active}
-                className="rounded"
-                id="branch-active"
-                type="checkbox"
-                onChange={(e) =>
-                  setBranchFormData({
-                    ...branchFormData,
-                    is_active: e.target.checked,
-                  })
-                }
-              />
-              <label className="text-sm font-medium" htmlFor="branch-active">
-                Sucursal activa
-              </label>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => {
-                setShowBranchDialog(false);
-                setEditingBranch(null);
-              }}
-            >
-              Cancelar
-            </Button>
-            <Button
-              onClick={editingBranch ? handleUpdateBranch : handleCreateBranch}
-            >
-              {editingBranch ? "Guardar Cambios" : "Crear Sucursal"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <OrgBranchDialog
+        branchFormData={branchFormData}
+        editingBranch={editingBranch}
+        open={showBranchDialog}
+        onFormChange={(data) => setBranchFormData((f) => ({ ...f, ...data }))}
+        onOpenChange={(open) => {
+          setShowBranchDialog(open);
+          if (!open) setEditingBranch(null);
+        }}
+        onSave={editingBranch ? handleUpdateBranch : handleCreateBranch}
+      />
 
-      {/* Delete Branch Confirmation Dialog */}
-      <Dialog
+      <OrgBranchDeleteDialog
         open={deleteBranchConfirmId !== null}
+        onConfirm={handleDeleteBranchConfirm}
         onOpenChange={(open) => !open && setDeleteBranchConfirmId(null)}
-      >
-        <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-red-500" />
-              Eliminar sucursal
-            </DialogTitle>
-            <DialogDescription>
-              ¿Estás seguro de eliminar esta sucursal? Esta acción eliminará
-              todos los datos relacionados.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setDeleteBranchConfirmId(null)}
-            >
-              Cancelar
-            </Button>
-            <Button variant="destructive" onClick={handleDeleteBranchConfirm}>
-              Eliminar
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      />
     </>
   );
 }

@@ -4,6 +4,7 @@ import { logAdminActivity } from "@/lib/api/middleware";
 
 import { getToolByName } from "../tools";
 import type { ToolExecutionContext, ToolResult } from "../tools/types";
+import type { LLMMessage, ToolCall } from "../types";
 import { initializeOrganizationalMemory } from "./memory-init";
 
 export class ToolExecutor {
@@ -158,4 +159,98 @@ export async function createToolExecutor(
     customerId: options.customerId,
   };
   return new ToolExecutor(context);
+}
+
+/**
+ * Execute collected tool calls with validation, single retry, and error reporting.
+ * Results are pushed to messages as tool-role entries for the LLM to consume.
+ * Extracted from agent.ts #executeToolCalls.
+ */
+export async function executeToolCalls(
+  toolCalls: ToolCall[],
+  executor: ToolExecutor,
+  config: { requireConfirmationForDestructiveActions: boolean },
+  messages: LLMMessage[],
+): Promise<void> {
+  for (const toolCall of toolCalls) {
+    if (!toolCall.name || !toolCall.name.trim()) {
+      const errorMsg = `Error: Nombre de herramienta inválido o vacío`;
+      console.error("Tool validation:", errorMsg);
+      messages.push({
+        role: "tool",
+        content: errorMsg,
+        toolCallId: toolCall.id,
+        name: "unknown",
+      });
+      continue;
+    }
+
+    const toolName = toolCall.name.trim();
+
+    console.log(`[Agent] Executing tool: ${toolName}`);
+    console.log("=== TOOL EXECUTION DEBUG ===");
+    console.log("Tool name:", toolName);
+    console.log("Tool arguments:", JSON.stringify(toolCall.arguments, null, 2));
+    console.log("Arguments type:", typeof toolCall.arguments);
+    console.log("Arguments keys:", toolCall.arguments ? Object.keys(toolCall.arguments) : []);
+    console.log("Arguments values:", toolCall.arguments ? Object.values(toolCall.arguments) : []);
+    console.log("===========================");
+
+    const validation = executor.validateToolCall(toolName, toolCall.arguments);
+    if (!validation.valid) {
+      const errorMsg = `Error validando herramienta: ${validation.error}`;
+      console.error("Tool validation failed:", { toolName, arguments: toolCall.arguments, error: validation.error });
+      messages.push({ role: "tool", content: errorMsg, toolCallId: toolCall.id, name: toolName });
+      continue;
+    }
+
+    if (executor.requiresConfirmation(toolName) && config.requireConfirmationForDestructiveActions) {
+      console.log(`[Agent] Tool ${toolName} requires confirmation, executing anyway`);
+    }
+
+    // ponytail: simple retry-once — exponential backoff if retries > 1 needed
+    let lastError: string | undefined;
+    for (let attempt = 0; attempt < 2; attempt++) {
+      try {
+        const result = await executor.executeTool(toolName, toolCall.arguments);
+
+        if (result.success) {
+          messages.push({
+            role: "tool",
+            content: JSON.stringify(result.data || result.message || "Success"),
+            toolCallId: toolCall.id,
+            name: toolName,
+          });
+          console.log(`[Agent] Tool ${toolName} completed successfully`);
+          break;
+        }
+
+        lastError = result.error || "Unknown error";
+        console.error(`[Agent] Tool ${toolName} failed (attempt ${attempt + 1}):`, lastError);
+
+        if (attempt === 0) {
+          console.log(`[Agent] Retrying tool ${toolName}...`);
+          continue;
+        }
+      } catch (innerError: unknown) {
+        lastError = (innerError as Error).message || "Error desconocido";
+        console.error(`[Agent] Tool ${toolName} threw (attempt ${attempt + 1}):`, lastError);
+
+        if (attempt === 0) {
+          continue;
+        }
+        break;
+      }
+    }
+
+    const finalMsg = lastError
+      ? `Error ejecutando ${toolName}: ${lastError}`
+      : `Ejecutado: ${toolName}`;
+    messages.push({
+      role: "tool",
+      content: finalMsg,
+      toolCallId: toolCall.id,
+      name: toolName,
+    });
+  }
 }

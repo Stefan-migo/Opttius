@@ -1,15 +1,14 @@
-/* eslint max-lines: off */
 /**
  * Process Sale Business Lookups — customer, agreement, quote, lens, prescription, order number.
  *
  * Extracted from processSaleHandler.ts. No behavioral changes.
  */
 
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
 
-import type { SupabaseClient } from "@supabase/supabase-js";
-
 import { buildCustomerName,buildOrderItems } from "./processResponseBuilder";
+import { handleAgreementLookups } from "./processSaleAgreementLookups";
 import { computeOrderNumber } from "./processSaleValidation";
 
 export interface BusinessLookupParams {
@@ -66,14 +65,14 @@ export async function handleBusinessLookups(
   const validationModule = await import("./processSaleValidation");
   const frameInfo = validationModule.extractFrameInfo(
     frame_data as Record<string, unknown> | null | undefined,
-    itemsArr as any,
+    itemsArr as unknown,
   );
   const lensInfo = validationModule.extractLensInfo(
     lens_data as Record<string, unknown> | null | undefined,
-    itemsArr as any,
+    itemsArr as unknown,
   );
-  const treatmentsCost = validationModule.extractTreatmentsCost(itemsArr as any);
-  const laborCost = validationModule.extractLaborCost(itemsArr as any);
+  const treatmentsCost = validationModule.extractTreatmentsCost(itemsArr as unknown);
+  const laborCost = validationModule.extractLaborCost(itemsArr as unknown);
 
   // Customer lookup
   let customer: Record<string, unknown> | null = null;
@@ -99,75 +98,16 @@ export async function handleBusinessLookups(
   }
 
   // Agreement + purchase order validation
-  let agreement: Record<string, unknown> | null = null;
-  let purchaseOrder: Record<string, unknown> | null = null;
-  let copagoAmount: number | null = null;
-  let institutionalAmount: number | null = null;
-
-  if (agreement_id) {
-    const { data: agreementData } = await supabase
-      .from("agreements")
-      .select("id, status, valid_from, valid_until, billing_rules")
-      .eq("id", agreement_id as string)
-      .single();
-    if (!agreementData) {
-      return NextResponse.json({ error: "Convenio no encontrado" }, { status: 404 }) as NextResponse;
-    }
-    agreement = agreementData as Record<string, unknown>;
-
-    if (agreement.status !== "active") {
-      return NextResponse.json({ error: "El convenio no está activo" }, { status: 400 }) as NextResponse;
-    }
-    const today = new Date().toISOString().split("T")[0];
-    const validFrom = agreement.valid_from as string;
-    const validUntil = agreement.valid_until as string | undefined;
-    if (validFrom > today) {
-      return NextResponse.json({ error: "El convenio aún no está vigente" }, { status: 400 }) as NextResponse;
-    }
-    if (validUntil && validUntil < today) {
-      return NextResponse.json({ error: "El convenio ha expirado" }, { status: 400 }) as NextResponse;
-    }
-
-    if (!purchase_order_id) {
-      return NextResponse.json(
-        { error: "La orden de compra (OC) es obligatoria para ventas bajo convenio" },
-        { status: 400 },
-      ) as NextResponse;
-    }
-
-    const { data: poData } = await supabase
-      .from("agreement_purchase_orders")
-      .select("id, status, max_amount, used_amount")
-      .eq("id", purchase_order_id as string)
-      .eq("agreement_id", agreement_id as string)
-      .single();
-    if (!poData) {
-      return NextResponse.json(
-        { error: "Orden de compra no encontrada o no pertenece al convenio" },
-        { status: 404 },
-      ) as NextResponse;
-    }
-    purchaseOrder = poData as Record<string, unknown>;
-    if (purchaseOrder.status !== "active") {
-      return NextResponse.json({ error: "La orden de compra no está activa" }, { status: 400 }) as NextResponse;
-    }
-
-    const rules = (agreement.billing_rules || {}) as Record<string, unknown>;
-    const copagoPercent = (rules.copago_percent as number) ?? 20;
-    const _institutionalPercent = (rules.institutional_percent as number) ?? 80;
-    copagoAmount = Math.round((total_amount as number) * (copagoPercent / 100) * 100) / 100;
-    institutionalAmount = Math.round(((total_amount as number) - copagoAmount) * 100) / 100;
-
-    if (purchaseOrder.max_amount != null) {
-      const newUsed = ((purchaseOrder.used_amount as number) || 0) + institutionalAmount;
-      if (newUsed > (purchaseOrder.max_amount as number)) {
-        return NextResponse.json(
-          { error: "La OC excede el monto máximo autorizado" },
-          { status: 400 },
-        ) as NextResponse;
-      }
-    }
+  const agreementResult = await handleAgreementLookups(
+    supabase,
+    agreement_id as string | undefined,
+    purchase_order_id as string | undefined,
+    total_amount as number | undefined,
+  );
+  if (agreementResult instanceof NextResponse) {
+    return agreementResult;
   }
+  const { agreement, purchaseOrder, copagoAmount, institutionalAmount } = agreementResult;
 
   // Quote validation
   let quote: Record<string, unknown> | null = null;
@@ -187,7 +127,7 @@ export async function handleBusinessLookups(
   }
 
   // Lens family validation
-  const lensInfoRecord = lensInfo as any;
+  const lensInfoRecord = lensInfo as unknown;
   let lensFamily: Record<string, unknown> | null = null;
   if (lensInfoRecord.lens_family_id) {
     const { data: family } = await supabase
@@ -268,7 +208,7 @@ export async function handleBusinessLookups(
     (lastOrder as Record<string, unknown> | null)?.order_number as string | null,
   );
 
-  const orderItems = buildOrderItems(itemsArr as any) as Array<Record<string, unknown>>;
+  const orderItems = buildOrderItems(itemsArr as unknown) as Array<Record<string, unknown>>;
 
   const { customerName, billingFirstName, billingLastName } = buildCustomerName({
     customer: customer as Record<string, unknown> | null,

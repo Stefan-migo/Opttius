@@ -6,6 +6,8 @@
  */
 "use client";
 
+import { Package, Tag } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -18,15 +20,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { formatCurrency } from "@/lib/utils";
-import { Package, Tag } from "lucide-react";
-
 import type { Prescription } from "@/lib/api/services/customerService";
+import { formatCurrency } from "@/lib/utils";
+
+import { POSPriceSummarySection } from "./_components/POSPriceSummarySection";
 import type {
   OrderFormData,
+  POSAdvancedSaleProps,
   POSProduct,
   Treatment,
-  POSAdvancedSaleProps,
 } from "./POSAdvancedSale.types";
 
 export interface POSAdvancedSalePricingTabProps {
@@ -120,7 +122,7 @@ export function POSAdvancedSalePricingTab({
                 quickCustomerEmail ||
                 quickCustomerPhone) && (
                 <div className="flex justify-between text-xs text-muted-foreground mt-1">
-                  <span></span>
+                  <span />
                   <span className="text-right">
                     {quickCustomerRUT && <span>RUT: {quickCustomerRUT} </span>}
                     {quickCustomerEmail && (
@@ -147,143 +149,16 @@ export function POSAdvancedSalePricingTab({
             </span>
           </div>
 
-          <Separator />
-
-          {/* For two_separate solution - show separate sections for distance and near */}
-          {orderFormData.presbyopia_solution === "two_separate" ? (
-            <>
-              {/* Distance Vision Section */}
-              <div className="p-3 border rounded-lg bg-muted/30">
-                <div className="font-medium mb-2">Visión Lejos</div>
-                {/* Frame for Distance */}
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Marco:</span>
-                  <span>
-                    {orderFormData.customer_own_frame
-                      ? orderFormData.frame_name || "Marco del cliente"
-                      : selectedFrame?.name || "No seleccionado"}
-                  </span>
-                </div>
-                {selectedFrame && !orderFormData.customer_own_frame && (
-                  <div className="flex justify-between text-sm ml-4">
-                    <span className="text-muted-foreground">Precio:</span>
-                    <span>{formatCurrency(selectedFrame.price || 0)}</span>
-                  </div>
-                )}
-                {/* Lens for Distance */}
-                <div className="flex justify-between text-sm mt-2">
-                  <span className="text-muted-foreground">Lente:</span>
-                  <span>
-                    {orderFormData.lens_family_id
-                      ? orderFormData.lens_family_name || "Seleccionado"
-                      : "No seleccionado"}
-                  </span>
-                </div>
-                <div className="flex justify-between text-sm ml-4">
-                  <span className="text-muted-foreground">Precio:</span>
-                  <span>{formatCurrency(80000)}</span>
-                </div>
-              </div>
-
-              {/* Near Vision Section */}
-              <div className="p-3 border rounded-lg bg-muted/30">
-                <div className="font-medium mb-2">Visión Cerca</div>
-                {/* Frame for Near */}
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Marco:</span>
-                  <span>
-                    {customerOwnNearFrame
-                      ? orderFormData.near_frame_name || "Marco del cliente"
-                      : selectedNearFrame?.name || "No seleccionado"}
-                  </span>
-                </div>
-                {selectedNearFrame && !customerOwnNearFrame && (
-                  <div className="flex justify-between text-sm ml-4">
-                    <span className="text-muted-foreground">Precio:</span>
-                    <span>{formatCurrency(selectedNearFrame.price || 0)}</span>
-                  </div>
-                )}
-                {/* Lens for Near */}
-                <div className="flex justify-between text-sm mt-2">
-                  <span className="text-muted-foreground">Lente:</span>
-                  <span>
-                    {orderFormData.near_lens_family_id
-                      ? orderFormData.near_lens_family_name || "Seleccionado"
-                      : "No seleccionado"}
-                  </span>
-                </div>
-                <div className="flex justify-between text-sm ml-4">
-                  <span className="text-muted-foreground">Precio:</span>
-                  <span>{formatCurrency(35000)}</span>
-                </div>
-              </div>
-            </>
-          ) : (
-            <>
-              {/* Frame - Single/Progressive */}
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Marco:</span>
-                <span>
-                  {orderFormData.customer_own_frame
-                    ? orderFormData.frame_name || "Marco del cliente"
-                    : selectedFrame?.name || "No seleccionado"}
-                </span>
-              </div>
-
-              {/* Frame Price */}
-              {selectedFrame && !orderFormData.customer_own_frame && (
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground ml-4">
-                    Precio Marco:
-                  </span>
-                  <span>{formatCurrency(selectedFrame.price || 0)}</span>
-                </div>
-              )}
-
-              {/* Lens */}
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Lentes:</span>
-                <span>
-                  {orderFormData.lens_family_id
-                    ? [...lensFamilies].find(
-                        (f) => f.id === orderFormData.lens_family_id,
-                      )?.name || "Seleccionado"
-                    : "No seleccionado"}
-                </span>
-              </div>
-
-              {orderFormData.lens_family_id && (
-                <div className="flex justify-between text-sm ml-4">
-                  <span className="text-muted-foreground">Precio Lentes:</span>
-                  <span>{formatCurrency(lensPrice())}</span>
-                </div>
-              )}
-            </>
-          )}
-
-          {/* Treatments */}
-          {orderFormData.treatment_ids.length > 0 && (
-            <div className="ml-4 space-y-1">
-              <div className="text-xs text-muted-foreground">Tratamientos:</div>
-              {orderFormData.treatment_ids.map((id) => {
-                const treatment = treatments.find((t) => t.id === id);
-                return treatment ? (
-                  <div className="flex justify-between text-sm" key={id}>
-                    <span className="ml-2">- {treatment.label}</span>
-                    <span>{formatCurrency(treatment.cost)}</span>
-                  </div>
-                ) : null;
-              })}
-            </div>
-          )}
-
-          {/* Labor */}
-          {orderFormData.labor_cost > 0 && (
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground ml-4">Mano de Obra:</span>
-              <span>{formatCurrency(orderFormData.labor_cost)}</span>
-            </div>
-          )}
+          <POSPriceSummarySection
+            customerOwnNearFrame={customerOwnNearFrame}
+            lensFamilies={lensFamilies}
+            lensPrice={lensPrice}
+            orderFormData={orderFormData}
+            selectedFrame={selectedFrame}
+            selectedNearFrame={selectedNearFrame}
+            treatments={treatments}
+            treatmentsPrice={treatmentsPrice}
+          />
 
           {/* Discount */}
           <div className="space-y-2 pt-2">
@@ -307,12 +182,12 @@ export function POSAdvancedSalePricingTab({
               {discountType !== "none" && (
                 <Input
                   className="flex-1"
-                  type="number"
-                  min={0}
                   max={discountType === "percentage" ? 100 : undefined}
+                  min={0}
                   placeholder={
                     discountType === "percentage" ? "0-100" : "Monto"
                   }
+                  type="number"
                   value={discountValue || ""}
                   onChange={(e) =>
                     setDiscountValue(parseFloat(e.target.value) || 0)
@@ -376,12 +251,12 @@ export function POSAdvancedSalePricingTab({
 
           <Button
             className="w-full"
-            variant="secondary"
             disabled={
               (!customer && !quickCustomerName && !quickCustomerRUT) ||
               creatingQuote
             }
             size="lg"
+            variant="secondary"
             onClick={handleCreateQuote}
           >
             {creatingQuote ? (

@@ -25,6 +25,8 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 
+
+
 interface Gateway {
   id: string;
   gateway_id: string;
@@ -269,37 +271,4 @@ export default function PaymentGatewaysPage() {
   );
 }
 
-// Simple Alert Component substitution for the page
-function Alert({
-  children,
-  className,
-}: {
-  children: React.ReactNode;
-  className?: string;
-}) {
-  return (
-    <div className={cn("p-4 rounded-lg border", className)}>{children}</div>
-  );
-}
-function AlertTitle({
-  children,
-  className,
-}: {
-  children: React.ReactNode;
-  className?: string;
-}) {
-  return (
-    <h5 className={cn("font-medium leading-none tracking-tight", className)}>
-      {children}
-    </h5>
-  );
-}
-function AlertDescription({
-  children,
-  className,
-}: {
-  children: React.ReactNode;
-  className?: string;
-}) {
-  return <div className={cn("text-sm opacity-90", className)}>{children}</div>;
-}
+import { Alert, AlertDescription, AlertTitle } from "./_components/AlertComponents";

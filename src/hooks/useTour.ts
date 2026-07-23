@@ -63,47 +63,42 @@ export function useTour() {
     gcTime: 1000 * 60 * 10, // Mantener en cache por 10 minutos
   });
 
-  // Iniciar tour - optimizado con timeout
   const startTour = useMutation({
     mutationFn: async () => {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 2000); // Timeout de 2 segundos
-
+      const timeoutId = setTimeout(() => controller.abort(), 2000);
       try {
         const res = await fetch("/api/onboarding/tour", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ action: "start" }),
           signal: controller.signal,
+          body: JSON.stringify({ action: "start" }),
         });
         clearTimeout(timeoutId);
-
         if (!res.ok) {
-          const error = await res
+          const err = await res
             .json()
             .catch(() => ({ error: "Failed to start tour" }));
-          throw new Error(error.error || "Failed to start tour");
+          throw new Error(err.error || "Failed to start tour");
         }
         return res.json();
       } catch (error) {
         clearTimeout(timeoutId);
-        // Si falla, actualizar el estado localmente para no bloquear (sin logs)
         if (error instanceof Error && error.name === "AbortError") {
-          const inProgressState = {
+          const state = {
             status: "in_progress" as const,
             current_step: 0,
             completed_steps: [],
             skip_on_next_login: false,
           };
-          queryClient.setQueryData(["tour-progress"], inProgressState);
-          return inProgressState;
+          queryClient.setQueryData(["tour-progress"], state);
+          return state;
         }
         throw error;
       }
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["tour-progress"] });
-    },
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: ["tour-progress"] }),
   });
 
   // Completar paso - optimizado con actualización optimista
@@ -154,96 +149,70 @@ export function useTour() {
     },
   });
 
-  // Completar tour
   const completeTour = useMutation({
-    mutationFn: async () => {
+    mutationFn: () => tourApiCall("complete"),
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: ["tour-progress"] }),
+  });
+
+  const tourApiCall = useCallback(
+    async (action: string, body?: Record<string, unknown>) => {
       const res = await fetch("/api/onboarding/tour", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "complete" }),
+        body: JSON.stringify(body ?? { action }),
       });
       if (!res.ok) {
-        const error = await res
+        const err = await res
           .json()
-          .catch(() => ({ error: "Failed to complete tour" }));
-        throw new Error(error.error || "Failed to complete tour");
+          .catch(() => ({ error: `Failed to ${action} tour` }));
+        throw new Error(err.error || `Failed to ${action} tour`);
       }
       return res.json();
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["tour-progress"] });
-    },
-  });
+    [],
+  );
 
   // Saltar tour - actualización inmediata sin esperar API
   const skipTour = useMutation({
     mutationFn: async () => {
-      // Actualizar inmediatamente el estado local - esto detiene el tour de inmediato
       const disabledState = {
         status: "disabled" as const,
         current_step: 0,
         completed_steps: [],
         skip_on_next_login: true,
       };
-
-      // Actualizar estado local inmediatamente
       queryClient.setQueryData(["tour-progress"], disabledState);
-
-      // Intentar actualizar en el servidor en segundo plano (no bloquea)
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 1000);
-
       try {
         const res = await fetch("/api/onboarding/tour", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ action: "skip" }),
           signal: controller.signal,
+          body: JSON.stringify({ action: "skip" }),
         });
         clearTimeout(timeoutId);
-
         if (res.ok) {
           const data = await res.json();
-          // Actualizar con los datos del servidor, pero mantener el estado disabled
           queryClient.setQueryData(["tour-progress"], {
             ...data,
             status: "disabled" as const,
           });
         }
-        // Si falla, no importa - el estado local ya está actualizado
-      } catch (error) {
+      } catch {
         clearTimeout(timeoutId);
-        // Silenciar errores - el estado local ya está actualizado
       }
-
       return disabledState;
     },
-    // NO invalidar queries aquí - eso causaría que el tour se reactive
-    // El estado local ya está actualizado, no necesitamos refetch
   });
 
-  // Reiniciar tour
   const restartTour = useMutation({
-    mutationFn: async () => {
-      const res = await fetch("/api/onboarding/tour", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "restart" }),
-      });
-      if (!res.ok) {
-        const error = await res
-          .json()
-          .catch(() => ({ error: "Failed to restart tour" }));
-        throw new Error(error.error || "Failed to restart tour");
-      }
-      return res.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["tour-progress"] });
-    },
+    mutationFn: () => tourApiCall("restart"),
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: ["tour-progress"] }),
   });
 
-  // Función wrapper para skipTour que asegura que funcione inmediatamente
   const skipTourImmediate = useCallback(() => {
     const disabledState = {
       status: "disabled" as const,
@@ -251,42 +220,28 @@ export function useTour() {
       completed_steps: [],
       skip_on_next_login: true,
     };
-
-    // Actualizar estado local inmediatamente - esto detiene el tour de inmediato
     queryClient.setQueryData(["tour-progress"], disabledState);
-
-    // Cancelar cualquier query en progreso para evitar que sobrescriba el estado
     queryClient.cancelQueries({ queryKey: ["tour-progress"] });
-
-    // Llamar a la mutación en segundo plano (no bloquea)
     skipTour.mutate(undefined, {
-      onSuccess: (data) => {
-        // Asegurar que el estado se mantenga como disabled
+      onSuccess: (data) =>
         queryClient.setQueryData(["tour-progress"], {
           ...data,
           status: "disabled" as const,
-        });
-      },
+        }),
     });
   }, [skipTour, queryClient]);
 
-  // Función para navegar a un paso específico (para navegación hacia atrás)
   const goToStep = useCallback(
     (stepIndex: number) => {
-      if (stepIndex < 0 || stepIndex >= TOUR_STEPS.length) {
-        return;
-      }
-
-      // Actualizar estado local inmediatamente
+      if (stepIndex < 0 || stepIndex >= TOUR_STEPS.length) return;
       const currentProgress = queryClient.getQueryData<TourProgress>([
         "tour-progress",
       ]);
-      if (currentProgress && currentProgress.status === "in_progress") {
-        const newProgress: TourProgress = {
+      if (currentProgress?.status === "in_progress") {
+        queryClient.setQueryData(["tour-progress"], {
           ...currentProgress,
           current_step: stepIndex,
-        };
-        queryClient.setQueryData(["tour-progress"], newProgress);
+        });
       }
     },
     [queryClient],

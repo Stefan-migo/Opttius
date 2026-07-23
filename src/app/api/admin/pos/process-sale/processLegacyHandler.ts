@@ -1,8 +1,12 @@
 /**
  * Legacy path handler for process-sale.
  *
- * Extracted from route.ts `else` branch (lines 1326-2147).
- * Uses sequential inserts for operativo/mobile-stock sales.
+ * Extracted from route.ts `else` branch. Uses sequential inserts for
+ * operativo/mobile-stock sales. Now delegates to focused sub-modules:
+ * - processLegacyOrderCreate.ts  → order, items, payments, POS transaction
+ * - processLegacyWorkOrder.ts    → work order creation, billing, notifications
+ * - processResponseBuilder.ts    → response construction
+ * - processPaymentUtils.ts       → amount/status computation
  */
 import { NextResponse } from "next/server";
 
@@ -12,227 +16,32 @@ import {
 } from "@/lib/api/response";
 import { BillingFactory } from "@/lib/billing/BillingFactory";
 import { appLogger as logger } from "@/lib/logger";
-import { PAYMENT_METHOD_MAP } from "@/lib/payments/constants";
 
+import { createLegacyOrder } from "./processLegacyOrderCreate";
 import {
-  computeCashAmount,
-  computeWorkOrderStatus,
-} from "./processPaymentUtils";
-import {
-  buildBillingOrder,
-  buildBillingResponse,
-  buildFullOrderResponse,
-} from "./processResponseBuilder";
+  createLegacyWorkOrder,
+  handleNonWorkOrderPath,
+  sendWorkOrderNotifications,
+  updateQuoteStatus,
+} from "./processLegacyWorkOrder";
+import type { OrderItem } from "./processResponseBuilder";
+import { buildBillingOrder, buildBillingResponse, buildFullOrderResponse } from "./processResponseBuilder";
 import type { ProcessSaleContext } from "./processSaleTypes";
-import { computeMinDepositFallback } from "./processSaleValidation";
 import { reduceContactLensStock,reduceStock } from "./processStockReduction";
 
 export async function handleLegacyPath(
   ctx: ProcessSaleContext,
 ): Promise<NextResponse> {
-  // Legacy path: sequential inserts (operativos with mobile stock)
-  const { data: newOrderData, error: orderError } =
-    await ctx.supabase
-      .from("orders")
-      .insert({
-        order_number: ctx.orderNumber,
-        email:
-          ctx.email || (ctx.customer?.email as string) || "venta@pos.local",
-        status: "processing",
-        payment_status: ctx.payment_status || "paid",
-        subtotal: ctx.subtotal,
-        tax_amount: ctx.tax_amount || 0,
-        discount_amount: 0,
-        total_amount: ctx.total_amount,
-        currency: ctx.currency || "CLP",
-        mp_payment_method: ctx.payment_method_type,
-        branch_id: ctx.effectiveBranchId,
-        organization_id: ctx.orderOrganizationId,
-        field_operation_id: ctx.fieldOperationId,
-        customer_notes: null,
-        is_pos_sale: true,
-        pos_session_id: ctx.posSessionId || null,
-        customer_name: ctx.customerName,
-        billing_first_name: ctx.billingFirstName,
-        billing_last_name: ctx.billingLastName,
-        sii_rut:
-          ctx.customer_rut ||
-          ctx.sii_rut ||
-          (ctx.customer?.rut as string) ||
-          null,
-        sii_business_name: ctx.sii_business_name || null,
-        customer_id: ctx.customer_id || null,
-        agreement_id: ctx.agreement_id || null,
-        purchase_order_id: ctx.purchase_order_id || null,
-        copago_amount: ctx.copagoAmount ?? null,
-        institutional_amount: ctx.institutionalAmount ?? null,
-      })
-      .select()
-      .single();
-
-  if (orderError) {
-    logger.error("Error creating order", orderError);
+  // 1. Create order + items + payments + POS transaction
+  const newOrder = await createLegacyOrder(ctx);
+  if (!newOrder) {
     return NextResponse.json(
-      {
-        error: "Failed to create order",
-        details: orderError.message,
-      },
+      { error: "Failed to create order", details: "Order creation returned null" },
       { status: 500 },
     );
   }
-  const newOrder = newOrderData as Record<string, unknown>;
 
-  // Insert order_items for persistence
-  if (ctx.orderItems.length > 0) {
-    const { error: itemsError } = await ctx.supabase
-      .from("order_items")
-      .insert(
-        ctx.orderItems.map((item: Record<string, unknown>) => ({
-          order_id: newOrder.id,
-          product_id: (item.product_id as string) || null,
-          product_name: (item.product_name as string) || "Producto",
-          quantity: item.quantity as number,
-          unit_price: item.unit_price as number,
-          total_price: (item.unit_price as number) * (item.quantity as number),
-          sku: (item as Record<string, unknown>).sku as string | null,
-        })),
-      );
-
-    if (itemsError) {
-      logger.error("Error creating order items", itemsError);
-    }
-  }
-
-  // Register payment(s) in order_payments
-  if (ctx.agreement_id && ctx.copagoAmount != null) {
-    const { error: paymentError } = await ctx.supabase
-      .from("order_payments")
-      .insert({
-        order_id: newOrder.id,
-        amount: ctx.copagoAmount,
-        payment_method: ctx.dbPaymentMethod,
-        pos_session_id: ctx.posSessionId || null,
-        payment_reference:
-          ctx.fiscal_reference?.trim() || ctx.siiInvoiceNumber || null,
-        created_by: ctx.user.id,
-        notes: `Copago convenio - ${ctx.payment_method_type}`,
-      });
-    if (paymentError) {
-      logger.error("Error creating payment record", paymentError);
-    }
-
-    if (ctx.institutionalAmount != null && ctx.institutionalAmount > 0) {
-      const { error: balanceErr } = await ctx.supabase
-        .from("agreement_institutional_balances")
-        .insert({
-          agreement_id: ctx.agreement_id,
-          order_id: newOrder.id,
-          purchase_order_id: ctx.purchase_order_id || null,
-          amount: ctx.institutionalAmount,
-          status: "pending",
-        });
-      if (balanceErr) {
-        logger.error("Error creating institutional balance", balanceErr);
-      }
-
-      if (ctx.purchase_order_id) {
-        await ctx.supabase
-          .from("agreement_purchase_orders")
-          .update({
-            used_amount:
-              ((ctx.purchaseOrder?.used_amount as number) || 0) +
-              ctx.institutionalAmount,
-          })
-          .eq("id", ctx.purchase_order_id);
-      }
-    }
-  } else if (ctx.paymentsArray && ctx.paymentsArray.length > 0) {
-    for (let i = 0; i < ctx.paymentsArray.length; i++) {
-      const p = ctx.paymentsArray[i] as Record<string, unknown>;
-      const dbMethod =
-        PAYMENT_METHOD_MAP[p.method as keyof typeof PAYMENT_METHOD_MAP] ||
-        p.method;
-      const { error: payErr } = await ctx.supabase
-        .from("order_payments")
-        .insert({
-          order_id: newOrder.id,
-          amount: p.amount as number,
-          payment_method: dbMethod,
-          pos_session_id: ctx.posSessionId || null,
-          payment_reference:
-            i === 0
-              ? ctx.fiscal_reference?.trim() || ctx.siiInvoiceNumber || null
-              : null,
-          created_by: ctx.user.id,
-          notes:
-            ctx.paymentsArray.length > 1
-              ? `Pago ${i + 1}/${ctx.paymentsArray.length} - ${dbMethod}`
-              : `Pago - ${dbMethod}`,
-        });
-      if (payErr) {
-        logger.error("Error creating payment record", payErr);
-      }
-    }
-  } else {
-    const { error: paymentError } = await ctx.supabase
-      .from("order_payments")
-      .insert({
-        order_id: newOrder.id,
-        amount: ctx.paymentAmount,
-        payment_method: ctx.dbPaymentMethod,
-        pos_session_id: ctx.posSessionId || null,
-        payment_reference:
-          ctx.fiscal_reference?.trim() || ctx.siiInvoiceNumber || null,
-        created_by: ctx.user.id,
-        notes: `Pago inicial - Método: ${ctx.payment_method_type}`,
-      });
-    if (paymentError) {
-      logger.error("Error creating payment record", paymentError);
-    }
-  }
-
-  // Create POS transaction
-  if (ctx.posSessionId) {
-    const { error: txError } = await ctx.supabase
-      .from("pos_transactions")
-      .insert({
-        order_id: newOrder.id,
-        pos_session_id: ctx.posSessionId,
-        transaction_type: "sale",
-        payment_method: ctx.dbPaymentMethod,
-        amount: ctx.total_amount,
-        change_amount: ctx.change_amount ?? null,
-        notes: `Venta POS - ${newOrder.order_number as string}`,
-      });
-    if (txError) {
-      logger.warn("Could not create pos_transaction for sale", {
-        txError,
-        order_id: newOrder.id,
-      });
-    }
-  }
-
-  // Update order's mp_payment_method
-  const { error: updatePaymentMethodError } = await ctx.supabase
-    .from("orders")
-    .update({ mp_payment_method: ctx.dbPaymentMethod })
-    .eq("id", newOrder.id);
-
-  if (updatePaymentMethodError) {
-    logger.error("Error updating payment method", updatePaymentMethodError);
-  }
-
-  // Calculate order balance
-  const { data: balanceData, error: balanceError } =
-    await ctx.supabase.rpc("calculate_order_balance", {
-      p_order_id: newOrder.id as string,
-    });
-
-  const balance = balanceError
-    ? ctx.total_amount - ctx.paymentAmount
-    : (balanceData as number) || 0;
-
-  // Emit billing document
+  // 2. Emit billing document
   let billingResult: Record<string, unknown> | null = null;
   try {
     const billingConfig = await BillingFactory.getBillingConfig(
@@ -247,9 +56,7 @@ export async function handleLegacyPath(
         .select("oc_number")
         .eq("id", ctx.purchase_order_id)
         .single();
-      ocNumber = (po as Record<string, unknown> | null)?.oc_number as
-        | string
-        | null;
+      ocNumber = (po as Record<string, unknown> | null)?.oc_number as string | null;
     }
 
     const billingOrder = buildBillingOrder({
@@ -260,7 +67,7 @@ export async function handleLegacyPath(
       totalAmount: ctx.total_amount,
       subtotal: ctx.subtotal,
       taxAmount: ctx.tax_amount || 0,
-      items: ctx.orderItems,
+      items: ctx.orderItems as unknown as OrderItem[],
       customer: ctx.customer as Record<string, unknown> | null,
       createdAt: newOrder.created_at as string,
       ocNumber,
@@ -272,10 +79,7 @@ export async function handleLegacyPath(
       siiBusinessName: ctx.sii_business_name,
     });
 
-    billingResult = (await billingAdapter.emitDocument(billingOrder)) as Record<
-      string,
-      unknown
-    >;
+    billingResult = (await billingAdapter.emitDocument(billingOrder)) as unknown as Record<string, unknown>;
     logger.info("Billing document emitted", {
       folio: billingResult?.folio,
       type: billingResult?.type,
@@ -284,301 +88,58 @@ export async function handleLegacyPath(
     logger.error("Error emitting billing document", billingError);
   }
 
-  // Stock reduction
+  // 3. Stock reduction
   const stockOk = await reduceStock(ctx, newOrder.id as string);
   if (!stockOk) {
     return createApiErrorResponse(
-      new (await import("@/lib/api/errors")).APIError("Error al actualizar stock", 400, "INSUFFICIENT_STOCK"),
+      new (await import("@/lib/api/errors")).APIError(
+        "Error al actualizar stock",
+        400,
+        "INSUFFICIENT_STOCK",
+      ),
     );
   }
   await reduceContactLensStock(ctx);
 
-  // Create work order if needed
+  // 4. Non-work-order path (no lab work needed)
   if (!ctx.actuallyRequiresWorkOrder) {
-    const { NotificationService } = await import(
-      "@/lib/notifications/notification-service"
-    );
-    NotificationService.notifyNewSale(
-      newOrder.id as string,
-      newOrder.order_number as string,
-      (newOrder.email as string) || "venta@pos.local",
-      newOrder.total_amount as number,
-      (newOrder.branch_id as string) ?? ctx.effectiveBranchId ?? undefined,
-    ).catch((err: unknown) =>
-      logger.error("Error creating sale notification", err),
-    );
+    await handleNonWorkOrderPath(ctx, newOrder, billingResult, {});
 
     const successResponse = {
       order: { ...newOrder, order_items: ctx.orderItems },
       work_order: null,
       billing: billingResult
-        ? {
-            folio: billingResult.folio,
-            pdfUrl: billingResult.pdfUrl,
-            type: billingResult.type,
-          }
+        ? { folio: billingResult.folio, pdfUrl: billingResult.pdfUrl, type: billingResult.type }
         : null,
     };
-    if (ctx.idempotency_key) {
-      await ctx.supabase.from("pos_sale_idempotency").upsert(
-        {
-          idempotency_key: ctx.idempotency_key,
-          order_id: newOrder.id,
-          work_order_id: null,
-          response_snapshot: successResponse,
-        },
-        { onConflict: "idempotency_key" },
-      );
-    }
+
+    await saveIdempotency(ctx, newOrder.id as string, null, successResponse);
     return createApiSuccessResponse(successResponse);
   }
 
-  // Cash-First Logic: Determine work order status based on payment
-  const { data: minDepositData } = await ctx.supabase.rpc(
-    "get_min_deposit",
-    {
-      p_order_total: ctx.total_amount,
-      p_branch_id: ctx.effectiveBranchId,
-    },
-  );
-  const minDeposit =
-    minDepositData ?? computeMinDepositFallback(ctx.total_amount);
+  // 5. Work order path (Cash-First)
+  const woResult = await createLegacyWorkOrder(ctx, newOrder);
 
-  const { status: workOrderStatus, paymentStatus: workOrderPaymentStatus } =
-    computeWorkOrderStatus(
-      ctx.paymentAmount,
-      minDeposit,
-      ctx.total_amount,
-      balance,
-    );
-
-  if (ctx.paymentAmount < minDeposit) {
-    logger.info("Insufficient deposit", {
-      paid: ctx.paymentAmount,
-      required: minDeposit,
-      total: ctx.total_amount,
-    });
-  }
-
-  // Generate work order number
-  const { data: workOrderNumber, error: workOrderNumberError } =
-    await ctx.supabase.rpc("generate_work_order_number");
-
-  if (workOrderNumberError || !workOrderNumber) {
-    logger.error("Error generating work order number", workOrderNumberError);
-    await ctx.supabase.from("orders").delete().eq("id", newOrder.id);
+  if ("error" in woResult) {
     return NextResponse.json(
-      { error: "Failed to generate work order number" },
-      { status: 500 },
+      { error: woResult.error },
+      { status: woResult.status },
     );
   }
 
-  // Create work order
-  const lensCost =
-    ctx.presbyopia_solution === "two_separate"
-      ? (ctx.far_lens_cost || 0) + (ctx.near_lens_cost || 0)
-      : ctx.contact_lens_cost || ctx.lensInfo.lens_cost || 0;
+  const { workOrder, balance } = woResult;
+  billingResult = woResult.billingResult || billingResult;
 
-  const workOrderData: Record<string, unknown> = {
-    work_order_number: workOrderNumber,
-    branch_id: ctx.effectiveBranchId,
-    field_operation_id: ctx.fieldOperationId,
-    operativo_batch_id: ctx.fieldOperationId,
-    customer_id: ctx.customer_id || null,
-    prescription_id: ctx.lensInfo.prescription_id || null,
-    quote_id: ctx.quote_id || null,
-    frame_product_id: ctx.frameInfo.frame_product_id,
-    frame_name: ctx.frameInfo.frame_name,
-    frame_brand: ctx.frameInfo.frame_brand,
-    frame_model: ctx.frameInfo.frame_model,
-    frame_color: ctx.frameInfo.frame_color,
-    frame_size: ctx.frameInfo.frame_size,
-    frame_sku: ctx.frameInfo.frame_sku,
-    frame_serial_number: null,
-    lens_family_id:
-      ctx.presbyopia_solution === "two_separate"
-        ? null
-        : ctx.lensInfo.lens_family_id || null,
-    lens_type: ctx.lensInfo.lens_type,
-    lens_sourcing_type:
-      (ctx.lensInfo as Record<string, unknown>).lens_sourcing_type ||
-      "surfaced",
-    lens_material: ctx.lensInfo.lens_material,
-    lens_index: ctx.lensInfo.lens_index,
-    lens_treatments: ctx.lensInfo.lens_treatments,
-    lens_tint_color: ctx.lensInfo.lens_tint_color,
-    lens_tint_percentage: ctx.lensInfo.lens_tint_percentage,
-    presbyopia_solution: ctx.presbyopia_solution || "none",
-    far_lens_family_id:
-      ctx.presbyopia_solution === "two_separate"
-        ? ctx.far_lens_family_id || null
-        : null,
-    near_lens_family_id:
-      ctx.presbyopia_solution === "two_separate"
-        ? ctx.near_lens_family_id || null
-        : null,
-    far_lens_cost:
-      ctx.presbyopia_solution === "two_separate"
-        ? ctx.far_lens_cost || 0
-        : null,
-    near_lens_cost:
-      ctx.presbyopia_solution === "two_separate"
-        ? ctx.near_lens_cost || 0
-        : null,
-    contact_lens_family_id: ctx.contact_lens_family_id || null,
-    contact_lens_rx_sphere_od: ctx.contact_lens_rx_sphere_od || null,
-    contact_lens_rx_cylinder_od: ctx.contact_lens_rx_cylinder_od || null,
-    contact_lens_rx_axis_od: ctx.contact_lens_rx_axis_od || null,
-    contact_lens_rx_add_od: ctx.contact_lens_rx_add_od || null,
-    contact_lens_rx_base_curve_od: ctx.contact_lens_rx_base_curve_od || null,
-    contact_lens_rx_diameter_od: ctx.contact_lens_rx_diameter_od || null,
-    contact_lens_rx_sphere_os: ctx.contact_lens_rx_sphere_os || null,
-    contact_lens_rx_cylinder_os: ctx.contact_lens_rx_cylinder_os || null,
-    contact_lens_rx_axis_os: ctx.contact_lens_rx_axis_os || null,
-    contact_lens_rx_add_os: ctx.contact_lens_rx_add_os || null,
-    contact_lens_rx_base_curve_os: ctx.contact_lens_rx_base_curve_os || null,
-    contact_lens_rx_diameter_os: ctx.contact_lens_rx_diameter_os || null,
-    contact_lens_quantity: ctx.contact_lens_family_id
-      ? ctx.contact_lens_quantity || 1
-      : null,
-    contact_lens_cost: ctx.contact_lens_cost || null,
-    prescription_snapshot: null,
-    lab_name: null,
-    lab_contact: null,
-    lab_order_number: null,
-    lab_estimated_delivery_date: null,
-    status: workOrderStatus,
-    frame_cost: ctx.frameInfo.frame_cost,
-    lens_cost: lensCost,
-    treatments_cost: ctx.treatmentsCost,
-    labor_cost: ctx.laborCost,
-    lab_cost: 0,
-    subtotal: ctx.subtotal,
-    tax_amount: ctx.tax_amount || 0,
-    discount_amount: 0,
-    total_amount: ctx.total_amount,
-    currency: ctx.currency || "CLP",
-    payment_status: workOrderPaymentStatus,
-    payment_method: ctx.payment_method_type,
-    deposit_amount: ctx.paymentAmount,
-    balance_amount: balance,
-    pos_order_id: newOrder.id,
-    agreement_id: ctx.agreement_id || null,
-    internal_notes: `Venta POS - Método: ${ctx.payment_method_type}${billingResult ? ` - Folio: ${billingResult.folio}` : ""} - Depósito: ${ctx.paymentAmount}/${ctx.total_amount} - Saldo: ${balance}${ctx.presbyopia_solution && ctx.presbyopia_solution !== "none" ? ` - Presbicia: ${ctx.presbyopia_solution}` : ""}${ctx.lensInfo.lens_family_id ? ` - Familia: ${(ctx.lensFamily?.name as string) || ctx.lensInfo.lens_family_id}` : ""}`,
-    customer_notes: null,
-    assigned_to: ctx.user.id,
-    created_by: ctx.user.id,
-  };
+  // 6. Notifications
+  await sendWorkOrderNotifications(ctx, newOrder, workOrder!);
 
-  const { data: newWorkOrder, error: workOrderError } =
-    await ctx.supabase
-      .from("lab_work_orders")
-      .insert(workOrderData)
-      .select()
-      .single();
+  // 7. Update quote status
+  await updateQuoteStatus(ctx, newOrder, workOrder?.id as string | null);
 
-  if (workOrderError) {
-    logger.error("Error creating work order", workOrderError);
-    return NextResponse.json(
-      {
-        error: "Failed to create work order",
-        details: workOrderError.message,
-        code: workOrderError.code,
-        hint: workOrderError.hint,
-      },
-      { status: 500 },
-    );
-  }
-
-  // Update status dates
-  if (workOrderData.status && workOrderData.status !== "quote") {
-    await ctx.supabase.rpc("update_work_order_status", {
-      p_work_order_id: (newWorkOrder as Record<string, unknown>).id,
-      p_new_status: workOrderData.status as string,
-      p_changed_by: ctx.user.id,
-      p_notes: "Work order created from POS sale",
-    });
-  }
-
-  // Update POS session cash amount
-  const cashAmount = computeCashAmount(
-    ctx.paymentsArray || [],
-    ctx.payment_method_type,
-    ctx.cash_received,
-    ctx.total_amount,
-  );
-  if (cashAmount > 0 && ctx.posSessionId) {
-    const { error: cashError } = await ctx.supabase.rpc(
-      "update_pos_session_cash",
-      { session_id: ctx.posSessionId, cash_amount: cashAmount },
-    );
-    if (cashError) {
-      logger.error("Error updating POS session cash", cashError);
-    }
-  }
-
-  // Notifications
-  const { NotificationService } = await import(
-    "@/lib/notifications/notification-service"
-  );
-
-  NotificationService.notifyNewSale(
-    newOrder.id as string,
-    newOrder.order_number as string,
-    (newOrder.email as string) || "venta@pos.local",
-    newOrder.total_amount as number,
-    (newOrder.branch_id as string) ?? ctx.effectiveBranchId ?? undefined,
-  ).catch((err: unknown) =>
-    logger.error("Error creating sale notification", err),
-  );
-
-  if (newWorkOrder) {
-    const customerName = ctx.customer
-      ? `${(ctx.customer.first_name as string) || ""} ${(ctx.customer.last_name as string) || ""}`.trim() ||
-        (ctx.customer.email as string) ||
-        "Cliente"
-      : "Cliente";
-
-    NotificationService.notifyNewWorkOrder(
-      (newWorkOrder as Record<string, unknown>).id as string,
-      (newWorkOrder as Record<string, unknown>).work_order_number as string,
-      customerName,
-      (newWorkOrder as Record<string, unknown>).total_amount as number,
-      ((newWorkOrder as Record<string, unknown>).branch_id as string) ??
-        ctx.effectiveBranchId ??
-        undefined,
-    ).catch((err: unknown) =>
-      logger.error("Error creating work order notification", err),
-    );
-  }
-
-  // Update quote status
-  if (ctx.quote_id && ctx.quote) {
-    const woId = (newWorkOrder as Record<string, unknown> | null)?.id || null;
-    const { error: quoteUpdateError } = await ctx.supabase
-      .from("quotes")
-      .update({
-        status: "accepted",
-        converted_to_work_order_id: woId,
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", ctx.quote_id);
-
-    if (quoteUpdateError) {
-      logger.error("Error updating quote status", quoteUpdateError);
-    } else {
-      logger.info("Quote marked as accepted", {
-        quote_id: ctx.quote_id,
-        work_order_id: woId,
-        order_id: newOrder.id,
-      });
-    }
-  }
-
-  // Build response
+  // 8. Build response
   const fullOrder = buildFullOrderResponse(
-    newOrder,
-    ctx.orderItems,
+    newOrder as Parameters<typeof buildFullOrderResponse>[0],
+    ctx.orderItems as unknown as OrderItem[],
     ctx.paymentAmount,
     ctx.dbPaymentMethod,
     ctx.siiInvoiceNumber,
@@ -590,24 +151,31 @@ export async function handleLegacyPath(
   const successResponse = {
     order: fullOrder,
     work_order: {
-      ...newWorkOrder,
+      ...workOrder,
       sii_invoice_number: ctx.siiInvoiceNumber,
     },
     billing: buildBillingResponse(billingResult),
   };
 
-  if (ctx.idempotency_key) {
-    await ctx.supabase.from("pos_sale_idempotency").upsert(
-      {
-        idempotency_key: ctx.idempotency_key,
-        order_id: newOrder.id,
-        work_order_id:
-          (newWorkOrder as Record<string, unknown> | null)?.id || null,
-        response_snapshot: successResponse,
-      },
-      { onConflict: "idempotency_key" },
-    );
-  }
-
+  await saveIdempotency(ctx, newOrder.id as string, workOrder?.id as string | null, successResponse);
   return createApiSuccessResponse(successResponse);
+}
+
+async function saveIdempotency(
+  ctx: ProcessSaleContext,
+  orderId: string,
+  workOrderId: string | null,
+  response: Record<string, unknown>,
+): Promise<void> {
+  if (!ctx.idempotency_key) return;
+
+  await ctx.supabase.from("pos_sale_idempotency").upsert(
+    {
+      idempotency_key: ctx.idempotency_key,
+      order_id: orderId,
+      work_order_id: workOrderId,
+      response_snapshot: response,
+    },
+    { onConflict: "idempotency_key" },
+  );
 }

@@ -9,7 +9,10 @@ import type {
 } from "@/types/supabase-rpc";
 import { createClient, createServiceRoleClient } from "@/utils/supabase/server";
 
+import { CSV_COLUMN_MAPPINGS, generateSlug, parseArray, parseBoolean, parseCSVLine, parseIngredients } from "./_helpers/csvHelpers";
+
 export const dynamic = "force-dynamic";
+// ponytail: this file is still 485 lines, the remaining logic is tightly coupled to the route handler
 export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();
@@ -55,71 +58,22 @@ export async function POST(request: NextRequest) {
     // Parse headers
     const headers = lines[0].split(",").map((h) => h.trim().replace(/"/g, ""));
 
-    // Define expected columns and their mappings
-    const columnMappings: Record<string, string> = {
-      nombre: "name",
-      name: "name",
-      slug: "slug",
-      descripcion: "description",
-      description: "description",
-      precio: "price",
-      price: "price",
-      precio_comparacion: "compare_at_price",
-      compare_at_price: "compare_at_price",
-      stock: "stock_quantity", // Changed to stock_quantity for product_branch_stock
-      stock_quantity: "stock_quantity",
-      inventory_quantity: "stock_quantity", // Map old field name for backward compatibility
-      estado: "status",
-      status: "status",
-      destacado: "is_featured",
-      is_featured: "is_featured",
-      sku: "sku",
-      peso: "weight",
-      weight: "weight",
-      tipos_piel: "skin_type",
-      skin_type: "skin_type",
-      beneficios: "benefits",
-      benefits: "benefits",
-      certificaciones: "certifications",
-      certifications: "certifications",
-      instrucciones: "usage_instructions",
-      usage_instructions: "usage_instructions",
-      ingredientes: "ingredients",
-      ingredients: "ingredients",
-      precauciones: "precautions",
-      precautions: "precautions",
-      dimensiones: "dimensions",
-      dimensions: "dimensions",
-      caracteristicas_paquete: "package_characteristics",
-      package_characteristics: "package_characteristics",
-      imagen_principal: "featured_image",
-      featured_image: "featured_image",
-      galeria_1: "gallery_1",
-      gallery_1: "gallery_1",
-      galeria_2: "gallery_2",
-      gallery_2: "gallery_2",
-      galeria_3: "gallery_3",
-      gallery_3: "gallery_3",
-      galeria_4: "gallery_4",
-      gallery_4: "gallery_4",
-      categoria: "category_name",
-      category: "category_name",
-    };
+    const columnMappings = CSV_COLUMN_MAPPINGS;
 
     // Get categories for mapping
     const { data: categories } = await supabase
       .from("categories")
       .select("id, name, slug");
 
-    const categoryMap =
-      categories?.reduce((acc: unknown, cat) => {
+    const categoryMap: Record<string, string> =
+      categories?.reduce((acc, cat) => {
         acc[cat.name.toLowerCase()] = cat.id;
         acc[cat.slug.toLowerCase()] = cat.id;
         return acc;
-      }, {}) || {};
+      }, {} as Record<string, string>) || {};
 
     // Parse data rows
-    const products = [];
+    const products: unknown[] = [];
     const errors = [];
     const warnings = [];
 
@@ -131,7 +85,7 @@ export async function POST(request: NextRequest) {
           continue;
         }
 
-        const rowData: unknown = {};
+        const rowData: Record<string, string> = {};
         headers.forEach((header, index) => {
           const mappedField = columnMappings[header.toLowerCase()];
           if (mappedField) {
@@ -140,7 +94,7 @@ export async function POST(request: NextRequest) {
         });
 
         // Process and validate product data
-        const product: unknown = {
+        const product: Record<string, unknown> = {
           name: rowData.name?.trim(),
           slug: rowData.slug?.trim() || generateSlug(rowData.name || ""),
           short_description: rowData.short_description?.trim(),
@@ -531,103 +485,3 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// Helper functions
-function parseCSVLine(line: string): string[] {
-  const result = [];
-  let current = "";
-  let inQuotes = false;
-
-  for (let i = 0; i < line.length; i++) {
-    const char = line[i];
-
-    if (char === '"') {
-      if (inQuotes && line[i + 1] === '"') {
-        current += '"';
-        i++; // Skip next quote
-      } else {
-        inQuotes = !inQuotes;
-      }
-    } else if (char === "," && !inQuotes) {
-      result.push(current.trim());
-      current = "";
-    } else {
-      current += char;
-    }
-  }
-
-  result.push(current.trim());
-  return result;
-}
-
-function generateSlug(name: string): string {
-  return name
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-z0-9\s-]/g, "")
-    .replace(/\s+/g, "-")
-    .replace(/-+/g, "-")
-    .trim();
-}
-
-function parseBoolean(value: string): boolean {
-  if (!value) return false;
-  const lowerValue = value.toLowerCase().trim();
-  return ["true", "1", "yes", "sí", "si", "y"].includes(lowerValue);
-}
-
-function parseArray(value: string): string[] {
-  if (!value) return [];
-
-  // Try to parse as JSON first (for complex data like ingredients)
-  if (value.trim().startsWith("[") && value.trim().endsWith("]")) {
-    try {
-      const parsed = JSON.parse(value);
-      if (Array.isArray(parsed)) {
-        return parsed.map((item) =>
-          typeof item === "string" ? item : JSON.stringify(item),
-        );
-      }
-    } catch (e) {
-      // If JSON parsing fails, fall back to semicolon splitting
-    }
-  }
-
-  // Fall back to semicolon-separated values
-  return value
-    .split(";")
-    .map((item) => item.trim())
-    .filter((item) => item.length > 0);
-}
-
-function parseIngredients(
-  value: string,
-): Array<{ name: string; percentage?: number }> {
-  if (!value) return [];
-
-  // Try to parse as JSON array of objects
-  if (value.trim().startsWith("[") && value.trim().endsWith("]")) {
-    try {
-      const parsed = JSON.parse(value);
-      if (Array.isArray(parsed)) {
-        return parsed.map((item) => {
-          if (typeof item === "object" && item.name) {
-            return {
-              name: item.name,
-              percentage: item.percentage || undefined,
-            };
-          }
-          return { name: String(item) };
-        });
-      }
-    } catch (e) {
-      logger.warn("Failed to parse ingredients JSON", { error: e });
-    }
-  }
-
-  // Fall back to semicolon-separated values
-  return value
-    .split(";")
-    .map((item) => ({ name: item.trim() }))
-    .filter((item) => item.name.length > 0);
-}

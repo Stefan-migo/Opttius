@@ -1,22 +1,14 @@
 "use client";
 
-import { ArrowRight, FileText, Loader2, Search, X } from "lucide-react";
+import { Loader2, Search, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { formatRUTAsYouType } from "@/lib/utils/rut";
 
 import type { POSCustomer, POSQuote } from "../types";
+import { POSQuickCustomerFields } from "./_components/POSQuickCustomerFields";
+import { POSQuoteSelectionDialog } from "./_components/POSQuoteSelectionDialog";
 
 interface POSCustomerSearchProps {
   searchTerm: string;
@@ -234,74 +226,19 @@ export function POSCustomerSearch({
               {quotesCount} presupuesto(s) disponible(s)
             </div>
           )}
-          {/* Quote Selection - Show list when customer has quotes, otherwise show manual input */}
+          {/* Quote Selection Dialog */}
           {selectedCustomer && quotes.length > 0 && (
-            <Dialog open={showQuoteDialog} onOpenChange={setShowQuoteDialog}>
-              <DialogTrigger asChild>
-                <Button
-                  className="w-full mt-2 gap-2"
-                  size="sm"
-                  variant="outline"
-                >
-                  <FileText className="h-4 w-4" />
-                  Seleccionar Presupuesto
-                  <ArrowRight className="h-3 w-3 ml-auto" />
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-[500px]">
-                <DialogHeader>
-                  <DialogTitle>Presupuestos del Cliente</DialogTitle>
-                  <DialogDescription>
-                    Selecciona un presupuesto para agregar al carrito
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="space-y-2 max-h-[400px] overflow-y-auto">
-                  {loadingQuotes ? (
-                    <div className="flex items-center justify-center py-8">
-                      <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-                    </div>
-                  ) : (
-                    quotes.map((quote) => (
-                      <div
-                        className={`p-3 border rounded-lg cursor-pointer transition-colors ${
-                          selectedQuote?.id === quote.id
-                            ? "border-primary bg-primary/5"
-                            : "hover:border-muted-foreground"
-                        }`}
-                        key={quote.id}
-                        onClick={() => {
-                          onSelectQuote?.(quote);
-                          setShowQuoteDialog(false);
-                        }}
-                      >
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <div className="font-medium">
-                              {quote.quote_number}
-                            </div>
-                            <div className="text-xs text-muted-foreground">
-                              {new Date(quote.created_at).toLocaleDateString(
-                                "es-CL",
-                              )}
-                            </div>
-                          </div>
-                          <div className="text-right">
-                            <div className="font-semibold">
-                              $
-                              {quote.total_amount?.toLocaleString("es-CL") ||
-                                "0"}
-                            </div>
-                            <div className="text-xs text-muted-foreground">
-                              {quote.status}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    ))
-                  )}
-                </div>
-              </DialogContent>
-            </Dialog>
+            <POSQuoteSelectionDialog
+              loadingQuotes={loadingQuotes}
+              open={showQuoteDialog}
+              quotes={quotes}
+              selectedQuote={selectedQuote ?? null}
+              onOpenChange={setShowQuoteDialog}
+              onSelectQuote={(quote) => {
+                onSelectQuote?.(quote);
+                setShowQuoteDialog(false);
+              }}
+            />
           )}
           {/* Show message when no quotes available */}
           {selectedCustomer && quotes.length === 0 && !loadingQuotes && (
@@ -332,63 +269,19 @@ export function POSCustomerSearch({
             Cliente no seleccionado (opcional)
           </div>
           {/* Quick customer fields - progressive disclosure */}
-          <div
-            ref={quickCustomerRef}
-            className={showQuickCustomerFields ? "grid grid-cols-2 gap-2" : ""}
-          >
-            <div className={showQuickCustomerFields ? "" : "w-full"}>
-              <Input
-                className="text-xs h-8"
-                placeholder="Nombre del cliente"
-                type="text"
-                value={customerBusinessName}
-                onChange={(e) => {
-                  onBusinessNameChange(e.target.value);
-                  if (e.target.value.length > 0) {
-                    setShowQuickCustomerFields(true);
-                  }
-                }}
-                onFocus={() => setShowQuickCustomerFields(true)}
-              />
-            </div>
-            {/* Secondary fields - shown when name is active or has content */}
-            {showQuickCustomerFields && (
-              <>
-                <div>
-                  <Input
-                    className="text-xs h-8"
-                    placeholder="RUT"
-                    type="text"
-                    value={customerRUT}
-                    onChange={(e) =>
-                      onRUTChange(formatRUTAsYouType(e.target.value))
-                    }
-                  />
-                </div>
-                {onCustomerEmailChange && (
-                  <div>
-                    <Input
-                      className="text-xs h-8"
-                      placeholder="Email"
-                      type="email"
-                      value={customerEmail}
-                      onChange={(e) => onCustomerEmailChange(e.target.value)}
-                    />
-                  </div>
-                )}
-                {onCustomerPhoneChange && (
-                  <div>
-                    <Input
-                      className="text-xs h-8"
-                      placeholder="Teléfono"
-                      type="tel"
-                      value={customerPhone}
-                      onChange={(e) => onCustomerPhoneChange(e.target.value)}
-                    />
-                  </div>
-                )}
-              </>
-            )}
+          <div ref={quickCustomerRef}>
+            <POSQuickCustomerFields
+              customerBusinessName={customerBusinessName}
+              customerEmail={customerEmail}
+              customerPhone={customerPhone}
+              customerRUT={customerRUT}
+              showQuickCustomerFields={showQuickCustomerFields}
+              onBusinessNameChange={onBusinessNameChange}
+              onCustomerEmailChange={onCustomerEmailChange}
+              onCustomerPhoneChange={onCustomerPhoneChange}
+              onRUTChange={onRUTChange}
+              onShowFieldsChange={setShowQuickCustomerFields}
+            />
           </div>
         </div>
       )}
