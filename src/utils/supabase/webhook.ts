@@ -7,12 +7,14 @@
 
 import { createClient } from "@supabase/supabase-js";
 
+import type { Database } from "@/types/supabase";
+
 export function createWebhookClient() {
   const key = process.env.SUPABASE_WEBHOOK_KEY;
   if (!key) {
     throw new Error("SUPABASE_WEBHOOK_KEY is not configured");
   }
-  return createClient(
+  return createClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL || "",
     key,
     {
