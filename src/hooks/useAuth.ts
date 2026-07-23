@@ -1,24 +1,16 @@
 "use client";
 
-import { AuthError, Session, User } from "@supabase/supabase-js";
+import type { AuthError, Session, User } from "@supabase/supabase-js";
 import { useEffect, useState } from "react";
 
-import { Tables } from "@/types/database";
 import { createClient } from "@/utils/supabase/client";
 
-type Profile = Tables<"profiles">;
-
-export interface AuthState {
-  user: User | null;
-  profile: Profile | null;
-  session: Session | null;
-  loading: boolean;
-  error: AuthError | null;
-}
+import { fetchProfile } from "./useAuthFetchProfile";
+import type { AuthState, Profile } from "./useAuthTypes";
+export type { AuthState } from "./useAuthTypes";
 
 /**
- * @param initialUser - Usuario validado en servidor (getUser). Evita redirect erróneo
- * cuando el cliente aún no tiene sesión en document.cookie (nueva pestaña/refresh).
+ * @param initialUser - Usuario validado en servidor (getUser).
  */
 export function useAuth(initialUser?: User | null) {
   const [authState, setAuthState] = useState<AuthState>({
@@ -136,86 +128,19 @@ export function useAuth(initialUser?: User | null) {
     };
   }, []);
 
-  const fetchProfile = async (userId: string): Promise<Profile | null> => {
-    const supabase = createClient();
-    try {
-      // Add timeout to profile fetch with more graceful handling
-      const profilePromise = supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", userId)
-        .single();
-
-      const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error("Profile fetch timeout")), 5000),
-      );
-
-      const { data, error } = (await Promise.race([
-        profilePromise,
-        timeoutPromise,
-      ])) as {
-        data: Profile | null;
-        error: { code?: string; message?: string } | null;
-      };
-
-      if (error) {
-        // Handle different error types more gracefully
-        if (error.message === "Profile fetch timeout") {
-          console.warn(
-            "⏱️ Profile fetch timed out - this is normal for new users or slow connections",
-          );
-          return null;
-        }
-
-        if (error.code === "PGRST116") {
-          console.log(
-            "📝 Profile not found for user - will be created automatically on first update",
-          );
-          return null;
-        }
-
-        // Only log actual errors, not expected cases
-        if (error.code !== "42P01") {
-          // Table doesn't exist
-          console.error("❌ Profile fetch error:", error);
-        }
-        return null;
-      }
-
-      console.log("✅ Profile loaded successfully");
-      return data;
-    } catch (error) {
-      // More specific error handling
-      if (error instanceof Error && error.message === "Profile fetch timeout") {
-        console.warn(
-          "⏱️ Profile fetch timeout - continuing without profile data",
-        );
-      } else {
-        console.error("❌ Unexpected profile fetch error:", error);
-      }
-      return null;
-    }
-  };
-
   const signUp = async (
     email: string,
     password: string,
-    userData?: {
-      firstName?: string;
-      lastName?: string;
-      phone?: string;
-    },
+    userData?: { firstName?: string; lastName?: string; phone?: string },
   ) => {
     const supabase = createClient();
     setAuthState((prev) => ({ ...prev, loading: true, error: null }));
 
     try {
-      // Create auth user - handle_new_user trigger creates profile with SECURITY DEFINER
-      // (bypasses RLS). We pass phone in metadata so the trigger can include it.
       const redirectUrl =
         typeof window !== "undefined"
           ? `${window.location.origin}/login`
-          : `${process.env.NEXT_PUBLIC_APP_URL || process.env.NEXT_PUBLIC_BASE_URL || "https://www.opttius.cl"}/login`;
+          : `${process.env.NEXT_PUBLIC_APP_URL || "https://www.opttius.cl"}/login`;
 
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
@@ -234,10 +159,6 @@ export function useAuth(initialUser?: User | null) {
         setAuthState((prev) => ({ ...prev, error: authError, loading: false }));
         throw authError;
       }
-
-      // Profile is created by handle_new_user trigger (SECURITY DEFINER - bypasses RLS).
-      // No client-side upsert needed - the trigger includes first_name, last_name, phone.
-      // When email confirmation is required, auth.uid() is null so client upsert would fail with RLS.
 
       setAuthState((prev) => ({ ...prev, loading: false }));
       return { data: authData, error: null };
@@ -262,14 +183,10 @@ export function useAuth(initialUser?: User | null) {
         email,
         password,
       });
-
       if (error) {
         setAuthState((prev) => ({ ...prev, error, loading: false }));
         return { data: null, error };
       }
-
-      // Don't set loading false here - let the auth state change handler do it
-      // This prevents race conditions
       return { data, error: null };
     } catch (error) {
       console.error("SignIn error:", error);
@@ -287,14 +204,11 @@ export function useAuth(initialUser?: User | null) {
   const signOut = async () => {
     const supabase = createClient();
     setAuthState((prev) => ({ ...prev, loading: true, error: null }));
-
     const { error } = await supabase.auth.signOut();
-
     if (error) {
       setAuthState((prev) => ({ ...prev, error, loading: false }));
       return { error };
     }
-
     return { error: null };
   };
 

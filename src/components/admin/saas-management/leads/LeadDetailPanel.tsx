@@ -3,16 +3,16 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
+import { LeadActivityTimeline } from "@/components/admin/saas-management/leads/LeadActivityTimeline";
+import { LeadInfoTab } from "@/components/admin/saas-management/leads/LeadInfoTab";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { LeadActivityTimeline } from "@/components/admin/saas-management/leads/LeadActivityTimeline";
 
 type FunnelStage =
   | "pending"
@@ -194,15 +194,15 @@ export function LeadDetailPanel({
         {/* Tabs */}
         <div className="flex gap-2 border-b border-white/10 pb-2 flex-shrink-0">
           <Button
-            variant={activeTab === "info" ? "default" : "ghost"}
             size="sm"
+            variant={activeTab === "info" ? "default" : "ghost"}
             onClick={() => setActiveTab("info")}
           >
             Información
           </Button>
           <Button
-            variant={activeTab === "activity" ? "default" : "ghost"}
             size="sm"
+            variant={activeTab === "activity" ? "default" : "ghost"}
             onClick={() => setActiveTab("activity")}
           >
             Actividad ({activities.length})
@@ -212,147 +212,7 @@ export function LeadDetailPanel({
         {/* Content */}
         <div className="flex-1 overflow-y-auto">
           {activeTab === "info" ? (
-            <div className="space-y-6">
-              {/* Score Section */}
-              {lead.lead_score !== undefined && lead.lead_score > 0 && (
-                <Card className="bg-white/5 border-white/10">
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-medium text-white/70">
-                      Score del Lead
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex items-center gap-4">
-                      <div className="text-4xl font-bold text-white">
-                        {lead.lead_score}
-                      </div>
-                      <div className="space-y-1">
-                        <p className="text-sm text-white/60">
-                          Prioridad:{" "}
-                          <span className={priorityConfig?.color}>
-                            {priorityConfig?.label}
-                          </span>
-                        </p>
-                        {lead.score_last_calculated_at && (
-                          <p className="text-xs text-white/40">
-                            Actualizado:{" "}
-                            {formatDate(lead.score_last_calculated_at)}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-
-              {/* Contact Info */}
-              <div className="space-y-3">
-                <h3 className="text-sm font-medium text-white/70">
-                  Información de Contacto
-                </h3>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-xs text-white/40">Email</p>
-                    <p className="text-sm text-white">{lead.email}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-white/40">Teléfono</p>
-                    <p className="text-sm text-white">{lead.phone || "—"}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-white/40">Nombre</p>
-                    <p className="text-sm text-white">
-                      {lead.full_name || "—"}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-white/40">Óptica</p>
-                    <p className="text-sm text-white">
-                      {lead.optica_name || "—"}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Pipeline Info */}
-              <div className="space-y-3">
-                <h3 className="text-sm font-medium text-white/70">Pipeline</h3>
-                <div className="flex flex-wrap gap-2">
-                  <Badge
-                    className={
-                      STAGE_COLORS[lead.funnel_stage as FunnelStage] || ""
-                    }
-                  >
-                    {STAGE_LABELS[lead.funnel_stage as FunnelStage] ||
-                      lead.funnel_stage ||
-                      "Pendiente"}
-                  </Badge>
-                </div>
-              </div>
-
-              {/* Dates */}
-              <div className="space-y-3">
-                <h3 className="text-sm font-medium text-white/70">Fechas</h3>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-xs text-white/40">Creado</p>
-                    <p className="text-sm text-white">
-                      {formatDate(lead.created_at)}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-white/40">Último contacto</p>
-                    <p className="text-sm text-white">
-                      {formatDate(lead.last_contact_at)}
-                    </p>
-                  </div>
-                  {lead.demo_expires_at && (
-                    <div>
-                      <p className="text-xs text-white/40">Demo expira</p>
-                      <p className="text-sm text-white">
-                        {formatDate(lead.demo_expires_at)}
-                        {daysUntilExpiry !== null && daysUntilExpiry <= 3 && (
-                          <span className="ml-2 text-orange-400">
-                            ({daysUntilExpiry} días)
-                          </span>
-                        )}
-                      </p>
-                    </div>
-                  )}
-                  {lead.next_followup_at && (
-                    <div>
-                      <p className="text-xs text-white/40">Próximo follow-up</p>
-                      <p className="text-sm text-white">
-                        {formatDate(lead.next_followup_at)}
-                      </p>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Source */}
-              {lead.source && (
-                <div className="space-y-3">
-                  <h3 className="text-sm font-medium text-white/70">Fuente</h3>
-                  <div className="flex flex-wrap gap-2">
-                    <Badge
-                      variant="outline"
-                      className="text-white border-white/30 bg-white/5"
-                    >
-                      {lead.source}
-                    </Badge>
-                    {lead.utm_source && (
-                      <Badge
-                        variant="outline"
-                        className="text-white border-white/30 bg-white/5"
-                      >
-                        UTM: {lead.utm_source}
-                      </Badge>
-                    )}
-                  </div>
-                </div>
-              )}
-            </div>
+            <LeadInfoTab lead={lead} />
           ) : (
             <div className="py-2">
               <LeadActivityTimeline
@@ -370,9 +230,9 @@ export function LeadDetailPanel({
             <>
               {onApprove && (
                 <Button
+                  disabled={actioning === lead.id}
                   size="sm"
                   variant="default"
-                  disabled={actioning === lead.id}
                   onClick={() => onApprove(lead.id)}
                 >
                   Aprobar Demo
@@ -380,9 +240,9 @@ export function LeadDetailPanel({
               )}
               {onReject && (
                 <Button
+                  disabled={actioning === lead.id}
                   size="sm"
                   variant="destructive"
-                  disabled={actioning === lead.id}
                   onClick={() => onReject(lead.id)}
                 >
                   Rechazar
