@@ -13,7 +13,7 @@ interface PrescriptionView {
   os_add?: number | null;
 }
 
-interface LensFamily {
+export interface LensFamily {
   id: string;
   name: string;
   lens_type: "vision" | "contact";
@@ -53,7 +53,7 @@ export function suggestLensFamily(
 
   let suggestedFamily = "";
   let suggestedNearFamily = "";
-  let suggestedSolution: "single" | "two_separate" | "progressive" = "single";
+  const suggestedSolution: "single" | "two_separate" | "progressive" = "single";
 
   if (hasAddition) {
     if (maxSphere > 4) {

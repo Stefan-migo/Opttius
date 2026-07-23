@@ -6,6 +6,8 @@
  */
 "use client";
 
+import { User, X } from "lucide-react";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,16 +19,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { User, X } from "lucide-react";
-
 import type { Prescription } from "@/lib/api/services/customerService";
+
+import { POSPrescriptionDetail } from "./_components/POSPrescriptionDetail";
+import { ExternalPrescriptionForm } from "./ExternalPrescriptionForm";
 import type {
   ExternalPrescriptionData,
   OrderFormData,
   POSAdvancedSaleProps,
 } from "./POSAdvancedSale.types";
-
-import { ExternalPrescriptionForm } from "./ExternalPrescriptionForm";
 import { PresbyopiaSolutionSelector } from "./PresbyopiaSolutionSelector";
 
 export interface POSAdvancedSaleCustomerTabProps {
@@ -231,81 +232,7 @@ export function POSAdvancedSaleCustomerTab({
                 )}
 
                 {selectedPrescription && (
-                  <div className="mt-3 p-3 border rounded-lg bg-muted/30">
-                    <div className="flex justify-between items-center mb-2">
-                      <h5 className="font-medium text-sm">Valores de Receta</h5>
-                      {selectedPrescription.is_current && (
-                        <Badge className="text-xs" variant="outline">
-                          Receta Vigente
-                        </Badge>
-                      )}
-                    </div>
-                    <div className="grid grid-cols-2 gap-3 text-sm">
-                      <div>
-                        <span className="font-medium">OD (Ojo Derecho):</span>
-                        <div className="text-muted-foreground">
-                          {selectedPrescription?.od_sphere != null
-                            ? `Esf: ${selectedPrescription!.od_sphere! >= 0 ? "+" : ""}${selectedPrescription!.od_sphere}`
-                            : "Sin dato"}
-                          {(selectedPrescription?.od_cylinder ?? 0) !== 0 &&
-                            ` Cil: ${selectedPrescription!.od_cylinder! >= 0 ? "+" : ""}${selectedPrescription!.od_cylinder}`}
-                          {(selectedPrescription?.od_axis ?? 0) !== 0 &&
-                            ` x ${selectedPrescription!.od_axis}°`}
-                          {(selectedPrescription?.od_add ?? 0) > 0 &&
-                            ` Ad: +${selectedPrescription!.od_add}`}
-                        </div>
-                      </div>
-                      <div>
-                        <span className="font-medium">OI (Ojo Izquierdo):</span>
-                        <div className="text-muted-foreground">
-                          {selectedPrescription?.os_sphere != null
-                            ? `Esf: ${selectedPrescription!.os_sphere! >= 0 ? "+" : ""}${selectedPrescription!.os_sphere}`
-                            : "Sin dato"}
-                          {(selectedPrescription?.os_cylinder ?? 0) !== 0 &&
-                            ` Cil: ${selectedPrescription!.os_cylinder! >= 0 ? "+" : ""}${selectedPrescription!.os_cylinder}`}
-                          {(selectedPrescription?.os_axis ?? 0) !== 0 &&
-                            ` x ${selectedPrescription!.os_axis}°`}
-                          {(selectedPrescription?.os_add ?? 0) > 0 &&
-                            ` Ad: +${selectedPrescription!.os_add}`}
-                        </div>
-                      </div>
-                    </div>
-                    {(selectedPrescription?.pd_distance ||
-                      selectedPrescription?.od_pd ||
-                      selectedPrescription?.os_pd) && (
-                      <div className="mt-2 text-xs text-muted-foreground">
-                        <div className="font-medium text-foreground">
-                          Distancia Pupilar (DP):
-                        </div>
-                        <div className="flex gap-4 mt-1">
-                          {(selectedPrescription?.od_pd ||
-                            selectedPrescription?.pd_distance) && (
-                            <div>
-                              <span className="text-muted-foreground">Lejos:</span>{" "}
-                              <span className="font-medium">
-                                {selectedPrescription?.pd_distance
-                                  ? `${selectedPrescription.pd_distance}mm`
-                                  : selectedPrescription?.od_pd &&
-                                      selectedPrescription?.os_pd
-                                    ? `${Number(selectedPrescription.od_pd) + Number(selectedPrescription.os_pd)}mm`
-                                    : selectedPrescription?.od_pd
-                                      ? `${selectedPrescription.od_pd}mm`
-                                      : ""}
-                              </span>
-                            </div>
-                          )}
-                          {selectedPrescription?.pd_near && (
-                            <div>
-                              <span className="text-muted-foreground">Cerca:</span>{" "}
-                              <span className="font-medium">
-                                {selectedPrescription?.pd_near}mm
-                              </span>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    )}
-                  </div>
+                  <POSPrescriptionDetail prescription={selectedPrescription} />
                 )}
 
                 {hasPrescriptionAddition && (
@@ -329,8 +256,8 @@ export function POSAdvancedSaleCustomerTab({
           (!customer && (quickCustomerName || quickCustomerRUT))) && (
           <ExternalPrescriptionForm
             data={externalPrescriptionData}
-            onChange={setExternalPrescriptionData}
             presbyopiaValue={orderFormData.presbyopia_solution}
+            onChange={setExternalPrescriptionData}
             onPresbyopiaChange={(value) =>
               setOrderFormData((prev) => ({
                 ...prev,
